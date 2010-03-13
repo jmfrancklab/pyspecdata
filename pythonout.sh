@@ -5,7 +5,7 @@ mv temp.py $1
 # should put a while loop around first sed, to catch all instances
 cat $1 | sed "s/^\([ \t]*\)%\(.*[^\\]\)<\(.*[^\\]\)>/\1%\2\'\'\',\3,r\'\'\' /" | sed "s/^\([ \t]*\)%\(.*\)/\1obs(r\'\'\'\2\'\'\')/" > temp.py
 mv temp.py $1
-cat $1 | sed "\/mnt\/windows\/linuxfiles/\/home\/john\/data/" > temp.py
+cat $1 | sed "s/\/mnt\/windows\/linuxfiles/\/home\/john\/data/" > temp.py
 mv temp.py $1
 #rm temp.py
 if [ -e "$1.old" ] && [ -e "$1" ]; then
