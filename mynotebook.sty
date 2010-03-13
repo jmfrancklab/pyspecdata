@@ -1,0 +1,166 @@
+\ProvidesPackage{mynotebook}
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+\usepackage{amsmath}
+\usepackage{fp}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=linkcolor, citecolor=blue, urlcolor=blue, bookmarksdepth=8]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
+%\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=blue, citecolor=blue, urlcolor=blue, bookmarksdepth=8]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
+\immediate\write18{bash\space datenow.sh\space datenow.out} % to save into the file
+\newcommand{\Now}{\immediate\input datenow.out}
+%{{{ filenames with fancy underscore escape
+\newcommand{\fn}[1]{{\color{red} #1}}
+\let\oldfn = \fn
+\def\fn{\begingroup\catcode`_=12 \newfnx}
+\newcommand{\newfnx}[1]{\oldfn{#1}\endgroup}
+%}}}
+\usepackage{ulem}
+\oddsidemargin -0.5in % add 1in to get margin
+\topmargin 0in
+\textwidth 7.5in
+\textheight 8.75in
+\headheight 0in
+\headsep 0in
+\newenvironment{co}{\begin{python}
+	import matplotlib; matplotlib.use('Agg')
+	from matlablike import *
+	}{\end{python}}
+%{{{Rather than including python.sty, copy and paste it here
+%% Author: Martin R. Ehmsen, ehmsen@imada.sdu.dk.
+
+\newwrite\@out
+\newwrite\@module
+
+\begingroup \catcode `|=0 \catcode `[=1
+\catcode`]=2 \catcode `\{=12 \catcode `\}=12
+\catcode`\\=12 |gdef|@xpython#1\end{python}[|immediate|write|@out[from fornotebook import *]|immediate|write|@out[#1]|end[python]]
+|endgroup % changed by franck to add include file
+
+\def\python{\kernel@ifnextchar [{\@python}{\@python[]}}
+%{{{ fauske hack
+\newcounter{py@codenum}
+\def\@python[#1]{%
+\stepcounter{py@codenum}
+\gdef\@pythoninclude{#1}
+\immediate\openout\@out=\jobname.\thepy@codenum.py
+%\immediate\openout\@out=\jobname.py
+\newlinechar='15
+\begingroup \catcode`\^^M=12 %
+\let\do\@makeother\dospecials\obeyspaces%
+\@xpython}
+
+\def\endpython{%
+\endgroup
+\immediate\closeout\@out
+\@writemodule
+\immediate\write18{bash\space pythonout.sh\space\jobname.\thepy@codenum.py\space pythonout.out\space\thepy@codenum}
+\immediate\input pythonout.out
+}
+\def\dontsavepython{\immediate\write18{rm\space\jobname.\thepy@codenum.py.old}\jobname.\thepy@codenum.py.old}
+%}}}
+\def\@writemodule{%
+\immediate\openout\@module=latex.py
+\immediate\write\@module{jobname="\jobname"}
+\immediate\closeout\@module}
+%}}}
+
+\definecolor{linkcolor}{cmyk}{0,0.7,0.5,0.5}
+\definecolor{mygreen}{rgb}{0,0.5,0.5}
+\newcommand\myline{\rule{\linewidth}{0.1mm}}
+\let\oldparagraph = \paragraph
+\let\oldsubparagraph = \subparagraph
+\renewcommand{\paragraph}[1]{\oldparagraph{{\color{black}#1}}}
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}{\color{black}$\Rightarrow$}}
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{{\small #1}}}
+\renewcommand{\o}[2][]{ {\color{mygreen}{\it #1}} {\color{blue} #2}}
+
+\newcommand\Emax{$E_{max}$ }
+\newcommand\tonen{$T_{1,0}$ }
+\newcommand{\lastorg}{
+
+\myline
+
+LAST ORGANIZED TO HERE
+\phantomsection\addcontentsline{toc}{section}{LAST ORGANIZED}
+
+\myline}
+
+\gdef\total{0}
+\gdef\obstimecounter{0}
+\gdef\obstimecounterflag{0}
+
+\newcommand{\maxtime}[1]{\FPset\tvar{#1}\FPadd\ttotal\tvar\total\global\let\total=\ttotal ({\it max \tvar hr})}
+
+\newcommand{\obstb}{\FPset\mytemp{0}\global\let\obstimecounter=\mytemp\FPset\mytemp{1}\global\let\obstimecounterflag=\mytemp}
+
+\newcommand{\obsts}{\FPset\obstimecounterflagvar{\obstimecounterflag}\FPset\mytemp{0}\FPset\mynegone{-1}\FPmul\mytemp\obstimecounterflagvar\mynegone\global\let\obstimecounterflag=\mytemp}
+
+\newcommand{\obsta}[1]{\obsts\FPset\obstimecountervar{\obstimecounter}\FPset\obstimecounterflagvar{\obstimecounterflag}\FPset\mytemp{#1}\FPset\myhr{3600}\FPmul\mytemp\obstimecounterflagvar\mytemp\FPdiv\mytemp\mytemp\myhr\FPadd\mytemp\obstimecountervar\mytemp\global\let\obstimecounter=\mytemp}
+
+\newcommand{\obstm}[1]{\FPset\obstimecountervar{\obstimecounter}\FPset\obstimecounterflagvar{\obstimecounterflag}\FPset\mytemp{#1}\FPset\myhr{60}\FPmul\mytemp\obstimecounterflagvar\mytemp\FPtrunc\mytemp\mytemp{1}\mytemp min\FPdiv\mytemp\mytemp\myhr\FPadd\mytemp\obstimecountervar\mytemp\global\let\obstimecounter=\mytemp}
+
+\newcommand{\obstd}{\FPset\mytemp\obstimecounter\FPtrunc\mytemp\mytemp{1} ({\bf \mytemp hr})\FPadd\mytemp\mytemp\dumpval\global\let\dumpval=\mytemp}
+\newcommand{\obstdump}{\FPset\mytemp\dumpval\FPtrunc\mytemp\mytemp{1} \o{({\bf \mytemp hr})}}
+
+\newenvironment{tasklist}{\begin{tiny}
+\FPset\ttotal{0}
+\begin{multicols}{2}
+\begin{itemize}
+}{
+\end{itemize}
+\end{multicols}
+\end{tiny}}
+
+\newenvironment{pcomments}{\begin{minipage}{4.5in}}{\end{minipage}}
+\newcommand{\pstandard}[1]{\begin{minipage}{3in}\includegraphics[width=3in]{#1}\end{minipage}}
+\newenvironment{tasks}{\gdef\total{0}\gdef\dumpval{0}\phantomsection\addcontentsline{toc}{subsubsection}{tasks}
+\begin{tiny}
+\FPset\ttotal{0}
+\begin{multicols}{2}
+}{
+\end{multicols}
+\FPset\mytemp\total
+\FPtrunc\mytemp\mytemp{1}
+{\tiny{\it = \mytemp hr total},\obstdump}
+\myline
+\end{tiny}}
+
+\newcommand{\breaklist}{\end{itemize}
+\end{multicols}
+\FPset\mytemp\total
+\FPtrunc\mytemp\mytemp{1}
+{\tiny{\it = \mytemp hr total}}
+\myline
+\begin{multicols}{2}
+\begin{itemize}
+}
+\newcommand{\breako}[1]{
+\o{\item #1}
+\end{itemize}
+\myline
+\begin{itemize}
+}
+\newcommand{\tasko}[1]{
+\o{#1}
+\myline
+}
+\newcommand{\breakk}[1]{
+\item #1
+\end{itemize}
+\myline
+\begin{itemize}
+}
+\newcommand{\taskk}[1]{
+#1
+\myline
+}
+
+\AtBeginDocument{
+\let\oldlabel=\label
+\renewcommand*{\label}[1]{{\tiny $#1$}\oldlabel{#1}}
+}
+%\bibliographystyle{abbrvnat}
+%\usepackage[sort&compress]{natbib}
+\bibliographystyle{unsrt}
+
