@@ -940,6 +940,7 @@ class ft():
 		#print 'size of f ',len(self.f),' size of fdata ',len(self.fdata)
 	def ift(self):
 		self.len = len(self.data)
+		self.dx = self.x[1]-self.x[0]
 		self.data = ifft(self.data)*double(len(self.data))*self.dx
 		self.x = linspace(0.,1.,len(self.data))/double(self.dx)
 		self.dx = self.x[1]-self.x[0]

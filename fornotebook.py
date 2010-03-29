@@ -38,6 +38,7 @@ def lplot(fname,width=3,figure=False,dpi=200,grid=True,alsosave=None):
 	\includegraphics[width=%0.2fin]{%s}
 	\end{minipage}'''%(width,fname)
 	clf()
+	return
 def addlabels(labelstring,x,y,labels):
 	for j in range(0,len(labels)):
 		text(x[j],y[j],labelstring%labels[j],alpha=0.5,color='g',ha='left',va='top',rotation=0)
@@ -171,8 +172,12 @@ def eplots(filename,setting,dbm,expno,integral,invalid=[],plot_slope=False,norma
 		lplot(filename+r'_slope.pdf')
 		xlabel('E')
 		ylabel('$\frac{dE}{dp}/\left.\frac{dE}{dp}\right|_{p=0}$')
-def emax_fit(power,integral,fit_axis_size = 100,emax=[],return_slope=False,normalize=False,order=False,forceone=False):
-	zeropower = 1e-3*10.0**((-99+40.0)/10.0) #20 db for each atten
+def dbm_to_power(dbm):
+	return 1e-3*10.0**((dbm+40.0)/10.0) #20 db for each atten
+def power_to_dbm(power):
+	return 10.0*log(power/1e-3)/log(10.0)-40 #20 db for each atten
+def emax_fit(power,integral,fit_axis_size = 100,emax=[],return_slope=False,normalize=False,order=False,forceone=False,upto = None):
+	zeropower = dbm_to_power(-99) #20 db for each atten
 	third_integral_with_power= where(power>zeropower)[0][2]
 	initial_slope = (integral[third_integral_with_power]-integral[0])/(power[third_integral_with_power]-power[0])
 	if emax==[]:
@@ -198,7 +203,10 @@ def emax_fit(power,integral,fit_axis_size = 100,emax=[],return_slope=False,norma
 			ftol = 1e-4, xtol = 1e-6)
 	Emax = p_out[0]-p_out[1]/p_out[2]
 	#print 'p\_out is ',p_out
-	x = linspace(power.min(),power.max(),100)
+	if upto == None:
+		x = linspace(power.min(),power.max(),100)
+	else:
+		x = linspace(power.min(),upto,100)
 	if normalize:
 		normalization = p_out[0] # normalize against the "1" of the fit
 	else:
@@ -225,7 +233,7 @@ def emax_errfunc(p,x,y):
 	return fit-y
 def emax_plot(setting,dbm,expno,integral,invalid=[],emax=[],return_slope=False,normalize=False,order=True,forceone=False):
 	setting = setting[0:len(expno)]
-	power = 1e-3*10.0**((dbm+40.0)/10.0) #20 db for each atten
+	power = dbm_to_power(dbm)
 	labelstring = []
 	for j in range(0,len(expno)):
 		labelstring += [r'#%d,set %d %0.2f$dBm$'%(expno[j],setting[j],dbm[j])]
@@ -245,11 +253,11 @@ def emax_plot(setting,dbm,expno,integral,invalid=[],emax=[],return_slope=False,n
 	if return_slope:
 		fitpower,fitintegral,Emax,relative_slope,normalization = emax_fit(
 				power[logical_not(invalid_mask)],
-				integral[logical_not(invalid_mask)],emax=emax,return_slope=True,normalize=normalize,forceone=forceone)
+				integral[logical_not(invalid_mask)],emax=emax,return_slope=True,normalize=normalize,forceone=forceone,upto = max(power))
 	else:
 		fitpower,fitintegral,Emax,normalization = emax_fit(
 				power[logical_not(invalid_mask)],
-				integral[logical_not(invalid_mask)],emax=emax,normalize=normalize,forceone=forceone)
+				integral[logical_not(invalid_mask)],emax=emax,normalize=normalize,forceone=forceone,upto = max(power))
 	if order:
 		ordplot(inipower,iniintegral/normalization,labelstring,'%s')
 	else:
@@ -272,7 +280,7 @@ def emax_plot(setting,dbm,expno,integral,invalid=[],emax=[],return_slope=False,n
 		return Emax
 def emax_T(setting,dbm,expno,integral,invalid=[],order=False,showemax = None,inverse=True):
 	setting = setting[0:len(expno)]
-	zeropower = 1e-3*10.0**((-99+40.0)/10.0) #20 db for each atten
+	zeropower = dbm_to_power(-99) #20 db for each atten
 	nonzeropower = dbm>-99
 	power = 1e-3*10.0**((dbm+40.0)/10.0) # 20 db for each atten
 	labelstring = []

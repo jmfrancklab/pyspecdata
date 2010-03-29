@@ -6,10 +6,63 @@ import struct
 import os
 import fornotebook
 from scipy.optimize import leastsq
+from scipy.io import loadmat
 
 def OUTPUT_notebook():
 	return True
 
+def auto_steps(filename,threshold = -35, t_minlength = 0.5*60,minstdev = 0.1,showplots = True, showdebug = False,t_start=0):
+	v = loadmat(filename)
+	p_ini = v['powerlist']
+	t_ini = v['timelist']
+	a = whereblocks(logical_and(t_ini>t_start,logical_or(p_ini>threshold,~(isfinite(p_ini)))))
+	a = a[argmax(map(len,a))]
+	minsteps = sum(t_ini<t_minlength)
+	t = t_ini[a]
+	p = p_ini[a]
+	flattened = NaN*zeros(len(p))
+	plotdev = zeros(len(p))
+	plotstd = zeros(len(p))
+	powerlist = []
+	nextpos = 0
+	while nextpos < len(t)-1:
+		# grab the stdev and average for the minimum number of steps
+		blockstart = nextpos
+		subset= p[nextpos:minsteps+nextpos]
+		curmean = mean(subset[isfinite(subset)])
+		stdev = std(subset[isfinite(subset)])
+		if stdev < minstdev:
+			stdev = minstdev
+		nextpos += minsteps
+		# now that we have a decent stdev, just test to see that every step is less than the stdev
+		while (nextpos < len(t)-1) and (abs(p[nextpos]-curmean)<2*stdev or ~isfinite(p[nextpos])):
+			subset= p[blockstart:nextpos]
+			curmean = mean(subset[isfinite(subset)])
+			stdev = std(subset[isfinite(subset)])
+			if stdev < minstdev:
+				stdev = minstdev
+			if showdebug:
+				plotdev[nextpos] = p[nextpos]-curmean
+				plotstd[nextpos] = 2*stdev 
+			nextpos += 1
+		#uptohere = flattened[0:nextpos]
+		#uptohere[uptohere==0] = cursum/curnum
+		#flattened[nextpos-1] = cursum/curnum
+		subset = flattened[0:nextpos]
+		subset[isnan(subset)] = curmean
+		powerlist += [curmean]
+		#flattened[nextpos-1] = curmean
+	if showplots:
+		plot(t_ini/60,p_ini.flatten(),'b')
+		plot(t/60,flattened,'g',linewidth=5,alpha=0.5)
+		title(filename)
+	if showdebug:
+		if showplots:
+			twinx()
+		plot(t/60,plotdev,'k')
+		plot(t/60,plotstd,'r')
+		title('Power meter log')
+	return array(powerlist)
 def error_plot(*arg):
 	width=6
 	dpi=200
@@ -26,7 +79,6 @@ def error_plot(*arg):
 	print r'\includegraphics[width=%0.2fin]{%s}'%(width,fname)
 	clf()
 	raise CustomError(*arg)
-
 #{{{ lower level functions
 #{{{ wrappers/generic functions to load acq and data files
 b0 = r'$B_0$'
@@ -325,6 +377,8 @@ def bruker_load_vdlist(file):
 	return array(lines)
 #}}}
 #{{{ bruker_load_acqu
+def load_title(file):
+	return bruker_load_title(file)
 def bruker_load_title(file):
 	file = dirformat(file)
 	fp = open(file+'pdata/1/title')
@@ -495,10 +549,24 @@ def t1_fitfunc(p,x):
 def t1_errfunc(p,x,y):
 	fit = t1_fitfunc(p,x)
 	return fit-y
+def t1_sat_fitfunc(p,x):
+	return p[0]-p[0]*exp(-x/p[1])
+def t1_sat_errfunc(p,x,y):
+	fit = t1_sat_errfunc(p,x)
+	return fit-y
 #}}}
 #}}}
 #{{{ process_emax, which just takes a list of expno and returns the list of integrals
-def integrate_emax(file,expno,integration_width=1e3,intpoints=None,showimage=False,usephase=True,filteredge = 10,center_peak=False,usebaseline=False,plotcheckbaseline=False,filter_direct = False,return_noise=False,show_integral = False,indiv_phase = False):
+def rg_check(file,expno):
+	#print 'diagnose: before emax'
+	data = load_emax(file,expno,printinfo = False) # load the data
+	data.reorder(['t2','power'])
+	plot(data['t2',0:100],'k')
+	plot(data['t2',0:100]*(-1j),'b',alpha=0.3)
+	title('receiver gain check')
+	axis('tight')
+	return
+def integrate_emax(file,expno,integration_width=1e3,intpoints=None,showimage=False,usephase=True,filteredge = 10,center_peak=False,usebaseline=False,plotcheckbaseline=False,filter_direct = False,return_noise=False,show_integral = False,indiv_phase = False,abs_image = False):
 	#print 'diagnose: before emax'
 	data = load_emax(file,expno) # load the data
 	see_fid = False
@@ -594,7 +662,12 @@ def integrate_emax(file,expno,integration_width=1e3,intpoints=None,showimage=Fal
 		try:
 			#image(newdata)
 			center_for_image = int32(sum(top*topvals)/sum(topvals))
-			image(data['t2',center_for_image-3*intpoints:center_for_image+3*intpoints+1])
+			if abs_image:
+				image(abs(data['t2',center_for_image-3*intpoints:center_for_image+3*intpoints+1]))
+				title('2D plot of spectra')
+			else:
+				image(data['t2',center_for_image-3*intpoints:center_for_image+3*intpoints+1])
+				title('2D plot of spectra')
 		except:
 			print 'top = ',top
 			print 'topvals = ',topvals
@@ -636,6 +709,7 @@ def integrate_emax(file,expno,integration_width=1e3,intpoints=None,showimage=Fal
 		figure(2)
 		clf()
 		plot((newdatacopy).reorder(['t2','power']))
+		title('Peaks, zoomed in to integration region')
 		if show_integral:
 			#{{{this does work to plot the integral
 			newdatacopy.integrate('t2') #newdatacopy.run_nopop(cumsum,'t2')
@@ -667,11 +741,12 @@ def print_info(filename):
 			else:
 				print '%0.4f $ppt$'%pptvalue
 			print '\n\n'
-def load_emax(file,datafiles):
+def load_emax(file,datafiles,printinfo=True):
 	datafiles = list(datafiles)
 	if len(datafiles)==0:
 		data = load_file(file,dimname='power') # got rid of a [0] here --> don't know why it was there --> load_file loads lists of files
-		print_info(file[0])
+		if printinfo:
+			print_info(file[0])
 	else:
 		file = dirformat(file)
 		datafiles = map(str,datafiles)
@@ -683,8 +758,9 @@ def load_emax(file,datafiles):
 				data += [load_file(file+datafiles[j],dimname='power')]
 			data = concat(data,'power')
 			#}}}
-			print_info(file+datafiles[0])
-			print_info(file+datafiles[-1])
+			if printinfo:
+				print_info(file+datafiles[0])
+				print_info(file+datafiles[-1])
 		elif spectype == 'prospa':
 			#{{{ kea version
 			datafiles = map((lambda x: file+str(x)), datafiles)
@@ -709,9 +785,10 @@ def load_emax(file,datafiles):
 	return data
 #}}}
 #{{{ process_t1
-def process_t1(file,expno,integration_width = 0.5e3,usebaseline = False,filter_direct = False,return_fit=False,center_peak = True,showimage = True,show_integral = True,plotcheckbaseline = False):
+def process_t1(file,expno,integration_width = 0.5e3,usebaseline = False,filter_direct = False,return_fit=False,center_peak = True,showimage = True,show_integral = True,plotcheckbaseline = False,abs_image = False,saturation = False):
 	if type(file) is str:
 		file = [file]
+	titlestr = load_title(file[0])
 	if det_type(file[0]) == ('prospa','t1'):
 		print 'Found a prospa format T1 file'
 		file,wait_time = prospa_t1_info(file[0])
@@ -728,7 +805,8 @@ def process_t1(file,expno,integration_width = 0.5e3,usebaseline = False,filter_d
 	   filter_direct = filter_direct,
 	   center_peak = center_peak,
 	   return_noise = True,
-	   show_integral = show_integral, plotcheckbaseline = plotcheckbaseline)
+	   show_integral = show_integral, plotcheckbaseline = plotcheckbaseline,abs_image = abs_image)
+	#return # to DEBUG
 	wait_time = wait_time[order]
 	integral = integral[order]
 	noiselevel = noiselevel[order]
@@ -740,10 +818,18 @@ def process_t1(file,expno,integration_width = 0.5e3,usebaseline = False,filter_d
 	plot(taxis,integral,'o')
 	plot(taxis,imagpart,'o')
 	p = t1_fit(taxis,integral)
-	plot(taxis,t1_fitfunc(p,taxis))
-	plot(taxis,t1_fitfunc(r_[p[0:2],p[2]*1.2],taxis),'y')
-	plot(taxis,t1_fitfunc(r_[p[0:2],p[2]*0.8],taxis),'y')
-	xlabel(r'$M(t)=%0.3g+(%0.3g-%0.3g)e^{-t/%0.4g}$'%(p[0],p[1],p[0],p[2]))
+	if saturation:
+		plot(taxis,t1_sat_fitfunc(p,taxis))
+		plot(taxis,t1_sat_fitfunc(r_[p[0:2],p[2]*1.2],taxis),'y')
+		plot(taxis,t1_sat_fitfunc(r_[p[0:2],p[2]*0.8],taxis),'y')
+		p = r_[p[0],0,p[2]]
+		xlabel(r'$M(t)=%0.3g+(%0.3g-%0.3g)e^{-t/%0.4g}$'%(p[0],p[1],p[0],p[2]))
+	else:
+		plot(taxis,t1_fitfunc(p,taxis))
+		plot(taxis,t1_fitfunc(r_[p[0:2],p[2]*1.2],taxis),'y')
+		plot(taxis,t1_fitfunc(r_[p[0:2],p[2]*0.8],taxis),'y')
+		xlabel(r'$M(t)=%0.3g+(%0.3g-%0.3g)e^{-t/%0.4g}$'%(p[0],p[1],p[0],p[2]))
+	title(titlestr)
 	if return_fit:
 		return p
 	#}}}
@@ -903,4 +989,51 @@ def baseline_spectrum(data,showplots=False,threshold=10,check_filter=False,set_e
 	baseline_data.labels(['t2'],[x])
 	#print 'diagnose: shape of baseline ',ndshape(baseline_data)
 	return baseline_data
+
+#{{{ plot_noise
+def plot_noise(path,j,calibration,mask_start,mask_stop,rgmin=0,k_B = None,smoothing = False, both = False, T = 293.0,plottype = 'semilogy'):
+	'''plot noise scan as resistance'''
+	data = load_file(r'%s%d'%(path,j),calibration=calibration)
+	k_B = 1.3806504e-23
+	data.ft('t2',shift = True)
+	newt2 = r'F2 / $Hz$'
+	data.rename('t2',newt2)
+	v = bruker_load_acqu(r'%s%d/'%(path,j))
+	dw = 1/v['SW_h']
+	dwov = dw/v['DECIM']
+	rg = v['RG']
+	aq = v['TD']*dw
+	if rg>rgmin:
+		plotdata = abs(data)
+		plotdata.data **= 2
+		johnson_factor = 4.0*k_B*T
+		plotdata.data /= (aq*johnson_factor)
+		t = data.getaxis(newt2)
+		mask = logical_and(t>mask_start,
+			t<mask_stop)
+		avg = plotdata.data[mask].mean() 
+		retval = []
+		if both or not smoothing:
+			plot(plotdata,'-',alpha=0.5,plottype = plottype)
+			retval += ['%d: '%j+bruker_load_title(r'%s%d'%(path,j))+' $t_{dwov}$ %0.1f RG %d, mean %0.1f'%(dwov*1e6,rg,avg)]
+			axis('tight')
+		if smoothing:
+			# begin convolution
+			originalt = plotdata.getaxis(newt2).copy()
+			plotdata.ft(newt2,shift = True)
+			sigma = smoothing
+			siginv = 0.5*sigma**2 # here, sigma is given in the original units (i.e. what we're convolving)
+			t = plotdata.getaxis(newt2)
+			g = exp(-siginv*t.copy()**2) # we use unnormalized kernel (1 at 0), which is not what I thought!
+			plotdata.data *= g
+			plotdata.ift(newt2,shift = True)
+			t = plotdata.getaxis(newt2).copy()
+			t[:] = originalt
+			# end convolution
+			plot(plotdata,'-',alpha=0.5,plottype = plottype)
+			retval += ['%d: '%j+bruker_load_title(r'%s%d'%(path,j))+' $t_{dwov}$ %0.1f RG %d, mean %0.1f'%(dwov*1e6,rg,avg)]
+			axis('tight')
+		return retval
+	else:
+		return []
 #}}}
