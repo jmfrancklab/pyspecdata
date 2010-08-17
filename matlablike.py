@@ -12,6 +12,7 @@ rcParams['ytick.minor.size'] = 6
 #rcParams['lines.linewidth'] = 3.0
 rcParams['legend.fontsize'] = 12
 rcParams['axes.grid'] = False
+rcParams['font.size'] = 18
 def emptyfunction():
     pass
 #{{{ errors

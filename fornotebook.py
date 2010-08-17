@@ -346,6 +346,7 @@ def dnp_for_rho(path,name,powerseries,
         t1expnos = [4,36,37],
         t1powers = None,
         first_figure = 3,
+        show_t1_raw = False,
         show_plots = True,
         verbose = False,
         integration_width = 150,
@@ -356,11 +357,12 @@ def dnp_for_rho(path,name,powerseries,
         **kwargs):
     r'This is essentially a function that matches the jf_dnp au program\nit will process the resulting data\n(using a standard run for that program as a default) and pull out all the info needed to calculate rho,\nplacing them in a HDF5 file'
     #{{{ pull all the relevant info out of the file name
-    if chemical_name == None:
-        chemical_name = pull_chemical_from_filename(name)
-    if concentration == None:
-        concentration = pull_concentration_from_filename(name)
-    date_of_file = pull_date_from_filename(name)
+    if h5file != None:
+        if chemical_name == None:
+            chemical_name = pull_chemical_from_filename(name)
+        if concentration == None:
+            concentration = pull_concentration_from_filename(name)
+        date_of_file = pull_date_from_filename(name)
     #}}}
     #{{{ initialize HDF5 info
     if h5file != None:
@@ -370,7 +372,9 @@ def dnp_for_rho(path,name,powerseries,
         else:
             Emax_table = h5file.root.concentration_series.Emax
         T1_table = h5file.root.concentration_series.T1
-    search_string = '(chemical_name == \'%s\') &'%chemical_name + gensearch('concentration','%0.5g',concentration,1e-6)+' & '+gensearch('date','%0.3f',date_of_file,0.1)
+        search_string = '(chemical_name == \'%s\') &'%chemical_name + gensearch('concentration','%0.5g',concentration,1e-6)+' & '+gensearch('date','%0.3f',date_of_file,0.1)
+        search_string_lowt1 = search_string + " & (power < -99)"
+        search_string_powert1 = search_string + " & (power > -99)"
     #}}}
     #{{{ process the Emax data
     if len(expno)>0:
@@ -394,6 +398,7 @@ def dnp_for_rho(path,name,powerseries,
             print ' $\Rightarrow$ then I sorted it','\n\n'
             #}}}
         powers = dbm_to_power(powerseries)
+        max_power = max(powers)
         #}}}
         #{{{ find the normalized integrals
         # this should be pretty portable -- maybe stick in fornotebook.py
@@ -411,6 +416,21 @@ def dnp_for_rho(path,name,powerseries,
         axis('tight')
         lplot('rawdata_'+name+basename+'.pdf',grid=False)
         #}}}
+        if (h5file != None):
+            #{{{ find the power scans
+            lowt1 = T1_table.readWhere(search_string_lowt1)
+            hight1 = T1_table.readWhere(search_string_powert1)
+            if (size(hight1)>0):
+                hight1 = hight1[argmax(abs(hight1['power']))]
+                testf = open('test_output.txt','a')
+                T1fit_table = h5file.root.concentration_series.T1fit
+                fit_data = T1fit_table.readWhere("(chemical_name == 'water')")
+                if fit_data['c_len']>0:
+                    fit_coeff = fit_data['c'][0:fit_data['c_len']].flatten()
+                    testf.write("found low power %g and high power %g for %g and T10 at max %g\n"%(lowt1['power'],hight1['power'],concentration,fit_coeff[0] + max_power * fit_coeff[1]))
+            #testf.write("found low power %g and high power %g for %g and T10 fit_coeff %s\n"%(lowt1['power'],hight1['power'],concentration,repr(fit_coeff).replace('\t',' ')))
+                testf.close()
+            #}}}
         #{{{ convert integral to Emax fit class, and plot the fit
         figure(first_figure+3)
         integral = emax(integral,fit_axis = 'power')
@@ -486,26 +506,29 @@ def dnp_for_rho(path,name,powerseries,
             t1file = [path+name+'/'+t1expno]
             t1startingfigure = first_figure+3+4*j
             fit = process_t1(t1file,[],
-               showimage = True,
+               show_image = True,
                integration_width = integration_width,
                usebaseline = False,
                center_peak = True,
                return_noise = True,
-               show_integral = True, plotcheckbaseline = False,abs_image = True,
+               show_integral = True,
+               plotcheckbaseline = False,
+               abs_image = False,
                first_figure = t1startingfigure)
+            print '\n\n'
             #{{{ show the raw data
-            show_t1_raw = False
+            t1lplotkwargs = {}
             if show_t1_raw:
                 figure(t1startingfigure)
-                lplot('signal'+name+basename+'_'+t1expno+'.pdf',grid = False)
-            print '\n\n'
+                t1lplotkwargs.update({'width':2})
+                lplot('signal'+name+basename+'_'+t1expno+'.pdf',grid = False,**t1lplotkwargs)
             #}}}
             #{{{ show the T1 plots and integral peaks
             if show_plots:
                 figure(t1startingfigure+1)
-                lplot('integral_peak'+name+basename+'_'+t1expno+'.pdf')
+                lplot('integral_peak'+name+basename+'_'+t1expno+'.pdf',**t1lplotkwargs)
                 figure(t1startingfigure+2)
-                lplot('t1'+name+basename+'_'+t1expno+'.pdf')
+                lplot('t1'+name+basename+'_'+t1expno+'.pdf',**t1lplotkwargs)
             #}}}
             if t1powers == None:
                 #{{{ search for the power in the title string
