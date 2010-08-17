@@ -46,3 +46,20 @@ this is an example
 	   print "Couldn't plot, setting ",setting.shape,"expno",expno.shape,"integral",integral.shape,"dbm",dbm.shape
 	   raise
 \end{python}
+
+\begin{tiny}
+\begin{python}
+# these change
+name = 'oxotempo9mM_100416'
+path = '/home/franck/data/cnsi_data/'
+power_file = 'mat_data/franck_oxotempo9mM_100416.mat'
+# leave the rest of the code relatively consistent
+dbm = auto_steps(path+power_file,t_minlength = 60,t_start = 5.5*60)
+lplot('powerlog'+thisjobname()+'.pdf')
+print ''%(),r'\begin{minipage}{3in}','\npower log:\n\n',', '.join(map((lambda x: r'$%0.2f\;dBm$'%x),dbm)),r'\end{minipage}','\n\n'
+dbm = dbm[:-2] # don't use T1 power
+dbm = r_[-999,dbm-10] # because I have 10 dB of attenuation immediately before power meter and emax_plot and the code below expect 20
+
+dnp_for_rho(path,name,dbm,expno = r_[5:32],t1expnos = r_[4,33,34])
+\end{python}
+\end{tiny}
