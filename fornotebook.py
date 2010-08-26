@@ -378,7 +378,7 @@ def dnp_for_rho(path,name,powerseries,
     #}}}
     #{{{ process the Emax data
     if len(expno)>0:
-        #{{{ calculate the powers, and if desired mask out some subset of them
+        #{{{ if desired, mask out some subset of the powers
         if coarse_power:
             desired_powers = r_[-999,powerseries.max()-r_[0:10]] # pull the zero power and 9 integral attenuation settings down from the max power
             #{{{ a BEAUTIFUL way to pull the closest value to what I want -- just shuffle out of old lists and into new lists
@@ -397,6 +397,8 @@ def dnp_for_rho(path,name,powerseries,
             powerseries = sort(powerseries)
             print ' $\Rightarrow$ then I sorted it','\n\n'
             #}}}
+        #}}}
+        #{{{ calculate the powers from the powers
         powers = dbm_to_power(powerseries)
         max_power = max(powers)
         #}}}

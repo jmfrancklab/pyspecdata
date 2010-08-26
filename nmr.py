@@ -670,193 +670,6 @@ def rg_check(file,expno,number_of_samples = 75,dynamic_range = 19,first_figure =
         axis('tight')
     return
 #}}}
-#{{{ integrate_emax --> old integration function
-def integrate_emax(file,expno,
-        integration_width=1e3,
-        intpoints=None,
-        showimage=False,
-        usephase=True,
-        filteredge = 10,
-        center_peak=False,
-        usebaseline=False,
-        plotcheckbaseline=False,
-        filter_direct = False,
-        return_noise=False,
-        show_integral = False,
-        indiv_phase = False,
-        abs_image = False,
-        add_sizes = [],
-        add_dims = [],
-        add_dims_cycle = []):
-    r''' old (obsolete) integration function'''
-    #print 'diagnose: before emax'
-    data = load_emax(file,expno,add_sizes = add_sizes,add_dims = add_dims) # load the data
-    for j in range(0,len(add_dims)):
-        if bool(add_dims[j].find('ph')==0):# starts with ph
-            data.ft(add_dims[j])
-            data = data[add_dims[j],add_dims_cycle[j]] # pull the correct phase cycle --> awesome!
-    see_fid = False
-    if see_fid:
-        #{{{ for debug
-        data.reorder(['t2','power'])
-        plot(abs(data['t2',0:500]))
-        return r_[0,1,2],r_[0,1,2]
-        #}}}
-    debug_ini_data_size = ndshape(data)
-    data.ft('t2',shiftornot=True) # ft along t2
-    #{{{ apply matched filter, which I've decided should be obsolete
-    if filter_direct:
-        data.ift('t2',shiftornot=True) # ft along t2
-        filter = matched_filter(data,'t2')
-        data *= filter
-        data.ft('t2',shiftornot=True) # ft along t2
-    #}}}
-    data_shape = ndshape(data)
-    #{{{ make the absolute value, so we can find the top of the peak
-    data_abs = data.copy()
-    #{{{ apply the matched filter to maximize our SNR while picking the peak
-    data_abs.ift('t2',shiftornot=True) # ft along t2
-    filter = matched_filter(data_abs,'t2')
-    data_abs *= filter
-    data_abs.ft('t2',shiftornot=True) # ft along t2
-    data_abs = abs(data_abs)
-    #}}}
-    #}}}
-    #{{{ find the top of the peak, or alternatively, put an array into data_abs which we can use for matched filtering
-    if not(center_peak):
-        data_abs.mean('power')
-    data_topvals = data_abs.copy()
-    data_topvals.run(amax,'t2') # amax returns the max along the appropriate axis
-    data_top = data_abs.copy() # since data_abs is currently not used, but I want to use it to do matched filtered integration, really need to make a separate variable here
-    data_top.run(argmax,'t2') # put the index of the top peak there
-    top = int32(data_top.data)
-    topvals = data_topvals.data
-    if not(center_peak):
-        data_abs.data = ones(data_shape['power'])*data_abs.data
-    #}}}
-    #{{{ if integration points unspec, pull out the integration width
-    if intpoints==None:
-        df = data.getaxis('t2').copy()
-        df = df[1]-df[0]
-        intpoints = floor(integration_width/(df))
-    #}}}
-    #{{{actually pull the integration points, + and - intpoints from the peak, putting them into newdata and the noise into newnoise
-    data_shape['t2'] = intpoints*2+1
-    newdata = []
-    newnoise = []
-    top[top<intpoints] = intpoints # prevent a bug where the integration range exceeds the spectrum
-    #{{{baseline correction
-    if usebaseline:
-        for j in range(0,ndshape(data)['power']):
-            if plotcheckbaseline:
-                hold(True)
-                baseline_data = baseline_spectrum_peakpick(data['power',j].copy(),showplots = True)
-            else:
-                baseline_data = baseline_spectrum_peakpick(data['power',j].copy())
-                data['power',j].data[:] -= baseline_data.data.flatten()
-                if any(isnan(data['power',j].data[:])):
-                    print 'isnan!!'
-                if any(isinf(data['power',j].data[:])):
-                    print 'isinf!!'
-        if plotcheckbaseline:
-            error_plot('Wanted to check baseline')
-    #}}}
-    for j in range(0,data_shape['power']):
-        newdata += [data['power',j,'t2',top[j]-intpoints:top[j]+intpoints+1]]
-        if return_noise:
-            #newnoise += [data['power',j,'t2',10:10+intpoints]]
-            newnoise += [data['power',j,'t2',top[j]+intpoints+1:top[j]+2*intpoints+1]] # pull noise from an integration range to the right of the current one --> this probably needs work
-    debug_top = top
-    debug_slice = [top[j]-intpoints,top[j]+intpoints+1]
-    debug_newdata_len = len(newdata)
-    newdata = concat(newdata,'power')
-    if return_noise:
-        newnoise = concat(newnoise,'power')
-    debug_newdata_shape = ndshape(newdata)
-    debug_newdata_data_shape = newdata.data.shape
-    #}}}
-    #{{{ if we're using absolute value, calculate the noiselevel --> just ignore this for now, since I don't really forsee using this
-    if not usephase:
-        noiselevel = data['t2',-(2*intpoints+1)-filteredge:-filteredge]
-        noiselevel = abs(noiselevel).mean('t2').mean_nopop('power')
-        newdata = abs(newdata)
-    #}}}
-    #{{{ show what we're integrating
-    if showimage:
-        clf()
-        figure(1)
-        try:
-            #image(newdata)
-            center_for_image = int32(sum(top*topvals)/sum(topvals))
-            if abs_image:
-                image(abs(data['t2',center_for_image-3*intpoints:center_for_image+3*intpoints+1]))
-                title('2D plot of spectra')
-            else:
-                image(data['t2',center_for_image-3*intpoints:center_for_image+3*intpoints+1])
-                title('2D plot of spectra')
-        except:
-            print 'top = ',top
-            print 'topvals = ',topvals
-            if(any(isnan(newdata.data))):
-                raise CustomError('image isnan')
-            elif(any(isinf(newdata.data))):
-                raise CustomError('image isinf')
-            else:
-                clf()
-                plot(debug_data_afterbaseline.T)
-                error_plot()
-                raise CustomError('cant make image from type',type(newdata.data),newdata.data.dtype,'data_shape:',data_shape,'debug_newdata_len:',debug_newdata_len,'debug_newdata_shape:',debug_newdata_shape,'debug_newdata_data_shape:',debug_newdata_data_shape,'debug_top:',debug_top,'debug_slice:',debug_slice,'debug_ini_data_size:',debug_ini_data_size,'debug_data_afterbaseline(',shape(debug_data_afterbaseline),'):',debug_data_afterbaseline)
-    newdatacopy = newdata.copy()
-    #}}}
-    newdata.mean('t2') # integrate
-    #{{{ either autophase, or subtract out the abs baseline 
-    if usephase:
-        if not indiv_phase:
-            #newdata.data *= exp(-1j*angle(newdata.data.sum()))
-            phaseoptval = phaseopt(newdata.data)
-            newdata.data *= phaseoptval
-            newdatacopy.data *= phaseoptval
-            if return_noise:
-                newnoise.data *= phaseoptval
-        else:
-            for j in range(0,len(newdata.data)):
-                phcorr =  newdata['power',j]
-                phcorr /= abs(phcorr)
-                try:
-                    newdatacopy['power',j] *= phcorr
-                    newdata['power',j] *= phcorr
-                except:
-                    print 'shape of newdatacopy',ndshape(newdatacopy)
-                    print 'shape of newdata',ndshape(newdata)
-    else:
-        newdata -= noiselevel
-        newdatacopy.data -= noiselevel
-    if showimage:
-        figure(2)
-        clf()
-        plot((newdatacopy).reorder(['t2','power']))
-        title('Peaks, zoomed in to integration region')
-        if show_integral:
-            #{{{this does work to plot the integral
-            newdatacopy.integrate('t2') #newdatacopy.run_nopop(cumsum,'t2')
-            gridandtick(gca())
-            ax = gca()
-            myxlim = ax.get_xlim()
-            twinx()
-            plot(newdatacopy,alpha=0.5)
-            axes(ax)
-            ax.set_xlim(myxlim)
-            #}}}
-        figure(1)
-    #}}}
-    if return_noise:
-        newnoise.data = abs(newnoise.data)
-        newnoise.data **= 2
-        newnoise.mean('t2') # which should give us the sigma --> note that if there is no baseline correction, this will not be a sigma
-        return real(newdata.data.flatten()),sqrt(newnoise.data.flatten()*sqrt(2.*intpoints+1.)) # we have to account for the signal averaging from the integral
-    else:
-        return real(newdata.data.flatten())
-#}}}
 #{{{ integrate --> new integration function
 def integrate(file,expno,
         integration_width=1e3,
@@ -873,7 +686,8 @@ def integrate(file,expno,
         peak_within = 20e3,
         abs_image = False,
         max_drift = 1e3,
-        first_figure = 1):
+        first_figure = 1,
+        offset_corr = 0):
     r'''new integration function, which replaces integrate_emax, and is used to integrate data, as for Emax and T1 curves'''
     if type(plot_check_baseline) is bool:
         if plot_check_baseline:
@@ -881,6 +695,8 @@ def integrate(file,expno,
         else:
             plot_check_baseline = -1
     data = load_emax(file,expno) # load the data
+    if offset_corr > 0: # number of points to use for digitizer offset (zero glitch) correction
+        data.data -= data['t2',-offset_corr:].copy().mean('t2').mean('power').data
     # see_fid obsolete by rg_check
     # also remove all debug statements
     #data = data['power',r_[0,1,-2,-1]];print 'WARNING, DEBUG --> pulling only 3 powers!'
@@ -892,7 +708,7 @@ def integrate(file,expno,
     data_abs['t2',abs(t2temp)>peak_within].data *= 0
     #{{{ apply the matched filter to maximize our SNR while picking the peak
     data_abs.ift('t2',shiftornot=True) # ft along t2
-    filter = matched_filter(data_abs,'t2')
+    filter = matched_filter(data_abs,'t2',decay_rate = 3)
     data_abs *= filter
     data_abs.ft('t2',shiftornot=True) # ft along t2
     #}}}

@@ -1068,6 +1068,7 @@ def image(A,x=[],y=[],**kwargs):
         setlabels = True
         templabels = list(A.dimlabels)
         x_label = templabels[-1]
+        x = list(A.getaxis(x_label))
         templabels.pop(-1)
         y_label = ''
         while len(templabels)>0:
