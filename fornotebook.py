@@ -354,6 +354,7 @@ def dnp_for_rho(path,name,powerseries,
         h5file = 'temperature_paper.h5',
         gensvg = False,
         coarse_power = False,
+        t1_offset_corr = 0,
         **kwargs):
     r'This is essentially a function that matches the jf_dnp au program\nit will process the resulting data\n(using a standard run for that program as a default) and pull out all the info needed to calculate rho,\nplacing them in a HDF5 file'
     #{{{ pull all the relevant info out of the file name
@@ -516,7 +517,8 @@ def dnp_for_rho(path,name,powerseries,
                show_integral = True,
                plotcheckbaseline = False,
                abs_image = False,
-               first_figure = t1startingfigure)
+               first_figure = t1startingfigure,
+               offset_corr = t1_offset_corr)
             print '\n\n'
             #{{{ show the raw data
             t1lplotkwargs = {}
