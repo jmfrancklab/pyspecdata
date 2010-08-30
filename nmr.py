@@ -695,7 +695,7 @@ def integrate(file,expno,
         else:
             plot_check_baseline = -1
     data = load_emax(file,expno) # load the data
-    if tyep(offset_corr) is list:
+    if type(offset_corr) is list:
         offset_corr = array(offset_corr)
     if type(offset_corr) is ndarray:
         data.data += data['t2',-offset_corr].copy().mean('t2').mean('power').data
