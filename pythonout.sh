@@ -10,9 +10,10 @@ mv temp.py $1
 #rm temp.py
 if [ -e "$1.old" ] && [ -e "$1" ]; then
 #	if ! diff $1.old $1; then
-		# if the old version and the new version are different, then run python, otherwise, do nothing
-		python -W "ignore" $1 > $1.out 2> $1.err
-		mv $1 $1.old
+    echo "running diff regardless of update status"
+    # if the old version and the new version are different, then run python, otherwise, do nothing
+    python -W "ignore" $1 > $1.out 2> $1.err
+    mv $1 $1.old
 #	fi
 else
 	# also need to run if both files don't exist
