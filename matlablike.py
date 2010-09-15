@@ -13,6 +13,19 @@ rcParams['ytick.minor.size'] = 6
 rcParams['legend.fontsize'] = 12
 rcParams['axes.grid'] = False
 rcParams['font.size'] = 18
+#{{{ function trickery
+def mydiff(data,axis = -1):
+    '''this will replace diff with a version that has the same number of indeces, with the last being the copy of the first'''
+    newdata = zeros(shape(data),dtype = data.dtype)
+    indeces = [slice(None,None,None)]*len(data.shape)
+    indeces[axis] = slice(None,-1,None)
+    newdata[indeces] = diff(data,axis = axis)
+    #setfrom = list(indeces)
+    #indeces[axis] = -1
+    #setfrom[axis] = 0
+    #newdata[indeces] = newdata[setfrom]
+    return newdata
+#}}}
 def emptyfunction():
     pass
 #{{{ errors
@@ -151,6 +164,10 @@ def plot_color_counter(*args):
         if len(args)>0:
             ax._get_lines.count = args[0] # set the value of the color counter
         return ax._get_lines.count
+def nextfigure(figurelist,name):
+        figure(len(figurelist)+1)
+        figurelist.append(name)
+        return figurelist
 def plot(*args,**kwargs):
     global myplotfunc
     myplotfunc = OLDplot # default
@@ -204,7 +221,7 @@ def plot(*args,**kwargs):
                 kwargs.update({'yerr':myyerror})
                 valueforxerr = myy.get_error(myy.dimlabels[0])
                 if valueforxerr != None: # if we have x errorbars too
-                    print "DEBUG decided to assign to xerr:",valueforxerr
+                    #print "DEBUG decided to assign to xerr:",valueforxerr
                     kwargs.update({'xerr':valueforxerr})
 
             myy = squeeze(myy.data.copy())
@@ -309,7 +326,10 @@ class ndshape ():
     def __repr__(self): #how it responds to print
         return zip(self.shape,self.dimlabels).__repr__()
     def __getitem__(self,args):
-        mydict = dict(zip(self.dimlabels,self.shape))
+        try:
+            mydict = dict(zip(self.dimlabels,self.shape))
+        except:
+            raise CustomError("either dimlabels=",self.dimlabels,"or shape",self.shape,"not in the correct format")
         return mydict[args]
     def pop(self,label):
         thisindex = self.dimlabels.index(label)
@@ -351,6 +371,7 @@ def concat(datalist,dimname):
         newdatalist[dimname] = t1size
     else:
         newdatalist += ([t1size],[dimname])
+    #print "DEBUG newdatalist is shaped like",newdatalist
     newdatalist = newdatalist.alloc()
     #}}}
     #{{{ actually contact the datalist
@@ -367,13 +388,17 @@ def concat(datalist,dimname):
     if len(datalist[-1].axis_coords)>0:
         dimlabels = list(datalist[-1].dimlabels)
         axis_coords = list(datalist[-1].axis_coords)
+        #print "axis_coords are",axis_coords,"for",dimlabels
         if dimname in dimlabels:
             thisindex = dimlabels.index(dimname)
             dimlabels.pop(thisindex)
             axis_coords.pop(thisindex)
         dimlabels += [dimname]
         axis_coords += [r_[0:t1size]]
-        newdatalist.labels(dimlabels,axis_coords)
+        try:
+            newdatalist.labels(dimlabels,axis_coords)
+        except:
+            raise CustomError("trying to attach axes of lengths",map(len,axis_coords),"to",dimlabels)
     #}}}
     return newdatalist
 #}}}
@@ -459,6 +484,26 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
     def rename(self,previous,new):
         self.dimlabels[self.dimlabels.index(previous)] = new
         return self
+    def __add__(self,arg):
+        a = self.copy()
+        if isscalar(arg):
+            a.data += arg
+            return a
+        b = arg.copy()
+        if (shape(arg.data)!=shape(a.data)):
+            a.matchdims(b)
+            b.matchdims(a)
+        a.data += b.data
+        Aerr = a.get_error()
+        Berr = arg.get_error()
+        if (Aerr is not None) or (Berr is not None):
+            sigma = 0
+            if Aerr != None:
+                sigma += Aerr**2
+            if Berr != None:
+                sigma += Berr**2
+            a.set_error(sqrt(sigma))
+        return a
     def __sub__(self,arg):
         a = self.copy()
         if isscalar(arg):
@@ -466,28 +511,18 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
             return a
         b = arg.copy()
         if (shape(arg.data)!=shape(a.data)):
-            #print 'diagnose: ndshape(a)',ndshape(a)
-            #print '\n\n'
-            #print 'diagnose: ndshape(b)',ndshape(b)
-            #print '\n\n'
-            #print r'diagnose: axis\_coords',map(len,a.axis_coords)
-            #print '\n\n'
             a.matchdims(b)
             b.matchdims(a)
-            #print 'diagnose:',ndshape(a)
-            #print 'diagnose:',ndshape(b)
-        try:
-            a.data -= b.data
-        except:
-            print '|-ERROR SUBTRACTING NDDATA-----------'
-            print '|','a.data.shape:',a.data.shape
-            print '|','arg.data.shape:',arg.data.shape
-            print '|------------------------------------'
-            raise
-        return a
-    def __add__(self,arg):
-        a = self.copy()
-        a.data += arg.data
+        a.data -= b.data
+        Aerr = a.get_error()
+        Berr = arg.get_error()
+        if (Aerr is not None) or (Berr is not None):
+            sigma = 0
+            if Aerr != None:
+                sigma += Aerr**2
+            if Berr != None:
+                sigma += Berr**2
+            a.set_error(sqrt(sigma))
         return a
     def __mul__(self,arg):
         #{{{ do scalar multiplication
@@ -737,10 +772,11 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
                 dt = t[1]-t[0]
                 self.ft_start_time = t[0]
                 self.data *= dt
+                self.axis_coords[thisaxis] = linspace(0,1./dt,size(t))
                 if bool(shiftornot[j]):
-                    self.axis_coords[thisaxis] = linspace(-0.5/dt,0.5/dt,size(t))
-                else:
-                    self.axis_coords[thisaxis] = linspace(0,1./dt,size(t))
+                    mask = self.axis_coords[thisaxis] > 0.5/dt
+                    self.axis_coords[thisaxis][mask] -= (1.+1./size(t))/dt
+                    self.axis_coords[thisaxis] = fftshift(self.axis_coords[thisaxis])
         return self
     def ift(self,axes,shiftornot=False,shift=None):
         if shift != None:
@@ -770,6 +806,7 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
     def runcopy(self,*args):
         newdata = self.copy()
         func = args[0]
+        func = self._wrapaxisfuncs(func)
         if len(args)>1:
             axis = args[1]
             thisaxis = newdata.dimlabels.index(axis)
@@ -794,7 +831,7 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
             self.axis_coords = [[]]*len(self.dimlabels)
         for j in range(0,len(listofstrings)):
             #{{{ test that the axis is the right size
-            if len(listofaxes[j]) != ndshape(self)[listofstrings[j]]:
+            if (len(listofaxes[j]) != ndshape(self)[listofstrings[j]]) and (len(listofaxes[j])!=0):
                 raise CustomError("You're trying to attach an axis of len",len(listofaxes[j]),"to the",listofstrings[j],"dimension, which is",ndshape(self)[listofstrings[j]],"long")
             #}}}
             try:
@@ -817,6 +854,8 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         # in the case that the dimensions match, and we want to copy the labels
         self.axis_coords = other.axis_coords
         return self
+    def retaxis(self,axisname):
+        return nddata(self.getaxis(axisname).copy(),[size(self.getaxis(axisname))],[axisname])
     def getaxis(self,axisname):
             return self.axis_coords[self.dimlabels.index(axisname)]
     def getaxisshape(self,axisname):
@@ -826,6 +865,7 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         return thishape
     def run(self,*args):
         func = args[0]
+        func = self._wrapaxisfuncs(func)
         if len(args)>1:
             axis = args[1]
             thisaxis = self.dimlabels.index(axis)
@@ -836,8 +876,22 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         else:
             self.data = func(self.data)
         return self
+    def _wrapaxisfuncs(self,func):
+        #{{{ for convenience, wrap the max and min functions
+        if func == max:
+            func = amax
+        if func == min:
+            func = amin
+        if func == diff:
+            func = mydiff
+        return func
+        #}}}
     def run_nopop(self,func,axis):
-        thisaxis = self.dimlabels.index(axis)
+        func = self._wrapaxisfuncs(func)
+        try:
+            thisaxis = self.dimlabels.index(axis)
+        except:
+            raise CustomError("I couldn't find the dimension",axis,"in the list of axes",self.dimlabels)
         temp = list(self.data.shape)
         temp[thisaxis] = 1
         self.data = func(self.data,axis=thisaxis)
@@ -866,6 +920,24 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         self.reorder(concatenate(listoflists))
         self.smash(map(len,listoflists))
         return self
+    def chunk(self,axisin,axesout,shapesout):
+        if prod(shapesout) != ndshape(self)[axisin]:
+            raise CustomError("The size of the axis you're trying to split doesn't match the size of the axes you're trying to split it into")
+        thisaxis = self.dimlabels.index(axisin)
+        if len(self.axis_coords[thisaxis]) > 0:
+            raise CustomError("split not yet supported on axes with labels")
+        newaxis_coords = self.axis_coords[0:thisaxis] + [[]]*len(axesout) + self.axis_coords[thisaxis+1:]
+        newshape = list(self.data.shape[0:thisaxis]) + shapesout + list(self.data.shape[thisaxis+1:])
+        newnames = list(self.dimlabels[0:thisaxis]) + axesout + list(self.dimlabels[thisaxis+1:])
+        self.data = self.data.reshape(newshape)
+        self.dimlabels = newnames
+        self.axis_coords = newaxis_coords
+        return self
+    def chunkoff(self,axisin,newaxes,newshapes):
+        r'''chunks up axisin, dividing it into newaxes with newshapes on the inside'''
+        axesout = [axisin]+newaxes
+        shapesout = [ndshape(self)[axisin]/prod(newshapes)]+newshapes
+        return self.chunk(axisin,axesout,shapesout)
     def reorder(self,axes):
         neworder = map(self.dimlabels.index,axes)
         self.dimlabels = map(self.dimlabels.__getitem__,neworder)
@@ -877,7 +949,7 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         try:
             self.data = self.data.transpose(neworder)
         except ValueError:
-            raise "you didn't supply all the dimensions for the reorder"
+            raise CustomError('you can\'t reorder',self.dimlabels,'as',neworder)
         return self
     def __getslice__(self,*args):
         print 'getslice! ',args
@@ -921,6 +993,7 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         #}}}
         return retval
     def __getitem__(self,args):
+        #print "DEBUG getitem called with",args
         if type(args[0]) is str:
             slicedict = dict(zip(list(self.dimlabels),[slice(None,None,None)]*len(self.dimlabels))) #initialize to all none
             if len(self.axis_coords)>0:
@@ -933,11 +1006,16 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
                 slicedict[x] = y
             #}}}
             #{{{ map the slices onto the axis coordinates and errors
+            #print "DEBUG slicedict is",slicedict
             if len(self.axis_coords)>0:
                 for x,y in slicedict.iteritems():
-                    if isscalar(y): axesdict.pop(x)
+                    #print "DEBUG, type of slice",x,"is",type(y)
+                    if isscalar(y):
+                        axesdict.pop(x)
+                        #print "type of scalar is",type(y)
                     elif type(y) is type(emptyfunction):
                         mask = y(axesdict[x])
+                        slicedict[x] = mask
                         axesdict[x] = axesdict[x][mask]
                     else:
                         axesdict[x] = axesdict[x][y] # pop the axes for all scalar dimensions

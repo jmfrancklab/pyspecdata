@@ -16,7 +16,15 @@ def thisjobname():
     retval = rstrip(fp.read())
     fp.close()
     return retval
-def lplot(fname,width=3,figure=False,dpi=100,grid=True,alsosave=None,gensvg = False):
+def lplotfigures(figurelist,string,numwide = 2,**kwargs):
+    print '\n\n'
+    for j,figname in enumerate(figurelist):
+        figure(j+1)
+        lplot(figname+string,grid = False,**kwargs)
+        if (j+1) % numwide == 0:
+            print '\n\n'
+    return []
+def lplot(fname,width=3,figure=False,dpi=100,grid=False,alsosave=None,gensvg = False):
     '''
     used with python.sty instead of savefig
     '''
@@ -27,6 +35,8 @@ def lplot(fname,width=3,figure=False,dpi=100,grid=True,alsosave=None,gensvg = Fa
         alsosave = fname.replace('.pdf','.svg')
     if grid:
         gridandtick(gca())
+    fig = gcf()
+    fig.autofmt_xdate()
     savefig(fname,dpi=dpi)
     if alsosave != None:
         savefig(alsosave,dpi=dpi)
@@ -345,7 +355,7 @@ def dnp_for_rho(path,name,powerseries,
         expno = r_[5:32],
         t1expnos = [4,36,37],
         t1powers = None,
-        first_figure = 3,
+        first_figure = None,
         show_t1_raw = False,
         show_plots = True,
         verbose = False,
@@ -355,8 +365,14 @@ def dnp_for_rho(path,name,powerseries,
         gensvg = False,
         coarse_power = False,
         t1_offset_corr = 0,
+        t1_phnum = [],
+        t1_phchannel = [],
         **kwargs):
     r'This is essentially a function that matches the jf_dnp au program\nit will process the resulting data\n(using a standard run for that program as a default) and pull out all the info needed to calculate rho,\nplacing them in a HDF5 file'
+    if first_figure == None:
+        figurelist = []
+    else:
+        figurelist = first_figure
     #{{{ pull all the relevant info out of the file name
     if h5file != None:
         if chemical_name == None:
@@ -405,19 +421,13 @@ def dnp_for_rho(path,name,powerseries,
         #}}}
         #{{{ find the normalized integrals
         # this should be pretty portable -- maybe stick in fornotebook.py
-        integral = integrate(path+name+'/',expno,integration_width=integration_width,return_noise=True,first_figure = first_figure)
+        integral,figurelist = integrate(path+name+'/',expno,integration_width=integration_width,return_noise=True,first_figure = figurelist,**kwargs)
+        #print '\n\nDEBUG test figurelist',figurelist,'\n\n'
+        figurelist = lplotfigures(figurelist,name+basename+'.pdf')
         #print '\n\nDEBUG 1 integral data ',zip(powerseries,integral.data),'\n\n'
         normalizer = integral['power',0:1].copy()
         integral /= normalizer
         #print '\n\nDEBUG 2 integral data ',zip(powerseries,integral.data),'\n\n'
-        #}}}
-        #{{{ initial plots
-        figure(first_figure)
-        axis('tight')
-        lplot('rawimage'+name+basename+'.pdf',grid=False)
-        figure(first_figure+1)
-        axis('tight')
-        lplot('rawdata_'+name+basename+'.pdf',grid=False)
         #}}}
         if (h5file != None):
             #{{{ find the power scans
@@ -435,7 +445,7 @@ def dnp_for_rho(path,name,powerseries,
                 testf.close()
             #}}}
         #{{{ convert integral to Emax fit class, and plot the fit
-        figure(first_figure+3)
+        figurelist = nextfigure(figurelist,'emax')
         integral = emax(integral,fit_axis = 'power')
         integral.labels(['power'],[powers])
         integral.makereal()
@@ -449,14 +459,14 @@ def dnp_for_rho(path,name,powerseries,
         power_axis_forplot = linspace(power_axis[0],power_axis[-1],100)
         print '\n\n$c_0$ is',integral.output('c_0'),'\n\n'
         plot(integral.eval(power_axis_forplot))
+        gridandtick(gca())
         Emax = integral.output('c_0') - integral.output('A')/integral.output('B')
         ax = gca()
         text(0.7,0.5,r'$E_{max}=$ %0.02f'%Emax,transform = ax.transAxes,size = 'x-large', horizontalalignment = 'center',color = 'b')
-        lplot('Evp'+name+basename+'.pdf',gensvg = gensvg)
-        #print '\n\nDEBUG 3 integral data ',zip(integral.getaxis('power').copy(),integral.data),'\n\n'
+        #lplot('Evp'+name+basename+'.pdf',gensvg = gensvg)
         #}}}
         #{{{ show the linear plot
-        figure(first_figure+4)
+        figurelist = nextfigure(figurelist,'linearemax')
         #{{{ find the plot limits
         lims = integral.linear().data.copy()
         lims = lims[isfinite(lims)]
@@ -469,8 +479,7 @@ def dnp_for_rho(path,name,powerseries,
         Evipplot = integral.linear(power_axis_forplot,set='c_0',set_to=1.0)
         plot(Evipplot,'b-')
         ax.set_ylim(lims)
-        #print "\n\nDEBUG, I would set the ylims to ",lims,"instead of",ax.get_ylim(),'\n\n'
-        lplot('Evip'+name+basename+'.pdf',grid=False,gensvg = gensvg)
+        #lplot('Evip'+name+basename+'.pdf',grid=False,gensvg = gensvg)
         #}}}
         #{{{ do the pinv fit
         print '\n\n'
@@ -501,14 +510,18 @@ def dnp_for_rho(path,name,powerseries,
                 row.append()
                 print "found no row with ",concentration,"M",chemical_name.replace('_',r'\_'),"date",datetime.fromtimestamp(date_of_file).strftime('%m/%d/%y'),"so appended Emax=",Emax
             #}}}
+        print '\n\ntest figurelist',figurelist,'\n\n'
+        figurelist = lplotfigures(figurelist,name+basename+'.pdf')
     #}}}
     if not coarse_power: # since this would just waste space, since I'm going to do it both ways anyways
         #{{{ now, go ahead and process the T_1 data
         t1expnos = map(str,t1expnos)
+        if len(t1_phchannel)>0:
+            kwargs['phchannel'] = t1_phchannel
+            kwargs['phnum'] = t1_phnum
         for j,t1expno in enumerate(t1expnos):
             t1file = [path+name+'/'+t1expno]
-            t1startingfigure = first_figure+3+4*j
-            fit = process_t1(t1file,[],
+            fit,figurelist = process_t1(t1file,[],
                show_image = True,
                integration_width = integration_width,
                usebaseline = False,
@@ -517,22 +530,16 @@ def dnp_for_rho(path,name,powerseries,
                show_integral = True,
                plotcheckbaseline = False,
                abs_image = False,
-               first_figure = t1startingfigure,
-               offset_corr = t1_offset_corr)
+               first_figure = figurelist,
+               offset_corr = t1_offset_corr,
+               **kwargs)
             print '\n\n'
             #{{{ show the raw data
-            t1lplotkwargs = {}
-            if show_t1_raw:
-                figure(t1startingfigure)
-                t1lplotkwargs.update({'width':2})
-                lplot('signal'+name+basename+'_'+t1expno+'.pdf',grid = False,**t1lplotkwargs)
             #}}}
             #{{{ show the T1 plots and integral peaks
             if show_plots:
-                figure(t1startingfigure+1)
-                lplot('integral_peak'+name+basename+'_'+t1expno+'.pdf',**t1lplotkwargs)
-                figure(t1startingfigure+2)
-                lplot('t1'+name+basename+'_'+t1expno+'.pdf',**t1lplotkwargs)
+                t1lplotkwargs = {'numwide':4,'width':2}
+                figurelist = lplotfigures(figurelist,name+basename+'_'+t1expno+'.pdf',**t1lplotkwargs)
             #}}}
             if t1powers == None:
                 #{{{ search for the power in the title string

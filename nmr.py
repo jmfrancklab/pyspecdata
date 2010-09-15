@@ -249,26 +249,16 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
                 dtype='complex128')
         data = data[0::2]+1j*data[1::2]
         data /= rg
-        if len(add_sizes)>0:
-            mydimsizes = [td1/prod(add_sizes)]+add_sizes+[td2_zf/2]
-        else:
-            mydimsizes = [td1,td2_zf/2]
-        mydimnames = [dimname]+add_dims+['t2']
+        mydimsizes = [td1,td2_zf/2]
+        mydimnames = [dimname]+['t2']
         data = nddata(data,mydimsizes,mydimnames)
         data = data['t2',0:td2/2] # now, chop out their zero filling
         t2axis = 1./v['SW_h']*r_[1:td2/2+1]
         t1axis = r_[0:td1]
-        add_labels = []
-        for j in range(0,len(add_dims)):
-            add_labels += [r_[0:add_sizes[j]]]
-        mylabels = [t1axis]+add_labels+[t2axis]
+        mylabels = [t1axis]+[t2axis]
         data.labels(mydimnames,mylabels)
         shiftpoints = int(bruker_det_phcorr(v)) # use the canned routine to calculate the first order phase shift
         data.circshift('t2',shiftpoints)
-        if return_acq:
-            return (data,v,v2)
-        else:
-            return data
         #}}}
         #{{{ Prospa 2D
     elif twod and filetype == 'prospa':
@@ -297,7 +287,6 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
             data.labels([dimname,'t2'],[r_[1],taxis])
             data.want_to_prospa_decim_correct = True
         #}}}
-        return data
         #}}}
         #{{{ bruker 1D
     else:
@@ -323,10 +312,6 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
             #print 'shiftpoints = ',shiftpoints
             data.circshift('t2',shiftpoints)
             # finally, I will probably need to add in the first order phase shift for the decimation --> just translate this
-            if return_acq:
-                return (data,v,v2)
-            else:
-                return data
         #}}}
         #{{{ prospa 1d
         elif filetype == 'prospa':
@@ -335,10 +320,21 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
             data = nddata(data,[v['nrPnts']],['t2'])
             taxis = linspace(0,1,v['nrPnts'])*v['acqTime']/1e3
             data.labels(['t2'],[taxis])
-            return data
         #}}}
         else:
-            raise CustomError("can't load this file type")
+            raise CustomError("can't load this file type $\\rightarrow$ \\verb+%s+"%filename)
+
+    #{{{ return, and if necessary, reorganize
+    if len(add_sizes)>0:
+        data.labels([dimname],[[]]) # remove the axis, so we can reshape
+        data.chunkoff(dimname,add_dims,add_sizes)
+        data.labels(add_dims,
+                [r_[0:x] for x in add_sizes])
+    if return_acq:
+        return (data,v,v2)
+    else:
+        return data
+    #}}}
 #}}}
 #{{{ t1 axis
 def load_t1_axis(file):
@@ -683,33 +679,40 @@ def integrate(file,expno,
         return_noise=False,
         show_integral = False,
         indiv_phase = False,
-        peak_within = 20e3,
+        peak_within = 1e3,
         abs_image = False,
         max_drift = 1e3,
-        first_figure = 1,
+        first_figure = None,
+        phnum = [],
+        phchannel = [],
         offset_corr = 0):
     r'''new integration function, which replaces integrate_emax, and is used to integrate data, as for Emax and T1 curves'''
+    if first_figure == None:
+        figurelist = []
+    else:
+        figurelist = first_figure
     if type(plot_check_baseline) is bool:
         if plot_check_baseline:
             plot_check_baseline = 0 
         else:
             plot_check_baseline = -1
-    data = load_emax(file,expno) # load the data
+    phcycdims = ['phcyc%d'%j for j in range(1,len(phnum)+1)]
+    data = load_emax(file,expno,add_sizes = phnum,add_dims = phcycdims) # load the data
+    #{{{ offset correction
     if type(offset_corr) is list:
         offset_corr = array(offset_corr)
     if type(offset_corr) is ndarray:
         data.data -= data['t2',offset_corr].copy().mean('t2').mean('power').data
     elif offset_corr > 0: # number of points to use for digitizer offset (zero glitch) correction
         data.data -= data['t2',-offset_corr:].copy().mean('t2').mean('power').data
+    #}}}
     # see_fid obsolete by rg_check
     # also remove all debug statements
-    #data = data['power',r_[0,1,-2,-1]];print 'WARNING, DEBUG --> pulling only 3 powers!'
-    data.ft('t2',shiftornot=True) # ft along t2
+    data,figurelist = phcyc(data,names = phcycdims,selections = phchannel, show_plot = ['t2',(lambda x:abs(x)<peak_within)],first_figure = figurelist) # ft along t2, applying phase cycle where necessary
     data_shape = ndshape(data) # this is used to shape the output
     #{{{ abs w/ max SNR, so we can pick the peak
     data_abs = data.copy()
-    t2temp = data_abs.getaxis('t2')
-    data_abs['t2',abs(t2temp)>peak_within].data *= 0
+    data_abs['t2',(lambda x: abs(x)<peak_within)].data *= 0
     #{{{ apply the matched filter to maximize our SNR while picking the peak
     data_abs.ift('t2',shiftornot=True) # ft along t2
     filter = matched_filter(data_abs,'t2',decay_rate = 3)
@@ -752,33 +755,7 @@ def integrate(file,expno,
     newdata = []
     newnoise = []
     center[center<intpoints] = intpoints # prevent a bug where the integration range exceeds the spectrum
-    #{{{ show what we're integrating
-    if show_image:
-        clf()
-        figure(first_figure)
-        try:
-            #image(newdata)
-            center_for_image = topavg
-            if abs_image:
-                image(abs(data['t2',center_for_image-3*intpoints:center_for_image+3*intpoints+1]))
-                title('2D plot of spectra')
-            else:
-                image(data['t2',center_for_image-3*intpoints:center_for_image+3*intpoints+1])
-                title('2D plot of spectra')
-        except:
-            print 'center_for_image = ',center_for_image
-            print 'topavg = ',topavg
-            print 'intpoints = ',intpoints
-            if(any(isnan(newdata.data))):
-                raise CustomError('image isnan')
-            elif(any(isinf(newdata.data))):
-                raise CustomError('image isinf')
-            else:
-                clf()
-                plot(debug_data_afterbaseline.T)
-                error_plot()
-                raise CustomError('cant make image from type',type(newdata.data),newdata.data.dtype,'data_shape:',data_shape,'debug_newdata_len:',debug_newdata_len,'debug_newdata_shape:',debug_newdata_shape,'debug_newdata_data_shape:',debug_newdata_data_shape,'debug_center:',debug_center,'debug_slice:',debug_slice,'debug_ini_data_size:',debug_ini_data_size,'debug_data_afterbaseline(',shape(debug_data_afterbaseline),'):',debug_data_afterbaseline)
-    #}}}
+    # plotting here removed, since this is done by phcyc
     #{{{baseline correction
     if use_baseline:
         #data.data += 0.1 #for debug baseline
@@ -856,8 +833,8 @@ def integrate(file,expno,
     #}}}
     #{{{ show what we're integrating
     if show_image:
-        figure(first_figure+1)
-        clf()
+        figurelist = nextfigure(figurelist,'intpeaks')
+        #print "DEBUG intpeaks figurelist =",figurelist,"gcf = ",gcf().number
         plot_newdata.reorder(['t2','power'])
         plot(plot_newdata,alpha=0.5)
         title('Peaks, zoomed in to integration region')
@@ -877,13 +854,15 @@ def integrate(file,expno,
             plot(plot_newdata,'k',alpha=0.1)
             gca().set_xlim(myxlim)
             #}}}
-        figure(first_figure)
     #}}}
     #{{{ return integral and the noise of the 
     if return_noise:
         number_of_integral_points = 2.*intpoints+1. # the integral is a sum over this many points
         newdata.set_error(sqrt(newnoise.data.flatten()*number_of_integral_points))
-    return newdata
+    if first_figure == None:
+        return newdata
+    else:
+        return newdata,figurelist
     #}}}
 #}}}
 #}}}
@@ -944,8 +923,53 @@ def load_emax(file,datafiles,printinfo=True,add_sizes = [],add_dims = []):
             #}}}
     return data
 #}}}
+#{{{ deal with manual phase cycling
+def phcyc(data,names=[],selections=[],remove_zeroglitch=None,show_plot = False,first_figure = None):
+    if first_figure == None:
+        figurelist = []
+    else:
+        figurelist = first_figure
+    data.ft('t2',shift=True)
+    if len(names)>0:
+        data.ft(names)
+        if remove_zeroglitch == None:
+            remove_zeroglitch = True
+    if remove_zeroglitch:
+        index = argmin(abs(data.getaxis('t2')-0)) # need to incorporate this functionality into the abstracted function indexer
+        indexlist = ['t2',index]
+        for j,name in enumerate(names):
+            indexlist += [name,0]
+        data[tuple(indexlist)] = 0
+    if show_plot:
+        figurelist = nextfigure(figurelist,'phcycchan')
+        allindexes = list(data.dimlabels)
+        for name in names:
+            if name in allindexes:
+                allindexes.remove(name)
+                allindexes = [name]+allindexes
+        allindexes.remove('t2')
+        data.reorder(allindexes+['t2'])
+        if show_plot == True: # if passed something other than just "true", use that to subscript data
+            image(data)
+        else:
+            image(data[tuple(show_plot)])
+        titlestr = 'Raw data'
+        if len(names)>0:
+            titlestr += ' by phase cycle channel'
+        title(titlestr)
+    for j,name in enumerate(names):
+        data = data[name,selections[j]]
+    if first_figure == None:
+        return data
+    else:
+        return data,figurelist
+#}}}
 #{{{ process_t1
-def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline = None,saturation = False,first_figure = 3,**kwargs):
+def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline = None,saturation = False,first_figure = None,**kwargs):
+    if first_figure == None:
+        figurelist = 1
+    else:
+        figurelist = first_figure
     #{{{ legacy kwargs
     if showimage != None:
         show_image = showimage
@@ -956,15 +980,18 @@ def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline 
         file = [file]
     titlestr = load_title(file[0])
     wait_time = load_t1_axis(file[0])
-    integral = integrate(file,expno,first_figure = first_figure,**kwargs)
+    integral,figurelist = integrate(file,expno,first_figure = figurelist,**kwargs)
     t1name = r'$t_1$'
     integral.rename('power',t1name)
     integral = t1curve(integral,fit_axis = t1name) # make this into an integral class, which fits along the dimension t1
+    if ndshape(integral)[t1name] < len(wait_time):
+        print '\n\nNote: ',t1name,'axis shorter than list of delays'
+        wait_time = wait_time[0:ndshape(integral)[t1name]]
     integral.labels([t1name],[wait_time]) # before, I had to sort them manually, but now, I don't
     #print 'DEBUG wait times:',integral.getaxis(t1name)
     integral.sort(t1name)
     #{{{ finally, show the fit  
-    figure(first_figure+2)
+    figurelist = nextfigure(figurelist,'t1')
     taxis = wait_time
     integral.data *= phaseopt(integral.data)
     plot(integral.runcopy(real),'ko')
@@ -977,17 +1004,20 @@ def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline 
     #plot(taxis,t1_fitfunc(r_[p[0:2],p[2]*0.8],taxis),'y')
     #}}}
     ax = gca()
-    text(0.5,0.5,integral.latex(),transform = ax.transAxes,size = 'x-large', horizontalalignment = 'center',color = 'g')
+    text(0.5,0.75,integral.latex(),transform = ax.transAxes,size = 'x-large', horizontalalignment = 'center',color = 'r')
     title(titlestr)
     #}}}
     #{{{ and the straight line plot
-    figure(first_figure+3)
+    figurelist = nextfigure(figurelist,'t1straight')
     #print 'linear data:',integral.linear().data
     plot(integral.linear(),'o')
     plot(integral.linear(taxis))
     #print ndshape(integral.linear())
     #}}}
-    return integral # there is never a return_fit, since the fit is stored in the class itsself
+    if first_figure == None:
+        return integral # there is never a return_fit, since the fit is stored in the class itsself
+    else:
+        return integral,figurelist # there is never a return_fit, since the fit is stored in the class itsself
 #}}}
 #{{{ process cpmg 
 def process_cpmg(file,dimname=''):
@@ -1004,31 +1034,31 @@ def process_cpmg(file,dimname=''):
 #{{{regularization
 def regularize1d(b,t,tau,alpha):
     # for Lx=b
-    if size(b) != size(t):
-        print "ERROR, size of b doesn't match size of t"
-    tau = tau.reshape(1,-1)
-    t = t.reshape(-1,1)
-    L = exp(-t/tau)
-    U,s,V = svd(L,full_matrices=0)
-    rms = zeros(len(alpha),dtype='double')
-    coeff = zeros((size(tau),size(alpha)),dtype='double')
-    fit = zeros((size(t),size(alpha)),dtype='double')
-    for j in range(0,len(alpha)):
-        S = diag(s / (s**2 + alpha[j]**2))
-        x = dot(
-                dot(
-                    conj(transpose(V)),
-                    dot(S,conj(transpose(U))))
-                ,b)# was b
-        fit[:,j] = dot(L,x)
-        try:
-            coeff[:,j] = x.flatten()
-        except:
-            print 'shape(coeff)',shape(coeff),'shape(x)',shape(x)
-            print 'first',shape(coeff[:,j]),'second',shape(x.reshape(-1,1))
-            raise
-        rms[j] = linalg.norm(fit[:,j]-b)
-    return (coeff,fit,rms)
+        if size(b) != size(t):
+            print "ERROR, size of b doesn't match size of t"
+        tau = tau.reshape(1,-1)
+        t = t.reshape(-1,1)
+        L = exp(-t/tau)
+        U,s,V = svd(L,full_matrices=0)
+        rms = zeros(len(alpha),dtype='double')
+        coeff = zeros((size(tau),size(alpha)),dtype='double')
+        fit = zeros((size(t),size(alpha)),dtype='double')
+        for j in range(0,len(alpha)):
+            S = diag(s / (s**2 + alpha[j]**2))
+            x = dot(
+                    dot(
+                        conj(transpose(V)),
+                        dot(S,conj(transpose(U))))
+                    ,b)# was b
+            fit[:,j] = dot(L,x)
+            try:
+                coeff[:,j] = x.flatten()
+            except:
+                print 'shape(coeff)',shape(coeff),'shape(x)',shape(x)
+                print 'first',shape(coeff[:,j]),'second',shape(x.reshape(-1,1))
+                raise
+            rms[j] = linalg.norm(fit[:,j]-b)
+        return (coeff,fit,rms)
 #}}}
 #{{{ matched filter
 def matched_filter(data,along_dim,decay_rate = 1,return_fit=False):
@@ -1218,6 +1248,7 @@ def plot_noise(path,j,calibration,mask_start,mask_stop,rgmin=0,k_B = None,smooth
     dw = 1/v['SW_h']
     dwov = dw/v['DECIM']
     rg = v['RG']
+    de = v['DE']
     aq = v['TD']*dw
     if rg>rgmin:
         plotdata = abs(data)
@@ -1231,7 +1262,7 @@ def plot_noise(path,j,calibration,mask_start,mask_stop,rgmin=0,k_B = None,smooth
         retval = []
         if both or not smoothing:
             pval = plot(plotdata,'-',alpha=0.5,plottype = plottype)
-            retval += ['%d: '%j+bruker_load_title(r'%s%d'%(path,j))+' $t_{dwov}$ %0.1f RG %d, mean %0.1f'%(dwov*1e6,rg,avg)]
+            retval += ['%d: '%j+bruker_load_title(r'%s%d'%(path,j))+' $t_{dwov}$ %0.1f RG %d, DE %0.2f, mean %0.1f'%(dwov*1e6,rg,de,avg)]
             axis('tight')
         if smoothing:
             # begin convolution
@@ -1247,7 +1278,7 @@ def plot_noise(path,j,calibration,mask_start,mask_stop,rgmin=0,k_B = None,smooth
             t[:] = originalt
             # end convolution
             pval = plot(plotdata,'-',alpha=0.5,plottype = plottype)
-            retval += ['%d: '%j+bruker_load_title(r'%s%d'%(path,j))+' $t_{dwov}$ %0.1f RG %d, mean %0.1f'%(dwov*1e6,rg,avg)]
+            retval += ['%d: '%j+bruker_load_title(r'%s%d'%(path,j))+' $t_{dwov}$ %0.1f RG %d, DE %0.2f, mean %0.1f'%(dwov*1e6,rg,de,avg)]
             axis('tight')
         if retplot:
             return pval,retval
@@ -1331,7 +1362,7 @@ class emax(fitdata):
         largest = len(power)
         initial_slope = (integral[largest/4]-integral[0])/(power[largest/4]-power[0])
         approx_emax = integral[-1]
-        print 'DEBUG: guessed initial slope',initial_slope,'approx emax',approx_emax
+        #print 'DEBUG: guessed initial slope',initial_slope,'approx emax',approx_emax
         return [1,-initial_slope,-initial_slope/(1-approx_emax)]
     def fitfunc_raw(self,p,x):
         '''just the actual fit function to return the array y as a function of p and x'''
