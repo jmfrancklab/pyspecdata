@@ -217,6 +217,8 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
         xpoints = v['RES']
         rg = v['RRG']
         data /= rg
+        modulation = v['RMA']
+        data /= modulation
         ypoints = len(data)/xpoints
         if ypoints>1:
             if ypoints != v['REY']:
