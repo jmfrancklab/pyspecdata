@@ -219,6 +219,7 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
         data /= rg
         modulation = v['RMA']
         data /= modulation
+        data /= v['JNS'] # divide by number of scans
         ypoints = len(data)/xpoints
         if ypoints>1:
             if ypoints != v['REY']:

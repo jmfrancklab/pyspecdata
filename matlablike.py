@@ -1,6 +1,8 @@
 from pylab import *
 import textwrap
 from scipy.optimize import leastsq
+from scipy.signal import fftconvolve
+from inspect import getargspec
 #rc('image',aspect='auto',interpolation='bilinear')
 rc('image',aspect='auto',interpolation='nearest')
 rcParams['xtick.direction'] = 'out'
@@ -752,6 +754,35 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         if len(self.axis_coords_units) > 0:
             self.axis_coords_units.pop(dimname) # because this is newer and a dictionary
         return self
+    def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*(y**2))))):
+        r'''perform a normalized convolution'''
+        #{{{ make a version of x that is oriented along the correct dimension
+        thisaxis = self.dimlabels.index(axisname)
+        newshape = [1] * len(self.data.shape)
+        x = self.getaxis(axisname).copy().flatten()
+        x = x-x.mean()
+        newshape[thisaxis] = len(x)
+        x.reshape(newshape)
+        #}}}
+        myfilter = convfunc(x,filterwidth)
+        myfilter /= myfilter.sum()
+        self.data = fftconvolve(self.data,myfilter,mode='same') # I need this, so the noise doesn't break up my blocks
+        return self
+    def multimin(self,minfunc,axisname,filterwidth,numberofmins):
+        cost = self.copy().convolve(axisname,filterwidth).run_nopop(minfunc)
+        for j in range(0,numberofmins):
+            #{{{ find the x value at which the minimum occurs
+            xvalues = cost.copy().argmin(axisname)
+            #}}}
+    def repwlabels(self,axis):
+        return None
+    def argmin(self,axis):
+        thisaxis = self.dimlabels.index(axisname)
+        self.data = argmin(thisaxis,axis = thisaxis)
+        x = self.getaxis(axis)
+        newdata = x[self.data]
+        self.data = newdata
+        return self
     def ft(self,axes,shiftornot=False,shift=None):
         if shift != None:
             shiftornot = shift
@@ -894,7 +925,13 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
             raise CustomError("I couldn't find the dimension",axis,"in the list of axes",self.dimlabels)
         temp = list(self.data.shape)
         temp[thisaxis] = 1
-        self.data = func(self.data,axis=thisaxis)
+        numnonoptargs = len(getargspec(func)[0])-len(getargspec(func)[3])
+        if numnonoptargs == 1:
+            self.data = func(self.data,axis=thisaxis)
+        elif numnonoptargs == 2:
+            self.data = func(self.getaxis(axis),self.data,axis=thisaxis)
+        else:
+            raise CustomError('you passed a function to run_nopop that doesn\'t have either one or two arguments!')
         #{{{ if the function doesn't rip out the dim, make sure we don't change the dims
         if len(self.data.shape)==len(temp):
             temp[thisaxis] = self.data.shape[thisaxis]
