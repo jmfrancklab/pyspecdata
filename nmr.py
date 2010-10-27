@@ -27,6 +27,7 @@ def auto_steps(filename,threshold = -35, upper_threshold = 0, t_minlength = 0.5*
         title(filename)
     mask = t_ini < t_stop
     minsteps = sum(t_ini<t_minlength)
+    maxsteps = sum(t_ini<t_maxlen)
     mask = logical_and(mask,p_ini < upper_threshold)
     mask = logical_and(mask,t_ini > t_start)
     mask = logical_and(mask,isfinite(p_ini))
@@ -63,12 +64,7 @@ def auto_steps(filename,threshold = -35, upper_threshold = 0, t_minlength = 0.5*
         # now that we have a decent stdev, just test to see that every step is less than the stdev
         track_curmean[nextpos] = curmean
         nextpos += minsteps
-        maxdiff_index = nextpos
-        maxdiff = 0
         while (nextpos < len(t)-1) and (abs(p[nextpos]-curmean)<tolerance*stdev or ~isfinite(p[nextpos])):
-            if abs(p[nextpos]-curmean) > maxdiff:
-                maxdiff_index = nextpos
-                maxdiff = abs(p[nextpos]-curmean)
             subset= p[blockstart:nextpos]
             curmean = mean(subset[isfinite(subset)])
             stdev = std(subset[isfinite(subset)])
@@ -80,10 +76,35 @@ def auto_steps(filename,threshold = -35, upper_threshold = 0, t_minlength = 0.5*
             track_curmean[nextpos] = curmean
             track_threshold[nextpos] = tolerance*stdev
             nextpos += 1
+            ##{{{ if we get up to the maximum length, I need to break twice the maximum length into two jumps
             if t[nextpos]-t[blockstart] > t_maxlen:
-                nextpos = maxdiff_index+1
-                break
-        track_curmean[nextpos] = curmean
+                if t_minlength > t_maxlen:
+                    raise CustomError('for auto_steps, minlength can\'t be greater than maxlen')
+                #print 'DEBUG: maxlen triggered, nextpos=',nextpos
+                biggestjump = blockstart+minsteps+1+argmax(abs(diff(t[blockstart+minsteps:blockstart+2*maxsteps]))) # find the biggest jump over the interval of two lengths
+                if biggestjump-blockstart < 2*minsteps: # if I can't make two steps before the biggest jump
+                    nextpos = blockstart + minsteps + 1 + argmax(abs(diff(t[blockstart+minsteps:blockstart+maxsteps])))
+                    break
+                if t[biggestjump]-t[blockstart] > t_maxlen: # otherwise, the biggest jump happens after another jump
+                    #print 'DEBUG: greater than'
+                    try:
+                        nextpos = blockstart + minsteps + 1 + argmax(abs(diff(t[blockstart+minsteps:biggestjump-minsteps])))
+                    except:
+                        raise CustomError("I don't have room to make two minimum length steps of ",minsteps,"between the start of the block at ",blockstart," and the biggest jump at",biggestjump)
+                    break
+                else: # and sometimes the biggest jump happens before another jump, but longer than twice the minlen
+                    #print 'DEBUG: less than'
+                    nextpos = biggestjump
+                    break
+            ##}}}
+        #{{{ need to recalculate the mean
+        subset= p[blockstart:nextpos]
+        curmean = mean(subset[isfinite(subset)])
+        #}}}
+        try:
+            track_curmean[nextpos] = curmean
+        except:
+            raise CustomError('track\_curmean is only',len(track_curmean),'and t is only',len(t),'but nextpos is',nextpos)
         #uptohere = flattened[0:nextpos]
         #uptohere[uptohere==0] = cursum/curnum
         #flattened[nextpos-1] = cursum/curnum
@@ -136,10 +157,10 @@ b0 = r'$B_0$'
 def show_acqu(vars):
     print '\\begin{verbatim}',vars.__repr__().replace(',','\n'),'\\end{verbatim}\n\n'
 #{{{ load the pulse sequence parameters
-def load_acqu(filename):
+def load_acqu(filename,whichdim=''):
     filename = dirformat(filename)
     if det_type(filename)[0] == 'bruker':
-        return bruker_load_acqu(filename)
+        return bruker_load_acqu(filename,whichdim=whichdim)
     elif det_type(filename)[0] == 'prospa':
         if det_type(filename)[1] == 't1_sub':
             filename = dirformat(filename)
@@ -218,8 +239,9 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
         rg = v['RRG']
         data /= rg
         modulation = v['RMA']
-        data /= modulation
+        #data /= modulation
         data /= v['JNS'] # divide by number of scans
+        data /= v['MP'] # divide by power
         ypoints = len(data)/xpoints
         if ypoints>1:
             if ypoints != v['REY']:

@@ -116,19 +116,29 @@ def obs(*arg):
     for j in arg:
         print j,
     print r'}'
-def save_data(inputdata=[],mat_file = 'data.mat'):
+def save_data(inputdata={},mat_file = 'data.mat'):
     # concatenate data to data already in data.mat file
     if path_exists(mat_file):
         #data = loadmat(mat_file,struct_as_record=True)
         data = loadmat(mat_file)
     else:
         data = {}
-    if not(data==[]):
-        data.update(inputdata)
-        savemat(mat_file,data)
+    if not(inputdata=={}):
+        try:
+            data.update(inputdata)
+        except:
+            raise CustomError('trying to update',data,'with',inputdata)
+        try:
+            savemat(mat_file,data)
+            #print "DEBUG, saved",data,'to',mat_file
+        except:
+            raise CustomError('trying to write',data,'to',mat_file)
     return data
-def save_local(inputdata=[]):
-    data = save_data(mat_file = 'local.mat')
+def save_local(inputdata={},verb = True):
+    data = save_data(inputdata,mat_file = 'local.mat')
+    if verb:
+        for k,v in inputdata.items():
+            obs(k.replace('_',r'\_'),r'$\Rightarrow$',v.replace('_',r'\_'))
     return data
 def clear_local(inputdata=[]):
     obs(r'{\it clear local}'+'\n\n')
@@ -163,6 +173,7 @@ def ernstangle(pulsetime=None,pulsetip=None,Tr=None,T1=None):
 def calcfielddata(freq,substance,spec=''):
     data = save_data()
     calcfield(freq,elratio=data[substance+'_elratio'+spec],nmrelratio=data[substance+'_nmrelratio'])
+    obs('(for radical',substance,')')
     save_data({'current_frequency':freq})
     save_data({'current_ppt':data[substance+'_nmrelratio']})
 def cpmgseries(filename,plotlabel,tau=None,alpha=None,alphaselect=None):
@@ -639,5 +650,44 @@ def plot_t1series(path,name,t1expnos,dbm,h5file = 'temperature_paper.h5',gensvg 
         row.append()
     h5file.close()
     return m0data,c,straightline
+#}}}
+#{{{ standard power parsing
+def parse_powers(path,name,power_file,expno = None,
+        scanlength_estimation_error = 0.2,
+        t_minlength = 10.0, # in seconds
+        t_start = 4.9, # in minutes
+        t_stop_extra = 0.0, # in minutes
+        extra_time = 7.86, # amount extra per scan
+        tolerance = 2.0):
+    fullpath = dirformat(dirformat(path)+name)+'%d/'%1
+    fileinfo = load_acqu(fullpath)
+    if expno == None:
+        expno = r_[5:5+3+1+int(fileinfo['CNST'][6])] # get the number of experiments stored by the au program
+        obs(r'automatically determined that you\'re using expno %d $\Rightarrow$ %d'%(expno[0],expno[-1]))
+    try:
+        fullpath = dirformat(dirformat(path)+name)+'%d/'%expno[0]
+    except:
+        raise CustomError('type of expno is',expno.dtype)
+    fileinfo = load_acqu(fullpath)
+    if det_type(fullpath)[1] == True:
+        td1 = load_acqu(fullpath,whichdim='2')['TD']
+    else:
+        td1 = 1
+    scan_length = td1*fileinfo['NS']*(fileinfo['D'][1]+fileinfo['TD']/fileinfo['SW_h']/2.0+fileinfo['D'][11]) + 11.0 + extra_time
+    t_stop = t_start*60.0+t_stop_extra*60.0+(len(expno)-1)*scan_length
+    obs(r'scan\_length is',scan_length,'and there are %d scans for t$_{stop}$=%0.3f\n\n'%(len(expno)-1,t_stop/60.0))
+    scanlength_estimation_error *= scan_length # convert from percentage to time
+    templen = scan_length-scanlength_estimation_error
+    if templen > t_minlength:
+       t_minlength = templen
+    t_maxlen = scan_length+scanlength_estimation_error
+    dbm = auto_steps(path+power_file,t_start = t_start*60,t_stop = t_stop,t_minlength = t_minlength,t_maxlen = t_maxlen,tolerance = tolerance, threshold = -36)
+    figure(1)
+    gridandtick(gca())
+    lplot('powerlog'+name+'.pdf')
+    figure(2)
+    gridandtick(gca())
+    lplot('powerlog_raw'+name+'.pdf')
+    return expno,dbm
 #}}}
 #}}}

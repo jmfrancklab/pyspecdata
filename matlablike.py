@@ -624,8 +624,12 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
             return retval
         else:
             return nddata(result,list(result.shape),newdimlabels,data_error = Rerr)
-    def integrate(self,thisaxis):
+    def integrate(self,thisaxis,backwards = False):
+        if backwards is True:
+            self.data = self[thisaxis,::-1].data
         self.run_nopop(cumsum,thisaxis)
+        if backwards is True:
+            self.data = self[thisaxis,::-1].data
         if len(self.axis_coords)>0:
             t = self.getaxis(thisaxis)
             dt = t[1]-t[0]
@@ -863,7 +867,7 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         for j in range(0,len(listofstrings)):
             #{{{ test that the axis is the right size
             if (len(listofaxes[j]) != ndshape(self)[listofstrings[j]]) and (len(listofaxes[j])!=0):
-                raise CustomError("You're trying to attach an axis of len",len(listofaxes[j]),"to the",listofstrings[j],"dimension, which is",ndshape(self)[listofstrings[j]],"long")
+                raise CustomError("You're trying to attach an axis of len",len(listofaxes[j]),"to the",listofstrings[j],"dimension, which has ",ndshape(self)[listofstrings[j]]," data points")
             #}}}
             try:
                 self.axis_coords[self.dimlabels.index(listofstrings[j])] = listofaxes[j]
