@@ -15,7 +15,7 @@ def dbm_to_power(dbm):
 def power_to_dbm(power):
     return 10.0*log(power/1e-3)/log(10.0)-40 #20 db for each atten
 #{{{ auto_steps
-def auto_steps(filename,threshold = -35, upper_threshold = 0, t_minlength = 0.5*60,minstdev = 0.1,showplots = True, showdebug = False,t_start=0,t_stop=60*1000,tolerance = 2,t_maxlen = inf):
+def auto_steps(filename,threshold = -35, upper_threshold = 0, t_minlength = 0.5*60,minstdev = 0.1,showplots = True, showdebug = False,t_start=0,t_stop=60*1000,tolerance = 2,t_maxlen = inf,return_lastspike = False):
     r'Plot the raw power output in figure 1, and chop into different powers in plot 2'
     v = loadmat(filename)
     p_ini = v['powerlist']
@@ -111,6 +111,10 @@ def auto_steps(filename,threshold = -35, upper_threshold = 0, t_minlength = 0.5*
         subset = flattened[0:nextpos] # subset of all the flattened stuff up to here
         subset[isnan(subset)] = curmean
         spikes[nextpos] = maxp # show a spike to see clearly where the data is divided
+        try:
+            lastspike = t[nextpos-minsteps]-t[-1]
+        except:
+            raise CustomError('len(spikes)=',len(spikes),'len(t)+minsteps=',len(t)+minsteps)
         subset = flattenedstd[0:nextpos] # subset of all the flattened stuff up to here
         subset[isnan(subset)] = stdev
         powerlist += [curmean]
@@ -131,7 +135,10 @@ def auto_steps(filename,threshold = -35, upper_threshold = 0, t_minlength = 0.5*
         plot(t/60,plotdev,'k')
         plot(t/60,plotstd,'r')
         title('Power meter log')
-    return array(powerlist)
+    if return_lastspike == True:
+        return array(powerlist),lastspike
+    else:
+        return array(powerlist)
 #}}}
 #{{{ error plot
 def error_plot(*arg):
@@ -214,11 +221,13 @@ def load_file(filenames,dimname='',calibration=1.0,add_sizes = [], add_dims = []
     #}}}
     # for the following, I used to have a condition, but this is incompatible with the pop statement at the end
     newdata = concat(data,dimname) # allocate the size of the indirect array
+    #print 'DEBUG concatenated list = ',data
     newdata_shape = ndshape(newdata)
     if all(map((lambda x:det_type(x)[0]=='prospa'),filenames)):
         if hasattr(data[0],'want_to_prospa_decim_correct'):
             if data[0].want_to_prospa_decim_correct is True:
                 newdata = prospa_decim_correct(newdata)
+    #print 'DEBUG concatenated list before pop = ',data
     if newdata_shape[dimname]==1:
         newdata.popdim(dimname)
     return newdata*calibration
@@ -240,7 +249,10 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
         data /= rg
         modulation = v['RMA']
         #data /= modulation
-        data /= v['JNS'] # divide by number of scans
+        try:
+            data /= v['JNS'] # divide by number of scans
+        except:
+            pass
         data /= v['MP'] # divide by power
         ypoints = len(data)/xpoints
         if ypoints>1:
@@ -276,7 +288,9 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
         data /= rg
         mydimsizes = [td1,td2_zf/2]
         mydimnames = [dimname]+['t2']
+        #print 'DEBUG: data going to nddata =',data
         data = nddata(data,mydimsizes,mydimnames)
+        #print 'DEBUG: data straight from nddata =',data
         data = data['t2',0:td2/2] # now, chop out their zero filling
         t2axis = 1./v['SW_h']*r_[1:td2/2+1]
         t1axis = r_[0:td1]
@@ -284,6 +298,7 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
         data.labels(mydimnames,mylabels)
         shiftpoints = int(bruker_det_phcorr(v)) # use the canned routine to calculate the first order phase shift
         data.circshift('t2',shiftpoints)
+        #print 'DEBUG 2: data from bruker file =',data
         #}}}
         #{{{ Prospa 2D
     elif twod and filetype == 'prospa':
@@ -352,7 +367,9 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
     #{{{ return, and if necessary, reorganize
     if len(add_sizes)>0:
         data.labels([dimname],[[]]) # remove the axis, so we can reshape
+        #print 'DEBUG: data before chunk = ',data
         data.chunkoff(dimname,add_dims,add_sizes)
+        #print 'DEBUG: data after chunk = ',data
         data.labels(add_dims,
                 [r_[0:x] for x in add_sizes])
     if return_acq:
@@ -1377,7 +1394,7 @@ class t1curve(fitdata):
         self.function_string = r'$M(t)=M(\infty)+(M(0)-M(\infty))e^{-t/T_1}$'
         self.symbol_list = [r'M(\infty)',r'M(0)',r'T_1'] # note that it must notbe possible to find part of one of the later strings by searching for one of the earlier strings
         return
-class emax(fitdata):
+class emax_legacy(fitdata):
     def guess(self):
         r'''provide the guess for our parameters, which is specific to the type of function'''
         newdata = self.copy()
@@ -1422,5 +1439,52 @@ class emax(fitdata):
         fitdata.__init__(self,*args,**kwargs)
         self.function_string = r'$E(t)=c_0-Ap/(1+Bp)$'
         self.symbol_list = [r'c_0',r'A',r'B'] # note that it must notbe possible to find part of one of the later strings by searching for one of the earlier strings
+        return
+class emax(fitdata):
+    def guess(self):
+        r'''provide the guess for our parameters, which is specific to the type of function'''
+        newdata = self.copy()
+        newdata.sort(self.fit_axis)
+        power = newdata.getaxis(self.fit_axis)
+        integral = newdata.data
+        largest = len(power)
+        initial_slope = (integral[largest/4]-integral[0])/(power[largest/4]-power[0])
+        approx_emax = integral[-1]/integral[0]
+        return [approx_emax,integral[0],-initial_slope] #guess [r'E_{max}',r'v',r'A']
+    def fitfunc_raw(self,p,x):
+        '''just the actual fit function to return the array y as a function of p and x'''
+        #self.function_string = r'$E(t)=v-Apv(1-E_{max})/(1-E_{max}+Ap)$'
+        #self.symbol_list = [r'E_{max}',r'v',r'A'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
+        return (p[1]-(p[2]*x*p[1]*(1.-p[0])/(1.-p[0]+p[2]*x)))
+    def linfunc(self,x,y,xerr = None,yerr = None):
+        '''just the actual fit function to return the pair of arrays x',y' that should be linear
+        it accepts as inputs x and y, and it uses the output from the fit, where necessary
+        also optionally propagates the error based on yerr and xerr, which can be passed in to it
+        For the case of E_max, we want 1/(1-E) = 
+        '''
+        # note that there is some error associated with m(\infty) that I'm just taking for granted
+        #print "linfunc passed x=",x,"and y=",y
+        rety = 1./(1.-y)
+        if yerr != None:
+            reterr = yerr/((1.-y)**2)
+        mask = isfinite(rety)
+        retx = 1./x # for instance, in emax, this is not just x
+        xname = r'1 / '+self.fit_axis # same as the fit axis
+        yname = r'$\frac{1}{1-E(p)}$'
+        #{{{ this should be pretty standardized
+        retval = nddata(rety,
+                [size(rety),1],
+                [xname,yname])
+        retval.labels([xname],
+                [retx.copy()])
+        if yerr != None:
+            retval.set_error(reterr)
+        #}}}
+        return retval
+    def __init__(self,*args,**kwargs):
+        '''here, we give the particular latex representation and list of symbols for this particular child class'''
+        fitdata.__init__(self,*args,**kwargs)
+        self.function_string = r'$E(t)=v-Apv(1-E_{max})/(1-E_{max}+Ap)$'
+        self.symbol_list = [r'E_{max}',r'v',r'A'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
         return
 #}}}

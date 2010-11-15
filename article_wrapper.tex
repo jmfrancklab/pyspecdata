@@ -1,0 +1,272 @@
+\documentclass[10pt]{article}
+%DIF PREAMBLE EXTENSION ADDED BY LATEXDIFF
+%DIF UNDERLINE PREAMBLE %DIF PREAMBLE
+\usepackage{fancyhdr}
+\usepackage{wrapfig}
+\pdfpagewidth 8.5in
+\pdfpageheight 11in
+
+\pagestyle{fancy}
+\fancyhf{}
+\oddsidemargin -0.5in % add 1in to get margin
+\evensidemargin -0.5in % add 1in to get margin
+\voffset -0.5in
+\topmargin 0in
+\textwidth 7.5in
+\textheight 9.25in
+\headheight 15pt 
+%\headheight 0in
+\headsep 15pt
+%\renewcommand{\sectionmark}[1]{\markright{#1}{}}
+%\markright{\sectionmark{}}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{hycolor}
+% BEGIN part for commenting
+\usepackage{makeidx}
+\makeindex
+\newcommand{\johncomment}[3]{\pdfcomment[author={John Franck #1},subject={},color=lime,hspace=10pt]{#3}\index{#2#3}\quad}
+\newcommand{\nandocomment}[3]{\pdfcomment[author={Nandini Ananth #1},subject={},color=pink,hspace=10pt]{#3}\index{#2#3}\quad}
+% END part for commenting
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{multicol}
+%\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=blue, citecolor=blue, urlcolor=blue, bookmarksdepth=8]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
+\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=linkcolor, citecolor=blue, urlcolor=blue, bookmarksdepth=8]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
+\usepackage{pdfcomment}
+\providecommand{\DIFadd}[1]{{\protect\color{blue}\uwave{#1}}} %DIF PREAMBLE
+\providecommand{\DIFdel}[1]{{\protect\color{red}\xout{#1}}}                      %DIF PREAMBLE
+\pdfstringdefDisableCommands{\renewcommand{\DIFdel}{}}
+\pdfstringdefDisableCommands{\renewcommand{\DIFadd}{}}
+\pdfstringdefDisableCommands{\renewcommand{\color}{}}
+\pdfstringdefDisableCommands{\renewcommand{\sout}{}}
+\pdfstringdefDisableCommands{\renewcommand{\uwave}{}}
+\pdfstringdefDisableCommands{\renewcommand{\uline}{}}
+\immediate\write18{bash\space datenow.sh\space datenow.out} % to save into the file
+\newcommand{\Now}{\immediate\input datenow.out}
+%{{{ filenames with fancy underscore escape
+%\begingroup
+%\gdef\tempunderscore{_}
+%\catcode`_=\active
+%\gdef\makeunderscoreliteral{
+%    \catcode`_=\active
+%    \def_{\textunderscore\-}
+%}
+%\gdef\changeunderscoreback{
+%    \catcode`_=\active
+%    \def_{\tempunderscore}
+%}
+%\endgroup
+%\newcommand{\verblike}[1]{\makeunderscoreliteral#1\changeunderscoreback}
+\newcommand{\fn}[1]{{\color{red} #1}}
+\let\oldfn = \fn
+\def\fn{\begingroup\catcode`_=12 \newfnx}
+\newcommand{\newfnx}[1]{\oldfn{#1}\endgroup}
+%}}}
+\usepackage[normalem]{ulem}
+\newenvironment{co}{\begin{python}
+	import matplotlib; matplotlib.use('Agg')
+	from matlablike import *
+	}{\end{python}}
+\newcommand{\mytitle}{PUTTITLEHERE}
+\usepackage{mynotebookminimal}
+\definecolor{linkcolor}{cmyk}{0,0.7,0.5,0.5}
+\definecolor{mygreen}{rgb}{0,0.5,0.5}
+\definecolor{mygray}{rgb}{0.6,0.6,0.6}
+\newcommand\myline{\rule{\linewidth}{0.1mm}}
+\newcommand\mysmallline{\rule{1in}{0.01mm}}
+\let\oldparagraph = \paragraph
+\let\oldsubparagraph = \subparagraph
+\let\oldsubsection = \subsection
+%\renewcommand{\subsection}[1]{\oldsubsection{{\tiny #1}}}
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}{\color{black}$\Rightarrow$}}
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{\color{black} {\small#1}}}
+\renewcommand{\o}[2][]{ {\color{mygreen}{\it #1}} {\color{blue} #2}}
+
+\def\Emax{\texorpdfstring{\ensuremath{E_{max}} }{Emax}}
+\def\smax{\texorpdfstring{\ensuremath{s_{max}} }{smax}}
+\def\uM{\texorpdfstring{\ensuremath{\mu M} }{uM}}
+\def\uL{\texorpdfstring{\ensuremath{\mu L} }{uL}}
+\def\tonen{\texorpdfstring{\ensuremath{T_{1,0}} }{T10 }}
+\newcommand{\hausseri}{\ensuremath{(\left\langle I_z\right\rangle - I_0)}}
+\newcommand{\haussers}{\ensuremath{(\left\langle S_z\right\rangle - S_0)}}
+\newcommand{\gammaratio}{659.32}
+%\def\Emax{\ensuremath{E_{max}}}
+%\def\smax{\ensuremath{s_{max}}}
+%\def\uM{$\mu M$}
+%\def\uL{$\mu L$}
+%\def\tonen{$T_{1,0}$ }
+\newcommand{\lastorg}{
+
+\myline
+
+LAST ORGANIZED TO HERE
+\phantomsection\addcontentsline{toc}{section}{LAST ORGANIZED}
+
+\myline}
+
+\gdef\total{0}
+\gdef\obstimecounter{0}
+\gdef\obstimecounterflag{0}
+
+\newcommand{\maxtime}[1]{\FPset\tvar{#1}\FPadd\ttotal\tvar\total\global\let\total=\ttotal\FPdiv\poftotal\tvar\timeblocktotalval\FPmul\poftotal\poftotal{100}\FPtrunc\poftotal\poftotal{1} ({\it max \tvar hr, \poftotal\%})}
+\gdef\timeblocktotalval{9}
+
+\newcommand{\maxtwenty}[1]{\FPset\tvar{#1}\FPdiv\tvar\tvar{3}\FPtrunc\tvar\tvar{2}\maxtime{\tvar}}
+
+\newcommand\timeblocktotal[1]{{\it Time block total: #1 hr}\gdef\timeblocktotalval{#1}}
+
+\newcommand{\obstb}{\FPset\mytemp{0}\global\let\obstimecounter=\mytemp\FPset\mytemp{1}\global\let\obstimecounterflag=\mytemp}
+
+\newcommand{\obsts}{\FPset\obstimecounterflagvar{\obstimecounterflag}\FPset\mytemp{0}\FPset\mynegone{-1}\FPmul\mytemp\obstimecounterflagvar\mynegone\global\let\obstimecounterflag=\mytemp}
+
+\newcommand{\obsta}[1]{\obsts\FPset\obstimecountervar{\obstimecounter}\FPset\obstimecounterflagvar{\obstimecounterflag}\FPset\mytemp{#1}\FPset\myhr{3600}\FPmul\mytemp\obstimecounterflagvar\mytemp\FPdiv\mytemp\mytemp\myhr\FPadd\mytemp\obstimecountervar\mytemp\global\let\obstimecounter=\mytemp}
+
+\newcommand{\obstm}[1]{\FPset\obstimecountervar{\obstimecounter}\FPset\obstimecounterflagvar{\obstimecounterflag}\FPset\mytemp{#1}\FPset\myhr{60}\FPmul\mytemp\obstimecounterflagvar\mytemp\FPtrunc\mytemp\mytemp{1}\mytemp min\FPdiv\mytemp\mytemp\myhr\FPadd\mytemp\obstimecountervar\mytemp\global\let\obstimecounter=\mytemp}
+
+\newcommand{\obstd}{\FPset\mytemp\obstimecounter
+\FPdiv\poftotal\mytemp\timeblocktotalval
+\FPtrunc\mytemp\mytemp{2}
+\FPmul\poftotal\poftotal{100}
+\FPtrunc\poftotal\poftotal{1}
+({\bf \mytemp hr, \poftotal\%})\FPadd\mytemp\mytemp\dumpval\global\let\dumpval=\mytemp}
+\newcommand{\obstdump}{\FPset\mytemp\dumpval\FPtrunc\mytemp\mytemp{2} \o{({\bf \mytemp hr})}}
+
+\newenvironment{tasklist}{\begin{tiny}
+\FPset\ttotal{0}
+\begin{multicols}{2}
+\begin{itemize}
+}{
+\end{itemize}
+\end{multicols}
+\end{tiny}}
+
+\newenvironment{hidden}[1]{}
+
+\newenvironment{pcomments}{\begin{minipage}{4.5in}}{\end{minipage}}
+\newcommand{\pstandard}[1]{\begin{minipage}{3in}\includegraphics[width=3in]{#1}\end{minipage}}
+\newcommand{\timeblockstart}{\gdef\total{0}\gdef\dumpval{0}\FPset\ttotal{0}}
+\newcommand{\timeblockend}{\FPset\mytemp\total
+\FPtrunc\mytemp\mytemp{1}
+{\tiny{\it = \mytemp hr total},\obstdump}}
+\newenvironment{tasks}{\timeblockstart\phantomsection\addcontentsline{toc}{subsubsection}{tasks}
+\begin{tiny}
+\begin{multicols}{2}
+\gdef\timeblocktotalval{9}
+}{
+\end{multicols}
+\timeblockend
+\myline
+\end{tiny}}
+
+\newcommand{\breaklist}{\end{itemize}
+\end{multicols}
+\FPset\mytemp\total
+\FPtrunc\mytemp\mytemp{1}
+{\tiny{\it = \mytemp hr total}}
+\myline
+\begin{multicols}{2}
+\begin{itemize}
+}
+\newcommand{\breako}[1]{
+\o{\item #1}
+\end{itemize}
+\myline
+\begin{itemize}
+}
+\newcommand{\tasko}[1]{
+\o{#1}
+
+\myline
+}
+\newcommand{\breakk}[1]{
+\item #1
+\end{itemize}
+\myline
+\begin{itemize}
+}
+\newcommand{\taskk}[1]{
+#1
+\myline
+}
+
+% Remember chapter title
+%\renewcommand{\chaptermark}[1]{\markboth{Chap. \thechapter:\ #1}{}}
+% section number and title
+%\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+%\renewcommand{\sectionmark}[1]{\markright{\thesection\ }}
+%\lhead[\fancyplain{}{\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad J. Franck Notebook, compiled \today}] %
+%    {\fancyplain{}{\bfseries\rightmark}}
+%\rhead[\fancyplain{}{\scshape\arabic{section}}] %
+%    {\fancyplain{}{J. Franck Notebook, compiled \today}}
+%\lhead{ \Roman{chapter}$\Rightarrow$\arabic{section}.\Alph{subsection} \leftmark}
+%%%\lhead{ \Roman{chapter}$\Rightarrow$\arabic{section} \leftmark}
+%%%%\lhead{\leftmark}
+%%%\rhead[\fancyplain{}{}] %
+%%%    {\fancyplain{}{ / J. Franck Notebook, compiled \today}}
+%%%\lfoot{p \thepage}
+%%%%\rfoot{p \thepage}
+%%%\renewcommand{\sectionmark}[1]{\markboth{#1}{#1}}
+
+% from http://www.kronto.org/thesis/tips/custom-headers.html
+\fancyhead[RE]{\mytitle}
+\fancyhead[RO]{\mytitle}
+
+%\rhead{Notebook \today}
+%\chead{\sectionname}
+%\lhead{John Franck}
+%\rfoot{Right bottom}
+%\cfoot{\thepage}
+%\rfoot{\thepage}
+%\lfoot{Left bottom}
+
+\AtBeginDocument{
+\let\oldlabel=\label
+%\renewcommand*{\label}[1]{{\tiny $#1$}\oldlabel{#1}}
+%\renewcommand*{\label}[1]{\fn{#1}\oldlabel{#1}}
+\let\oldlabel = \label
+\def\label{\begingroup\catcode`_=12 \newlabelx}
+\newcommand{\newlabelx}[1]{{\tiny #1}\endgroup\oldlabel{#1}}
+}
+%\bibliographystyle{abbrvnat}
+%\usepackage[sort&compress]{natbib}
+\usepackage{fp}
+\newcommand{\add}[1]{{\it #1}}
+\newcommand{\command}[1]{{\tt #1}}
+\newcommand{\na}[1]{\begin{tiny}{\it{\color{mygray}#1}}\end{tiny}}
+\newcommand{\refhyp}[1]{{\it hyp:}\ref{hyp:#1}}
+\newcommand{\Cat}{Cat$_1$}
+\newcommand{\mainhyp}[1]{{\bf #1}}
+\newcommand{\rhosmax}{\ensuremath{\rho s_{max}}}
+\newcommand{\subhyp}[2][]{{\it \textbf{#1} }{\it #2}}
+\bibliographystyle{unsrt}
+\def\thechapter{\Roman{chapter}}
+\def\thesection{\arabic{section}}
+\def\thesubsection{\arabic{section}.\Alph{subsection}}
+\def\thesubsubsection{\arabic{section}.\Alph{subsection}.\arabic{subsubsection}}
+\newcommand{\notyet}[1]{{\color{red}#1}}
+\newcommand{\needtocheck}[1]{{\color{yellow}#1}}
+\newcommand{\putref}{\begin{tiny}[ref]\end{tiny}}
+\RequirePackage[normalem]{ulem} %DIF PREAMBLE
+\RequirePackage{color}\definecolor{RED}{rgb}{1,0,0}\definecolor{BLUE}{rgb}{0,0,1} %DIF PREAMBLE
+\providecommand{\DIFadd}[1]{{\protect\color{blue}\uwave{#1}}} %DIF PREAMBLE
+\providecommand{\DIFdel}[1]{{\protect\color{red}\sout{#1}}}                      %DIF PREAMBLE
+%DIF SAFE PREAMBLE %DIF PREAMBLE
+\providecommand{\DIFaddbegin}{} %DIF PREAMBLE
+\providecommand{\DIFaddend}{} %DIF PREAMBLE
+\providecommand{\DIFdelbegin}{} %DIF PREAMBLE
+\providecommand{\DIFdelend}{} %DIF PREAMBLE
+%DIF FLOATSAFE PREAMBLE %DIF PREAMBLE
+\providecommand{\DIFaddFL}[1]{\DIFadd{#1}} %DIF PREAMBLE
+\providecommand{\DIFdelFL}[1]{\DIFdel{#1}} %DIF PREAMBLE
+\providecommand{\DIFaddbeginFL}{} %DIF PREAMBLE
+\providecommand{\DIFaddendFL}{} %DIF PREAMBLE
+\providecommand{\DIFdelbeginFL}{} %DIF PREAMBLE
+\providecommand{\DIFdelendFL}{} %DIF PREAMBLE
+%DIF END PREAMBLE EXTENSION ADDED BY LATEXDIFF
+
+\begin{document}
+\input{INPUTHERE}
+
+BIBLIOGRAPHYHERE
+\end{document}

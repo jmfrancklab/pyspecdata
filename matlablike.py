@@ -1,5 +1,7 @@
 from pylab import *
 import textwrap
+from copy import deepcopy 
+import traceback
 from scipy.optimize import leastsq
 from scipy.signal import fftconvolve
 from inspect import getargspec
@@ -34,17 +36,24 @@ def emptyfunction():
 class CustomError(Exception):
     def __init__(self, *value):
         if len(value)>1:
-            self.value = map(str,value)
+            retval = map(str,value)
         else:
-            self.value = value
-    def __str__(self):
-        retval = ' '.join(self.value)
-        return '\n'+'\n'.join(textwrap.wrap(retval,90))
+            retval = str(value)
+        retval = map(str,value)
+        retval = ' '.join(retval)
+        retval = '\n'+'\n'.join(textwrap.wrap(retval,90))
+        if traceback.format_exc() != 'None':
+            retval += '\n\nOriginal Traceback:\n'+''.join(['V']*40)+'\n'+traceback.format_exc() + '\n' + ''.join(['^']*40) + '\n'
+        Exception.__init__(self,retval)
+        return
 def copy_maybe_none(input):
     if input == None:
         return None
     else:
-        return input.copy()
+        if type(input) is list:
+            return map(copy,input)
+        else:
+            return input.copy()
 def maprep(*mylist):
     mylist = list(mylist)
     for j in range(0,len(mylist)):
@@ -155,7 +164,9 @@ def whereblocks(a): # returns contiguous chunks where the condition is true
     return retlist
 def autolegend(*args):
     #lg = legend(legendstr,'best'),loc = 2, borderaxespad = 0.)
-    if len(args)==1:
+    if len(args)==0:
+        lg = legend(loc='best')
+    elif len(args)==1:
         lg = legend(args[0],'best')
     else:
         lg = legend(args[0],args[1],'best')
@@ -272,8 +283,7 @@ def plot(*args,**kwargs):
             try:
                 retval = myplotfunc(*tuple(plotargs),**kwargs)
             except:
-                print CustomError('error trying to plot',myplotfunc,'with',plotargs,'and kwargs',kwargs)
-                raise
+                raise CustomError('error trying to plot',myplotfunc,'with arguments',plotargs,'and kwargs',kwargs,'\nsizes of arguments:',[shape(j) for j in plotargs])
         #{{{ attach labels and such
         if (myxlabel!=None):
             xlabel(myxlabel)
@@ -285,12 +295,11 @@ def plot(*args,**kwargs):
     except:
         message = 'Error plotting,'
         message += ':'
-        print CustomError(message,'myformat',myformat,
+        raise CustomError(message,'myformat',myformat,
                 'myxlabel',type(myxlabel),shape(myxlabel),
                 'myylabel',type(myylabel),shape(myylabel),
                 'myy',type(myy),shape(myy),
-                'myx',type(myx),shape(myx)).__repr__()
-        raise
+                'myx',type(myx),shape(myx))
     return retval
 #}}}
 #{{{general functions
@@ -317,8 +326,8 @@ class ndshape ():
     def __setitem__(self,reference,setto):
         self.shape[self.dimlabels.index(reference)] = setto
         return
-    def copy(self,*args):
-        return ndshape(list(self.shape),list(self.dimlabels))
+    def copy(self):
+        return deepcopy(self)
     def __add__(self,arg):
         shape = arg[0]
         dimlabels = arg[1]
@@ -425,14 +434,31 @@ class nddata ():
         self.data_error = data_error
         self.data_units = data_units
         if axis_coords_error == None:
-            self.axis_coords_error = dict(zip(self.dimlabels,[None]*len(axis_coords)))
+            self.axis_coords_error = [None]*len(axis_coords)
         else:
-            self.axis_coords_error = dict(zip(self.dimlabels,axis_coords_error))
+            self.axis_coords_error = axis_coords_error
         if axis_coords_units == None:
-            self.axis_coords_units = dict(zip(self.dimlabels,[None]*len(axis_coords)))
+            self.axis_coords_units = [None]*len(axis_coords)
         else:
-            self.axis_coords_units = dict(zip(self.dimlabels,axis_coords_units))
+            self.axis_coords_units = axis_coords_units 
         return
+    def __repr__(self):
+        return repr(self.data)+'\n\t+/-'+repr(self.get_error())+'\ndimlabels=['+repr(self.dimlabels)+']\naxes='+repr(self.mkd(self.axis_coords))+'\n\t+/-'+repr(self.mkd(self.axis_coords_error))+'\n'
+    def axn(self,axis):
+        return self.dimlabels.index(axis)
+    def mkd(self,*arg):
+        if len(arg) == 1:
+            #print 'DEBUG: mkd called on',arg[0]
+            for i,v in enumerate(arg[0]):
+                if type(v) == ndarray:
+                    if v.shape == ():
+                        arg[0][i] = None
+            #print 'DEBUG: mkd fixed argument to',arg[0]
+            return dict(zip(self.dimlabels,arg[0]))
+        else:
+            return dict(zip(self.dimlabels,[None]*len(self.dimlabels)))
+    def fld(self,errordict):
+        return [errordict[x] for x in self.dimlabels]
     #{{{ set + get the error
     def set_error(self,*args):
         r'''set the errors
@@ -440,10 +466,16 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         if (len(args) is 1) and (type(args[0]) is ndarray):
             self.data_error = reshape(args[0],shape(self.data))
         elif (len(args) is 2) and (type(args[0]) is str) and (type(args[1]) is nddata):
-            self.axis_coords_error[args[0]] = args[1]
+            self.axis_coords_error[self.axn(args[0])] = args[1]
         else:
             raise CustomError('Not a valid argument to set_error:',map(type,args))
         return self
+    def random_mask(self,axisname,threshold = exp(-1.0),inversion = False):
+        r'''generate a random mask with about 'threshold' of the points thrown out'''
+        if inversion:
+            threshold = threshold / (1.0 - threshold)
+        myr = rand(self.data.shape[self.axn(axisname)]) # random array same length as the axis
+        return myr > threshold
     def get_error(self,*args):
         r'''get the errors
 either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
@@ -453,13 +485,17 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
             else:
                 return real(self.data_error)
         elif (len(args) is 1) and (type(args[0]) is str):
-            if args[0] in self.axis_coords_error.keys():
-                if self.axis_coords_error[args[0]] is None:
-                    return None
-                else:
-                    return real(self.axis_coords_error[args[0]])
-            else:
+            if self.axis_coords_error[self.axn(args[0])] is None:
                 return None
+            else:
+                x = self.axis_coords_error[self.axn(args[0])]
+                if type(x) is ndarray:
+                    if x.shape == ():
+                        return None
+                    else:
+                        return real(self.axis_coords_error[self.axn(args[0])])
+                else:
+                    return real(self.axis_coords_error[self.axn(args[0])])
         else:
             raise CustomError('Not a valid argument to get_error')
     #}}}
@@ -595,9 +631,9 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         Aerr = None
         Berr = None
         if self.get_error() != None:
-            Aerr = self.get_error().reshape(Ashape)
+            Aerr = self.get_error().copy().reshape(Ashape)
         if arg.get_error() != None:
-            Berr = arg.get_error().transpose(Border).reshape(Bshape)
+            Berr = arg.get_error().copy().transpose(Border).reshape(Bshape)
         Rerr = 0.0 # we can have error on one or both, so we're going to need to add up the variances
         if Aerr != None:
             Rerr += (Aerr/B)**2
@@ -611,16 +647,19 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         if len(self.axis_coords)>0:
             retval = nddata(result,list(result.shape),newdimlabels,axis_coords=list(self.axis_coords),data_error = Rerr)
             #{{{ handle the axis_coords_error directly, since it's a dictionary
-            retval.axis_coords_error = {}
+            errordict = retval.mkd()
             #{{{ add the errors for B
-            if type(arg.axis_coords_error) is dict:
-                retval.axis_coords_error.update(arg.axis_coords_error)
+            if type(arg.axis_coords_error) is list:
+                if len(arg.axis_coords_error) > 0:
+                    errordict.update(arg.mkd(arg.axis_coords_error))
             #}}}
             #{{{ add the errors for A
-            if type(self.axis_coords_error) is dict:
-                retval.axis_coords_error.update(self.axis_coords_error)
+            if type(self.axis_coords_error) is list:
+                if len(self.axis_coords_error) > 0:
+                    errordict.update(self.mkd(self.axis_coords_error))
             #}}}
             #}}}
+            retval.axis_coords_error = retval.fld(errordict)
             return retval
         else:
             return nddata(result,list(result.shape),newdimlabels,data_error = Rerr)
@@ -745,7 +784,7 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
             self.data = self.data.reshape(temp)
         return self
     def popdim(self,dimname):
-        thisaxis = self.dimlabels.index(dimname)
+        thisaxis = self.axn(dimname)
         thisshape = list(self.data.shape)
         if thisshape[thisaxis]!=1:
             raise CustomError("trying to pop a dim that's not length 1")
@@ -753,10 +792,11 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         self.data = self.data.reshape(thisshape)
         self.dimlabels.pop(thisaxis)
         self.axis_coords.pop(thisaxis)
-        if len(self.axis_coords_error) > 0:
-            self.axis_coords_error.pop(dimname) # because this is newer and a dictionary
-        if len(self.axis_coords_units) > 0:
-            self.axis_coords_units.pop(dimname) # because this is newer and a dictionary
+        try:
+            self.axis_coords_error.pop(thisaxis)
+        except:
+            raise CustomError('trying to pop',thisaxis,'from',self.axis_coords_error)
+        #self.axis_coords_units.pop(thisaxis)
         return self
     def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*(y**2))))):
         r'''perform a normalized convolution'''
@@ -864,8 +904,11 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
     def labels(self,listofstrings,listofaxes):
         if len(self.axis_coords) == 0:
             self.axis_coords = [[]]*len(self.dimlabels)
+            self.axis_coords_error = [None]*len(self.dimlabels)
         for j in range(0,len(listofstrings)):
             #{{{ test that the axis is the right size
+            if type(listofstrings) is not list:
+                raise CustomError("the arguments passed to the .labels() method must be a list of the axis names followed by the list of the axis arrays")
             if (len(listofaxes[j]) != ndshape(self)[listofstrings[j]]) and (len(listofaxes[j])!=0):
                 raise CustomError("You're trying to attach an axis of len",len(listofaxes[j]),"to the",listofstrings[j],"dimension, which has ",ndshape(self)[listofstrings[j]]," data points")
             #}}}
@@ -968,11 +1011,13 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         if len(self.axis_coords[thisaxis]) > 0:
             raise CustomError("split not yet supported on axes with labels")
         newaxis_coords = self.axis_coords[0:thisaxis] + [[]]*len(axesout) + self.axis_coords[thisaxis+1:]
+        newaxis_coords_error = self.axis_coords_error[0:thisaxis] + [None]*len(axesout) + self.axis_coords_error[thisaxis+1:]
         newshape = list(self.data.shape[0:thisaxis]) + shapesout + list(self.data.shape[thisaxis+1:])
         newnames = list(self.dimlabels[0:thisaxis]) + axesout + list(self.dimlabels[thisaxis+1:])
         self.data = self.data.reshape(newshape)
         self.dimlabels = newnames
         self.axis_coords = newaxis_coords
+        self.axis_coords_error = newaxis_coords_error
         return self
     def chunkoff(self,axisin,newaxes,newshapes):
         r'''chunks up axisin, dividing it into newaxes with newshapes on the inside'''
@@ -1022,26 +1067,15 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
             raise
         #print 'STOP SETITEM --------------------------------'
     def copy(self):
-        retval = nddata(self.data.copy(),
-                list(self.data.shape),
-                list(self.dimlabels),
-                axis_coords=map(copy,self.axis_coords),
-                data_error = copy_maybe_none(self.data_error),
-                data_units = copy_maybe_none(self.data_units))
-        #{{{ because I pass the dictionary arguments as list kwargs, do these differently
-        retval.axis_coords_error = dict(self.axis_coords_error)
-        retval.axis_coords_units = dict(self.axis_coords_units)
-        #}}}
-        return retval
+        return deepcopy(self)
     def __getitem__(self,args):
         #print "DEBUG getitem called with",args
         if type(args[0]) is str:
             slicedict = dict(zip(list(self.dimlabels),[slice(None,None,None)]*len(self.dimlabels))) #initialize to all none
             if len(self.axis_coords)>0:
-                axesdict = dict(zip(list(self.dimlabels),self.axis_coords))
-                errordict = None
-                if len(self.axis_coords_error)>0:
-                    errordict = dict(self.axis_coords_error)
+                axesdict = self.mkd(self.axis_coords)
+                errordict = self.mkd(self.axis_coords_error)
+                #print 'DEBUG: made errordict',errordict
             #{{{ store the passed slices appropriately
             for x,y in zip(args[0::2],args[1::2]):
                 slicedict[x] = y
@@ -1052,22 +1086,27 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
                 for x,y in slicedict.iteritems():
                     #print "DEBUG, type of slice",x,"is",type(y)
                     if isscalar(y):
-                        axesdict.pop(x)
-                        #print "type of scalar is",type(y)
+                        axesdict.pop(x) # pop the axes for all scalar dimensions
                     elif type(y) is type(emptyfunction):
                         mask = y(axesdict[x])
                         slicedict[x] = mask
                         axesdict[x] = axesdict[x][mask]
                     else:
-                        axesdict[x] = axesdict[x][y] # pop the axes for all scalar dimensions
-                if errordict != None:
+                        axesdict[x] = axesdict[x][y]
+                if errordict != None and errordict != array(None):
                     for x,y in slicedict.iteritems():
-                        if isscalar(y) or (errordict[x] == None): errordict.pop(x)
-                        elif type(y) is type(emptyfunction):
-                            mask = y(axesdict[x])
-                            axesdict[x] = axesdict[x][mask]
-                        else: errordict[x] = errordict[x][y] # pop the error for all scalar dimensions
-
+                        if errordict[x] != None:
+                            if isscalar(y):
+                                errordict.pop(x)
+                            elif type(y) is type(emptyfunction):
+                                mask = y(axesdict[x])
+                                errordict[x] = errordict[x][mask]
+                            else:
+                                try:
+                                    errordict[x] = errordict[x][y] # default
+                                except:
+                                    raise CustomError('Trying to index',errordict,'-->',x,'=',errordict[x],'with',y,'error started as',self.axis_coords_error)
+                    errordict = self.mkd().update(errordict) # make everything none except the ones I've updated
             #}}}
             indexlist = [slicedict[x] for x in self.dimlabels]# generate the new list of slices, in the correct order, by mapping getitem onto self.dimlabels
             newlabels = [x for x in self.dimlabels if not isscalar(slicedict[x])] # generate the new list of labels, in order, for all dimensions that are not indexed by a scalar
@@ -1078,11 +1117,15 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
                 newerror = None
             #}}}
             if len(self.axis_coords)>0:
+                if errordict != None:
+                    axis_coords_error = [errordict[x] for x in newlabels]
+                else:
+                    axis_coords_error = None
                 return nddata(self.data[indexlist],
                         self.data[indexlist].shape,
                         newlabels,
                         axis_coords = [axesdict[x] for x in newlabels],
-                        axis_coords_error = errordict,
+                        axis_coords_error = axis_coords_error,
                         data_error = newerror)
             else:
                 return nddata(self.data[indexlist],self.data[indexlist].shape,newlabels)
@@ -1277,12 +1320,10 @@ class fitdata(nddata):
                     axis_coords = args[0].axis_coords,
                     ft_start_time = args[0].ft_start_time,
                     data_error = args[0].data_error,
+                    axis_coords_error = args[0].axis_coords_error,
+                    axis_coords_units = args[0].axis_coords_units,
                     data_units = args[0].data_units,
                     **kwargs)
-            #{{{ again, I need to handle the dictionary properties differently, since the appropriate kwargs are passed as lists
-            self.axis_coords_error = args[0].axis_coords_error
-            self.axis_coords_units = args[0].axis_coords_units
-            #}}}
             self.fit_axis = fit_axis
         else:
             #self.__base_init(*args,**kwargs)
@@ -1322,8 +1363,10 @@ class fitdata(nddata):
     def errfunc(self,p,x,y,sigma):
         '''just the error function'''
         fit = self.fitfunc(p,x)
-        normalization = sum(1.0/sigma)
-        retval = (fit-y)/sigma/normalization # normalize, just so that when we set the tolerances and such, we know what's up
+        try:
+            retval = (y-fit)/sigma
+        except ValueError:
+            raise CustomError('your error (',shape(sigma),') probably doesn\'t match y (',shape(y),') and fit (',shape(fit),')')
         return retval
     def pinv(self,*args,**kwargs):
         if 'verbose' in kwargs.keys():
@@ -1374,6 +1417,17 @@ class fitdata(nddata):
             return p[self.symbol_list.index(name)]
         except:
             CustomError("While running output: couldn't find",name,"in",self.symbol_list)
+    def _pn(self,name):
+        return self.symbol_list.index(name)
+    def covar(self,*names):
+        r'''give the covariance for the different symbols'''
+        if len(names) == 1:
+            names = [names[0],names[0]]
+        return self.covariance[self._pn(names[0]),
+                self._pn(names[1])].copy()
+    def covarmat(self,*names):
+        indeces = map(self._pn,names)
+        return self.covariance[c_[indeces],r_[indeces]].copy()
     def latex(self):
         r'''show the latex string for the function, with all the symbols substituted by their values'''
         # this should actually be generic to fitdata
@@ -1404,6 +1458,10 @@ class fitdata(nddata):
     def eval(self,taxis,set = None,set_to = None):
         r'''after we have fit, evaluate the fit function along the axis taxis
         set and set_to allow you to forcibly set a specific symbol to a specific value --> however, this does not affect the class, but only the return value'''
+        if type(taxis) is int:
+            taxis = linspace( self.getaxis(self.fit_axis).min(),
+                    self.getaxis(self.fit_axis).max(),
+                    taxis)
         p = self.fit_coeff.copy()
         #{{{ LOCALLY apply any forced values
         if set != None:
@@ -1447,13 +1505,52 @@ class fitdata(nddata):
             p_ini = p_ini[self.active_mask] # collapse p_ini
             #print "DEBUG to",p_ini
         try:
-            p_out,success = leastsq(self.errfunc, p_ini,
-                    args = (x,y,sigma),ftol = 1e-4, xtol = 1e-6)
+            p_out,cov,infodict,mesg,success = leastsq(self.errfunc, p_ini,
+                    args = (x,y,sigma),ftol = 1e-4, xtol = 1e-6,
+                    full_output = True)
+            self.covariance = cov
         except:
-            print 'type(x):', type(x), 'type(y):', type(y)
-            print CustomError('leastsq failed').__repr__()
-            raise
+            if type(x) != ndarray and type(y) != ndarray:
+                raise CustomError('leastsq failed because the two arrays aren\'t of the right type','type(x):',type(x),'type(y):',type(y))
+            else:
+                if any(shape(x) != shape(y)):
+                    raise CustomError('leastsq failed because the two arrays do not match in size size','shape(x):',shape(x),'shape(y):',shape(y))
+                else:
+                    raise CustomError('leastsq failed; I don\'t know why')
         # here, I do NOT uncollapse p_out, since fitfunc is wrapped to do so already
         self.fit_coeff = p_out
         return
+    def bootstrap(self,points,swap_out = exp(-1.0),seedval = 10347):
+        print r'\begin{verbatim}'
+        seed(seedval)
+        fitparameters = list(self.symbol_list)
+        recordlist = array([tuple([0]*len(fitparameters))]*points,
+                {'names':tuple(fitparameters),'formats':tuple(['double']*len(fitparameters))}) # make an instance of the recordlist
+        for runno in range(0,points):
+            thiscopy = self.copy()
+            #{{{ discard datapoints
+            origsizecheck = double(size(thiscopy.data))
+            mask = thiscopy.random_mask(self.fit_axis,threshold = swap_out)
+            thiscopy.data = thiscopy.data[mask]
+            derr = thiscopy.get_error()
+            x = thiscopy.getaxis(self.fit_axis)
+            x = x[mask] # note that x is probably no longer a pointer
+            derr = derr[mask]
+            #print 'DEBUG: size of data after cut',double(size(thiscopy.data))/origsizecheck,' (expected ',1.-swap_out,')'
+            #}}}
+            #{{{ now extend
+            number_to_replace = origsizecheck - thiscopy.data.size
+            #print 'DEBUG: number_to_replace',number_to_replace
+            random_indeces = int32((rand(number_to_replace)*(thiscopy.data.size-1.0)).round())
+            thiscopy.data = r_[thiscopy.data,thiscopy.data.copy()[random_indeces]]
+            thiscopy.labels([self.fit_axis],[r_[x,x.copy()[random_indeces]]])
+            thiscopy.set_error(r_[derr,derr.copy()[random_indeces]])
+            #print 'DEBUG: size of data after extension',double(size(thiscopy.data))/origsizecheck
+            #}}}
+            thiscopy.fit()
+            # here, use the internal routines, in case there are constraints, etc
+            for name in thiscopy.symbol_list: # loop over all fit coeff
+                recordlist[runno][name] = thiscopy.output(name)
+        print r'\end{verbatim}'
+        return recordlist # collect into a single recordlist array
 #}}}

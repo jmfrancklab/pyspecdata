@@ -11,6 +11,13 @@ from time import mktime
 from nmr import *
 import re
 
+golden_ratio = (1.0 + sqrt(5))/2.0
+
+def lsafe(string):
+    string = string.replace('_',r'\_')
+    string = string.replace('#',r'\#')
+    string = string.replace('%',r'\%')
+    return string
 def thisjobname():
     fp = open('pythonjobname.txt')
     retval = rstrip(fp.read())
@@ -24,6 +31,11 @@ def lplotfigures(figurelist,string,numwide = 2,**kwargs):
         if (j+1) % numwide == 0:
             print '\n\n'
     return []
+def lrecordarray(recordlist):
+    print r'\begin{tabular}{',''.join(['r']+['l']*(len(recordlist))),'}'
+    for v in recordlist.dtype.names:
+        print r'\ensuremath{',v,'}$=$ &',' & '.join(map(str,list(recordlist[v]))),r'\\'
+    print r'\end{tabular}'
 def lplot(fname,width=3,figure=False,dpi=100,grid=False,alsosave=None,gensvg = False):
     '''
     used with python.sty instead of savefig
@@ -457,7 +469,7 @@ def dnp_for_rho(path,name,powerseries,
             #}}}
         #{{{ convert integral to Emax fit class, and plot the fit
         figurelist = nextfigure(figurelist,'emax')
-        integral = emax(integral,fit_axis = 'power')
+        integral = emax_legacy(integral,fit_axis = 'power')
         integral.labels(['power'],[powers])
         integral.makereal()
         change = r_[1,diff(integral.getaxis('power'))]
@@ -598,8 +610,8 @@ def dnp_for_rho(path,name,powerseries,
         h5file.close()
 #}}}
 #{{{ retrieve the t1 power series results from an HDF file
-def plot_t1series(path,name,t1expnos,dbm,h5file = 'temperature_paper.h5',gensvg = False):
-    dnp_for_rho(path,name,[],expno = [],t1expnos = t1expnos,t1powers = dbm,show_plots = False)
+def plot_t1series(path,name,t1expnos,dbm,h5file = 'temperature_paper.h5',gensvg = False,**kwargs):
+    dnp_for_rho(path,name,[],expno = [],t1expnos = t1expnos,t1powers = dbm,show_plots = False,**kwargs)
     h5file = openFile(h5file,'r+')
     T1_table = h5file.root.concentration_series.T1
     print r'\begin{verbatim}'
@@ -681,7 +693,8 @@ def parse_powers(path,name,power_file,expno = None,
     if templen > t_minlength:
        t_minlength = templen
     t_maxlen = scan_length+scanlength_estimation_error
-    dbm = auto_steps(path+power_file,t_start = t_start*60,t_stop = t_stop,t_minlength = t_minlength,t_maxlen = t_maxlen,tolerance = tolerance, threshold = -36)
+    dbm,lastspike = auto_steps(path+power_file,t_start = t_start*60,t_stop = t_stop,t_minlength = t_minlength,t_maxlen = t_maxlen,tolerance = tolerance, threshold = -36,return_lastspike = True)
+    obs('Time between last spike and end is',lastspike/len(expno),'$s$, so if that\'s too much, set extra\_time to',extra_time+lastspike/(len(expno)-1),'$s$\n\n')
     figure(1)
     gridandtick(gca())
     lplot('powerlog'+name+'.pdf')
