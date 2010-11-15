@@ -1,16 +1,12 @@
 \ProvidesPackage{mynotebook}
 \NeedsTeXFormat{LaTeX2e}[1994/12/01]
-\DeclareOption{supressmulticols}{\newcommand{\supressmulticols}{test}}
-\ProcessOptions
 \usepackage{fancyhdr}
 \usepackage{wrapfig}
 \pdfpagewidth 8.5in
 \pdfpageheight 11in
 
 \pagestyle{fancy}
-\fancyhf{}
 \oddsidemargin -0.5in % add 1in to get margin
-\evensidemargin -0.5in % add 1in to get margin
 \voffset -0.5in
 \topmargin 0in
 \textwidth 7.5in
@@ -20,31 +16,14 @@
 \headsep 15pt
 %\renewcommand{\sectionmark}[1]{\markright{#1}{}}
 %\markright{\sectionmark{}}
+\usepackage{fancyheadings}
 \usepackage{amsmath}
-\usepackage{xcolor}
-\usepackage{hycolor}
-% BEGIN part for commenting
-\usepackage{makeidx}
-\makeindex
-\newcommand{\johncomment}[3]{\pdfcomment[author={John Franck #1},subject={},color=lime,hspace=10pt]{#3}\index{#2#3}\quad}
-\newcommand{\nandocomment}[3]{\pdfcomment[author={Nandini Ananth #1},subject={},color=pink,hspace=10pt]{#3}\index{#2#3}\quad}
-% END part for commenting
+\usepackage{color}
 \usepackage{verbatim}
 \usepackage{graphicx}
-\@ifundefined{supressmulticols}{
 \usepackage{multicol}
-}{}
-%\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=blue, citecolor=blue, urlcolor=blue, bookmarksdepth=8]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
 \usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=linkcolor, citecolor=blue, urlcolor=blue, bookmarksdepth=8]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
-\usepackage{pdfcomment}
-\providecommand{\DIFadd}[1]{{\protect\color{blue}\uwave{#1}}} %DIF PREAMBLE
-\providecommand{\DIFdel}[1]{{\protect\color{red}\xout{#1}}}                      %DIF PREAMBLE
-\pdfstringdefDisableCommands{\renewcommand{\DIFdel}{}}
-\pdfstringdefDisableCommands{\renewcommand{\DIFadd}{}}
-\pdfstringdefDisableCommands{\renewcommand{\color}{}}
-\pdfstringdefDisableCommands{\renewcommand{\sout}{}}
-\pdfstringdefDisableCommands{\renewcommand{\uwave}{}}
-\pdfstringdefDisableCommands{\renewcommand{\uline}{}}
+%\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=blue, citecolor=blue, urlcolor=blue, bookmarksdepth=8]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
 \immediate\write18{bash\space datenow.sh\space datenow.out} % to save into the file
 \newcommand{\Now}{\immediate\input datenow.out}
 %{{{ filenames with fancy underscore escape
@@ -66,7 +45,7 @@
 \def\fn{\begingroup\catcode`_=12 \newfnx}
 \newcommand{\newfnx}[1]{\oldfn{#1}\endgroup}
 %}}}
-\usepackage[normalem]{ulem}
+\usepackage{ulem}
 \newenvironment{co}{\begin{python}
 	import matplotlib; matplotlib.use('Agg')
 	from matlablike import *
@@ -102,9 +81,7 @@
 \immediate\write18{bash\space pythonout.sh\space\jobname.\thepy@codenum.py\space pythonout.out\space\thepy@codenum}
 \immediate\input pythonout.out
 }
-\def\dontsavepython{\immediate\write18{rm\space\jobname.\thepy@codenum.py.old}\jobname.\thepy@codenum.py.old
-
-{\color{red}Not caching the previous python code!}}
+\def\dontsavepython{\immediate\write18{rm\space\jobname.\thepy@codenum.py.old}\jobname.\thepy@codenum.py.old}
 %}}}
 \def\@writemodule{%
 \immediate\openout\@module=latex.py
@@ -117,32 +94,14 @@
 \definecolor{mygray}{rgb}{0.6,0.6,0.6}
 \newcommand\myline{\rule{\linewidth}{0.1mm}}
 \newcommand\mysmallline{\rule{1in}{0.01mm}}
-\let\oldsubsubsection = \subsubsection
 \let\oldparagraph = \paragraph
 \let\oldsubparagraph = \subparagraph
-\let\oldsubsection = \subsection
-%\renewcommand{\subsection}[1]{\oldsubsection{{\tiny #1}}}
-\newcommand{\blacktext}[1]{\texorpdfstring{{\color{black}#1}}{#1}}
-\renewcommand{\subsubsection}[1]{\oldsubsubsection{\uline{#1}}}
-\renewcommand{\paragraph}[1]{\oldparagraph{#1}\blacktext{$\Rightarrow$}}
-\renewcommand{\subparagraph}[1]{\oldsubparagraph{\blacktext{{\small#1}}}}
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}{\color{black}$\Rightarrow$}}
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{\color{black} {\small#1}}}
 \renewcommand{\o}[2][]{ {\color{mygreen}{\it #1}} {\color{blue} #2}}
 
-\def\Emax{\texorpdfstring{\ensuremath{E_{max}}}{Emax}}
-\def\smax{\texorpdfstring{\ensuremath{s_{max}}}{smax}}
-\def\uM{\texorpdfstring{\ensuremath{\mu M}}{uM}}
-\def\uL{\texorpdfstring{\ensuremath{\mu L}}{uL}}
-\def\tonen{\texorpdfstring{\ensuremath{T_{1,0}}}{T10}}
-\newcommand{\hausseri}{\ensuremath{(\left\langle I_z\right\rangle - I_0)}}
-\newcommand{\haussers}{\ensuremath{(\left\langle S_z\right\rangle - S_0)}}
-\newcommand{\gammaratio}{659.32}
-\newcommand{\oht}{4-hydroxy-tempo }
-\newcommand{\ot}{4-oxo-tempo }
-%\def\Emax{\ensuremath{E_{max}}}
-%\def\smax{\ensuremath{s_{max}}}
-%\def\uM{$\mu M$}
-%\def\uL{$\mu L$}
-%\def\tonen{$T_{1,0}$ }
+\newcommand\Emax{\ensuremath{E_{max}}}
+\newcommand\tonen{$T_{1,0}$ }
 \newcommand{\lastorg}{
 
 \myline
@@ -187,8 +146,6 @@ LAST ORGANIZED TO HERE
 \end{itemize}
 \end{multicols}
 \end{tiny}}
-
-\newenvironment{hidden}[1]{}
 
 \newenvironment{pcomments}{\begin{minipage}{4.5in}}{\end{minipage}}
 \newcommand{\pstandard}[1]{\begin{minipage}{3in}\includegraphics[width=3in]{#1}\end{minipage}}
@@ -237,36 +194,20 @@ LAST ORGANIZED TO HERE
 \myline
 }
 
+\pagestyle{fancyplain}
 % Remember chapter title
 %\renewcommand{\chaptermark}[1]{\markboth{Chap. \thechapter:\ #1}{}}
 % section number and title
 %\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
 %\renewcommand{\sectionmark}[1]{\markright{\thesection\ }}
+\renewcommand{\sectionmark}[1]{\markright{ {\tiny \thesection }\ #1}}
 %\lhead[\fancyplain{}{\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad J. Franck Notebook, compiled \today}] %
 %    {\fancyplain{}{\bfseries\rightmark}}
-%\rhead[\fancyplain{}{\scshape\arabic{section}}] %
+\rhead[\fancyplain{}{\scshape\arabic{section}}] %
+    {\fancyplain{}{J. Franck, compiled \today}}
+%\lhead{\arabic{section}.\Alph{subsection}}
+%\rhead[\fancyplain{}{}] %
 %    {\fancyplain{}{J. Franck Notebook, compiled \today}}
-%\lhead{ \Roman{chapter}$\Rightarrow$\arabic{section}.\Alph{subsection} \leftmark}
-%%%\lhead{ \Roman{chapter}$\Rightarrow$\arabic{section} \leftmark}
-%%%%\lhead{\leftmark}
-%%%\rhead[\fancyplain{}{}] %
-%%%    {\fancyplain{}{ / J. Franck Notebook, compiled \today}}
-%%%\lfoot{p \thepage}
-%%%%\rfoot{p \thepage}
-%%%\renewcommand{\sectionmark}[1]{\markboth{#1}{#1}}
-
-% from http://www.kronto.org/thesis/tips/custom-headers.html
-\@ifundefined{chaptermark}{}{
-\renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{#1}}{}}
-}
-\renewcommand{\sectionmark}[1]{\markright{#1}{}}
-
-\@ifundefined{thechapter}{}{
-\fancyhead[LO]{\thechapter.\thesection:}
-\fancyhead[RE]{\thechapter.\thesection}
-\fancyhead[RO]{{\footnotesize\rightmark}\hspace{2em}p{\bf\thepage}}
-\fancyhead[LE]{p{\bf\thepage}\hspace{2em}\footnotesize{\leftmark}}
-}
 
 %\rhead{Notebook \today}
 %\chead{\sectionname}
@@ -276,7 +217,6 @@ LAST ORGANIZED TO HERE
 %\rfoot{\thepage}
 %\lfoot{Left bottom}
 
-\@ifundefined{supressmulticols}{
 \AtBeginDocument{
 \let\oldlabel=\label
 %\renewcommand*{\label}[1]{{\tiny $#1$}\oldlabel{#1}}
@@ -285,7 +225,6 @@ LAST ORGANIZED TO HERE
 \def\label{\begingroup\catcode`_=12 \newlabelx}
 \newcommand{\newlabelx}[1]{{\tiny #1}\endgroup\oldlabel{#1}}
 }
-}{}
 %\bibliographystyle{abbrvnat}
 %\usepackage[sort&compress]{natbib}
 \usepackage{fp}
@@ -298,11 +237,7 @@ LAST ORGANIZED TO HERE
 \newcommand{\rhosmax}{\ensuremath{\rho s_{max}}}
 \newcommand{\subhyp}[2][]{{\it \textbf{#1} }{\it #2}}
 \bibliographystyle{unsrt}
-%\def\thechapter{\Roman{chapter}}
-%\def\thesection{\arabic{section}}
-%\def\thesubsection{\Alph{subsection}}
-%\def\thesubsubsection{\arabic{subsubsection}}
-\newcommand{\notyet}[1]{{\color{red}#1}}
-\newcommand{\needtocheck}[1]{{\color{yellow}#1}}
-\newcommand{\putref}{\begin{tiny}[ref]\end{tiny}}
-\newenvironment{DIFnomarkup}{}{}
+\def\thechapter{\Roman{chapter}}
+\def\thesection{\arabic{section}}
+\def\thesubsection{\arabic{section}.\Alph{subsection}}
+\def\thesubsubsection{\arabic{section}.\Alph{subsection}.\arabic{subsubsection}}
