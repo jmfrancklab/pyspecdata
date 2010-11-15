@@ -1024,7 +1024,11 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         axesout = [axisin]+newaxes
         shapesout = [ndshape(self)[axisin]/prod(newshapes)]+newshapes
         return self.chunk(axisin,axesout,shapesout)
-    def reorder(self,axes):
+    def reorder(self,*axes):
+        if len(axes) == 1:
+            axes = axes[0]
+        else:
+            axes = axes
         neworder = map(self.dimlabels.index,axes)
         self.dimlabels = map(self.dimlabels.__getitem__,neworder)
         if len(self.axis_coords)>0:
