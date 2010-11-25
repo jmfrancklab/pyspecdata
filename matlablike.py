@@ -181,6 +181,15 @@ def nextfigure(figurelist,name):
         figure(len(figurelist)+1)
         figurelist.append(name)
         return figurelist
+def text_on_plot(x,y,thistext,**kwargs):
+    ax = gca()
+    newkwargs = {'transform':ax.transAxes,'size':'x-large',"horizontalalignment":'center'}
+    if 'match_data' in kwargs.keys():
+        if kwargs['match_data'].get_plot_color() is not None:
+            newkwargs.update({'color':kwargs['match_data'].get_plot_color()})
+        else:
+            raise CustomError('You passed match_data to text_on_plot, but I can\'t find a color in the object')
+    return text(x,y,thistext,**newkwargs)
 def plot(*args,**kwargs):
     global myplotfunc
     myplotfunc = OLDplot # default
@@ -210,6 +219,8 @@ def plot(*args,**kwargs):
         #}}}
         #{{{ parse nddata
         if isinstance(myy,nddata):
+            if myy.get_plot_color() is not None:
+                kwargs.update({'color':myy.get_plot_color()})
             if (len(myy.dimlabels)>1):
                 myylabel = myy.dimlabels[1]
             if (len(myy.dimlabels)>0):
@@ -363,7 +374,13 @@ def dp(number,decimalplaces,scientific=False):
 def concat(datalist,dimname):
     #{{{ allocate a new datalist structure  
     t1size = 0
-    shapes = map(ndshape,datalist)
+    #print 'DEBUG: type(datalist)',type(datalist)
+    try:
+        shapes = map(ndshape,datalist)
+    except:
+        if type(datalist) is not list:
+            raise CustomError('You didn\'t pass a list, you passed a',type(datalist))
+        raise CustomError('Problem with what you passed to concat, list of types,',map(type,datalist))
     for j in range(0,len(datalist)):
         if dimname in shapes[j].dimlabels:
             t1size += shapes[j][dimname]
@@ -413,9 +430,9 @@ def concat(datalist,dimname):
     #}}}
     return newdatalist
 #}}}
-class nddata ():
+class nddata (object):
     want_to_prospa_decim_correct = False
-    def __init__(self,data,sizes,dimlabels,axis_coords=[],ft_start_time = 0.,data_error = None, axis_coords_error = None,axis_coords_units = None, data_units = None):
+    def __init__(self,data,sizes,dimlabels,axis_coords=[],ft_start_time = 0.,data_error = None, axis_coords_error = None,axis_coords_units = None, data_units = None, other_info = {}):
         if not (type(data) is ndarray):
             #if (type(data) is float64) or (type(data) is complex128) or (type(data) is list):
             if isscalar(data) or (type(data) is list) or (type(data) is tuple):
@@ -433,6 +450,7 @@ class nddata ():
         self.ft_start_time = ft_start_time
         self.data_error = data_error
         self.data_units = data_units
+        self.other_info = dict(other_info)
         if axis_coords_error == None:
             self.axis_coords_error = [None]*len(axis_coords)
         else:
@@ -522,6 +540,33 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
     def rename(self,previous,new):
         self.dimlabels[self.dimlabels.index(previous)] = new
         return self
+    def set_prop(self,propname,val):
+        self.other_info.update({propname:val})
+        return
+    def get_prop(self,propname):
+        return self.other_info[propname]
+    def set_plot_color(self,thiscolor):
+        if thiscolor is None:
+            return
+        if thiscolor is str:
+            colordict = {'r':[1,0,0],
+                    'g':[0,1,0],
+                    'b':[0,0,1],
+                    'k':[0,0,0],
+                    'y':[0.5,0.5,0],
+                    'o':[0.75,0.25,0],
+                    'c':[0,0.5,0.5]}
+            try:
+                thiscolor = colordict[thiscolor]
+            except:
+                raise CustomError('Color',thiscolor,'not in dictionary')
+        self.other_info.update({'plot_color':thiscolor})
+        return
+    def get_plot_color(self):
+        if 'plot_color' in self.other_info.keys():
+            return self.other_info['plot_color']
+        else:
+            return None
     def __add__(self,arg):
         a = self.copy()
         if isscalar(arg):
@@ -1029,7 +1074,10 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
             axes = axes[0]
         else:
             axes = axes
-        neworder = map(self.dimlabels.index,axes)
+        try:
+            neworder = map(self.dimlabels.index,axes)
+        except ValueError:
+            raise CustomError('one of',axes,'not in',self.dimlabels)
         self.dimlabels = map(self.dimlabels.__getitem__,neworder)
         if len(self.axis_coords)>0:
             try:
@@ -1043,6 +1091,11 @@ either set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         return self
     def __getslice__(self,*args):
         print 'getslice! ',args
+#    def __getattribute__(self,name):
+#        if name == 'test':
+#            return 0.
+#        else:
+#            return object.__getattribute__(self,name)
     def __setitem__(self,*args):
         if isinstance(args[1],nddata):
             rightdata = args[1].data
@@ -1327,6 +1380,7 @@ class fitdata(nddata):
                     axis_coords_error = args[0].axis_coords_error,
                     axis_coords_units = args[0].axis_coords_units,
                     data_units = args[0].data_units,
+                    other_info = args[0].other_info,
                     **kwargs)
             self.fit_axis = fit_axis
         else:
@@ -1339,6 +1393,8 @@ class fitdata(nddata):
         self.active_indeces = None
         #}}}
         return
+    def copy(self): # for some reason, if I don't override this with the same thing, it doesn't override
+        return deepcopy(self)
     def gen_indeces(self,set,set_to):
         r'''pass this set and set\_to parameters, and it will return:
         indeces,values,mask
@@ -1405,7 +1461,7 @@ class fitdata(nddata):
         else:
             retval = self.linfunc(self.getaxis(self.fit_axis),self.data,yerr = self.get_error(),xerr = self.get_error(self.fit_axis)) # otherwise, return the raw data
         return retval
-    def output(self,name):
+    def output(self,*name):
         r'''give the fit value of a particular symbol'''
         p = self.fit_coeff.copy()
         if self.set_indeces != None:
@@ -1417,10 +1473,16 @@ class fitdata(nddata):
             p[self.set_indeces] = self.set_to # then just set the forced values to their given values
             #print "DEBUG trying to uncollapse in fitfunc w/ ",self.symbol_list,"; from",temp,"to",p
         # this should also be generic
-        try:
-            return p[self.symbol_list.index(name)]
-        except:
-            CustomError("While running output: couldn't find",name,"in",self.symbol_list)
+        if len(name) is 1:
+            try:
+                return p[self.symbol_list.index(name[0])]
+            except:
+                raise CustomError("While running output: couldn't find",name,"in",self.symbol_list)
+        elif len(name) is 0:
+            # return a record array
+            return array(tuple(p),{"names":list(self.symbol_list),"formats":['double']*len(p)}).reshape(1)
+        else:
+            raise CustomError("You can't pass",len(name),"arguments to .output()")
     def _pn(self,name):
         return self.symbol_list.index(name)
     def covar(self,*names):
@@ -1478,6 +1540,7 @@ class fitdata(nddata):
         newdata = ndshape(self)
         newdata[self.fit_axis] = size(taxis)
         newdata = newdata.alloc()
+        newdata.set_plot_color(self.get_plot_color())
         #}}}
         #{{{ keep all axis labels the same, except the expanded one
         newdata.axis_coords = list(newdata.axis_coords)
@@ -1510,9 +1573,8 @@ class fitdata(nddata):
             #print "DEBUG to",p_ini
         try:
             p_out,cov,infodict,mesg,success = leastsq(self.errfunc, p_ini,
-                    args = (x,y,sigma),ftol = 1e-4, xtol = 1e-6,
+                    args = (x,y,sigma),
                     full_output = True)
-            self.covariance = cov
         except:
             if type(x) != ndarray and type(y) != ndarray:
                 raise CustomError('leastsq failed because the two arrays aren\'t of the right type','type(x):',type(x),'type(y):',type(y))
@@ -1521,40 +1583,69 @@ class fitdata(nddata):
                     raise CustomError('leastsq failed because the two arrays do not match in size size','shape(x):',shape(x),'shape(y):',shape(y))
                 else:
                     raise CustomError('leastsq failed; I don\'t know why')
+        if success != 1:
+            if mesg.find('maxfev'):
+                maxfev = 10000
+                p_out,cov,infodict,mesg,success = leastsq(self.errfunc, p_ini,
+                        args = (x,y,sigma),
+                        maxfev = maxfev,
+                        full_output = True)
+                if success != 1:
+                    if mesg.find('two consecutive iterates'):
+                        print 'DBG:2 cons iter err'
+                    else:
+                        raise CustomError('leastsq finished with an error message:',mesg)
+        self.covariance = cov
         # here, I do NOT uncollapse p_out, since fitfunc is wrapped to do so already
         self.fit_coeff = p_out
         return
-    def bootstrap(self,points,swap_out = exp(-1.0),seedval = 10347):
+    def bootstrap(self,points,swap_out = exp(-1.0),seedval = 10347,minbounds = {},maxbounds = {}):
         print r'\begin{verbatim}'
         seed(seedval)
         fitparameters = list(self.symbol_list)
         recordlist = array([tuple([0]*len(fitparameters))]*points,
                 {'names':tuple(fitparameters),'formats':tuple(['double']*len(fitparameters))}) # make an instance of the recordlist
         for runno in range(0,points):
-            thiscopy = self.copy()
-            #{{{ discard datapoints
-            origsizecheck = double(size(thiscopy.data))
-            mask = thiscopy.random_mask(self.fit_axis,threshold = swap_out)
-            thiscopy.data = thiscopy.data[mask]
-            derr = thiscopy.get_error()
-            x = thiscopy.getaxis(self.fit_axis)
-            x = x[mask] # note that x is probably no longer a pointer
-            derr = derr[mask]
-            #print 'DEBUG: size of data after cut',double(size(thiscopy.data))/origsizecheck,' (expected ',1.-swap_out,')'
-            #}}}
-            #{{{ now extend
-            number_to_replace = origsizecheck - thiscopy.data.size
-            #print 'DEBUG: number_to_replace',number_to_replace
-            random_indeces = int32((rand(number_to_replace)*(thiscopy.data.size-1.0)).round())
-            thiscopy.data = r_[thiscopy.data,thiscopy.data.copy()[random_indeces]]
-            thiscopy.labels([self.fit_axis],[r_[x,x.copy()[random_indeces]]])
-            thiscopy.set_error(r_[derr,derr.copy()[random_indeces]])
-            #print 'DEBUG: size of data after extension',double(size(thiscopy.data))/origsizecheck
-            #}}}
-            thiscopy.fit()
-            # here, use the internal routines, in case there are constraints, etc
-            for name in thiscopy.symbol_list: # loop over all fit coeff
-                recordlist[runno][name] = thiscopy.output(name)
+            success = False # because sometimes this doesn't work
+            while success is False:
+                thiscopy = self.copy()
+                #{{{ discard datapoints
+                origsizecheck = double(size(thiscopy.data))
+                mask = thiscopy.random_mask(thiscopy.fit_axis,threshold = swap_out)
+                thiscopy.data = thiscopy.data[mask]
+                derr = thiscopy.get_error()
+                x = thiscopy.getaxis(thiscopy.fit_axis)
+                x = x[mask] # note that x is probably no longer a pointer
+                derr = derr[mask]
+                #print 'DEBUG: size of data after cut',double(size(thiscopy.data))/origsizecheck,' (expected ',1.-swap_out,')'
+                #}}}
+                #{{{ now extend
+                number_to_replace = origsizecheck - thiscopy.data.size
+                #print 'DEBUG: number_to_replace',number_to_replace
+                random_indeces = int32((rand(number_to_replace)*(thiscopy.data.size-1.0)).round())
+                thiscopy.data = r_[thiscopy.data,thiscopy.data.copy()[random_indeces]]
+                thiscopy.labels([thiscopy.fit_axis],[r_[x,x.copy()[random_indeces]]])
+                thiscopy.set_error(r_[derr,derr.copy()[random_indeces]])
+                #print 'DEBUG: size of data after extension',double(size(thiscopy.data))/origsizecheck
+                #}}}
+                try:
+                    thiscopy.fit()
+                    success = True
+                    if len(minbounds) > 0:
+                        for k,v in minbounds.iteritems():
+                            if thiscopy.output(k) < v:
+                                success = False
+                    if len(maxbounds) > 0:
+                        for k,v in maxbounds.iteritems():
+                            if thiscopy.output(k) > v:
+                                success = False
+                except:
+                    #print 'WARNING, didn\'t fit'
+                    success = False
+                # here, use the internal routines, in case there are constraints, etc
+                if success is True:
+                    for name in thiscopy.symbol_list: # loop over all fit coeff
+                        recordlist[runno][name] = thiscopy.output(name)
         print r'\end{verbatim}'
         return recordlist # collect into a single recordlist array
 #}}}

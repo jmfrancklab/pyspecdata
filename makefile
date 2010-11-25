@@ -36,7 +36,6 @@ notebook_wc.pdf: notebook.tex notebook.out
 	-rm notebook.*.py
 	mv notebook.pdf notebook_wc.pdf
 	bash remove_empty.sh
-	aplay beep-14_soft.wav
 compilation_wc.pdf: compilation.aux compilation.tex papers.tex mynotebook.sty 09*.tex notebook*.tex notebook.*.py.old
 	pdflatex --shell-escape compilation.tex 
 	-rm compilation.*.py
@@ -80,7 +79,6 @@ $(FILE)_plain.pdf: $(BIBFILES) $(FILE)_onlyforplain.out $(FILE)_onlyforplain.aux
 	echo "verstring is $(VERSTRING)"
 	-rm $(FILE)_onlyforplain.*.py
 	mv $(FILE)_onlyforplain.pdf $(FILE)_plain.pdf
-	aplay beep-14_soft.wav
 $(FILE)_onlyfordiff.tex: $(FILE).tex $(BASEFILE)
 	echo "BUILDING diff tex"
 	-rm $(FILE)-diff*.tex
@@ -111,7 +109,6 @@ $(FILE)_diff.pdf: $(BIBFILES) $(FILE)_onlyfordiff.out $(FILE)_onlyfordiff.aux
 	echo "verstring is $(VERSTRING)"
 	-rm $(FILE)_onlyfordiff.*.py
 	mv $(FILE)_onlyfordiff.pdf $(FILE)_diff.pdf
-	aplay beep-14_soft.wav
 diff: $(FILE)_diff.pdf
  ifndef NOBIB
    override BIBFILES+=$(FILE)_onlyfordiff.bbl

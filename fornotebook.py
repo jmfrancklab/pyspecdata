@@ -13,8 +13,18 @@ import re
 
 golden_ratio = (1.0 + sqrt(5))/2.0
 
-def lsafe(string):
+def dprint(*stuff):
+    print '\n\nDEBUG',' '.join(map(repr(stuff))),'\n\n'
+def lsafe(*string):
+    if len(string) > 1:
+        return ' '.join(list(map(lsafe,string)))
+    else:
+        string = string[0]
+    if type(string) is not str:
+        string = repr(string)
     string = string.replace('_',r'\_')
+    string = string.replace('<',r'$<$')
+    string = string.replace('>',r'$>$')
     string = string.replace('#',r'\#')
     string = string.replace('%',r'\%')
     return string
@@ -31,11 +41,22 @@ def lplotfigures(figurelist,string,numwide = 2,**kwargs):
         if (j+1) % numwide == 0:
             print '\n\n'
     return []
-def lrecordarray(recordlist):
-    print r'\begin{tabular}{',''.join(['r']+['l']*(len(recordlist))),'}'
-    for v in recordlist.dtype.names:
-        print r'\ensuremath{',v,'}$=$ &',' & '.join(map(str,list(recordlist[v]))),r'\\'
-    print r'\end{tabular}'
+def lrecordarray(recordlist,columnformat = True):
+    reclen = len(recordlist)
+    recnames = recordlist.dtype.names
+    if columnformat:
+        print r'\begin{tabular}{',''.join(['c']*len(recnames)),'}'
+        recordstrings = [r'\ensuremath{'+v+'}' for v in recnames]
+        print ' & '.join(recordstrings),r'\\'
+        for j in range(0,len(recordlist)):
+            datastrings = [str(recordlist[v][j]) for v in recnames]
+            print ' & '.join(datastrings),r'\\'
+        print r'\end{tabular}'
+    else:
+        print r'\begin{tabular}{',''.join(['r']+['l']*reclen),'}'
+        for v in recnames:
+            print r'\ensuremath{',v,'}$=$ &',' & '.join(map(str,list(recordlist[v]))),r'\\'
+        print r'\end{tabular}'
 def lplot(fname,width=3,figure=False,dpi=100,grid=False,alsosave=None,gensvg = False):
     '''
     used with python.sty instead of savefig
