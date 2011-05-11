@@ -5,24 +5,32 @@ import string
 import struct
 import os
 import fornotebook
+import sympy
 from scipy.io import loadmat
 
 def OUTPUT_notebook():
     return True
 #{{{ general, non file-format specific functions
-def dbm_to_power(dbm):
-    return 1e-3*10.0**((dbm+40.0)/10.0) #20 db for each atten
+def dbm_to_power(dbm,cavity_setup = 'cnsi'):
+    if cavity_setup == 'cnsi':
+        attenuation = 30.0
+    elif cavity_setup == 'te102':
+        attenuation = 40.0
+    elif cavity_setup == 'dielectric':
+        attenuation = 20.0
+    return 1e-3*10.0**((dbm+attenuation)/10.0) #20 db for each atten
 def power_to_dbm(power):
     return 10.0*log(power/1e-3)/log(10.0)-40 #20 db for each atten
 #{{{ auto_steps
-def auto_steps(filename,threshold = -35, upper_threshold = 0, t_minlength = 0.5*60,minstdev = 0.1,showplots = True, showdebug = False,t_start=0,t_stop=60*1000,tolerance = 2,t_maxlen = inf,return_lastspike = False):
+def auto_steps(filename,threshold = -35, upper_threshold = 0, t_minlength = 0.5*60,minstdev = 0.1,showplots = True, showdebug = False,t_start=0,t_stop=60*1000,tolerance = 2,t_maxlen = inf,return_lastspike = False,first_figure = None):
     r'Plot the raw power output in figure 1, and chop into different powers in plot 2'
+    figurelist = figlistini(first_figure)
     v = loadmat(filename)
     p_ini = v['powerlist']
     t_ini = v['timelist']
     #{{{ plot the raw power log, then just pull out the times we're interested in
     if showplots:
-        figure(1)
+        figurelist = nextfigure(figurelist,'powerlog_raw')
         plot(t_ini/60,p_ini)
         title(filename)
     mask = t_ini < t_stop
@@ -52,8 +60,9 @@ def auto_steps(filename,threshold = -35, upper_threshold = 0, t_minlength = 0.5*
     powerlist = []
     stdlist = []
     nextpos = 0
-    while nextpos < len(t)-1:
-        figure(2)
+    while nextpos < len(t)-2:
+        nextpos += 1 # just to skip a couple points so I don't grab the rise 
+        figurelist = nextfigure(figurelist,'powerlog')
         # grab the stdev and average for the minimum number of steps
         blockstart = nextpos
         subset= p[nextpos:minsteps+nextpos]
@@ -64,6 +73,7 @@ def auto_steps(filename,threshold = -35, upper_threshold = 0, t_minlength = 0.5*
         # now that we have a decent stdev, just test to see that every step is less than the stdev
         track_curmean[nextpos] = curmean
         nextpos += minsteps
+        #{{{ iterate over blocks
         while (nextpos < len(t)-1) and (abs(p[nextpos]-curmean)<tolerance*stdev or ~isfinite(p[nextpos])):
             subset= p[blockstart:nextpos]
             curmean = mean(subset[isfinite(subset)])
@@ -90,6 +100,7 @@ def auto_steps(filename,threshold = -35, upper_threshold = 0, t_minlength = 0.5*
                     try:
                         nextpos = blockstart + minsteps + 1 + argmax(abs(diff(t[blockstart+minsteps:biggestjump-minsteps])))
                     except:
+                        figlisterr(figurelist,basename = pdfstring)
                         raise CustomError("I don't have room to make two minimum length steps of ",minsteps,"between the start of the block at ",blockstart," and the biggest jump at",biggestjump)
                     break
                 else: # and sometimes the biggest jump happens before another jump, but longer than twice the minlen
@@ -97,6 +108,7 @@ def auto_steps(filename,threshold = -35, upper_threshold = 0, t_minlength = 0.5*
                     nextpos = biggestjump
                     break
             ##}}}
+        #}}}
         #{{{ need to recalculate the mean
         subset= p[blockstart:nextpos]
         curmean = mean(subset[isfinite(subset)])
@@ -135,10 +147,15 @@ def auto_steps(filename,threshold = -35, upper_threshold = 0, t_minlength = 0.5*
         plot(t/60,plotdev,'k')
         plot(t/60,plotstd,'r')
         title('Power meter log')
+    retval = [array(powerlist)]
     if return_lastspike == True:
-        return array(powerlist),lastspike
+        retval += [lastspike]
+    if first_figure is not None:
+        retval += [figurelist]
+    if len(retval) > 1:
+        return tuple(retval)
     else:
-        return array(powerlist)
+        return retval[0]
 #}}}
 #{{{ error plot
 def error_plot(*arg):
@@ -211,9 +228,33 @@ def det_type(filename):
             raise CustomError('WARNING! unidentified file type '+filename)
 #}}}
 #{{{ load an nddata structure for a 2d set -- give the data needed to load
-def load_file(filenames,dimname='',calibration=1.0,add_sizes = [], add_dims = []):
-    if type(filenames) is not list:
-        filenames = [filenames]
+def format_listofexps(args):
+    'aux function, just used to decode (filename,listofexpnos) vs. (listoffilenames) in an arbitrary way'
+    if type(args[0]) is str: # even if it's just a string, make it a list
+        args[0] = [args[0]]
+    if len(args) > 1 and ((not isscalar(args[1])) and len(args[1]) == 0): args.pop(1)
+    if len(args) > 1:
+        if len(args) > 2: raise CustomError('wrong number of args!')
+        if isscalar(args[1]): args[1] = [args[1]] # if the second argument is a single file number, make it into a list
+        if len(args[0]) > 1: raise CustomError("you can't have both the filename and the expnos be longer than 1")
+        filenames = [dirformat(args[0][0]) + str(x) for x in args[1]]
+    else:
+        filenames = args[0]
+    return filenames
+def load_file(*args,**kwargs):
+    'load a file or series of files; load as load_file(filename) or load_file(dirname,expnos)'
+    args = list(args)
+    #{{{ manually do kwargs
+    dimname = '' 
+    if 'dimname' in kwargs.keys(): dimname = kwargs['dimname']
+    calibration = 1.0
+    if 'calibration' in kwargs.keys(): calibration = kwargs['calibration']
+    add_sizes = []
+    if 'add_sizes' in kwargs.keys(): add_sizes = kwargs['add_sizes']
+    add_dims = []
+    if 'add_dims' in kwargs.keys(): add_dims = kwargs['add_dims']
+    #}}}
+    filenames = format_listofexps(args)
     #{{{load all the data into a list
     data = [load_indiv_file(filenames[0],dimname=dimname,add_sizes = add_sizes,add_dims = add_dims)]
     for filename in filenames[1:]:
@@ -289,7 +330,10 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
         mydimsizes = [td1,td2_zf/2]
         mydimnames = [dimname]+['t2']
         #print 'DEBUG: data going to nddata =',data
-        data = nddata(data,mydimsizes,mydimnames)
+        try:
+            data = nddata(data,mydimsizes,mydimnames)
+        except:
+            raise CustomError("found td1=",td1,"for",filename,"which I don't think is right")
         #print 'DEBUG: data straight from nddata =',data
         data = data['t2',0:td2/2] # now, chop out their zero filling
         t2axis = 1./v['SW_h']*r_[1:td2/2+1]
@@ -352,6 +396,7 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
             #print 'shiftpoints = ',shiftpoints
             data.circshift('t2',shiftpoints)
             # finally, I will probably need to add in the first order phase shift for the decimation --> just translate this
+            data.other_info['title'] = bruker_load_title(filename)
         #}}}
         #{{{ prospa 1d
         elif filetype == 'prospa':
@@ -688,7 +733,8 @@ def exp_errfunc(p,x,y):
 def rg_check(file,expno,number_of_samples = 75,dynamic_range = 19,first_figure = 1,show_complex = True):
     r'''show the fid, plotted vs. the max possible value to check the max of the receiver gain in figure 1
     in figure 2, plot in the complex plain to check digitization limit'''
-    data = load_emax(file,expno,printinfo = False) # load the data
+    # the following was load_emax, and I have not yet checked it
+    data = load_file(file,expno,dimname = 'power',printinfo = False) # load the data
     if len(expno)>0:
         params = load_acqu('%s/%d'%(dirformat(file),expno[0])) # load the parameters
     else:
@@ -720,6 +766,7 @@ def rg_check(file,expno,number_of_samples = 75,dynamic_range = 19,first_figure =
 #{{{ integrate --> new integration function
 def integrate(file,expno,
         integration_width=1e3,
+        dimname = 'power',
         intpoints=None,
         show_image=True,
         filter_edge = 10,
@@ -727,39 +774,55 @@ def integrate(file,expno,
         use_baseline=True,
         plot_check_baseline=False,
         filter_direct = False,
-        return_noise=False,
+        return_noise=True,
         show_integral = False,
         indiv_phase = False,
+        scale_plot = False,
         peak_within = 1e3,
         abs_image = False,
         max_drift = 1e3,
         first_figure = None,
+        pdfstring = '',
         phnum = [],
         phchannel = [],
         offset_corr = 0):
     r'''new integration function, which replaces integrate_emax, and is used to integrate data, as for Emax and T1 curves'''
-    if first_figure == None:
-        figurelist = []
-    else:
-        figurelist = first_figure
+    #print lsafen("DEBUG: yes, integrate was called")
+    figurelist = figlistini(first_figure)
     if type(plot_check_baseline) is bool:
         if plot_check_baseline:
             plot_check_baseline = 0 
         else:
             plot_check_baseline = -1
     phcycdims = ['phcyc%d'%j for j in range(1,len(phnum)+1)]
-    data = load_emax(file,expno,add_sizes = phnum,add_dims = phcycdims) # load the data
+    data = load_file(file,expno,dimname = dimname, add_sizes = phnum,add_dims = phcycdims) # load the data
     #{{{ offset correction
     if type(offset_corr) is list:
         offset_corr = array(offset_corr)
     if type(offset_corr) is ndarray:
-        data.data -= data['t2',offset_corr].copy().mean('t2').mean('power').data
+        data.data -= data['t2',offset_corr].copy().mean('t2').mean(dimname).data
     elif offset_corr > 0: # number of points to use for digitizer offset (zero glitch) correction
-        data.data -= data['t2',-offset_corr:].copy().mean('t2').mean('power').data
+        offset_verbose = False
+        if offset_verbose:
+            nextfigure(figurelist,'beforecorr')
+            image(abs(data))
+            colorbar()
+            print 'DEBUG: attempting offset correction by',offset_corr
+        if array(offset_corr).dtype is dtype('float64'):
+            data.data -= data['t2',lambda x: x > offset_corr].copy().mean('t2').mean(dimname).data
+            if offset_verbose: print 'which is a double'
+        else:
+            data.data -= data['t2',-offset_corr:].copy().mean('t2').mean(dimname).data
+        if offset_verbose:
+            print '\n\n'
+            nextfigure(figurelist,'aftercorr')
+            image(abs(data))
+            colorbar()
     #}}}
     # see_fid obsolete by rg_check
     # also remove all debug statements
-    data,figurelist = phcyc(data,names = phcycdims,selections = phchannel, show_plot = ['t2',(lambda x:abs(x)<peak_within)],first_figure = figurelist) # ft along t2, applying phase cycle where necessary
+    #print 'DEBUG: before phcyc, figlist is',lsafen(figurelist)
+    data,figurelist = phcyc(data,names = phcycdims,selections = phchannel, show_plot = ['t2',(lambda x:abs(x)<peak_within)],first_figure = figurelist,pdfstring = pdfstring) # ft along t2, applying phase cycle where necessary
     data_shape = ndshape(data) # this is used to shape the output
     #{{{ abs w/ max SNR, so we can pick the peak
     data_abs = data.copy()
@@ -774,7 +837,7 @@ def integrate(file,expno,
     #}}}
     #{{{ generate topavg --> the index at the top of the average
     data_mean = data_abs.copy()
-    data_mean.mean('power') # note that we are taking the mean over the abs here, which would not be great for the noise, but the center should still be in the right place
+    data_mean.mean(dimname) # note that we are taking the mean over the abs here, which would not be great for the noise, but the center should still be in the right place
     data_mean.run(argmax,'t2') # put the index of the top peak there
     topavg = int32(data_mean.data)
     #}}}
@@ -784,7 +847,7 @@ def integrate(file,expno,
     data_center['t2',abs(f-f[topavg])>max_drift] = 0# we need to keep the indeces in place, but don't want to pick anything too far out of the way
     test_drift_limit = False
     if test_drift_limit:
-        plot(data_center.reorder(['t2','power']))
+        plot(data_center.reorder(['t2',dimname]))
         return
     data_center_sum = data_center.copy()
     data_center_sum.sum_nopop('t2')
@@ -810,25 +873,25 @@ def integrate(file,expno,
     #{{{baseline correction
     if use_baseline:
         #data.data += 0.1 #for debug baseline
-        for j in range(0,ndshape(data)['power']):
+        for j in range(0,ndshape(data)[dimname]):
             if plot_check_baseline == j: # if I've passed this index, show this baseline
-                baseline_data = baseline_spectrum(data['power',j].copy(),center[j],intpoints,showplots = True) # call baseline_spectrum with center and intpoints, which should already be defined
+                baseline_data = baseline_spectrum(data[dimname,j].copy(),center[j],intpoints,showplots = True) # call baseline_spectrum with center and intpoints, which should already be defined
                 error_plot('Wanted to check baseline on scan ',j)
             else:
-                baseline_data = baseline_spectrum(data['power',j].copy(),center[j],intpoints) # call baseline_spectrum with center and intpoints, which should already be defined
-                data['power',j].data[:] -= baseline_data.data.flatten()
-                if any(isnan(data['power',j].data[:])):
+                baseline_data = baseline_spectrum(data[dimname,j].copy(),center[j],intpoints) # call baseline_spectrum with center and intpoints, which should already be defined
+                data[dimname,j].data[:] -= baseline_data.data.flatten()
+                if any(isnan(data[dimname,j].data[:])):
                     print 'isnan!!'
-                if any(isinf(data['power',j].data[:])):
+                if any(isinf(data[dimname,j].data[:])):
                     print 'isinf!!'
     #}}}
     #{{{ actually pull the integral points and the standard deviation of the noise
     #print 'DEBUG: center points are',center
     plot_noise = [] # array where we can put the noise for plotting
-    for j in range(0,data_shape['power']):
-        newdata += [data['power',j,'t2',center[j]-intpoints:center[j]+intpoints+1]]
+    for j in range(0,data_shape[dimname]):
+        newdata += [data[dimname,j,'t2',center[j]-intpoints:center[j]+intpoints+1]]
         if return_noise:
-            #newnoise += [data['power',j,'t2',10:10+intpoints]]
+            #newnoise += [data[dimname,j,'t2',10:10+intpoints]]
             #{{{ grab intpoints to the left of the spectrum 
             temp = center[j]+r_[0:intpoints]-2*intpoints
             temp = temp[temp>0]
@@ -840,7 +903,7 @@ def integrate(file,expno,
             list_of_noise_indeces = int32(r_[temp,list_of_noise_indeces])
             #{{{ pull the noise data and calculate the standard deviation of the noise
             #print 'DEBUG: shape of data',ndshape(data),j,list_of_noise_indeces
-            temp = data['power',j,'t2',list_of_noise_indeces]
+            temp = data[dimname,j,'t2',list_of_noise_indeces]
             if show_image:
                 plot_noise += [temp.copy()]
             temp.data = abs(temp.data-temp.data.mean()) # need to explicitly do the abs, since the data is complex
@@ -848,11 +911,11 @@ def integrate(file,expno,
             temp.mean('t2') # I DO NOT take the sqrt here, because it's taken at the very end
             #}}}
             newnoise += [temp.copy()] # find the standard deviation of the noise which we have pulled --> it should be independent of the number of points that we're using
-    newdata = concat(newdata,'power')
+    newdata = concat(newdata,dimname)
     if return_noise:
-        newnoise = concat(newnoise,'power')
+        newnoise = concat(newnoise,dimname)
         if show_image:
-            plot_noise = concat(plot_noise,'power')
+            plot_noise = concat(plot_noise,dimname)
     #}}}
     if show_image:
         plot_newdata = newdata.copy() # make a backup for plotting
@@ -868,29 +931,37 @@ def integrate(file,expno,
         # do NOT rotate the noise data to be returned, since it's real!
     else:
         for j in range(0,len(newdata.data)):
-            phcorr =  newdata['power',j]
+            phcorr =  newdata[dimname,j]
             phcorr /= abs(phcorr)
             try:
                 if show_image:
-                    plot_newdata['power',j] *= phcorr
-                newdata['power',j] *= phcorr
+                    plot_newdata[dimname,j] *= phcorr
+                newdata[dimname,j] *= phcorr
                 if return_noise:
-                    #newnoise['power',j] *= phcorr # again, don't rotate the real noise
+                    #newnoise[dimname,j] *= phcorr # again, don't rotate the real noise
                     if show_image:
-                        plot_noise['power',j] *= phcorr
+                        plot_noise[dimname,j] *= phcorr
             except:
                 print 'shape of newdatacopy',ndshape(newdatacopy)
                 print 'shape of newdata',ndshape(newdata)
     #}}}
     #{{{ show what we're integrating
     if show_image:
-        figurelist = nextfigure(figurelist,'intpeaks')
+        figurelist = nextfigure(figurelist,'intpeaks' + pdfstring)
         #print "DEBUG intpeaks figurelist =",figurelist,"gcf = ",gcf().number
-        plot_newdata.reorder(['t2','power'])
+        plot_newdata.reorder(['t2',dimname])
+        def maybescale(x):
+            if scale_plot:
+                return x/newdata
+            else:
+                return x
+        if scale_plot:
+            plot_newdata /= newdata
+            plot_noise /= newdata
         plot(plot_newdata,alpha=0.5)
         title('Peaks, zoomed in to integration region')
         if return_noise:
-            plot_noise.reorder(['t2','power'])
+            plot_noise.reorder(['t2',dimname])
             plot_color_counter(0)
             plot(plot_noise['t2',0:intpoints],'-',alpha=0.1)
             plot_color_counter(0)
@@ -906,6 +977,7 @@ def integrate(file,expno,
             gca().set_xlim(myxlim)
             #}}}
     #}}}
+    #print lsafen("DEBUG: ready to return from integrate")
     #{{{ return integral and the noise of the 
     if return_noise:
         number_of_integral_points = 2.*intpoints+1. # the integral is a sum over this many points
@@ -918,12 +990,27 @@ def integrate(file,expno,
 #}}}
 #}}}
 #{{{ load the data from a emax series based on input array
-def print_info(filename):
+def print_info(filename,also = {}):
+    'print the info for a file: to add other parameters, call with the "also" dictionary, with the description as a key, and the variable name or variable name, index number pair as the key'
     filetype,twod = det_type(filename)
     if filetype == 'bruker':
         v = bruker_load_acqu(dirformat(filename))
+        f = open(dirformat(filename)+'pulseprogram','r')
+        ppginfo = f.read()
+        f.close()
+        for m in re.finditer(r'\b([pd])([0-9]+)\b',ppginfo):
+            also.update({m.group():[m.group(1).upper(),int(m.group(2))]})
         if OUTPUT_notebook():
             print r'\fn{%s}: sfo1:%0.5f aq:%0.3f swh:%0.3f ns:%d ds: %d rg:%0.1f d1:%0.1f p1:%0.2f pl1:%0.1f'%(filename,v['SFO1'],v['TD']/v['SW_h']/2.0,v['SW_h'],v['NS'],v['DS'],v['RG'],v['D'][1],v['P'][1],v['PL'][1])
+            if len(also) > 0:
+                for k,val in also.iteritems():
+                    if type(val) is list or type(val) is tuple:
+                        try:
+                            print k,':',lsafe(v[val[0]][val[1]])
+                        except:
+                            print "(Can't find",k,val,map(type,val),"!)"
+                    else:
+                        print k,':',lsafe(v[val])
             data = fornotebook.save_data()
             pptvalue = v['SFO1']/data['current_frequency']
             if abs(pptvalue-data['current_ppt'])>1e-4:
@@ -931,55 +1018,10 @@ def print_info(filename):
             else:
                 print '%0.4f $ppt$'%pptvalue
             print '\n\n'
-def load_emax(file,datafiles,printinfo=True,add_sizes = [],add_dims = []):
-    datafiles = list(datafiles)
-    if len(datafiles)==0:
-        data = load_file(file,dimname='power',add_sizes = add_sizes,add_dims = add_dims) # got rid of a [0] here --> don't know why it was there --> load_file loads lists of files
-        if printinfo:
-            print_info(file[0])
-    else:
-        file = dirformat(file)
-        datafiles = map(str,datafiles)
-        spectype,dim = det_type(file+datafiles[0])
-        if spectype == 'bruker':
-            #{{{ concatenate all the files into one 
-            data = []
-            for j in range(0,len(datafiles)):
-                data += [load_file(file+datafiles[j],dimname='power',add_sizes = add_sizes,add_dims = add_dims)]
-            data = concat(data,'power')
-            #}}}
-            if printinfo:
-                print_info(file+datafiles[0])
-                print_info(file+datafiles[-1])
-        elif spectype == 'prospa':
-            #{{{ kea version
-            datafiles = map((lambda x: file+str(x)), datafiles)
-            vars = prospa_load_acqu(datafiles[0])
-            for j in range(0,len(datafiles)):
-                vars_check = prospa_load_acqu(datafiles[j])
-                if (vars_check['acqTime']!=vars['acqTime']) or (vars_check['nrPnts']!=vars['nrPnts']):
-                    raise CustomError('Problem! doesn\'t match first file:\n')
-                    show_acqu(vars)
-                    show_acqu(vars_check)
-                    return
-            npoints = vars['nrPnts']
-            taxis = linspace(0,1,npoints)*vars['acqTime']/1e3
-            #npoints = load_datafile(datafiles[0]).shape[0] #hack
-            data_shape = ndshape([npoints,len(datafiles)],['t2','power'])
-            data = data_shape.alloc()
-            data.labels(['power','t2'],[range(0,len(datafiles)),taxis])
-            for j in range(0,data_shape['power']):
-                    data['power',j] = prospa_load_datafile(datafiles[j])
-            data = prospa_decim_correct(data)
-            #}}}
-    return data
 #}}}
 #{{{ deal with manual phase cycling
-def phcyc(data,names=[],selections=[],remove_zeroglitch=None,show_plot = False,first_figure = None):
-    if first_figure == None:
-        figurelist = []
-    else:
-        figurelist = first_figure
+def phcyc(data,names=[],selections=[],remove_zeroglitch=None,show_plot = False,first_figure = None,pdfstring = ''):
+    figurelist = figlistini(first_figure)
     data.ft('t2',shift=True)
     if len(names)>0:
         data.ft(names)
@@ -992,7 +1034,7 @@ def phcyc(data,names=[],selections=[],remove_zeroglitch=None,show_plot = False,f
             indexlist += [name,0]
         data[tuple(indexlist)] = 0
     if show_plot:
-        figurelist = nextfigure(figurelist,'phcycchan')
+        nextfigure(figurelist,'phcycchan' + pdfstring)
         allindexes = list(data.dimlabels)
         for name in names:
             if name in allindexes:
@@ -1016,11 +1058,13 @@ def phcyc(data,names=[],selections=[],remove_zeroglitch=None,show_plot = False,f
         return data,figurelist
 #}}}
 #{{{ process_t1
-def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline = None,saturation = False,first_figure = None,**kwargs):
-    if first_figure == None:
-        figurelist = 1
-    else:
-        figurelist = first_figure
+def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline = None,saturation = False,first_figure = None,pdfstring = '',t1_offset_corr = None,**kwargs):
+    #{{{ hack it, since it only actually takes a single file 
+    file = format_listofexps([file,expno])
+    if len(file) > 1: raise CustomError('I don\'t think this can handle more than one file at a time')
+    expno = []
+    #}}}
+    figurelist = figlistini(first_figure)
     #{{{ legacy kwargs
     if showimage != None:
         show_image = showimage
@@ -1031,7 +1075,9 @@ def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline 
         file = [file]
     titlestr = load_title(file[0])
     wait_time = load_t1_axis(file[0])
-    integral,figurelist = integrate(file,expno,first_figure = figurelist,**kwargs)
+    if t1_offset_corr is not None:
+        kwargs.update({'offset_corr':t1_offset_corr})
+    integral,figurelist = integrate(file,expno,first_figure = figurelist,pdfstring = pdfstring,**kwargs)
     t1name = r'$t_1$'
     integral.rename('power',t1name)
     integral = t1curve(integral,fit_axis = t1name) # make this into an integral class, which fits along the dimension t1
@@ -1042,14 +1088,14 @@ def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline 
     #print 'DEBUG wait times:',integral.getaxis(t1name)
     integral.sort(t1name)
     #{{{ finally, show the fit  
-    figurelist = nextfigure(figurelist,'t1')
+    figurelist = nextfigure(figurelist,'t1'+pdfstring)
     taxis = wait_time
     integral.data *= phaseopt(integral.data)
     plot(integral.runcopy(real),'ko')
     plot(integral.runcopy(imag),'yo')
     integral.makereal() # otherwise, it won't fit
     integral.fit()
-    plot(integral.eval(taxis)) # evaluate the fit function on the axis taxis
+    plot(integral.eval(300)) # evaluate the fit function on the axis taxis
     #{{{ for now, do not plot the modified versions
     #plot(taxis,t1_fitfunc(r_[p[0:2],p[2]*1.2],taxis),'y')
     #plot(taxis,t1_fitfunc(r_[p[0:2],p[2]*0.8],taxis),'y')
@@ -1059,7 +1105,7 @@ def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline 
     title(titlestr)
     #}}}
     #{{{ and the straight line plot
-    figurelist = nextfigure(figurelist,'t1straight')
+    figurelist = nextfigure(figurelist,'t1straight'+pdfstring)
     #print 'linear data:',integral.linear().data
     plot(integral.linear(),'o')
     plot(integral.linear(taxis))
@@ -1344,13 +1390,13 @@ class t1curve(fitdata):
         r'''provide the guess for our parameters, which is specific to the type of function'''
         x = self.getaxis(self.fit_axis)
         y = self.data
-        testpoint = len(y)/3
+        testpoint = argmin(abs(x-x.max()/3)) # don't just pull 1/3 of the index, because it can be unevenly spaced
         initial_slope = (y[testpoint]-y[0])/(x[testpoint]-x[0])
         A = y[-1]
         B = y[testpoint]-x[testpoint]*initial_slope
         C = (A-B)/initial_slope
         if (C < 0):
-            print repr(CustomError(maprep('Negative T1!!! A-B=',A-B,'initial_slope=',initial_slope,x,y)))
+            raise CustomError(maprep('Negative T1!!! A-B=',A-B,'initial_slope=',initial_slope,x,y))
         #else:
         #   print 'C is ',C
         return r_[A,B,C]
@@ -1446,7 +1492,7 @@ class emax_legacy(fitdata):
     def __init__(self,*args,**kwargs):
         '''here, we give the particular latex representation and list of symbols for this particular child class'''
         fitdata.__init__(self,*args,**kwargs)
-        self.function_string = r'$E(t)=c_0-Ap/(1+Bp)$'
+        self.function_string = r'$E(p)=c_0-Ap/(1+Bp)$'
         self.symbol_list = [r'c_0',r'A',r'B'] # note that it must notbe possible to find part of one of the later strings by searching for one of the earlier strings
         return
 class emax(fitdata):
@@ -1462,7 +1508,7 @@ class emax(fitdata):
         return [approx_emax,integral[0],-initial_slope] #guess [r'E_{max}',r'v',r'A']
     def fitfunc_raw(self,p,x):
         '''just the actual fit function to return the array y as a function of p and x'''
-        #self.function_string = r'$E(t)=v-Apv(1-E_{max})/(1-E_{max}+Ap)$'
+        #self.function_string = r'$E(p)=v-Apv(1-E_{max})/(1-E_{max}+Ap)$'
         #self.symbol_list = [r'E_{max}',r'v',r'A'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
         return (p[1]-(p[2]*x*p[1]*(1.-p[0])/(1.-p[0]+p[2]*x)))
     def linfunc(self,x,y,xerr = None,yerr = None):
@@ -1493,7 +1539,157 @@ class emax(fitdata):
     def __init__(self,*args,**kwargs):
         '''here, we give the particular latex representation and list of symbols for this particular child class'''
         fitdata.__init__(self,*args,**kwargs)
-        self.function_string = r'$E(t)=v-Apv(1-E_{max})/(1-E_{max}+Ap)$'
+        #self.function_string = r'$E(p)=v-Apv(1-E_{max})/(1-E_{max}+Ap)$'
         self.symbol_list = [r'E_{max}',r'v',r'A'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
+        self.function_name = r'E(p)'
+        self.gen_symbolic()
         return
+class one_minus_emax(fitdata):
+    def __init__(self,*args,**kwargs):
+        '''here, we give the particular latex representation and list of symbols for this particular child class'''
+        fitdata.__init__(self,*args,**kwargs)
+        self.function_name = r'1-E(p)'
+        self.symbol_list = [r'E_{max}',r'A'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
+        self.gen_symbolic()
+        return
+    def fitfunc_raw(self,p,x):
+        '''just the actual fit function to return the array y as a function of p and x'''
+        return ((x*p[1]*(1.-p[0])/(1.-p[0]+p[1]*x)))
+    def guess(self):
+        r'''provide the guess for our parameters, which is specific to the type of function'''
+        newdata = self.copy()
+        newdata.sort(self.fit_axis)
+        power = newdata.getaxis(self.fit_axis)
+        one_minus_E = newdata.data
+        largest = len(power)
+        initial_slope = (one_minus_E[largest/4]-one_minus_E[0])/(one_minus_E[largest/4]-one_minus_E[0])
+        approx_emax = (1.0-one_minus_E[-1])
+        return [approx_emax,initial_slope] #guess [r'E_{max}',r'A']
+    def linfunc(self,x,y,xerr = None,yerr = None):
+        '''just the actual fit function to return the pair of arrays x',y' that should be linear
+        it accepts as inputs x and y, and it uses the output from the fit, where necessary
+        also optionally propagates the error based on yerr and xerr, which can be passed in to it
+        For the case of E_max, we want 1/(1-E) = 
+        '''
+        # note that there is some error associated with m(\infty) that I'm just taking for granted
+        #print "linfunc passed x=",x,"and y=",y
+        rety = 1./(y)
+        if yerr != None:
+            reterr = yerr/(y**2) # check this later
+        mask = isfinite(rety)
+        retx = 1./x # for instance, in emax, this is not just x
+        xname = r'1 / '+self.fit_axis # same as the fit axis
+        yname = r'$\frac{1}{1-E(p)}$'
+        #{{{ this should be pretty standardized
+        retval = nddata(rety,
+                [size(rety),1],
+                [xname,yname])
+        retval.labels([xname],
+                [retx.copy()])
+        if yerr != None:
+            retval.set_error(reterr)
+        #}}}
+        return retval
+class xismax(fitdata):
+    def __init__(self,*args,**kwargs):
+        '''here, we give the particular latex representation and list of symbols for this particular child class'''
+        fitdata.__init__(self,*args,**kwargs)
+        self.function_string = r'$\xi s(p)=B p \xi s_{max}/(\xi s_{max} + B p$'
+        self.symbol_list = [r'B',r'\xi s_{max}'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
+        return
+    def fitfunc_raw(self,p,x):
+        '''just the actual fit function to return the array y as a function of p and x'''
+        #self.function_string = r'$\xi s(p)=B p \xi s_{max}/(\xi s_{max} + B p$'
+        #self.symbol_list = [r'B',r'\xi s_{max}'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
+        return (p[0]*x*p[1])/(p[1]+p[0]*x)
+    def guess(self):
+        r'''provide the guess for our parameters, which is specific to the type of function'''
+        newdata = self.copy()
+        newdata.sort(self.fit_axis)
+        power = newdata.getaxis(self.fit_axis)
+        integral = newdata.data
+        largest = len(power)
+        initial_slope = (integral[largest/4]-integral[0])/(power[largest/4]-power[0])
+        #{{{ use the indexing functions to more legibly set the return values
+        retval = zeros(len(self.symbol_list))
+        retval[self._pn(r'\xi s_{max}')] = integral[-1]
+        retval[self._pn(r'B')] = initial_slope
+        return retval
+        #}}}
+    def linfunc(self,x,y,xerr = None,yerr = None):
+        '''just the actual fit function to return the pair of arrays x',y' that should be linear
+        it accepts as inputs x and y, and it uses the output from the fit, where necessary
+        also optionally propagates the error based on yerr and xerr, which can be passed in to it
+        For the case of E_max, we want 1/(1-E) = 
+        '''
+        # note that there is some error associated with m(\infty) that I'm just taking for granted
+        #print "linfunc passed x=",x,"and y=",y
+        rety = 1./(1.-y)
+        if yerr != None:
+            reterr = yerr/((1.-y)**2)
+        mask = isfinite(rety)
+        retx = 1./x # for instance, in emax, this is not just x
+        xname = r'1 / '+self.fit_axis # same as the fit axis
+        yname = r'$\frac{1}{1-E(p)}$'
+        #{{{ this should be pretty standardized
+        retval = nddata(rety,
+                [size(rety),1],
+                [xname,yname])
+        retval.labels([xname],
+                [retx.copy()])
+        if yerr != None:
+            retval.set_error(reterr)
+        #}}}
+        return retval
+class smax(fitdata):
+    def __init__(self,*args,**kwargs):
+        '''here, we give the particular latex representation and list of symbols for this particular child class'''
+        fitdata.__init__(self,*args,**kwargs)
+        self.symbol_list = [r'x',r'\xi'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
+        self.function_name = r'xismax(C)'
+        self.gen_symbolic()
+        return
+    def fitfunc_raw(self,p,C):
+        '''just the actual fit function to return the array y as a function of p and x'''
+        x = p[0]*C
+        xi = p[1]
+        snrmax = x/(x+3)
+        return xi*(1./3.+2./3.*snrmax)
+    def set_guess(self,**kwargs):
+        newdata = self.copy()
+        maxC = lambda x: x == self.getaxis(self.fit_axis).max()
+        self.guesses = {r'xi':newdata[self.fit_axis,maxC].data[-1],
+            'x':1.}
+        self.guesses.update(kwargs)
+        return
+    def guess(self):
+        r'''provide the guess for our parameters, which is specific to the type of function'''
+        if not hasattr(self,'guesses'):
+            self.set_guess()
+        return [self.guesses[x] for x in ['x','xi']] #guess [r'E_{max}',r'A']
+    def linfunc(self,x,y,xerr = None,yerr = None):
+        '''just the actual fit function to return the pair of arrays x',y' that should be linear
+        it accepts as inputs x and y, and it uses the output from the fit, where necessary
+        also optionally propagates the error based on yerr and xerr, which can be passed in to it
+        For the case of E_max, we want 1/(1-E) = 
+        '''
+        # note that there is some error associated with m(\infty) that I'm just taking for granted
+        #print "linfunc passed x=",x,"and y=",y
+        rety = 1./(y)
+        if yerr != None:
+            reterr = yerr/(y**2) # check this later
+        mask = isfinite(rety)
+        retx = 1./x # for instance, in emax, this is not just x
+        xname = r'1 / '+self.fit_axis # same as the fit axis
+        yname = r'$\frac{1}{1-E(p)}$'
+        #{{{ this should be pretty standardized
+        retval = nddata(rety,
+                [size(rety),1],
+                [xname,yname])
+        retval.labels([xname],
+                [retx.copy()])
+        if yerr != None:
+            retval.set_error(reterr)
+        #}}}
+        return retval
 #}}}
