@@ -1,12 +1,102 @@
 \ProvidesPackage{mynotebook}
 \NeedsTeXFormat{LaTeX2e}[1994/12/01]
 \DeclareOption{supressmulticols}{\newcommand{\supressmulticols}{test}}
+\DeclareOption{nolabels}{\newcommand{\nolabels}{test}}
+\DeclareOption{noparagraph}{\newcommand{\noparagraph}{test}}
+\DeclareOption{nopageformat}{\newcommand{\nopageformat}{test}}
+\DeclareOption{nohrule}{\newcommand{\nohrule}{test}}
 \ProcessOptions
+%{{{ symbols
+\usepackage{pifont}
+\usepackage[electronic]{ifsym}
+%}}}
 \usepackage{fancyhdr}
 \usepackage{wrapfig}
+\usepackage[procnames]{listings}
+\usepackage{textcomp}
+\usepackage{setspace}
+%\usepackage{minted}
+\usepackage{palatino}
+\usepackage{amsfonts}
+\usepackage{color}
+\usepackage{url}
+\usepackage{xcolor}
+\definecolor{linkcolor}{cmyk}{0,0.7,0.5,0.5}
+\definecolor{mygreen}{rgb}{0,0.5,0.5}
+\definecolor{mygray}{rgb}{0.6,0.6,0.6}
+\definecolor{dblackcolor}{rgb}{0.0,0.0,0.0}
+\definecolor{dbluecolor}{rgb}{.01,.02,0.29}
+\definecolor{dredcolor}{rgb}{0.8,0,0}
+\definecolor{dgreencolor}{rgb}{0,0.5,0}
+\definecolor{dgraycolor}{rgb}{0.50,0.50,0.50}
+%{{{ original listings code -- not great
+%\lstset{frame=none,
+%  showtabs=False,
+%  showspaces=False,
+%  showstringspaces=False,
+%  commentstyle={\ttfamily\color{dgraycolor}},
+%  keywordstyle={\ttfamily\color{blue}\bfseries},
+%  stringstyle={\ttfamily\color{dgreencolor}\bfseries},
+%  language=Python,
+%  basicstyle={\fontsize{7pt}{7pt}\ttfamily},
+%  aboveskip=0.3em,
+%  belowskip=0.1em,
+%  numbers=left,
+%  numberstyle={\fontsize{5pt}{5pt}\ttfamily}}
+%}}}
+%{{{ new listings code
+\lstset{
+language=python,
+basicstyle=\fontsize{8pt}{8pt}\ttfamily,%\small\setstretch{1},
+stringstyle=\color{dgreencolor},
+showstringspaces=false,
+alsoletter={1234567890},
+otherkeywords={\ , \}, \{},
+keywordstyle=\color{blue},
+emph={access,and,as,break,class,continue,def,del,elif,else,%
+except,exec,finally,for,from,global,if,import,in,is,%
+lambda,not,or,pass,print,raise,return,try,while,assert},
+emphstyle=\color{dbluecolor}\bfseries,
+emph={[2]self},
+emphstyle=[2]\color{gray},
+emph={[4]ArithmeticError,AssertionError,AttributeError,BaseException,%
+DeprecationWarning,EOFError,Ellipsis,EnvironmentError,Exception,%
+False,FloatingPointError,FutureWarning,GeneratorExit,IOError,%
+ImportError,ImportWarning,IndentationError,IndexError,KeyError,%
+KeyboardInterrupt,LookupError,MemoryError,NameError,None,%
+NotImplemented,NotImplementedError,OSError,OverflowError,%
+PendingDeprecationWarning,ReferenceError,RuntimeError,RuntimeWarning,%
+StandardError,StopIteration,SyntaxError,SyntaxWarning,SystemError,%
+SystemExit,TabError,True,TypeError,UnboundLocalError,UnicodeDecodeError,%
+UnicodeEncodeError,UnicodeError,UnicodeTranslateError,UnicodeWarning,%
+UserWarning,ValueError,Warning,ZeroDivisionError,abs,all,any,apply,%
+basestring,bool,buffer,callable,chr,classmethod,cmp,coerce,compile,%
+complex,copyright,credits,delattr,dict,dir,divmod,enumerate,eval,%
+execfile,exit,file,filter,float,frozenset,getattr,globals,hasattr,%
+hash,help,hex,id,input,int,intern,isinstance,issubclass,iter,len,%
+license,list,locals,long,map,max,min,object,oct,open,ord,pow,property,%
+quit,range,raw_input,reduce,reload,repr,reversed,round,set,setattr,%
+slice,sorted,staticmethod,str,sum,super,tuple,type,unichr,unicode,%
+vars,xrange,zip},
+emphstyle=[4]\color{purple},
+upquote=true,
+morecomment=[s][\color{dgraycolor}]{"""}{"""},
+commentstyle=\color{dgraycolor}\slshape,
+literate={>>>}{\textbf{\textcolor{darkred}{>{>}>}}}3%
+         {...}{{\textcolor{gray}{...}}}3,
+procnamekeys={def,class},
+procnamestyle=\color{dredcolor},
+framexleftmargin=1mm, framextopmargin=1mm, frame=shadowbox,
+numbers=left,
+numberstyle={\fontsize{5pt}{5pt}\ttfamily},
+rulesepcolor=\color{dgraycolor},
+mathescape=true
+}
+%}}}
 \pdfpagewidth 8.5in
 \pdfpageheight 11in
 
+\@ifundefined{nopageformat}{
 \pagestyle{fancy}
 \fancyhf{}
 \oddsidemargin -0.5in % add 1in to get margin
@@ -18,16 +108,25 @@
 \headheight 15pt 
 %\headheight 0in
 \headsep 15pt
+}{}
 %\renewcommand{\sectionmark}[1]{\markright{#1}{}}
 %\markright{\sectionmark{}}
 \usepackage{amsmath}
-\usepackage{xcolor}
 \usepackage{hycolor}
 % BEGIN part for commenting
 \usepackage{makeidx}
 \makeindex
-\newcommand{\johncomment}[3]{\pdfcomment[author={John Franck #1},subject={},color=lime,hspace=10pt]{#3}\index{#2#3}\quad}
+\newcommand{\johncomment}[3]{\pdfcomment[author={John Franck #1},subject={},color=blue,hspace=10pt]{#3}\index{#2#3}\quad}
+\newcommand{\john}[1]{\pdfcomment[author={John Franck},subject={},color=blue,hspace=10pt]{#1}\quad}
+\newcommand{\icomment}[1]{\pdfcomment[author={},subject={immediate change},color=red,hspace=10pt]{#1}\quad}
+\newcommand{\songi}[1]{\pdfcomment[author={},subject={immediate change},color=lime,hspace=10pt]{#1}\quad}
+\newcommand{\sunyia}[1]{\pdfcomment[author={sunyia},subject={},color=orange,hspace=10pt]{#1}\quad}
+\newcommand{\julia}[1]{\pdfcomment[author={julia},subject={},color=green,hspace=10pt]{#1}\quad}
 \newcommand{\nandocomment}[3]{\pdfcomment[author={Nandini Ananth #1},subject={},color=pink,hspace=10pt]{#3}\index{#2#3}\quad}
+\newcommand{\nts}[1]{{\bf{\color{yellow}#1}}}
+%%\let\oldlabel=\label
+%%\newcommand{\newlabelx}[1]{\pdfcomment[author={label},subject={},color=lime,hspace=10pt]{#1}\oldlabel{#1}}
+%%\renewcommand{\label}[1]{\newlabelx{#1}}
 % END part for commenting
 \usepackage{verbatim}
 \usepackage{graphicx}
@@ -35,7 +134,11 @@
 \usepackage{multicol}
 }{}
 %\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=blue, citecolor=blue, urlcolor=blue, bookmarksdepth=8]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
-\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=linkcolor, citecolor=blue, urlcolor=blue, bookmarksdepth=8]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
+\setcounter{tocdepth}{9}
+\setcounter{secnumdepth}{6}
+%\renewcommand\theparagraph{\roman{paragraph}}
+%\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=linkcolor, citecolor=blue, urlcolor=blue, bookmarksdepth=subparagraph,breaklinks=true]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
+\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=linkcolor, citecolor=blue, urlcolor=blue, bookmarksdepth=subparagraph]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
 \usepackage{pdfcomment}
 \providecommand{\DIFadd}[1]{{\protect\color{blue}\uwave{#1}}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{{\protect\color{red}\xout{#1}}}                      %DIF PREAMBLE
@@ -61,16 +164,38 @@
 %}
 %\endgroup
 %\newcommand{\verblike}[1]{\makeunderscoreliteral#1\changeunderscoreback}
-\newcommand{\fn}[1]{{\color{red} #1}}
-\let\oldfn = \fn
-\def\fn{\begingroup\catcode`_=12 \newfnx}
-\newcommand{\newfnx}[1]{\oldfn{#1}\endgroup}
+%\begingroup\catcode`_=\active
+%\gdef\mysmallverb{%    note the global \gdef
+%  \catcode`_=\active
+%  \def_{blah}%
+%}
+%\endgroup
+
+%\newcommand{\fn}[1]{{\color{red}
+%\begingroup\catcode`_=13
+%#1
+%\endgroup
+%}}
+\newcommand{\fn}[1]{{\color{red} \url{#1} }}
+\begingroup
+  \catcode`\_=\active
+  \gdef_#1{\ensuremath{\sb{\mathrm{#1}}}}
+\endgroup
+%\mathcode`\_=\string"8000
+\catcode`\_=12
+
+%\def\fn{\begingroup\catcode`\_=12 \newfnx}
+%\newcommand{\newfnx}[1]{\oldfn{#1}\endgroup}
 %}}}
 \usepackage[normalem]{ulem}
 \newenvironment{co}{\begin{python}
 	import matplotlib; matplotlib.use('Agg')
 	from matlablike import *
 	}{\end{python}}
+    \newenvironment{err}{\begin{quotation}\begin{small}\begin{tiny}\textsc{(Debug:)}\end{tiny}}{\end{small}\end{quotation}}
+\def\pythonshow#1{\begin{lstlisting}#1\end{lstlisting}}
+%\def\pythonshow#1{\begin{lstlisting}#1\end{lstlisting}}
+%\def\endpythonshow{}
 %{{{Rather than including python.sty, copy and paste it here
 %% Author: Martin R. Ehmsen, ehmsen@imada.sdu.dk.
 
@@ -79,28 +204,32 @@
 
 \begingroup \catcode `|=0 \catcode `[=1
 \catcode`]=2 \catcode `\{=12 \catcode `\}=12
-\catcode`\\=12 |gdef|@xpython#1\end{python}[|immediate|write|@out[from fornotebook import *]|immediate|write|@out[#1]|end[python]]
+\catcode`\\=12 |gdef|@xpython#1\end{python}[|immediate|write|@out[from h5nmr import *]|immediate|write|@out[#1]|end[python]]
 |endgroup % changed by franck to add include file
 
-\def\python{\kernel@ifnextchar [{\@python}{\@python[]}}
+\def\python{\kernel@ifnextchar [{\@python}{\@python[]}} % the best I can guess, this defines the start of the environment
 %{{{ fauske hack
 \newcounter{py@codenum}
-\def\@python[#1]{%
+
+\def\@python[#1]{% this appears to be the first-level command that parses the python code
 \stepcounter{py@codenum}
-\gdef\@pythoninclude{#1}
-\immediate\openout\@out=\jobname.\thepy@codenum.py
+\gdef\@pythoninclude{#1} % don't know what does this
+\immediate\openout\@out=\jobname.\thepy@codenum.py % clearly opens the output fid
 %\immediate\openout\@out=\jobname.py
 \newlinechar='15
-\begingroup \catcode`\^^M=12 %
+\begingroup \catcode`\^^M=12 % this stuff must just reassign characters
 \let\do\@makeother\dospecials\obeyspaces%
-\@xpython}
+\@xpython}% this just writes the header and the contents to the file and may be redefining the whole \@xpython{stuff}\end{python} string with the thing it gives
 
-\def\endpython{%
+\def\endpython{% this definitely gives the end of the environment
 \endgroup
 \immediate\closeout\@out
-\@writemodule
+\@writemodule% this is defined below, and appears to write the jobname (the file name) to latex.py
 \immediate\write18{bash\space pythonout.sh\space\jobname.\thepy@codenum.py\space pythonout.out\space\thepy@codenum}
-\immediate\input pythonout.out
+\immediate\write18{mv\space \jobname.\thepy@codenum.py.old \space pythonout.backup}% the crazy moving around of this and the next three lines is to fool synctex into opening the *.py.old file rather than the pythonout.out file
+\immediate\write18{mv\space pythonout.out\space\jobname.\thepy@codenum.py.old}
+\immediate\input \jobname.\thepy@codenum.py.old
+\immediate\write18{mv\space pythonout.backup\space \jobname.\thepy@codenum.py.old}
 }
 \def\dontsavepython{\immediate\write18{rm\space\jobname.\thepy@codenum.py.old}\jobname.\thepy@codenum.py.old
 
@@ -112,23 +241,43 @@
 \immediate\closeout\@module}
 %}}}
 
-\definecolor{linkcolor}{cmyk}{0,0.7,0.5,0.5}
-\definecolor{mygreen}{rgb}{0,0.5,0.5}
-\definecolor{mygray}{rgb}{0.6,0.6,0.6}
 \newcommand\myline{\rule{\linewidth}{0.1mm}}
 \newcommand\mysmallline{\rule{1in}{0.01mm}}
+\let\oldsection = \section
+\let\oldsubsection = \subsection
 \let\oldsubsubsection = \subsubsection
 \let\oldparagraph = \paragraph
 \let\oldsubparagraph = \subparagraph
-\let\oldsubsection = \subsection
 %\renewcommand{\subsection}[1]{\oldsubsection{{\tiny #1}}}
 \newcommand{\blacktext}[1]{\texorpdfstring{{\color{black}#1}}{#1}}
-\renewcommand{\subsubsection}[1]{\oldsubsubsection{\uline{#1}}}
-\renewcommand{\paragraph}[1]{\oldparagraph{#1}\blacktext{$\Rightarrow$}}
-\renewcommand{\subparagraph}[1]{\oldsubparagraph{\blacktext{{\small#1}}}}
+\newcommand{\condhrule}{\@ifundefined{nohrule}{\hrulefill}{}}
+\newcommand{\outlineblank}[1]{\phantomsection\addcontentsline{toc}{#1}{ }}
+\renewcommand{\subsection}[1]{\oldsubsection{#1\condhrule}}
+\renewcommand{\section}[1]{\oldsection{#1\condhrule}}
+\@ifundefined{noparagraph}{
+\renewcommand{\subsubsection}[1]{\oldsubsubsection{\uline{#1}\condhrule}}
+%\renewcommand{\paragraph}[1]{\textsc{\oldparagraph{#1}}\textsc{\uline{#1}}\blacktext{$\Rightarrow$}\addcontentsline{toc}{paragraph}{#1}}
+\renewcommand{\paragraph}[1]{\textsc{\oldparagraph{#1}}\textsc{\uline{#1}}\blacktext{$\Rightarrow$}\phantomsection\addcontentsline{toc}{paragraph}{#1}}
+\renewcommand{\subparagraph}[1]{\textit{\small{\uline{#1}}}\phantomsection\addcontentsline{toc}{subparagraph}{#1}
+
+}
+%\renewcommand{\subparagraph}[1]{\textit{\small{\uline{#1}}}}
+}{
+\renewcommand{\subsubsection}[1]{\phantomsection\addcontentsline{toc}{subsubsection}{#1}
+
+}
+\renewcommand{\paragraph}[1]{\phantomsection\addcontentsline{toc}{paragraph}{#1}
+
+}
+\renewcommand{\subparagraph}[1]{\phantomsection\addcontentsline{toc}{subparagraph}{#1}}
+}
 \renewcommand{\o}[2][]{ {\color{mygreen}{\it #1}} {\color{blue} #2}}
 
 \def\Emax{\texorpdfstring{\ensuremath{E_{max}}}{Emax}}
+\newcommand{\Real}[1]{\Re\mathfrak{e}\left[ #1 \right]}
+\newcommand{\Imag}[1]{\Im\mathfrak{m}\left[ #1 \right]}
+\def\xsm{\texorpdfstring{\ensuremath{\xi s_{max}}}{xi smax}}
+\def\xsp{\texorpdfstring{\ensuremath{\xi s(p)}}{xi s(p)}}
 \def\smax{\texorpdfstring{\ensuremath{s_{max}}}{smax}}
 \def\uM{\texorpdfstring{\ensuremath{\mu M}}{uM}}
 \def\uL{\texorpdfstring{\ensuremath{\mu L}}{uL}}
@@ -138,6 +287,10 @@
 \newcommand{\gammaratio}{659.32}
 \newcommand{\oht}{4-hydroxy-tempo }
 \newcommand{\ot}{4-oxo-tempo }
+\newcommand{\obpair}[2]{\ensuremath{\overbrace{#1}^{\mbox{\begin{small}#2\end{small}}}}}
+\newcommand{\ubpair}[2]{\ensuremath{\underbrace{#1}_{\mbox{\begin{small}#2\end{small}}}}}
+%\newcommand{\gammabar}{\ensuremath\gamma\kern-0.53em-}
+%\newcommand{\gammabar}{\ensuremath\gamma^{\kern-0.25em\lower 3ex\hbox \mbox{\begin{tiny}\textbackslash\end{tiny}}}}
 %\def\Emax{\ensuremath{E_{max}}}
 %\def\smax{\ensuremath{s_{max}}}
 %\def\uM{$\mu M$}
@@ -151,17 +304,45 @@ LAST ORGANIZED TO HERE
 \phantomsection\addcontentsline{toc}{section}{LAST ORGANIZED}
 
 \myline}
+\newcommand{\lastedit}{
+
+\myline
+
+COMPLETE EDIT TO HERE
+
+\myline}
 
 \gdef\total{0}
+\gdef\thistimeblock{0.001}
 \gdef\obstimecounter{0}
 \gdef\obstimecounterflag{0}
 
-\newcommand{\maxtime}[1]{\FPset\tvar{#1}\FPadd\ttotal\tvar\total\global\let\total=\ttotal\FPdiv\poftotal\tvar\timeblocktotalval\FPmul\poftotal\poftotal{100}\FPtrunc\poftotal\poftotal{1} ({\it max \tvar hr, \poftotal\%})}
+\def\zeroPadTwo#1%
+{% Left zero pad of the argument to 2 digits.  The argument
+%  should be a number between 1 and 99.  This macro outputs
+%  a `0' if the argument is less than ten, then it outputs
+%  the argument.
+%
+  \ifnum #1<10 0\fi    % Conditionally output a zero
+  #1%    Then output the argument
+}% --- \zeroPadTwo ---
+
+\newcommand{\myprinttime}[1]{\FPset\numhrs{#1}\FPtrunc\numhrs\numhrs{0}\FPset\nummins{0}\FPsub\nummins{#1}\numhrs\FPmul\nummins\nummins{60}\FPtrunc\nummins\nummins{0}\numhrs:\zeroPadTwo\nummins}
+
+\newcommand{\maxtime}[1]{\FPset\tvar{#1}
+\FPadd\ttotal\tvar\total
+\global\let\total=\ttotal
+\FPdiv\poftotal\tvar\timeblocktotalval
+\FPmul\poftotal\poftotal{100}
+\FPtrunc\poftotal\poftotal{1}
+\global\let\thistimeblock=\tvar
+({\it max \myprinttime\tvar, \poftotal\% of total})}
 \gdef\timeblocktotalval{9}
 
 \newcommand{\maxtwenty}[1]{\FPset\tvar{#1}\FPdiv\tvar\tvar{3}\FPtrunc\tvar\tvar{2}\maxtime{\tvar}}
+\newcommand{\maxminutes}[1]{\FPset\tvar{#1}\FPdiv\tvar\tvar{60}\FPtrunc\tvar\tvar{2}\maxtime{\tvar}}
 
-\newcommand\timeblocktotal[1]{{\it Time block total: #1 hr}\gdef\timeblocktotalval{#1}}
+\newcommand\timeblocktotal[1]{{\it Time block total: \myprinttime{#1}}\gdef\timeblocktotalval{#1}}
 
 \newcommand{\obstb}{\FPset\mytemp{0}\global\let\obstimecounter=\mytemp\FPset\mytemp{1}\global\let\obstimecounterflag=\mytemp}
 
@@ -172,11 +353,11 @@ LAST ORGANIZED TO HERE
 \newcommand{\obstm}[1]{\FPset\obstimecountervar{\obstimecounter}\FPset\obstimecounterflagvar{\obstimecounterflag}\FPset\mytemp{#1}\FPset\myhr{60}\FPmul\mytemp\obstimecounterflagvar\mytemp\FPtrunc\mytemp\mytemp{1}\mytemp min\FPdiv\mytemp\mytemp\myhr\FPadd\mytemp\obstimecountervar\mytemp\global\let\obstimecounter=\mytemp}
 
 \newcommand{\obstd}{\FPset\mytemp\obstimecounter
-\FPdiv\poftotal\mytemp\timeblocktotalval
+\FPdiv\poftotal\mytemp\thistimeblock
 \FPtrunc\mytemp\mytemp{2}
 \FPmul\poftotal\poftotal{100}
 \FPtrunc\poftotal\poftotal{1}
-({\bf \mytemp hr, \poftotal\%})\FPadd\mytemp\mytemp\dumpval\global\let\dumpval=\mytemp}
+({\bf \myprinttime\mytemp, \poftotal\%})\FPadd\mytemp\mytemp\dumpval\global\let\dumpval=\mytemp}
 \newcommand{\obstdump}{\FPset\mytemp\dumpval\FPtrunc\mytemp\mytemp{2} \o{({\bf \mytemp hr})}}
 
 \newenvironment{tasklist}{\begin{tiny}
@@ -197,14 +378,14 @@ LAST ORGANIZED TO HERE
 \FPtrunc\mytemp\mytemp{1}
 {\tiny{\it = \mytemp hr total},\obstdump}}
 \newenvironment{tasks}{\timeblockstart\phantomsection\addcontentsline{toc}{subsubsection}{tasks}
-\begin{tiny}
+\begin{small}
 \begin{multicols}{2}
 \gdef\timeblocktotalval{9}
 }{
 \end{multicols}
 \timeblockend
 \myline
-\end{tiny}}
+\end{small}}
 
 \newcommand{\breaklist}{\end{itemize}
 \end{multicols}
@@ -276,15 +457,25 @@ LAST ORGANIZED TO HERE
 %\rfoot{\thepage}
 %\lfoot{Left bottom}
 
-\@ifundefined{supressmulticols}{
+\@ifundefined{nolabels}{
 \AtBeginDocument{
 \let\oldlabel=\label
 %\renewcommand*{\label}[1]{{\tiny $#1$}\oldlabel{#1}}
 %\renewcommand*{\label}[1]{\fn{#1}\oldlabel{#1}}
 \let\oldlabel = \label
-\def\label{\begingroup\catcode`_=12 \newlabelx}
-\newcommand{\newlabelx}[1]{{\tiny #1}\endgroup\oldlabel{#1}}
+%\begingroup\catcode`\_=\active\def_{\_} \newcommand{\newlabelx}[1]{{\tiny #1}\endgroup\oldlabel{#1}}
+%\begingroup\catcode`_=12 \newcommand{\newlabelx}[1]{{\tiny #1}\endgroup\oldlabel{#1}}
+%\def\label{\newlabelx}
+%\def\label{\begingroup\catcode`_=12 \newlabelx}
+%\newcommand{\newlabelx}[1]{{\tiny #1}\endgroup\oldlabel{#1}}
 }
+%%{{{ the following shows the labels for equations
+\usepackage{showlabels}
+\usepackage{rotating}
+%\renewcommand{\showlabelsetlabel}[1]{$\!\!\!\!\!\!\!\hookleftarrow$\begin{rotate}{90}\begin{tiny}\showlabelfont \ #1\end{tiny}\end{rotate}}
+\newcommand{\newshowlabelsetlabelx}[1]{$\!\!\!\!\!\!\!\hookleftarrow$\begin{rotate}{90}\begin{tiny}\showlabelfont \ \begingroup\catcode`_=13 #1\endgroup\end{tiny}\end{rotate}}
+\def\showlabelsetlabel{\newshowlabelsetlabelx}
+%%}}}
 }{}
 %\bibliographystyle{abbrvnat}
 %\usepackage[sort&compress]{natbib}
@@ -306,3 +497,25 @@ LAST ORGANIZED TO HERE
 \newcommand{\needtocheck}[1]{{\color{yellow}#1}}
 \newcommand{\putref}{\begin{tiny}[ref]\end{tiny}}
 \newenvironment{DIFnomarkup}{}{}
+\newcommand{\cwdnp}{cw-DNP}
+
+\newcommand\precaution[1]{\begin{tiny}\textit{#1}\end{tiny}}
+\newcommand\twooptions[2]{
+
+\begin{tabular}{c|c}
+    Option 1 & Option 2\\
+\begin{minipage}{3.5in}
+#1
+\end{minipage}
+&
+\begin{minipage}{3.5in}
+#2
+\end{minipage}
+\\
+\end{tabular}
+
+}
+
+\newcommand\textsubscript[1]{\ensuremath{{}_{\text{#1}}}}
+\let\myolditemi=\labelitemi
+\let\myolditemii=\labelitemii
