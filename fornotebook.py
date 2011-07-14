@@ -40,7 +40,7 @@ class figlistl (figlist):
             if type(figname) is dict:
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
-                    print kwargs.pop('print_string')
+                    print '\n\n'+kwargs.pop('print_string')+'\n\n'
             else:
                 figure(j+1)
                 sep = ''
@@ -67,7 +67,7 @@ def lplotfigures(figurelist,string,numwide = 2,**kwargs):
         if type(figname) is dict:
             kwargs.update(figname)
             if 'print_string' in kwargs:
-                print kwargs.pop('print_string')
+                print '\n\n'+kwargs.pop('print_string')+'\n\n'
         else:
             figure(j+1)
             try:
@@ -101,23 +101,33 @@ def figlistret(first_figure,figurelist,*args,**kwargs):
             return args[0]
         else:
             return args
-def lrecordarray(recordlist,columnformat = True):
+def see_if_math(recnames):
+    'return latex formatted strings --> ultimately, have this actually check to see if the individual strings are math or not, rather than just assuming that they are.  Do this simply by seeing whether or not the thing starts with a full word (more than two characters) or not.'
+    return [r'\ensuremath{'+v.replace('\\\\','\\')+'}' for v in recnames]
+def lrecordarray(recordlist,columnformat = True,smoosh = True):
     reclen = len(recordlist)
     recnames = recordlist.dtype.names
+    alltext = ''
     if columnformat:
-        print r'\begin{tabular}{',''.join(['c']*len(recnames)),'}'
-        recordstrings = [r'\ensuremath{'+v.replace('\\\\','\\')+'}' for v in recnames]
-        print ' & '.join(recordstrings),r'\\'# \hline'
+        colheadings = [r'c']*len(recnames)
+        recordstrings = see_if_math(recnames)
         for j in range(0,len(recordlist)):
             datastrings = [lsafe(str(recordlist[v][j])) for v in recnames]
-            print ' & '.join(datastrings),r'\\'# \hline'
-        print r'\end{tabular}'
+            if smoosh:
+                for k,l in enumerate(map(len,datastrings)):
+                    if l>40:
+                        colheadings[k] = r'p{%0.2f\textwidth}'%(0.8/len(recnames))
+            alltext+=' & '.join(datastrings)+r'\\ \hline'+'\n'
+        alltext += r'\end{tabular}'
+        print r'\begin{tabular}{','|'.join(colheadings),'}'
+        print ' & '.join(recordstrings),r'\\ \hline\hline'+'\n'
+        print alltext
     else:
         print r'\begin{tabular}{',''.join(['r']+['l']*reclen),'}'
         for v in recnames:
             print r'\ensuremath{',v,'}$=$ &',' & '.join(map(lambda x: lsafe(str(x)),list(recordlist[v]))),r'\\'
         print r'\end{tabular}'
-def lplot(fname,width=3,figure=False,dpi=300,grid=False,alsosave=None,gensvg = False,print_string = None,centered = False,legend = False,equal_aspect = False,autopad = True):
+def lplot(fname,width=3,figure=False,dpi=300,grid=False,alsosave=None,gensvg = False,print_string = None,centered = False,legend = False,equal_aspect = False,autopad = True,bytextwidth = False):
     '''
     used with python.sty instead of savefig
     '''
@@ -146,14 +156,21 @@ def lplot(fname,width=3,figure=False,dpi=300,grid=False,alsosave=None,gensvg = F
         \begin{figure}[h]
         \end{figure}
         """
-    print r'''\begin{minipage}{%0.2fin}
-    \fn{%s: %s}'''%(width,thisjobname(),fname)
+    if bytextwidth:
+        mpwidth = r'%0.2f\textwidth'%width
+        figwidth = r'\textwidth'
+    else:
+        mpwidth = r'%0.2fin'%width
+        figwidth = mpwidth
+    print r'''\fbox{
+    \begin{minipage}{%s}
+    {\color{red}%s:}\begin{tiny}\fn{%s}'''%(mpwidth,thisjobname(),fname)
     if alsosave != None:
         print r'also saved \fn{%s}'%alsosave
-    print r'''
-
-    \includegraphics[width=%0.2fin]{%s}
-    \end{minipage}'''%(width,fname)
+    print '\n\n'+r'\hrulefill'+'\n\n'
+    print r'''\includegraphics[width=%s]{%s}
+    \end{tiny}\end{minipage}
+    }'''%(figwidth,fname)
     clf()
     return
 def addlabels(labelstring,x,y,labels):

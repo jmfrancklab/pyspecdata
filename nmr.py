@@ -13,7 +13,9 @@ def OUTPUT_notebook():
 #{{{ general, non file-format specific functions
 def dbm_to_power(dbm,cavity_setup = 'cnsi'):
     if cavity_setup == 'cnsi':
-        attenuation = 30.0
+        attenuation = 30.0 # starting 6/20/11 this is actually what it uses, because I removed the extra -10, etc, in h5nmr.py
+    if cavity_setup == 'newcnsi':
+        attenuation = 35.16 # plus or minus a full dB --> this was measured
     elif cavity_setup == 'te102':
         attenuation = 40.0
     elif cavity_setup == 'dielectric':
@@ -22,7 +24,7 @@ def dbm_to_power(dbm,cavity_setup = 'cnsi'):
 def power_to_dbm(power):
     return 10.0*log(power/1e-3)/log(10.0)-40 #20 db for each atten
 #{{{ auto_steps
-def auto_steps(filename,threshold = -35, upper_threshold = 0, t_minlength = 0.5*60,minstdev = 0.1,showplots = True, showdebug = False,t_start=0,t_stop=60*1000,tolerance = 2,t_maxlen = inf,return_lastspike = False,first_figure = None):
+def auto_steps(filename,threshold = -35, upper_threshold = 5, t_minlength = 0.5*60,minstdev = 0.1,showplots = True, showdebug = False,t_start=0,t_stop=60*1000,tolerance = 2,t_maxlen = inf,return_lastspike = False,first_figure = None):
     r'Plot the raw power output in figure 1, and chop into different powers in plot 2'
     figurelist = figlistini(first_figure)
     v = loadmat(filename)
@@ -32,6 +34,11 @@ def auto_steps(filename,threshold = -35, upper_threshold = 0, t_minlength = 0.5*
     if showplots:
         figurelist = nextfigure(figurelist,'powerlog_raw')
         plot(t_ini/60,p_ini)
+        ax = gca()
+        ylim = list(ax.get_ylim())
+        ylim[0] = -35
+        ax.set_ylim(ylim)
+        gridandtick(ax)
         title(filename)
     mask = t_ini < t_stop
     minsteps = sum(t_ini<t_minlength)
@@ -1095,6 +1102,7 @@ def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline 
     plot(integral.runcopy(imag),'yo')
     integral.makereal() # otherwise, it won't fit
     integral.fit()
+    print 'DEBUG: after fit, fit coeff is',integral.fit_coeff
     plot(integral.eval(300)) # evaluate the fit function on the axis taxis
     #{{{ for now, do not plot the modified versions
     #plot(taxis,t1_fitfunc(r_[p[0:2],p[2]*1.2],taxis),'y')
@@ -1390,7 +1398,7 @@ class t1curve(fitdata):
         r'''provide the guess for our parameters, which is specific to the type of function'''
         x = self.getaxis(self.fit_axis)
         y = self.data
-        testpoint = argmin(abs(x-x.max()/3)) # don't just pull 1/3 of the index, because it can be unevenly spaced
+        testpoint = argmin(abs(x-x.max()/4)) # don't just pull 1/4 of the index, because it can be unevenly spaced #this was 1/3 before, but not working great
         initial_slope = (y[testpoint]-y[0])/(x[testpoint]-x[0])
         A = y[-1]
         B = y[testpoint]-x[testpoint]*initial_slope
