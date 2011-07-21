@@ -43,7 +43,7 @@ class store_integrals:
                 self.attach_aux()
             except:
                 lplotfigures(self.figurelist,'error_figures.pdf')
-                raise CustomError('Probably a problem with the power meter')
+                raise CustomError('Look at the power meter graph to see if you can reset the extra time parameter, or if there is something wrong with the power meter.')
             self.integral.hdf5_write(self.h5filename + '/integrals')
             self.newrecord = True
             self.catalog()
