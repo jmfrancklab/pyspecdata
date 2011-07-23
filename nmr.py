@@ -8,6 +8,8 @@ import fornotebook
 import sympy
 from scipy.io import loadmat
 
+mu_B = 9.27400915e-24
+
 def OUTPUT_notebook():
     return True
 #{{{ general, non file-format specific functions

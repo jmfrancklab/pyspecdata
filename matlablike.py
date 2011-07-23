@@ -1989,10 +1989,10 @@ class nddata (object):
                     #print "DEBUG, type of slice",x,"is",type(y)
                     if isscalar(y):
                         axesdict.pop(x) # pop the axes for all scalar dimensions
-                    elif type(y) is slice and type(y.start) in [float,double,float64,float32]:
-                        mask = logical_and(axesdict[x]>y.start,axesdict[x]<y.stop)
-                        slicedict[x] = mask
-                        axesdict[x] = axesdict[x][mask]
+                    #elif type(y) is slice and type(y.start) in [float,double,float64,float32]:
+                    #    mask = logical_and(axesdict[x]>y.start,axesdict[x]<y.stop)
+                    #    slicedict[x] = mask
+                    #    axesdict[x] = axesdict[x][mask]
                     elif type(y) is type(testf):
                         mask = y(axesdict[x])
                         slicedict[x] = mask
