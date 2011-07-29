@@ -212,7 +212,10 @@ def det_type(filename):
     #}}}
     else:
         filename = dirformat(filename)
-        files_in_dir = os.listdir(filename)
+        try:
+            files_in_dir = os.listdir(filename)
+        except:
+            raise CustomError('Problems finding directory:',filename)
         #{{{ Bruker 2D
         if os.path.exists(filename+'ser'):
             return ('bruker',True)
@@ -265,9 +268,12 @@ def load_file(*args,**kwargs):
     #}}}
     filenames = format_listofexps(args)
     #{{{load all the data into a list
-    data = [load_indiv_file(filenames[0],dimname=dimname,add_sizes = add_sizes,add_dims = add_dims)]
-    for filename in filenames[1:]:
-        data += [load_indiv_file(filename,dimname=dimname,add_sizes = add_sizes,add_dims = add_dims)]
+    try:
+        data = [load_indiv_file(filenames[0],dimname=dimname,add_sizes = add_sizes,add_dims = add_dims)]
+        for filename in filenames[1:]:
+            data += [load_indiv_file(filename,dimname=dimname,add_sizes = add_sizes,add_dims = add_dims)]
+    except:
+        raise CustomError('Problem loading list of files',filenames)
     #}}}
     # for the following, I used to have a condition, but this is incompatible with the pop statement at the end
     newdata = concat(data,dimname) # allocate the size of the indirect array
@@ -686,6 +692,120 @@ def winepr_load_acqu(file):
 #}}}
 #}}}
 #{{{ higher level functions
+#{{{ standard EPR processing
+def standard_epr(dir = None,
+        files = None,
+        normalize_field = False,
+        find_maxslope = False,
+        offset_spectra = False,
+        subtract_first = False,
+        normalize_peak = False,
+        background = None,
+        grid = False,
+        figure_list = None):
+    if background is not None:
+        if type(background) is list:
+            if len(background) > 1:
+                raise CustomError("multiple backgrounds not yet supported")
+            else:
+                background = background[0]
+        files = [background,files]
+        subtract_first = True
+    dir = dirformat(dir)
+    mu_B = 9.27400915e-24
+    h = 6.62606957e-34
+    if subtract_first:
+        firstdata = 2*load_indiv_file(dir+files.pop(0))
+    legendtext = list(files)
+    for index,file in enumerate(files):
+       data = load_indiv_file(dir+file)
+       if subtract_first:
+           data -= firstdata
+       field = r'$B_0$'
+       neworder = list(data.dimlabels)
+       data.reorder([neworder.pop(neworder.index(field))]+neworder) # in case this is a saturation experiment
+       data -= data.copy().run_nopop(mean,field)
+       figure_list.next('epr')
+       v = winepr_load_acqu(dir+file)
+       if index == 0:
+            fieldbar = data[field,lambda x: logical_and(x>x.mean(),x<x.mean()+10.)]
+            fieldbar.data[:] = 0.5
+            fieldbar.data[0] = 0.6
+            fieldbar.data[-1] = 0.6
+            fxaxis = fieldbar.getaxis(field)
+       xaxis = data.getaxis(field)
+       centerfield = None
+       if normalize_field:
+           xaxis /= v['MF']
+           if index == 0:
+               fxaxis /= v['MF']
+           newname = r'$B_0/\nu_e$'
+       else:
+           deriv = data.copy()
+           deriv.run_nopop(diff,field)
+           deriv.data[abs(data.data) > abs(data.data).max()/10] = 0 # so it doesn't give a fast slope, non-zero area
+           deriv = abs(deriv)
+           deriv.argmax(field)
+           centerfield = mean(xaxis[int32(deriv.data)])
+           if find_maxslope:
+               xaxis -= centerfield
+               if index == 0:
+                   fxaxis -= centerfield
+               newname = r'$\Delta B_0$'
+           else:
+               newname = field
+       data.rename(field,newname)
+       if index == 0:
+           fieldbar.rename(field,newname)
+       mask = data.getaxis(newname)
+       mask = mask > mask[int32(len(mask)-len(mask)/20)]
+       snr = abs(data.data).max()/std(data.data[mask])
+       integral = data.copy()
+       integral.data -= integral.data.mean() # baseline correct it
+       integral.integrate(newname)
+       figure_list.next('epr_int')
+       plot(integral,alpha=0.5,linewidth=0.3)
+       pc = plot_color_counter()
+       integral.integrate(newname)
+       figure_list.next('epr')
+       if normalize_peak:
+          normalization = abs(data).run_nopop(max,newname)
+          data /= normalization
+       ax = gca()
+       if offset_spectra:
+           myoffset = array(ax.get_ylim()).min()
+       else:
+           myoffset = 0.
+       pc = plot_color_counter()
+       plot(data+myoffset,alpha=0.5,linewidth=0.3)
+       plot_color_counter(pc)
+       minval = abs(data.getaxis(newname)-centerfield).argmin()
+       centerpoint = data[newname,minval]
+       plot(centerfield,centerpoint.data+myoffset,'o',markersize = 5,alpha=0.3)
+       axis('tight')
+       if index == 0:
+           fieldbar *= array(ax.get_ylim()).max()
+       legendtext[index] += '\n'
+       if centerfield != None:
+           legendtext[index] += ', %0.03f $G$'%centerfield
+           gfactor = h*v['MF']*1e9/mu_B/(centerfield*1e-4)
+           legendtext[index] += ', g=%0.03f'%gfactor
+       legendtext[index] += r', SNR %0.2g $\int\int$ %0.3g'%(snr,integral[newname,-1].data[-1])
+    #xtl = ax.get_xticklabels()
+    #at.xaxis.tick_top()
+    #map( (lambda x: x.set_visible(False)), xtl)
+    plot(data.getaxis(newname)[mask],zeros(shape(data.getaxis(newname)[mask])),'k',alpha=0.2,linewidth=10)
+    figure_list.next('epr')
+    plot(fieldbar,'k',linewidth = 2.0)
+    if grid:
+        gridandtick(gca())
+    #autolegend(legendtext)
+    axis('tight')
+    figure_list.next('epr_int')
+    autolegend(legendtext)
+    axis('tight')
+    return figure_list
+#}}}
 #{{{ optimize the first-order phase the right way
 def phaseopt(curve):
     curve = curve.copy()
@@ -739,38 +859,39 @@ def exp_errfunc(p,x,y):
 #}}}
 #{{{ routines for processing emax and t1 type curves
 #{{{ rg_check --> check the receiver gain
-def rg_check(file,expno,number_of_samples = 75,dynamic_range = 19,first_figure = 1,show_complex = True):
+def rg_check(file,expno,number_of_samples = 75,dynamic_range = 19,first_figure = None,show_complex = True):
     r'''show the fid, plotted vs. the max possible value to check the max of the receiver gain in figure 1
     in figure 2, plot in the complex plain to check digitization limit'''
+    fl = figlistini(first_figure)
     # the following was load_emax, and I have not yet checked it
     data = load_file(file,expno,dimname = 'power',printinfo = False) # load the data
-    if len(expno)>0:
-        params = load_acqu('%s/%d'%(dirformat(file),expno[0])) # load the parameters
-    else:
-        params = load_acqu(dirformat(file[0])) # load the parameters
+    listoffiles = format_listofexps([file,expno])
+    params = load_acqu(listoffiles[0]) # load the parameters
     maxfloat = 3.4028234e38
     maxint = 2147483648
     max_for_this_dynamic_range= 2**(dynamic_range-1) # the -1 is the bit used for the sign
     data.reorder(['t2','power'])
-    if type(file) is list:
-        spec_type = det_type(file[0])[0]
-    else:
-        spec_type = det_type(file)[0]
+    spec_type = det_type(listoffiles[0])[0]
     if spec_type == 'bruker':
         data.data *= params['RG'] # scale back up by RG, so we get raw numbers
     data.data /= max_for_this_dynamic_range # scale down by the max int number, so we test digitization
-    figure(first_figure)
+    nextfigure(fl,'rg1')
+    if normalize == True:
+        data['t2',:] /= data['t1',1:2]
     plot(data['t2',0:number_of_samples],'k')
     plot(data['t2',0:number_of_samples]*(-1j),'b',alpha=0.3)
     title('receiver gain upper value check')
     axis('tight')
     if show_complex:
-        figure(first_figure+1)
+        nextfigure(fl,'rg2')
         OLDplot(real(data['t2',0:number_of_samples].data),imag(data['t2',0:number_of_samples].data),'.',markersize=0.6)
         #polar(angle(data['t2',0:number_of_samples].data),abs(data['t2',0:number_of_samples].data),'.',markersize=0.1)
         title('receiver gain minimum value check')
         axis('tight')
-    return
+    if first_figure == None:
+        return
+    else:
+        return fl
 #}}}
 #{{{ integrate --> new integration function
 def integrate(file,expno,
@@ -1398,8 +1519,10 @@ def plot_noise(path,j,calibration,mask_start,mask_stop,rgmin=0,k_B = None,smooth
 class t1curve(fitdata):
     def guess(self):
         r'''provide the guess for our parameters, which is specific to the type of function'''
+        fprime = self.parameter_derivatives()
         x = self.getaxis(self.fit_axis)
         y = self.data
+        print '\n\nshape of parameter derivatives',shape(fprime),'shape of output',shape(y),'\n\n'
         testpoint = argmin(abs(x-x.max()/4)) # don't just pull 1/4 of the index, because it can be unevenly spaced #this was 1/3 before, but not working great
         initial_slope = (y[testpoint]-y[0])/(x[testpoint]-x[0])
         A = y[-1]
@@ -1409,7 +1532,7 @@ class t1curve(fitdata):
             raise CustomError(maprep('Negative T1!!! A-B=',A-B,'initial_slope=',initial_slope,x,y))
         #else:
         #   print 'C is ',C
-        return r_[A,B,C]
+        return r_[A,B,C/3.0] # dividing the guessed T1 by two seems to give something that fits more of the time
     def fitfunc_raw(self,p,x):
         '''just the actual fit function to return the array y as a function of p and x'''
         return p[0]+(p[1]-p[0])*exp(-x/p[2])

@@ -2362,13 +2362,8 @@ class fitdata(nddata):
         self.active_indeces = None
         #}}}
         return
-    def analytical_covariance(self):
-        #parameters = self.symbol_list[::-1]
-        parameters = self._active_symbols()
-        solution_list = dict([(self.symbolic_dict[x],self.output(x)) for x in self.symbol_list])
-        number_of_i = len(self.getaxis(self.fit_axis))
-        fprime = zeros([len(parameters),number_of_i])
-        covarmatrix = zeros([len(parameters)]*2)
+    def parameter_derivatives(self):
+        r'return a matrix containing derivatives of the parameters'
         mydiff_sym = [[]] * len(self.symbolic_vars)
         xvals = self.getaxis(self.fit_axis)
         x = self.symbolic_x
@@ -2381,7 +2376,16 @@ class fitdata(nddata):
                 fprime[j,:] = array([mydiff.subs(x,xvals[k]) for k in range(0,len(xvals))])
             except:
                 raise CustomError('Trying to set index',j, 'shape(fprime)',shape(fprime), 'shape(xvals)',shape(xvals))
+        return fprime
+    def analytical_covariance(self):
+        #parameters = self.symbol_list[::-1]
+        parameters = self._active_symbols()
+        solution_list = dict([(self.symbolic_dict[x],self.output(x)) for x in self.symbol_list])
+        number_of_i = len(self.getaxis(self.fit_axis))
+        fprime = zeros([len(parameters),number_of_i])
+        covarmatrix = zeros([len(parameters)]*2)
         #{{{ try this ppt suggestion --> his V is my fprime, but 
+        fprime = self.parameter_derivatives()
         dirproductform = False
         if dirproductform:
             sigma = self.get_error()
@@ -2428,6 +2432,7 @@ class fitdata(nddata):
             #covarmatrix = array( betapremult * S * betapremult.T)
         #print "shape of fprime",shape(fprime),"shape of fprime_prod",shape(fprime_prod),'sigma = ',sigma,'covarmat=',covarmatrix,'\n'
         #}}}
+        # note for this code, that it depends on above code I later moved to  parameter_derivatives
         #for j in range(0,shape(covarmatrix)[0]):
         #    for k in range(0,shape(covarmatrix)[0]):
         #        #mydiff_second = sympy.diff(mydiff_sym[j],self.symbolic_vars[k]).subs(solution_list)

@@ -1,6 +1,7 @@
 from fornotebook import *
 from matlablike import *
 from nmr import *
+import time
 #{{{ Classes to load and store stuff to the HDF5 file
 ##{{{ the parent
 class store_integrals:
@@ -9,8 +10,10 @@ class store_integrals:
             fid_args,
             first_figure = None,
             auxiliary_args = {},integration_args = {},integrate_function = integrate,
-            lplotfigurekwargs = {}):
+            lplotfigurekwargs = {},
+            type_str = 'integral'):
         self.figurelist = figlistini(first_figure)
+        self.type_str = type_str
         self.name = fid_args["name"]
         self.compilationroot_name = '/compilations'
         self.expno = fid_args['expno']
@@ -37,6 +40,16 @@ class store_integrals:
             ####{{{ load the self and accompanying data
             self.auxiliary(fid_args,auxiliary_args) # tack on powers, delay times, etc.
             self.integral,self.figurelist = integrate_function(dirformat(fid_args["path"])+fid_args["name"]+'/',self.expno,first_figure = self.figurelist,pdfstring = self.integralnode_name,**integration_args)
+            if type(self.expno) in [list,ndarray]:
+                begin_and_end_files = [self.expno[0],self.expno[-1]]
+            else:
+                begin_and_end_files = [self.expno]
+            for thisexp in begin_and_end_files:
+                thisfile = dirformat(fid_args["path"]) + dirformat(fid_args["name"])+'%d'%thisexp
+                thisfiledate = load_acqu(thisfile)['DATE']
+                thisfiledate = time.localtime(thisfiledate)
+                thisfiledate = time.strftime('%d %b %Y %I:%M:%S %p',thisfiledate)
+                print '\n\n',r'{\bf Start time of %s exp %d}'%(type_str,thisexp),thisfiledate,'\n\n'
             ####}}}
             self.integral.set_prop('name',self.integralnode_name) # sets the name for subsequent saving
             try:
@@ -112,7 +125,7 @@ class store_T1 (store_integrals):
             chemical_id,
             fid_args,
             first_figure = first_figure,
-            auxiliary_args = auxiliary_args,integration_args = integration_args,integrate_function = integrate_function,lplotfigurekwargs = lplotfigurekwargs)
+            auxiliary_args = auxiliary_args,integration_args = integration_args,integrate_function = integrate_function,lplotfigurekwargs = lplotfigurekwargs,type_str = r'$T_1$')
         return
     def auxiliary(self,
             fid_args,
