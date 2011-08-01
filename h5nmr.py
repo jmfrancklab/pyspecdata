@@ -266,17 +266,33 @@ def pull_date_from_filename(name):
 ##}}}
 #}}}
 #{{{ Convenience functions for different nodes
-def search_delete_datanode(filename,string):
-    'calls delete_datanode on all nodes containing the string'
-    try:
-        h5file,childnode =  h5nodebypath(filename+'/integrals/',check_only = True)
-    except:
-        print lsafen("The node /integrals/ doesn't exist in",filename,": continuing")
-        return
-    names_of_children = childnode._v_children.keys()
-    for name in names_of_children:
-        if name.find(string) > -1:
-            delete_datanode(filename,name)
+def search_delete_datanode(filename,name = None,chemical = None,concentration = None):
+    'calls delete_datanode on all nodes matching the search criteria'
+    if (chemical is None) and (concentration is None) and (name is not None):
+        try:
+            h5file,childnode =  h5nodebypath(filename+'/integrals/',check_only = True)
+        except:
+            print lsafen("The node /integrals/ doesn't exist in",filename,": continuing")
+            return
+        names_of_children = childnode._v_children.keys()
+        for name in names_of_children:
+            if name.find(string) > -1:
+                delete_datanode(filename,name)
+        h5file.close()
+    else:
+        chemical_ids = get_chemical_index(filename+'/compilations/chemicals',chemical = 'GroES')
+        for chemical_id in chemical_ids:
+            # find the nodes that contain this chemical
+            searchstring = 'chemical_id == %d'%chemical_id
+            for thistablename in ['Emax_curves','T1_fits']:
+                h5file,compilationroot_node =  h5nodebypath(filename+'/compilations',check_only = True)
+                thistable = h5table(compilationroot_node,thistablename,None)
+                thistable_result = thistable.readWhere(searchstring)
+                integral_names = thistable_result['integrals']
+                print r'search\_delete\_datanode found datasets: '+lsafen(', '.join(list(integral_names)))
+                h5file.close()
+                for j in integral_names:
+                    delete_datanode('dnp.h5',j)
 def delete_datanode(filename,integralnodename):
     "Deletes a data node (by name) and all references to it"
     try:
@@ -303,25 +319,43 @@ def print_chemical_by_index(compilationroot_name,indexnumber):
     lrecordarray(chemicalnode.chemicals.readWhere('index == %d'%indexnumber))
     return
 def get_chemical_index(compilationroot_name,*args,**kwargs):
-    r'get_chemical_index(location of HDF5 node, chemical name,concentration)' + '\n' + 'OR get_chemical_index(location of HDF5 name, string with chemical + conc)'
+    r'OLD format: get_chemical_index(location of HDF5 node, chemical name,concentration)' + '\n' + 'OR get_chemical_index(location of HDF5 name, string with chemical + conc)' + '\n' + 'NEW FORMAT: pass no arguments, but pass kwargs chemical_name, concentration, and name'
     ##{{{ manual kwargs
     verbose = False
     if 'verbose' in kwargs.keys():
         verbose = kwargs.pop('verbose')
-    if len(kwargs) > 0:
-        raise CustomError('kwargs not understood!:',kwargs)
     ##}}}
-    if len(args) == 1: # a filename was given
-        if verbose: print 'DEBUG: only one arg given',lsafen(args)
-        chemical_name = pull_chemical_from_filename(args[0])
-        concentration = pull_concentration_from_filename(args[0])
-    elif len(args) == 2:
-        chemical_name = args[0]
-        concentration = args[1]
+    #{{{ parse both old and new format arguments
+    if len(kwargs) > 0:
+        chemical_name = None
+        concentration = None
+        name = None
+        if 'chemical' in kwargs.keys():
+            chemical_name = kwargs.pop('chemical')
+        if 'concentration' in kwargs.keys():
+            concentration = kwargs.pop('concentration')
+        if 'name' in kwargs.keys():
+            name = kwargs.pop(name)
+        if len(kwargs) > 0:
+            h5file.close()
+            raise CustomError('kwargs not understood!:',kwargs)
+    else:
+        if len(args) == 1: # a filename was given
+            if verbose: print 'DEBUG: only one arg given',lsafen(args)
+            chemical_name = pull_chemical_from_filename(args[0])
+            concentration = pull_concentration_from_filename(args[0])
+        elif len(args) == 2:
+            chemical_name = args[0]
+            concentration = args[1]
+    #}}}
     if chemical_name == None:
+        h5file.close()
         raise CustomError('Chemical name is "None"!')
     ##{{{ identify the id in the solutions table corresponding to the chemical and concentration
-    search_string = '(chemical == \'%s\') &'%chemical_name + gensearch('concentration','%0.5g',concentration,1e-6)
+    if concentration is None:
+        search_string = '(chemical == \'%s\')'%chemical_name 
+    else:
+        search_string = '(chemical == \'%s\') &'%chemical_name + gensearch('concentration','%0.5g',concentration,1e-6)
     ###{{{ grab (or create) the table
     h5file,compilationroot_node = h5nodebypath(compilationroot_name)
     concentration_table,concentration_id = h5addrow(compilationroot_node,'chemicals',[chemical_name,double(concentration)],['chemical','concentration'],match_row = search_string,verbose = True)

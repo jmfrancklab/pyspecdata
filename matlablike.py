@@ -282,7 +282,7 @@ def h5remrows(bottomnode,tablename,searchstring):
         return counter,data
     except tables.NoSuchNodeError:
         return False,None
-def h5addrow(bottomnode,tablename,listofdata,listofnames,force = False,match_row = None,verbose = False):
+def h5addrow(bottomnode,tablename,listofdata,listofnames,force = False,match_row = None,verbose = False,only_last = True):
     'add a row to a table, creating it if necessary, but don\'t add if the data matches the search condition'
     try: # see if the table exists
         mytable = h5table(bottomnode,tablename,None)
@@ -296,10 +296,14 @@ def h5addrow(bottomnode,tablename,listofdata,listofnames,force = False,match_row
             except NameError:
                 raise CustomError('The columns available are',mytable.colnames)
             if len(matches) > 0:
-                if verbose: print r'\o{',lsafen(len(matches),"rows match your search criterion, returning the last row"),'}'
-                return mytable,matches['index'][-1]
+                if only_last:
+                    return mytable,matches['index'][:]
+                else:
+                    if verbose: print r'\o{',lsafen(len(matches),"rows match your search criterion, returning the last row"),'}'
+                    return mytable,matches['index'][-1]
             else:
-                if verbose: print r'\o{',lsafen("Creating a new row for your data"),'}'
+                if add:
+                    if verbose: print r'\o{',lsafen("Creating a new row for your data"),'}'
         tableexists = True
     except CustomError: # if table doesn't exist, create it
         newindex = 1L
@@ -341,7 +345,7 @@ def h5table(bottomnode,tablename,tabledata):
         if tabledata is not None:
             datatable = h5file.createTable(bottomnode,tablename,tabledata) # actually write the data to the table
         else:
-            raise CustomError('You passed no data, but claim you want to create a table')
+            raise CustomError('You passed no data, so I can\'t create table',tablename,'but it doesn\'t exist in',bottomnode,'which has children',bottomnode._v_children.keys())
     else:
         if tabledata is not None:
             raise CustomError('You\'re passing data to create the table, but the table already exists!')
@@ -424,7 +428,7 @@ def attach_node_attributes(node,listofattributes,myvalues):
         elif thisval is  None:
             pass
         else:
-            raise CustomError('type of value (',type(thisval),') passed to attach_node_attributes is not currently supported')
+            raise CustomError('type of value (',type(thisval),') for attribute name',thisattr,'passed to attach_node_attributes is not currently supported')
         if thisval is not None:
             node._v_attrs.__setattr__(thisattr,thisval)
             listout.remove(thisattr)
@@ -534,19 +538,22 @@ def whereblocks(a): # returns contiguous chunks where the condition is true
 def autolegend(*args,**kwargs):
     #lg = legend(legendstr,'best'),loc = 2, borderaxespad = 0.)
     if 'ax' in kwargs.keys():
-        ax = kwargs.pop('ax')
+        ax_list = [kwargs.pop('ax')]
     else:
-        ax = gca()
-    if len(args)==0:
-        lg = ax.legend(loc='best')
-    elif len(args)==1:
-        lg = ax.legend(args[0],'best')
-    else:
-        lg = ax.legend(args[0],args[1],'best')
-    try:
-        lg.get_frame().set_alpha(0.45)
-    except:
-        print "Warning! couldn't set legend frame"
+        ax_list = [gca()]
+    if 'ax2' in kwargs.keys():
+        ax_list.append(kwargs.pop('ax2'))
+    for ax in ax_list:
+        if len(args)==0:
+            lg = ax.legend(loc='best')
+        elif len(args)==1:
+            lg = ax.legend(args[0],'best')
+        else:
+            lg = ax.legend(args[0],args[1],'best')
+        try:
+            lg.get_frame().set_alpha(0.45)
+        except:
+            print "Warning! couldn't set legend frame"
     return lg
 def autopad_figure(pad = 0.2,centered = False):
     #{{{ solve the axis issue --> this does just the left
@@ -1043,6 +1050,8 @@ class nddata (object):
         else:
             self.axis_coords_units = axis_coords_units 
         return
+    def _contains_symbolic(self,string):
+        return string[:9] == 'symbolic_' and hasattr(self,string)
     #{{{ for printing
     def __repr__(self):
         return repr(self.data)+'\n\t+/-'+repr(self.get_error())+'\ndimlabels=['+repr(self.dimlabels)+']\naxes='+repr(self.mkd(self.axis_coords))+'\n\t+/-'+repr(self.mkd(self.axis_coords_error))+'\n'
@@ -2091,7 +2100,12 @@ class nddata (object):
         if len(myotherattrs) > 0:
             #print 'DEBUG 4: bottomnode is',bottomnode
             test = repr(bottomnode) # somehow, this prevents it from claiming that the bottomnode is None --> some type of bug?
-            attach_node_attributes(bottomnode,myotherattrs,self)
+            try:
+                attach_node_attributes(bottomnode,
+                    [j for j in myotherattrs if not self._contains_symbolic(j)],
+                    self)
+            except:
+                raise CustomError('Problem trying to attach attributes',myotherattrs,'of self to node',bottomnode)
             if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
         #}}}
         h5file.close()
@@ -2362,11 +2376,21 @@ class fitdata(nddata):
         self.active_indeces = None
         #}}}
         return
-    def parameter_derivatives(self):
-        r'return a matrix containing derivatives of the parameters'
+    def parameter_derivatives(self,set = None,set_to = None):
+        r'return a matrix containing derivatives of the parameters, can set dict set, or keys set, vals set_to'
+        if type(set) is dict:
+            set_to = set.values()
+            set = set.keys()
+        solution_list = dict([(self.symbolic_dict[x],set_to[j])
+            if x in set
+            else (self.symbolic_dict[x],self.output(x))
+            for j,x in enumerate(self.symbol_list)]) # load into the solution list
+        number_of_i = len(self.getaxis(self.fit_axis))
+        parameters = self._active_symbols()
         mydiff_sym = [[]] * len(self.symbolic_vars)
         xvals = self.getaxis(self.fit_axis)
         x = self.symbolic_x
+        fprime = zeros([len(parameters),number_of_i])
         for j in range(0,len(parameters)):
             thisvar = self.symbolic_dict[parameters[j]]
             mydiff_sym[j] = sympy.diff(self.symbolic_func,thisvar)
@@ -2378,12 +2402,7 @@ class fitdata(nddata):
                 raise CustomError('Trying to set index',j, 'shape(fprime)',shape(fprime), 'shape(xvals)',shape(xvals))
         return fprime
     def analytical_covariance(self):
-        #parameters = self.symbol_list[::-1]
-        parameters = self._active_symbols()
-        solution_list = dict([(self.symbolic_dict[x],self.output(x)) for x in self.symbol_list])
-        number_of_i = len(self.getaxis(self.fit_axis))
-        fprime = zeros([len(parameters),number_of_i])
-        covarmatrix = zeros([len(parameters)]*2)
+        covarmatrix = zeros([len(self._active_symbols())]*2)
         #{{{ try this ppt suggestion --> his V is my fprime, but 
         fprime = self.parameter_derivatives()
         dirproductform = False
@@ -2446,14 +2465,19 @@ class fitdata(nddata):
         #        #if j != k:
         #        #    covarmatrix[j,k] *= 2
         return covarmatrix
-    def gen_symbolic(self):
+    def gen_symbolic(self,function_name):
+        r'''generates the symbolic representations the function'''
+        self.function_name = function_name
         self.symbolic_vars = map(sympy.var,self.symbol_list)
         self.symbolic_x = sympy.var(self.fit_axis)
         #print lsafen('test symbol_list=',self.symbol_list)
         self.symbolic_dict = dict(zip(self.symbol_list,self.symbolic_vars))
         #print lsafen('test symbolic_vars=',self.symbolic_vars)
         #print lsafen('test symbolic_x=',self.symbolic_x)
-        self.symbolic_func = self.fitfunc_raw(self.symbolic_vars,self.symbolic_x)
+        if hasattr(self,'fitfunc_raw_symb'):
+            self.symbolic_func = self.fitfunc_raw_symb(self.symbolic_vars,self.symbolic_x)
+        else:
+            self.symbolic_func = self.fitfunc_raw(self.symbolic_vars,self.symbolic_x)
         self.function_string = sympy.latex(self.symbolic_func).replace('$','')
         self.function_string = r'$' + self.function_name + '=' + self.function_string + r'$'
         return self
@@ -2461,7 +2485,7 @@ class fitdata(nddata):
         namelist = []
         vallist = []
         for j in dir(self):
-            if j[:9] == 'symbolic_' and hasattr(self,j):
+            if self._contains_symbolic(j):
                 namelist.append(j)
                 vallist.append(self.__getattribute__(j))
                 self.__delattr__(j)
@@ -2549,7 +2573,7 @@ class fitdata(nddata):
             return self.linfunc(self.getaxis(self.fit_axis),self.data,yerr = self.get_error(),xerr = self.get_error(self.fit_axis)) # otherwise, return the raw data
     def output(self,*name):
         r'''give the fit value of a particular symbol'''
-        if self.fit_coeff is None:
+        if not hasattr(self,'fit_coeff') or self.fit_coeff is None:
             return None
         p = self.fit_coeff.copy()
         if self.set_indeces != None:
@@ -2639,7 +2663,10 @@ class fitdata(nddata):
         self.fit_coeff = real(self.guess())
         return self
     def _taxis(self,taxis):
-        if type(taxis) is int:
+        r'You can enter None, to get the fit along the same range as the data, an integer to give the number of points, or a range of data, which will return with 300 points'
+        if taxis is None:
+            taxis = self.getaxis(self.fit_axis).copy()
+        elif type(taxis) is int:
             taxis = linspace(self.getaxis(self.fit_axis).min(),
                     self.getaxis(self.fit_axis).max(),
                     taxis)
@@ -2649,8 +2676,14 @@ class fitdata(nddata):
     def eval(self,taxis,set = None,set_to = None):
         r'''after we have fit, evaluate the fit function along the axis taxis
         set and set_to allow you to forcibly set a specific symbol to a specific value --> however, this does not affect the class, but only the return value'''
+        if type(set) is dict:
+            set_to = set.values()
+            set = set.keys()
         taxis = self._taxis(taxis)
-        p = self.fit_coeff.copy()
+        if hasattr(self,'fit_coeff'):
+            p = self.fit_coeff.copy()
+        else:
+            p = array([NaN]*len(self.symbol_list))
         #{{{ LOCALLY apply any forced values
         if set != None:
             if self.set_indeces != None:
@@ -2680,6 +2713,9 @@ class fitdata(nddata):
         return self
     def fit(self,set = None, set_to = None, force_analytical = False):
         r'''actually run the fit'''
+        if type(set) is dict:
+            set_to = set.values()
+            set = set.keys()
         x = self.getaxis(self.fit_axis)
         if iscomplex(self.data.flatten()[0]):
             print lsafen('Warning, taking only real part of fitting data!')

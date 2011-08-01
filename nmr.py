@@ -8,8 +8,6 @@ import fornotebook
 import sympy
 from scipy.io import loadmat
 
-mu_B = 9.27400915e-24
-
 def OUTPUT_notebook():
     return True
 #{{{ general, non file-format specific functions
@@ -1519,10 +1517,22 @@ def plot_noise(path,j,calibration,mask_start,mask_stop,rgmin=0,k_B = None,smooth
 class t1curve(fitdata):
     def guess(self):
         r'''provide the guess for our parameters, which is specific to the type of function'''
-        fprime = self.parameter_derivatives()
-        x = self.getaxis(self.fit_axis)
+        ini_guess = {r'M(\infty)':1.0,r'M(0)':-1.0,r'T_1':1.0}
+        fprime = self.parameter_derivatives(set = ini_guess)
+        f_at_ini_guess = real(self.eval(None,set = ini_guess).data)
         y = self.data
+        new_y_shape = list(y.shape)
+        new_y_shape.append(1)
+        y = y.reshape(tuple(new_y_shape))
+        try:
+            f_at_ini_guess = f_at_ini_guess.reshape(tuple(new_y_shape))
+        except:
+            raise CustomError('trying to reshape f_at_ini_guess from',f_at_ini_guess.shape,'to',new_y_shape)
+        print '\n\n'+lsafen(' fprime = ',fprime,'f_at_ini_guess',f_at_ini_guess,'y=',y)
         print '\n\nshape of parameter derivatives',shape(fprime),'shape of output',shape(y),'\n\n'
+        newguess = array(ini_guess.values()) + dot(pinv(fprime.T),(y-f_at_ini_guess)).flatten()
+        # old stuff here
+        x = self.getaxis(self.fit_axis)
         testpoint = argmin(abs(x-x.max()/4)) # don't just pull 1/4 of the index, because it can be unevenly spaced #this was 1/3 before, but not working great
         initial_slope = (y[testpoint]-y[0])/(x[testpoint]-x[0])
         A = y[-1]
@@ -1532,10 +1542,15 @@ class t1curve(fitdata):
             raise CustomError(maprep('Negative T1!!! A-B=',A-B,'initial_slope=',initial_slope,x,y))
         #else:
         #   print 'C is ',C
-        return r_[A,B,C/3.0] # dividing the guessed T1 by two seems to give something that fits more of the time
+        oldguess = r_[A,B,C/3.0]
+        print "\n\nnewguess = ",newguess," oldguess = ",oldguess,"\n\n"
+        return newguess
     def fitfunc_raw(self,p,x):
         '''just the actual fit function to return the array y as a function of p and x'''
         return p[0]+(p[1]-p[0])*exp(-x/p[2])
+    def fitfunc_raw_symb(self,p,x):
+        '''if I'm using a named function, I have to define separately in terms of sympy rather than numpy functions'''
+        return p[0]+(p[1]-p[0])*sympy.exp(-x/p[2])
     def linfunc(self,x,y,xerr = None,yerr = None):
         '''just the actual fit function to return the pair of arrays x',y' that should be linear
         it accepts as inputs x and y, and it uses the output from the fit, where necessary
@@ -1581,6 +1596,7 @@ class t1curve(fitdata):
         fitdata.__init__(self,*args,**kwargs)
         self.function_string = r'$M(t)=M(\infty)+(M(0)-M(\infty))e^{-t/T_1}$'
         self.symbol_list = [r'M(\infty)',r'M(0)',r'T_1'] # note that it must notbe possible to find part of one of the later strings by searching for one of the earlier strings
+        self.gen_symbolic(r'M(t)')
         return
 class emax_legacy(fitdata):
     def guess(self):
@@ -1674,16 +1690,14 @@ class emax(fitdata):
         fitdata.__init__(self,*args,**kwargs)
         #self.function_string = r'$E(p)=v-Apv(1-E_{max})/(1-E_{max}+Ap)$'
         self.symbol_list = [r'E_{max}',r'v',r'A'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
-        self.function_name = r'E(p)'
-        self.gen_symbolic()
+        self.gen_symbolic(r'E(p)')
         return
 class one_minus_emax(fitdata):
     def __init__(self,*args,**kwargs):
         '''here, we give the particular latex representation and list of symbols for this particular child class'''
         fitdata.__init__(self,*args,**kwargs)
-        self.function_name = r'1-E(p)'
         self.symbol_list = [r'E_{max}',r'A'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
-        self.gen_symbolic()
+        self.gen_symbolic(r'1-E(p)')
         return
     def fitfunc_raw(self,p,x):
         '''just the actual fit function to return the array y as a function of p and x'''
@@ -1779,8 +1793,7 @@ class smax(fitdata):
         '''here, we give the particular latex representation and list of symbols for this particular child class'''
         fitdata.__init__(self,*args,**kwargs)
         self.symbol_list = [r'x',r'\xi'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
-        self.function_name = r'xismax(C)'
-        self.gen_symbolic()
+        self.gen_symbolic(r'xismax(C)')
         return
     def fitfunc_raw(self,p,C):
         '''just the actual fit function to return the array y as a function of p and x'''
