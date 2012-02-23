@@ -1,6 +1,7 @@
 from fornotebook import *
 from matlablike import *
 from nmr import *
+from nmrfit import *
 import time
 #{{{ Classes to load and store stuff to the HDF5 file
 ##{{{ the parent
@@ -9,10 +10,12 @@ class store_integrals:
             chemical_id,
             fid_args,
             first_figure = None,
+            run_number = 0,
             auxiliary_args = {},integration_args = {},integrate_function = integrate,
             lplotfigurekwargs = {},
             type_str = 'integral'):
         self.figurelist = figlistini(first_figure)
+        self.run_number = run_number
         self.type_str = type_str
         self.name = fid_args["name"]
         self.compilationroot_name = '/compilations'
@@ -56,7 +59,7 @@ class store_integrals:
                 self.attach_aux()
             except:
                 lplotfigures(self.figurelist,'error_figures.pdf')
-                raise CustomError('Look at the power meter graph to see if you can reset the extra time parameter, or if there is something wrong with the power meter.')
+                raise CustomError('Look at the power meter graph to see if you can reset the extra_time parameter, or if there is something wrong with the power meter.')
             self.integral.hdf5_write(self.h5filename + '/integrals')
             self.newrecord = True
             self.catalog()
@@ -78,7 +81,7 @@ class store_Emax (store_integrals):
         h5file,compilationroot_node = h5nodebypath(self.h5filename + '/compilations')
         search_string = '(integrals == \'%s\')'%self.integralnode_name 
         if self.newrecord:
-            Emax_table,self.index = h5addrow(compilationroot_node,'Emax_curves',[long(self.chemical_id),self.integralnode_name,expand_expno(self.expno)],['chemical_id','integrals','experiments'],match_row = search_string)
+            Emax_table,self.index = h5addrow(compilationroot_node,'Emax_curves',[long(self.chemical_id),self.integralnode_name,expand_expno(self.expno),self.run_number],['chemical_id','integrals','experiments','run_number'],match_row = search_string)
             print 'DEBUG loaded row:\n\n',lrecordarray(Emax_table.readWhere('index == %d'%self.index),smoosh=True),'\n\n'
 
         else: # these things are probably not defined yet.
@@ -119,12 +122,14 @@ class store_T1 (store_integrals):
             chemical_id,
             fid_args,
             first_figure = None,
+            run_number = 0,
             auxiliary_args = {},integration_args = {},integrate_function = process_t1,
             lplotfigurekwargs = {'numwide':4,'width':2}):
         store_integrals.__init__(self,h5filename,
             chemical_id,
             fid_args,
             first_figure = first_figure,
+            run_number = run_number,
             auxiliary_args = auxiliary_args,integration_args = integration_args,integrate_function = integrate_function,lplotfigurekwargs = lplotfigurekwargs,type_str = r'$T_1$')
         return
     def auxiliary(self,
@@ -158,6 +163,8 @@ class store_T1 (store_integrals):
             mydata = [long(self.chemical_id),self.integralnode_name]
             mynames = ['chemical_id','integrals']
             mycoeff = self.integral.output()
+            mynames.append('run_number')
+            mydata.append(self.run_number)
             mynames += ['power']
             mydata += [self.power]
             mynames += ['temperature']
@@ -176,10 +183,10 @@ class store_T1 (store_integrals):
                 concentration_table,self.index = h5addrow(compilationroot_node,'T1_fits',mydata,mynames,match_row = search_string)
             except:
                 raise CustomError("Problem saving row",lsafen(zip(mynames,mydata)))
-            print 'DEBUG loaded row\n\n',lrecordarray(concentration_table.readWhere('index == %d'%self.index),smoosh = False),'\n\n'
+            #print 'DEBUG loaded row\n\n',lrecordarray(concentration_table.readWhere('index == %d'%self.index),smoosh = False),'\n\n'
         else:
             concentration_table,self.index = h5addrow(compilationroot_node,'T1_fits',[],[],match_row = search_string)
-            print 'DEBUG read row\n\n',lrecordarray(concentration_table.readWhere('index == %d'%self.index),smoosh = False),'\n\n'
+            #print 'DEBUG read row\n\n',lrecordarray(concentration_table.readWhere('index == %d'%self.index),smoosh = False),'\n\n'
         h5file.close()
         return
 ##}}}
@@ -192,7 +199,8 @@ def parse_powers(path,name,power_file,expno = None,
         t_stop_extra = 0.0, # in minutes
         extra_time = 7.86, # amount extra per scan
         tolerance = 2.0,
-        first_figure = None):
+        first_figure = None,
+        threshold = -36):
     figurelist = figlistini(first_figure)
     fullpath = dirformat(dirformat(path)+name)+'%d/'%1
     fileinfo = load_acqu(fullpath)
@@ -216,7 +224,7 @@ def parse_powers(path,name,power_file,expno = None,
     if templen > t_minlength:
        t_minlength = templen
     t_maxlen = scan_length+scanlength_estimation_error
-    dbm,lastspike,figurelist = auto_steps(path+power_file,t_start = t_start*60,t_stop = t_stop,t_minlength = t_minlength,t_maxlen = t_maxlen,tolerance = tolerance, threshold = -36,return_lastspike = True,first_figure = figurelist)
+    dbm,lastspike,figurelist = auto_steps(path+power_file,t_start = t_start*60,t_stop = t_stop,t_minlength = t_minlength,t_maxlen = t_maxlen,tolerance = tolerance, threshold = threshold,return_lastspike = True,first_figure = figurelist)
     downby = r_[-5:5]
     timetomakeup = (len(expno)-len(dbm))*60.0*scan_length+lastspike
     obs(lsafen(r"Assuming you have less scans than you need or just one too many, you are down by expno-1-dbm=%d and the last spike is %0.2f s from the end, which means your scan length is off by %0.2f, set extra_time from %0.2f to %0.2f"%(len(expno)-1-len(dbm),lastspike,timetomakeup,extra_time,extra_time + timetomakeup/(len(expno)-1))))
@@ -275,12 +283,12 @@ def search_delete_datanode(filename,name = None,chemical = None,concentration = 
             print lsafen("The node /integrals/ doesn't exist in",filename,": continuing")
             return
         names_of_children = childnode._v_children.keys()
-        for name in names_of_children:
-            if name.find(string) > -1:
-                delete_datanode(filename,name)
+        for thisname in names_of_children:
+            if thisname.find(name) > -1:
+                delete_datanode(filename,thisname)
         h5file.close()
     else:
-        chemical_ids = get_chemical_index(filename+'/compilations/chemicals',chemical = 'GroES')
+        chemical_ids = get_chemical_index(filename+'/compilations/chemicals',chemical = chemical)
         for chemical_id in chemical_ids:
             # find the nodes that contain this chemical
             searchstring = 'chemical_id == %d'%chemical_id
@@ -289,7 +297,7 @@ def search_delete_datanode(filename,name = None,chemical = None,concentration = 
                 thistable = h5table(compilationroot_node,thistablename,None)
                 thistable_result = thistable.readWhere(searchstring)
                 integral_names = thistable_result['integrals']
-                print r'search\_delete\_datanode found datasets: '+lsafen(', '.join(list(integral_names)))
+                print '\n\n'+r'search\_delete\_datanode found datasets: '+lsafen(', '.join(list(integral_names)))+'for chemical %d'%chemical_id+lsafen('(%s)'%chemical)
                 h5file.close()
                 for j in integral_names:
                     delete_datanode('dnp.h5',j)
@@ -309,8 +317,9 @@ def delete_datanode(filename,integralnodename):
             print lsafe('and %d associated lines in %s'%(numrem,thistablename))
             if thistablename is 'Emax_curves':
                 for j in removed_table_data['index']:
-                    numrem,junk = h5remrows(compilationroot_node,'xismax_fits',"Emax_curve == %d"%j)
-                    print lsafe('and %d associated lines in %s'%(numrem,'xismax_fits'))
+                    for fittablename in ['xismax_fits','Emax_fits']:
+                        numrem,junk = h5remrows(compilationroot_node,fittablename,"Emax_curve == %d"%j)
+                        print lsafe('and %d associated lines in %s'%(numrem,'xismax_fits'))
     h5file.close()
     print lsafen()
     return
@@ -319,7 +328,7 @@ def print_chemical_by_index(compilationroot_name,indexnumber):
     lrecordarray(chemicalnode.chemicals.readWhere('index == %d'%indexnumber))
     return
 def get_chemical_index(compilationroot_name,*args,**kwargs):
-    r'OLD format: get_chemical_index(location of HDF5 node, chemical name,concentration)' + '\n' + 'OR get_chemical_index(location of HDF5 name, string with chemical + conc)' + '\n' + 'NEW FORMAT: pass no arguments, but pass kwargs chemical_name, concentration, and name'
+    r'OLD format: get_chemical_index(location of HDF5 node, chemical name,concentration)' + '\n' + 'OR get_chemical_index(location of HDF5 name, string with chemical + conc)' + '\n' + 'NEW FORMAT: pass no arguments, but pass kwargs chemical, concentration, and name'
     ##{{{ manual kwargs
     verbose = False
     if 'verbose' in kwargs.keys():
@@ -619,7 +628,10 @@ def old_dnp_for_rho(path,name,powerseries,
 def dnp_for_rho(path,
         name,
         dbm = None,
-        expno = [],t1expnos = [],h5file = 'dnp.h5',t10name = None,
+        expno = [],
+        t1expnos = [],
+        h5file = 'dnp.h5',
+        t10name = None,
         t10chemical = None,
         t10conc = 0.0,
         t1powers = [], # for this and the next, remember that the no power scan is always added to the end
@@ -628,7 +640,7 @@ def dnp_for_rho(path,
         power_file = None,
         guessonly = False,
         chemical = None,
-        concentration = None,
+        concentration = None,# the spin label concentration
         show_t1_raw = True,
         t1_offset_corr = None,
         dontfit = False,
@@ -641,16 +653,17 @@ def dnp_for_rho(path,
         simul_types = [], # simulate an ernst angle experiment, etc
         pdfstring = '',ignore_emax_error = False,
         color_pair = ['k','r'],
+        run_number = 0,
         plot_vs_A = False,
         **kwargs):
+    print '{\\bf\\color{blue}This data is part of series %d:}\n\n'%run_number
     if t1_powers is not None:
         t1powers = t1_powers
     if expnos is not None and expno == []:
         expno = expnos
-    figurelist = figlistini(first_figure)
+    figurelist = figlistini(first_figure) # when I convert this to a new function, definitely convert to a new format
     if (type(t1powers) is list and len(t1powers) > 0) or (type(t1powers) is ndarray):
         t1powers = array(t1powers,dtype = 'double')
-    print 'DEBUG -- t1powers is',lsafen(t1powers)
     if type(clear_nodes) is list:
         clear_nodes = array(clear_nodes)
     if type(clear_nodes) is ndarray:
@@ -692,8 +705,8 @@ def dnp_for_rho(path,
         raise CustomError('I didn\'t understand the arguments',kwargs)
     ###}}}
     ###{{{ find the concentration id
-    if chemical == None:
-        #print 'DEBUG: found no chemical name, so pulling from name\n\n'
+    if chemical is None:
+        print 'DEBUG: found no chemical name, so pulling from name\n\n'
         concentration_id = get_chemical_index(h5file+'/compilations/chemicals',name)
     else:
         print lsafen('DEBUG: pulling from chemical %s and conc %f'%(chemical,concentration))
@@ -704,7 +717,7 @@ def dnp_for_rho(path,
     t1kwargs = {}
     for argname in ['phchannel','phnum','offset_corr']:
         if 't1_' + argname in integration_args.keys() and (isscalar(integration_args['t1_' + argname]) or len(integration_args['t1_'+argname])>0):
-            t1kwargs[argname] = integration_args.pop('t1_'+argname)
+            t1kwargs[argname] = integration_args.pop('t1_'+argname) # does the part before "or" even work???
     ####}}}
     if len(expno) > 0:
         emax_in_file = store_Emax(h5file,concentration_id,
@@ -725,6 +738,7 @@ def dnp_for_rho(path,
                 delete_datanode(h5file,genexpname(name,j))
     else:
         t1names_forerror = map(lambda x: 'manually entered exp %d'%x,t1expnos)
+    #{{{ manually enter certain kwargs
     integration_args_save = dict(integration_args)
     integration_args.update({'show_image':show_t1_raw})
     if t1_offset_corr is not None:
@@ -733,6 +747,7 @@ def dnp_for_rho(path,
         integration_args.update({'phnum':t1_phnum})
     if t1_phchannel is not None:
         integration_args.update({'phchannel':t1_phchannel})
+    #}}}
     if len(t1powers) > 0 and len(t1powers) != len(t1expnos):
         raise CustomError("You didn't pass the same number t1powers (%d) as there are T1's (%d)!"%(len(t1powers),len(t1expnos)))
     for j,t1expno in enumerate(t1expnos):
@@ -746,7 +761,8 @@ def dnp_for_rho(path,
                     fid_args,
                     first_figure = figurelist,
                     auxiliary_args = auxiliary_args,
-                    integration_args = integration_args)
+                    integration_args = integration_args,
+                    run_number = run_number)
             figurelist = t1info.figurelist
         except:
             test = list(figurelist)
@@ -757,33 +773,43 @@ def dnp_for_rho(path,
     integration_args = integration_args_save
     ####}}}
     ###}}}
-    if len(expno) > 0:
-        ###{{{ grab data for f and plot it
+    if len(expno) > 0: # only do this if I have acquired enhancement scans
         if t10chemical == None:
             if t10name != None:
-                t10dataset = retrieve_T1series(h5file,t10name)
+                t10dataset = retrieve_T1series(h5file,t10name,show_result = 'for $T_{1,0}$')
             elif chemical != None: # find the same chemical at 0 conc
-                t10dataset = retrieve_T1series(h5file,None,chemical,0.0)
+                t10dataset = retrieve_T1series(h5file,None,chemical,0.0,run_number = run_number,show_result = 'for $T_{1,0}$')
             else:
                 print "{\\bf Warning!!} I can't figure out what your $T_{1,0}$ data is!"
                 t10dataset = None
         else:
             if t10name != None and t10conc != None:
-                t10dataset = retrieve_T1series(h5file,t10name,t10chemical,t10conc)
+                t10dataset = retrieve_T1series(h5file,t10name,t10chemical,t10conc,show_result = 'for $T_{1,0}$')
             elif t10conc != None:
-                t10dataset = retrieve_T1series(h5file,None,t10chemical,t10conc)
+                t10dataset = retrieve_T1series(h5file,None,t10chemical,t10conc,run_number = run_number,show_result = 'for $T_{1,0}$')
             else:
                 print "{\\bf Warning!!} I can't figure out what your $T_{1,0}$ data is, even though you passed a t10 chemical name!"
                 t10dataset = None
+        ###{{{ search for and retrieve the previously stored T_1(p) values
+        t1dataset = None
         if chemical == None and concentration == None:
-            t1dataset = retrieve_T1series(h5file,name)
+            t1dataset = retrieve_T1series(h5file,name,run_number = run_number,show_result = 'for $T_{1}$')
         else:
-            t1dataset = retrieve_T1series(h5file,None,chemical,concentration)
+            t1dataset = retrieve_T1series(h5file,None,chemical,concentration,run_number = run_number,show_result = 'for $T_{1}$')
+        ###}}}
+        ###{{{ calculate the linear function for T_1(p)
+        if t1dataset is not None:
+            ct1,t1line = t1dataset.polyfit('power')
+            t1err = t1dataset['power',0:1]
+            t1err /= t1err.data[0] # so this way, multiplying by this will just give an nddata with teh correct error.
+            t1f = lambda x: t1err*(nddata(x,len(x),['power'])*ct1[1]+ct1[0]) # a function that gives T_1(p)
+        ###}}}
+        ###{{{ grab data for f and plot it
         if t1dataset == None or t10dataset == None:
             fdata_exists = False # if both aren't present, I can't calculate the leakage
         else:
             fdata_exists = True
-        if fdata_exists:
+        if fdata_exists: # if I can calculate the leakage factor
             nextfigure(figurelist,'t10data' + pdfstring)
             powers_forplot = linspace(0,max(r_[t10dataset.getaxis('power').max(),t1dataset.getaxis('power').max()]),10)
             save_color_t10 = plot_color_counter()
@@ -793,12 +819,6 @@ def dnp_for_rho(path,
             ct10,t10line = t10dataset.polyfit('power')
             t10err = t10dataset['power',0:1]
             t10err /= t10err.data[0] # so this way, multiplying by this will just give an nddata with teh correct error.
-            ct1,t1line = t1dataset.polyfit('power')
-            print 'DEBUG: $T_1$ values =',lsafen(t1dataset)
-            t1err = t1dataset['power',0:1]
-            t1err /= t1err.data[0] # so this way, multiplying by this will just give an nddata with teh correct error.
-            #print lsafen('DEBUG: T1err is',t1err)
-            t1f = lambda x: t1err*(nddata(x,len(x),['power'])*ct1[1]+ct1[0])
             if size(t10dataset.data) < 2:
                 print r'{\bf Warning:} $T_{1,0}$  dataset only has a single power point'
                 if size(t1dataset.data) > 1:
@@ -816,7 +836,6 @@ def dnp_for_rho(path,
             plot_color_counter(save_color_t1)
             plot(powers_forplot,1.0/t1f(powers_forplot).set_error(None),'-', alpha = 0.2)
             plot(powers_forplot,f(powers_forplot).set_error(None),'-',label = '$f$', alpha = 0.2)
-            #print lsafen('DEBUG: T1=',t1f(x_t1))
             #print 'new probe test min:',t10line['power',0],'test max:',t10line['power',-1],'\n\n'
             #{{{ set the bottom ylim to 0, which is a more sensible plot
             ax = gca()
@@ -827,14 +846,42 @@ def dnp_for_rho(path,
             gridandtick(gca())
             autolegend()
         ###}}}
+        #{{{ grab and normalize the previously stored list of integrals
         emax_unmod = nddata_hdf5(h5file + '/integrals/' + emax_in_file.integralnode_name)
         normalizer = emax_unmod.copy().sort('power')['power',0:1]
         emax_unmod /= normalizer
+        #}}}
+        #{{{ calculate xi*s(p) by the leakage factor method, with and without heating correction
         if fdata_exists:
             ###{{{ two methods of processing the real data
             xisp_f = (1.0 - emax_unmod.copy()) * 1.51671e-3 / f(r_[0.0])
             xisp_fp = (1.0 - emax_unmod.copy()) * 1.51671e-3 / f(emax_unmod.getaxis('power'))
             ###}}}
+        #}}}
+        ###{{{ calculate and plot k*s(p), both corrected and uncorrected
+        ksp_corr = (1.0 - emax_unmod.copy()) / t1f(
+                emax_unmod.getaxis('power')) / concentration * 1.51671e-3 # calculate k s(p)
+        ksp_uncorr = (1.0 - emax_unmod.copy()) / t1f(
+                r_[0.0]) / concentration * 1.51671e-3 # calculate k s(p)
+        nextfigure(figurelist,'ksp_corr')
+        ksp_corr.rename('power','p')
+        ksp_uncorr.rename('power','p')
+        plot_updown(ksp_uncorr,'p','b','g',label = 'uncorrected')
+        plot_updown(ksp_corr,'p','k','r',label = 'corrected')
+        ylabel(r'$k_\sigma s(p)$')
+        ksp_corr = ksp(ksp_corr)
+        ksp_uncorr = ksp(ksp_uncorr)
+        ksp_corr.fit()
+        ksp_uncorr.fit()
+        plot(ksp_uncorr.eval(100),'b')
+        text(0.25,0.75,ksp_uncorr.latex(),transform = ax.transAxes,size = 'x-large', horizontalalignment = 'center',color = 'b')
+        plot(ksp_corr.eval(100),'k')
+        text(0.75,0.25,ksp_corr.latex(),transform = ax.transAxes,size = 'x-large', horizontalalignment = 'center',color = 'k')
+        print r'\begin{verbatim}'
+        print 'DEBUG: ksp_uncorr is',ksp_uncorr
+        print 'DEBUG: ksp_corr is',ksp_corr
+        print r'\end{verbatim}'
+        ###}}}
         ###{{{ null lists so that I can collect the data
         # do this here, because I might not have any simulated data
         fit_types_simul = []
@@ -943,11 +990,35 @@ def dnp_for_rho(path,
                 w.rename('power','$p A$')
             plot(w,color1[j])
             ax.set_ylim(myylims)
-            if not guessonly: text(0.7,textpos,r'$E_{max}= %0.03f \pm %0.03f$'%(v.output(r'E_{max}'),sqrt(v.covar(r'E_{max}'))),
+            if not guessonly:
+                Emaxerr = v.covar(r'E_{max}')
+                if Emaxerr is not None:
+                    Emaxerr = sqrt(Emaxerr)
+                else:
+                    Emaxerr = NaN
+                text(0.7,textpos,r'$E_{max}= %0.03f \pm %0.03f$'%(v.output(r'E_{max}'),Emaxerr),
                     transform = ax.transAxes,
                     size = 'x-large',
                     horizontalalignment = 'center',
                     color = color1[j])
+                h5file_node,compilationroot_node = h5nodebypath(h5file + '/compilations')
+                ####{{{ tabulate it
+                mycoeff = v.output()
+                search_string = '(Emax_curve == %d)'%(emax_in_file.index)
+                mydata = [emax_in_file.index]
+                mynames = ['Emax_curve']
+                mydata.append(run_number)
+                mynames.append('run_number')
+                mynames += mycoeff.dtype.names
+                mydata += mycoeff.tolist()[0]
+                mynames += ['covariance']
+                mydata += [v.covarmat()]
+                numrem,junk = h5remrows(compilationroot_node,'Emax_fits',search_string)
+                if numrem:
+                    print lsafen('Removed',numrem,'rows from Emax_fits, with values',junk[r'E_{max}'],'because they conflict with these entries')
+                concentration_table,parameters_index = h5addrow(compilationroot_node,'Emax_fits',mydata,mynames,match_row = search_string)
+                ####}}}
+                h5file_node.close()
             ####}}}
             ####{{{ new linear plot
             figurelist.append({'legend':True})
@@ -985,7 +1056,10 @@ def dnp_for_rho(path,
                     ####{{{ plot the data
                     plot_updown(v,'power',color1[j],color2[j],label = description[j])
                     v = xismax(v)
-                    v.fit()
+                    try:
+                        v.fit()
+                    except:
+                        raise CustomError('Try setting dontfit to True; it is currently',dontfit)
                     textpos = (j+1.0)/(len(datasets)-1.0+2.0)
                     plot(v.eval(100),color1[j],label = description[j])
                     text(0.7,textpos,r'$\xi s_{max}= %0.03f \pm %0.03f$'%(v.output(r'\xi s_{max}'),sqrt(v.covar(r'\xi s_{max}'))),
@@ -999,6 +1073,8 @@ def dnp_for_rho(path,
                     search_string = '(Emax_curve == %d) & (fit_type == \'%s\')'%(emax_in_file.index,fit_type[j])
                     mydata = [emax_in_file.index,fit_type[j]]
                     mynames = ['Emax_curve','fit_type']
+                    mydata.append(run_number)
+                    mynames.append('run_number')
                     mynames += mycoeff.dtype.names
                     mydata += mycoeff.tolist()[0]
                     mynames += ['covariance']
@@ -1084,7 +1160,11 @@ def parse_t1_covariance(data):
     return covariance.reshape((num_coeff,num_coeff,len(data)))
 ##}}}
 ##{{{ load a series of t1 vs power
-def t1vp(h5filename,expnos,dbm,fid_args = {},integration_args = {}, auxiliary_args = {},chem_conc = None,chem_name = None):
+def t1vp(h5filename,expnos,dbm,fid_args = {},integration_args = {}, auxiliary_args = {},chem_conc = None,chem_name = None,first_figure = None):
+    r'''this tries to load a series of T1 vs. power curves
+    it uses expno and t1power to select the T1 files to load,
+    and it calls store T1'''
+    figurelist = figlistini(first_figure)
     if len(expnos) != len(dbm):
         raise CustomError('len(expnos)=',len(expnos),'len(dbm)=',len(dbm),dbm)
     if chem_name is not None:
@@ -1096,6 +1176,7 @@ def t1vp(h5filename,expnos,dbm,fid_args = {},integration_args = {}, auxiliary_ar
         auxiliary_args.update({'t1power':dbm[j]})
         store_T1(h5filename,chemidx,
                 fid_args,
+                first_figure = figurelist,
                 auxiliary_args = auxiliary_args,
                 integration_args = integration_args)
     h5file = tables.openFile(h5filename)
@@ -1116,13 +1197,23 @@ def t1vp(h5filename,expnos,dbm,fid_args = {},integration_args = {}, auxiliary_ar
 ##{{{ retrieve a series of T1 measurements from HDF5
 def retrieve_T1series(h5filename,name,*cheminfo,**kwargs):
     'cheminfo -- either file name, or empty to use name'
+    #{{{ kwargs processing
     verbose = False
     indirect_dim = 'power'
+    run_number = None
+    show_result = False
     if 'indirect_dim' in kwargs.keys():
         indirect_dim = kwargs.pop('indirect_dim')
     if 'verbose' in kwargs.keys():
         verbose = kwargs.pop('verbose')
+        if verbose == True and show_result == False:
+            show_result = True
+    if 'run_number' in kwargs.keys():
+        run_number = kwargs.pop('run_number')
+    if 'show_result' in kwargs.keys():
+        show_result = kwargs.pop('show_result')
     if verbose: print lsafen('DEBUG: retrieve T1series called with name=',name,'cheminfo',cheminfo)
+    #}}}
     if len(cheminfo) == 2:
         chemidx = get_chemical_index(h5filename+'/compilations/chemicals',cheminfo[0],cheminfo[1])
     elif len(cheminfo) == 0:
@@ -1130,25 +1221,32 @@ def retrieve_T1series(h5filename,name,*cheminfo,**kwargs):
     else:
         raise CustomError('You called retrieve_T1series with neither no info about the chemical nor a chemical, concentration pair')
     h5file = tables.openFile(h5filename)
-    data = h5file.root.compilations.T1_fits.readWhere('chemical_id == %d'%chemidx)
+    search_string = 'chemical_id == %d'%chemidx
+    if run_number is not None:
+        search_string = '('+search_string+') & (run_number == %d)'%run_number
+    data = h5file.root.compilations.T1_fits.readWhere(search_string)
     h5file.close()
-    if len(data) == 0:
-        print 'No $T_1$ data found for chemidx=\n\n',print_chemical_by_index(h5filename+'/compilations/chemicals',chemidx),'\n\n'
-        return None
-    if verbose: lrecordarray(data)
     if name is not None: # only run this code if I pass an explicit name
         data = [x.reshape(1) for x in data if re.match('^'+name,x['integrals'])]
         if len(data) == 0:
-            raise CustomError("found no T1 data for",name)
-        data = concatenate(data)
+            if show_result:
+                raise RuntimeError("found no T1 data "+show_result+" for chemical "+name)
+            else:
+                raise RuntimeError("found no T1 data for"+name)
+        data = concatenate(data) # this concatenates the nddata
+    if len(data) == 0:
+        print 'No $T_1$ data found for chemidx=\n\n',print_chemical_by_index(h5filename+'/compilations/chemicals',chemidx),'\n\n'
+        return None
+    if show_result: print r'{\bf retrieved $T_1$ series',show_result,':}','\n\n',lrecordarray(data),'\n\n'
     if verbose: print '\n\n',lsafe('matching indeces:',data['index']),'\n\n'
     myerrors = sqrt(parse_t1_covariance(data)[0,0,:])
     if indirect_dim == 'power':
         powers = data[indirect_dim][:]
-        if indirect_dim == 'power':
-            powers = dbm_to_power(powers)
+        powers = dbm_to_power(powers)
+    elif indirect_dim in data.dtype.names:
+            powers = data[indirect_dim][:]
     else:
-        powers = None
+            raise CustomError('indirect dim',indirect_dim,'not in',data.dtype.names)
     data = data['T_1'][:]
     retval = nddata(data,[len(data)],[indirect_dim],data_error = myerrors,axis_coords = [powers])
     if indirect_dim == 'power':

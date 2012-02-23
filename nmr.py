@@ -1,11 +1,11 @@
 # just make this a library of all NMR reading software
 from matlablike import *
+from nmrfit import *
 import re
 import string
 import struct
 import os
 import fornotebook
-import sympy
 from scipy.io import loadmat
 
 def OUTPUT_notebook():
@@ -210,10 +210,7 @@ def det_type(filename):
     #}}}
     else:
         filename = dirformat(filename)
-        try:
-            files_in_dir = os.listdir(filename)
-        except:
-            raise CustomError('Problems finding directory:',filename)
+        files_in_dir = os.listdir(filename)
         #{{{ Bruker 2D
         if os.path.exists(filename+'ser'):
             return ('bruker',True)
@@ -266,12 +263,9 @@ def load_file(*args,**kwargs):
     #}}}
     filenames = format_listofexps(args)
     #{{{load all the data into a list
-    try:
-        data = [load_indiv_file(filenames[0],dimname=dimname,add_sizes = add_sizes,add_dims = add_dims)]
-        for filename in filenames[1:]:
-            data += [load_indiv_file(filename,dimname=dimname,add_sizes = add_sizes,add_dims = add_dims)]
-    except:
-        raise CustomError('Problem loading list of files',filenames)
+    data = [load_indiv_file(filenames[0],dimname=dimname,add_sizes = add_sizes,add_dims = add_dims)]
+    for filename in filenames[1:]:
+        data += [load_indiv_file(filename,dimname=dimname,add_sizes = add_sizes,add_dims = add_dims)]
     #}}}
     # for the following, I used to have a condition, but this is incompatible with the pop statement at the end
     newdata = concat(data,dimname) # allocate the size of the indirect array
@@ -346,7 +340,21 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
         try:
             data = nddata(data,mydimsizes,mydimnames)
         except:
-            raise CustomError("found td1=",td1,"for",filename,"which I don't think is right")
+            size_it_should_be = array(mydimsizes).prod()
+            if size_it_should_be > len(data):
+                zero_filled_data = zeros(size_it_should_be)
+                zero_filled_data[0:len(data)] = data
+                data = nddata(zero_filled_data,mydimsizes,mydimnames)
+            else:
+                new_guess = len(data)/(td2_zf/2)
+                print lsafen("WARNING!, chopping the length of the data to fit the specified td1 of ",td1,"points!\n(specified ",zip(mydimnames,mydimsizes),' td2_zf=%d)'%td2_zf)
+                #td2_zf_new = 2**ceil(log(td2)/log(2))
+                #mydimsizes[1] = td2_zf_new
+                #size_it_might_be = array(mydimsizes).prod()
+                #print "maybe this works:",size_it_might_be == len(data)
+                data = data[0:size_it_should_be]
+                data = nddata(data,mydimsizes,mydimnames)
+                #raise CustomError("found td1=",td1,"for",filename,"which I don't think is right, because the product of the dimensions",zip(mydimnames,mydimsizes),'=',size_it_should_be,'does not equal the length of the data',len(data),'I think that it should be',len(data)/(td2_zf/2))
         #print 'DEBUG: data straight from nddata =',data
         data = data['t2',0:td2/2] # now, chop out their zero filling
         t2axis = 1./v['SW_h']*r_[1:td2/2+1]
@@ -355,6 +363,8 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
         data.labels(mydimnames,mylabels)
         shiftpoints = int(bruker_det_phcorr(v)) # use the canned routine to calculate the first order phase shift
         data.circshift('t2',shiftpoints)
+        data.set_units('t2','s')
+        data.set_units('digital')
         #print 'DEBUG 2: data from bruker file =',data
         #}}}
         #{{{ Prospa 2D
@@ -743,7 +753,7 @@ def standard_epr(dir = None,
            deriv.run_nopop(diff,field)
            deriv.data[abs(data.data) > abs(data.data).max()/10] = 0 # so it doesn't give a fast slope, non-zero area
            deriv = abs(deriv)
-           deriv.argmax(field)
+           deriv.argmax(field,raw_index = True)
            centerfield = mean(xaxis[int32(deriv.data)])
            if find_maxslope:
                xaxis -= centerfield
@@ -907,6 +917,7 @@ def integrate(file,expno,
         indiv_phase = False,
         scale_plot = False,
         peak_within = 1e3,
+        bandpass = None,
         abs_image = False,
         max_drift = 1e3,
         first_figure = None,
@@ -950,7 +961,7 @@ def integrate(file,expno,
     # see_fid obsolete by rg_check
     # also remove all debug statements
     #print 'DEBUG: before phcyc, figlist is',lsafen(figurelist)
-    data,figurelist = phcyc(data,names = phcycdims,selections = phchannel, show_plot = ['t2',(lambda x:abs(x)<peak_within)],first_figure = figurelist,pdfstring = pdfstring) # ft along t2, applying phase cycle where necessary
+    data,figurelist = phcyc(data,names = phcycdims,selections = phchannel, show_plot = ['t2',(lambda x:abs(x)<peak_within)],first_figure = figurelist,pdfstring = pdfstring,bandpass = bandpass) # ft along t2, applying phase cycle where necessary
     data_shape = ndshape(data) # this is used to shape the output
     #{{{ abs w/ max SNR, so we can pick the peak
     data_abs = data.copy()
@@ -1148,9 +1159,11 @@ def print_info(filename,also = {}):
             print '\n\n'
 #}}}
 #{{{ deal with manual phase cycling
-def phcyc(data,names=[],selections=[],remove_zeroglitch=None,show_plot = False,first_figure = None,pdfstring = ''):
+def phcyc(data,names=[],selections=[],remove_zeroglitch=None,show_plot = False,first_figure = None,pdfstring = '',bandpass = None):
     figurelist = figlistini(first_figure)
     data.ft('t2',shift=True)
+    if (bandpass is not None):
+        data = data['t2',lambda x: abs(x)<bandpass]
     if len(names)>0:
         data.ft(names)
         if remove_zeroglitch == None:
@@ -1465,7 +1478,11 @@ def baseline_spectrum(data,center,points,showplots=False):
 #{{{ plot_noise
 def plot_noise(path,j,calibration,mask_start,mask_stop,rgmin=0,k_B = None,smoothing = False, both = False, T = 293.0,plottype = 'semilogy',retplot = False):
     '''plot noise scan as resistance'''
-    data = load_file(r'%s%d'%(path,j),calibration=calibration)
+    filename = r'%s%d'%(path,j)
+    try:
+        data = load_file(filename,calibration=calibration)
+    except:
+        raise CustomError('error loading file'+filename)
     k_B = 1.3806504e-23
     data.ft('t2',shift = True)
     newt2 = r'F2 / $Hz$'
@@ -1484,7 +1501,10 @@ def plot_noise(path,j,calibration,mask_start,mask_stop,rgmin=0,k_B = None,smooth
         t = data.getaxis(newt2)
         mask = logical_and(t>mask_start,
             t<mask_stop)
-        avg = plotdata.data[mask].mean() 
+        try:
+            avg = plotdata.data[mask].mean() 
+        except IndexError:
+            raise CustomError('error trying to mask for the average because the mask is',mask,'of shape',shape(mask),'for shape(plotdata)=',shape(plotdata.data))
         retval = []
         if both or not smoothing:
             pval = plot(plotdata,'-',alpha=0.5,plottype = plottype)
@@ -1513,329 +1533,4 @@ def plot_noise(path,j,calibration,mask_start,mask_stop,rgmin=0,k_B = None,smooth
     else:
         return []
 #}}}
-#{{{ different types of fit classes
-class t1curve(fitdata):
-    def guess(self):
-        r'''provide the guess for our parameters, which is specific to the type of function'''
-        ini_guess = {r'M(\infty)':1.0,r'M(0)':-1.0,r'T_1':1.0}
-        fprime = self.parameter_derivatives(set = ini_guess)
-        f_at_ini_guess = real(self.eval(None,set = ini_guess).data)
-        y = self.data
-        new_y_shape = list(y.shape)
-        new_y_shape.append(1)
-        y = y.reshape(tuple(new_y_shape))
-        try:
-            f_at_ini_guess = f_at_ini_guess.reshape(tuple(new_y_shape))
-        except:
-            raise CustomError('trying to reshape f_at_ini_guess from',f_at_ini_guess.shape,'to',new_y_shape)
-        print '\n\n'+lsafen(' fprime = ',fprime,'f_at_ini_guess',f_at_ini_guess,'y=',y)
-        print '\n\nshape of parameter derivatives',shape(fprime),'shape of output',shape(y),'\n\n'
-        newguess = array(ini_guess.values()) + dot(pinv(fprime.T),(y-f_at_ini_guess)).flatten()
-        # old stuff here
-        x = self.getaxis(self.fit_axis)
-        testpoint = argmin(abs(x-x.max()/4)) # don't just pull 1/4 of the index, because it can be unevenly spaced #this was 1/3 before, but not working great
-        initial_slope = (y[testpoint]-y[0])/(x[testpoint]-x[0])
-        A = y[-1]
-        B = y[testpoint]-x[testpoint]*initial_slope
-        C = (A-B)/initial_slope
-        if (C < 0):
-            raise CustomError(maprep('Negative T1!!! A-B=',A-B,'initial_slope=',initial_slope,x,y))
-        #else:
-        #   print 'C is ',C
-        oldguess = r_[A,B,C/3.0]
-        print "\n\nnewguess = ",newguess," oldguess = ",oldguess,"\n\n"
-        return newguess
-    def fitfunc_raw(self,p,x):
-        '''just the actual fit function to return the array y as a function of p and x'''
-        return p[0]+(p[1]-p[0])*exp(-x/p[2])
-    def fitfunc_raw_symb(self,p,x):
-        '''if I'm using a named function, I have to define separately in terms of sympy rather than numpy functions'''
-        return p[0]+(p[1]-p[0])*sympy.exp(-x/p[2])
-    def linfunc(self,x,y,xerr = None,yerr = None):
-        '''just the actual fit function to return the pair of arrays x',y' that should be linear
-        it accepts as inputs x and y, and it uses the output from the fit, where necessary
-        also optionally propagates the error based on yerr and xerr, which can be passed in to it
-        For the case of T1, we want to return ln(y-M(\infty)) = ln(M(0)-M(\infty)) - t/T_1
-        '''
-        #print 'DEBUG: y is',y
-        #print 'DEBUG: M(\infty) is',self.output(r'M(\infty)')
-        temp = self.output(r'M(\infty)')-y # the argument for log
-        #print 'DEBUG: temp is',temp
-        # note that there is some error associated with m(\infty) that I'm just taking for granted
-        rety = log(temp)
-        if yerr != None:
-            reterr = yerr/abs(temp)
-        mask = isfinite(rety)
-        retx = x # for instance, in emax, this is not just x
-        xname = self.fit_axis # same as the fit axis
-        yname = r'$ln(M(\infty)-M(t))$'
-        #{{{ this should be pretty standardized
-        retval = nddata(rety,
-                [size(rety),1],
-                [xname,yname])
-        retval.labels([self.fit_axis],
-                [retx.copy()])
-        if yerr != None:
-            retval.set_error(reterr)
-        #}}}
-        return retval
-    def linerror(self,x,y):
-        '''propagate the error for linfunc
-        '''
-        rety = log(y-self.output(r'M(\infty)'))
-        mask = isfinite(rety)
-        x_axis_of_linear_plot = x # for instance, in emax, this is not just x
-        retval = nddata(rety,
-                [size(rety),1],
-                [self.fit_axis,r'$ln(M(t)-M(\infty))$'])
-        retval.labels([self.fit_axis],
-                [x_axis_of_linear_plot.copy()])
-        return retval
-    def __init__(self,*args,**kwargs):
-        '''here, we give the particular latex representation and list of symbols for this particular child class'''
-        fitdata.__init__(self,*args,**kwargs)
-        self.function_string = r'$M(t)=M(\infty)+(M(0)-M(\infty))e^{-t/T_1}$'
-        self.symbol_list = [r'M(\infty)',r'M(0)',r'T_1'] # note that it must notbe possible to find part of one of the later strings by searching for one of the earlier strings
-        self.gen_symbolic(r'M(t)')
-        return
-class emax_legacy(fitdata):
-    def guess(self):
-        r'''provide the guess for our parameters, which is specific to the type of function'''
-        newdata = self.copy()
-        newdata.sort(self.fit_axis)
-        power = newdata.getaxis(self.fit_axis)
-        integral = newdata.data
-        largest = len(power)
-        initial_slope = (integral[largest/4]-integral[0])/(power[largest/4]-power[0])
-        approx_emax = integral[-1]
-        #print 'DEBUG: guessed initial slope',initial_slope,'approx emax',approx_emax
-        return [1,-initial_slope,-initial_slope/(1-approx_emax)]
-    def fitfunc_raw(self,p,x):
-        '''just the actual fit function to return the array y as a function of p and x'''
-        return (p[0]-(p[1]*x/(1.+p[2]*x)))
-    def linfunc(self,x,y,xerr = None,yerr = None):
-        '''just the actual fit function to return the pair of arrays x',y' that should be linear
-        it accepts as inputs x and y, and it uses the output from the fit, where necessary
-        also optionally propagates the error based on yerr and xerr, which can be passed in to it
-        For the case of E_max, we want 1/(1-E) = 
-        '''
-        # note that there is some error associated with m(\infty) that I'm just taking for granted
-        #print "linfunc passed x=",x,"and y=",y
-        rety = 1./(1.-y)
-        if yerr != None:
-            reterr = yerr/((1.-y)**2)
-        mask = isfinite(rety)
-        retx = 1./x # for instance, in emax, this is not just x
-        xname = r'1 / '+self.fit_axis # same as the fit axis
-        yname = r'$\frac{1}{1-E(p)}$'
-        #{{{ this should be pretty standardized
-        retval = nddata(rety,
-                [size(rety),1],
-                [xname,yname])
-        retval.labels([xname],
-                [retx.copy()])
-        if yerr != None:
-            retval.set_error(reterr)
-        #}}}
-        return retval
-    def __init__(self,*args,**kwargs):
-        '''here, we give the particular latex representation and list of symbols for this particular child class'''
-        fitdata.__init__(self,*args,**kwargs)
-        self.function_string = r'$E(p)=c_0-Ap/(1+Bp)$'
-        self.symbol_list = [r'c_0',r'A',r'B'] # note that it must notbe possible to find part of one of the later strings by searching for one of the earlier strings
-        return
-class emax(fitdata):
-    def guess(self):
-        r'''provide the guess for our parameters, which is specific to the type of function'''
-        newdata = self.copy()
-        newdata.sort(self.fit_axis)
-        power = newdata.getaxis(self.fit_axis)
-        integral = newdata.data
-        largest = len(power)
-        initial_slope = (integral[largest/4]-integral[0])/(power[largest/4]-power[0])
-        approx_emax = integral[-1]/integral[0]
-        return [approx_emax,integral[0],-initial_slope] #guess [r'E_{max}',r'v',r'A']
-    def fitfunc_raw(self,p,x):
-        '''just the actual fit function to return the array y as a function of p and x'''
-        #self.function_string = r'$E(p)=v-Apv(1-E_{max})/(1-E_{max}+Ap)$'
-        #self.symbol_list = [r'E_{max}',r'v',r'A'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
-        return (p[1]-(p[2]*x*p[1]*(1.-p[0])/(1.-p[0]+p[2]*x)))
-    def linfunc(self,x,y,xerr = None,yerr = None):
-        '''just the actual fit function to return the pair of arrays x',y' that should be linear
-        it accepts as inputs x and y, and it uses the output from the fit, where necessary
-        also optionally propagates the error based on yerr and xerr, which can be passed in to it
-        For the case of E_max, we want 1/(1-E) = 
-        '''
-        # note that there is some error associated with m(\infty) that I'm just taking for granted
-        #print "linfunc passed x=",x,"and y=",y
-        rety = 1./(1.-y)
-        if yerr != None:
-            reterr = yerr/((1.-y)**2)
-        mask = isfinite(rety)
-        retx = 1./x # for instance, in emax, this is not just x
-        xname = r'1 / '+self.fit_axis # same as the fit axis
-        yname = r'$\frac{1}{1-E(p)}$'
-        #{{{ this should be pretty standardized
-        retval = nddata(rety,
-                [size(rety),1],
-                [xname,yname])
-        retval.labels([xname],
-                [retx.copy()])
-        if yerr != None:
-            retval.set_error(reterr)
-        #}}}
-        return retval
-    def __init__(self,*args,**kwargs):
-        '''here, we give the particular latex representation and list of symbols for this particular child class'''
-        fitdata.__init__(self,*args,**kwargs)
-        #self.function_string = r'$E(p)=v-Apv(1-E_{max})/(1-E_{max}+Ap)$'
-        self.symbol_list = [r'E_{max}',r'v',r'A'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
-        self.gen_symbolic(r'E(p)')
-        return
-class one_minus_emax(fitdata):
-    def __init__(self,*args,**kwargs):
-        '''here, we give the particular latex representation and list of symbols for this particular child class'''
-        fitdata.__init__(self,*args,**kwargs)
-        self.symbol_list = [r'E_{max}',r'A'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
-        self.gen_symbolic(r'1-E(p)')
-        return
-    def fitfunc_raw(self,p,x):
-        '''just the actual fit function to return the array y as a function of p and x'''
-        return ((x*p[1]*(1.-p[0])/(1.-p[0]+p[1]*x)))
-    def guess(self):
-        r'''provide the guess for our parameters, which is specific to the type of function'''
-        newdata = self.copy()
-        newdata.sort(self.fit_axis)
-        power = newdata.getaxis(self.fit_axis)
-        one_minus_E = newdata.data
-        largest = len(power)
-        initial_slope = (one_minus_E[largest/4]-one_minus_E[0])/(one_minus_E[largest/4]-one_minus_E[0])
-        approx_emax = (1.0-one_minus_E[-1])
-        return [approx_emax,initial_slope] #guess [r'E_{max}',r'A']
-    def linfunc(self,x,y,xerr = None,yerr = None):
-        '''just the actual fit function to return the pair of arrays x',y' that should be linear
-        it accepts as inputs x and y, and it uses the output from the fit, where necessary
-        also optionally propagates the error based on yerr and xerr, which can be passed in to it
-        For the case of E_max, we want 1/(1-E) = 
-        '''
-        # note that there is some error associated with m(\infty) that I'm just taking for granted
-        #print "linfunc passed x=",x,"and y=",y
-        rety = 1./(y)
-        if yerr != None:
-            reterr = yerr/(y**2) # check this later
-        mask = isfinite(rety)
-        retx = 1./x # for instance, in emax, this is not just x
-        xname = r'1 / '+self.fit_axis # same as the fit axis
-        yname = r'$\frac{1}{1-E(p)}$'
-        #{{{ this should be pretty standardized
-        retval = nddata(rety,
-                [size(rety),1],
-                [xname,yname])
-        retval.labels([xname],
-                [retx.copy()])
-        if yerr != None:
-            retval.set_error(reterr)
-        #}}}
-        return retval
-class xismax(fitdata):
-    def __init__(self,*args,**kwargs):
-        '''here, we give the particular latex representation and list of symbols for this particular child class'''
-        fitdata.__init__(self,*args,**kwargs)
-        self.function_string = r'$\xi s(p)=B p \xi s_{max}/(\xi s_{max} + B p$'
-        self.symbol_list = [r'B',r'\xi s_{max}'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
-        return
-    def fitfunc_raw(self,p,x):
-        '''just the actual fit function to return the array y as a function of p and x'''
-        #self.function_string = r'$\xi s(p)=B p \xi s_{max}/(\xi s_{max} + B p$'
-        #self.symbol_list = [r'B',r'\xi s_{max}'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
-        return (p[0]*x*p[1])/(p[1]+p[0]*x)
-    def guess(self):
-        r'''provide the guess for our parameters, which is specific to the type of function'''
-        newdata = self.copy()
-        newdata.sort(self.fit_axis)
-        power = newdata.getaxis(self.fit_axis)
-        integral = newdata.data
-        largest = len(power)
-        initial_slope = (integral[largest/4]-integral[0])/(power[largest/4]-power[0])
-        #{{{ use the indexing functions to more legibly set the return values
-        retval = zeros(len(self.symbol_list))
-        retval[self._pn(r'\xi s_{max}')] = integral[-1]
-        retval[self._pn(r'B')] = initial_slope
-        return retval
-        #}}}
-    def linfunc(self,x,y,xerr = None,yerr = None):
-        '''just the actual fit function to return the pair of arrays x',y' that should be linear
-        it accepts as inputs x and y, and it uses the output from the fit, where necessary
-        also optionally propagates the error based on yerr and xerr, which can be passed in to it
-        For the case of E_max, we want 1/(1-E) = 
-        '''
-        # note that there is some error associated with m(\infty) that I'm just taking for granted
-        #print "linfunc passed x=",x,"and y=",y
-        rety = 1./(1.-y)
-        if yerr != None:
-            reterr = yerr/((1.-y)**2)
-        mask = isfinite(rety)
-        retx = 1./x # for instance, in emax, this is not just x
-        xname = r'1 / '+self.fit_axis # same as the fit axis
-        yname = r'$\frac{1}{1-E(p)}$'
-        #{{{ this should be pretty standardized
-        retval = nddata(rety,
-                [size(rety),1],
-                [xname,yname])
-        retval.labels([xname],
-                [retx.copy()])
-        if yerr != None:
-            retval.set_error(reterr)
-        #}}}
-        return retval
-class smax(fitdata):
-    def __init__(self,*args,**kwargs):
-        '''here, we give the particular latex representation and list of symbols for this particular child class'''
-        fitdata.__init__(self,*args,**kwargs)
-        self.symbol_list = [r'x',r'\xi'] # note that it must not be possible to find part of one of the later strings by searching for one of the earlier strings
-        self.gen_symbolic(r'xismax(C)')
-        return
-    def fitfunc_raw(self,p,C):
-        '''just the actual fit function to return the array y as a function of p and x'''
-        x = p[0]*C
-        xi = p[1]
-        snrmax = x/(x+3)
-        return xi*(1./3.+2./3.*snrmax)
-    def set_guess(self,**kwargs):
-        newdata = self.copy()
-        maxC = lambda x: x == self.getaxis(self.fit_axis).max()
-        self.guesses = {r'xi':newdata[self.fit_axis,maxC].data[-1],
-            'x':1.}
-        self.guesses.update(kwargs)
-        return
-    def guess(self):
-        r'''provide the guess for our parameters, which is specific to the type of function'''
-        if not hasattr(self,'guesses'):
-            self.set_guess()
-        return [self.guesses[x] for x in ['x','xi']] #guess [r'E_{max}',r'A']
-    def linfunc(self,x,y,xerr = None,yerr = None):
-        '''just the actual fit function to return the pair of arrays x',y' that should be linear
-        it accepts as inputs x and y, and it uses the output from the fit, where necessary
-        also optionally propagates the error based on yerr and xerr, which can be passed in to it
-        For the case of E_max, we want 1/(1-E) = 
-        '''
-        # note that there is some error associated with m(\infty) that I'm just taking for granted
-        #print "linfunc passed x=",x,"and y=",y
-        rety = 1./(y)
-        if yerr != None:
-            reterr = yerr/(y**2) # check this later
-        mask = isfinite(rety)
-        retx = 1./x # for instance, in emax, this is not just x
-        xname = r'1 / '+self.fit_axis # same as the fit axis
-        yname = r'$\frac{1}{1-E(p)}$'
-        #{{{ this should be pretty standardized
-        retval = nddata(rety,
-                [size(rety),1],
-                [xname,yname])
-        retval.labels([xname],
-                [retx.copy()])
-        if yerr != None:
-            retval.set_error(reterr)
-        #}}}
-        return retval
 #}}}

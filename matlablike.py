@@ -13,6 +13,7 @@ import sympy
 from scipy.optimize import leastsq
 from scipy.signal import fftconvolve
 import scipy.sparse as sparse
+import numpy.lib.recfunctions as recf
 from inspect import getargspec
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
@@ -63,6 +64,59 @@ def showtype(x):
         return type(x)
 def emptyfunction():
     pass
+def lookup_rec(A,B,indexpair):
+    r'''look up information about A in table B (i.e. chemical by index, etc)
+    indexpair is either the name of the index
+    or -- if it's differently named -- the pair of indeces
+    given in (A,B) respectively
+    
+    This will just drop any fields in B that are also in A,
+    and the output uses the first indexname'''
+    if type(indexpair) not in [tuple,list]:
+        indexpair = (indexpair,indexpair)
+    Bini = copy(B)
+    B = recf.drop_fields(B,( set(B.dtype.names) & set(A.dtype.names) ) - set([indexpair[1]])) # indexpair for B gets dropped later anyways
+    joined = []
+    for j in A:
+        matchedrows =  B[B[indexpair[1]] == j[indexpair[0]]]
+        for matchedrow in matchedrows:
+            joined.append((j,matchedrow))
+    if len(joined) == 0:
+        raise CustomError('Unable to find any matches between',A[indexpair[0]],'and',B[indexpair[1]],'!')
+    whichisindex = joined[0][1].dtype.names.index(indexpair[1])
+    allbutindex = lambda x: list(x)[0:whichisindex]+list(x)[whichisindex+1:]
+    joined = concatenate([array(tuple(list(j[0])+allbutindex(j[1])),
+                    dtype = dtype(j[0].dtype.descr+allbutindex(j[1].dtype.descr))).reshape(1) for j in joined])
+    return joined
+def reorder_rec(myarray,listofnames,first = True):
+    indeces_to_move = [myarray.dtype.names.index(j) for j in listofnames]
+    old_type = list(myarray.dtype.descr)
+    new_type = [old_type[j] for j in indeces_to_move] + [old_type[j] for j in range(0,len(old_type)) if j not in indeces_to_move]
+    new_list_of_data = [myarray[j[0]] for j in new_type]
+    return rec.fromarrays(new_list_of_data,dtype = new_type)
+def lambda_rec(myarray,myname,myfunction,myargs):
+    r'''make a new field "myname" which consists of "myfunction" evaluated with the fields given by "myargs" as arguments
+    the new field is always placed at the end
+    if myname is in myargs, the original row is popped'''
+    if type(myargs) is not tuple:
+        myargs = tuple(myargs)
+    argdata = map((lambda x: myarray[x]),myargs)
+    try:
+        newrow = myfunction(*tuple(argdata))
+    except TypeError:
+        newrow = array([myfunction(*tuple([x[rownumber] for x in argdata])) for rownumber in range(0,len(argdata[0]))])
+    try:
+        new_field_type = list(newrow.dtype.descr[0])
+    except AttributeError:
+        raise CustomError("evaluated function on",argdata,"and got back",newrow,"which appears not to be a numpy array")
+    new_field_type[0] = myname
+    eliminate = None
+    new_dtype = list(myarray.dtype.descr)
+    if myname in myargs:
+        eliminate = myname
+        new_dtype = [j for j in new_dtype if j[0] != eliminate]
+    new_dtype.append(tuple(new_field_type))
+    return rec.fromarrays([myarray[x] for x in myarray.dtype.names if x != eliminate]+[newrow],dtype = new_dtype)
 def make_rec(*args,**kwargs):
     r'input,names or a single argument, which is a dictionary\nstrlen = 100 gives length of the strings (which need to be specified in record arrays)\nyou can also specify (especially useful with the dictionary format) the list order = [str1,str2,...] which orders the output records with the field containing str1 first, then the field containing str2, then any remaining fields'
     strlen = 100
@@ -271,7 +325,10 @@ def h5remrows(bottomnode,tablename,searchstring):
     try:
         thistable = bottomnode.__getattr__(tablename)
         counter = 0
-        data = thistable.readWhere(searchstring).copy()
+        try:
+            data = thistable.readWhere(searchstring).copy()
+        except:
+            raise CustomError('Problem trying to remove rows using search string',searchstring,'in',thistable)
         for row in thistable.where(searchstring):
             if len(thistable) == 1:
                 thistable.remove()
@@ -297,10 +354,10 @@ def h5addrow(bottomnode,tablename,listofdata,listofnames,force = False,match_row
                 raise CustomError('The columns available are',mytable.colnames)
             if len(matches) > 0:
                 if only_last:
-                    return mytable,matches['index'][:]
-                else:
                     if verbose: print r'\o{',lsafen(len(matches),"rows match your search criterion, returning the last row"),'}'
                     return mytable,matches['index'][-1]
+                else:
+                    return mytable,matches['index'][:]
             else:
                 if add:
                     if verbose: print r'\o{',lsafen("Creating a new row for your data"),'}'
@@ -763,11 +820,15 @@ def plot(*args,**kwargs):
     if isinstance(myy,nddata):
         if myy.get_plot_color() is not None:
             kwargs.update({'color':myy.get_plot_color()})
+        #if (len(myy.dimlabels)>1):
+        #    myylabel = myy.dimlabels[1]
+        #    yunits = myy.get_units(myylabel)
+        #    if yunits is not None:
+        #        myylabel += ' / $' + yunits + '$'
         if (len(myy.dimlabels)>1):
-            myylabel = myy.dimlabels[1]
-            yunits = myy.get_units(myylabel)
+            yunits = myy.get_units()
             if yunits is not None:
-                myylabel += ' / $' + yunits + '$'
+                myylabel = 'data / $' + yunits + '$'
         if (len(myy.dimlabels)>0):
             myxlabel = myy.dimlabels[0]
             xunits = myy.get_units(myxlabel)
@@ -1810,6 +1871,11 @@ class nddata (object):
                 self.axis_coords = map(self.axis_coords.__getitem__,neworder)
             except:
                 raise CustomError('problem mapping',map(len,self.axis_coords),'onto',neworder)
+            if len(self.axis_coords_units)>0:
+                try:
+                    self.axis_coords_units = map(self.axis_coords_units.__getitem__,neworder)
+                except:
+                    raise CustomError('problem mapping',map(len,self.axis_coords_units),'onto',neworder)
         try:
             self.data = self.data.transpose(neworder)
         except ValueError:
@@ -1920,25 +1986,21 @@ class nddata (object):
         print 'getslice! ',args
     def __setitem__(self,*args):
         if isinstance(args[1],nddata):
+            #{{{ reorder so the shapes match
+            unshared_indeces = list(set(args[1].dimlabels) ^ set(self.dimlabels))
+            shared_indeces = list(self.dimlabels)
+            for j in unshared_indeces:
+                shared_indeces.remove(j)
+            if len(args[1].dimlabels) != len(shared_indeces) or (not all([args[1].dimlabels[j] == shared_indeces[j] for j in range(0,len(shared_indeces))])):
+                args[1].reorder[shared_indeces]
+            #}}}
             rightdata = args[1].data
-            #print 'check size:',self.data.shape,args[1].data.shape
-            rightlabels = args[1].dimlabels
         else: # assume it's an ndarray
             rightdata = args[1]
             if (type(rightdata) is not ndarray): # in case its a scalar
                 rightdata = array([rightdata])
-        #{{{ build up the left index list
-        leftindex = [slice(None,None,None)]*len(self.dimlabels) # by default, just pass everything, to cut the :,:,: notation
-        for j in range(0,len(args[0]),2):
-            try:
-                thisindex = self.dimlabels.index(args[0][j]) # find the number of the dimension we're about to index
-            except:
-                print 'ERROR------------------------'
-                print args[0][j],' not found'
-                print '-----------------------------'
-                raise
-            leftindex[thisindex] = args[0][j+1] # substitute the default value of the index with the new value
-        #}}}
+        slicedict,axesdict,errordict = self._parse_slices(args[0]) # pull left index list from parse slices
+        leftindex = self.fld(slicedict)
         try:
             self.data[tuple(leftindex)] = rightdata.squeeze() # assign the data
         except:
@@ -2376,19 +2438,18 @@ class fitdata(nddata):
         self.active_indeces = None
         #}}}
         return
-    def parameter_derivatives(self,set = None,set_to = None):
+    def parameter_derivatives(self,xvals,set = None,set_to = None):
         r'return a matrix containing derivatives of the parameters, can set dict set, or keys set, vals set_to'
         if type(set) is dict:
             set_to = set.values()
             set = set.keys()
-        solution_list = dict([(self.symbolic_dict[x],set_to[j])
-            if x in set
-            else (self.symbolic_dict[x],self.output(x))
-            for j,x in enumerate(self.symbol_list)]) # load into the solution list
-        number_of_i = len(self.getaxis(self.fit_axis))
+        solution_list = dict([(self.symbolic_dict[k],set_to[j])
+            if k in set
+            else (self.symbolic_dict[k],self.output(k))
+            for j,k in enumerate(self.symbol_list)]) # load into the solution list
+        number_of_i = len(xvals)
         parameters = self._active_symbols()
         mydiff_sym = [[]] * len(self.symbolic_vars)
-        xvals = self.getaxis(self.fit_axis)
         x = self.symbolic_x
         fprime = zeros([len(parameters),number_of_i])
         for j in range(0,len(parameters)):
@@ -2401,10 +2462,15 @@ class fitdata(nddata):
             except:
                 raise CustomError('Trying to set index',j, 'shape(fprime)',shape(fprime), 'shape(xvals)',shape(xvals))
         return fprime
+    def parameter_gradient(self,p,x,y,sigma):
+        r'this gives the specific format wanted by leastsq'
+        # for now, I'm going to assume that it's not using sigma, though this could be wrong
+        # and I could need to scale everything by sigma in the same way as errfunc
+        return self.parameter_derivatives(x,set = self.symbol_list,set_to = p).T
     def analytical_covariance(self):
         covarmatrix = zeros([len(self._active_symbols())]*2)
         #{{{ try this ppt suggestion --> his V is my fprime, but 
-        fprime = self.parameter_derivatives()
+        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis))
         dirproductform = False
         if dirproductform:
             sigma = self.get_error()
@@ -2630,7 +2696,10 @@ class fitdata(nddata):
             indeces = map(self._pn_active,names) # slice out only these rows and columns
             return self.covariance[r_[indeces],:][:,r_[indeces]].copy()
         else:
-            return self.covariance.copy()
+            try:
+                return self.covariance.copy()
+            except:
+                return zeros([len(self.fit_coeff)]*2,dtype = 'double')
     def latex(self):
         r'''show the latex string for the function, with all the symbols substituted by their values'''
         # this should actually be generic to fitdata
@@ -2680,7 +2749,7 @@ class fitdata(nddata):
             set_to = set.values()
             set = set.keys()
         taxis = self._taxis(taxis)
-        if hasattr(self,'fit_coeff'):
+        if hasattr(self,'fit_coeff') and self.fit_coeff is not None:
             p = self.fit_coeff.copy()
         else:
             p = array([NaN]*len(self.symbol_list))
@@ -2728,10 +2797,13 @@ class fitdata(nddata):
         if set != None:
             self.set_indeces,self.set_to,self.active_mask = self.gen_indeces(set,set_to)
             p_ini = self.remove_inactive_p(p_ini)
+        leastsq_args = (self.errfunc, p_ini)
+        leastsq_kwargs = {'args':(x,y,sigma),
+                    'full_output':True}
+        if hasattr(self,'has_grad') and self.has_grad == True:
+            leastsq_kwargs.update({'Dfun':self.parameter_gradient})
         try:
-            p_out,cov,infodict,mesg,success = leastsq(self.errfunc, p_ini,
-                    args = (x,y,sigma),
-                    full_output = True)
+            p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
         except:
             #{{{ just give various explicit errors
             if type(x) != ndarray and type(y) != ndarray:
@@ -2749,14 +2821,26 @@ class fitdata(nddata):
         if success != 1:
             #{{{ up maximum number of evals
             if mesg.find('maxfev'):
-                maxfev = 50000
-                p_out,cov,infodict,mesg,success = leastsq(self.errfunc, p_ini,
-                        args = (x,y,sigma),
-                        maxfev = maxfev,
-                        full_output = True)
+                leastsq_kwargs.update({ 'maxfev':50000 })
+                p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
                 if success != 1:
                     if mesg.find('two consecutive iterates'):
-                        print r'{\Large\color{red}{\bf Warning data is not fit!!! guess shown for debug purposes only!}}',
+                        print r'{\Large\color{red}{\bf Warning data is not fit!!! guess shown for debug purposes only!}}','\n\n'
+                        print r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n'
+                        infodict_keys = infodict.keys()
+                        infodict_vals = infodict.values()
+                        if 'nfev' in infodict_keys:
+                            infodict_keys[infodict_keys.index('nfev')] = 'nfev, number of function calls'
+                        if 'fvec' in infodict_keys:
+                            infodict_keys[infodict_keys.index('fvec')] = 'fvec, the function evaluated at the output'
+                        if 'fjac' in infodict_keys:
+                            infodict_keys[infodict_keys.index('fjac')] = 'fjac, A permutation of the R matrix of a QR factorization of the final approximate Jacobian matrix, stored column wise. Together with ipvt, the covariance of the estimate can be approximated.'
+                        if 'ipvt' in infodict_keys:
+                            infodict_keys[infodict_keys.index('ipvt')] = 'ipvt, an integer array of length N which defines a permutation matrix, p, such that fjac*p = q*r, where r is upper triangular with diagonal elements of nonincreasing magnitude.  Column j of p is column ipvt(j) of the identity matrix'
+                        if 'qtf' in infodict_keys:
+                            infodict_keys[infodict_keys.index('qtf')] = 'qtf, the vector (transpose(q)*fvec)'
+                        for k,v in zip(infodict_keys,infodict_vals):
+                            print r'{\color{red}{\bf %s:}%s}'%(k,v),'\n\n'
                         self.fit_coeff = None
                         self.settoguess()
                         return

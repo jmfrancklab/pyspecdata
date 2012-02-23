@@ -103,21 +103,79 @@ def figlistret(first_figure,figurelist,*args,**kwargs):
             return args
 def see_if_math(recnames):
     'return latex formatted strings --> ultimately, have this actually check to see if the individual strings are math or not, rather than just assuming that they are.  Do this simply by seeing whether or not the thing starts with a full word (more than two characters) or not.'
-    return [r'\ensuremath{'+v.replace('\\\\','\\')+'}' for v in recnames]
-def lrecordarray(recordlist,columnformat = True,smoosh = True):
+    def ismath(myin):
+        out = myin.split('_')
+        myin = out
+        out = []
+        for j in range(0,len(myin)):
+            out.extend(myin[j].split('('))
+        myin = out
+        out = []
+        for j in range(0,len(myin)):
+            out.extend(myin[j].split(')'))
+        return not any(map(lambda x: len(x)>1 and not (x[0] == '{' or x[0] == '\\'),out))
+    return [r'\ensuremath{'+v.replace('\\\\','\\')+'}' if ismath(v) else v.replace('_',' ') for v in recnames]
+def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True):
     reclen = len(recordlist)
     recnames = recordlist.dtype.names
     alltext = ''
     if columnformat:
         colheadings = [r'c']*len(recnames)
         recordstrings = see_if_math(recnames)
+        datastrings = []
+        clinerow = [True]*len(recnames)
+        clinelist = []
+        def gencline(inputar):
+            ind = 0
+            listoftuples = []
+            while ind < len(inputar):
+                if inputar[ind]:
+                    startval = ind
+                    while ind < len(inputar) and inputar[ind]:
+                        ind += 1
+                    endval = ind - 1
+                    listoftuples.append((startval,endval))
+                else:
+                    ind += 1
+            retval = ''
+            for thistuple in listoftuples:
+                if thistuple[0] == thistuple[1]:
+                    retval = retval + r'\cline{%d-%d}'%tuple([thistuple[0]+1]*2)
+                elif thistuple[0] == 0 and thistuple[1] == len(recnames)-1:
+                    retval = retval + r'\hline'
+                else:
+                    retval = retval + r'\cline{%d-%d}'%tuple(map((lambda x: x+1),thistuple))
+            return retval
+        #{{{ first, store the strings for the data
         for j in range(0,len(recordlist)):
-            datastrings = [lsafe(str(recordlist[v][j])) for v in recnames]
+            datastrings.append([lsafe(str(recordlist[v][j])) for v in recnames])
+            clinelist.append(list(clinerow))
+        #}}}
+        if multi:
+            #{{{ now, do a multirow replacement
+            for j in range(0,len(datastrings[0])): # loop over the columns
+                k = 0
+                while k<len(datastrings): # loop over rows (outer)
+                    # see if the next row is the same
+                    numrows = 1
+                    while ((numrows+k < len(datastrings))
+                            and
+                            (datastrings[k+numrows][j] == datastrings[k][j])):
+                        datastrings[k+numrows][j] = '' # clear the data of the later row
+                        clinelist[k+numrows-1][j] = False # remove this cline
+                        numrows += 1
+                    #clinelist[k+numrows-1][j] = True # add the cline for the last one
+                    # if there are matching rows, replace the first with a multirow statement
+                    if numrows > 1:
+                        datastrings[k][j] = r'\multirow{%d}{*}{%s}'%(numrows,datastrings[k][j])
+                    k += numrows # jump ahead past the end of the processed rows
+            #}}}
+        for j in range(0,len(recordlist)):
             if smoosh:
                 for k,l in enumerate(map(len,datastrings)):
                     if l>40:
                         colheadings[k] = r'p{%0.2f\textwidth}'%(0.8/len(recnames))
-            alltext+=' & '.join(datastrings)+r'\\ \hline'+'\n'
+            alltext+=' & '.join(datastrings[j])+r'\\ '+gencline(clinelist[j])+'\n'
         alltext += r'\end{tabular}'
         print r'\begin{tabular}{','|'.join(colheadings),'}'
         print ' & '.join(recordstrings),r'\\ \hline\hline'+'\n'
@@ -164,7 +222,7 @@ def lplot(fname,width=3,figure=False,dpi=300,grid=False,alsosave=None,gensvg = F
         figwidth = mpwidth
     print r'''\fbox{
     \begin{minipage}{%s}
-    {\color{red}%s:}\begin{tiny}\fn{%s}'''%(mpwidth,thisjobname(),fname)
+    {\color{red}{\tiny %s}:}\begin{tiny}\fn{%s}'''%(mpwidth,thisjobname(),fname)
     if alsosave != None:
         print r'also saved \fn{%s}'%alsosave
     print '\n\n'+r'\hrulefill'+'\n\n'
@@ -438,4 +496,70 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
     #}}}
 #}}}
 #{{{ dnp
+def standard_noise_comparison(name):
+    print '\n\n'
+    # noise tests
+    close(1)
+    figure(1,figsize=(16,8))
+    v = save_data();our_calibration = double(v['our_calibration']);cnsi_calibration = double(v['cnsi_calibration'])
+    calibration = cnsi_calibration*sqrt(50.0/10.0)*sqrt(50.0/40.0)
+    path = []
+    explabel = []
+    noiseexpno = []
+    signalexpno = []
+    plotlabel = name+'_noise'
+    #
+    path += [DATADIR+'cnsi_data/popem_4mM_5p_pct_110610/']
+    explabel += ['control without shield']
+    noiseexpno += [3] # 3 is the noise scan 2 is the reference
+    path += [DATADIR+'cnsi_data/noisetest100916/'] + [DATADIR+'cnsi_data/'+name+'/']
+    explabel += ['',r'$\mathbf{this experiment}$']
+    noiseexpno += [2,3] # 3 is the noise scan 2 is the reference
+    #
+    mask_start = -1e6
+    mask_stop = 1e6
+    ind = 0
+    smoothing = 5e3
+    for j in range(0,1): # for multiple plots $\Rightarrow$ add in j index below if this is what i want
+       figure(1)
+       ind += 1
+       legendstr = []
+       linelist = []
+       subplot(121) # so that legend will fit
+       for k in range(0,len(noiseexpno)):
+          retval = plot_noise(path[k],noiseexpno[k],calibration,mask_start,mask_stop,smoothing = smoothing, both = False,retplot = True)
+          linelist += retval[0]
+          legendstr.append('\n'.join(textwrap.wrap(explabel[k]+':'+retval[1][0],50))+'\n')
+       ylabel(r'$\Omega$')
+       titlestr = 'Noise scans (smoothed %0.2f $kHz$) for CNSI spectrometer\n'%(smoothing/1e3)
+       title(titlestr+r'$n V$ RG/ disk units = %0.3f, mask (%0.3f,%0.3f)'%(calibration*1e9,mask_start,mask_stop))
+       ax = gca()
+       ylims = list(ax.get_ylim())
+       #gridandtick(gca(),formatonly = True)
+       gridandtick(gca(),logarithmic = True)
+       subplot(122)
+       grid(False)
+       lg = autolegend(linelist,legendstr)
+       ax = gca()
+       ax.get_xaxis().set_visible(False)
+       ax.get_yaxis().set_visible(False)
+       map((lambda x: x.set_visible(False)),ax.spines.values())
+       lplot('noise'+plotlabel+'_%d.pdf'%ind,grid=False,width=5,gensvg=True)
+       print '\n\n'
+       figure(2)
+       legendstr = []
+       for k in range(0,len(signalexpno)):
+          data = load_file(dirformat(path[k])+'%d'%noiseexpno[k],calibration=calibration)
+          data.ft('t2',shift = True)
+          x = data.getaxis('t2')
+          data['t2',abs(x)>1e3] = 0
+          data.ift('t2',shift = True)
+          plot(abs(data['t2',0:300])*1e9)
+          xlabel('signal / $nV$')
+          legendstr += [explabel[k]]
+       if len(signalexpno)>0:
+           autolegend(legendstr)
+           lplot('signal'+plotlabel+'_%d.pdf'%ind,grid=False)
+       if (ind % 2) ==  0:
+          print '\n\n'
 #}}}
