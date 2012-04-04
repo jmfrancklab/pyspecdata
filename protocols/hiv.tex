@@ -1,0 +1,231 @@
+\subsection{Wild-type $T_{1,0}$}\label{sec:florida_sample2_t10}
+\timeblockstart
+\timeblocktotal{3.6}
+This sample says ``bsi quenched,'' so I think it's the wild type $T_{1,0}$.
+\subsubsection{initial setup}\maxminutes{57}
+\paragraph{always}
+Be sure to change section title and label.
+
+\sout{ Copy section label to list for the day. }
+Leave samples to thaw on the way over.
+
+\paragraph{capillary prep}
+Put spectrometer into tune mode, and turn down power.
+
+Load 3.5\uL of sample.
+
+Press twice in critoseal.
+Score other end very lightly.
+Break + press twice in semi-soft (clay consistency) wax.
+Melt wax.
+Clean w/ razor.
+\sout{ Inspect + measure with magnifying glasses. }
+
+Put into tune mode before inserting sample, and turn down power.
+
+\subsubsection{set up DNP}\maxminutes{38}
+\paragraph{insert probe and autotune}
+
+Turn off field.
+
+Check marker marks on probe.
+
+Insert probe with sample.
+
+Attach tuning box, then position and tighted screw.
+
+Turn up air to 10 SCFH.
+
+Press autotune.
+
+\paragraph{Tune and set resonant field}
+Detach mod coil and hang in the plastic loop (here so that I don't potentially mess up microwave tune later!).
+
+Copy nmr template dataset.
+\fn{hiv_wt_t10_120301}
+
+Overwrite exp 1 with desired parameters.
+\fn{hiv_120301}
+
+Round nearest 0.0005\GHz to get YIG frequency.
+
+Turn on field.
+
+Open first experiment and set NMR sfo1 to (1.5167)*(YIG frequency).
+
+Tune NMR with {\tt wobb}.
+
+\precaution{Run jf\_dnpconf if necessary -- specifically may need to decrease my attenuation settings by 2.7 $dB$ (or just round it to 3 $dB$).}
+Tune microwave by hand
+{\small (Simultaneously set:
+\begin{itemize}
+    \item bias (diode centered at 50 $dB$)
+    \item frequency (AFC)
+    \item phase (coarse: dip in tune mode; fine: furthest right diode w.r.t.signal phase while AFC remains locked)
+\end{itemize}
+up to 5 $dB$.)}
+\begin{lstlisting}
+calcfielddata(9.789856,'3MP','cnsi')
+\end{lstlisting}
+
+\precaution{If diode is jittery at high powers, set AFC DC gain to 1/10 rather than 1; if that doesn't work, try decreasing the AFC mod amp, etc.}
+
+Check that YIG frequency is still good
+
+EPR to standby.
+
+Set field.
+
+\paragraph{ Match NMR + YIG frequencies}
+jf\_zg $\Rightarrow$ for 3.5 $\mu L$ sample, peak should 10-15 high.
+
+Check that the source is on, and reads 0.26 $A$ (rather than 0.54 $A$).
+
+Click lightning bolt to set o1 (while zoomed in with top window).
+
+Set YIG frequency.
+
+Be sure the ppt value is set to the value above.
+
+Repeat jf\_zg to verify that field has stabilized (peak should be at 0).
+
+\precaution{Test amp switch with jf\_setmw (leave other parameters as default).}
+Iteratively adjust the field.
+{\small
+\begin{enumerate}
+	\item jf\_setmw (31.5 $dB$, YIG frequency),
+	\item then if field offset is significant, adjust $B_0$, otherwise stop
+	\item jf\_zgm
+	\item then set sfo1 to NMR resonance (lightning bolt) + start over
+\end{enumerate}
+}
+
+\paragraph{90 time and ready amp}
+jf\_zg + zoom + dpl1 + run {\tt paropt} (p1,8,1,3)
+
+\precaution{This should go down to up at the full cycle;
+if problems, (p1,1,1,11).}
+\precaution{If you want to decrease the narrow noise spikes, minimize WinEPR + turn off bridge + put all bridge cables on top of dewar while paropt is running; could be obsolete with box?}
+Flip waveguide switch.
+
+Set + record $t_{90}$ (``\texttt{p1}'')=(length of full cycle [\us])/4 (At this point, you've determined the resonance frequency, resonant field, and $t_{90}$).
+
+\paragraph{run DNP}
+Start jf\_dnp: Set minimum and maximum $T_1$ values based on $T_1$ estimate (with heating).
+
+Set number of $T_1$ time to 14~min for this sample, because I'm worried about lifetime issues.
+
+Set watch timer for experiment time.
+
+Cool all samples.
+
+\subsubsection{wait for DNP to run}\maxminutes{90}
+\subsubsection{process DNP + put back system}\maxminutes{6}
+\paragraph{process}
+Transfer NMR files.
+
+Change name, chemical names, concentration, and run number.
+
+For $T_{1,0}$, set dontfit to True, otherwise False.
+
+Run processing.
+
+Mask/unmask $T_1$'s as necessary.
+
+Check that my longest $T_1$ falls within range.
+
+Add to the compilation, to see how the data looks.
+
+Check the consistency of the enhancements with decreasing power.
+
+Redo experiment 5 as 505 \texttt{re 5 1;Ctrl-N} + enter exp 505 +\texttt{zg}.
+
+Comment {\tt search\_delete\_datanode}.
+
+
+\begin{scriptsize}
+\begin{lstlisting}
+import textwrap
+# re-run
+# different initial guess
+name = 'hiv_wt_t10_120301'
+path = DATADIR+'cnsi_data/'
+search_delete_datanode('dnp.h5',name)
+# leave the rest of the code relatively consistent
+#{{{ generate the powers for the T1 series
+print 'First, check the $T_1$ powers:\n\n'
+fl = []
+t1_dbm,fl = auto_steps(path+name+'/t1_powers.mat',
+    threshold = -35,t_minlength = 5.0*60,
+    t_maxlen = 40*60, t_start = 4.9*60.,
+    t_stop = inf,first_figure = fl)
+print r't1\_dbm is:',lsafen(t1_dbm)
+lplotfigures(fl,'t1series_'+name)
+print '\n\n'
+t1mask = bool8(ones(len(t1_dbm)))
+# the next line will turn off select (noisy T1
+# outputs) enter the number of the scan to remove --
+# don't include power off
+#t1mask[-1] = 0
+#}}}
+dnp_for_rho(path,name,integration_width = 160,
+        peak_within = 500, show_t1_raw = True,
+        phnum = [4],phchannel = [-1],
+        t1_autovals = r_[2:2+len(t1_dbm)][t1mask],
+        t1_powers = r_[t1_dbm[t1mask],-999.],
+        power_file = name+'/power.mat',t_start = 4.6,
+        chemical = 'hiv_pr_wt',
+        concentration = 0.0, extra_time = 6.0,
+        dontfit = True, run_number = 120301,
+        threshold = -50.)
+standard_noise_comparison(name)
+# tried to fix error on cov more fix more fix more fix more fix more fix
+\end{lstlisting}
+\end{scriptsize}
+
+\paragraph{put back system}
+\subparagraph{Always}
+Field off.
+
+Hook up mod coil. 
+
+Flip back ESR switch.
+
+Turn off the air + check rate.
+
+Pull out + inspect + measure sample\sout{  with magnifying glasses }.
+
+\subsubsection{wrap up}\maxminutes{18}
+SVN, then copy working copy of notebook into compilation.
+
+Clear + copy to protocol.
+
+\subparagraph{Run ESR background scan}
+Autotune + run ESR background scan.
+
+\subparagraph{Last experiment only}
+If done, remove air tube.
+
+Unscrew top collet + carry box w/ dewar around to back.
+
+Remove glass tube and replace dewar.
+
+Insert inner collet.
+
+Screw down top collet holder.
+
+Cap cavity.
+
+Tell software that bridge is on + switch to tune mode
+
+Check for dip near 9.88~GHz (if without dewar) or 9.31~GHz (if with dewar).
+
+Autotune + record Q.
+
+Remove tuning box.
+
+If done, magnet off, ESR off, chiller off, source output off.
+
+Be sure to take coolers and dewar back to lab.
+
+\timeblockend

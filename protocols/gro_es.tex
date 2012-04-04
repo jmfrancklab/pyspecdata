@@ -1,0 +1,679 @@
+\subsection{GroES 3MP DNP}\label{sec:groes3mpreprod_groesdnprep2}
+\timeblockstart
+\timeblocktotal{3.6}
+This is the protocol, which has all the relevant info.
+Note that the first time, I will want to determine both the ratio, and rough estimation of the $T_1$ time.
+Actually, rather than doing hidden, I should go ahead and delete stuff in working copy and then diff to copy back.
+
+\subsubsection{initial setup}\maxminutes{57}
+\paragraph{before leaving}
+Be sure to carry over:
+\begin{itemize}
+    \item microcentrifuge tubes
+    \item dry ice and LN$_2$
+    \item water ice 
+    \item toolbox 
+    \item multimeter 
+    \item samples
+    \item magnifying glasses
+\end{itemize}
+Leave samples to thaw on the way over.
+
+\paragraph{always}
+Be sure to change section title and label!!!
+
+Copy section label to list for the day.
+
+Leave samples to thaw once there.
+
+\paragraph{On + set up for (first exp only)}
+\precaution{Check that copper plate is set up}
+
+EPR and source on, magnet and air off.
+
+Be sure mod coil is hooked up, and the waveguide switch is set to ESR.
+
+Remove top collets on dewar.
+
+Take box around back.
+
+Remove dewar.
+
+Insert air tube (put only bottom collet on, tighten very loosely, then add and tighten top collet).
+
+Zip tie air tube.
+
+Attach probe to plate.
+
+Wait until bridge stops flashing, then open WinEPR + switch to tune mode 40~dB.
+
+Find dip near 9.8~GHz.
+
+\paragraph{sample prep}
+\subparagraph{GroES3MP}
+4\uL GroES 3MP + 1.25\uL 0.1\M ATP $\Rightarrow$ (GroES 3MP+ATP)
+
+5\uL G10K buffer + 1\uL (GroES 3MP+ATP) $\Rightarrow$ (sample)
+
+Mix gently.
+
+\subparagraph{GroES NL}
+4\uL GroES NL + 1.25\uL 0.1\M ATP $\Rightarrow$ (GroES NL+ATP)
+
+5\uL G10K buffer + 1\uL (GroES NL+ATP) $\Rightarrow$ (sample)
+
+\subparagraph{Complex 3MP}
+4\uL GroES 3MP + 1.25\uL 0.1\M ATP $\Rightarrow$ (GroES 3MP+ATP)
+
+5\uL GroEL + 1\uL (GroES 3MP+ATP)
+Mix gently.
+
+While waiting 5 minutes:
+Copy nmr template dataset.
+\fn{grocomplex_120208}
+
+Overwrite exp 1 with desired parameters.
+\fn{groes_120204}
+
+Check jf\_dnpconf.
+
+\subparagraph{Complex NL}
+4\uL GroES NL + 1.25\uL 0.1\M ATP $\Rightarrow$ (GroES NL+ATP)
+
+5\uL GroEL + 1\uL (GroES NL+ATP)
+Mix gently.
+
+While waiting 5 minutes:
+Copy nmr template dataset.
+\fn{grocomplex_nl_120203}
+
+Overwrite exp 1 with desired parameters.
+\fn{groes_120202}
+Run jf\_dnpconf to be sure that the number of FID's is set to 2 or 3 (so it runs fast).
+
+\paragraph{capillary prep}
+Put spectrometer into tune mode, and turn down power.
+
+Load 3.5\uL of sample.
+
+Press twice in critoseal.
+
+Score other end very lightly.
+
+Break + press twice in semi-soft (clay consistency) wax.
+
+Melt wax.
+
+Clean w/ razor.
+
+Inspect + measure with magnifying glasses.
+
+Put into tune mode before inserting sample, and turn down power.
+
+\subsubsection{Run time course} Copy the template.  \fn{popemx_4mM_5p_mmsl_timecourse_110711} Copy first experiment from last one.  \fn{popeca_4mM_5p_mmsl_110708} Turn on the amplifier, with the source off.  Copy experiment 520 from last time into the new folder and remove raw data.  Assume a ninety time of 2.0 $\mu s$ in both exp 1 and 520.  Start power meter program running so that it won't quit.  Set EPR to tune mode at low power.  Mix 1.75 of each sample (mark exact time here).  Load sample.  Turn air up to 10 SCFM.  Tune the EPR quickly by hand, record frequency.  Set to standby and set field.  Tune NMR (forgot this), then check EPR tune.  Use jf setmw to set the frequency and zero in on the signal in exp 1.  Flip EPR switch, remove mod coil, turn on source.  Use jf setmw to set to 6 $dB$ Copy sfo1 to new experiment and start experiment.  Copy data and process when done.  \fn{popemx_4mM_5p_mmsl_timecourse_110711.mat} Since I may see a slight increase, iexpno, and run for twice as long.  
+\begin{tiny}
+\begin{lstlisting}
+fl = []
+print 'Next, process the saturation-recovery data:\n\n'
+sat_data,fl = integrate(DATADIR+'cnsi_data/popemx_4mM_5p_mmsl_timecourse_110711/',
+    r_[520],
+    first_figure = fl,
+    integration_width = 200,
+    phnum = [4], phchannel = [-1],
+    dimname = r'exp #',
+    pdfstring = 'sat')
+sat_data2,fl = integrate(DATADIR+'cnsi_data/popemx_4mM_5p_mmsl_timecourse_110711/',
+    r_[521],
+    first_figure = fl,
+    integration_width = 200,
+    phnum = [4], phchannel = [-1],
+    dimname = r'exp #',
+    pdfstring = 'sat')
+nextfigure(fl,'integral')
+plot(sat_data,label = 'sat-rec')
+plot(sat_data2,label = 'sat-rec 2')
+ax = gca()
+ylims = array(ax.get_ylim())
+ylims[ylims.argmin()] = 0
+ax.set_ylim(ylims)
+autolegend()
+lplotfigures(fl,'timecourse_110708.pdf')
+\end{lstlisting}
+\end{tiny}
+
+\subsubsection{Saturation curve following ESR}
+\maxtime{0.5}
+\paragraph{copy previous parameters}
+Copy experiment just run + change number of scans to 1 + decrease resolution along $x$.
+
+Decrease receiver gain by an order of magnitude.
+
+Run quick saturation with 3,6,10.
+
+Save quicksat parameters.
+
+\fn{hydroxytempo_50uM_quicksat_110114}
+Blue stop once it is on the decrease.
+
+Copy experiment.
+
+Set receiver gain with box.
+
+Also set number of scans appropriate for the concentration.
+
+Start at 3 $dB$ and go to 30 $dB$, or 40 $dB$ for low concentrations, with the step size equal to $(dB\;width)*t_{scan}*n_{scans}/420$ (scan time for 7 minutes).
+
+Divide the span by the stepsize to get the ``resolution along $y$.''
+
+Start + click to stop so field doesn't run through any signal when returning to start.
+
+Set watch timer for time.
+
+\paragraph{process the data}
+Save data.
+
+\fn{hydroxytempo_50uM_sat_110114}
+Close quicksat experiment, and save.
+
+Wait for it to finish, and close and save.
+
+Select all, and winscp.
+
+Just leave it alone, since I know the data's good, and instead just plot an image to show the difference in snr
+
+Set the smoothing to half the linewidth (about 0.25), which should provide optimal SNR, then optimize the threshold
+
+
+\begin{tiny}
+\begin{lstlisting}
+scaling = 50.24/(10**(-6.0/10.0))
+setting = r_[3:34+1:1]
+power = scaling*(10**(-0.1*setting))
+esr_saturation(DATADIR+'cnsi_data/oxotempo_50uM_saturation_100427',power,
+    threshold=0.6,smoothing=0.25)
+print '\n\nsettings:',setting
+\end{lstlisting}
+
+
+\begin{lstlisting}
+data = load_file(DATADIR+'cnsi_data/oxotempo_50uM_saturation_100427',
+    dimname='power')
+image(data)
+title('new saturation data')
+lplot('newsat'+thisjobname()+'.pdf')
+data = load_file(DATADIR+'cnsi_data/oxotempo_50uM_saturation_coax_100309',
+    dimname='power')
+image(data)
+title('old saturation data')
+lplot('oldsat'+thisjobname()+'.pdf')
+\end{lstlisting}
+\end{tiny}
+
+
+\subsubsection{set up DNP}\maxminutes{38}
+
+\paragraph{insert probe and autotune}
+
+Turn off field.
+
+Check marker marks on probe.
+
+Insert probe with sample.
+
+Attach tuning box, then position and tighted screw.
+
+Turn up air to 10 SCFH.
+
+Press autotune.
+
+\paragraph{determine ratio (if desired)}
+
+\subparagraph{determine experimentally}
+Re-run ESR with probe.
+
+Set sfo1 to resonance.  
+
+Increase aq to 2.0.  
+
+jf\_zgm and lightning bolt for o1.  
+
+Copy microwave frequency from ESR and sfo1 from center frequency.  
+
+\begin{lstlisting}
+microwave_frequency = 9.344975 #(from file)
+field = 3329.828
+nmr_frequency = 14.1730638
+field = field * 1e-4
+chemical = 'hydroxytempo'
+obs('previous:')
+calcfielddata(microwave_frequency,chemical,'cnsi')
+obs('new:')
+save_data({chemical+'_elratiocnsi':microwave_frequency/field})
+save_data({chemical+'_nmrelratio':nmr_frequency/microwave_frequency})
+calcfielddata(microwave_frequency,chemical,'cnsi')
+\end{lstlisting}
+
+Set aq back to 0.05.
+
+
+\subparagraph{assume field/frequency ratio is constant}
+
+Just set to a reasonable field where I will see signal, and wobb.
+
+Copy template and first experiment here.
+\fn{dopc_32mM_3p_120123}
+
+Just \texttt{wobb} on the frequency that the parameter set is at.
+
+EPR to standby.
+
+Set sfo1 to resonance.
+
+Increase aq to 2.0.  
+
+\texttt{jf\_zg} and lightning bolt for \texttt{o1}.  
+
+Copy microwave frequency and center field from the ESR experiment I ran.
+
+Copy sfo1 and current field.
+
+\begin{lstlisting}
+# for the next two lines, use field in G
+# take the following from EPR
+GHz_per_field = 9.773276/3483.0
+# take the following from NMR
+MHz_per_field = 14.8484844/3488.566
+# leave the following alone
+chemical = '3MP'
+#obs('previous:')
+#calcfielddata(microwave_frequency,chemical,'cnsi')
+obs('new:')
+# in the following, I am converting to G T
+save_data({chemical+'_elratiocnsi':GHz_per_field * 1e4})
+save_data({chemical+'_nmrelratio':MHz_per_field/GHz_per_field})
+calcfielddata(9.79,chemical,'cnsi')
+\end{lstlisting}
+
+Set \texttt{aq} back to 0.5.
+
+Autotune.
+\paragraph{Tune and set resonant field}
+Detach mod coil and hang in the plastic loop (here so that I don't potentially mess up microwave tune later!).
+
+Copy nmr template dataset.
+\fn{groes_120208}
+
+Overwrite exp 1 with desired parameters.
+\fn{grocomplex_120208}
+
+Round nearest 0.0005\GHz to get YIG frequency.
+
+Turn on field.
+
+Open first experiment and set NMR sfo1 to (1.5167)*(YIG frequency).
+
+Tune NMR with {\tt wobb}.
+
+\precaution{Run jf\_dnpconf if necessary -- specifically may need to decrease my attenuation settings by 2.7 $dB$ (or just round it to 3 $dB$).}
+
+Tune microwave by hand
+{\small (Simultaneously set:
+\begin{itemize}
+    \item bias (diode centered at 50 $dB$)
+    \item frequency (AFC)
+    \item phase (coarse: dip in tune mode; fine: furthest right diode w.r.t.signal phase while AFC remains locked)
+\end{itemize}
+up to 5 $dB$.)}
+\begin{lstlisting}
+calcfielddata(9.789958,'3MP','cnsi')
+\end{lstlisting}
+
+Check that YIG frequency is still good
+
+EPR to standby.
+
+Set field.
+
+\paragraph{ Match NMR + YIG frequencies}
+jf\_zg $\Rightarrow$ for 3.5 $\mu L$ sample, peak should 10-15 high.
+
+Check that the source is on, and reads 0.26 $A$ (rather than 0.54 $A$).
+
+Click lightning bolt to set o1 (while zoomed in with top window).
+
+Set YIG frequency.
+
+Be sure the ppt value is set to the value above.
+
+Repeat jf\_zg to verify that field has stabilized (peak should be at 0).
+
+\precaution{Test amp switch with jf\_setmw (leave other parameters as default).}
+Iteratively adjust the field.
+{\small
+\begin{enumerate}
+	\item jf\_setmw (31.5 $dB$, YIG frequency),
+	\item then if field offset is significant, adjust $B_0$, otherwise stop
+	\item jf\_zgm
+	\item then set sfo1 to NMR resonance (lightning bolt) + start over
+\end{enumerate}
+}
+
+\paragraph{90 time and ready amp}
+jf\_zg + zoom + dpl1 + run {\tt paropt} (p1,8,1,3)
+
+\precaution{This should go down to up at the full cycle;
+if problems, (p1,1,1,11).}
+\precaution{If you want to decrease the narrow noise spikes, minimize WinEPR + turn off bridge + put all bridge cables on top of dewar while paropt is running; could be obsolete with box?}
+Flip waveguide switch.
+
+Set + record $t_{90}$ (``\texttt{p1}'')=(length of full cycle [\us])/4 (At this point, you've determined the resonance frequency, resonant field, and $t_{90}$).
+
+\paragraph{Estimate $T_1$ (with heating)}
+
+\subparagraph{Estimate based on concentration {\tiny (if $T_1$ is available for a different concentration)}}
+
+\begin{lstlisting}
+# edit following
+oldconc = 2e-3 # set this to None if oldt1 is given at
+#the same concentration
+oldt1 = 0.89
+newconc = 10e-6
+# leave the following alone
+def estimate_t1(concentration,value,newconc):
+    water = 1./2.6
+    relaxivity = 1./value
+    relaxivity -= water
+    relaxivity /= concentration
+    relaxivity *= newconc
+    relaxivity += water
+    return 1./relaxivity
+def estimate_hot_t1(thist1):
+    water = 1./2.6
+    hot_water = 1./3.65 # this is for the
+    #new ``closed'' type probe # 7/8 adjusted this
+    thist1 = 1./thist1 # convert to a rate
+    thist1 -= water # figure out which part
+    #is from water
+    thist1 += hot_water # add back in for heating
+    return 1./thist1
+if oldconc == None:
+    t1 = oldt1
+else:
+    t1 = estimate_t1(oldconc,oldt1,newconc)
+    obs(dp(t1,2),r' $s$ without heating')
+obs(dp(estimate_hot_t1(t1),2),r' $s$ with heating')
+\end{lstlisting}
+
+\subparagraph{Estimate experimentally (from rough measurement of $T_1$ and known heating)}
+\texttt{jf\_t10} with default parameters (should be min 1,max 3,steps 5,min ratio 0.08 (should have been 0.05 to match), max ratio 4, pull from exp 4, put in exp 101).
+
+Copy the nmr data.
+
+Change file name!
+
+Process the $T_1$
+
+\begin{scriptsize}
+\begin{lstlisting}
+# these change
+name = 'dopc_dil_3p_120118'
+path = DATADIR+'cnsi_data/'
+# the following stays the same
+dnp_for_rho(path,name,[],expno=[],t1expnos = [101],
+        integration_width = 150,peak_within = 500,
+        show_t1_raw = True,phnum = [4],
+        phchannel = [-1],
+        h5file='t1_estimation_only.h5',
+        clear_nodes=True)
+t1 = retrieve_T1series('t1_estimation_only.h5',name)
+def estimate_hot_t1(thist1):
+    water = 1./2.6
+    hot_water = 1./3.8 # this is for the new ``closed''
+    #type probe # 7/8 adjustted this
+    thist1 = 1./thist1 # convert to a rate
+    thist1 -= water # figure out which part is from
+    #water
+    thist1 += hot_water # add back in for heating
+    return 1./thist1
+obs(r'Min $T_1\approx$',lsafe(t1['power',0]),r'\quad $T_{1,max}\approx$',
+        lsafe(estimate_hot_t1(t1)),
+        r' $s$ with heating')
+\end{lstlisting}
+\end{scriptsize}
+
+\paragraph{determine $T_1(t)$}
+Use jf\_dnp to determine number of points:
+
+Run jf\_t10s:
+complex+3MP $\Rightarrow$ Set min of 1.5, max of 2.4
+GroES+3MP $\Rightarrow$ Set min of 2.2, max of 3.1
+For complex NL $\Rightarrow$ set min 1.8 of and max of 2.1
+For GroES NL $\Rightarrow$ set min 2.2 of and max of 3.2
+
+Set 20 experiments for 4:40, exp 4$\Rightarrow$ 101.
+
+\paragraph{run DNP}
+Start jf\_dnp: Set minimum and maximum $T_1$ values based on $T_1$ estimate (with heating).
+complex+3MP $\Rightarrow$ Set min of 1.5, max of 2.4
+GroES+3MP $\Rightarrow$ Set min of 2.2, max of 3.1
+For complex NL $\Rightarrow$ set min 1.8 of and max of 2.1
+For GroES NL $\Rightarrow$ set min 2.2 of and max of 3.2
+
+Set number of $T_1$ time to 14~min for this sample, because I'm worried about lifetime issues.
+
+Set watch timer for experiment time.
+
+\sout{ Check the lock voltage. }
+\nts{consider closing and opening FTDI connection in the code, so the lock check works!}
+Cool all samples!!
+
+\subsubsection{wait for DNP to run}\maxminutes{90}
+
+\subsubsection{process DNP + put back system}\maxminutes{6}
+\paragraph{process}
+Transfer NMR files.
+
+Change name, chemical names, concentration, and run number.
+
+For $T_{1,0}$, set dontfit to True, otherwise False.
+
+\nts{why does the $T_{1,0}$ have a concentration, since it will always be 0?}
+Run processing.
+
+Mask/unmask $T_1$'s as necessary.
+
+\nts{in the new version, I should really set it up so that it automatically takes care of both the auto steps for $T_1$ and the $T_1$ mask!, and also checks that the max $T_1$ is OK!!!}
+Check that my longest $T_1$ falls within range.
+
+Add to the compilation, to see how the data looks.
+
+Check the consistency of the enhancements with decreasing power.
+
+Redo experiment 5 as 505 \texttt{re 5 1;Ctrl-N} + enter exp 505 +\texttt{zg}.
+
+Comment {\tt search\_delete\_datanode}.
+
+\nts{should actually be able to get rid of the guessing problem by switching it to guess with the pseudoinverse!}
+
+\begin{scriptsize}
+\begin{lstlisting}
+import textwrap
+# different initial guess
+name = 'groes_120204'
+path = DATADIR+'cnsi_data/'
+search_delete_datanode('dnp.h5',name)
+# leave the rest of the code relatively consistent
+#{{{ generate the powers for the T1 series
+print 'First, check the $T_1$ powers:\n\n'
+fl = []
+t1_dbm,fl = auto_steps(path+name+'/t1_powers.mat',
+    threshold = -35,t_minlength = 5.0*60,
+    t_maxlen = 40*60, t_start = 4.9*60.,
+    t_stop = inf,first_figure = fl)
+print r't1\_dbm is:',lsafen(t1_dbm)
+lplotfigures(fl,'t1series_'+name)
+print '\n\n'
+t1mask = bool8(ones(len(t1_dbm)))
+# the next line will turn off select (noisy T1
+# outputs) enter the number of the scan to remove --
+# don't include power off
+#t1mask[-1] = 0
+#}}}
+dnp_for_rho(path,name,integration_width = 160,
+        peak_within = 500, show_t1_raw = True,
+        phnum = [4],phchannel = [-1],
+        t1_autovals = r_[2:2+len(t1_dbm)][t1mask],
+        t1_powers = r_[t1_dbm[t1mask],-999.],
+        power_file = name+'/power.mat',t_start = 4.6,
+        chemical = 'groes',
+        concentration = 240e-6, extra_time = 6.0,
+        dontfit = False, run_number = 120224,
+        threshold = -50.)
+standard_noise_comparison(name)
+# tried to fix error on cov more fix more fix more fix more fix more fix
+\end{lstlisting}
+\end{scriptsize}
+
+\paragraph{Process multiple $T_1$ data}
+Copy (or Git once that's ready) files.
+
+Run script
+
+\begin{scriptsize}
+\begin{lstlisting}
+# these change
+name = 'groes_nl_120313'
+number_of_repeats = 20
+path = DATADIR+'cnsi_data/'
+# the following stays the same
+dnp_for_rho(path,name,[],expno=[],
+    t1expnos = r_[101:101+number_of_repeats],
+    integration_width = 150,peak_within = 500,
+    show_t1_raw = True,phnum = [4],
+    phchannel = [-1],
+    h5file='t1_estimation_only.h5',
+    pdfstring = name)
+#    clear_nodes=True)
+t1 = retrieve_T1series('t1_estimation_only.h5',name)
+t1.rename('power','expno')
+t1.labels('expno',r_[1:1+number_of_repeats])
+plot(t1)
+lplot(name+'_t1_vs_time.pdf')
+#obs('retrieved $T_1$ series:',t1)
+\end{lstlisting}
+\end{scriptsize}
+\paragraph{put back system}
+\subparagraph{Always}
+Field off.
+
+Hook up mod coil.
+
+Flip back ESR switch.
+
+Turn off the air + check rate.
+
+Pull out + inspect + measure sample with magnifying glasses.
+
+\paragraph{put back system}
+\subparagraph{Always}
+Field off.
+
+Hook up mod coil.
+
+Flip back ESR switch.
+
+Turn off the air + check rate.
+
+Pull out + inspect + measure sample with magnifying glasses.
+
+\subsubsection{ESR}\maxminutes{11}
+
+(Here, I run ESR after the DNP, so I don't have to worry about timing, but still get the double integral)
+Put into tune mode, $40\;dB$ first.
+
+Load sample in the teflon sample holder (I want ~77 $mm$ from collet to bottom of sample, need to remeasure) -- weight the top with the collet holder.
+
+Move to near 9.77 and autotune.
+
+Open ESR parameter set similar to this one.
+\fn{grocomplex_120202.par}
+
+Turn on field.
+
+Copy experiment.
+
+If not exactly the same type of sample, test run to check some stuff.
+
+\precaution{Only if the experiment says ``uncalibrated'' at the top $\Rightarrow$ ``I'' (interactive spectrometer control) icon, click calibrated, then set parameters to spectrum, then window.}
+
+\paragraph{if new type of sample}
+Stop at second peak.
+
+Check that modulation amplitude is $<$ 0.2 x smallest feature.
+
+Set RG with box.
+
+Check that resolution along $x$ is OK.
+
+\paragraph{always}
+
+Run actual scan.
+
+Save ESR.
+\fn{groes_120202}
+
+For 8 scans, alarm for about 2.5 min.
+
+Cntrl-S after scan is finished.
+
+Hit Cntrl-A for ssh transfer and process.
+
+
+\begin{tiny}
+\begin{lstlisting}
+fl = figlistl()
+standard_epr(dir = DATADIR+'cnsi_data',
+    files = ['grocomplex_120224','groes_120224','grocomplex_rep_120224'],
+    figure_list = fl)
+fl.show(thisjobname()+'.pdf')
+\end{lstlisting}
+\end{tiny}
+
+Put into tune mode before removing sample, and turn down power.
+
+Run background scan.
+
+\subsubsection{wrap up}\maxminutes{18}
+SVN, then copy working copy of notebook into compilation.
+
+Clear + copy to protocol.
+
+\subparagraph{Run ESR background scan}
+Autotune + run ESR background scan.
+
+\subparagraph{Last experiment only}
+If done, remove air tube.
+
+Unscrew top collet + carry box w/ dewar around to back.
+
+Remove glass tube and replace dewar.
+
+Insert inner collet.
+
+Screw down top collet holder.
+
+Cap cavity.
+
+Tell software that bridge is on + switch to tune mode
+
+Check for dip near 9.88~GHz (if without dewar) or 9.31~GHz (if with dewar).
+
+Autotune + record Q.
+
+Remove tuning box.
+
+If done, magnet off, ESR off, chiller off, source output off.
+
+Be sure to take coolers and dewar back to lab.
+
+\timeblockend

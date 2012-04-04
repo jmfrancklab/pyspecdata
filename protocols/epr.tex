@@ -1,0 +1,650 @@
+\subsection{Run EPR of all POPE-M samples}\maxtime{2.73}\label{sec:vesicles_byme1_redoeprall_m}
+\timeblockstart
+\timeblocktotal{2.73}
+\subsubsection{Sample prep}
+Walk over.
+
+Prep samples.
+
+
+\subsubsection{Calibrate position on new EPR tube}
+\hidden{
+Now, I need to calibrate the position.
+
+Start by opening the position experiment from before (which uses only 4 scans).
+\fn{calpos_4at_pos0_110503.par}
+Tune empty cavity.
+
+Be sure tube is marked.
+
+\paragraph{position -3}
+Tune mode.
+
+Copy EPR file.
+
+Insert to desired position.
+
+
+Fine tune at 5 $dB$ (since zero is now floating).
+
+Record Q.
+
+Check tune.
+
+\precaution{Run a quick saturation (saved ``quick sat'') to find the max, and check that I'm not saturating at the 15 $dB$ power level I'm using.}
+
+Run the actual EPR.
+
+Save and copy EPR files.
+\fn{calpos_4at_posn2_110504.par}
+
+Decide which way to move based on SNR.
+
+\paragraph{position -2}
+Tune mode.
+
+Copy EPR file.
+
+Insert to desired position.
+
+Fine tune at 5 $dB$ (since zero is now floating).
+
+Record Q.
+
+Check tune.
+
+\precaution{Run a quick saturation (saved ``quick sat'') to find the max, and check that I'm not saturating at the 15 $dB$ power level I'm using.}
+
+Run the actual EPR.
+
+Save and copy EPR files.
+\fn{calpos_4at_posn3_110504.par}
+
+Decide which way to move based on SNR.
+
+\paragraph{position 0}
+Tune mode.
+
+Copy EPR file.
+
+Insert to desired position.
+
+Fine tune at 5 $dB$ (since zero is now floating).
+
+Record Q.
+
+Check tune.
+
+\precaution{Run a quick saturation (saved ``quick sat'') to find the max, and check that I'm not saturating at the 15 $dB$ power level I'm using.}
+
+Run the actual EPR.
+
+Save and copy EPR files.
+\fn{calpos_4at_pos0_110504.par}
+
+Decide which way to move based on SNR.
+
+\paragraph{position -1}
+Tune mode.
+
+Copy EPR file.
+
+Insert to desired position.
+
+Fine tune at 5 $dB$ (since zero is now floating).
+
+Record Q.
+
+Check tune.
+
+\precaution{Run a quick saturation (saved ``quick sat'') to find the max, and check that I'm not saturating at the 15 $dB$ power level I'm using.}
+
+Run the actual EPR.
+
+Save and copy EPR files.
+\fn{calpos_4at_posn1_110504.par}
+
+Decide which way to move based on SNR.
+
+\paragraph{process}
+
+\begin{tiny}
+\begin{python}
+dir = '/home/franck/data/cnsi_data'
+files = ['calpos_4at_posn3_110504','calpos_4at_posn2_110504','calpos_4at_pos0_110504','calpos_4at_posn1_110504']
+positions = 2.0*r_[-3,-2,0,-1]+107.0
+snrdata = []
+normalize_field = True
+find_maxslope = True
+normalize_peak = True
+# the next part should not change, and should be compiled into a function later
+dir = dirformat(dir)
+legendtext = list(files)
+clf()
+for index,file in enumerate(files):
+   data = load_indiv_file(dir+file)
+   field = r'$B_0$'
+   neworder = list(data.dimlabels)
+   data.reorder([neworder.pop(neworder.index(field))]+neworder) # in case this is a saturation experiment
+   data -= data.copy().run_nopop(mean,field)
+   figure(1)
+   v = winepr_load_acqu(dir+file)
+   xaxis = data.getaxis(field)
+   centerfield = None
+   if normalize_field:
+       xaxis /= v['MF']
+       newname = r'$B_0/\nu_e$'
+   elif find_maxslope:
+       deriv = data.copy()
+       deriv.run_nopop(diff,field)
+       deriv.data[abs(data.data) > abs(data.data).max()/10] = 0 # so it doesn't give a fast slope, non-zero area
+       deriv = abs(deriv)
+       deriv.argmax(field)
+       centerfield = mean(xaxis[int32(deriv.data)])
+       xaxis -= centerfield
+       newname = r'$\Delta B_0$'
+   else:
+       newname = field
+   data.rename(field,newname)
+   mask = data.getaxis(newname)
+   mask = mask > mask[int32(len(mask)-len(mask)/20)]
+   snr = abs(data.data).max()/std(data.data[mask])
+   snrdata.append(snr)
+   integral = data.copy()
+   integral.data -= integral.data.mean() # baseline correct it
+   integral.integrate(newname)
+   figure(2)
+   plot(integral,alpha=0.5,linewidth=0.3)
+   pc = plot_color_counter()
+   ax = gca()
+   #at = twinx()
+   integral.integrate(newname)
+   #plot_color_counter(pc)
+   #plot(integral,alpha=0.15,linewidth=0.3)
+   axes(ax)
+   figure(1)
+   if normalize_peak:
+      normalization = abs(data).run_nopop(max,newname)
+      data /= normalization
+   plot(data,alpha=0.5,linewidth=0.3)
+   if centerfield != None:
+      legendtext[index] += ', %0.03f $G$'%centerfield
+   legendtext[index] += r', SNR %0.2g $\int\int$ %0.3g'%(snr,integral[newname,-1].data[-1])
+#xtl = ax.get_xticklabels()
+#at.xaxis.tick_top()
+#map( (lambda x: x.set_visible(False)), xtl)
+plot(data.getaxis(newname)[mask],zeros(shape(data.getaxis(newname)[mask])),'k',alpha=0.2,linewidth=10)
+figure(1)
+autolegend(legendtext)
+axis('tight')
+lplot('esr_'+thisjobname()+'.pdf')
+figure(2)
+autolegend(legendtext)
+axis('tight')
+lplot('esr_integrated'+thisjobname()+'.pdf')
+figure(3)
+pos = 'position / $mm$'
+snrdata = nddata(array(snrdata),[len(snrdata)],[pos],axis_coords = [array(positions)])
+plot(snrdata,'bo')
+c,fitdata = snrdata[pos,:].polyfit(pos,order = 2)
+fitl = lambda x: c[0]+c[1]*x+c[2]*x**2
+ax = gca()
+parabolamaxat = -0.5*c[1]/c[2]
+text(0.5,0.5,r'best = %0.2f $mm$'%parabolamaxat,transform = ax.transAxes, horizontalalignment = 'center',color = 'g',alpha = 0.5)
+plot(r_[parabolamaxat],r_[fitl(parabolamaxat)],'go')
+axis('tight')
+x = r_[ax.get_xlim()[0]:ax.get_xlim()[1]:100j]
+plot(x,fitl(x),'g-')
+print '\n\n'
+lplot('esr_optpos'+thisjobname()+'.pdf')
+\end{python}
+\end{tiny}
+
+Then, I need to measure the actual length, and add that in to the measurement above.
+
+
+}
+\subsubsection{sample prep for EPR}
+
+\subsubsection{EPR for MDS}\maxtime{0.116667}
+\paragraph{First time only: Set up instrument}
+Turn on chiller, then EPR console (magnet off).
+
+Be sure  mod coil is hooked up, and the waveguide switch is set to ESR.
+
+Turn on the air - 1 bottom w/ bottom of cavity taped.
+
+Wait until bridge stops flashing, then open WinEPR + switch to tune mode.
+
+Be sure that we have dewar $\Rightarrow$ inner white collet $\Rightarrow$ outer white piece $\Rightarrow$ o-ring $\Rightarrow$ collet $\Rightarrow$ black piece\john{I put this first because you don't want the EPR on while you adjust it.}
+
+\precaution{Be sure frequency is at 9.34 $GHz$ (w/ EPR tube in).}
+
+Slide white collet to correct position (one notch below red).
+
+\paragraph{load sample}
+Put into tune mode before changing samples.
+
+Load sample with white sample holder into special EPR tube.
+
+\precaution{Check the orientation of the collet ring from the top, to be sure it screws on straight.}
+\twooptions{ Autotune ({\it easier}) at 10-12 $dB$ } { Tune by hand ({\it faster} -- simultaneously set bias (diode centered at 50 $dB$), frequency (AFC) phase (coarse: dip in tune mode; fine: furthest right diode w.r.t.signal phase while AFC remains locked)) up to 5 $dB$.}
+
+Switch to 10 $dB$ + record $Q$.
+
+Switch to operate straight from tune + adjust bias at 50.
+
+Fine tune at 5 $dB$ + check going back down to 50 $dB$.
+
+\precaution{Check jitter and float at 0 $dB$.}
+First exp only: Run ``quick sat.par'' to check that it's not saturated at 15 $dB$.
+
+Open ESR parameter set similar to this one.
+\fn{popcg_4mM_5p_16dsa_epr_110419.par}
+
+First exp only: Turn on field.
+
+Copy experiment.
+
+First exp only: Run.
+
+First exp only: Only if the experiment says ``uncalibrated'' at the top $\Rightarrow$ ``I'' (interactive spectrometer control) icon, click calibrated, then set parameters to spectrum, then window.
+First exp only: Stop at second peak.
+First exp only: Check that modulation amplitude is $<$ 0.2 x smallest feature.
+Set RG with box.
+
+First exp only: Check that resolution along $x$ is OK.
+
+Run actual scan.
+
+Save ESR.
+\fn{popem_4mM_5p_16dsa_epr_110517}
+
+
+
+
+
+Cntrl-S after scan is finished.
+
+If repeating, copy procedure and ctr-d t only.
+
+\subsubsection{EPR for MTE}\maxtime{0.116667}
+\paragraph{First time only: Set up instrument}
+\hidden{
+Turn on chiller, then EPR console (magnet off).
+
+Be sure  mod coil is hooked up, and the waveguide switch is set to ESR.
+
+Turn on the air - 1 bottom w/ bottom of cavity taped.
+
+Wait until bridge stops flashing, then open WinEPR + switch to tune mode.
+
+Be sure that we have dewar $\Rightarrow$ inner white collet $\Rightarrow$ outer white piece $\Rightarrow$ o-ring $\Rightarrow$ collet $\Rightarrow$ black piece\john{I put this first because you don't want the EPR on while you adjust it.}
+
+\precaution{Be sure frequency is at 9.34 $GHz$ (w/ EPR tube in).}
+
+Slide white collet to correct position (one notch below red).
+
+}
+\paragraph{load sample}
+Put into tune mode before changing samples.
+
+Load sample with white sample holder into special EPR tube.
+
+\precaution{Check the orientation of the collet ring from the top, to be sure it screws on straight.}
+\twooptions{ Autotune ({\it easier}) at 10-12 $dB$ } { Tune by hand ({\it faster} -- simultaneously set bias (diode centered at 50 $dB$), frequency (AFC) phase (coarse: dip in tune mode; fine: furthest right diode w.r.t.signal phase while AFC remains locked)) up to 5 $dB$.}
+
+Switch to 10 $dB$ + record $Q$.
+
+Adjust bias to recenter.
+
+Fine tune at 5 $dB$ + check going back down to 50 $dB$.
+
+\precaution{Check jitter and float at 0 $dB$.}
+First exp only: Run ``quick sat.par'' to check that it's not saturated at 15 $dB$.
+
+Open ESR parameter set similar to this one.
+\fn{popem_4mM_5p_16dsa_epr_110517.par} and cut ns in half.
+
+First exp only: Turn on field.
+
+Copy experiment.
+
+\hidden{First exp only: Run.
+
+First exp only: Only if the experiment says ``uncalibrated'' at the top $\Rightarrow$ ``I'' (interactive spectrometer control) icon, click calibrated, then set parameters to spectrum, then window.
+First exp only: Stop at second peak.
+First exp only: Check that modulation amplitude is $<$ 0.2 x smallest feature.
+Set RG with box.
+
+First exp only: Check that resolution along $x$ is OK.
+}
+Run actual scan.
+
+Save ESR.
+\fn{popem_4mM_5p_pct_epr_110517}
+
+Cntrl-S after scan is finished.
+
+If repeating, copy procedure and ctr-d t only.
+
+\subsubsection{EPR for MSL}\maxtime{0.116667}
+\paragraph{First time only: Set up instrument}
+\hidden{
+Turn on chiller, then EPR console (magnet off).
+
+Be sure  mod coil is hooked up, and the waveguide switch is set to ESR.
+
+Turn on the air - 1 bottom w/ bottom of cavity taped.
+
+Wait until bridge stops flashing, then open WinEPR + switch to tune mode.
+
+Be sure that we have dewar $\Rightarrow$ inner white collet $\Rightarrow$ outer white piece $\Rightarrow$ o-ring $\Rightarrow$ collet $\Rightarrow$ black piece\john{I put this first because you don't want the EPR on while you adjust it.}
+
+\precaution{Be sure frequency is at 9.34 $GHz$ (w/ EPR tube in).}
+
+Slide white collet to correct position (one notch below red).
+
+}
+\paragraph{load sample}
+Put into tune mode before changing samples.
+
+Load sample with white sample holder into special EPR tube.
+
+\precaution{Check the orientation of the collet ring from the top, to be sure it screws on straight.}
+\twooptions{ Autotune ({\it easier}) at 10-12 $dB$ } { Tune by hand ({\it faster} -- simultaneously set bias (diode centered at 50 $dB$), frequency (AFC) phase (coarse: dip in tune mode; fine: furthest right diode w.r.t.signal phase while AFC remains locked)) up to 5 $dB$.}
+
+Switch to 10 $dB$ + record $Q$.
+
+Adjust bias to recenter.
+
+Fine tune at 5 $dB$ + check going back down to 50 $dB$.
+
+\precaution{Check jitter and float at 0 $dB$.}
+First exp only: Run ``quick sat.par'' to check that it's not saturated at 15 $dB$.
+
+Open ESR parameter set similar to this one.
+\fn{popem_4mM_5p_pct_epr_110517.par}
+
+First exp only: Turn on field.
+
+Copy experiment.
+
+\hidden{First exp only: Run.
+
+First exp only: Only if the experiment says ``uncalibrated'' at the top $\Rightarrow$ ``I'' (interactive spectrometer control) icon, click calibrated, then set parameters to spectrum, then window.
+First exp only: Stop at second peak.
+First exp only: Check that modulation amplitude is $<$ 0.2 x smallest feature.
+Set RG with box.
+
+First exp only: Check that resolution along $x$ is OK.
+}
+Run actual scan.
+
+Save ESR.
+\fn{popem_4mM_5p_mmsl_epr_110517}
+
+Cntrl-S after scan is finished.
+
+If repeating, copy procedure and ctr-d t only.
+
+\subsubsection{EPR for MLL}\maxtime{0.116667}
+\paragraph{First time only: Set up instrument}
+\hidden{
+Turn on chiller, then EPR console (magnet off).
+
+Be sure  mod coil is hooked up, and the waveguide switch is set to ESR.
+
+Turn on the air - 1 bottom w/ bottom of cavity taped.
+
+Wait until bridge stops flashing, then open WinEPR + switch to tune mode.
+
+Be sure that we have dewar $\Rightarrow$ inner white collet $\Rightarrow$ outer white piece $\Rightarrow$ o-ring $\Rightarrow$ collet $\Rightarrow$ black piece\john{I put this first because you don't want the EPR on while you adjust it.}
+
+\precaution{Be sure frequency is at 9.34 $GHz$ (w/ EPR tube in).}
+
+Slide white collet to correct position (one notch below red).
+
+}
+\paragraph{load sample}
+Put into tune mode before changing samples.
+
+Load sample with white sample holder into special EPR tube.
+
+\precaution{Check the orientation of the collet ring from the top, to be sure it screws on straight.}
+\twooptions{ Autotune ({\it easier}) at 10-12 $dB$ } { Tune by hand ({\it faster} -- simultaneously set bias (diode centered at 50 $dB$), frequency (AFC) phase (coarse: dip in tune mode; fine: furthest right diode w.r.t.signal phase while AFC remains locked)) up to 5 $dB$.}
+
+Switch to 10 $dB$ + record $Q$.
+
+Adjust bias to recenter.
+
+Fine tune at 5 $dB$ + check going back down to 50 $dB$.
+
+\precaution{Check jitter and float at 0 $dB$.}
+First exp only: Run ``quick sat.par'' to check that it's not saturated at 15 $dB$.
+
+Open ESR parameter set similar to this one.
+\fn{popem_4mM_5p_mmsl_epr_110517.par}
+
+First exp only: Turn on field.
+
+Copy experiment.
+
+\hidden{First exp only: Run.
+
+First exp only: Only if the experiment says ``uncalibrated'' at the top $\Rightarrow$ ``I'' (interactive spectrometer control) icon, click calibrated, then set parameters to spectrum, then window.
+First exp only: Stop at second peak.
+First exp only: Check that modulation amplitude is $<$ 0.2 x smallest feature.
+Set RG with box.
+
+First exp only: Check that resolution along $x$ is OK.
+}
+Run actual scan.
+
+Save ESR.
+\fn{popem_4mM_5p_mmll_epr_110517}
+
+Cntrl-S after scan is finished.
+
+If repeating, copy procedure and ctr-d t only.
+
+\subsubsection{(debug) code for test gain}
+Hit Cntrl-A for ssh transfer.
+
+Process.
+
+
+
+\begin{tiny}
+\begin{python}
+dir = '/home/franck/data/cnsi_data'
+files = ['test_gain1','test_gain2','test_gain3','test_gain4','test_gain5','test_gain6']
+normalize_field = True
+find_maxslope = True
+subtract_first = False
+normalize_peak = False
+# the next part should not change, and should be compiled into a function later
+dir = dirformat(dir)
+fl = figlistl()
+if subtract_first:
+    firstdata = load_indiv_file(dir+files.pop(0))
+legendtext = list(files)
+for index,file in enumerate(files):
+   data = load_indiv_file(dir+file)
+   if subtract_first:
+       data -= firstdata
+   field = r'$B_0$'
+   neworder = list(data.dimlabels)
+   data.reorder([neworder.pop(neworder.index(field))]+neworder) # in case this is a saturation experiment
+   data -= data.copy().run_nopop(mean,field)
+   fl.next('epr')
+   v = winepr_load_acqu(dir+file)
+   if index == 0:
+        fieldbar = data[field,lambda x: logical_and(x>x.mean(),x<x.mean()+10.)]
+        fieldbar.data[:] = 0.5
+        fieldbar.data[0] = 0.6
+        fieldbar.data[-1] = 0.6
+        fxaxis = fieldbar.getaxis(field)
+   xaxis = data.getaxis(field)
+   centerfield = None
+   if normalize_field:
+       xaxis /= v['MF']
+       if index == 0:
+           fxaxis /= v['MF']
+       newname = r'$B_0/\nu_e$'
+   elif find_maxslope:
+       deriv = data.copy()
+       deriv.run_nopop(diff,field)
+       deriv.data[abs(data.data) > abs(data.data).max()/10] = 0 # so it doesn't give a fast slope, non-zero area
+       deriv = abs(deriv)
+       deriv.argmax(field)
+       centerfield = mean(xaxis[int32(deriv.data)])
+       xaxis -= centerfield
+       if index == 0:
+           fxaxis -= centerfield
+       newname = r'$\Delta B_0$'
+   else:
+       newname = field
+   data.rename(field,newname)
+   if index == 0:
+       fieldbar.rename(field,newname)
+   mask = data.getaxis(newname)
+   mask = mask > mask[int32(len(mask)-len(mask)/20)]
+   snr = abs(data.data).max()/std(data.data[mask])
+   integral = data.copy()
+   integral.data -= integral.data.mean() # baseline correct it
+   integral.integrate(newname)
+   fl.next('epr_int')
+   plot(integral,alpha=0.5,linewidth=0.3)
+   pc = plot_color_counter()
+   integral.integrate(newname)
+   fl.next('epr')
+   if normalize_peak:
+      normalization = abs(data).run_nopop(max,newname)
+      data /= normalization
+   ax = gca()
+   plot(data+array(ax.get_ylim()).min(),alpha=0.5,linewidth=0.3)
+   axis('tight')
+   if index == 0:
+       fieldbar *= array(ax.get_ylim()).max()
+   if centerfield != None:
+      legendtext[index] += ', %0.03f $G$'%centerfield
+   legendtext[index] += r', SNR %0.2g $\int\int$ %0.3g'%(snr,integral[newname,-1].data[-1])
+#xtl = ax.get_xticklabels()
+#at.xaxis.tick_top()
+#map( (lambda x: x.set_visible(False)), xtl)
+plot(data.getaxis(newname)[mask],zeros(shape(data.getaxis(newname)[mask])),'k',alpha=0.2,linewidth=10)
+fl.next('epr')
+plot(fieldbar,'k',linewidth = 2.0)
+#autolegend(legendtext)
+axis('tight')
+fl.next('epr_int')
+autolegend(legendtext)
+axis('tight')
+fl.show(thisjobname()+'.pdf')
+\end{python}
+\end{tiny}
+
+
+
+
+\subsubsection{code for all above}
+Hit Cntrl-A for ssh transfer.
+
+Process.
+
+When done, copy working copy into main file, svn, then wipe working copy and move into protocol dir.
+
+\begin{tiny}
+\begin{python}
+dir = '/home/franck/data/cnsi_data'
+files = ['popeca_4mM_5p_cnl_epr_110504','popem_4mM_5p_mmll_epr_110517','popem_4mM_5p_mmsl_epr_110517','popem_4mM_5p_pct_epr_110517','popem_4mM_5p_16dsa_epr_110517']
+normalize_field = True
+find_maxslope = True
+subtract_first = True
+normalize_peak = False
+# the next part should not change, and should be compiled into a function later
+dir = dirformat(dir)
+fl = figlistl()
+if subtract_first:
+    firstdata = load_indiv_file(dir+files.pop(0))
+legendtext = list(files)
+for index,file in enumerate(files):
+   data = load_indiv_file(dir+file)
+   if subtract_first:
+       data -= firstdata
+   field = r'$B_0$'
+   neworder = list(data.dimlabels)
+   data.reorder([neworder.pop(neworder.index(field))]+neworder) # in case this is a saturation experiment
+   data -= data.copy().run_nopop(mean,field)
+   fl.next('epr')
+   v = winepr_load_acqu(dir+file)
+   if index == 0:
+        fieldbar = data[field,lambda x: logical_and(x>x.mean(),x<x.mean()+10.)]
+        fieldbar.data[:] = 0.5
+        fieldbar.data[0] = 0.6
+        fieldbar.data[-1] = 0.6
+        fxaxis = fieldbar.getaxis(field)
+   xaxis = data.getaxis(field)
+   centerfield = None
+   if normalize_field:
+       xaxis /= v['MF']
+       if index == 0:
+           fxaxis /= v['MF']
+       newname = r'$B_0/\nu_e$'
+   elif find_maxslope:
+       deriv = data.copy()
+       deriv.run_nopop(diff,field)
+       deriv.data[abs(data.data) > abs(data.data).max()/10] = 0 # so it doesn't give a fast slope, non-zero area
+       deriv = abs(deriv)
+       deriv.argmax(field)
+       centerfield = mean(xaxis[int32(deriv.data)])
+       xaxis -= centerfield
+       if index == 0:
+           fxaxis -= centerfield
+       newname = r'$\Delta B_0$'
+   else:
+       newname = field
+   data.rename(field,newname)
+   if index == 0:
+       fieldbar.rename(field,newname)
+   mask = data.getaxis(newname)
+   mask = mask > mask[int32(len(mask)-len(mask)/20)]
+   snr = abs(data.data).max()/std(data.data[mask])
+   integral = data.copy()
+   integral.data -= integral.data.mean() # baseline correct it
+   integral.integrate(newname)
+   fl.next('epr_int')
+   plot(integral,alpha=0.5,linewidth=0.3)
+   pc = plot_color_counter()
+   integral.integrate(newname)
+   fl.next('epr')
+   if normalize_peak:
+      normalization = abs(data).run_nopop(max,newname)
+      data /= normalization
+   ax = gca()
+   plot(data+array(ax.get_ylim()).min(),alpha=0.5,linewidth=0.3)
+   axis('tight')
+   if index == 0:
+       fieldbar *= array(ax.get_ylim()).max()
+   if centerfield != None:
+      legendtext[index] += ', %0.03f $G$'%centerfield
+   legendtext[index] += r', SNR %0.2g $\int\int$ %0.3g'%(snr,integral[newname,-1].data[-1])
+#xtl = ax.get_xticklabels()
+#at.xaxis.tick_top()
+#map( (lambda x: x.set_visible(False)), xtl)
+plot(data.getaxis(newname)[mask],zeros(shape(data.getaxis(newname)[mask])),'k',alpha=0.2,linewidth=10)
+fl.next('epr')
+plot(fieldbar,'k',linewidth = 2.0)
+#autolegend(legendtext)
+axis('tight')
+fl.next('epr_int')
+autolegend(legendtext)
+axis('tight')
+fl.show(thisjobname()+'.pdf')
+\end{python}
+\end{tiny}
+
+
+
+
