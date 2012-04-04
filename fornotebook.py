@@ -116,6 +116,8 @@ def see_if_math(recnames):
         return not any(map(lambda x: len(x)>1 and not (x[0] == '{' or x[0] == '\\'),out))
     return [r'\ensuremath{'+v.replace('\\\\','\\')+'}' if ismath(v) else v.replace('_',' ') for v in recnames]
 def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True):
+    r'generate latex representation of a structured array'
+    # previously documented
     reclen = len(recordlist)
     recnames = recordlist.dtype.names
     alltext = ''
@@ -231,9 +233,6 @@ def lplot(fname,width=3,figure=False,dpi=300,grid=False,alsosave=None,gensvg = F
     }'''%(figwidth,fname)
     clf()
     return
-def addlabels(labelstring,x,y,labels):
-    for j in range(0,len(labels)):
-        text(x[j],y[j],labelstring%labels[j],alpha=0.5,color='g',ha='left',va='top',rotation=0)
 def ordplot(x,y,labels,formatstring):
         order = argsort(x)
         plot(x[order],y[order],'o-')

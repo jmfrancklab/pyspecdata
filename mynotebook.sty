@@ -1,32 +1,40 @@
-\ProvidesPackage{mynotebook}
+\ProvidesPackage{new_mynotebook}
 \NeedsTeXFormat{LaTeX2e}[1994/12/01]
 \DeclareOption{supressmulticols}{\newcommand{\supressmulticols}{test}}
+\DeclareOption{showscriptnumber}{\newcommand{\showscriptnumber}{test}}
 \DeclareOption{nolabels}{\newcommand{\nolabels}{test}}
 \DeclareOption{noparagraph}{\newcommand{\noparagraph}{test}}
 \DeclareOption{nopageformat}{\newcommand{\nopageformat}{test}}
 \DeclareOption{nohrule}{\newcommand{\nohrule}{test}}
+\DeclareOption{noheader}{\newcommand{\noheader}{test}}
 \ProcessOptions
 %{{{ symbols
-\usepackage{pifont}
-\usepackage[electronic]{ifsym}
+\RequirePackage{pifont}
+\RequirePackage{xspace}
+\RequirePackage[electronic]{ifsym}
 %}}}
-\usepackage{fancyhdr}
-\usepackage{wrapfig}
-\usepackage[procnames]{listings}
-\usepackage{textcomp}
-\usepackage{setspace}
-%\usepackage{minted}
-\usepackage{palatino}
-\usepackage{amsfonts}
-\usepackage{color}
-\usepackage{url}
-\usepackage{xcolor}
+\RequirePackage{fancyhdr}
+\RequirePackage{wrapfig}
+\RequirePackage[procnames]{listings}
+\RequirePackage{textcomp}% among other things, gives \textmu
+\RequirePackage{setspace}
+\RequirePackage[justification=centerlast,font=small]{caption}% this provides the \newline command within captions
+%\RequirePackage{minted}
+\RequirePackage{palatino}
+\RequirePackage{amsfonts}
+\RequirePackage{color}
+\RequirePackage{url}
+\RequirePackage{xcolor}
+\RequirePackage{array}
+\RequirePackage{lettrine} % large initial caps
+%\RequirePackage{cleveref} % cref -- which does references like citations
 \definecolor{linkcolor}{cmyk}{0,0.7,0.5,0.5}
 \definecolor{mygreen}{rgb}{0,0.5,0.5}
 \definecolor{mygray}{rgb}{0.6,0.6,0.6}
 \definecolor{dblackcolor}{rgb}{0.0,0.0,0.0}
 \definecolor{dbluecolor}{rgb}{.01,.02,0.29}
 \definecolor{dredcolor}{rgb}{0.8,0,0}
+\definecolor{vdredcolor}{rgb}{0.4,0,0}
 \definecolor{dgreencolor}{rgb}{0,0.5,0}
 \definecolor{dgraycolor}{rgb}{0.50,0.50,0.50}
 %{{{ original listings code -- not great
@@ -47,7 +55,7 @@
 %{{{ new listings code
 \lstset{
 language=python,
-basicstyle=\fontsize{8pt}{8pt}\ttfamily,%\small\setstretch{1},
+basicstyle=\footnotesize\ttfamily\renewcommand{\baselinestretch}{0.7},
 stringstyle=\color{dgreencolor},
 showstringspaces=false,
 alsoletter={1234567890},
@@ -82,11 +90,13 @@ emphstyle=[4]\color{purple},
 upquote=true,
 morecomment=[s][\color{dgraycolor}]{"""}{"""},
 commentstyle=\color{dgraycolor}\slshape,
-literate={>>>}{\textbf{\textcolor{darkred}{>{>}>}}}3%
+%literate={>>>}{\textbf{\textcolor{darkred}{>{>}>}}}3%
+literate={>>>}{\textbf{\textcolor{red}{>{>}>}}}3%
          {...}{{\textcolor{gray}{...}}}3,
 procnamekeys={def,class},
 procnamestyle=\color{dredcolor},
-framexleftmargin=1mm, framextopmargin=1mm, frame=shadowbox,
+%framexleftmargin=1mm, framextopmargin=1mm, frame=shadowbox,
+xleftmargin=\parindent,frame=shadowbox,
 numbers=left,
 numberstyle={\fontsize{5pt}{5pt}\ttfamily},
 rulesepcolor=\color{dgraycolor},
@@ -111,35 +121,41 @@ mathescape=true
 }{}
 %\renewcommand{\sectionmark}[1]{\markright{#1}{}}
 %\markright{\sectionmark{}}
-\usepackage{amsmath}
-\usepackage{hycolor}
+\RequirePackage{amsmath}
+\RequirePackage{hycolor}
 % BEGIN part for commenting
-\usepackage{makeidx}
+\RequirePackage{makeidx}
 \makeindex
 \newcommand{\johncomment}[3]{\pdfcomment[author={John Franck #1},subject={},color=blue,hspace=10pt]{#3}\index{#2#3}\quad}
-\newcommand{\john}[1]{\pdfcomment[author={John Franck},subject={},color=blue,hspace=10pt]{#1}\quad}
+%\newcommand{\john}[1]{\pdfcomment[author={John Franck},subject={},color=blue,hspace=10pt]{#1}\quad}
+\newcommand{\john}[1]{\pdfcomment[author={John Franck},subject={},color=blue,hspace=10pt]{#1}{\color{blue}\protect\footnote{\color{blue}#1}}}
+\newcommand{\johnemph}[1]{\pdfcomment[author={John Franck},subject={},color=red,hspace=10pt]{#1}{\color{red}\protect\footnote{\color{red}#1}}}
 \newcommand{\icomment}[1]{\pdfcomment[author={},subject={immediate change},color=red,hspace=10pt]{#1}\quad}
-\newcommand{\songi}[1]{\pdfcomment[author={},subject={immediate change},color=lime,hspace=10pt]{#1}\quad}
+%\newcommand{\songi}[1]{\pdfcomment[author={},subject={immediate change},color=lime,hspace=10pt]{#1}\quad}
+\newcommand{\songi}[1]{\pdfcomment[author={Songi Han},subject={},color=green,hspace=10pt]{#1}{\color{green}\protect\footnote{\protect\color{green}#1}}}
 \newcommand{\sunyia}[1]{\pdfcomment[author={sunyia},subject={},color=orange,hspace=10pt]{#1}\quad}
 \newcommand{\julia}[1]{\pdfcomment[author={julia},subject={},color=green,hspace=10pt]{#1}\quad}
 \newcommand{\nandocomment}[3]{\pdfcomment[author={Nandini Ananth #1},subject={},color=pink,hspace=10pt]{#3}\index{#2#3}\quad}
-\newcommand{\nts}[1]{{\bf{\color{yellow}#1}}}
+% need to show
+\newcommand{\nts}[1]{\xspace{\bf{\color{orange}#1}}}
+% need to do
+\newcommand{\ntd}[1]{\xspace{\textit{\textbf{\color{orange}#1}}}}
 %%\let\oldlabel=\label
 %%\newcommand{\newlabelx}[1]{\pdfcomment[author={label},subject={},color=lime,hspace=10pt]{#1}\oldlabel{#1}}
 %%\renewcommand{\label}[1]{\newlabelx{#1}}
 % END part for commenting
-\usepackage{verbatim}
-\usepackage{graphicx}
+\RequirePackage{verbatim}
+\RequirePackage{graphicx}
 \@ifundefined{supressmulticols}{
-\usepackage{multicol}
+\RequirePackage{multicol}
 }{}
-%\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=blue, citecolor=blue, urlcolor=blue, bookmarksdepth=8]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
+%\RequirePackage[colorlinks=true, pdfstartview=FitV, linkcolor=blue, citecolor=blue, urlcolor=blue, bookmarksdepth=8]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
 \setcounter{tocdepth}{9}
 \setcounter{secnumdepth}{6}
 %\renewcommand\theparagraph{\roman{paragraph}}
-%\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=linkcolor, citecolor=blue, urlcolor=blue, bookmarksdepth=subparagraph,breaklinks=true]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
-\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=linkcolor, citecolor=blue, urlcolor=blue, bookmarksdepth=subparagraph]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
-\usepackage{pdfcomment}
+%\RequirePackage[colorlinks=true, pdfstartview=FitV, linkcolor=linkcolor, citecolor=blue, urlcolor=blue, bookmarksdepth=subparagraph,breaklinks=true]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
+\RequirePackage[colorlinks=true, pdfstartview=FitV, linkcolor=linkcolor, citecolor=blue, urlcolor=blue, bookmarksdepth=subparagraph]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
+\RequirePackage{pdfcomment}
 \providecommand{\DIFadd}[1]{{\protect\color{blue}\uwave{#1}}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{{\protect\color{red}\xout{#1}}}                      %DIF PREAMBLE
 \pdfstringdefDisableCommands{\renewcommand{\DIFdel}{}}
@@ -187,12 +203,17 @@ mathescape=true
 %\def\fn{\begingroup\catcode`\_=12 \newfnx}
 %\newcommand{\newfnx}[1]{\oldfn{#1}\endgroup}
 %}}}
-\usepackage[normalem]{ulem}
+\RequirePackage[normalem]{ulem}
 \newenvironment{co}{\begin{python}
 	import matplotlib; matplotlib.use('Agg')
 	from matlablike import *
 	}{\end{python}}
-    \newenvironment{err}{\begin{quotation}\begin{small}\begin{tiny}\textsc{(Debug:)}\end{tiny}}{\end{small}\end{quotation}}
+%\newenvironment{err}{\let\oldparskip=\parskip\setlength{\parskip}{-100ex}\begin{quotation}\begin{small}\begin{tiny}\textsc{(Debug:)}\setlength{\parskip}{-100ex}\end{tiny}}{\end{small}\end{quotation}\setlength{\parskip}{\oldparskip}}
+\newenvironment{err}{\vspace{-2.25ex}\begin{quotation}\begin{footnotesize}\hspace{-0.5in}\begin{tiny}\textsc{(Debug:)}\end{tiny}\mysmallline
+    
+    \vspace{-0.5ex}}{
+    
+    \vspace{-2ex}\hspace{-0.5in}\myarbline{1.3in}\end{footnotesize}\end{quotation}\vspace{-1.5ex}}
 \def\pythonshow#1{\begin{lstlisting}#1\end{lstlisting}}
 %\def\pythonshow#1{\begin{lstlisting}#1\end{lstlisting}}
 %\def\endpythonshow{}
@@ -201,11 +222,12 @@ mathescape=true
 
 \newwrite\@out
 \newwrite\@module
+\newread\myinput % do this only once
 
 \begingroup \catcode `|=0 \catcode `[=1
 \catcode`]=2 \catcode `\{=12 \catcode `\}=12
-\catcode`\\=12 |gdef|@xpython#1\end{python}[|immediate|write|@out[from h5nmr import *]|immediate|write|@out[#1]|end[python]]
-|endgroup % changed by franck to add include file
+\catcode`\\=12 |gdef|@xpython#1\end{python}[|immediate|write|@out[#1]|end[python]]
+|endgroup % changed by franck to add include file --> very important with the way that latexscript.py is written that this is one and only one line!
 
 \def\python{\kernel@ifnextchar [{\@python}{\@python[]}} % the best I can guess, this defines the start of the environment
 %{{{ fauske hack
@@ -214,7 +236,7 @@ mathescape=true
 \def\@python[#1]{% this appears to be the first-level command that parses the python code
 \stepcounter{py@codenum}
 \gdef\@pythoninclude{#1} % don't know what does this
-\immediate\openout\@out=\jobname.\thepy@codenum.py % clearly opens the output fid
+\immediate\openout\@out=currentscript.py % clearly opens the output fid
 %\immediate\openout\@out=\jobname.py
 \newlinechar='15
 \begingroup \catcode`\^^M=12 % this stuff must just reassign characters
@@ -225,15 +247,20 @@ mathescape=true
 \endgroup
 \immediate\closeout\@out
 \@writemodule% this is defined below, and appears to write the jobname (the file name) to latex.py
-\immediate\write18{bash\space pythonout.sh\space\jobname.\thepy@codenum.py\space pythonout.out\space\thepy@codenum}
-\immediate\write18{mv\space \jobname.\thepy@codenum.py.old \space pythonout.backup}% the crazy moving around of this and the next three lines is to fool synctex into opening the *.py.old file rather than the pythonout.out file
-\immediate\write18{mv\space pythonout.out\space\jobname.\thepy@codenum.py.old}
-\immediate\input \jobname.\thepy@codenum.py.old
-\immediate\write18{mv\space pythonout.backup\space \jobname.\thepy@codenum.py.old}
+\immediate\write18{python\space latexscript.py\space\jobname\space\thepy@codenum\space currentscript.py\space scriptname.txt}
+\immediate\openin\myinput=scriptname.txt
+\immediate\read\myinput to \localline %store the text of scriptname in localline
+%\immediate\input pythonout.out 
+\@ifundefined{showscriptnumber}{}{
+{\it the script name is ``\localline''} %read the filename stored in scriptname.txt
 }
-\def\dontsavepython{\immediate\write18{rm\space\jobname.\thepy@codenum.py.old}\jobname.\thepy@codenum.py.old
-
-{\color{red}Not caching the previous python code!}}
+\immediate\write18{python \space latex_cycle_files.py \space \localline \space presentoutput}
+\immediate\input \localline % because of the result of the previous line, this now has the OUTPUT, but in synctex, it will be referenced to the right file
+\immediate\write18{python \space latex_cycle_files.py \space \localline \space storeoutput}
+}
+%\def\dontsavepython{\immediate\write18{rm\space\jobname.\thepy@codenum.py.old}\jobname.\thepy@codenum.py.old
+%
+%{\color{red}Not caching the previous python code!}}
 %}}}
 \def\@writemodule{%
 \immediate\openout\@module=latex.py
@@ -243,6 +270,7 @@ mathescape=true
 
 \newcommand\myline{\rule{\linewidth}{0.1mm}}
 \newcommand\mysmallline{\rule{1in}{0.01mm}}
+\newcommand\myarbline[1]{\rule{#1}{0.01mm}}
 \let\oldsection = \section
 \let\oldsubsection = \subsection
 \let\oldsubsubsection = \subsubsection
@@ -253,14 +281,12 @@ mathescape=true
 \newcommand{\condhrule}{\@ifundefined{nohrule}{\hrulefill}{}}
 \newcommand{\outlineblank}[1]{\phantomsection\addcontentsline{toc}{#1}{ }}
 \renewcommand{\subsection}[1]{\oldsubsection{#1\condhrule}}
-\renewcommand{\section}[1]{\oldsection{#1\condhrule}}
+\renewcommand{\section}[2][]{\oldsection{#2\condhrule{\tiny #1}}}
 \@ifundefined{noparagraph}{
-\renewcommand{\subsubsection}[1]{\oldsubsubsection{\uline{#1}\condhrule}}
+\renewcommand{\subsubsection}[1]{\oldsubsubsection{{\small #1}\condhrule}}
 %\renewcommand{\paragraph}[1]{\textsc{\oldparagraph{#1}}\textsc{\uline{#1}}\blacktext{$\Rightarrow$}\addcontentsline{toc}{paragraph}{#1}}
-\renewcommand{\paragraph}[1]{\textsc{\oldparagraph{#1}}\textsc{\uline{#1}}\blacktext{$\Rightarrow$}\phantomsection\addcontentsline{toc}{paragraph}{#1}}
-\renewcommand{\subparagraph}[1]{\textit{\small{\uline{#1}}}\phantomsection\addcontentsline{toc}{subparagraph}{#1}
-
-}
+\renewcommand{\paragraph}[1]{\texttt{\oldparagraph{#1}}\texttt{\uline{#1}}\blacktext{$\Rightarrow$}\phantomsection\addcontentsline{toc}{paragraph}{#1}}
+\renewcommand{\subparagraph}[1]{\texttt{\small{\uline{#1:}}}\phantomsection\addcontentsline{toc}{subparagraph}{#1}}
 %\renewcommand{\subparagraph}[1]{\textit{\small{\uline{#1}}}}
 }{
 \renewcommand{\subsubsection}[1]{\phantomsection\addcontentsline{toc}{subsubsection}{#1}
@@ -273,22 +299,49 @@ mathescape=true
 }
 \renewcommand{\o}[2][]{ {\color{mygreen}{\it #1}} {\color{blue} #2}}
 
-\def\Emax{\texorpdfstring{\ensuremath{E_{max}}}{Emax}}
+\def\Emax{\texorpdfstring{\ensuremath{E_{max}}\xspace}{Emax}}
+\newcommand{\etal}{\texorpdfstring{et.~al.\xspace}{et. al. }}
 \newcommand{\Real}[1]{\Re\mathfrak{e}\left[ #1 \right]}
 \newcommand{\Imag}[1]{\Im\mathfrak{m}\left[ #1 \right]}
-\def\xsm{\texorpdfstring{\ensuremath{\xi s_{max}}}{xi smax}}
-\def\xsp{\texorpdfstring{\ensuremath{\xi s(p)}}{xi s(p)}}
+\def\xsm{\texorpdfstring{\ensuremath{\xi s_{max}}\xspace}{xi smax}}
+\def\ksm{\texorpdfstring{\ensuremath{k_\sigma s_{max}}\xspace}{k\_sigma smax}}
+\def\xsp{\texorpdfstring{\ensuremath{\xi s(p)}\xspace}{xi s(p)}}
+\def\ksp{\texorpdfstring{\ensuremath{k_\sigma s(p)}\xspace}{k\_sigma s(p)}}
 \def\smax{\texorpdfstring{\ensuremath{s_{max}}}{smax}}
-\def\uM{\texorpdfstring{\ensuremath{\mu M}}{uM}}
-\def\uL{\texorpdfstring{\ensuremath{\mu L}}{uL}}
 \def\tonen{\texorpdfstring{\ensuremath{T_{1,0}}}{T10}}
 \newcommand{\hausseri}{\ensuremath{(\left\langle I_z\right\rangle - I_0)}}
 \newcommand{\haussers}{\ensuremath{(\left\langle S_z\right\rangle - S_0)}}
 \newcommand{\gammaratio}{659.32}
-\newcommand{\oht}{4-hydroxy-tempo }
-\newcommand{\ot}{4-oxo-tempo }
+\newcommand{\oht}{4-hydroxy-tempo\xspace}
+\newcommand{\ot}{4-oxo-tempo\xspace}
 \newcommand{\obpair}[2]{\ensuremath{\overbrace{#1}^{\mbox{\begin{small}#2\end{small}}}}}
 \newcommand{\ubpair}[2]{\ensuremath{\underbrace{#1}_{\mbox{\begin{small}#2\end{small}}}}}
+%{{{ units
+\def\uM{\texorpdfstring{\ensuremath{\;\mbox{\textmu M}}}{uM}\xspace}
+\def\us{\texorpdfstring{\ensuremath{\;\mbox{\textmu s}}}{us}\xspace}
+\def\uL{\texorpdfstring{\ensuremath{\;\mbox{\textmu L}}}{uL}\xspace}
+\def\mM{\texorpdfstring{\ensuremath{\;\mbox{mM}}}{uM}\xspace}
+\def\mL{\texorpdfstring{\ensuremath{\;\mbox{mL}}}{mL}\xspace}
+\def\cm{\texorpdfstring{\ensuremath{\;\mbox{cm}}}{cm}\xspace}
+\newcommand\M{test that this guy is new!}
+\newcommand\s{test that this guy is new!}
+\newcommand\m{test that this guy is new!}
+\newcommand\nm{test that this guy is new!}
+\newcommand\magn[1]{\texorpdfstring{\ensuremath{\times 10^{#1}}}{e#1}\xspace}
+\newcommand\Ang{\texorpdfstring{\ensuremath{\;\mbox{\AA}}}{Ang.}\xspace}
+\newcommand\GHz{\texorpdfstring{\ensuremath{\;\mbox{GHz}}}{GHz}\xspace}
+\newcommand\MHz{\texorpdfstring{\ensuremath{\;\mbox{MHz}}}{MHz}\xspace}
+\newcommand\kHz{\texorpdfstring{\ensuremath{\;\mbox{kHz}}}{kHz}\xspace}
+\newcommand\mm{\texorpdfstring{\ensuremath{\;\mbox{mm}}}{mm}\xspace}
+\newcommand\W{\texorpdfstring{\ensuremath{\;\mbox{W}}}{W}\xspace}
+\newcommand\K{\texorpdfstring{\ensuremath{\;\mbox{K}}}{K}\xspace}
+\def\M{\texorpdfstring{\ensuremath{\;\mbox{M}}}{M}\xspace}
+\def\nm{\texorpdfstring{\ensuremath{\;\mbox{nm}}}{nm}\xspace}
+\def\m{\texorpdfstring{\ensuremath{\;\mbox{m}}}{m}\xspace}
+\newcommand\secs{\texorpdfstring{\ensuremath{\;\mbox{s}}}{s}\xspace}
+\newcommand\ns{\texorpdfstring{\ensuremath{\;\mbox{ns}}}{ns}\xspace}
+\newcommand\ps{\texorpdfstring{\ensuremath{\;\mbox{ps}}}{ps}\xspace}
+%}}}
 %\newcommand{\gammabar}{\ensuremath\gamma\kern-0.53em-}
 %\newcommand{\gammabar}{\ensuremath\gamma^{\kern-0.25em\lower 3ex\hbox \mbox{\begin{tiny}\textbackslash\end{tiny}}}}
 %\def\Emax{\ensuremath{E_{max}}}
@@ -311,6 +364,8 @@ LAST ORGANIZED TO HERE
 COMPLETE EDIT TO HERE
 
 \myline}
+
+\newcommand{\editpoint}[1]{\phantomsection\addcontentsline{toc}{section}{#1}{\bf #1}\phantomsection\addcontentsline{toc}{subsection}{ }\phantomsection\addcontentsline{toc}{subsubsection}{ }\phantomsection\addcontentsline{toc}{paragraph}{ }\phantomsection\addcontentsline{toc}{subparagraph}{ }}
 
 \gdef\total{0}
 \gdef\thistimeblock{0.001}
@@ -442,12 +497,14 @@ COMPLETE EDIT TO HERE
 }
 \renewcommand{\sectionmark}[1]{\markright{#1}{}}
 
+\@ifundefined{noheader}{
 \@ifundefined{thechapter}{}{
 \fancyhead[LO]{\thechapter.\thesection:}
 \fancyhead[RE]{\thechapter.\thesection}
 \fancyhead[RO]{{\footnotesize\rightmark}\hspace{2em}p{\bf\thepage}}
 \fancyhead[LE]{p{\bf\thepage}\hspace{2em}\footnotesize{\leftmark}}
 }
+}{}
 
 %\rhead{Notebook \today}
 %\chead{\sectionname}
@@ -470,16 +527,18 @@ COMPLETE EDIT TO HERE
 %\newcommand{\newlabelx}[1]{{\tiny #1}\endgroup\oldlabel{#1}}
 }
 %%{{{ the following shows the labels for equations
-\usepackage{showlabels}
-\usepackage{rotating}
+\RequirePackage{showlabels}
+\RequirePackage{rotating}
 %\renewcommand{\showlabelsetlabel}[1]{$\!\!\!\!\!\!\!\hookleftarrow$\begin{rotate}{90}\begin{tiny}\showlabelfont \ #1\end{tiny}\end{rotate}}
 \newcommand{\newshowlabelsetlabelx}[1]{$\!\!\!\!\!\!\!\hookleftarrow$\begin{rotate}{90}\begin{tiny}\showlabelfont \ \begingroup\catcode`_=13 #1\endgroup\end{tiny}\end{rotate}}
 \def\showlabelsetlabel{\newshowlabelsetlabelx}
 %%}}}
 }{}
 %\bibliographystyle{abbrvnat}
-%\usepackage[sort&compress]{natbib}
-\usepackage{fp}
+%\RequirePackage[sort&compress]{natbib}
+\RequirePackage{fp}
+\gdef\total{0}\gdef\dumpval{0}\FPset\ttotal{0} % initialize, whether or not I start the timeblock
+
 \newcommand{\add}[1]{{\it #1}}
 \newcommand{\command}[1]{{\tt #1}}
 \newcommand{\na}[1]{\begin{tiny}{\it{\color{mygray}#1}}\end{tiny}}
@@ -488,7 +547,7 @@ COMPLETE EDIT TO HERE
 \newcommand{\mainhyp}[1]{{\bf #1}}
 \newcommand{\rhosmax}{\ensuremath{\rho s_{max}}}
 \newcommand{\subhyp}[2][]{{\it \textbf{#1} }{\it #2}}
-\bibliographystyle{unsrt}
+%\bibliographystyle{unsrt}
 %\def\thechapter{\Roman{chapter}}
 %\def\thesection{\arabic{section}}
 %\def\thesubsection{\Alph{subsection}}
@@ -499,7 +558,7 @@ COMPLETE EDIT TO HERE
 \newenvironment{DIFnomarkup}{}{}
 \newcommand{\cwdnp}{cw-DNP}
 
-\newcommand\precaution[1]{\begin{tiny}\textit{#1}\end{tiny}}
+\newcommand\precaution[1]{\begin{scriptsize}\textit{#1}\end{scriptsize}}
 \newcommand\twooptions[2]{
 
 \begin{tabular}{c|c}
@@ -519,3 +578,73 @@ COMPLETE EDIT TO HERE
 \newcommand\textsubscript[1]{\ensuremath{{}_{\text{#1}}}}
 \let\myolditemi=\labelitemi
 \let\myolditemii=\labelitemii
+\RequirePackage{multirow}
+
+% start date formatting
+\RequirePackage{datetime}
+\RequirePackage{datenumber}% Date formatting
+\RequirePackage{pgf}% For math
+\RequirePackage{xstring}% Needed for \IfStrEqCase and \IfEq 
+\newcounter{randomstartdate}
+\newcounter{mynewdate}
+\newcounter{mytodaysdate}
+\newcounter{numberofdaysago}
+\newcounter{numberofdaysuntil}
+\newcounter{numberofweeksuntil}
+\newcounter{mytemporary}
+\newdateformat{mydate}{\shortmonthname[\THEMONTH] \ordinaldate{\THEDAY}}
+\newcommand{\formatdatenumber}{\mydate\formatdate{\the\value{dateday}}{\the\value{datemonth}}{\the\value{dateyear}}}
+\newcommand{\saydate}[3]{%
+    \setdatenumber{2010}{1}{1}%
+    \setcounter{randomstartdate}{\value{datenumber}}% use to make numbers manageable%
+    \setdatenumber{#1}{#2}{#3}%
+    \setcounter{mynewdate}{\value{datenumber}}%
+    \addtocounter{mynewdate}{-\value{randomstartdate}}%
+    \setdatetoday % sets the counters back to today%
+    \setcounter{mytodaysdate}{\value{datenumber}}%
+    \addtocounter{mytodaysdate}{-\value{randomstartdate}}%
+    \pgfmathsetcounter{numberofdaysuntil}{int(\value{mynewdate})-int(\value{mytodaysdate})}%
+    \pgfmathsetcounter{numberofdaysago}{ifthenelse(int(\value{numberofdaysuntil})<0,int(-int(\value{numberofdaysuntil})),0)}%
+    \pgfmathsetcounter{numberofdaysuntil}{ifthenelse(int(\value{numberofdaysuntil})<0,-1,int(\value{numberofdaysuntil}))}%
+    \pgfmathsetcounter{numberofweeksuntil}{(int(\value{numberofdaysuntil}) + int(\value{datedayname}) - 1)/7}% give weeks until, but add an offset, so next monday is ``next'' monday, not ``this'' monday -- monday starts the week%
+    \addtocounter{mynewdate}{\value{randomstartdate}}%
+    \addtocounter{mytodaysdate}{\value{randomstartdate}}%
+    \setdatebynumber{\value{mynewdate}}%
+    \setcounter{mytemporary}{\value{numberofdaysago}}%don't know why I need to do this, but apparently I do
+    \IfEq{\the\value{numberofdaysuntil}}{-1}{\textbf{already!!} %
+            \IfEq{\the\value{mytemporary}}{1}{(yesterday)}{%
+                (\the\value{mytemporary} days ago)%
+            }%
+        }{%
+        \IfEq{\the\value{numberofdaysuntil}}{0}{\textbf{today}}{%
+            \IfEq{\the\value{numberofdaysuntil}}{1}{\textbf{tomorrow}}{%
+                \IfEq{\the\value{numberofweeksuntil}}{0}{\datedayname, this week (\formatdatenumber)}{%
+                    \IfEq{\the\value{numberofweeksuntil}}{1}{\datedayname, next week (\formatdatenumber)}{%
+                        later: \formatdatenumber%
+                    }%
+                }%
+            }%
+        }%
+    }%
+    \setdatetoday%
+}%
+\newcommand{\detcolor}[3]{%
+    \setdatenumber{2010}{1}{1}%
+    \setcounter{randomstartdate}{\value{datenumber}}% use to make numbers manageable%
+    \setdatenumber{#1}{#2}{#3}%
+    \setcounter{mynewdate}{\value{datenumber}}%
+    \addtocounter{mynewdate}{-\value{randomstartdate}}%
+    \setdatetoday % sets the counters back to today%
+    \setcounter{mytodaysdate}{\value{datenumber}}%
+    \addtocounter{mytodaysdate}{-\value{randomstartdate}}%
+    \pgfmathsetcounter{numberofdaysuntil}{int(\value{mynewdate})-int(\value{mytodaysdate})}%
+    \pgfmathsetcounter{numberofdaysago}{ifthenelse(int(\value{numberofdaysuntil})<0,int(-int(\value{numberofdaysuntil})),0)}%
+    \pgfmathsetcounter{numberofdaysuntil}{ifthenelse(int(\value{numberofdaysuntil})<0,-1,int(\value{numberofdaysuntil}))}%
+    \pgfmathsetcounter{numberofweeksuntil}{(int(\value{numberofdaysuntil}) + int(\value{datedayname}) - 1)/7}% give weeks until, but add an offset, so next monday is ``next'' monday, not ``this'' monday -- monday starts the week%
+    \pgfmathparse{ifthenelse(int(\value{numberofdaysuntil}) < 4,"red",%
+        ifthenelse(int(\value{numberofdaysuntil}) < 7,"dredcolor",%
+            "vdredcolor"))}\color{\pgfmathresult}%
+    \setdatetoday%
+}%
+\newcommand\due[4][]{{\detcolor{#2}{#3}{#4}Due:\,\saydate{#2}{#3}{#4}} {\detcolor{#2}{#3}{#4}#1}}
+% end date formatting

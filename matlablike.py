@@ -3,10 +3,11 @@ import textwrap
 import matplotlib.transforms as mtransforms
 from matplotlib.lines import Line2D
 import tables
+import warnings
 from inspect import ismethod
 from numpy.core import rec
 import tables
-from os import listdir
+from os import listdir,environ
 from copy import deepcopy 
 import traceback
 import sympy
@@ -19,6 +20,7 @@ from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
 #rc('image',aspect='auto',interpolation='bilinear')
 rc('image',aspect='auto',interpolation='nearest')
+#rc('text',usetex=True) # this creates all sorts of other problems
 rcParams['xtick.direction'] = 'out'
 rcParams['xtick.major.size'] = 12
 rcParams['xtick.minor.size'] = 6
@@ -29,6 +31,10 @@ rcParams['ytick.minor.size'] = 6
 rcParams['legend.fontsize'] = 12
 rcParams['axes.grid'] = False
 rcParams['font.size'] = 18
+if 'PYTHONDATADIR' in environ.keys():
+    DATADIR = environ['PYTHONDATADIR']
+else:
+    DATADIR = '/home/franck/data/'
 
 def mybasicfunction(first_figure = None):
     r'''this gives the format for doing the image thing
@@ -64,6 +70,7 @@ def showtype(x):
         return type(x)
 def emptyfunction():
     pass
+#{{{ structured array helper functions
 def lookup_rec(A,B,indexpair):
     r'''look up information about A in table B (i.e. chemical by index, etc)
     indexpair is either the name of the index
@@ -71,7 +78,10 @@ def lookup_rec(A,B,indexpair):
     given in (A,B) respectively
     
     This will just drop any fields in B that are also in A,
-    and the output uses the first indexname'''
+    and the output uses the first indexname
+    
+    note that it it seems like the join_rec function above may be more efficient!!'''
+    raise RuntimeError('You should now use decorate_rec!!')
     if type(indexpair) not in [tuple,list]:
         indexpair = (indexpair,indexpair)
     Bini = copy(B)
@@ -89,15 +99,24 @@ def lookup_rec(A,B,indexpair):
                     dtype = dtype(j[0].dtype.descr+allbutindex(j[1].dtype.descr))).reshape(1) for j in joined])
     return joined
 def reorder_rec(myarray,listofnames,first = True):
-    indeces_to_move = [myarray.dtype.names.index(j) for j in listofnames]
+    try:
+        indeces_to_move = [myarray.dtype.names.index(j) for j in listofnames]
+    except:
+        stuff_not_found = [j for j in listofnames if j not in myarray.dtype.names]
+        if len(stuff_not_found) > 0:
+            raise CustomError(stuff_not_found,'is/are in the list you passed, but not one of the fields, which are',myarray.dtype.names)
+        else:
+            raise CustomError('unknown problem')
     old_type = list(myarray.dtype.descr)
     new_type = [old_type[j] for j in indeces_to_move] + [old_type[j] for j in range(0,len(old_type)) if j not in indeces_to_move]
     new_list_of_data = [myarray[j[0]] for j in new_type]
     return rec.fromarrays(new_list_of_data,dtype = new_type)
 def lambda_rec(myarray,myname,myfunction,myargs):
     r'''make a new field "myname" which consists of "myfunction" evaluated with the fields given by "myargs" as arguments
-    the new field is always placed at the end
+    the new field is always placed after the last argument name
     if myname is in myargs, the original row is popped'''
+    if type(myargs) is str:
+        myargs = (myargs,)
     if type(myargs) is not tuple:
         myargs = tuple(myargs)
     argdata = map((lambda x: myarray[x]),myargs)
@@ -110,13 +129,90 @@ def lambda_rec(myarray,myname,myfunction,myargs):
     except AttributeError:
         raise CustomError("evaluated function on",argdata,"and got back",newrow,"which appears not to be a numpy array")
     new_field_type[0] = myname
-    eliminate = None
+    starting_names = myarray.dtype.names
+    #{{{ make the dtype
     new_dtype = list(myarray.dtype.descr)
+    #{{{ determine if I need to pop one of the existing rows due to a name conflict
+    eliminate = None
     if myname in myargs:
         eliminate = myname
+        insert_before = starting_names.index(myname) # if we are replacing, we want it in the same place
         new_dtype = [j for j in new_dtype if j[0] != eliminate]
-    new_dtype.append(tuple(new_field_type))
-    return rec.fromarrays([myarray[x] for x in myarray.dtype.names if x != eliminate]+[newrow],dtype = new_dtype)
+    #}}}
+    # if we haven't already eliminated, determine where to put it
+    if eliminate is None:
+        insert_before = starting_names.index(myargs[-1])+1
+    # insert the new field where it goes
+    new_dtype.insert(insert_before,tuple(new_field_type))
+    #}}}
+    #{{{ separate starting_names and ending_names
+    if eliminate is None:
+        ending_names = starting_names[insert_before:]
+        starting_names = starting_names[:insert_before]
+    else: # if I'm eliminating, I don't want to include the eliminated one
+        ending_names = starting_names[insert_before+1:]
+        starting_names = starting_names[:insert_before]
+    #}}}
+    return rec.fromarrays([myarray[x] for x in starting_names if x != eliminate]+[newrow]+[myarray[x] for x in ending_names if x != eliminate],dtype = new_dtype)
+def join_rec((A,a_ind),(B,b_ind)):
+    raise RuntimeError('You should now use decorate_rec!!')
+def decorate_rec((B,b_ind),(C,c_ind),drop_fields = False):
+    r'''Decorate the rows in B with information in C --> if names overlap, keep the ones in B
+    c_ind and b_ind can be either a single key, or a list of keys'''
+    # first find the list of indeces that give us the data we want
+    if (type(c_ind) is str) and (type(b_ind) is str):
+        c_ind = [c_ind]
+        b_ind = [b_ind]
+    if ((type(c_ind) is list) and (type(b_ind) is list)) and (len(c_ind) == len(b_ind)):
+        pass
+    else:
+        raise ValueError('If you call a list for c_ind and/or b_ind, they must match in length!!!')
+    if any([x not in C.dtype.names for x in c_ind]):
+        raise ValueError(repr(c_ind)+' not in '+repr(C.dtype.names)+'!!!')
+    if any([x not in B.dtype.names for x in b_ind]):
+        raise ValueError(repr(b_ind)+' not in '+repr(C.dtype.names)+'!!!')
+    C_reduced = C[c_ind] # a version of C reduced to only include the keys
+    B_reduced = B[b_ind] # same for B
+    # now, I need to generate a mapping from the c_ind to b_ind
+    field_mapping = dict(zip(c_ind,b_ind))
+    C_reduced.dtype.names = tuple([field_mapping[x] for x in C_reduced.dtype.names])
+    # now I change the names so they match and I can compare them
+    # now find the one index of C that matches each value of B
+    list_of_matching = [where(C_reduced == j)[0] for j in B_reduced]
+    length_of_matching = array([len(j) for j in list_of_matching])
+    if any(length_of_matching == 0):
+        if drop_fields:
+            B = B[length_of_matching != 0]
+            list_of_matching = [j[0] for j in list_of_matching if len(j) != 0]
+            dropped_fields = B_reduced[length_of_matching == 0]
+            print r'{\color{red}Warning! decorate\_rec dropped fields in the first argument',lsafen(repr(zip(B_reduced.dtype.names * len(dropped_fields),dropped_fields.tolist()))),r'}'
+        else:
+            raise CustomError('There is no data in the second argument that has',c_ind,'fields to match the',b_ind,'fields of the first argument for the following records:',B_reduced[length_of_matching == 0],'if this is correct, you can set the drop_fields = True keyword argument to drop these fields')
+
+    else:
+        list_of_matching = [j[0] for j in list_of_matching]
+    # now grab the data for these rows
+    add_data = C[list_of_matching]
+    # finally, smash the two sets of data together
+    new_dtypes = [j for j in C.dtype.descr if j[0] not in B.dtype.names]
+    retval = newcol_rec(B,new_dtypes)
+    for name in dtype(new_dtypes).names:
+        retval[name][:] = add_data[name][:]
+    return retval
+def newcol_rec(A,new_dtypes):
+    r'''add new, empty (i.e. random numbers) fields to A, as given by new_dtypes
+    --> note that there are deeply nested numpy functions to do this, but the options are confusing, and I think the way these work is efficient'''
+    if type(new_dtypes) is dtype:
+        new_dtypes = new_dtypes.descr
+    elif type(new_dtypes) is tuple:
+        new_dtypes = [new_dtypes]
+    elif type(new_dtypes) is list:
+        if type(new_dtypes[0]) is not tuple:
+            new_dtypes = [tuple(new_dtypes)]
+    retval = empty(A.shape,dtype = A.dtype.descr + new_dtypes)
+    for name in A.dtype.names:
+        retval[name][:] = A[name][:]
+    return retval
 def make_rec(*args,**kwargs):
     r'input,names or a single argument, which is a dictionary\nstrlen = 100 gives length of the strings (which need to be specified in record arrays)\nyou can also specify (especially useful with the dictionary format) the list order = [str1,str2,...] which orders the output records with the field containing str1 first, then the field containing str2, then any remaining fields'
     strlen = 100
@@ -163,6 +259,7 @@ def make_rec(*args,**kwargs):
         return array([tuple(input)],dtype = mydtype)
     except:
         raise CustomError('problem trying to assign data of type',map(type,input),'\nvalues',input,'\nonto',mydtype,'\ndtype made from tuple:',zip(names,types,shapes))#,'"types" was',types)
+#}}}
 def emptytest(x): # test is it is one of various forms of empty
    if type(x) in [list,array]:
        if len(x) == 0:
@@ -176,13 +273,18 @@ def emptytest(x): # test is it is one of various forms of empty
    if size(x) is 1 and x is None: return True
    if size(x) is 0: return True
    return False
-def lsafen(*string):
+def lsafen(*string,**kwargs):
     "see lsafe, but with an added double newline"
     string = list(string)
     string += ['\n\n']
-    return lsafe(*tuple(string))
-def lsafe(*string):
+    return lsafe(*tuple(string),**kwargs)
+def lsafe(*string,**kwargs):
     "Output properly escaped for latex"
+    #{{{ kwargs
+    spaces = False
+    if 'spaces' in kwargs.keys():
+        spaces = kwargs.pop('spaces')
+    #}}}
     if len(string) > 1:
         return ' '.join(list(map(lsafe,string)))
     else:
@@ -190,6 +292,10 @@ def lsafe(*string):
     if type(string) is not str:
         string = repr(string)
     string = string.replace('\\','\\\\')
+    if spaces:
+        string = string.replace(' ','\\ ')
+    string = string.replace('\n\t\t','\n\n\\quad\\quad ')
+    string = string.replace('\n\t','\n\n\\quad ')
     string = string.replace('_',r'\_')
     string = string.replace('{',r'\{')
     string = string.replace('}',r'\}')
@@ -248,31 +354,31 @@ def gensearch(labelname,format = '%0.3f',value = None,precision = None):
     searchstring_low = '(%s > %s - (%s))'%tuple([labelname]+[format]*2)
     searchstring_low = searchstring_low%(value,precision)
     return searchstring_low + ' & ' + searchstring_high
-def h5searchstring(labelname,value,format = '%g',precision = 0.01):
+def h5searchstring(fieldname,value,format = '%g',precision = 0.01):
     'search AROUND a certain value (overcomes some type conversion issues) optional arguments are the format specifier and the fractional precision'
-    if value == None:
-        raise CustomError('You must pass a value to gensearch')
     precision *= value
-    searchstring_high = '(%s < %s + (%s))'%tuple([labelname]+[format]*2)
+    searchstring_high = '(%s < %s + (%s))'%tuple([fieldname]+[format]*2)
     #print "\n\nDEBUG check format:\\begin{verbatim}",searchstring_high,r'\end{verbatim}'
     searchstring_high = searchstring_high%(value,precision)
     #print "\n\nDEBUG after substitution with",value,precision,":\\begin{verbatim}",searchstring_high,r'\end{verbatim}'
-    searchstring_low = '(%s > %s - (%s))'%tuple([labelname]+[format]*2)
+    searchstring_low = '(%s > %s - (%s))'%tuple([fieldname]+[format]*2)
     searchstring_low = searchstring_low%(value,precision)
     return '(' + searchstring_low + ' & ' + searchstring_high + ')'
 #}}}
 def h5loaddict(thisnode,verbose = False):
+    #{{{ load all attributes of the node
     retval = dict([(x,thisnode._v_attrs.__getattribute__(x))
         for x in thisnode._v_attrs._f_list('user')])
-    for k,v in retval.iteritems():
+    #}}}
+    for k,v in retval.iteritems():#{{{ search for record arrays that represent normal lists
         if type(v) is recarray:
             if 'LISTELEMENTS' in v.dtype.names:
                 if v.dtype.names == tuple(['LISTELEMENTS']):
                     retval[k] = list(v['LISTELEMENTS'])
                 else:
                     raise CustomError('Attribute',k,'is a recordarray with a LISTELEMENTS field, but it also has other dimensions:',v.dtype.names,'not',tuple(['LISTELEMENTS']))
-    for k,v in retval.iteritems():
-        if type(v) is list:
+                #}}}
+        elif type(v) is list:#{{{ deal with lists
             if verbose: print k,"is a list"
             typeofall = map(type,v)
             if all(map(lambda x: x is string_,typeofall)):
@@ -280,13 +386,14 @@ def h5loaddict(thisnode,verbose = False):
                 retval[k] = map(str,v)
             else:
                 if verbose: print k,"=",typeofall,"are not all numpy string"
-        elif type(v) is string_:
+            #}}}
+        elif type(v) is string_:#{{{ map numpy strings onto normal strings
             retval[k] = str(v)
             if verbose: print k,"=",type(v),"is a numpy string"
+            #}}}
         else:
             if verbose: print k,"=",type(v),"is not a numpy string"
-    #{{{ load any table data
-    if type(thisnode) is tables.table.Table:
+    if type(thisnode) is tables.table.Table:#{{{ load any table data
         if verbose: print "It's a table\n\n"
         if 'data' in retval.keys():
             raise CustomError('There\'s an attribute called data --> this should not happen!')
@@ -339,8 +446,24 @@ def h5remrows(bottomnode,tablename,searchstring):
         return counter,data
     except tables.NoSuchNodeError:
         return False,None
-def h5addrow(bottomnode,tablename,listofdata,listofnames,force = False,match_row = None,verbose = False,only_last = True):
+def h5addrow(bottomnode,tablename,*args,**kwargs):
     'add a row to a table, creating it if necessary, but don\'t add if the data matches the search condition'
+    #{{{ process kwargs
+    force = False
+    if 'force' in kwargs.keys():
+        force = kwargs.pop('force')
+    match_row = None
+    if 'match_row' in kwargs.keys():
+        match_row = kwargs.pop('match_row')
+    verbose = False
+    if 'verbose' in kwargs.keys():
+        verbose = kwargs.pop('verbose')
+    only_last = True
+    if 'only_last' in kwargs.keys():
+        only_last = kwargs.pop('only_last')
+    if len(kwargs) != 0:
+        raise ValueError('kwargs'+repr(kwargs)+'not understood!!')
+    #}}}
     try: # see if the table exists
         mytable = h5table(bottomnode,tablename,None)
         #{{{ auto-increment "index"
@@ -365,7 +488,17 @@ def h5addrow(bottomnode,tablename,listofdata,listofnames,force = False,match_row
     except CustomError: # if table doesn't exist, create it
         newindex = 1L
         tableexists = False
-    listofdata = [newindex] + listofdata
+    if len(args) == 1 and (type(args[0]) is dict):
+        listofnames,listofdata = map(list,zip(*tuple(args[0].items())))
+    elif len(args) == 2 and type(args[0]) is list and type(args[1]) is list:
+        listofdata = args[0]
+        listofnames = args[1]
+    else:
+        raise TypeError('h5addrow takes either a dictionary for the third argument or a list for the third and fourth arguments')
+    try:
+        listofdata = [newindex] + listofdata
+    except:
+        raise TypeError('newindex is'+repr(newindex)+'listofdata is'+repr(listofdata))
     listofnames = ['index'] + listofnames
     myrowdata = make_rec(listofdata,listofnames)
     if tableexists:
@@ -414,6 +547,7 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
     r'''return the node based on an absolute path, including the filename'''
     if verbose: print lsafen("DEBUG: called h5nodebypath on",h5path)
     h5path = h5path.split('/')
+    #{{{ open the file / check if it exists
     if verbose: print lsafen('h5path=',h5path)
     try:
         if h5path[0] in listdir('.'):
@@ -426,32 +560,34 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
         h5file = tables.openFile(h5path[0],mode = mode,title = 'test file')
     except IOError:
         raise CustomError('I think the HDF5 file has not been created yet, and there is a bug pytables that makes it freak out, but you can just run again.')
-    currentnode = h5file.getNode('/')
-    for pathlevel in range(1,len(h5path)):
-        clear = False
-        create = True
-        if only_lowest or check_only:
-            create = False
-        if pathlevel == len(h5path)-1: # the lowest level
-            if only_lowest:
-                create = True
-            if force:
-                clear = True
-        safetoleaveopen = False
-        try:
-            currentnode = h5child(currentnode, # current node
-                    h5path[pathlevel], # the child
-                    verbose = verbose,
-                    create = create,
-                    clear = clear)
-            if verbose: print lsafen("searching for node path: descended to node",currentnode)
-        except:
-            if verbose: print lsafen("searching for node path: got caught searching for node",h5path[pathlevel])
-            h5file.close()
-            #print lsafen("DEBUG: Yes, I closed the file")
-            raise CustomError('Problem trying to load node ',h5path)
+    #}}}
+    currentnode = h5file.getNode('/') # open the root node
+    for pathlevel in range(1,len(h5path)):#{{{ step down the path
+            clear = False
+            create = True
+            if only_lowest or check_only:
+                create = False
+            if pathlevel == len(h5path)-1: # the lowest level
+                if only_lowest:
+                    create = True
+                if force:
+                    clear = True
+            safetoleaveopen = False
+            try:
+                currentnode = h5child(currentnode, # current node
+                        h5path[pathlevel], # the child
+                        verbose = verbose,
+                        create = create,
+                        clear = clear)
+                if verbose: print lsafen("searching for node path: descended to node",currentnode)
+            except:
+                if verbose: print lsafen("searching for node path: got caught searching for node",h5path[pathlevel])
+                h5file.close()
+                #print lsafen("DEBUG: Yes, I closed the file")
+                raise CustomError('Problem trying to load node ',h5path)
+            #}}}
     return h5file,currentnode
-def attach_node_attributes(node,listofattributes,myvalues):
+def h5attachattributes(node,listofattributes,myvalues):
     if node is None:
         raise CustomError('Problem!, node ',node,'is None!')
     h5file = node._v_file
@@ -477,7 +613,7 @@ def attach_node_attributes(node,listofattributes,myvalues):
                     thisattr,
                     clear = True,
                     create = True)
-            attach_node_attributes(dictnode,
+            h5attachattributes(dictnode,
                     thisval.keys(),
                     thisval.values())
             thisval = None
@@ -485,11 +621,65 @@ def attach_node_attributes(node,listofattributes,myvalues):
         elif thisval is  None:
             pass
         else:
-            raise CustomError('type of value (',type(thisval),') for attribute name',thisattr,'passed to attach_node_attributes is not currently supported')
+            raise CustomError('type of value (',type(thisval),') for attribute name',thisattr,'passed to h5attachattributes is not currently supported')
         if thisval is not None:
             node._v_attrs.__setattr__(thisattr,thisval)
             listout.remove(thisattr)
     listofattributes[:] = listout # pointer
+def h5inlist(columnname,mylist):
+    'returns rows where the column named columnname is in the value of mylist'
+    return '('+'|'.join(map(lambda x: "(%s == %d)"%(columnname,x),mylist))+')'
+def h5join(firsttuple,secondtuple,
+    additional_search = '',
+    select_fields = None,
+    pop_fields = None,
+    show_orig_indeces = True,
+    verbose = False):
+    if not ((type(firsttuple) is tuple) and (type(secondtuple) is tuple)):
+        raise ValueError('both the first and second arguments must be tuples!')
+    if not ((len(firsttuple) == 2) and (len(secondtuple) == 2)):
+        raise ValueError('The length of the first and second arguments must be two!')
+    tablenode = firsttuple[0]
+    tableindeces = firsttuple[1]
+    if tableindeces is not list:
+        tableindeces = [tableindeces]
+    mystructarray = secondtuple[0].copy()
+    mystructarrayindeces = secondtuple[1]
+    if mystructarrayindeces is not list:
+        mystructarrayindeces = [mystructarrayindeces]
+    #{{{ generate a search string to match potentially more than one key
+    search_string = []
+    if len(tableindeces) != len(mystructarrayindeces):
+        raise ValueError('You must pass either a string or a list for the second element of each tuple!\nIf you pass a list, they must be of the same length, since the field names need to line up!')
+    # this can't use h5inlist, because the and needs to be on the inside
+    # first, I need to generate the sets of criteria for each field
+    for thistableindex,thisstructarrayindex in zip(tableindeces,mystructarrayindeces):
+        search_string.append(["(%s == %d)"%(thistableindex,x) for x in mystructarray[thisstructarrayindex]])
+    # then, if there is more than one 'and' them together, so both fields much matc
+    search_string = [' & '.join(x) for x in zip(*tuple(search_string))]
+    # then slam the whole thing together with or
+    search_string = '('+'|'.join(search_string)+')'
+    #}}}
+    if len(additional_search) > 0:
+        additional_search = " & (%s)"%additional_search
+        search_string = search_string + additional_search
+    if verbose: print '\n\nh5join generated the search string:',lsafen(search_string)
+    retval = tablenode.readWhere(search_string)
+    #{{{ then join the data together
+    # here I'm debugging the join function, again, and again, and agin
+    retval = decorate_rec((retval,tableindeces),(mystructarray,mystructarrayindeces))
+    if pop_fields is not None:
+        if select_fields is not None:
+            raise ValueError("It doesn't make sense to specify pop_fields and select_fields at the same time!!")
+        select_fields = list(set(retval.dtype.names) ^ set(pop_fields))
+    if select_fields is not None:
+        if show_orig_indeces: print '\n\noriginal indeces',lsafen(retval.dtype.names)
+        try:
+            retval = retval[select_fields]
+        except ValueError:
+            raise CustomError('One of the fields',select_fields,'is not in',retval.dtype.names)
+    #}}}
+    return retval
 #}}}
 #{{{ indeces to slice
 #}}}
@@ -705,24 +895,42 @@ def expand_y():
     ylims[0] -= width/10
     ylims[1] += width/10
     ax.set_ylim(ylims)
+def plot_label_points(x,y,labels,**kwargs_passed):
+    kwargs = {'alpha':0.5,'color':'g','ha':'left','va':'center','rotation':0}
+    kwargs.update(kwargs_passed)
+    for j in range(0,len(labels)):
+        text(x[j],y[j],labels[j],**kwargs)
+def addlabels(labelstring,x,y,labels):
+    r'obsolete -- use plot_label_points'
+    for j in range(0,len(labels)):
+        text(x[j],y[j],labelstring%labels[j],alpha=0.5,color='g',ha='left',va='top',rotation=0)
 def plot_color_counter(*args,**kwargs):
     if 'ax' in kwargs.keys():
         ax = kwargs.pop('ax')
     else:
         ax = gca()
     if len(args)>0:
-        ax._get_lines.count = args[0] # set the value of the color counter
-    return ax._get_lines.count
-def plot_updown(data,axis,color1,color2,**kwargs):
+        try:
+            ax._get_lines.count = args[0] # set the value of the color counter
+        except:
+            ax._get_lines.color_cycle = args[0] # set the value of the color counter
+    try: # this is different depending on the version of matlablike
+        retval = ax._get_lines.count
+    except:
+        retval = ax._get_lines.color_cycle
+    return retval
+def plot_updown(data,axis,color1,color2,symbol = '',**kwargs):
+    if symbol == '':
+        symbol = 'o'
     change = r_[1,diff(data.getaxis(axis))]
     changemask = change > 0
     if 'force_color' in kwargs.keys() and kwargs['force_color'] == True:
         if hasattr(data,'other_info'):
             if 'plot_color' in data.other_info.keys():
                 data.other_info.pop('plot_color')
-    plot(data[axis,changemask],color1+'o',**kwargs)
+    plot(data[axis,changemask],color1+symbol,**kwargs)
     if len(kwargs) > 0 and 'label' in kwargs.keys(): kwargs.pop('label') # if I'm doing a legend, I want it on the first
-    plot(data[axis,~changemask],color2+'o',**kwargs)
+    plot(data[axis,~changemask],color2+symbol,**kwargs)
     return
 def nextfigure(figurelist,name):
     'obsolete -- now use class'
@@ -764,17 +972,19 @@ class figlist():
         if len(kwargs) > 0:
             self.figurelist.append(kwargs)
         return
-    def next(self,name):
+    def next(self,name,**kwargs):
         if self.verbose: print lsafe('DEBUG figurelist, called with',name)
         if name in self.figurelist:
-            fig = figure(self.figurelist.index(name)+1)
+            fig = figure(self.figurelist.index(name)+1,**kwargs)
             if self.verbose: print lsafen('in',self.figurelist,'at figure',self.figurelist.index(name)+1,'switched figures')
         else:
-            fig = figure(len(self.figurelist)+1)
+            fig = figure(len(self.figurelist)+1,**kwargs)
             fig.add_subplot(111)
             if self.verbose: print lsafen('added, figure',len(self.figurelist)+1,'because not in figurelist',self.figurelist)
             self.figurelist.append(name)
-        return
+        return gca()
+    def text(self,mytext):
+        self.figurelist.append({'print_string':mytext})
 def text_on_plot(x,y,thistext,**kwargs):
     ax = gca()
     newkwargs = {'transform':ax.transAxes,'size':'x-large',"horizontalalignment":'center'}
@@ -786,6 +996,7 @@ def text_on_plot(x,y,thistext,**kwargs):
     return text(x,y,thistext,**newkwargs)
 def plot(*args,**kwargs):
     global myplotfunc
+    has_labels = False
     #{{{ deal with axes
     if 'ax' in kwargs.keys():
         ax = kwargs.pop('ax')
@@ -827,8 +1038,12 @@ def plot(*args,**kwargs):
         #        myylabel += ' / $' + yunits + '$'
         if (len(myy.dimlabels)>1):
             yunits = myy.get_units()
+            if myy.name() is not None:
+                myylabel = myy.name()
+            else:
+                myylabel = 'data'
             if yunits is not None:
-                myylabel = 'data / $' + yunits + '$'
+                myylabel = myylabel + ' / ' + yunits
         if (len(myy.dimlabels)>0):
             myxlabel = myy.dimlabels[0]
             xunits = myy.get_units(myxlabel)
@@ -856,6 +1071,13 @@ def plot(*args,**kwargs):
             if valueforxerr != None: # if we have x errorbars too
                 #print "DEBUG decided to assign to xerr:",valueforxerr
                 kwargs.update({'xerr':valueforxerr})
+        #{{{ deal with axis labels along y
+        if myy.getaxis(myy.dimlabels[-1]) is not None:
+            yaxislabels = myy.getaxis(myy.dimlabels[-1])
+            if len(yaxislabels) > 0:
+                if type(yaxislabels[0]) is string_:
+                    has_labels = True
+            #}}}
         myy = squeeze(myy.data.copy())
     #}}}
     #{{{ semilog where appropriate
@@ -871,6 +1093,8 @@ def plot(*args,**kwargs):
             myplotfunc = ax.semilogy
         elif kwargs['plottype'] == 'semilogx':
             myplotfunc = ax.semilogx
+        elif kwargs['plottype'] == 'loglog':
+            myplotfunc = ax.loglog
         kwargs.pop('plottype')
     #}}}
     #{{{ take care of manual colors
@@ -908,6 +1132,10 @@ def plot(*args,**kwargs):
             #{{{ here, i update the kwargs to include the specific color for this line
             newkwargs = kwargs.copy() # kwargs is a dict
             newkwargs.update({'color':cm.hsv(double(j)/double(myy.shape[1]))})
+            #}}}
+            #{{{ here, I update to use the labels
+            if has_labels:
+                newkwargs.update({'label':yaxislabels[j]})
             #}}}
             myy[isinf(myy)] = NaN # added this to prevent an overflow error
             try:
@@ -969,7 +1197,10 @@ class ndshape ():
         self.shape[self.dimlabels.index(reference)] = setto
         return
     def copy(self):
-        return deepcopy(self)
+        try:
+            return deepcopy(self)
+        except:
+            raise RuntimeError('Some type of error trying to run deepcopy on'+repr(self))
     def matchdims(self,arg):
         r'returns shape with [not in self, len 1] + [overlapping dims between arg + self] + [not in arg] --> this is better accomplished by using sets as I do in the matchdims below'
         for k in set(self.dimlabels) & set(arg.dimlabels):
@@ -999,17 +1230,30 @@ class ndshape ():
             mydict = dict(zip(self.dimlabels,self.shape))
         except:
             raise CustomError("either dimlabels=",self.dimlabels,"or shape",self.shape,"not in the correct format")
-        return mydict[args]
+        try:
+            return mydict[args]
+        except:
+            raise CustomError("one or more of the dimensions named",args,"do not exist in",self.dimlabels)
     def pop(self,label):
         thisindex = self.dimlabels.index(label)
         self.dimlabels.pop(thisindex)
         self.shape.pop(thisindex)
-    def alloc(self,dtype='complex128'):
+    def alloc(self,dtype='complex128',labels = False,format = 0):
         try:
-            emptyar = zeros(tuple(self.shape),dtype=dtype)
+            if format == 0:
+                emptyar = zeros(tuple(self.shape),dtype=dtype)
+            elif format == 1:
+                emptyar = ones(tuple(self.shape),dtype=dtype)
+            elif format is None:
+                emptyar = empty(tuple(self.shape),dtype=dtype)
+            else:
+                emptyar = format*ones(tuple(self.shape),dtype=dtype)
         except TypeError:
             raise CustomError('Wrong type for self.shape',map(type,self.shape))
-        return nddata(emptyar,self.shape,self.dimlabels)
+        retval = nddata(emptyar,self.shape,self.dimlabels)
+        if labels:
+            retval.labels(self.dimlabels,map(lambda x: zeros(x),self.shape))
+        return retval
 #}}}
 #{{{ format out to a certain decimal place
 def dp(number,decimalplaces,scientific=False):
@@ -1022,9 +1266,9 @@ def dp(number,decimalplaces,scientific=False):
     return fstring%number
 #}}}
 #{{{ concatenate datalist along dimname
-def concat(datalist,dimname):
+def concat(datalist,dimname,chop = False,verbose = False):
     #{{{ allocate a new datalist structure  
-    t1size = 0
+    newdimsize = 0
     #print 'DEBUG: type(datalist)',type(datalist)
     try:
         shapes = map(ndshape,datalist)
@@ -1033,35 +1277,44 @@ def concat(datalist,dimname):
             raise CustomError('You didn\'t pass a list, you passed a',type(datalist))
         raise CustomError('Problem with what you passed to concat, list of types,',map(type,datalist))
     for j in range(0,len(datalist)):
+        #{{{ make list for the shape to check, which contains the dimensions we are NOT concatting along
         if dimname in shapes[j].dimlabels:
-            t1size += shapes[j][dimname]
+            newdimsize += shapes[j][dimname]
             shapetocheck = list(shapes[j].shape)
             shapetocheck.pop(shapes[j].dimlabels.index(dimname))
         else:
-            t1size += 1
+            newdimsize += 1
             shapetocheck = list(shapes[j].shape)
+        #}}}
         if j is 0:
             shapetocheckagainst = shapetocheck
         else:
             if any(~(array(shapetocheck) == array(shapetocheckagainst))):
-                raise CustomError('For item ',j,'in concat, ',shapetocheck,'!=',shapetocheckagainst,'where all the shapes of the things you\'re trying to concat are:',shapes)
+                if chop:
+                    if verbose:
+                        print lsafen(repr(shapetocheck)),lsafen(repr(shapetocheckagainst))
+                        raise CustomError('For item ',j,'in concat, ',shapetocheck,'!=',shapetocheckagainst,'where all the shapes of the things you\'re trying to concat are:',shapes)
+                else:
+                    raise CustomError('For item ',j,'in concat, ',shapetocheck,'!=',shapetocheckagainst,'where all the shapes of the things you\'re trying to concat are:',shapes)
     newdatalist = ndshape(datalist[-1])
     if dimname in newdatalist.dimlabels:
-        newdatalist[dimname] = t1size
+        newdatalist[dimname] = newdimsize
     else:
-        newdatalist += ([t1size],[dimname])
+        newdatalist += ([newdimsize],[dimname])
     #print "DEBUG newdatalist is shaped like",newdatalist
     newdatalist = newdatalist.alloc()
+    if datalist[0].get_error() is not None:
+        newdatalist.set_error(zeros(shape(newdatalist.data)))
     #}}}
-    #{{{ actually contact the datalist
-    t1size = 0 # now use it to track to position
+    #{{{ actually contract the datalist
+    newdimsize = 0 # now use it to track to position
     for j in range(0,len(datalist)):
         if dimname in shapes[j].dimlabels:
-            newdatalist[dimname,t1size:t1size+shapes[j][dimname]] = datalist[j]
-            t1size += shapes[j][dimname]
+            newdatalist[dimname,newdimsize:newdimsize+shapes[j][dimname]] = datalist[j]
+            newdimsize += shapes[j][dimname]
         else:
-            newdatalist[dimname,t1size:t1size+1] = datalist[j]
-            t1size += 1
+            newdatalist[dimname,newdimsize:newdimsize+1] = datalist[j]
+            newdimsize += 1
     #}}}
     #{{{ pull the axis labels from the last item in the list
     if len(datalist[-1].axis_coords)>0:
@@ -1073,7 +1326,7 @@ def concat(datalist,dimname):
             dimlabels.pop(thisindex)
             axis_coords.pop(thisindex)
         dimlabels += [dimname]
-        axis_coords += [r_[0:t1size]]
+        axis_coords += [r_[0:newdimsize]]
         try:
             newdatalist.labels(dimlabels,axis_coords)
         except:
@@ -1098,6 +1351,10 @@ class nddata (object):
             raise CustomError("trying to reshape a ",data.shape,"array with list of sizes",sizes)
         self.dimlabels = dimlabels
         self.axis_coords = axis_coords
+        #if len(axis_coords) > 0:
+        #    testshape = data.shape
+        #    if not all([len(axis_coords[j])==testshape[j] if axis_coords[j] is not None else True for j in range(0,len(axis_coords))]):
+        #        raise IndexError('The length of your axis labels (axis_coords) (shape %s) and your axis data (shape %s) does not match!!!'%(repr([len(thiscoord) for thiscoord in axis_coords]),repr(data.shape)))
         self.ft_start_time = ft_start_time
         self.data_error = data_error
         self.data_units = data_units
@@ -1115,7 +1372,7 @@ class nddata (object):
         return string[:9] == 'symbolic_' and hasattr(self,string)
     #{{{ for printing
     def __repr__(self):
-        return repr(self.data)+'\n\t+/-'+repr(self.get_error())+'\ndimlabels=['+repr(self.dimlabels)+']\naxes='+repr(self.mkd(self.axis_coords))+'\n\t+/-'+repr(self.mkd(self.axis_coords_error))+'\n'
+        return repr(self.data)+'\n\t\t+/-'+repr(self.get_error())+'\n\tdimlabels=['+repr(self.dimlabels)+']\n\taxes='+repr(self.mkd(self.axis_coords))+'\n\t\t+/-'+repr(self.mkd(self.axis_coords_error))+'\n'
     #}}}
     #{{{ error-related functions
     def normalize(self,axis,first_figure = None):#,whichpoint = slice(0,1,None)):
@@ -1156,19 +1413,12 @@ class nddata (object):
     #{{{ shortcuts for axes
     def axlen(self,axis):
         return shape(self.data)[self.axn(axis)]
-    def axn(self,*axis):
-        if len(axis) == 0:
-            if len(self.dimlabels) == 1:
-                return 0
-            else:
-                raise CustomError('you need to specify an axis name, because there are more than one')
-        elif len(axis) == 1:
-            try:
-                return self.dimlabels.index(axis[0])
-            except:
-                raise CustomError('there is no axis named',axis[0],'all axes are named',self.dimlabels)
-        else:
-            raise CustomError('wrong number of arguments to axn')
+    def axn(self,axis):
+        r'return the number for the axis with the name "axis"'
+        try:
+            return self.dimlabels.index(axis)
+        except:
+            raise CustomError('there is no axis named',axis,'all axes are named',self.dimlabels)
     #}}}
     #{{{ dictionary functions -- these convert between two formats:
     # dictionary -- stuff labeled according the dimension label.
@@ -1228,7 +1478,7 @@ class nddata (object):
         '''set the errors\neither set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         if (len(args) is 1) and (type(args[0]) is ndarray):
             self.data_error = reshape(args[0],shape(self.data))
-        elif (len(args) is 2) and (type(args[0]) is str) and (type(args[1]) is nddata):
+        elif (len(args) is 2) and (type(args[0]) is str) and (type(args[1]) is ndarray):
             self.axis_coords_error[self.axn(args[0])] = args[1]
         elif (len(args) is 1) and args[0] is None:
             self.data_error = None
@@ -1252,23 +1502,27 @@ class nddata (object):
                 return None
             else:
                 return real(self.data_error)
-        elif (len(args) is 1) and (type(args[0]) is str):
-            if len(self.axis_coords_error) == 0: self.axis_coords_error = [None] * len(self.dimlabels) # is we have an empty axis_coords_error, need to fill with None's
-            try:
-                errorforthisaxis = self.axis_coords_error[self.axn(args[0])]
-            except:
-                raise CustomError('Problem trying to load error',self.axn(args[0]),'for axis',args[0],'out of',self.axis_coords_error)
-            if errorforthisaxis is None:
-                return None
-            else:
-                x = self.axis_coords_error[self.axn(args[0])]
-                if type(x) is ndarray:
-                    if x.shape == ():
-                        return None
-                    else:
-                        return real(self.axis_coords_error[self.axn(args[0])])
+        elif (len(args) is 1):
+            thearg = args[0]
+            if type(thearg) is str_:
+                thearg = str(thearg) # like in the other spot, this became necessary with some upgrade, though I'm not sure that I should maybe just change the error functions to treat the numpy string in the same way
+            if (type(thearg) is str):
+                if len(self.axis_coords_error) == 0: self.axis_coords_error = [None] * len(self.dimlabels) # is we have an empty axis_coords_error, need to fill with None's
+                try:
+                    errorforthisaxis = self.axis_coords_error[self.axn(thearg)]
+                except:
+                    raise CustomError('Problem trying to load error',self.axn(thearg),'for axis',thearg,'out of',self.axis_coords_error)
+                if errorforthisaxis is None:
+                    return None
                 else:
-                    return real(self.axis_coords_error[self.axn(args[0])])
+                    x = self.axis_coords_error[self.axn(thearg)]
+                    if type(x) is ndarray:
+                        if x.shape == ():
+                            return None
+                        else:
+                            return real(self.axis_coords_error[self.axn(thearg)])
+                    else:
+                        return real(self.axis_coords_error[self.axn(thearg)])
         else:
             raise CustomError('Not a valid argument to get_error: *args=',args,'map(type,args)=',map(type,args))
         #}}}
@@ -1305,7 +1559,19 @@ class nddata (object):
         self.other_info.update({propname:val})
         return
     def get_prop(self,propname):
+        if propname not in self.other_info.keys():
+            return None
         return self.other_info[propname]
+    def name(self,*arg):
+        r"""args:
+           .name(newname) --> Name the object (for storage, etc)
+           .name() --> Return the name"""
+        if len(arg) == 1:
+            self.set_prop('name',arg[0])
+        elif len(arg) == 0:
+            return self.get_prop('name')
+        else:
+            raise ValueError("invalid number of arguments")
     #}}}
     #{{{ set and get plot color
     def set_plot_color(self,thiscolor):
@@ -1620,18 +1886,44 @@ class nddata (object):
             func = mydiff
         return func
         #}}}
-    def argmax(self,axes):
+    def argmax(self,axes,raw_index = False):
+        r'find the max along a particular axis, and get rid of that axis, replacing it with the index number of the max value'
         if (type(axes) is str):
             axes = [axes]
         for j in range(0,len(axes)):
             try:
-                thisindex = self.dimlabels.index(axes[j])
+                thisindex = self.axn(axes[j])
             except:
                 print 'error, dimlabels is: ',self.dimlabels
                 print "doesn't contain: ",axes[j]
                 raise
-            self.data = argmax(self.data,
-                    axis=thisindex)
+            if raw_index:
+                self.data = argmax(self.data,
+                        axis=thisindex)
+            else:
+                self.data = self.axis_coords[thisindex][argmax(self.data,
+                    axis=thisindex)]
+            self.dimlabels.pop(thisindex)
+            if self.axis_coords!=[]:
+                self.axis_coords.pop(thisindex)
+        return self
+    def argmin(self,axes,raw_index = False):
+        r'find the min along a particular axis, and get rid of that axis, replacing it with the index number of the min value'
+        if (type(axes) is str):
+            axes = [axes]
+        for j in range(0,len(axes)):
+            try:
+                thisindex = self.axn(axes[j])
+            except:
+                print 'error, dimlabels is: ',self.dimlabels
+                print "doesn't contain: ",axes[j]
+                raise
+            if raw_index:
+                self.data = argmin(self.data,
+                        axis=thisindex)
+            else:
+                self.data = self.axis_coords[thisindex][argmin(self.data,
+                    axis=thisindex)]
             self.dimlabels.pop(thisindex)
             if self.axis_coords!=[]:
                 self.axis_coords.pop(thisindex)
@@ -1652,6 +1944,13 @@ class nddata (object):
                 print 'error, dimlabels is: ',self.dimlabels
                 print "doesn't contain: ",axes[j]
                 raise
+            if self.data_error is not None:
+                this_axis_length = self.data.shape[thisindex]
+                try:
+                    self.data_error = sqrt(sum((self.data*self.data_error)**2,
+                            axis=thisindex)/(this_axis_length**2))
+                except:
+                    raise CustomError('shape of data',shape(self.data),'shape of data error',shape(self.data_error))
             self.data = mean(self.data,
                     axis=thisindex)
             self.dimlabels.pop(thisindex)
@@ -1660,13 +1959,6 @@ class nddata (object):
         return self
     def mean_nopop(self,axis):
         self = self.run_nopop(mean,axis=axis)
-        return self
-    def argmin(self,axis):
-        thisaxis = self.dimlabels.index(axisname)
-        self.data = argmin(thisaxis,axis = thisaxis)
-        x = self.getaxis(axis)
-        newdata = x[self.data]
-        self.data = newdata
         return self
     #}}}
     #{{{ running functions and popping dimensions
@@ -1749,7 +2041,7 @@ class nddata (object):
         myfilter /= myfilter.sum()
         self.data = fftconvolve(self.data,myfilter,mode='same') # I need this, so the noise doesn't break up my blocks
         return self
-    def ft(self,axes,shiftornot=False,shift=None):
+    def ft(self,axes,shiftornot=False,shift=None,pad = False):
         if shift != None:
             shiftornot = shift
         if (type(axes) is str):
@@ -1761,18 +2053,23 @@ class nddata (object):
                 thisaxis = self.dimlabels.index(axes[j])
             except:
                 raise CustomError('error, dimlabels is: ',self.dimlabels)
-            self.data = fft(self.data,axis=thisaxis)
+            padded_length = self.data.shape[thisaxis]
+            if pad is True:
+                padded_length = 2**(ceil(log2(padded_length)))
+            elif pad:
+                padded_length = pad
+            self.data = fft(self.data,n = padded_length,axis=thisaxis)
             if bool(shiftornot[j]):
                 self.data = fftshift(self.data,axes=[thisaxis])
             if len(self.axis_coords)>0:
                 t = self.axis_coords[thisaxis]
-                dt = t[1]-t[0]
+                dt = t[1]-t[0] # the dwell gives the bandwidth, whether or not it has been zero padded
                 self.ft_start_time = t[0]
                 self.data *= dt
-                self.axis_coords[thisaxis] = linspace(0,1./dt,size(t))
+                self.axis_coords[thisaxis] = linspace(0,1./dt,padded_length)
                 if bool(shiftornot[j]):
                     mask = self.axis_coords[thisaxis] > 0.5/dt
-                    self.axis_coords[thisaxis][mask] -= (1.+1./size(t))/dt
+                    self.axis_coords[thisaxis][mask] -= (1.+1./padded_length)/dt
                     self.axis_coords[thisaxis] = fftshift(self.axis_coords[thisaxis])
         return self
     def ift(self,axes,shiftornot=False,shift=None):
@@ -1800,17 +2097,26 @@ class nddata (object):
         return self
     #}}}
     #{{{ interpolation
-    def interp(self,axis,axisvalues,past_bounds = None,**kwargs):
+    def interp(self,axis,axisvalues,past_bounds = None,verbose = False,**kwargs):
         'interpolate data values given axis values'
         oldaxis = self.getaxis(axis)
+        if (type(axisvalues) is int) or (type(axisvalues) is int32):
+            axisvalues = linspace(oldaxis[0],oldaxis[-1],axisvalues)
+        elif (type(axisvalues) not in [ndarray,tuple]):
+            raise ValueError("You passed a target axis of type"+repr(type(axisvalues))+"which I don't get")
         if past_bounds == None:
             axisvalues[axisvalues<oldaxis.min()] = oldaxis.min()
             axisvalues[axisvalues>oldaxis.max()] = oldaxis.max()
         elif not (past_bounds == 'fail'):
-            axisvalues[axisvalues<oldaxis.min()] = past_bounds
-            axisvalues[axisvalues>oldaxis.max()] = past_bounds
-        if type(axisvalues) is int:
-            axisvalues = linspace(oldaxis[0],oldaxis[-1],axisvalues)
+            if type(past_bounds) is tuple:
+                if len(past_bounds) == 2:
+                    axisvalues[axisvalues<oldaxis.min()] = past_bounds[0]
+                    axisvalues[axisvalues>oldaxis.max()] = past_bounds[1]
+                else:
+                    raise TypeError('If you pass axisvalues as a tuple, it must be of length 2!')
+            else:
+                axisvalues[axisvalues<oldaxis.min()] = past_bounds
+                axisvalues[axisvalues>oldaxis.max()] = past_bounds
         rdata = real(self.data)
         idata = imag(self.data)
         if 'kind' in kwargs.keys():
@@ -1821,16 +2127,22 @@ class nddata (object):
                 thiskind = 'quadratic'
                 if len(rdata) < 3:
                     thiskind = 'linear'
+        thisaxis = self.axn(axis)
         try:
-            interpfunc =  interp1d(oldaxis,rdata,kind = thiskind)
+            if verbose: print 'Using %s interpolation'%thiskind
+            interpfunc =  interp1d(oldaxis,rdata,kind = thiskind,axis = thisaxis)
             #interpfunc =  UnivariateSpline(oldaxis,rdata,s=1)
             rdata = interpfunc(axisvalues)
-            interpfunc =  interp1d(oldaxis,idata,kind = thiskind)
+            interpfunc =  interp1d(oldaxis,idata,kind = thiskind,axis = thisaxis)
             #interpfunc =  UnivariateSpline(oldaxis,idata,s=1)
             idata = interpfunc(axisvalues)
             self.data = rdata + 1j * idata
         except ValueError:
-            raise CustomError('Value error, bounds for data are',self.getaxis(axis)[r_[0,-1]],'bounds for new axis are',axisvalues[r_[0,-1]])
+            raise CustomError('Value error, bounds for data are',self.getaxis(axis)[r_[0,-1]],'bounds for new axis are',axisvalues[r_[0,-1]],
+                    'shapes are',
+                    shape(axisvalues),shape(oldaxis),shape(self.data),
+                    'dtypes are',
+                    axisvalues.dtype,self.getaxis(axis).dtype,self.data.dtype)
 
         except TypeError:
             raise CustomError('Type error, types are',
@@ -1843,15 +2155,20 @@ class nddata (object):
         return self
     def invinterp(self,axis,values):
         'interpolate axis values given data values'
+        origdata = self.data.copy()
+        origaxis = self.getaxis(axis).copy()
         self.data = values
-        self.setaxis(axis,interp(values,self.data,self.getaxis(axis)))
+        try:
+            self.setaxis(axis,interp(values,origdata,origaxis))
+        except:
+            raise CustomError('problem interpolating for axis',axis,'values',values,'with axis length',shape(self.getaxis(axis)),'and data shape',shape(self.data))
         return self
     #}}}
     def multimin(self,minfunc,axisname,filterwidth,numberofmins):
         cost = self.copy().convolve(axisname,filterwidth).run_nopop(minfunc)
         for j in range(0,numberofmins):
             #{{{ find the x value at which the minimum occurs
-            xvalues = cost.copy().argmin(axisname)
+            xvalues = cost.copy().argmin(axisname,raw_index = True)
             #}}}
     def repwlabels(self,axis):
         return None
@@ -1880,27 +2197,43 @@ class nddata (object):
             self.data = self.data.transpose(neworder)
         except ValueError:
             raise CustomError('you can\'t reorder',self.dimlabels,'as',neworder)
+        if self.data_error is not None:
+            self.data_error = self.data_error.transpose(neworder)
         return self
     def labels(self,listofstrings,listofaxes):
+        r'''label the dimensions, given in listofstrings with the axis labels given in listofaxes -- listofaxes must be a numpy array;
+        you can pass either a list or a axis name (string)/axis label (numpy array) pair'''
         if len(self.axis_coords) == 0:
             self.axis_coords = [[]]*len(self.dimlabels)
             self.axis_coords_error = [None]*len(self.dimlabels)
+        if type(listofstrings) is str:
+            listofstrings = [listofstrings]
+            listofaxes = [listofaxes]
+        if type(listofstrings) is not list:
+            raise TypeError("the arguments passed to the .labels() method must be a list of the axis names followed by the list of the axis arrays")
+        elif all(map(( lambda x: type(x) is str_ ),listofstrings)):
+            listofstrings = map(str,listofstrings)
+        elif not all(map(( lambda x: type(x) in [str,str_] ),listofstrings)):
+            raise TypeError("the arguments passed to the .labels() method must be a list of the axis names followed by the list of the axis arrays")
         for j in range(0,len(listofstrings)):
-            #{{{ test that the axis is the right size
-            if type(listofstrings) is not list:
-                raise CustomError("the arguments passed to the .labels() method must be a list of the axis names followed by the list of the axis arrays")
-            if isscalar(listofaxes[j]):#interpret as a timestep
-                listofaxes[j] = listofaxes[j] * r_[0:ndshape(self)[listofstrings[j]]]
-            if (len(listofaxes[j]) != ndshape(self)[listofstrings[j]]) and (len(listofaxes[j])!=0):
-                raise CustomError("You're trying to attach an axis of len",len(listofaxes[j]),"to the",listofstrings[j],"dimension, which has ",ndshape(self)[listofstrings[j]]," data points")
-            #}}}
-            try:
-                self.axis_coords[self.dimlabels.index(listofstrings[j])] = listofaxes[j]
-            except:
+            if listofaxes[j] is None:
+                self.axis_coords[self.axn(listofstrings[j])] = None
+            else:
+                #{{{ test that the axis is the right size
+                if isscalar(listofaxes[j]):#interpret as a timestep
+                    listofaxes[j] = listofaxes[j] * r_[0:ndshape(self)[listofstrings[j]]]
+                if type(listofaxes[j]) not in [ndarray,list]:
+                    raise TypeError('You passed an axis label of type '+repr(type(listofaxes[j]))+' for the axis '+listofstrings[j]+' to the labels method, which you can\'t do --> it must be an nddata')
+                if (len(listofaxes[j]) != ndshape(self)[listofstrings[j]]) and (len(listofaxes[j])!=0):
+                    raise IndexError("You're trying to attach an axis of len %d to the '%s' dimension, which has %d data points"%(len(listofaxes[j]),listofstrings[j],ndshape(self)[listofstrings[j]]))
+                #}}}
                 try:
-                    raise CustomError("Can't assign the coordinates to"+listofstrings[j]+"as"+listofaxes[j].__repr__())
+                    self.axis_coords[self.dimlabels.index(listofstrings[j])] = listofaxes[j]
                 except:
-                    raise CustomError("listofaxes (",len(listofaxes),") isn't same length as ",listofstrings)
+                    try:
+                        raise CustomError("Can't assign the coordinates to"+listofstrings[j]+"as"+listofaxes[j].__repr__())
+                    except:
+                        raise CustomError("listofaxes (",len(listofaxes),") isn't same length as ",listofstrings)
         return self
     def sort(self,axisname):
         whichaxis = self.dimlabels.index(axisname)
@@ -1915,7 +2248,11 @@ class nddata (object):
         self.axis_coords = other.axis_coords
         return self
     def retaxis(self,axisname):
-        return nddata(self.getaxis(axisname).copy(),[size(self.getaxis(axisname))],[axisname])
+        newshape = ones(len(self.data.shape),dtype = 'uint')
+        thisaxis = self.axn(axisname)
+        newshape[thisaxis] = self.data.shape[thisaxis]
+        newshape = list(newshape)
+        return nddata(self.getaxis(axisname).copy().reshape(newshape),newshape,list(self.dimlabels))
     def getaxis(self,*axisname):
         try:
             return self.axis_coords[self.axn(*axisname)]
@@ -1985,6 +2322,7 @@ class nddata (object):
     def __getslice__(self,*args):
         print 'getslice! ',args
     def __setitem__(self,*args):
+        righterrors = None
         if isinstance(args[1],nddata):
             #{{{ reorder so the shapes match
             unshared_indeces = list(set(args[1].dimlabels) ^ set(self.dimlabels))
@@ -1995,6 +2333,7 @@ class nddata (object):
                 args[1].reorder[shared_indeces]
             #}}}
             rightdata = args[1].data
+            righterrors = args[1].get_error()
         else: # assume it's an ndarray
             rightdata = args[1]
             if (type(rightdata) is not ndarray): # in case its a scalar
@@ -2006,6 +2345,9 @@ class nddata (object):
         except:
             raise CustomError('ERROR ASSIGNING NDDATA:','rightdata.shape:',rightdata.shape,'self.data.shape:',self.data.shape,' dimlabels:',self.dimlabels,' leftindex:',tuple(leftindex),'--> shape of left slice: ',self.data[tuple(leftindex)].shape)
             raise
+        lefterror = self.get_error()
+        if lefterror is not None:
+            lefterror[tuple(leftindex)] = righterrors.squeeze()
     def copy(self):
         return deepcopy(self)
     def __getitem__(self,args):
@@ -2040,6 +2382,10 @@ class nddata (object):
         #print "DEBUG getitem called with",args
         errordict = None # in case it's not set
         axesdict = None # in case it's not set
+        args = list(args)
+        for j in range(0,len(args),2):
+            if type(args[j]) is str_:
+                args[j] = str(args[j]) # on upgrading + using on windows, this became necessary, for some reason I don't understand
         if type(args) in [float,int32,int,double]:
             raise CustomError('You tried to pass just a nddata[',type(args),']')
         if type(args[0]) is str:
@@ -2087,13 +2433,16 @@ class nddata (object):
             return slicedict,axesdict,errordict
             #}}}
         else:
-            raise CustomError('label your freaking dimensions!')
+            raise CustomError('label your freaking dimensions! (type of args[0] is ',type(args[0]),'and it should be str!)')
     #}}}
     #{{{ hdf5 write
     def hdf5_write(self,h5path,verbose = False):
         #{{{ add the final node based on the name stored in the nddata structure
         if h5path[-1] != '/': h5path += '/' # make sure it ends in a slash first
-        thisname = self.get_prop('name')
+        try:
+            thisname = self.get_prop('name')
+        except:
+            raise CustomError("You're trying to save an nddata object which does not yet have a name, and you can't do this! Run yourobject.name('setname')")
         if type(thisname) is str:
             h5path += thisname
         else:
@@ -2126,7 +2475,7 @@ class nddata (object):
             #print 'DEBUG 2: datatable is',datatable
             if verbose: print "Writing remaining axis attributes\n\n"
             if len(mydataattrs) > 0:
-                attach_node_attributes(datatable,mydataattrs,self)
+                h5attachattributes(datatable,mydataattrs,self)
         else:
             raise CustomError("I can't find the data object when trying to save the HDF5 file!!")
         #}}}
@@ -2154,7 +2503,7 @@ class nddata (object):
                     #print 'DEBUG 3: axesnode is',axesnode
                     if verbose: print "Writing remaining axis attributes for",axisname,"\n\n"
                     if len(myaxisattrsforthisdim) > 0:
-                        attach_node_attributes(datatable,myaxisattrsforthisdim.keys(),myaxisattrsforthisdim.values())
+                        h5attachattributes(datatable,myaxisattrsforthisdim.keys(),myaxisattrsforthisdim.values())
         #}}}
         #{{{ Check the remaining attributes.
         if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
@@ -2163,23 +2512,43 @@ class nddata (object):
             #print 'DEBUG 4: bottomnode is',bottomnode
             test = repr(bottomnode) # somehow, this prevents it from claiming that the bottomnode is None --> some type of bug?
             try:
-                attach_node_attributes(bottomnode,
+                h5attachattributes(bottomnode,
                     [j for j in myotherattrs if not self._contains_symbolic(j)],
                     self)
             except:
                 raise CustomError('Problem trying to attach attributes',myotherattrs,'of self to node',bottomnode)
+            warnlist = [j for j in myotherattrs if (not self._contains_symbolic(j)) and type(self.__getattribute__(j)) is dict]
+            #{{{ to avoid pickling, test that none of the attributes I'm trying to write are dictionaries or lists
+            if len(warnlist) > 0:
+                print "WARNING!!, attributes",warnlist,"are dictionaries!"
+            warnlist = [j for j in myotherattrs if (not self._contains_symbolic(j)) and type(self.__getattribute__(j)) is list]
+            if len(warnlist) > 0:
+                print "WARNING!!, attributes",warnlist,"are lists!"
+            #}}}
             if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
         #}}}
         h5file.close()
     #}}}
 class nddata_hdf5 (nddata):
-    def __init__(self,pathstring,verbose = False,**kwargs):
-        if kwargs is None:
-            kwargs = {}
+    def __repr__(self):
+        if hasattr(self,'_node_children'):
+            return repr(self.datanode)
+        else:
+            return nddata.__repr__(self)
+    def __del__(self):
+        if hasattr(self,'_node_children'):
+            self.h5file.close()
+            del self.h5file
+            del self.datanode
+        return
+    def __init__(self,pathstring):
+        self.pathstring = pathstring
         try:
-            h5file,datanode = h5nodebypath(pathstring,check_only = True)
+            self.h5file,self.datanode = h5nodebypath(pathstring,check_only = True)
         except:
             raise CustomError("I can't find the node",pathstring)
+        self._init_datanode(self.datanode)
+    def _init_datanode(self,datanode,verbose = False,**kwargs):
         datadict = h5loaddict(datanode)
         #{{{ load the data, and pop it from datadict
         try:
@@ -2194,10 +2563,10 @@ class nddata_hdf5 (nddata):
         datadict.pop('data')
         #}}}
         #{{{ be sure to load the dimlabels
-        try:
-            mydimlabels = datadict['dimlabels']
-        except:
-            raise CustomError("I can't find the nddata.dimlabels")
+        mydimlabels = datadict['dimlabels']
+        if len(mydimlabels) == 1:
+            if len(mydimlabels[0]) == 1:
+                mydimlabels = list([mydimlabels[0][0]]) # for some reason, think I need to do this for length 1
         #}}}
         #{{{ load the axes and pop them from datadict
         datadict.pop('dimlabels')
@@ -2225,7 +2594,9 @@ class nddata_hdf5 (nddata):
                 **kwargs)
         for remainingattribute in datadict.keys():
             self.__setattr__(remainingattribute,datadict[remainingattribute])
-        h5file.close()
+        self.h5file.close()
+        del self.h5file
+        del self.datanode
         return
 #}}}
 
@@ -2274,7 +2645,6 @@ def ndgrid(*input):
         output.append(input[j].reshape(tempsize))
     return output
 def pinvr(C,alpha):
-    print 'pinvr called'
     U,S,V = svd(C,full_matrices=0)
     #print 'U S V shapes:'
     #print U.shape
@@ -2438,8 +2808,11 @@ class fitdata(nddata):
         self.active_indeces = None
         #}}}
         return
-    def parameter_derivatives(self,xvals,set = None,set_to = None):
+    def parameter_derivatives(self,xvals,set = None,set_to = None,verbose = False):
         r'return a matrix containing derivatives of the parameters, can set dict set, or keys set, vals set_to'
+        if verbose: print 'parameter derivatives is called!'
+        if iscomplex(self.data.flatten()[0]):
+            print lsafen('Warning, taking only real part of fitting data!')
         if type(set) is dict:
             set_to = set.values()
             set = set.keys()
@@ -2456,9 +2829,14 @@ class fitdata(nddata):
             thisvar = self.symbolic_dict[parameters[j]]
             mydiff_sym[j] = sympy.diff(self.symbolic_func,thisvar)
             #print r'$\frac{\partial %s}{\partial %s}=%s$'%(self.function_name,repr(thisvar),sympy.latex(mydiff).replace('$','')),'\n\n'
-            mydiff = mydiff_sym[j].subs(solution_list)
             try:
-                fprime[j,:] = array([mydiff.subs(x,xvals[k]) for k in range(0,len(xvals))])
+                mydiff = mydiff_sym[j].subs(solution_list)
+            except:
+                raise CustomError('error trying to substitute',mydiff_sym[j],'with',solution_list)
+            try:
+                fprime[j,:] = array([complex(mydiff.subs(x,xvals[k])) for k in range(0,len(xvals))])
+            except ValueError:
+                raise CustomError('Trying to set index',j, 'shape(fprime)',shape(fprime), 'shape(xvals)',shape(xvals),'the thing I\'m trying to compute looks like this',[mydiff.subs(x,xvals[k]) for k in range(0,len(xvals))])
             except:
                 raise CustomError('Trying to set index',j, 'shape(fprime)',shape(fprime), 'shape(xvals)',shape(xvals))
         return fprime
@@ -2676,8 +3054,11 @@ class fitdata(nddata):
         r'''give the covariance for the different symbols'''
         if len(names) == 1:
             names = [names[0],names[0]]
-        return self.covariance[self._pn_active(names[0]),
-                self._pn_active(names[1])].copy()
+        if self.covariance is not None:
+            return self.covariance[self._pn_active(names[0]),
+                    self._pn_active(names[1])].copy()
+        else:
+            return None
     def covarmat(self,*names):
         if (len(names) == 1) and (names[0] is 'recarray'):
             if hasattr(self,'active_mask'):
@@ -2700,7 +3081,7 @@ class fitdata(nddata):
                 return self.covariance.copy()
             except:
                 return zeros([len(self.fit_coeff)]*2,dtype = 'double')
-    def latex(self):
+    def latex(self,verbose = False):
         r'''show the latex string for the function, with all the symbols substituted by their values'''
         # this should actually be generic to fitdata
         p = self.fit_coeff
@@ -2709,7 +3090,9 @@ class fitdata(nddata):
         allsymb = []
         locations = []
         for j in range(0,len(self.symbol_list)):
-            symbol = self.symbol_list[j]
+            #symbol = self.symbol_list[j]
+            symbol = sympy.latex(self.symbolic_vars[j]).replace('$','')
+            if verbose: print 'DEBUG: replacing symbol \\verb|',symbol,'|'
             location = printfstring.find(symbol)
             while location != -1:
                 if printfstring[location-1] == '-':
@@ -2718,14 +3101,14 @@ class fitdata(nddata):
                 else:
                     newstring = printfstring[:location]+'%01.03g'+printfstring[location+len(symbol):] # replace the symbol in the written function with the appropriate number
                     thissign = 1.0
-                #print r"\begin{verbatim} trying to replace",printfstring[location:location+len(symbol)],r'\end{verbatim}'
+                if verbose: print r"\begin{verbatim} trying to replace",printfstring[location:location+len(symbol)],r'\end{verbatim}'
                 printfstring = newstring
                 printfargs += [thissign*p[j]] # add that number to the printf list
                 locations += [location]
                 allsymb += [symbol]
                 location = printfstring.find(symbol)
         printfargs = [printfargs[x] for x in argsort(locations)]
-        #print r"\begin{verbatim}trying to generate",self.function_string,'\n',printfstring,'\n',[allsymb[x] for x in argsort(locations)],'\n',printfargs,r'\end{verbatim}'
+        if verbose: print r"\begin{verbatim}trying to generate",self.function_string,'\n',printfstring,'\n',[allsymb[x] for x in argsort(locations)],'\n',printfargs,r'\end{verbatim}'
         return printfstring%tuple(printfargs)
     def settoguess(self):
         'a debugging function, to easily plot the initial guess'
@@ -2791,7 +3174,8 @@ class fitdata(nddata):
         y = real(self.data)
         sigma = self.get_error()
         if sigma is None:
-            raise CustomError('I am getting no error, and want to flag this for now')
+            print '{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n'
+            warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
             sigma = ones(shape(y))
         p_ini = real(array(self.guess())) # need the numpy format to allow boolean mask
         if set != None:
@@ -2799,33 +3183,32 @@ class fitdata(nddata):
             p_ini = self.remove_inactive_p(p_ini)
         leastsq_args = (self.errfunc, p_ini)
         leastsq_kwargs = {'args':(x,y,sigma),
-                    'full_output':True}
+                    'full_output':True}# 'maxfev':1000*(len(p_ini)+1)}
         if hasattr(self,'has_grad') and self.has_grad == True:
             leastsq_kwargs.update({'Dfun':self.parameter_gradient})
         try:
             p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
-        except:
-            #{{{ just give various explicit errors
+        #{{{ just give various explicit errors
+        except TypeError,err:
             if type(x) != ndarray and type(y) != ndarray:
                 raise CustomError('leastsq failed because the two arrays aren\'t of the right type','type(x):',type(x),'type(y):',type(y))
             else:
                 if any(shape(x) != shape(y)):
                     raise CustomError('leastsq failed because the two arrays do not match in size size','shape(x):',shape(x),'shape(y):',shape(y))
-                elif TypeError:
-                    raise CustomError('leastsq failed because of a type error!','type(x):',showtype(x),'type(y):',showtype(y),'type(sigma)',showtype(sigma),'shape(x):',shape(x),'shape(y):',shape(y),'shape(sigma)',shape(sigma),'p_ini',type(p_ini),p_ini)
-                elif ValueError:
-                    raise CustomError('leastsq failed, maybe there is something wrong with the input:',self)
-                else:
-                    raise CustomError('leastsq failed; I don\'t know why')
-                #}}}
-        if success != 1:
+            raise CustomError('leastsq failed because of a type error!','type(x):',showtype(x),'type(y):',showtype(y),'type(sigma)',showtype(sigma),'shape(x):',shape(x),'shape(y):',shape(y),'shape(sigma)',shape(sigma),'p_ini',type(p_ini),p_ini)
+        except ValueError,err:
+            raise CustomError('leastsq failed with "',err,'", maybe there is something wrong with the input:',self)
+        except:
+            raise CustomError('leastsq failed; I don\'t know why')
+        #}}}
+        if success not in [1,2,3,4]:
             #{{{ up maximum number of evals
             if mesg.find('maxfev'):
                 leastsq_kwargs.update({ 'maxfev':50000 })
                 p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
                 if success != 1:
                     if mesg.find('two consecutive iterates'):
-                        print r'{\Large\color{red}{\bf Warning data is not fit!!! guess shown for debug purposes only!}}','\n\n'
+                        print r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n'
                         print r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n'
                         infodict_keys = infodict.keys()
                         infodict_vals = infodict.values()
@@ -2841,14 +3224,18 @@ class fitdata(nddata):
                             infodict_keys[infodict_keys.index('qtf')] = 'qtf, the vector (transpose(q)*fvec)'
                         for k,v in zip(infodict_keys,infodict_vals):
                             print r'{\color{red}{\bf %s:}%s}'%(k,v),'\n\n'
-                        self.fit_coeff = None
-                        self.settoguess()
-                        return
+                        #self.fit_coeff = None
+                        #self.settoguess()
+                        #return
                     else:
                         raise CustomError('leastsq finished with an error message:',mesg)
                     #}}}
             else:
                 raise CustomError('leastsq finished with an error message:',mesg)
+        else:
+            print r'{\color{blue}'
+            print lsafen("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg))
+            print r'}'
         self.fit_coeff = p_out # note that this is stored in HIDDEN form
         dof = len(x) - len(p_out)
         if hasattr(self,'symbolic_x') and force_analytical:
@@ -2856,14 +3243,16 @@ class fitdata(nddata):
         else:
             if force_analytical: raise CustomError("I can't take the analytical covariance!  This is problematic.")
             if cov == None:
-                raise CustomError('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success)
+                #raise CustomError('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success)
+                print r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success),'}\n'
             self.covariance = cov
-        try:
-            self.covariance *= sum(infodict["fvec"]**2)/dof # scale by chi_v "RMS of residuals"
-        except:
-            raise CustomError("type(self.covariance)",type(self.covariance),
-                    "type(infodict[fvec])",type(infodict["fvec"]),
-                    "type(dof)",type(dof))
+        if self.covariance is not None:
+            try:
+                self.covariance *= sum(infodict["fvec"]**2)/dof # scale by chi_v "RMS of residuals"
+            except:
+                raise CustomError("type(self.covariance)",type(self.covariance),
+                        "type(infodict[fvec])",type(infodict["fvec"]),
+                        "type(dof)",type(dof))
         #print lsafen("DEBUG: at end of fit covariance is shape",shape(self.covariance),"fit coeff shape",shape(self.fit_coeff))
         return
     def bootstrap(self,points,swap_out = exp(-1.0),seedval = 10347,minbounds = {},maxbounds = {}):
@@ -2915,4 +3304,92 @@ class fitdata(nddata):
                         recordlist[runno][name] = thiscopy.output(name)
         print r'\end{verbatim}'
         return recordlist # collect into a single recordlist array
+    def guess(self,verbose = False,super_verbose = False):
+        r'''provide the guess for our parameters; by default, based on pseudoinverse'''
+        self.has_grad = False
+        y = self.data
+        # I ended up doing the following, because as it turns out
+        # T1 is a bad fit function, because it has a singularity!
+        # this is probably why it freaks out if I set this to zero
+        # on the other hand, setting a value of one seems to be
+        # bad for very short T1 samples
+        which_starting_guess = 0
+        thisguess = self.starting_guesses[which_starting_guess]
+        numguesssteps = 20
+        #{{{ for some reason (not sure) adding a dimension to y
+        new_y_shape = list(y.shape)
+        new_y_shape.append(1)
+        y = y.reshape(tuple(new_y_shape))
+        #}}}
+        #{{{ evaluate f, fprime and residuals
+        guess_dict = dict(zip(self.symbol_list,list(thisguess)))
+        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+        f_at_guess = real(self.eval(None,set = guess_dict).data)
+        try:
+            f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
+        except:
+            raise CustomError('trying to reshape f_at_ini_guess from',f_at_guess.shape,'to',new_y_shape)
+        thisresidual = sqrt((y-f_at_guess)**2).sum()
+        #}}}
+        lastresidual = thisresidual
+        for j in range(0,numguesssteps):
+            if super_verbose: print '\n\n(matlablike.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\end{verbatim}'
+            if super_verbose: print '\n\n(matlablike.guess) shape of parameter derivatives',shape(fprime),'shape of output',shape(y),'\n\n'
+            regularization_bad = True
+            alpha_max = 100.
+            alpha_mult = 2.
+            alpha = 0.1 # maybe I can rather estimate this based on the change in the residual, similar to in L-M?
+            if verbose: print '\n\n(matlablike.guess) value of residual before regularization %d:'%j,thisresidual
+            while regularization_bad:
+                newguess = real(array(thisguess) + dot(pinvr(fprime.T,alpha),(y-f_at_guess)).flatten())
+                mask = newguess < self.guess_lb
+                newguess[mask] = self.guess_lb[mask]
+                mask = newguess > self.guess_ub
+                newguess[mask] = self.guess_ub[mask]
+                if any(isnan(newguess)):
+                    if verbose: print '\n\n(matlablike.guess) Regularization blows up $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha
+                    alpha *= alpha_mult
+                else:
+                    #{{{ evaluate f, fprime and residuals
+                    guess_dict = dict(zip(self.symbol_list,list(newguess)))
+                    # only evaluate fprime once we know this is good, below
+                    f_at_guess = real(self.eval(None,set = guess_dict).data)
+                    try:
+                        f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
+                    except:
+                        raise CustomError('trying to reshape f_at_ini_guess from',f_at_guess.shape,'to',new_y_shape)
+                    thisresidual = sqrt((y-f_at_guess)**2).sum()
+                    #}}}
+                    if (thisresidual-lastresidual)/lastresidual > 0.10:
+                        alpha *= alpha_mult
+                        if verbose: print '\n\n(matlablike.guess) Regularized Pinv gave a step uphill $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha
+                    else: # accept the step
+                        regularization_bad = False
+                        thisguess = newguess
+                        lastresidual = thisresidual
+                        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+                if alpha > alpha_max:
+                    print "\n\n(matlablike.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max
+                    if which_starting_guess >= len(self.starting_guesses)-1:
+                        print "\n\n(matlablike.guess) {\\color{red} Warning!!!} ran out of guesses!!!%d\n\n"%alpha_max
+                        return thisguess
+                    else:
+                        which_starting_guess += 1
+                        thisguess = self.starting_guesses[which_starting_guess]
+                        print "\n\n(matlablike.guess) try a new starting guess:",lsafen(thisguess)
+                        j = 0 # restart the loop
+                        #{{{ evaluate f, fprime and residuals for the new starting guess
+                        guess_dict = dict(zip(self.symbol_list,list(thisguess)))
+                        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+                        f_at_guess = real(self.eval(None,set = guess_dict).data)
+                        try:
+                            f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
+                        except:
+                            raise CustomError('trying to reshape f_at_ini_guess from',f_at_guess.shape,'to',new_y_shape)
+                        thisresidual = sqrt((y-f_at_guess)**2).sum()
+                        #}}}
+                        regularization_bad = False # jump out of this loop
+            if verbose: print '\n\n(matlablike.guess) new value of guess after regularization:',lsafen(newguess)
+            if verbose: print '\n\n(matlablike.guess) value of residual after regularization:',thisresidual
+        return thisguess
 #}}}

@@ -22,14 +22,25 @@ def calcrho(omegaH,tau):
 	omega = omegaH/1.5171e-3
 	denom = 6.*J(omega-omegaH,tau)+3.*J(omegaH,tau)+J(omega+omegaH,tau)
 	return denom
-def interptau(rhoinput,nmr_freq,simple = False):
-    tau = logspace(-15,-8,1000)
+def interptau(xiinput,nmr_freq,simple = False,tau_short = 10**(-15),tau_long = 10**(-8)):
+    tau = logspace(log10(tau_short),log10(tau_long),1000)
     B0 = double(nmr_freq)*1e6/4.258e7
     omegaH = 2*pi*B0*4.258e7
-    rho = calcxi(omegaH,tau)
-    order = argsort(rho)
-    interpresult = interp(double(rhoinput),rho[order],tau[order])
+    xi = calcxi(omegaH,tau)
+    order = argsort(xi)
+    interpresult = interp(double(xiinput),xi[order],tau[order])
     if simple:
         return interpresult
     else:
-        return interpresult,tau,rho
+        return interpresult,tau,xi
+def interpxi(tauinput,nmr_freq,simple = False,tau_short = 10**(-15),tau_long = 10**(-8)):
+    tau = logspace(log10(tau_short),log10(tau_long),1000)
+    B0 = double(nmr_freq)*1e6/4.258e7
+    omegaH = 2*pi*B0*4.258e7
+    xi = calcxi(omegaH,tau)
+    order = argsort(tau)
+    interpresult = interp(double(tauinput),tau[order],xi[order])
+    if simple:
+        return interpresult
+    else:
+        return tauinput,interpresult,xi
