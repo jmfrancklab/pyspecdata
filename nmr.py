@@ -11,7 +11,7 @@ from scipy.io import loadmat
 def OUTPUT_notebook():
     return True
 #{{{ general, non file-format specific functions
-def dbm_to_power(dbm,cavity_setup = 'cnsi'):
+def dbm_to_power(dbm,cavity_setup = 'newcnsi'):
     if cavity_setup == 'cnsi':
         attenuation = 30.0 # starting 6/20/11 this is actually what it uses, because I removed the extra -10, etc, in h5nmr.py
     if cavity_setup == 'newcnsi':
@@ -711,13 +711,15 @@ def standard_epr(dir = None,
         background = None,
         grid = False,
         figure_list = None):
+    if type(files) is str:
+        files = [files]
     if background is not None:
         if type(background) is list:
             if len(background) > 1:
                 raise CustomError("multiple backgrounds not yet supported")
             else:
                 background = background[0]
-        files = [background,files]
+        files = [background] + files
         subtract_first = True
     dir = dirformat(dir)
     mu_B = 9.27400915e-24
@@ -726,7 +728,10 @@ def standard_epr(dir = None,
         firstdata = 2*load_indiv_file(dir+files.pop(0))
     legendtext = list(files)
     for index,file in enumerate(files):
-       data = load_indiv_file(dir+file)
+       try:
+           data = load_indiv_file(dir+file)
+       except:
+           raise CustomError('type of dir',type(dir),'type of file',type(file))
        if subtract_first:
            data -= firstdata
        field = r'$B_0$'
@@ -772,8 +777,9 @@ def standard_epr(dir = None,
        integral.data -= integral.data.mean() # baseline correct it
        integral.integrate(newname)
        figure_list.next('epr_int')
-       plot(integral,alpha=0.5,linewidth=0.3)
        pc = plot_color_counter()
+       plot_color_counter(pc)
+       plot(integral,alpha=0.5,linewidth=0.3)
        integral.integrate(newname)
        figure_list.next('epr')
        if normalize_peak:
@@ -784,12 +790,12 @@ def standard_epr(dir = None,
            myoffset = array(ax.get_ylim()).min()
        else:
            myoffset = 0.
-       pc = plot_color_counter()
-       plot(data+myoffset,alpha=0.5,linewidth=0.3)
        plot_color_counter(pc)
+       plot(data+myoffset,alpha=0.5,linewidth=0.3,label=file)
        minval = abs(data.getaxis(newname)-centerfield).argmin()
        centerpoint = data[newname,minval]
-       plot(centerfield,centerpoint.data+myoffset,'o',markersize = 5,alpha=0.3)
+       #plot_color_counter(pc)
+       #plot(centerfield,centerpoint.data+myoffset,'o',markersize = 5,alpha=0.3)
        axis('tight')
        if index == 0:
            fieldbar *= array(ax.get_ylim()).max()
@@ -802,12 +808,13 @@ def standard_epr(dir = None,
     #xtl = ax.get_xticklabels()
     #at.xaxis.tick_top()
     #map( (lambda x: x.set_visible(False)), xtl)
+    plot_color_counter(pc)
     plot(data.getaxis(newname)[mask],zeros(shape(data.getaxis(newname)[mask])),'k',alpha=0.2,linewidth=10)
     figure_list.next('epr')
     plot(fieldbar,'k',linewidth = 2.0)
     if grid:
         gridandtick(gca())
-    #autolegend(legendtext)
+    #autolegend()
     axis('tight')
     figure_list.next('epr_int')
     autolegend(legendtext)
@@ -1199,7 +1206,7 @@ def phcyc(data,names=[],selections=[],remove_zeroglitch=None,show_plot = False,f
         return data,figurelist
 #}}}
 #{{{ process_t1
-def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline = None,saturation = False,first_figure = None,pdfstring = '',t1_offset_corr = None,**kwargs):
+def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline = None,saturation = False,first_figure = None,pdfstring = '',t1_offset_corr = None,verbose = False,**kwargs):
     #{{{ hack it, since it only actually takes a single file 
     file = format_listofexps([file,expno])
     if len(file) > 1: raise CustomError('I don\'t think this can handle more than one file at a time')
@@ -1226,7 +1233,7 @@ def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline 
         print '\n\nNote: ',t1name,'axis shorter than list of delays'
         wait_time = wait_time[0:ndshape(integral)[t1name]]
     integral.labels([t1name],[wait_time]) # before, I had to sort them manually, but now, I don't
-    #print 'DEBUG wait times:',integral.getaxis(t1name)
+    if verbose: print 'DEBUG wait times:',integral.getaxis(t1name)
     integral.sort(t1name)
     #{{{ finally, show the fit  
     figurelist = nextfigure(figurelist,'t1'+pdfstring)
@@ -1236,7 +1243,7 @@ def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline 
     plot(integral.runcopy(imag),'yo')
     integral.makereal() # otherwise, it won't fit
     integral.fit()
-    print 'DEBUG: after fit, fit coeff is',integral.fit_coeff
+    if verbose: print 'DEBUG: after fit, fit coeff is',integral.fit_coeff
     plot(integral.eval(300)) # evaluate the fit function on the axis taxis
     #{{{ for now, do not plot the modified versions
     #plot(taxis,t1_fitfunc(r_[p[0:2],p[2]*1.2],taxis),'y')

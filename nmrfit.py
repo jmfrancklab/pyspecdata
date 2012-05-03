@@ -53,7 +53,7 @@ class t1curve(fitdata):
         '''here, we give the particular latex representation and list of symbols for this particular child class'''
         fitdata.__init__(self,*args,**kwargs)
         self.symbol_list = [r'M(\infty)',r'M(0)',r'T_1'] # note that it must notbe possible to find part of one of the later strings by searching for one of the earlier strings
-        self.starting_guesses = map(double,[r_[1,1,1],r_[0,0,1],r_[-100,100,0.03],r_[0.001,0.001,0.001]])
+        self.starting_guesses = map(double,[r_[1,1,1],r_[0,0,1],r_[-100,100,0.03],r_[0.001,0.001,0.001],r_[1,-1,4.0]])
         self.guess_lb = r_[-inf,-inf,1e-4]
         self.guess_ub = r_[+inf,+inf,20.]
         self.gen_symbolic(r'M(t)')
