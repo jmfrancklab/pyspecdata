@@ -516,25 +516,25 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
     #}}}
 #}}}
 #{{{ dnp
-def standard_noise_comparison(name,data_subdir = 'reference_data'):
+def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'reference_data',expnos = [3]):
     print '\n\n'
     # noise tests
     close(1)
     figure(1,figsize=(16,8))
     v = save_data();our_calibration = double(v['our_calibration']);cnsi_calibration = double(v['cnsi_calibration'])
     calibration = cnsi_calibration*sqrt(50.0/10.0)*sqrt(50.0/40.0)
-    path = []
+    path_list = []
     explabel = []
     noiseexpno = []
     signalexpno = []
     plotlabel = name+'_noise'
     #
-    path += [DATADIR+'%s/nmr/popem_4mM_5p_pct_110610/'%data_subdir]
+    path_list += [DATADIR+'%s/nmr/popem_4mM_5p_pct_110610/'%data_subdir]
     explabel += ['control without shield']
     noiseexpno += [3] # 3 is the noise scan 2 is the reference
-    path += [DATADIR+'%s/nmr/noisetest100916/'%data_subdir] + [DATADIR+'%s/nmr/'%data_subdir+name+'/']
-    explabel += ['',r'$\mathbf{this experiment}$']
-    noiseexpno += [2,3] # 3 is the noise scan 2 is the reference
+    path_list += [DATADIR+'%s/nmr/noisetest100916/'%data_subdir] + [DATADIR+path+name+'/']*len(expnos)
+    explabel += ['']+[r'$\mathbf{this experiment}$']*len(expnos)
+    noiseexpno += [2]+expnos # 3 is the noise scan 2 is the reference
     #
     mask_start = -1e6
     mask_stop = 1e6
@@ -547,7 +547,7 @@ def standard_noise_comparison(name,data_subdir = 'reference_data'):
        linelist = []
        subplot(121) # so that legend will fit
        for k in range(0,len(noiseexpno)):
-          retval = plot_noise(path[k],noiseexpno[k],calibration,mask_start,mask_stop,smoothing = smoothing, both = False,retplot = True)
+          retval = plot_noise(path_list[k],noiseexpno[k],calibration,mask_start,mask_stop,smoothing = smoothing, both = False,retplot = True)
           linelist += retval[0]
           legendstr.append('\n'.join(textwrap.wrap(explabel[k]+':'+retval[1][0],50))+'\n')
        ylabel(r'$\Omega$')
@@ -569,7 +569,7 @@ def standard_noise_comparison(name,data_subdir = 'reference_data'):
        figure(2)
        legendstr = []
        for k in range(0,len(signalexpno)):
-          data = load_file(dirformat(path[k])+'%d'%noiseexpno[k],calibration=calibration)
+          data = load_file(dirformat(path_list[k])+'%d'%noiseexpno[k],calibration=calibration)
           data.ft('t2',shift = True)
           x = data.getaxis('t2')
           data['t2',abs(x)>1e3] = 0

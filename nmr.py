@@ -365,6 +365,7 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
         data.circshift('t2',shiftpoints)
         data.set_units('t2','s')
         data.set_units('digital')
+        data.other_info['title'] = bruker_load_title(filename)
         #print 'DEBUG 2: data from bruker file =',data
         #}}}
         #{{{ Prospa 2D
@@ -1038,6 +1039,7 @@ def integrate(file,expno,
     #{{{ actually pull the integral points and the standard deviation of the noise
     #print 'DEBUG: center points are',center
     plot_noise = [] # array where we can put the noise for plotting
+    other_info_retval = data.other_info # hack to compensate for the fact that other info isn't carried through the slice
     for j in range(0,data_shape[dimname]):
         newdata += [data[dimname,j,'t2',center[j]-intpoints:center[j]+intpoints+1]]
         if return_noise:
@@ -1062,6 +1064,7 @@ def integrate(file,expno,
             #}}}
             newnoise += [temp.copy()] # find the standard deviation of the noise which we have pulled --> it should be independent of the number of points that we're using
     newdata = concat(newdata,dimname)
+    newdata.other_info = other_info_retval # hack to compensate for the fact that other info isn't carried through the slice
     if return_noise:
         newnoise = concat(newnoise,dimname)
         if show_image:
@@ -1202,8 +1205,10 @@ def phcyc(data,names=[],selections=[],remove_zeroglitch=None,show_plot = False,f
         if len(names)>0:
             titlestr += ' by phase cycle channel'
         title(titlestr)
+    other_info_retval = data.other_info
     for j,name in enumerate(names):
         data = data[name,selections[j]]
+    data.other_info = other_info_retval # this and the line that saves other_info_retval above are a hack because nddata doesn't do this correctly
     if first_figure == None:
         return data
     else:

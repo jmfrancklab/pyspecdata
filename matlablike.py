@@ -1274,6 +1274,7 @@ def concat(datalist,dimname,chop = False,verbose = False):
         if type(datalist) is not list:
             raise CustomError('You didn\'t pass a list, you passed a',type(datalist))
         raise CustomError('Problem with what you passed to concat, list of types,',map(type,datalist))
+    other_info_out = datalist[0].other_info
     for j in range(0,len(datalist)):
         #{{{ make list for the shape to check, which contains the dimensions we are NOT concatting along
         if dimname in shapes[j].dimlabels:
@@ -1330,6 +1331,7 @@ def concat(datalist,dimname,chop = False,verbose = False):
         except:
             raise CustomError("trying to attach axes of lengths",map(len,axis_coords),"to",dimlabels)
     #}}}
+    newdatalist.other_info = other_info_out
     return newdatalist
 #}}}
 class nddata (object):
