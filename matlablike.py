@@ -18,6 +18,7 @@ import numpy.lib.recfunctions as recf
 from inspect import getargspec
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
+from datadir import getDATADIR
 #rc('image',aspect='auto',interpolation='bilinear')
 rc('image',aspect='auto',interpolation='nearest')
 #rc('text',usetex=True) # this creates all sorts of other problems
@@ -31,10 +32,7 @@ rcParams['ytick.minor.size'] = 6
 rcParams['legend.fontsize'] = 12
 rcParams['axes.grid'] = False
 rcParams['font.size'] = 18
-if 'PYTHONDATADIR' in environ.keys():
-    DATADIR = environ['PYTHONDATADIR']
-else:
-    DATADIR = '/home/franck/data/'
+DATADIR = getDATADIR() 
 
 def mybasicfunction(first_figure = None):
     r'''this gives the format for doing the image thing
@@ -1701,7 +1699,12 @@ class nddata (object):
                 result.set_error(abs(x.copy()/(self.data**2)))
             return result
         else:
-            raise CustomError("nothing but -1 supported yet!")
+            if self.get_error() != None:
+                raise CustomError("nothing but -1 supported yet!")
+            else:
+                result = self.copy()
+                result.data = result.data**arg
+                return result
     def __div__(self,arg):
         if isscalar(arg):
             A = self.copy()
@@ -2546,7 +2549,7 @@ class nddata_hdf5 (nddata):
         try:
             self.h5file,self.datanode = h5nodebypath(pathstring,check_only = True)
         except:
-            raise CustomError("I can't find the node",pathstring)
+            raise IndexError("I can't find the node"+pathstring)
         self._init_datanode(self.datanode)
     def _init_datanode(self,datanode,verbose = False,**kwargs):
         datadict = h5loaddict(datanode)
@@ -2697,6 +2700,8 @@ def image(A,x=[],y=[],**kwargs):
         x = list(A.getaxis(x_label))
         templabels.pop(-1)
         y_label = ''
+        if len(templabels) == 1:
+            y = list(A.getaxis(templabels[0]))
         while len(templabels)>0:
             y_label += templabels.pop(0)
             if len(templabels)>0:

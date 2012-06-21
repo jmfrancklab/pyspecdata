@@ -1,1 +1,1 @@
-jobname="notebook"
+jobname="working_copy_basic"

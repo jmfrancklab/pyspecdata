@@ -4,34 +4,11 @@ import numpy
 import os
 from matplotlib.mlab import rec2csv, csv2rec
 from difflib import ndiff
+from datadir import grab_data_directory
 from subprocess import Popen,PIPE
 #script_catalog_type = numpy.dtype([('number','>u8'),('hash','>u8',4)])
 script_catalog_type = numpy.dtype([('number','>u8'),('hash','|S72')])
-grabbed_datadir_from_file = False
-datadir_error = False
-if not os.path.exists(os.getcwd()+'/.matplotlib'):
-    os.mkdir(os.getcwd()+'/.matplotlib')
-if 'PYTHONDATADIR' in os.environ.keys():
-    pass
-elif os.path.exists('.datadir'):
-    fp_datadir = open('.datadir','r')
-    mydatadir = fp_datadir.read().strip()
-    if mydatadir[-1] not in ['/','\\']:
-        if os.name == 'posix':
-            mydatadir = mydatadir+'/'
-        else:
-            mydatadir = mydatadir+'\\'
-    os.environ['PYTHONDATADIR'] = mydatadir
-    fp_datadir.close()
-    grabbed_datadir_from_file = True
-else:
-    datadir_error = ('''Since this is your first time running the notebook code, you need to create a file called .datadir in the directory
-
-            %s
-
-            (your base notebook directory) that tells where all your data is stored
-            
-            '''%os.getcwd()).replace('\\','\\textbackslash ').replace('_','\\_')
+grabbed_datadir_from_file,datadir_error = grab_data_directory()
 def determine_file_catalog_number(filename):
     r'a function that returns the index number associated with a given file; if necessary, it will add the file to the underlying csv file'
     return
@@ -68,6 +45,10 @@ def sha_string(script):
     return ''.join(map(lambda x: '%016x'%x,list(hasharray)))
 def get_catalog(filename = 'script_catalog.csv',this_dtype = script_catalog_type):
     'get the catalog file'
+    #{{{ just generate auto figures here
+    if not os.path.exists('auto_figures/'):
+        os.mkdir('scripts')
+    #}}}
     if os.path.exists('scripts/'):
         if not os.path.exists('scripts/warn_shell_escape.tex'):
             make_shell_escape_warning()
@@ -149,9 +130,22 @@ else:
         fp_out.write(r'\end{lstlisting}'+'\n')
 
     if os.name == 'posix':
-        proc = Popen(['python','-W','ignore',script_fname],stdout = PIPE,stdin = PIPE,stderr = PIPE,env = {'PYTHONPATH':os.getcwd(),'PYTHONDATADIR':os.environ['PYTHONDATADIR']})
+        proc = Popen(['python','-W','ignore',script_fname],
+                stdout = PIPE,
+                stdin = PIPE,
+                stderr = PIPE,
+                env = {'PYTHONPATH':os.getcwd(),
+                    'PYTHONDATADIR':os.environ['PYTHONDATADIR']})
     else: #windows should give os.name == 'nt'
-        proc = Popen(['python','-W','ignore',script_fname],stdout = PIPE,stdin = PIPE,stderr = PIPE,env = {'PYTHONPATH':os.getcwd(),'SystemRoot':'C:\\Windows','MPLCONFIGDIR':os.getcwd()+'/.matplotlib','PATH':'','PYTHONDATADIR':os.environ['PYTHONDATADIR']})
+        proc = Popen(['python','-W','ignore',script_fname],
+                stdout = PIPE,
+                stdin = PIPE,
+                stderr = PIPE,
+                env = {'PYTHONPATH':os.getcwd(),
+                    'SystemRoot':'C:\\Windows',
+                    'MPLCONFIGDIR':os.getcwd()+'/.matplotlib',
+                    'PATH':'',
+                    'PYTHONDATADIR':os.environ['PYTHONDATADIR']})
     stdoutdata,stderrdata = proc.communicate()
     #fp_out.write('File has not been run, output:\n\n')
     fp_out.write(stdoutdata)

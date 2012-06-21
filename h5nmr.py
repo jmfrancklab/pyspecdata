@@ -393,20 +393,21 @@ def genexpname(name,expnos):
 #}}}
 #{{{ base functions for dealing with dnp data
 ##{{{ linear dnp plot
-def emax_linearandplot(integral,first_figure = None,pdfstring = '',power_axis = 'power',max_invpower = inf,color_pair = ['r','k'],**kwargs):
+def emax_linearandplot(integral,first_figure = None,pdfstring = '',power_axis = 'power',max_invpower = inf,color_pair = ['r','k'],show_Evip_plot = True,**kwargs):
     "generates the 1/(1-E) plots for DNP"
     figurelist = figlistini(first_figure)
     lineardata = integral.linear()
     lineardata = lineardata['1 / power',lambda x: x < max_invpower]
     x = lineardata.getaxis('1 / power').copy()
-    ###{{{ show the linear plot
-    nextfigure(figurelist,'Evip'+pdfstring)
-    plot_updown(lineardata,'1 / power',color_pair[0],color_pair[1],nosemilog = True)
-    ax = gca()
-    ax.set_xlim([0,array(ax.get_xlim()).max()])
-    Evipplot = integral.linear(r_[1/array(ax.get_xlim()).max(),1/x.min()],**kwargs)
-    plot(Evipplot,color_pair[0]+'-',alpha = 0.1)
-    ###}}}
+    if show_Evip_plot:
+        ###{{{ show the linear plot
+        nextfigure(figurelist,'Evip'+pdfstring)
+        plot_updown(lineardata,'1 / power',color_pair[0],color_pair[1],nosemilog = True)
+        ax = gca()
+        ax.set_xlim([0,array(ax.get_xlim()).max()])
+        Evipplot = integral.linear(r_[1/array(ax.get_xlim()).max(),1/x.min()],**kwargs)
+        plot(Evipplot,color_pair[0]+'-',alpha = 0.1)
+        ###}}}
     return figlistret(first_figure,figurelist)
 ##}}}
 ##{{{ DNP for rho
@@ -444,7 +445,7 @@ def dnp_for_rho(path,
         verbose = False,
         **kwargs):
     run_number = double(run_number)
-    print '{\\bf\\color{blue}This data is part of series %d:}\n\n'%run_number
+    print '{\\bf\\color{blue}This data is part of series %f:}\n\n'%run_number
     if t1_powers is not None:
         t1powers = t1_powers
     if expnos is not None and expno == []:
@@ -475,6 +476,8 @@ def dnp_for_rho(path,
         fid_args.update({'dbm':dbm})
     arglist = ['expno','t1expnos']
     fid_args.update(dict([(x,kwargs.pop(x)) for x in kwargs.keys() if x in arglist]))
+    arglist = ['temperature']
+    t1_auxiliary_args = dict([(x,kwargs.pop(x)) for x in kwargs.keys() if x in arglist])
     integration_args = {}
     arglist = []
     for func in [integrate]:
@@ -504,24 +507,28 @@ def dnp_for_rho(path,
     concentration_id = get_chemical_index(h5file+'/compilations/chemicals',chemical,concentration)
     ###}}}
     ###{{{ store the data as necessary
+    #{{{ retrieve the store_Emax object emax_in_file
+    emax_figlist_start = len(figurelist)
+    figurelist.append({'print_string':r'\subparagraph{retrieve Emax data}'+'\n\n'})
+    if len(expno) > 0:
+        emax_in_file = store_Emax(h5file,concentration_id,
+                fid_args,
+                first_figure = figurelist,# because I append this later!
+                auxiliary_args = auxiliary_args,
+                integration_args = integration_args)
+        figurelist = emax_in_file.figurelist
+        if verbose: print lsafen('DEBUG: figurelist after Emax load is',figurelist)
+        if verbose: print lsafen('DEBUG: index is',emax_in_file.index,'for',emax_in_file.integralnode_name,'with experiments',emax_in_file.expno)
+    emax_figlist_stop = len(figurelist)
+    #}}}
     ####{{{ grab any possible t1 args
     t1kwargs = {}
     for argname in ['phchannel','phnum','offset_corr']:
         if 't1_' + argname in integration_args.keys() and (isscalar(integration_args['t1_' + argname]) or len(integration_args['t1_'+argname])>0):
             t1kwargs[argname] = integration_args.pop('t1_'+argname) # does the part before "or" even work???
     ####}}}
-    #{{{ retrieve the store_Emax object emax_in_file
-    if len(expno) > 0:
-        emax_in_file = store_Emax(h5file,concentration_id,
-                fid_args,
-                first_figure = figurelist,
-                auxiliary_args = auxiliary_args,
-                integration_args = integration_args)
-        figurelist = emax_in_file.figurelist
-        if verbose: print lsafen('DEBUG: figurelist after Emax load is',figurelist)
-        if verbose: print lsafen('DEBUG: index is',emax_in_file.index,'for',emax_in_file.integralnode_name,'with experiments',emax_in_file.expno)
-    #}}}
     ####{{{ loop through the T_1 experiments, processing and saving as necessary
+    figurelist.append({'print_string':r'\subparagraph{retrieve $T_1$ data}'+'\n\n'})
     integration_args.update(t1kwargs) # copy over the t1 args
     if t1expnos == 'auto':
         t1expnos = r_[emax_in_file.expno[-1]+t1_autovals,304] #right now, set to three, but can easily add others later
@@ -543,11 +550,14 @@ def dnp_for_rho(path,
     #}}}
     if len(t1powers) > 0 and len(t1powers) != len(t1expnos):
         raise CustomError("You didn't pass the same number t1powers (%d) as there are T1's (%d)!"%(len(t1powers),len(t1expnos)))
+    auxiliary_args.update(t1_auxiliary_args)
     for j,t1expno in enumerate(t1expnos):
+        #{{{ should be able to get rid of this line by including with t1 auxiliary args above
         if len(t1powers) > 0:
             auxiliary_args.update({"t1power":t1powers[j]})
         elif "t1power" in auxiliary_args.keys():
             auxiliary_args.pop("t1power")
+        #}}}
         fid_args.update({'expno':t1expno})
         try:
             t1info = store_T1(h5file,concentration_id,
@@ -599,19 +609,23 @@ def dnp_for_rho(path,
         print '\n\nlinear interpolation using $T_1(0)$ of %0.3f for $k_\\sigma$ analysis\n\n'%t1_at_zero_power
         rho = (1./t1_at_zero_power) - (1./t10_at_zero_power)
         print '\n\nlinear interpolation using $\\rho$ of %0.5f for $k_\\sigma$ analysis\n\n'%rho
-        F_linear = 1./(1./t1dataset.copy().set_error(None) - rho)
-        c_F_linear,F_linear_line = F_linear.polyfit('power')
-        print '\n\n$F\\_{linear}$ is',lsafen(F_linear),'and its fit is',F_linear_line
+        F_nonlinear = 1./(1./t1dataset.copy().set_error(None) - rho)
+        F_nonlinear_to_order = 5
+        c_F_nonlinear,F_nonlinear_line = F_nonlinear.polyfit('power',order = 5)
+        print '\n\n$F\\_{linear}$ is',lsafen(F_nonlinear),'and its fit is',F_nonlinear_line
         # now, linearly interpolate w.r.t. power
         # in the same step, convert back to T1(p)
         t1err = t1dataset['power',0:1]
         t1err /= t1err.data[0] # so this way, multiplying by this will just give an nddata with teh correct error.
-        t1f = lambda x: t1err/(
-                1./(nddata(x,
-                    len(x),
-                    ['power'])*c_F_linear[1]+c_F_linear[0])
-                + rho)
-        DeltaT10 = c_F_linear[1]
+        def t1f(x):
+            x_data = nddata(x, len(x), ['power'])
+            return t1err/(
+                    1./(c_F_nonlinear[0]+
+                        x_data*c_F_nonlinear[1]+
+                        x_data**2*c_F_nonlinear[2]+
+                        x_data**3*c_F_nonlinear[3])
+                    + rho)
+        DeltaT10 = c_F_nonlinear[1]
         ###}}}
         ###{{{ grab data for f and plot it
         if t1dataset == None or t10dataset == None:
@@ -619,6 +633,7 @@ def dnp_for_rho(path,
         else:
             fdata_exists = True
         if fdata_exists: # if I can calculate the leakage factor
+            figurelist.append({'print_string':r'\subparagraph{$T_{1,0}$ data}'})
             nextfigure(figurelist,'t10data' + pdfstring)
             powers_forplot = linspace(0,max(r_[t10dataset.getaxis('power').max(),t1dataset.getaxis('power').max()]),10)
             save_color_t10 = plot_color_counter()
@@ -686,6 +701,7 @@ def dnp_for_rho(path,
                     emax_unmod.getaxis('power')) / concentration * 1.51671e-3 # calculate k s(p)
             ksp_uncorr = (1.0 - emax_unmod.copy()) / t1f(
                     r_[0.0]) / concentration * 1.51671e-3 # calculate k s(p)
+            figurelist.append({'print_string':r'\subparagraph{ksp data}'})
             nextfigure(figurelist,'ksp_corr')
             ksp_corr.rename('power','p')
             ksp_uncorr.rename('power','p')
@@ -815,8 +831,11 @@ def dnp_for_rho(path,
         ###{{{ plot the Emax data
         if verbose: print lsafen('DEBUG: before Emax, figurelist',figurelist)
         ####{{{ set the order of the plots, before plotting to them
+        figurelist.append({'print_string':r'\subparagraph{Emax curves}'+'\n\n'})
         nextfigure(figurelist,'Emax')
-        nextfigure(figurelist,'Evip')
+        show_Evip_plot = False
+        if show_Evip_plot:
+            nextfigure(figurelist,'Evip')
         figurelist.append({'print_string':r'\Emax\ integration finished'+'\n\n'})
         ####}}}
         if verbose: print lsafen('DEBUG: after Emax, figurelist',figurelist)
@@ -878,74 +897,78 @@ def dnp_for_rho(path,
                 h5file_node.close()
                 ####}}}
             ####}}}
-            ####{{{ new linear plot
-            figurelist.append({'legend':True})
-            nextfigure(figurelist,'newlinear')
-            thisemax = v.output(r'E_{max}')
-            print ndshape(v)
-            newlinear = (1.-thisemax)/(v.copy()-thisemax)
-            current_color = plot_color_counter()
-            plot(newlinear,'o',label = description[j])
-            plot_color_counter(current_color)
-            maxp = lambda x: x == x.max()
-            print 'shape of newlinear:',ndshape(newlinear)
-            plot(r_[0.0,newlinear.getaxis('power').max()],r_[1.0,newlinear['power',maxp].data[0]],'-',alpha = 0.5,label = description[j])
-            xlabel('power / $W$')
-            ylabel(r'$\frac{1-E_{max}}{E-E_{max}}$')
-            ####}}}
-            figurelist = emax_linearandplot(v,first_figure = figurelist,max_invpower = 100, color_pair = color_pair[::-1])
+            plot_newlinear = False
+            if plot_newlinear:
+                ####{{{ new linear plot
+                figurelist.append({'legend':True})
+                nextfigure(figurelist,'newlinear')
+                thisemax = v.output(r'E_{max}')
+                print ndshape(v)
+                newlinear = (1.-thisemax)/(v.copy()-thisemax)
+                current_color = plot_color_counter()
+                plot(newlinear,'o',label = description[j])
+                plot_color_counter(current_color)
+                maxp = lambda x: x == x.max()
+                print 'shape of newlinear:',ndshape(newlinear)
+                plot(r_[0.0,newlinear.getaxis('power').max()],r_[1.0,newlinear['power',maxp].data[0]],'-',alpha = 0.5,label = description[j])
+                xlabel('power / $W$')
+                ylabel(r'$\frac{1-E_{max}}{E-E_{max}}$')
+                ####}}}
+            figurelist = emax_linearandplot(v,first_figure = figurelist,max_invpower = 100, color_pair = color_pair[::-1],show_Evip_plot = show_Evip_plot)
         #gridandtick(gca())
         #autolegend()
         ###}}}
         if fdata_exists:
-            ###{{{ process the xi s(p) data
-            ####{{{ collect into lists
-            datasets = [xisp_f,xisp_fp] + datasets_xisp_simul
-            color1 = ['b','k'] + color1_simul
-            color2 = ['g','r'] + color2_simul
-            description = [r'$(1-E(p))/f(0)$',r'$(1-E(p))/f(p)$'] + description_simul
-            fit_type = ['constant f','power dependent f'] + fit_types_simul
-            ####}}}
-            nextfigure(figurelist,'multifitxismax' + pdfstring)
-            ax = gca()
-            h5file_node,compilationroot_node = h5nodebypath(h5file + '/compilations')
-            if not dontfit:
-                for j,v in enumerate(datasets):
-                    ####{{{ plot the data
-                    plot_updown(v,'power',color1[j],color2[j],label = description[j])
-                    v = xismax(v)
-                    try:
-                        v.fit()
-                    except:
-                        raise CustomError('Try setting dontfit to True; it is currently',dontfit)
-                    textpos = (j+1.0)/(len(datasets)-1.0+2.0)
-                    plot(v.eval(100),color1[j],label = description[j])
-                    text(0.7,textpos,r'$\xi s_{max}= %0.03f \pm %0.03f$'%(v.output(r'\xi s_{max}'),sqrt(v.covar(r'\xi s_{max}'))),
-                            transform = ax.transAxes,
-                            size = 'x-large',
-                            horizontalalignment = 'center',
-                            color = color1[j])
-                    ####}}}
-                    ####{{{ tabulate it
-                    mycoeff = v.output()
-                    search_string = '(Emax_curve == %d) & (fit_type == \'%s\')'%(emax_in_file.index,fit_type[j])
-                    mydata = [emax_in_file.index,fit_type[j]]
-                    mynames = ['Emax_curve','fit_type']
-                    mydata.append(run_number)
-                    mynames.append('run_number')
-                    mynames += mycoeff.dtype.names
-                    mydata += mycoeff.tolist()[0]
-                    mynames += ['covariance']
-                    mydata += [v.covarmat()]
-                    numrem,junk = h5remrows(compilationroot_node,'xismax_fits',search_string)
-                    if numrem:
-                        print lsafen('Removed',numrem,'rows from xismax_fits, with values',junk[r'\xi s_{max}'],'because they conflict with these entries')
-                    concentration_table,parameters_index = h5addrow(compilationroot_node,'xismax_fits',mydata,mynames,match_row = search_string)
-                    ####}}}
-            h5file_node.close()
-            autolegend()
-            title(r'$\xi s(p)$ by various methods')
-            ###}}}
+            process_xisp = False
+            if process_xisp:
+                ###{{{ process the xi s(p) data
+                ####{{{ collect into lists
+                datasets = [xisp_f,xisp_fp] + datasets_xisp_simul
+                color1 = ['b','k'] + color1_simul
+                color2 = ['g','r'] + color2_simul
+                description = [r'$(1-E(p))/f(0)$',r'$(1-E(p))/f(p)$'] + description_simul
+                fit_type = ['constant f','power dependent f'] + fit_types_simul
+                ####}}}
+                nextfigure(figurelist,'multifitxismax' + pdfstring)
+                ax = gca()
+                h5file_node,compilationroot_node = h5nodebypath(h5file + '/compilations')
+                if not dontfit:
+                    for j,v in enumerate(datasets):
+                        ####{{{ plot the data
+                        plot_updown(v,'power',color1[j],color2[j],label = description[j])
+                        v = xismax(v)
+                        try:
+                            v.fit()
+                        except:
+                            raise CustomError('Try setting dontfit to True; it is currently',dontfit)
+                        textpos = (j+1.0)/(len(datasets)-1.0+2.0)
+                        plot(v.eval(100),color1[j],label = description[j])
+                        text(0.7,textpos,r'$\xi s_{max}= %0.03f \pm %0.03f$'%(v.output(r'\xi s_{max}'),sqrt(v.covar(r'\xi s_{max}'))),
+                                transform = ax.transAxes,
+                                size = 'x-large',
+                                horizontalalignment = 'center',
+                                color = color1[j])
+                        ####}}}
+                        ####{{{ tabulate it
+                        mycoeff = v.output()
+                        search_string = '(Emax_curve == %d) & (fit_type == \'%s\')'%(emax_in_file.index,fit_type[j])
+                        mydata = [emax_in_file.index,fit_type[j]]
+                        mynames = ['Emax_curve','fit_type']
+                        mydata.append(run_number)
+                        mynames.append('run_number')
+                        mynames += mycoeff.dtype.names
+                        mydata += mycoeff.tolist()[0]
+                        mynames += ['covariance']
+                        mydata += [v.covarmat()]
+                        numrem,junk = h5remrows(compilationroot_node,'xismax_fits',search_string)
+                        if numrem:
+                            print lsafen('Removed',numrem,'rows from xismax_fits, with values',junk[r'\xi s_{max}'],'because they conflict with these entries')
+                        concentration_table,parameters_index = h5addrow(compilationroot_node,'xismax_fits',mydata,mynames,match_row = search_string)
+                        ####}}}
+                h5file_node.close()
+                autolegend()
+                title(r'$\xi s(p)$ by various methods')
+                ###}}}
     return figlistret(first_figure,figurelist,basename = fid_args['name'])
 ##}}}
 #}}}
@@ -1031,6 +1054,7 @@ def t1vp(h5filename,expnos,dbm,fid_args = {},integration_args = {}, auxiliary_ar
         chem_name = pull_chemical_from_filename(fid_args['name'])
         chem_conc = pull_concentration_from_filename(fid_args['name'])
     chemidx = get_chemical_index(h5filename+'/compilations/chemicals',chem_name,chem_conc)
+    figurelist.append({'print_string':r'\subparagraph{$T_1$ raw data}'+'\n\n'})
     for j in range(0,len(expnos)):
         fid_args.update({'expno':expnos[j]})
         auxiliary_args.update({'t1power':dbm[j]})
@@ -1086,7 +1110,7 @@ def retrieve_T1series(h5filename,name,*cheminfo,**kwargs):
     h5file = tables.openFile(h5filename)
     search_string = 'chemical_id == %d'%chemidx
     if run_number is not None:
-        search_string = '('+search_string+') & (run_number == %d)'%run_number
+        search_string = '('+search_string+') & (run_number == %0.3f)'%run_number
     data = h5file.root.compilations.T1_fits.readWhere(search_string)
     h5file.close()
     if name is not None: # only run this code if I pass an explicit name
@@ -1100,7 +1124,7 @@ def retrieve_T1series(h5filename,name,*cheminfo,**kwargs):
     if len(data) == 0:
         print 'No $T_1$ data found for chemidx=\n\n',print_chemical_by_index(h5filename+'/compilations/chemicals',chemidx),'\n\n'
         return None
-    if show_result: print r'{\bf retrieved $T_1$ series',show_result,':}','\n\n',lrecordarray(data),'\n\n'
+    if show_result: print r'\subparagraph{$T_1$ series}','\n\n',r'{\bf retrieved $T_1$ series',show_result,':}','\\begin{tiny}\n\n',lrecordarray(data),'\\end{tiny}\n\n'
     if verbose: print '\n\n',lsafe('matching indeces:',data['index']),'\n\n'
     myerrors = sqrt(parse_t1_covariance(data)[0,0,:])
     if indirect_dim == 'power':

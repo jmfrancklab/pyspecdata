@@ -8,6 +8,7 @@ from scipy.signal import fftconvolve
 from tables import openFile
 from datetime import datetime
 from time import mktime
+from datadir import grab_data_directory
 from nmr import *
 import re
 
@@ -187,7 +188,7 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True):
         for v in recnames:
             print r'\ensuremath{',v,'}$=$ &',' & '.join(map(lambda x: lsafe(str(x)),list(recordlist[v]))),r'\\'
         print r'\end{tabular}'
-def lplot(fname,width=3,figure=False,dpi=300,grid=False,alsosave=None,gensvg = False,print_string = None,centered = False,legend = False,equal_aspect = False,autopad = True,bytextwidth = False):
+def lplot(fname,width=3,figure=False,dpi=300,grid=False,alsosave=None,gensvg = False,print_string = None,centered = False,legend = False,equal_aspect = False,autopad = True,bytextwidth = False,showbox = True):
     '''
     used with python.sty instead of savefig
     '''
@@ -217,20 +218,26 @@ def lplot(fname,width=3,figure=False,dpi=300,grid=False,alsosave=None,gensvg = F
         \end{figure}
         """
     if bytextwidth:
-        mpwidth = r'%0.2f\textwidth'%width
-        figwidth = r'\textwidth'
+        if showbox:
+            mpwidth = r'%0.2f\linewidth'%width
+            figwidth = r'\linewidth'
+        else:
+            figwidth = r'%0.2f\linewidth'%width
     else:
         mpwidth = r'%0.2fin'%width
         figwidth = mpwidth
-    print r'''\fbox{
+    if showbox:
+        print r'''\fbox{
     \begin{minipage}{%s}
     {\color{red}{\tiny %s}:}\begin{tiny}\fn{%s}'''%(mpwidth,thisjobname(),fname)
     if alsosave != None:
         print r'also saved \fn{%s}'%alsosave
-    print '\n\n'+r'\hrulefill'+'\n\n'
-    print r'''\includegraphics[width=%s]{%s}
-    \end{tiny}\end{minipage}
-    }'''%(figwidth,fname)
+    if showbox:
+        print '\n\n'+r'\hrulefill'+'\n\n'
+    print r'\includegraphics[width=%s]{%s}'%(figwidth,fname)
+    if showbox:
+        print r'''\end{tiny}\end{minipage}
+    }'''
     clf()
     return
 def ordplot(x,y,labels,formatstring):
@@ -245,11 +252,25 @@ def obs(*arg):
     for j in arg:
         print j,
     print r'}'
-def save_data(inputdata={},mat_file = 'data.mat'):
+def txt_to_dict(file='data.txt'):
+    fp = open(file,'r')
+    retval = {}
+    for j in fp.readlines():
+        k,v = tuple(j.split('::'))
+        retval.update({k:eval(v)})
+    fp.close()
+    return retval
+def dict_to_txt(mydict,file='data.txt'):
+    set_printoptions(precision = 16)
+    fp = open(file,'w')
+    for k,v in mydict.iteritems():
+        fp.write('%s::%s\n'%(k,repr(v)))
+    fp.close()
+def save_data(inputdata={},file = 'data.txt'):
     # concatenate data to data already in data.mat file
-    if path_exists(mat_file):
+    if path_exists(file):
         #data = loadmat(mat_file,struct_as_record=True)
-        data = loadmat(mat_file)
+        data = txt_to_dict(file = file)
     else:
         data = {}
     if not(inputdata=={}):
@@ -258,13 +279,13 @@ def save_data(inputdata={},mat_file = 'data.mat'):
         except:
             raise CustomError('trying to update',data,'with',inputdata)
         try:
-            savemat(mat_file,data)
+            dict_to_txt(data,file = file)
             #print "DEBUG, saved",data,'to',mat_file
         except:
-            raise CustomError('trying to write',data,'to',mat_file)
+            raise CustomError('trying to write',data,'to',file)
     return data
 def save_local(inputdata={},verb = True):
-    data = save_data(inputdata,mat_file = 'local.mat')
+    data = save_data(inputdata,file = 'local.mat')
     if verb:
         for k,v in inputdata.items():
             obs(k.replace('_',r'\_'),r'$\Rightarrow$',v.replace('_',r'\_'))
@@ -273,14 +294,14 @@ def clear_local(inputdata=[]):
     obs(r'{\it clear local}'+'\n\n')
     if path_exists('local.mat'):
         os.unlink('local.mat')
-def save_variable(variable,content,disp=True):
-    if path_exists('data.mat'):
+def save_variable(variable,content,disp=True,file = 'data.txt'):
+    if path_exists(file):
         #data = loadmat('data.mat',struct_as_record=True)
-        data = loadmat('data.mat')
+        data = txt_to_dict(file = file)
     else:
         data = {}
     data.update({variable:content})
-    savemat('data.mat',data)
+    dict_to_txt(data,file = file)
     if disp:
         obs(variable.replace('_',r'\_'),'=',dp(content,5))
     return data
@@ -495,7 +516,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
     #}}}
 #}}}
 #{{{ dnp
-def standard_noise_comparison(name):
+def standard_noise_comparison(name,data_subdir = 'reference_data'):
     print '\n\n'
     # noise tests
     close(1)
@@ -508,10 +529,10 @@ def standard_noise_comparison(name):
     signalexpno = []
     plotlabel = name+'_noise'
     #
-    path += [DATADIR+'cnsi_data/popem_4mM_5p_pct_110610/']
+    path += [DATADIR+'%s/nmr/popem_4mM_5p_pct_110610/'%data_subdir]
     explabel += ['control without shield']
     noiseexpno += [3] # 3 is the noise scan 2 is the reference
-    path += [DATADIR+'cnsi_data/noisetest100916/'] + [DATADIR+'cnsi_data/'+name+'/']
+    path += [DATADIR+'%s/nmr/noisetest100916/'%data_subdir] + [DATADIR+'%s/nmr/'%data_subdir+name+'/']
     explabel += ['',r'$\mathbf{this experiment}$']
     noiseexpno += [2,3] # 3 is the noise scan 2 is the reference
     #

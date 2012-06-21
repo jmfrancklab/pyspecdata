@@ -673,19 +673,23 @@ def winepr_load_acqu(file):
     vars = {}
     line_re = re.compile(r'([_A-Za-z0-9]+) +(.*)')
     lines = map(string.rstrip,lines)
+    #lines = [j.rstrip('\n') for j in lines] # because it's just \n, even on windows
     v = {'DRS':4096,'RES':1024,'HSW':50}
     for line in lines:
         m = line_re.match(line)
-        name = m.groups()[0]
-        value = m.groups()[1]
-        try:
-            value = int(value)
-        except:
+        if m is None:
+            print 'Warning:',lsafen(repr(line)),'does not appear to be a valid WinEPR format line, and I suspect this is a problem with the terminators!'
+        else:
+            name = m.groups()[0]
+            value = m.groups()[1]
             try:
-                value = double(value)
+                value = int(value)
             except:
-                pass
-        v[name]=value
+                try:
+                    value = double(value)
+                except:
+                    pass
+            v[name]=value
     jss = long(v['JSS'])
     parameters = [ 'DUAL', '2D', 'FT', 'MAN0', 'MAN1', 'PROT', 'VEPR', 'POW', 'ABS', 'FTX', 'FTY', 'POW2', 'ABS2']
     parameters = map((lambda x: 's_'+x),parameters)
@@ -731,7 +735,7 @@ def standard_epr(dir = None,
        try:
            data = load_indiv_file(dir+file)
        except:
-           raise CustomError('type of dir',type(dir),'type of file',type(file))
+           raise CustomError('Error loading file: type of dir',type(dir),'type of file',type(file),'file=',file)
        if subtract_first:
            data -= firstdata
        field = r'$B_0$'
@@ -1206,7 +1210,7 @@ def phcyc(data,names=[],selections=[],remove_zeroglitch=None,show_plot = False,f
         return data,figurelist
 #}}}
 #{{{ process_t1
-def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline = None,saturation = False,first_figure = None,pdfstring = '',t1_offset_corr = None,verbose = False,**kwargs):
+def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline = None,saturation = False,first_figure = None,pdfstring = '',t1_offset_corr = None,verbose = False,showlinear = False,**kwargs):
     #{{{ hack it, since it only actually takes a single file 
     file = format_listofexps([file,expno])
     if len(file) > 1: raise CustomError('I don\'t think this can handle more than one file at a time')
@@ -1253,13 +1257,14 @@ def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline 
     text(0.5,0.75,integral.latex(),transform = ax.transAxes,size = 'x-large', horizontalalignment = 'center',color = 'r')
     title(titlestr)
     #}}}
-    #{{{ and the straight line plot
-    figurelist = nextfigure(figurelist,'t1straight'+pdfstring)
-    #print 'linear data:',integral.linear().data
-    plot(integral.linear(),'o')
-    plot(integral.linear(taxis))
-    #print ndshape(integral.linear())
-    #}}}
+    if showlinear:
+        #{{{ and the straight line plot
+        figurelist = nextfigure(figurelist,'t1straight'+pdfstring)
+        #print 'linear data:',integral.linear().data
+        plot(integral.linear(),'o')
+        plot(integral.linear(taxis))
+        #print ndshape(integral.linear())
+        #}}}
     if first_figure == None:
         return integral # there is never a return_fit, since the fit is stored in the class itsself
     else:
