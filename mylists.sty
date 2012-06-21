@@ -1,0 +1,109 @@
+\ProvidesPackage{mylists}
+%\RequirePackage{mynotebook}
+\oddsidemargin -0.75in % add 1in to get margin
+\evensidemargin -0.75in % add 1in to get margin
+\voffset -0.125in
+\topmargin -0.89in
+\textheight 7.5in
+\textwidth 10.5in
+\DeclareOption{nolandscape}{
+    \oddsidemargin -0.5in % add 1in to get margin
+    \evensidemargin -0.5in % add 1in to get margin
+    \voffset -0.5in
+    \topmargin 0in
+    \textwidth 7.5in
+    \textheight 9.25in
+    \headsep 15pt
+}
+\DeclareOption{nobib}{
+\newcommand{\nobib}{nobib}
+}
+\ProcessOptions
+%\usepackage[backend=biber,style=verbose-ibid]{biblatex} % this is better, but may not work right 
+%\usepackage[backend=biber,style=verbose,terseinits=true,sorting=none]{biblatex}
+%\usepackage[backend=biber,style=verbose-inote,terseinits=true,sorting=none]{biblatex}
+%{{{ the following was taken from some online post, and seems to work well
+\@ifundefined{nobib}{
+\usepackage[style=numeric-comp]{biblatex}
+\bibliography{library}
+\makeatletter
+
+\ExecuteBibliographyOptions{citetracker,sorting=none}
+
+\DeclareCiteCommand{\notefullcite}[\mkbibbrackets]
+  {\usebibmacro{cite:init}%
+   \usebibmacro{prenote}}
+  {\usebibmacro{citeindex}%
+   \usebibmacro{notefullcite}%
+   \usebibmacro{cite:comp}}
+  {}
+  {\usebibmacro{cite:dump}%
+   \usebibmacro{postnote}}
+
+\newbibmacro*{notefullcite}{%
+  \ifciteseen
+    {}
+    {\protect\footnote[\thefield{labelnumber}]{% modified both so they are footnote instead of footnotetext, though this does add the extra footnote number, which is annoying
+       \usedriver{}{\thefield{entrytype}}.}}}
+\DeclareCiteCommand{\superfullcite}[\cbx@superscript]%
+  {\usebibmacro{cite:init}%
+   \let\multicitedelim=\supercitedelim
+   \iffieldundef{prenote}
+     {}
+     {\BibliographyWarning{Ignoring prenote argument}}%
+   \iffieldundef{postnote}
+     {}
+     {\BibliographyWarning{Ignoring postnote argument}}}
+  {\usebibmacro{citeindex}%
+   \usebibmacro{superfullcite}%
+   \usebibmacro{cite:comp}}
+  {}
+  {\usebibmacro{cite:dump}}
+
+\newbibmacro*{superfullcite}{%
+  \ifciteseen
+    {}
+    {\xappto\cbx@citehook{%
+       \protect\noexpand\footnote[\thefield{labelnumber}]{%
+         \fullcite{\thefield{entrykey}}.}}}}
+
+\newrobustcmd{\cbx@superscript}[1]{%
+  \mkbibsuperscript{#1}%
+  \cbx@citehook
+  \global\let\cbx@citehook=\empty}
+\let\cbx@citehook=\empty
+
+\makeatother
+%}}}}
+
+
+\renewcommand{\cite}[1]{\superfullcite{#1}}
+}{}
+
+%begin specific stuff
+\let\initialspacing=\itemsep
+\let\origduecommand=\due
+\newcommand{\newdue}[4][]{{\color{vdgreencolor}(Was due: \ordinalnum{#4}/#3/#2 #1)}}%
+\newcommand\smallspacing{\setlength\itemsep{0pt}\tiny%
+\renewcommand{\due}{\newdue}%
+}
+\newcommand\nosmallspacing{
+
+\setlength\itemsep{\initialspacing}\small% forgot that this should be small
+\renewcommand{\due}{\origduecommand}}
+
+\newcommand\blanknumber{\uline{\quad\quad}.}
+\newenvironment{mycols}{
+
+        \vspace{-1ex}\begin{minipage}{\linewidth}
+            \begin{multicols}{2}}{
+            \end{multicols}
+        \end{minipage}\vspace{0.5ex}}
+
+\definecolor{lightgreen}{cmyk}{0.05,0.0,0.1,0.025}
+\makeatletter\newenvironment{subtextbox}{%
+
+\begin{lrbox}{\@tempboxa}\begin{minipage}{\linewidth}}{\end{minipage}\end{lrbox}%
+       \colorbox{lightgreen}{\usebox{\@tempboxa}}
+}\makeatother
+%end specific stuff

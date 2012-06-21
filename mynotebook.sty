@@ -8,7 +8,9 @@
 \DeclareOption{noheader}{\newcommand{\noheader}{test}}
 \ProcessOptions
 %{{{ symbols
+\RequirePackage{bbold} %for mathbb
 \RequirePackage{pifont}
+\RequirePackage{cancel}
 \RequirePackage{xspace}
 \RequirePackage[electronic]{ifsym}
 %}}}
@@ -33,7 +35,9 @@
 \definecolor{dblackcolor}{rgb}{0.0,0.0,0.0}
 \definecolor{dbluecolor}{rgb}{.01,.02,0.29}
 \definecolor{dredcolor}{rgb}{0.4,0,0}
+\definecolor{dgreencolor}{rgb}{0.0,0.4,0}
 \definecolor{vdredcolor}{rgb}{0.2,0,0}
+\definecolor{vdgreencolor}{rgb}{0.0,0.2,0}
 \definecolor{dgreencolor}{rgb}{0,0.5,0}
 \definecolor{vdgreencolor}{rgb}{0,0.25,0}
 \definecolor{dgraycolor}{rgb}{0.50,0.50,0.50}
@@ -55,7 +59,7 @@
 %{{{ new listings code
 \lstset{
 language=python,
-basicstyle=\footnotesize\ttfamily\renewcommand{\baselinestretch}{0.7}
+basicstyle=\footnotesize\ttfamily\renewcommand{\baselinestretch}{0.7},
 stringstyle=\color{dgreencolor},
 showstringspaces=false,
 alsoletter={1234567890},
@@ -129,6 +133,7 @@ mathescape=true
 \newcommand{\johncomment}[3]{\pdfcomment[author={John Franck #1},subject={},color=blue,hspace=10pt]{#3}\index{#2#3}\quad}
 %\newcommand{\john}[1]{\pdfcomment[author={John Franck},subject={},color=blue,hspace=10pt]{#1}\quad}
 \newcommand{\john}[1]{\pdfcomment[author={John Franck},subject={},color=blue,hspace=10pt]{#1}{\color{blue}\protect\footnote{\color{blue}#1}}}
+\newcommand{\adlin}[1]{\pdfcomment[author={Adlin},subject={},color=green,hspace=10pt]{#1}{\color{green}\protect\footnote{\color{green}#1}}}
 \newcommand{\johnemph}[1]{\pdfcomment[author={John Franck},subject={},color=red,hspace=10pt]{#1}{\color{red}\protect\footnote{\color{red}#1}}}
 \newcommand{\icomment}[1]{\pdfcomment[author={},subject={immediate change},color=red,hspace=10pt]{#1}\quad}
 %\newcommand{\songi}[1]{\pdfcomment[author={},subject={immediate change},color=lime,hspace=10pt]{#1}\quad}
@@ -136,6 +141,10 @@ mathescape=true
 \newcommand{\sunyia}[1]{\pdfcomment[author={sunyia},subject={},color=orange,hspace=10pt]{#1}\quad}
 \newcommand{\julia}[1]{\pdfcomment[author={julia},subject={},color=green,hspace=10pt]{#1}\quad}
 \newcommand{\nandocomment}[3]{\pdfcomment[author={Nandini Ananth #1},subject={},color=pink,hspace=10pt]{#3}\index{#2#3}\quad}
+% need to show
+%\newcommand{\nts}[1]{\xspace{\bf{\color{orange}#1}}}
+% need to do
+%\newcommand{\ntd}[1]{\xspace{\textit{\textbf{\color{orange}#1}}}}
 %%\let\oldlabel=\label
 %%\newcommand{\newlabelx}[1]{\pdfcomment[author={label},subject={},color=lime,hspace=10pt]{#1}\oldlabel{#1}}
 %%\renewcommand{\label}[1]{\newlabelx{#1}}
@@ -295,10 +304,17 @@ mathescape=true
 
 \def\Emax{\texorpdfstring{\ensuremath{E_{max}}\xspace}{Emax}}
 \newcommand{\etal}{\texorpdfstring{et.~al.\xspace}{et. al. }}
+\newcommand{\ie}{i.e.\xspace}
 \newcommand{\Real}[1]{\Re\mathfrak{e}\left[ #1 \right]}
 \newcommand{\Imag}[1]{\Im\mathfrak{m}\left[ #1 \right]}
 \def\xsm{\texorpdfstring{\ensuremath{\xi s_{max}}\xspace}{xi smax}}
-%\def\xsp{\texorpdfstring{\ensuremath{\xi s(p)}\xspace}{xi s(p)}}
+\newcommand\ksigma{\texorpdfstring{\ensuremath{k_\sigma}\xspace}{k\_sigma}}
+\def\ksm{\texorpdfstring{\ensuremath{k_\sigma s_{max}}\xspace}{k\_sigma smax}}
+\def\xsp{\texorpdfstring{\ensuremath{\xi s(p)}\xspace}{xi s(p)}}
+\newcommand{\Dlocal}{\ensuremath{D_{local}}\xspace}%
+\newcommand{\Dw}{\ensuremath{D_{H_2O}}\xspace}%
+\newcommand{\Dsl}{\ensuremath{D_{SL}}\xspace}%
+\def\ksp{\texorpdfstring{\ensuremath{k_\sigma s(p)}\xspace}{k\_sigma s(p)}}
 \def\smax{\texorpdfstring{\ensuremath{s_{max}}}{smax}}
 \def\tonen{\texorpdfstring{\ensuremath{T_{1,0}}}{T10}}
 \newcommand{\hausseri}{\ensuremath{(\left\langle I_z\right\rangle - I_0)}}
@@ -311,6 +327,7 @@ mathescape=true
 %{{{ units
 \def\uM{\texorpdfstring{\ensuremath{\;\mbox{\textmu M}}}{uM}\xspace}
 \def\us{\texorpdfstring{\ensuremath{\;\mbox{\textmu s}}}{us}\xspace}
+\def\ms{\texorpdfstring{\ensuremath{\;\mbox{ms}}}{ms}\xspace}
 \def\uL{\texorpdfstring{\ensuremath{\;\mbox{\textmu L}}}{uL}\xspace}
 \def\mM{\texorpdfstring{\ensuremath{\;\mbox{mM}}}{uM}\xspace}
 \def\mL{\texorpdfstring{\ensuremath{\;\mbox{mL}}}{mL}\xspace}
@@ -323,6 +340,7 @@ mathescape=true
 \newcommand\Ang{\texorpdfstring{\ensuremath{\;\mbox{\AA}}}{Ang.}\xspace}
 \newcommand\GHz{\texorpdfstring{\ensuremath{\;\mbox{GHz}}}{GHz}\xspace}
 \newcommand\MHz{\texorpdfstring{\ensuremath{\;\mbox{MHz}}}{MHz}\xspace}
+\newcommand\Ohm{\texorpdfstring{\ensuremath{\;\Omega}}{Ohms}\xspace}
 \newcommand\kHz{\texorpdfstring{\ensuremath{\;\mbox{kHz}}}{kHz}\xspace}
 \newcommand\mm{\texorpdfstring{\ensuremath{\;\mbox{mm}}}{mm}\xspace}
 \newcommand\W{\texorpdfstring{\ensuremath{\;\mbox{W}}}{W}\xspace}
@@ -633,9 +651,12 @@ COMPLETE EDIT TO HERE
     \pgfmathsetcounter{numberofdaysago}{ifthenelse(int(\value{numberofdaysuntil})<0,int(-int(\value{numberofdaysuntil})),0)}%
     \pgfmathsetcounter{numberofdaysuntil}{ifthenelse(int(\value{numberofdaysuntil})<0,-1,int(\value{numberofdaysuntil}))}%
     \pgfmathsetcounter{numberofweeksuntil}{(int(\value{numberofdaysuntil}) + int(\value{datedayname}) - 1)/7}% give weeks until, but add an offset, so next monday is ``next'' monday, not ``this'' monday -- monday starts the week%
-    \pgfmathparse{ifthenelse(int(\value{numberofdaysuntil}) < 4,"red",%
-        ifthenelse(int(\value{numberofdaysuntil}) < 7,"dredcolor",%
-            "vdredcolor"))}\color{\pgfmathresult}%
+    \pgfmathparse{ifthenelse(int(\value{numberofdaysuntil}) < 2,"red",%
+        ifthenelse(int(\value{numberofdaysuntil}) < 4,"dredcolor",%
+            ifthenelse(int(\value{numberofdaysuntil}) < 7,"dgreencolor",%
+                "vdgreencolor")))}\color{\pgfmathresult}%
+    \pgfmathparse{ifthenelse(int(\value{numberofdaysuntil}) < 2,"red","white")%
+                }\bgcolor{\pgfmathresult}%
     \setdatetoday%
 }%
 \newcommand\due[4][]{{\detcolor{#2}{#3}{#4}Due:\,\saydate{#2}{#3}{#4}} {\detcolor{#2}{#3}{#4}#1}}

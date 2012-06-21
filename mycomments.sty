@@ -1,0 +1,82 @@
+\ProvidesPackage{mycomments}
+\DeclareOption{margins}{
+\oddsidemargin -0.75in % add 1in to get margin
+\evensidemargin +0.25in % add 1in to get margin
+\voffset -0.5in
+\topmargin 0in
+\textwidth 6.5in
+\textheight 9.25in
+\headheight 15pt 
+%\headheight 0in
+\headsep 15pt
+}
+\ProcessOptions
+\RequirePackage{wrapfig}
+\pagestyle{fancy}
+\fancyhf{}
+%% begin arrow comments and my ntd notation
+    \usepackage{tikz}
+    \usetikzlibrary{arrows,shapes}
+    \tikzstyle{every picture}+=[remember picture]
+    \newcounter{mycommentcounter}
+    \newcommand{\note}[1]{% the first argument is the text to highlight and the second is the footnote
+    \stepcounter{mycommentcounter}%
+    \tikz[baseline]\node[fill=blue,fill opacity=0.25,text opacity=1.0,anchor=base] (reffootnote\themycommentcounter) {#1};%
+    }%
+    \def\noteloc{l}
+    \def\noteang{0}
+    \newcommand{\wrapnote}[2][-90]{%
+    \begin{wrapfigure}{\noteloc}{1in}%
+    \setstretch{-1}
+    %\hspace{-0.75in}
+    \begin{tikzpicture}%
+        \node[fill=blue,fill opacity=0.25,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] (footnote\themycommentcounter) {%
+        \begin{minipage}{1in}%
+            \begin{tiny}%
+                #2
+            \end{tiny}%
+        \end{minipage}%
+        };%
+    \end{tikzpicture}%
+    \end{wrapfigure}%
+    \begin{tikzpicture}[overlay]%
+        \path[->,color=blue,opacity=0.25,line width=2] (footnote\themycommentcounter) edge [out=\noteang,in=#1] (reffootnote\themycommentcounter);%
+    \end{tikzpicture}%
+    \def\noteloc{l}
+    \def\noteang{0}
+    }%
+    \newcommand{\shownote}[2][-90]{%
+    \marginpar{%
+    \setstretch{-1}
+    %\hspace{-0.75in}
+    \begin{tikzpicture}%
+        \node[fill=blue,fill opacity=0.25,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] (footnote\themycommentcounter) {%
+        \begin{minipage}{1in}%
+            \begin{tiny}%
+                #2
+            \end{tiny}%
+        \end{minipage}%
+        };%
+    \end{tikzpicture}%
+    }%
+    \begin{tikzpicture}[overlay]%
+        \path[->,color=blue,opacity=0.25,line width=2] (footnote\themycommentcounter) edge [out=180,in=#1] (reffootnote\themycommentcounter);%
+    \end{tikzpicture}%
+    }%
+    \newcommand{\showfootnote}[2][out=0, in=-90]{%
+        \footnote{
+            \begin{minipage}{\linewidth}
+                \begin{tikzpicture}[baseline]
+                    \node[fill=blue,fill opacity=0.25,text opacity=1.0,anchor=north,rounded corners] (footnote\themycommentcounter) {\begin{minipage}{\linewidth}{\color{black}#2}\end{minipage}};
+                \end{tikzpicture}
+            \end{minipage}
+        }
+        \begin{tikzpicture}[overlay]%
+            \path[->,color=blue,opacity=0.25,line width=2] (footnote\themycommentcounter) edge [#1] (reffootnote\themycommentcounter);%
+        \end{tikzpicture}%
+    }%
+    \newcommand{\nts}[1]{\xspace{\bf{\color{orange}#1}}}
+    \newcommand{\ntd}[1]{\xspace{\textit{\textbf{\color{orange}#1}}}}
+    %\newcommand{\ntd}[1]{\note{}\wrapnote{#1}}
+    \newcommand{\skipping}[1]{\xspace{\color{orange}\sout{#1}}}
+%% end arrow comments
