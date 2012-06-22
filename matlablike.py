@@ -2699,7 +2699,10 @@ def image(A,x=[],y=[],**kwargs):
         setlabels = True
         templabels = list(A.dimlabels)
         x_label = templabels[-1]
-        x = list(A.getaxis(x_label))
+        try:
+            x = list(A.getaxis(x_label))
+        except:
+            x = r_[0,ndshape(A)[x_label]]
         templabels.pop(-1)
         y_label = ''
         if len(templabels) == 1:
@@ -2707,7 +2710,7 @@ def image(A,x=[],y=[],**kwargs):
         while len(templabels)>0:
             y_label += templabels.pop(0)
             if len(templabels)>0:
-                y_label += r' $\times$ '
+                y_label += '$\\times$'
         A = A.data
     if type(x) is list:
         x = array(x)
@@ -2723,6 +2726,11 @@ def image(A,x=[],y=[],**kwargs):
         y = y.flatten()
     myext = (x[0],x[-1],y[-1],y[0])
     extralines = 0
+    origAndim = A.ndim
+    if A.ndim > 2:
+        ax = gca()
+        setp(ax.get_yticklabels(),visible = False)
+        ax.yaxis.set_ticks_position("none")
     while A.ndim>2:# to substitude for imagehsvm, etc., so that we just need a ersion of ft
         # order according to how it's ordered in the memory
         # the innermost two will form the image -- first add a line to the end of the images we're going to join up
@@ -2734,9 +2742,9 @@ def image(A,x=[],y=[],**kwargs):
         A = A.reshape(tempsize) # now join them up
         ++extralines # keep track of the extra lines at the end
     A = A[:A.shape[0]-extralines,:]
-    line_mask = isnan(A)
+    #line_mask = isnan(A)
     #A[line_mask] = A[logical_not(line_mask)].max()
-    A[line_mask] = 0
+    #A[line_mask] = 0
     if iscomplex(A).any():
         A = imagehsv(A)
         imshow(A,extent=myext,**kwargs)
@@ -2753,8 +2761,10 @@ def colormap(points,colors,n=256):
     g = interp(linspace(0,1,n),points,colors[:,1].flatten())
     b = interp(linspace(0,1,n),points,colors[:,2].flatten())
     return reshape(r_[r,g,b],(3,n)).T
-def imagehsv(A):
+def imagehsv(A,logscale = False):
     n = 256
+    mask = isnan(A)
+    A[mask] = 0
     theta = (n-1.)*mod(angle(A)/pi/2.0,1)# angle in 255*cycles
     hsv = colormap(r_[0.,1./3.,2./3.,1.],double(array([
         [1,0,0],
@@ -2766,8 +2776,14 @@ def imagehsv(A):
     hsv = hsv/hsv_norm
     colors = hsv[ix_(int32(theta.flatten().round()),[0,1,2])]
     colors = reshape(colors,(A.shape[0],A.shape[1],3))
-    colors *= abs(A).reshape(A.shape[0],A.shape[1],1)
-    colors /= abs(A).max()
+    mask = mask.reshape(A.shape[0],A.shape[1],1) # reshape the mask into the 3 color shape as well
+    mask = tile(mask,(1,3)).reshape(mask.shape[0],mask.shape[1],3) # and copy the mask across all colors
+    intensity = abs(A).reshape(A.shape[0],A.shape[1],1)
+    intensity /= abs(A).max()
+    if logscale:
+        intensity = log10(intensity)
+    colors = 1.0-intensity*(1.0-colors)
+    colors[mask] = 0.0
     return colors
 def myfilter(x,center = 250e3,sigma = 100e3):
     x = (x-center)**2
