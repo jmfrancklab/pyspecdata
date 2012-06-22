@@ -2694,6 +2694,12 @@ def spectrogram(waveform,f_start,f_stop,npoints_fdom=40,tdom_div=2):
     imshow(abs(specgram),extent=(t_axis[0]*1e6,t_axis[-1]*1e6,f_axis[-1]/1e6,f_axis[0]/1e6)) # now do an imagehsv (see if we can make imagerybw) plot of the resulting spectrogram
     return gca()
 def image(A,x=[],y=[],**kwargs):
+    #{{{ pull out kwargs for imagehsv
+    imagehsvkwargs = {}
+    for k,v in kwargs.items():
+        if k in ['black','logscale']:
+            imagehsvkwargs[k] = kwargs.pop(k)
+    #}}}
     setlabels = False
     if isinstance(A,nddata):
         setlabels = True
@@ -2746,7 +2752,7 @@ def image(A,x=[],y=[],**kwargs):
     #A[line_mask] = A[logical_not(line_mask)].max()
     #A[line_mask] = 0
     if iscomplex(A).any():
-        A = imagehsv(A)
+        A = imagehsv(A,**imagehsvkwargs)
         imshow(A,extent=myext,**kwargs)
     else:
         imshow(A,extent=myext,**kwargs)
@@ -2761,7 +2767,7 @@ def colormap(points,colors,n=256):
     g = interp(linspace(0,1,n),points,colors[:,1].flatten())
     b = interp(linspace(0,1,n),points,colors[:,2].flatten())
     return reshape(r_[r,g,b],(3,n)).T
-def imagehsv(A,logscale = False):
+def imagehsv(A,logscale = False,black = False):
     n = 256
     mask = isnan(A)
     A[mask] = 0
@@ -2782,8 +2788,12 @@ def imagehsv(A,logscale = False):
     intensity /= abs(A).max()
     if logscale:
         intensity = log10(intensity)
-    colors = 1.0-intensity*(1.0-colors)
-    colors[mask] = 0.0
+    if black:
+        colors = intensity*colors
+        colors[mask] = 1.0
+    else:
+        colors = 1.0-intensity*(1.0-colors)
+        colors[mask] = 0.0
     return colors
 def myfilter(x,center = 250e3,sigma = 100e3):
     x = (x-center)**2
