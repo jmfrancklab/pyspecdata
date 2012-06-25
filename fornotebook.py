@@ -17,9 +17,12 @@ golden_ratio = (1.0 + sqrt(5))/2.0
 def dprint(*stuff):
     print '\n\nDEBUG',' '.join(map(repr(stuff))),'\n\n'
 def thisjobname():
-    fp = open('pythonjobname.txt')
-    retval = rstrip(fp.read())
-    fp.close()
+    if path_exists('pythonjobname.txt'):
+        fp = open('pythonjobname.txt')
+        retval = rstrip(fp.read())
+        fp.close()
+    else:
+        retval = 'JobnameUndefined'
     return retval
 def show_matrix(B,plot_name,first_figure = None):
     fl = figlistini(first_figure)
