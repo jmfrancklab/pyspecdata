@@ -43,4 +43,4 @@ dnp_for_rho(path,name,integration_width = 160,
         run_number = run_number,
         threshold = -50.)
 print r'\subparagraph{Noise test}'
-standard_noise_comparison(name)
+standard_noise_comparison(name,path = path)
