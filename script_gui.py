@@ -50,9 +50,10 @@ class my_widget_class (QtGui.QDialog):
         if not os.path.exists('auto_figures'):
             os.mkdir('auto_figures')
         if self.datadir_changed:
-            fp = open('.datadir','r')
-            print '.datadir originally said:',fp.read()
-            fp.close()
+            if os.path.exists('.datadir'):
+                fp = open('.datadir','r')
+                print '.datadir originally said:',fp.read()
+                fp.close()
             fp = open(os.curdir+'/.datadir','w')
             fp.write(self.currently_displayed_datadir)
             fp = open('.datadir','r')
