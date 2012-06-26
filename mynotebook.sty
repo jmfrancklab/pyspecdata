@@ -1,6 +1,7 @@
-\ProvidesPackage{mynotebook}
 \NeedsTeXFormat{LaTeX2e}[1994/12/01]
 \DeclareOption{supressmulticols}{\newcommand{\supressmulticols}{test}}
+\DeclareOption{nomulticols}{\newcommand{\supressmulticols}{test}}
+\DeclareOption{showscriptnumber}{\newcommand{\showscriptnumber}{test}}
 \DeclareOption{nolabels}{\newcommand{\nolabels}{test}}
 \DeclareOption{noparagraph}{\newcommand{\noparagraph}{test}}
 \DeclareOption{nopageformat}{\newcommand{\nopageformat}{test}}
@@ -34,9 +35,10 @@
 \definecolor{mygray}{rgb}{0.6,0.6,0.6}
 \definecolor{dblackcolor}{rgb}{0.0,0.0,0.0}
 \definecolor{dbluecolor}{rgb}{.01,.02,0.29}
-\definecolor{dredcolor}{rgb}{0.4,0,0}
+\definecolor{dredcolor}{rgb}{0.8,0,0}
 \definecolor{dgreencolor}{rgb}{0.0,0.4,0}
-\definecolor{vdredcolor}{rgb}{0.2,0,0}
+\definecolor{lightredcolor}{rgb}{1.0,0.5,0.5}
+\definecolor{vdredcolor}{rgb}{0.4,0,0}
 \definecolor{vdgreencolor}{rgb}{0.0,0.2,0}
 \definecolor{dgreencolor}{rgb}{0,0.5,0}
 \definecolor{vdgreencolor}{rgb}{0,0.25,0}
@@ -142,9 +144,9 @@ mathescape=true
 \newcommand{\julia}[1]{\pdfcomment[author={julia},subject={},color=green,hspace=10pt]{#1}\quad}
 \newcommand{\nandocomment}[3]{\pdfcomment[author={Nandini Ananth #1},subject={},color=pink,hspace=10pt]{#3}\index{#2#3}\quad}
 % need to show
-%\newcommand{\nts}[1]{\xspace{\bf{\color{orange}#1}}}
+\newcommand{\nts}[1]{\xspace{\bf{\color{orange}#1}}}
 % need to do
-%\newcommand{\ntd}[1]{\xspace{\textit{\textbf{\color{orange}#1}}}}
+\newcommand{\ntd}[1]{\xspace{\textit{\textbf{\color{orange}#1}}}}
 %%\let\oldlabel=\label
 %%\newcommand{\newlabelx}[1]{\pdfcomment[author={label},subject={},color=lime,hspace=10pt]{#1}\oldlabel{#1}}
 %%\renewcommand{\label}[1]{\newlabelx{#1}}
@@ -161,9 +163,8 @@ mathescape=true
 %\RequirePackage[colorlinks=true, pdfstartview=FitV, linkcolor=linkcolor, citecolor=blue, urlcolor=blue, bookmarksdepth=subparagraph,breaklinks=true]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
 \RequirePackage[colorlinks=true, pdfstartview=FitV, linkcolor=linkcolor, citecolor=blue, urlcolor=blue, bookmarksdepth=subparagraph]{hyperref}% hyperref for pdf -- no idea what half these are, but the bookmarksdepth is to include down to subparagraphs
 \RequirePackage{pdfcomment}
-%\providecommand{\DIFadd}[1]{{\protect\color{dgreencolor}\uwave{#1}}} %DIF PREAMBLE
-\providecommand{\DIFadd}[1]{{\protect\color{vdgreencolor}\uline{#1}}} %DIF PREAMBLE
-\providecommand{\DIFdel}[1]{{\protect\color{mygray}\sout{#1}}}                      %DIF PREAMBLE
+\providecommand{\DIFadd}[1]{{\protect\color{blue}\uwave{#1}}} %DIF PREAMBLE
+\providecommand{\DIFdel}[1]{{\protect\color{red}\xout{#1}}}                      %DIF PREAMBLE
 \pdfstringdefDisableCommands{\renewcommand{\DIFdel}{}}
 \pdfstringdefDisableCommands{\renewcommand{\DIFadd}{}}
 \pdfstringdefDisableCommands{\renewcommand{\color}{}}
@@ -210,6 +211,36 @@ mathescape=true
 %\newcommand{\newfnx}[1]{\oldfn{#1}\endgroup}
 %}}}
 \RequirePackage[normalem]{ulem}
+%{{{ example for comma separated list, taken from http://stackoverflow.com/questions/2402354/split-comma-separated-parameters-in-latex
+
+% Functional foreach construct 
+% #1 - Function to call on each comma-separated item in #3
+% #2 - Parameter to pass to function in #1 as first parameter
+% #3 - Comma-separated list of items to pass as second parameter to function #1
+\def\foreach#1#2#3{%
+  \@test@foreach{#1}{#2}#3,\@end@token%
+}
+
+% Internal helper function - Eats one input
+\def\@swallow#1{}
+
+% Internal helper function - Checks the next character after #1 and #2 and 
+% continues loop iteration if \@end@token is not found 
+\def\@test@foreach#1#2{%
+  \@ifnextchar\@end@token%
+    {\@swallow}%
+    {\@foreach{#1}{#2}}%
+}
+
+% Internal helper function - Calls #1{#2}{#3} and recurses
+% The magic of splitting the third parameter occurs in the pattern matching of the \def
+\def\@foreach#1#2#3,#4\@end@token{%
+  #1{#2}{#3}%
+  \@test@foreach{#1}{#2}#4\@end@token%
+}
+
+%}}}
+
 \newenvironment{co}{\begin{python}
 	import matplotlib; matplotlib.use('Agg')
 	from matlablike import *
@@ -223,44 +254,66 @@ mathescape=true
 \def\pythonshow#1{\begin{lstlisting}#1\end{lstlisting}}
 %\def\pythonshow#1{\begin{lstlisting}#1\end{lstlisting}}
 %\def\endpythonshow{}
+
 %{{{Rather than including python.sty, copy and paste it here
 %% Author: Martin R. Ehmsen, ehmsen@imada.sdu.dk.
 
 \newwrite\@out
 \newwrite\@module
+\newread\myinput % do this only once
 
 \begingroup \catcode `|=0 \catcode `[=1
 \catcode`]=2 \catcode `\{=12 \catcode `\}=12
-\catcode`\\=12 |gdef|@xpython#1\end{python}[|immediate|write|@out[from h5nmr import *]|immediate|write|@out[#1]|end[python]]
-|endgroup % changed by franck to add include file --> it's very important with the way that pythonout.py is coded that this is one and only one file!
+\catcode`\\=12 |gdef|@xpython#1\end{python}[|immediate|write|@out[#1]|end[python]]
+|endgroup % changed by franck to add include file --> very important with the way that latexscript.py is written that this is one and only one line!
 
-\def\python{\kernel@ifnextchar [{\@python}{\@python[]}} % the best I can guess, this defines the start of the environment
-%{{{ fauske hack
+\definecolor{MyGray}{rgb}{0.95,0.92,0.90}
+\newenvironment{graybox}{%
+    \begin{lrbox}{\@tempboxa}\begin{minipage}{\linewidth}%
+        }{%
+    \end{minipage}\end{lrbox}%
+    \colorbox{MyGray}{\usebox{\@tempboxa}}%
+}
+
+\def\python{\kernel@ifnextchar [{\@python}{\@python[]}} % the best I can guess, this says that if the next character is [, then run the first, otherwise run the second, so @python is the command that does the actual work
+%{{{ based on fauske hack
 \newcounter{py@codenum}
-
 \def\@python[#1]{% this appears to be the first-level command that parses the python code
 \stepcounter{py@codenum}
-\gdef\@pythoninclude{#1} % don't know what does this
-\immediate\openout\@out=\jobname.\thepy@codenum.py % clearly opens the output fid
-%\immediate\openout\@out=\jobname.py
+\gdef\@pythonargument{#1} % this sets the argument to @pythonargument
+\def\mytestargument{off}%for some reason, just using off doesn't work
+\ifx\@pythonargument\mytestargument%
+\def\my@startcommand{\begingroup\color{dbluecolor}\verbatim}%
+\def\my@endcommand{\endverbatim\endgroup}%
+\else%
+\def\my@startcommand{\@xpython}%
+\def\my@endcommand{}%
+\fi%
+\immediate\openout\@out=currentscript.py% clearly opens the output fid
 \newlinechar='15
 \begingroup \catcode`\^^M=12 % this stuff must just reassign characters
 \let\do\@makeother\dospecials\obeyspaces%
-\@xpython}% this just writes the header and the contents to the file and may be redefining the whole \@xpython{stuff}\end{python} string with the thing it gives
+\my@startcommand}% this just writes the header and the contents to the file and may be redefining the whole \@xpython{stuff}\end{python} string with the thing it gives
 
 \def\endpython{% this definitely gives the end of the environment
+\my@endcommand
 \endgroup
 \immediate\closeout\@out
 \@writemodule% this is defined below, and appears to write the jobname (the file name) to latex.py
-\immediate\write18{bash\space pythonout.sh\space\jobname.\thepy@codenum.py\space pythonout.out\space\thepy@codenum}
-\immediate\write18{mv\space \jobname.\thepy@codenum.py.old \space pythonout.backup}% the crazy moving around of this and the next three lines is to fool synctex into opening the *.py.old file rather than the pythonout.out file
-\immediate\write18{mv\space pythonout.out\space\jobname.\thepy@codenum.py.old}
-\immediate\input \jobname.\thepy@codenum.py.old
-\immediate\write18{mv\space pythonout.backup\space \jobname.\thepy@codenum.py.old}
+\immediate\write18{python\space latexscript.py\space\jobname\space\thepy@codenum\space currentscript.py\space scriptname.txt}
+\immediate\openin\myinput=scriptname.txt
+\immediate\read\myinput to \localline %store the text of scriptname in localline
+%\immediate\input pythonout.out 
+\@ifundefined{showscriptnumber}{}{
+{\it the script name is ``\localline''} %read the filename stored in scriptname.txt
 }
-\def\dontsavepython{\immediate\write18{rm\space\jobname.\thepy@codenum.py.old}\jobname.\thepy@codenum.py.old
-
-{\color{red}Not caching the previous python code!}}
+\immediate\write18{python \space latex_cycle_files.py \space \localline \space presentoutput}
+\immediate\input \localline % because of the result of the previous line, this now has the OUTPUT, but in synctex, it will be referenced to the right file
+\immediate\write18{python \space latex_cycle_files.py \space \localline \space storeoutput}
+}
+%\def\dontsavepython{\immediate\write18{rm\space\jobname.\thepy@codenum.py.old}\jobname.\thepy@codenum.py.old
+%
+%{\color{red}Not caching the previous python code!}}
 %}}}
 \def\@writemodule{%
 \immediate\openout\@module=latex.py
@@ -281,25 +334,25 @@ mathescape=true
 \newcommand{\condhrule}{\@ifundefined{nohrule}{\hrulefill}{}}
 \newcommand{\outlineblank}[1]{\phantomsection\addcontentsline{toc}{#1}{ }}
 \renewcommand{\subsection}[1]{\oldsubsection{#1\condhrule}}
-\renewcommand{\section}[1]{\oldsection{#1\condhrule}}
-\newcommand{\mysubsubsection}[1]{\oldsubsubsection{{\small #1}\condhrule}}
-\newcommand{\myhiddensubsubsection}[1]{\phantomsection\addcontentsline{toc}{subsubsection}{#1}
-
-}
-\newcommand{\myhiddenparagraph}[1]{\phantomsection\addcontentsline{toc}{paragraph}{#1}
-
-}
+\renewcommand{\section}[2][]{\oldsection{#2\condhrule{\tiny #1}}}
 \@ifundefined{noparagraph}{
-\newcommand{\myusedsubsubsection}[1]{\mysubsubsection{#1}}
-\newcommand{\myusedparagraph}[1]{\textsc{\oldparagraph{#1}}\textsc{\uline{#1}}\blacktext{$\Rightarrow$}\phantomsection\addcontentsline{toc}{paragraph}{#1}}
-\renewcommand{\subparagraph}[1]{\textit{\small{\uline{#1:}}}\phantomsection\addcontentsline{toc}{subparagraph}{#1}}
+\renewcommand{\subsubsection}[1]{\oldsubsubsection{{\small #1}\condhrule}}
+%\renewcommand{\paragraph}[1]{\textsc{\oldparagraph{#1}}\textsc{\uline{#1}}\blacktext{$\Rightarrow$}\addcontentsline{toc}{paragraph}{#1}}
+%\renewcommand{\paragraph}[1]{\texttt{\oldparagraph{#1}}\texttt{\uline{#1}}\blacktext{$\Rightarrow$}\phantomsection\addcontentsline{toc}{paragraph}{#1}}
+\renewcommand{\paragraph}[1]{%uline on the inside!!!
+
+\textbf{\uline{#1 \protect{\ensuremath{\Rightarrow}}}}\phantomsection\addcontentsline{toc}{paragraph}{#1}}
+\renewcommand{\subparagraph}[1]{{\small\textbf{\uline{#1:}}}\phantomsection\addcontentsline{toc}{subparagraph}{#1}}
+%\renewcommand{\subparagraph}[1]{\textit{\small{\uline{#1}}}}
 }{
-\newcommand{\myusedsubsubsection}[1]{\myhiddensubsubsection{#1}}
-\newcommand{\myusedparagraph}[1]{\myhiddenparagraph{#1}}
+\renewcommand{\subsubsection}[1]{\phantomsection\addcontentsline{toc}{subsubsection}{#1}
+
+}
+\renewcommand{\paragraph}[1]{\phantomsection\addcontentsline{toc}{paragraph}{#1}
+
+}
 \renewcommand{\subparagraph}[1]{\phantomsection\addcontentsline{toc}{subparagraph}{#1}}
 }
-\renewcommand{\paragraph}[1]{\myusedparagraph{#1}}
-\renewcommand{\subsubsection}[1]{\myusedsubsubsection{#1}}
 \renewcommand{\o}[2][]{ {\color{mygreen}{\it #1}} {\color{blue} #2}}
 
 \def\Emax{\texorpdfstring{\ensuremath{E_{max}}\xspace}{Emax}}
@@ -309,6 +362,7 @@ mathescape=true
 \newcommand{\Imag}[1]{\Im\mathfrak{m}\left[ #1 \right]}
 \def\xsm{\texorpdfstring{\ensuremath{\xi s_{max}}\xspace}{xi smax}}
 \newcommand\ksigma{\texorpdfstring{\ensuremath{k_\sigma}\xspace}{k\_sigma}}
+\newcommand\krho{\texorpdfstring{\ensuremath{k_\rho}\xspace}{k\_rho}}
 \def\ksm{\texorpdfstring{\ensuremath{k_\sigma s_{max}}\xspace}{k\_sigma smax}}
 \def\xsp{\texorpdfstring{\ensuremath{\xi s(p)}\xspace}{xi s(p)}}
 \newcommand{\Dlocal}{\ensuremath{D_{local}}\xspace}%
@@ -316,7 +370,7 @@ mathescape=true
 \newcommand{\Dsl}{\ensuremath{D_{SL}}\xspace}%
 \def\ksp{\texorpdfstring{\ensuremath{k_\sigma s(p)}\xspace}{k\_sigma s(p)}}
 \def\smax{\texorpdfstring{\ensuremath{s_{max}}}{smax}}
-\def\tonen{\texorpdfstring{\ensuremath{T_{1,0}}}{T10}}
+\def\tonen{\texorpdfstring{\ensuremath{T_{1,0}}\xspace}{T10}}
 \newcommand{\hausseri}{\ensuremath{(\left\langle I_z\right\rangle - I_0)}}
 \newcommand{\haussers}{\ensuremath{(\left\langle S_z\right\rangle - S_0)}}
 \newcommand{\gammaratio}{659.32}
@@ -505,7 +559,7 @@ COMPLETE EDIT TO HERE
 \@ifundefined{chaptermark}{}{
 \renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{#1}}{}}
 }
-\renewcommand{\sectionmark}[1]{\markright{\quad #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{#1}{}}
 
 \@ifundefined{noheader}{
 \@ifundefined{thechapter}{}{
@@ -537,10 +591,10 @@ COMPLETE EDIT TO HERE
 %\newcommand{\newlabelx}[1]{{\tiny #1}\endgroup\oldlabel{#1}}
 }
 %%{{{ the following shows the labels for equations
-\RequirePackage{showlabels}
+\RequirePackage[right]{showlabels}
 \RequirePackage{rotating}
 %\renewcommand{\showlabelsetlabel}[1]{$\!\!\!\!\!\!\!\hookleftarrow$\begin{rotate}{90}\begin{tiny}\showlabelfont \ #1\end{tiny}\end{rotate}}
-\newcommand{\newshowlabelsetlabelx}[1]{$\!\!\!\!\!\!\!\hookleftarrow$\begin{rotate}{90}\begin{tiny}\showlabelfont \ \begingroup\catcode`_=13 #1\endgroup\end{tiny}\end{rotate}}
+\newcommand{\newshowlabelsetlabelx}[1]{$\!\!\!\!\!\!\!\hookleftarrow$\begin{rotate}{45}\begin{tiny}\showlabelfont \ \begingroup\catcode`_=13 #1\endgroup\end{tiny}\end{rotate}}
 \def\showlabelsetlabel{\newshowlabelsetlabelx}
 %%}}}
 }{}
@@ -651,13 +705,23 @@ COMPLETE EDIT TO HERE
     \pgfmathsetcounter{numberofdaysago}{ifthenelse(int(\value{numberofdaysuntil})<0,int(-int(\value{numberofdaysuntil})),0)}%
     \pgfmathsetcounter{numberofdaysuntil}{ifthenelse(int(\value{numberofdaysuntil})<0,-1,int(\value{numberofdaysuntil}))}%
     \pgfmathsetcounter{numberofweeksuntil}{(int(\value{numberofdaysuntil}) + int(\value{datedayname}) - 1)/7}% give weeks until, but add an offset, so next monday is ``next'' monday, not ``this'' monday -- monday starts the week%
-    \pgfmathparse{ifthenelse(int(\value{numberofdaysuntil}) < 2,"red",%
-        ifthenelse(int(\value{numberofdaysuntil}) < 4,"dredcolor",%
-            ifthenelse(int(\value{numberofdaysuntil}) < 7,"dgreencolor",%
-                "vdgreencolor")))}\color{\pgfmathresult}%
-    \pgfmathparse{ifthenelse(int(\value{numberofdaysuntil}) < 2,"red","white")%
-                }\bgcolor{\pgfmathresult}%
+    \pgfmathparse{ifthenelse(int(\value{numberofdaysuntil}) < 1,"white",%
+        ifthenelse(int(\value{numberofdaysuntil}) < 4,"red",%
+            ifthenelse(int(\value{numberofdaysuntil}) < 7,"dredcolor",%
+                "dgreencolor")))}\color{\pgfmathresult}%
+    \pgfmathparse{ifthenelse(int(\value{numberofdaysuntil}) < 1,"dredcolor","white")%
+        }\def\myboxcolor{\pgfmathresult}%
     \setdatetoday%
+    %
 }%
-\newcommand\due[4][]{{\detcolor{#2}{#3}{#4}Due:\,\saydate{#2}{#3}{#4}} {\detcolor{#2}{#3}{#4}#1}}
+\newcommand\due[4][]{{\detcolor{#2}{#3}{#4}\colorbox{\myboxcolor}{Due:\,\saydate{#2}{#3}{#4} {\detcolor{#2}{#3}{#4}#1}}}}
+
+\definecolor{lightgreen}{cmyk}{0.05,0.0,0.1,0.025}
+\definecolor{darkgreen}{cmyk}{0.05,0.0,0.1,0.5}
+\makeatletter\newenvironment{inplacenotebox}{%
+
+\def\myboxwidth{\linewidth-0.5in}\begin{lrbox}{\@tempboxa}\begin{minipage}{\myboxwidth}\textbf{\color{darkgreen}Note:}\begin{scriptsize}}{\end{scriptsize}\end{minipage}\end{lrbox}%
+       \colorbox{lightgreen}{\usebox{\@tempboxa}}
+\quad\\ 
+}\makeatother
 % end date formatting
