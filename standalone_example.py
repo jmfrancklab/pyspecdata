@@ -9,14 +9,14 @@ run_number = 120418 # this is a continuous run of data
 SL_concentration = 200e-6 # the concentration of spin label
 dontfit = False # only set to true where you don't expect enhancement
 extra_t1_problem = True # always start with this false, and if it complains, about the number of T1 powers not matching with the number of T1 experiments, then turn it to True
-path = getDATADIR()+'reference_data/nmr/'
+path = 'reference_data/nmr/'
 search_delete_datanode('dnp.h5',name) # comment this line out if you are OK with the script pulling the data from previously cached stuff written to the database
 ###########################}}}
 # leave the rest of the code relatively consistent
 #{{{ generate the powers for the T1 series
 print 'First, check the $T_1$ powers:\n\n'
 fl = []
-t1_dbm,fl = auto_steps(path+name+'/t1_powers.mat',
+t1_dbm,fl = auto_steps(getDATADIR()+path+name+'/t1_powers.mat',
     threshold = -35,t_minlength = 5.0*60,
     t_maxlen = 40*60, t_start = 4.9*60.,
     t_stop = inf,first_figure = fl)
@@ -30,7 +30,7 @@ t1mask = bool8(ones(len(t1_dbm)))
 if extra_t1_problem == True:
     t1mask[-1] = 0
 #}}}
-dnp_for_rho(path,name,integration_width = 160,
+dnp_for_rho(getDATADIR()+path,name,integration_width = 160,
         peak_within = 500, show_t1_raw = True,
         phnum = [4],phchannel = [-1],
         t1_autovals = r_[2:2+len(t1_dbm)][t1mask],
