@@ -317,7 +317,7 @@ class CustomError(Exception):
             retval = str(value)
         retval = map(str,value)
         retval = ' '.join(retval)
-        retval = '\n'+'\n'.join(textwrap.wrap(retval,90,replace_whitespace = False))
+        retval = '\n'+'\n'.join(textwrap.wrap(retval,45,replace_whitespace = False))
         if traceback.format_exc() != 'None':
             retval += '\n\nOriginal Traceback:\n'+''.join(['V']*40)+'\n'+traceback.format_exc() + '\n' + ''.join(['^']*40) + '\n'
         Exception.__init__(self,retval)
