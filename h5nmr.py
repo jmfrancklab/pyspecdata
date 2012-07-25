@@ -444,6 +444,7 @@ def dnp_for_rho(path,
         ksp_symbol = '',
         verbose = False,
         **kwargs):
+    print 'DEBUG checkpoint 1: t1expnos=',t1expnos,'\n\n'
     run_number = double(run_number)
     print '{\\bf\\color{blue}This data is part of series %f:}\n\n'%run_number
     if t1_powers is not None:
@@ -470,6 +471,7 @@ def dnp_for_rho(path,
         t1expnos = 'auto'
         if clear_nodes:
             delete_datanode(h5file,genexpname(name,expno))
+    print 'DEBUG checkpoint 3: t1expnos=',t1expnos,'\n\n'
     ###{{{ process the kwargs to divvy them up onto the functions they refer to
     fid_args = {'name':name,'path':path,'expno':expno}
     if dbm is not None:
@@ -531,13 +533,15 @@ def dnp_for_rho(path,
     figurelist.append({'print_string':r'\subparagraph{retrieve $T_1$ data}'+'\n\n'})
     integration_args.update(t1kwargs) # copy over the t1 args
     if t1expnos == 'auto':
-        t1expnos = r_[emax_in_file.expno[-1]+t1_autovals,304] #right now, set to three, but can easily add others later
+        t1expnos = array(r_[emax_in_file.expno[-1]+t1_autovals,304],dtype = 'int') #right now, set to three, but can easily add others later
+        print 'DEBUG checkpoint 3.5: generated t1expnos=',t1expnos,'\n\n'
         t1names_forerror = map(lambda x: 'autoval %d'%x,t1_autovals)+['exp 304']
         if clear_nodes:
             for j in t1expnos:
                 delete_datanode(h5file,genexpname(name,j))
     else:
         t1names_forerror = map(lambda x: 'manually entered exp %d'%x,t1expnos)
+    print 'DEBUG checkpoint 4: t1expnos=',t1expnos,'\n\n'
     #{{{ manually enter certain kwargs
     integration_args_save = dict(integration_args)
     integration_args.update({'show_image':show_t1_raw})
@@ -551,6 +555,7 @@ def dnp_for_rho(path,
     if len(t1powers) > 0 and len(t1powers) != len(t1expnos):
         raise CustomError("You didn't pass the same number t1powers (%d) as there are T1's (%d)!"%(len(t1powers),len(t1expnos)))
     auxiliary_args.update(t1_auxiliary_args)
+    print 'DEBUG checkpoint 5: t1expnos=',t1expnos,'\n\n'
     for j,t1expno in enumerate(t1expnos):
         #{{{ should be able to get rid of this line by including with t1 auxiliary args above
         if len(t1powers) > 0:
