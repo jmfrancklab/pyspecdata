@@ -415,13 +415,13 @@ def dnp_for_rho(path,
         name,
         dbm = None,
         expno = [],
-        t1expnos = [],
         h5file = 'dnp.h5',
         t10name = None,
         t10chemical = None,
         t10conc = 0.0,
         t1powers = [], # for this and the next, remember that the no power scan is always added to the end
         t1_powers = None, # new format
+        t1expnos = [],
         t1_autovals = r_[2,3], 
         power_file = None,
         guessonly = False,
@@ -564,6 +564,14 @@ def dnp_for_rho(path,
             auxiliary_args.pop("t1power")
         #}}}
         fid_args.update({'expno':t1expno})
+        if t1expno == 304:
+            figurelist.append({'print_string':'power off\n\n'})# t1expnos and t1_autovals should have the same indeces
+        else:# t1expnos and t1_autovals should have the same indeces
+            figurelist.append({'print_string':'$T_1$ expno %d\n\n'%(t1expno)})
+            if len(t1_autovals) > j:
+                figurelist.append({'print_string':'$T_1$ autoval %d\n\n'%(t1_autovals[j])})
+            if len(t1powers) > 0:
+                figurelist.append({'print_string':'$T_1$ power %g\n\n'%dbm_to_power(t1powers[j])})
         try:
             t1info = store_T1(h5file,concentration_id,
                     fid_args,
