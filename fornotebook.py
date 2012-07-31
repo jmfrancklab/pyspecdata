@@ -35,7 +35,7 @@ def show_matrix(B,plot_name,first_figure = None):
     #image(~isfinite(B))
     return figlistret(first_figure,fl)
 class figlistl (figlist):
-    def show(self,string,numwide = 2,**kwargs):
+    def show(self,string,**kwargs):
         'latexify the series of figures, where "string" gives the base file name'
         print '\n\n'
         if not len(kwargs):
@@ -57,12 +57,10 @@ class figlistl (figlist):
                         lplot(figname+sep+string,**kwargs)
                     except:
                         raise CustomError('self.figurelist = ',self.figurelist,'figname = ',figname,'while string = ',string)
-                if (j+1) % numwide == 0:
-                    print '\n\n'
         while len(self.figurelist) > 0:
             self.figurelist.pop(-1)
         return
-def lplotfigures(figurelist,string,numwide = 2,**kwargs):
+def lplotfigures(figurelist,string,**kwargs):
     'obsolete, use the class!'
     print '\n\n'
     if not len(kwargs):
@@ -78,8 +76,6 @@ def lplotfigures(figurelist,string,numwide = 2,**kwargs):
                 lplot(figname+string,**kwargs)
             except:
                 raise CustomError('figurelist = ',figurelist,'figname = ',figname,'while string = ',string)
-            if (j+1) % numwide == 0:
-                print '\n\n'
     while len(figurelist) > 0:
         figurelist.pop(-1)
     return
@@ -191,10 +187,18 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True):
         for v in recnames:
             print r'\ensuremath{',v,'}$=$ &',' & '.join(map(lambda x: lsafe(str(x)),list(recordlist[v]))),r'\\'
         print r'\end{tabular}'
-def lplot(fname,width=3,figure=False,dpi=300,grid=False,alsosave=None,gensvg = False,print_string = None,centered = False,legend = False,equal_aspect = False,autopad = True,bytextwidth = False,showbox = True):
+def lplot(fname,width=0.33,figure=False,dpi=300,grid=False,alsosave=None,gensvg = False,print_string = None,centered = False,legend = False,equal_aspect = False,autopad = True,bytextwidth = None,showbox = True):
     '''
     used with python.sty instead of savefig
+    
+    by default, if width is less than 1, 
+    it's interpreted as bytextwidth = True (i.e. width given as a fraction of the linewidth)
+    if it's greater than, the width is interpreted in inches.
     '''
+    if width < 1.0:
+        bytextwidth = True
+    else:
+        bytextwidth = False
     if print_string is not None:
         print print_string
     fname = 'auto_figures/'+fname
@@ -230,17 +234,16 @@ def lplot(fname,width=3,figure=False,dpi=300,grid=False,alsosave=None,gensvg = F
         mpwidth = r'%0.2fin'%width
         figwidth = mpwidth
     if showbox:
-        print r'''\fbox{
-    \begin{minipage}{%s}
-    {\color{red}{\tiny %s}:}\begin{tiny}\fn{%s}'''%(mpwidth,thisjobname(),fname)
+        print r'''\mbox{\begin{minipage}{%s}'''%mpwidth
     if alsosave != None:
         print r'also saved \fn{%s}'%alsosave
-    if showbox:
-        print '\n\n'+r'\hrulefill'+'\n\n'
     print r'\includegraphics[width=%s]{%s}'%(figwidth,fname)
     if showbox:
-        print r'''\end{tiny}\end{minipage}
-    }'''
+        print '\n\n'+r'\hrulefill'+'\n\n'
+        print r'''{\color{red}{\tiny %s}:}\begin{tiny}\fn{%s}\end{tiny}'''%('file:',fname)
+        print '\n\n'+r'\hrulefill'+'\n\n'
+        print r'''\end{minipage}
+}''',
     clf()
     return
 def ordplot(x,y,labels,formatstring):

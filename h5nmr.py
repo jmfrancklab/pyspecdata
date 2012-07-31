@@ -432,6 +432,7 @@ def dnp_for_rho(path,
         dontfit = False,
         t1_phnum = None,
         t1_phchannel = None,
+        t1_bad_powers = None,
         expnos = None,
         clear_nodes = False,
         first_figure = None,
@@ -443,10 +444,15 @@ def dnp_for_rho(path,
         plot_vs_A = False,
         ksp_symbol = '',
         verbose = False,
+        T1w = 2.4691,
+        DeltaT1w = 0.10267,
         **kwargs):
-    print 'DEBUG checkpoint 1: t1expnos=',t1expnos,'\n\n'
     run_number = double(run_number)
     print '{\\bf\\color{blue}This data is part of series %f:}\n\n'%run_number
+    #{{{ test that it pulls t1max correctly
+    t1max = load_acqu(dirformat(dirformat(path)+name)+'1')['CNST'][9]
+    print '\n\n'
+    #}}}
     if t1_powers is not None:
         t1powers = t1_powers
     if expnos is not None and expno == []:
@@ -609,50 +615,149 @@ def dnp_for_rho(path,
         ###{{{ search for and retrieve the previously stored T_1(p) values
         t1dataset = None
         if chemical == None and concentration == None:
-            t1dataset = retrieve_T1series(h5file,name,run_number = run_number,show_result = 'for $T_{1}$')
+            t1dataset = retrieve_T1series(h5file,name,run_number = run_number,show_result = 'for $T_{1}$',t1max = t1max)
         else:
-            t1dataset = retrieve_T1series(h5file,None,chemical,concentration,run_number = run_number,show_result = 'for $T_{1}$')
+            t1dataset = retrieve_T1series(h5file,None,chemical,concentration,run_number = run_number,show_result = 'for $T_{1}$',t1max = t1max)
         ###}}}
         ###{{{ calculate the linear function for T_1(p)
+        #{{{ Set all the T10 related values
         t10_at_zero_power = 2.5
         if t10dataset is not None:
             t10_at_zero_power = t10dataset['power',0.0].data[0]
-        print '\n\nlinear interpolation using $T_{1,0}(0)$ of %0.3f for $k_\\sigma$ analysis\n\n'%t10_at_zero_power
+        T1w_inv_f = lambda x: nddata(1.0/(T1w+x*DeltaT1w),[-1],['power']).labels('power',x)
+        print '\n\nlinear interpolation using $T_{1,0}(0)$ of %0.3f for $k_\\sigma$ analysis, which is'%t10_at_zero_power
+        if t10dataset is None:
+            print 'just randomly estimated\n\n'
+        else:
+            print 'taken from previous data\n\n'
+        Ck_HH = 1./t10_at_zero_power-1./T1w
+        print '\n\nThis implies that $C_{macro}k_{HH}$ is %0.3f\n\n'%(Ck_HH)
+        #}}}
+        #{{{ T_1 interpolation
+        #{{{ if there are any scans that are bad (i.e. close to the signal null, remove them by power here
+        if t1_bad_powers is not None:
+            mask = zeros(size(t1dataset.getaxis('power')),dtype = 'bool8')
+            for j in range(0,len(t1_bad_powers)):
+                mask |= abs(t1dataset.getaxis('power') - t1_bad_powers[j]) < abs(0.05*t1_bad_powers[j])
+                figurelist.append({'print_string':
+                    r"\textbf{I'm leaving out $T_1$'s with power %g, because you marked them as bad (there are %d of these)}"%(t1_bad_powers[j],sum(mask))})
+            new_t1dataset = nddata(t1dataset.data[~mask],[sum(~mask)],['power'])
+            new_t1dataset.labels('power',t1dataset.getaxis('power')[~mask])
+            new_t1dataset.set_error(t1dataset.get_error()[~mask])
+            t1dataset = new_t1dataset
+        #}}}
         t1_at_zero_power = t1dataset['power',0.0].data[0]
         print '\n\nlinear interpolation using $T_1(0)$ of %0.3f for $k_\\sigma$ analysis\n\n'%t1_at_zero_power
         rho = (1./t1_at_zero_power) - (1./t10_at_zero_power)
         print '\n\nlinear interpolation using $\\rho$ of %0.5f for $k_\\sigma$ analysis\n\n'%rho
-        F_nonlinear = 1./(1./t1dataset.copy().set_error(None) - rho)
-        F_nonlinear_to_order = 5
-        c_F_nonlinear,F_nonlinear_line = F_nonlinear.polyfit('power',order = 5)
-        print '\n\n$F\\_{linear}$ is',lsafen(F_nonlinear),'and its fit is',F_nonlinear_line
+        #{{{ find list of independent powers
+        list_of_t1_powers = t1dataset.getaxis('power').copy()
+        list_of_different_t1_powers = array([])
+        for j in range(0,len(list_of_t1_powers)):
+            if not any(abs(list_of_different_t1_powers -
+                    list_of_t1_powers[j])
+                    < 0.05*list_of_t1_powers[j]):
+                list_of_different_t1_powers = r_[
+                        list_of_different_t1_powers,
+                        list_of_t1_powers[j]]
+        figurelist.append({'print_string':
+            r'I found %d different $T_1$ powers:'%len(list_of_different_t1_powers)
+            +lsafen(list_of_different_t1_powers)})
+        #}}}
+        F_nonlinear = 1./(1./t1dataset.copy().set_error(None)
+                - Ck_HH
+                - T1w_inv_f(t1dataset.getaxis('power')))
+        #{{{ threshold, in case the inverse was too small
+        threshold_number = 1./0.5e-3 # note that this is 2000s!
+        def threshold_F_nonlinear(myx):
+            mask = myx.data > threshold_number # if the inverse was very small
+            mask |= myx.data <= 0.0 # if the inverse was negative
+            mask |= isnan(myx.data) # if it was exactly zero
+            myx.data[mask] = threshold_number
+        threshold_F_nonlinear(F_nonlinear)
+        #}}}
+        if len(list_of_different_t1_powers) > 3:
+            F_nonlinear_to_order = 2
+        else:
+            F_nonlinear_to_order = 1
+        c_F_nonlinear,F_nonlinear_line = F_nonlinear.polyfit('power',order = F_nonlinear_to_order)
+        print '\n\n$F\\_{nonlinear}$ is',lsafen(F_nonlinear),'and its fit is',F_nonlinear_line
         # now, linearly interpolate w.r.t. power
         # in the same step, convert back to T1(p)
         t1err = t1dataset['power',0:1]
         t1err /= t1err.data[0] # so this way, multiplying by this will just give an nddata with teh correct error.
-        def t1f(x):
+        DeltaT10 = c_F_nonlinear[1]
+        def F_nonlinear_f(x):
             x_data = nddata(x, len(x), ['power'])
-            return t1err/(
-                    1./(c_F_nonlinear[0]+
-                        x_data*c_F_nonlinear[1]+
-                        x_data**2*c_F_nonlinear[2]+
-                        x_data**3*c_F_nonlinear[3])
-                    + rho)
+            #{{{ evaluate c_F_nonlinear over the nonlinear polynomial
+            retval = c_F_nonlinear[0]
+            for j in range(1,F_nonlinear_to_order+1):
+                retval += x_data**j*c_F_nonlinear[j]
+            #}}}
+            retval.labels('power',x)
+            threshold_F_nonlinear(retval)
+            return retval
+        t1f = lambda x: t1err/(1./F_nonlinear_f(x) + Ck_HH + T1w_inv_f(x))
+        powers_forplot = linspace(0,t1dataset.getaxis('power').max(),100)
+        #{{{ just diagnosis
+        #{{{ plot F_nonlinear directly
+        #{{{ plot stuff
+        nextfigure(figurelist,'Fnonlinear' + pdfstring)
+        plot(F_nonlinear,'o',label = '$F_{nonlinear}$ points')
+        #}}}
+        powers_fordiagnose = linspace(0,t1dataset.getaxis('power').max(),100)
+        print '\n\n$T_1(p)$ is',lsafen(t1f(powers_fordiagnose))
+        closely_spaced_F = F_nonlinear_f(powers_fordiagnose)
+        plot(F_nonlinear,'-',alpha=0.8,label = '$F_{nonlinear}(p)$')
+        plot(F_nonlinear_line,'-',alpha=0.8,label = r'$F_{nonlinear,origfit}(p)$')
+        plot(closely_spaced_F,'-',alpha=0.8,label = '$F_{nonlinear,interpolated}(p)$')
+        title(name)
+        autolegend()
+        #}}}
+        #{{{ plot inverse of F_nonlinear
+        nextfigure(figurelist,'invFnonlinear' + pdfstring)
+        plot(T1w_inv_f(t1dataset.getaxis('power'))+rho,
+                '-',label = '$T_{1,w}^{-1}(p)+\\rho(0)$')
+        plot(1.0/F_nonlinear,'o',alpha=0.8,label = '$F_{nonlinear}^{-1}(p)$')
+        plot(1.0/F_nonlinear_line,'-',alpha=0.8,label = '$F_{nonlinear}^{-1}(p)$')
+        plot(1./t1dataset.copy().set_error(None),
+                'o', label = '$T_1^{-1}$')
+        plot(powers_forplot,1.0/t1f(powers_forplot).set_error(None),
+                '-', alpha = 0.2, label = '$T_1^{-1}(p) = F_{nonlinear}^{-1}(p)+(T_{1,w}^-1+p \\Delta T_{1,w}^{-1})^{-1} + C_{macro} k_{HH}$')
+        myones = F_nonlinear.copy()
+        myones.data[:] = 1.0
+        plot(rho*myones,
+                '--',
+                label = '$\\rho(0)$')
+        plot((1./t10_at_zero_power+rho)*myones,
+                '--',
+                label = '$T_{1,0}^{-1} + \\rho(0)$')
+        expand_y()
+        expand_x()
+        gridandtick(gca())
+        title(name)
+        autolegend()
+        #}}}
+        #}}}
         DeltaT10 = c_F_nonlinear[1]
         ###}}}
+        #}}}
         ###{{{ grab data for f and plot it
         if t1dataset == None or t10dataset == None:
             fdata_exists = False # if both aren't present, I can't calculate the leakage
         else:
             fdata_exists = True
+        #{{{ do the T1 stuff first, regardless
+        figurelist.append({'print_string':r'\subparagraph{$T_1$ data}'})
+        nextfigure(figurelist,'t1data' + pdfstring)
+        save_color_t1 = plot_color_counter()
+        plot(1.0/t1dataset,'o', label = '$T_1^{-1}$ / $s^{-1}$')
+        plot_color_counter(save_color_t1)
+        plot(powers_forplot,1.0/t1f(powers_forplot).set_error(None),'-', alpha = 0.2)
+        #}}}
         if fdata_exists: # if I can calculate the leakage factor
-            figurelist.append({'print_string':r'\subparagraph{$T_{1,0}$ data}'})
-            nextfigure(figurelist,'t10data' + pdfstring)
-            powers_forplot = linspace(0,max(r_[t10dataset.getaxis('power').max(),t1dataset.getaxis('power').max()]),10)
             save_color_t10 = plot_color_counter()
             plot(1.0/t10dataset,'o', label = '$T_{1,0}^{-1}$ / $s^{-1}$')
-            save_color_t1 = plot_color_counter()
-            plot(1.0/t1dataset,'o', label = '$T_1^{-1}$ / $s^{-1}$')
             ct10,t10line = t10dataset.polyfit('power')
             t10err = t10dataset['power',0:1]
             t10err /= t10err.data[0] # so this way, multiplying by this will just give an nddata with teh correct error.
@@ -669,19 +774,29 @@ def dnp_for_rho(path,
             f = lambda x: 1.0 - t1f(x)/t10f(x)
             plot_color_counter(save_color_t10)
             plot(powers_forplot,1.0/t10f(powers_forplot).set_error(None),'-', alpha = 0.2)
-            plot_color_counter(save_color_t1)
-            plot(powers_forplot,1.0/t1f(powers_forplot).set_error(None),'-', alpha = 0.2)
             plot(powers_forplot,f(powers_forplot).set_error(None),'-',label = '$f$', alpha = 0.2)
-            #{{{ show k_\rho in the plot
-            print r'$T_1$ for $\rho$ is',t1dataset['power',lambda x: argmin(abs(x+999.))].data
-            rho_forprint = 1.0/t1dataset['power',lambda x: argmin(abs(x+999.))].data
-            t10_with_power_off = t10dataset['power',lambda x: argmin(abs(x+999.))].data.mean()
+            #{{{ show k_\rho in the plot, along with Delta rho (overall change in rho)
+            print '$T_1$ power axis is',lsafen(t1dataset.getaxis('power'))
+            t1_with_power_off = t1dataset['power',lambda x: argmin(x)].data
+            t1_at_max_power = t1dataset['power',lambda x: argmax(x)].data
+            print r'$T_1$ for $\rho$ is',t1_with_power_off
+            print r'$T_1$ for $\rho_{max}$ is',t1_at_max_power
+            rho_forprint = 1.0/t1_with_power_off
+            rho_atmax = 1.0/t1_at_max_power
+            t10_with_power_off = t10dataset['power',lambda x: argmin(x)].data.mean()
+            t10_at_max_power = t10dataset['power',lambda x: argmax(x)].data.mean()
+            print r'$T_{1,0}$ for $\rho$ stored as',t10_with_power_off
+            print r'$T_{1,0}$ for $\rho_{max}$ stored as',t10_at_max_power
             rho_forprint -= 1.0/t10_with_power_off
-            print r'$T_{1,0}$ for $\rho$ is',t10dataset['power',lambda x: argmin(abs(x+999.))].data,'\n\n'
+            rho_atmax -= 1.0/t10_at_max_power
+            print r'$T_{1,0}$ for $\rho$ is',t10dataset['power',lambda x: argmin(abs(x))].data,'\n\n'
+            print r'$T_{1,0}$ for $\rho$ is NOT',t10dataset['power',lambda x: argmin(abs(x+999.))].data,'\n\n'
             print r'$C$ for $k_\rho$ is',concentration,'\n\n'
             print r'$\rho$ is',rho_forprint,'\n\n'
+            print r'$\rho_{max}$ is',rho_atmax,'\n\n'
             print r'$k_\rho$ is',rho_forprint/concentration,'\n\n'
-            textstring = '$k_\\rho = %0.3f$ s$^{-1}$M$^{-1}$\n$\\Delta T_{1,0}=%0.3f$ s/W'%(rho_forprint/concentration,DeltaT10)
+            print r'$k_{\rho,max}$ is',rho_atmax/concentration,'\n\n'
+            textstring = '$k_\\rho = %0.3f$ s$^{-1}$M$^{-1}$\n$\\Delta T_{1,0}=%0.3f$ s/W\n\Delta\\rho %0.3f %%'%(rho_forprint/concentration,DeltaT10,(rho_forprint-rho_atmax)/rho_forprint)
             ax = gca()
             text(0.5,0.5,textstring,transform = ax.transAxes,size = 'x-large', horizontalalignment = 'center',color = 'k')
             #}}}
@@ -1109,6 +1224,9 @@ def retrieve_T1series(h5filename,name,*cheminfo,**kwargs):
         run_number = double(kwargs.pop('run_number'))
     if 'show_result' in kwargs.keys():
         show_result = kwargs.pop('show_result')
+    t1max = None
+    if 't1max' in kwargs.keys():
+        t1max = kwargs.pop('t1max')
     if verbose: print lsafen('DEBUG: retrieve T1series called with name=',name,'cheminfo',cheminfo)
     #}}}
     if len(cheminfo) == 2:
@@ -1138,6 +1256,13 @@ def retrieve_T1series(h5filename,name,*cheminfo,**kwargs):
         print 'No $T_1$ data found for chemidx=\n\n',print_chemical_by_index(h5filename+'/compilations/chemicals',chemidx),'\n\n'
         return None
     if show_result: print r'\subparagraph{$T_1$ series}','\n\n',r'{\bf retrieved $T_1$ series',show_result,':}','\\begin{tiny}\n\n',lrecordarray(data),'\\end{tiny}\n\n'
+    if t1max is not None:
+        actual_t1max = data['T_1'].max()
+        print r'You set $T_{1,max}$ to %0.3f s'%t1max,"which compared to %0.2f"%actual_t1max,
+        if actual_t1max>t1max:
+            print r'{\Large{\color{red} is NOT OK!!!!}}'
+        else:
+            print r'{\large is OK}'
     if verbose: print '\n\n',lsafe('matching indeces:',data['index']),'\n\n'
     myerrors = sqrt(parse_t1_covariance(data)[0,0,:])
     if indirect_dim == 'power':

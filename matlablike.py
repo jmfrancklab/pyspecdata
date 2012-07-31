@@ -1,11 +1,15 @@
 from pylab import *
 import textwrap
 import matplotlib.transforms as mtransforms
+from mpl_toolkits.mplot3d import axes3d
+from matplotlib.collections import PolyCollection
+from matplotlib.colors import LightSource
 from matplotlib.lines import Line2D
 import tables
 import warnings
 from inspect import ismethod
 from numpy.core import rec
+from matplotlib.pyplot import cm
 import tables
 from os import listdir,environ
 from copy import deepcopy 
@@ -257,6 +261,60 @@ def make_rec(*args,**kwargs):
         return array([tuple(input)],dtype = mydtype)
     except:
         raise CustomError('problem trying to assign data of type',map(type,input),'\nvalues',input,'\nonto',mydtype,'\ndtype made from tuple:',zip(names,types,shapes))#,'"types" was',types)
+#{{{ convert back and forth between lists, etc, and ndarray
+def make_ndarray(array_to_conv,name_forprint = 'unknown',verbose = False): 
+    if type(array_to_conv) in [int,int32,double,float,complex,complex128,float,bool,bool_]: # if it's a scalar
+        pass
+    elif type(array_to_conv) is str:
+        pass
+    elif type(array_to_conv) in [list,ndarray] and len(array_to_conv) > 0:
+        array_to_conv = rec.fromarrays([array_to_conv],names = 'LISTELEMENTS') #list(rec.fromarrays([b])['f0']) to convert back
+    elif type(array_to_conv) in [list,ndarray] and len(array_to_conv) is 0:
+        array_to_conv = None
+    elif array_to_conv is  None:
+        pass
+    else:
+        raise CustomError('type of value (',type(array_to_conv),') for attribute name',name_forprint,'passed to make_ndarray is not currently supported')
+    return array_to_conv
+def unmake_ndarray(array_to_conv,name_forprint = 'unknown',verbose = False): 
+    r'Convert this item to an ndarray'
+    if (type(array_to_conv) is recarray) or (type(array_to_conv) is ndarray and array_to_conv.dtype.names is not None and len(array_to_conv.dtype.names)>0):
+        #{{{ if it's a record/structured array, it should be either a list or dictionary
+        if 'LISTELEMENTS' in array_to_conv.dtype.names:
+            if array_to_conv.dtype.names == tuple(['LISTELEMENTS']):
+                retval = list(array_to_conv['LISTELEMENTS'])
+            else:
+                raise CustomError('Attribute',name_forprint,'is a recordarray with a LISTELEMENTS field, but it also has other dimensions:',array_to_conv.dtype.names,'not',tuple(['LISTELEMENTS']))
+        elif len(array_to_conv)==1:
+            thisval = dict(zip(a.dtype.names,a.tolist()[0]))
+        else: raise CustomError('You passed a structured array, but it has more than one dimension, which is not yet supported\nLater, this should be supported by returning a dictionary of arrays')
+        #}}}
+    elif type(array_to_conv) is ndarray and len(array_to_conv)==1:
+        #{{{ if it's a length 1 ndarray, then return the element
+        retval = array_to_conv.tolist()
+        if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is a numpy array of length one"
+        #}}}
+    elif type(array_to_conv) in [string_,int32,float64,bool_]:
+        #{{{ map numpy strings onto normal strings
+        retval = array_to_conv.tolist()
+        if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is a numpy scalar"
+        #}}}
+    elif type(array_to_conv) is list:
+        #{{{ deal with lists
+        if verbose: print "(from unmake ndarray verbose):", name_forprint,"is a list"
+        typeofall = map(type,array_to_conv)
+        if all(map(lambda x: x is string_,typeofall)):
+            if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",typeofall,"are all numpy strings"
+            retval = map(str,array_to_conv)
+        else:
+            if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",typeofall,"are not all numpy string"
+            retval = array_to_conv
+        #}}}
+    else:
+        if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is not a numpy string or record array"
+        retval = array_to_conv
+    return retval
+#}}}
 #}}}
 def emptytest(x): # test is it is one of various forms of empty
    if type(x) in [list,array]:
@@ -369,28 +427,7 @@ def h5loaddict(thisnode,verbose = False):
         for x in thisnode._v_attrs._f_list('user')])
     #}}}
     for k,v in retval.iteritems():#{{{ search for record arrays that represent normal lists
-        if type(v) is recarray:
-            if 'LISTELEMENTS' in v.dtype.names:
-                if v.dtype.names == tuple(['LISTELEMENTS']):
-                    retval[k] = list(v['LISTELEMENTS'])
-                else:
-                    raise CustomError('Attribute',k,'is a recordarray with a LISTELEMENTS field, but it also has other dimensions:',v.dtype.names,'not',tuple(['LISTELEMENTS']))
-                #}}}
-        elif type(v) is list:#{{{ deal with lists
-            if verbose: print k,"is a list"
-            typeofall = map(type,v)
-            if all(map(lambda x: x is string_,typeofall)):
-                if verbose: print k,"=",typeofall,"are all numpy strings"
-                retval[k] = map(str,v)
-            else:
-                if verbose: print k,"=",typeofall,"are not all numpy string"
-            #}}}
-        elif type(v) is string_:#{{{ map numpy strings onto normal strings
-            retval[k] = str(v)
-            if verbose: print k,"=",type(v),"is a numpy string"
-            #}}}
-        else:
-            if verbose: print k,"=",type(v),"is not a numpy string"
+        retval[k]  = unmake_ndarray(v,name_forprint = k,verbose = verbose)
     if type(thisnode) is tables.table.Table:#{{{ load any table data
         if verbose: print "It's a table\n\n"
         if 'data' in retval.keys():
@@ -408,8 +445,17 @@ def h5loaddict(thisnode,verbose = False):
         raise CustomError("I don't know what to do with this node:",thisnode)
     #}}}
     return retval
-def h5child(thisnode,childname,clear = False,create = True,verbose = False):
-    r'''grab the child, optionally clearing it and/or creating it'''
+def h5child(thisnode,childname,clear = False,create = None,verbose = False):
+    r'''grab the child, optionally clearing it and/or (by default) creating it'''
+    #{{{ I can't create and clear at the same time
+    if create and clear:
+        raise CustomError("You can't call clear and create at the same time!\nJust call h5child twice, once with clear, once with create")
+    if create is None:
+        if clear == True:
+            create = False
+        else:
+            create = True
+    #}}}
     h5file = thisnode._v_file
     try:
         childnode = h5file.getNode(thisnode,childname)
@@ -419,8 +465,10 @@ def h5child(thisnode,childname,clear = False,create = True,verbose = False):
             childnode._f_remove(recursive = True)
             childnode = None
     except tables.NoSuchNodeError:
-        if create is False:
+        if create is False and not clear:
             raise CustomError('Trying to grab a node that does not exist with create = False')
+        elif clear:
+            childnode = None
         else:
             childnode = h5file.createGroup(thisnode,childname)
             if verbose:
@@ -587,7 +635,7 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
     return h5file,currentnode
 def h5attachattributes(node,listofattributes,myvalues):
     if node is None:
-        raise CustomError('Problem!, node ',node,'is None!')
+        raise CustomError('Problem!, node passed to h5attachattributes: ',node,'is None!')
     h5file = node._v_file
     if isinstance(myvalues,nddata):
         attributevalues = map(lambda x: myvalues.__getattribute__(x),listofattributes)
@@ -598,28 +646,20 @@ def h5attachattributes(node,listofattributes,myvalues):
     listout = list(listofattributes)
     for j,thisattr in enumerate(listofattributes):
         thisval = attributevalues[j]
-        if type(thisval) in [int,int32,double,float,complex,complex128,float,bool]: # if it's a scalar
-            pass
-        elif type(thisval) is str:
-            pass
-        elif type(thisval) in [list,ndarray] and len(thisval) > 0:
-            thisval = rec.fromarrays([thisval],names = 'LISTELEMENTS') #list(rec.fromarrays([b])['f0']) to convert back
-        elif type(thisval) in [list,ndarray] and len(thisval) is 0:
-            thisval = None
-        elif type(thisval) in [dict]:
+        if type(thisval) in [dict]:
             dictnode = h5child(node,
                     thisattr,
-                    clear = True,
+                    clear = True)
+            dictnode = h5child(node,
+                    thisattr,
                     create = True)
             h5attachattributes(dictnode,
                     thisval.keys(),
                     thisval.values())
             thisval = None
             listout.remove(thisattr)
-        elif thisval is  None:
-            pass
         else:
-            raise CustomError('type of value (',type(thisval),') for attribute name',thisattr,'passed to h5attachattributes is not currently supported')
+            thisval = make_ndarray(thisval,name_forprint = thisattr)
         if thisval is not None:
             node._v_attrs.__setattr__(thisattr,thisval)
             listout.remove(thisattr)
@@ -1051,7 +1091,7 @@ def plot(*args,**kwargs):
             try:
                 myx = myy.getaxis(myy.dimlabels[0])
             except:
-                raise CustomError("problem, ",shape(myy.axis_coords),"not valid axes for",ndshape(myy))
+                myx = r_[0:myy.data.shape[0]]
         if type(myy.data_error) is ndarray and len(myy.data_error)>0: #then this should be an errorbar plot
             def thiserrbarplot(*tebargs,**tebkwargs):
                 if type(tebargs[-1]) is str:
@@ -1070,11 +1110,14 @@ def plot(*args,**kwargs):
                 #print "DEBUG decided to assign to xerr:",valueforxerr
                 kwargs.update({'xerr':valueforxerr})
         #{{{ deal with axis labels along y
-        if myy.getaxis(myy.dimlabels[-1]) is not None:
+        try:
             yaxislabels = myy.getaxis(myy.dimlabels[-1])
+            # at this point, if there is no axis label, it will break and go to pass
             if len(yaxislabels) > 0:
                 if type(yaxislabels[0]) is string_:
                     has_labels = True
+        except:
+            pass
             #}}}
         myy = squeeze(myy.data.copy())
     #}}}
@@ -1374,6 +1417,100 @@ class nddata (object):
     def __repr__(self):
         return repr(self.data)+'\n\t\t+/-'+repr(self.get_error())+'\n\tdimlabels=['+repr(self.dimlabels)+']\n\taxes='+repr(self.mkd(self.axis_coords))+'\n\t\t+/-'+repr(self.mkd(self.axis_coords_error))+'\n'
     #}}}
+    #{{{ for plotting
+    #{{{ 3D mesh plot
+    def meshplot(self,stride = None,alpha = 0.3,onlycolor = False,light = None,rotation = [65,0],cmap = cm.gray,**kwargs):
+        r'''takes both rotation and light as elevation, azimuth
+        only use the light kwarg to generate a black and white shading display'''
+        if not onlycolor:
+            fig = gcf()
+            ax = fig.add_subplot(111,projection = '3d')
+        if len(self.dimlabels) > 2:
+            raise CustomError("I don't know how to handle something with more than two dimensions for a surface plot!")
+        #{{{ shared to both
+        x_dim = self.dimlabels[0]
+        y_dim = self.dimlabels[1]
+        x_axis = self.retaxis(x_dim).data
+        y_axis = self.retaxis(y_dim).data
+        #}}}
+        rstride = 1
+        cstride = 1
+        if stride is not None:
+            if x_dim in stride.keys():
+                rstride = stride[x_dim]
+            if y_dim in stride.keys():
+                cstride = stride[y_dim]
+        X = x_axis*ones(shape(y_axis))
+        Y = ones(shape(x_axis))*y_axis
+        Z = self.data
+        if light is not None:
+            ls = LightSource(azdeg = light[1],altdeg = light[0])
+            rgb = ls.shade(Z,cmap)
+        else:
+            for_rgb = Z-Z.min()
+            for_rgb /= for_rgb.max()
+            rgb = cmap(for_rgb)
+        if onlycolor:
+            imshow(rgb)
+        else:
+            if light is None:
+                ax.plot_surface(X,Y,Z,
+                        rstride = rstride,
+                        cstride = cstride,
+                        cmap = cmap,
+                        shade = False,
+                        **kwargs)
+            else:
+                newkwargs = kwargs
+                newkwargs['linewidth'] = 0.0
+                ax.plot_surface(X,Y,Z,
+                        rstride = rstride,
+                        cstride = cstride,
+                        alpha = alpha,
+                        facecolors = rgb,
+                        shade = False,
+                        **newkwargs)
+            ax.set_xlabel(x_dim)
+            ax.set_ylabel(y_dim)
+            ax.set_zlabel(self.name())
+            ax.view_init(elev = rotation[0],azim = rotation[1])
+        if onlycolor:
+            return
+        else:
+            return ax
+    def waterfall(self):
+        fig = gcf()
+        ax = fig.add_subplot(111,projection = '3d')
+        if len(self.dimlabels) > 2:
+            raise CustomError("I don't know how to handle something with more than two dimensions for a surface plot!")
+        #{{{ shared to both
+        x_dim = self.dimlabels[0]
+        y_dim = self.dimlabels[1]
+        x_axis = self.retaxis(x_dim).data
+        y_axis = self.retaxis(y_dim).data
+        #}}}
+        ax.set_xlabel(x_dim)
+        ax.set_ylabel(y_dim)
+        ax.set_zlabel(self.name())
+        verts = []
+        xs = x_axis.flatten()
+        xs = r_[xs[0],xs,xs[-1]] # add points for the bottoms of the vertices
+        ys = y_axis.flatten()
+        for j in range(0,len(ys)):
+            zs = self[y_dim,j].data.flatten()
+            zs = r_[0,zs,0]
+            verts.append(zip(xs,zs)) # one of the faces
+        poly = PolyCollection(verts) # the individual facecolors would go here
+        poly.set_alpha(0.3)
+        fig = gcf()
+        ax = fig.add_subplot(111,projection = '3d')
+        ax.add_collection3d(poly,zs = ys, zdir = 'y')
+        ax.set_zlim3d(self.data.min(),self.data.max())
+        ax.set_xlim3d(xs.min(),xs.max())
+        ax.set_ylim3d(ys.min(),ys.max())
+        return ax
+    #}}}
+    #}}}
     #{{{ error-related functions
     def normalize(self,axis,first_figure = None):#,whichpoint = slice(0,1,None)):
        x = self.data
@@ -1423,18 +1560,39 @@ class nddata (object):
     #{{{ dictionary functions -- these convert between two formats:
     # dictionary -- stuff labeled according the dimension label.
     # list -- same information, but it's assumed they are listed in the order given by "dimlabels"
-    def mkd(self,*arg):
+    def mkd(self,*arg,**kwargs):
         'make dictionary format'
+        #{{{ process kwargs
+        give_None = True
+        if len(kwargs) > 0:
+            if 'give_None' in kwargs.keys():
+                give_None = kwargs.pop('give_None')
+        if len(kwargs) > 0:
+            raise CustomError("you passed mkd kwargs I didn't understand:",kwargs)
+        #}}}
         if len(arg) == 1:
             if emptytest(arg[0]):
                 return dict(zip(self.dimlabels,
                     [None]*len(self.dimlabels)))
+            if len(arg[0]) != len(self.dimlabels):
+                #raise ValueError("When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is"+repr(self.dimlabels)+"and you passed"+repr(arg))
+                print r"{\color{red}WARNING! mkd error (John will fix this later):}"
+                print "When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is"+repr(self.dimlabels)+"and you passed"+repr(arg)+'\n\n'
             for i,v in enumerate(arg[0]):
                 if type(v) == ndarray:
                     if v.shape == ():
                         arg[0][i] = None
+            if give_None:
             return dict(zip(self.dimlabels,arg[0]))
+            else:
+                #{{{ don't return values for the things that are None
+                mykeys = [self.dimlabels[j] for j in range(0,len(self.dimlabels)) if arg[0][j] is not None]
+                myvals = [arg[0][j] for j in range(0,len(self.dimlabels)) if arg[0][j] is not None]
+                return dict(zip(mykeys,myvals))
+                #}}}
         elif len(arg) == 0:
+            if not give_None:
+                raise CustomError("You can't tell me not to give none and then not pass me anything!!")
             return dict(zip(self.dimlabels,
                 [None]*len(self.dimlabels)))
         else:
@@ -1650,48 +1808,24 @@ class nddata (object):
             return A
         #}}}
         #{{{ shape and multiply
-        Ashape,Bshape,newdimlabels,Border= self.aligndata(arg)
-        A = self.data.copy().reshape(Ashape)
-        B = arg.data.copy().transpose(Border).reshape(Bshape)
-        result = A * B
+        A,B = self.aligndata(arg)
+        retval = A
+        retval.data = A.data * B.data
         #}}}
         #{{{ if we have error for both the sets of data, I should propagate that error
-        Aerr = None
-        Berr = None
-        if self.get_error() != None:
-            Aerr = self.get_error().copy().reshape(Ashape)
-        if arg.get_error() != None:
-            Berr = arg.get_error().copy().transpose(Border).reshape(Bshape)
+        Aerr = A.get_error()
+        Berr = B.get_error()
         Rerr = 0.0 # we can have error on one or both, so we're going to need to add up the variances
         if Aerr != None:
-            Rerr += (Aerr * B)**2
+            Rerr += (Aerr * B.data)**2
         if Berr != None:
-            Rerr += (Berr * A)**2
+            Rerr += (Berr * A.data)**2
         Rerr = sqrt(real(Rerr)) # convert back to stdev
         if Aerr == None and Berr == None:
             Rerr = None
         #}}}
-        if len(self.axis_coords)>0:
-            #{{{ transfer the errors associated with the axis labels
-            retval = nddata(result,list(result.shape),newdimlabels,axis_coords=list(self.axis_coords),data_error = Rerr)
-            #{{{ handle the axis_coords_error directly, since it's a dictionary
-            errordict = retval.mkd()
-            #{{{ add the errors for B
-            if type(arg.axis_coords_error) is list:
-                if len(arg.axis_coords_error) > 0:
-                    errordict.update(arg.mkd(arg.axis_coords_error))
-            #}}}
-            #{{{ add the errors for A
-            if type(self.axis_coords_error) is list:
-                if len(self.axis_coords_error) > 0:
-                    errordict.update(self.mkd(self.axis_coords_error))
-            #}}}
-            #}}}
-            retval.axis_coords_error = retval.fld(errordict)
+        retval.set_error(Rerr)
             return retval
-            #}}}
-        else:
-            return nddata(result,list(result.shape),newdimlabels,data_error = Rerr)
     def __pow__(self,arg):
         if arg == -1:
             x = self.get_error()
@@ -1715,46 +1849,27 @@ class nddata (object):
                 error = A.get_error()
                 error /= abs(arg)
             return A
-        Ashape,Bshape,newdimlabels,Border= self.aligndata(arg)
-        A = self.data.copy().reshape(Ashape)
-        B = arg.data.copy().transpose(Border).reshape(Bshape)
-        result = A / B
+        A,B = self.aligndata(arg)
+        retval = A
+        retval.data = A.data / B.data
         #{{{ if we have error for both the sets of data, I should propagate that error
-        Aerr = None
-        Berr = None
-        if self.get_error() != None:
-            Aerr = self.get_error().copy().reshape(Ashape)
-        if arg.get_error() != None:
-            Berr = arg.get_error().copy().transpose(Border).reshape(Bshape)
+        Aerr = A.get_error()
+        Berr = B.get_error()
         Rerr = 0.0 # we can have error on one or both, so we're going to need to add up the variances
         if Aerr != None:
-            Rerr += (Aerr/B)**2
+            Rerr += (Aerr/B.data)**2
         if Berr != None:
-            Rerr += (A*Berr/(B**2))**2
+            Rerr += (A.data*Berr/(B.data**2))**2
+        try:
         Rerr = sqrt(real(Rerr)) # convert back to stdev
+        except:
+            raise CustomError("Rerr gave an attribute error when you passed",Rerr)
         #print "Rerr dtype",Rerr.dtype
         if Aerr == None and Berr == None:
             Rerr = None
         #}}}
-        if len(self.axis_coords)>0:
-            retval = nddata(result,list(result.shape),newdimlabels,axis_coords=list(self.axis_coords),data_error = Rerr)
-            #{{{ handle the axis_coords_error directly, since it's a dictionary
-            errordict = retval.mkd()
-            #{{{ add the errors for B
-            if type(arg.axis_coords_error) is list:
-                if len(arg.axis_coords_error) > 0:
-                    errordict.update(arg.mkd(arg.axis_coords_error))
-            #}}}
-            #{{{ add the errors for A
-            if type(self.axis_coords_error) is list:
-                if len(self.axis_coords_error) > 0:
-                    errordict.update(self.mkd(self.axis_coords_error))
-            #}}}
-            #}}}
-            retval.axis_coords_error = retval.fld(errordict)
+        retval.set_error(Rerr)
             return retval
-        else:
-            return nddata(result,list(result.shape),newdimlabels,data_error = Rerr)
     def __abs__(self):
         return self.runcopy(abs)
     __radd__ = __add__
@@ -1771,7 +1886,9 @@ class nddata (object):
     #}}}
     #{{{ align data
     def aligndata(self,arg):
-        r'''return the information needed to reshape both self and arg, such that any extra dimensions from arg are tacked on to those from self --> this allows multiplication + division where dimensions may not match in the numpy sense'''
+        r'''This now just returns selfout,argout
+        which are aligned to each other, and which contain
+        axis labels and axis errors for both'''
         augmentdims = [x for x in arg.dimlabels if x in set(self.dimlabels)^set(arg.dimlabels)] # dims in arg but now self, ordered as they were in arg
         newdims = self.dimlabels + augmentdims # this should return the new dimensions with the order of self preserved, followed by augmentdims
         selfshape = list(self.data.shape)+list(ones(len(augmentdims))) # there is no need to transpose self, since its order is preserved
@@ -1783,7 +1900,46 @@ class nddata (object):
                 argshape[j] = arg.data.shape[arg.dimlabels.index(k)]
         #}}}
         argorder = map(arg.dimlabels.index,new_arg_labels) # for each new dimension, determine the position of the original dimension
-        return selfshape,argshape,newdims,argorder
+        selfout = self.copy() # copy self
+        selfout.data = self.data.reshape(selfshape) # and reshape to its new shape
+        selfout.dimlabels = newdims
+        argout = arg.copy() # copy arg
+        argout.data = arg.data.transpose(argorder).reshape(argshape) # and reshape the data
+        argout.dimlabels = newdims
+        if self.get_error() != None:
+            temp = self.get_error().copy().reshape(selfshape)
+            self.set_error(temp)
+        if arg.get_error() != None:
+            temp = arg.get_error().copy().transpose(argorder).reshape(argshape)
+            arg.set_error(temp)
+        if (len(self.axis_coords)>0) or (len(arg.axis_coords)>0):
+            #{{{ transfer the errors and the axis labels
+            #{{{ make dictionaries for both, and update with info from both, giving preference to self
+            axesdict = selfout.mkd()
+            errordict = selfout.mkd()
+            #{{{ add the axes and errors for B
+            if type(arg.axis_coords) is list:
+                if len(arg.axis_coords) > 0:
+                    axesdict.update(arg.mkd(arg.axis_coords))
+            if type(arg.axis_coords_error) is list:
+                if len(arg.axis_coords_error) > 0 and not all([x is None for x in arg.axis_coords_error]):
+                    errordict.update(arg.mkd(arg.axis_coords_error))
+            #}}}
+            #{{{ add the errors for A
+            if type(self.axis_coords) is list:
+                if len(self.axis_coords) > 0:
+                    axesdict.update(self.mkd(self.axis_coords))
+            if type(self.axis_coords_error) is list:
+                if len(self.axis_coords_error) > 0 and not all([x is None for x in self.axis_coords_error]):
+                    errordict.update(self.mkd(self.axis_coords_error))
+            #}}}
+            #}}}
+            selfout.axis_coords_error = selfout.fld(errordict)
+            argout.axis_coords_error = selfout.fld(errordict)
+            selfout.axis_coords = selfout.fld(axesdict)
+            argout.axis_coords = selfout.fld(axesdict)
+            #}}}
+        return selfout,argout
     #}}}
     #{{{ integrate, differentiate, and sum
     def integrate(self,thisaxis,backwards = False):
@@ -2245,7 +2401,11 @@ class nddata (object):
         order = argsort(self.axis_coords[whichaxis])
         datacopy = self.copy()
         for j in range(0,len(order)): # do it this way, so that it deals with other dimensions correctly
+            try:
             self[axisname,j] = datacopy[axisname,order[j]]
+            except:
+                if len(self.axis_coords_error) > len(self.dimlabels):
+                    raise ValueError("sort failed because there are more sets of axis errors than there are axes!")
         self.axis_coords[whichaxis] = self.axis_coords[whichaxis][order]
         return self
     def copyaxes(self,other):
@@ -2579,7 +2739,10 @@ class nddata_hdf5 (nddata):
             myaxiscoords = [None]*len(mydimlabels)
             myaxiscoordserror = [None]*len(mydimlabels)
             for axisname in datadict['axes'].keys():
+                try:
                 axisnumber = mydimlabels.index(axisname)
+                except AttributeError:
+                    raise CustomError('mydimlabels is not in the right format!\nit looks like this:\n',mydimlabels,type(mydimlabels))
                 recordarrayofaxis = datadict['axes'][axisname]['data']
                 myaxiscoords[axisnumber] = recordarrayofaxis['data']
                 if 'error' in recordarrayofaxis.dtype.names:
@@ -2590,13 +2753,28 @@ class nddata_hdf5 (nddata):
                 datadict['axes'].pop(axisname)
             kwargs.update({"axis_coords":myaxiscoords})
             kwargs.update({"axis_coords_error":myaxiscoordserror})
+        elif len(mydimlabels)>1:
+            raise CustomError("The current version uses the axis labels to figure out the shape of the data\nBecause you stored unlabeled data, I can\'t figure out the shape of the data!!")
+            # the reshaping this refers to is done below
         #}}}
-        #print "DEBUG: type(mydimlabels)",type(mydimlabels),"mydimlabels=",mydimlabels
         nddata.__init__(self,
                 mydata,
                 mydata.shape,
                 mydimlabels,
                 **kwargs)
+        #{{{ reshape multidimensional data to match the axes
+        if len(mydimlabels)>1:
+            det_shape = []
+            for thisdimlabel in mydimlabels:
+                try:
+                    temp = self.getaxis(thisdimlabel)
+                except:
+                    temp = -1 # no axis is given
+                if type(temp) is ndarray:
+                    temp = len(temp)
+                det_shape.append(temp)
+            self.data = self.data.reshape(tuple([len(self.getaxis(x)) for x in mydimlabels]))
+        #}}}
         for remainingattribute in datadict.keys():
             self.__setattr__(remainingattribute,datadict[remainingattribute])
         self.h5file.close()
@@ -2712,7 +2890,10 @@ def image(A,x=[],y=[],**kwargs):
         templabels.pop(-1)
         y_label = ''
         if len(templabels) == 1:
+            try:
             y = list(A.getaxis(templabels[0]))
+            except:
+                y = r_[0:A.data.shape[A.axn(templabels[0])]]
         while len(templabels)>0:
             y_label += templabels.pop(0)
             if len(templabels)>0:
