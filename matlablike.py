@@ -1118,7 +1118,7 @@ def plot(*args,**kwargs):
                     has_labels = True
         except:
             pass
-            #}}}
+        #}}}
         myy = squeeze(myy.data.copy())
     #}}}
     #{{{ semilog where appropriate
@@ -1583,7 +1583,7 @@ class nddata (object):
                     if v.shape == ():
                         arg[0][i] = None
             if give_None:
-            return dict(zip(self.dimlabels,arg[0]))
+                return dict(zip(self.dimlabels,arg[0]))
             else:
                 #{{{ don't return values for the things that are None
                 mykeys = [self.dimlabels[j] for j in range(0,len(self.dimlabels)) if arg[0][j] is not None]
@@ -1825,7 +1825,7 @@ class nddata (object):
             Rerr = None
         #}}}
         retval.set_error(Rerr)
-            return retval
+        return retval
     def __pow__(self,arg):
         if arg == -1:
             x = self.get_error()
@@ -1861,7 +1861,7 @@ class nddata (object):
         if Berr != None:
             Rerr += (A.data*Berr/(B.data**2))**2
         try:
-        Rerr = sqrt(real(Rerr)) # convert back to stdev
+            Rerr = sqrt(real(Rerr)) # convert back to stdev
         except:
             raise CustomError("Rerr gave an attribute error when you passed",Rerr)
         #print "Rerr dtype",Rerr.dtype
@@ -1869,7 +1869,7 @@ class nddata (object):
             Rerr = None
         #}}}
         retval.set_error(Rerr)
-            return retval
+        return retval
     def __abs__(self):
         return self.runcopy(abs)
     __radd__ = __add__
@@ -2402,7 +2402,7 @@ class nddata (object):
         datacopy = self.copy()
         for j in range(0,len(order)): # do it this way, so that it deals with other dimensions correctly
             try:
-            self[axisname,j] = datacopy[axisname,order[j]]
+                self[axisname,j] = datacopy[axisname,order[j]]
             except:
                 if len(self.axis_coords_error) > len(self.dimlabels):
                     raise ValueError("sort failed because there are more sets of axis errors than there are axes!")
@@ -2740,7 +2740,7 @@ class nddata_hdf5 (nddata):
             myaxiscoordserror = [None]*len(mydimlabels)
             for axisname in datadict['axes'].keys():
                 try:
-                axisnumber = mydimlabels.index(axisname)
+                    axisnumber = mydimlabels.index(axisname)
                 except AttributeError:
                     raise CustomError('mydimlabels is not in the right format!\nit looks like this:\n',mydimlabels,type(mydimlabels))
                 recordarrayofaxis = datadict['axes'][axisname]['data']
@@ -2891,7 +2891,7 @@ def image(A,x=[],y=[],**kwargs):
         y_label = ''
         if len(templabels) == 1:
             try:
-            y = list(A.getaxis(templabels[0]))
+                y = list(A.getaxis(templabels[0]))
             except:
                 y = r_[0:A.data.shape[A.axn(templabels[0])]]
         while len(templabels)>0:
