@@ -216,7 +216,7 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
         alltext += r'\end{tabular}'
         if showpipe:
             final_retval.append(r'\begin{tabular}{'+('|'.join(colheadings))+'}')
-    else:
+        else:
             final_retval.append(r'\begin{tabular}{'+(''.join(colheadings))+'}')
         final_retval.append((' & '.join(recordstrings))+r'\\ \hline\hline'+'\n')
         final_retval.append(alltext)
@@ -279,8 +279,8 @@ def lplot(fname,width=0.33,figure=False,dpi=300,grid=False,alsosave=None,gensvg 
         figwidth = mpwidth
     if showbox:
         print r'''\mbox{\begin{minipage}{%s}'''%mpwidth
-    if alsosave != None:
-        print r'also saved \fn{%s}'%alsosave
+        if alsosave != None:
+            print r'also saved \fn{%s}'%alsosave
     print r'\includegraphics[width=%s]{%s}'%(figwidth,fname.replace(r'auto_figures',r'\autofiguredir'))
     if showbox:
         print '\n\n'+r'\hrulefill'+'\n\n'
