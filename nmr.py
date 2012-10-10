@@ -191,7 +191,10 @@ def show_acqu(vars):
 def load_acqu(filename,whichdim=''):
     filename = dirformat(filename)
     if det_type(filename)[0] == 'bruker':
-        return bruker_load_acqu(filename,whichdim=whichdim)
+        if return_s is not None:
+            return bruker_load_acqu(filename,whichdim=whichdim,return_s = return_s)
+        else:
+            return bruker_load_acqu(filename,whichdim=whichdim)
     elif det_type(filename)[0] == 'prospa':
         if det_type(filename)[1] == 't1_sub':
             filename = dirformat(filename)
@@ -620,8 +623,11 @@ def bruker_load_title(file):
     while emptystring in lines:
         lines.pop(lines.index(emptystring))
     return ''.join(lines)
-def bruker_load_acqu(file,whichdim=''):
-    fp = open(file+'acqu'+whichdim+'s')
+def bruker_load_acqu(file,whichdim='',return_s = True):
+    if return_s:
+        fp = open(file+'acqu'+whichdim+'s')# this is what I am initially doing, and what works with the matched filtering, etc, as is, but it's actually wrong
+    else:
+        fp = open(file+'acqu'+whichdim)# this is actually right, but doesn't work with the matched filtering, etc.
     lines = fp.readlines()
     vars = {}
     number_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *([0-9\-\.]+)')
@@ -707,7 +713,9 @@ def winepr_load_acqu(file):
 #{{{ higher level functions
 #{{{ standard EPR processing
 def standard_epr(dir = None,
-        files = None,
+        files = None,# this is a single string for the file, a
+        #list of files, each of which can optionally be a tuple
+        #with a sample length (to calculate a "concentration")
         normalize_field = False,
         find_maxslope = False,
         offset_spectra = False,
@@ -716,7 +724,7 @@ def standard_epr(dir = None,
         background = None,
         grid = False,
         figure_list = None):
-    if type(files) is str:
+    if type(files) is str or type(files) is tuple:
         files = [files]
     if background is not None:
         if type(background) is list:
@@ -732,84 +740,96 @@ def standard_epr(dir = None,
     if subtract_first:
         firstdata = 2*load_indiv_file(dir+files.pop(0))
     legendtext = list(files)
+    for j in range(0,len(legendtext)):
+        if type(legendtext[j]) is tuple:
+            legendtext[j] = legendtext[j][0]
+    print lsafen("legendtext is",legendtext,"to start with")
     for index,file in enumerate(files):
-       try:
-           data = load_indiv_file(dir+file)
-       except:
-           raise CustomError('Error loading file: type of dir',type(dir),'type of file',type(file),'file=',file)
-       if subtract_first:
-           data -= firstdata
-       field = r'$B_0$'
-       neworder = list(data.dimlabels)
-       data.reorder([neworder.pop(neworder.index(field))]+neworder) # in case this is a saturation experiment
-       data -= data.copy().run_nopop(mean,field)
-       figure_list.next('epr')
-       v = winepr_load_acqu(dir+file)
-       if index == 0:
-            fieldbar = data[field,lambda x: logical_and(x>x.mean(),x<x.mean()+10.)]
-            fieldbar.data[:] = 0.5
-            fieldbar.data[0] = 0.6
-            fieldbar.data[-1] = 0.6
-            fxaxis = fieldbar.getaxis(field)
-       xaxis = data.getaxis(field)
-       centerfield = None
-       if normalize_field:
-           xaxis /= v['MF']
-           if index == 0:
-               fxaxis /= v['MF']
-           newname = r'$B_0/\nu_e$'
-       else:
-           deriv = data.copy()
-           deriv.run_nopop(diff,field)
-           deriv.data[abs(data.data) > abs(data.data).max()/10] = 0 # so it doesn't give a fast slope, non-zero area
-           deriv = abs(deriv)
-           deriv.argmax(field,raw_index = True)
-           centerfield = mean(xaxis[int32(deriv.data)])
-           if find_maxslope:
-               xaxis -= centerfield
-               if index == 0:
-                   fxaxis -= centerfield
-               newname = r'$\Delta B_0$'
-           else:
-               newname = field
-       data.rename(field,newname)
-       if index == 0:
-           fieldbar.rename(field,newname)
-       mask = data.getaxis(newname)
-       mask = mask > mask[int32(len(mask)-len(mask)/20)]
-       snr = abs(data.data).max()/std(data.data[mask])
-       integral = data.copy()
-       integral.data -= integral.data.mean() # baseline correct it
-       integral.integrate(newname)
-       figure_list.next('epr_int')
-       pc = plot_color_counter()
-       plot_color_counter(pc)
-       plot(integral,alpha=0.5,linewidth=0.3)
-       integral.integrate(newname)
-       figure_list.next('epr')
-       if normalize_peak:
-          normalization = abs(data).run_nopop(max,newname)
-          data /= normalization
-       ax = gca()
-       if offset_spectra:
-           myoffset = array(ax.get_ylim()).min()
-       else:
-           myoffset = 0.
-       plot_color_counter(pc)
-       plot(data+myoffset,alpha=0.5,linewidth=0.3,label=file)
-       minval = abs(data.getaxis(newname)-centerfield).argmin()
-       centerpoint = data[newname,minval]
-       #plot_color_counter(pc)
-       #plot(centerfield,centerpoint.data+myoffset,'o',markersize = 5,alpha=0.3)
-       axis('tight')
-       if index == 0:
-           fieldbar *= array(ax.get_ylim()).max()
-       legendtext[index] += '\n'
-       if centerfield != None:
-           legendtext[index] += ', %0.03f $G$'%centerfield
-           gfactor = h*v['MF']*1e9/mu_B/(centerfield*1e-4)
-           legendtext[index] += ', g=%0.03f'%gfactor
-       legendtext[index] += r', SNR %0.2g $\int\int$ %0.3g'%(snr,integral[newname,-1].data[-1])
+        if type(file) is tuple:
+            sample_len = file[1]
+            file = file[0]
+        else:
+            sample_len = None
+        try:
+            data = load_indiv_file(dir+file)
+        except:
+            raise CustomError('Error loading file: type of dir',type(dir),'type of file',type(file),'file=',file)
+        if subtract_first:
+            data -= firstdata
+        field = r'$B_0$'
+        neworder = list(data.dimlabels)
+        data.reorder([neworder.pop(neworder.index(field))]+neworder) # in case this is a saturation experiment
+        data -= data.copy().run_nopop(mean,field)
+        figure_list.next('epr')
+        v = winepr_load_acqu(dir+file)
+        if index == 0:
+             fieldbar = data[field,lambda x: logical_and(x>x.mean(),x<x.mean()+10.)]
+             fieldbar.data[:] = 0.5
+             fieldbar.data[0] = 0.6
+             fieldbar.data[-1] = 0.6
+             fxaxis = fieldbar.getaxis(field)
+        xaxis = data.getaxis(field)
+        centerfield = None
+        if normalize_field:
+            xaxis /= v['MF']
+            if index == 0:
+                fxaxis /= v['MF']
+            newname = r'$B_0/\nu_e$'
+        else:
+            deriv = data.copy()
+            deriv.run_nopop(diff,field)
+            deriv.data[abs(data.data) > abs(data.data).max()/10] = 0 # so it doesn't give a fast slope, non-zero area
+            deriv = abs(deriv)
+            deriv.argmax(field,raw_index = True)
+            centerfield = mean(xaxis[int32(deriv.data)])
+            if find_maxslope:
+                xaxis -= centerfield
+                if index == 0:
+                    fxaxis -= centerfield
+                newname = r'$\Delta B_0$'
+            else:
+                newname = field
+        data.rename(field,newname)
+        if index == 0:
+            fieldbar.rename(field,newname)
+        mask = data.getaxis(newname)
+        mask = mask > mask[int32(len(mask)-len(mask)/20)]
+        snr = abs(data.data).max()/std(data.data[mask])
+        integral = data.copy()
+        integral.data -= integral.data.mean() # baseline correct it
+        integral.integrate(newname)
+        figure_list.next('epr_int')
+        pc = plot_color_counter()
+        plot_color_counter(pc)
+        plot(integral,alpha=0.5,linewidth=0.3)
+        integral.integrate(newname)
+        figure_list.next('epr')
+        if normalize_peak:
+           normalization = abs(data).run_nopop(max,newname)
+           data /= normalization
+        ax = gca()
+        if offset_spectra:
+            myoffset = array(ax.get_ylim()).min()
+        else:
+            myoffset = 0.
+        plot_color_counter(pc)
+        plot(data+myoffset,alpha=0.5,linewidth=0.3,label=file)
+        minval = abs(data.getaxis(newname)-centerfield).argmin()
+        centerpoint = data[newname,minval]
+        #plot_color_counter(pc)
+        #plot(centerfield,centerpoint.data+myoffset,'o',markersize = 5,alpha=0.3)
+        axis('tight')
+        if index == 0:
+            fieldbar *= array(ax.get_ylim()).max()
+        legendtext[index] += '\n'
+        if centerfield != None:
+            legendtext[index] += ', %0.03f $G$'%centerfield
+            gfactor = h*v['MF']*1e9/mu_B/(centerfield*1e-4)
+            legendtext[index] += ', g=%0.03f'%gfactor
+        if sample_len is None:
+            legendtext[index] += r', SNR %0.2g $\int\int$ %0.3g'%(snr,integral[newname,-1].data[-1])
+        else:
+            legendtext[index] += r', SNR %0.2g $\int\int$ %0.3g / cm'%(snr,integral[newname,-1].data[-1]/double(sample_len))
     #xtl = ax.get_xticklabels()
     #at.xaxis.tick_top()
     #map( (lambda x: x.set_visible(False)), xtl)

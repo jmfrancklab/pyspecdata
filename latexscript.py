@@ -147,6 +147,8 @@ else:
                     'PATH':'',
                     'PYTHONDATADIR':os.environ['PYTHONDATADIR']})
     stdoutdata,stderrdata = proc.communicate()
+    if os.name != 'posix':
+        stdoutdata = stdoutdata.replace('\r','')
     #fp_out.write('File has not been run, output:\n\n')
     fp_out.write(stdoutdata)
     #fp_out.write('\n\n$\\Rightarrow$ end of output\n\n')

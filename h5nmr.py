@@ -2,7 +2,11 @@ from fornotebook import *
 from matlablike import *
 from nmr import *
 from nmrfit import *
+from interptau import interptau
 import time
+from numpy.lib.recfunctions import rename_fields
+klow_name = r'k_{low}/k_{low,bulk}'
+ksmax_name = r'k_{\sigma}/k_{\sigma,bulk}'
 #{{{ Classes to load and store stuff to the HDF5 file
 ##{{{ the parent
 class store_integrals:
@@ -450,7 +454,9 @@ def dnp_for_rho(path,
     run_number = double(run_number)
     print '{\\bf\\color{blue}This data is part of series %f:}\n\n'%run_number
     #{{{ test that it pulls t1max correctly
-    t1max = load_acqu(dirformat(dirformat(path)+name)+'1')['CNST'][9]
+    temp = load_acqu(dirformat(dirformat(path)+name)+'1',return_s = False)
+    t1max = temp['CNST'][9]
+    sfo1 = temp['SFO1']
     print '\n\n'
     #}}}
     if t1_powers is not None:
@@ -477,7 +483,6 @@ def dnp_for_rho(path,
         t1expnos = 'auto'
         if clear_nodes:
             delete_datanode(h5file,genexpname(name,expno))
-    print 'DEBUG checkpoint 3: t1expnos=',t1expnos,'\n\n'
     ###{{{ process the kwargs to divvy them up onto the functions they refer to
     fid_args = {'name':name,'path':path,'expno':expno}
     if dbm is not None:
@@ -539,15 +544,13 @@ def dnp_for_rho(path,
     figurelist.append({'print_string':r'\subparagraph{retrieve $T_1$ data}'+'\n\n'})
     integration_args.update(t1kwargs) # copy over the t1 args
     if t1expnos == 'auto':
-        t1expnos = array(r_[emax_in_file.expno[-1]+t1_autovals,304],dtype = 'int') #right now, set to three, but can easily add others later
-        print 'DEBUG checkpoint 3.5: generated t1expnos=',t1expnos,'\n\n'
+        t1expnos = r_[emax_in_file.expno[-1]+t1_autovals,304] #right now, set to three, but can easily add others later
         t1names_forerror = map(lambda x: 'autoval %d'%x,t1_autovals)+['exp 304']
         if clear_nodes:
             for j in t1expnos:
                 delete_datanode(h5file,genexpname(name,j))
     else:
         t1names_forerror = map(lambda x: 'manually entered exp %d'%x,t1expnos)
-    print 'DEBUG checkpoint 4: t1expnos=',t1expnos,'\n\n'
     #{{{ manually enter certain kwargs
     integration_args_save = dict(integration_args)
     integration_args.update({'show_image':show_t1_raw})
@@ -561,7 +564,6 @@ def dnp_for_rho(path,
     if len(t1powers) > 0 and len(t1powers) != len(t1expnos):
         raise CustomError("You didn't pass the same number t1powers (%d) as there are T1's (%d)!"%(len(t1powers),len(t1expnos)))
     auxiliary_args.update(t1_auxiliary_args)
-    print 'DEBUG checkpoint 5: t1expnos=',t1expnos,'\n\n'
     for j,t1expno in enumerate(t1expnos):
         #{{{ should be able to get rid of this line by including with t1 auxiliary args above
         if len(t1powers) > 0:
@@ -618,6 +620,33 @@ def dnp_for_rho(path,
             t1dataset = retrieve_T1series(h5file,name,run_number = run_number,show_result = 'for $T_{1}$',t1max = t1max)
         else:
             t1dataset = retrieve_T1series(h5file,None,chemical,concentration,run_number = run_number,show_result = 'for $T_{1}$',t1max = t1max)
+        print '\n\n'
+        #{{{ store the T1 data with error, for later error propagation
+        if t1dataset is None:
+            t1_w_error = NaN
+        else:
+            t1_at_min_power = t1dataset['power',lambda x: x == x.min()]
+            t1_w_error = t1_at_min_power.copy()
+            if len(t1_w_error.data) > 1:
+                t1_w_error.data = t1_w_error.data.mean()
+                temp = t1_w_error.get_error().mean()
+                t1_w_error.set_error(temp)
+        print 'The $T_1$ dataset looks like this:',lsafen(t1dataset),'and the value at minimum power is',t1_w_error
+        print '\n\n'
+        #}}}
+        #{{{ store the T10 data with error, for later error propagation
+        if t10dataset is None:
+            t10_w_error = nddata([NaN],[1],['power']).set_error([NaN])
+        else:
+            t10_at_min_power = t10dataset['power',lambda x: x == x.min()]
+            t10_w_error = t10_at_min_power.copy()
+            if len(t10_w_error.data) > 1:
+                t10_w_error.data = r_[t10_w_error.data.mean()]
+                temp = t10_w_error.get_error().mean()
+                t10_w_error.set_error(r_[temp])
+        print 'The $T_{1,0}$ dataset looks like this:',lsafen(t10dataset),'and the value at minimum power is',t10_w_error
+        print '\n\n'
+        #}}}
         ###}}}
         ###{{{ calculate the linear function for T_1(p)
         #{{{ Set all the T10 related values
@@ -706,7 +735,7 @@ def dnp_for_rho(path,
         plot(F_nonlinear,'o',label = '$F_{nonlinear}$ points')
         #}}}
         powers_fordiagnose = linspace(0,t1dataset.getaxis('power').max(),100)
-        print '\n\n$T_1(p)$ is',lsafen(t1f(powers_fordiagnose))
+        #print '\n\n$T_1(p)$ is',lsafen(t1f(powers_fordiagnose))
         closely_spaced_F = F_nonlinear_f(powers_fordiagnose)
         plot(F_nonlinear,'-',alpha=0.8,label = '$F_{nonlinear}(p)$')
         plot(F_nonlinear_line,'-',alpha=0.8,label = r'$F_{nonlinear,origfit}(p)$')
@@ -753,7 +782,7 @@ def dnp_for_rho(path,
         save_color_t1 = plot_color_counter()
         plot(1.0/t1dataset,'o', label = '$T_1^{-1}$ / $s^{-1}$')
         plot_color_counter(save_color_t1)
-        plot(powers_forplot,1.0/t1f(powers_forplot).set_error(None),'-', alpha = 0.2)
+        plot(powers_forplot,1.0/t1f(powers_forplot).set_error(None),'-',linewidth = 3, alpha = 0.5)
         #}}}
         if fdata_exists: # if I can calculate the leakage factor
             save_color_t10 = plot_color_counter()
@@ -800,14 +829,15 @@ def dnp_for_rho(path,
             ax = gca()
             text(0.5,0.5,textstring,transform = ax.transAxes,size = 'x-large', horizontalalignment = 'center',color = 'k')
             #}}}
-            #{{{ set the bottom ylim to 0, which is a more sensible plot
-            ax = gca()
-            ylims = array(ax.get_ylim())
-            ylims[ylims.argmin()] = 0.0
-            ax.set_ylim(ylims)
-            #}}}
-            gridandtick(gca())
-            autolegend()
+        #{{{ set the bottom ylim to 0, which is a more sensible plot
+        ax = gca()
+        ylims = array(ax.get_ylim())
+        ylims[ylims.argmin()] = 0.0
+        ax.set_ylim(ylims)
+        #}}}
+        gridandtick(gca())
+        expand_x()
+        autolegend()
         ###}}}
         #{{{ grab and normalize the previously stored list of integrals
         emax_unmod = nddata_hdf5(h5file + '/integrals/' + emax_in_file.integralnode_name)
@@ -1005,6 +1035,34 @@ def dnp_for_rho(path,
                     size = 'x-large',
                     horizontalalignment = 'center',
                     color = color1[j])
+                emax_w_error = nddata(v.output(r'E_{max}'),[1],['val']).set_error(r_[Emaxerr])
+                ksigma_w_error = (1.0-emax_w_error)/t1_w_error/concentration*1.51671e-3
+                krho_w_error = (1.0/t1_w_error - 1.0/t10_w_error)/concentration
+                xi_w_error = ksigma_w_error / krho_w_error
+                if len(xi_w_error.data) > 1:
+                    raise CustomError('length of xi is greater than 1-- what\'s going on!!??')
+                tau = interptau(xi_w_error.data[0],sfo1,simple = True)
+                onethousandthofxi = xi_w_error.data.copy().flatten()[0]*1e-3
+                tau_plusthousandth = interptau(xi_w_error.data[0]+onethousandthofxi,sfo1,simple = True)
+                tau_error = abs((tau_plusthousandth-tau)/onethousandthofxi)*(xi_w_error.get_error().copy().flatten()[0])
+                report_array = make_rec({'$E_{max}$' : emax_w_error.data.copy().flatten()[0],
+                        '$E_{max}$_error' : emax_w_error.get_error().copy().flatten()[0],
+                        '$T_1$' : t1_w_error.data.copy().flatten()[0],
+                        '$T_1$_error' : t1_w_error.get_error().copy().flatten()[0],
+                        '$T_{1,0}$' : t10_w_error.data.copy().flatten()[0],
+                        '$T_{1,0}$_error' : t10_w_error.get_error().copy().flatten()[0],
+                        r'$k_\rho$' : krho_w_error.data.copy().flatten()[0],
+                        r'$k_\rho$_error' : krho_w_error.get_error().copy().flatten()[0],
+                        r'$k_\sigma$' : ksigma_w_error.data.copy().flatten()[0],
+                        r'$k_\sigma$_error' : ksigma_w_error.get_error().copy().flatten()[0],
+                        r'$\xi$' : xi_w_error.data.copy().flatten()[0],
+                        r'$\xi$_error' : xi_w_error.get_error().copy().flatten()[0],
+                        r'$\tau_c$ / ps' : tau/1e-12,
+                        r'$\tau_c$_error / ps' : tau_error/1e-12,
+                        })
+                report_array = reorder_rec(report_array,['$E_{max}$' , '$E_{max}$_error' , '$T_1$' , '$T_1$_error' , '$T_{1,0}$' , '$T_{1,0}$_error' , r'$k_\rho$' , r'$k_\rho$_error' , r'$k_\sigma$' , r'$k_\sigma$_error' , r'$\xi$' , r'$\xi$_error'])
+                figurelist.append({'print_string':r'\subparagraph{Results of uncorrected analysis}'+'\n\n'+lrecordarray(report_array,resizebox = 1.0,return_only=True)})
+                figurelist.append({'print_string':r'\begin{tiny}(calculated as follows:) From above, the $T_1$ is '+lsafen(t1_w_error)+r'I find the \Emax to be '+lsafen(emax_w_error)+r'giving \ksm = '+lsafen(ksigma_w_error)+'and sfo1 is %0.4f'%sfo1+r'\end{tiny}'})
                 #}}}
                 ####{{{ tabulate it
                 h5file_node,compilationroot_node = h5nodebypath(h5file + '/compilations')
@@ -1165,7 +1223,10 @@ def parse_t1_covariance(data):
     covariance = zeros((num_coeff**2,len(data)))
     for j in range(0,len(data)):
         for k in range(0,num_coeff**2):
-            covariance[k,j] = data['covarelement%d'%k][j]
+            try:
+                covariance[k,j] = data['covarelement%d'%k][j]
+            except:
+                raise CustomError("Couldn't find the field I was looking for in",data.dtype.names)
     return covariance.reshape((num_coeff,num_coeff,len(data)))
 ##}}}
 ##{{{ load a series of t1 vs power
@@ -1198,7 +1259,7 @@ def t1vp(h5filename,expnos,dbm,fid_args = {},integration_args = {}, auxiliary_ar
     errorbars = zeros(len(data))
     for j in range(0,len(data)):
         #errorbars[j] = sqrt(1.0/(pinv(covariance[:,:,j])[0,0]))
-        errorbars[j] = sqrt(covariance[:,:,j][0,0])
+        errorbars[j] = sqrt(covariance[:,:,j][2,2])
     powers = data['power'][:]
     data = data['T_1'][:]
     data = nddata(data,[len(data)],['power'],data_error = errorbars,axis_coords = [dbm_to_power(powers)])
@@ -1206,6 +1267,160 @@ def t1vp(h5filename,expnos,dbm,fid_args = {},integration_args = {}, auxiliary_ar
     plot(data,'o')
     lplot('T1vp_%s.pdf'%fid_args['name'])
 ##}}}
+#{{{ compile all the DNP data for a given chemical, etc
+def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_additional_search = '',verbose = False):
+    h5file = tables.openFile(h5file) # open the HDF5 file
+    #{{{ retrieve chemical information
+    search_string = h5inlist('chemical',chemical_list)
+    chemical_data = h5file.root.compilations.chemicals.chemicals.readWhere(search_string)
+    #}}}
+    #{{{ join ksp data onto the chemical information
+    data = h5join((h5file.root.compilations.Emax_curves,'chemical_id'),
+        (chemical_data,'index'),
+        pop_fields = ['experiments'])# the first time, run it verbose, so we can see how this works
+    data = h5join((h5file.root.compilations.ksp_fits,'Emax_curve'),
+        (data,'index'),
+        additional_search = 'fit_type == "%s"'%fit_type)
+    #}}}
+    #{{{ pull the T10 data
+    list_of_interesting_fields = ['chemical','run_number']
+    mask = chemical_data['concentration'] == 0. # to select just the T1,0 samples
+    t10data = decorate_rec( (data[list_of_interesting_fields],'chemical'),
+        (chemical_data[mask],'chemical'))# decorate those interesting fields with the T10 chemical id
+    t10data = rename_fields(t10data,{'index':'chemical_id'})# numpy function to rename the fields
+    list_of_interesting_fields.append('T_1')
+    #{{{ here, I specify only by chemical id, so I can pull the data later
+    if len(t10_additional_search) > 0:
+        temp = ' & '.join(map(lambda x: '('+x+')',['power == -999.',t10_additional_search]))
+    else:
+        temp = 'power == -999.'
+    t10data = h5join((h5file.root.compilations.T1_fits,['chemical_id']),
+        (t10data,['chemical_id']),
+        additional_search = temp,
+        select_fields = list_of_interesting_fields)
+    #}}}
+    # this is where I could go back and find stuff that matches the chemical ID but not the run number
+    t10data = applyto_rec(mean,t10data,['run_number','chemical'])
+    t10data = rename_fields(t10data,{'T_1':'T_{1,0}'})
+    if verbose: lrecordarray(t10data)
+    #}}}
+    #{{{ reorder the data, and specify this is the chemical ID for the spin labeled compound
+    data = data[['run_number','chemical','fit_type','ksmax','chemical_id','concentration']]
+    data = rename_fields(data,{'chemical_id':'SL_chemical_id'})
+    data.sort()
+    #}}}
+    #{{{ add the T10 data onto the data
+    newdata,missing_t10s = decorate_rec((data,['chemical','run_number']),
+        (t10data,['chemical','run_number']),
+        drop_rows = 'return')
+    if missing_t10s is not None:
+        #{{{ alert to, and take care of the missing t10 data
+        obs('\n\n$T_{1,0}$ experiments are missing for the following chemical / run number pairs:\n\n')
+        print r'{\color{red}'
+        lrecordarray(missing_t10s[['chemical','run_number']])
+        t10fields = list(t10data.dtype.names)
+        print '\n\n',r'To rectify this, I make the following assignments','\n\n'
+        missing_t10s = rename_fields(missing_t10s,{'run_number':'DNP_run_number'})
+        missing_t10s = decorate_rec((missing_t10s,'chemical'),
+            (t10data,'chemical'),
+            drop_rows = True)
+        print r'}'
+        missing_t10s = rename_fields(missing_t10s,{'run_number':'T10_run_number'})
+        lrecordarray(missing_t10s,resizebox = True)
+        #{{{ put into the write format and average them
+        print r'Then average for all degenerate entries of chemical and DNP run number:','\n\n'
+        missing_t10s = rename_fields(missing_t10s,{'DNP_run_number':'run_number'})
+        missing_t10s = missing_t10s[t10fields] # go back to fields used in the t10data function, because otherwise I have a string and it freaks out, and also because I need to put them together, below
+        missing_t10s = reorder_rec(missing_t10s,t10fields)# because apparently, the above does not accomplish a reorder
+        applyto_rec(mean,missing_t10s,['chemical','run_number'])
+        lrecordarray(missing_t10s)
+        #}}}
+        #{{{ Finally, add the second-choice T10's in, and retrieve the resulting data
+        try:
+            t10data = r_[t10data,missing_t10s]
+        except:
+            raise CustomError('There is a problem with either t10data=',t10data,'or missing t10s=',missing_t10s)
+        # try again
+        newdata,missing_t10s = decorate_rec((data,['chemical','run_number']),
+            (t10data,['chemical','run_number']),
+            drop_rows = 'return')
+        if missing_t10s is not None:
+            obs('$T_{1,0}$ experiments are STILL missing for the following chemical / run number pairs!!')
+            print r'{\color{red}'
+            lrecordarray(missing_t10s[['chemical','run_number']])
+            print r'}'
+        #}}}
+        #}}}
+        print r"{\color{red} $\Rightarrow$ done substituting $T_{1,0}$'s}",'\n\n'
+    data = newdata
+    #}}}
+    #{{{ Tack on the T1 data.
+    # Here we note that we are only interested in the fields I have right now
+    list_of_interesting_fields = list(data.dtype.names)
+    # and the T_1
+    list_of_interesting_fields.append('T_1')
+    list_of_interesting_fields.remove('SL_chemical_id')
+    if verbose: lrecordarray(data)
+    # rerun!!
+    data = h5join((h5file.root.compilations.T1_fits,['run_number','chemical_id']),
+        (data,['run_number','SL_chemical_id']),
+        additional_search = 'power == -999.',
+        select_fields = list_of_interesting_fields)
+    #}}}
+    h5file.close() # close the HDF5 file, since all the rest is just spreadsheet math
+    if verbose: lrecordarray(data,resizebox = 0.8)
+    if verbose: print r"Now, I use lambda\_rec~\ref{codelabel:lambda_rec} to calculate $k_\rho$, then $k_{low}$:"
+    #{{{ take the mean of the T10 values, so I only get one krho for data_nice
+    nont10fields = list(data.dtype.names)
+    try:
+        temp = nont10fields.index('T_{1,0}')
+    except:
+        raise CustomError('list is',nont10fields)
+    nont10fields.pop(temp)
+    data_nice = applyto_rec(mean,data,nont10fields)
+    #}}}
+    #{{{ calculate krho, then klow; do for both tables, since I get many krho for one and only one for the other
+    data = lambda_rec(data,
+        r'krho',
+        (lambda x,y,C: (1.0/x - 1.0/y)/C),
+        ['T_1','T_{1,0}','concentration'])
+    data_nice = lambda_rec(data_nice,
+        r'krho',
+        (lambda x,y,C: (1.0/x - 1.0/y)/C),
+        ['T_1','T_{1,0}','concentration'])
+    # 5/3rho-7/3sigma
+    data = lambda_rec(data,
+        r'klow',
+        (lambda x,y: 5./3.*x - 7./3.*y),
+        ['krho','ksmax'])
+    data_nice = lambda_rec(data_nice,
+        r'klow',
+        (lambda x,y: 5./3.*x - 7./3.*y),
+        ['krho','ksmax'])
+    data_nice = lambda_rec(data_nice,
+        r'\xi',
+        (lambda x,y: x/y),
+        ['ksmax','krho'])
+    #}}}
+    #{{{ reference against free spin label values, and give it nicer names
+    data_nice = data_nice[['chemical','run_number','ksmax','klow',r'\xi']]
+    data_nice = reorder_rec(data_nice,['chemical','run_number','ksmax','klow',r'\xi'])
+    data_nice = lambda_rec(data_nice,
+        r'ksmax',
+        (lambda x: x/116.),
+        ['ksmax'])
+    data_nice = lambda_rec(data_nice,
+        r'klow',
+        (lambda x: x/318.),
+        ['klow'])
+    #{{{ use clumsier but nicer names for my table
+    data_nice = rename_fields(data_nice,{'klow':klow_name,
+                                'ksmax':ksmax_name})
+    data_nice.sort()
+    #}}}
+    #}}}
+    return data,data_nice
+#}}}
 ##{{{ retrieve a series of T1 measurements from HDF5
 def retrieve_T1series(h5filename,name,*cheminfo,**kwargs):
     'cheminfo -- either file name, or empty to use name'
@@ -1264,7 +1479,7 @@ def retrieve_T1series(h5filename,name,*cheminfo,**kwargs):
         else:
             print r'{\large is OK}'
     if verbose: print '\n\n',lsafe('matching indeces:',data['index']),'\n\n'
-    myerrors = sqrt(parse_t1_covariance(data)[0,0,:])
+    myerrors = sqrt(parse_t1_covariance(data)[2,2,:])# the T1 is the third thing, not the first!!
     if indirect_dim == 'power':
         powers = data[indirect_dim][:]
         powers = dbm_to_power(powers)

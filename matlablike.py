@@ -73,6 +73,95 @@ def showtype(x):
 def emptyfunction():
     pass
 #{{{ structured array helper functions
+def make_bar_graph_indeces(mystructarray,list_of_text_fields,
+        recursion_depth = 0,
+        verbose = False,
+        spacing = 0.1):
+    r"This is a recursive function that is used as part of textlabel_bargraph; it does NOT work without the sorting given at the beginning of that function"
+    #{{{ if there are still text fields left, then break down the array further, otherwise, just return the indeces for this subarray
+    if len(list_of_text_fields) > 0:
+        unique_values = unique(mystructarray[list_of_text_fields[0]])# the return_index argument doesn't do what it's supposed to all the time, so I have to manually find the start indeces, as given in the following line
+        start_indeces = [nonzero(mystructarray[list_of_text_fields[0]] == val)[0][0] for val in unique_values]
+        # find the structured array for the unique value
+        index_values = []
+        label_values = []
+        start_indeces = r_[start_indeces,len(mystructarray)] # I add this so I can do the next step
+        if verbose: print 'recursion depth is',recursion_depth,'and I am analyzing',list_of_text_fields[0],': ',
+        if verbose: print 'I found these unique values:',unique_values,'at these start indeces:',start_indeces[:-1]
+        for k in range(0,len(start_indeces)-1):
+            if verbose: print 'recursion depth is',recursion_depth,'and I am analyzing',list_of_text_fields[0],': ',
+            if verbose: print 'trying to extract unique value',unique_values[k],'using the range',start_indeces[k],start_indeces[k+1]
+            if verbose: print 'which has this data'
+            indiv_struct_array = mystructarray[start_indeces[k]:start_indeces[k+1]]
+            if verbose: print lsafen(indiv_struct_array)
+            these_index_values,these_labels = make_bar_graph_indeces(indiv_struct_array,list_of_text_fields[1:],recursion_depth = recursion_depth+1,verbose = verbose)
+            index_values.append(these_index_values)
+            label_values.append([str(unique_values[k])+','+j for j in these_labels])
+        #{{{ scale the result of each call down to the equal size (regardless of number of elements), shift by the position in this array, and return
+        if verbose: print 'recursion depth is',recursion_depth,'and I just COMPLETED THE LOOP, which gives a list of index values like this',index_values
+        max_indeces = max(array(map(len,index_values),dtype='double'))# the maximum width of the array inside
+        index_values = map(lambda x: x+(max_indeces-len(x))/2.0,index_values)# if the bar is less than max indeces, shift it over, so it's still in the center
+        if verbose: print 'recursion depth is',recursion_depth,'and I centered each set like this',index_values
+        index_values = map(lambda x: x/max_indeces*(1-spacing)+(1-spacing)/2,index_values)# scale down, so the width from left edge of bar to right edge of largest bar runs 0--> 1
+        if verbose: print 'recursion depth is',recursion_depth,'and I scaled down so each runs zero to one*(1-spacing) (centered) like this',index_values
+        # this adds an index value, and also collapses down to a single dimension list
+        retval_indeces = [x+num for num,val in enumerate(index_values) for x in val]
+        # now collapse labels down to a single dimension
+        retval_labels = [k for j in label_values for k in j]
+        if verbose: print 'recursion depth is',recursion_depth,'and I am passing up indeces',retval_indeces,'and labels',retval_labels
+        return retval_indeces,retval_labels
+        #}}}
+    else:
+        if verbose: print 'recursion depth is',recursion_depth,
+        N = len(mystructarray)
+        if verbose: print 'hit innermost (no text labels left) and passing up a list of indeces that looks like this:',r_[0:N]
+        return r_[0:N],['']*N
+    #}}}
+def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,verbose = False,ax = None,tickfontsize = 8):
+    if ax is None:
+        thisfig = gcf()
+        ax = thisfig.add_axes([0.2,0.5,0.8,0.5])
+        try:
+            ax.tick_params(axis = 'both',which = 'major',labelsize = tickfontsize)
+            ax.tick_params(axis = 'both',which = 'minor',labelsize = tickfontsize)
+        except:
+            print 'Warning, in this version I can\'t set the tick params method for the axis'
+    #{{{ perform the necessary sorting!
+    mystructarray = mystructarray.copy()
+    list_of_text_fields = [str(j[0]) for j in mystructarray.dtype.descr if j[1][0:2] == '|S']
+    mystructarray = mystructarray[list_of_text_fields + [x[0]
+        for x in mystructarray.dtype.descr
+        if x[0] not in list_of_text_fields]]
+    mystructarray.sort()
+    if verbose: print 'test --> now, it has this form:',lsafen(mystructarray)
+    #}}}
+    if othersort is not None:
+        list_of_text_fields.append(othersort)
+    #list_of_text_fields = ['chemical','run_number']
+    if verbose: print 'list of text fields is',lsafen(list_of_text_fields)
+    indeces,labels = make_bar_graph_indeces(mystructarray,list_of_text_fields,verbose = verbose,spacing = spacing)
+    temp = zip(indeces,labels)
+    if verbose: print '(indeces,labels) (len %d):'%len(temp),lsafen(temp)
+    if verbose: print 'I get these labels (len %d):'%len(labels),labels,'for the data (len %d)'%len(mystructarray),lsafen(mystructarray)
+    indeces = array(indeces)
+    indiv_width = min(diff(indeces))*(1-spacing)
+    remaining_fields = list(set(mystructarray.dtype.names)^set(list_of_text_fields))
+    if verbose: print 'The list of remaining (i.e. non-text) fields is',lsafen(remaining_fields)
+    colors = ['b','r','g']
+    rects = []
+    for j,thisfield in enumerate(remaining_fields):
+        field_bar_width = indiv_width/len(remaining_fields)
+        try:
+            rects.append(ax.bar(indeces+j*field_bar_width,
+                    mystructarray[thisfield],
+                    field_bar_width,color = colors[j]))
+        except:
+            raise CustomError('Problem with bar graph: there are %d indeces, but %d pieces of data'%(len(indeces),len(mystructarray[thisfield])),'indeces:',indeces,'data',mystructarray[thisfield])
+    ax.set_xticks(indeces+indiv_width/2)
+    ax.set_xticklabels(labels)
+    ax.legend([j[0] for j in rects],
+            ['$%s$'%j for j in remaining_fields],loc = 'best')
+    return
 def lookup_rec(A,B,indexpair):
     r'''look up information about A in table B (i.e. chemical by index, etc)
     indexpair is either the name of the index
@@ -158,49 +247,95 @@ def lambda_rec(myarray,myname,myfunction,myargs):
     return rec.fromarrays([myarray[x] for x in starting_names if x != eliminate]+[newrow]+[myarray[x] for x in ending_names if x != eliminate],dtype = new_dtype)
 def join_rec((A,a_ind),(B,b_ind)):
     raise RuntimeError('You should now use decorate_rec!!')
-def decorate_rec((B,b_ind),(C,c_ind),drop_fields = False):
-    r'''Decorate the rows in B with information in C --> if names overlap, keep the ones in B
-    c_ind and b_ind can be either a single key, or a list of keys'''
+def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
+    r'''Decorate the rows in A with information in B --> if names overlap,
+    keep the ones in A
+    b_ind and a_ind can be either a single key, or a list of keys;
+    if more than one element in B matches that in A, include both options!!'''
+    #A = A.copy() # because I play with it later
+    dropped_rows = None
     # first find the list of indeces that give us the data we want
-    if (type(c_ind) is str) and (type(b_ind) is str):
-        c_ind = [c_ind]
+    #{{{ process the arguments
+    if (type(b_ind) is str) and (type(a_ind) is str):
         b_ind = [b_ind]
-    if ((type(c_ind) is list) and (type(b_ind) is list)) and (len(c_ind) == len(b_ind)):
+        a_ind = [a_ind]
+    if ((type(b_ind) is list) and (type(a_ind) is list)) and (len(b_ind) == len(a_ind)):
         pass
     else:
-        raise ValueError('If you call a list for c_ind and/or b_ind, they must match in length!!!')
-    if any([x not in C.dtype.names for x in c_ind]):
-        raise ValueError(repr(c_ind)+' not in '+repr(C.dtype.names)+'!!!')
+        raise ValueError('If you call a list for b_ind and/or a_ind, they must match in length!!!')
     if any([x not in B.dtype.names for x in b_ind]):
-        raise ValueError(repr(b_ind)+' not in '+repr(C.dtype.names)+'!!!')
-    C_reduced = C[c_ind] # a version of C reduced to only include the keys
-    B_reduced = B[b_ind] # same for B
-    # now, I need to generate a mapping from the c_ind to b_ind
-    field_mapping = dict(zip(c_ind,b_ind))
-    C_reduced.dtype.names = tuple([field_mapping[x] for x in C_reduced.dtype.names])
+        raise ValueError(repr(b_ind)+' not in '+repr(B.dtype.names)+'!!!')
+    if any([x not in A.dtype.names for x in a_ind]):
+        raise ValueError(repr(a_ind)+' not in '+repr(B.dtype.names)+'!!!')
+    #}}}
+    B_reduced = B[b_ind] # a version of B reduced to only include the keys
+    B_reduced = reorder_rec(B_reduced,b_ind)# again, because it doesn't do this just based on the indexing
+    A_reduced = A[a_ind] # same for A
+    A_reduced = reorder_rec(A_reduced,a_ind)# again, because it doesn't do this just based on the indexing
+    # now, I need to generate a mapping from the b_ind to a_ind
+    field_mapping = dict(zip(b_ind,a_ind))
     # now I change the names so they match and I can compare them
-    # now find the one index of C that matches each value of B
-    list_of_matching = [where(C_reduced == j)[0] for j in B_reduced]
+    B_reduced.dtype.names = tuple([field_mapping[x] for x in B_reduced.dtype.names])
+    #{{{ now find the list of indeces for B that match each value of A
+    old_B_reduced_names,old_B_reduced_types = tuple(zip(*tuple(B_reduced.dtype.descr)))
+    B_reduced.dtype = dtype(zip(A_reduced.dtype.names,old_B_reduced_types))
+    if A_reduced.dtype != B_reduced.dtype:
+        B_reduced.dtype = dtype(zip(old_B_reduced_names,old_B_reduced_types))
+        raise CustomError('The datatype of A_reduced=',A_reduced.dtype,'and B_reduced=',B_reduced.dtype,'are not the same, which is going to create problems!')
+    try:
+        list_of_matching = [nonzero(B_reduced == j)[0] for j in A_reduced]
+    except:
+        raise CustomError('When trying to decorate, A_reduced=',A_reduced,'with B_reduced=',B_reduced,'one or more of the following is an empty tuple, which is wrong!:',[nonzero(B_reduced == j) for j in A_reduced])
+    if verbose: print "(decorate\\_rec):: original list of matching",list_of_matching
     length_of_matching = array([len(j) for j in list_of_matching])
+    if verbose: print "(decorate\\_rec):: length of matching is",length_of_matching
     if any(length_of_matching == 0):
-        if drop_fields:
-            B = B[length_of_matching != 0]
-            list_of_matching = [j[0] for j in list_of_matching if len(j) != 0]
-            dropped_fields = B_reduced[length_of_matching == 0]
-            print r'{\color{red}Warning! decorate\_rec dropped fields in the first argument',lsafen(repr(zip(B_reduced.dtype.names * len(dropped_fields),dropped_fields.tolist()))),r'}'
+        if drop_rows:
+            if drop_rows == 'return':
+                dropped_rows = A[length_of_matching == 0].copy()
+            else:
+                dropped_rows = A_reduced[length_of_matching == 0]
+                print r'{\color{red}Warning! decorate\_rec dropped fields in the first argument',lsafen(repr(zip(A_reduced.dtype.names * len(dropped_rows),dropped_rows.tolist()))),r'}'
+            #{{{ now, remove all trace of the dropped fields
+            A = A[length_of_matching != 0]
+            list_of_matching = [j for j in list_of_matching if len(j)>0]
+            length_of_matching = [len(j) for j in list_of_matching]
+            #}}}
         else:
-            raise CustomError('There is no data in the second argument that has',c_ind,'fields to match the',b_ind,'fields of the first argument for the following records:',B_reduced[length_of_matching == 0],'if this is correct, you can set the drop_fields = True keyword argument to drop these fields')
-
-    else:
-        list_of_matching = [j[0] for j in list_of_matching]
+            raise CustomError('There is no data in the second argument that has',b_ind,'fields to match the',a_ind,'fields of the first argument for the following records:',A_reduced[length_of_matching == 0],'if this is correct, you can set the drop_rows = True keyword argument to drop these fields')
+    # now, do a neat trick of stackoverflow to collapse a nested list
+    # this gives just the indeces in B that match the values of A
+    list_of_matching = [j for i in list_of_matching for j in i]
+    #}}}
+    if verbose: print "(decorate\\_rec):: list of matching is",list_of_matching
     # now grab the data for these rows
-    add_data = C[list_of_matching]
-    # finally, smash the two sets of data together
-    new_dtypes = [j for j in C.dtype.descr if j[0] not in B.dtype.names]
-    retval = newcol_rec(B,new_dtypes)
+    add_data = B[list_of_matching]
+    #{{{ finally, smash the two sets of data together
+    #{{{ Now, I need to replicate the rows that have multiple matchesjk
+    if any(length_of_matching > 1):
+        index_replication_vector = [k for j in range(0,len(length_of_matching))
+                for k in [j]*length_of_matching[j]]
+        retval = A[index_replication_vector]
+    else:
+        retval = A.copy()
+    #}}}
+    #{{{ add the new fields
+    new_dtypes = [j for j in B.dtype.descr if j[0] not in A.dtype.names]
+    if verbose: print "(decorate\\_rec):: new dtypes:",repr(new_dtypes)
+    try:
+        retval = newcol_rec(retval,new_dtypes)
+    except:
+        raise CustomError("Problem trying to add new columns with the dtypes",new_dtypes)
+    #}}}
+    if verbose: print "(decorate\\_rec):: add data:",repr(add_data)
     for name in dtype(new_dtypes).names:
+        if verbose: print "(decorate\\_rec):: trying to add data for",name,':',add_data[name][:]
         retval[name][:] = add_data[name][:]
-    return retval
+    #}}}
+    if drop_rows == 'return':
+        return retval,dropped_rows
+    else:
+        return retval
 def newcol_rec(A,new_dtypes):
     r'''add new, empty (i.e. random numbers) fields to A, as given by new_dtypes
     --> note that there are deeply nested numpy functions to do this, but the options are confusing, and I think the way these work is efficient'''
@@ -215,6 +350,42 @@ def newcol_rec(A,new_dtypes):
     for name in A.dtype.names:
         retval[name][:] = A[name][:]
     return retval
+def applyto_rec(myfunc,myarray,mylist,verbose = False):
+    r'apply myfunc to myarray with the intention of collapsing it to a smaller number of values'
+    if type(mylist) is not list and type(mylist) is str:
+        mylist = [mylist]
+    combined = []
+    #{{{ first, find stuff that matches the first index
+    j = 0
+    while len(myarray) > 0:
+        thisitem = myarray[0] # always grab the first row of what's left
+        if j == 0:
+            newrow = thisitem.reshape(1)
+        newrow = newrow.copy()
+        #{{{ make a mask for all items that are identified as the same data
+        # and copy the identical data to newrow
+        mask = myarray[mylist[0]] == thisitem[mylist[0]]
+        newrow[mylist[0]] = thisitem[mylist[0]]
+        for k in range(1,len(mylist)):
+            mask &= myarray[mylist[k]] == thisitem[mylist[k]]
+            newrow[mylist[k]] = thisitem[mylist[k]]
+        #}}}
+        if verbose: print lsafen('(applyto rec): for row %d, I select these:'%j)
+        myarray_subset = myarray[mask]
+        if verbose: print lsafen('(applyto rec): ',repr(myarray_subset))
+        other_fields = set(mylist)^set(thisitem.dtype.names)
+        if verbose: print lsafen('(applyto rec): other fields are:',other_fields)
+        for thisfield in list(other_fields):
+            newrow[thisfield] = myfunc(myarray_subset[thisfield])
+        if verbose: print lsafen("(applyto rec): for row %d, I get this as a result:"%j,newrow)
+        combined.append(newrow) # add this row to the list
+        myarray = myarray[~mask] # mask out everything I have used from the original matrix
+        if verbose: print lsafen("(applyto rec): the array is now",repr(myarray))
+        j += 1
+    #}}}
+    combined = concatenate(combined)
+    if verbose: print lsafen("(applyto rec): final result",repr(combined),"has length",len(combined))
+    return combined
 def make_rec(*args,**kwargs):
     r'input,names or a single argument, which is a dictionary\nstrlen = 100 gives length of the strings (which need to be specified in record arrays)\nyou can also specify (especially useful with the dictionary format) the list order = [str1,str2,...] which orders the output records with the field containing str1 first, then the field containing str2, then any remaining fields'
     strlen = 100
@@ -336,18 +507,27 @@ def lsafen(*string,**kwargs):
     return lsafe(*tuple(string),**kwargs)
 def lsafe(*string,**kwargs):
     "Output properly escaped for latex"
+    if len(string) > 1:
+        lsafewkargs = lambda x: lsafe(x,**kwargs)
+        return ' '.join(list(map(lsafewkargs,string)))
+    else:
+        string = string[0]
     #{{{ kwargs
     spaces = False
     if 'spaces' in kwargs.keys():
         spaces = kwargs.pop('spaces')
-    #}}}
-    if len(string) > 1:
-        return ' '.join(list(map(lsafe,string)))
+    if 'wrap' in kwargs.keys():
+        wrap = kwargs.pop('wrap')
     else:
-        string = string[0]
+        wrap = None
+    #}}}
     if type(string) is not str:
         string = repr(string)
-    string = string.replace('\\','\\\\')
+    if wrap is True:
+        wrap = 60
+    if wrap is not None:
+        string = '\n'.join(textwrap.wrap(string,wrap))
+    string = string.replace('\\','\\textbackslash ')
     if spaces:
         string = string.replace(' ','\\ ')
     string = string.replace('\n\t\t','\n\n\\quad\\quad ')
@@ -355,14 +535,18 @@ def lsafe(*string,**kwargs):
     string = string.replace('_',r'\_')
     string = string.replace('{',r'\{')
     string = string.replace('}',r'\}')
+    string = string.replace('$$',r'ACTUALDOUBLEDOLLAR')
     string = string.replace(']',r'$]$')
     string = string.replace('[',r'$[$')
     string = string.replace('<',r'$<$')
     string = string.replace('>',r'$>$')
+    string = string.replace('$$',r'')
+    string = string.replace('ACTUALDOUBLEDOLLAR',r'$$')
     string = string.replace('^',r'\^')
     string = string.replace('#',r'\#')
     string = string.replace('%',r'\%')
     string = string.replace('&',r'\&')
+    string = string.replace('|',r'$|$')
     return string
 #{{{ errors
 class CustomError(Exception):
@@ -375,7 +559,7 @@ class CustomError(Exception):
             retval = str(value)
         retval = map(str,value)
         retval = ' '.join(retval)
-        retval = '\n'+'\n'.join(textwrap.wrap(retval,45,replace_whitespace = False))
+        retval = '\n'+'\n'.join(textwrap.wrap(retval,90,replace_whitespace = False))
         if traceback.format_exc() != 'None':
             retval += '\n\nOriginal Traceback:\n'+''.join(['V']*40)+'\n'+traceback.format_exc() + '\n' + ''.join(['^']*40) + '\n'
         Exception.__init__(self,retval)
@@ -634,6 +818,7 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
             #}}}
     return h5file,currentnode
 def h5attachattributes(node,listofattributes,myvalues):
+    print "DEBUG 5: node passed to h5attachattributes",node
     if node is None:
         raise CustomError('Problem!, node passed to h5attachattributes: ',node,'is None!')
     h5file = node._v_file
@@ -653,6 +838,7 @@ def h5attachattributes(node,listofattributes,myvalues):
             dictnode = h5child(node,
                     thisattr,
                     create = True)
+            print "DEBUG: trying to create dictnode",dictnode
             h5attachattributes(dictnode,
                     thisval.keys(),
                     thisval.values())
@@ -666,37 +852,58 @@ def h5attachattributes(node,listofattributes,myvalues):
     listofattributes[:] = listout # pointer
 def h5inlist(columnname,mylist):
     'returns rows where the column named columnname is in the value of mylist'
-    return '('+'|'.join(map(lambda x: "(%s == %d)"%(columnname,x),mylist))+')'
+    if type(mylist) is not list:
+        raise TypeError("the second argument to h5inlist must be a list!!!")
+    if any([type(x) in [double,float64] for x in mylist]):
+        if all([type(x) in [double,float64,int,int32,int64] for x in mylist]):
+            return '('+'|'.join(map(lambda x: "(%s == %g)"%(columnname,x),mylist))+')'
+    elif all([type(x) in [int,int32] for x in mylist]):
+        return '('+'|'.join(map(lambda x: "(%s == %g)"%(columnname,x),mylist))+')'
+    elif all([type(x) is str for x in mylist]):
+        return '('+'|'.join(map(lambda x: "(%s == '%s')"%(columnname,x),mylist))+')'
+    else:
+        raise TypeError("I can't figure out what to do with this list --> I know what to do with a list of numbers or a list of strings, but not this.")
 def h5join(firsttuple,secondtuple,
     additional_search = '',
     select_fields = None,
     pop_fields = None,
-    show_orig_indeces = True,
     verbose = False):
+    #{{{ process the first argument as the hdf5 table and indeces, and process the second one as the structured array to join onto
     if not ((type(firsttuple) is tuple) and (type(secondtuple) is tuple)):
         raise ValueError('both the first and second arguments must be tuples!')
     if not ((len(firsttuple) == 2) and (len(secondtuple) == 2)):
         raise ValueError('The length of the first and second arguments must be two!')
     tablenode = firsttuple[0]
     tableindeces = firsttuple[1]
-    if tableindeces is not list:
+    if verbose: print 'h5join tableindeces looks like this:',tableindeces
+    if type(tableindeces) is not list:
         tableindeces = [tableindeces]
+    if verbose: print 'h5join tableindeces looks like this:',tableindeces
     mystructarray = secondtuple[0].copy()
     mystructarrayindeces = secondtuple[1]
-    if mystructarrayindeces is not list:
+    if type(mystructarrayindeces) is not list:
         mystructarrayindeces = [mystructarrayindeces]
+    #}}}
     #{{{ generate a search string to match potentially more than one key
     search_string = []
     if len(tableindeces) != len(mystructarrayindeces):
         raise ValueError('You must pass either a string or a list for the second element of each tuple!\nIf you pass a list, they must be of the same length, since the field names need to line up!')
     # this can't use h5inlist, because the and needs to be on the inside
-    # first, I need to generate the sets of criteria for each field
+    #{{{ this loop creates a list of lists, where the inner lists are a set of conditions that need to be satisfied
+    # this is actually not causing  any trouble right now, but needs to be fixed, because of the way that it's doing the type conversion
     for thistableindex,thisstructarrayindex in zip(tableindeces,mystructarrayindeces):
-        search_string.append(["(%s == %d)"%(thistableindex,x) for x in mystructarray[thisstructarrayindex]])
-    # then, if there is more than one 'and' them together, so both fields much matc
-    search_string = [' & '.join(x) for x in zip(*tuple(search_string))]
-    # then slam the whole thing together with or
-    search_string = '('+'|'.join(search_string)+')'
+        if thisstructarrayindex not in mystructarray.dtype.names:
+            raise ValueError(repr(thisstructarrayindex)+" is not in "+repr(mystructarray.dtype.names))
+        if type(mystructarray[thisstructarrayindex][0]) in [str,str_]:
+            search_string.append(["(%s == '%s')"%(thistableindex,x) for x in mystructarray[thisstructarrayindex]])
+        elif type(mystructarray[thisstructarrayindex][0]) in [int,double,float,float64,float32,int32,int64]:
+            search_string.append(["(%s == %s)"%(thistableindex,str(x)) for x in mystructarray[thisstructarrayindex]])
+            #print 'a g mapping for',[x for x in mystructarray[thisstructarrayindex]],'gives',search_string[-1],'\n\n'
+        else:
+            raise TypeError("I don't know what to do with a structured array that has a row of type"+repr(type(mystructarray[thisstructarrayindex][0])))
+    #}}}
+    search_string = [' & '.join(x) for x in zip(*tuple(search_string))] # this "and"s together the inner lists, since all conditions must be matched
+    search_string = '('+'|'.join(search_string)+')' # then, it "or"s the outer lists, since I want to collect data for all rows of the table
     #}}}
     if len(additional_search) > 0:
         additional_search = " & (%s)"%additional_search
@@ -705,13 +912,16 @@ def h5join(firsttuple,secondtuple,
     retval = tablenode.readWhere(search_string)
     #{{{ then join the data together
     # here I'm debugging the join function, again, and again, and agin
-    retval = decorate_rec((retval,tableindeces),(mystructarray,mystructarrayindeces))
+    try:
+        retval = decorate_rec((retval,tableindeces),(mystructarray,mystructarrayindeces)) # this must be the problem, since the above looks fine
+    except:
+        raise CustomError('Some problems trying to decorate the table',retval,'of dtype',retval.dtype,'with the structured array',mystructarray,'of dtype',mystructarray.dtype)
     if pop_fields is not None:
         if select_fields is not None:
             raise ValueError("It doesn't make sense to specify pop_fields and select_fields at the same time!!")
         select_fields = list(set(retval.dtype.names) ^ set(pop_fields))
     if select_fields is not None:
-        if show_orig_indeces: print '\n\noriginal indeces',lsafen(retval.dtype.names)
+        if verbose: print '\n\nh5join original indeces',lsafen(retval.dtype.names)
         try:
             retval = retval[select_fields]
         except ValueError:
@@ -1575,9 +1785,9 @@ class nddata (object):
                 return dict(zip(self.dimlabels,
                     [None]*len(self.dimlabels)))
             if len(arg[0]) != len(self.dimlabels):
-                #raise ValueError("When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is"+repr(self.dimlabels)+"and you passed"+repr(arg))
                 print r"{\color{red}WARNING! mkd error (John will fix this later):}"
                 print "When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is"+repr(self.dimlabels)+"and you passed"+repr(arg)+'\n\n'
+                raise ValueError("When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is"+repr(self.dimlabels)+"and you passed"+repr(arg))
             for i,v in enumerate(arg[0]):
                 if type(v) == ndarray:
                     if v.shape == ():
@@ -1636,6 +1846,8 @@ class nddata (object):
         '''set the errors\neither set_error('axisname',error_for_axis) or set_error(error_for_data)'''
         if (len(args) is 1) and (type(args[0]) is ndarray):
             self.data_error = reshape(args[0],shape(self.data))
+        elif (len(args) is 1) and (type(args[0]) is list):
+            self.data_error = reshape(array(args[0]),shape(self.data))
         elif (len(args) is 2) and (type(args[0]) is str) and (type(args[1]) is ndarray):
             self.axis_coords_error[self.axn(args[0])] = args[1]
         elif (len(args) is 1) and args[0] is None:
@@ -1978,9 +2190,7 @@ class nddata (object):
                 raise
             self.data = sum(self.data,
                     axis=thisindex)
-            self.dimlabels.pop(thisindex)
-            if self.axis_coords!=[]:
-                self.axis_coords.pop(thisindex)
+            self._pop_axis_info(thisindex)
         return self
     def sum_nopop(self,axes):
         if (type(axes) is str):
@@ -2064,9 +2274,7 @@ class nddata (object):
             else:
                 self.data = self.axis_coords[thisindex][argmax(self.data,
                     axis=thisindex)]
-            self.dimlabels.pop(thisindex)
-            if self.axis_coords!=[]:
-                self.axis_coords.pop(thisindex)
+            self._pop_axis_info(thisindex)
         return self
     def argmin(self,axes,raw_index = False):
         r'find the min along a particular axis, and get rid of that axis, replacing it with the index number of the min value'
@@ -2085,9 +2293,7 @@ class nddata (object):
             else:
                 self.data = self.axis_coords[thisindex][argmin(self.data,
                     axis=thisindex)]
-            self.dimlabels.pop(thisindex)
-            if self.axis_coords!=[]:
-                self.axis_coords.pop(thisindex)
+            self._pop_axis_info(thisindex)
         return self
     def mean_all_but(self,listofdims):
         'take the mean over all dimensions not in the list'
@@ -2095,7 +2301,8 @@ class nddata (object):
             if not (dimname in listofdims):
                 self.mean(dimname)
         return self
-    def mean(self,axes):
+    def mean(self,axes,return_error = False):
+        r'Take the mean and set the error to the standard deviation'
         if (type(axes) is str):
             axes = [axes]
         for j in range(0,len(axes)):
@@ -2112,31 +2319,39 @@ class nddata (object):
                             axis=thisindex)/(this_axis_length**2))
                 except:
                     raise CustomError('shape of data',shape(self.data),'shape of data error',shape(self.data_error))
+            if return_error: # since I think this is causing an error
+                thiserror = std(self.data,
+                        axis=thisindex)
+                if isscalar(thiserror):
+                    thiserror = r_[thiserror]
+                self.set_error(thiserror) # set the error to the standard deviation
             self.data = mean(self.data,
                     axis=thisindex)
-            self.dimlabels.pop(thisindex)
-            if self.axis_coords!=[]:
-                self.axis_coords.pop(thisindex)
+            self._pop_axis_info(thisindex)
         return self
     def mean_nopop(self,axis):
         self = self.run_nopop(mean,axis=axis)
         return self
     #}}}
     #{{{ running functions and popping dimensions
+    def _pop_axis_info(self,thisindex):
+        r'pop axis by index'
+        self.dimlabels.pop(thisindex)
+        if self.axis_coords!=[]:
+            self.axis_coords.pop(thisindex)
+            try:
+                self.axis_coords_error.pop(thisindex)
+            except:
+                raise CustomError('trying to pop',thisindex,'from',self.axis_coords_error)
+        return self
     def popdim(self,dimname):
-        thisaxis = self.axn(dimname)
+        thisindex = self.axn(dimname)
         thisshape = list(self.data.shape)
-        if thisshape[thisaxis]!=1:
+        if thisshape[thisindex]!=1:
             raise CustomError("trying to pop a dim that's not length 1")
-        thisshape.pop(thisaxis)
+        thisshape.pop(thisindex)
         self.data = self.data.reshape(thisshape)
-        self.dimlabels.pop(thisaxis)
-        self.axis_coords.pop(thisaxis)
-        try:
-            self.axis_coords_error.pop(thisaxis)
-        except:
-            raise CustomError('trying to pop',thisaxis,'from',self.axis_coords_error)
-        #self.axis_coords_units.pop(thisaxis)
+        self._pop_axis_info(thisindex)
         return self
     def runcopy(self,*args):
         newdata = self.copy()
@@ -2144,11 +2359,9 @@ class nddata (object):
         func = self._wrapaxisfuncs(func)
         if len(args)>1:
             axis = args[1]
-            thisaxis = newdata.dimlabels.index(axis)
-            newdata.data = func(newdata.data,axis=thisaxis)
-            newdata.dimlabels.pop(thisaxis)
-            if newdata.axis_coords!=[]:
-                newdata.axis_coords.pop(thisaxis)
+            thisindex = newdata.dimlabels.index(axis)
+            newdata.data = func(newdata.data,axis=thisindex)
+            newdata._pop_axis_info(thisindex)
         else:
             newdata.data = func(newdata.data)
         return newdata
@@ -2157,11 +2370,9 @@ class nddata (object):
         func = self._wrapaxisfuncs(func)
         if len(args)>1:
             axis = args[1]
-            thisaxis = self.dimlabels.index(axis)
-            self.data = func(self.data,axis=thisaxis)
-            self.dimlabels.pop(thisaxis)
-            if self.axis_coords!=[]:
-                self.axis_coords.pop(thisaxis)
+            thisindex = self.dimlabels.index(axis)
+            self.data = func(self.data,axis=thisindex)
+            self._pop_axis_info(thisindex)
         else:
             self.data = func(self.data)
         return self
@@ -2396,16 +2607,16 @@ class nddata (object):
                     except:
                         raise CustomError("listofaxes (",len(listofaxes),") isn't same length as ",listofstrings)
         return self
+    def check_axis_coords_errors(self):
+        if len(self.axis_coords_error) > len(self.dimlabels):
+            raise ValueError("this failed because there are more sets of axis errors than there are axes!\nlen(axis_coords_error) = %s\naxes = %s"%(repr(len(self.axis_coords_error)),repr(self.dimlabels)))
     def sort(self,axisname):
         whichaxis = self.dimlabels.index(axisname)
         order = argsort(self.axis_coords[whichaxis])
         datacopy = self.copy()
         for j in range(0,len(order)): # do it this way, so that it deals with other dimensions correctly
-            try:
-                self[axisname,j] = datacopy[axisname,order[j]]
-            except:
-                if len(self.axis_coords_error) > len(self.dimlabels):
-                    raise ValueError("sort failed because there are more sets of axis errors than there are axes!")
+            self.check_axis_coords_errors()
+            self[axisname,j] = datacopy[axisname,order[j]]
         self.axis_coords[whichaxis] = self.axis_coords[whichaxis][order]
         return self
     def copyaxes(self,other):
@@ -2526,7 +2737,10 @@ class nddata (object):
         newlabels = [x for x in self.dimlabels if not isscalar(slicedict[x])] # generate the new list of labels, in order, for all dimensions that are not indexed by a scalar
         #{{{ properly index the data error
         if self.data_error != None:
-            newerror = self.data_error[indexlist]
+            try:
+                newerror = self.data_error[indexlist]
+            except:
+                raise ValueError('Problem trying to index data_error'+repr(self.data_error)+' with',repr(indexlist))
         else:
             newerror = None
         #}}}
@@ -2535,6 +2749,7 @@ class nddata (object):
                 axis_coords_error = [errordict[x] for x in newlabels]
             else:
                 axis_coords_error = None
+            #print "DEBUG, determined error of",axis_coords_error,"for slices",args,"and original error",self.axis_coords_error
             return nddata(self.data[indexlist],
                     self.data[indexlist].shape,
                     newlabels,
@@ -2557,6 +2772,7 @@ class nddata (object):
             #{{{ create a slicedict and errordict to store the slices
             slicedict = dict(zip(list(self.dimlabels),[slice(None,None,None)]*len(self.dimlabels))) #initialize to all none
             if len(self.axis_coords)>0:
+                #print "DEBUG --> trying to make dictionaries from axis coords of len",len(self.axis_coords),"and axis_coords_error of len",len(self.axis_coords_error),"when dimlabels has len",len(self.dimlabels)
                 axesdict = self.mkd(self.axis_coords)
                 errordict = self.mkd(self.axis_coords_error)
                 #print 'DEBUG: made errordict',errordict

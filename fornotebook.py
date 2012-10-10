@@ -115,9 +115,44 @@ def see_if_math(recnames):
             out.extend(myin[j].split(')'))
         return not any(map(lambda x: len(x)>1 and not (x[0] == '{' or x[0] == '\\'),out))
     return [r'\ensuremath{'+v.replace('\\\\','\\')+'}' if ismath(v) else v.replace('_',' ') for v in recnames]
-def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True):
-    r'generate latex representation of a structured array'
+def lrecordarray_broken(recordlist,rows=30,numwide= 5):
+    width = 1.0/numwide
+    for j in range(0,len(recordlist),rows):
+        print r'\begin{minipage}[t]{%0.3f\linewidth}'%width,
+        lrecordarray(recordlist[j:j+rows],resizebox = True)
+        print r'\end{minipage}',
+    if j+rows<len(recordlist):
+        print r'\begin{minipage}[t]{%0.3\linewidth}'%width,
+        lrecordarray(recordlist[j+rows:],resizebox = True)
+        print r'\end{minipage}',
+def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resizebox = False,showpipe = True,return_only=False):
+    r'''generate latex representation of a structured array
+    if set to True, resizebox will automatically scale down the table so it fits on the page (but it will also scale up a small table to fit the width of the page)
+    resizebox can also be a fractional number, so that it is resized to a fraction of the page'''
+    final_retval = []
+    if len(recordlist) == 0:
+        print r'{\color{red}This array is empty!!}'
+        return
     # previously documented
+    def maybe_matrix(x):
+        if type(x) is ndarray:
+            if len(x.shape) == 2:
+                #retval = r'\begin{tabular}{'+'c'*x.shape[1]+'}'
+                retval = r'$\displaystyle\begin{pmatrix}'
+                matrixlist = []
+                for j in range(0,x.shape[0]):
+                    matrixlist.append(' & '.join(map(str,list(x[j,:]))))
+                retval += (r'\\' +'\n').join(matrixlist)
+                retval += r'\end{pmatrix}$'
+                return retval
+            else:
+                return "an array:"+lsafe(str(x))
+        else:
+            return lsafe(str(x))
+    if resizebox not in [True,False]:
+        final_retval.append(r'\resizebox{%0.3f\linewidth}{!}{'%resizebox)
+    elif resizebox:
+        final_retval.append(r'\resizebox{\linewidth}{!}{')
     reclen = len(recordlist)
     recnames = recordlist.dtype.names
     alltext = ''
@@ -139,18 +174,18 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True):
                     listoftuples.append((startval,endval))
                 else:
                     ind += 1
-            retval = ''
+            final_retval = ''
             for thistuple in listoftuples:
                 if thistuple[0] == thistuple[1]:
-                    retval = retval + r'\cline{%d-%d}'%tuple([thistuple[0]+1]*2)
+                    final_retval = final_retval + r'\cline{%d-%d}'%tuple([thistuple[0]+1]*2)
                 elif thistuple[0] == 0 and thistuple[1] == len(recnames)-1:
-                    retval = retval + r'\hline'
+                    final_retval = final_retval + r'\hline'
                 else:
-                    retval = retval + r'\cline{%d-%d}'%tuple(map((lambda x: x+1),thistuple))
-            return retval
+                    final_retval = final_retval + r'\cline{%d-%d}'%tuple(map((lambda x: x+1),thistuple))
+            return final_retval
         #{{{ first, store the strings for the data
         for j in range(0,len(recordlist)):
-            datastrings.append([lsafe(str(recordlist[v][j])) for v in recnames])
+            datastrings.append([maybe_matrix(recordlist[v][j]) for v in recnames])
             clinelist.append(list(clinerow))
         #}}}
         if multi:
@@ -179,14 +214,23 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True):
                         colheadings[k] = r'p{%0.2f\textwidth}'%(0.8/len(recnames))
             alltext+=' & '.join(datastrings[j])+r'\\ '+gencline(clinelist[j])+'\n'
         alltext += r'\end{tabular}'
-        print r'\begin{tabular}{','|'.join(colheadings),'}'
-        print ' & '.join(recordstrings),r'\\ \hline\hline'+'\n'
-        print alltext
+        if showpipe:
+            final_retval.append(r'\begin{tabular}{'+('|'.join(colheadings))+'}')
     else:
-        print r'\begin{tabular}{',''.join(['r']+['l']*reclen),'}'
+            final_retval.append(r'\begin{tabular}{'+(''.join(colheadings))+'}')
+        final_retval.append((' & '.join(recordstrings))+r'\\ \hline\hline'+'\n')
+        final_retval.append(alltext)
+    else:
+        final_retval.append(r'\begin{tabular}{'+(''.join(['r']+['l']*reclen))+'}')
         for v in recnames:
-            print r'\ensuremath{',v,'}$=$ &',' & '.join(map(lambda x: lsafe(str(x)),list(recordlist[v]))),r'\\'
-        print r'\end{tabular}'
+            final_retval.append(r'\ensuremath{'+v+'}$=$ &'+(' & '.join(map(lambda x: lsafe(str(x))+list(recordlist[v]))))+r'\\')
+        final_retval.append(r'\end{tabular}')
+    if resizebox:
+        final_retval.append(r'}')
+    if return_only:
+        return '\n'.join(final_retval)
+    else:
+        print '\n'.join(final_retval)
 def lplot(fname,width=0.33,figure=False,dpi=300,grid=False,alsosave=None,gensvg = False,print_string = None,centered = False,legend = False,equal_aspect = False,autopad = True,bytextwidth = None,showbox = True):
     '''
     used with python.sty instead of savefig
@@ -201,9 +245,9 @@ def lplot(fname,width=0.33,figure=False,dpi=300,grid=False,alsosave=None,gensvg 
         bytextwidth = False
     if print_string is not None:
         print print_string
-    fname = 'auto_figures/'+fname
+    fname = r'auto_figures/'+fname
     if alsosave != None:
-        alsosave = 'auto_figures/'+alsosave
+        alsosave = r'auto_figures/'+alsosave
     if gensvg == True:
         alsosave = fname.replace('.pdf','.svg')
     if grid:
@@ -237,7 +281,7 @@ def lplot(fname,width=0.33,figure=False,dpi=300,grid=False,alsosave=None,gensvg 
         print r'''\mbox{\begin{minipage}{%s}'''%mpwidth
     if alsosave != None:
         print r'also saved \fn{%s}'%alsosave
-    print r'\includegraphics[width=%s]{%s}'%(figwidth,fname)
+    print r'\includegraphics[width=%s]{%s}'%(figwidth,fname.replace(r'auto_figures',r'\autofiguredir'))
     if showbox:
         print '\n\n'+r'\hrulefill'+'\n\n'
         print r'''{\color{red}{\tiny %s}:}\begin{tiny}\fn{%s}\end{tiny}'''%('file:',fname)
