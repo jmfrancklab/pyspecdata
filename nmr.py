@@ -188,7 +188,7 @@ b0 = r'$B_0$'
 def show_acqu(vars):
     print '\\begin{verbatim}',vars.__repr__().replace(',','\n'),'\\end{verbatim}\n\n'
 #{{{ load the pulse sequence parameters
-def load_acqu(filename,whichdim=''):
+def load_acqu(filename,whichdim='',return_s = None):
     filename = dirformat(filename)
     if det_type(filename)[0] == 'bruker':
         if return_s is not None:
