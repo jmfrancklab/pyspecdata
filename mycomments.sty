@@ -1,4 +1,7 @@
 \ProvidesPackage{mycomments}
+\DeclareOption{commentsoff}{
+\newcommand{\commentsoff}{}
+}
 \DeclareOption{margins}{
 \oddsidemargin -0.75in % add 1in to get margin
 \evensidemargin +0.25in % add 1in to get margin
@@ -12,25 +15,248 @@
 }
 \ProcessOptions
 \RequirePackage{wrapfig}
-\pagestyle{fancy}
-\fancyhf{}
+\RequirePackage{setspace}
+\RequirePackage{soul}
+\RequirePackage[maxfloats=100]{morefloats}
+%%{{{ these are for solution 2 below, which doesn't work
+%\RequirePackage{zref-abspage}
+%\RequirePackage{zref-user}
+%\RequirePackage{atbegshi}
+%%}}}
+\RequirePackage{tikz}
+\usetikzlibrary{decorations.pathmorphing}
+\usetikzlibrary{calc}
+\usetikzlibrary{arrows,shapes}
+\tikzstyle{every picture}+=[remember picture]
+
+%{{{ highlightling of stackexchange
+%   http://tex.stackexchange.com/questions/5959/cool-text-highlighting-in-latex
+
+\newcommand{\defhighlighter}[3][]{%
+  \tikzset{every highlighter/.style={color=#2, fill opacity=#3, #1}}%
+}
+
+\defhighlighter{yellow}{0.33}%JF changed to 0.33 to match
+
+\newcommand{\highlight@DoHighlight}{
+  \fill [ decoration = {random steps, amplitude=1pt, segment length=15pt}
+        , outer sep = -15pt, inner sep = 0pt, decorate
+        , every highlighter, this highlighter ]
+        ($(begin highlight)+(0,8pt)$) rectangle ($(end highlight)+(0,-3pt)$) ;
+}
+
+\newcommand{\highlight@BeginHighlight}{
+  \coordinate (begin highlight) at (0,0) ;
+}
+
+\newcommand{\highlight@EndHighlight}{
+  \coordinate (end highlight) at (0,0) ;
+}
+
+\newdimen\highlight@previous
+\newdimen\highlight@current
+
+\DeclareRobustCommand*\highlight[1][]{%
+  \tikzset{this highlighter/.style={#1}}%
+  \SOUL@setup
+  %
+  \def\SOUL@preamble{%
+    \begin{tikzpicture}[overlay, remember picture]
+      \highlight@BeginHighlight
+      \highlight@EndHighlight
+    \end{tikzpicture}%
+  }%
+  %
+  \def\SOUL@postamble{%
+    \begin{tikzpicture}[overlay, remember picture]
+      \highlight@EndHighlight
+      \highlight@DoHighlight
+    \end{tikzpicture}%
+  }%
+  %
+  \def\SOUL@everyhyphen{%
+    \discretionary{%
+      \SOUL@setkern\SOUL@hyphkern
+      \SOUL@sethyphenchar
+      \tikz[overlay, remember picture] \highlight@EndHighlight ;%
+    }{%
+    }{%
+      \SOUL@setkern\SOUL@charkern
+    }%
+  }%
+  %
+  \def\SOUL@everyexhyphen##1{%
+    \SOUL@setkern\SOUL@hyphkern
+    \hbox{##1}%
+    \discretionary{%
+      \tikz[overlay, remember picture] \highlight@EndHighlight ;%
+    }{%
+    }{%
+      \SOUL@setkern\SOUL@charkern
+    }%
+  }%
+  %
+  \def\SOUL@everysyllable{%
+    \begin{tikzpicture}[overlay, remember picture]
+      \path let \p0 = (begin highlight), \p1 = (0,0) in \pgfextra
+        \global\highlight@previous=\y0
+        \global\highlight@current =\y1
+      \endpgfextra (0,0) ;
+      \ifdim\highlight@current < \highlight@previous
+        \highlight@DoHighlight
+        \highlight@BeginHighlight
+      \fi
+    \end{tikzpicture}%
+    \the\SOUL@syllable
+    \tikz[overlay, remember picture] \highlight@EndHighlight ;%
+  }%
+  \SOUL@
+}
+%}}} end highlighting
+%%{{{ highlightling ver. 2 off stackexchange
+%\newcommand{\currentsidemargin}{%
+%  \ifodd\zref@extract{textarea-\thetextarea}{abspage}%
+%    \oddsidemargin%
+%  \else%
+%    \evensidemargin%
+%  \fi%
+%}
+%
+%\newcounter{textarea}
+%\newcommand{\settextarea}{%
+%   \stepcounter{textarea}%
+%   \zlabel{textarea-\thetextarea}%
+%   \begin{tikzpicture}[overlay,remember picture]
+%    % Helper nodes
+%    \path (current page.north west) ++(\hoffset, -\voffset)
+%        node[anchor=north west, shape=rectangle, inner sep=0, minimum width=\paperwidth, minimum height=\paperheight]
+%        (pagearea) {};
+%    \path (pagearea.north west) ++(1in+\currentsidemargin,-1in-\topmargin-\headheight-\headsep)
+%        node[anchor=north west, shape=rectangle, inner sep=0, minimum width=\textwidth, minimum height=\textheight]
+%        (textarea) {};
+%  \end{tikzpicture}%
+%}
+%
+%
+%\usepackage{lipsum}
+%\newcommand\xlipsum[1][]{{\let\par\relax\lipsum*[#1]}}
+%
+%\tikzset{tikzul/.style={yshift=-.75\dp\strutbox}}
+%
+%\newcounter{tikzul}%
+%\newcommand\tikzul[1][]{%
+%    \begingroup
+%    \global\tikzullinewidth\linewidth
+%    \def\tikzulsetting{[#1]}%
+%    \stepcounter{tikzul}%
+%    \settextarea
+%    \zlabel{tikzul-begin-\thetikzul}%
+%    \tikz[overlay,remember picture,tikzul] \coordinate (tikzul-\thetikzul) at (0,0);% Modified \tikzmark macro
+%    \ifnum\zref@extract{tikzul-begin-\thetikzul}{abspage}=\zref@extract{tikzul-end-\thetikzul}{abspage}
+%    \else
+%        \AtBeginShipoutNext{\tikzul@endpage{#1}}%
+%    \fi
+%    \bgroup
+%    \def\par{\ifhmode\unskip\fi\egroup\par\@ifnextchar\noindent{\noindent\tikzul[#1]}{\tikzul[#1]\bgroup}}%
+%    \aftergroup\endtikzul
+%    \let\@let@token=%
+%}
+%
+%\newlength\tikzullinewidth
+%
+%\def\tikzul@endpage#1{%
+%\setbox\AtBeginShipoutBox\hbox{%
+%\box\AtBeginShipoutBox
+%\hbox{%
+%\begin{tikzpicture}[overlay,remember picture,tikzul]
+%\draw[#1]
+%    let \p1 = (tikzul-\thetikzul), \p2 = ([xshift=\tikzullinewidth+\@totalleftmargin]textarea.south west) in
+%    \ifdim\dimexpr\y1-\y2<.5\baselineskip
+%        (\x1,\y1) -- (\x2,\y1)
+%    \else
+%        let \p3 = ([xshift=\@totalleftmargin]textarea.west) in
+%        (\x1,\y1) -- +(\tikzullinewidth-\x1+\x3,0)
+%        % (\x3,\y2) -- (\x2,\y2)
+%        (\x3,\y1)
+%       \myloop{\y1-\y2+.5\baselineskip}{%
+%           ++(0,-\baselineskip) -- +(\tikzullinewidth,0)
+%       }%
+%    \fi
+%;
+%\end{tikzpicture}%
+%}}%
+%}%
+%
+%\def\endtikzul{%
+%    \zlabel{tikzul-end-\thetikzul}%
+%    \ifnum\zref@extract{tikzul-begin-\thetikzul}{abspage}=\zref@extract{tikzul-end-\thetikzul}{abspage}
+%    \begin{tikzpicture}[overlay,remember picture,tikzul]
+%        \expandafter\draw\tikzulsetting
+%            let \p1 = (tikzul-\thetikzul), \p2 = (0,0) in
+%            \ifdim\y1=\y2
+%                (\x1,\y1) -- (\x2,\y2)
+%            \else
+%                let \p3 = ([xshift=\@totalleftmargin]textarea.west), \p4 = ([xshift=-\rightmargin]textarea.east) in
+%                (\x1,\y1) -- +(\tikzullinewidth-\x1+\x3,0)
+%                (\x3,\y2) -- (\x2,\y2)
+%                (\x3,\y1)
+%                \myloop{\y1-\y2}{%
+%                    ++(0,-\baselineskip) -- +(\tikzullinewidth,0)
+%                }%
+%            \fi
+%        ;
+%    \end{tikzpicture}%
+%    \else
+%    \settextarea
+%    \begin{tikzpicture}[overlay,remember picture,tikzul]
+%        \expandafter\draw\tikzulsetting
+%            let \p1 = ([xshift=\@totalleftmargin,yshift=-.5\baselineskip]textarea.north west), \p2 = (0,0) in
+%            \ifdim\dimexpr\y1-\y2<.5\baselineskip
+%                (\x1,\y2) -- (\x2,\y2)
+%            \else
+%                let \p3 = ([xshift=\@totalleftmargin]textarea.west), \p4 = ([xshift=-\rightmargin]textarea.east) in
+%                (\x3,\y2) -- (\x2,\y2)
+%                (\x3,\y2)
+%                \myloop{\y1-\y2}{%
+%                    ++(0,+\baselineskip) -- +(\tikzullinewidth,0)
+%                }
+%            \fi
+%        ;
+%    \end{tikzpicture}%
+%    \fi
+%    \endgroup
+%}
+%
+%\def\myloop#1#2#3{%
+%    #3%
+%    \ifdim\dimexpr#1>1.1\baselineskip
+%        #2%
+%        \expandafter\myloop\expandafter{\the\dimexpr#1-\baselineskip\relax}{#2}%
+%    \fi
+%}
+%%}}} end highlighting
+
+%\renewcommand{\highlight}[1]{#1}%do nothing, use as a marker
 %% begin arrow comments and my ntd notation
-    \usepackage{tikz}
-    \usetikzlibrary{arrows,shapes}
-    \tikzstyle{every picture}+=[remember picture]
-    \newcounter{mycommentcounter}
-    \newcommand{\note}[1]{% the first argument is the text to highlight and the second is the footnote
-    \stepcounter{mycommentcounter}%
-    \tikz[baseline]\node[fill=blue,fill opacity=0.25,text opacity=1.0,anchor=base] (reffootnote\themycommentcounter) {#1};%
+    \newcounter{myreferencecounter}%this is incremented every time I add a reference in the text
+    \newcounter{mycommentstacksizecounter}%this tells me about the excess of reference to references+text bubbles I have
+    \newcounter{currentreferencecounter}%this tells me what reference I want to point AT
+    \newcommand{\note}[2][blue]{% the first argument is the text to highlight and the second is the footnote
+    \stepcounter{myreferencecounter}%whenever I call note, I create a new reference
+    \stepcounter{mycommentstacksizecounter}%but, I have not yet used that to make a comment, debug follows: %(for note, reference counter is \themyreferencecounter\ and stack is \themycommentstacksizecounter\ deep)
+    \highlight[#1]{#2}\hspace*{-0.25cm}\tikz[baseline]\node[fill=#1,fill opacity=0.0,text opacity=1.0,anchor=base,text width=0.01cm,draw=none] (reffootnote\themyreferencecounter) {};%the tikz part is just the marker for the arrow.
+    %\tikzul[line width=1.5\ht\strutbox,semitransparent,yellow]{#2};\hspace*{-0.25cm}\tikz[baseline]\node[fill=#1,fill opacity=0.0,text opacity=1.0,anchor=base,text width=0.01cm,draw=none] (reffootnote\themyreferencecounter) {};%the tikz part is just the marker for the arrow.
+    %\sethlcolor{#1}\hl{#2}\hspace*{-0.25cm}\tikz[baseline]\node[fill=#1,fill opacity=0.0,text opacity=1.0,anchor=base,text width=0.01cm,draw=none] (reffootnote\themyreferencecounter) {};%the tikz part is just the marker for the arrow.
     }%
     \def\noteloc{l}
     \def\noteang{0}
     \newcommand{\wrapnote}[2][-90]{%
+    WRAP NOTE SHOULD BE UPDATED TO MATCH SHOWNOTESETCOLOR
     \begin{wrapfigure}{\noteloc}{1in}%
     \setstretch{-1}
     %\hspace{-0.75in}
     \begin{tikzpicture}%
-        \node[fill=blue,fill opacity=0.25,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] (footnote\themycommentcounter) {%
+        \node[fill=blue,fill opacity=0.33,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] (footnote\themyreferencecounter) {%
         \begin{minipage}{1in}%
             \begin{tiny}%
                 #2
@@ -40,18 +266,32 @@
     \end{tikzpicture}%
     \end{wrapfigure}%
     \begin{tikzpicture}[overlay]%
-        \path[->,color=blue,opacity=0.25,line width=2] (footnote\themycommentcounter) edge [out=\noteang,in=#1] (reffootnote\themycommentcounter);%
+        \path[->,color=blue,opacity=0.33,line width=2] (footnote\themyreferencecounter) edge [out=\noteang,in=#1] (reffootnote\themyreferencecounter);%
     \end{tikzpicture}%
     \def\noteloc{l}
     \def\noteang{0}
     }%
+    \newcommand{\showfootnote}[2][out=0, in=-90]{%
+    SHOW FOOTNOTE SHOULD BE UPDATED TO MATCH SHOWINLINESETCOLOR
+        \footnote{
+            \begin{minipage}{\linewidth}
+                \begin{tikzpicture}[baseline]
+                    \node[fill=blue,fill opacity=0.33,text opacity=1.0,anchor=north,rounded corners] (footnote\themyreferencecounter) {\begin{minipage}{\linewidth}{\color{black}#2}\end{minipage}};
+                \end{tikzpicture}
+            \end{minipage}
+        }
+    \begin{tikzpicture}[overlay]%
+            \path[->,color=blue,opacity=0.33,line width=2] (footnote\themyreferencecounter) edge [#1] (reffootnote\themyreferencecounter);%
+    \end{tikzpicture}%
+    }%
     \newcommand{\shownote}[2][-90]{%
+    SHOULD BE UPDATED TO MATCH SHOWINLINESETCOLOR
     \marginpar{%
     \setstretch{-1}
     %\hspace{-0.75in}
     \begin{tikzpicture}%
-        \node[fill=blue,fill opacity=0.25,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] (footnote\themycommentcounter) {%
-        \begin{minipage}{1in}%
+        \node[fill=blue,fill opacity=0.33,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] (footnote\themyreferencecounter) {%
+        \begin{minipage}{1.75in}%
             \begin{tiny}%
                 #2
             \end{tiny}%
@@ -59,24 +299,87 @@
         };%
     \end{tikzpicture}%
     }%
+    \myarrowcommand{out=180,in=#1}%
+    }%
+\newcommand{\myarrowcommand}[2][blue]{%\myarrowcommand[color]{angle}
     \begin{tikzpicture}[overlay]%
-        \path[->,color=blue,opacity=0.25,line width=2] (footnote\themycommentcounter) edge [out=180,in=#1] (reffootnote\themycommentcounter);%
+        \path[->,color=#1,opacity=0.33,line width=2] (footnote\thecurrentreferencecounter) edge [#2] (reffootnote\thecurrentreferencecounter);%
+    \end{tikzpicture}%
+}%
+    \newcommand{\shownotesetcolor}[3][-30]{%\shownotesetcolor[angle]{color}{text}
+    \setcounter{currentreferencecounter}{\themyreferencecounter}%
+    \addtocounter{currentreferencecounter}{-\themycommentstacksizecounter}%
+    \addtocounter{currentreferencecounter}{1}%by default there is one thing on the stack, and it will be the last one, but otherwise, it will go further back, debug follows: %(for shownote, comment counter is \themyreferencecounter, stack is \themycommentstacksizecounter\ deep, and I decide to use shape \thecurrentreferencecounter)
+    \marginpar{%
+    \setstretch{-1}
+    %\hspace{-0.75in}
+    \begin{tikzpicture}%
+        \node[fill=#2,fill opacity=0.33,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] (footnote\thecurrentreferencecounter) {%
+        \begin{minipage}{3in}%
+            \begin{scriptsize}%
+                #3
+            \end{scriptsize}%
+        \end{minipage}%
+        };%
     \end{tikzpicture}%
     }%
-    \newcommand{\showfootnote}[2][out=0, in=-90]{%
-        \footnote{
-            \begin{minipage}{\linewidth}
-                \begin{tikzpicture}[baseline]
-                    \node[fill=blue,fill opacity=0.25,text opacity=1.0,anchor=north,rounded corners] (footnote\themycommentcounter) {\begin{minipage}{\linewidth}{\color{black}#2}\end{minipage}};
-                \end{tikzpicture}
-            \end{minipage}
-        }
-        \begin{tikzpicture}[overlay]%
-            \path[->,color=blue,opacity=0.25,line width=2] (footnote\themycommentcounter) edge [#1] (reffootnote\themycommentcounter);%
-        \end{tikzpicture}%
+    \myarrowcommand[#2]{out=180,in=#1}%
+    \addtocounter{mycommentstacksizecounter}{-1}%``pop'' the stack
     }%
-    \newcommand{\nts}[1]{\xspace{\bf{\color{orange}#1}}}
-    \newcommand{\ntd}[1]{\xspace{\textit{\textbf{\color{orange}#1}}}}
-    %\newcommand{\ntd}[1]{\note{}\wrapnote{#1}}
+    \newcommand{\showinlinesetcolor}[3][0]{%\shownotesetcolor[angle]{color}{text}
+    \setcounter{currentreferencecounter}{\themyreferencecounter}%I need to decide which reference I want to point at
+    \addtocounter{currentreferencecounter}{-\themycommentstacksizecounter}%
+    \addtocounter{currentreferencecounter}{1}%by default my stack size is 1, and I use 1, debug follows: %(for inline, comment counter is \themyreferencecounter, stack is \themycommentstacksizecounter\ deep, and I decide to use shape \thecurrentreferencecounter)
+    \begin{tikzpicture}%
+        \node[fill=#2,fill opacity=0.33,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] (footnote\thecurrentreferencecounter) {%
+        \begin{minipage}{\linewidth}%
+            \begin{scriptsize}%
+                #3
+            \end{scriptsize}%
+        \end{minipage}%
+        };%
+        \end{tikzpicture}%
+    \myarrowcommand[#2]{out=#1,in=0}%
+    \addtocounter{mycommentstacksizecounter}{-1}%``pop'' the stack
+    }%
     \newcommand{\skipping}[1]{\xspace{\color{orange}\sout{#1}}}
 %% end arrow comments
+%{{{ map comment commands to printed comments
+\@ifundefined{commentsoff}{
+%{{{ need to do
+\renewcommand{\ntd}[2][]{\note[blue]{#1}\shownotesetcolor{blue}{{\tiny\textit{Need To Do:}}#2}}
+\newcommand{\ntdmark}[1]{\note[blue]{#1}}
+\newcommand{\ntdbox}[2][180]{\showinlinesetcolor[#1]{blue}{{\tiny\textit{Need To Do:}}#2}}
+%}}}
+%{{{ john
+\newcommand{\johnmark}[1]{\note[blue]{#1}}
+\newcommand{\johnbox}[2][180]{\showinlinesetcolor[#1]{blue}{{\tiny\textit{John:}}#2}}
+\newcommand{\johnbubble}[1]{\shownotesetcolor{blue}{{\tiny\textit{John:}}#1}}
+\renewcommand{\john}[2][]{\johnmark{#1}\johnbubble{#2}}
+%}}}
+%{{{ songi
+\newcommand{\songimark}[1]{\note[blue]{#1}}
+\newcommand{\songibox}[2][180]{\showinlinesetcolor[#1]{blue}{{\tiny\textit{Songi:}}#2}}
+\newcommand{\songibubble}[1]{\shownotesetcolor{blue}{{\tiny\textit{Songi:}}#1}}
+\renewcommand{\songi}[2][]{\songimark{#1}\songibubble{#2}}
+%}}}
+%{{{peter
+\newcommand{\petermark}[1]{\note[green]{#1}}
+\newcommand{\peterbox}[1]{\showinlinesetcolor{green}{{\tiny\textit{Peter:}}#1}}
+\newcommand{\peterbubble}[1]{\shownotesetcolor{green}{{\tiny\textit{Peter:}}#1}}
+\renewcommand{\peter}[2][]{\petermark{#1}\peterbubble{#2}}
+%}}}
+%{{{yuan
+\newcommand{\yuanmark}[1]{\note[yellow]{#1}}
+\newcommand{\yuanbox}[1]{\showinlinesetcolor{yellow}{{\tiny\textit{Yuan:}}#1}}
+\newcommand{\yuanbubble}[1]{\shownotesetcolor{yellow}{{\tiny\textit{Yuan:}}#1}}
+\renewcommand{\yuan}[2][]{\yuanmark{#1}\yuanbubble{#2}}
+%}}} end yuan
+}{
+\renewcommand{\ntd}[2][]{#1}
+\renewcommand{\john}[2][]{#1}
+\renewcommand{\songi}[2][]{#1}
+\renewcommand{\peter}[2][]{#1}
+\renewcommand{\yuan}[2][]{#1}
+}
+%}}}

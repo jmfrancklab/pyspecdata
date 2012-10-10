@@ -44,7 +44,7 @@
   \ifciteseen
     {}
     {\protect\footnote[\thefield{labelnumber}]{% modified both so they are footnote instead of footnotetext, though this does add the extra footnote number, which is annoying
-       \usedriver{}{\thefield{entrytype}}.}}}
+        \usedriver{}{\thefield{entrytype}}.}}}
 \DeclareCiteCommand{\superfullcite}[\cbx@superscript]%
   {\usebibmacro{cite:init}%
    \let\multicitedelim=\supercitedelim
@@ -64,8 +64,8 @@
   \ifciteseen
     {}
     {\xappto\cbx@citehook{%
-       \protect\noexpand\footnote[\thefield{labelnumber}]{%
-         \fullcite{\thefield{entrykey}}.}}}}
+        \protect\noexpand\footnote[\thefield{labelnumber}]{%
+           \fullcite{\thefield{entrykey}}.}}}}
 
 \newrobustcmd{\cbx@superscript}[1]{%
   \mkbibsuperscript{#1}%
@@ -101,9 +101,24 @@
         \end{minipage}\vspace{0.5ex}}
 
 \definecolor{lightgreen}{cmyk}{0.05,0.0,0.1,0.025}
-\makeatletter\newenvironment{subtextbox}{%
+\makeatletter\newenvironment{boxindesc}[1][]{\enddescription% end the current description
+\hspace{-0.9cm}% it seems to need to be manually tabbed back over
+\begin{lrbox}{\@tempboxa}%start the box that we put the minipage into
+\begin{minipage}{\linewidth+0.9cm}% start a new minipage with new description
+        #1
 
+\description
+        }{\enddescription
+\end{minipage}%and end that
+\end{lrbox}%end the lrbox
+\colorbox{lightgreen}{\usebox{\@tempboxa}}%use the lrbox
+\description%and restart the original description
+        }\makeatother
+\makeatletter\newenvironment{subtextbox}{%
+\pdfstringdefDisableCommands{\renewcommand{\color}[1]{}}%lets me get rid of the color commands in the outline!!
 \begin{lrbox}{\@tempboxa}\begin{minipage}{\linewidth}}{\end{minipage}\end{lrbox}%
        \colorbox{lightgreen}{\usebox{\@tempboxa}}
 }\makeatother
 %end specific stuff
+
+\renewcommand{\section}[1]{\oldsection{\texorpdfstring{\color{vdgreencolor}#1}{#1}\condhrule}}
