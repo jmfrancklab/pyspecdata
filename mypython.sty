@@ -1,0 +1,76 @@
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+\ProvidesPackage{mypython}
+\ProcessOptions
+\RequirePackage{mycolors}
+\RequirePackage{multirow}%needed for automatic tex tables
+\RequirePackage{array}% needed for automatic tex tables
+\@ifundefined{autofiguredir}{
+\newcommand{\autofiguredir}{auto_figures}
+}{}
+\renewcommand{\o}[2][]{ {\color{mygreen}{\it #1}} {\color{blue} #2}}
+\newcommand{\fn}[1]{{\color{red} \url{#1} }}
+\newenvironment{co}{\begin{python}
+	import matplotlib; matplotlib.use('Agg')
+	from matlablike import *
+	}{\end{python}}
+%{{{Rather than including python.sty, copy and paste it here
+%% Author: Martin R. Ehmsen, ehmsen@imada.sdu.dk.
+
+\newwrite\@out
+\newwrite\@module
+\newread\myinput % do this only once
+
+\begingroup \catcode `|=0 \catcode `[=1
+\catcode`]=2 \catcode `\{=12 \catcode `\}=12
+\catcode`\\=12 |gdef|@xpython#1\end{python}[|immediate|write|@out[#1]|end[python]]
+|endgroup % changed by franck to add include file --> very important with the way that latexscript.py is written that this is one and only one line!
+
+\definecolor{MyGray}{rgb}{0.95,0.92,0.90}
+\newenvironment{graybox}{%
+    \begin{lrbox}{\@tempboxa}\begin{minipage}{\linewidth}%
+        }{%
+    \end{minipage}\end{lrbox}%
+    \colorbox{MyGray}{\usebox{\@tempboxa}}%
+}
+
+\def\python{\kernel@ifnextchar [{\@python}{\@python[]}} % the best I can guess, this says that if the next character is [, then run the first, otherwise run the second, so @python is the command that does the actual work
+%{{{ based on fauske hack
+\newcounter{py@codenum}
+\def\@python[#1]{% this appears to be the first-level command that parses the python code
+\stepcounter{py@codenum}
+\gdef\@pythonargument{#1} % this sets the argument to @pythonargument
+\def\mytestargument{off}%for some reason, just using off doesn't work
+\ifx\@pythonargument\mytestargument%
+\def\my@startcommand{\begingroup\color{dbluecolor}\verbatim}%
+\def\my@endcommand{\endverbatim\endgroup}%
+\else%
+\def\my@startcommand{\@xpython}%
+\def\my@endcommand{}%
+\fi%
+\immediate\openout\@out=currentscript.py% clearly opens the output fid
+\newlinechar='15
+\begingroup \catcode`\^^M=12 % this stuff must just reassign characters
+\let\do\@makeother\dospecials\obeyspaces%
+\my@startcommand}% this just writes the header and the contents to the file and may be redefining the whole \@xpython{stuff}\end{python} string with the thing it gives
+
+\def\endpython{% this definitely gives the end of the environment
+\my@endcommand
+\endgroup
+\immediate\closeout\@out
+\@writemodule% this is defined below, and appears to write the jobname (the file name) to latex.py
+\immediate\write18{python\space latexscript.py\space\jobname\space\thepy@codenum\space currentscript.py\space scriptname.txt}
+\immediate\openin\myinput=scriptname.txt
+\immediate\read\myinput to \localline %store the text of scriptname in localline
+\@ifundefined{showscriptnumber}{}{
+{\it the script name is ``\localline''} %read the filename stored in scriptname.txt
+}
+\immediate\write18{python \space latex_cycle_files.py \space \localline \space presentoutput}
+\immediate\input \localline % because of the result of the previous line, this now has the OUTPUT, but in synctex, it will be referenced to the right file
+\immediate\write18{python \space latex_cycle_files.py \space \localline \space storeoutput}
+}
+%}}}
+\def\@writemodule{%
+\immediate\openout\@module=latex.py
+\immediate\write\@module{jobname="\jobname"}
+\immediate\closeout\@module}
+%}}}

@@ -1,0 +1,20 @@
+\ProvidesPackage{mybasiccomments}
+\RequirePackage{xcolor}
+\RequirePackage{pdfcomment}
+\newcommand{\johncomment}[3]{\pdfcomment[author={John Franck #1},subject={},color=blue,hspace=10pt]{#3}\index{#2#3}\quad}
+%\newcommand{\john}[1]{\pdfcomment[author={John Franck},subject={},color=blue,hspace=10pt]{#1}\quad}
+\newcommand{\john}[1]{\pdfcomment[author={John Franck},subject={},color=blue,hspace=10pt]{#1}{\color{blue}\protect\footnote{\color{blue}#1}}}
+\newcommand{\adlin}[1]{\pdfcomment[author={Adlin},subject={},color=green,hspace=10pt]{#1}{\color{green}\protect\footnote{\color{green}#1}}}
+\newcommand{\johnemph}[1]{\pdfcomment[author={John Franck},subject={},color=red,hspace=10pt]{#1}{\color{red}\protect\footnote{\color{red}#1}}}
+\newcommand{\icomment}[1]{\pdfcomment[author={},subject={immediate change},color=red,hspace=10pt]{#1}\quad}
+%\newcommand{\songi}[1]{\pdfcomment[author={},subject={immediate change},color=lime,hspace=10pt]{#1}\quad}
+\newcommand{\songi}[1]{\pdfcomment[author={Songi Han},subject={},color=red,hspace=10pt]{#1}{\color{red}\protect\footnote{\protect\color{red}#1}}}
+\newcommand{\peter}[1]{\pdfcomment[author={Peter Qin},subject={},color=green,hspace=10pt]{#1}{\color{green}\protect\footnote{\protect\color{green}#1}}}
+\newcommand{\yuan}[1]{\pdfcomment[author={Yuan Ding},subject={},color=yellow,hspace=10pt]{#1}{\color{yellow}\protect\footnote{\protect\color{yellow}#1}}}
+\newcommand{\sunyia}[1]{\pdfcomment[author={sunyia},subject={},color=orange,hspace=10pt]{#1}\quad}
+\newcommand{\julia}[1]{\pdfcomment[author={julia},subject={},color=green,hspace=10pt]{#1}\quad}
+\newcommand{\nandocomment}[3]{\pdfcomment[author={Nandini Ananth #1},subject={},color=pink,hspace=10pt]{#3}\index{#2#3}\quad}
+% need to show
+\newcommand{\nts}[1]{\xspace{\bf{\color{orange}#1}}}
+% need to do
+\newcommand{\ntd}[1]{\xspace{\textit{\textbf{\color{orange}#1}}}}

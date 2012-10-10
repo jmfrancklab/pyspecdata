@@ -1,0 +1,34 @@
+\ProvidesPackage{myparagraphformatting}
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+\DeclareOption{noparagraph}{\newcommand{\noparagraph}{test}}
+\DeclareOption{nohrule}{\newcommand{\nohrule}{test}}
+\ProcessOptions
+\RequirePackage[normalem]{ulem}
+\RequirePackage{myhyperref}
+\pdfstringdefDisableCommands{\renewcommand{\color}{}}
+\pdfstringdefDisableCommands{\renewcommand{\sout}{}}
+\pdfstringdefDisableCommands{\renewcommand{\uwave}{}}
+\pdfstringdefDisableCommands{\renewcommand{\uline}{}}
+\let\oldsubsubsection = \subsubsection
+\let\oldparagraph = \paragraph
+\let\oldsubparagraph = \subparagraph
+\newcommand{\outlineblank}[2][-->]{\phantomsection\addcontentsline{toc}{#2}{#1}}
+\newcommand{\condhrule}{\@ifundefined{nohrule}{\hrulefill}{}}
+\@ifundefined{noparagraph}{
+\renewcommand{\subsubsection}[1]{\oldsubsubsection{{\small #1}\condhrule}}
+%\renewcommand{\paragraph}[1]{\textsc{\oldparagraph{#1}}\textsc{\uline{#1}}\blacktext{$\Rightarrow$}\addcontentsline{toc}{paragraph}{#1}}
+%\renewcommand{\paragraph}[1]{\texttt{\oldparagraph{#1}}\texttt{\uline{#1}}\blacktext{$\Rightarrow$}\phantomsection\addcontentsline{toc}{paragraph}{#1}}
+\renewcommand{\paragraph}[1]{%uline on the inside!!!
+
+\textbf{\uline{#1 \protect{\ensuremath{\Rightarrow}}}}\phantomsection\addcontentsline{toc}{paragraph}{#1}}
+\renewcommand{\subparagraph}[1]{{\small\textbf{\uline{#1:}}}\phantomsection\addcontentsline{toc}{subparagraph}{#1}}
+%\renewcommand{\subparagraph}[1]{\textit{\small{\uline{#1}}}}
+}{
+\renewcommand{\subsubsection}[1]{\phantomsection\addcontentsline{toc}{subsubsection}{#1}
+
+}
+\renewcommand{\paragraph}[1]{\phantomsection\addcontentsline{toc}{paragraph}{#1}
+
+}
+\renewcommand{\subparagraph}[1]{\phantomsection\addcontentsline{toc}{subparagraph}{#1}}
+}

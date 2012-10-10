@@ -1,0 +1,78 @@
+\ProvidesPackage{mydefs}
+\ProcessOptions
+\RequirePackage{xspace}
+\RequirePackage{myhyperref}
+\RequirePackage{textcomp}% among other things, gives \textmu
+\newcommand\myline{\rule{\linewidth}{0.1mm}}
+\def\Emax{\texorpdfstring{\ensuremath{E_{max}}\xspace}{Emax}}
+\newcommand{\figref}[1]{Fig.~\ref{fig:#1}}
+\newcommand{\etal}{\texorpdfstring{et.~al.\xspace}{et. al. }}
+\newcommand{\ie}{\textit{i.e.}\xspace}
+\newcommand{\etc}{\textit{etc.}\xspace}
+\newcommand{\eg}{\textit{e.g.}\xspace}
+\newcommand{\relaxivityunits}{\ensuremath{\;\mbox{s}^{-1}\mbox{M}^{-1}\!\!}\xspace}%
+\newcommand{\Real}[1]{\Re\mathfrak{e}\left[ #1 \right]}
+\newcommand{\Imag}[1]{\Im\mathfrak{m}\left[ #1 \right]}
+\def\xsm{\texorpdfstring{\ensuremath{\xi s_{max}}\xspace}{xi smax}}
+\newcommand\ksigma{\texorpdfstring{\ensuremath{k_\sigma}\xspace}{k\_sigma}}
+\newcommand\ksigmabulk{\texorpdfstring{\ensuremath{k_{\sigma,bulk}}\xspace}{k\_sigma,bulk}}
+\newcommand\ksigmarel{\ensuremath{\ksigma/\ksigmabulk}}
+\newcommand\klowbulk{\texorpdfstring{\ensuremath{k_{low,bulk}}\xspace}{k\_low,bulk}}
+\newcommand\krhobulk{\texorpdfstring{\ensuremath{k_{\rho,bulk}}\xspace}{k\_rho,bulk}}
+\newcommand\klowrel{\ensuremath{\klow/\klowbulk}}
+\newcommand\degC{\ensuremath{^{\mbox{\scriptsize o}}\mbox{C}}\xspace}
+\newcommand\krho{\texorpdfstring{\ensuremath{k_\rho}\xspace}{k\_rho}}
+\newcommand\klow{\texorpdfstring{\ensuremath{k_{low}}\xspace}{k\_low}}
+\def\ksm{\texorpdfstring{\ensuremath{k_\sigma s_{max}}\xspace}{k\_sigma smax}}
+\def\xsp{\texorpdfstring{\ensuremath{\xi s(p)}\xspace}{xi s(p)}}
+\newcommand{\Dlocal}{\ensuremath{D_{local}}\xspace}%
+\newcommand{\Dw}{\ensuremath{D_{H_2O}}\xspace}%
+\newcommand{\Dsl}{\ensuremath{D_{SL}}\xspace}%
+\def\ksp{\texorpdfstring{\ensuremath{k_\sigma s(p)}\xspace}{k\_sigma s(p)}}
+\def\smax{\texorpdfstring{\ensuremath{s_{max}}}{smax}}
+\def\tonen{\texorpdfstring{\ensuremath{T_{1,0}}\xspace}{T10}}
+\newcommand{\correltime}{\ensuremath{\tau_c}\xspace}%
+\newcommand{\hausseri}{\ensuremath{(\left\langle I_z\right\rangle - I_0)}}
+\newcommand{\haussers}{\ensuremath{(\left\langle S_z\right\rangle - S_0)}}
+\newcommand{\gammaratio}{659.32}
+\newcommand{\oht}{4-hydroxy-TEMPO\xspace}
+\newcommand{\ot}{4-oxo-TEMPO\xspace}
+\newcommand{\obpair}[2]{\ensuremath{\overbrace{#1}^{\mbox{\begin{small}#2\end{small}}}}}
+\newcommand{\ubpair}[2]{\ensuremath{\underbrace{#1}_{\mbox{\begin{small}#2\end{small}}}}}
+\def\ninetytime{\texorpdfstring{\ensuremath{\tau_{90^{\mbox{\tiny o}}}}}{tau90}\xspace}
+%{{{ units
+\def\uM{\texorpdfstring{\ensuremath{\;\mbox{\textmu M}}}{uM}\xspace}
+\def\us{\texorpdfstring{\ensuremath{\;\mbox{\textmu s}}}{us}\xspace}
+\def\ms{\texorpdfstring{\ensuremath{\;\mbox{ms}}}{ms}\xspace}
+\def\uL{\texorpdfstring{\ensuremath{\;\mbox{\textmu L}}}{uL}\xspace}
+\def\mM{\texorpdfstring{\ensuremath{\;\mbox{mM}}}{uM}\xspace}
+\def\mL{\texorpdfstring{\ensuremath{\;\mbox{mL}}}{mL}\xspace}
+\def\cm{\texorpdfstring{\ensuremath{\;\mbox{cm}}}{cm}\xspace}
+\newcommand\M{test that this guy is new!}
+\newcommand\s{test that this guy is new!}
+\newcommand\m{test that this guy is new!}
+\newcommand\nm{test that this guy is new!}
+\newcommand\magn[1]{\texorpdfstring{\ensuremath{\times 10^{#1}}}{e#1}\xspace}
+\newcommand\Ang{\texorpdfstring{\ensuremath{\;\mbox{\AA}}}{Ang.}\xspace}
+\newcommand\GHz{\texorpdfstring{\ensuremath{\;\mbox{GHz}}}{GHz}\xspace}
+\newcommand\MHz{\texorpdfstring{\ensuremath{\;\mbox{MHz}}}{MHz}\xspace}
+\newcommand\Ohm{\texorpdfstring{\ensuremath{\;\Omega}}{Ohms}\xspace}
+\newcommand\kHz{\texorpdfstring{\ensuremath{\;\mbox{kHz}}}{kHz}\xspace}
+\newcommand\mm{\texorpdfstring{\ensuremath{\;\mbox{mm}}}{mm}\xspace}
+\newcommand\W{\texorpdfstring{\ensuremath{\;\mbox{W}}}{W}\xspace}
+\newcommand\K{\texorpdfstring{\ensuremath{\;\mbox{K}}}{K}\xspace}
+\def\M{\texorpdfstring{\ensuremath{\;\mbox{M}}}{M}\xspace}
+\def\nm{\texorpdfstring{\ensuremath{\;\mbox{nm}}}{nm}\xspace}
+\def\m{\texorpdfstring{\ensuremath{\;\mbox{m}}}{m}\xspace}
+\newcommand\secs{\texorpdfstring{\ensuremath{\;\mbox{s}}}{s}\xspace}
+\newcommand\ns{\texorpdfstring{\ensuremath{\;\mbox{ns}}}{ns}\xspace}
+\newcommand\ps{\texorpdfstring{\ensuremath{\;\mbox{ps}}}{ps}\xspace}
+%}}}
+
+
+\newcommand{\editpoint}[1]{\phantomsection\addcontentsline{toc}{section}{#1}{\begin{center}\bf #1\end{center}}\phantomsection\addcontentsline{toc}{subsection}{ }\phantomsection\addcontentsline{toc}{subsubsection}{ }\phantomsection\addcontentsline{toc}{paragraph}{ }\phantomsection\addcontentsline{toc}{subparagraph}{ }}
+
+\newcommand{\lastedit}{
+
+\myline
+\editpoint{COMPLETE EDIT TO HERE}\myline\\ }
