@@ -846,7 +846,7 @@ def standard_epr(dir = None,
     axis('tight')
     return figure_list
 #}}}
-#{{{ optimize the first-order phase the right way
+#{{{ optimize the zero-order phase the right way
 def phaseopt(curve):
     curve = curve.copy()
     #{{{ find bestindex once
@@ -1297,6 +1297,7 @@ def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline 
 #}}}
 #{{{ process cpmg 
 def process_cpmg(file,dimname=''):
+    r'this just takes an FT along T2 and pulls the signal at the frequency where it\'s maxed'
     data = load_file(file,dimname=dimname)
     data.ft('t2')
     findmax = abs(data)

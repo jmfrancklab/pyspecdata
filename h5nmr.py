@@ -4,7 +4,7 @@ from nmr import *
 from nmrfit import *
 from interptau import interptau
 import time
-from numpy.lib.recfunctions import rename_fields
+from numpy.lib.recfunctions import rename_fields,drop_fields
 klow_name = r'k_{low}/k_{low,bulk}'
 ksmax_name = r'k_{\sigma}/k_{\sigma,bulk}'
 #{{{ Classes to load and store stuff to the HDF5 file
@@ -1268,7 +1268,7 @@ def t1vp(h5filename,expnos,dbm,fid_args = {},integration_args = {}, auxiliary_ar
     lplot('T1vp_%s.pdf'%fid_args['name'])
 ##}}}
 #{{{ compile all the DNP data for a given chemical, etc
-def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_additional_search = '',verbose = False):
+def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_additional_search = '',verbose = False,divide_klow_by = None):
     h5file = tables.openFile(h5file) # open the HDF5 file
     #{{{ retrieve chemical information
     search_string = h5inlist('chemical',chemical_list)
@@ -1409,13 +1409,27 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
         r'ksmax',
         (lambda x: x/116.),
         ['ksmax'])
+    extra_factor = 1
+    if divide_klow_by is not None:
+        extra_factor = divide_klow_by
     data_nice = lambda_rec(data_nice,
         r'klow',
-        (lambda x: x/318.),
+        (lambda x: x/318./extra_factor),
         ['klow'])
+    data_nice = lambda_rec(data_nice,
+        r'\xi',
+        (lambda x: x/0.33),
+        [r'\xi'])
     #{{{ use clumsier but nicer names for my table
-    data_nice = rename_fields(data_nice,{'klow':klow_name,
-                                'ksmax':ksmax_name})
+    if divide_klow_by is None:
+        klow_name_new = klow_name
+    else:
+        klow_name_new = '%s/%d'%(klow_name,extra_factor)
+    xi_name = r'\xi/\xi_{bulk}'
+    data_nice = rename_fields(data_nice,{r'\xi':xi_name,
+                                'ksmax':ksmax_name,
+                                'klow':klow_name_new})
+    data_nice = reorder_rec(data_nice,['chemical','run_number',klow_name_new,ksmax_name,xi_name])
     data_nice.sort()
     #}}}
     #}}}

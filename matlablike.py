@@ -154,13 +154,12 @@ def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,verbose = Fa
         try:
             rects.append(ax.bar(indeces+j*field_bar_width,
                     mystructarray[thisfield],
-                    field_bar_width,color = colors[j]))
+                    field_bar_width,color = colors[j],
+                    label = '$%s$'%thisfield))
         except:
             raise CustomError('Problem with bar graph: there are %d indeces, but %d pieces of data'%(len(indeces),len(mystructarray[thisfield])),'indeces:',indeces,'data',mystructarray[thisfield])
     ax.set_xticks(indeces+indiv_width/2)
     ax.set_xticklabels(labels)
-    ax.legend([j[0] for j in rects],
-            ['$%s$'%j for j in remaining_fields],loc = 'best')
     return
 def lookup_rec(A,B,indexpair):
     r'''look up information about A in table B (i.e. chemical by index, etc)
@@ -202,10 +201,16 @@ def reorder_rec(myarray,listofnames,first = True):
     new_type = [old_type[j] for j in indeces_to_move] + [old_type[j] for j in range(0,len(old_type)) if j not in indeces_to_move]
     new_list_of_data = [myarray[j[0]] for j in new_type]
     return rec.fromarrays(new_list_of_data,dtype = new_type)
-def lambda_rec(myarray,myname,myfunction,myargs):
+def lambda_rec(myarray,myname,myfunction,*varargs):
     r'''make a new field "myname" which consists of "myfunction" evaluated with the fields given by "myargs" as arguments
     the new field is always placed after the last argument name
     if myname is in myargs, the original row is popped'''
+    if len(varargs) == 1:
+        myargs = varargs[0]
+    elif len(varargs) == 0:
+        myargs = [myname]
+    else:
+        raise CustomError("For the fourth argument, you must pass either a list with the names of the arguments, or nothing (to use the field itself as an argument)")
     if type(myargs) is str:
         myargs = (myargs,)
     if type(myargs) is not tuple:
@@ -215,6 +220,8 @@ def lambda_rec(myarray,myname,myfunction,myargs):
         newrow = myfunction(*tuple(argdata))
     except TypeError:
         newrow = array([myfunction(*tuple([x[rownumber] for x in argdata])) for rownumber in range(0,len(argdata[0]))])
+    if type(newrow) is list and type(newrow[0]) is str:
+        newrow = array(newrow,dtype = '|S100')
     try:
         new_field_type = list(newrow.dtype.descr[0])
     except AttributeError:
@@ -355,13 +362,15 @@ def applyto_rec(myfunc,myarray,mylist,verbose = False):
     if type(mylist) is not list and type(mylist) is str:
         mylist = [mylist]
     combined = []
-    #{{{ first, find stuff that matches the first index
     j = 0
+    #{{{ make the list "combined", which I later concatenate
     while len(myarray) > 0:
         thisitem = myarray[0] # always grab the first row of what's left
+        #{{{ initialize the empty new row
         if j == 0:
             newrow = thisitem.reshape(1)
         newrow = newrow.copy()
+        #}}}
         #{{{ make a mask for all items that are identified as the same data
         # and copy the identical data to newrow
         mask = myarray[mylist[0]] == thisitem[mylist[0]]
@@ -376,7 +385,53 @@ def applyto_rec(myfunc,myarray,mylist,verbose = False):
         other_fields = set(mylist)^set(thisitem.dtype.names)
         if verbose: print lsafen('(applyto rec): other fields are:',other_fields)
         for thisfield in list(other_fields):
-            newrow[thisfield] = myfunc(myarray_subset[thisfield])
+            try:
+                newrow[thisfield] = myfunc(myarray_subset[thisfield])
+            except:
+                raise CustomError("error in applyto_rec:  You usually get this when one of the fields that you have NOT passed in the second argument is a string.  The fields and types are:",repr(myarray_subset.dtype.descr))
+        if verbose: print lsafen("(applyto rec): for row %d, I get this as a result:"%j,newrow)
+        combined.append(newrow) # add this row to the list
+        myarray = myarray[~mask] # mask out everything I have used from the original matrix
+        if verbose: print lsafen("(applyto rec): the array is now",repr(myarray))
+        j += 1
+    #}}}
+    combined = concatenate(combined)
+    if verbose: print lsafen("(applyto rec): final result",repr(combined),"has length",len(combined))
+    return combined
+def meanstd_rec(myarray,mylist,verbose = False):
+    r'this is something like applyto_rec, except that it applies the mean and creates new rows for the "error," where it puts the standard deviation'
+    if type(mylist) is not list and type(mylist) is str:
+        mylist = [mylist]
+    combined = []
+    other_fields = set(mylist)^set(myarray.dtype.names)
+    if verbose: print '(meanstd_rec): other fields are',lsafen(other_fields)
+    newrow_dtype = [[j,('%s_ERROR'%j[0],)+j[1:]] if j[0] in other_fields else [j] for j in myarray.dtype.descr]
+    newrow_dtype = [k for j in newrow_dtype for k in j]
+    if verbose: print lsafen('(applyto rec): other fields are:',other_fields)
+    #{{{ make the list "combined", which I later concatenate
+    j = 0
+    while len(myarray) > 0:
+        thisitem = myarray[0] # always grab the first row of what's left
+        #{{{ initialize the empty new row
+        newrow = zeros(1,dtype = newrow_dtype)
+        #}}}
+        #{{{ make a mask for all items that are identified as the same data
+        # and copy the identical data to newrow
+        mask = myarray[mylist[0]] == thisitem[mylist[0]]
+        newrow[mylist[0]] = thisitem[mylist[0]]
+        for k in range(1,len(mylist)):
+            mask &= myarray[mylist[k]] == thisitem[mylist[k]]
+            newrow[mylist[k]] = thisitem[mylist[k]]
+        #}}}
+        if verbose: print lsafen('(applyto rec): for row %d, I select these:'%j)
+        myarray_subset = myarray[mask]
+        if verbose: print lsafen('(applyto rec): ',repr(myarray_subset))
+        for thisfield in list(other_fields):
+            try:
+                newrow[thisfield] = mean(myarray_subset[thisfield])
+                newrow[thisfield+"_ERROR"] = std(myarray_subset[thisfield])
+            except:
+                raise CustomError("error in applyto_rec:  You usually get this when one of the fields that you have NOT passed in the second argument is a string.  The fields and types are:",repr(myarray_subset.dtype.descr))
         if verbose: print lsafen("(applyto rec): for row %d, I get this as a result:"%j,newrow)
         combined.append(newrow) # add this row to the list
         myarray = myarray[~mask] # mask out everything I have used from the original matrix
@@ -1045,10 +1100,10 @@ def autolegend(*args,**kwargs):
             lg = ax.legend(args[0],'best')
         else:
             lg = ax.legend(args[0],args[1],'best')
-        try:
+        if lg is None:
+            print "Warning! you called autolegend, but you don't seem to have anything labeled!!"
+        else:
             lg.get_frame().set_alpha(0.45)
-        except:
-            print "Warning! couldn't set legend frame"
     return lg
 def autopad_figure(pad = 0.2,centered = False):
     #{{{ solve the axis issue --> this does just the left
@@ -1167,6 +1222,37 @@ def plot_color_counter(*args,**kwargs):
     except:
         retval = ax._get_lines.color_cycle
     return retval
+def contour_plot(xvals,yvals,zvals,color = 'k',alpha = 1.0,npts = 300,**kwargs):
+    if 'inline_spacing' in kwargs.keys():
+        inline_spacing = kwargs.pop('inline_spacing')
+    else:
+        inline_spacing = 20
+    xi = linspace(xvals.min(),xvals.max(),npts)
+    yi = linspace(yvals.min(),yvals.max(),npts)
+    #{{{ show the diffusivity
+    #plot(array(xvals),array(yvals),'k')# to show where everything is
+    zi = scipy_griddata((xvals,yvals),
+        zvals,
+        (xi[None,:],yi[:,None]))
+    zi_min = zi[isfinite(zi)].min()
+    zi_max = zi[isfinite(zi)].max()
+    levels = r_[zi_min:zi_max:40j]
+    CS = contour(xi,yi,zi,levels,colors = color,
+            alpha = 0.25*alpha)
+    oldspacing = levels[1]-levels[0]
+    levels = r_[zi_min:zi_max:oldspacing*5]
+    try:
+        CS = contour(xi,yi,zi,levels,colors = color,
+            alpha = alpha,**kwargs)
+    except:
+        raise CustomError("Is there something wrong with your levels?:",levels,"min z",zi_min,"max z",zi_max)
+    clabel(CS,fontsize = 9,inline = 1,
+        #fmt = r'$k_\sigma/k_{\sigma,bulk} = %0.2f$',
+        fmt = r'%0.2f',
+        use_clabeltext = True,
+        inline_spacing = inline_spacing,
+        alpha = alpha)
+    #}}}
 def plot_updown(data,axis,color1,color2,symbol = '',**kwargs):
     if symbol == '':
         symbol = 'o'
@@ -1233,6 +1319,8 @@ class figlist():
         return gca()
     def text(self,mytext):
         self.figurelist.append({'print_string':mytext})
+    def show(self):
+        show()
 def text_on_plot(x,y,thistext,**kwargs):
     ax = gca()
     newkwargs = {'transform':ax.transAxes,'size':'x-large',"horizontalalignment":'center'}
@@ -1277,7 +1365,9 @@ def plot(*args,**kwargs):
     #}}}
     #{{{ parse nddata
     if isinstance(myy,nddata):
-        if myy.get_plot_color() is not None:
+        myy = myy.copy().human_units()
+        if myy.get_plot_color() is not None\
+            and 'color' not in kwargs.keys():# allow override
             kwargs.update({'color':myy.get_plot_color()})
         #if (len(myy.dimlabels)>1):
         #    myylabel = myy.dimlabels[1]
@@ -1312,7 +1402,7 @@ def plot(*args,**kwargs):
             myplotfunc = thiserrbarplot
             #{{{ pop any singleton dims
             myyerror = myy.get_error()
-            myyerror = squeeze(myyerror.copy())
+            myyerror = squeeze(myyerror)
             #}}}
             kwargs.update({'yerr':myyerror})
             valueforxerr = myy.get_error(myy.dimlabels[0])
@@ -1329,7 +1419,7 @@ def plot(*args,**kwargs):
         except:
             pass
         #}}}
-        myy = squeeze(myy.data.copy())
+        myy = squeeze(myy.data)
     #}}}
     #{{{ semilog where appropriate
     if (myx != None) and (len(myx)>1): # by doing this and making myplotfunc global, we preserve the plot style if we want to tack on one point
@@ -1589,7 +1679,14 @@ def concat(datalist,dimname,chop = False,verbose = False):
 #}}}
 class nddata (object):
     want_to_prospa_decim_correct = False
-    def __init__(self,data,sizes,dimlabels,axis_coords=[],ft_start_time = 0.,data_error = None, axis_coords_error = None,axis_coords_units = None, data_units = None, other_info = {}):
+    def __init__(self,*args,**kwargs):
+        if len(args) > 1:
+            self.__my_init__(args[0],args[1],args[2],**kwargs)
+        else:
+            self.__my_init__(args[0],[-1],['value'],**kwargs)
+        return
+    def __my_init__(self,data,sizes,dimlabels,axis_coords=[],ft_start_time = 0.,data_error = None, axis_coords_error = None,axis_coords_units = None, data_units = None, other_info = {}):
+        self.genftpairs = False
         if not (type(data) is ndarray):
             #if (type(data) is float64) or (type(data) is complex128) or (type(data) is list):
             if isscalar(data) or (type(data) is list) or (type(data) is tuple):
@@ -1824,6 +1921,34 @@ class nddata (object):
             self.data_units = unitval
         else:
             raise CustomError(".set_units() takes data units or 'axis' and axis units")
+    def human_units(self):
+        prev_label = self.get_units()
+        if prev_label is not None and len(prev_label)>0:
+            average_oom = log10(self.data).mean()/3. # find the average order of magnitude, rounded down to the nearest power of 3
+            average_oom = 3*ceil(abs(average_oom))*sign(average_oom)
+            oom_names =   ['T','G','M','','m','\\mu','p']
+            oom_values = r_[12, 6 , 3 ,0, -3,   -6  ,-12]
+            oom_index = argmin(abs(average_oom-oom_values))
+            self.data /= 10**oom_values[oom_index]
+            self.set_units(oom_names[oom_index]+prev_label)
+        for thisaxis in self.dimlabels:
+            prev_label = self.get_units(thisaxis)
+            if prev_label is not None and len(prev_label)>0:
+                data_to_test = self.getaxis(thisaxis)
+                data_to_test = data_to_test[isfinite(data_to_test)]
+                average_oom = log10(abs(data_to_test.mean()))/3. # find the average order of magnitude, rounded down to the nearest power of 3
+                print "for axis",thisaxis,"the average oom is",average_oom*3
+                average_oom = 3*ceil(abs(average_oom))*sign(average_oom)
+                print "for axis",thisaxis,"I ceiling this to",average_oom
+                oom_names =   ['T','G','M','','m','\\mu ','n','p']
+                oom_values = r_[12, 6 , 3 ,0, -3,   -6   ,-9,-12]
+                oom_index = argmin(abs(average_oom-oom_values))
+                print "for axis",thisaxis,"selected an oom value of",oom_values[oom_index]
+                x = self.getaxis(thisaxis)
+                x[:] /= 10**oom_values[oom_index]
+                self.setaxis(thisaxis,x)
+                self.set_units(thisaxis,oom_names[oom_index]+prev_label)
+        return self
     #}}}
     #{{{ get units
     def get_units(self,*args):
@@ -1844,6 +1969,8 @@ class nddata (object):
     #{{{ set error
     def set_error(self,*args):
         '''set the errors\neither set_error('axisname',error_for_axis) or set_error(error_for_data)'''
+        if (len(args) is 1) and isscalar(args[0]):
+            args = (r_[args[0]],)
         if (len(args) is 1) and (type(args[0]) is ndarray):
             self.data_error = reshape(args[0],shape(self.data))
         elif (len(args) is 1) and (type(args[0]) is list):
@@ -2413,6 +2540,15 @@ class nddata (object):
         myfilter /= myfilter.sum()
         self.data = fftconvolve(self.data,myfilter,mode='same') # I need this, so the noise doesn't break up my blocks
         return self
+    def _ft_conj(self,x):
+        pairs = [('s','Hz'),('m',r'm^{-1}')]
+        a,b = zip(*tuple(pairs))
+        if x in a:
+            return b[a.index(x)]
+        elif x in b:
+            return a[b.index(x)]
+        else:
+            return None
     def ft(self,axes,shiftornot=False,shift=None,pad = False):
         if shift != None:
             shiftornot = shift
@@ -2421,6 +2557,8 @@ class nddata (object):
         if not (type(shiftornot) is list):
             shiftornot = [bool(shiftornot)]
         for j in range(0,len(axes)):
+            if self.get_units(axes[j]) is not None:
+                self.set_units(axes[j],self._ft_conj(self.get_units(axes[j])))
             try:
                 thisaxis = self.dimlabels.index(axes[j])
             except:
@@ -2452,6 +2590,8 @@ class nddata (object):
         if not (type(shiftornot) is list):
             shiftornot = [bool(shiftornot)]
         for j in range(0,len(axes)):
+            if self.get_units(axes[j]) is not None:
+                self.set_units(axes[j],self._ft_conj(self.get_units(axes[j])))
             try:
                 thisaxis = self.dimlabels.index(axes[j])
             except:
