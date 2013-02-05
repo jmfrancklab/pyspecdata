@@ -125,30 +125,92 @@ def lrecordarray_broken(recordlist,rows=30,numwide= 5):
         print r'\begin{minipage}[t]{%0.3\linewidth}'%width,
         lrecordarray(recordlist[j+rows:],resizebox = True)
         print r'\end{minipage}',
-def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resizebox = False,showpipe = True,return_only=False):
+def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resizebox = False,showpipe = True,return_only=False,format = '%0.3f',std_sf = None):
     r'''generate latex representation of a structured array
     if set to True, resizebox will automatically scale down the table so it fits on the page (but it will also scale up a small table to fit the width of the page)
     resizebox can also be a fractional number, so that it is resized to a fraction of the page'''
+    error_names = [j for j in recordlist.dtype.names if j[-6:] == '_ERROR']
+    data_names = [j for j in recordlist.dtype.names if j[-6:] != '_ERROR']
+    data_has_error_names = [j for j in data_names if j+'_ERROR' in error_names]
+    if len(data_has_error_names)<len(error_names):
+        print r'{\color{red}Warning! unassigned error names!',lsafe(set(error_names)-set(map(lambda x: x+'_ERROR',data_has_error_names))),'}\n\n'
+    recordlist_errors = recordlist[error_names]
+    recordlist = recordlist[data_names]
     final_retval = []
     if len(recordlist) == 0:
         print r'{\color{red}This array is empty!!}'
         return
     # previously documented
-    def maybe_matrix(x):
+    def this_format_function(x,error_val = None):
+        if type(x) is str_:
+            if error_val is None:
+                return str(x)
+            else:
+                return str(x)+'\\pm'+str(error_val)
+        elif std_sf is not None:
+            #just return two significant figures
+            number_sf = std_sf
+            if error_val is None:
+                highest_significant = floor(log10(x))
+                lowest_significant = highest_significant-(number_sf-1) # the -1 is for number_sf significant figures, not just one
+                x /= 10**lowest_significant
+                x = round(x)
+                x *= 10**lowest_significant
+                if lowest_significant<0:
+                    thisformat = '%%0.%df'%(-1*lowest_significant)
+                else:
+                    thisformat = '%0.0f'
+                return (thisformat)%(x)
+            else:
+                highest_significant = floor(log10(error_val))
+                lowest_significant = highest_significant-(number_sf-1) # the -1 is for number_sf significant figures, not just one
+                error_val /= 10**lowest_significant
+                x /= 10**lowest_significant
+                error_val = round(error_val)
+                x = round(x)
+                error_val *= 10**lowest_significant
+                x *= 10**lowest_significant
+                if lowest_significant<0:
+                    thisformat = '%%0.%df'%(-1*lowest_significant)
+                else:
+                    thisformat = '%0.0f'
+                return (thisformat+'\\pm'+thisformat)%(x,error_val)
+        else:
+            if error_val is None:
+                return (format)%(x)
+            else:
+                return (format+'\\pm'+format)%(x,error_val)
+    def maybe_matrix(x,error = None):
+        if error is not None:
+            if type(x) is ndarray:
+                if x.shape != error.shape:
+                    raise ValueError("shape of the error does not match the shape of the value/matrix")
         if type(x) is ndarray:
             if len(x.shape) == 2:
-                #retval = r'\begin{tabular}{'+'c'*x.shape[1]+'}'
-                retval = r'$\displaystyle\begin{pmatrix}'
-                matrixlist = []
-                for j in range(0,x.shape[0]):
-                    matrixlist.append(' & '.join(map(str,list(x[j,:]))))
-                retval += (r'\\' +'\n').join(matrixlist)
-                retval += r'\end{pmatrix}$'
+                if error is None:
+                    #retval = r'\begin{tabular}{'+'c'*x.shape[1]+'}'
+                    retval = r'$\displaystyle\begin{pmatrix}'
+                    matrixlist = []
+                    for j in range(0,x.shape[0]):
+                        matrixlist.append(' & '.join(map(this_format_function,list(x[j,:]))))
+                    retval += (r'\\' +'\n').join(matrixlist)
+                    retval += r'\end{pmatrix}$'
+                else:
+                    # values first
+                    retval = r'$\displaystyle\begin{pmatrix}'
+                    matrixlist = []
+                    for j in range(0,x.shape[0]):
+                        matrixlist.append(' & '.join(map(this_format_function,list(x[j,:]),list(error[j,:]))))
+                    retval += (r'\\' +'\n').join(matrixlist)
+                    retval += r'\end{pmatrix}$'
                 return retval
             else:
                 return "an array:"+lsafe(str(x))
         else:
-            return lsafe(str(x))
+            if type(x) in [str_,str]:
+                return lsafe(this_format_function(x,error))
+            else:
+                return '$'+this_format_function(x,error)+'$'
     if resizebox not in [True,False]:
         final_retval.append(r'\resizebox{%0.3f\linewidth}{!}{'%resizebox)
     elif resizebox:
@@ -185,7 +247,10 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
             return final_retval
         #{{{ first, store the strings for the data
         for j in range(0,len(recordlist)):
-            datastrings.append([maybe_matrix(recordlist[v][j]) for v in recnames])
+            datastrings.append([maybe_matrix(recordlist[v][j],error = recordlist_errors[v+'_ERROR'][j])
+                if v in data_has_error_names
+                else maybe_matrix(recordlist[v][j])
+                for v in recnames])
             clinelist.append(list(clinerow))
         #}}}
         if multi:
@@ -280,7 +345,7 @@ def lplot(fname,width=0.33,figure=False,dpi=300,grid=False,alsosave=None,gensvg 
     if showbox:
         print r'''\mbox{\begin{minipage}{%s}'''%mpwidth
         if alsosave != None:
-            print r'also saved \fn{%s}'%alsosave
+            print r'also saved \fn{%s}'%alsosave+'\n\n'
     print r'\includegraphics[width=%s]{%s}'%(figwidth,fname.replace(r'auto_figures',r'\autofiguredir'))
     if showbox:
         print '\n\n'+r'\hrulefill'+'\n\n'
@@ -306,6 +371,7 @@ def txt_to_dict(file='data.txt'):
     fp = open(file,'r')
     retval = {}
     for j in fp.readlines():
+        j = j.replace('\\n','\n')
         k,v = tuple(j.split('::'))
         retval.update({k:eval(v)})
     fp.close()
@@ -314,7 +380,7 @@ def dict_to_txt(mydict,file='data.txt'):
     set_printoptions(precision = 16)
     fp = open(file,'w')
     for k,v in mydict.iteritems():
-        fp.write('%s::%s\n'%(k,repr(v)))
+        fp.write('%s::%s\n'%(k,repr(v).replace('\n','\\n')))
     fp.close()
 def save_data(inputdata={},file = 'data.txt'):
     # concatenate data to data already in data.mat file
@@ -334,16 +400,13 @@ def save_data(inputdata={},file = 'data.txt'):
         except:
             raise CustomError('trying to write',data,'to',file)
     return data
-def save_local(inputdata={},verb = True):
-    data = save_data(inputdata,file = 'local.mat')
-    if verb:
-        for k,v in inputdata.items():
-            obs(k.replace('_',r'\_'),r'$\Rightarrow$',v.replace('_',r'\_'))
+def save_local(inputdata={}):
+    data = save_data(inputdata,file = 'local.txt')
     return data
 def clear_local(inputdata=[]):
     obs(r'{\it clear local}'+'\n\n')
-    if path_exists('local.mat'):
-        os.unlink('local.mat')
+    if path_exists('local.txt'):
+        os.unlink('local.txt')
 def save_variable(variable,content,disp=True,file = 'data.txt'):
     if path_exists(file):
         #data = loadmat('data.mat',struct_as_record=True)
@@ -416,7 +479,7 @@ def cpmgs(exp,number,tau=None,alpha=None,alphaselect=None,first=False):
     alpha = local_data['alpha']
     alphaselect = local_data['alphaselect']
     #}}}
-    filename = '/mnt/esr/Magritek/john/'+exp+'/%d/'%number
+    filename = getDATADIR()+'franck_hanlabMagritek/'+exp+'/%d/'%number
     print r'\fn{%s %d}'%(exp,number)+'\n\n'
     cpmgseries(filename,exp+thisjobname(),tau,alpha,alphaselect)
 #{{{ esr_saturation

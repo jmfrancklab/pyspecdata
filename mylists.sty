@@ -43,7 +43,7 @@
 \newbibmacro*{notefullcite}{%
   \ifciteseen
     {}
-    {\protect\footnote[\thefield{labelnumber}]{% modified both so they are footnote instead of footnotetext, though this does add the extra footnote number, which is annoying
+    {\protect\footnotetext[\thefield{labelnumber}]{% modified both so they are footnote instead of footnotetext, though this does add the extra footnote number, which is annoying
         \usedriver{}{\thefield{entrytype}}.}}}
 \DeclareCiteCommand{\superfullcite}[\cbx@superscript]%
   {\usebibmacro{cite:init}%
@@ -64,7 +64,7 @@
   \ifciteseen
     {}
     {\xappto\cbx@citehook{%
-        \protect\noexpand\footnote[\thefield{labelnumber}]{%
+        \protect\noexpand\footnotetext[\thefield{labelnumber}]{%
            \fullcite{\thefield{entrykey}}.}}}}
 
 \newrobustcmd{\cbx@superscript}[1]{%
@@ -114,7 +114,8 @@
 \colorbox{lightgreen}{\usebox{\@tempboxa}}%use the lrbox
 \description%and restart the original description
         }\makeatother
-\makeatletter\newenvironment{subtextbox}{%
+\makeatletter\newenvironment{subtextbox}{
+
 \pdfstringdefDisableCommands{\renewcommand{\color}[1]{}}%lets me get rid of the color commands in the outline!!
 \begin{lrbox}{\@tempboxa}\begin{minipage}{\linewidth}}{\end{minipage}\end{lrbox}%
        \colorbox{lightgreen}{\usebox{\@tempboxa}}

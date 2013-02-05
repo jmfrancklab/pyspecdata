@@ -2,6 +2,46 @@ from matlablike import *
 import sympy
 
 #{{{ different types of fit classes
+class t2curve(fitdata):
+    def guess(self):
+        'this overrides the pinvr guess'
+        return [1.0,1.0,-2.0,0.1]
+    def fitfunc_raw(self,p,x):
+        '''just the actual fit function to return the array y as a function of p and x'''
+        for j in range(0,self.multiplicity):
+            if j == 0:
+                retval = p[2*j]*exp(-x/p[2*j+1])
+            else:
+                retval = retval + p[2*j]*exp(-x/p[2*j+1])
+        return retval
+    def fitfunc_raw_symb(self,p,x):
+        '''if I'm using a named function, I have to define separately in terms of sympy rather than numpy functions'''
+        for j in range(0,self.multiplicity):
+            if j == 0:
+                retval = p[2*j]*sympy.exp(-x/p[2*j+1])
+            else:
+                retval = retval + p[2*j]*sympy.exp(-x/p[2*j+1])
+        return retval
+    def __init__(self,*args,**kwargs):
+        if 'multiplicity' in kwargs:
+            multiplicity = kwargs.pop('multiplicity')
+        else:
+            multiplicity = 1
+        fitdata.__init__(self,*args,**kwargs)
+        alphaletter = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+        self.symbol_list = [k for j in range(0,multiplicity)
+                for k in r'M_%s(0)'%alphaletter[j],r'T_2%s'%alphaletter[j]]
+        #self.starting_guesses = map(double,[array([1,0.1]*multiplicity)])
+        self.starting_guesses = map(double,[array([1,2,-1,0.1])])
+        self.guess_lb = array([0.,-inf]*multiplicity)
+        self.guess_ub = array([+inf,+inf]*multiplicity)
+        print 'symbol list is:',self.symbol_list
+        print 'starting guesses is:',self.starting_guesses
+        print 'guess lb is:',self.guess_lb
+        print 'guess ub is:',self.guess_ub
+        self.multiplicity = multiplicity
+        self.gen_symbolic(r'M(t)')
+        return
 class t1curve(fitdata):
     def fitfunc_raw(self,p,x):
         '''just the actual fit function to return the array y as a function of p and x'''

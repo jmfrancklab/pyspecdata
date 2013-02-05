@@ -1,20 +1,32 @@
 \ProvidesPackage{mydefs}
 \ProcessOptions
+\RequirePackage{calc}% for length addition + subtraction
 \RequirePackage{xspace}
-\RequirePackage{myhyperref}
-\RequirePackage{textcomp}% among other things, gives \textmu
+%\RequirePackage{myhyperref}
+\@ifundefined{texorpdfstring}{%
+\newcommand{\texorpdfstring}[1]{#1}
+}{}
+\RequirePackage{textcomp}% among other things, gives \textmu and \textperthousand
 \newcommand\myline{\rule{\linewidth}{0.1mm}}
 \def\Emax{\texorpdfstring{\ensuremath{E_{max}}\xspace}{Emax}}
+\newcommand\phalf{\ensuremath{p_{1/2}}\xspace}
 \newcommand{\figref}[1]{Fig.~\ref{fig:#1}}
-\newcommand{\etal}{\texorpdfstring{et.~al.\xspace}{et. al. }}
+\newcommand{\tauformyhigh}{33.3\ps}
+\newcommand{\tauw}{\ensuremath{\tau_{c,w}}\xspace}%
+\newcommand{\relativeviscosity}{\ensuremath{\eta/\eta_{H_2O}}\xspace}%
+\newcommand{\capillarydim}{0.6\mm i.d.\ 0.84\mm o.d.\ quartz\xspace}
+\newcommand{\etal}{\texorpdfstring{\textit{et.~al.}\xspace}{et. al. }}
 \newcommand{\ie}{\textit{i.e.}\xspace}
 \newcommand{\etc}{\textit{etc.}\xspace}
+\newcommand{\vs}{\textit{vs.}\xspace}
 \newcommand{\eg}{\textit{e.g.}\xspace}
 \newcommand{\relaxivityunits}{\ensuremath{\;\mbox{s}^{-1}\mbox{M}^{-1}\!\!}\xspace}%
+\newcommand{\diffusionunits}{\ensuremath{\;\mbox{m}^{2}\mbox{s}^{-1}\!\!}\xspace}%
 \newcommand{\Real}[1]{\Re\mathfrak{e}\left[ #1 \right]}
 \newcommand{\Imag}[1]{\Im\mathfrak{m}\left[ #1 \right]}
 \def\xsm{\texorpdfstring{\ensuremath{\xi s_{max}}\xspace}{xi smax}}
 \newcommand\ksigma{\texorpdfstring{\ensuremath{k_\sigma}\xspace}{k\_sigma}}
+\newcommand\permil{\texorpdfstring{\ensuremath{\mbox{\textperthousand}}\xspace}{parts per thousand}}
 \newcommand\ksigmabulk{\texorpdfstring{\ensuremath{k_{\sigma,bulk}}\xspace}{k\_sigma,bulk}}
 \newcommand\ksigmarel{\ensuremath{\ksigma/\ksigmabulk}}
 \newcommand\klowbulk{\texorpdfstring{\ensuremath{k_{low,bulk}}\xspace}{k\_low,bulk}}
@@ -32,16 +44,35 @@
 \def\smax{\texorpdfstring{\ensuremath{s_{max}}}{smax}}
 \def\tonen{\texorpdfstring{\ensuremath{T_{1,0}}\xspace}{T10}}
 \newcommand{\correltime}{\ensuremath{\tau_c}\xspace}%
+\newcommand{\retardationfactor}{\ensuremath{\tau_c/\tau_{c,w}}\xspace}%
 \newcommand{\hausseri}{\ensuremath{(\left\langle I_z\right\rangle - I_0)}}
 \newcommand{\haussers}{\ensuremath{(\left\langle S_z\right\rangle - S_0)}}
 \newcommand{\gammaratio}{659.32}
 \newcommand{\oht}{4-hydroxy-TEMPO\xspace}
+\newcommand{\amt}{4-amino-TEMPO\xspace}
 \newcommand{\ot}{4-oxo-TEMPO\xspace}
-\newcommand{\obpair}[2]{\ensuremath{\overbrace{#1}^{\mbox{\begin{small}#2\end{small}}}}}
-\newcommand{\ubpair}[2]{\ensuremath{\underbrace{#1}_{\mbox{\begin{small}#2\end{small}}}}}
+\newlength{\mylength}%
+\newlength{\mysecondlength}%
+\newcommand{\obpair}[2]{%
+\settowidth{\mylength}{#2}%
+\settowidth{\mysecondlength}{\ensuremath{\displaystyle #1}}%
+\setlength{\mylength}{\mylength/2-\mysecondlength/2}%
+\hspace{-\mylength}%
+\ensuremath{\overbrace{#1}^{\mbox{\begin{small}#2\end{small}}}}%
+\hspace{-\mylength}%
+}
+\newcommand{\ubpair}[2]{%
+\settowidth{\mylength}{#2}%
+\settowidth{\mysecondlength}{\ensuremath{\displaystyle #1}}%
+\setlength{\mylength}{\mylength/2-\mysecondlength/2}%
+\hspace{-\mylength}%
+\ensuremath{\underbrace{#1}_{\mbox{\begin{small}#2\end{small}}}}%
+\hspace{-\mylength}%
+}
 \def\ninetytime{\texorpdfstring{\ensuremath{\tau_{90^{\mbox{\tiny o}}}}}{tau90}\xspace}
 %{{{ units
 \def\uM{\texorpdfstring{\ensuremath{\;\mbox{\textmu M}}}{uM}\xspace}
+\def\um{\texorpdfstring{\ensuremath{\;\mbox{\textmu m}}}{um}\xspace}
 \def\us{\texorpdfstring{\ensuremath{\;\mbox{\textmu s}}}{us}\xspace}
 \def\ms{\texorpdfstring{\ensuremath{\;\mbox{ms}}}{ms}\xspace}
 \def\uL{\texorpdfstring{\ensuremath{\;\mbox{\textmu L}}}{uL}\xspace}

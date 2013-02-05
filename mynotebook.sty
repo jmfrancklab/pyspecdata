@@ -7,6 +7,7 @@
 \DeclareOption{nopageformat}{\newcommand{\nopageformat}{test}}
 \DeclareOption{noheader}{\newcommand{\noheader}{test}}
 \ProcessOptions
+\RequirePackage{myhyperref}
 \RequirePackage{mypython}
 \RequirePackage{mycolors}
 \RequirePackage{mydefs}
@@ -129,7 +130,6 @@ mathescape=true
 \setcounter{tocdepth}{9}
 \setcounter{secnumdepth}{6}
 %\renewcommand\theparagraph{\roman{paragraph}}
-\RequirePackage{myhyperref}
 \providecommand{\DIFadd}[1]{{\protect\color{blue}\uwave{#1}}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{{\protect\color{red}\xout{#1}}}                      %DIF PREAMBLE
 \pdfstringdefDisableCommands{\renewcommand{\DIFdel}{}}
@@ -228,6 +228,7 @@ mathescape=true
 \gdef\thistimeblock{0.001}
 \gdef\obstimecounter{0}
 \gdef\obstimecounterflag{0}
+\gdef\mytempval{0}
 
 \def\zeroPadTwo#1%
 {% Left zero pad of the argument to 2 digits.  The argument
@@ -241,16 +242,26 @@ mathescape=true
 
 \newcommand{\myprinttime}[1]{\FPset\numhrs{#1}\FPtrunc\numhrs\numhrs{0}\FPset\nummins{0}\FPsub\nummins{#1}\numhrs\FPmul\nummins\nummins{60}\FPtrunc\nummins\nummins{0}\numhrs:\zeroPadTwo\nummins}
 
+\newcommand{\finishedtime}[1]{%
+\FPmul\mytemp{#1}{60}%
+\global\let\mytempval=\mytemp%
+\o[\obstb\obstm{\mytempval}\obstd]{}%
+}
+\newcommand{\donetime}[1]{%
+\maxtime{#1}\finishedtime{#1}
+}
 \newcommand{\maxtime}[1]{\FPset\tvar{#1}
 \FPadd\ttotal\tvar\total
 \global\let\total=\ttotal
 \FPdiv\poftotal\tvar\timeblocktotalval
 \FPmul\poftotal\poftotal{100}
 \FPdiv\numberdays\tvar{8}
+\FPdiv\numbertotaldays\ttotal{8}
+\FPtrunc\numbertotaldays\numbertotaldays{2}
 \FPtrunc\poftotal\poftotal{1}
 \FPtrunc\numberdays\numberdays{2}
 \global\let\thistimeblock=\tvar
-({\it max \myprinttime\tvar, \numberdays\ days, \poftotal\% of total})}
+({\it max \myprinttime\tvar, +\numberdays =\numbertotaldays\ days, \poftotal\% of total})}
 \gdef\timeblocktotalval{9}
 
 \newcommand{\maxtwenty}[1]{\FPset\tvar{#1}\FPdiv\tvar\tvar{3}\FPtrunc\tvar\tvar{2}\maxtime{\tvar}}
@@ -258,6 +269,10 @@ mathescape=true
 \newcommand{\maxdays}[1]{#1 days \FPset\tvar{#1}\FPmul\tvar\tvar{8}\FPtrunc\tvar\tvar{2}\maxtime{\tvar}}
 
 \newcommand\timeblocktotal[1]{{\it Time block total: \myprinttime{#1}}\gdef\timeblocktotalval{#1}}
+\newcommand\timeblocktotaldays[1]{ {\it Time block total:%
+\FPset\mytemp{#1}\FPmul\mytemp{8}\mytemp%
+\global\let\mytempval=\mytemp%
+\myprinttime{\mytempval}}\gdef\timeblocktotalval{\mytempval}}
 
 \newcommand{\obstb}{\FPset\mytemp{0}\global\let\obstimecounter=\mytemp\FPset\mytemp{1}\global\let\obstimecounterflag=\mytemp}
 
@@ -350,36 +365,36 @@ mathescape=true
 %%%\lfoot{p \thepage}
 %%%%\rfoot{p \thepage}
 %%%\renewcommand{\sectionmark}[1]{\markboth{#1}{#1}}
-
-% from http://www.kronto.org/thesis/tips/custom-headers.html
-\@ifundefined{chaptermark}{}{
-\renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{#1}}{}}
-}
-\renewcommand{\sectionmark}[1]{\markright{#1}{}}
-
-\@ifundefined{noheader}{
-\@ifundefined{thechapter}{}{
-\fancyhead[LO]{\thechapter.\thesection:}
-\fancyhead[RE]{\thechapter.\thesection}
-\fancyhead[RO]{{\footnotesize\rightmark}\hspace{2em}p{\bf\thepage}}
-\fancyhead[LE]{p{\bf\thepage}\hspace{2em}\footnotesize{\leftmark}}
-}
-}{}
-
-%\rhead{Notebook \today}
-%\chead{\sectionname}
-%\lhead{John Franck}
-%\rfoot{Right bottom}
-%\cfoot{\thepage}
-%\rfoot{\thepage}
-%\lfoot{Left bottom}
-
-\@ifundefined{nolabels}{
-\RequirePackage{mylabels}
-}{}
-%\bibliographystyle{abbrvnat}
-%\RequirePackage[sort&compress]{natbib}
-%\bibliographystyle{unsrt}
+%
+%% from http://www.kronto.org/thesis/tips/custom-headers.html
+%\@ifundefined{chaptermark}{}{
+%\renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{#1}}{}}
+%}
+%\renewcommand{\sectionmark}[1]{\markright{#1}{}}
+%
+%\@ifundefined{noheader}{
+%\@ifundefined{thechapter}{}{
+%\fancyhead[LO]{\thechapter.\thesection:}
+%\fancyhead[RE]{\thechapter.\thesection}
+%\fancyhead[RO]{{\footnotesize\rightmark}\hspace{2em}p{\bf\thepage}}
+%\fancyhead[LE]{p{\bf\thepage}\hspace{2em}\footnotesize{\leftmark}}
+%}
+%}{}
+%
+%%\rhead{Notebook \today}
+%%\chead{\sectionname}
+%%\lhead{John Franck}
+%%\rfoot{Right bottom}
+%%\cfoot{\thepage}
+%%\rfoot{\thepage}
+%%\lfoot{Left bottom}
+%
+%\@ifundefined{nolabels}{
+%\RequirePackage{mylabels}
+%}{}
+%%\bibliographystyle{abbrvnat}
+%%\RequirePackage[sort&compress]{natbib}
+%%\bibliographystyle{unsrt}
 \RequirePackage{fp}
 \gdef\total{0}\gdef\dumpval{0}\FPset\ttotal{0} % initialize, whether or not I start the timeblock
 

@@ -14,6 +14,7 @@
 \headsep 15pt
 }
 \ProcessOptions
+\RequirePackage{changepage}
 \RequirePackage{wrapfig}
 \RequirePackage{setspace}
 \RequirePackage{soul}
@@ -29,6 +30,7 @@
 \usetikzlibrary{arrows,shapes}
 \tikzstyle{every picture}+=[remember picture]
 
+\gdef\myarrowdir{-90}
 %{{{ highlightling of stackexchange
 %   http://tex.stackexchange.com/questions/5959/cool-text-highlighting-in-latex
 
@@ -36,7 +38,7 @@
   \tikzset{every highlighter/.style={color=#2, fill opacity=#3, #1}}%
 }
 
-\defhighlighter{yellow}{0.33}%JF changed to 0.33 to match
+\defhighlighter{yellow}{0.15}%JF changed to 0.33 to match
 
 \newcommand{\highlight@DoHighlight}{
   \fill [ decoration = {random steps, amplitude=1pt, segment length=15pt}
@@ -237,11 +239,26 @@
 %%}}} end highlighting
 
 %\renewcommand{\highlight}[1]{#1}%do nothing, use as a marker
-%% begin arrow comments and my ntd notation
+%{{{ wrapfigure that fits inside revtex
+\def\inlinewrapfigside{r}
+\newcommand{\inlinewrapfig}[1]{%
+\begin{wrapfigure}{\inlinewrapfigside}[0.3in]{1.5in}%[number of narrow lines] {placement} [overhang] {width of figure}
+\vspace{-0.2in}
+\hspace{-0.2in}
+\begin{minipage}{1.5in}
+    #1
+\end{minipage}
+\vspace{-0.2in}
+\end{wrapfigure}
+}%
+%}}}
+%{{{ begin arrow comments and my ntd notation
     \newcounter{myreferencecounter}%this is incremented every time I add a reference in the text
     \newcounter{mycommentstacksizecounter}%this tells me about the excess of reference to references+text bubbles I have
     \newcounter{currentreferencecounter}%this tells me what reference I want to point AT
+    \makeatletter
     \newcommand{\note}[2][blue]{% the first argument is the text to highlight and the second is the footnote
+    \gdef\myarrowdir{-90}%should be able to use if@firstcolumn, but not able to
     \stepcounter{myreferencecounter}%whenever I call note, I create a new reference
     \stepcounter{mycommentstacksizecounter}%but, I have not yet used that to make a comment, debug follows: %(for note, reference counter is \themyreferencecounter\ and stack is \themycommentstacksizecounter\ deep)
     \highlight[#1]{#2}\hspace*{-0.25cm}\tikz[baseline]\node[fill=#1,fill opacity=0.0,text opacity=1.0,anchor=base,text width=0.01cm,draw=none] (reffootnote\themyreferencecounter) {};%the tikz part is just the marker for the arrow.
@@ -256,7 +273,7 @@
     \setstretch{-1}
     %\hspace{-0.75in}
     \begin{tikzpicture}%
-        \node[fill=blue,fill opacity=0.33,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] (footnote\themyreferencecounter) {%
+        \node[fill=blue,fill opacity=0.15,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] (footnote\themyreferencecounter) {%
         \begin{minipage}{1in}%
             \begin{tiny}%
                 #2
@@ -266,7 +283,7 @@
     \end{tikzpicture}%
     \end{wrapfigure}%
     \begin{tikzpicture}[overlay]%
-        \path[->,color=blue,opacity=0.33,line width=2] (footnote\themyreferencecounter) edge [out=\noteang,in=#1] (reffootnote\themyreferencecounter);%
+        \path[->,color=blue,opacity=0.15,line width=2] (footnote\themyreferencecounter) edge [out=\noteang,in=#1] (reffootnote\themyreferencecounter);%
     \end{tikzpicture}%
     \def\noteloc{l}
     \def\noteang{0}
@@ -276,12 +293,12 @@
         \footnote{
             \begin{minipage}{\linewidth}
                 \begin{tikzpicture}[baseline]
-                    \node[fill=blue,fill opacity=0.33,text opacity=1.0,anchor=north,rounded corners] (footnote\themyreferencecounter) {\begin{minipage}{\linewidth}{\color{black}#2}\end{minipage}};
+                    \node[fill=blue,fill opacity=0.15,text opacity=1.0,anchor=north,rounded corners] (footnote\themyreferencecounter) {\begin{minipage}{\linewidth}{\color{black}#2}\end{minipage}};
                 \end{tikzpicture}
             \end{minipage}
         }
     \begin{tikzpicture}[overlay]%
-            \path[->,color=blue,opacity=0.33,line width=2] (footnote\themyreferencecounter) edge [#1] (reffootnote\themyreferencecounter);%
+            \path[->,color=blue,opacity=0.15,line width=2] (footnote\themyreferencecounter) edge [#1] (reffootnote\themyreferencecounter);%
     \end{tikzpicture}%
     }%
     \newcommand{\shownote}[2][-90]{%
@@ -290,7 +307,7 @@
     \setstretch{-1}
     %\hspace{-0.75in}
     \begin{tikzpicture}%
-        \node[fill=blue,fill opacity=0.33,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] (footnote\themyreferencecounter) {%
+        \node[fill=blue,fill opacity=0.15,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] (footnote\themyreferencecounter) {%
         \begin{minipage}{1.75in}%
             \begin{tiny}%
                 #2
@@ -303,7 +320,7 @@
     }%
 \newcommand{\myarrowcommand}[2][blue]{%\myarrowcommand[color]{angle}
     \begin{tikzpicture}[overlay]%
-        \path[->,color=#1,opacity=0.33,line width=2] (footnote\thecurrentreferencecounter) edge [#2] (reffootnote\thecurrentreferencecounter);%
+        \path[->,color=#1,opacity=0.15,line width=2] (footnote\thecurrentreferencecounter) edge [#2] (reffootnote\thecurrentreferencecounter);%
     \end{tikzpicture}%
 }%
     \newcommand{\shownotesetcolor}[3][-30]{%\shownotesetcolor[angle]{color}{text}
@@ -314,8 +331,8 @@
     \setstretch{-1}
     %\hspace{-0.75in}
     \begin{tikzpicture}%
-        \node[fill=#2,fill opacity=0.33,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] (footnote\thecurrentreferencecounter) {%
-        \begin{minipage}{3in}%
+        \node[fill=#2,fill opacity=0.15,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] (footnote\thecurrentreferencecounter) {%
+        \begin{minipage}{2.75in}%
             \begin{scriptsize}%
                 #3
             \end{scriptsize}%
@@ -323,15 +340,27 @@
         };%
     \end{tikzpicture}%
     }%
-    \myarrowcommand[#2]{out=180,in=#1}%
+    \myarrowcommand[#2]{out=\myarrowdir,in=#1}%
     \addtocounter{mycommentstacksizecounter}{-1}%``pop'' the stack
+    }%
+    \newcommand{\showrespbox}[2]{%\shownotesetcolor[angle]{color}{text}
+    %\hspace{-0.75in}
+    \begin{tikzpicture}%
+        \node[fill=#1,fill opacity=0.15,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] {%
+        \begin{minipage}{2.70in}%
+            \begin{scriptsize}%
+                #2
+            \end{scriptsize}%
+        \end{minipage}%
+        };%
+    \end{tikzpicture}%
     }%
     \newcommand{\showinlinesetcolor}[3][0]{%\shownotesetcolor[angle]{color}{text}
     \setcounter{currentreferencecounter}{\themyreferencecounter}%I need to decide which reference I want to point at
     \addtocounter{currentreferencecounter}{-\themycommentstacksizecounter}%
     \addtocounter{currentreferencecounter}{1}%by default my stack size is 1, and I use 1, debug follows: %(for inline, comment counter is \themyreferencecounter, stack is \themycommentstacksizecounter\ deep, and I decide to use shape \thecurrentreferencecounter)
     \begin{tikzpicture}%
-        \node[fill=#2,fill opacity=0.33,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] (footnote\thecurrentreferencecounter) {%
+        \node[fill=#2,fill opacity=0.15,draw opacity=1.0,text opacity=1.0,anchor=base,rounded corners] (footnote\thecurrentreferencecounter) {%
         \begin{minipage}{\linewidth}%
             \begin{scriptsize}%
                 #3
@@ -343,7 +372,7 @@
     \addtocounter{mycommentstacksizecounter}{-1}%``pop'' the stack
     }%
     \newcommand{\skipping}[1]{\xspace{\color{orange}\sout{#1}}}
-%% end arrow comments
+%}}} end arrow comments
 %{{{ map comment commands to printed comments
 \@ifundefined{commentsoff}{
 %{{{ need to do
@@ -354,14 +383,17 @@
 %{{{ john
 \newcommand{\johnmark}[1]{\note[blue]{#1}}
 \newcommand{\johnbox}[2][180]{\showinlinesetcolor[#1]{blue}{{\tiny\textit{John:}}#2}}
+\newcommand{\johnresp}[1]{\johnmark{}\showrespbox{blue}{{\tiny\textit{John:}}#1}}
 \newcommand{\johnbubble}[1]{\shownotesetcolor{blue}{{\tiny\textit{John:}}#1}}
 \renewcommand{\john}[2][]{\johnmark{#1}\johnbubble{#2}}
+\newcommand{\johntwocol}[2][]{\johnmark{#1}\inlinewrapfig{\johnbox[0]{#2}}}
 %}}}
 %{{{ songi
-\newcommand{\songimark}[1]{\note[blue]{#1}}
-\newcommand{\songibox}[2][180]{\showinlinesetcolor[#1]{blue}{{\tiny\textit{Songi:}}#2}}
-\newcommand{\songibubble}[1]{\shownotesetcolor{blue}{{\tiny\textit{Songi:}}#1}}
+\newcommand{\songimark}[1]{\note[red]{#1}}
+\newcommand{\songibox}[2][180]{\showinlinesetcolor[#1]{red}{{\tiny\textit{Songi:}}#2}}
+\newcommand{\songibubble}[1]{\shownotesetcolor{red}{{\tiny\textit{Songi:}}#1}}
 \renewcommand{\songi}[2][]{\songimark{#1}\songibubble{#2}}
+\newcommand{\songitwocol}[2][]{\songimark{#1}\inlinewrapfig{\songibox[0]{#2}}}
 %}}}
 %{{{peter
 \newcommand{\petermark}[1]{\note[green]{#1}}

@@ -1,0 +1,228 @@
+%{{{ preamble -- includes the 
+\documentclass[8pt]{book}
+\usepackage{etex}%eliminates complaint about ``no room for a new #3''
+\usepackage{cancel}
+\newif\ifhtml 
+\htmlfalse 
+%or 
+%\htmlfalse 
+\ifhtml 
+%{{{ for html
+\newcommand{\autofiguredir}{../auto_figures}
+%\newcommand{\myfiguredir}{dna_figures}%so I can change once for all
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{textcomp}%  among other things, gives  \textmu 
+\usepackage{xspace}
+%\usepackage{array} 
+\usepackage{amsfonts}
+\usepackage{amsfonts}
+%\let\oldcaption=\caption
+%\renewcommand{\caption}[1]{\oldcaption{%
+%\begin{minipage}{3.5in}%
+%#1%
+%\end{minipage}%
+%}}
+
+% the stuff that follows is my markup
+
+\NewConfigure{nts}[2]{\def\ntshookI{#1}\def\ntshookII{#2}}
+\def\nts#1{\ntshookI#1\ntshookII}
+\Configure{nts}{\Tg<span style="color:orange">}{\Tg</span>}
+
+\NewConfigure{o}[2]{\def\ohookI{#1}\def\ohookII{#2}}
+\renewcommand{\o}[2][]{\ohookI#1#2\ohookII}
+\Configure{o}{\Tg<span style="color:blue">}{\Tg</span>}
+
+\newcounter{commentcounter}
+
+\NewConfigure{johnbubble}[2]{\def\johnbubblehookI{#1}\def\johnbubblehookII{#2}}
+\def\johnbubble#1{\johnbubblehookI#1\johnbubblehookII}
+\newcommand{\johnbox}[2][]{\johnbubblehookI#2\johnbubblehookII}
+
+\NewConfigure{songibubble}[2]{\def\songibubblehookI{#1}\def\songibubblehookII{#2}}
+\def\songibubble#1{\songibubblehookI#1\songibubblehookII}
+\newcommand{\songibox}[2][]{\songibubblehookI#2\songibubblehookII}
+
+\NewConfigure{peterbubble}[2]{\def\peterbubblehookI{#1}\def\peterbubblehookII{#2}}
+\def\peterbubble#1{\peterbubblehookI#1\peterbubblehookII}
+\newcommand{\peterbox}[2][]{\peterbubblehookI#2\peterbubblehookII}
+
+\NewConfigure{yuanbubble}[2]{\def\yuanbubblehookI{#1}\def\yuanbubblehookII{#2}}
+\def\yuanbubble#1{\yuanbubblehookI#1\yuanbubblehookII}
+\newcommand{\yuanbox}[2][]{\yuanbubblehookI#2\yuanbubblehookII}
+
+\NewConfigure{johnmark}[2]{\def\johnmarkhookI{#1}\def\johnmarkhookII{#2}}
+\def\johnmark#1{\johnmarkhookI#1\johnmarkhookII}
+
+\NewConfigure{songimark}[2]{\def\songimarkhookI{#1}\def\songimarkhookII{#2}}
+\def\songimark#1{\songimarkhookI#1\songimarkhookII}
+
+\NewConfigure{petermark}[2]{\def\petermarkhookI{#1}\def\petermarkhookII{#2}}
+\def\petermark#1{\petermarkhookI#1\petermarkhookII}
+
+\NewConfigure{yuanmark}[2]{\def\yuanmarkhookI{#1}\def\yuanmarkhookII{#2}}
+\def\yuanmark#1{\yuanmarkhookI#1\yuanmarkhookII}
+
+\makeatletter
+\newcounter{myreferencecounter}%this is incremented every time I add a reference in the text
+\newcounter{mycommentstacksizecounter}%this tells me about the excess of reference to references+text bubbles I have
+\newcounter{currentreferencecounter}%this tells me what reference I want to point AT
+
+\Configure{songimark}{\stepcounter{myreferencecounter}\stepcounter{mycommentstacksizecounter}\Tg<a style='mso-comment-reference:SH_\themyreferencecounter'>}{\Tg</a>}
+
+\Configure{songibubble}{\addtocounter{currentreferencecounter}{1}\Tg<!--begin comment-->\Tg<span style='mso-element:comment'>\Tg<span style='mso-comment-author:Han'>\Tg</span>\Tg<p class=MsoCommentText>}{\Tg</p>\Tg</span>\Tg<!--end comment-->}
+
+\Configure{petermark}{\stepcounter{myreferencecounter}\stepcounter{mycommentstacksizecounter}\Tg<a style='mso-comment-reference:PQ_\themyreferencecounter'>}{\Tg</a>}
+
+\Configure{peterbubble}{\addtocounter{currentreferencecounter}{1}\Tg<!--begin comment-->\Tg<span style='mso-element:comment'>\Tg<span style='mso-comment-author:Qin'>\Tg</span>\Tg<p class=MsoCommentText>}{\Tg</p>\Tg</span>\Tg<!--end comment-->}
+
+\Configure{yuanmark}{\stepcounter{myreferencecounter}\stepcounter{mycommentstacksizecounter}\Tg<a style='mso-comment-reference:YD_\themyreferencecounter'>}{\Tg</a>}
+
+\Configure{yuanbubble}{\addtocounter{currentreferencecounter}{1}\Tg<!--begin comment-->\Tg<span style='mso-element:comment'>\Tg<span style='mso-comment-author:Ding'>\Tg</span>\Tg<p class=MsoCommentText>}{\Tg</p>\Tg</span>\Tg<!--end comment-->}
+
+\Configure{johnmark}{\stepcounter{myreferencecounter}\stepcounter{mycommentstacksizecounter}\Tg<a style='mso-comment-reference:JF_\themyreferencecounter'>}{\Tg</a>}
+
+\Configure{johnbubble}{\addtocounter{currentreferencecounter}{1}\Tg<!--begin comment-->\Tg<span style='mso-element:comment'>\Tg<span style='mso-comment-author:Franck'>\Tg</span>\Tg<p class=MsoCommentText>}{\Tg</p>\Tg</span>\Tg<!--end comment-->}
+
+\makeatother 
+\newcommand{\john}[2][]{\johnmark{#1}\johnbubble{#2}}
+\newcommand{\songi}[2][]{\songimark{#1}\songibubble{#2}}
+\newcommand{\peter}[2][]{\petermark{#1}\peterbubble{#2}}
+\newcommand{\yuan}[2][]{\yuanmark{#1}\yuanbubble{#2}}
+\newcommand{\ntdmark}[1]{\johnmark{#1}}
+\newcommand{\ntdbox}[2][]{\johnbox[#1]{(need to do:) #2}}
+\newcommand{\ntdbubble}[1]{\johnbubble{(need to do:) #1}}
+\newcommand{\ntd}[2][]{\ntdmark{#1}\ntdbubble{#2}}
+%}}}
+\else 
+%{{{ non-html
+\newcommand{\myfiguredir}{dna/dna_figures}%so I can change once for all
+%{{{ begin notebook-like
+%\textwidth 3.5in
+\textwidth 6in
+\oddsidemargin 0.0in % add 1in to get margin
+\evensidemargin -0.5in % add 1in to get margin
+\topmargin 0in
+\headheight 15pt 
+\headsep 15pt
+\textheight 8.25in
+\newenvironment{widetext}{}{}
+\usepackage{amssymb}
+\usepackage{import}% allows me to import the pdf_tex file
+%}}} end notebook-like
+%\documentclass[twocolumn,nofootinbib,secnumarabic]{revtex4}
+%{{{ this is for when I don't use mynotebook
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{mynotebook}
+%\usepackage{mydefs}
+%\usepackage{mybasiccomments}
+%\usepackage[commentsoff]{mycomments}
+%\usepackage{mycomments}
+%\usepackage{mylabels}
+%\usepackage[nohrule]{myparagraphformatting}
+%}}}
+%\usepackage[draft]{graphicx}
+%\usepackage[noparagraph,nolabels,nomulticols]{mynotebook}
+%\usepackage[nolandscape,nobib]{mylists}
+\usepackage{mathrsfs}
+\usepackage{ifsym}
+%% begin two column
+%\documentclass[twocolumn,nofootinbib,floatfix]{revtex4}
+%\usepackage[showscriptnumber,supressmulticols,noparagraph,nolabels]{new_mynotebook}
+%% end two column
+\synctex=1
+%{{{
+%DIF PREAMBLE EXTENSION ADDED BY LATEXDIFF
+%DIF UNDERLINE PREAMBLE %DIF PREAMBLE
+\usepackage[normalem]{ulem} %DIF PREAMBLE
+\usepackage{subfigure}
+\usepackage{afterpage}
+%}}}
+%}}}
+\fi 
+%{{{ for all
+\usepackage{mypython}
+%}}}
+
+%}}}
+\bibliographystyle{unsrt}
+\ifhtml 
+%{{{following for html 
+\newcommand{\intertext}[1]{\end{equation}#1\begin{equation}}
+\newcommand{\outlineblank}[2][]{}
+\renewcommand{\paragraph}[1]{
+
+}
+\renewcommand{\subparagraph}[1]{}
+\newenvironment{widetext}{}{}
+%}}}end html 
+\else 
+\fi 
+\usepackage{mysoftware_style}
+\usepackage{mydefs}%  does this work?
+\begin{document}
+
+\pagestyle{plain}
+%\title{Employing Compact High-Frequency Sources to Probe Dielectric Response}
+%\author{J. Franck}
+%\maketitle
+%\lhead{J.Franck}
+%\fancyhf{}
+
+%{\tiny Compiled \today
+%\par}
+%\begin{multicols}{2}
+%{{{ the following will turn on the table of contents
+%\pagenumbering{roman}
+%\tableofcontents
+%\newpage
+%\pagenumbering{arabic}
+%\tableofcontents
+%}}}
+
+%\input{summaries/dna}
+%\input{summaries/bio_demo}
+%\input{specific/klow_math}
+%\input{inprocess/writeup_dna}
+%\input{specific/marohn_prop}
+%\input{specific/phcyc}
+%\begin{python}
+%#redo
+%data = save_data({
+%   'oxotempo_elratio':9.7912/3482.776e-4,
+%   'oxotempo_nmrelratio':14.8503632/9.7912});
+%calcfield(9.7912,elratio=data['oxotempo_elratio'],nmrelratio=data['oxotempo_nmrelratio'])
+%\end{python}
+%\input{allratios}
+\input{summaries/writeup_software}
+%\input{summaries/software/struct_array}
+%\input{inprocess/4ohtseries}
+%\input{inprocess/4ohtseries/repetition_fresh}
+%\input{inprocess/4ohtseries/nice_like_prev}
+%\input{inprocess/conc_xi}
+%\input{inprocess/hiv_pr}
+%\input{inprocess/groes}
+%\input{inprocess/groes/new_label}
+%\input{inprocess/groes/first_go}
+%\input{inprocess/groes/new_label_rerun}
+%\input{inprocess/crowding/summary121029}
+%\input{summaries/dna}
+%\input{summaries/dna-diff}
+%\input{specific/example_pseudocode_for_thomas}
+%\input{specific/breit_rabi}
+%\input{specific/breit_rabi}
+%\input{protocols/gro_es}
+%\input{specific/}
+%\end{multicols}
+
+%\printbibliography[title=Works Cited]
+%\renewcommand{\section}[1]{\oldsection{#1}}
+%{{{ending 
+\bibliographystyle{unsrt}
+\bibliography{library}
+\afterpage{\clearpage}
+\end{document}
+%}}}

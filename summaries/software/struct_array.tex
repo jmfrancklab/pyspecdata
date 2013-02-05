@@ -1,0 +1,308 @@
+\paragraph{textlabel\_bargraph(mystructarray)}
+This plots data as a bargraph.
+It uses all fields with text-format labels to form nested groups of the data.
+
+For example, we can load the following text into test.csv.
+
+\begin{verbatim}
+chemical,run,measurement A,measurement B
+A,1,10,20
+A,2,11,20.5
+A,3,10.5,30
+B,1,20,5.1
+C,1,30,1.0
+C,2,30.5,1.1
+\end{verbatim}
+
+Then read the data with the matplotlib function csv2rec,
+    and plot it.
+Here, we use some functions that will be introduced later in order
+    to convert a set of numbered labels, initially simply entered as numbers,
+    to text, so that the code will also use those as a sorting dimension.
+
+\begin{python}
+#redo!!!!!!!!!!!!!!!!!!!
+from matplotlib.mlab import rec2csv, csv2rec
+data = csv2rec('test.csv')
+lrecordarray(data)
+# the next two lines are just to convert the ``run'' number to a text field
+data = lambda_rec(data,'run_string',lambda x: '%0.1f'%x,'run') # make a text field
+data = data[list(set(data.dtype.names)-set(['run']))] # and pop the old run number field
+lrecordarray(data)
+textlabel_bargraph(data,verbose = True)
+lplot('bargraph_demo120921.pdf')
+\end{python}
+
+\begin{python}
+import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
+
+styles = mpatches.ArrowStyle.get_styles()
+
+ncol=2
+nrow = (len(styles)+1) // ncol
+figheight = (nrow+0.5)
+fig1 = figure(1, (4.*ncol/1.5, figheight/1.5))
+fontsize = 0.2 * 70
+
+ax = fig1.add_axes([0, 0, 1, 1], frameon=False, aspect=1.)
+
+ax.set_xlim(0, 4*ncol)
+ax.set_ylim(0, figheight)
+
+def to_texstring(s):
+    s = s.replace("<", r"$<$")
+    s = s.replace(">", r"$>$")
+    s = s.replace("|", r"$|$")
+    return s
+
+for i, (stylename, styleclass) in enumerate(sorted(styles.items())):
+    x = 3.2 + (i//nrow)*4
+    y = (figheight - 0.7 - i%nrow) # /figheight
+    p = mpatches.Circle((x, y), 0.4, fc="w")
+    ax.add_patch(p)
+
+    ax.annotate(to_texstring(stylename), (x, y),
+                (x-1.5, y),
+                #xycoords="figure fraction", textcoords="figure fraction",
+                ha="right", va="center",
+                size=fontsize,
+                arrowprops=dict(arrowstyle=stylename,
+                                patchB=p,
+                                shrinkA=5,
+                                shrinkB=5,
+                                fc="w", ec="k",
+                                connectionstyle="arc3,rad=0.0",
+                                ),
+                bbox=dict(boxstyle="square", fc="w"))
+
+ax.xaxis.set_visible(False)
+ax.yaxis.set_visible(False)
+
+lplot('test_arrows.pdf')
+\end{python}
+\paragraph{applyto\_rec(myfunc,myarray,['name1',\ldots,'nameN'])}\label{codelabel:applyto_rec}
+This applies \texttt{myarray} to \texttt{myarray} in an attempt
+    to collapse many datapoints describing the same set of data
+    into a single set of datapoints.
+
+Sometimes, you have a structured array \texttt{myarray} that
+    contains large sets of data,
+    and you are only interested in the average
+    (\texttt{myfunc} is \texttt{mean})
+    or in the standard deviation
+    (\texttt{myfunc} is \texttt{std})
+    of that data.
+For such cases, this function allows you to identify ``unique''
+    pieces of data according to one or more fields
+    (the \texttt{name1}\ldots\texttt{nameN} above),
+    and to find the mean, standard deviation, etc,
+    over those means.
+
+For instance:
+\ntd{make function, and run test function}
+
+\begin{python}
+obs("just make a fake set of data, which I'm going to identify by ``xvalue'' and ``yvalue''")
+b = r_[1.0,2.0,3.0,4.0,
+    1.0,2.0,3.1,4.1,
+    1.0,2.0,3.2,4.2,
+    2.0,2.0,2.0,4.0,
+    2.0,2.0,2.2,4.2,
+    2.0,3.0,2.0,4.0,
+    2.0,3.0,3.2,5.2]
+a = make_rec(b[0:4].tolist(),['xvalue','yvalue','datapoint1','datapoint2']) # just to set the type
+b = b.view(a.dtype)
+lrecordarray(b)
+b_mean = applyto_rec(mean,b,['xvalue','yvalue'])
+b_std = applyto_rec(std,b,['xvalue','yvalue'])
+obs("after the mean:")
+lrecordarray(b_mean)
+obs("after the std:")
+lrecordarray(b_std)
+\end{python}
+
+\paragraph{meanstd\_rec(myfunc,['name1',\ldots,'nameN']}
+\nts{For the example code, run a search over the inprocess/crowding tex files}
+\paragraph{make\_rec(\ldots)}
+This makes a 1 element numpy structured array.
+It can be called in one of two ways.
+
+\subparagraph{make\_rec(inputdict)} where ``inputdict'' is a dictionary
+    whose key,value pairs give the field names and their values.
+
+\subparagraph{make\_rec(inputlist,namelist)}
+    where ``inputlist'' g
+\begin{mykwargs}
+    \begin{description}
+        \item[strlen = 100] gives the maximum length of strings
+            (in structured arrays, the maximum length of strings needs to be
+            specified)
+        \item[order = ['field1','field2',\ldots] ]
+            specifies the order in which the fields are stored,
+            where ``fieldN'' here is the name of a field.
+            If all the fields are not specified, the specified fields
+            will come first in the order, and the remainder will come afterwards.
+    \end{description}
+\end{mykwargs}
+If a structured array with more elements is desired,
+    it can be constructed by using the data type, or assigning values of the 1-D array,
+    \nts{like this\ldots}
+\paragraph{lookup\_rec(\ldots)}
+\nts{This is made obsolete by the decorate\_rec function!}
+\paragraph{reorder\_rec(myarray,['name1',\ldots,'nameN'])}
+Reorder the fields in the structured array named myarray,
+    placing the fields named 'name1',\ldots,'name2'
+    first and in order.
+\paragraph{lambda\_rec(myarray,\ldots)}\label{codelabel:lambda_rec}
+This function is used to perform spreadsheet-like calculations,
+    where we evaluate functions of the fields in the structured
+    array named myarray and use the result to generate new fields.
+
+\subparagraph{lambda_rec(ksp_uncorr_data,'s_{max}',calc\_s,'concentration')}
+In this example, the function calc\_s takes a single argument, which corresponds to the concentration field.
+\subparagraph{lambda\_rec(myarray,``newfieldname'',(lambda x: sin(x)+1.0),``inputfield'')}
+In this example, we have used a ``lambda'' function;
+    lambda functions are a standard part of the python language.
+This takes the structured array myarray,
+    and evaluate $\sin(x)+1.0$, where $x$ is given
+    by the data in the field named ``inputfield.''
+Place the result in a new field named ``newfieldname,''
+    which is placed after the last argument.
+If there is already a field called ``newfiledname,''
+    that field will be replaced with the result.
+
+\subparagraph{lambda\_rec(myarray,``newfieldname'',(lambda x: sin(x)+1.0))}
+Same as above, but where \texttt{``inputfield''} is the same as \texttt{``newfieldname''}.
+\subparagraph{lambda\_rec(myarray,``newfieldname'',(lambda x,y: sin(x)+cos(y)+1.0),[``inputfield1'',``inputfield2''])}
+This does the same as the previous, except that
+    the result is $\sin(x)+\cos(y)+1.0$, where
+    $x$ is given by inputfield1 and $y$ by inputfield2.
+An arbitrary number of arguments can be used in this way.
+\paragraph{decorate\_rec(\ldots)}
+Typically, we want to store information in an HDF5 file consistently
+    and efficiently.
+In the examples here,
+    we might want to store a bunch of information about a chemical
+    in one table, for instance, the chemical name, the spin label
+    concentration, etc.
+We can then retrieve that table as a structured array
+    with the PyTables .read() method
+    (or retrieve information that matches a pattern with .readWhere(pattern)).
+The read function returns a structured array,
+    in these examples, we assume that we we have assigned it
+    to the variable chemical\_table.
+Then, in other tables,
+    we can simply refer, eg., to the ``index'' field of, eg., the chemical\_table 
+    in order to refer to all the relevant information at once.
+
+The ``decorate\_rec'' allows us to join all the information back onto the table
+    that uses the index.
+
+\subparagraph{decorate\_rec((tableA,``chemical\_index''),(tableB,``index'')}
+join all the fields from tableB, whose index field is called ``index'',
+    onto the tableA.
+If the names of any of the fields overlap, do not copy the information from
+    tableB.
+This is somewhat analogous to an SQL join.
+
+\subparagraph{decorate\_rec((t1\_data,[``run\_number'',``chemical'']),(emax\_data,[``run\_number'',``chemical''])}
+Here we take a table of $T_1$ data, and join the $E_{max}$ data for the same run\_number
+    and chemical name onto it.
+This form (where an arbitrary number of fields can be used in the list above)
+    is useful when there is no unique index that can be used to
+    collect together matching data from different tables
+    when there is not a unique index field that identifies
+    the row by experiment/chemical/etc.
+\subparagraph{keyword arguments:}
+\begin{description}
+    \item[drop\_rows = False] if there is no information in the second argument to match that in the first, an error is thrown.  Rather than ``False'' this can also be set to:
+        \begin{description}
+            \item[True] the rows are dropped, and warning messages are issued.
+            \item['return'] the dropped rows are returned as a second argument
+        \end{description}
+\end{description}
+
+For example
+\begin{python}
+# rerun!!
+a = r_[make_rec([1,2],['key','first']),
+    make_rec([2,3],['key','first'])]
+print "let's use a first table like this:"
+lrecordarray(a)
+b = r_[make_rec([1,4,'something'],['key','first','second']),
+    make_rec([2,3,'something else'],['key','first','second']),
+    make_rec([2,3,'something else again'],['key','first','second'])]
+print 'and a second argument like this:'
+lrecordarray(b)
+print "now, let's decorate the first with the second, using the ``key'' column to identify a unique piece of data:"
+lrecordarray(decorate_rec((a,'key'),(b,'key')))
+obs("Notice how it keeps the data from the first table when there's overlap\n\n")
+obs("Also notice how if there is more than one row in the second table that matches a row in the first, it makes a duplicate.")
+print "now, let's be more specific, and insist that both ``key'' and ``first'' must match:"
+lrecordarray(decorate_rec((a,['key','first']),(b,['key','first']),
+    drop_rows = True))
+obs('Note that this would refuse to run and throw and error without setting drop\_rows to True!')
+print "Finally, let's go ahead and pull out the dropped rows, for further processing" 
+good,bad = decorate_rec((a,['key','first']),(b,['key','first']),
+    drop_rows = 'return')
+obs('The stuff that matched is:')
+lrecordarray(good)
+obs("The stuff that didn't find a match is:")
+lrecordarray(bad)
+\end{python}
+\paragraph{newcol\_rec(myarray,\ldots)}
+Adds new, empty fields according to the dtype specifier,
+    which is given by the second argument.
+The data in the new fields is a numpy ``empty'' array
+    before it's assigned;
+    it is unassigned memory,
+    i.e. jibberish.
+
+\subparagraph{newcol\_rec(myarray,[('first','<f8'),('second','i1'),('third','i1',(3,3))])}
+This is the format that we recommend.
+This example adds three fields name ``first,'' ``second,'' and ``third.'' 
+The datatype of the first field is an eight-byte float (f8) and explicitly
+    little-endian ($<$).
+The second field is a single-byte long integer.
+The third field is a 3x3 array of integers.
+
+\subparagraph{newcol\_rec(myarray,someothervar.dtype)}
+This will use the dtype of an existing variable.
+
+\subparagraph{newcol\_rec(myarray,\ldots)}
+There are various ways of specifying a dtype, and any of them is acceptable
+    for the second argument.
+They are further explained in the numpy documentation.
+
+\begin{python}
+obs('for example:')
+A = make_rec([1.0,200,'something'],['first','second','third'])
+A_row2 = A.copy()
+A_row2['first'] = 10.0
+A_row2['second'] = 1
+A_row2['third'] = 'another thing'
+A = r_[A,A_row2]
+obs('take this array:')
+lrecordarray(A)
+obs('and add a column called ``fourth\'\'')
+B = newcol_rec(A,('fourth','<f8'))
+lrecordarray(B)
+obs('or two columns')
+B = newcol_rec(A,[('fourth','<f8'),('fifth','<i8')])
+lrecordarray(B)
+obs('note how the extra column is just filled with random junk')
+\end{python}
+
+\paragraph{{\scriptsize in module fornotebook:}lrecordarray(myarray)}
+This prints a spreadsheet array
+    as a latex tabular environment (in spreadsheet-like format).
+It takes the optional keyword arguments
+\begin{mykwargs}
+    \begin{description}
+        \item[columnformat = True] prints the fields as columns, rather than as rows.
+        \item[smoosh = True] \nts{I don't know what this does $\Rightarrow$ something with printing in the given space?}
+        \item[multi = True] merge cells in adjacent rows that have the same value.
+    \end{description}
+\end{mykwargs}
+\paragraph{{\scriptsize in module fornotebook:}lrecordarray\_broken(myarray)}

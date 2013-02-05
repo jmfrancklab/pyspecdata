@@ -4,7 +4,7 @@
 \DeclareOption{nohrule}{\newcommand{\nohrule}{test}}
 \ProcessOptions
 \RequirePackage[normalem]{ulem}
-\RequirePackage{myhyperref}
+%\RequirePackage{myhyperref}
 \pdfstringdefDisableCommands{\renewcommand{\color}{}}
 \pdfstringdefDisableCommands{\renewcommand{\sout}{}}
 \pdfstringdefDisableCommands{\renewcommand{\uwave}{}}
@@ -21,7 +21,9 @@
 \renewcommand{\paragraph}[1]{%uline on the inside!!!
 
 \textbf{\uline{#1 \protect{\ensuremath{\Rightarrow}}}}\phantomsection\addcontentsline{toc}{paragraph}{#1}}
+\let\myparagraph=\paragraph
 \renewcommand{\subparagraph}[1]{{\small\textbf{\uline{#1:}}}\phantomsection\addcontentsline{toc}{subparagraph}{#1}}
+\let\mysubparagraph=\subparagraph
 %\renewcommand{\subparagraph}[1]{\textit{\small{\uline{#1}}}}
 }{
 \renewcommand{\subsubsection}[1]{\phantomsection\addcontentsline{toc}{subsubsection}{#1}

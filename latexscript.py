@@ -118,7 +118,7 @@ if has_been_run:
     if not stored_script == script: # because the inclusions are in the first line
         fp_out = open(output_fname,'w')
         fp_out.write(r"{\color{red} Warning!} the previously saved script file for \#%d doesn't match what's in the latex file; possibly, you edited the script file (via synctex), but this is not yet supported"%script_number)# this goes to normal standard output, not into the file!
-        fp_out.write('\nThe diff is:\\begin{verbatim}\n%s\\end{verbatim}\n'%(''.join(ndiff(script,stored_script))))
+        fp_out.write('\nThe diff is:\\begin{verbatim}\n%s\\end{verbatim}\n'%(''.join(ndiff(script,stored_script))).replace('\\','\\\\'))
         fp_out.close()
     #}}}
 else:
