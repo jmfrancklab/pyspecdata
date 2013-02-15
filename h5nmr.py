@@ -106,9 +106,25 @@ class store_Emax (store_integrals):
             power_file = auxiliary_args.pop('power_file')
             if fid_args['expno'] == 'auto' or fid_args['expno'] == 'Auto':
                 self.expno,dbm,self.figurelist = parse_powers(path,fid_args['name'],power_file,first_figure = self.figurelist,**auxiliary_args) # the 1 is because I'm not interested in the expnos it uses
+                fl = figlistl()
+                fl.figurelist = self.figurelist
+                mythreshold = -36
+                if 'threshold' in auxiliary_args.keys():
+                    mythreshold = auxiliary_args['threshold']
+                fl = check_autosteps(mythreshold,dbm,figure_list = fl)
+                self.figurelist = list(fl.figurelist)
+                del fl
             else:
                 self.expno = fid_args['expno']
                 junk,dbm,self.figurelist = parse_powers(path,fid_args['name'],power_file,expno = self.expno,first_figure = self.figurelist,**auxiliary_args) # the 1 is because I'm not interested in the expnos it uses
+                fl = figlistl()
+                fl.figurelist = self.figurelist
+                mythreshold = -36
+                if 'threshold' in auxiliary_args.keys():
+                    mythreshold = auxiliary_args['threshold']
+                fl = check_autosteps(mythreshold,dbm,figure_list = fl)
+                self.figurelist = list(fl.figurelist)
+                del fl
             print ''%(),r'\begin{minipage}{3in}','\npower log:\n\n',', '.join(map((lambda x: r'$%0.2f\;dBm$'%x),dbm)),r'\end{minipage}','\n\n'
             dbm = r_[-999,dbm] # 6/20/11, I get rid of the -10 here to make things less confusing, though I now for sure don't know what's right
         print 'len(dbm)',len(dbm)
@@ -454,6 +470,8 @@ def dnp_for_rho(path,
     run_number = double(run_number)
     print '{\\bf\\color{blue}This data is part of series %f:}\n\n'%run_number
     #{{{ test that it pulls t1max correctly
+    temp = load_acqu(dirformat(dirformat(path)+name)+'5',return_s = False)
+    d1val = temp['D'][1]
     temp = load_acqu(dirformat(dirformat(path)+name)+'1',return_s = False)
     t1max = temp['CNST'][9]
     sfo1 = temp['SFO1']
@@ -619,7 +637,7 @@ def dnp_for_rho(path,
         if chemical == None and concentration == None:
             t1dataset = retrieve_T1series(h5file,name,run_number = run_number,show_result = 'for $T_{1}$',t1max = t1max)
         else:
-            t1dataset = retrieve_T1series(h5file,None,chemical,concentration,run_number = run_number,show_result = 'for $T_{1}$',t1max = t1max)
+            t1dataset = retrieve_T1series(h5file,None,chemical,concentration,run_number = run_number,show_result = 'for $T_{1}$',t1max = t1max,d1val = d1val)
         print '\n\n'
         #{{{ store the T1 data with error, for later error propagation
         if t1dataset is None:
@@ -1456,6 +1474,9 @@ def retrieve_T1series(h5filename,name,*cheminfo,**kwargs):
     t1max = None
     if 't1max' in kwargs.keys():
         t1max = kwargs.pop('t1max')
+    d1val = None
+    if 'd1val' in kwargs.keys():
+        d1val = kwargs.pop('d1val')
     if verbose: print lsafen('DEBUG: retrieve T1series called with name=',name,'cheminfo',cheminfo)
     #}}}
     if len(cheminfo) == 2:
@@ -1484,10 +1505,17 @@ def retrieve_T1series(h5filename,name,*cheminfo,**kwargs):
     if len(data) == 0:
         print 'No $T_1$ data found for chemidx=\n\n',print_chemical_by_index(h5filename+'/compilations/chemicals',chemidx),'\n\n'
         return None
-    if show_result: print r'\subparagraph{$T_1$ series}','\n\n',r'{\bf retrieved $T_1$ series',show_result,':}','\\begin{tiny}\n\n',lrecordarray(data),'\\end{tiny}\n\n'
+    if show_result:
+        print r'\subparagraph{$T_1$ series}','\n\n',r'{\bf retrieved $T_1$ series',show_result,':}','\\begin{tiny}\n\n',lrecordarray(data),'\\end{tiny}\n\n'
+        temp = [x[0:x.find('_exp')] for x in data['integrals'].tolist() if x.find('_exp')>-1]
+        temp = unique(array(temp))
+        if len(temp)>1:
+            print r"{\Large{\color{red} Warning!!}} You are using more than one dataset (",lsafe(temp),") for your $T_1$ experiments; unless you are doing this on purpose, it's a mistake.  You probably need to change your \\texttt{run\_number}, which should be the same for all samples of a \\textit{different} chemical composition in a run, but should \\textit{not} be the same for repeats with the same chemical composition (that would be a different run...)\n\n"
+        else:
+            print "$T_1$ datasets unique\n\n"
     if t1max is not None:
         actual_t1max = data['T_1'].max()
-        print r'You set $T_{1,max}$ to %0.3f s'%t1max,"which compared to %0.2f"%actual_t1max,
+        print r'You set $T_{1,max}$ to %0.3f s'%t1max,"($\\frac{d1}{5}=%0.3f$ s) which compared to %0.2f"%(d1val/5.,actual_t1max),
         if actual_t1max>t1max:
             print r'{\Large{\color{red} is NOT OK!!!!}}'
         else:

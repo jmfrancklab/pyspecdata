@@ -24,6 +24,28 @@ def dbm_to_power(dbm,cavity_setup = 'newcnsi'):
 def power_to_dbm(power):
     return 10.0*log(power/1e-3)/log(10.0)-40 #20 db for each atten
 #{{{ auto_steps
+def check_autosteps(threshold,values,figure_list = None):
+    if figure_list == None:
+        figure_list = figlistl()
+    figure_list.next('checkpowerlog')
+    x = r_[r_[0:len(values)],r_[0:len(values)]+0.99]
+    y = r_[values,values]
+    s = argsort(x)
+    plot(x[s],y[s],'b',linewidth=1)
+    expand_y()
+    expand_x()
+    ax = gca()
+    ylims = list(ax.get_ylim())
+    ylims[0] = threshold
+    ax.set_ylim(ylims)
+    gridandtick(ax)
+    ylims = list(ax.get_ylim())
+    ylims[0] = threshold
+    ax.set_ylim(ylims)
+    title('Interpretation:')
+    xlabel('experiment number')
+    ylabel('power (dBm)')
+    return figure_list
 def auto_steps(filename,threshold = -35, upper_threshold = 5, t_minlength = 0.5*60,minstdev = 0.1,showplots = True, showdebug = False,t_start=0,t_stop=60*1000,tolerance = 2,t_maxlen = inf,return_lastspike = False,first_figure = None):
     r'Plot the raw power output in figure 1, and chop into different powers in plot 2'
     figurelist = figlistini(first_figure)
@@ -154,6 +176,7 @@ def auto_steps(filename,threshold = -35, upper_threshold = 5, t_minlength = 0.5*
         plot(t/60,plotdev,'k')
         plot(t/60,plotstd,'r')
         title('Power meter log')
+    gridandtick(gca())
     retval = [array(powerlist)]
     if return_lastspike == True:
         retval += [lastspike]
