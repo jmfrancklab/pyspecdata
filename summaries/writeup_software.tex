@@ -2218,7 +2218,7 @@ We organize this description into two categories: mathematical operators,
 Multiplication of two nddata objects has various important properties.
 \begin{description}
 \item[dimensions identified by name, not order]
-Multiplication uses the internal function \texttt{aligndata(\ldots)}
+Multiplication uses the internal function \texttt{aligndata(\ldots)} \label{codelabel:aligndata}
     to align the dimensions of the operands.
 
 \begin{python}
@@ -2379,6 +2379,107 @@ Interpolate onto the new axis given by targetaxis, which must be an ndarray.
 \paragraph{instance.getaxis('t')}
 \paragraph{instance.retaxis('t')}
 \subsubsection{Operations that change the dimensionality of the data}
+\paragraph{selfout,argout = instance.aligndata(arg)}\label{codelabel:aligndata}
+This function is mostly intended for use arithmetic operations.
+It takes advantage of the naming of dimensions to automaticalkly
+    align the dimensions in two nddata instances.
+
+It looks at the nddata in \texttt{instance} and \texttt{arg} and
+    returns a version of both
+    (\texttt{selfout} and \texttt{argout}, respectively)
+    which have the same dimensionality.
+
+It applies two rules:
+\begin{enumerate}
+    \item If a dimension is missing from one nddata instance,
+            a dimension of the same name and length 1 will be
+            added in the output.
+        Importantly, when this instance is used to do algebra,
+            by standard numpy rules,
+            it will be tiled and duplicated for all indeces of
+            that dimension in the array/instance that it is
+            added/subtracted/multiplied/divided with.
+    \item The dimensions of both output instances will consist of
+        the dimensions of \texttt{instance},
+        in their original order, followed by any additional
+        dimensions.
+\end{enumerate}
+
+\begin{tiny}
+\begin{python}
+t = r_[-10:10:5j]
+x = nddata(t**2,[-1],['x'])
+y = nddata(t,[-1],['y'])
+print 'x has shape'+lsafe(ndshape(x))+'is:\n\n',lsafen(x)
+print 'y has shape'+lsafe(ndshape(y))+'is:\n\n',lsafen(y)
+x_out,y_out = x.aligndata(y)
+print 'after aligning, x\_out has shape'+lsafe(ndshape(x_out))+' and is:\n\n'
+print lsafen(x_out)
+print 'after aligning, y\_out has shape'+lsafe(ndshape(y_out))+' and is:\n\n'
+print lsafen(y_out)
+\end{python}
+\end{tiny}
+
+Now, we redo the above with axis labels and data error.
+
+\begin{tiny}
+\begin{python}
+t = r_[-10:10:5j]
+x = nddata(t**2,[-1],['x']).labels('x',t).set_error(1.0*ones(len(t)))
+y = nddata(t,[-1],['y']).labels('y',t).set_error(2.0*ones(len(t)))
+print 'x has shape'+lsafe(ndshape(x))+'is:\n\n',lsafen(x)
+print 'y has shape'+lsafe(ndshape(y))+'is:\n\n',lsafen(y)
+x_out,y_out = x.aligndata(y)
+print 'after aligning, x\_out has shape'+lsafe(ndshape(x_out))+' and is:\n\n'
+print lsafen(x_out)
+print 'after aligning, y\_out has shape'+lsafe(ndshape(y_out))+' and is:\n\n'
+print lsafen(y_out)
+\end{python}
+\end{tiny}
+
+Sometimes we might need to deal with data that's zero
+    dimensional, but with a single label.
+To avoid errors, aligndata will convert this to a single
+    dimension of length 1.
+
+\begin{tiny}
+\begin{python}
+#after debug
+t = r_[-10:10:5j]
+x = nddata(t**2,[-1],['x']).labels('x',t).set_error(1.0*ones(len(t)))
+y = nddata(t,[-1],['y']).labels('y',t).set_error(2.0*ones(len(t)))
+y.data = y.data.mean()
+y.set_error(y.get_error().mean())
+print "y error is",lsafen(y.get_error())
+print 'x has shape',lsafe(ndshape(x)),'is:\n\n',lsafen(x)
+print 'y has shape',lsafe(ndshape(y)),'is:\n\n',lsafen(y)
+x_out,y_out = x.aligndata(y)
+print 'after aligning, x\_out has shape'+lsafe(ndshape(x_out))+' and is:\n\n'
+print lsafen(x_out)
+print 'after aligning, y\_out has shape'+lsafe(ndshape(y_out))+' and is:\n\n'
+print lsafen(y_out)
+\end{python}
+\end{tiny}
+
+This should work, but does not:
+
+\begin{tiny}
+\begin{python}
+t = r_[-10:10:5j]
+x = nddata(t**2,[-1],['x']).labels('x',t).set_error(1.0*ones(len(t))).set_error('x',3.0*ones(len(t)))
+y = nddata(t,[-1],['y']).labels('y',t).set_error(2.0*ones(len(t))).set_error('y',4.0*ones(len(t)))
+print 'x has shape'+lsafe(ndshape(x))+'is:\n\n',lsafen(x)
+print 'y has shape'+lsafe(ndshape(y))+'is:\n\n',lsafen(y)
+x_out,y_out = x.aligndata(y)
+print 'after aligning, x\_out has shape'+lsafe(ndshape(x_out))+' and is:\n\n'
+print lsafen(x_out)
+print 'after aligning, y\_out has shape'+lsafe(ndshape(y_out))+' and is:\n\n'
+print lsafen(y_out)
+\end{python}
+\end{tiny}
+
+\paragraph{instance.chunk()}
+\paragraph{instance.chunkoff()}
 \paragraph{instance.smash()}
 \paragraph{instance.smashorder()}
 \paragraph{instance.chunk()}
@@ -2897,3 +2998,168 @@ dnp_for_rho(path,name,integration_width = 160,peak_within = 500,
 standard_noise_comparison(name)
 \end{python}
 \end{tiny}
+\chapter{F90 Density matrix code}
+This is not organized, but I am currently just copying a copy of the section around \ref{sec:task2203_innb} here for Ryan.
+\outlineblank{section}
+\subsection{Adiabatic pulses}
+Adiabatic pulses are a good example of a complex pulse that has a relatively simple result, and so gives us a good opportunity to test our pulses.
+
+\phantomsection\label{sec:task2203_innb}
+(I put notes for making this ion \ref{sec:task2203})
+
+\begin{python}
+# I copied this from for_crif.py
+from time import *
+from matlablike import *
+from prop import *
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+I_z = 0.5*array([[1,0],[0,-1]],dtype='complex128')
+E = array([[1,0],[0,1]],dtype='complex128')
+I_x = 0.5*array([[0,1],[1,0]],dtype='complex128')
+I_y = 0.5*array([[0,1j],[-1j,0]],dtype='complex128')
+I_p = array([[0,1],[0,0]],dtype='complex128')
+# note that i can test fortran order with .flags, and that it has no effect on 1D arrays!
+fl = figlistl()
+
+n_nu = 200
+
+# do an adiabatic pulse
+beta = 5.4
+multiplier = 1/1.5167e-3*100/234*17
+scaling_factor = 1.
+scaleup_freq = 2
+nu_sweep = 100e6
+nu_plot = 1.5*nu_sweep
+B1_inv = 48e6/scaling_factor
+B1_exc = 9.6/48.*B1_inv
+tau_pulse = 620e-9*(scaling_factor**2)
+#(28.1175e9/1e4)
+print 'nu_sweep',nu_sweep, 'B1_exc',B1_exc, 'B1_inv',B1_inv, 'tau_pulse',tau_pulse
+t_steps = 500
+nu_offset = linspace(-nu_plot,nu_plot,n_nu)
+#t = linspace(0,2.5*tau_pulse,2.5*t_steps)
+t = r_[0.:3*tau_pulse:1e-9]
+#t_axis = linspace(0,tau_pulse*3,t_steps*3)
+t_axis = t.copy()
+fpg = (28.1175e9/1e4)
+mu = -2*pi*nu_sweep/beta
+bprime = beta*2./tau_pulse
+complex_form = (sech(bprime * (t-tau_pulse/2)))**(1.+1j*mu) # no idea why this isn't working
+dt = t[1]-t[0]
+#{{{ generate the complex for the second
+pulse_center = tau_pulse/2
+tau = (t-pulse_center)*2/tau_pulse
+fmod = nu_sweep*tanh(beta*tau)
+fmod[t<pulse_center - tau_pulse/2] = 0
+fmod[t>pulse_center + tau_pulse/2] = 0
+pulse_phase = dt * cumsum(fmod)# second pulse
+pulse_phase = exp(1j*2.*pi*pulse_phase)
+complex_form1 = B1_exc * sech(beta*tau) * pulse_phase
+complex_form1[t<pulse_center - tau_pulse/2] = 0
+complex_form1[t>pulse_center + tau_pulse/2] = 0
+#}}}
+fmod1 = fmod
+#{{{ generate the complex for the second
+pulse_center = 3*tau_pulse/2
+tau = (t-pulse_center)*2/tau_pulse
+fmod = nu_sweep*tanh(beta*tau)
+fmod[t<pulse_center - tau_pulse/2] = 0
+fmod[t>pulse_center + tau_pulse/2] = 0
+pulse_phase = dt * cumsum(fmod)# second pulse
+pulse_phase = exp(1j*2.*pi*pulse_phase)
+complex_form2 = B1_inv * sech(beta*tau) * pulse_phase
+complex_form2[t<pulse_center - tau_pulse/2] = 0
+complex_form2[t>pulse_center + tau_pulse/2] = 0
+#}}}
+complex_form = complex_form1 + complex_form2 # the overlay of the two pulses
+fl.next('waveforms')
+plot(abs(complex_form)/fpg,'k',linewidth=3)
+plot(abs(complex_form1)/fpg,'r',linewidth=1.5)
+plot(abs(complex_form2)/fpg,'b',linewidth=1.5)
+fl.next('coherence')
+t_dep = array([r_[(fmod+fmod1)] , r_[abs(complex_form)] , r_[ones(shape(t))]]) * tau_pulse / t_steps
+operators = array([I_z          , I_x                   , I_z])
+parameters = (array([1.])       , array([1.])           , nu_offset) # these need to have the same number of dimensions as the full parameter grid
+
+# generate the density matrices, w/out time propagation
+#{{{ excitation
+U = prop(t = t_dep,p = parameters,H = operators,accumtime = True)
+rho = sandwich(U[:,:,:,:],
+	array(I_z,dtype='complex128')
+	)
+#}}}
+signal = lvdot(rho,I_p)
+signal_mask = abs(signal)
+image(abs(signal),
+		x=t_axis/1e-9,y=nu_offset/1e6)
+xlabel(r't / $ns$')
+ylabel(r'$\Omega$ / 2 $\pi\;MHz$')
+title('Magnitude of coherence')
+fl.next('signal_complex')
+image(signal,
+		x=t_axis/1e-9,y=nu_offset/1e6)
+xlabel(r't / $ns$')
+ylabel(r'$\Omega$ / 2 $\pi\;MHz$')
+title('complex coherence')
+fl.next('inversion')
+image(abs(lvdot(rho,I_z)),
+		x=t_axis/1e-9,y=nu_offset/1e6)
+xlabel(r't / $ns$')
+ylabel(r'$\Omega$ / 2 $\pi\;MHz$')
+title('inversion')
+fl.next('signal')
+plotfunc = angle(lvdot(rho,I_p))
+plotfunc = diff(plotfunc,axis=0)**2
+plotfunc = -log(abs(plotfunc))
+plotfunc *= signal_mask[:-1,:]
+print plotfunc
+nu_offset = nu_offset[:-1]
+print shape(plotfunc)
+image(plotfunc,
+		x=t_axis/1e-9,y=nu_offset/1e6)
+xlabel(r't / $ns$')
+ylabel(r'$\Omega$ / 2 $\pi\;MHz$')
+
+print 'nu_sweep',nu_sweep/1e6, 'MHz, B1_exc',B1_exc/1e6, 'MHz B1_inv',B1_inv/1e6,'MHz --> ',B1_inv/(28.1175e9/1e4),'G tau_pulse',tau_pulse/1e-9,'ns dt',dt*1e9,'ns'
+title('Signal Level (log of inverse of dispersion)')
+fl.show('prop_test_130215')
+\end{python}
+
+The important parts of the above code look like this:
+
+% the lstlisting seems to tolerate 100 characters
+\begin{lstlisting}
+t_dep = array([r_[(fmod+fmod1)] , r_[abs(complex_form)] , r_[ones(shape(t))]]) * tau_pulse / t_steps
+operators = array([I_z          , I_x                   , I_z])
+parameters = (array([1.])       , array([1.])           , nu_offset)
+U = prop(t = t_dep,p = parameters,H = operators,accumtime = True)
+rho = sandwich(U[:,:,:,:],
+	array(I_z,dtype='complex128')
+	)
+signal = lvdot(rho,I_p)
+image(abs(signal),
+		x=t_axis/1e-9,y=nu_offset/1e6)
+\end{lstlisting}
+\subsection{How to use F2PY on windows}
+Tim uses the following .bat file for compiling
+
+\begin{verbatim}
+f2py.py -c -m %~n1 %1 --fcompiler=gnu95 --compiler=mingw32
+pause
+\end{verbatim}
+
+and I can see that these flags do work.
+\subsection{How to use F2PY on linux}
+I can't find the code that I exactly used to compile prop,
+but here is several lines that compile other examples that use lapack (a linear algebra library).
+This is more complicated than Tim's stuff for windows because it has compiler flags to use the Intel Fortran lapack library (if possible, do not use Intel, but rather the gnu compiler (g95) because Intel is not free on Windows).
+
+\begin{verbatim}
+#ifort -xK -w Eigenvalue.f -L/opt/intel/Compiler/11.0/081/mkl/examples/lapack95/lib/32 -lmkl_lapack95 -L"/opt/intel/Compiler/11.0/081/mkl/lib/32" "/opt/intel/Compiler/11.0/081/mkl/lib/32"/libmkl_intel.a -Wl,--start-group "/opt/intel/Compiler/11.0/081/mkl/lib/32"/libmkl_intel_thread.a "/opt/intel/Compiler/11.0/081/mkl/lib/32"/libmkl_core.a -Wl,--end-group -L"/opt/intel/Compiler/11.0/081/mkl/lib/32" -liomp5 -L"/opt/intel/Compiler/11.0/081/mkl/lib/32" -liomp5 -lpthread -o Eigenvalue
+ifort -xK -w Eigenvalue.f -L/opt/intel/Compiler/11.0/081/mkl/examples/lapack95/lib/32 -lmkl_lapack95 -L"/opt/intel/composerxe-2011.3.174/mkl/lib/ia32" "/opt/intel/composerxe-2011.3.174/mkl/lib/ia32"/libmkl_intel.a -Wl,--start-group "/opt/intel/composerxe-2011.3.174/mkl/lib/ia32"/libmkl_intel_thread.a "/opt/intel/composerxe-2011.3.174/mkl/lib/ia32"/libmkl_core.a -Wl,--end-group -L"/opt/intel/composerxe-2011.3.174/mkl/lib/ia32" -liomp5 -L"/opt/intel/composerxe-2011.3.174/mkl/lib/ia32" -liomp5 -lpthread -o Eigenvalue
+#f2py --fcompiler=intel -c -L"/opt/intel/Compiler/11.0/081/mkl/examples/lapack95/lib/32" -L"/opt/intel/Compiler/11.0/081/mkl/lib/32" "/opt/intel/Compiler/11.0/081/mkl/lib/32/libmkl_intel.a" -L"/opt/intel/Compiler/11.0/081/mkl/lib/32" -L"/opt/intel/Compiler/11.0/081/mkl/lib/32" -liomp5 -lmkl_lapack95 -lmkl_intel_thread -lmkl_core -lpthread --link-mkl_lapack Eigenvalue.f90 -m Eigenvalue
+f2py --fcompiler=intel -c -L"/opt/intel/composerxe-2011.3.174/mkl/lib/ia32" "/opt/intel/composerxe-2011.3.174/mkl/lib/ia32/libmkl_intel.a" -liomp5 -lmkl_lapack95 -lmkl_intel_thread -lmkl_core -lpthread --link-mkl_lapack Eigenvalue.f90 -m Eigenvalue
+f2py --fcompiler=intel -c -L"/opt/intel/composerxe-2011.3.174/mkl/lib/ia32" -lmkl_def -lmkl_pm4 -liomp5 -lmkl_lapack -lmkl_intel_thread -lmkl_core -lpthread Eigenvalue.f90 -m Eigenvalue "/opt/intel/composerxe-2011.3.174/mkl/lib/ia32/libmkl_intel.a"
+# "/opt/intel/Compiler/11.0/081/mkl/lib/32/libmkl_lapack.so"
+\end{verbatim}
