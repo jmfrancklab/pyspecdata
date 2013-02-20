@@ -61,7 +61,9 @@ implicit none
 integer p_counter,t_counter
 double complex tempmat(size(propagators,1),size(propagators,2)) 
 write(*,*) '------------------------------------------------------------'
-write (*,*) 'sandwiching rho of size ',size(rho,1),size(rho,2),size(rho,3),size(rho,4),' with propagator of size ',size(propagators,1),size(propagators,2),size(propagators,3),size(propagators,4)
+write (*,*) 'sandwiching rho of size ',size(rho,1),size(rho,2),size(rho,3),size(rho,4),&
+    ' with propagator of size ',size(propagators,1),size(propagators,2),&
+    size(propagators,3),size(propagators,4)
 if (allocated(propagators)) then
 	write (*,*) 'propagators is allocated for size ',size(propagators)
 else
@@ -71,10 +73,7 @@ if (size(rho,4).eq.size(propagators,4).and.size(rho,3).eq.size(rho,3)) then
 	write (*,*) 'case 1'
 	do p_counter = 1,size(propagators,4)
 		do t_counter = 1,size(propagators,3)
-			call sandwich_internal(&
-				rho(:,:,t_counter,p_counter),&
-				propagators(:,:,t_counter,p_counter),&
-				propagators(:,:,t_counter,p_counter))
+			call sandwich_internal(rho(:,:,t_counter,p_counter),propagators(:,:,t_counter,p_counter),propagators(:,:,t_counter,p_counter))
 		enddo
 	enddo
 elseif (size(rho,4).eq.1.and.size(rho,3).eq.1) then
@@ -82,13 +81,10 @@ elseif (size(rho,4).eq.1.and.size(rho,3).eq.1) then
 	do p_counter = 1,size(propagators,4)
 		do t_counter = 1,size(propagators,3)
 			!write (*,*) 'multiply',t_counter,p_counter
-			propagators(:,:,t_counter,p_counter) = matmul(&
-				propagators(:,:,t_counter,p_counter),&
-				matmul(&
-					rho(:,:,1,1) , conjg(transpose(&
-						propagators(:,:,t_counter,p_counter)&
-						))&
-					))
+			propagators(:,:,t_counter,p_counter) =&
+                matmul(propagators(:,:,t_counter,p_counter),&
+                matmul(rho(:,:,1,1) ,&
+                conjg(transpose(propagators(:,:,t_counter,p_counter)))))
 		enddo
 	enddo
 else
@@ -112,13 +108,9 @@ if (size(rho,3).eq.size(traceout,1).and.size(rho,4).eq.size(traceout,2)) then
 		do p_counter = 1,size(rho,4)
 			!write (*,*) 'multiply',t_counter,p_counter
 			if (size(C,3).gt.1) then
-				tempmat = matmul(&
-					rho(:,:,t_counter,p_counter),&
-					conjg(transpose(C(:,:,p_counter))))
+				tempmat = matmul(rho(:,:,t_counter,p_counter),conjg(transpose(C(:,:,p_counter))))
 			else
-				tempmat = matmul(&
-					rho(:,:,t_counter,p_counter),&
-					conjg(transpose(C(:,:,1))))
+				tempmat = matmul(rho(:,:,t_counter,p_counter),conjg(transpose(C(:,:,1))))
 			endif
 			traceout(t_counter,p_counter) = 0
 			call trace_internal(tempmat,traceout(t_counter,p_counter))
@@ -176,20 +168,17 @@ if (size(propagators,3) .gt. 1) then
 		do t_counter = 1,size(time_dependence,2)
 			propagators(:,:,t_counter,p_counter) = 0
 			do op_counter = 1,size(time_dependence,1)
-				propagators(:,:,t_counter,p_counter) = &
-					propagators(:,:,t_counter,p_counter) &
-					+ p(op_counter,p_counter) &
-					* time_dependence(op_counter,t_counter) &
-					* operators(:,:,op_counter)
+				propagators(:,:,t_counter,p_counter) =&
+                    propagators(:,:,t_counter,p_counter) +&
+                    p(op_counter,p_counter) *&
+                    time_dependence(op_counter,t_counter) *&
+                    operators(:,:,op_counter)
 			end do
 			call complexexp(propagators(:,:,t_counter,p_counter)) ! this passes a HERMITIAN argument, and gets back the exponent of the 2*pi*i* that argument
 			!call exact(propagators(:,:,t_counter,p_counter)) ! this passes a HERMITIAN argument, and gets back the exponent
 			! for now, i'm not actually propagating, just exponentiating
 			if (t_counter.gt.1) then
-				propagators(:,:,t_counter,p_counter) = &
-					matmul(&
-					propagators(:,:,t_counter,p_counter),&
-					propagators(:,:,t_counter-1,p_counter))
+				propagators(:,:,t_counter,p_counter) = matmul( propagators(:,:,t_counter,p_counter), propagators(:,:,t_counter-1,p_counter))
 			endif
 		enddo
 		!write(*,*) 'done propagating parameter ',p_counter,' out of ',size(p,2)
@@ -200,18 +189,12 @@ else
 		do t_counter = 1,size(time_dependence,2)
 			temp_exp = 0
 			do op_counter = 1,size(time_dependence,1)
-				temp_exp = temp_exp &
-					+ p(op_counter,p_counter) &
-					* time_dependence(op_counter,t_counter) &
-					* operators(:,:,op_counter)
+				temp_exp = temp_exp + p(op_counter,p_counter) * time_dependence(op_counter,t_counter) * operators(:,:,op_counter)
 			end do
 			call complexexp(temp_exp) ! this passes a HERMITIAN argument, and gets back the exponent of the 2*pi*i* that argument
 			! for now, i'm not actually propagating, just exponentiating
 			if (t_counter.gt.1) then
-				propagators(:,:,1,p_counter) = &
-					matmul( temp_exp,&
-						propagators(:,:,1,p_counter)&
-						)
+				propagators(:,:,1,p_counter) = matmul( temp_exp, propagators(:,:,1,p_counter))
 			else
 				propagators(:,:,1,p_counter) = temp_exp
 			endif
@@ -238,32 +221,26 @@ else
 	t_steps = size(propagators,3)
 	do p_counter = 1,size(propagators,4)
 		if (size(C,3).gt.1) then
-			call sandwich_internal(&
-				conjg(transpose(C(:,:,p_counter))),&
+			call sandwich_internal( conjg(transpose(C(:,:,p_counter))),&
+                conjg(transpose(propagators(:,:,size(propagators,3),&
+                p_counter))),end_sandwich)
 				!propagators(:,:,size(propagators,3),p_counter),&
-				conjg(transpose(propagators(:,:,size(propagators,3),p_counter))),&
-				end_sandwich)
 		else
-			call sandwich_internal(&
-				conjg(transpose(C(:,:,1))),&
-				!propagators(:,:,size(propagators,3),p_counter),&
+			call sandwich_internal(conjg(transpose(C(:,:,1))),&
 				conjg(transpose(propagators(:,:,size(propagators,3),p_counter))),&
 				end_sandwich)
+				!propagators(:,:,size(propagators,3),p_counter),&
 		endif
 		do t_counter = 1,t_steps
-			call sandwich_internal(&
-				H_c,&
+			call sandwich_internal(H_c,conjg(transpose(propagators(:,:,t_counter,p_counter))),tempmat)
 				!propagators(:,:,t_counter,p_counter),&
-				conjg(transpose(propagators(:,:,t_counter,p_counter))),&
-				tempmat)
 			if (size(rho,3).gt.1) then
 				call commutator_internal(tempmat,rho(:,:,1,p_counter))
 			else
 				call commutator_internal(tempmat,rho(:,:,1,1))
 			endif
 			tempmat = matmul(end_sandwich,tempmat)
-			call trace_internal(tempmat,&
-				gradient(t_counter,p_counter))
+			call trace_internal(tempmat,gradient(t_counter,p_counter))
 		enddo
 	enddo
 	gradient = gradient * (0,1)
@@ -328,13 +305,7 @@ subroutine sandwich_internal(mat,with,output)
 double complex, intent(in), dimension(:,:):: mat
 double complex, intent(in), dimension(:,:):: with
 double complex, intent(out), dimension(:,:):: output
-output = matmul(&
-	with,&
-	matmul(&
-		mat , conjg(transpose(&
-			with &
-			))&
-		))
+output = matmul(with,matmul(mat , conjg(transpose(with))))
 return
 end subroutine sandwich_internal
 
