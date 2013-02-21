@@ -3149,6 +3149,11 @@ f2py.py -c -m %~n1 %1 --fcompiler=gnu95 --compiler=mingw32
 pause
 \end{verbatim}
 
+Ryan uses these lines on a mac to compile the .f90 code
+\begin{verbatim}
+f2py -c -m propagator propagator.f90 --fcompiler=gnu95 -llapack
+\end{verbatim}
+
 and I can see that these flags do work.
 \subsection{How to use F2PY on linux}
 I can't find the code that I exactly used to compile prop,
