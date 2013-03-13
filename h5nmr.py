@@ -18,7 +18,7 @@ class store_integrals:
             auxiliary_args = {},integration_args = {},integrate_function = integrate,
             lplotfigurekwargs = {},
             type_str = 'integral'):
-        self.figurelist = figlistini(first_figure)
+        self.figurelist = figlistini_old(first_figure)
         self.run_number = run_number
         self.type_str = type_str
         self.name = fid_args["name"]
@@ -221,7 +221,7 @@ def parse_powers(path,name,power_file,expno = None,
         tolerance = 2.0,
         first_figure = None,
         threshold = -36):
-    figurelist = figlistini(first_figure)
+    figurelist = figlistini_old(first_figure)
     fullpath = dirformat(dirformat(path)+name)+'%d/'%1
     fileinfo = load_acqu(fullpath)
     if expno == None:
@@ -345,7 +345,7 @@ def delete_datanode(filename,integralnodename):
     return
 def print_chemical_by_index(compilationroot_name,indexnumber):
     h5file,chemicalnode = h5nodebypath(compilationroot_name)
-    lrecordarray(chemicalnode.chemicals.readWhere('index == %d'%indexnumber))
+    lrecordarray(chemicalnode.chemicals.readWhere('index == %d'%indexnumber),format = '%g')
     return
 def get_chemical_index(compilationroot_name,*args,**kwargs):
     r'OLD format: get_chemical_index(location of HDF5 node, chemical name,concentration)' + '\n' + 'OR get_chemical_index(location of HDF5 name, string with chemical + conc)' + '\n' + 'NEW FORMAT: pass no arguments, but pass kwargs chemical, concentration, and name'
@@ -415,7 +415,7 @@ def genexpname(name,expnos):
 ##{{{ linear dnp plot
 def emax_linearandplot(integral,first_figure = None,pdfstring = '',power_axis = 'power',max_invpower = inf,color_pair = ['r','k'],show_Evip_plot = True,**kwargs):
     "generates the 1/(1-E) plots for DNP"
-    figurelist = figlistini(first_figure)
+    figurelist = figlistini_old(first_figure)
     lineardata = integral.linear()
     lineardata = lineardata['1 / power',lambda x: x < max_invpower]
     x = lineardata.getaxis('1 / power').copy()
@@ -481,7 +481,7 @@ def dnp_for_rho(path,
         t1powers = t1_powers
     if expnos is not None and expno == []:
         expno = expnos
-    figurelist = figlistini(first_figure) # when I convert this to a new function, definitely convert to a new format
+    figurelist = figlistini_old(first_figure) # when I convert this to a new function, definitely convert to a new format
     if (type(t1powers) is list and len(t1powers) > 0) or (type(t1powers) is ndarray):
         t1powers = array(t1powers,dtype = 'double')
     if type(clear_nodes) is list:
@@ -564,11 +564,12 @@ def dnp_for_rho(path,
     if t1expnos == 'auto':
         t1expnos = r_[emax_in_file.expno[-1]+t1_autovals,304] #right now, set to three, but can easily add others later
         t1names_forerror = map(lambda x: 'autoval %d'%x,t1_autovals)+['exp 304']
+    else:
+        t1names_forerror = map(lambda x: 'manually entered exp %d'%x,t1expnos)
+    if len(t1expnos) > 0:
         if clear_nodes:
             for j in t1expnos:
                 delete_datanode(h5file,genexpname(name,j))
-    else:
-        t1names_forerror = map(lambda x: 'manually entered exp %d'%x,t1expnos)
     #{{{ manually enter certain kwargs
     integration_args_save = dict(integration_args)
     integration_args.update({'show_image':show_t1_raw})
@@ -1252,7 +1253,7 @@ def t1vp(h5filename,expnos,dbm,fid_args = {},integration_args = {}, auxiliary_ar
     r'''this tries to load a series of T1 vs. power curves
     it uses expno and t1power to select the T1 files to load,
     and it calls store T1'''
-    figurelist = figlistini(first_figure)
+    figurelist = figlistini_old(first_figure)
     if len(expnos) != len(dbm):
         raise CustomError('len(expnos)=',len(expnos),'len(dbm)=',len(dbm),dbm)
     if chem_name is None:
@@ -1503,8 +1504,14 @@ def retrieve_T1series(h5filename,name,*cheminfo,**kwargs):
                 raise RuntimeError("found no T1 data for"+name)
         data = concatenate(data) # this concatenates the nddata
     if len(data) == 0:
-        print 'No $T_1$ data found for chemidx=\n\n',print_chemical_by_index(h5filename+'/compilations/chemicals',chemidx),'\n\n'
+        print 'No $T_1$ data found for chemidx=\n\n'
+        print_chemical_by_index(h5filename+'/compilations/chemicals',chemidx)
+        print '\n\n'
         return None
+    else:
+        print '$T_1$ data was found for chemidx=\n\n'
+        print_chemical_by_index(h5filename+'/compilations/chemicals',chemidx)
+        print '\n\n'
     if show_result:
         print r'\subparagraph{$T_1$ series}','\n\n',r'{\bf retrieved $T_1$ series',show_result,':}','\\begin{tiny}\n\n',lrecordarray(data),'\\end{tiny}\n\n'
         temp = [x[0:x.find('_exp')] for x in data['integrals'].tolist() if x.find('_exp')>-1]
