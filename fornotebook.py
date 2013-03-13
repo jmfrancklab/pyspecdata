@@ -79,6 +79,19 @@ def lplotfigures(figurelist,string,**kwargs):
     while len(figurelist) > 0:
         figurelist.pop(-1)
     return
+def figlistini(first_figure):
+    r"""processes a figure list argument:
+    typically, you want to have a figure_list keyword argument for every function, which is by default set to None, then call this on the argument -- it always returns a figure list, creating a new one if required
+    similarly, somewhere I have another guy that processes the output, so that if it's set to None, it will by default dump and show the figure list,
+    and not return a figure list in the output"""
+    verbose = False
+    if verbose: print lsafe('DEBUG: initialize figlist')
+    if first_figure == None:
+        if verbose: print lsafen('empty')
+        return figlistl() # note that this is changed, and it used to be an empty list
+    else:
+        if verbose: print lsafen(first_figure.figurelist)
+        return first_figure
 def figlisterr(figurelist,*args,**kwargs):
     if 'basename' in kwargs.keys():
         basename = kwargs['basename']
@@ -146,11 +159,11 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
             if error_val is None:
                 return str(x)
             else:
-                return str(x)+'\\pm'+str(error_val)
+                return str(x)+'\\pm '+str(error_val)
         elif std_sf is not None:
             #just return two significant figures
             number_sf = std_sf
-            if error_val is None:
+            if error_val is None or error_val == 0.0:
                 highest_significant = floor(log10(x))
                 lowest_significant = highest_significant-(number_sf-1) # the -1 is for number_sf significant figures, not just one
                 x /= 10**lowest_significant
@@ -171,15 +184,15 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
                 error_val *= 10**lowest_significant
                 x *= 10**lowest_significant
                 if lowest_significant<0:
-                    thisformat = '%%0.%df'%(-1*lowest_significant)
+                    thisformat = '%%0.%df'%int(-1*lowest_significant)
                 else:
                     thisformat = '%0.0f'
-                return (thisformat+'\\pm'+thisformat)%(x,error_val)
+                return (thisformat+'\\pm '+thisformat)%(x,error_val)
         else:
             if error_val is None:
                 return (format)%(x)
             else:
-                return (format+'\\pm'+format)%(x,error_val)
+                return (format+'\\pm '+format)%(x,error_val)
     def maybe_matrix(x,error = None):
         if error is not None:
             if type(x) is ndarray:
@@ -296,7 +309,7 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
         return '\n'.join(final_retval)
     else:
         print '\n'.join(final_retval)
-def lplot(fname,width=0.33,figure=False,dpi=300,grid=False,alsosave=None,gensvg = False,print_string = None,centered = False,legend = False,equal_aspect = False,autopad = True,bytextwidth = None,showbox = True):
+def lplot(fname,width=0.33,figure=False,dpi=72,grid=False,alsosave=None,gensvg = False,print_string = None,centered = False,legend = False,equal_aspect = False,autopad = True,bytextwidth = None,showbox = True):
     '''
     used with python.sty instead of savefig
     
@@ -325,7 +338,13 @@ def lplot(fname,width=0.33,figure=False,dpi=300,grid=False,alsosave=None,gensvg 
     if legend:
         autolegend()
     if autopad: autopad_figure(centered = centered)
-    savefig(fname,dpi=dpi)
+    try:
+        savefig(fname,dpi=dpi)
+    except ValueError,exc_string:
+        if exc_string.find('finite numbers') > -1:
+            raise ValueError("It gives this error because you're trying to do a bar graph with zero width")
+        else:
+            raise ValueError(exc_string)
     if alsosave != None:
         savefig(alsosave,dpi=dpi)
     if figure:

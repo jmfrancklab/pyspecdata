@@ -24,7 +24,25 @@ def dbm_to_power(dbm,cavity_setup = 'newcnsi'):
 def power_to_dbm(power):
     return 10.0*log(power/1e-3)/log(10.0)-40 #20 db for each atten
 #{{{ auto_steps
-def check_autosteps(threshold,values,figure_list = None):
+def show_powerlog(filename,threshold = -35,extra_t1_problem = False,figure_list = None,**kwargs):
+    #{{{ generate the powers for the T1 series
+    figure_list = fornotebook.figlistini(figure_list)
+    #figure_list.text('\n\nCheck the $T_1$ powers:\n\n')
+    figure_list.next('powerlog_raw')
+    figure_list.next('checkpowerlog')
+    figure_list.next('powerlog')
+    t1_dbm,figure_list.figurelist = auto_steps(filename,
+        threshold = threshold,
+        first_figure = figure_list.figurelist,# note that auto_steps is old-style, so I pull the list out of the figlist class
+        **kwargs)
+    t1mask = ones(len(t1_dbm),dtype='bool')
+    if extra_t1_problem == True:
+        t1mask[-1] = 0 # this is the line you sometimes want to uncomment
+    figure_list = check_autosteps(threshold,t1_dbm,figure_list = figure_list,mask = t1mask)
+    figure_list.text('\n\nresulting array:'+lsafen(t1_dbm))
+    #}}}
+    return figure_list,t1_dbm,t1mask
+def check_autosteps(threshold,values,figure_list = None,mask = None):
     if figure_list == None:
         figure_list = figlistl()
     figure_list.next('checkpowerlog')
@@ -32,6 +50,12 @@ def check_autosteps(threshold,values,figure_list = None):
     y = r_[values,values]
     s = argsort(x)
     plot(x[s],y[s],'b',linewidth=1)
+    if mask is not None:
+        if sum(mask) > 0:
+            x = r_[r_[0:len(values)][~mask],r_[0:len(values)][~mask]+0.99]
+            y = r_[values[~mask],values[~mask]]
+            s = argsort(x)
+            plot(x[s],y[s],'r',linewidth=2)
     expand_y()
     expand_x()
     ax = gca()
@@ -42,13 +66,13 @@ def check_autosteps(threshold,values,figure_list = None):
     ylims = list(ax.get_ylim())
     ylims[0] = threshold
     ax.set_ylim(ylims)
-    title('Interpretation:')
+    title('Interpretation:\n(red values are not used)')
     xlabel('experiment number')
     ylabel('power (dBm)')
     return figure_list
 def auto_steps(filename,threshold = -35, upper_threshold = 5, t_minlength = 0.5*60,minstdev = 0.1,showplots = True, showdebug = False,t_start=0,t_stop=60*1000,tolerance = 2,t_maxlen = inf,return_lastspike = False,first_figure = None):
     r'Plot the raw power output in figure 1, and chop into different powers in plot 2'
-    figurelist = figlistini(first_figure)
+    figurelist = figlistini_old(first_figure)
     v = loadmat(filename)
     p_ini = v['powerlist']
     t_ini = v['timelist']
@@ -270,7 +294,7 @@ def format_listofexps(args):
         if len(args) > 2: raise CustomError('wrong number of args!')
         if isscalar(args[1]): args[1] = [args[1]] # if the second argument is a single file number, make it into a list
         if len(args[0]) > 1: raise CustomError("you can't have both the filename and the expnos be longer than 1")
-        filenames = [dirformat(args[0][0]) + str(x) for x in args[1]]
+        filenames = [dirformat(args[0][0]) + '%d'%x for x in args[1]]
     else:
         filenames = args[0]
     return filenames
@@ -407,7 +431,7 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
             indirect_dim_len = []
             dimshere = 2
         taxis = linspace(0,1,v['nrPnts'])*v['acqTime']/1e3 # this is the t2 dimension, and so is always true
-        data = prospa_load_datafile(filename,dims=dimshere)
+        data = prospa_load_datafile(filename,dims=dimshere)/v['nrScans']#added this 2/20/13 to allow automatic signal averaging
         #{{{ Prospa CPMG
         if v['experiment'].find('cpmg') > -1:
             data = nddata(data,indirect_dim_len+[v['nrEchoes'],v['nrPnts']],indirect_dim_name+['echo','t2'])
@@ -451,7 +475,7 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
         #{{{ prospa 1d
         elif filetype == 'prospa':
             v = prospa_load_acqu(filename)
-            data = prospa_load_datafile(filename,dims=1)
+            data = prospa_load_datafile(filename,dims=1)/v['nrScans']#added this 2/20/13 to allow automatic signal averaging
             data = nddata(data,[v['nrPnts']],['t2'])
             taxis = linspace(0,1,v['nrPnts'])*v['acqTime']/1e3
             data.labels(['t2'],[taxis])
@@ -925,7 +949,7 @@ def exp_errfunc(p,x,y):
 def rg_check(file,expno,number_of_samples = 75,dynamic_range = 19,first_figure = None,show_complex = True):
     r'''show the fid, plotted vs. the max possible value to check the max of the receiver gain in figure 1
     in figure 2, plot in the complex plain to check digitization limit'''
-    fl = figlistini(first_figure)
+    fl = figlistini_old(first_figure)
     # the following was load_emax, and I have not yet checked it
     data = load_file(file,expno,dimname = 'power',printinfo = False) # load the data
     listoffiles = format_listofexps([file,expno])
@@ -982,7 +1006,7 @@ def integrate(file,expno,
         offset_corr = 0):
     r'''new integration function, which replaces integrate_emax, and is used to integrate data, as for Emax and T1 curves'''
     #print lsafen("DEBUG: yes, integrate was called")
-    figurelist = figlistini(first_figure)
+    figurelist = figlistini_old(first_figure)
     if type(plot_check_baseline) is bool:
         if plot_check_baseline:
             plot_check_baseline = 0 
@@ -1217,7 +1241,7 @@ def print_info(filename,also = {}):
 #}}}
 #{{{ deal with manual phase cycling
 def phcyc(data,names=[],selections=[],remove_zeroglitch=None,show_plot = False,first_figure = None,pdfstring = '',bandpass = None):
-    figurelist = figlistini(first_figure)
+    figurelist = figlistini_old(first_figure)
     data.ft('t2',shift=True)
     if (bandpass is not None):
         data = data['t2',lambda x: abs(x)<bandpass]
@@ -1264,7 +1288,7 @@ def process_t1(file,expno,usebaseline = None,showimage = None,plotcheckbaseline 
     if len(file) > 1: raise CustomError('I don\'t think this can handle more than one file at a time')
     expno = []
     #}}}
-    figurelist = figlistini(first_figure)
+    figurelist = figlistini_old(first_figure)
     #{{{ legacy kwargs
     if showimage != None:
         show_image = showimage

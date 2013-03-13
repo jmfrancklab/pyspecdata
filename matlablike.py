@@ -37,6 +37,10 @@ rcParams['legend.fontsize'] = 12
 rcParams['axes.grid'] = False
 rcParams['font.size'] = 18
 DATADIR = getDATADIR() 
+#{{{ constants
+k_B = 1.380648813e-23
+hbar = 6.6260695729e-34/2./pi
+#}}}
 
 def mybasicfunction(first_figure = None):
     r'''this gives the format for doing the image thing
@@ -45,7 +49,7 @@ nextfigure(fl,'name')
 and
 nextfigure({'lplotproperty':value})
 '''
-    fl = figlistini(first_figure)
+    fl = figlistini_old(first_figure)
     return figlistret(first_figure,figurelist,other)
 
 #{{{ function trickery
@@ -1279,14 +1283,14 @@ def nextfigure(figurelist,name):
         if verbose: print lsafen('added, figure',len(figurelist)+1,'because not in figurelist',figurelist)
         figurelist.append(name)
     return figurelist
-def figlistini(first_figure):
+def figlistini_old(first_figure):
     verbose = False
     if verbose: print lsafe('DEBUG: initialize figlist')
     if first_figure == None:
         if verbose: print lsafen('empty')
         return []
     else:
-        if verbose: print lsafen(first_figure)
+        if verbose: print lsafen(first_figure.figurelist)
         return first_figure
 class figlist():
     def __init__(self,*arg,**kwargs):
@@ -1725,20 +1729,47 @@ class nddata (object):
         return repr(self.data)+'\n\t\t+/-'+repr(self.get_error())+'\n\tdimlabels=['+repr(self.dimlabels)+']\n\taxes='+repr(self.mkd(self.axis_coords))+'\n\t\t+/-'+repr(self.mkd(self.axis_coords_error))+'\n'
     #}}}
     #{{{ for plotting
+    def gnuplot_save(self,filename):
+        x = self.getaxis(self.dimlabels[0])[:5]
+        y = self.getaxis(self.dimlabels[1])[:5]
+        z = self.data[:5,:5]
+        print "size of x",size(x),"size of y",size(y),"size of z",size(z)
+        print "x",x,"y",y,"z",z
+        data = empty((z.shape[0]+1,z.shape[1]+1))
+        data[1:,1:] = z[:]
+        data[0,0] = z.shape[1]
+        data[0,1:] = y.flatten()
+        data[1:,0] = x.flatten()
+        print "data",data
+        fp = open('auto_figures/'+filename+'.dat','w')
+        fp.write(float32(data).tostring())
+        fp.write('\n')
+        fp.close()
+        return
     #{{{ 3D mesh plot
-    def meshplot(self,stride = None,alpha = 0.3,onlycolor = False,light = None,rotation = [65,0],cmap = cm.gray,**kwargs):
+    def meshplot(self,stride = None,alpha = 0.3,onlycolor = False,light = None,rotation = None,cmap = cm.gray,ax = None,invert = False,**kwargs):
         r'''takes both rotation and light as elevation, azimuth
         only use the light kwarg to generate a black and white shading display'''
+        sortedself = self.copy()
+        self.sort(self.dimlabels[0])
+        self.sort(self.dimlabels[1])
+        if invert:
+            print "trying to invert meshplot"
+        if light == True:
+            light = [0,0]# I think this is 45 degrees up shining down from the left of the y axis
         if not onlycolor:
-            fig = gcf()
-            ax = fig.add_subplot(111,projection = '3d')
-        if len(self.dimlabels) > 2:
+            if ax is None: 
+                ax = sortedself._init_3d_axis(ax,rotation = rotation)
+            else:
+                if rotation is not None:
+                    raise ValueError("you can only set the rotation once! (you tried"+repr(rotation)+")")
+        if len(sortedself.dimlabels) > 2:
             raise CustomError("I don't know how to handle something with more than two dimensions for a surface plot!")
         #{{{ shared to both
-        x_dim = self.dimlabels[0]
-        y_dim = self.dimlabels[1]
-        x_axis = self.retaxis(x_dim).data
-        y_axis = self.retaxis(y_dim).data
+        x_dim = sortedself.dimlabels[0]
+        y_dim = sortedself.dimlabels[1]
+        x_axis = sortedself.retaxis(x_dim).data
+        y_axis = sortedself.retaxis(y_dim).data
         #}}}
         rstride = 1
         cstride = 1
@@ -1749,45 +1780,61 @@ class nddata (object):
                 cstride = stride[y_dim]
         X = x_axis*ones(shape(y_axis))
         Y = ones(shape(x_axis))*y_axis
-        Z = self.data
+        Z = real(sortedself.data)
+        if invert:
+            X = X[:,::-1]
+            Y = Y[:,::-1]
+            Z = Z[:,::-1]
+        #mask = isfinite(Z).flatten()
+        #X = X.flatten()[mask]
+        #Y = Y.flatten()[mask]
+        #Z = Z.flatten()[mask]
         if light is not None:
             ls = LightSource(azdeg = light[1],altdeg = light[0])
-            rgb = ls.shade(Z,cmap)
+            if cmap is not None:
+                rgb = ls.shade(Z,cmap)
         else:
-            for_rgb = Z-Z.min()
-            for_rgb /= for_rgb.max()
-            rgb = cmap(for_rgb)
+            mask = isfinite(Z.flatten())
+            for_rgb = Z-Z.flatten()[mask].min()
+            for_rgb /= for_rgb.flatten()[mask].max()
+            if cmap is not None:
+                rgb = cmap(for_rgb)
         if onlycolor:
             imshow(rgb)
         else:
             if light is None:
+                if cmap is not None:
+                    kwargs.update({'cmap':cmap})
                 ax.plot_surface(X,Y,Z,
                         rstride = rstride,
                         cstride = cstride,
-                        cmap = cmap,
                         shade = False,
                         **kwargs)
             else:
-                newkwargs = kwargs
+                newkwargs = {}
                 newkwargs['linewidth'] = 0.0
+                newkwargs.update(kwargs)
+                if cmap is not None:
+                    newkwargs['facecolors'] = rgb
                 ax.plot_surface(X,Y,Z,
                         rstride = rstride,
                         cstride = cstride,
                         alpha = alpha,
-                        facecolors = rgb,
                         shade = False,
                         **newkwargs)
             ax.set_xlabel(x_dim)
             ax.set_ylabel(y_dim)
-            ax.set_zlabel(self.name())
-            ax.view_init(elev = rotation[0],azim = rotation[1])
+            ax.set_zlabel(sortedself.name())
         if onlycolor:
             return
         else:
             return ax
-    def waterfall(self):
-        fig = gcf()
-        ax = fig.add_subplot(111,projection = '3d')
+    def waterfall(self,alpha = 0.3,ax = None,rotation = None):
+        if ax is None: 
+            ax = self._init_3d_axis(ax,rotation = rotation)
+        else:
+            if rotation is not None:
+                raise ValueError("you can only set the rotation once!")
         if len(self.dimlabels) > 2:
             raise CustomError("I don't know how to handle something with more than two dimensions for a surface plot!")
         #{{{ shared to both
@@ -1810,10 +1857,63 @@ class nddata (object):
         poly = PolyCollection(verts) # the individual facecolors would go here
         poly.set_alpha(0.3)
         fig = gcf()
-        ax = fig.add_subplot(111,projection = '3d')
         ax.add_collection3d(poly,zs = ys, zdir = 'y')
         ax.set_zlim3d(self.data.min(),self.data.max())
         ax.set_xlim3d(xs.min(),xs.max())
+        ax.set_ylim3d(ys.min(),ys.max())
+        return ax
+    def _init_3d_axis(self,ax,rotation = None):
+        # other things that should work don't work correctly, so use this to initialize the 3D axis
+        #ax.view_init(elev = rotation[0],azim = rotation[1])
+        if rotation is None:
+            rotation = [0,0]
+        if ax == None:
+            fig = gcf()
+            ax = axes3d.Axes3D(fig)
+            print "I'm trying to rotate to",rotation
+            #ax.view_init(20,-120)
+            ax.view_init(elev = 20 + rotation[1],azim = -120 + rotation[0])
+        return ax
+    def oldtimey(self,alpha = 0.5,ax = None,linewidth = None,sclinewidth = 20.,light = True,rotation = None,invert = False,**kwargs):
+        sortedself = self.copy()
+        self.sort(self.dimlabels[0])
+        self.sort(self.dimlabels[1])
+        if invert:
+            print "trying to invert oldtimey"
+        if linewidth == None:
+            linewidth = sclinewidth/sortedself.data.shape[1]
+            print "setting linewidth to %0.1f"%linewidth
+        if ax is None: 
+            ax = sortedself._init_3d_axis(ax,rotation = rotation)
+        else:
+            if rotation is not None:
+                raise ValueError("you can only set the rotation once!")
+        ax = sortedself.meshplot(linewidth = 0,light = light,ax = ax,invert = invert)
+        #return
+        if len(sortedself.dimlabels) > 2:
+            raise CustomError("I don't know how to handle something with more than two dimensions for a surface plot!")
+        #{{{ shared to both
+        x_dim = sortedself.dimlabels[0]
+        y_dim = sortedself.dimlabels[1]
+        x_axis = sortedself.retaxis(x_dim).data
+        y_axis = sortedself.retaxis(y_dim).data
+        #}}}
+        verts = []
+        xs = x_axis.flatten()
+        ys = y_axis.flatten() # this is the depth dimension
+        if invert:
+            ys = ys[::-1]
+        for j in range(0,len(ys)):
+            zs = sortedself[y_dim,j].data.flatten() # pulls the data (zs) for a specific y slice
+            if invert:
+                zs = zs[::-1]
+            ax.plot(xs,ones(len(xs))*ys[j],zs,'k',linewidth = linewidth)
+        fig = gcf()
+        ax.set_zlim3d(sortedself.data.min(),sortedself.data.max())
+        ax.set_xlim3d(xs.min(),xs.max())
+        #if invert:
+        #    ax.set_ylim3d(ys.max(),ys.min())
+        #else:
         ax.set_ylim3d(ys.min(),ys.max())
         return ax
     #}}}
@@ -2230,28 +2330,53 @@ class nddata (object):
         axis labels and axis errors for both'''
         augmentdims = [x for x in arg.dimlabels if x in set(self.dimlabels)^set(arg.dimlabels)] # dims in arg but now self, ordered as they were in arg
         newdims = self.dimlabels + augmentdims # this should return the new dimensions with the order of self preserved, followed by augmentdims
-        selfshape = list(self.data.shape)+list(ones(len(augmentdims))) # there is no need to transpose self, since its order is preserved
+        selfout = self.copy() # copy self
+        if len(selfout.data.shape) == 0:
+            if len(selfout.dimlabels) == 1:
+                selfout.data.reshape(1)
+            else:
+                raise ValueError("This instance is zero dimensional (It's %s)!!!"%repr(self))
+        selfshape = list(selfout.data.shape)+list(ones(len(augmentdims))) # there is no need to transpose self, since its order is preserved
         new_arg_labels = [x for x in newdims if x in arg.dimlabels] # only the labels valid for B, ordered as they are in newdims
+        argout = arg.copy()
+        if len(argout.data.shape) == 0:
+            if len(argout.dimlabels) == 1:
+                argout.data = argout.data.reshape(1)
+                if argout.get_error() is not None:
+                    try:
+                        argout.set_error(argout.get_error().reshape(1))
+                    except:
+                        raise ValueError("error was"+repr(argout.get_error()))
+                #print "DEBUG: I reshaped argout, so that it now has shape",argout.data.shape,"dimlabels",argout.dimlabels,"and ndshape",ndshape(argout)
+            else:
+                raise ValueError("This instance is zero dimensional (It's %s)!!!"%repr(self))
         argshape = list(ones(len(newdims)))
         #{{{ wherever the dimension exists in arg, pull the shape from arg
         for j,k in enumerate(newdims):
-            if k in arg.dimlabels:
-                argshape[j] = arg.data.shape[arg.dimlabels.index(k)]
+            if k in argout.dimlabels:
+                try:
+                    argshape[j] = argout.data.shape[argout.axn(k)]
+                except:
+                    raise CustomError("There seems to be a problem because the shape of argout is now len:%d "%len(argout.data.shape),argout.data.shape,"while the dimlabels is len:%d "%len(argout.dimlabels),argout.dimlabels)
         #}}}
-        argorder = map(arg.dimlabels.index,new_arg_labels) # for each new dimension, determine the position of the original dimension
-        selfout = self.copy() # copy self
-        selfout.data = self.data.reshape(selfshape) # and reshape to its new shape
+        argorder = map(argout.dimlabels.index,new_arg_labels) # for each new dimension, determine the position of the original dimension
+        selfout.data = selfout.data.reshape(selfshape) # and reshape to its new shape
         selfout.dimlabels = newdims
-        argout = arg.copy() # copy arg
-        argout.data = arg.data.transpose(argorder).reshape(argshape) # and reshape the data
+        argout.data = argout.data.transpose(argorder).reshape(argshape) # and reshape the data
         argout.dimlabels = newdims
-        if self.get_error() != None:
-            temp = self.get_error().copy().reshape(selfshape)
-            self.set_error(temp)
-        if arg.get_error() != None:
-            temp = arg.get_error().copy().transpose(argorder).reshape(argshape)
-            arg.set_error(temp)
-        if (len(self.axis_coords)>0) or (len(arg.axis_coords)>0):
+        if selfout.get_error() != None:
+            try:
+                temp = selfout.get_error().copy().reshape(selfshape)
+            except ValueError,Argument:
+                raise ValueError("The instance (selfout) has a shape of "+repr(selfout.data.shape)+" but its error has a shape of"+repr(selfout.get_error().shape)+"!!!\n\n(original argument:\n"+repr(Argument)+"\n)")
+            selfout.set_error(temp)
+        if argout.get_error() != None:
+            try:
+                temp = argout.get_error().copy().transpose(argorder).reshape(argshape)
+            except ValueError,Argument:
+                raise ValueError("The argument (argout) has a shape of "+repr(argout.data.shape)+" but its error has a shape of"+repr(argout.get_error().shape)+"(it's "+repr(argout.get_error())+")!!!\n\n(original argument:\n"+repr(Argument)+"\n)")
+            argout.set_error(temp)
+        if (len(selfout.axis_coords)>0) or (len(argout.axis_coords)>0):
             #{{{ transfer the errors and the axis labels
             #{{{ make dictionaries for both, and update with info from both, giving preference to self
             axesdict = selfout.mkd()
@@ -2815,7 +2940,7 @@ class nddata (object):
         return self
     def chunk(self,axisin,axesout,shapesout):
         if prod(shapesout) != ndshape(self)[axisin]:
-            raise CustomError("The size of the axis you're trying to split doesn't match the size of the axes you're trying to split it into")
+            raise CustomError("The size of the axis (%s) you're trying to split (%s) doesn't match the size of the axes you're trying to split it into (%s = %s)"%(repr(axisin),repr(ndshape(self)[axisin]),repr(axesout),repr(shapesout)))
         thisaxis = self.dimlabels.index(axisin)
         if len(self.axis_coords[thisaxis]) > 0:
             raise CustomError("split not yet supported on axes with labels")
@@ -2889,7 +3014,6 @@ class nddata (object):
                 axis_coords_error = [errordict[x] for x in newlabels]
             else:
                 axis_coords_error = None
-            #print "DEBUG, determined error of",axis_coords_error,"for slices",args,"and original error",self.axis_coords_error
             return nddata(self.data[indexlist],
                     self.data[indexlist].shape,
                     newlabels,
@@ -3877,7 +4001,9 @@ class fitdata(nddata):
     def guess(self,verbose = False,super_verbose = False):
         r'''provide the guess for our parameters; by default, based on pseudoinverse'''
         self.has_grad = False
-        y = self.data
+        if iscomplex(self.data.flatten()[0]):
+            print lsafen('Warning, taking only real part of fitting data!')
+        y = real(self.data)
         # I ended up doing the following, because as it turns out
         # T1 is a bad fit function, because it has a singularity!
         # this is probably why it freaks out if I set this to zero
