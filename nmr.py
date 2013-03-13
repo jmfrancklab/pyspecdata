@@ -52,8 +52,8 @@ def check_autosteps(threshold,values,figure_list = None,mask = None):
     plot(x[s],y[s],'b',linewidth=1)
     if mask is not None:
         if sum(mask) > 0:
-            x = r_[r_[0:len(values)][~mask],r_[0:len(values)][~mask]+0.99]
-            y = r_[values[~mask],values[~mask]]
+            x = r_[r_[0:len(values)][~mask],r_[0:len(values)][~mask]+0.99,r_[0:len(values)][~mask]+0.991]
+            y = r_[values[~mask],values[~mask],NaN*ones(shape(values[~mask]))]
             s = argsort(x)
             plot(x[s],y[s],'r',linewidth=2)
     expand_y()
