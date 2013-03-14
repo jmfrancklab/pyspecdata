@@ -877,7 +877,7 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
             #}}}
     return h5file,currentnode
 def h5attachattributes(node,listofattributes,myvalues):
-    print "DEBUG 5: node passed to h5attachattributes",node
+    #print "DEBUG 5: node passed to h5attachattributes",node
     if node is None:
         raise CustomError('Problem!, node passed to h5attachattributes: ',node,'is None!')
     h5file = node._v_file

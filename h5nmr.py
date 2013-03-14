@@ -636,9 +636,9 @@ def dnp_for_rho(path,
         ###{{{ search for and retrieve the previously stored T_1(p) values
         t1dataset = None
         if chemical == None and concentration == None:
-            t1dataset = retrieve_T1series(h5file,name,run_number = run_number,show_result = 'for $T_{1}$',t1max = t1max)
+            t1dataset,M0dataset,Minfdataset = retrieve_T1series(h5file,name,run_number = run_number,show_result = 'for $T_{1}$',t1max = t1max,retcheckval = True)
         else:
-            t1dataset = retrieve_T1series(h5file,None,chemical,concentration,run_number = run_number,show_result = 'for $T_{1}$',t1max = t1max,d1val = d1val)
+            t1dataset,M0dataset,Minfdataset = retrieve_T1series(h5file,None,chemical,concentration,run_number = run_number,show_result = 'for $T_{1}$',t1max = t1max,d1val = d1val,retcheckval = True)
         print '\n\n'
         #{{{ store the T1 data with error, for later error propagation
         if t1dataset is None:
@@ -800,8 +800,17 @@ def dnp_for_rho(path,
         nextfigure(figurelist,'t1data' + pdfstring)
         save_color_t1 = plot_color_counter()
         plot(1.0/t1dataset,'o', label = '$T_1^{-1}$ / $s^{-1}$')
+        ylabel('various (see legend)')
         plot_color_counter(save_color_t1)
         plot(powers_forplot,1.0/t1f(powers_forplot).set_error(None),'-',linewidth = 3, alpha = 0.5)
+        nextfigure(figurelist,'M0data' + pdfstring)
+        plot_updown(-1*M0dataset,'power','k','r',symbol = 'o', label = r'$-M(0)$')
+        plot_updown(Minfdataset,'power','b','g',symbol = 'o', label = r'$M(\infty)$')
+        autolegend()
+        ylabel('net magnetization')
+        expand_y()
+        expand_x()
+        nextfigure(figurelist,'t1data' + pdfstring)		
         #}}}
         if fdata_exists: # if I can calculate the leakage factor
             save_color_t10 = plot_color_counter()
@@ -852,6 +861,7 @@ def dnp_for_rho(path,
         ax = gca()
         ylims = array(ax.get_ylim())
         ylims[ylims.argmin()] = 0.0
+        ylims[ylims.argmax()] *= 1.1
         ax.set_ylim(ylims)
         #}}}
         gridandtick(gca())
@@ -1462,6 +1472,9 @@ def retrieve_T1series(h5filename,name,*cheminfo,**kwargs):
     indirect_dim = 'power'
     run_number = None
     show_result = False
+    retcheckval = False
+    if 'retcheckval' in kwargs.keys():
+        retcheckval = kwargs.pop('retcheckval')
     if 'indirect_dim' in kwargs.keys():
         indirect_dim = kwargs.pop('indirect_dim')
     if 'verbose' in kwargs.keys():
@@ -1536,11 +1549,16 @@ def retrieve_T1series(h5filename,name,*cheminfo,**kwargs):
             powers = data[indirect_dim][:]
     else:
             raise CustomError('indirect dim',indirect_dim,'not in',data.dtype.names)
+    Minfdata = nddata(data[r'M(\infty)'],[len(data)],[indirect_dim],data_error = myerrors,axis_coords = [powers])		
+    M0data = nddata(data[r'M(0)'],[len(data)],[indirect_dim],data_error = myerrors,axis_coords = [powers])		
     data = data['T_1'][:]
     retval = nddata(data,[len(data)],[indirect_dim],data_error = myerrors,axis_coords = [powers])
     if indirect_dim == 'power':
         retval.sort(indirect_dim)
     retval.name('T_1')
-    return retval
+    if retcheckval:
+	    return retval,M0data,Minfdata
+    else:
+        return retval
 ##}}}
 #}}}
