@@ -2654,12 +2654,8 @@ class nddata (object):
     def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*(y**2))))):
         r'''perform a normalized convolution'''
         #{{{ make a version of x that is oriented along the correct dimension
-        thisaxis = self.dimlabels.index(axisname)
-        newshape = [1] * len(self.data.shape)
-        x = self.getaxis(axisname).copy().flatten()
-        x = x-x.mean()
-        newshape[thisaxis] = len(x)
-        x.reshape(newshape)
+        nd_x = self.retaxis(axisname)
+        x = nd_x.data
         #}}}
         myfilter = convfunc(x,filterwidth)
         myfilter /= myfilter.sum()
