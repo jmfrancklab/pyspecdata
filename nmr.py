@@ -70,7 +70,7 @@ def check_autosteps(threshold,values,figure_list = None,mask = None):
     xlabel('experiment number')
     ylabel('power (dBm)')
     return figure_list
-def auto_steps(filename,threshold = -35, upper_threshold = 5, t_minlength = 0.5*60,minstdev = 0.1,showplots = True, showdebug = False,t_start=0,t_stop=60*1000,tolerance = 2,t_maxlen = inf,return_lastspike = False,first_figure = None):
+def auto_steps(filename,threshold = -35, upper_threshold = 30.0, t_minlength = 0.5*60,minstdev = 0.1,showplots = True, showdebug = False,t_start=0,t_stop=60*1000,tolerance = 2,t_maxlen = inf,return_lastspike = False,first_figure = None):
     r'Plot the raw power output in figure 1, and chop into different powers in plot 2'
     figurelist = figlistini_old(first_figure)
     v = loadmat(filename)
@@ -153,7 +153,7 @@ def auto_steps(filename,threshold = -35, upper_threshold = 5, t_minlength = 0.5*
                     try:
                         nextpos = blockstart + minsteps + 1 + argmax(abs(diff(t[blockstart+minsteps:biggestjump-minsteps])))
                     except:
-                        figlisterr(figurelist,basename = pdfstring)
+                        #figlisterr(figurelist,basename = pdfstring)
                         raise CustomError("I don't have room to make two minimum length steps of ",minsteps,"between the start of the block at ",blockstart," and the biggest jump at",biggestjump)
                     break
                 else: # and sometimes the biggest jump happens before another jump, but longer than twice the minlen
@@ -351,7 +351,7 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
             data /= v['JNS'] # divide by number of scans
         except:
             pass
-        data /= v['MP'] # divide by power
+        #data /= v['MP'] # divide by power <-- weird, don't do this!
         ypoints = len(data)/xpoints
         if ypoints>1:
             if ypoints != v['REY']:
@@ -363,7 +363,16 @@ def load_indiv_file(filename,dimname='',return_acq=False,add_sizes=[],add_dims=[
             data = nddata(data,[xpoints],[b0])
         xlabels = linspace(v['HCF']-v['HSW']/2.,v['HCF']+v['HSW']/2.,xpoints)
         if len(data.dimlabels)>1:
-            data.labels([dimname,b0],[linspace(0,1,ypoints),xlabels])
+            yaxis = r_[0:v['REY']]
+            if dimname == 'mw-power-sweep':
+                yaxis *= v['MPS']
+                yaxis += v['XYLB'] # the starting attenuation
+                yaxis = 10**(-yaxis/10.) # convert to linear power
+                yaxis *= v['MP']/yaxis[0] # the initial power
+                yaxis *= 1e-3 # convert from mW to W
+                data.rename('mw-power-sweep','power')
+                dimname = 'power'
+            data.labels([dimname,b0],[yaxis,xlabels])
             data.reorder([b0,dimname])
         else:
             data.labels([b0],[xlabels])
@@ -732,7 +741,7 @@ def winepr_load_acqu(file):
     for line in lines:
         m = line_re.match(line)
         if m is None:
-            print 'Warning:',lsafen(repr(line)),'does not appear to be a valid WinEPR format line, and I suspect this is a problem with the terminators!'
+            raise RuntimeError('Warning:',lsafen(repr(line)),'does not appear to be a valid WinEPR format line, and I suspect this is a problem with the terminators!')
         else:
             name = m.groups()[0]
             value = m.groups()[1]
@@ -848,7 +857,7 @@ def standard_epr(dir = None,
         figure_list.next('epr_int')
         pc = plot_color_counter()
         plot_color_counter(pc)
-        plot(integral,alpha=0.5,linewidth=0.3)
+        plot(integral,alpha=0.5,linewidth=0.9)
         integral.integrate(newname)
         figure_list.next('epr')
         if normalize_peak:
@@ -860,7 +869,7 @@ def standard_epr(dir = None,
         else:
             myoffset = 0.
         plot_color_counter(pc)
-        plot(data+myoffset,alpha=0.5,linewidth=0.3,label=file)
+        plot(data+myoffset,alpha=0.5,linewidth=0.9,label=file)
         minval = abs(data.getaxis(newname)-centerfield).argmin()
         centerpoint = data[newname,minval]
         #plot_color_counter(pc)
@@ -1593,7 +1602,7 @@ def plot_noise(path,j,calibration,mask_start,mask_stop,rgmin=0,k_B = None,smooth
         retval = []
         if both or not smoothing:
             pval = plot(plotdata,'-',alpha=0.5,plottype = plottype)
-            retval += ['%d: '%j+bruker_load_title(r'%s%d'%(path,j))+' $t_{dwov}$ %0.1f RG %d, DE %0.2f, mean %0.1f'%(dwov*1e6,rg,de,avg)]
+            retval += ['%d: '%j+bruker_load_title(r'%s%d'%(path,j))+'$t_{dw}$ %0.1f $t_{dwov}$ %0.1f RG %d, DE %0.2f, mean %0.1f'%(dw*1e6,dwov*1e6,rg,de,avg)]
             axis('tight')
         if smoothing:
             # begin convolution

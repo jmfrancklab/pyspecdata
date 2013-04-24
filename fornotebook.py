@@ -44,7 +44,9 @@ class figlistl (figlist):
             if type(figname) is dict:
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
-                    print '\n\n'+kwargs.pop('print_string')+'\n\n'
+                    print '\n\n'
+                    print kwargs.pop('print_string')
+                    print '\n\n'
             else:
                 figure(j+1)
                 sep = ''
@@ -59,6 +61,12 @@ class figlistl (figlist):
                         raise CustomError('self.figurelist = ',self.figurelist,'figname = ',figname,'while string = ',string)
         while len(self.figurelist) > 0:
             self.figurelist.pop(-1)
+        return
+    def obs(self,*args):
+        self.text(obs_repr(*args))
+        return
+    def obsn(self,*args):
+        self.text(obs_repr(*args)+'\n\n')
         return
 def lplotfigures(figurelist,string,**kwargs):
     'obsolete, use the class!'
@@ -381,11 +389,36 @@ def ordplot(x,y,labels,formatstring):
         for j in range(0,len(order)): 
             newlabels += [labels[order[j]]]
         addlabels(formatstring,x[order],y[order],newlabels)
-def obs(*arg):
-    print r'\o{'
+def obs_repr(*arg):
+    thisstr = ''
+    thisstr += r'\o{'
+    num = 0
     for j in arg:
-        print j,
-    print r'}'
+        if type(j) in [double,float,float32]:
+            if log10(j) > 3 or log10(j) < -3:# greater than a thousand or less than a thousandth
+                power = floor(log10(j))
+                j /= 10**power
+                thisstr += r'$%0.3f\times 10^{%d}$'%(j,power)
+            else:
+                if log10(j)<-1:
+                    temp = '%%0.%df'%(floor(-log10(j))+3)
+                    thisstr += temp%j
+                else:
+                    thisstr += r'%0.3f'%j
+        else:
+            thisstr += j
+        if num < len(arg)-1:
+            thisstr += " "
+            num += 1
+    thisstr += r'}'
+    return thisstr
+def obs(*arg):
+    print obs_repr(*arg)
+    return
+def obsn(*arg):
+    obs(*arg)
+    print '\n\n'
+    return
 def txt_to_dict(file='data.txt'):
     fp = open(file,'r')
     retval = {}
@@ -441,7 +474,7 @@ def save_variable(variable,content,disp=True,file = 'data.txt'):
 def calcdistance(freq,optdistance):
     print r'$%0.1f\;GHz$ @ '%(freq/1e9),dp((optdistance+119e-3)*1e3,1),r'$mm$'
 def calcfield(elfreq,elratio = 28.113,nmrelratio = 1.5167):
-    obs(elfreq,'$GHz$,',dp(elratio,5),'$GHz/T\;',dp(nmrelratio,6),'\;ppt\;\Rightarrow$',dp(elfreq/elratio*1e4,3),'$G$',dp(elfreq*nmrelratio,5),'$MHz$')
+    obs('$%0.6f'%elfreq,r'\;\text{GHz}$ ${\tiny ',dp(elratio,5),r'\;\text{GHz/T}=}',dp(1e4/elratio,5),r'\;\text{G/GHz}$, $',dp(nmrelratio,6),r'\permil\;\Rightarrow$ $',dp(elfreq/elratio*1e4,3),r'\;\text{G}$, $',dp(elfreq*nmrelratio,5),r'\;\text{MHz}$')
 def qcalc(freq1,freq2):
     centerfreq = (freq2+freq1)/2
     q = centerfreq/abs(freq2-freq1)

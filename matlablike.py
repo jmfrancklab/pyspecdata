@@ -1,6 +1,7 @@
 from pylab import *
 import textwrap
 import matplotlib.transforms as mtransforms
+from numpy import sqrt as np_sqrt
 from mpl_toolkits.mplot3d import axes3d
 from matplotlib.collections import PolyCollection
 from matplotlib.colors import LightSource
@@ -1321,9 +1322,14 @@ class figlist():
             if self.verbose: print lsafen('added, figure',len(self.figurelist)+1,'because not in figurelist',self.figurelist)
             self.figurelist.append(name)
         return gca()
+    def plot(self,*args,**kwargs):
+        plot(*args,**kwargs)#just a placeholder for now, will later keep units + such
     def text(self,mytext):
         self.figurelist.append({'print_string':mytext})
-    def show(self):
+    def show(self,*args):
+        if len(args) == 1:
+            if (args[0][:-4] == '.pdf') or (args[0][:-4] == '.png') or (args[0][:-4] == '.jpg'):
+                print "you passed me a filename, but I'm just burning it"
         show()
 def text_on_plot(x,y,thistext,**kwargs):
     ax = gca()
@@ -1390,7 +1396,7 @@ def plot(*args,**kwargs):
             myxlabel = myy.dimlabels[0]
             xunits = myy.get_units(myxlabel)
             if xunits is not None:
-                myxlabel += ' / $' + xunits + '$'
+                myxlabel += ' / ' + xunits
         if (myx == None):
             try:
                 myx = myy.getaxis(myy.dimlabels[0])
@@ -1685,7 +1691,14 @@ class nddata (object):
     want_to_prospa_decim_correct = False
     def __init__(self,*args,**kwargs):
         if len(args) > 1:
-            self.__my_init__(args[0],args[1],args[2],**kwargs)
+            if len(args) == 2:
+                if len(args[0].shape) == 1 and type(args[1]) is str:
+                    self.__my_init__(args[0],[len(args[0])],[args[1]])
+                    self.labels(args[1],args[0])
+                else:
+                    raise ValueError('You can pass two arguments only if you pass a 1d ndarray and a name for the axis') 
+            else:
+                self.__my_init__(args[0],args[1],args[2],**kwargs)
         else:
             self.__my_init__(args[0],[-1],['value'],**kwargs)
         return
@@ -2021,33 +2034,38 @@ class nddata (object):
             self.data_units = unitval
         else:
             raise CustomError(".set_units() takes data units or 'axis' and axis units")
-    def human_units(self):
+    def human_units(self,verbose = False):
         prev_label = self.get_units()
+        oom_names =   ['T' , 'G' , 'M' , 'k' , '' , 'm' , '\\mu' , 'p']
+        oom_values = r_[12 , 9   , 6   , 3   , 0  , -3  , -6     , -12]
         if prev_label is not None and len(prev_label)>0:
-            average_oom = log10(self.data).mean()/3. # find the average order of magnitude, rounded down to the nearest power of 3
-            average_oom = 3*ceil(abs(average_oom))*sign(average_oom)
-            oom_names =   ['T','G','M','','m','\\mu','p']
-            oom_values = r_[12, 6 , 3 ,0, -3,   -6  ,-12]
+            average_oom = log10(abs(self.data)).mean()/3. # find the average order of magnitude, rounded down to the nearest power of 3
+            average_oom = 3*floor(abs(average_oom))*sign(average_oom)
             oom_index = argmin(abs(average_oom-oom_values))
             self.data /= 10**oom_values[oom_index]
             self.set_units(oom_names[oom_index]+prev_label)
+        else:
+            if verbose: print 'data does not have a unit label'
         for thisaxis in self.dimlabels:
             prev_label = self.get_units(thisaxis)
             if prev_label is not None and len(prev_label)>0:
                 data_to_test = self.getaxis(thisaxis)
                 data_to_test = data_to_test[isfinite(data_to_test)]
-                average_oom = log10(abs(data_to_test.mean()))/3. # find the average order of magnitude, rounded down to the nearest power of 3
-                print "for axis",thisaxis,"the average oom is",average_oom*3
-                average_oom = 3*ceil(abs(average_oom))*sign(average_oom)
-                print "for axis",thisaxis,"I ceiling this to",average_oom
-                oom_names =   ['T','G','M','','m','\\mu ','n','p']
-                oom_values = r_[12, 6 , 3 ,0, -3,   -6   ,-9,-12]
+                #{{{ find the average order of magnitude, rounded down to the nearest power of 3
+                average_oom = log10(abs(data_to_test))/3.
+                average_oom = average_oom[isfinite(average_oom)].mean()
+                #}}}
+                if verbose: print "(human units): for axis",thisaxis,"the average oom is",average_oom*3
+                average_oom = 3*floor(abs(average_oom))*sign(average_oom)
+                if verbose: print "(human units): for axis",thisaxis,"I round this to",average_oom
                 oom_index = argmin(abs(average_oom-oom_values))
-                print "for axis",thisaxis,"selected an oom value of",oom_values[oom_index]
+                if verbose: print "(human units): for axis",thisaxis,"selected an oom value of",oom_values[oom_index]
                 x = self.getaxis(thisaxis)
                 x[:] /= 10**oom_values[oom_index]
                 self.setaxis(thisaxis,x)
                 self.set_units(thisaxis,oom_names[oom_index]+prev_label)
+            else:
+                if verbose: print thisaxis,'does not have a unit label'
         return self
     #}}}
     #{{{ get units
@@ -2509,10 +2527,18 @@ class nddata (object):
             func = mydiff
         return func
         #}}}
-    def argmax(self,axes,raw_index = False):
+    def argmax(self,*args,**kwargs):
         r'find the max along a particular axis, and get rid of that axis, replacing it with the index number of the max value'
+        #{{{ process arguments
+        axes = self._possibly_one_axis(*args)
+        raw_index = False
+        if 'raw_index' in kwargs.keys():
+            raw_index = kwargs.pop('raw_index')
+        if len(kwargs) > 0:
+            raise ValueError("I didn't understand the kwargs:",repr(kwargs))
         if (type(axes) is str):
             axes = [axes]
+        #}}}
         for j in range(0,len(axes)):
             try:
                 thisindex = self.axn(axes[j])
@@ -2553,10 +2579,20 @@ class nddata (object):
             if not (dimname in listofdims):
                 self.mean(dimname)
         return self
-    def mean(self,axes,return_error = False):
+    def mean(self,*args,**kwargs):
         r'Take the mean and set the error to the standard deviation'
+        #{{{ process arguments
+        if len(args) > 1:
+            raise ValueError('you can\'t pass more than one argument!!')
+        axes = self._possibly_one_axis(*args)
+        return_error = False
+        if return_error in kwargs.keys():
+            return_error = kwargs.pop('return_error')
+        if len(kwargs) > 0:
+            raise ValueError("I didn't understand the kwargs:",repr(kwargs))
         if (type(axes) is str):
             axes = [axes]
+        #}}}
         for j in range(0,len(axes)):
             try:
                 thisindex = self.dimlabels.index(axes[j])
@@ -2654,12 +2690,18 @@ class nddata (object):
     def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*(y**2))))):
         r'''perform a normalized convolution'''
         #{{{ make a version of x that is oriented along the correct dimension
-        nd_x = self.retaxis(axisname)
-        x = nd_x.data
+        x = self.getaxis(axisname).copy()
+        x_centerpoint = (x[-1]+x[0])/2
+        x -= x_centerpoint # so that zero is in the center
+        x = ifftshift(x) # so that it's convolved about time 0
+        thisaxis = self.axn(axisname)
         #}}}
         myfilter = convfunc(x,filterwidth)
         myfilter /= myfilter.sum()
-        self.data = fftconvolve(self.data,myfilter,mode='same') # I need this, so the noise doesn't break up my blocks
+        filtershape = ones_like(self.data.shape)
+        filtershape[thisaxis] = len(myfilter)
+        myfilter = myfilter.reshape(filtershape)
+        self.data = ifft(fft(self.data,axis = thisaxis)*fft(myfilter,axis = thisaxis),axis = thisaxis)
         return self
     def _ft_conj(self,x):
         pairs = [('s','Hz'),('m',r'm^{-1}')]
@@ -2670,13 +2712,20 @@ class nddata (object):
             return a[b.index(x)]
         else:
             return None
-    def ft(self,axes,shiftornot=False,shift=None,pad = False):
+    def ft(self,*args,**kwargs):
+        #{{{ process arguments
+        if len(args) > 1:
+            raise ValueError('you can\'t pass more than one argument!!')
+        axes = self._possibly_one_axis(*args)
+        #kwargs: shiftornot=False,shift=None,pad = False
+        shiftornot,shift,pad = self._process_kwargs([('shiftornot',False),('shift',None),('pad',False)],**kwargs)
         if shift != None:
             shiftornot = shift
         if (type(axes) is str):
             axes = [axes]
         if not (type(shiftornot) is list):
-            shiftornot = [bool(shiftornot)]
+            shiftornot = [bool(shiftornot)]*len(axes)
+        #}}}
         for j in range(0,len(axes)):
             if self.get_units(axes[j]) is not None:
                 self.set_units(axes[j],self._ft_conj(self.get_units(axes[j])))
@@ -2833,6 +2882,14 @@ class nddata (object):
         if self.data_error is not None:
             self.data_error = self.data_error.transpose(neworder)
         return self
+    def plot_labels(self,labels,fmt = None):
+        r'this only works for one axis now'
+        axisname = self.dimlabels[0]
+        if format is None:
+            plot_label_points(self.getaxis(axisname),self.data,labels)
+        else:
+            plot_label_points(self.getaxis(axisname),self.data,[fmt%j for j in labels])
+        return
     def labels(self,listofstrings,listofaxes):
         r'''label the dimensions, given in listofstrings with the axis labels given in listofaxes -- listofaxes must be a numpy array;
         you can pass either a list or a axis name (string)/axis label (numpy array) pair'''
@@ -3010,14 +3067,44 @@ class nddata (object):
                 axis_coords_error = [errordict[x] for x in newlabels]
             else:
                 axis_coords_error = None
-            return nddata(self.data[indexlist],
+            retval =  nddata(self.data[indexlist],
                     self.data[indexlist].shape,
                     newlabels,
                     axis_coords = [axesdict[x] for x in newlabels],
                     axis_coords_error = axis_coords_error,
-                    data_error = newerror)
+                    data_error = newerror,
+                    other_info = self.other_info)
+            retval.axis_coords_units = self.axis_coords_units
+            retval.data_units = self.data_units
+            return retval
         else:
-            return nddata(self.data[indexlist],self.data[indexlist].shape,newlabels)
+            retval = nddata(self.data[indexlist],self.data[indexlist].shape,newlabels,self.other_info)
+            retval.axis_coords_units = self.axis_coords_units
+            retval.data_units = self.data_units
+            return retval
+    def _possibly_one_axis(self,*args):
+        if len(args) == 1:
+            return args[0]
+        if len(args) > 1:
+            raise ValueError('you can\'t pass more than one argument!!')
+        if len(args) == 0:
+            if len(self.dimlabels) == 1:
+                axes = self.dimlabels
+            elif len(self.dimlabels) == 0:
+                raise ValueError("You're trying to do something to data with no dimensions")
+            else:
+                raise ValueError("If you have more than one dimension, you need to tell me which one!!")
+        return axes
+    def _process_kwargs(self,listoftuples,**kwargs):
+        kwargnames,kwargdefaultvals = zip(*listoftuples)
+        output = []
+        for j,val in enumerate(kwargnames):
+            output.append(kwargdefaultvals[j])
+            if val in kwargs.keys():
+                output[-1] = kwargs.pop(val)
+        if len(kwargs) > 0:
+            raise ValueError("I didn't understand the kwargs:",repr(kwargs))
+        return tuple(output)
     def _parse_slices(self,args):
         #print "DEBUG getitem called with",args
         errordict = None # in case it's not set
@@ -4085,3 +4172,8 @@ class fitdata(nddata):
             if verbose: print '\n\n(matlablike.guess) value of residual after regularization:',thisresidual
         return thisguess
 #}}}
+def sqrt(arg):
+    if isinstance(arg,nddata):
+        return arg**0.5
+    else:
+        return np_sqrt(arg)
