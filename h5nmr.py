@@ -1297,11 +1297,22 @@ def t1vp(h5filename,expnos,dbm,fid_args = {},integration_args = {}, auxiliary_ar
     lplot('T1vp_%s.pdf'%fid_args['name'])
 ##}}}
 #{{{ compile all the DNP data for a given chemical, etc
-def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_additional_search = '',verbose = False,divide_klow_by = None):
+def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_additional_search = '',verbose = False,divide_klow_by = None,t10subst = None):
+    if t10subst is not None:
+        obsn(r"You have chosen to make the following \tonen substitutions")
+        temp = empty(len(t10subst),dtype = [('dataset','|S100'),('uses $T_{1,0}$ from','|S100')])
+        temp['dataset'] = array(t10subst.keys())
+        temp['uses $T_{1,0}$ from'] = array(t10subst.values())
+        lrecordarray(temp)
+        print '\n\n'
     h5file = tables.openFile(h5file) # open the HDF5 file
     #{{{ retrieve chemical information
     search_string = h5inlist('chemical',chemical_list)
     chemical_data = h5file.root.compilations.chemicals.chemicals.readWhere(search_string)
+    if verbose:
+        print "All the relevant chemicals (chemical\\_data) I see are:\n\n"
+        lrecordarray(chemical_data,format = '%g')
+        print '\n\n'
     #}}}
     #{{{ join ksp data onto the chemical information
     data = h5join((h5file.root.compilations.Emax_curves,'chemical_id'),
@@ -1310,13 +1321,34 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
     data = h5join((h5file.root.compilations.ksp_fits,'Emax_curve'),
         (data,'index'),
         additional_search = 'fit_type == "%s"'%fit_type)
+    if verbose:
+        print "All \\ksp data (data) I see are:\n\n"
+        lrecordarray(data,resizebox = True)
+        print '\n\n'
     #}}}
     #{{{ pull the T10 data
     list_of_interesting_fields = ['chemical','run_number']
     mask = chemical_data['concentration'] == 0. # to select just the T1,0 samples
+    if verbose:
+        print "The indeces for the \\tonen samples are:\n\n"
+        lrecordarray(chemical_data[mask],format = '%g')
+        print '\n\n'
+    if t10subst is not None:
+        temp = data['chemical'].copy()
+        data['chemical'] = [t10subst[j] if j in t10subst.keys() else j for j in data['chemical']]
+        t10data = decorate_rec( (data[list_of_interesting_fields],'chemical'),
+            (chemical_data[mask],'chemical'))# decorate those interesting fields with the T10 chemical id
+        t10data['chemical'] = temp
+        data['chemical'] = temp
+    else:
     t10data = decorate_rec( (data[list_of_interesting_fields],'chemical'),
         (chemical_data[mask],'chemical'))# decorate those interesting fields with the T10 chemical id
     t10data = rename_fields(t10data,{'index':'chemical_id'})# numpy function to rename the fields
+    if verbose:
+        print "selecting the fields",lsafe(list_of_interesting_fields),r"from the \ksp data (\texttt{data})"
+        print "and decorating with the chemical ID of the \\tonen samples gives the new t10data:\n\n"
+        lrecordarray(t10data,format = '%g')
+        print '\n\n'
     list_of_interesting_fields.append('T_1')
     #{{{ here, I specify only by chemical id, so I can pull the data later
     if len(t10_additional_search) > 0:
@@ -1329,9 +1361,15 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
         select_fields = list_of_interesting_fields)
     #}}}
     # this is where I could go back and find stuff that matches the chemical ID but not the run number
+    if len(t10data) == 0:
+        raise ValueError("I didn't find any T10 data!")
     t10data = applyto_rec(mean,t10data,['run_number','chemical'])
     t10data = rename_fields(t10data,{'T_1':'T_{1,0}'})
-    if verbose: lrecordarray(t10data)
+    if verbose:
+        print r"After joining the \tonen data onto the t10data array and averaging, it becomes:"
+        print '\n\n'
+        lrecordarray(t10data)
+        print '\n\n'
     #}}}
     #{{{ reorder the data, and specify this is the chemical ID for the spin labeled compound
     data = data[['run_number','chemical','fit_type','ksmax','chemical_id','concentration']]
@@ -1342,6 +1380,15 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
     newdata,missing_t10s = decorate_rec((data,['chemical','run_number']),
         (t10data,['chemical','run_number']),
         drop_rows = 'return')
+    if verbose:
+        print r"Decorating the \ksp data with \texttt{t10data} gives \texttt{newdata} where there was a successfully identified \tonen:"
+        print '\n\n'
+        lrecordarray(newdata)
+        print '\n\n'
+        print r"and the dropped rows (\texttt{missing_t10s}):"
+        print '\n\n'
+        lrecordarray(missing_t10s)
+        print '\n\n'
     if missing_t10s is not None:
         #{{{ alert to, and take care of the missing t10 data
         obs('\n\n$T_{1,0}$ experiments are missing for the following chemical / run number pairs:\n\n')
@@ -1363,6 +1410,7 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
         missing_t10s = reorder_rec(missing_t10s,t10fields)# because apparently, the above does not accomplish a reorder
         applyto_rec(mean,missing_t10s,['chemical','run_number'])
         lrecordarray(missing_t10s)
+        print '\n\n'
         #}}}
         #{{{ Finally, add the second-choice T10's in, and retrieve the resulting data
         try:
@@ -1374,7 +1422,7 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
             (t10data,['chemical','run_number']),
             drop_rows = 'return')
         if missing_t10s is not None:
-            obs('$T_{1,0}$ experiments are STILL missing for the following chemical / run number pairs!!')
+            obsn('$T_{1,0}$ experiments are STILL missing for the following chemical / run number pairs!!')
             print r'{\color{red}'
             lrecordarray(missing_t10s[['chemical','run_number']])
             print r'}'
@@ -1389,16 +1437,17 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
     # and the T_1
     list_of_interesting_fields.append('T_1')
     list_of_interesting_fields.remove('SL_chemical_id')
-    if verbose: lrecordarray(data)
-    # rerun!!
     data = h5join((h5file.root.compilations.T1_fits,['run_number','chemical_id']),
         (data,['run_number','SL_chemical_id']),
         additional_search = 'power == -999.',
         select_fields = list_of_interesting_fields)
     #}}}
     h5file.close() # close the HDF5 file, since all the rest is just spreadsheet math
-    if verbose: lrecordarray(data,resizebox = 0.8)
-    if verbose: print r"Now, I use lambda\_rec~\ref{codelabel:lambda_rec} to calculate $k_\rho$, then $k_{low}$:"
+    if verbose:
+        print r"After joining the data for the spin-labeled $T_1$'s onto \texttt{data}, we have","\n\n"
+        lrecordarray(data,resizebox = 0.8)
+        print '\n\n'
+    if verbose: print r"Now, I use lambda\_rec~\ref{codelabel:lambda_rec} to calculate $k_\rho$, then $k_{low}$:"+'\n\n'
     #{{{ take the mean of the T10 values, so I only get one krho for data_nice
     nont10fields = list(data.dtype.names)
     try:
