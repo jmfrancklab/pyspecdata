@@ -1311,12 +1311,21 @@ class figlist():
         if len(kwargs) > 0:
             self.figurelist.append(kwargs)
         return
-    def next(self,name,**kwargs):
+    def next(self,name,legend = False,boundaries = None,**kwargs):
         if self.verbose: print lsafe('DEBUG figurelist, called with',name)
         if name in self.figurelist:
             fig = figure(self.figurelist.index(name)+1,**kwargs)
             if self.verbose: print lsafen('in',self.figurelist,'at figure',self.figurelist.index(name)+1,'switched figures')
         else:
+            if boundaries == False:
+                self.setprops(boundaries = False)
+            if legend:
+                if 'figsize' not in kwargs.keys():
+                    kwargs.update({'figsize':(12,6)})
+                self.setprops(outer_legend = True)
+                fig = figure(len(self.figurelist)+1,**kwargs)
+                fig.add_subplot(121)
+            else:
             fig = figure(len(self.figurelist)+1,**kwargs)
             fig.add_subplot(111)
             if self.verbose: print lsafen('added, figure',len(self.figurelist)+1,'because not in figurelist',self.figurelist)
@@ -1325,7 +1334,9 @@ class figlist():
     def plot(self,*args,**kwargs):
         plot(*args,**kwargs)#just a placeholder for now, will later keep units + such
     def text(self,mytext):
-        self.figurelist.append({'print_string':mytext})
+        self.setprops(print_string = mytext)
+    def setprops(self,**kwargs):
+        self.figurelist.append(kwargs)
     def show(self,*args):
         if len(args) == 1:
             if (args[0][:-4] == '.pdf') or (args[0][:-4] == '.png') or (args[0][:-4] == '.jpg'):
@@ -2882,13 +2893,13 @@ class nddata (object):
         if self.data_error is not None:
             self.data_error = self.data_error.transpose(neworder)
         return self
-    def plot_labels(self,labels,fmt = None):
+    def plot_labels(self,labels,fmt = None,**kwargs_passed):
         r'this only works for one axis now'
         axisname = self.dimlabels[0]
-        if format is None:
-            plot_label_points(self.getaxis(axisname),self.data,labels)
+        if fmt is None:
+            plot_label_points(self.getaxis(axisname),self.data,labels,**kwargs_passed)
         else:
-            plot_label_points(self.getaxis(axisname),self.data,[fmt%j for j in labels])
+            plot_label_points(self.getaxis(axisname),self.data,[fmt%j for j in labels],**kwargs_passed)
         return
     def labels(self,listofstrings,listofaxes):
         r'''label the dimensions, given in listofstrings with the axis labels given in listofaxes -- listofaxes must be a numpy array;
