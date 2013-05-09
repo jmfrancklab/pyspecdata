@@ -1341,8 +1341,8 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
         t10data['chemical'] = temp
         data['chemical'] = temp
     else:
-    t10data = decorate_rec( (data[list_of_interesting_fields],'chemical'),
-        (chemical_data[mask],'chemical'))# decorate those interesting fields with the T10 chemical id
+        t10data = decorate_rec( (data[list_of_interesting_fields],'chemical'),
+            (chemical_data[mask],'chemical'))# decorate those interesting fields with the T10 chemical id
     t10data = rename_fields(t10data,{'index':'chemical_id'})# numpy function to rename the fields
     if verbose:
         print "selecting the fields",lsafe(list_of_interesting_fields),r"from the \ksp data (\texttt{data})"

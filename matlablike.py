@@ -1326,8 +1326,8 @@ class figlist():
                 fig = figure(len(self.figurelist)+1,**kwargs)
                 fig.add_subplot(121)
             else:
-            fig = figure(len(self.figurelist)+1,**kwargs)
-            fig.add_subplot(111)
+                fig = figure(len(self.figurelist)+1,**kwargs)
+                fig.add_subplot(111)
             if self.verbose: print lsafen('added, figure',len(self.figurelist)+1,'because not in figurelist',self.figurelist)
             self.figurelist.append(name)
         return gca()
