@@ -1,4 +1,5 @@
 import matplotlib; matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 from matlablike import *
 from string import rstrip
 from scipy.io import savemat,loadmat
@@ -317,7 +318,7 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
         return '\n'.join(final_retval)
     else:
         print '\n'.join(final_retval)
-def lplot(fname,width=0.33,figure=False,dpi=72,grid=False,alsosave=None,gensvg = False,print_string = None,centered = False,legend = False,equal_aspect = False,autopad = True,bytextwidth = None,showbox = True):
+def lplot(fname,width=0.33,figure=False,dpi=72,grid=False,alsosave=None,gensvg = False,print_string = None,centered = False,legend = False,equal_aspect = False,autopad = True,bytextwidth = None,showbox = True,outer_legend = False,boundaries = True):
     '''
     used with python.sty instead of savefig
     
@@ -343,9 +344,25 @@ def lplot(fname,width=0.33,figure=False,dpi=72,grid=False,alsosave=None,gensvg =
     if equal_aspect:
         ax.set_aspect('equal')
     fig.autofmt_xdate()
+    if autopad: autopad_figure(centered = centered)
     if legend:
         autolegend()
-    if autopad: autopad_figure(centered = centered)
+    if outer_legend:
+        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    if not boundaries:
+        ax = gca()
+        for j in ax.spines.keys():
+            ax.spines[j].set_visible(False)
+        setp(ax.get_xticklabels(),visible = False)
+        setp(ax.get_yticklabels(),visible = False)
+        setp(ax.get_xticklines(),visible = False)
+        setp(ax.get_yticklines(),visible = False)
+        this_xlabel = ax.get_xlabel()
+        if len(this_xlabel) > 0:
+            ax.set_xlabel(this_xlabel + r" $\rightarrow$")
+        this_ylabel = ax.get_ylabel()
+        if len(this_ylabel) > 0:
+            ax.set_ylabel(this_ylabel + r" $\rightarrow$")
     try:
         savefig(fname,dpi=dpi)
     except ValueError,exc_string:

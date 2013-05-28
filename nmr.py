@@ -771,7 +771,10 @@ def winepr_load_acqu(file):
 def standard_epr(dir = None,
         files = None,# this is a single string for the file, a
         #list of files, each of which can optionally be a tuple
-        #with a sample length (to calculate a "concentration")
+        #with sample length (to calculate a "concentration")
+        #and/or a visible name, like this:
+        #(filename,sample_length,visible_name)
+        linewidth = 1.8,
         normalize_field = False,
         find_maxslope = False,
         offset_spectra = False,
@@ -795,17 +798,17 @@ def standard_epr(dir = None,
     h = 6.62606957e-34
     if subtract_first:
         firstdata = 2*load_indiv_file(dir+files.pop(0))
-    legendtext = list(files)
-    for j in range(0,len(legendtext)):
-        if type(legendtext[j]) is tuple:
-            legendtext[j] = legendtext[j][0]
-    print lsafen("legendtext is",legendtext,"to start with")
     for index,file in enumerate(files):
         if type(file) is tuple:
+            if len(file) > 2:
+                visiblename = file[2]
+            else:
+                visiblename = file[0]
             sample_len = file[1]
             file = file[0]
         else:
             sample_len = None
+            visiblename = file
         try:
             data = load_indiv_file(dir+file)
         except:
@@ -816,7 +819,7 @@ def standard_epr(dir = None,
         neworder = list(data.dimlabels)
         data.reorder([neworder.pop(neworder.index(field))]+neworder) # in case this is a saturation experiment
         data -= data.copy().run_nopop(mean,field)
-        figure_list.next('epr')
+        figure_list.next('epr',legend = True,boundaries = False)
         v = winepr_load_acqu(dir+file)
         if index == 0:
              fieldbar = data[field,lambda x: logical_and(x>x.mean(),x<x.mean()+10.)]
@@ -837,7 +840,7 @@ def standard_epr(dir = None,
             deriv.data[abs(data.data) > abs(data.data).max()/10] = 0 # so it doesn't give a fast slope, non-zero area
             deriv = abs(deriv)
             deriv.argmax(field,raw_index = True)
-            centerfield = mean(xaxis[int32(deriv.data)])
+            centerfield = mean(xaxis[int32(deriv.data)]) # "centerfield" is the center of peak, where the derivative is maximized
             if find_maxslope:
                 xaxis -= centerfield
                 if index == 0:
@@ -854,51 +857,52 @@ def standard_epr(dir = None,
         integral = data.copy()
         integral.data -= integral.data.mean() # baseline correct it
         integral.integrate(newname)
-        figure_list.next('epr_int')
+        figure_list.next('epr_int',legend = True,boundaries = False)
         pc = plot_color_counter()
         plot_color_counter(pc)
-        plot(integral,alpha=0.5,linewidth=0.9)
-        integral.integrate(newname)
+        legendtext = visiblename
+        legendtext += '\n'
+        if centerfield != None:
+            legendtext += ', %0.03f $G$'%centerfield
+            gfactor = h*v['MF']*1e9/mu_B/(centerfield*1e-4)
+            legendtext += ', g=%0.03f'%gfactor
+        doubleintegral = integral.copy()
+        doubleintegral.integrate(newname)
+        if sample_len is None:
+            legendtext += r', SNR %0.2g $\int\int=$ %0.3g'%(snr,doubleintegral[newname,-1].data[-1])
+        else:
+            legendtext += r', SNR %0.2g $\int\int=$ %0.3g / cm'%(snr,doubleintegral[newname,-1].data[-1]/double(sample_len))
+        plot(integral,alpha=0.5,linewidth=linewidth,label = legendtext)
         figure_list.next('epr')
         if normalize_peak:
            normalization = abs(data).run_nopop(max,newname)
            data /= normalization
         ax = gca()
-        if offset_spectra:
-            myoffset = array(ax.get_ylim()).min()
+        if offset_spectra and index>0:
+            myoffset = array(ax.get_ylim()).min()-array(ax.get_ylim()).max() # so I set the zero at the bottom of the plot, which is negative, and also allow space for the top of the spectrum (which is positive
         else:
             myoffset = 0.
         plot_color_counter(pc)
-        plot(data+myoffset,alpha=0.5,linewidth=0.9,label=file)
-        minval = abs(data.getaxis(newname)-centerfield).argmin()
-        centerpoint = data[newname,minval]
-        #plot_color_counter(pc)
-        #plot(centerfield,centerpoint.data+myoffset,'o',markersize = 5,alpha=0.3)
+        plot(data+myoffset,alpha=0.5,linewidth=linewidth,label=visiblename)
+        if not normalize_field:
+            minval = abs(data.getaxis(newname)-centerfield).argmin()
+            centerpoint = data[newname,minval]
+            plot_color_counter(pc)
+            plot(centerfield,centerpoint.data+myoffset,'o',markersize = 5,alpha=0.3)
         axis('tight')
         if index == 0:
             fieldbar *= array(ax.get_ylim()).max()
-        legendtext[index] += '\n'
-        if centerfield != None:
-            legendtext[index] += ', %0.03f $G$'%centerfield
-            gfactor = h*v['MF']*1e9/mu_B/(centerfield*1e-4)
-            legendtext[index] += ', g=%0.03f'%gfactor
-        if sample_len is None:
-            legendtext[index] += r', SNR %0.2g $\int\int$ %0.3g'%(snr,integral[newname,-1].data[-1])
-        else:
-            legendtext[index] += r', SNR %0.2g $\int\int$ %0.3g / cm'%(snr,integral[newname,-1].data[-1]/double(sample_len))
-    #xtl = ax.get_xticklabels()
-    #at.xaxis.tick_top()
-    #map( (lambda x: x.set_visible(False)), xtl)
     plot_color_counter(pc)
-    plot(data.getaxis(newname)[mask],zeros(shape(data.getaxis(newname)[mask])),'k',alpha=0.2,linewidth=10)
+    show_errorzone = False
+    if show_errorzone:
+        plot(data.getaxis(newname)[mask],zeros(shape(data.getaxis(newname)[mask])),'k',alpha=0.2,linewidth=10)
     figure_list.next('epr')
     plot(fieldbar,'k',linewidth = 2.0)
+    fieldbar[newname,4:5].plot_labels(['10 G\n'],va = 'bottom',color = 'k',alpha = 1.0,size = 'x-small')
     if grid:
         gridandtick(gca())
-    #autolegend()
     axis('tight')
     figure_list.next('epr_int')
-    autolegend(legendtext)
     axis('tight')
     return figure_list
 #}}}
