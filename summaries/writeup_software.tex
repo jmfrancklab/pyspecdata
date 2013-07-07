@@ -254,6 +254,26 @@ Either is most easily set up with an external diff
 "/c/Program Files (x86)/Vim/vim73/gvim" -d "$2" "$5" | cat
 \end{verbatim}
 \section{Installation}
+\subsection{Install required software on Mac}
+When I write this, there not a very good free all-in-one Python package for the Mac.
+The solution is still straightforward, though it takes a little time for everything to compile.
+You should download Xcode, then install the following Python components \textbf{Ryan and Anthony: using which package manager??}
+\begin{small}
+\begin{multicols}{3}
+\begin{enumerate}
+    \item Python2.7 or higher, but not Python3
+    \item ipython
+    \item matplotlib
+    \item numpy
+    \item pyreadline
+    \item pyserial
+    \item scipy
+    \item sympy
+    \item pytables
+\end{enumerate}
+\end{multicols}
+\end{small}
+You will also need to download some form of \LaTeX\ distribution \textbf{Ryan and Anthony, please recommend a latex distribution}
 \subsection{Install required software on Windows}
 %%fakesubsubsection
 \outlineblank{subsubsection}
@@ -335,7 +355,7 @@ The notebook code itself consists of a set of home-built
     that help you develop code to process the data,
     in addition to some code (described later)
     that allows you to embed such scripts in a latex file.
-
+\paragraph{Download (for novice Windows users)}
 Use TortoiseSVN to check out the
     most recent version of the code
     by right-clicking on your desktop,
@@ -349,6 +369,51 @@ This will create a folder with the code.
 You can install future updates to the code
     simply by right-clicking on this folder,
     and selecting SVN update.
+\paragraph{Download (On the mac, or Git users)}
+Install Git and git-svn (on windows, you can get these from msysgit, on mac you need to download Xcode and then \textbf{I don't know, Ryan and Anthony please remind me}), if you don't already have it.
+\begin{inplacenotebox}
+If you are already a Git user, congratulations, you are awesome!
+This note is for you.
+If not, skip this note.
+
+You can add the public notebook as a remote source as follows
+    \begin{enumerate}
+        \item change to the working directory where you will
+            want to import the notebook code and run \texttt{git commit -a} 
+            to commit any changes to your working directory.
+        \item \texttt{vim .git/config} 
+            and add:
+    \begin{tiny}
+            \begin{verbatim}
+[svn-remote "public"]
+	url = https://franck@franck.privatedns.org/svn/public_notebook
+	fetch = :refs/remotes/git-svn-public
+            \end{verbatim}
+    \end{tiny}
+        \item \texttt{git svn fetch public} 
+            (this pulls the history)
+
+        \item \texttt{git branch -t public remotes/git-svn-public} 
+            (this creates a local branch called ``public'' that tracks the remote)
+
+        \item \texttt{git checkout public} 
+            (this switches to the public branch)
+
+        \item \texttt{git svn rebase} 
+            (this is to check that it's up-to-date, and, yes, it is frequently necessary)
+
+        \item \texttt{git checkout master} 
+    \end{enumerate}
+The ``public'' branch then stores a copy of the public code.
+You can pull updated code into the public branch.
+Typically, your working code will be in your ``master'' branch,
+    and you will then want to (possibly selectively) merge the updates
+    from ``public'' into ``master.''
+\end{inplacenotebox}
+To start a fresh directory called \texttt{public\_notebook} that contains the public notebook code, and where you will run your scripts, run the command
+\texttt{git svn clone} \url{https://franck.privatedns.org/svn/public\_notebook}.
+
+In either case, you can then run \texttt{git svn rebase} to update the code when updates are published.
 \paragraph{Running the Graphical User Interface (GUI)}
 The notebook code comes with a graphical user interface
     (GUI) that allows you to tell the
@@ -593,7 +658,7 @@ Rather than installing Python(X,Y) (if you are crazy),
     you can choose to install a selection of Python packages manually.
 All the required packages are
 \ntd{grab the list from my notebook}
-\ntd{before, on cnsi, I had the following programs installed:
+\ntd{before, on cnsi, I had the following programs installed:}
 \begin{itemize}
     \item Python2.5
     \item ipython-0.10
@@ -606,7 +671,7 @@ All the required packages are
     \item scipy-0.7.1
     \item Python 2.6 ipython-0.10 (this should not be required)
 \end{itemize}
-note that sympy and pytables are missing from this list.
+\ntd{note that sympy and pytables are missing from this list.
 However, this should translate into a usable list of required packages.
 }
     \paragraph{latexmk}
@@ -1569,13 +1634,53 @@ Aside from the figure names, we can also load special operating
     to switch the sizes of figures.
     \paragraph{instance = figlistl()} initialize a new figure list,
         optionally loading format codes into the list.
+    \paragraph{instance.plot(\ldots)}
+    This is uses the matlablike \texttt{plot()} function.
+    This is the preferred method $\Rightarrow$ storing in a figure list allows the figure list to keep track of and implement automatic unit scaling on the different axes.
+    \paragraph{instance.setprops(key1 = value1,key2 = value2,\ldots)}
+    This sets various properties of plots that are used by subsequent plots.
+
+    In the case of a latex figurelist, these are the keyword arguments passed to
+    \texttt{lplotfigures(\ldots)}
     \paragraph{instance.next('figname')} move to the figure named by the string ``figname''
     if a figure named figname does not exist, make a new one.
+
+    \subparagraph{instance.next('figname',legend = True,\ldots)}
+    This will generate a plot with the legends placed outside, like so:
+
+\begin{python}[on]
+fl = figlistl()
+fl.setprops(width=0.45,bytextwidth=True)
+fl.next('example',legend = True)
+fl.plot(r_[0:10],label = 'this is for dataset 1')
+fl.plot(r_[0:10]*3,label = 'this is for dataset 2')
+fl.show('legendlayout_130426.pdf')
+\end{python}
+    
+    To do this, it sets up two subplots (one empty) to create space for the legend, and sets the ``outer\_legend'' option.
+    This, in turn, sets up a nice legend in an standard way recommended by matplotlib documentation, etc.
+    \subparagraph{instance.next('figname',boundaries = False,\ldots)}
+    This plots the figure without axes, and adds an arrow to whichever axes are labeled.
+    All the real code for doing this is in the ``boundaries'' option for lplotfigures.
+
+\begin{python}[on]
+fl = figlistl()
+fl.setprops(width=0.45,bytextwidth=True)
+fl.next('example',legend = True,boundaries = False)
+fl.plot(r_[0:10],label = 'this is for dataset 1')
+fl.plot(r_[0:10]*3,label = 'this is for dataset 2')
+xlabel('x axis')
+ylabel('y axis')
+fl.show('noboundarieslayout_130426.pdf')
+\end{python}
     \paragraph{instance.show('filename111119.pdf')} generate/display
         all the figures.
         For latex generation, a base filename, like 'filename111119.pdf' above, should be passed.
         This filename should be made unique, for instance by using the date.
 \subsection{Random math functions}
+\paragraph{sqrt(\ldots)}
+Like the normal sqrt function, except that it accepts nddata arguments as well.
+\nts{the way that it accepts the nddata arguments might not be optimal, esp for SNR calculation, so make a separate sqrt method later}
 \paragraph{box\_muller(length)}
 Return normally distributed noise
     \nts{with a standard deviation of 1}.
@@ -1740,11 +1845,12 @@ To understand the structure of the various tables used here, it
     \end{mykwargs}
 
 \phantomsection\label{codelabel:h5label}
+\nts{for this, I need an example database that includes the DNA data!}
 \begin{python}
 #rerun!
 from numpy.lib.recfunctions import rename_fields
 obs('First, we retrieve the same chemical data as above:\\ref{codelabel:h5inlist}\n\n')
-h5file = tables.openFile('dnp.h5') # open the HDF5 file
+h5file = tables.openFile('example_database.h5') # open the HDF5 file
 search_string = h5inlist('chemical',['dna_cs14_unbound',
     'dna_cs14_bound',
     'dna_cs19_bound',
@@ -2135,9 +2241,15 @@ axes={'t': array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])}
 To get started with the nddata module,
     it's important for one to read the sections on ``Creating an instance''
     and ``Operator Overloading'' first.
+
+\nts{general note $\Rightarrow$ subtracting a mean (like data -= data.mean() does not work, but shoudl}
 \subsection{Creating an instance}
 %%fakesubsubsection
 \outlineblank{subsubsection}
+\paragraph{instance = nddata(data1d,`axisname')}
+This initializes a simple 1-dimensional dataset,
+    where both the data and the labels are set to the given ``data1d'' argument.
+This is ideal for quick calculations.
 \paragraph{instance = nddata(data,sizes,dimlabels)}
 Initializes a new nddata object.
 The initialization is typically performed by a developer
@@ -2334,7 +2446,7 @@ Give the list of axes names, followed by the list of their label axes.
 \nts{label the axes in dictionary format}
 \subparagraph{instance.labels('axis',axislabels)}
 \nts{label a single axis}
-\paragraph{instance.ft('axisname',shift = False,pad = False)}
+\paragraph{instance.ft('axisname',shift = False,pad = False,automix = False)}
 Fourier transform along axis ``axisname,'' by padding the data to a round power of 2 if you want (though not by default) so a fast fourier transform can be run (note that this can result in expansion and sinc convolution of the result).
 By default (according to the optional shift argument),
     it also assumes the frequencies start at a frequency of 0,
@@ -2343,6 +2455,8 @@ By default (according to the optional shift argument),
 Here, by using an nddata object, we can save several steps of coding,
     because the spectral width and resolution of the result are determined from
     axis labels.
+    
+The ``\texttt{automix}" parameter allows us to specify the approximate based frequency (for instance if we have a known carrier, but are sampling at a much lower rate).
     
 \begin{python}
 import nmr # this module can auto-detect a variety of nmr file formats and read the file appropriately
@@ -2378,6 +2492,7 @@ Interpolate onto the new axis given by targetaxis, which must be an ndarray.
 \end{mykwargs}
 \paragraph{instance.getaxis('t')}
 \paragraph{instance.retaxis('t')}
+\paragraph{instance.axis('t')}
 \subsubsection{Operations that change the dimensionality of the data}
 \paragraph{selfout,argout = instance.aligndata(arg)}\label{codelabel:aligndata}
 This function is mostly intended for use arithmetic operations.
@@ -2514,6 +2629,113 @@ Return a dictionary whose keys are the names of the dimensions,
 The opposite of mkd.
 \paragraph{instance.axn('axisname')}
 Returns the index number associated with the dimension named 'axisname'.
+\subsubsection{Plotting functions}
+Here is an example for the various plotting functions.
+
+Arguments used by several of these functions
+\begin{mykwargs}
+    \begin{description}
+        \item[light = None] can give a pair
+            \texttt{[azimuth,altitude]} for the angles where
+            a light source list located.
+            It seems that \texttt{[0,0]} (the default) is always to the front right (I assume straight on), regardless of what the rotation angle of the plot is set to.
+        \item[rotation = [0,0]] gives the \texttt{[azimuth,altitude]} rotation relative to a default rotation (better than the matplotlib default) where x is forward and y goes back to the left.
+            The rotation argument can \textbf{only} be set for the first 3D plot you call on a given axis.
+        \item[invert = False] \nts{not working now} Invert the x dimension (\ie plot the same data but with inversion)
+    \end{description}
+\end{mykwargs}
+
+\begin{python}
+t = r_[-10:20:10j]
+x = nddata(t**2,[-1],['x']).labels('x',t)
+obs('Data should be parabolic along x, which goes from -10 to 20\n\n')
+y = nddata(t/10.,[-1],['y']).labels('y',t/10)
+obs('Data should be linear along y, which goes from -1 to 2\n\n')
+exampledataset = x*y
+obs('The shape is',ndshape(exampledataset),'\n\n')
+image(exampledataset)
+lplot('software_doc_meshplot_image.pdf')
+exampledataset.meshplot()
+lplot('software_doc_mesh.pdf')
+obs('\n\nFor meshplot, you can also set the alpha, and set a non-unity stride along a dimension, like this\n\n')
+exampledataset.meshplot(alpha = 0.9,stride = {'x':3})
+lplot('software_doc_meshstride.pdf')
+exampledataset.waterfall()
+lplot('software_doc_waterfall.pdf')
+t = r_[-10:20:30j]
+obs('\n\nHere, I increase the data density from 10 to 30 points along each axis\n\n')
+x = nddata(t**2,[-1],['x']).labels('x',t)
+obs('Data should be parabolic along x, which goes from -10 to 20\n\n')
+y = nddata(t/10.,[-1],['y']).labels('y',t/10)
+obs('Data should be linear along y, which goes from -1 to 2\n\n')
+exampledataset = x*y
+obs('\n\nShow an oldtimey plot, with the grid lines going along one of two dimensions\n\n')
+exampledataset.oldtimey()
+lplot('software_doc_oldtimey.png')
+exampledataset.reorder(['y','x'])
+exampledataset.oldtimey(rotation = [270,0])
+lplot('software_doc_oldtimey_rev.png')
+exampledataset.gnuplot_save('test')
+\end{python}
+\paragraph{instance.waterfall(alpha = 0.3)}
+This provides a plot style like the matlab ``waterfall'' plots,
+    with axis labels pulled from nddata.
+This is heavily based on an example code taken straight
+    off the matplotlib gallery website.
+
+The first (innermost) dimension is the x-dimension of the
+    individual plots,
+    while the second (outer) dimension is the dimension along
+    which they are stacked.
+
+\nts{we would like to generalize this for n-dimensional data,
+    (i.e. split plots)
+    by using some type of general function that we can re-use for
+    all plot styles.}
+\paragraph{instance.meshplot()}
+
+    \begin{mykwargs}
+        \begin{description}
+            \item[rotation, light] see above
+            \item[alpha = 0.3] to use this, you must set
+                ``light'' $\Rightarrow$ sets the transparency
+            \item[cmap = cm.gray] the color map (gray by default)
+            \item[rotation] \nts{this needs to go in}
+                \texttt{\_init\_3d\_axis}
+            \item[onlycolor = False] if set to true, show only
+                the colormap
+        \end{description}
+    \end{mykwargs}
+
+\nts{Actually, this just maps onto an nddata method that does the mesh plot.}
+
+\nts{we would like to generalize this for n-dimensional data,
+    (i.e. split plots)
+    by using some type of general function that we can re-use for
+    all plot styles.}
+\paragraph{instance.oldtimey(\ldots)}
+This is inspired by an elegant plotting style that comes from old papers,
+    which consists of lines that follow the surface of the data
+    \textit{densely} and \textit{only in one direction}.
+It works exceptionally well for black-and white reproduction.
+Note that it's not possible to get this plot style from a
+    meshplot by setting one of the stride values to 1
+    $\Rightarrow$ something odd happens.
+    \begin{description}
+        \item[linewidth = None] this refers to the linewidth of the lines that follow the surface.  If linewidth is ``None,'' see sclinewidth.
+        \item[sclinewidth] sets ``linewidth'' to 10/len(y), so that it scales with the number of grid lines.  The setting I've chosen here seems to work OK for png output.
+        \item[contour] \nts{add optional lines to label the height of the countours}
+        \item[light] is by default set to ``True'' (so we have shading) and passed to meshplot
+        \item[\ldots] all other kwargs are passed on 
+    \end{description}
+
+\nts{the keyword argument shading gives an optional surface
+    shading to the plot (based on meshplot)}
+
+\nts{we would like to generalize this for n-dimensional data,
+    (i.e. split plots)
+    by using some type of general function that we can re-use for
+    all plot styles.}
 \subsection{nddata-associated functions}
 \subsubsection{combining objects}
 \paragraph{concat([instance1,instance2,\ldots,instanceN],'newdimname',chop = True)}
