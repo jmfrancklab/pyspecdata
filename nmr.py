@@ -782,7 +782,8 @@ def standard_epr(dir = None,
         normalize_peak = False,
         background = None,
         grid = False,
-        figure_list = None):
+        figure_list = None,#the next (conc_calib) gives the concentration in mM/(signal units / cM)
+        conc_calib = None):
     if type(files) is str or type(files) is tuple:
         files = [files]
     if background is not None:
@@ -869,9 +870,14 @@ def standard_epr(dir = None,
         doubleintegral = integral.copy()
         doubleintegral.integrate(newname)
         if sample_len is None:
-            legendtext += r', SNR %0.2g $\int\int=$ %0.3g'%(snr,doubleintegral[newname,-1].data[-1])
+            if conc_calib is not None:
+                raise ValueError("If you want to set the concentration calibration, you need to give a sample length!")
+            legendtext += r', SNR %0.2g $\int\int=$ %0.3g sig. units'%(snr,doubleintegral[newname,-1].data[-1])
         else:
-            legendtext += r', SNR %0.2g $\int\int=$ %0.3g / cm'%(snr,doubleintegral[newname,-1].data[-1]/double(sample_len))
+            if conc_calib is None:
+                legendtext += r', SNR %0.2g $\int\int=$ %0.3g sig. units / cm'%(snr,doubleintegral[newname,-1].data[-1]/double(sample_len))
+            else:
+                legendtext += r', SNR %0.2g $\int\int=$ %0.3g mM'%(snr,doubleintegral[newname,-1].data[-1]/double(sample_len)*double(conc_calib))
         plot(integral,alpha=0.5,linewidth=linewidth,label = legendtext)
         figure_list.next('epr')
         if normalize_peak:
