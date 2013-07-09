@@ -176,14 +176,12 @@ $pdf_previewer=q/okular --unique/;''')
                         QtGui.QMessageBox.warning(self,"Done!","Script ran without any errors!")
                     dump_latex_finish(fp_out)
                     fp_out.close()
-                    print "about to run",['pdflatex','-synctex=1','-shell-escape',file_to_gen]
                     proc = Popen(['pdflatex -synctex=1 -shell-escape %s'%file_to_gen],
                             shell = True)
                     proc.wait()
                     proc = Popen(['bibtex %s'%file_to_gen_basename],
                             shell = True)
                     proc.wait()
-                    print "about to run",['pdflatex','-synctex=1','-shell-escape',file_to_gen]
                     proc = Popen(['pdflatex -synctex=1 -shell-escape %s'%file_to_gen],
                         shell = True)
                     proc.wait()
