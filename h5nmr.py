@@ -939,8 +939,8 @@ def dnp_for_rho(path,
             row_to_add.update(dict(zip(mycoeff.dtype.names,mycoeff.tolist()[0])))
             concentration_table,parameters_index = h5addrow(compilationroot_node,'ksp_fits',row_to_add)
             #}}}
-            h5file_node.close()
-            ###}}}
+        h5file_node.close()
+        ###}}}
         ###{{{ null lists so that I can collect the data
         # do this here, because I might not have any simulated data
         fit_types_simul = []

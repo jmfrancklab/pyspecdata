@@ -177,17 +177,15 @@ $pdf_previewer=q/okular --unique/;''')
                     dump_latex_finish(fp_out)
                     fp_out.close()
                     print "about to run",['pdflatex','-synctex=1','-shell-escape',file_to_gen]
-                    proc = Popen(['pdflatex','-synctex=1','-shell-escape',file_to_gen],
+                    proc = Popen(['pdflatex -synctex=1 -shell-escape %s'%file_to_gen],
                             shell = True)
                     proc.wait()
-                    proc = Popen(['bibtex',file_to_gen_basename],
+                    proc = Popen(['bibtex %s'%file_to_gen_basename],
                             shell = True)
                     proc.wait()
                     print "about to run",['pdflatex','-synctex=1','-shell-escape',file_to_gen]
-                    proc = Popen(['pdflatex',
-                        '-synctex=1',
-                        '-shell-escape',
-                        file_to_gen],shell = True)
+                    proc = Popen(['pdflatex -synctex=1 -shell-escape %s'%file_to_gen],
+                        shell = True)
                     proc.wait()
                     if os.name == 'nt':
                         proc = Popen(['start',
@@ -195,8 +193,7 @@ $pdf_previewer=q/okular --unique/;''')
                             '-reuse-instance',
                             file_to_gen_basename+'.pdf'],shell = True)
                     elif os.name == 'posix':# this is for Mac, actually, which we could further discriminate by running "uname -a"
-                        proc = Popen(['open',
-                            file_to_gen_basename+'.pdf'],shell = True)
+                        proc = Popen(['open %s'%file_to_gen_basename+'.pdf'],shell = True)
                     proc.wait()
                 else:
                     raise ValueError("You selected a file that's not a python script!!")
