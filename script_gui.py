@@ -56,11 +56,12 @@ class my_widget_class (QtGui.QDialog):
                 fp.close()
             fp = open(os.curdir+'/.datadir','w')
             fp.write(self.currently_displayed_datadir)
+            fp.close()
             fp = open('.datadir','r')
             print 'now, .datadir says:',fp.read()
             fp.close()
         if os.path.exists(self.currently_displayed_homedir+'/.latexmkrc'):
-            print 'I see that you already have a',self.currently_displayed_homedir+'/.datadir, so I\'m not going to overwrite it'
+            print 'I see that you already have a',self.currently_displayed_homedir+'/.latexmkrc, so I\'m not going to overwrite it'
         else:
             print "I see that no latexmkrc exists in",self.currently_displayed_homedir,"so I will create one"
             QtGui.QMessageBox.warning(self,"testing installation","Since this seems to be the first time that you are running stuff, I'm going to try to open sumatrapdf --> if it comes up, just close it.")
