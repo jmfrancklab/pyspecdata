@@ -83,7 +83,7 @@ class store_integrals:
 class store_Emax (store_integrals):
     def catalog(self):
         h5file,compilationroot_node = h5nodebypath(self.h5filename + '/compilations')
-        search_string = '(integrals == \'%s\')'%self.integralnode_name 
+        search_string = '(integrals == \'%s\')'%self.integralnode_name
         if self.newrecord:
             Emax_table,self.index = h5addrow(compilationroot_node,'Emax_curves',[long(self.chemical_id),self.integralnode_name,expand_expno(self.expno),self.run_number],['chemical_id','integrals','experiments','run_number'],match_row = search_string)
             print 'DEBUG loaded row:\n\n',lrecordarray(Emax_table.readWhere('index == %d'%self.index),smoosh=True),'\n\n'
@@ -197,7 +197,7 @@ class store_T1 (store_integrals):
             mynames += ['covarelement%d'%x for x in range(0,len(covarmatrix))]
             mydata += list(covarmatrix)
         h5file,compilationroot_node = h5nodebypath(self.h5filename + '/compilations')
-        search_string = '(integrals == \'%s\')'%self.integralnode_name 
+        search_string = '(integrals == \'%s\')'%self.integralnode_name
         if self.newrecord:
             try:
                 concentration_table,self.index = h5addrow(compilationroot_node,'T1_fits',mydata,mynames,match_row = search_string)
@@ -381,7 +381,7 @@ def get_chemical_index(compilationroot_name,*args,**kwargs):
         raise CustomError('Chemical name is "None"!')
     ##{{{ identify the id in the solutions table corresponding to the chemical and concentration
     if concentration is None:
-        search_string = '(chemical == \'%s\')'%chemical_name 
+        search_string = '(chemical == \'%s\')'%chemical_name
     else:
         search_string = '(chemical == \'%s\') &'%chemical_name + gensearch('concentration','%0.5g',concentration,1e-6)
     ###{{{ grab (or create) the table
@@ -442,7 +442,7 @@ def dnp_for_rho(path,
         t1powers = [], # for this and the next, remember that the no power scan is always added to the end
         t1_powers = None, # new format
         t1expnos = [],
-        t1_autovals = r_[2,3], 
+        t1_autovals = r_[2,3],
         power_file = None,
         guessonly = False,
         chemical = None,
@@ -810,7 +810,7 @@ def dnp_for_rho(path,
         ylabel('net magnetization')
         expand_y()
         expand_x()
-        nextfigure(figurelist,'t1data' + pdfstring)		
+        nextfigure(figurelist,'t1data' + pdfstring)
         #}}}
         if fdata_exists: # if I can calculate the leakage factor
             save_color_t10 = plot_color_counter()
@@ -1598,15 +1598,15 @@ def retrieve_T1series(h5filename,name,*cheminfo,**kwargs):
             powers = data[indirect_dim][:]
     else:
             raise CustomError('indirect dim',indirect_dim,'not in',data.dtype.names)
-    Minfdata = nddata(data[r'M(\infty)'],[len(data)],[indirect_dim],data_error = myerrors,axis_coords = [powers])		
-    M0data = nddata(data[r'M(0)'],[len(data)],[indirect_dim],data_error = myerrors,axis_coords = [powers])		
+    Minfdata = nddata(data[r'M(\infty)'],[len(data)],[indirect_dim],data_error = myerrors,axis_coords = [powers])
+    M0data = nddata(data[r'M(0)'],[len(data)],[indirect_dim],data_error = myerrors,axis_coords = [powers])
     data = data['T_1'][:]
     retval = nddata(data,[len(data)],[indirect_dim],data_error = myerrors,axis_coords = [powers])
     if indirect_dim == 'power':
         retval.sort(indirect_dim)
     retval.name('T_1')
     if retcheckval:
-	    return retval,M0data,Minfdata
+        return retval,M0data,Minfdata
     else:
         return retval
 ##}}}
