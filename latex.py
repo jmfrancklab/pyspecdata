@@ -1,1 +1,1 @@
-jobname="current_writeup"
+jobname="notebook"

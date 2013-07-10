@@ -30,7 +30,7 @@ if extra_t1_problem == True:
     t1mask[-1] = 0
 t1_autovals = r_[2:2+len(t1_dbm)] # so that I can exclude experiments
 for j in bad_t1_autovals:
-	t1mask = logical_and(t1mask,t1_autovals != j)
+    t1mask = logical_and(t1mask,t1_autovals != j)
 fl = check_autosteps(power_threshold,t1_dbm,figure_list = fl,mask = t1mask)
 fl.show('T1powers_'+name+'.pdf')
 print r't1\_dbm is:',lsafen(t1_dbm),'\n\n'
