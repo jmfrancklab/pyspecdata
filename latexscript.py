@@ -133,7 +133,9 @@ else:
         proc = Popen(['python','-W','ignore',script_fname],
                 stdout = PIPE,
                 stdin = PIPE,
-                stderr = PIPE)
+                stderr = PIPE,
+                env = {'PYTHONPATH':os.getcwd(),
+                    'PYTHONDATADIR':os.environ['PYTHONDATADIR']})
     else: #windows should give os.name == 'nt'
         proc = Popen(['python','-W','ignore',script_fname],
                 stdout = PIPE,
