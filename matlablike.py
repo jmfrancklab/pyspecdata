@@ -2327,7 +2327,14 @@ class nddata (object):
         if Aerr != None:
             Rerr += (Aerr/B.data)**2
         if Berr != None:
-            Rerr += (A.data*Berr/(B.data**2))**2
+            try:
+                Rerr += (A.data*Berr/(B.data**2))**2
+            except:
+                raise CustomError('self was',self,
+                        'arg was',arg,
+                        'dtype of A.data',A.data.dtype,
+                        'dtype of Berr',Berr.dtype,
+                        'dtype of B.data',Berr)
         try:
             Rerr = sqrt(real(Rerr)) # convert back to stdev
         except:
