@@ -257,7 +257,7 @@ Either is most easily set up with an external diff
 \subsection{Install required software on Mac}
 When I write this, there not a very good free all-in-one Python package for the Mac.
 The solution is still straightforward, though it takes a little time for everything to compile.
-You should download Xcode, then install the following Python components \textbf{Ryan and Anthony: using which package manager??}
+You should download Xcode, then install the following Python components using MacPorts (It's crucial to install everything from the same location -- \ie, don't install the main Python code from another location, then try to install the other modules from MacPorts). 
 \begin{small}
 \begin{multicols}{3}
 \begin{enumerate}
@@ -273,7 +273,7 @@ You should download Xcode, then install the following Python components \textbf{
 \end{enumerate}
 \end{multicols}
 \end{small}
-You will also need to download some form of \LaTeX\ distribution \textbf{Ryan and Anthony, please recommend a latex distribution}
+You will also need to download some form of \LaTeX\ distribution, such as the MacTex distribution.
 \subsection{Install required software on Windows}
 %%fakesubsubsection
 \outlineblank{subsubsection}
@@ -462,14 +462,13 @@ You can organize your data however you like within this directory,
         directory.
 \end{inplacenotebox}
 To set the location of your main data directory
-    (``exp\_data'' in the example above),
+    (\texttt{exp\_data} in the example above),
     simply select ``Set Data Directory'' from the drop-down list
     at the top,
     and select the appropriate folder.
-If, when quitting the program, you press ``Save All,''
-    the script\_gui.py program
-    will remember the location of your data directory
-    the next time you open it.
+Before quitting the program, press ``Save All,''
+    so that the \texttt{script\_gui.py} program
+    saves the location of your data directory.
     \begin{inplacenotebox}
         Incidentally, this is also the point at which it configures
             everything needed to run large latex file(s)
@@ -478,16 +477,15 @@ If, when quitting the program, you press ``Save All,''
         \nts{This will be discussed later.}
     \end{inplacenotebox}
 \paragraph{Running the example scripts}
-Additionally, to run the examples
-    you need to retrieve the zip file
-    that contains various sets of example data\\ 
+Retrieve the zip file
+    that contains various sets of example data:\\ 
     \url{http://franck.privatedns.org/~franck/reference_data.zip}\\ 
 and unpack it inside your main data directory,
     so that your data directory has a subdirectory called
-    ``reference\_data,'' as shown in the note above.
+    \texttt{reference\_data} , as shown in the note above.
 Once you do this, you can select ``Run Script'' from the dropdown
     list,
-    and select ``standalone\_example.py,''
+    and select \texttt{standalone\_example.py} ,
     which is a python script.
 Upon hitting OK the program simply hangs for
     half a minute
@@ -1642,7 +1640,7 @@ Aside from the figure names, we can also load special operating
 
     In the case of a latex figurelist, these are the keyword arguments passed to
     \texttt{lplotfigures(\ldots)}
-    \paragraph{instance.next('figname')} move to the figure named by the string ``figname''
+    \paragraph{instance.next('figname',\ldots)} move to the figure named by the string ``figname''
     if a figure named figname does not exist, make a new one.
 
     \subparagraph{instance.next('figname',legend = True,\ldots)}
@@ -2187,7 +2185,7 @@ Sometimes, we wish not to multiply data on consistent axes,
 For instance, this happens for certain types of convolution
     see \ref{sec:mwshaping_present_code}
     \nts{we can then multiply by an intermediate class to change the type of multiplication and make our life easier}
-\section{the ndshape module}
+\section{the ndshape class}
 This module is used to define the shape of an nddata object.
 \paragraph{initialization}
 It can be started in one of two ways,
@@ -2237,7 +2235,7 @@ dimlabels=[['t']]
 axes={'t': array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])}
         +/-{'t': None}
 \end{lstlisting}
-\section{the nddata module}
+\section{the nddata class}
 To get started with the nddata module,
     it's important for one to read the sections on ``Creating an instance''
     and ``Operator Overloading'' first.
@@ -2455,7 +2453,7 @@ By default (according to the optional shift argument),
 Here, by using an nddata object, we can save several steps of coding,
     because the spectral width and resolution of the result are determined from
     axis labels.
-    
+
 The ``\texttt{automix}" parameter allows us to specify the approximate based frequency (for instance if we have a known carrier, but are sampling at a much lower rate).
     
 \begin{python}
@@ -2597,8 +2595,6 @@ print lsafen(y_out)
 \paragraph{instance.chunkoff()}
 \paragraph{instance.smash()}
 \paragraph{instance.smashorder()}
-\paragraph{instance.chunk()}
-\paragraph{instance.chunkoff()}
 \subsubsection{Functions that affect general properties}
 \paragraph{instance.name()}
 \paragraph{instance.set\_plot\_color()}
@@ -2783,9 +2779,9 @@ lplot('software_doc_meshstride.pdf')
 exampledataset.waterfall()
 lplot('software_doc_waterfall.pdf')
 \end{python}
-\section{the nddata\_hdf5 module}
+\section{the nddata\_hdf5 class}
 \ntd{use code from~\ref{sec:task1485} as example of try/except format}
-\section{fitdata}
+\section{the fitdata class}
 This is a child class of nddata used for fitting.
 \subsection{creating new types of fitdata modules}
 There is a base class called ``fitdata'' that
@@ -3140,6 +3136,65 @@ plot(d.eval(100),label = d.name()+' fit')
 autolegend()
 fl.show('asymptotetest120201.pdf') # dump out all our figures.
 \end{python}
+\section{The nmr module}
+This module contains various files that are useful for loading NMR and EPR files.
+\paragraph{load\_file(\ldots)}
+This load a Bruker file (give the directory for the expno),
+    a WinEPR file (give the \texttt{.spc} or \texttt{.par} file without extension),
+    or a Kea file (give the directory for the experiment number).
+
+    \begin{mykwargs}
+        \begin{description}
+            \item[dimname = 'mydimname']
+                see below.
+                
+            \item[add\_dims = ['phcyc1','phcyc2',\ldots,'phcycN'],add\_sizes = [4,4,\ldots,2]]
+                These go together.
+                They divide up two dimensional data (using \texttt{nddata.chunkoff()})
+                    along \texttt{N} dimensions \textit{in addition to}
+                    to the original \texttt{t2}
+                    (at least for NMR, it's called this)
+                    and \texttt{dimname} dimensions.
+                Each dimension has the sizes given in \texttt{add\_sizes}.
+
+                This is less complicated than it sounds, and very useful.
+                For instance,
+                    if your 2D data includes an inner loop that is 4 steps long,
+                    along which you are changing the phase of your pulse
+                    (but not your receiver),
+                    then you can add an additional '\texttt{phcyc}'
+                    dimension that's four steps long.
+                By then running \texttt{data.ft('phcyc',shift = False)}, 
+                    you can apply the phase cycle,
+                    and then select any of the coherences channels that you want.
+                \item[calibration = 0.5] 
+                    This gives a calibration (which you typically measure yourself)
+                        that converts the numbers in the file to actual units of signal volts
+                        (\ie\ \texttt{calibration} has units of [V]/[``file units'']).
+                    Typically, when you calculate this value,
+                        you give it a name that is unique for a specific instrument, dwell time, and receiver gain,
+                        and you can then store it \texttt{data.txt}
+                        using the \texttt{save\_data(\textit{dict})}
+                        convenience function.
+                    You can then retrieve at any later point with
+                        \texttt{load\_data()}.
+        \end{description}
+    \end{mykwargs}
+
+You can load one or multiple files into a single array, as follows:
+
+\subparagraph{load\_file(filename,dimname = 'mydimname',\ldots)}
+Loads a single file.
+When there is more than one FID or spectrum involved,
+        arrange the others along a dimension called \texttt{'mydimname'} .
+Note that the default value of \texttt{dimname} is just an empty string, ''.
+
+\subparagraph{load\_file([filename1,filename2,filename3,\ldots],dimname = 'mydimname',\ldots)}
+Loads multiple files,
+    as though the data in them belongs to a single 2D dataset.
+As before, they different files are loaded as different entries of \texttt{mydimname} .
+(For instance we use this to load enhancement curves in DNP).
+
 \section{High-Level ODNP related functions}
 \paragraph{retrieve\_T1series(\ldots)}
 \subparagraph{retrieve\_T1series('dnp.h5',None,chemical\_name,concentration)}

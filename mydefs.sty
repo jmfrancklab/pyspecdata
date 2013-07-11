@@ -4,22 +4,26 @@
 \RequirePackage{xspace}
 %\RequirePackage{myhyperref}
 \@ifundefined{texorpdfstring}{%
-\newcommand{\texorpdfstring}[1]{#1}
+\newcommand{\texorpdfstring}[2]{#1}
 }{}
 \RequirePackage{textcomp}% among other things, gives \textmu and \textperthousand
 \newcommand\myline{\rule{\linewidth}{0.1mm}}
 \def\Emax{\texorpdfstring{\ensuremath{E_{max}}\xspace}{Emax}}
+\newcommand{\myft}[3]{\int_{-\infty}^{\infty}e^{-i2\pi #2 #1} #3 d#1 }
 \newcommand\phalf{\ensuremath{p_{1/2}}\xspace}
 \newcommand{\figref}[1]{Fig.~\ref{fig:#1}}
 \newcommand{\tauformyhigh}{33.3\ps}
 \newcommand{\tauw}{\ensuremath{\tau_{c,w}}\xspace}%
 \newcommand{\relativeviscosity}{\ensuremath{\eta/\eta_{H_2O}}\xspace}%
 \newcommand{\capillarydim}{0.6\mm i.d.\ 0.84\mm o.d.\ quartz\xspace}
-\newcommand{\etal}{\texorpdfstring{\textit{et.~al.}\xspace}{et. al. }}
-\newcommand{\ie}{\textit{i.e.}\xspace}
-\newcommand{\etc}{\textit{etc.}\xspace}
-\newcommand{\vs}{\textit{vs.}\xspace}
-\newcommand{\eg}{\textit{e.g.}\xspace}
+%{{{ these had xspace, which turns out to be a pain in the ass
+\newcommand{\etal}{\texorpdfstring{\textit{et.~al.}\xspace}{et al.}}
+\newcommand{\ie}{\textit{i.e.}}
+\newcommand{\etc}{\textit{etc.}}
+\newcommand{\via}{\textit{via}}
+\newcommand{\vs}{\textit{vs.}}
+\newcommand{\eg}{\textit{e.g.}}
+%}}} these had xspace, which turns out to be a pain in the ass
 \newcommand{\relaxivityunits}{\ensuremath{\;\mbox{s}^{-1}\mbox{M}^{-1}\!\!}\xspace}%
 \newcommand{\diffusionunits}{\ensuremath{\;\mbox{m}^{2}\mbox{s}^{-1}\!\!}\xspace}%
 \newcommand{\Real}[1]{\Re\mathfrak{e}\left[ #1 \right]}
@@ -32,7 +36,7 @@
 \newcommand\klowbulk{\texorpdfstring{\ensuremath{k_{low,bulk}}\xspace}{k\_low,bulk}}
 \newcommand\krhobulk{\texorpdfstring{\ensuremath{k_{\rho,bulk}}\xspace}{k\_rho,bulk}}
 \newcommand\klowrel{\ensuremath{\klow/\klowbulk}}
-\newcommand\degC{\ensuremath{^{\mbox{\scriptsize o}}\mbox{C}}\xspace}
+\newcommand\degC{\ensuremath{^{\scriptsize \circ}\mbox{C}}\xspace}
 \newcommand\krho{\texorpdfstring{\ensuremath{k_\rho}\xspace}{k\_rho}}
 \newcommand\klow{\texorpdfstring{\ensuremath{k_{low}}\xspace}{k\_low}}
 \def\ksm{\texorpdfstring{\ensuremath{k_\sigma s_{max}}\xspace}{k\_sigma smax}}
@@ -61,6 +65,12 @@
 \ensuremath{\overbrace{#1}^{\mbox{\begin{small}#2\end{small}}}}%
 \hspace{-\mylength}%
 }
+
+\newcommand{\sfrac}[2]{
+\settowidth{\mylength}{\scriptsize{\ensuremath{#1}}}%
+\settowidth{\mysecondlength}{\scriptsize{\ensuremath{#2}}}%
+\ensuremath{^{#1}\hspace{-\mylength}/_{#2}}}
+
 \newcommand{\ubpair}[2]{%
 \settowidth{\mylength}{#2}%
 \settowidth{\mysecondlength}{\ensuremath{\displaystyle #1}}%
@@ -69,6 +79,7 @@
 \ensuremath{\underbrace{#1}_{\mbox{\begin{small}#2\end{small}}}}%
 \hspace{-\mylength}%
 }
+
 \def\ninetytime{\texorpdfstring{\ensuremath{\tau_{90^{\mbox{\tiny o}}}}}{tau90}\xspace}
 %{{{ units
 \def\uM{\texorpdfstring{\ensuremath{\;\mbox{\textmu M}}}{uM}\xspace}
@@ -76,7 +87,9 @@
 \def\us{\texorpdfstring{\ensuremath{\;\mbox{\textmu s}}}{us}\xspace}
 \def\ms{\texorpdfstring{\ensuremath{\;\mbox{ms}}}{ms}\xspace}
 \def\uL{\texorpdfstring{\ensuremath{\;\mbox{\textmu L}}}{uL}\xspace}
-\def\mM{\texorpdfstring{\ensuremath{\;\mbox{mM}}}{uM}\xspace}
+\def\uV{\texorpdfstring{\ensuremath{\;\mbox{\textmu V}}}{uV}\xspace}
+\def\mV{\texorpdfstring{\ensuremath{\;\mbox{mV}}}{mV}\xspace}
+\def\mM{\texorpdfstring{\ensuremath{\;\mbox{mM}}}{mM}\xspace}
 \def\mL{\texorpdfstring{\ensuremath{\;\mbox{mL}}}{mL}\xspace}
 \def\cm{\texorpdfstring{\ensuremath{\;\mbox{cm}}}{cm}\xspace}
 \newcommand\M{test that this guy is new!}
