@@ -154,8 +154,7 @@ $pdf_previewer=q/okular --unique/;''')
                     proc = Popen(['python','-W','ignore',self.script_to_run],
                             stdout = PIPE,
                             stdin = PIPE,
-                            stderr = PIPE,
-                            env = python_arg_dict)
+                            stderr = PIPE)
                     stdoutdata,stderrdata = proc.communicate()
                     print "done running"
                     fp_out = open(file_to_gen,'w')
