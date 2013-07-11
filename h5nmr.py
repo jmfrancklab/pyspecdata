@@ -1,3 +1,4 @@
+import sys
 from fornotebook import *
 from matlablike import *
 from nmr import *
