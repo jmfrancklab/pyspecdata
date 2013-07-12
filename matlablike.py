@@ -2324,17 +2324,24 @@ class nddata (object):
         Aerr = A.get_error()
         Berr = B.get_error()
         Rerr = 0.0 # we can have error on one or both, so we're going to need to add up the variances
+        dt128 = dtype('complex128')
         if Aerr != None:
-            Rerr += (Aerr/B.data)**2
+            if (A.data.dtype is dt128) or (B.data.dtype is dt128):# this should avoid the error that Ryan gets
+                Rerr += (complex128(Aerr)/complex128(B.data))**2
+            else:
+                Rerr += (Aerr/B.data)**2
         if Berr != None:
-            try:
-                Rerr += (A.data*Berr/(B.data**2))**2
-            except:
-                raise CustomError('self was',self,
-                        'arg was',arg,
-                        'dtype of A.data',A.data.dtype,
-                        'dtype of Berr',Berr.dtype,
-                        'dtype of B.data',Berr)
+            if (A.data.dtype is dt128) or (Berr.dtype is dt128) or (B.data.dtype is dt128):# this should avoid the error that Ryan gets
+                Rerr += (complex128(A.data)*complex128(Berr)/(complex128(B.data)**2))**2
+            else:
+                try:
+                    Rerr += (A.data*Berr/(B.data**2))**2
+                except:
+                    raise CustomError('self was',self,
+                            'arg was',arg,
+                            'dtype of A.data',A.data.dtype,
+                            'dtype of Berr',Berr.dtype,
+                            'dtype of B.data',Berr)
         try:
             Rerr = sqrt(real(Rerr)) # convert back to stdev
         except:
