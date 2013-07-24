@@ -346,6 +346,7 @@ def delete_datanode(filename,integralnodename):
 def print_chemical_by_index(compilationroot_name,indexnumber):
     h5file,chemicalnode = h5nodebypath(compilationroot_name)
     lrecordarray(chemicalnode.chemicals.readWhere('index == %d'%indexnumber),format = '%g')
+    h5file.close()
     return
 def get_chemical_index(compilationroot_name,*args,**kwargs):
     r'OLD format: get_chemical_index(location of HDF5 node, chemical name,concentration)' + '\n' + 'OR get_chemical_index(location of HDF5 name, string with chemical + conc)' + '\n' + 'NEW FORMAT: pass no arguments, but pass kwargs chemical, concentration, and name'
