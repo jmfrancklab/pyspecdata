@@ -1,6 +1,7 @@
 import sys
 import hashlib
 import numpy
+import textwrap
 import os
 from matplotlib.mlab import rec2csv, csv2rec
 from difflib import ndiff
@@ -159,9 +160,12 @@ else:
             fp_out.write(datadir_error)
         else:
             fp_out.write("\n\nThe data directory was"+"not"*(not grabbed_datadir_from_file)+"read from .datadir\n\n")
+            fp_out.write("\\begin{tiny}\n")
             fp_out.write("\\begin{verbatim}\n")
+            fp_out.write('...\n\t'.join(textwrap.wrap(stderrdata,80)))
             fp_out.write(stderrdata)
             fp_out.write("\\end{verbatim}\n")
+            fp_out.write("\\end{tiny}\n")
         fp_out.write("{\\small {\\color{red} {\\tt ---------------------------}}}\\\\\n")
     fp_out.close()
 rec2csv(catalog,'scripts/script_catalog.csv')
