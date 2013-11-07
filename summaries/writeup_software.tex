@@ -1779,6 +1779,9 @@ In the following set of data, we use pull information for the
     chemicals that are
     relevant for a set of experiments on DNA.
 
+\subparagraph{h5inlist(colum\_name,slice(val1,val2))}
+This returns anything between val1 and val2
+
 \phantomsection\label{codelabel:h5inlist}
 \begin{python}
 h5file = tables.openFile('dnp.h5') # open the HDF5 file
@@ -1803,6 +1806,9 @@ For a further extension of this code, see \ref{codelabel:h5join} followed by \re
 or just
 
 \subparagraph{resultarray = h5join((tablenode,``tablecol''),(my\_struct\_array,``arraycol''))}
+
+Join \texttt{my\_struct\_array} onto \texttt{tablenode}.
+
 This takes the listed columns (\ie~\texttt{arraycolA},\ldots,\texttt{arraycolN}) in
     \texttt{my\_struct\_array} as a starting point that identifies a
     particular set of dataset.
@@ -2063,29 +2069,15 @@ There is nothing to this function that can't be done with
         \end{description}
     \end{mykwargs}
 \nts{For example\ldots}
-\paragraph{counter,data = h5remrows(mynode,``tablename'',searchstring)}
-This will look at the table named ``tablename'' contained
-    under the node ``mynode'' and remove all rows that match
-    the pattern given by ``searchstring.''
-The returned value data here is a structured array containing
-    the rows removed, while counter is an integer giving the
-    number of rows removed.
-If the mynode does not exist, it returns False for counter
-    and None for data.
-\nts{For example\ldots}
-\paragraph{tablenode,newindex = h5addrow(bottomnode,``tablename'',listofdata,listofnames)}
+\paragraph{adding and removing data rows}
+\subparagraph{tablenode,newindex = h5addrow(bottomnode,``tablename'',{'name1':val1,'name2':val2,\ldots})}
+\subparagraph{tablenode,newindex = h5addrow(bottomnode,``tablename'',['name1','name2',\ldots],[val1,val2,\ldots])}
 This finds the table named ``tablename'' which belongs
     in the group given by the node bottomnode.
 If the table does not exist, it creates it.
 Then, it adds the row of data given by
-    the list ``listofdata''
-    where each element belongs to a field given by
-    the list of strings
-    ``listofnames.''
-\ntd{the following is done, just change the documentation:}
-\ntd{I should just change this so that these two could also be a
-    dictionary -- the easiest way to do this is to pass them as an
-    *args straight to make\_rec.}
+    the \texttt{name}, \texttt{val} pair,
+    where each \texttt{name} is the name of a field
 
 By convention, a table created and augmented with this function
     has a field named `index,' which is automatically incremented
@@ -2099,7 +2091,35 @@ This is in analogy to a relational database
     of PyTables doesn't demonstrate the same speedups
     relating to indexing that relation database programs do.
 
-\nts{For example\ldots}
+This implements several conventions:
+\begin{mykwargs}
+    \begin{description}
+        \item[match_row = None] give a search string.  If any matches are returned, don't add anything to the type.
+        \item[only_last = True] only return the last element of the match from \texttt{match\_row}.
+    \end{description}
+\end{mykwargs}
+\subparagraph{counter,data = h5remrows(mynode,``tablename'',searchstring)}
+This will look at the table named ``tablename'' contained
+    under the node ``mynode'' and remove all rows that match
+    the pattern given by ``searchstring.''
+The returned value data here is a structured array containing
+    the rows removed, while counter is an integer giving the
+    number of rows removed.
+If the mynode does not exist, it returns False for counter
+    and None for data.
+\subparagraph{\textit{example:}}
+\begin{python}
+h5fp,mynode = h5nodebypath('test.h5/mygroup')
+tablenode,data = h5remrows(mynode,'test_table','index > -1')# i.e. just remove all rows, which is an unusual request
+print 'removed data:\n\n'
+lrecordarray(data)
+tablenode,currentindex = h5addrow(mynode,'test_table',{'column1':32,'column2':102.1})
+tablenode,currentindex = h5addrow(mynode,'test_table',{'column1':33,'column2':104.1})
+print '\n\n'
+print 'added data:\n\n'
+lrecordarray(tablenode.read())
+h5fp.close()
+\end{python}
 \paragraph{h5loaddict(mynode)}
 Creates a dictionary containing all the attributes
     belonging to the HDF5 node ``mynode.''
@@ -2490,6 +2510,46 @@ Interpolate onto the new axis given by targetaxis, which must be an ndarray.
 \end{mykwargs}
 \paragraph{instance.getaxis('t')}
 \paragraph{instance.retaxis('t')}
+\textbf{don't use this anymore, pass the same arguments to fromaxis}
+\paragraph{instance.fromaxis('t',\cdots)}
+\subparagraph{instance.fromaxis('t')}
+Just return an nddata with the values of the axis loaded into the data.
+\subparagraph{instance.fromaxis(['t','f'],x)}
+\textbf{If \texttt{x} is a sympy expression} with variables named the same as the axis (here `t' and `f'), this will return an nddata that is calculated from the values of the axis.
+
+\textbf{If \texttt{x} is a lambda function} it operates the same way, except that it matches up the arguments of the list to the arguments of the lambda function in order of appearance.
+
+\subparagraph{instance.fromaxis('t',x)}
+A shortcut that can be used with just one axis.
+
+\begin{mykwargs}
+    \begin{description}
+        \item[overwrite = False] 
+            if set to \texttt{True}, this overwrites the previous data in \texttt{instance}, otherwise, it just returns the result.
+    \end{description}
+\end{mykwargs}
+
+\subparagraph{example}
+
+\begin{python}
+from matlablike import *
+fl = figlist_var()
+f = sympy.var('f')
+l = -1.0
+R = 3.0
+l /= -1j*2*pi*f - R
+print issympy(l)
+#l = sympy.lambdify(f,l)
+x = ndshape([100],['f']).alloc(format = None)
+x.labels('f',r_[-10:10:100j])
+x = x.fromaxis('f',l,overwrite = True)
+print x
+fl.next('lorentzian')
+fl.plot(x.runcopy(imag),'g',alpha = 0.5)
+fl.plot(x.runcopy(real),'b',alpha = 0.5)
+fl.show('lorentzian131105.pdf')
+\end{python}
+
 \paragraph{instance.axis('t')}
 \subsubsection{Operations that change the dimensionality of the data}
 \paragraph{selfout,argout = instance.aligndata(arg)}\label{codelabel:aligndata}
@@ -3196,6 +3256,35 @@ As before, they different files are loaded as different entries of \texttt{mydim
 (For instance we use this to load enhancement curves in DNP).
 
 \section{High-Level ODNP related functions}
+\subsubsection{Dealing with indexed chemical mixtures}
+\paragraph{chemical\_id = get\_chemical\_index(h5file+'/compilations/chemical',chemical = 'chemname',concentration = thisconc)}
+find the index (an integer identifier) for a chemical named \texttt{chemname} that's dissolved in solution with concentration \texttt{thisconc}.
+
+The example above looks for and puts chemicals in a table called ``chemicals'' inside the node \texttt{compilations/chemical}, which is the location where scripts will typically search for the chemicals.
+
+It also takes the optional argument \texttt{only\_last}, which it passes on to \texttt{h5addrow(\ldots)},
+    so that, for instance, you can return all concentrations for a given chemical name.
+\paragraph{print\_chemical\_by\_index(h5file+'/compilations/chemical',\ldots)}
+This prints the values stored or retrieved from the previous function.
+\subparagraph{print\_chemical\_by\_index(h5file+'/compilations/chemical',chemical\_id)}
+just a single \texttt{chemical\_id} 
+\subparagraph{print\_chemical\_by\_index(h5file+'/compilations/chemical',[chemical\_id1,chemical\_id2,\ldots])}
+a list of chemical id's
+
+\begin{python}
+chemical_id_list = []
+chemical_id_list.append(
+    get_chemical_index('dnp.h5/compilations/chemicals','test_chemical',1e-6))
+chemical_id_list.append(
+    get_chemical_index('dnp.h5/compilations/chemicals','test_chemical',2e-6))
+chemical_id_list.append(
+    get_chemical_index('dnp.h5/compilations/chemicals','test_chemical',3e-6))
+print_chemical_by_index('dnp.h5/compilations/chemicals',chemical_id_list[0])
+print_chemical_by_index('dnp.h5/compilations/chemicals',chemical_id_list)
+chemical_id = get_chemical_index('dnp.h5/compilations/chemicals',chemical = 'test_chemical',only_last = False) #since it's optional, try just the name
+print_chemical_by_index('dnp.h5/compilations/chemicals',chemical_id)
+\end{python}
+\subsubsection{retrieving datasets}
 \paragraph{retrieve\_T1series(\ldots)}
 \subparagraph{retrieve\_T1series('dnp.h5',None,chemical\_name,concentration)}
 Retrieve all the $T_1$ information that has a particular chemical

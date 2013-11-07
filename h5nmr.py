@@ -106,7 +106,7 @@ class store_Emax (store_integrals):
             power_file = auxiliary_args.pop('power_file')
             if fid_args['expno'] == 'auto' or fid_args['expno'] == 'Auto':
                 self.expno,dbm,self.figurelist = parse_powers(path,fid_args['name'],power_file,first_figure = self.figurelist,**auxiliary_args) # the 1 is because I'm not interested in the expnos it uses
-                fl = figlistl()
+                fl = figlist_var()
                 fl.figurelist = self.figurelist
                 mythreshold = -36
                 if 'threshold' in auxiliary_args.keys():
@@ -117,7 +117,7 @@ class store_Emax (store_integrals):
             else:
                 self.expno = fid_args['expno']
                 junk,dbm,self.figurelist = parse_powers(path,fid_args['name'],power_file,expno = self.expno,first_figure = self.figurelist,**auxiliary_args) # the 1 is because I'm not interested in the expnos it uses
-                fl = figlistl()
+                fl = figlist_var()
                 fl.figurelist = self.figurelist
                 mythreshold = -36
                 if 'threshold' in auxiliary_args.keys():
@@ -197,7 +197,7 @@ class store_T1 (store_integrals):
             mynames += ['covarelement%d'%x for x in range(0,len(covarmatrix))]
             mydata += list(covarmatrix)
         h5file,compilationroot_node = h5nodebypath(self.h5filename + '/compilations')
-        search_string = '(integrals == \'%s\')'%self.integralnode_name
+        search_string = '(integrals == \'%s\')'%self.integralnode_name 
         if self.newrecord:
             try:
                 concentration_table,self.index = h5addrow(compilationroot_node,'T1_fits',mydata,mynames,match_row = search_string)
@@ -345,7 +345,10 @@ def delete_datanode(filename,integralnodename):
     return
 def print_chemical_by_index(compilationroot_name,indexnumber):
     h5file,chemicalnode = h5nodebypath(compilationroot_name)
-    lrecordarray(chemicalnode.chemicals.readWhere('index == %d'%indexnumber),format = '%g')
+    if type(indexnumber) in [list,ndarray]:
+        lrecordarray(chemicalnode.chemicals.readWhere(h5inlist('index',indexnumber)),format = '%g')
+    else:
+        lrecordarray(chemicalnode.chemicals.readWhere('index == %d'%indexnumber),format = '%g')
     h5file.close()
     return
 def get_chemical_index(compilationroot_name,*args,**kwargs):
@@ -356,10 +359,13 @@ def get_chemical_index(compilationroot_name,*args,**kwargs):
         verbose = kwargs.pop('verbose')
     ##}}}
     #{{{ parse both old and new format arguments
+    chemical_name = None
+    concentration = None
+    name = None
+    only_last = True
     if len(kwargs) > 0:
-        chemical_name = None
-        concentration = None
-        name = None
+        if 'only_last' in kwargs.keys():
+            only_last = kwargs.pop('only_last')
         if 'chemical' in kwargs.keys():
             chemical_name = kwargs.pop('chemical')
         if 'concentration' in kwargs.keys():
@@ -387,7 +393,8 @@ def get_chemical_index(compilationroot_name,*args,**kwargs):
         search_string = '(chemical == \'%s\') &'%chemical_name + gensearch('concentration','%0.5g',concentration,1e-6)
     ###{{{ grab (or create) the table
     h5file,compilationroot_node = h5nodebypath(compilationroot_name)
-    concentration_table,concentration_id = h5addrow(compilationroot_node,'chemicals',[chemical_name,double(concentration)],['chemical','concentration'],match_row = search_string,verbose = True)
+    concentration_table,concentration_id = h5addrow(compilationroot_node,'chemicals',[chemical_name,double(concentration)],['chemical','concentration'],match_row = search_string,verbose = True,only_last = only_last)
+    h5attachattributes(compilationroot_node.chemicals,['TITLE'],['(indexed list of solutions)'])
     if verbose: print 'concentration table (returned row %d):\n\n'%concentration_id,lrecordarray(concentration_table.read()),'\n\n'
     h5file.close()
     ###}}}
@@ -462,15 +469,14 @@ def dnp_for_rho(path,
         pdfstring = '',ignore_emax_error = False,
         color_pair = ['k','r'],
         run_number = 0,
+        run_number_for_conc = None,
         plot_vs_A = False,
         ksp_symbol = '',
         verbose = False,
         T1w = 2.4691,
         DeltaT1w = 0.10267,
         **kwargs):
-    run_number = double(run_number)
-    print '{\\bf\\color{blue}This data is part of series %f:}\n\n'%run_number
-    #{{{ test that it pulls t1max correctly
+    #{{{ pull T1max
     temp = load_acqu(dirformat(dirformat(path)+name)+'5',return_s = False)
     d1val = temp['D'][1]
     temp = load_acqu(dirformat(dirformat(path)+name)+'1',return_s = False)
@@ -478,6 +484,9 @@ def dnp_for_rho(path,
     sfo1 = temp['SFO1']
     print '\n\n'
     #}}}
+    #{{{ inital kwarg processing
+    run_number = double(run_number)
+    print '{\\bf\\color{blue}This data is part of series %f:}\n\n'%run_number
     if t1_powers is not None:
         t1powers = t1_powers
     if expnos is not None and expno == []:
@@ -502,6 +511,7 @@ def dnp_for_rho(path,
         t1expnos = 'auto'
         if clear_nodes:
             delete_datanode(h5file,genexpname(name,expno))
+            #}}}
     ###{{{ process the kwargs to divvy them up onto the functions they refer to
     fid_args = {'name':name,'path':path,'expno':expno}
     if dbm is not None:
@@ -535,7 +545,36 @@ def dnp_for_rho(path,
         chemical = pull_chemical_from_filename(name)
         concentration = pull_concentration_from_filename(name)
     else:
-        if verbose: print lsafen('DEBUG: pulling from chemical %s and conc %f'%(chemical,concentration))
+        if concentration is None:
+            if verbose: print lsafen('DEBUG: pulling from chemical %s and getting the concentration from previously stored ESR data'%(chemical))
+            if run_number_for_conc is None:
+                run_number_for_conc = run_number
+            if type(run_number_for_conc) is array:
+                run_number_for_conc = run_number_for_conc.tolist()
+            if type(run_number_for_conc) is not list and type(run_number_for_conc) is not slice:
+                run_number_for_conc = [run_number_for_conc]
+            h5fp,chemical_node = h5nodebypath(h5file+'/compilations/chemicals')
+            try:
+                thisnode = chemical_node.default_chemical_id
+            except:
+                raise CustomError('You passed a me a chemical name but no concentration, which would seem to imply you want me to pull a concentration from the table generated by ESR (default_chemical_id), but I can\'t find this table!')
+            temp = "(chemical == '%s') & %s"%(chemical,h5inlist('run_number',run_number_for_conc))
+            #print "search string is:",temp
+            thistable = thisnode.readWhere(temp)
+            concentration_id = thistable['chemical_id']
+            if len(concentration_id) == 0:
+                thistable = thisnode.readWhere("(chemical == '%s')"%(chemical))
+                if len(thistable) > 0:
+                    raise ValueError('There is no ESR data for '+chemical+' for runs '+repr(run_number_for_conc)+' -- you might try one of the following: '+repr(thistable['run_number']))
+                else:
+                    raise ValueError('There is no ESR data for %s'%(chemical))
+            else:
+                thisnode = chemical_node.chemicals
+                concentration = thisnode.readWhere(h5inlist('index',concentration_id))['concentration'].mean()
+            h5fp.close()
+            print "\n\nI automatically identified a concentration of $%0.3f\uM$ based on the ESR of %s for run number %s\n\n"%(concentration/1e-6,chemical,repr(run_number_for_conc))
+        else:
+            if verbose: print lsafen('DEBUG: pulling from chemical %s and conc %f'%(chemical,concentration))
     concentration_id = get_chemical_index(h5file+'/compilations/chemicals',chemical,concentration)
     ###}}}
     ###{{{ store the data as necessary
@@ -802,16 +841,17 @@ def dnp_for_rho(path,
         save_color_t1 = plot_color_counter()
         plot(1.0/t1dataset,'o', label = '$T_1^{-1}$ / $s^{-1}$')
         ylabel('various (see legend)')
+        title(r'%s, run %0.2f'%(chemical,run_number))
         plot_color_counter(save_color_t1)
         plot(powers_forplot,1.0/t1f(powers_forplot).set_error(None),'-',linewidth = 3, alpha = 0.5)
         nextfigure(figurelist,'M0data' + pdfstring)
-        plot_updown(-1*M0dataset,'power','k','r',symbol = 'o', label = r'$-M(0)$')
-        plot_updown(Minfdataset,'power','b','g',symbol = 'o', label = r'$M(\infty)$')
+        plot_updown(-1*M0dataset,'power','k','r',symbol = 'o', label = r'$-M(0)$',alpha = 0.5)
+        plot_updown(Minfdataset,'power','b','g',symbol = 'o', label = r'$M(\infty)$',alpha = 0.5)
         autolegend()
         ylabel('net magnetization')
         expand_y()
         expand_x()
-        nextfigure(figurelist,'t1data' + pdfstring)
+        nextfigure(figurelist,'t1data' + pdfstring)		
         #}}}
         if fdata_exists: # if I can calculate the leakage factor
             save_color_t10 = plot_color_counter()
@@ -896,6 +936,7 @@ def dnp_for_rho(path,
             plot_updown(ksp_uncorr,'p','b','g',symbol = ksp_symbol,label = 'uncorrected')
             plot_updown(ksp_corr,'p','k','r',symbol = ksp_symbol,label = 'corrected')
             ylabel(r'$k_\sigma s(p)$')
+            title(r'%s, run %0.2f'%(chemical,run_number))
 
             ksp_corr = ksp(ksp_corr)
             ksp_uncorr = ksp(ksp_uncorr)
@@ -940,8 +981,8 @@ def dnp_for_rho(path,
             row_to_add.update(dict(zip(mycoeff.dtype.names,mycoeff.tolist()[0])))
             concentration_table,parameters_index = h5addrow(compilationroot_node,'ksp_fits',row_to_add)
             #}}}
-        h5file_node.close()
-        ###}}}
+            h5file_node.close()
+            ###}}}
         ###{{{ null lists so that I can collect the data
         # do this here, because I might not have any simulated data
         fit_types_simul = []
@@ -1556,7 +1597,9 @@ def retrieve_T1series(h5filename,name,*cheminfo,**kwargs):
     search_string = 'chemical_id == %d'%chemidx
     if run_number is not None:
         search_string = '('+search_string+') & (run_number == %0.3f)'%run_number
+    if verbose: print "search string is",lsafen(search_string)
     data = h5file.root.compilations.T1_fits.readWhere(search_string)
+    if verbose: print "search data is",lsafen(data)
     h5file.close()
     if name is not None: # only run this code if I pass an explicit name
         data = [x.reshape(1) for x in data if re.match('^'+name,x['integrals'])]
@@ -1599,16 +1642,189 @@ def retrieve_T1series(h5filename,name,*cheminfo,**kwargs):
             powers = data[indirect_dim][:]
     else:
             raise CustomError('indirect dim',indirect_dim,'not in',data.dtype.names)
-    Minfdata = nddata(data[r'M(\infty)'],[len(data)],[indirect_dim],data_error = myerrors,axis_coords = [powers])
-    M0data = nddata(data[r'M(0)'],[len(data)],[indirect_dim],data_error = myerrors,axis_coords = [powers])
+    Minfdata = nddata(data[r'M(\infty)'],[len(data)],[indirect_dim],data_error = myerrors,axis_coords = [powers])		
+    M0data = nddata(data[r'M(0)'],[len(data)],[indirect_dim],data_error = myerrors,axis_coords = [powers])		
     data = data['T_1'][:]
     retval = nddata(data,[len(data)],[indirect_dim],data_error = myerrors,axis_coords = [powers])
     if indirect_dim == 'power':
         retval.sort(indirect_dim)
     retval.name('T_1')
     if retcheckval:
-        return retval,M0data,Minfdata
+	    return retval,M0data,Minfdata
     else:
         return retval
 ##}}}
+#}}}
+#{{{ standard EPR processing
+def standard_epr(dir = None,
+        files = None,
+        linewidth = 1.8,
+        normalize_field = False,
+        find_maxslope = False,
+        maxslope_within = [0,0.5],# a fractional amount the maxslope is within
+        offset_spectra = False,
+        subtract_first = False,
+        normalize_peak = False,
+        background = None,
+        grid = False,
+        h5file = 'dnp.h5',
+        run_number = None,
+        figure_list = None,#the next (conc_calib) gives the concentration in mM/(signal units / mm)
+        conc_calib = None):
+    """the files argument is either:
+    a single string for the file
+    a list of files
+    a list of tuples with sample length (to calculate a
+        "concentration") and/or a chemical_name, like this:
+        (filename,sample_length,chemical_name)"""
+    if type(run_number) in [int,long,int32,int64]:
+        run_number = double(run_number)
+    if type(files) is str or type(files) is tuple:
+        files = [files]
+    if background is not None:
+        if type(background) is list:
+            if len(background) > 1:
+                raise CustomError("multiple backgrounds not yet supported")
+            else:
+                background = background[0]
+        files = [background] + files
+        subtract_first = True
+    dir = dirformat(dir)
+    mu_B = 9.27400915e-24
+    h = 6.62606957e-34
+    if subtract_first:
+        firstdata = 2*load_indiv_file(dir+files.pop(0))
+    for index,file in enumerate(files):
+        if type(file) is tuple:
+            if len(file) > 2:
+                chemical_name = file[2]
+            else:
+                chemical_name = file[0]
+            sample_len = file[1]
+            file = file[0]
+        else:
+            sample_len = None
+            chemical_name = file
+        try:
+            data = load_indiv_file(dir+file)
+        except:
+            raise CustomError('Error loading file: type of dir',type(dir),'type of file',type(file),'file=',file)
+        if subtract_first:
+            data -= firstdata
+        field = r'$B_0$'
+        neworder = list(data.dimlabels)
+        data.reorder([neworder.pop(neworder.index(field))]+neworder) # in case this is a saturation experiment
+        data -= data.copy().run_nopop(mean,field)
+        figure_list.next('epr',legend = True,boundaries = False)
+        v = winepr_load_acqu(dir+file)
+        if index == 0:
+             fieldbar = data[field,lambda x: logical_and(x>x.mean(),x<x.mean()+10.)]
+             fieldbar.data[:] = 0.5
+             fieldbar.data[0] = 0.6
+             fieldbar.data[-1] = 0.6
+             fxaxis = fieldbar.getaxis(field)
+        xaxis = data.getaxis(field)
+        centerfield = None
+        if normalize_field:
+            xaxis /= v['MF']
+            if index == 0:
+                fxaxis /= v['MF']
+            newname = r'$B_0/\nu_e$'
+        else:
+            deriv = data.copy()
+            deriv.run_nopop(diff,field)
+            deriv.data[abs(data.data) > abs(data.data).max()/10.] = 0 # so it doesn't give a fast slope, non-zero area
+            deriv = abs(deriv)
+            thisstart = deriv.getaxis(field)[0]
+            thiswidth = deriv.getaxis(field)[-1]-thisstart
+            deriv = deriv[field,lambda x: logical_and(
+                (x-thisstart)>thiswidth * maxslope_within[0]
+                ,
+                (x-thisstart)<thiswidth * maxslope_within[1]
+                )]
+            deriv.argmax(field,raw_index = True)
+            centerfield = mean(xaxis[int32(deriv.data)]) # "centerfield" is the center of peak, where the derivative is maximized
+            if find_maxslope:
+                xaxis -= centerfield
+                if index == 0:
+                    fxaxis -= centerfield
+                newname = r'$\Delta B_0$'
+            else:
+                newname = field
+        data.rename(field,newname)
+        if index == 0:
+            fieldbar.rename(field,newname)
+        mask = data.getaxis(newname)
+        mask = mask > mask[int32(len(mask)-len(mask)/20)]
+        snr = abs(data.data).max()/std(data.data[mask])
+        integral = data.copy()
+        integral.data -= integral.data.mean() # baseline correct it
+        integral.integrate(newname)
+        figure_list.next('epr_int',legend = True,boundaries = False)
+        pc = plot_color_counter()
+        plot_color_counter(pc)
+        legendtext = chemical_name
+        legendtext += '\n'
+        if centerfield != None:
+            legendtext += ', %0.03f $G$'%centerfield
+            gfactor = h*v['MF']*1e9/mu_B/(centerfield*1e-4)
+            legendtext += ', g=%0.03f'%gfactor
+        doubleintegral = integral.copy()
+        doubleintegral.integrate(newname)
+        if sample_len is None:
+            if conc_calib is not None:
+                raise ValueError("If you want to set the concentration calibration, you need to give a sample length!")
+            legendtext += r', SNR %0.2g $\int\int=$ %0.3g sig. units'%(snr,doubleintegral[newname,-1].data[-1])
+        else:
+            if conc_calib is None:
+                legendtext += r', SNR %0.2g $\int\int=$ %0.3g sig. units / mm'%(snr,doubleintegral[newname,-1].data[-1]/double(sample_len))
+            else:
+                thisconc = doubleintegral[newname,-1].data[-1]/double(sample_len)*double(conc_calib)
+                legendtext += r', SNR %0.2g $\int\int=$ %0.3g mM'%(snr,thisconc)
+                if run_number is not None:
+                    chem_id = get_chemical_index(h5file+'/compilations/chemicals',chemical_name,thisconc*1e-3)
+                    h5fp,thisnode = h5nodebypath(h5file+'/compilations/chemicals')
+                    h5remrows(thisnode,
+                            'default_chemical_id',
+                            "(run_number == %0.3f) & (chemical == '%s')"%(run_number,chemical_name))# clear any data for this run number and chemical name that was previously entered (since there can be only one entry)
+                    h5addrow(thisnode,
+                            'default_chemical_id',
+                            {'run_number':run_number,'chemical':chemical_name,'chemical_id':chem_id},
+                            match_row = "(chemical_id == %d) & (run_number == %0.3f) & (chemical == '%s')"%(chem_id,run_number,chemical_name))
+                    h5attachattributes(thisnode.default_chemical_id,['TITLE'],['(default concentration, determined by ESR, for a particular chemical name and run number)'])
+                    h5fp.close()
+        plot(integral,alpha=0.5,linewidth=linewidth,label = legendtext)
+        figure_list.next('epr')
+        if normalize_peak:
+           normalization = abs(data).run_nopop(max,newname)
+           data /= normalization
+        ax = gca()
+        if offset_spectra and index>0:
+            myoffset = array(ax.get_ylim()).min()-array(ax.get_ylim()).max() # so I set the zero at the bottom of the plot, which is negative, and also allow space for the top of the spectrum (which is positive
+        else:
+            myoffset = 0.
+        plot_color_counter(pc)
+        plot(data+myoffset,alpha=0.5,linewidth=linewidth,label=chemical_name)
+        if not normalize_field:
+            minval = abs(data.getaxis(newname)-centerfield).argmin()
+            centerpoint = data[newname,minval]
+            plot_color_counter(pc)
+            if not find_maxslope:
+                plot(centerfield,centerpoint.data+myoffset,'o',markersize = 5,alpha=0.3)
+        axis('tight')
+        if index == 0:
+            fieldbar *= array(ax.get_ylim()).max()
+    plot_color_counter(pc)
+    show_errorzone = False
+    if show_errorzone:
+        plot(data.getaxis(newname)[mask],zeros(shape(data.getaxis(newname)[mask])),'k',alpha=0.2,linewidth=10)
+    figure_list.next('epr')
+    plot(fieldbar,'k',linewidth = 2.0)
+    fieldbar[newname,4:5].plot_labels(['10 G\n'],va = 'bottom',color = 'k',alpha = 1.0,size = 'x-small')
+    if grid:
+        gridandtick(gca())
+    axis('tight')
+    figure_list.next('epr_int')
+    axis('tight')
+    return figure_list
 #}}}

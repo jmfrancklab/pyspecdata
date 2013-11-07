@@ -147,7 +147,7 @@ def lrecordarray_broken(recordlist,rows=30,numwide= 5):
         print r'\begin{minipage}[t]{%0.3\linewidth}'%width,
         lrecordarray(recordlist[j+rows:],resizebox = True)
         print r'\end{minipage}',
-def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resizebox = False,showpipe = True,return_only=False,format = '%0.3f',std_sf = None):
+def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resizebox = False,showpipe = True,return_only=False,format = '%0.3f',std_sf = None,scientific_notation = True):
     r'''generate latex representation of a structured array
     if set to True, resizebox will automatically scale down the table so it fits on the page (but it will also scale up a small table to fit the width of the page)
     resizebox can also be a fractional number, so that it is resized to a fraction of the page'''
@@ -163,7 +163,7 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
         print r'{\color{red}This array is empty!!}'
         return
     # previously documented
-    def this_format_function(x,error_val = None):
+    def this_format_function(x,error_val = None,scientific_notation = True):
         if type(x) is str_:
             if error_val is None:
                 return str(x)
@@ -173,16 +173,21 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
             #just return two significant figures
             number_sf = std_sf
             if error_val is None or error_val == 0.0:
-                highest_significant = floor(log10(x))
-                lowest_significant = highest_significant-(number_sf-1) # the -1 is for number_sf significant figures, not just one
-                x /= 10**lowest_significant
-                x = round(x)
-                x *= 10**lowest_significant
-                if lowest_significant<0:
-                    thisformat = '%%0.%df'%(-1*lowest_significant)
+                powerof = floor(log10(abs(x)))
+                if scientific_notation and abs(powerof)>3:
+                    if abs(powerof)>3:
+                        return ('%%0.%df'%number_sf)%(x/(10**powerof))+r'\magn{%d}'%powerof
                 else:
-                    thisformat = '%0.0f'
-                return (thisformat)%(x)
+                    highest_significant = floor(log10(x))
+                    lowest_significant = highest_significant-(number_sf-1) # the -1 is for number_sf significant figures, not just one
+                    x /= 10**lowest_significant
+                    x = round(x)
+                    x *= 10**lowest_significant
+                    if lowest_significant<0:
+                        thisformat = '%%0.%df'%(-1*lowest_significant)
+                    else:
+                        thisformat = '%0.0f'
+                    return (thisformat)%(x)
             else:
                 highest_significant = floor(log10(error_val))
                 lowest_significant = highest_significant-(number_sf-1) # the -1 is for number_sf significant figures, not just one
@@ -332,6 +337,9 @@ def lplot(fname,width=0.33,figure=False,dpi=72,grid=False,alsosave=None,gensvg =
         bytextwidth = False
     if print_string is not None:
         print print_string
+    fname = fname.replace(' ','_')
+    fname = fname.replace('-','_')
+    fname = fname.replace('+','_')
     fname = r'auto_figures/'+fname
     if alsosave != None:
         alsosave = r'auto_figures/'+alsosave
