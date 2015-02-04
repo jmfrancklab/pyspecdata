@@ -33,7 +33,6 @@ from scipy.interpolate import UnivariateSpline
 from datadir import getDATADIR
 #rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
 rc('image',aspect='auto',interpolation='nearest')
-#rc('text',usetex=True) # this creates all sorts of other problems
 rcParams['xtick.direction'] = 'out'
 rcParams['xtick.major.size'] = 12
 rcParams['xtick.minor.size'] = 6
