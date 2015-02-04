@@ -36,12 +36,27 @@ def show_matrix(B,plot_name,first_figure = None):
     #image(~isfinite(B))
     return figlistret(first_figure,fl)
 class figlistl (figlist):
+    def __init__(self,*args,**kwargs):
+        super(figlistl,self).__init__(*args,**kwargs)
+        self.black = False
+        return
     def show(self,string,**kwargs):
         'latexify the series of figures, where "string" gives the base file name'
+        #{{{ process kwargs
+        verbose = False
+        if 'verbose' in kwargs.keys():
+            verbose = kwargs.pop('verbose')
+        #}}}
         print '\n\n'
+        self.show_prep()
         if not len(kwargs):
             kwargs = {}
+            mlab = False
+            if hasattr(self,'mlab'):
+                kwargs.update({'mlab':self.mlab})
+                mlab = True
         for j,figname in enumerate(self.figurelist):
+            if verbose: print "showing figure"+lsafen(figname)
             if type(figname) is dict:
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
@@ -49,7 +64,10 @@ class figlistl (figlist):
                     print kwargs.pop('print_string')
                     print '\n\n'
             else:
-                figure(j+1)
+                if hasattr(self,'mlab') and self.mlab:
+                    self.mlab.figure(j+1)
+                else:
+                    figure(j+1)
                 sep = ''
                 if len(string)>0:
                     sep = '_'
@@ -57,7 +75,7 @@ class figlistl (figlist):
                     print 'not running lplot'
                 else:
                     try:
-                        lplot(figname+sep+string,**kwargs)
+                        lplot(figname.replace('.','_')+sep+string,**kwargs)
                     except:
                         raise CustomError('self.figurelist = ',self.figurelist,'figname = ',figname,'while string = ',string)
         while len(self.figurelist) > 0:
@@ -69,6 +87,7 @@ class figlistl (figlist):
     def obsn(self,*args):
         self.text(obs_repr(*args)+'\n\n')
         return
+figlist = figlistl
 def lplotfigures(figurelist,string,**kwargs):
     'obsolete, use the class!'
     print '\n\n'
@@ -163,7 +182,7 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
         print r'{\color{red}This array is empty!!}'
         return
     # previously documented
-    def this_format_function(x,error_val = None,scientific_notation = True):
+    def this_format_function(x,error_val = None,scientific_notation = scientific_notation):
         if type(x) is str_:
             if error_val is None:
                 return str(x)
@@ -173,10 +192,12 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
             #just return two significant figures
             number_sf = std_sf
             if error_val is None or error_val == 0.0:
+                if x == 0.0:
+                    return '0.0'
                 powerof = floor(log10(abs(x)))
                 if scientific_notation and abs(powerof)>3:
                     if abs(powerof)>3:
-                        return ('%%0.%df'%number_sf)%(x/(10**powerof))+r'\magn{%d}'%powerof
+                        return ('%%0.%df' % int(number_sf))%float(x/(10**powerof))+r'\magn{%d}'%int(powerof)
                 else:
                     highest_significant = floor(log10(x))
                     lowest_significant = highest_significant-(number_sf-1) # the -1 is for number_sf significant figures, not just one
@@ -323,7 +344,7 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
         return '\n'.join(final_retval)
     else:
         print '\n'.join(final_retval)
-def lplot(fname,width=0.33,figure=False,dpi=72,grid=False,alsosave=None,gensvg = False,print_string = None,centered = False,legend = False,equal_aspect = False,autopad = True,bytextwidth = None,showbox = True,outer_legend = False,boundaries = True):
+def lplot(fname,width=0.33,figure=False,dpi=72,grid=False,alsosave=None,gensvg = False,print_string = None,centered = False,equal_aspect = False,autopad = True,bytextwidth = None,showbox = True,boundaries = True,genpng = False,mlab = False):
     '''
     used with python.sty instead of savefig
     
@@ -331,7 +352,7 @@ def lplot(fname,width=0.33,figure=False,dpi=72,grid=False,alsosave=None,gensvg =
     it's interpreted as bytextwidth = True (i.e. width given as a fraction of the linewidth)
     if it's greater than, the width is interpreted in inches.
     '''
-    if width < 1.0:
+    if width <= 1.0:
         bytextwidth = True
     else:
         bytextwidth = False
@@ -340,11 +361,23 @@ def lplot(fname,width=0.33,figure=False,dpi=72,grid=False,alsosave=None,gensvg =
     fname = fname.replace(' ','_')
     fname = fname.replace('-','_')
     fname = fname.replace('+','_')
+    fname = fname.replace('\\','_')
+    fname = fname.replace('$','')
+    fname = fname.replace('(','')
+    fname = fname.replace(')','')
+    fname = fname.replace('"','')
+    fname = fname.replace('=','_')
+    fname = fname.replace('\n','_')
+    fname = fname.replace('*','_star_')
+    fname = fname.replace(':','')
+    fname = fname.replace('^','')
     fname = r'auto_figures/'+fname
     if alsosave != None:
         alsosave = r'auto_figures/'+alsosave
     if gensvg == True:
         alsosave = fname.replace('.pdf','.svg')
+    if genpng == True:
+        alsosave = fname.replace('.pdf','.png')
     if grid:
         gridandtick(gca())
     fig = gcf()
@@ -353,10 +386,7 @@ def lplot(fname,width=0.33,figure=False,dpi=72,grid=False,alsosave=None,gensvg =
         ax.set_aspect('equal')
     fig.autofmt_xdate()
     if autopad: autopad_figure(centered = centered)
-    if legend:
-        autolegend()
-    if outer_legend:
-        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    # replaced outer_legend with appropriate modification to the "legend" option of figlist.show_prep(), same with legend option
     if not boundaries:
         ax = gca()
         for j in ax.spines.keys():
@@ -371,15 +401,18 @@ def lplot(fname,width=0.33,figure=False,dpi=72,grid=False,alsosave=None,gensvg =
         this_ylabel = ax.get_ylabel()
         if len(this_ylabel) > 0:
             ax.set_ylabel(this_ylabel + r" $\rightarrow$")
-    try:
-        savefig(fname,dpi=dpi)
-    except ValueError,exc_string:
-        if exc_string.find('finite numbers') > -1:
-            raise ValueError("It gives this error because you're trying to do a bar graph with zero width")
-        else:
-            raise ValueError(exc_string)
-    if alsosave != None:
-        savefig(alsosave,dpi=dpi)
+    if mlab:
+        mlab.savefig(fname,magnification = dpi/72)
+    else:
+        try:
+            savefig(fname,dpi=dpi,facecolor = (1,1,1,0))
+        except ValueError,exc_string:
+            if exc_string.find('finite numbers') > -1:
+                raise ValueError("It gives this error because you're trying to do a bar graph with zero width")
+            else:
+                raise ValueError(exc_string)
+        if alsosave != None:
+            savefig(alsosave,dpi=dpi,facecolor = (1,1,1,0))
     if figure:
         print r"""
         \begin{figure}[h]
@@ -440,6 +473,7 @@ def obs_repr(*arg):
 def obs(*arg):
     print obs_repr(*arg)
     return
+obsndef = True
 def obsn(*arg):
     obs(*arg)
     print '\n\n'

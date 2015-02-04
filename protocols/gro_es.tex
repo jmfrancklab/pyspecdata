@@ -13,6 +13,19 @@ Be sure to carry over:
     \item dry ice and LN$_2$
     \item water ice 
     \item toolbox 
+<<<<<<< HEAD
+    \item samples
+\end{itemize}
+
+\paragraph{First Time}
+
+Everything on, mod coil attached, \sout{and temperature controller inserted}\add{quartz tube in}.
+
+\paragraph{always}
+Set up labels in notebook (just do task-based).
+
+Leave buffers, then samples to thaw once there.
+=======
     \item multimeter 
     \item samples
     \item magnifying glasses
@@ -48,6 +61,7 @@ Attach probe to plate.
 Wait until bridge stops flashing, then open WinEPR + switch to tune mode 40~dB.
 
 Find dip near 9.8~GHz.
+>>>>>>> public
 
 \paragraph{sample prep}
 \subparagraph{GroES3MP}
@@ -87,6 +101,17 @@ While waiting 5 minutes:
 Copy nmr template dataset.
 \fn{grocomplex_nl_120203}
 
+<<<<<<< HEAD
+Run jf\_dnpconf to be sure that the number of FID's is set to 2 or 3 (so it runs fast).
+
+\paragraph{capillary prep}
+
+Mark down the sample name and concentration.
+
+Just cut to a decent length\sout{, and if necessary spin down}\add{(I'm not using sealed tubes)}
+
+Measure sample.
+=======
 Overwrite exp 1 with desired parameters.
 \fn{groes_120202}
 Run jf\_dnpconf to be sure that the number of FID's is set to 2 or 3 (so it runs fast).
@@ -109,6 +134,7 @@ Clean w/ razor.
 Inspect + measure with magnifying glasses.
 
 Put into tune mode before inserting sample, and turn down power.
+>>>>>>> public
 
 \subsubsection{Run time course} Copy the template.  \fn{popemx_4mM_5p_mmsl_timecourse_110711} Copy first experiment from last one.  \fn{popeca_4mM_5p_mmsl_110708} Turn on the amplifier, with the source off.  Copy experiment 520 from last time into the new folder and remove raw data.  Assume a ninety time of 2.0 $\mu s$ in both exp 1 and 520.  Start power meter program running so that it won't quit.  Set EPR to tune mode at low power.  Mix 1.75 of each sample (mark exact time here).  Load sample.  Turn air up to 10 SCFM.  Tune the EPR quickly by hand, record frequency.  Set to standby and set field.  Tune NMR (forgot this), then check EPR tune.  Use jf setmw to set the frequency and zero in on the signal in exp 1.  Flip EPR switch, remove mod coil, turn on source.  Use jf setmw to set to 6 $dB$ Copy sfo1 to new experiment and start experiment.  Copy data and process when done.  \fn{popemx_4mM_5p_mmsl_timecourse_110711.mat} Since I may see a slight increase, iexpno, and run for twice as long.  
 \begin{tiny}
@@ -210,6 +236,130 @@ lplot('oldsat'+thisjobname()+'.pdf')
 \end{tiny}
 
 
+<<<<<<< HEAD
+\subsubsection{ESR}\maxminutes{11}
+
+(Here, I run ESR after the DNP, so I don't have to worry about timing, but still get the double integral)
+Put into tune mode, $40\;dB$ first.
+
+Load sample in the teflon sample holder (I want ~77 $mm$ from collet to bottom of sample, need to remeasure) -- weight the top with the collet holder.
+
+Move to near 9.77 and autotune.
+
+Open ESR parameter set similar to this one.
+\fn{grocomplex_120202.par}
+
+Turn on field.
+
+Copy experiment.
+
+If not exactly the same type of sample, test run to check some stuff.
+
+\precaution{Only if the experiment says ``uncalibrated'' at the top $\Rightarrow$ ``I'' (interactive spectrometer control) icon, click calibrated, then set parameters to spectrum, then window.}
+
+\paragraph{if new type of sample}
+Stop at second peak.
+
+Check that modulation amplitude is $<$ 0.2 x smallest feature.
+
+Set RG with box.
+
+Check that resolution along $x$ is OK.
+
+\paragraph{always}
+
+Run actual scan.
+
+Save ESR.
+\fn{groes_120202}
+
+For 8 scans, alarm for about 2.5 min.
+
+Cntrl-S after scan is finished.
+
+Hit Cntrl-A for ssh transfer and process.
+
+
+\begin{tiny}
+\begin{lstlisting}
+fl = figlistl()
+standard_epr(dir = DATADIR+'cnsi_data',
+    files = ['grocomplex_120224','groes_120224','grocomplex_rep_120224'],
+    figure_list = fl)
+fl.show(thisjobname()+'.pdf')
+\end{lstlisting}
+\end{tiny}
+
+Put into tune mode before removing sample, and turn down power.
+
+Run background scan.
+
+\subsubsection{DNP Experimental Setup}
+\paragraph{tune NMR, when I'm not using microwave power}
+Set switch to DNP amp, set bridge to standby.
+
+Attach probe w/ coil perpendicular to $B_0$ + at correct height, then turn on air \sout{(14~SCFM)}20~SCFM.
+
+Turn on $B_0$ field.
+
+Make a new NMR experiment based on template, and change into that experiment.
+
+\texttt{wobb}. \adlin{back moves lf/right front moves down/up}
+
+\texttt{gs} and field sweep $B_0$ over about 0.1~G until 0 (set center field, then copy to static field, then back to time scan).
+
+Check that the YIG's DC power supply reads 0.26-0.27~A with first light on and other lights green.
+
+\paragraph{tune and set resonant field}
+Attach probe w/ coil perpendicular to $B_0$ + at correct height, then turn on air 20~SCFM 25$^o$C.
+
+Put into tune mode before inserting sample, and turn down power.
+
+Move to near \sout{9.3}\add{9.8 (86\%)} and autotune + turn on $B_0$ field.
+
+\texttt{jf\_newexp}
+\fn{tau_10uM_120524}
+Then, because of the power problem be sure to check I'm using the right power range.
+
+Use \texttt{jf\_setmw} to set frequency ratio and YIG frequency.
+
+Check that the YIG's DC power supply reads 0.26-0.27~A with first light on and other lights green.
+
+Set sfo1 to (ppt value)*(YIG frequency) then \texttt{wobb}.
+
+Check the ESR tune by hand up to 0~dB and record microwave frequency.
+\begin{python}[off]
+calcfielddata(9.790195,'mtsl','cnsi')
+\end{python}
+
+\precaution{if YIG frequency has changed, re-set sfo1, and check microwave tune again, and reset jf\_setmw}
+
+Put ESR bridge in standby mode and disconnect the mod coil.
+
+Set the field to a reasonable value (last value usually fine, if not use the value from the ratio).
+
+\texttt{jf\_zg} for signal about 15 high.
+
+Set \texttt{aq} to 0.25 and \texttt{d1} to 0.01 and \texttt{p1} to 1u.
+
+Use jf\_setmw to center resonance in gs (or just jf\_zg if SNR is no good).
+
+\paragraph{calibrate 90 time and $T_1$}
+
+Run \texttt{jf_zg}; zoom in; \texttt{dpl1}; then \texttt{paropt} with \texttt{p1},8,1,3 which gives signal at 8\us, 9\us, and 10\us pulse length, which should be $\approx 360^o$.
+
+Flip the waveguide switch so the amp is connected (not the bridge).
+
+Set and record $t_{90}$.
+
+If needed, run a rough experiment to determine the $T_1$ time, and put it in experiment 101.
+
+\begin{scriptsize}
+\begin{python}[off]
+# these change
+name = 'dna_cs24_bound_120510' # the name of the experiment directory
+path = DATADIR+'franck_cnsi/nmr/' # the name of the directory where you are storing your data
+=======
 \subsubsection{set up DNP}\maxminutes{38}
 
 \paragraph{insert probe and autotune}
@@ -418,17 +568,26 @@ Process the $T_1$
 # these change
 name = 'dopc_dil_3p_120118'
 path = DATADIR+'cnsi_data/'
+>>>>>>> public
 # the following stays the same
 dnp_for_rho(path,name,[],expno=[],t1expnos = [101],
         integration_width = 150,peak_within = 500,
         show_t1_raw = True,phnum = [4],
         phchannel = [-1],
         h5file='t1_estimation_only.h5',
+<<<<<<< HEAD
+        pdfstring = name,
+=======
+>>>>>>> public
         clear_nodes=True)
 t1 = retrieve_T1series('t1_estimation_only.h5',name)
 def estimate_hot_t1(thist1):
     water = 1./2.6
+<<<<<<< HEAD
+    hot_water = 1./4.2 # this is for the new ``closed''
+=======
     hot_water = 1./3.8 # this is for the new ``closed''
+>>>>>>> public
     #type probe # 7/8 adjustted this
     thist1 = 1./thist1 # convert to a rate
     thist1 -= water # figure out which part is from
@@ -438,6 +597,110 @@ def estimate_hot_t1(thist1):
 obs(r'Min $T_1\approx$',lsafe(t1['power',0]),r'\quad $T_{1,max}\approx$',
         lsafe(estimate_hot_t1(t1)),
         r' $s$ with heating')
+<<<<<<< HEAD
+\end{python}
+\end{scriptsize}
+
+\paragraph{run DNP}
+Start jf\_dnp, and write down $T_1$ times entered.
+
+\paragraph{determine $T_1(t)$}
+Play with the number of points to get a scan 12~min long:
+
+For complex NL $\Rightarrow$ set min 1.8 of and max of 2.1
+
+Run jf\_t10s:
+Set 40 experiments at 14~min for slightly over 6 hrs, exp 4$\Rightarrow$ 101.
+
+Come back after it ran.
+
+
+\subsubsection{ESR}\maxminutes{11}
+\paragraph{insert + start}
+Put into tune mode, $40\;dB$ first.
+
+Measure sample length.
+
+Measure distance from bottom of sample to bottom of threaded rod.
+
+\paragraph{sample position w/ dewar}
+Load sample in the threaded sample holder, and mark position.
+
+(top of rod measurement)-(sample to bottom of rod)/2 = 13.5
+or (bottom of nut measurement)-(sample to bottom of rod)/2 = 6.5
+
+Turn up to 20~SCFH.
+
+Move to near 9.3 and autotune.
+
+\paragraph{sample position NO dewar}
+Set nut 33\mm from top, top of threaded rod 39.2\mm from the top, with the red marked side of the nut facing forward.
+
+(top of rod measurement)-(sample to bottom of rod)/2 = 34.9
+
+or (bottom of nut measurement)-(sample to bottom of rod)/2 = 28.2
+
+Turn up to 20~SCFH.
+
+Move to near 9.8 and autotune.
+
+\paragraph{Run}
+
+Open ESR parameter set similar to this one.
+\fn{background_overmod_120727.par}
+
+Copy experiment.
+
+\precaution{Only if the experiment says ``uncalibrated'' at the top $\Rightarrow$ ``I'' (interactive spectrometer control) icon, click calibrated, then set parameters to spectrum, then window.}
+
+\precaution{If a new sample, can turn up modulation amplitude to help find signal}
+
+\precaution{If new sample, must check modulation amplitude $<$0.2 x smallest feature, and set rg.}
+
+\precaution{If new sample, should check for saturation}
+
+Run.
+\fn{grodscomplex_overmod_120829}
+
+\begin{tiny}
+\begin{python}[off]
+fl = figlistl()
+standard_epr(dir = DATADIR+'franck_cnsi/',
+    files = ['groes_overmod_120727','grodscomplex_overmod_120727','groes_overmod_120828','grodscomplex_overmod_120727'],
+    background = ['background_overmod_120727'],
+    normalize_peak = True,
+    figure_list = fl)
+fl.show(thisjobname()+'.pdf')
+\end{python}
+\end{tiny}
+
+Put into tune mode before removing sample, and turn down power and air.
+
+\subsubsection{Processing}
+\paragraph{process DNP}
+Process results.
+
+\begin{scriptsize}
+\begin{python}[off]
+#now running with T1max code, debug, format, format, format
+import textwrap # don't pay attention to this
+# change the following parameters
+name = 'grodscomplex_120727' # replace with the name of the experiment
+chemical_name = 'grodscomplex' # this is the name of the chemical i.e. 'hydroxytempo' or 'DOPC', etc.
+run_number = 120727 # this is a continuous run of data
+concentration = 240e-6 # the concentration of spin label
+dontfit = False # only set to true where you don't expect enhancement
+extra_t1_problem = False # always start with this false, and if it complains, about the number of T1 powers not matching with the number of T1 experiments, then turn it to True
+path = getDATADIR()+'franck_cnsi/nmr/'
+refresh_database = True # this option clears the data in the database generally, could be a good idea to leave this as False, unless you have reloaded the data
+# if after setting all these correctly,
+# it complains about your T1 experiments
+# try to uncomment the t1mask line below
+###########################
+# the following stays the same
+if refresh_database:
+    search_delete_datanode('dnp.h5',name)
+=======
 \end{lstlisting}
 \end{scriptsize}
 
@@ -502,6 +765,7 @@ import textwrap
 name = 'groes_120204'
 path = DATADIR+'cnsi_data/'
 search_delete_datanode('dnp.h5',name)
+>>>>>>> public
 # leave the rest of the code relatively consistent
 #{{{ generate the powers for the T1 series
 print 'First, check the $T_1$ powers:\n\n'
@@ -517,7 +781,12 @@ t1mask = bool8(ones(len(t1_dbm)))
 # the next line will turn off select (noisy T1
 # outputs) enter the number of the scan to remove --
 # don't include power off
+<<<<<<< HEAD
+if extra_t1_problem == True:
+    t1mask[-1] = 0 # this is the line you sometimes want to uncomment
+=======
 #t1mask[-1] = 0
+>>>>>>> public
 #}}}
 dnp_for_rho(path,name,integration_width = 160,
         peak_within = 500, show_t1_raw = True,
@@ -525,6 +794,59 @@ dnp_for_rho(path,name,integration_width = 160,
         t1_autovals = r_[2:2+len(t1_dbm)][t1mask],
         t1_powers = r_[t1_dbm[t1mask],-999.],
         power_file = name+'/power.mat',t_start = 4.6,
+<<<<<<< HEAD
+        chemical = chemical_name,
+        concentration = concentration,
+        extra_time = 7.0,
+        dontfit = dontfit,
+        run_number = run_number,
+        threshold = -50.)
+standard_noise_comparison(name)
+# tried to fix error on cov more fix more fix more fix more fix more fix
+\end{python}
+\end{scriptsize}
+
+Check that my longest $T_1$ falls within range I used.
+
+Check the consistency of the enhancements with decreasing power.
+
+Set \texttt{refresh\_database} to false.
+
+\paragraph{Process multiple $T_1$ data}
+Copy \sout{(or Git once that's ready) }files.
+
+Change all parameters at beginning.
+
+Run script
+
+
+\begin{scriptsize}
+\begin{python}[off]
+# these change
+name = 'grodscomplex_nl_120904' # name of dataset
+chemical = 'grodscomplex' # chemical name
+concentration = 0.0 # concentration of spin label (usually 0)
+run_number =  120904
+number_of_repeats = 40 # number of T1 experiments run
+start_exp = 101 # the experiment you started at
+# everything else stays the same
+path = DATADIR+'franck_cnsi/nmr/'
+dnp_for_rho(path,name,[],expno=[],
+    t1expnos = r_[start_exp:start_exp+number_of_repeats],
+    integration_width = 150,peak_within = 500,
+    show_t1_raw = True,phnum = [4],
+    phchannel = [-1],
+    chemical = chemical,
+    concentration = concentration,
+    run_number = run_number,
+    h5file='dnp.h5',
+    pdfstring = name,
+    clear_nodes = False)
+t1 = retrieve_T1series('dnp.h5',
+    name,
+    chemical,
+    concentration)
+=======
         chemical = 'groes',
         concentration = 240e-6, extra_time = 6.0,
         dontfit = False, run_number = 120224,
@@ -555,10 +877,25 @@ dnp_for_rho(path,name,[],expno=[],
     pdfstring = name)
 #    clear_nodes=True)
 t1 = retrieve_T1series('t1_estimation_only.h5',name)
+>>>>>>> public
 t1.rename('power','expno')
 t1.labels('expno',r_[1:1+number_of_repeats])
 plot(t1)
 lplot(name+'_t1_vs_time.pdf')
+<<<<<<< HEAD
+\end{python}
+\end{scriptsize}
+\subsubsection{wrap up}\maxminutes{18}
+Run background EPR scan.
+
+Turn off air and flip switch.
+
+Remove probe + look at sample \sout{+ save sample!}
+
+\precaution{If done: remove tuning box, turn off air, unhook + off temperature controller, hook up mod coil, tune with dewar in (9.3\GHz at 25\%), ESR and magnet off.}
+
+Move working copy to main file.
+=======
 #obs('retrieved $T_1$ series:',t1)
 \end{lstlisting}
 \end{scriptsize}
@@ -673,6 +1010,7 @@ Autotune + record Q.
 Remove tuning box.
 
 If done, magnet off, ESR off, chiller off, source output off.
+>>>>>>> public
 
 Be sure to take coolers and dewar back to lab.
 

@@ -1,3 +1,43 @@
+<<<<<<< HEAD
+3MP_nmrelratio::1.5168704611595631
+R5a_elratiocnsi::28.06160107770357
+hydroxytempo_elratiocnsi::28.064437562540764
+mmll_nmrelratio::1.5168705948924348
+our_calibration::3.129310344827586e-06
+tempo_M::0.0009996492458786354
+current_ppt::1.511880267535709
+aminotempo_elratio::28.115652760436845
+mmll_elratiocnsi::28.060720891686078
+oxotempo_nmrelratio::1.516709515702001
+oxotempo_elratiocnsi::28.06173615738561
+oxotempo_elratio::28.112092447853133
+water_density::997.8
+hydroxytempo_nmrelratio::1.5166507989587987
+N15mtslleft_elratiocnsi::28.15483674302771
+weight_flask::14.1316
+tempo_g_mol::171.06
+weight_tempo::0.17099999999999937
+cnsi_dw50::7.175031472388582e-07
+current_frequency::9.790644
+cnsi_calibration::5.207052700065062e-07
+mtsl_nmrelratio::1.5168490779909154
+aminotempo_elratiocnsi::28.063830588717465
+mtsl_elratiocnsi::28.061980817849832
+mmsl_nmrelratio::1.5168786975932518
+N15mtslleft_nmrelratio::1.511880267535709
+flask_with_tempo::14.3026
+flask_with_solution::24.0986
+cnsi_fastdwell::1.4133473095737247e-06
+desired_M_L::0.4
+R5a_nmrelratio::1.5168511805223315
+eye_stock_conc::0.10182217410552288
+doxyl_elratiocnsi::28.063750460592114
+eye_stock_density::996.7
+mmsl_elratiocnsi::28.06045319629047
+doxyl_nmrelratio::1.5166821617121105
+3MP_elratiocnsi::28.059936836060864
+aminotempo_nmrelratio::1.5167842679321226
+=======
 tempo_M::array([[ 0.0009996492458786]])
 current_ppt::array([[ 1.5168490779909154]])
 oxotempo_nmrelratio::array([[ 1.516709515702001]])
@@ -22,3 +62,4 @@ our_calibration::array([[  3.1293103448275860e-06]])
 tempo_g_mol::array([[ 171.0600000000000023]])
 3MP_elratiocnsi::array([[ 28.0599368360608636]])
 aminotempo_nmrelratio::array([[ 1.5166210808032206]])
+>>>>>>> public

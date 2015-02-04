@@ -227,13 +227,22 @@ else
 				!propagators(:,:,size(propagators,3),p_counter),&
 		else
 			call sandwich_internal(conjg(transpose(C(:,:,1))),&
+<<<<<<< HEAD
+                conjg(transpose(propagators(:,:,size(propagators,3),p_counter))),&
+                end_sandwich)
+=======
 				conjg(transpose(propagators(:,:,size(propagators,3),p_counter))),&
 				end_sandwich)
+>>>>>>> public
 				!propagators(:,:,size(propagators,3),p_counter),&
 		endif
 		do t_counter = 1,t_steps
 			call sandwich_internal(H_c,conjg(transpose(propagators(:,:,t_counter,p_counter))),tempmat)
+<<<<<<< HEAD
+            !propagators(:,:,t_counter,p_counter),&
+=======
 				!propagators(:,:,t_counter,p_counter),&
+>>>>>>> public
 			if (size(rho,3).gt.1) then
 				call commutator_internal(tempmat,rho(:,:,1,p_counter))
 			else

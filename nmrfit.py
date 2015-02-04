@@ -2,6 +2,23 @@ from matlablike import *
 import sympy
 
 #{{{ different types of fit classes
+<<<<<<< HEAD
+class rate_curve(fitdata):
+    'for multiplicity, see t2curve'
+    def __init__(self,*args,**kwargs):
+        fitdata.__init__(self,*args,**kwargs)
+        self.symbol_list = ['A','R','b']
+        self.starting_guesses = map(double,[r_[0,0,0],r_[500,0.04,0],r_[500,0.02,0],r_[100,0.005,0],r_[10,0.001,0],r_[3,1e-4,0]])
+        self.guess_lb = r_[-inf,-inf,-inf]
+        self.guess_ub = r_[+inf,+inf,2.]
+        self.gen_symbolic('F(t)')
+        return
+    def fitfunc_raw_symb(self,p,x):
+        return p[0]*sympy.exp(-p[1]*x) + p[2]**2
+    def fitfunc_raw(self,p,x):
+        return p[0]*exp(-p[1]*x) + p[2]**2
+=======
+>>>>>>> public
 class t2curve(fitdata):
     def guess(self):
         'this overrides the pinvr guess'
@@ -93,7 +110,11 @@ class t1curve(fitdata):
         '''here, we give the particular latex representation and list of symbols for this particular child class'''
         fitdata.__init__(self,*args,**kwargs)
         self.symbol_list = [r'M(\infty)',r'M(0)',r'T_1'] # note that it must notbe possible to find part of one of the later strings by searching for one of the earlier strings
+<<<<<<< HEAD
+        self.starting_guesses = map(double,[r_[1,1,1],r_[0,0,1],r_[-100,100,0.03],r_[0.001,0.001,0.001],r_[1,-1,4.0]])
+=======
         self.starting_guesses = map(double,[r_[20,-20,2],r_[3,-3,0.1],r_[1,1,1],r_[0,0,1],r_[-100,100,0.03],r_[0.001,0.001,0.001],r_[1,-1,4.0]])
+>>>>>>> public
         self.guess_lb = r_[-inf,-inf,1e-4]
         self.guess_ub = r_[+inf,+inf,20.]
         self.gen_symbolic(r'M(t)')

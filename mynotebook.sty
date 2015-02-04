@@ -7,14 +7,18 @@
 \DeclareOption{nopageformat}{\newcommand{\nopageformat}{test}}
 \DeclareOption{noheader}{\newcommand{\noheader}{test}}
 \ProcessOptions
+\RequirePackage{mathrsfs}% for mathscr
 \RequirePackage{myhyperref}
 \RequirePackage{mypython}
 \RequirePackage{mycolors}
+\RequirePackage{paralist}
+\RequirePackage{pgfplots}
+\setdefaultenum{(1)}{(a)}{}{}
 \RequirePackage{mydefs}
 \RequirePackage{mybasiccomments}
 %{{{ symbols
 \RequirePackage{bbold} %for mathbb
-\RequirePackage{subfigure} %for mathbb
+%\RequirePackage{subfigure} %for mathbb
 \RequirePackage{pifont}
 \RequirePackage{cancel}
 \RequirePackage{xspace}
@@ -102,8 +106,6 @@ mathescape=true
 \pdfpageheight 11in
 
 \@ifundefined{nopageformat}{
-\pagestyle{fancy}
-\fancyhf{}
 \oddsidemargin -0.5in % add 1in to get margin
 \evensidemargin -0.5in % add 1in to get margin
 \voffset -0.5in
@@ -114,6 +116,9 @@ mathescape=true
 \headheight 15pt 
 %\headheight 0in
 \headsep 15pt
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
 }{}
 %\renewcommand{\sectionmark}[1]{\markright{#1}{}}
 %\markright{\sectionmark{}}
@@ -202,11 +207,12 @@ mathescape=true
 
 %}}}
 
-\newenvironment{err}{\vspace{-2.25ex}\begin{quotation}\begin{footnotesize}\hspace{-0.5in}\begin{tiny}\textsc{(Debug:)}\end{tiny}\mysmallline
-    
-    \vspace{-0.5ex}}{
-    
-    \vspace{-2ex}\hspace{-0.5in}\myarbline{1.3in}\end{footnotesize}\end{quotation}\vspace{-1.5ex}}
+%\newenvironment{err}{\vspace{-4ex}\begin{quotation}\begin{footnotesize}\hspace{-0.5in}\begin{tiny}\textsc{(Debug:)}\end{tiny}\mysmallline
+%    
+%    \vspace{-0.5ex}}{
+%    
+%    \vspace{-2ex}\hspace{-0.5in}\myarbline{1.3in}\end{footnotesize}\end{quotation}\vspace{-1.5ex}}
+\newenvironment{err}{\ \\ \textit{\footnotesize{\color{gray}Debug}}$\color{gray}\left\{\normalcolor\begin{minipage}{0.95\linewidth}\begin{footnotesize}}{\end{footnotesize}\end{minipage}\right.$}
 
 \newcommand\mysmallline{\rule{1in}{0.01mm}}
 \newcommand\myarbline[1]{\rule{#1}{0.01mm}}
@@ -219,16 +225,17 @@ mathescape=true
 \RequirePackage[noparagraph]{myparagraphformatting}
 }
 \newcommand{\blacktext}[1]{\texorpdfstring{{\color{black}#1}}{#1}}
-\renewcommand{\subsection}[1]{\oldsubsection{#1\condhrule}}
-\renewcommand{\section}[2][]{\oldsection{#2\condhrule{\tiny #1}}}
+\renewcommand{\subsection}[1]{\color{darkgray}\oldsubsection{#1\condhrule{lightgray}}\normalcolor}
+\renewcommand{\section}[2][]{\oldsection{#2\condhrule{black}{\tiny #1}}}
 
 \renewcommand{\o}[2][]{ {\color{mygreen}{\it #1}} {\color{blue} #2}}
-
-\gdef\total{0}
+\gdef\taskListOrTimeBlockTotal{0}
 \gdef\thistimeblock{0.001}
 \gdef\obstimecounter{0}
 \gdef\obstimecounterflag{0}
 \gdef\mytempval{0}
+\gdef\TimeToHereAtLastMark{0}
+\gdef\timeusedontask{0}
 
 \def\zeroPadTwo#1%
 {% Left zero pad of the argument to 2 digits.  The argument
@@ -242,37 +249,91 @@ mathescape=true
 
 \newcommand{\myprinttime}[1]{\FPset\numhrs{#1}\FPtrunc\numhrs\numhrs{0}\FPset\nummins{0}\FPsub\nummins{#1}\numhrs\FPmul\nummins\nummins{60}\FPtrunc\nummins\nummins{0}\numhrs:\zeroPadTwo\nummins}
 
-\newcommand{\finishedtime}[1]{%
-\FPmul\mytemp{#1}{60}%
-\global\let\mytempval=\mytemp%
-\o[\obstb\obstm{\mytempval}\obstd]{}%
+%{{{ finished time using tex optional arguments (allows colon/no colon)!
+\newcommand{\finishedtime}{}%just to check
+\DeclareRobustCommand\finishedtime{\@ifnextchar[{\@@finishedtime}{\@finishedtime}}
+\def\@finishedtime#1{%
+\pgfmathparse{#1*60}%
+\global\let\mytempval=\pgfmathresult%
+\o[\obstb\obstmINV{\mytempval}\obstd]{}%
 }
-\newcommand{\donetime}[1]{%
-\maxtime{#1}\finishedtime{#1}
+\def\@@finishedtime[#1]#2{%
+\pgfmathparse{#2*60}%
+\global\let\mytempval=\pgfmathresult%
+\o[#1: \obstb\obstmINV{\mytempval}\obstd]{}%
 }
-\newcommand{\maxtime}[1]{\FPset\tvar{#1}
-\FPadd\ttotal\tvar\total
-\global\let\total=\ttotal
-\FPdiv\poftotal\tvar\timeblocktotalval
-\FPmul\poftotal\poftotal{100}
-\FPdiv\numberdays\tvar{8}
-\FPdiv\numbertotaldays\ttotal{8}
-\FPtrunc\numbertotaldays\numbertotaldays{2}
-\FPtrunc\poftotal\poftotal{1}
-\FPtrunc\numberdays\numberdays{2}
-\global\let\thistimeblock=\tvar
-({\it max \myprinttime\tvar, +\numberdays =\numbertotaldays\ days, \poftotal\% of total})}
-\gdef\timeblocktotalval{9}
+
+\DeclareRobustCommand\donetime{\@ifnextchar[{\@@donetime}{\@donetime}}
+\def\@donetime#1{\maxtime{#1}\finishedtime{#1}}
+\def\@@donetime[#1]#2{%
+\maxtime{#2}\finishedtime[#1]{#2}%
+}
+
+\gdef\timeperday{8}
+\gdef\timeAllotedForTimeBlock{9}
+
+
+\newcommand{\maxtime}[1]{%
+\pgfmathparse{#1+\taskListOrTimeBlockTotal}%
+\global\let\taskListOrTimeBlockTotal=\pgfmathresult% ttotal is the total time for a week
+\pgfmathparse{safepercentage(#1,\timeAllotedForTimeBlock)}%
+\global\let\poftotal=\pgfmathresult%poftotal is temporary
+\pgfmathparse{safedivide(#1,\timeperday)}%
+\global\let\numberdays=\pgfmathresult%
+\pgfmathparse{#1}%
+\global\let\thistimeblock=\pgfmathresult%
+({\it \myprinttime{#1}, +\numberdays\ days, \pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\poftotal}\% of total})%
+\gdef\timeusedontask{0.0}%
+}
+
+\def\IsPositive#1{%
+  TT\fi%
+  \ifcat_\ifnum0<#1 _\else A\fi%
+}
+\newcommand{\marktime}{
+\pgfmathparse{\taskListOrTimeBlockTotal-\runningTimeCounter}%
+\global\let\tempTimeToHere=\pgfmathresult% tempTimeToHere is just a local variable
+\pgfmathparse{safedivide(\tempTimeToHere,\timeperday)}%
+\global\let\numbertotaldays=\pgfmathresult%
+%http://en.wikibooks.org/wiki/LaTeX/Plain_TeX
+\pgfmathparse{ifthenelse((\tempTimeToHere-\TimeToHereAtLastMark)>=0,"TT","FT")}% character codes match (true) or don't (false)
+\if\pgfmathresult%(
+    \pgfmathparse{int(floor(\tempTimeToHere))}%
+    \let\localresulthours = \pgfmathresult%
+    \pgfmathparse{int(round((\tempTimeToHere-\localresulthours)*60))}%
+    \let\localresultminutes = \pgfmathresult
+    {{\it =\localresulthours:\zeroPadTwo\localresultminutes\ (\numbertotaldays\ days) to get here}}%
+    \global\let\TimeToHereAtLastMark=\tempTimeToHere%
+\else%)(
+    \pgfmathparse{\TimeToHereAtLastMark-\tempTimeToHere}%
+    \let\localresulthours = \pgfmathresult%
+    {\color{red}{over:\maxtime{\localresulthours}}}% and \TimeToHereAtLastMark remains unchanged (because it has zero added time)
+\fi%)
+}
 
 \newcommand{\maxtwenty}[1]{\FPset\tvar{#1}\FPdiv\tvar\tvar{3}\FPtrunc\tvar\tvar{2}\maxtime{\tvar}}
 \newcommand{\maxminutes}[1]{\FPset\tvar{#1}\FPdiv\tvar\tvar{60}\FPtrunc\tvar\tvar{2}\maxtime{\tvar}}
-\newcommand{\maxdays}[1]{#1 days \FPset\tvar{#1}\FPmul\tvar\tvar{8}\FPtrunc\tvar\tvar{2}\maxtime{\tvar}}
+\newcommand{\maxdays}[1]{#1 days \FPset\tvar{#1}\FPmul\tvar\tvar{\timeperday}\FPtrunc\tvar\tvar{2}\maxtime{\tvar}}
 
-\newcommand\timeblocktotal[1]{{\it Time block total: \myprinttime{#1}}\gdef\timeblocktotalval{#1}}
-\newcommand\timeblocktotaldays[1]{ {\it Time block total:%
-\FPset\mytemp{#1}\FPmul\mytemp{8}\mytemp%
-\global\let\mytempval=\mytemp%
-\myprinttime{\mytempval}}\gdef\timeblocktotalval{\mytempval}}
+\gdef\weektotaltime{0}
+\newcommand\resetweektotaltime{%
+\pgfmathparse{0}%
+\global\let\weektotaltime=\pgfmathresult%
+}%
+\newcommand{\showweektotaltime}{%
+\myprinttime{\weektotaltime}}%
+
+\newcommand\timeblocktotal[1]{{\it Time block total: \myprinttime{#1}}\gdef\timeAllotedForTimeBlock{#1}}
+\newcommand\timeblocktotaldays[1]{ {\it
+{\tiny$\timeperday\times#1\;day$}%
+Time block total:%
+\pgfmathparse{#1*\timeperday}%
+\global\let\timeAllotedForTimeBlock=\pgfmathresult%
+\gdef\TimeToHereAtLastMark{0}% reset this, since the marks start over
+\pgfmathparse{\weektotaltime+\timeAllotedForTimeBlock}%
+\global\let\weektotaltime=\pgfmathresult%
+\myprinttime{\timeAllotedForTimeBlock}}%
+}
 
 \newcommand{\obstb}{\FPset\mytemp{0}\global\let\obstimecounter=\mytemp\FPset\mytemp{1}\global\let\obstimecounterflag=\mytemp}
 
@@ -281,17 +342,50 @@ mathescape=true
 \newcommand{\obsta}[1]{\obsts\FPset\obstimecountervar{\obstimecounter}\FPset\obstimecounterflagvar{\obstimecounterflag}\FPset\mytemp{#1}\FPset\myhr{3600}\FPmul\mytemp\obstimecounterflagvar\mytemp\FPdiv\mytemp\mytemp\myhr\FPadd\mytemp\obstimecountervar\mytemp\global\let\obstimecounter=\mytemp}
 
 \newcommand{\obstm}[1]{\FPset\obstimecountervar{\obstimecounter}\FPset\obstimecounterflagvar{\obstimecounterflag}\FPset\mytemp{#1}\FPset\myhr{60}\FPmul\mytemp\obstimecounterflagvar\mytemp\FPtrunc\mytemp\mytemp{1}\mytemp min\FPdiv\mytemp\mytemp\myhr\FPadd\mytemp\obstimecountervar\mytemp\global\let\obstimecounter=\mytemp}
+\newcommand{\obstmINV}[1]{%same as obstm, but invisible (doesn't print minutes)
+\FPset\obstimecountervar{\obstimecounter}%
+\FPset\obstimecounterflagvar{\obstimecounterflag}%
+\FPset\mytemp{#1}%
+\FPset\myhr{60}%
+\FPmul\mytemp\obstimecounterflagvar%
+\mytemp\FPtrunc\mytemp\mytemp{1}%
+\FPdiv\mytemp\mytemp\myhr%
+\FPadd\mytemp\obstimecountervar\mytemp%
+\global\let\obstimecounter=\mytemp}
 
-\newcommand{\obstd}{\FPset\mytemp\obstimecounter
-\FPdiv\poftotal\mytemp\thistimeblock
-\FPtrunc\mytemp\mytemp{2}
-\FPmul\poftotal\poftotal{100}
-\FPtrunc\poftotal\poftotal{1}
-({\bf \myprinttime\mytemp, \poftotal\%})\FPadd\mytemp\mytemp\dumpval\global\let\dumpval=\mytemp}
-\newcommand{\obstdump}{\FPset\mytemp\dumpval\FPtrunc\mytemp\mytemp{2} \o{({\bf \mytemp hr})}}
+\pgfmathdeclarefunction{safedivide}{2}{%
+\pgfmathparse{ifthenelse(#1<160,#1,160)/ifthenelse(#2>0.01,#2,0.01)}
+}
+\pgfmathdeclarefunction{safepercentage}{2}{%
+\pgfmathparse{ifthenelse(safedivide(#1,#2)>160,160,safedivide(#1,#2))*100}
+}
+\newcommand{\obstd}{% dump the runningTimeCounter
+\pgfmathparse{\obstimecounter+\timeusedontask}%
+\global\let\timeusedontask=\pgfmathresult%
+%``time used on task \timeusedontask''
+\pgfmathparse{safepercentage(\obstimecounter,\thistimeblock)}%so it doesn't exceed tex limit of 16,300
+\let\poftotal=\pgfmathresult%
+%``percent of total \poftotal''
+({\bf%
+\myprinttime\obstimecounter%
+% nest note that we don't schedule anything for only 6min
+\pgfmathparse{ifthenelse(\thistimeblock>=0.1,"TT","FT")}% character codes match (true) or don't (false)
+\if\pgfmathresult%(
+, \pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\poftotal}\%,%
+\pgfmathparse{\obstimecounter+\runningTimeCounter}%
+\global\let\runningTimeCounter=\pgfmathresult%
+\pgfmathparse{safepercentage(\timeusedontask,\thistimeblock)}
+{\tiny \pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\pgfmathresult}\%}%
+\fi%)
+})%
+}
+
+\newcommand{\obstdump}{%
+\o{({\bf \pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\runningTimeCounter} hr})}%
+}
 
 \newenvironment{tasklist}{\begin{tiny}
-\FPset\ttotal{0}
+\gdef\taskListOrTimeBlockTotal{0}%
 \begin{multicols}{2}
 \begin{itemize}
 }{
@@ -303,14 +397,39 @@ mathescape=true
 
 \newenvironment{pcomments}{\begin{minipage}{4.5in}}{\end{minipage}}
 \newcommand{\pstandard}[1]{\begin{minipage}{3in}\includegraphics[width=3in]{#1}\end{minipage}}
-\newcommand{\timeblockstart}{\gdef\total{0}\gdef\dumpval{0}\FPset\ttotal{0}}
-\newcommand{\timeblockend}{\FPset\mytemp\total
-\FPtrunc\mytemp\mytemp{1}
-{\tiny{\it = \mytemp hr total},\obstdump}}
+\newcommand{\timeblockstart}{\gdef\taskListOrTimeBlockTotal{0}\gdef\runningTimeCounter{0}%
+\gdef\taskListOrTimeBlockTotal{0}%
+\dotfill}
+
+\newcommand{\timeblockend}{%
+{\tiny{\it = \pgfmathprintnumber[assume math mode=true,fixed,precision=2]{\taskListOrTimeBlockTotal} hr total\ %
+\pgfmathparse{ifthenelse((\taskListOrTimeBlockTotal-\timeAllotedForTimeBlock)==0,"TT","FT")}%
+\if\pgfmathresult%(
+(breaks even)
+\else%)(
+\pgfmathparse{ifthenelse((\taskListOrTimeBlockTotal-\timeAllotedForTimeBlock)>0,"red","blue")}%
+{\color{\pgfmathresult}
+\pgfmathparse{ifthenelse((\taskListOrTimeBlockTotal-\timeAllotedForTimeBlock)>0,", over ",", under ")}\pgfmathresult%
+\pgfmathparse{abs(\taskListOrTimeBlockTotal-\timeAllotedForTimeBlock)}\pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\pgfmathresult}%
+}%
+\fi%)
+}%
+\o{{\bf %
+\pgfmathparse{\taskListOrTimeBlockTotal-\runningTimeCounter}%
+{\footnotesize \pgfmathprintnumber[assume math mode=true,fixed,precision=2]{\pgfmathresult} hr left}}
+}%
+}\dotfill}
+
+\newenvironment{timeblock}[2]{%
+\timeblockstart\gdef\timeperday{#1}\timeblocktotaldays{#2}%
+}{%
+\timeblockend
+}
+
 \newenvironment{tasks}{\timeblockstart\phantomsection\addcontentsline{toc}{subsubsection}{tasks}
 \begin{small}
 \begin{multicols}{2}
-\gdef\timeblocktotalval{9}
+\gdef\timeAllotedForTimeBlock{9}
 }{
 \end{multicols}
 \timeblockend
@@ -319,9 +438,7 @@ mathescape=true
 
 \newcommand{\breaklist}{\end{itemize}
 \end{multicols}
-\FPset\mytemp\total
-\FPtrunc\mytemp\mytemp{1}
-{\tiny{\it = \mytemp hr total}}
+{\tiny{\it = \pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\taskListOrTimeBlockTotal} hr total}}
 \myline
 \begin{multicols}{2}
 \begin{itemize}
@@ -353,10 +470,10 @@ mathescape=true
 % section number and title
 %\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
 %\renewcommand{\sectionmark}[1]{\markright{\thesection\ }}
-%\lhead[\fancyplain{}{\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad J. Franck Notebook, compiled \today}] %
-%    {\fancyplain{}{\bfseries\rightmark}}
-%\rhead[\fancyplain{}{\scshape\arabic{section}}] %
-%    {\fancyplain{}{J. Franck Notebook, compiled \today}}
+\lhead[\fancyplain{}{\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad J. Franck Notebook p \thepage}] %
+    {\fancyplain{}{\bfseries\rightmark}}
+%\rhead[\fancyplain{}{\scshape Sec.\arabic{section}}] %
+%    {\fancyplain{}{J. Franck Notebook p \thepage}}
 %\lhead{ \Roman{chapter}$\Rightarrow$\arabic{section}.\Alph{subsection} \leftmark}
 %%%\lhead{ \Roman{chapter}$\Rightarrow$\arabic{section} \leftmark}
 %%%%\lhead{\leftmark}
@@ -389,22 +506,17 @@ mathescape=true
 %%\rfoot{\thepage}
 %%\lfoot{Left bottom}
 %
-%\@ifundefined{nolabels}{
-%\RequirePackage{mylabels}
-%}{}
+\@ifundefined{nolabels}{
+\RequirePackage{mylabels}
+}{}
 %%\bibliographystyle{abbrvnat}
 %%\RequirePackage[sort&compress]{natbib}
 %%\bibliographystyle{unsrt}
 \RequirePackage{fp}
-\gdef\total{0}\gdef\dumpval{0}\FPset\ttotal{0} % initialize, whether or not I start the timeblock
+\gdef\runningTimeCounter{0}\gdef\taskListOrTimeBlockTotal{0} % initialize, whether or not I start the timeblock
 
-\newcommand{\add}[1]{\textit{#1}}
-\newcommand{\command}[1]{{\tt #1}}
-\newcommand{\na}[1]{\begin{tiny}{\it{\color{mygray}#1}}\end{tiny}}
 \newcommand{\refhyp}[1]{{\it hyp:}\ref{hyp:#1}}
-\newcommand{\Cat}{Cat$_1$}
 \newcommand{\mainhyp}[1]{{\bf #1}}
-\newcommand{\rhosmax}{\ensuremath{\rho s_{max}}}
 \newcommand{\subhyp}[2][]{{\it \textbf{#1} }{\it #2}}
 %\def\thechapter{\Roman{chapter}}
 %\def\thesection{\arabic{section}}
@@ -414,7 +526,6 @@ mathescape=true
 \newcommand{\needtocheck}[1]{{\color{yellow}#1}}
 \newcommand{\putref}{\begin{tiny}[ref]\end{tiny}}
 \newenvironment{DIFnomarkup}{}{}
-\newcommand{\cwdnp}{cw-DNP}
 
 \newcommand\precaution[1]{\begin{scriptsize}\textit{#1}\end{scriptsize}}
 \newcommand\twooptions[2]{
@@ -517,3 +628,7 @@ mathescape=true
 \quad\\ 
 }\makeatother
 % end date formatting
+\newcommand{\startsquarepar}{%
+    \par\begingroup \parfillskip 0pt \relax}
+\newcommand{\stopsquarepar}{%
+    \par\endgroup}

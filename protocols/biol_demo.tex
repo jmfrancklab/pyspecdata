@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+\subsection{Biol. Demo Protocol}\label{sec:biol_}
+\timeblockstart
+\timeblocktotal{3.6}
+Here, I am demonstrating biological samples at 10\uM.
+
+\subsubsection{initial setup}\maxminutes{57}
+\paragraph{first time}
+=======
 \subsection{tau187 $T_{1,0}$ sample}\label{sec:biol_tau_unlabeled}
 \timeblockstart
 \timeblocktotal{3.6}
@@ -5,6 +14,7 @@ This is the protocol
 
 \subsubsection{initial setup}\maxminutes{57}
 \paragraph{before leaving}
+>>>>>>> public
 Be sure to carry over:
 \begin{itemize}
     \item microcentrifuge tubes
@@ -14,11 +24,64 @@ Be sure to carry over:
     \item magnifying glasses
 \end{itemize}
 
+<<<<<<< HEAD
+$B_0$ field off, air off, everything else on, and swap the dewar for the quartz tube.
+
+Attach air tube to temperature control, insert, turn on temp control.
+
+=======
+>>>>>>> public
 \paragraph{always}
 Be sure to change section title and label!!!
 
 Copy section label to list for the day.
 
+<<<<<<< HEAD
+$B_0$ field off, air off.
+
+\paragraph{capillary prep}
+\subparagraph{using the sealed tubes}
+
+Cut a decent length of tube.
+
+Put capillary on GELoader tip, and turn pipette upside down.
+
+Centrifuge sample down at 1000 rpm.
+
+Cut again, then add critoseal and withdraw air with pipette
+
+Put stuff back in fridge!
+
+Measure sample.
+
+Insert in probe.
+
+\subsubsection{Quick ESR in probe}\maxminutes{11}
+Put into tune mode, $40\;dB$ first.
+
+Insert probe, and turn up air to 12~SCFH (since a new sample, just use a higher flow rate).
+
+Move to near 9.77 and autotune.
+
+\paragraph{test for signal}
+try same parameters as her.
+
+try to increase the modulation amplitude, just to see signal.
+
+zoom in and repeat.
+
+check for saturation 15, down by 3~dB.
+
+save saturated scan.
+\fn{dna_cs14_overmod_sat_120314}
+
+use a power slightly before saturation.
+
+Make an experiment with this power, but turn down the modulation amplitude and change the receiver window and the resolution and number of scans.
+
+Increase the modulation amplitude to 2~G.
+
+=======
 \paragraph{On + set up for (first exp only)}
 \precaution{Check that copper plate is set up}
 
@@ -84,34 +147,113 @@ Use a power slightly before saturation.
 
 Make an experiment with this power, but turn down the modulation amplitude and change the receiver window and the resolution and number of scans.
 
+>>>>>>> public
 \paragraph{actual ESR}
 Turn on field.
 
 Copy experiment.
+<<<<<<< HEAD
+\fn{dna_cs14_overmod_120314}
+=======
 \fn{tau_120329.par}
+>>>>>>> public
 
 \paragraph{always}
 Run actual scan.
 
 Save ESR.
+<<<<<<< HEAD
+\fn{dna_cs14_bound_overmod_120314}
+=======
 \fn{tau_120329}
+>>>>>>> public
 
 Cntrl-S after scan is finished.
 
 Hit Cntrl-A for ssh transfer and process.
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> public
 \begin{tiny}
 \begin{lstlisting}
 fl = figlistl()
 standard_epr(dir = DATADIR+'cnsi_data',
+<<<<<<< HEAD
+    files = ['dna_cs14_overmod_120314',
+        'dna_cs14_bound_overmod_120314',
+        'dna_cs14_nl_bound_overmod_120314',
+        'dna_cs14_unbound_overmod_120315'],
+=======
     files = ['tau_120329'],
     background = 'tau_nl_120329',
+>>>>>>> public
     figure_list = fl)
 fl.show(thisjobname()+'.pdf')
 \end{lstlisting}
 \end{tiny}
 
+<<<<<<< HEAD
+\paragraph{determine ratio}
+\ntd{I don't have git set up right here, but later, I should paste the ratio procedure here}
+\subsubsection{DNP Experimental Setup}
+
+\paragraph{tune NMR, when I'm not using microwave power}
+Set switch to DNP amp, set bridge to standby.
+
+Attach probe w/ coil perpendicular to $B_0$ + at correct height, then turn on air (14~SCFM).
+
+Turn on $B_0$ field.
+
+Make a new NMR experiment based on template, and change into that experiment.
+
+(leaving sfo1 at the value you used for DNP) \texttt{wobb}. \adlin{back moves lf/right front moves down/up}
+
+\texttt{p1 1u}, then use \texttt{jf\_setmw} to center resonance in \texttt{gs}.
+
+\paragraph{tune and set resonant field}
+Attach probe w/ coil perpendicular to $B_0$ + at correct height, then turn on air (20~SCFM).
+
+Put into tune mode before inserting sample, and turn down power.
+
+Move to near 9.77 and autotune + turn on $B_0$ field.
+
+Make a new NMR experiment based on template, and change into that experiment.
+
+\fn{dopc_984mM_120503}
+
+Set sfo1 to (ppt value)*(YIG frequency), then \texttt{wobb}. \adlin{back moves lf/right front moves down/up}
+
+Check the ESR tune by hand up to 0~dB and record microwave frequency.
+\begin{python}[off]
+calcfielddata(9.790094,'mtsl','cnsi')
+\end{python}
+Put ESR bridge in standby mode and disconnect the mod coil.
+
+Set the field to a reasonable value (last value usually fine, if not use the value from the ratio).
+
+Use \texttt{jf\_setmw} to set frequency ratio and YIG frequency.
+Check that the YIG's DC power supply reads 0.26-0.27~A with first light on and other lights green.
+
+\texttt{jf\_zg} for signal about 15 high, then set it on resonance (lightning bolt o1).
+
+Use \texttt{jf\_setmw} to center resonance in \texttt{gs}.
+
+\paragraph{calibrate 90 time and $T_1$}
+
+Run \texttt{jf_zg}; zoom in; \texttt{dpl1}; then \texttt{paropt} with \texttt{p1},8,1,3 which gives signal at 8\us, 9\us, and 10\us pulse length, which should be $\approx 360^o$.
+
+Flip the waveguide switch so the amp is connected (not the bridge).
+
+If needed, run a rough experiment to determine the $T_1$ time, and put it in experiment 101.
+
+\begin{scriptsize}
+\begin{python}[off]
+# these change
+name = 'dopc_32mMnl_120504' # the name of the experiment directory
+path = DATADIR+'franck_cnsi/nmr/' # the name of the directory where you are storing your data
+=======
 \subsubsection{set up DNP}\maxminutes{38}
 \paragraph{determine ratio (if desired)}
 
@@ -305,6 +447,7 @@ Process the $T_1$
 # these change
 name = 'tau_120329'
 path = DATADIR+'cnsi_data/'
+>>>>>>> public
 # the following stays the same
 dnp_for_rho(path,name,[],expno=[],t1expnos = [101],
         integration_width = 150,peak_within = 500,
@@ -316,7 +459,11 @@ dnp_for_rho(path,name,[],expno=[],t1expnos = [101],
 t1 = retrieve_T1series('t1_estimation_only.h5',name)
 def estimate_hot_t1(thist1):
     water = 1./2.6
+<<<<<<< HEAD
+    hot_water = 1./4.2 # this is for the new ``closed''
+=======
     hot_water = 1./3.8 # this is for the new ``closed''
+>>>>>>> public
     #type probe # 7/8 adjustted this
     thist1 = 1./thist1 # convert to a rate
     thist1 -= water # figure out which part is from
@@ -326,6 +473,16 @@ def estimate_hot_t1(thist1):
 obs(r'Min $T_1\approx$',lsafe(t1['power',0]),r'\quad $T_{1,max}\approx$',
         lsafe(estimate_hot_t1(t1)),
         r' $s$ with heating')
+<<<<<<< HEAD
+\end{python}
+\end{scriptsize}
+\paragraph{determine $T_1(t)$}
+Use jf\_dnp to determine number of points for a scan 17~min long:
+DOPC 32\mM $\Rightarrow$ min 3.4 of max of 3.6
+
+Run jf\_t10s:
+Set 15 experiments at 17~min for 2h50m, exp 4$\Rightarrow$ 501.
+=======
 \end{lstlisting}
 \end{scriptsize}
 
@@ -335,10 +492,39 @@ tau187 nl $\Rightarrow$ min of 2.1 max of 2.2
 
 Run jf\_t10s:
 Set \sout{ 20 }10 experiments for \sout{ 4:40 }\add{2:50}, exp 4$\Rightarrow$ 501.
+>>>>>>> public
 
 Come back after it ran.
 
 \paragraph{run DNP}
+<<<<<<< HEAD
+Start jf\_dnp, and write down $T_1$ times entered.
+bound CS19 $\Rightarrow$ 1.5 to 2.1 to be safe
+DOPC high concentration $\Rightarrow$ 0.67 to 0.8 to be safe
+
+\subsubsection{Processing}
+
+\paragraph{process DNP}
+Process results.
+
+
+\begin{scriptsize}
+\begin{python}[off]
+import textwrap # don't pay attention to this
+# change the following parameters
+name = 'enterexperiment' # replace with the name of the experiment
+chemical_name = 'enterchemicalhere' # this is the name of the chemical i.e. 'hydroxytempo' or 'DOPC', etc.
+run_number = 120503 # this is a continuous run of data
+concentration = 984e-6 # the concentration of spin label
+dontfit = False # only set to true where you don't expect enhancement
+path = DATADIR+'franck_cnsi/nmr/'
+# if after setting all these correctly,
+# it complains about your T1 experiments
+# try to uncomment the t1mask line below
+###########################
+# the following stays the same
+#search_delete_datanode('dnp.h5',name)
+=======
 Start jf\_dnp: Set minimum and maximum $T_1$ values based on $T_1$ estimate (with heating).
 tau187 $\Rightarrow$ min 1.8, max 2.4
 tau187 nl $\Rightarrow$ min of 2.1 max of 3.0
@@ -387,6 +573,7 @@ dontfit = False
 # the following stays the same
 path = DATADIR+'franck_cnsi/nmr'
 search_delete_datanode('dnp.h5',name)
+>>>>>>> public
 # leave the rest of the code relatively consistent
 #{{{ generate the powers for the T1 series
 print 'First, check the $T_1$ powers:\n\n'
@@ -402,7 +589,11 @@ t1mask = bool8(ones(len(t1_dbm)))
 # the next line will turn off select (noisy T1
 # outputs) enter the number of the scan to remove --
 # don't include power off
+<<<<<<< HEAD
+#t1mask[-1] = 0 # this is the line you sometimes want to uncomment
+=======
 t1mask[-1] = 0
+>>>>>>> public
 #}}}
 dnp_for_rho(path,name,integration_width = 160,
         peak_within = 500, show_t1_raw = True,
@@ -412,16 +603,39 @@ dnp_for_rho(path,name,integration_width = 160,
         power_file = name+'/power.mat',t_start = 4.6,
         chemical = chemical_name,
         concentration = concentration,
+<<<<<<< HEAD
+        extra_time = 9.0,
+=======
         extra_time = 6.0,
+>>>>>>> public
         dontfit = dontfit,
         run_number = run_number,
         threshold = -50.)
 standard_noise_comparison(name)
 # tried to fix error on cov more fix more fix more fix more fix more fix
+<<<<<<< HEAD
+\end{python}
+\end{scriptsize}
+
+Check that my longest $T_1$ falls within range I used.
+\ntd{just code this in}
+
+Check the consistency of the enhancements with decreasing power.
+
+Comment {\tt search\_delete\_datanode}.
+
+Git commit.
+
+Copy working\_copy into compilation for this project.
+
+Turn $B_0$ off, remove probe + look at sample.
+
+=======
 \end{lstlisting}
 \end{scriptsize}
 
 \ntd{Here, I should be sure I'm including time for the 3 scans in addition to the ones that are counted.}
+>>>>>>> public
 \paragraph{Process multiple $T_1$ data}
 Copy (or Git once that's ready) files.
 
@@ -430,6 +644,16 @@ Change all parameters at beginning.
 Run script
 
 \begin{scriptsize}
+<<<<<<< HEAD
+\begin{python}[off]
+# these change
+name = 'dna_cs19_nl_unbound_120418' # name of dataset
+chemical = 'dna_cs19' # chemical name
+concentration = 0.0 # concentration of spin label (usually 0)
+run_number =  120418
+number_of_repeats = 30 # number of T1 experiments run
+start_exp = 501 # the experiment you started at
+=======
 \begin{lstlisting}
 # these change
 name = 'tau_nl_120330'
@@ -438,6 +662,7 @@ concentration = 0.0
 run_number = 120330
 number_of_repeats = 7
 start_exp = 101
+>>>>>>> public
 # everything else stays the same
 path = DATADIR+'franck_cnsi/nmr/'
 dnp_for_rho(path,name,[],expno=[],
@@ -459,6 +684,10 @@ t1.rename('power','expno')
 t1.labels('expno',r_[1:1+number_of_repeats])
 plot(t1)
 lplot(name+'_t1_vs_time.pdf')
+<<<<<<< HEAD
+\end{python}
+\end{scriptsize}
+=======
 \end{lstlisting}
 \end{scriptsize}
 \paragraph{put back system}
@@ -473,6 +702,7 @@ Turn off the air + check rate.
 
 Pull out + inspect + measure sample with magnifying glasses.
 
+>>>>>>> public
 \subsubsection{ESR}\maxminutes{11}
 
 (Here, I run ESR after the DNP, so I don't have to worry about timing, but still get the double integral)
@@ -519,9 +749,14 @@ Hit Cntrl-A for ssh transfer and process.
 \begin{tiny}
 \begin{lstlisting}
 fl = figlistl()
+<<<<<<< HEAD
+standard_epr(dir = DATADIR+'cnsi_data',
+    files = ['grocomplex_120224','groes_120224','grocomplex_rep_120224'],
+=======
 standard_epr(dir = DATADIR+'franck_cnsi',
     files = ['tau_likeanna2_120330',
         r'500uM100%label18kdaBeforeHeparin031308'],
+>>>>>>> public
     figure_list = fl)
 fl.show(thisjobname()+'.pdf')
 \end{lstlisting}
@@ -532,11 +767,30 @@ Put into tune mode before removing sample, and turn down power.
 Run background scan.
 
 \subsubsection{wrap up}\maxminutes{18}
+<<<<<<< HEAD
+Turn off field and air and flip switch.
+
+Pull out, check and measure sample.
+
+Copy this file into compilation for the project.
+=======
 git commit, then copy working copy of notebook into compilation.
+>>>>>>> public
 
 Clear + copy to protocol.
 
 \subparagraph{Run ESR background scan}
+<<<<<<< HEAD
+\subparagraph{Last experiment only}
+Put quartz tube in loops to right, reattach mod coil.
+
+Replace the dewar (being sure to include both inner and outer top collets).
+
+Find dip near 9.88~GHz (if without dewar) or 9.31~GHz (if with dewar), and autotune.
+
+Git commit again and Git push.
+
+=======
 Autotune + run ESR background scan.
 
 \subparagraph{Last experiment only}
@@ -563,5 +817,6 @@ Remove tuning box.
 If done, magnet off, ESR off, chiller off, source output off.
 
 Be sure to take coolers and dewar back to lab.
+>>>>>>> public
 
 \timeblockend

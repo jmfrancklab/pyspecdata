@@ -4,19 +4,22 @@ endif
 ifndef DATE
   ifdef VER
     VERSTRING=$(VER)
-    DATE=:\\\\begin{verbatim}\\n
-    DATE+=$(shell svn log -r$(VERSTRING) $(FILE).tex | sed s/-*//)\\n
-    DATE+=\\\\end{verbatim}\\n
   else
     VERSTRING=HEAD
-    DATE=HEAD
   endif
 else
   VERSTRING=\{$(DATE)\}
 endif
-BIBFILES=
+#DATE=:\\\\begin{verbatim}\\n
+#DATE+=$(shell svn log -r$(VERSTRING) $(FILE).tex | sed s/-*//)\\n
+DATE=$(shell svn log -r$(VERSTRING) $(FILE).tex | sed 's/-\+/--/g' | sed 's/[_]/\\\\\\\\_/g' | sed 's/\//\\\//g')\\n
+FNAME=$(shell echo $(FILE) | sed "s/.*\/\(.*\)/\1/")
+#DATE+=\\\\end{verbatim}\\n
+PLAINBIBFILES=
+DIFFBIBFILES=
 ifndef NOBIB
-  BIBFILES+=$(FILE)_onlyforplain.bbl
+  DIFFBIBFILES+=$(FNAME)_onlyfordiff.bbl
+  PLAINBIBFILES+=$(FNAME)_onlyforplain.bbl
 endif
 
 all: compilation.pdf progress.pdf
@@ -24,93 +27,101 @@ clean:
 	rm notebook.aux notebook.log notebook.out notebook.*.py.out notebook.*.py.old notebook.*.py.err
 compclean:
 	rm compilation.aux compilation.log compilation.out compilation.*.py.out compilation.*.py.old compilation.*.py.err
-notebook.aux: notebook.tex papers.tex mynotebook.sty 09*.tex notebook*.tex summary.tex inprocess/*.tex library.bib
-	pdflatex --shell-escape notebook 
-notebook.out: notebook.tex papers.tex mynotebook.sty 09*.tex notebook*.tex summary.tex inprocess/*.tex
-	pdflatex --shell-escape notebook 
+notebook.aux: notebook.tex papers.tex mynotebook.sty 09*.tex notebook*.tex summary.tex inprocess/*.tex library.bib lists.tex
+	pdflatex -synctex=1 --shell-escape notebook 
+notebook.out: notebook.tex papers.tex mynotebook.sty 09*.tex notebook*.tex summary.tex inprocess/*.tex lists.tex
+	pdflatex -synctex=1 --shell-escape notebook 
 notebook.bbl: notebook.aux library.bib
 	bibtex notebook
 notebook_wc.pdf: notebook.tex notebook.out
 #papers.tex notebook*.tex mynotebook.sty load_cpmg_emax.py notebook.out summary.tex inprocess.tex summary.tex inprocess/*.tex
-	pdflatex --shell-escape notebook 
+	pdflatex -synctex=1 --shell-escape notebook 
 	-rm notebook.*.py
 	mv notebook.pdf notebook_wc.pdf
+	mv notebook.synctex.gz notebook_wc.synctex.gz
 	bash remove_empty.sh
+	-rm *-oldtmp-*.tex
+	#aplay beep-14_soft.wav
 compilation_wc.pdf: compilation.aux compilation.tex papers.tex mynotebook.sty 09*.tex notebook*.tex notebook.*.py.old
-	pdflatex --shell-escape compilation.tex 
+	pdflatex -synctex=1 --shell-escape compilation.tex 
 	-rm compilation.*.py
 	-rm compilation_wc.pdf
 	mv compilation.pdf compilation_wc.pdf
 	bash remove_empty.sh
 dnp_protocol.pdf: dnp_protocol.aux dnp_protocol.tex mynotebook.sty notebook.*.py.old 
-	pdflatex --shell-escape dnp_protocol.tex 
+	pdflatex -synctex=1 --shell-escape dnp_protocol.tex 
 	-rm dnp_protocol.*.py
 compilation.aux: compilation.tex papers.tex mynotebook.sty 09*.tex notebook*.tex
-	pdflatex --shell-escape compilation.tex 
+	pdflatex -synctex=1 --shell-escape compilation.tex 
 progress.pdf: papers.tex progress.tex mynotebook.sty
-	pdflatex --shell-escape progress.tex 
+	pdflatex -synctex=1 --shell-escape progress.tex 
 
-$(FILE)_onlyforplain.tex: $(FILE).tex $(BASEFILE)
+$(FNAME)_onlyforplain.tex: $(FILE).tex $(BASEFILE)
 	echo "BUILDING plain tex"
-	cat $(BASEFILE) | sed "s/INPUTHERE/$(FILE)/" | sed "s/DATEHERE/$(DATE)/" | sed "s/PUTTITLEHERE/$(TITLE)/" > temp.tex
+	cat $(BASEFILE) | sed "s|INPUTHERE|$(FILE)|" | sed "s/DATEHERE/$(DATE)/" | sed "s/PUTTITLEHERE/$(TITLE)/" > temp.tex
  ifndef NOBIB
-	cat temp.tex | sed "s/BIBLIOGRAPHYHERE/\\\\bibliography{library.bib}/" > $(FILE)_onlyforplain.tex
+	cat temp.tex | sed "s/BIBLIOGRAPHYHERE/\\\\bibliography{library.bib}/" > $(FNAME)_onlyforplain.tex
 else
-	cat temp.tex | sed "s/BIBLIOGRAPHYHERE//" > $(FILE)_onlyforplain.tex
+	cat temp.tex | sed "s/BIBLIOGRAPHYHERE//" > $(FNAME)_onlyforplain.tex
 endif
-$(FILE)_onlyforplain.aux: $(FILE)_onlyforplain.tex
+$(FNAME)_onlyforplain.aux: $(FNAME)_onlyforplain.tex
 	echo "BUILDING aux"
-	pdflatex --shell-escape $(FILE)_onlyforplain 
-$(FILE)_onlyforplain.out: $(FILE)_onlyforplain.tex
+	pdflatex -synctex=1 --shell-escape $(FNAME)_onlyforplain 
+$(FNAME)_onlyforplain.out: $(FNAME)_onlyforplain.tex
 	echo "BUILDING out"
-	pdflatex --shell-escape $(FILE)_onlyforplain 
-$(FILE)_onlyforplain.bbl: library.bib $(FILE)_onlyforplain.tex
-	pdflatex --shell-escape $(FILE)_onlyforplain 
+	pdflatex -synctex=1 --shell-escape $(FNAME)_onlyforplain 
+$(FNAME)_onlyforplain.bbl: library.bib $(FNAME)_onlyforplain.tex
+	pdflatex -synctex=1 --shell-escape $(FNAME)_onlyforplain 
  ifndef NOBIB
-	echo "BUILDING bibtex"
-	bibtex $(FILE)_onlyforplain
-	makeindex $(FILE)_onlyforplain
+	echo "BUILDING bibtex for plain"
+	bibtex $(FNAME)_onlyforplain
+	makeindex $(FNAME)_onlyforplain
  endif
-$(FILE)_plain.pdf: $(BIBFILES) $(FILE)_onlyforplain.out $(FILE)_onlyforplain.aux
-	echo "BUILDING pdf"
-	pdflatex --shell-escape $(FILE)_onlyforplain 
-	pdflatex --shell-escape $(FILE)_onlyforplain 
+$(FNAME)_plain.pdf: $(PLAINBIBFILES) $(FNAME)_onlyforplain.out $(FNAME)_onlyforplain.aux $(FNAME)_onlyforplain.tex mynotebook.sty
+	echo "building $(FILE)_plain.pdf"
+	pdflatex -synctex=1 --shell-escape $(FNAME)_onlyforplain 
+	pdflatex -synctex=1 --shell-escape $(FNAME)_onlyforplain 
 	echo "MOVING"
 	echo "verstring is $(VERSTRING)"
-	-rm $(FILE)_onlyforplain.*.py
-	mv $(FILE)_onlyforplain.pdf $(FILE)_plain.pdf
-$(FILE)_onlyfordiff.tex: $(FILE).tex $(BASEFILE)
+	-rm $(FNAME)_onlyforplain.*.py
+	mv $(FNAME)_onlyforplain.pdf $(FNAME)_plain.pdf
+	-mv $(FNAME)_onlyforplain.synctex.gz $(FNAME)_plain.synctex.gz
+	#aplay beep-14_soft.wav
+$(FNAME)_onlyfordiff.tex: $(FILE).tex $(BASEFILE)
 	echo "BUILDING diff tex"
 	-rm $(FILE)-diff*.tex
 	echo "verstring" $(VERSTRING)
-	latexdiff-svn -r$(VERSTRING) --exclude-safecmd=o $(FILE).tex
-	cat $(BASEFILE) | sed s/INPUTHERE/$(FILE)-diff$(VERSTRING)/ | sed "s/DATEHERE/$(DATE)/" > temp.tex
+	if latexdiff-svn -r$(VERSTRING) --exclude-safecmd="o" --append-textcmd="item" $(FILE).tex;then echo "exit status good";else echo "exit status bad";cp "$(FILE).tex" "$(FILE)-diff$(VERSTRING).tex";fi
+	cat $(BASEFILE) | sed "s|INPUTHERE|$(FILE)-diff$(VERSTRING)|" | sed "s/DATEHERE/$(DATE)/" > temp.tex
  ifndef NOBIB
-	cat temp.tex | sed "s/BIBLIOGRAPHYHERE/\\\\bibliography{library.bib}/" > $(FILE)_onlyfordiff.tex
+	cat temp.tex | sed "s/BIBLIOGRAPHYHERE/\\\\bibliography{library.bib}/" > $(FNAME)_onlyfordiff.tex
 else
-	cat temp.tex | sed "s/BIBLIOGRAPHYHERE//" > $(FILE)_onlyfordiff.tex
+	cat temp.tex | sed "s/BIBLIOGRAPHYHERE//" > $(FNAME)_onlyfordiff.tex
 endif
-$(FILE)_onlyfordiff.bbl: library.bib $(FILE)_onlyfordiff.tex
-	echo "BUILDING bibtex"
-	pdflatex --shell-escape $(FILE)_onlyfordiff 
-	bibtex $(FILE)_onlyfordiff
-	makeindex $(FILE)_onlyfordiff
-$(FILE)_onlyfordiff.aux: $(FILE)_onlyfordiff.tex
+$(FNAME)_onlyfordiff.bbl: library.bib $(FNAME)_onlyfordiff.tex
+	echo "BUILDING bibtex for diff"
+	pdflatex -synctex=1 --shell-escape $(FNAME)_onlyfordiff 
+	bibtex $(FNAME)_onlyfordiff
+	makeindex $(FNAME)_onlyfordiff
+$(FNAME)_onlyfordiff.aux: $(FNAME)_onlyfordiff.tex
 	echo "BUILDING aux"
-	pdflatex --shell-escape $(FILE)_onlyfordiff 
-$(FILE)_onlyfordiff.out: $(FILE)_onlyfordiff.tex
+	pdflatex -synctex=1 --shell-escape $(FNAME)_onlyfordiff 
+$(FNAME)_onlyfordiff.out: $(FNAME)_onlyfordiff.tex
 	echo "BUILDING out"
-	pdflatex --shell-escape $(FILE)_onlyfordiff 
-$(FILE)_diff.pdf: $(BIBFILES) $(FILE)_onlyfordiff.out $(FILE)_onlyfordiff.aux
+	pdflatex -synctex=1 --shell-escape $(FNAME)_onlyfordiff 
+$(FNAME)_diff.pdf: $(DIFFBIBFILES) $(FNAME)_onlyfordiff.out $(FNAME)_onlyfordiff.aux $(FNAME)_onlyfordiff.tex mynotebook.sty
 	echo "BUILDING pdf"
-	pdflatex --shell-escape $(FILE)_onlyfordiff 
-	pdflatex --shell-escape $(FILE)_onlyfordiff 
+	pdflatex -synctex=1 --shell-escape $(FNAME)_onlyfordiff 
+	pdflatex -synctex=1 --shell-escape $(FNAME)_onlyfordiff 
 	echo "MOVING"
 	echo "verstring is $(VERSTRING)"
-	-rm $(FILE)_onlyfordiff.*.py
-	mv $(FILE)_onlyfordiff.pdf $(FILE)_diff.pdf
-diff: $(FILE)_diff.pdf
+	-rm $(FNAME)_onlyfordiff.*.py
+	mv $(FNAME)_onlyfordiff.pdf $(FNAME)_diff.pdf
+	-mv $(FNAME)_onlyfordiff.synctex.gz $(FNAME)_diff.synctex.gz
+	#aplay beep-14_soft.wav
+diff: $(FNAME)_diff.pdf
  ifndef NOBIB
-   override BIBFILES+=$(FILE)_onlyfordiff.bbl
+   override DIFFBIBFILES+=$(FNAME)_onlyfordiff.bbl
  endif
-plain: $(FILE)_plain.pdf
+plain: $(FNAME)_plain.pdf
+	echo "building plain"

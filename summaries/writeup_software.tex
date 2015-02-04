@@ -1,27 +1,113 @@
 \chapter{pySpectrum: an Object-Oriented Tool for Batch Processing of Newly Developed Spectroscopic Techniques}
+<<<<<<< HEAD
+\section{Better intro}
+This code is built on top of numpy and matplotlib, which are modern Python utilities for dealing with numerical data and for plotting, respectively.
+They fill in for many of the standard functions that can be found in, \eg, Matlab.
+This code comprises three parts:
+\begin{description}
+    \item[notebook functionality:]
+        The same (matplotlib-based) code can either be run on the command line
+        to generate standard pop-up plots,
+        or can be inserted into latex code to generate a PDF notebook.
+        Keeps track of the names/titles of plots, as well as the units
+        associated with their axes (automatically rescales units to ``human''
+        proportions).
+    \item[the nddata object:]  
+        Provides a way for dealing with data in a truly object-oriented way.
+        Here ``data'' means multidimensional data,
+        where each dimension is named,
+        and can optionally have associated axis labels.
+        The data itself, as well as the axis labels can have associated errors
+        and units.
+        Error is propagated automatically (via operator overloading).
+        Naming the dimensions allows us to deal with them in a more sensible
+        fashion.
+        Various methods (and/or inherited classes) are provided 
+        that take advantage of the object-oriented nature of the data, including:
+        \begin{description}
+            \item[standard file format readers] read standard file formats (\eg,
+                Bruker fid and ser (NMR) files or spc (EPR) files),
+                and store all the resulting information in an nddata object.
+            \item[storage in HDF5 format] the HDF5 format is optimized for storing large sets of data, and data with object-oriented structure, so nddata can be directly stored and retrieved from an HDF5 file. 
+            \item[fourier transformation] automatically relabels axes 
+            \item[least squares fitting] takes advantage of axis labels and
+                symbolic math to provide easier fitting routines
+            \item[axis reorganization] chunk\ldots
+            \item[list the rest\ldots]  
+        \end{description}
+    \item[structured array helper functions]  
+        we provide a variety of functions that help with the generation of
+        summary reports that are collected from multiple data sets.
+        These specifically are designed to organize data from
+        collected from various numpy structured arrays,
+        since the PyTables library can be used to read data from an HDF5 file
+        into a numpy structured array.
+\end{description}
+\section{Introduction}\label{sec:writeup_software_intro}
+\outlineblank{subsection}
+\outlineblank{subsubsection}
+We present the implementation
+=======
 \section{Introduction}\label{sec:writeup_software_intro}
 \outlineblank{subsection}
 \outlineblank{subsubsection}
 In this publication,
     we present the implementation
+>>>>>>> public
     of a strategy for spectroscopic data processing.
 While motivated by our own research into DNP,
     we believe the resulting strategy and libraries
     should be useful to researchers in a variety of spectroscopic fields.
+<<<<<<< HEAD
+We provide software to process DNP data originating on common commercial platforms (\ie, FID's stored by Bruker or Prospa software \textit{Varian?}),
+    however, the code also provides a sufficiently robust and flexible
+=======
 We provide software to process DNP data coming from common commercial platforms,
     however, we the code also provides a sufficiently robust and flexible
+>>>>>>> public
     base to routinely and directly interface with home-built instrumentation,
     as we also demonstrate.
 This software also supports a variety of interfaces;
     the interface we favor, and have most fully developed,
     involves direct generation
     of a pdf-format laboratory notebook;
+<<<<<<< HEAD
+    however, we also employ display in an interactive
+    python terminal (ipython),
+    and display in the format of a more traditional graphical
+=======
     however, display in the format of a graphical
+>>>>>>> public
     user interface (GUI) is also possible,
     with the integration of the appropriate code.
 \paragraph{overview}
 Until recently,
     spectroscopists had to choose between two types of programs.
+<<<<<<< HEAD
+User-end processing programs
+    (\eg, Bruker Topspin, \etc)
+    are designed to optimally perform specific tasks
+    inside a (typically graphical) user-friendly interface.
+More versatile software,
+    such as Matlab and Mathematica offer the opportunity
+    to deal with the data in more detail,
+    and make it possible to develop data processing routines
+    with a great deal of detailed control
+    and a higher capacity for automation.
+However,
+    this comes at the expense not only of user friendliness,
+    but often also many hours spent coding the needed
+    software and adjustments.
+The processing \textit{must} be stepped through at a high level
+    of detail;
+    functions are available to Fourier transform, \etc,
+    but
+    very little of the book-keeping that's needed for data
+    processing is taken care of transparently.
+Most recently,
+    open-source libraries for the scripting language Python have
+    offered similar capabilities to those available in Matlab.
+=======
 High-level
     programs have been designed for optimally performing specific tasks
     very well or in with a very user-friendly interface.
@@ -35,12 +121,25 @@ However,
 Most recently,
     open-source libraries for the scripting language Python have
     offered similar capabilities.
+>>>>>>> public
 However, Python offers a distinct advantage by being {\it modular} and {\it object-oriented}.
 We use these benefits to our advantage in a novel way
     in order to attempt to bridge the gap between these two extremes.
 We take advantage of the modular, object oriented nature of Python
     to build up a scripting language that should require
     less lines of code and address the data in a more natural way.
+<<<<<<< HEAD
+In turn, end developers in specific labs
+    can more easily build specific user-friendly applications
+    out of these scripts.
+\paragraph{structure}
+Our strategy follows three key directives:
+    \begin{itemize}
+        \item We are building an open-source toolbox.
+        \item We employ as many object-oriented programming strategies as possible.
+        \item We subdivide the code into different ``layers,'' where ``deeper'' layers are targeted for editing by users of increasing technical competence/involvement, and have a more general impact on the function of the end software.
+    \end{itemize}
+=======
 In turn, end developers in specific labs or companies
     can more easily build user-friendly applications
     out of these scripts.
@@ -50,6 +149,7 @@ Our strategy follows two key directives:
     \item we are building an open-source toolbox
     \item we subdivide the code into different ``layers,'' where ``deeper'' layers are targeted for editing by users of increasing technical competence/involvement, and have a more general impact on the function of the end software.
 \end{itemize}
+>>>>>>> public
 The layer strategy is deliberately modeled off the
     design strategy that has naturally evolved
     in the open-source / linux community
@@ -62,7 +162,11 @@ Applying such a strategy to a far less ambitious
     of each such layer, or even to creating new layers.
 In the code presented here,
     one layer provides several processing functions commonly used in DNP,
+<<<<<<< HEAD
+    while a deeper layer can handle the reading of NMR data files (\ie, Bruker or Kea format),
+=======
     while a deeper layer can handle the reading of NMR data files (i.e. Bruker or Kea format),
+>>>>>>> public
     or can pull data directly from instruments,
     such as oscilloscopes.
 The deepest layer we present 
@@ -76,16 +180,33 @@ The entire code rests on top of multiple layers
     of general mathematical libraries previously created by the open
     source community.
 \ntd{show a diagram with labeled classes/modules here!}
+<<<<<<< HEAD
+\paragraph{OO programming}
+We first need to explain 
+    how we use the object-oriented capabilities of python
+    to store and process our data.
+This is the ``glue'' that binds all our layers of coding together.
+We wanted to develop a ``glue'' that is flexible,
+    but also allows us to work with any imaginable type
+    of spectroscopic data.
+In the scheme we settled on,
+    we bind together the data describing the spectrum
+=======
 \paragraph{spectroscopy layer}
 We place special emphasis on the layer responsible for
     storing the spectroscopic data.
 By taking advantage of the object-oriented nature of python,
     we can bind together the data describing the spectrum
+>>>>>>> public
     with information about its axes, errors, and units.
 We keep track the various dimensions of multi-dimensional data
     by providing sensible labels for the various dimensions.
 We then define a series of abstract routines that handle the resulting
+<<<<<<< HEAD
+    bundle of data (\ie, object) in an intuitive way.
+=======
     bundle of data (i.e. object) in an intuitive way.
+>>>>>>> public
 For instance, relabeling of the axes after Fourier transformation,
     propagation of the error,
     determination of the units,
@@ -98,7 +219,12 @@ We can also slice out pieces of a spectrum by frequency range in a simple way,
     easily.
 This object-oriented design forms the core of our strategy,
     which proves to have many benefits.
+<<<<<<< HEAD
+\section{The \texttt{nddata} object}
+\input{summaries/nddata_expl}
+=======
 
+>>>>>>> public
 \section{Review of relevant tools}
 \ntd{be sure to pull relevant stuff from installation first}
 \subsection{Latex}
@@ -344,7 +470,11 @@ Any text editor can, of course, edit
     python scripts and latex files.
 For Windows,
     we recommend Notepad++ (freeware)
+<<<<<<< HEAD
+    which supports syntax highlighting (\ie, coloring)
+=======
     which supports syntax highlighting (i.e. coloring)
+>>>>>>> public
     and the folding of sections of code.
 \subsection{Install the notebook code}
 %%fakesubsubsection
@@ -1844,7 +1974,11 @@ To understand the structure of the various tables used here, it
                 keep the listed fields (colA\ldots colN) in the output.
             \item[pop\_fields = [``colA'',\ldots,``colN''] ] 
                 throw out the listed fields in the output.
+<<<<<<< HEAD
+            \item[show\_orig\_indices = True]
+=======
             \item[show\_orig\_indeces = True]
+>>>>>>> public
         \end{description}
     \end{mykwargs}
 
@@ -1975,6 +2109,15 @@ print 'unbound mask is',lsafen(unbound_mask)
 #chemnames = list(set(data['chemical'].tolist()))
 chemnames = data['chemical'][unbound_mask].tolist()
 chemnames = [j.replace('_unbound','') for j in chemnames]
+<<<<<<< HEAD
+indices = r_[0:len(chemnames)]
+width = 0.35
+#{{{ first, do klow
+ax = subplot(111)
+rects_unbound = ax.bar(indices,data[klow_name][unbound_mask],width,color = 'r')
+rects_bound = ax.bar(indices+width,data[klow_name][~unbound_mask],width,color = 'b')
+ax.set_xticks(indices+width)
+=======
 indeces = r_[0:len(chemnames)]
 width = 0.35
 #{{{ first, do klow
@@ -1982,6 +2125,7 @@ ax = subplot(111)
 rects_unbound = ax.bar(indeces,data[klow_name][unbound_mask],width,color = 'r')
 rects_bound = ax.bar(indeces+width,data[klow_name][~unbound_mask],width,color = 'b')
 ax.set_xticks(indeces+width)
+>>>>>>> public
 ax.set_xticklabels(chemnames)
 ax.legend((rects_unbound[0],rects_bound[0]),('unbound','bound'),loc = 'best')
 ax.set_ylabel('$'+klow_name+'$')
@@ -1990,9 +2134,15 @@ lplot('dna_bargraph_klow_120822.pdf')
 #}}}
 #{{{ now, do ksigma
 ax = subplot(111)
+<<<<<<< HEAD
+rects_unbound = ax.bar(indices,data[ksmax_name][unbound_mask],width,color = 'r')
+rects_bound = ax.bar(indices+width,data[ksmax_name][~unbound_mask],width,color = 'b')
+ax.set_xticks(indices+width)
+=======
 rects_unbound = ax.bar(indeces,data[ksmax_name][unbound_mask],width,color = 'r')
 rects_bound = ax.bar(indeces+width,data[ksmax_name][~unbound_mask],width,color = 'b')
 ax.set_xticks(indeces+width)
+>>>>>>> public
 ax.set_xticklabels(chemnames)
 ax.legend((rects_unbound[0],rects_bound[0]),('unbound','bound'),loc = 'best')
 ax.set_ylabel('$'+ksmax_name+'$')
@@ -2152,8 +2302,11 @@ This implements several conventions:
 \end{mykwargs}
 \paragraph{gensearch(fieldname,format = '\%0.3f',value = myvalue,precision = None)}
 \nts{This function is obsolete and completely replaced by h5searchstring}
+<<<<<<< HEAD
+=======
 \subsubsection{Functions for Converting nddata $\Leftrightarrow$
     Pytables}
+>>>>>>> public
 \paragraph{h5file,thenode = h5nodebypath(``dnp.h5/compilations/chemicals'')}
 This is the base function that much of the DNP code uses
     to retrieve data.
@@ -2259,8 +2412,11 @@ axes={'t': array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])}
 To get started with the nddata module,
     it's important for one to read the sections on ``Creating an instance''
     and ``Operator Overloading'' first.
+<<<<<<< HEAD
+=======
 
 \nts{general note $\Rightarrow$ subtracting a mean (like data -= data.mean() does not work, but shoudl}
+>>>>>>> public
 \subsection{Creating an instance}
 %%fakesubsubsection
 \outlineblank{subsubsection}
@@ -2384,11 +2540,44 @@ lplot('software_doc_mult3_image.pdf')
 \item[multiplication by scalars]
 \nts{\ldots}
 \end{description}
+<<<<<<< HEAD
+\paragraph{inequalities}
+
+\begin{python}
+from matlablike import *
+a = nddata(r_[0:10])
+b = nddata(5)
+print a < b
+print a > b
+print b < a
+print b > a
+\end{python}
+=======
+>>>>>>> public
 \subsubsection{Slicing and Indexing}
 \paragraph{myinstance['axis1',\ldots,'axis2',\ldots]}
 There are various ways to select data in nddata.
 
 \ntd{Here, I need to fix the fact that ``other data'' does not seem to be returned when it slices!!!}
+<<<<<<< HEAD
+
+\nts{be sure that when slicing I get views, rather than a copy}
+
+\begin{python}
+from matlablike import *
+a = nddata(r_[0:10],[-1],['firstdim'])
+b = nddata(r_[0:4]*10,[-1],['seconddim'])
+c = nddata(r_[0,100],[-1],['thirddim'])
+res = c+b+a
+print "full array"
+print res
+print "index two dimensions"
+print res['firstdim',1,'thirddim',1]
+print "return zero dimensional"
+print res['firstdim',1,'thirddim',1,'seconddim',1]
+\end{python}
+=======
+>>>>>>> public
 \subsection{methods of the nddata class}
 \subsubsection{Max, mean, etc: functions that collapse a dimension}
 \paragraph{instance.argmax('whichdim')}
@@ -2427,7 +2616,11 @@ It returns the resulting coefficients for the polynomial in
     i.e. so that ``mycoefficients(n)'' gives the coefficient of
     the $x^n$ term.
 \ntd{allow it to not fit linear or zero order, but still have it
+<<<<<<< HEAD
+    return zeros for those indices}
+=======
     return zeros for those indeces}
+>>>>>>> public
 
 \subparagraph{optional arguments:}
 \begin{mykwargs}
@@ -2453,6 +2646,10 @@ lplot('test_polyfit.pdf')
 print 'coefficients of the fit data are:\n\\begin{description}'
 for j in range(0,4):
     print '\\item[$x^%d\Rightarrow$] %0.3f'%(j,coeffs[j]) # here, we are generating latex output with standard python string substitution
+<<<<<<< HEAD
+    #$
+=======
+>>>>>>> public
 print '\\end{description}\n'
 \end{python}
 
@@ -2489,6 +2686,17 @@ fl.text('this figure in this data has the shape'+lsafen(ndshape(data)))
 image(data) # generate an image plot of the data
 fl.show('for_software_demo.pdf') # output the list of figures --> the argument gives the base filename
 \end{python}
+<<<<<<< HEAD
+\paragraph{instance.run\_avg('t',\ldots)}
+Performs a running average.
+\begin{mykwargs}
+    \begin{description}
+        \item[decimation = 20] the number of adjacent points to average together
+        \item[centered = False] if the length of \texttt{'t'} isn't an even multiple of \texttt{decimation}, do you want me to throw out points at the end (\texttt{False}) or an even amount on both ends (\texttt{True})
+    \end{description}
+\end{mykwargs}
+=======
+>>>>>>> public
 \paragraph{instance.interp('t',\ldots)}
 This can take two formats:
 \subparagraph{instance.interp('t',mylen)}
@@ -2506,12 +2714,62 @@ Interpolate onto the new axis given by targetaxis, which must be an ndarray.
                 \item[(\ldots,\ldots)] in addition, two values can be chosen as a tuple pair, for the maximum and minimum, respectively.
                 \item[\ldots] in addition, any single value can be chosen, and the values past either bounds will be set to this value.
             \end{description}
+<<<<<<< HEAD
+        \item[kind = None] \texttt{'cubic'}, \texttt{'quadratic'}, or \texttt{'linear'}, which is passed to the underlying nddata function.
+            By default, we the highest possible order is chosen.
+    \end{description}
+\end{mykwargs}
+\paragraph{instance.invinterp('t',values)}
+This does the opposite of interp.
+It takes (one or more) values of
+    \texttt{instance.data}, and
+    interpolates the axis values where
+    they are expected to be found.
+\begin{mykwargs}
+    \begin{description}
+        \item[copy] This returns a copy, rather than modifying the underlying data.
+            \textit{Moreso}, it puts what was the data long the axis (using the \texttt{.name()} of the data to name the axis) and loads the interpolated axis avleus into the \texttt{instance.data} of the returned object.
+        \item[kind] as for interp
+    \end{description}
+\end{mykwargs}
+
+\begin{python}
+from matlablike import *
+fl = figlist_var(showbox = False,width = 0.5)
+t = r_[0:2.5:100j]
+x = nddata(t**2,[-1],['t']).labels('t',t)
+x.name('y')
+fl.next('copy usage')
+fl.plot(x.data,x.getaxis('t'))
+fl.plot(x.invinterp('t',r_[1.0,0.5,0.25],copy = True),'o')
+fl.next('normal usage')
+fl.plot(x)
+x.invinterp('t',r_[1.0,0.5,0.25])
+fl.plot(x,'o')
+
+fl.next('normal usage')
+expand_x()
+expand_y()
+gridandtick(gca())
+fl.next('copy usage')
+expand_x()
+expand_y()
+gridandtick(gca())
+fl.show('invinterp140410.pdf')
+\end{python}
+
+\paragraph{instance.getaxis('t')}
+\paragraph{instance.retaxis('t')}
+\textbf{don't use this anymore, pass the same arguments to fromaxis}
+\paragraph{instance.fromaxis('t',\ldots)}
+=======
     \end{description}
 \end{mykwargs}
 \paragraph{instance.getaxis('t')}
 \paragraph{instance.retaxis('t')}
 \textbf{don't use this anymore, pass the same arguments to fromaxis}
 \paragraph{instance.fromaxis('t',\cdots)}
+>>>>>>> public
 \subparagraph{instance.fromaxis('t')}
 Just return an nddata with the values of the axis loaded into the data.
 \subparagraph{instance.fromaxis(['t','f'],x)}
@@ -2569,7 +2827,11 @@ It applies two rules:
             added in the output.
         Importantly, when this instance is used to do algebra,
             by standard numpy rules,
+<<<<<<< HEAD
+            it will be tiled and duplicated for all indices of
+=======
             it will be tiled and duplicated for all indeces of
+>>>>>>> public
             that dimension in the array/instance that it is
             added/subtracted/multiplied/divided with.
     \item The dimensions of both output instances will consist of
@@ -2652,9 +2914,157 @@ print lsafen(y_out)
 \end{tiny}
 
 \paragraph{instance.chunk()}
+<<<<<<< HEAD
+
+\subparagraph{instance.chunk('olddim',['newdim1',\ldots,'newdimN'],[size1,\ldots,sizeN])}
+Split \texttt{olddim} into \texttt{N} chunks, listed from outermost to innermost (\ie, memory adjacent).
+One of the sizes can be -1 (\ie automatic).
+\ntd{dealing with the axis is not yet supported, but this could be achieved easily simply by reshaping the list appropriately, then separating the slices appropriately}
+
+\subparagraph{instance.chunk('olddim',{'newdim1':size1,\ldots,'newdimN':sizeN})}
+
+\subparagraph{instance.chunk('olddim',['newdim1',\ldots,'newdimN'])}
+The same as above, except assume the chunks are equally sized.
+\paragraph{instance.chunkoff(\ldots)}
+This is like the first usage of \texttt{instance.chunk(\ldots)} except that it's assumed the given dimensions are ``inside'' the original dimension, which is retained.
+\paragraph{instance.chunk\_auto(axis\_name,which\_field)}
+Assuming that axis \texttt{axis\_name} is currently labeled with a structured array, choose one field (\texttt{which\_field}) of that structured array to generate a new dimension
+The new dimension is sorted and labeled according to the unique indices that are present in \texttt{which\_field}.
+
+Note that for now, by definition, no error is allowed on the axes.
+\ntd{Inside this function, there is a loop over the unique indices $\Rightarrow$ if I thought more carefully about it, this might not be necessary.}
+
+\begin{python}[on]
+from matlablike import *
+a = r_[0:60.]
+d = nddata(a,[3,-1],['indirect','myaxis'])
+d.set_error(a*0.001)
+mylabels = zeros(ndshape(d)['myaxis'],dtype = [('firstindex','d'),('secondindex','d')])
+mylabels['firstindex'] = (r_[0,4,2,3].reshape(1,-1)*r_[1,1,1,1,1].reshape(-1,1)).flatten() + 1
+mylabels['secondindex'] = r_[0:20]
+d.labels('myaxis',mylabels)
+print 'The starting data (note ``myaxis'' is labeled with a structured array):\n\n'
+print lsafen(d)
+d1 = d.copy()
+d2 = d.copy()
+print lsafen('First reshape by firstindex')
+print lsafen('---------------------------')
+d1.chunk_auto('myaxis','firstindex')
+print "d1 is:",lsafen(d1)
+print lsafen('Next, reshape by secondindex')
+print lsafen('----------------------------')
+d2.chunk_auto('myaxis','secondindex')
+print "d2 is:",lsafen(d2)
+\end{python}
+
+\paragraph{instance.smoosh(['dimtosquash1',\ldots,'dimtosquashN'])}
+collapse multiple dimensions into one dimension
+
+\begin{mykwargs}
+    \begin{description}
+        \item[dimname = 0] can be a variety of values 
+            \begin{description}
+                \item[None]  create a new (direct product) name,
+                \item[a number] lump the existing dimension into the number given, in the list
+                \item[a string] same as the previous, where the string can be part of the list or not
+            \end{description}
+
+    \end{description}
+\end{mykwargs}
+\begin{python}
+from acert_hdf5 import *
+fl = figlist_var()
+#{{{ load up the data
+base_name = 'receiver_test'
+atten_names = map(str,r_[1:15])
+datalist = []
+for thisname in atten_names:
+    thisdata = find_file(base_name + '_' + thisname + r'\.',subdirectory = 'fid/')
+    datalist.append(thisdata)
+data = concat(datalist,dimname = 'attenuation')
+fl.next('look for saturation')
+data.reorder('t2')
+#}}}
+#{{{ define all the variables I will use
+data = data['t2':(10e-9,71e-9)] # only use this window
+signal_less_modulator = data['attenuation',:-1]-data['attenuation',-1]
+mask = ndshape(signal_less_modulator)
+#mask['attenuation'] -= 1
+mask = mask.alloc(dtype = bool)
+mask.data[:] = True # all are bad to begin with
+mask['attenuation',-1] = False # count all of the most attenuated scan as being good
+amplitude = abs(signal_less_modulator).run(lambda x: x**2).sum('t2').run(sqrt) # the initial amplitude for all steps
+P_in_normalized = abs(signal_less_modulator['attenuation',-4:-1]/amplitude['attenuation',-4:-1]).mean('attenuation') # drop the last, which is very noisy
+amplitude_corr = amplitude.copy()
+#}}}
+def generate_corrected_amplitudes(iteration,threshold):
+    if iteration % 10 == 0:
+        do_plot = True
+    else:
+        do_plot = False
+    for j in range(4):
+        if do_plot: fl.next('iteration %d channel %d'%(iteration,j))
+        for k in r_[0:ndshape(signal_less_modulator)['attenuation']-1][::-1]:# do not include the most attenuated scan, then start from the most attenuated and move to least attenuated
+            def generate_norm_abs_scan(l,m):
+                return abs(signal_less_modulator['attenuation',m,'phcyc',l]/amplitude_corr['attenuation',m,'phcyc',l]) # amplitude_corr is for iteration -- it starts out as just amplitude
+            this_scan = generate_norm_abs_scan(j,k)
+            more_attenuated_scan = generate_norm_abs_scan(j,k+1)
+            mask['attenuation',k,'phcyc',j] = abs(this_scan-more_attenuated_scan) > threshold
+            #{{{ now, calculate the change in amplitude for the two -- remember that this is just a correction --> they are already normalized by "amplitude"
+            this_amplitude_correction = this_scan[~mask['attenuation',k,'phcyc',j]].run(lambda x:x**2).sum('t2')\
+                    / more_attenuated_scan[~mask['attenuation',k,'phcyc',j]].run(lambda x:x**2).sum('t2')
+            amplitude_corr['attenuation',0:k+1] *= this_amplitude_correction # apply to this and all less attenuated scans
+            #}}}
+        #{{{ plot the corrected vs. uncorrected sigmas, and calculate the corrected value to plot
+        value_to_plot = abs(signal_less_modulator['phcyc',j]/amplitude['phcyc',j])
+        this_sigma = value_to_plot.copy().run(std,'attenuation')
+        if do_plot: fl.push_marker()
+        if do_plot: fl.next('iteration %d: stdev before (dashed) vs after correction'%iteration)
+        if do_plot: fl.plot(this_sigma,':') #uncorrected
+        value_to_plot = abs(signal_less_modulator['phcyc',j]/amplitude_corr['phcyc',j])
+        this_sigma = value_to_plot.copy().run(std,'attenuation')
+        if do_plot: fl.plot(this_sigma) #corrected
+        if do_plot: fl.pop_marker()
+        #}}}
+        if do_plot: fl.plot(P_in_normalized['phcyc',j],'k',linewidth = 2,alpha = 0.5) # so I get a continuous line all the way across
+        if do_plot: fl.plot(value_to_plot,alpha = 0.2) # so I get a continuous line all the way across
+        value_to_plot[mask['phcyc',j]] = NaN
+        if do_plot: fl.plot(value_to_plot,'.',alpha = 0.8,markersize = 5)
+        if do_plot: expand_y()
+    if do_plot:
+        for j in range(0,4):
+            fl.next('iteration %d transfer function'%iteration)
+            transfer_function = abs(signal_less_modulator['phcyc',j])
+            print "ndshape of transfer function",ndshape(transfer_function)
+            P_in = P_in_normalized['phcyc',j]*amplitude_corr['phcyc',j]
+            print "ndshape of thing I want to use for axis:",ndshape(P_in)
+            transfer_function.name('$P_{out}$')
+            transfer_function.rename('t2','$P_{in}$')
+            for k in range(0,ndshape(transfer_function)['attenuation']):
+                transfer_function.setaxis('$P_{in}$',P_in['attenuation',k].data)
+                fl.plot(transfer_function['attenuation',k],'.')
+for iteration in range(11):
+    generate_corrected_amplitudes(iteration,5e-3)
+# find the stdev across the spectrum
+fl.next('amplitudes for all channels')
+fl.plot(amplitude)
+fl.next('corrected amplitudes for all channels')
+fl.plot(amplitude_corr)
+#note that I think I could do data.smash(['phcyc','attenuation'])
+fl.show('Rx_transfer_140818.pdf')
+\end{python}
+\paragraph{instance.reorder([a,b,c])}
+Reorders the dimensions so that they come in the order \texttt{a} then \texttt{b} then \texttt{c} 
+(remember we're doing C ordering, so it's outer to inner).
+
+\texttt{[a,b,c]} must all be pre-existing dimensions.
+If they are not all the dimensions, they are moved to the front of the ordering.
+\paragraph{instance.smooshorder()}
+=======
 \paragraph{instance.chunkoff()}
 \paragraph{instance.smash()}
 \paragraph{instance.smashorder()}
+>>>>>>> public
 \subsubsection{Functions that affect general properties}
 \paragraph{instance.name()}
 \paragraph{instance.set\_plot\_color()}
@@ -2912,6 +3322,13 @@ If one is {\it not} using symbolic math (not recommended),
     one define the attribute {\tt self.function\_string} and {\tt self.function\_name}
     by hand (these are strings that give the functional format and name of the y values,
     respectively).
+<<<<<<< HEAD
+
+If you want to see an example that allows ``multiplicity'' -- i.e. a
+    biexponential, rather than an exponential -- see the \texttt{t2curve} class
+    in \fn{nmrfit.py}
+=======
+>>>>>>> public
 \paragraph{fitfunc\_raw(self,p,x) and fitfunc\_raw\_symb(self,p,x)}
 \ntd{Rather than demanding that these both be equal, I should employ a conversion, like he does in the packet I printed out; I should also use his compilation routines to speed things up, perhaps.}
 These defines the functional form of the fit
@@ -2945,9 +3362,16 @@ def fitfunc_raw_symb(self,p,x):
     rather than numpy functions'''
     return p[0]+(p[1]-p[0])*sympy.exp(-x/p[2])
 \end{lstlisting}
+<<<<<<< HEAD
+\nts{Rather than doing it this way, I should only have the symbolic one, and use ``lambdify'' to convert it.}
+It is {\bf highly recommended} that after writing a new class,
+    one first checks that the two functions above are mathematically identical (by inspection),
+    and then checks that the parameter indices here
+=======
 It is {\bf highly recommended} that after writing a new class,
     one first checks that the two functions above are mathematically identical (by inspection),
     and then checks that the parameter indeces here
+>>>>>>> public
     line up in the expected way with the parameter
     names given in the {\tt \_\_init\_\_()} method
     with the {\tt function\_string} method, as used in the example
@@ -3140,7 +3564,11 @@ The following are functions used internally by routines in the fitdata class:
     \item instance.fitfunc(p,x) {\rm all references to the fit function should be made with this method}
     \item instance.gen\_symbolic(\ldots)
         {\rm used above}
+<<<<<<< HEAD
+    \item instance.gen\_indices(\ldots)
+=======
     \item instance.gen\_indeces(\ldots)
+>>>>>>> public
     \item instance.parameter\_derivatives(\ldots)
     \item instance.parameter\_gradient(\ldots)
     \item instance.remove\_inactive\_p(\ldots)

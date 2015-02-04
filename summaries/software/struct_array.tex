@@ -20,6 +20,18 @@ Here, we use some functions that will be introduced later in order
     to convert a set of numbered labels, initially simply entered as numbers,
     to text, so that the code will also use those as a sorting dimension.
 
+<<<<<<< HEAD
+\begin{mykwargs}
+    \begin{description}
+        \item[othersort = None] fields that might not be text format (and so not used for the labels), but that you want to treat as such
+        \item[spacing = 0.1]  the spacing between groups of bars
+        \item[ax = None] an existing axis to plot on
+        \item[tickfontsize = 8] the size of the tick labels
+    \end{description}
+\end{mykwargs}
+
+=======
+>>>>>>> public
 \begin{python}
 #redo!!!!!!!!!!!!!!!!!!!
 from matplotlib.mlab import rec2csv, csv2rec
@@ -125,7 +137,17 @@ lrecordarray(b_std)
 \paragraph{meanstd\_rec(myfunc,['name1',\ldots,'nameN']}
 \nts{For the example code, run a search over the inprocess/crowding tex files}
 \paragraph{make\_rec(\ldots)}
+<<<<<<< HEAD
+This makes a numpy structured array.
+Originally, it was designed to generate only 1-element array.
+Now, however, if it's fed matching N-dimensional inputs,
+    it will assume that they form an N-dimensional array of outputs.
+
+Given a couple example variables, it can also be used to construct a new structured array, for later data loading (see kwargs below).
+
+=======
 This makes a 1 element numpy structured array.
+>>>>>>> public
 It can be called in one of two ways.
 
 \subparagraph{make\_rec(inputdict)} where ``inputdict'' is a dictionary
@@ -143,6 +165,11 @@ It can be called in one of two ways.
             where ``fieldN'' here is the name of a field.
             If all the fields are not specified, the specified fields
             will come first in the order, and the remainder will come afterwards.
+<<<<<<< HEAD
+        \item[zeros_like = False] if this is anything other than ``False,'' construct a new structured array of shape \texttt{zeros\_like} 
+        \item[equal\_shapes] ???? 
+=======
+>>>>>>> public
     \end{description}
 \end{mykwargs}
 If a structured array with more elements is desired,
@@ -154,6 +181,11 @@ If a structured array with more elements is desired,
 Reorder the fields in the structured array named myarray,
     placing the fields named 'name1',\ldots,'name2'
     first and in order.
+<<<<<<< HEAD
+\paragraph{rename\_fields(myarray,{`oldname':`newname'})}
+This is from numpy.lib.recfunctions, and it renames the fields.
+=======
+>>>>>>> public
 \paragraph{lambda\_rec(myarray,\ldots)}\label{codelabel:lambda_rec}
 This function is used to perform spreadsheet-like calculations,
     where we evaluate functions of the fields in the structured

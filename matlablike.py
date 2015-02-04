@@ -1,5 +1,7 @@
 import paramset
+from os import listdir,environ
 if paramset.myparams['figlist_type'] == 'figlistl':
+    environ['ETS_TOOLKIT'] = 'qt4'
     import matplotlib; matplotlib.use('Agg')
 from matlablike import *
 from pylab import *
@@ -18,7 +20,6 @@ from inspect import ismethod
 from numpy.core import rec
 from matplotlib.pyplot import cm
 import tables
-from os import listdir,environ
 from copy import deepcopy 
 import traceback
 import sympy
@@ -30,7 +31,7 @@ from inspect import getargspec
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
 from datadir import getDATADIR
-#rc('image',aspect='auto',interpolation='bilinear')
+#rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
 rc('image',aspect='auto',interpolation='nearest')
 #rc('text',usetex=True) # this creates all sorts of other problems
 rcParams['xtick.direction'] = 'out'
@@ -70,15 +71,15 @@ def issympy(x):
 
 #{{{ function trickery
 def mydiff(data,axis = -1):
-    '''this will replace diff with a version that has the same number of indeces, with the last being the copy of the first'''
+    '''this will replace diff with a version that has the same number of indices, with the last being the copy of the first'''
     newdata = zeros(shape(data),dtype = data.dtype)
-    indeces = [slice(None,None,None)]*len(data.shape)
-    indeces[axis] = slice(None,-1,None)
-    newdata[indeces] = diff(data,axis = axis)
-    #setfrom = list(indeces)
-    #indeces[axis] = -1
+    indices = [slice(None,None,None)]*len(data.shape)
+    indices[axis] = slice(None,-1,None)
+    newdata[indices] = diff(data,axis = axis)
+    #setfrom = list(indices)
+    #indices[axis] = -1
     #setfrom[axis] = 0
-    #newdata[indeces] = newdata[setfrom]
+    #newdata[indices] = newdata[setfrom]
     return newdata
 #}}}
 def normal_attrs(obj):
@@ -93,48 +94,48 @@ def showtype(x):
 def emptyfunction():
     pass
 #{{{ structured array helper functions
-def make_bar_graph_indeces(mystructarray,list_of_text_fields,
+def make_bar_graph_indices(mystructarray,list_of_text_fields,
         recursion_depth = 0,
         verbose = False,
         spacing = 0.1):
     r"This is a recursive function that is used as part of textlabel_bargraph; it does NOT work without the sorting given at the beginning of that function"
-    #{{{ if there are still text fields left, then break down the array further, otherwise, just return the indeces for this subarray
+    #{{{ if there are still text fields left, then break down the array further, otherwise, just return the indices for this subarray
     if len(list_of_text_fields) > 0:
-        unique_values = unique(mystructarray[list_of_text_fields[0]])# the return_index argument doesn't do what it's supposed to all the time, so I have to manually find the start indeces, as given in the following line
-        start_indeces = [nonzero(mystructarray[list_of_text_fields[0]] == val)[0][0] for val in unique_values]
+        unique_values = unique(mystructarray[list_of_text_fields[0]])# the return_index argument doesn't do what it's supposed to all the time, so I have to manually find the start indices, as given in the following line
+        start_indices = [nonzero(mystructarray[list_of_text_fields[0]] == val)[0][0] for val in unique_values]
         # find the structured array for the unique value
         index_values = []
         label_values = []
-        start_indeces = r_[start_indeces,len(mystructarray)] # I add this so I can do the next step
+        start_indices = r_[start_indices,len(mystructarray)] # I add this so I can do the next step
         if verbose: print 'recursion depth is',recursion_depth,'and I am analyzing',list_of_text_fields[0],': ',
-        if verbose: print 'I found these unique values:',unique_values,'at these start indeces:',start_indeces[:-1]
-        for k in range(0,len(start_indeces)-1):
+        if verbose: print 'I found these unique values:',unique_values,'at these start indices:',start_indices[:-1]
+        for k in range(0,len(start_indices)-1):
             if verbose: print 'recursion depth is',recursion_depth,'and I am analyzing',list_of_text_fields[0],': ',
-            if verbose: print 'trying to extract unique value',unique_values[k],'using the range',start_indeces[k],start_indeces[k+1]
+            if verbose: print 'trying to extract unique value',unique_values[k],'using the range',start_indices[k],start_indices[k+1]
             if verbose: print 'which has this data'
-            indiv_struct_array = mystructarray[start_indeces[k]:start_indeces[k+1]]
+            indiv_struct_array = mystructarray[start_indices[k]:start_indices[k+1]]
             if verbose: print lsafen(indiv_struct_array)
-            these_index_values,these_labels = make_bar_graph_indeces(indiv_struct_array,list_of_text_fields[1:],recursion_depth = recursion_depth+1,verbose = verbose)
+            these_index_values,these_labels = make_bar_graph_indices(indiv_struct_array,list_of_text_fields[1:],recursion_depth = recursion_depth+1,verbose = verbose)
             index_values.append(these_index_values)
             label_values.append([str(unique_values[k])+','+j for j in these_labels])
         #{{{ scale the result of each call down to the equal size (regardless of number of elements), shift by the position in this array, and return
         if verbose: print 'recursion depth is',recursion_depth,'and I just COMPLETED THE LOOP, which gives a list of index values like this',index_values
-        max_indeces = max(array(map(len,index_values),dtype='double'))# the maximum width of the array inside
-        index_values = map(lambda x: x+(max_indeces-len(x))/2.0,index_values)# if the bar is less than max indeces, shift it over, so it's still in the center
+        max_indices = max(array(map(len,index_values),dtype='double'))# the maximum width of the array inside
+        index_values = map(lambda x: x+(max_indices-len(x))/2.0,index_values)# if the bar is less than max indices, shift it over, so it's still in the center
         if verbose: print 'recursion depth is',recursion_depth,'and I centered each set like this',index_values
-        index_values = map(lambda x: x/max_indeces*(1-spacing)+(1-spacing)/2,index_values)# scale down, so the width from left edge of bar to right edge of largest bar runs 0--> 1
+        index_values = map(lambda x: x/max_indices*(1-spacing)+(1-spacing)/2,index_values)# scale down, so the width from left edge of bar to right edge of largest bar runs 0--> 1
         if verbose: print 'recursion depth is',recursion_depth,'and I scaled down so each runs zero to one*(1-spacing) (centered) like this',index_values
         # this adds an index value, and also collapses down to a single dimension list
-        retval_indeces = [x+num for num,val in enumerate(index_values) for x in val]
+        retval_indices = [x+num for num,val in enumerate(index_values) for x in val]
         # now collapse labels down to a single dimension
         retval_labels = [k for j in label_values for k in j]
-        if verbose: print 'recursion depth is',recursion_depth,'and I am passing up indeces',retval_indeces,'and labels',retval_labels
-        return retval_indeces,retval_labels
+        if verbose: print 'recursion depth is',recursion_depth,'and I am passing up indices',retval_indices,'and labels',retval_labels
+        return retval_indices,retval_labels
         #}}}
     else:
         if verbose: print 'recursion depth is',recursion_depth,
         N = len(mystructarray)
-        if verbose: print 'hit innermost (no text labels left) and passing up a list of indeces that looks like this:',r_[0:N]
+        if verbose: print 'hit innermost (no text labels left) and passing up a list of indices that looks like this:',r_[0:N]
         return r_[0:N],['']*N
     #}}}
 def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,verbose = False,ax = None,tickfontsize = 8):
@@ -146,7 +147,7 @@ def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,verbose = Fa
             ax.tick_params(axis = 'both',which = 'minor',labelsize = tickfontsize)
         except:
             print 'Warning, in this version I can\'t set the tick params method for the axis'
-    #{{{ perform the necessary sorting!
+    #{{{ find the text fields, put them first, and sort by them
     mystructarray = mystructarray.copy()
     list_of_text_fields = [str(j[0]) for j in mystructarray.dtype.descr if j[1][0:2] == '|S']
     mystructarray = mystructarray[list_of_text_fields + [x[0]
@@ -155,36 +156,47 @@ def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,verbose = Fa
     mystructarray.sort()
     if verbose: print 'test --> now, it has this form:',lsafen(mystructarray)
     #}}}
+    error_fields = [str(j) for j in mystructarray.dtype.names if j[-6:] == '_ERROR']
+    if len(error_fields) > 0:
+        mystructarray_errors = mystructarray[error_fields]
+        if verbose: "found error fields:",mystructarray_errors
+    mystructarray = mystructarray[[str(j) for j in mystructarray.dtype.names if j not in error_fields]]
     if othersort is not None:
         list_of_text_fields.append(othersort)
-    #list_of_text_fields = ['chemical','run_number']
     if verbose: print 'list of text fields is',lsafen(list_of_text_fields)
-    indeces,labels = make_bar_graph_indeces(mystructarray,list_of_text_fields,verbose = verbose,spacing = spacing)
-    temp = zip(indeces,labels)
-    if verbose: print '(indeces,labels) (len %d):'%len(temp),lsafen(temp)
+    indices,labels = make_bar_graph_indices(mystructarray,list_of_text_fields,verbose = verbose,spacing = spacing)
+    temp = zip(indices,labels)
+    if verbose: print '(indices,labels) (len %d):'%len(temp),lsafen(temp)
     if verbose: print 'I get these labels (len %d):'%len(labels),labels,'for the data (len %d)'%len(mystructarray),lsafen(mystructarray)
-    indeces = array(indeces)
-    indiv_width = min(diff(indeces))*(1-spacing)
-    remaining_fields = list(set(mystructarray.dtype.names)^set(list_of_text_fields))
+    indices = array(indices)
+    indiv_width = min(diff(indices))*(1-spacing)
+    remaining_fields = [x for x in mystructarray.dtype.names if x not in list_of_text_fields] # so they are in the right order, since set does not preserve order
     if verbose: print 'The list of remaining (i.e. non-text) fields is',lsafen(remaining_fields)
-    colors = ['b','r','g']
+    colors = ['b','g','r','c','m','k']
     rects = []
     for j,thisfield in enumerate(remaining_fields):
         field_bar_width = indiv_width/len(remaining_fields)
+        thiserror = None
+        if thisfield+'_ERROR' in error_fields:
+            thiserror = mystructarray_errors[thisfield+'_ERROR']
         try:
-            rects.append(ax.bar(indeces+j*field_bar_width,
+            rects.append(ax.bar(indices+j*field_bar_width,
                     mystructarray[thisfield],
                     field_bar_width,color = colors[j],
+                    yerr = thiserror,#just to test
+                    ecolor = 'k',
                     label = '$%s$'%thisfield))
         except:
-            raise CustomError('Problem with bar graph: there are %d indeces, but %d pieces of data'%(len(indeces),len(mystructarray[thisfield])),'indeces:',indeces,'data',mystructarray[thisfield])
-    ax.set_xticks(indeces+indiv_width/2)
+            raise CustomError('Problem with bar graph: there are %d indices, but %d pieces of data'%(len(indices),len(mystructarray[thisfield])),'indices:',indices,'data',mystructarray[thisfield])
+    ax.set_xticks(indices+indiv_width/2)
     ax.set_xticklabels(labels)
+    ax.legend([j[0] for j in rects],
+            ['$%s$'%j for j in remaining_fields],loc = 'best')
     return
 def lookup_rec(A,B,indexpair):
     r'''look up information about A in table B (i.e. chemical by index, etc)
     indexpair is either the name of the index
-    or -- if it's differently named -- the pair of indeces
+    or -- if it's differently named -- the pair of indices
     given in (A,B) respectively
     
     This will just drop any fields in B that are also in A,
@@ -210,7 +222,7 @@ def lookup_rec(A,B,indexpair):
     return joined
 def reorder_rec(myarray,listofnames,first = True):
     try:
-        indeces_to_move = [myarray.dtype.names.index(j) for j in listofnames]
+        indices_to_move = [myarray.dtype.names.index(j) for j in listofnames]
     except:
         stuff_not_found = [j for j in listofnames if j not in myarray.dtype.names]
         if len(stuff_not_found) > 0:
@@ -218,7 +230,7 @@ def reorder_rec(myarray,listofnames,first = True):
         else:
             raise CustomError('unknown problem')
     old_type = list(myarray.dtype.descr)
-    new_type = [old_type[j] for j in indeces_to_move] + [old_type[j] for j in range(0,len(old_type)) if j not in indeces_to_move]
+    new_type = [old_type[j] for j in indices_to_move] + [old_type[j] for j in range(0,len(old_type)) if j not in indices_to_move]
     new_list_of_data = [myarray[j[0]] for j in new_type]
     return rec.fromarrays(new_list_of_data,dtype = new_type)
 def lambda_rec(myarray,myname,myfunction,*varargs):
@@ -281,7 +293,7 @@ def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
     if more than one element in B matches that in A, include both options!!'''
     #A = A.copy() # because I play with it later
     dropped_rows = None
-    # first find the list of indeces that give us the data we want
+    # first find the list of indices that give us the data we want
     #{{{ process the arguments
     if (type(b_ind) is str) and (type(a_ind) is str):
         b_ind = [b_ind]
@@ -291,9 +303,11 @@ def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
     else:
         raise ValueError('If you call a list for b_ind and/or a_ind, they must match in length!!!')
     if any([x not in B.dtype.names for x in b_ind]):
-        raise ValueError(repr(b_ind)+' not in '+repr(B.dtype.names)+'!!!')
+        problem_index = [x for x in b_ind if x not in B.dtype.names]
+        raise ValueError(repr(problem_index)+' not in second argument, which has fields'+repr(B.dtype.names)+'!!!')
     if any([x not in A.dtype.names for x in a_ind]):
-        raise ValueError(repr(a_ind)+' not in '+repr(B.dtype.names)+'!!!')
+        problem_index = [x for x in a_ind if x not in A.dtype.names]
+        raise ValueError(repr(problem_index)+' not in first argument, which has fields'+repr(A.dtype.names)+'!!!')
     #}}}
     B_reduced = B[b_ind] # a version of B reduced to only include the keys
     B_reduced = reorder_rec(B_reduced,b_ind)# again, because it doesn't do this just based on the indexing
@@ -303,7 +317,7 @@ def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
     field_mapping = dict(zip(b_ind,a_ind))
     # now I change the names so they match and I can compare them
     B_reduced.dtype.names = tuple([field_mapping[x] for x in B_reduced.dtype.names])
-    #{{{ now find the list of indeces for B that match each value of A
+    #{{{ now find the list of indices for B that match each value of A
     old_B_reduced_names,old_B_reduced_types = tuple(zip(*tuple(B_reduced.dtype.descr)))
     B_reduced.dtype = dtype(zip(A_reduced.dtype.names,old_B_reduced_types))
     if A_reduced.dtype != B_reduced.dtype:
@@ -331,13 +345,13 @@ def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
         else:
             raise CustomError('There is no data in the second argument that has',b_ind,'fields to match the',a_ind,'fields of the first argument for the following records:',A_reduced[length_of_matching == 0],'if this is correct, you can set the drop_rows = True keyword argument to drop these fields')
     # now, do a neat trick of stackoverflow to collapse a nested list
-    # this gives just the indeces in B that match the values of A
+    # this gives just the indices in B that match the values of A
     list_of_matching = [j for i in list_of_matching for j in i]
     #}}}
     if verbose: print "(decorate\\_rec):: list of matching is",list_of_matching
     # now grab the data for these rows
     add_data = B[list_of_matching]
-    #{{{ finally, smash the two sets of data together
+    #{{{ finally, smoosh the two sets of data together
     #{{{ Now, I need to replicate the rows that have multiple matchesjk
     if any(length_of_matching > 1):
         index_replication_vector = [k for j in range(0,len(length_of_matching))
@@ -427,7 +441,7 @@ def meanstd_rec(myarray,mylist,verbose = False,standard_error = False):
     if verbose: print '(meanstd_rec): other fields are',lsafen(other_fields)
     newrow_dtype = [[j,('%s_ERROR'%j[0],)+j[1:]] if j[0] in other_fields else [j] for j in myarray.dtype.descr]
     newrow_dtype = [k for j in newrow_dtype for k in j]
-    if verbose: print lsafen('(applyto rec): other fields are:',other_fields)
+    if verbose: print lsafen('(meanstd rec): other fields are:',other_fields)
     #{{{ make the list "combined", which I later concatenate
     j = 0
     while len(myarray) > 0:
@@ -443,9 +457,9 @@ def meanstd_rec(myarray,mylist,verbose = False,standard_error = False):
             mask &= myarray[mylist[k]] == thisitem[mylist[k]]
             newrow[mylist[k]] = thisitem[mylist[k]]
         #}}}
-        if verbose: print lsafen('(applyto rec): for row %d, I select these:'%j)
+        if verbose: print lsafen('(meanstd rec): for row %d, I select these:'%j)
         myarray_subset = myarray[mask]
-        if verbose: print lsafen('(applyto rec): ',repr(myarray_subset))
+        if verbose: print lsafen('(meanstd rec): ',repr(myarray_subset))
         for thisfield in list(other_fields):
             try:
                 newrow[thisfield] = mean(myarray_subset[thisfield])
@@ -454,15 +468,16 @@ def meanstd_rec(myarray,mylist,verbose = False,standard_error = False):
                 else:
                     newrow[thisfield+"_ERROR"] = std(myarray_subset[thisfield])
             except:
-                raise CustomError("error in applyto_rec:  You usually get this when one of the fields that you have NOT passed in the second argument is a string.  The fields and types are:",repr(myarray_subset.dtype.descr))
-        if verbose: print lsafen("(applyto rec): for row %d, I get this as a result:"%j,newrow)
+                raise CustomError("error in meanstd_rec:  You usually get this when one of the fields that you have NOT passed in the second argument is a string.  The fields and types are:",repr(myarray_subset.dtype.descr))
+            #print 'for field',lsafe(thisfield),'I find',lsafen(newrow[thisfield])
+        if verbose: print lsafen("(meanstd rec): for row %d, I get this as a result:"%j,newrow)
         combined.append(newrow) # add this row to the list
         myarray = myarray[~mask] # mask out everything I have used from the original matrix
-        if verbose: print lsafen("(applyto rec): the array is now",repr(myarray))
+        if verbose: print lsafen("(meanstd rec): the array is now",repr(myarray))
         j += 1
     #}}}
     combined = concatenate(combined)
-    if verbose: print lsafen("(applyto rec): final result",repr(combined),"has length",len(combined))
+    if verbose: print lsafen("(meanstd rec): final result",repr(combined),"has length",len(combined))
     return combined
 def make_rec(*args,**kwargs):
     r'input,names or a single argument, which is a dictionary\nstrlen = 100 gives length of the strings (which need to be specified in record arrays)\nyou can also specify (especially useful with the dictionary format) the list order = [str1,str2,...] which orders the output records with the field containing str1 first, then the field containing str2, then any remaining fields'
@@ -473,6 +488,10 @@ def make_rec(*args,**kwargs):
         order = kwargs.pop('order')
     else:
         order = None
+    if 'zeros_like' in kwargs.keys():
+        zeros_like = kwargs.pop('zeros_like')
+    else:
+        zeros_like = False
     if len(kwargs)>0:
         raise CustomError("You have kwargs I don't understand!:",kwargs)
     if len(args) == 1 and (type(args[0]) is dict):
@@ -485,13 +504,12 @@ def make_rec(*args,**kwargs):
         raise CustomError("I don't understand the arguments you passed to make_rec!!!\nshould be (list of values, list of field names), or a dictionary")
     #{{{ apply the order kwarg
     if order is not None:
-        newindeces = []
+        newindices = []
         for orderitem in order:
-            newindeces += [j for j,k in enumerate(names) if (k.find(orderitem)>-1 and j not in newindeces)]
-        print 'debug, before adding rest',newindeces
-        newindeces += [j for j,k in enumerate(names) if j not in newindeces]
-        names = [names[j] for j in newindeces]
-        input = [input[j] for j in newindeces]
+            newindices += [j for j,k in enumerate(names) if (k.find(orderitem)>-1 and j not in newindices)]
+        newindices += [j for j,k in enumerate(names) if j not in newindices]
+        names = [names[j] for j in newindices]
+        input = [input[j] for j in newindices]
     #}}}
     if not (type(input) is list and type(names) is list):
         raise CustomError('you must enter a list for both')
@@ -500,6 +518,7 @@ def make_rec(*args,**kwargs):
     if all([j == shapes[0] for j in shapes]):
         if shapes[0] == ():# if it's one dimensional
             equal_shapes = False
+            shapes = [(1)]*len(shapes)
         else:
             equal_shapes = True
             shape_of_array = shapes[0]
@@ -517,6 +536,9 @@ def make_rec(*args,**kwargs):
         mydtype = dtype(zip(names,types,shapes))
     except:
         raise CustomError('problem trying to make names',names,' types',types,'shapes',shapes)
+    if zeros_like:
+        retval = zeros(zeros_like,dtype = mydtype)
+        return retval
     if equal_shapes:
         retval = empty(shape_of_array,dtype = mydtype)
         for j,thisname in enumerate(names):
@@ -526,10 +548,10 @@ def make_rec(*args,**kwargs):
                 raise CustomError("error trying to load input for '"+thisname+"' of shape "+repr(shape(input[j]))+" into retval field of shape "+repr(shape(retval[thisname])))
         return retval
     else:
-    try:
-        return array([tuple(input)],dtype = mydtype)
-    except:
-        raise CustomError('problem trying to assign data of type',map(type,input),'\nvalues',input,'\nonto',mydtype,'\ndtype made from tuple:',zip(names,types,shapes))#,'"types" was',types)
+        try:
+            return array([tuple(input)],dtype = mydtype)
+        except:
+            raise CustomError('problem trying to assign data of type',map(type,input),'\nvalues',input,'\nonto',mydtype,'\ndtype made from tuple:',zip(names,types,shapes))#,'"types" was',types)
 #{{{ convert back and forth between lists, etc, and ndarray
 def make_ndarray(array_to_conv,name_forprint = 'unknown',verbose = False): 
     if type(array_to_conv) in [int,int32,double,float,complex,complex128,float,bool,bool_]: # if it's a scalar
@@ -628,8 +650,8 @@ def lsafe(*string,**kwargs):
     string = string.replace('\\','\\textbackslash ')
     if spaces:
         string = string.replace(' ','\\ ')
-    string = string.replace('\n\t\t','\n\n\\quad\\quad ')
     string = string.replace('\n\t','\n\n\\quad ')
+    string = string.replace('\t','\\quad ')
     string = string.replace('_',r'\_')
     string = string.replace('{',r'\{')
     string = string.replace('}',r'\}')
@@ -644,6 +666,7 @@ def lsafe(*string,**kwargs):
     string = string.replace('#',r'\#')
     string = string.replace('%',r'\%')
     string = string.replace('&',r'\&')
+    string = string.replace('+/-',r'\ensuremath{\pm}')
     string = string.replace('|',r'$|$')
     return string
 #{{{ errors
@@ -806,9 +829,6 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
                     return mytable,matches['index'][-1]
                 else:
                     return mytable,matches['index'][:]
-            else:
-                if add:
-                    if verbose: print r'\o{',lsafen("Creating a new row for your data"),'}'
         tableexists = True
     except CustomError: # if table doesn't exist, create it
         newindex = 1L
@@ -933,7 +953,6 @@ def h5attachattributes(node,listofattributes,myvalues):
             dictnode = h5child(node,
                     thisattr,
                     create = True)
-            print "DEBUG: trying to create dictnode",dictnode
             h5attachattributes(dictnode,
                     thisval.keys(),
                     thisval.values())
@@ -974,30 +993,30 @@ def h5join(firsttuple,secondtuple,
     select_fields = None,
     pop_fields = None,
     verbose = False):
-    #{{{ process the first argument as the hdf5 table and indeces, and process the second one as the structured array to join onto
+    #{{{ process the first argument as the hdf5 table and indices, and process the second one as the structured array to join onto
     if not ((type(firsttuple) is tuple) and (type(secondtuple) is tuple)):
         raise ValueError('both the first and second arguments must be tuples!')
     if not ((len(firsttuple) == 2) and (len(secondtuple) == 2)):
         raise ValueError('The length of the first and second arguments must be two!')
     tablenode = firsttuple[0]
-    tableindeces = firsttuple[1]
-    if verbose: print 'h5join tableindeces looks like this:',tableindeces
-    if type(tableindeces) is not list:
-        tableindeces = [tableindeces]
-    if verbose: print 'h5join tableindeces looks like this:',tableindeces
+    tableindices = firsttuple[1]
+    if verbose: print 'h5join tableindices looks like this:',tableindices
+    if type(tableindices) is not list:
+        tableindices = [tableindices]
+    if verbose: print 'h5join tableindices looks like this:',tableindices
     mystructarray = secondtuple[0].copy()
-    mystructarrayindeces = secondtuple[1]
-    if type(mystructarrayindeces) is not list:
-        mystructarrayindeces = [mystructarrayindeces]
+    mystructarrayindices = secondtuple[1]
+    if type(mystructarrayindices) is not list:
+        mystructarrayindices = [mystructarrayindices]
     #}}}
     #{{{ generate a search string to match potentially more than one key
     search_string = []
-    if len(tableindeces) != len(mystructarrayindeces):
+    if len(tableindices) != len(mystructarrayindices):
         raise ValueError('You must pass either a string or a list for the second element of each tuple!\nIf you pass a list, they must be of the same length, since the field names need to line up!')
     # this can't use h5inlist, because the and needs to be on the inside
     #{{{ this loop creates a list of lists, where the inner lists are a set of conditions that need to be satisfied
     # this is actually not causing  any trouble right now, but needs to be fixed, because of the way that it's doing the type conversion
-    for thistableindex,thisstructarrayindex in zip(tableindeces,mystructarrayindeces):
+    for thistableindex,thisstructarrayindex in zip(tableindices,mystructarrayindices):
         if thisstructarrayindex not in mystructarray.dtype.names:
             raise ValueError(repr(thisstructarrayindex)+" is not in "+repr(mystructarray.dtype.names))
         if type(mystructarray[thisstructarrayindex][0]) in [str,str_]:
@@ -1019,7 +1038,7 @@ def h5join(firsttuple,secondtuple,
     #{{{ then join the data together
     # here I'm debugging the join function, again, and again, and agin
     try:
-        retval = decorate_rec((retval,tableindeces),(mystructarray,mystructarrayindeces)) # this must be the problem, since the above looks fine
+        retval = decorate_rec((retval,tableindices),(mystructarray,mystructarrayindices)) # this must be the problem, since the above looks fine
     except:
         raise CustomError('Some problems trying to decorate the table',retval,'of dtype',retval.dtype,'with the structured array',mystructarray,'of dtype',mystructarray.dtype)
     if pop_fields is not None:
@@ -1027,7 +1046,7 @@ def h5join(firsttuple,secondtuple,
             raise ValueError("It doesn't make sense to specify pop_fields and select_fields at the same time!!")
         select_fields = list(set(retval.dtype.names) ^ set(pop_fields))
     if select_fields is not None:
-        if verbose: print '\n\nh5join original indeces',lsafen(retval.dtype.names)
+        if verbose: print '\n\nh5join original indices',lsafen(retval.dtype.names)
         try:
             retval = retval[select_fields]
         except ValueError:
@@ -1035,7 +1054,7 @@ def h5join(firsttuple,secondtuple,
     #}}}
     return retval
 #}}}
-#{{{ indeces to slice
+#{{{ indices to slice
 #}}}
 #{{{ add slashes for dir's
 def dirformat(file):
@@ -1046,7 +1065,33 @@ def dirformat(file):
         return file
 #}}}
 #{{{ old grid and tick
-def gridandtick(ax,rotation=(0,0),precision=(2,2),labelstring=('',''),gridcolor=r_[0,0,0],formatonly = False,fixed_y_locator = None,logarithmic = False,use_grid = True):
+def gridandtick(ax,rotation=(0,0),precision=(2,2),labelstring=('',''),gridcolor=r_[0,0,0],formatonly = False,fixed_y_locator = None,logarithmic = False,use_grid = True,spines = None,y = True):
+    #{{{ taken from matplotlib examples
+    def adjust_spines(ax,spines):
+        xlabel = ax.get_xlabel()
+        ylabel = ax.get_ylabel()
+        for loc, spine in ax.spines.items():
+            if loc in spines:
+                spine.set_position(('outward',5)) # outward by 5 points
+                spine.set_smart_bounds(True)
+            else:
+                spine.set_color('none') # don't draw spine
+        # turn off ticks where there is no spine
+        if 'left' in spines:
+            ax.yaxis.set_ticks_position('left')
+        else:
+            # no yaxis ticks
+            ax.yaxis.set_ticks([],minor = False)
+        if 'bottom' in spines:
+            ax.xaxis.set_ticks_position('bottom')
+        else:
+            # no xaxis ticks
+            ax.xaxis.set_ticks([],minor = False)
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+    #}}}
+    if spines is not None:
+        adjust_spines(gca(),spines = spines)
     if not formatonly:
         #{{{x ticks
         # determine the size
@@ -1064,62 +1109,96 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),labelstring=('',''),gridcolor=
         #for the minor ticks, use no labels; default NullFormatter
         ax.xaxis.set_minor_locator(minorLocator)
         #}}}
-        #{{{ y ticks
-        width = abs(diff(ax.get_ylim()))
-        if width==0:
-            raise CustomError('y axis width is zero')
-        widthexp = floor(log(width)/log(10.))-1
-        scalefactor = 10**widthexp
-        width /= scalefactor
-        if fixed_y_locator == None:
-            if logarithmic:
-                majorLocator = LogLocator(10)
+        if y:
+            #{{{ y ticks
+            width = abs(diff(ax.get_ylim()))
+            if width==0:
+                raise CustomError('y axis width is zero')
+            widthexp = floor(log(width)/log(10.))-1
+            scalefactor = 10**widthexp
+            width /= scalefactor
+            if fixed_y_locator == None:
+                if logarithmic:
+                    majorLocator = LogLocator(10)
+                else:
+                    majorLocator   = MultipleLocator(5*scalefactor)
             else:
-                majorLocator   = MultipleLocator(5*scalefactor)
-        else:
-            majorLocator   = MultipleLocator(fixed_y_locator[4::5])
-        #majorFormatter = FormatStrFormatter('%0.'+'%d'%precision[1]+'f'+labelstring[1])# labelstring can be used, for instance, for pi
-        #ax.yaxis.set_major_formatter(majorFormatter)
-        if fixed_y_locator == None:
-            if logarithmic:
-                minorLocator = LogLocator(10,subs=r_[0:11])
+                majorLocator   = MultipleLocator(fixed_y_locator[4::5])
+            #majorFormatter = FormatStrFormatter('%0.'+'%d'%precision[1]+'f'+labelstring[1])# labelstring can be used, for instance, for pi
+            #ax.yaxis.set_major_formatter(majorFormatter)
+            if fixed_y_locator == None:
+                if logarithmic:
+                    minorLocator = LogLocator(10,subs=r_[0:11])
+                else:
+                    minorLocator   = MultipleLocator(1*scalefactor)
             else:
-                minorLocator   = MultipleLocator(1*scalefactor)
-        else:
-            minorLocator   = FixedLocator(fixed_y_locator)
-        ax.yaxis.set_major_locator(majorLocator)
-        #for the minor ticks, use no labels; default NullFormatter
-        ax.yaxis.set_minor_locator(minorLocator)
-        #}}}
-    grid(use_grid,which='major',color=gridcolor,alpha=0.1,linestyle='-')
-    grid(use_grid,which='minor',color=gridcolor,alpha=0.05,linestyle='-')
+                minorLocator   = FixedLocator(fixed_y_locator)
+            ax.yaxis.set_major_locator(majorLocator)
+            #for the minor ticks, use no labels; default NullFormatter
+            ax.yaxis.set_minor_locator(minorLocator)
+            #}}}
+    grid(use_grid,which='major',color=gridcolor,alpha=0.15,linestyle='-')
+    grid(use_grid,which='minor',color=gridcolor,alpha=0.125,linestyle='-')
     labels = ax.get_xticklabels()
     setp(labels,rotation=rotation[0],fontsize=10)
-    labels = ax.get_yticklabels()
-    setp(labels,rotation=rotation[1],fontsize=10)
+    if y:
+        labels = ax.get_yticklabels()
+        setp(labels,rotation=rotation[1],fontsize=10)
     fig = gcf()
     fig.autofmt_xdate()
+    return
 def gridon(gridcolor=r_[0,0,0]):
     grid(True,which='major',color=gridcolor,alpha=0.1,linestyle='-')
     grid(True,which='minor',color=gridcolor,alpha=0.05,linestyle='-')
 #}}}
 #{{{ a better version?
-def othergridandtick(ax,rotation=(0,0),precision=(2,2),labelstring=('',''),gridcolor=r_[0,0,0]):
-    #{{{x ticks
-    # determine the size
-    ax.xaxis.set_major_locator(MaxNLocator(10)) # could use multiplelocator if it keeps try to do multiples of 2
-    ax.xaxis.set_minor_locator(MaxNLocator(50))
+def othergridandtick(ax,rotation=(0,0),precision=(2,2),labelstring=('',''),gridcolor=r_[0,0,0],y = True,x = True,spines = None):
+    #{{{ taken from matplotlib examples
+    def adjust_spines(ax,spines):
+        xlabel = ax.get_xlabel()
+        ylabel = ax.get_ylabel()
+        for loc, spine in ax.spines.items():
+            if loc in spines:
+                spine.set_position(('outward',5)) # outward by 5 points
+                spine.set_smart_bounds(True)
+            else:
+                spine.set_color('none') # don't draw spine
+        # turn off ticks where there is no spine
+        if 'left' in spines:
+            ax.yaxis.set_ticks_position('left')
+        else:
+            # no yaxis ticks
+            ax.yaxis.set_ticks([],minor = False)
+        if 'bottom' in spines:
+            ax.xaxis.set_ticks_position('bottom')
+        else:
+            # no xaxis ticks
+            ax.xaxis.set_ticks([],minor = False)
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
     #}}}
-    #{{{ y ticks
-    ax.yaxis.set_major_locator(MaxNLocator(10))
-    ax.yaxis.set_minor_locator(MaxNLocator(50))
-    #}}}
+    if spines is not None:
+        adjust_spines(gca(),spines = spines)
+    if x:
+        #{{{x ticks
+        # determine the size
+        ax.xaxis.set_major_locator(MaxNLocator(10)) # could use multiplelocator if it keeps try to do multiples of 2
+        ax.xaxis.set_minor_locator(MaxNLocator(50))
+        #}}}
+    if y:
+        #{{{ y ticks
+        ax.yaxis.set_major_locator(MaxNLocator(10))
+        ax.yaxis.set_minor_locator(MaxNLocator(50))
+        #}}}
     grid(True,which='major',color=gridcolor,alpha=0.2,linestyle='-')
     grid(True,which='minor',color=gridcolor,alpha=0.1,linestyle='-')
-    labels = ax.get_xticklabels()
-    setp(labels,rotation=rotation[0],fontsize=10)
-    labels = ax.get_yticklabels()
-    setp(labels,rotation=rotation[1],fontsize=10)
+    if x:
+        labels = ax.get_xticklabels()
+        setp(labels,rotation=rotation[0],fontsize=10)
+    if y:
+        labels = ax.get_yticklabels()
+        setp(labels,rotation=rotation[1],fontsize=10)
+    return
 #}}}
 #{{{ plot wrapper
 global OLDplot
@@ -1138,6 +1217,12 @@ def whereblocks(a): # returns contiguous chunks where the condition is true
     return retlist
 def autolegend(*args,**kwargs):
     #lg = legend(legendstr,'best'),loc = 2, borderaxespad = 0.)
+    match_colors = False
+    if 'match_colors' in kwargs.keys():
+        match_colors = kwargs.pop('match_colors')
+    alpha = 0.45
+    if 'alpha' in kwargs.keys():
+        alpha = kwargs.pop('alpha')
     if 'ax' in kwargs.keys():
         ax_list = [kwargs.pop('ax')]
     else:
@@ -1146,15 +1231,19 @@ def autolegend(*args,**kwargs):
         ax_list.append(kwargs.pop('ax2'))
     for ax in ax_list:
         if len(args)==0:
-            lg = ax.legend(loc='best')
+            lg = ax.legend(**kwargs)
         elif len(args)==1:
-            lg = ax.legend(args[0],'best')
+            lg = ax.legend(args[0],**kwargs)
         else:
-            lg = ax.legend(args[0],args[1],'best')
+            lg = ax.legend(args[0],args[1],**kwargs)
         if lg is None:
-            print "Warning! you called autolegend, but you don't seem to have anything labeled!!"
+            raise ValueError("Warning! you called autolegend, but you don't seem to have anything labeled!!")
         else:
-            lg.get_frame().set_alpha(0.45)
+            lg.get_frame().set_alpha(alpha)
+    if match_colors:
+        for line, txt in zip(lg.get_lines(), lg.get_texts()): # from http://stackoverflow.com/questions/13828246/matplotlib-text-color-code-in-the-legend-instead-of-a-line 
+                    txt.set_color(line.get_color())  
+                    txt.set_alpha(line.get_alpha())  
     return lg
 def autopad_figure(pad = 0.2,centered = False):
     #{{{ solve the axis issue --> this does just the left
@@ -1328,6 +1417,11 @@ def plot_updown(data,axis,color1,color2,symbol = '',**kwargs):
     return
 def nextfigure(figurelist,name):
     'obsolete -- now use class'
+    if isinstance(figurelist,figlist_var):
+        figurelist.next(name)
+        return figurelist
+    else:
+        print 'Boo! not a new style name!'
     verbose = False # a good way to debug
     if verbose: print lsafe('DEBUG figurelist, called with',name)
     if name in figurelist:
@@ -1339,7 +1433,20 @@ def nextfigure(figurelist,name):
         if verbose: print lsafen('added, figure',len(figurelist)+1,'because not in figurelist',figurelist)
         figurelist.append(name)
     return figurelist
+def figlistret(first_figure,figurelist,*args,**kwargs):
+    if first_figure is None:
+        raise ValueError("Don't know how to do this when you run interactively")
+    else:
+        args += (figurelist,)
+        if len(args) == 1:
+            return args[0]
+        else:
+            return args
 def figlistini_old(first_figure):
+    if isinstance(first_figure,figlist_var):
+        return first_figure
+    else:
+        print "Boo, not a new style name! (initialize)"
     verbose = False
     if verbose: print lsafe('DEBUG: initialize figlist')
     if first_figure == None:
@@ -1348,10 +1455,13 @@ def figlistini_old(first_figure):
     else:
         if verbose: print lsafen(first_figure.figurelist)
         return first_figure
-class figlist():
+class figlist(object):
     def __init__(self,*arg,**kwargs):
         self.verbose = False
+        self.black = 0.9
         self.env = ''
+        if 'mlab' in kwargs.keys():
+            self.mlab = kwargs.pop('mlab')
         if 'env' in kwargs.keys():
             self.env = kwargs.pop('env')
         if 'verbose' in kwargs.keys():
@@ -1365,18 +1475,63 @@ class figlist():
             self.figurelist = arg[0]
         if len(kwargs) > 0:
             self.figurelist.append(kwargs)
+        self.units = {}
+        self.autolegend_list = {}
+        self.twinx_list = {}
+        self.basename = None
         return
-    def twinx(self,autopad = True):
+    def twinx(self,autopad = True,orig = False,color = None):
         #self.figurelist.insert(self.figurelist.index(self.current),{'autopad':False}) #doesn't work because it changes the figure number; I can get the number with fig = gcf(); fig.number, but I can't set it; it would be best to switch to using a list that contains all the figure numbers to match all their names -- or alternatively, note that matplotlib allows you to give them names, though I don't know how that works
-        autopad_figure()
-        twinx()
-        return gca()
-    def next(self,name,legend = False,boundaries = None,**kwargs):
+        if self.current in self.twinx_list.keys():
+            ax1,ax2 = self.twinx_list[self.current]
+        else:
+            autopad_figure()
+            ax1 = gca()
+            twinx()
+            ax2 = gca()
+            self.twinx_list[self.current] = (ax1,ax2)
+            if color is not None:
+                print ax2.spines
+                ax2.tick_params(axis = 'y',colors = color)
+                ax2.yaxis.label.set_color(color)
+                ax2.spines['right'].set_color(color)
+        if orig:
+            sca(ax1)
+            return ax1
+        else:
+            sca(ax2)
+            return ax2
+    def use_autolegend(self,value = None):
+        'No argument sets to true if it\'s not already set'
+        if value is None:
+            if not self.current in self.autolegend_list.keys():
+                self.autolegend_list.update({self.current:True})
+            else: #leave it alone
+                return
+        else: #passed an explicit value
+            self.autolegend_list.update({self.current:value})
+            return
+    def push_marker(self):
+        if not hasattr(self,'pushlist'):
+            self.pushlist = []
+        self.pushlist.append(self.current)
+        return
+    def pop_marker(self):
+        self.next(self.pushlist.pop())
+        return
+    def next(self,name,legend = False,boundaries = None,twinx = None,**kwargs):
+        if self.basename is not None: #basename for groups of figures
+            name = self.basename + '_' + name
         if name.find('/') > 0:
             raise ValueError("don't include slashes in the figure name, that's just too confusing")
         if self.verbose: print lsafe('DEBUG figurelist, called with',name)
         if name in self.figurelist:
-            fig = figure(self.figurelist.index(name)+1,**kwargs)
+            if hasattr(self,'mlab'):
+                fig = mlab.figure(self.figurelist.index(name)+1,bgcolor = (1,1,1),**kwargs)
+                fig.scene.render_window.aa_frames = 20
+                fig.scene.anti_aliasing_frames = 20
+            else:
+                fig = figure(self.figurelist.index(name)+1,**kwargs)
             self.current = name
             if self.verbose: print lsafen('in',self.figurelist,'at figure',self.figurelist.index(name)+1,'switched figures')
         else:
@@ -1386,51 +1541,215 @@ class figlist():
             if legend:
                 if 'figsize' not in kwargs.keys():
                     kwargs.update({'figsize':(12,6)})
-                self.setprops(outer_legend = True)
-                fig = figure(len(self.figurelist)+1,**kwargs)
-                fig.add_subplot(121)
+                if hasattr(self,'mlab'):
+                    fig = mlab.figure(len(self.figurelist)+1,bgcolor = (1,1,1),**kwargs)
+                    fig.scene.render_window.aa_frames = 8
+                else:
+                    fig = figure(len(self.figurelist)+1,**kwargs)
+                fig.add_axes([0.075,0.2,0.7,0.7]) # l b w h
+                self.use_autolegend('outside')
             else:
                 fig = figure(len(self.figurelist)+1,**kwargs)
-                fig.add_subplot(111)
+                if hasattr(self,'mlab'):
+                    fig = self.mlab.figure(len(self.figurelist)+1,bgcolor = (1,1,1),**kwargs)
+                    fig.scene.render_window.aa_frames = 8
+                else:
+                    fig = figure(len(self.figurelist)+1,**kwargs)
+                if twinx is not None:
+                    fig.add_subplot(111)
             if self.verbose: print lsafen('added, figure',len(self.figurelist)+1,'because not in figurelist',self.figurelist)
             self.figurelist.append(name)
-        return gca()
+        if twinx is not None:
+            if twinx == 0:
+                self.twinx(orig = True)
+                fig = gcf()
+            elif twinx == 1:
+                self.twinx()
+                fig = gcf()
+            else:
+                raise ValueError('If you pass twinx, pass 0 for the original or 1 for the right side')
+        return fig
     def plot(self,*args,**kwargs):
-        plot(*args,**kwargs)#just a placeholder for now, will later keep units + such
+        if 'label' in kwargs.keys():
+            self.use_autolegend()
+        human_units = True
+        if 'human_units' in kwargs.keys():
+            human_units = kwargs.pop('human_units')
+        if human_units:
+            firstarg = self.check_units(args[0],0,1) # check units, and if need be convert to human units, where x is the first dimension and y is the last
+        else:
+            firstarg = args[0]
+        if 'label' not in kwargs.keys() and isinstance(args[0],nddata):
+            thisname = args[0].name()
+            if thisname is not None:
+                kwargs['label'] = thisname
+        retval = plot(*tuple((firstarg,)+args[1:]),**kwargs)#just a placeholder for now, will later keep units + such
         ax = gca()
         if ax.get_title() is None or len(ax.get_title()) == 0:
-            title(self.current)
+            try:
+                title(self.current)
+            except:
+                title('untitled')
+        return retval
+    def check_units(self,testdata,x_index,y_index):
+        if isinstance(testdata,nddata):
+            testdata = testdata.copy().human_units()
+            if len(testdata.dimlabels) > 1:
+                if not hasattr(self,'current'):
+                    raise ValueError("give your plot a name (using .next()) first! (this is used for naming the PDF's etc)")
+                if self.current in self.units.keys():
+                        theseunits = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
+                        if theseunits != self.units[self.current] and theseunits[0] != self.units[self.current]:
+                                raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(theseunits,self.units[self.current]))
+                else:
+                    if isinstance(testdata,nddata):
+                        self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
+            else:
+                if not hasattr(self,'current'):
+                    self.next('default')
+                if self.current in self.units.keys():
+                    theseunits = (testdata.get_units(testdata.dimlabels[x_index]))
+                    testunits = self.units[self.current]
+                    if theseunits != testunits:
+                        if type(testunits) is tuple and testunits[1] is None:
+                            pass
+                        else:
+                            raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(theseunits,self.units[self.current]))
+                else:
+                    self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]))
+        return testdata
     def image(self,*args,**kwargs):
-        image(*args,**kwargs)#just a placeholder for now, will later keep units + such
+        firstarg = self.check_units(args[0],-1,0) # check units, and if need be convert to human units, where x is the last dimension and y is the first
+        if self.black and 'black' not in kwargs.keys():
+            kwargs.update({'black':self.black})
+        retval = image(*tuple((firstarg,)+args[1:]),**kwargs)#just a placeholder for now, will later keep units + such
         ax = gca()
         if ax.get_title() is None or len(ax.get_title()) == 0:
             title(self.current)
+        return retval
     def text(self,mytext):
         self.setprops(print_string = mytext)
     def setprops(self,**kwargs):
         self.figurelist.append(kwargs)
-    def show(self,*args):
+    def show_prep(self):
+        for k,v in self.autolegend_list.items():
+            kwargs = {}
+            if v:
+                if type(v) is str:
+                    if v[0:7] == 'colored':
+                        kwargs.update(dict(match_colors = True))
+                        v = v[7:]
+                        if v == '':
+                            v = True
+                    if v == 'outside':
+                        kwargs.update(dict(bbox_to_anchor=(1.05,1),loc = 2,borderaxespad=0.))
+                self.next(k)
+                try:
+                    autolegend(**kwargs)
+                except:
+                    try:
+                        self.twinx(orig = True)
+                        autolegend(**kwargs)
+                    except:
+                        raise CustomError('error while trying to run autolegend for',k)
+    def show(self,*args,**kwargs):
+        verbose = False
+        if 'verbose' in kwargs.keys():
+            verbose = kwargs.pop('verbose')
+        if len(kwargs) > 0:
+            raise ValueError("didn't understand kwargs "+repr(kwargs))
+        self.show_prep()
+        #{{{ just copy from fornnotebook to get the print string functionality
+        kwargs = {}
+        for j,figname in enumerate(self.figurelist):
+            if verbose: print "showing figure"+lsafen(figname)
+            if type(figname) is dict:
+                kwargs.update(figname)
+                if 'print_string' in kwargs:
+                    print '\n\n'
+                    print kwargs.pop('print_string')
+                    print '\n\n'
+        #}}}
         if len(args) == 1:
             if (args[0][:-4] == '.pdf') or (args[0][:-4] == '.png') or (args[0][:-4] == '.jpg'):
                 print "you passed me a filename, but I'm just burning it"
-        show()
-def text_on_plot(x,y,thistext,**kwargs):
+        if hasattr(self,'mlab'):
+            print "running mlab show!"
+            self.mlab.show()
+        else:
+            #print "not running mlab show!"
+            show()
+    def header(self,number_above,input_string):
+        header_list = ['\\section','\\subsection','\\subsubsection','\\paragraph','\\subparagraph']
+        self.text(header_list[number_above+1]+'{%s}'%input_string)
+        return number_above + 1
+def text_on_plot(x,y,thistext,coord = 'axes',**kwargs):
     ax = gca()
-    newkwargs = {'transform':ax.transAxes,'size':'x-large',"horizontalalignment":'center'}
+    if coord == 'axes':
+        newkwargs = {'transform':ax.transAxes,'size':'x-large',"horizontalalignment":'center'}
+    elif coord == 'data':
+        print "Yes, I am using data transform"
+        newkwargs = {'transform':ax.transData,'size':'small',"horizontalalignment":'right'}
+    color = None
     if 'match_data' in kwargs.keys():
-        if kwargs['match_data'].get_plot_color() is not None:
-            newkwargs.update({'color':kwargs['match_data'].get_plot_color()})
+        if type(kwargs['match_data']) is list:
+            color = kwargs['match_data'][-1].get_color() # get the color of the last line
+        elif kwargs['match_data'].get_plot_color() is not None:
+            color = kwargs['match_data'].get_plot_color() # don't know when this works, but apparently, it does!
+        if color is not None:
+            newkwargs.update({'color':color})
         else:
             raise CustomError('You passed match_data to text_on_plot, but I can\'t find a color in the object')
+        kwargs.pop('match_data')
+    newkwargs.update(kwargs)
     return text(x,y,thistext,**newkwargs)
+def unitify_axis(myy,axis_name,is_axis = True):
+    'this just generates an axis label with appropriate units'
+    if is_axis:
+        yunits = myy.units_texsafe(axis_name)
+        j = axis_name.find('_')
+        if j > -1:
+            prevword = axis_name[0:j]
+            if j+1< len(axis_name):
+                followword = axis_name[j+1:]
+            else:
+                followword = []
+            k = followword.find(' ')
+            if k > -1 and k < len(followword):
+                followword = followword[:k]
+            k = followword.find('_')
+            if len(followword) > 0:
+                if not (k > -1) and (len(prevword) < 2 or len(followword) < 2):
+                    if len(followword) > 1:
+                        axis_name = axis_name[:j+1+len(followword)]  + '}$' + axis_name[j+1+len(followword):]
+                        axis_name = axis_name[:j+1] + '{' + axis_name[j+1:]
+                    else:
+                        axis_name = axis_name[0:j+2] + '$' + axis_name[j+2:]
+                    axis_name = '$'+axis_name
+        if myy.get_prop('FT'):
+            axis_name = r'F{'+axis_name+r'}'
+    else:
+        yunits = myy.units_texsafe()
+    if yunits is not None:
+        axis_name = axis_name + ' / ' + yunits
+    return axis_name
 def plot(*args,**kwargs):
     global myplotfunc
     has_labels = False
-    #{{{ deal with axes
+    #{{{ deal with axes and some other kwargs
     if 'ax' in kwargs.keys():
         ax = kwargs.pop('ax')
     else:
         ax = gca()
+    human_units = False
+    if 'human_units' in kwargs.keys():
+        human_units = kwargs.pop('human_units')
+    label_format_string = None
+    if 'label_format_string' in kwargs.keys():
+        label_format_string = kwargs.pop('label_format_string')
+    normalize = False
+    if 'normalize' in kwargs.keys():
+        normalize = kwargs.pop('normalize')
     #}}}
     myplotfunc = ax.plot # default
     #{{{ all possible properties
@@ -1458,23 +1777,16 @@ def plot(*args,**kwargs):
     #}}}
     #{{{ parse nddata
     if isinstance(myy,nddata):
-        myy = myy.copy().human_units()
+        myy = myy.copy()
+        if human_units: myy = myy.human_units()
         if myy.get_plot_color() is not None\
             and 'color' not in kwargs.keys():# allow override
             kwargs.update({'color':myy.get_plot_color()})
-        #if (len(myy.dimlabels)>1):
-        #    myylabel = myy.dimlabels[1]
-        #    yunits = myy.get_units(myylabel)
-        #    if yunits is not None:
-        #        myylabel += ' / $' + yunits + '$'
-        if (len(myy.dimlabels)>1):
-            yunits = myy.units_texsafe()
-            if myy.name() is not None:
-                myylabel = myy.name()
-            else:
-                myylabel = 'data'
-            if yunits is not None:
-                myylabel = myylabel + ' / ' + yunits
+        if myy.name() is not None:
+            myylabel = myy.name()
+        else:
+            myylabel = 'data'
+        myylabel = unitify_axis(myy,myylabel,is_axis = False)
         if (len(myy.dimlabels)>0):
             myxlabel = myy.dimlabels[0]
             xunits = myy.units_texsafe(myxlabel)
@@ -1505,18 +1817,25 @@ def plot(*args,**kwargs):
         #{{{ deal with axis labels along y
         try:
             yaxislabels = myy.getaxis(myy.dimlabels[-1])
-            # at this point, if there is no axis label, it will break and go to pass
+        except:
+            pass
+        # at this point, if there is no axis label, it will break and go to pass
+        if yaxislabels is not None:
             if len(yaxislabels) > 0:
                 if type(yaxislabels[0]) is string_:
                     has_labels = True
-        except:
-            pass
+                elif label_format_string is not None:
+                    yaxislabels = [label_format_string%j for j in yaxislabels]
+                    has_labels = True
         #}}}
         myy = squeeze(myy.data)
     #}}}
     #{{{ semilog where appropriate
     if (myx != None) and (len(myx)>1): # by doing this and making myplotfunc global, we preserve the plot style if we want to tack on one point
-        b = diff(log10(myx))
+        try:
+            b = diff(log10(myx))
+        except:
+            raise CustomError('likely a problem with the type of the x label, which is',myx)
         if (size(b)>3) and all(abs((b-b[0])/b[0])<1e-4) and not ('nosemilog' in kwargs.keys()):
             myplotfunc = ax.semilogx
     if ('nosemilog' in kwargs.keys()):
@@ -1552,6 +1871,8 @@ def plot(*args,**kwargs):
         if len(myformat) == 0:
             myformat = None
     #}}}
+    if normalize:
+        myy /= myy.max()
     #{{{ hsv plots when we have multiple lines
     if len(shape(myy))>1 and sum(array(shape(myy))>1):
         #{{{ hsv plots
@@ -1571,7 +1892,8 @@ def plot(*args,**kwargs):
             if has_labels:
                 newkwargs.update({'label':yaxislabels[j]})
             #}}}
-            myy[isinf(myy)] = NaN # added this to prevent an overflow error
+            if any(isinf(myy)):
+                myy[isinf(myy)] = NaN # added this to prevent an overflow error
             try:
                 retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
                 #print "\n\n\\begin{verbatim}DEBUG plot:",plotargs,'\nkwargs:\n',newkwargs,'\\end{verbatim}'
@@ -1620,16 +1942,29 @@ def box_muller(length):
 #{{{ shaping and allocating
 class ndshape ():
     def __init__(self,*args):
+        self.zero_dimensional = False
         if len(args) == 2:
             self.shape = list(args[0])
             self.dimlabels = args[1]
         if len(args) == 1: #assum that it's an nddata object
-            self.shape = list(args[0].data.shape)
-            self.dimlabels = list(args[0].dimlabels)
+            if isinstance(args[0],nddata):
+                self.shape = list(args[0].data.shape)
+                self.dimlabels = list(args[0].dimlabels)
+                if len(self.shape) == 0 and len(self.dimlabels) == 0:
+                    self.zero_dimensional = True
+                    return
+            else:
+                raise ValueError('If you pass a single argument, it must be an nddata')
         return
     def __setitem__(self,reference,setto):
-        self.shape[self.dimlabels.index(reference)] = setto
+        self.shape[self.axn(reference)] = setto
         return
+    def axn(self,axis):
+        r'return the number for the axis with the name "axis"'
+        try:
+            return self.dimlabels.index(axis)
+        except:
+            raise CustomError('there is no axis named',axis,'all axes are named',self.dimlabels)
     def copy(self):
         try:
             return deepcopy(self)
@@ -1638,8 +1973,8 @@ class ndshape ():
     def matchdims(self,arg):
         r'returns shape with [not in self, len 1] + [overlapping dims between arg + self] + [not in arg] --> this is better accomplished by using sets as I do in the matchdims below'
         for k in set(self.dimlabels) & set(arg.dimlabels):
-            a = arg.shape[arg.dimlabels.index(k)]
-            b = self.shape[self.dimlabels.index(k)]
+            a = arg.shape[arg.axn(k)]
+            b = self.shape[self.axn(k)]
             if a != b:
                 raise CustomError('the',k,'dimension is not the same for self',self,'and arg',arg)
         if isinstance(arg,nddata):
@@ -1654,8 +1989,36 @@ class ndshape ():
         'take list of shape,dimlabels'
         shape = arg[0]
         dimlabels = arg[1]
+        if type(shape) is str:
+            shape,dimlabels = dimlabels,shape
+        if isscalar(self.shape):
+            self.shape = [self.shape]
+        if isscalar(self.dimlabels):
+            self.dimlabels = [self.dimlabels]
+        if isscalar(shape):
+            shape = [shape]
+        if isscalar(dimlabels):
+            dimlabels = [dimlabels]
         self.shape = shape + self.shape
         self.dimlabels = dimlabels + self.dimlabels
+        return self
+    def add_correctly(self,arg):
+        '''take list of shape,dimlabels
+        this is the correct function, until I can fix my back-references for add, which does it backwards'''
+        shape = arg[0]
+        dimlabels = arg[1]
+        if type(shape) is str:
+            shape,dimlabels = dimlabels,shape
+        if isscalar(self.shape):
+            self.shape = [self.shape]
+        if isscalar(self.dimlabels):
+            self.dimlabels = [self.dimlabels]
+        if isscalar(shape):
+            shape = [shape]
+        if isscalar(dimlabels):
+            dimlabels = [dimlabels]
+        self.shape = self.shape + shape
+        self.dimlabels = self.dimlabels + dimlabels
         return self
     def __repr__(self): #how it responds to print
         return zip(self.shape,self.dimlabels).__repr__()
@@ -1669,13 +2032,18 @@ class ndshape ():
         except:
             raise CustomError("one or more of the dimensions named",args,"do not exist in",self.dimlabels)
     def pop(self,label):
-        thisindex = self.dimlabels.index(label)
+        r'remove a dimension'
+        thisindex = self.axn(label)
         self.dimlabels.pop(thisindex)
         self.shape.pop(thisindex)
+        return self
     def alloc(self,dtype='complex128',labels = False,format = 0):
         try:
             if format == 0:
-                emptyar = zeros(tuple(self.shape),dtype=dtype)
+                try:
+                    emptyar = zeros(tuple(self.shape),dtype=dtype)
+                except TypeError:
+                    raise TypeError("You passed a type of "+repr(dtype)+", which was likely not understood (you also passed a shape of "+repr(tuple(self.shape))+")")
             elif format == 1:
                 emptyar = ones(tuple(self.shape),dtype=dtype)
             elif format is None:
@@ -1686,7 +2054,7 @@ class ndshape ():
             raise CustomError('Wrong type for self.shape',map(type,self.shape))
         retval = nddata(emptyar,self.shape,self.dimlabels)
         if labels:
-            retval.labels(self.dimlabels,map(lambda x: zeros(x),self.shape))
+            retval.labels(self.dimlabels,map(lambda x: double(r_[0:x]),self.shape))
         return retval
 #}}}
 #{{{ format out to a certain decimal place
@@ -1716,7 +2084,7 @@ def concat(datalist,dimname,chop = False,verbose = False):
         if dimname in shapes[j].dimlabels:
             newdimsize += shapes[j][dimname]
             shapetocheck = list(shapes[j].shape)
-            shapetocheck.pop(shapes[j].dimlabels.index(dimname))
+            shapetocheck.pop(shapes[j].axn(dimname))
         else:
             newdimsize += 1
             shapetocheck = list(shapes[j].shape)
@@ -1737,7 +2105,10 @@ def concat(datalist,dimname,chop = False,verbose = False):
     else:
         newdatalist += ([newdimsize],[dimname])
     #print "DEBUG newdatalist is shaped like",newdatalist
-    newdatalist = newdatalist.alloc()
+    try:
+        newdatalist = newdatalist.alloc()
+    except:
+        raise CustomError("trying to alloc the newdatalist",newdatalist,"created a problem")
     if datalist[0].get_error() is not None:
         newdatalist.set_error(zeros(shape(newdatalist.data)))
     #}}}
@@ -1822,7 +2193,22 @@ class nddata (object):
         return string[:9] == 'symbolic_' and hasattr(self,string)
     #{{{ for printing
     def __repr__(self):
-        return repr(self.data)+'\n\t\t+/-'+repr(self.get_error())+'\n\tdimlabels=['+repr(self.dimlabels)+']\n\taxes='+repr(self.mkd(self.axis_coords))+'\n\t\t+/-'+repr(self.mkd(self.axis_coords_error))+'\n'
+        retval = repr(self.data) 
+        retval += '\n\t\t+/-'
+        retval += repr(self.get_error())
+        retval += '\n\tdimlabels=['
+        retval += repr(self.dimlabels)
+        retval += ']\n\taxes='
+        def rep_this_dict(starting_indent,thisdict,errordict):
+            dictrep = []
+            for k,v in thisdict.iteritems():
+                dictrep.append('`'+k+'\':'+repr(v)+starting_indent+'\t\t+/-'+repr(errordict[k]))
+            return '{'+(','+starting_indent+'\t').join(dictrep)+'}' # separate with an extra comma, the existing indent, and a tab
+        retval += rep_this_dict('\n\t',self.mkd(self.axis_coords),self.mkd(self.axis_coords_error))
+        #retval += '\n\t\t+/-'
+        #retval += rep_this_dict('\n\t\t',self.mkd(self.axis_coords_error))
+        retval += '\n'
+        return retval
     #}}}
     #{{{ for plotting
     def gnuplot_save(self,filename):
@@ -1842,23 +2228,11 @@ class nddata (object):
         fp.write('\n')
         fp.close()
         return
-    #{{{ 3D mesh plot
-    def meshplot(self,stride = None,alpha = 0.3,onlycolor = False,light = None,rotation = None,cmap = cm.gray,ax = None,invert = False,**kwargs):
-        r'''takes both rotation and light as elevation, azimuth
-        only use the light kwarg to generate a black and white shading display'''
+    #{{{ sort and shape the data for 3d plotting
+    def sorted_and_xy(self):
         sortedself = self.copy()
         self.sort(self.dimlabels[0])
         self.sort(self.dimlabels[1])
-        if invert:
-            print "trying to invert meshplot"
-        if light == True:
-            light = [0,0]# I think this is 45 degrees up shining down from the left of the y axis
-        if not onlycolor:
-            if ax is None: 
-                ax = sortedself._init_3d_axis(ax,rotation = rotation)
-            else:
-                if rotation is not None:
-                    raise ValueError("you can only set the rotation once! (you tried"+repr(rotation)+")")
         if len(sortedself.dimlabels) > 2:
             raise CustomError("I don't know how to handle something with more than two dimensions for a surface plot!")
         #{{{ shared to both
@@ -1867,13 +2241,11 @@ class nddata (object):
         x_axis = sortedself.retaxis(x_dim).data
         y_axis = sortedself.retaxis(y_dim).data
         #}}}
-        rstride = 1
-        cstride = 1
-        if stride is not None:
-            if x_dim in stride.keys():
-                rstride = stride[x_dim]
-            if y_dim in stride.keys():
-                cstride = stride[y_dim]
+        return sortedself,x_axis,y_axis
+    def matrices_3d(self,also1d = False,invert = False):
+        sortedself,x_axis,y_axis = self.sorted_and_xy()
+        if invert:
+            print "trying to invert meshplot-like data"
         X = x_axis*ones(shape(y_axis))
         Y = ones(shape(x_axis))*y_axis
         Z = real(sortedself.data)
@@ -1881,10 +2253,41 @@ class nddata (object):
             X = X[:,::-1]
             Y = Y[:,::-1]
             Z = Z[:,::-1]
-        #mask = isfinite(Z).flatten()
-        #X = X.flatten()[mask]
-        #Y = Y.flatten()[mask]
-        #Z = Z.flatten()[mask]
+        if also1d:
+            if invert:
+                return X,Y,Z,x_axis[::-1],y_axis[::-1]
+            else:
+                return X,Y,Z,x_axis,y_axis
+        else:
+            return X,Y,Z
+    #}}}
+    def mayavi_surf(self):
+        from mayavi.mlab import surf
+        X,Y,Z = self.matrices_3d()
+        s = surf(X,Y,Z)
+        return s
+    #{{{ 3D mesh plot
+    def meshplot(self,stride = None,alpha = 0.3,onlycolor = False,light = None,rotation = None,cmap = cm.gray,ax = None,invert = False,**kwargs):
+        r'''takes both rotation and light as elevation, azimuth
+        only use the light kwarg to generate a black and white shading display'''
+        X,Y,Z = self.matrices_3d()
+        if light == True:
+            light = [0,0]# I think this is 45 degrees up shining down from the left of the y axis
+        if not onlycolor:
+            if ax is None: 
+                ax = self._init_3d_axis(ax,rotation = rotation)
+            else:
+                if rotation is not None:
+                    raise ValueError("you can only set the rotation once! (you tried"+repr(rotation)+")")
+        rstride = 1
+        cstride = 1
+        x_dim = self.dimlabels[0]
+        y_dim = self.dimlabels[1]
+        if stride is not None:
+            if x_dim in stride.keys():
+                rstride = stride[x_dim]
+            if y_dim in stride.keys():
+                cstride = stride[y_dim]
         if light is not None:
             ls = LightSource(azdeg = light[1],altdeg = light[0])
             if cmap is not None:
@@ -1904,7 +2307,7 @@ class nddata (object):
                 ax.plot_surface(X,Y,Z,
                         rstride = rstride,
                         cstride = cstride,
-                        shade = False,
+                        shade = True,
                         **kwargs)
             else:
                 newkwargs = {}
@@ -1920,12 +2323,22 @@ class nddata (object):
                         **newkwargs)
             ax.set_xlabel(x_dim)
             ax.set_ylabel(y_dim)
-            ax.set_zlabel(sortedself.name())
+            ax.set_zlabel(self.name())
         if onlycolor:
             return
         else:
             return ax
-    def waterfall(self,alpha = 0.3,ax = None,rotation = None):
+    def contour(self,levels = True):
+        x_axis,y_axis = self.dimlabels
+        x = self.getaxis(x_axis)[:,None]
+        y = self.getaxis(y_axis)[None,:]
+        cs = contour(x*ones_like(y),ones_like(x)*y,self.data,levels = r_[self.data.min():self.data.max():30j])
+        if levels:
+            clabel(cs,inline = 1,fontsize = 10)
+        xlabel(unitify_axis(self,x_axis))
+        ylabel(unitify_axis(self,y_axis))
+        return cs
+    def waterfall(self,alpha = 0.3,ax = None,rotation = None,color = 'b',edgecolor = 'k'):
         if ax is None: 
             ax = self._init_3d_axis(ax,rotation = rotation)
         else:
@@ -1936,12 +2349,15 @@ class nddata (object):
         #{{{ shared to both
         x_dim = self.dimlabels[0]
         y_dim = self.dimlabels[1]
-        x_axis = self.retaxis(x_dim).data
+        try:
+            x_axis = self.retaxis(x_dim).data
+        except:
+            raise CustomError('trying to get the info on axis',x_dim,'which is',self.getaxis(x_dim))
         y_axis = self.retaxis(y_dim).data
         #}}}
-        ax.set_xlabel(x_dim)
-        ax.set_ylabel(y_dim)
-        ax.set_zlabel(self.name())
+        ax.set_xlabel(unitify_axis(self,x_dim))
+        ax.set_ylabel(unitify_axis(self,y_dim))
+        ax.set_zlabel(unitify_axis(self,self.name(),is_axis = False))
         verts = []
         xs = x_axis.flatten()
         xs = r_[xs[0],xs,xs[-1]] # add points for the bottoms of the vertices
@@ -1950,8 +2366,8 @@ class nddata (object):
             zs = self[y_dim,j].data.flatten()
             zs = r_[0,zs,0]
             verts.append(zip(xs,zs)) # one of the faces
-        poly = PolyCollection(verts) # the individual facecolors would go here
-        poly.set_alpha(0.3)
+        poly = PolyCollection(verts, facecolors = [color]*len(verts), edgecolors = edgecolor) # the individual facecolors would go here
+        poly.set_alpha(alpha)
         fig = gcf()
         ax.add_collection3d(poly,zs = ys, zdir = 'y')
         ax.set_zlim3d(self.data.min(),self.data.max())
@@ -1968,7 +2384,8 @@ class nddata (object):
             ax = axes3d.Axes3D(fig)
             print "I'm trying to rotate to",rotation
             #ax.view_init(20,-120)
-            ax.view_init(elev = 20 + rotation[1],azim = -120 + rotation[0])
+            #ax.view_init(elev = 20 + rotation[1],azim = -120 + rotation[0])
+            ax.view_init(azim = rotation[0],elev = rotation[1])
         return ax
     def oldtimey(self,alpha = 0.5,ax = None,linewidth = None,sclinewidth = 20.,light = True,rotation = None,invert = False,**kwargs):
         sortedself = self.copy()
@@ -2079,8 +2496,8 @@ class nddata (object):
                     [None]*len(self.dimlabels)))
             if len(arg[0]) != len(self.dimlabels):
                 print r"{\color{red}WARNING! mkd error (John will fix this later):}"
-                print "When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is"+repr(self.dimlabels)+"and you passed"+repr(arg)+'\n\n'
-                raise ValueError("When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is"+repr(self.dimlabels)+"and you passed"+repr(arg))
+                print "When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is "+repr(self.dimlabels)+" and you passed "+repr(arg)+'\n\n'
+                raise ValueError("When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is "+repr(self.dimlabels)+" and you passed "+repr(arg))
             for i,v in enumerate(arg[0]):
                 if type(v) == ndarray:
                     if v.shape == ():
@@ -2117,15 +2534,25 @@ class nddata (object):
             self.data_units = unitval
         else:
             raise CustomError(".set_units() takes data units or 'axis' and axis units")
+        return self
     def human_units(self,verbose = False):
         prev_label = self.get_units()
         oom_names =   ['T' , 'G' , 'M' , 'k' , '' , 'm' , '\\mu ' , 'n' , 'p']
         oom_values = r_[12 , 9   , 6   , 3   , 0  , -3  , -6     , -9  , -12]
         if prev_label is not None and len(prev_label)>0:
-            average_oom = log10(abs(self.data)).mean()/3. # find the average order of magnitude, rounded down to the nearest power of 3
-            average_oom = 3*floor(average_oom)
+            #{{{ find the average order of magnitude, rounded down to the nearest power of 3
+            average_oom = log10(abs(self.data))/3.
+            average_oom = average_oom[isfinite(average_oom)].mean()
+            #}}}
+            if verbose: print "(human units): for data the average oom is",average_oom*3
+            if round(average_oom) == 0.0:
+                average_oom = 0
+            else:
+                average_oom = 3*floor(average_oom)
+            if verbose: print "(human units): for data I round this to",average_oom
             oom_index = argmin(abs(average_oom-oom_values))
-            self.data /= 10**oom_values[oom_index]
+            if verbose: print "(human units): for data, selected an oom value of",oom_values[oom_index]
+            self.data[:] /= 10**oom_values[oom_index]
             self.set_units(oom_names[oom_index]+prev_label)
         else:
             if verbose: print 'data does not have a unit label'
@@ -2133,20 +2560,26 @@ class nddata (object):
             prev_label = self.get_units(thisaxis)
             if prev_label is not None and len(prev_label)>0:
                 data_to_test = self.getaxis(thisaxis)
-                data_to_test = data_to_test[isfinite(data_to_test)]
-                #{{{ find the average order of magnitude, rounded down to the nearest power of 3
-                average_oom = log10(abs(data_to_test))/3.
-                average_oom = average_oom[isfinite(average_oom)].mean()
-                #}}}
-                if verbose: print "(human units): for axis",thisaxis,"the average oom is",average_oom*3
-                average_oom = 3*floor(average_oom)
-                if verbose: print "(human units): for axis",thisaxis,"I round this to",average_oom
-                oom_index = argmin(abs(average_oom-oom_values))
-                if verbose: print "(human units): for axis",thisaxis,"selected an oom value of",oom_values[oom_index]
-                x = self.getaxis(thisaxis)
-                x[:] /= 10**oom_values[oom_index]
-                self.setaxis(thisaxis,x)
-                self.set_units(thisaxis,oom_names[oom_index]+prev_label)
+                if data_to_test is not None:
+                    try:
+                        data_to_test = data_to_test[isfinite(data_to_test)]
+                    except:
+                        raise CustomError('data_to_test is',data_to_test,'isfinite is',isfinite(data_to_test))
+                    #{{{ find the average order of magnitude, rounded down to the nearest power of 3
+                    average_oom = log10(abs(data_to_test))/3.
+                    average_oom = average_oom[isfinite(average_oom)].mean()
+                    #}}}
+                    if verbose: print "(human units): for axis",thisaxis,"the average oom is",average_oom*3
+                    average_oom = 3*floor(average_oom)
+                    if verbose: print "(human units): for axis",thisaxis,"I round this to",average_oom
+                    oom_index = argmin(abs(average_oom-oom_values))
+                    if verbose: print "(human units): for axis",thisaxis,"selected an oom value of",oom_values[oom_index]
+                    x = self.getaxis(thisaxis)
+                    x[:] /= 10**oom_values[oom_index]
+                    self.setaxis(thisaxis,x)
+                    self.set_units(thisaxis,oom_names[oom_index]+prev_label)
+                else:
+                    if verbose: print thisaxis,'does not have an axis label'
             else:
                 if verbose: print thisaxis,'does not have a unit label'
         return self
@@ -2329,10 +2762,75 @@ class nddata (object):
             Rerr = None
         retval.set_error(Rerr)
         return retval
+    def __sub__(self,arg):
+        return self.__add__(-1*arg)
+    def __lt__(self,arg):
+        if type(arg) is ndarray:
+            retval = self.copy()
+            retval.data = retval.data < arg
+            return retval
+        elif isinstance(arg,nddata):
+            retval,B = self.aligndata(arg)
+            retval.data = retval.data < B.data
+            return retval
+        elif isscalar(arg):
+            retval = self.copy()
+            retval.data = retval.data < arg
+            return retval
+        else:
+            raise ValueError("I don't know what to do with an argument of type"+repr(type(arg)))
+    def __gt__(self,arg):
+        if type(arg) is ndarray:
+            retval = self.copy()
+            retval.data = retval.data > arg
+            return retval
+        elif isinstance(arg,nddata):
+            retval,B = self.aligndata(arg)
+            retval.data = retval.data > B.data
+            return retval
+        elif isscalar(arg):
+            retval = self.copy()
+            retval.data = retval.data > arg
+            return retval
+        else:
+            raise ValueError("I don't know what to do with an argument of type"+repr(type(arg)))
+    def __le__(self,arg):
+        if type(arg) is ndarray:
+            retval = self.copy()
+            retval.data = retval.data <= arg
+            return retval
+        elif isinstance(arg,nddata):
+            retval,B = self.aligndata(arg)
+            retval.data = retval.data <= B.data
+            return retval
+        elif isscalar(arg):
+            retval = self.copy()
+            retval.data = retval.data <= arg
+            return retval
+        else:
+            raise ValueError("I don't know what to do with an argument of type"+repr(type(arg)))
+    def __ge__(self,arg):
+        if type(arg) is ndarray:
+            retval = self.copy()
+            retval.data = retval.data >= arg
+            return retval
+        elif isinstance(arg,nddata):
+            retval,B = self.aligndata(arg)
+            retval.data = retval.data >= B.data
+            return retval
+        elif isscalar(arg):
+            retval = self.copy()
+            retval.data = retval.data >= arg
+            return retval
+        else:
+            raise ValueError("I don't know what to do with an argument of type"+repr(type(arg)))
     def __mul__(self,arg):
         #{{{ do scalar multiplication
         if isscalar(arg):
+            #print "multiplying",self.data.dtype,"with scalar of type",type(arg)
             A = self.copy()
+            if type(arg) is complex and self.data.dtype not in [complex128,complex64]:
+                A.data = complex128(A.data)
             A.data *= arg
             if A.get_error() != None:
                 error = A.get_error()
@@ -2340,7 +2838,10 @@ class nddata (object):
             return A
         #}}}
         #{{{ shape and multiply
-        A,B = self.aligndata(arg)
+        try:
+            A,B = self.aligndata(arg)
+        except:
+            raise CustomError("Error aligning right (arg)",arg.name(),"with left (self)",self.name())
         retval = A
         retval.data = A.data * B.data
         #}}}
@@ -2381,7 +2882,10 @@ class nddata (object):
                 error = A.get_error()
                 error /= abs(arg)
             return A
-        A,B = self.aligndata(arg)
+        try:
+            A,B = self.aligndata(arg)
+        except:
+            raise CustomError("Error aligning right (arg) name:",arg.name(),"with left (self) name:",self.name(),"shapes are (resp):",ndshape(arg),ndshape(self))
         retval = A
         retval.data = A.data / B.data
         #{{{ if we have error for both the sets of data, I should propagate that error
@@ -2407,7 +2911,7 @@ class nddata (object):
                             'dtype of Berr',Berr.dtype,
                             'dtype of B.data',Berr)
         try:
-            Rerr = sqrt(real(Rerr)) # convert back to stdev
+            Rerr = sqrt(real(Rerr)) # convert back to stdev --> note that this has problems with complex numbers, hence the "abs" above
         except:
             raise CustomError("Rerr gave an attribute error when you passed",Rerr)
         #print "Rerr dtype",Rerr.dtype
@@ -2416,6 +2920,12 @@ class nddata (object):
         #}}}
         retval.set_error(Rerr)
         return retval
+    def __invert__(self):
+        if self.data.dtype is dtype('bool'):
+            self.data = ~self.data
+            return self
+        else:
+            raise ValueError('invert only implemented for boolean now')
     def __abs__(self):
         return self.runcopy(abs)
     __radd__ = __add__
@@ -2435,6 +2945,22 @@ class nddata (object):
         r'''This now just returns selfout,argout
         which are aligned to each other, and which contain
         axis labels and axis errors for both'''
+        #{{{ if zero dimensional, fake a singleton dimension and recurse
+        #{{{ unless both are zero dimensional, in which case, just leave alone
+        if ndshape(self).zero_dimensional and ndshape(arg).zero_dimensional:
+            return self.copy(),arg.copy()
+        #}}}
+        elif ndshape(self).zero_dimensional:
+            A = self.copy()
+            A.dimlabels = [arg.dimlabels[0]]
+            A.data = A.data.reshape(1)
+            return A.aligndata(arg)
+        elif ndshape(arg).zero_dimensional:
+            arg = arg.copy()
+            arg.dimlabels = [self.dimlabels[0]]
+            arg.data = arg.data.reshape(1)
+            return self.aligndata(arg)
+        #}}}
         augmentdims = [x for x in arg.dimlabels if x in set(self.dimlabels)^set(arg.dimlabels)] # dims in arg but now self, ordered as they were in arg
         newdims = self.dimlabels + augmentdims # this should return the new dimensions with the order of self preserved, followed by augmentdims
         selfout = self.copy() # copy self
@@ -2456,8 +2982,10 @@ class nddata (object):
                         raise ValueError("error was"+repr(argout.get_error()))
                 #print "DEBUG: I reshaped argout, so that it now has shape",argout.data.shape,"dimlabels",argout.dimlabels,"and ndshape",ndshape(argout)
             else:
-                raise ValueError("This instance is zero dimensional (It's %s)!!!"%repr(self))
+                raise ValueError("The argument is zero dimensional (It's %s), but the self is not (It's %s)!!!"%(repr(arg),repr(self)))
         argshape = list(ones(len(newdims)))
+        #print "DEBUG 2: shape of self",ndshape(self),"self data shape",self.data.shape,"shape of arg",ndshape(arg),"arg data shape",arg.data.shape
+        #print "DEBUG 3: shape of selfout",ndshape(selfout),"selfout data shape",selfout.data.shape,"shape of argout",ndshape(argout),"argout data shape",argout.data.shape
         #{{{ wherever the dimension exists in arg, pull the shape from arg
         for j,k in enumerate(newdims):
             if k in argout.dimlabels:
@@ -2469,7 +2997,10 @@ class nddata (object):
         argorder = map(argout.dimlabels.index,new_arg_labels) # for each new dimension, determine the position of the original dimension
         selfout.data = selfout.data.reshape(selfshape) # and reshape to its new shape
         selfout.dimlabels = newdims
-        argout.data = argout.data.transpose(argorder).reshape(argshape) # and reshape the data
+        try:
+            argout.data = argout.data.transpose(argorder).reshape(argshape) # and reshape the data
+        except ValueError,Argument:
+            raise ValueError('the shape of the data is '+repr(argout.data.shape)+' the transpose '+repr(argorder)+' and the new shape '+repr(argshape)+' original arg: '+repr(Argument))
         argout.dimlabels = newdims
         if selfout.get_error() != None:
             try:
@@ -2510,6 +3041,15 @@ class nddata (object):
             selfout.axis_coords = selfout.fld(axesdict)
             argout.axis_coords = selfout.fld(axesdict)
             #}}}
+            selfout.axis_coords_units = [None]*len(newdims)
+            argout.axis_coords_units = [None]*len(newdims)
+            for thisdim in newdims:
+                if thisdim in self.dimlabels:
+                    selfout.set_units(thisdim,self.get_units(thisdim))
+                    argout.set_units(thisdim,self.get_units(thisdim))
+                elif thisdim in arg.dimlabels:
+                    selfout.set_units(thisdim,arg.get_units(thisdim))
+                    argout.set_units(thisdim,arg.get_units(thisdim))
         return selfout,argout
     #}}}
     #{{{ integrate, differentiate, and sum
@@ -2720,6 +3260,11 @@ class nddata (object):
                 self.axis_coords_error.pop(thisindex)
             except:
                 raise CustomError('trying to pop',thisindex,'from',self.axis_coords_error)
+            if len(self.axis_coords_units) > 0:
+                try:
+                    self.axis_coords_units.pop(thisindex)
+                except:
+                    raise CustomError('trying to pop',thisindex,'from',self.axis_coords_units)
         return self
     def popdim(self,dimname):
         thisindex = self.axn(dimname)
@@ -2729,6 +3274,13 @@ class nddata (object):
         thisshape.pop(thisindex)
         self.data = self.data.reshape(thisshape)
         self._pop_axis_info(thisindex)
+        return self
+    def cropped_log(self,magnitude = 4):
+        r'''For the purposes of plotting, this generates a copy where I take the log, spanning "magnitude" orders of magnitude
+        This is designed to be called as abs(instance).cropped_log(), so it doesn't make a copy'''
+        self = self.run(log10)
+        self -= self.data.flatten().max() - 4 # span only 4 orders of magnitude
+        self.data[self.data < 0] = 0
         return self
     def runcopy(self,*args):
         newdata = self.copy()
@@ -2767,9 +3319,15 @@ class nddata (object):
         temp[thisaxis] = 1
         numnonoptargs = len(getargspec(func)[0])-len(getargspec(func)[3])
         if numnonoptargs == 1:
-            self.data = func(self.data,axis=thisaxis)
+            try:
+                self.data = func(self.data,axis=thisaxis)
+            except TypeError:
+                self.data = func(self.data,axes=thisaxis)
         elif numnonoptargs == 2:
-            self.data = func(self.getaxis(axis),self.data,axis=thisaxis)
+            try:
+                self.data = func(self.getaxis(axis),self.data,axis=thisaxis)
+            except TypeError:
+                self.data = func(self.getaxis(axis),self.data,axes=thisaxis)
         else:
             raise CustomError('you passed a function to run_nopop that doesn\'t have either one or two arguments!')
         #{{{ if the function doesn't rip out the dim, make sure we don't change the dims
@@ -2805,7 +3363,16 @@ class nddata (object):
             return a[b.index(x)]
         else:
             return None
+    def ftshift(self,axis):
+        self.data = fftshift(self.data,axes = self.axn(axis))
+        x = self.getaxis(axis)
+        x[:] = fftshift(x)
+        j = len(x)/2 # given the floor, this works out to be the central index
+        x_subset = x[:j]
+        x_subset -= x_subset[-1] + x[j+1] # zero and set to this
+        return self
     def ft(self,*args,**kwargs):
+        self.set_prop('FT',True)
         #{{{ process arguments
         if len(args) > 1:
             raise ValueError('you can\'t pass more than one argument!!')
@@ -2836,16 +3403,21 @@ class nddata (object):
                 if automix:
                     raise ValueError("You can't use automix and shift at the same time --> it doesn't make sense")
                 self.data = fftshift(self.data,axes=[thisaxis])
-            if len(self.axis_coords)>0:
-                t = self.axis_coords[thisaxis]
+            t = self.getaxis(axes[j])
+            if t is not None:
                 dt = t[1]-t[0] # the dwell gives the bandwidth, whether or not it has been zero padded
                 self.ft_start_time = t[0]
                 self.data *= dt
                 self.axis_coords[thisaxis] = linspace(0,1./dt,padded_length)
                 if bool(shiftornot[j]):
                     mask = self.axis_coords[thisaxis] > 0.5/dt
-                    self.axis_coords[thisaxis][mask] -= (1.+1./padded_length)/dt
-                    self.axis_coords[thisaxis] = fftshift(self.axis_coords[thisaxis])
+                    #{{{ just the axis part of ftshift
+                    x = self.axis_coords[thisaxis]
+                    x[:] = fftshift(x)
+                    j = len(x)/2 # given the floor, this works out to be the central index
+                    x_subset = x[:j]
+                    x_subset -= x_subset[-1] + x[j+1] # zero and set to this
+                    #}}}
             if automix:
                 sw = 1.0/dt
                 carrier = abs(self).mean_all_but(axes[j]).argmax(axes[j]).data
@@ -2855,13 +3427,21 @@ class nddata (object):
                 x = self.getaxis(axes[j])
                 x += round(add_to_axis)*sw
         return self
-    def ift(self,axes,shiftornot=False,shift=None):
+    def ift(self,*args,**kwargs):
+        self.set_prop('FT',False)
+        #{{{ process arguments
+        if len(args) > 1:
+            raise ValueError('you can\'t pass more than one argument!!')
+        axes = self._possibly_one_axis(*args)
+        #kwargs: shiftornot=False,shift=None,pad = False
+        shiftornot,shift,pad = self._process_kwargs([('shiftornot',False),('shift',None),('pad',False)],**kwargs)
         if shift != None:
             shiftornot = shift
         if (type(axes) is str):
             axes = [axes]
         if not (type(shiftornot) is list):
-            shiftornot = [bool(shiftornot)]
+            shiftornot = [bool(shiftornot)]*len(axes)
+        #}}}
         for j in range(0,len(axes)):
             if self.get_units(axes[j]) is not None:
                 self.set_units(axes[j],self._ft_conj(self.get_units(axes[j])))
@@ -2869,11 +3449,16 @@ class nddata (object):
                 thisaxis = self.dimlabels.index(axes[j])
             except:
                 raise CustomError('error, dimlabels is: ',self.dimlabels)
+            padded_length = self.data.shape[thisaxis]
+            if pad is True:
+                padded_length = 2**(ceil(log2(padded_length)))
+            elif pad:
+                padded_length = pad
             if bool(shiftornot[j]):
                 self.data = ifftshift(self.data,axes=[thisaxis])
-            self.data = ifft(self.data,axis=thisaxis)
-            if len(self.axis_coords)>0:
-                t = self.axis_coords[thisaxis]
+            self.data = ifft(self.data,n = padded_length,axis=thisaxis)
+            t = self.getaxis(axes[j])
+            if t is not None:
                 dt = t[1]-t[0]
                 self.data *= size(t) * dt # here, the algorithm divides by N, so for integration, we need to not do that
                 #{{{ shiftornot specifies the shifting of the initial ft, not this result, so we always return a 0->1 time axis
@@ -2881,14 +3466,53 @@ class nddata (object):
                 #}}}
         return self
     #}}}
-    #{{{ interpolation
+    #{{{ interpolation and binning
+    def run_avg(self,thisaxisname,decimation = 20,centered = False):
+        'a simple running average'
+        temp = self.getaxis(thisaxisname).size % decimation
+        decimation = int(decimation)
+        if temp != 0:
+            if centered:
+                self = self[thisaxisname,temp/2:-int(temp/2. + 0.5)]
+            else:
+                self = self[thisaxisname,0:-temp]
+        thisaxis = nddata(self.getaxis(thisaxisname),[-1],[thisaxisname])
+        self.setaxis(thisaxisname,[])
+        self.chunkoff(thisaxisname,['avg'],[decimation])
+        self.run(mean,'avg')
+        thisaxis.chunkoff(thisaxisname,['avg'],[decimation])
+        thisaxis.run(mean,'avg')
+        self.setaxis(thisaxisname,thisaxis.data)
+        return self
+    def histogram(*args,**kwargs):
+        per_hit = 1e-3
+        if 'per_hit' in kwargs.keys():
+            per_hit = kwargs.pop('per_hit')
+        if len(kwargs) > 0:
+            raise ValueError("I don't understand the arguments:"+repr(kwargs))
+        if len(args) == 1:
+            if type(args[0]) is ndarray:
+                if args[0].shape[2] != len(self.dimlabels):
+                    raise ValueError("You must pass an N x M array, where M is the number of dimensions in this array!")
+            elif type(args[0]) is dict:
+                raise ValueError("should eventually support dictionaries (via fld), but doesn't yet")
+            else:
+                raise ValueError("I don't know what funny business you're up to passing me a"+repr(type(args[0])))
+        else:
+            raise ValueError("should eventually support array, label pair, but doesn't yet")
     def interp(self,axis,axisvalues,past_bounds = None,verbose = False,**kwargs):
         'interpolate data values given axis values'
         oldaxis = self.getaxis(axis)
         if (type(axisvalues) is int) or (type(axisvalues) is int32):
             axisvalues = linspace(oldaxis[0],oldaxis[-1],axisvalues)
+        elif isscalar(axisvalues):
+            axisvalues = r_[axisvalues]
         elif (type(axisvalues) not in [ndarray,tuple]):
             raise ValueError("You passed a target axis of type"+repr(type(axisvalues))+"which I don't get")
+        if any(imag(axisvalues) > 1e-38):
+            raise ValueError("I can't interpolate imaginary values")
+        else:
+            axisvalues = real(axisvalues)
         if past_bounds == None:
             axisvalues[axisvalues<oldaxis.min()] = oldaxis.min()
             axisvalues[axisvalues>oldaxis.max()] = oldaxis.max()
@@ -2913,41 +3537,65 @@ class nddata (object):
                 if len(rdata) < 3:
                     thiskind = 'linear'
         thisaxis = self.axn(axis)
+        if verbose: print 'Using %s interpolation'%thiskind
+        interpfunc =  interp1d(oldaxis,rdata,kind = thiskind,axis = thisaxis)
         try:
-            if verbose: print 'Using %s interpolation'%thiskind
-            interpfunc =  interp1d(oldaxis,rdata,kind = thiskind,axis = thisaxis)
-            #interpfunc =  UnivariateSpline(oldaxis,rdata,s=1)
             rdata = interpfunc(axisvalues)
-            interpfunc =  interp1d(oldaxis,idata,kind = thiskind,axis = thisaxis)
-            #interpfunc =  UnivariateSpline(oldaxis,idata,s=1)
-            idata = interpfunc(axisvalues)
-            self.data = rdata + 1j * idata
-        except ValueError:
-            raise CustomError('Value error, bounds for data are',self.getaxis(axis)[r_[0,-1]],'bounds for new axis are',axisvalues[r_[0,-1]],
-                    'shapes are',
-                    shape(axisvalues),shape(oldaxis),shape(self.data),
-                    'dtypes are',
-                    axisvalues.dtype,self.getaxis(axis).dtype,self.data.dtype)
-
-        except TypeError:
-            raise CustomError('Type error, types are',
-                    type(axisvalues),type(self.getaxis(axis)),type(self.data),
-                    'shapes are',
-                    shape(axisvalues),shape(self.getaxis(axis)),shape(self.data),
-                    'dtypes are',
-                    axisvalues.dtype,self.getaxis(axis).dtype,self.data.dtype)
+        except:
+            raise CustomError("dtype of axis is"+repr(axisvalues.dtype))
+        interpfunc =  interp1d(oldaxis,idata,kind = thiskind,axis = thisaxis)
+        idata = interpfunc(axisvalues)
+        self.data = rdata + 1j * idata
         self.setaxis(axis,axisvalues)
         return self
-    def invinterp(self,axis,values):
+    def invinterp(self,axis,values,**kwargs):
         'interpolate axis values given data values'
+        copy = False
+        if 'copy' in kwargs.keys():
+            copy = kwargs.pop('copy')
+        if isscalar(values):
+            values = r_[values]
         origdata = self.data.copy()
         origaxis = self.getaxis(axis).copy()
-        self.data = values
+        if any(imag(values) > 1e-38):
+            raise ValueError("I can't interpolate imaginary values")
+        else:
+            values = real(values)
+        args = origdata.argsort()
+        origdata = origdata[args]
+        rdata = real(origaxis)
+        idata = imag(origaxis)
+        rdata = rdata[args]
+        idata = idata[args]
+        #{{{ determine type of interpolation
+        if 'kind' in kwargs.keys():
+            thiskind = kwargs.pop('kind')
+        else:
+            thiskind = 'cubic'
+            if len(rdata) < 4:
+                thiskind = 'quadratic'
+                if len(rdata) < 3:
+                    thiskind = 'linear'
+        #}}}
+        interpfunc =  interp1d(origdata,rdata,kind = thiskind)
         try:
-            self.setaxis(axis,interp(values,origdata,origaxis))
+            rdata = interpfunc(values)
         except:
-            raise CustomError('problem interpolating for axis',axis,'values',values,'with axis length',shape(self.getaxis(axis)),'and data shape',shape(self.data))
-        return self
+            raise CustomError('You passed',values,'and the data spans from',origdata.min(),'to',origdata.max())
+        interpfunc =  interp1d(origdata,idata,kind = thiskind)
+        idata = interpfunc(values)
+        cdata = rdata + 1j * idata
+        if copy:
+            newaxis = 'name data before interpolation'
+            if self.name() is not None:
+                newaxis = self.name()
+            retval = nddata(cdata,[-1],[newaxis])
+            retval.labels(newaxis,values)
+            return retval
+        else:
+            self.data = values
+            self.setaxis(axis,cdata)
+            return self
     #}}}
     def multimin(self,minfunc,axisname,filterwidth,numberofmins):
         cost = self.copy().convolve(axisname,filterwidth).run_nopop(minfunc)
@@ -2958,11 +3606,26 @@ class nddata (object):
     def repwlabels(self,axis):
         return None
     #{{{ functions to manipulate and return the axes
-    def reorder(self,*axes):
+    def reorder(self,*axes,**kwargs):
+        first = True
+        if 'first' in kwargs:
+            first = kwargs.pop('first')
+        if len(kwargs) > 0:
+            raise ValueError("I don't understand your kwargs!")
         if len(axes) == 1:
             axes = axes[0]
         else:
             axes = axes
+        if type(axes) is str:
+            axes = [axes]
+        if len(axes) < len(self.dimlabels):
+            if first:
+                oldorder = list(self.dimlabels)
+                for thisaxis in axes:
+                    oldorder.pop(oldorder.index(thisaxis))
+                axes = axes + oldorder
+            else:
+                raise ValueError("False (to put these axes at the end) is not yet supported")
         try:
             neworder = map(self.dimlabels.index,axes)
         except ValueError:
@@ -3003,6 +3666,9 @@ class nddata (object):
             listofaxes = args[0].values()
         else:
             raise CustomError("I can't figure out how to deal with the arguments",args)
+        for j in range(0,len(listofaxes)):
+            if type(listofaxes[j]) is list:
+                listofaxes[j] = array(listofaxes[j])
         if len(self.axis_coords) == 0:
             self.axis_coords = [[]]*len(self.dimlabels)
             self.axis_coords_error = [None]*len(self.dimlabels)
@@ -3031,9 +3697,9 @@ class nddata (object):
                     self.axis_coords[self.dimlabels.index(listofstrings[j])] = listofaxes[j]
                 except:
                     try:
-                        raise CustomError("Can't assign the coordinates to"+listofstrings[j]+"as"+listofaxes[j].__repr__())
+                        raise CustomError("Can't assign the coordinates to "+listofstrings[j]+" as "+listofaxes[j].__repr__())
                     except:
-                        raise CustomError("listofaxes (",len(listofaxes),") isn't same length as ",listofstrings)
+                        raise CustomError("length of listofaxes (",len(listofaxes),") isn't same length as ",listofstrings)
         return self
     def check_axis_coords_errors(self):
         if len(self.axis_coords_error) > len(self.dimlabels):
@@ -3062,7 +3728,6 @@ class nddata (object):
         newshape = list(newshape)
         return self.getaxis(axisname).copy().reshape(newshape)
     def retaxis(self,axisname):
-        print "Don't use retaxis anymore -- use fromaxis!!"
         thisaxis = self._axis_inshape(axisname)
         return nddata(thisaxis,thisaxis.shape,list(self.dimlabels)).labels(axisname,thisaxis.flatten())
     def fromaxis(self,*args,**kwargs):
@@ -3071,6 +3736,9 @@ class nddata (object):
         overwrite = False
         if 'overwrite' in kwargs.keys() and kwargs['overwrite'] == True:
             overwrite = True
+        as_array = False
+        if 'as_array' in kwargs.keys() and kwargs['as_array'] == True:
+            as_array = True
         if len(args) == 1:
             if type(args[0]) is str:
                 retval = self.retaxis(args[0])
@@ -3079,7 +3747,10 @@ class nddata (object):
                 if overwrite:
                     self.data = thisaxis
                 else:
-                    return nddata(thisaxis,thisaxis.shape,list(self.dimlabels)).labels(axisname,thisaxis.flatten())
+                    retval = nddata(thisaxis,thisaxis.shape,list(self.dimlabels)).labels(axisname,thisaxis.flatten())
+                    retval.axis_coords_units = list(self.axis_coords_units)
+                    retval.data_units = self.data_units
+                    return retval
                 #}}}
             else:
                 raise CustomError("I don't know what to do!")
@@ -3098,26 +3769,43 @@ class nddata (object):
         retval = func(*list_of_axes)
         newshape = ones_like(list_of_axes[0].shape)
         for j in list_of_axes:
-            print newshape
-            print array(j.shape)
             newshape *= array(j.shape)
         if overwrite:
             self.data = retval.reshape(newshape)
             return self
         else:
-            return nddata(retval,
-                    newshape,
-                    list(self.dimlabels)).labels(axisnames,
-                            [self.getaxis(x).copy() for x in axisnames])
-    def getaxis(self,*axisname):
-        try:
-            return self.axis_coords[self.axn(*axisname)]
-        except:
-            raise CustomError(axisname,'does not seem to have axis labels')
+            if as_array:
+                return retval.reshape(newshape)
+            else:
+                retval =  nddata(retval,
+                        newshape,
+                        list(self.dimlabels)).labels(axisnames,
+                                [self.getaxis(x).copy() for x in axisnames])
+                retval.axis_coords_units = list(self.axis_coords_units)
+                retval.data_units = self.data_units
+                return retval
+    def getaxis(self,axisname):
+        if self.axis_coords is None or len(self.axis_coords) == 0:
+            return None
+        else:
+            retval = self.axis_coords[self.axn(axisname)]
+        if retval is None:
+            return None
+        elif len(retval) > 0:
+            return retval
+        else:
+            return None
     def setaxis(self,axis,value):
         if type(value) in [float,int,double,float64]:
            value = linspace(0.,value,self.axlen(axis))
-        self.axis_coords[self.axn(axis)] = value
+        if type(value)is list:
+            value = array(value)
+        if ( self.axis_coords is None ) or self.axis_coords == []:
+            self.axis_coords = [None] * len(self.dimlabels)
+        try:
+            self.axis_coords[self.axn(axis)] = value
+        except:
+            raise ValueError("I can't set this -- axis coords is",self.axis_coords)
     def getaxisshape(self,axisname):
         thishape = ones(len(self.dimlabels))
         thisaxis = self.dimlabels.index(axisname) 
@@ -3134,92 +3822,387 @@ class nddata (object):
         return self
     #}}}
     #{{{ breaking up and combining axes
-    def smash(self,listofhowmany):
-        r'''collapse multiple dimensions into one dimension'''
-        names = ['error'] * len(listofhowmany)
-        newsize = []
-        laststop = 0 
-        j = 0
-        for ndims in listofhowmany:
-            thisstop = laststop + ndims
-            newsize += [prod(self.data.shape[laststop:thisstop])]
-            names[j] = ' x '.join(self.dimlabels[laststop:thisstop])
-            laststop = thisstop
-            j+=1
-        self.data = self.data.reshape(newsize)
-        self.dimlabels = names
+    def smoosh(self,dimstocollapse,dimname = 0,verbose = False):
+        r'''collapse multiple dimensions into one dimension
+        if dimname is:
+            None, create a new (direct product) name,
+            a number, lump the existing dimension into the number given, in the list
+            a string, same as the previous, where the string can be part of the list or not
+        '''
+        #{{{ first, put them all at the end, in order given here
+        retained_dims = list(self.dimlabels)
+        if verbose: print "old order",retained_dims
+        #{{{ if I'm using a dimension here, be sure to grab its current position
+        if dimname is None:
+            final_position = -1
+            dimname = ' $\\times$ '.join(dimstocollapse)
+        else:
+            if type(dimname) is int:
+                dimname = dimstocollapse[dimname]
+                final_position = self.axn(dimname)
+            elif dimname in self.dimlabels:
+                final_position = self.axn(dimname)
+            else:
+                final_position = -1
+        #}}}
+        for this_name in dimstocollapse:
+            retained_dims.pop(retained_dims.index(this_name))
+        new_order = retained_dims + dimstocollapse
+        self.reorder(new_order)
+        if verbose: print "new order",new_order
+        #}}}
+        #{{{ then, reshape the data (and error)
+        if verbose: print "old shape",self.data.shape
+        new_shape = list(self.data.shape)[:-len(dimstocollapse)]
+        if verbose: print "dimensions to keep",new_shape
+        dimstocollapse_shapes = array(self.data.shape[-len(dimstocollapse):])
+        new_shape += [dimstocollapse_shapes.prod()]
+        self.data = self.data.reshape(new_shape)
+        if self.get_error() is not None:
+            self.set_error(self.get_error().reshape(new_shape))
+        if verbose: print "new shape",self.data.shape
+        #}}}
+        #{{{ now for the tricky part -- deal with the axis labels
+        #{{{ in order, make a list of the relevant axis names, dtypes, and sizes
+        axes_with_labels = [j for j in dimstocollapse if self.getaxis(j) is not None] # specifically, I am only concerned with the ones I am collapsing that have labels
+        axes_with_labels_haserror = [self.get_error(j) is not None for j in axes_with_labels]
+        axes_with_labels_dtype = [(j,self.getaxis(j).dtype) for j in axes_with_labels]
+        axes_with_labels_size = [self.getaxis(j).size for j in axes_with_labels]
+        #}}}
+        if verbose: print "the dtype that I want is:",axes_with_labels_dtype
+        if verbose: print "the axes that have labels are:",axes_with_labels
+        if verbose: print "the axes that have labels have sizes:",axes_with_labels_size
+        multidim_axis_error = None
+        if len(axes_with_labels_dtype) > 0:
+            # create a new axis of the appropriate shape and size
+            multidim_axis_label = empty(axes_with_labels_size,dtype = axes_with_labels_dtype)
+            if any(axes_with_labels_haserror):
+                multidim_axis_error = empty(axes_with_labels_size,
+                        dtype = [(axes_with_labels[j],self.getaxis(axes_with_labels[j]).dtype)
+                            for j in range(len(axes_with_labels)) if axes_with_labels_haserror[j]])
+            # one at a time index the relevant dimension, and load in the information
+            full_slice = [slice(None,None,None)]*len(axes_with_labels_dtype)
+            for this_index,thisdim in enumerate(axes_with_labels):
+                axis_for_thisdim = self.getaxis(thisdim)
+                if axes_with_labels_haserror[this_index]:
+                    axis_error_for_thisdim = self.get_error(thisdim)
+                if verbose: print "the axis for",thisdim,"is",axis_for_thisdim
+                for j in range(axes_with_labels_size[this_index]):
+                    this_slice = list(full_slice)
+                    this_slice[this_index] = j # set this element
+                    multidim_axis_label[thisdim][tuple(this_slice)] = axis_for_thisdim[j]
+                    if axes_with_labels_haserror[this_index]:
+                        multidim_axis_error[thisdim][tuple(this_slice)] = axis_error_for_thisdim[j]
+            if verbose: print "shape of multidim_axis_label is now",multidim_axis_label.shape,"(",axes_with_labels,")"
+            if verbose: print "multidim_axis_label is:\n",repr(multidim_axis_label)
+            multidim_axis_label = multidim_axis_label.flatten() # then flatten the axis
+            if verbose: print "shape of multidim_axis_label is now",multidim_axis_label.shape
+            if verbose: print "multidim_axis_label is:\n",repr(multidim_axis_label)
+            #{{{ create a new axis dictionary with the new info
+            axis_coords_dict = self.mkd(self.axis_coords)
+            axis_coords_error_dict = self.mkd(self.axis_coords_error)
+            axis_coords_dict[dimname] = multidim_axis_label
+            axis_coords_error_dict[dimname] = multidim_axis_error
+            if verbose: print "end up with axis_coords_dict",axis_coords_dict
+            if verbose: print "end up with axis_coords_error_dict",axis_coords_error_dict
+            #}}}
+        #}}}
+        #{{{ make new dimlabels, and where relevant, project the new dictionary onto these dimlabels
+        self.dimlabels = retained_dims + [dimname]
+        if verbose: print "new dimlabels",self.dimlabels
+        if len(axes_with_labels_dtype) > 0:
+            self.axis_coords = self.fld(axis_coords_dict)
+            self.axis_coords_error = self.fld(axis_coords_error_dict)
+        if verbose: print "new axis coords",self.axis_coords
+        if verbose: print "new axis coords errors",self.axis_coords_error
+        #}}}
+        #{{{ then deal with the units
+        #}}}
+        #{{{ finally, if I need to, reorder again to put the new dimension where I want it
+        #}}}
         return self
-    def smashorder(self,listoflists):
-        self.reorder(concatenate(listoflists))
-        self.smash(map(len,listoflists))
-        return self
-    def chunk(self,axisin,axesout,shapesout):
+    def chunk(self,axisin,*otherargs):
+        r'''chunks axisin into multiple new axes
+        arguments:
+            axesout -- gives the names of the output axes
+            shapesout -- optional -- if not given, it assumes equal length -- if given, one of the values can be -1, which is assumed length'''
+        if len(otherargs) == 2:
+            axesout,shapesout = otherargs
+        elif len(otherargs) == 1:
+            axesout = otherargs[0]
+            shapesout = ndshape(self)[axisin]**(1./len(axesout))
+            if abs(shapesout-round(shapesout)) > 1e-15: # there is some kind of roundoff error here
+                raise ValueError('''In order for chunk to be called with
+                        only a list of axes, the shape of the dimension you are
+                        trying to split (here %s) must be an Nth root of
+                        the original dimension size (here: %d), where N (here
+                        %d) is the number of dimensions you are trying to chunk into'''%(axisin,ndshape(self)[axisin],len(axesout)))
+            else:
+                shapesout = round(shapesout)
+            shapesout = [shapesout] * len(axesout)
+        else:
+            raise ValueError("otherargs must be one or two arguments!")
+        if any([j == -1 for j in shapesout]):
+            j = shapesout.index(-1)
+            if j < len(shapesout)-1:
+                shapesout[j] = int(round(ndshape(self)[axisin]/prod(r_[shapesout[0:j],shapesout[j+1:]])))
+            else:
+                shapesout[j] = int(round(ndshape(self)[axisin]/prod(shapesout[0:j])))
         if prod(shapesout) != ndshape(self)[axisin]:
             raise CustomError("The size of the axis (%s) you're trying to split (%s) doesn't match the size of the axes you're trying to split it into (%s = %s)"%(repr(axisin),repr(ndshape(self)[axisin]),repr(axesout),repr(shapesout)))
-        thisaxis = self.dimlabels.index(axisin)
-        if len(self.axis_coords[thisaxis]) > 0:
-            raise CustomError("split not yet supported on axes with labels")
-        newaxis_coords = self.axis_coords[0:thisaxis] + [[]]*len(axesout) + self.axis_coords[thisaxis+1:]
-        newaxis_coords_error = self.axis_coords_error[0:thisaxis] + [None]*len(axesout) + self.axis_coords_error[thisaxis+1:]
+        thisaxis = self.axn(axisin)
+        if self.getaxis(axisin) is not None and len(self.getaxis(axisin)) > 0:
+            raise CustomError("You cannot chunk data with labels! Try 'chunk_by' instead!")
+        #{{{ if there is a list of axis coordinates, add in slots for the new axes
+        if type(self.axis_coords) is list:
+            if len(self.axis_coords) == 0:
+                self.axis_coords = [None] * len(self.dimlabels)
+            for j in range(len(axesout)-1):
+                self.axis_coords.insert(thisaxis,None)
+        if type(self.axis_coords_error) is list:
+            if len(self.axis_coords_error) == 0:
+                self.axis_coords_error = [None] * len(self.dimlabels)
+            for j in range(len(axesout)-1):
+                self.axis_coords_error.insert(thisaxis,None)
+        if type(self.axis_coords_units) is list:
+            if len(self.axis_coords_units) == 0:
+                self.axis_coords_units = [None] * len(self.dimlabels)
+            for j in range(len(axesout)-1):
+                self.axis_coords_units.insert(thisaxis,None)
+        #}}}
         newshape = list(self.data.shape[0:thisaxis]) + shapesout + list(self.data.shape[thisaxis+1:])
         newnames = list(self.dimlabels[0:thisaxis]) + axesout + list(self.dimlabels[thisaxis+1:])
         self.data = self.data.reshape(newshape)
         self.dimlabels = newnames
-        self.axis_coords = newaxis_coords
-        self.axis_coords_error = newaxis_coords_error
         return self
     def chunkoff(self,axisin,newaxes,newshapes):
         r'''chunks up axisin, dividing it into newaxes with newshapes on the inside'''
         axesout = [axisin]+newaxes
         shapesout = [ndshape(self)[axisin]/prod(newshapes)]+newshapes
         return self.chunk(axisin,axesout,shapesout)
+    def chunk_auto(self,axis_name,which_field,verbose = False,dimname = None):
+        r'''assuming that axis "axis_name" is currently labeled with a structured array, choose one field ("which_field") of that structured array to generate a new dimension
+        Note that for now, by definition, no error is allowed on the axes.
+        However, once I upgrade to using structured arrays to handle axis and data errors, I will want to deal with that appropriately here.'''
+        axis_number = self.axn(axis_name)
+        new_axis,indices = unique(self.getaxis(axis_name)[which_field],
+                return_inverse = True) # we are essentially creating a hash table for the axis.  According to numpy documentation, the hash indices that this returns should also be sorted sorted.
+        if verbose: print "(chunk auto) indices look like this:",indices
+        #{{{ check that there are equal numbers of all the unique new_axis
+        index_count = array([count_nonzero(indices == j) for j in range(indices.max()+1)])
+        if all(index_count == index_count[0]):
+            if verbose: print "(chunk auto) Yes, there are equal numbers of all unique new_axis! (Each element of the hash table has been indexed the same number of times.)"
+            #}}}
+            #{{{ store the old shape and generate the new shape
+            current_shape = list(self.data.shape)
+            if verbose: print "(chunk auto) old shape -- ",current_shape
+            new_shape = insert(current_shape,axis_number + 1,len(new_axis))
+            new_shape[axis_number] /= len(new_axis) # the indices of the hash table become the new dimension
+            #}}}
+            #{{{ actually reorder the data and error -- perhaps a view would be more efficient here
+            old_data = self.data
+            has_data_error = not (self.get_error() is None)
+            self.data = empty(new_shape,dtype = self.data.dtype)
+            if has_data_error:
+                old_error = self.get_error()
+                self.set_error(empty(new_shape,dtype = self.data.dtype))
+            #}}}
+            #{{{ adjust all the relevant axis information
+            #{{{ generate an axis label along the axis I'm chunking that's stripped of the field that I'm creating a dimension from (i.e. chunking off a new dimension based on) -- because I am independently manipulating the data, I don't use self.getaxis()
+            x_strip_current_field = self.axis_coords[axis_number][
+                    [j for j in
+                        self.axis_coords[axis_number].dtype.names
+                        if j != which_field]]
+            #}}}
+            #{{{ reshape the axis coordinate so that it becomes a 2D array with the new dimension chunked off
+            self.axis_coords[axis_number] = empty((len(x_strip_current_field)/len(new_axis),len(new_axis)),
+                    dtype = x_strip_current_field.dtype)
+            if not (self.get_error(axis_name) is None):
+                raise ValueError("Until I do the structured array upgrade chunk_auto will not be able to deal with an axis that has errors.")
+            #}}}
+            #{{{ everything is now ready to sort the data and residual axis into ordered slots
+            #{{{ initialize the slices
+            copy_to_slice   = len(new_shape)*[slice(None,None,None)] # this is the memory address inside the new data (where stuff goes)
+            copy_from_slice = len(current_shape)*[slice(None,None,None)] # this is the memory address inside the old data (where stuff comes from)
+            #}}}
+            if has_data_error:
+                data_error_location = self.get_error()
+            for j in range(len(new_axis)): # j is the index in the hash table
+                copy_to_slice[axis_number + 1]     = j
+                copy_from_slice[axis_number]       = where(indices == j)[0]
+                self.data[copy_to_slice]           = old_data[copy_from_slice]
+                if has_data_error:
+                    data_error_location[copy_to_slice] = old_error[copy_from_slice]
+                if verbose: print "(chunk auto) ",j,'matches at',x_strip_current_field[copy_from_slice[axis_number]]
+                self.axis_coords[axis_number][:,j] = x_strip_current_field[copy_from_slice[axis_number]]
+            #}}}
+            if verbose: print "(chunk auto) new axis -- ",self.axis_coords[axis_number]
+            if verbose: print "(chunk auto) new shape -- ",self.data.shape
+            #{{{ housekeeping for the various axes + data properties -- should perhaps be possible to do this first, then use .getaxis()
+            self.dimlabels.insert(axis_number + 1,which_field)
+            self.axis_coords.insert(axis_number + 1,new_axis)
+            #{{{ by definition, axis can have neither errors nor units associated, for now.
+            self.axis_coords_error.insert(axis_number + 1,None)
+            self.axis_coords_units.insert(axis_number + 1,None)
+            #}}}
+            if verbose: print '(chunk auto) the dimensions of ',self.dimlabels[axis_number],'are (?? x ',self.dimlabels[axis_number+1],')=',self.axis_coords[axis_number].shape
+            #}}}
+            #}}}
+            #{{{ deal appropriately with the "remainder axis" (axis_number)
+            if dimname is None:
+                remainder_axis_name = '_and_'.join(self.axis_coords[axis_number].dtype.names)
+            else:
+                remainder_axis_name = dimname
+            #{{{ if everything is the same along the dimension that I've just
+            # created (which is the second dimension), then get rid of the
+            # duplicate labels
+            test_axis = self.axis_coords[axis_number].T
+            if verbose: print "(chunk auto) test axis -- ",test_axis
+            test_axis = ascontiguousarray(test_axis).flatten().view([('',test_axis.dtype)]*test_axis.shape[1])
+            if all(test_axis == test_axis[0]):
+                self.axis_coords[axis_number] = self.axis_coords[axis_number][:,0].reshape(1,-1)
+                print "(chunk auto) collapsed to", self.axis_coords[axis_number]
+            #}}}
+            if self.axis_coords[axis_number].shape[0] == 1:# then this is a "valid" axis -- because, for each position of the new axis, there is only one value of the remainder axis
+                self.axis_coords[axis_number] = self.axis_coords[axis_number].reshape(-1)
+                self.dimlabels[axis_number] = remainder_axis_name
+                if len(self.axis_coords[axis_number].dtype) == 1: # only one field, which by the previous line will be named appropriately, so drop the structured array name
+                    new_dtype = self.axis_coords[axis_number].dtype.descr[0][1]
+                    self.axis_coords[axis_number] = array(self.axis_coords[axis_number],dtype = new_dtype) # probably more efficiently done with a view, but leave alone for now
+                return self
+            else:
+                #{{{ generate an index list to label the remainder axis, and generate a new nddata with the actual values (which are note copied across the new dimension that matches which_field)
+                remainder_axis_index_list = r_[0:self.axis_coords[axis_number].shape[0]]
+                new_data = nddata(self.axis_coords[axis_number],
+                        self.axis_coords[axis_number].shape,
+                        [remainder_axis_name,which_field])
+                self.axis_coords[axis_number] = remainder_axis_index_list
+                new_data.labels([remainder_axis_name,which_field],
+                        [self.axis_coords[axis_number].copy(),self.axis_coords[axis_number + 1].copy()])
+                self.dimlabels[axis_number] = remainder_axis_name + '_INDEX'
+                #}}}
+                return self,new_data
+            #}}}
+        else:
+            raise ValueError("Along the axis '"+axis_name+"', the field '"+which_field+"' does not represent an axis that is repeated one or more times!  The counts for how many times each element along the field is used is "+repr(index_count))
+            return
     #}}}
     #{{{ messing with data -- get, set, and copy
     def __getslice__(self,*args):
         print 'getslice! ',args
     def __setitem__(self,*args):
         righterrors = None
-        if type(args[0]) is ndarray:# if selector is an ndarray
-            if args[0].dtype is not dtype('bool'):
-                raise ValueError("I don't know what to do with an ndarray subscript that has dtype "+repr(args[0].dtype))
-            self.data[args[0]] = args[1]
+        A = args[0]
+        if type(A) is nddata:
+            _,B = self.aligndata(A)
+            A = B.data # now the next part will handle this
+        if type(A) is ndarray:# if selector is an ndarray
+            if A.dtype is not dtype('bool'):
+                raise ValueError("I don't know what to do with an ndarray subscript that has dtype "+repr(A.dtype))
+            if A.shape != self.data.shape:
+                temp = array(A.shape) == 1
+                if all( array(A.shape)[temp] == array(self.data.shape)[temp]):
+                    pass
+                else:
+                    raise ValueError("The shape of your logical mask "+repr(A.shape)+" and the shape of your data "+repr(self.data.shape)+" are not compatible (matching or singleton) -- I really don't think that you want to do this!")
+            self.data[A] = args[1]
             return
         if isinstance(args[1],nddata):
             #{{{ reorder so the shapes match
-            unshared_indeces = list(set(args[1].dimlabels) ^ set(self.dimlabels))
-            shared_indeces = list(self.dimlabels)
-            for j in unshared_indeces:
-                shared_indeces.remove(j)
-            if len(args[1].dimlabels) != len(shared_indeces) or (not all([args[1].dimlabels[j] == shared_indeces[j] for j in range(0,len(shared_indeces))])):
-                args[1].reorder[shared_indeces]
+            unshared_indices = list(set(args[1].dimlabels) ^ set(self.dimlabels))
+            shared_indices = list(self.dimlabels)
+            for j in unshared_indices:
+                shared_indices.remove(j)
+            if len(args[1].dimlabels) != len(shared_indices) or (not all([args[1].dimlabels[j] == shared_indices[j] for j in range(0,len(shared_indices))])):
+                args[1].reorder[shared_indices]
             #}}}
             rightdata = args[1].data
             righterrors = args[1].get_error()
         else: # assume it's an ndarray
             rightdata = args[1]
+            #{{{ if I just passed a function, assume that I'm applying some type of data-based mask
+            if type(args[0]) is type(emptyfunction):
+                thisfunc = args[0]
+                self.data[thisfunc(self.data)] = rightdata
+                return
+                #}}}
             if (type(rightdata) is not ndarray): # in case its a scalar
                 rightdata = array([rightdata])
-        slicedict,axesdict,errordict = self._parse_slices(args[0]) # pull left index list from parse slices
+        slicedict,axesdict,errordict,unitsdict = self._parse_slices(args[0]) # pull left index list from parse slices
         leftindex = self.fld(slicedict)
-        try:
-            self.data[tuple(leftindex)] = rightdata.squeeze() # assign the data
-        except:
-            raise CustomError('ERROR ASSIGNING NDDATA:','rightdata.shape:',rightdata.shape,'self.data.shape:',self.data.shape,' dimlabels:',self.dimlabels,' leftindex:',tuple(leftindex),'--> shape of left slice: ',self.data[tuple(leftindex)].shape)
-            raise
+        rightdata = rightdata.squeeze()
+        if len(rightdata.shape) > 0:
+            left_shape = shape(self.data[tuple(leftindex)])
+            try:
+                self.data[tuple(leftindex)] = rightdata.reshape(left_shape) # assign the data
+            except:
+                raise CustomError('ERROR ASSIGNING NDDATA:\n',
+                        'self.data.shape:',self.data.shape,
+                        'left index',leftindex,'\n',
+                        'rightdata.shape:',rightdata.shape,
+                        '--> shape of left slice: ',left_shape)
+        else:
+            self.data[tuple(leftindex)] = rightdata
         lefterror = self.get_error()
         if lefterror is not None:
             lefterror[tuple(leftindex)] = righterrors.squeeze()
     def copy(self):
         return deepcopy(self)
     def __getitem__(self,args):
-        try:
-            slicedict,axesdict,errordict = self._parse_slices(args)
-        except:
-            raise CustomError('error trying to get slices given by',args)
-        if type(args[1]) is list and type(args[0]) is str and len(args) == 2:
-            return concat([self[args[0],x] for x in args[1]],args[0])
-        indexlist = self.fld(slicedict)
-        newlabels = [x for x in self.dimlabels if not isscalar(slicedict[x])] # generate the new list of labels, in order, for all dimensions that are not indexed by a scalar
+        if type(args) is type(emptyfunction):
+            #{{{ just a lambda function operates on the data
+            thisfunc = args
+            newdata = self.copy()
+            mask = thisfunc(newdata.data)
+            newdata.data = newdata.data[mask]
+            if len(newdata.dimlabels) == 1:
+                x = newdata.getaxis(newdata.dimlabels[0])
+                newdata.setaxis(newdata.dimlabels[0],x[mask])
+            else:
+                raise ValueError("I don't know how to do this for multidimensional data yet!")
+            return newdata
+            #}}}
+        elif type(args) is nddata:
+            #{{{ try the nddata mask
+            A = args
+            if isinstance(A,nddata) and A.data.dtype is dtype("bool"):
+                thisshape = ndshape(A)
+                nonsingleton = []
+                for thisdim in A.dimlabels:
+                    if thisshape[thisdim] != 1:
+                        nonsingleton.append(thisdim)
+                if len(nonsingleton) != 1:
+                    raise ValueError("To index with an nddata, you must have only one dimension")
+                else:
+                    self.setaxis(nonsingleton[0],self.getaxis(nonsingleton[0])[A.data.flatten()])
+                _,B = self.aligndata(A)
+                A = B.data # now the next part will handle this
+                if A.dtype is not dtype('bool'):
+                    raise ValueError("I don't know what to do with an ndarray subscript that has dtype "+repr(A.dtype))
+                if A.shape != self.data.shape:
+                    temp = array(A.shape) == 1
+                    if all( array(A.shape)[temp] == array(self.data.shape)[temp]):
+                        pass
+                    else:
+                        raise ValueError("The shape of your logical mask "+repr(A.shape)+" and the shape of your data "+repr(self.data.shape)+" are not compatible (matching or singleton) -- I really don't think that you want to do this!")
+                self.data = self.data[A]
+                return self
+            else:
+                errmsg = "you passed a single argument of type "+repr(type(A))
+                if type(A) is nddata:
+                    errmsg += " with dtype "+repr(A.data.dtype)
+                errmsg += " -- I don't know what to do with this"
+                raise ValueError(errmsg)
+            #}}}
+        else:
+            try:
+                slicedict,axesdict,errordict,unitsdict = self._parse_slices(args)
+            except:
+                raise CustomError('error trying to get slices given by',args)
+            if type(args) is not slice and type(args[1]) is list and type(args[0]) is str and len(args) == 2:
+                return concat([self[args[0],x] for x in args[1]],args[0])
+            indexlist = tuple(self.fld(slicedict))
+            newlabels = [x for x in self.dimlabels if not isscalar(slicedict[x])] # generate the new list of labels, in order, for all dimensions that are not indexed by a scalar
         #{{{ properly index the data error
         if self.data_error != None:
             try:
@@ -3234,14 +4217,21 @@ class nddata (object):
                 axis_coords_error = [errordict[x] for x in newlabels]
             else:
                 axis_coords_error = None
-            retval =  nddata(self.data[indexlist],
-                    self.data[indexlist].shape,
-                    newlabels,
-                    axis_coords = [axesdict[x] for x in newlabels],
-                    axis_coords_error = axis_coords_error,
-                    data_error = newerror,
-                    other_info = self.other_info)
-            retval.axis_coords_units = self.axis_coords_units
+            if unitsdict is not None:
+                axis_coords_units = [unitsdict[x] for x in newlabels]
+            else:
+                axis_coords_units = None
+            try:
+                retval =  nddata(self.data[indexlist],
+                        self.data[indexlist].shape,
+                        newlabels,
+                        axis_coords = [axesdict[x] for x in newlabels],
+                        axis_coords_error = axis_coords_error,
+                        data_error = newerror,
+                        other_info = self.other_info)
+            except:
+                raise CustomError("likely some problem recasting the data when trying to initialize a new nddata: shape of self.data",self.data,"indexlist",indexlist)
+            retval.axis_coords_units = axis_coords_units
             retval.data_units = self.data_units
             return retval
         else:
@@ -3273,10 +4263,35 @@ class nddata (object):
             raise ValueError("I didn't understand the kwargs:",repr(kwargs))
         return tuple(output)
     def _parse_slices(self,args):
+        """This controls nddata slicing:
+            it previously took
+            \'axisname\',value
+            pairs where value was an index or a lambda function.
+            Now, it also takes
+            \'axisname\':value
+            and
+            \'axisname\':(value1,value2)
+            pairs, where the values give either a single value or an inclusive range on the axis, respectively"""
         #print "DEBUG getitem called with",args
         errordict = None # in case it's not set
+        if self.axis_coords_units is not None:
+            unitsdict = self.mkd(self.axis_coords_units)
         axesdict = None # in case it's not set
-        args = list(args)
+        if type(args) is slice:
+            args = [args]
+        else:
+            args = list(args)
+        #{{{ to make things easier, convert "slice" arguments to "axis,slice" pairs
+        j=0
+        trueslice = [] # this lets me distinguish from 'axisname',slice
+        while j < len(args):
+            if type(args[j]) is slice:
+                temp = args[j].start
+                args.insert(j,temp)
+                trueslice.append(temp)
+                j+=1
+            j+=2 # even only
+        #}}}
         for j in range(0,len(args),2):
             if type(args[j]) is str_:
                 args[j] = str(args[j]) # on upgrading + using on windows, this became necessary, for some reason I don't understand
@@ -3289,7 +4304,6 @@ class nddata (object):
                 #print "DEBUG --> trying to make dictionaries from axis coords of len",len(self.axis_coords),"and axis_coords_error of len",len(self.axis_coords_error),"when dimlabels has len",len(self.dimlabels)
                 axesdict = self.mkd(self.axis_coords)
                 errordict = self.mkd(self.axis_coords_error)
-                #print 'DEBUG: made errordict',errordict
             for x,y in zip(args[0::2],args[1::2]):
                 slicedict[x] = y
             #}}}
@@ -3300,17 +4314,73 @@ class nddata (object):
                 for x,y in slicedict.iteritems():
                     #print "DEBUG, type of slice",x,"is",type(y)
                     if isscalar(y):
-                        axesdict.pop(x) # pop the axes for all scalar dimensions
-                    #elif type(y) is slice and type(y.start) in [float,double,float64,float32]:
-                    #    mask = logical_and(axesdict[x]>y.start,axesdict[x]<y.stop)
-                    #    slicedict[x] = mask
-                    #    axesdict[x] = axesdict[x][mask]
+                        if axesdict[x] is not None:
+                            axesdict.pop(x) # pop the axes for all scalar dimensions
                     elif type(y) is type(testf):
                         mask = y(axesdict[x])
                         slicedict[x] = mask
-                        axesdict[x] = axesdict[x][mask]
+                        if axesdict[x] is not None:
+                            axesdict[x] = axesdict[x][mask]
                     else:
-                        axesdict[x] = axesdict[x][y]
+                        if type(y) is slice and x in trueslice:
+                            #print "DEBUG, I found",y,"to be of type slice"
+                            if y.step is not None:
+                                raise ValueError("setting the slice step is not currently supported")
+                            else:
+                                if type(y.stop) is tuple: #then I passed a single index
+                                    temp = diff(axesdict[x]) 
+                                    if not all(temp*sign(temp[0])>0):
+                                        raise ValueError("you can only use the range format on data where the axis is in consecutively increasing or decreasing order")
+                                    del temp
+                                    if len(y.stop) > 2:
+                                        raise ValueError("range with more than two values not currently supported")
+                                    elif len(y.stop) == 1:
+                                        temp_low = y.stop[0]
+                                        temp_high = inf
+                                        temp_high_value = inf
+                                    else:
+                                        temp_low = y.stop[0]
+                                        temp_high = y.stop[1]
+                                        temp_high_value = y.stop[1]
+                                        if temp_low is None:
+                                            temp_low = -inf
+                                        if temp_high is None:
+                                            temp_high = inf
+                                        if temp_low > temp_high:
+                                            temp_low,temp_high = temp_high,temp_low
+                                    #print "DEBUG: slice values",temp_low,'to',temp_high
+                                    if temp_low == inf:
+                                        temp_low = axesdict[x].argmax()
+                                    elif temp_low == -inf:
+                                        temp_low = axesdict[x].argmin()
+                                    else:
+                                        temp_low = abs(axesdict[x] - temp_low).argmin()
+                                    if temp_high == inf:
+                                        temp_high = axesdict[x].argmax()
+                                    elif temp_high == -inf:
+                                        temp_high = axesdict[x].argmin()
+                                    else:
+                                        temp_high = abs(axesdict[x] - temp_high).argmin()
+                                    if temp_high + 1 < len(axesdict[x]):
+                                        #print "DEBUG: I test against value",axesdict[x][temp_high + 1]
+                                        if axesdict[x][temp_high + 1] <= temp_high_value:
+                                            temp_high += 1
+                                    #print "DEBUG: evaluate to indices",temp_low,'to',temp_high,'out of',len(axesdict[x])
+                                    if temp_high-temp_low == 0:
+                                        raise ValueError('The indices '+repr(y)+' on axis '+x+' slices to nothing!  The limits of '+x+' are '+repr(axesdict[x].min())+':'+repr(axesdict[x].max()))
+                                    slicedict[x] = slice(temp_low,temp_high,None)
+                                    y = slicedict[x]
+                                else: #then I passed a single index
+                                    temp = abs(axesdict[x] - y.stop).argmin()
+                                    slicedict[x] = slice(temp,temp+1,None)
+                                    y = slicedict[x]
+                        if axesdict[x] == []:
+                            axesdict[x] = None
+                        if axesdict[x] is not None:
+                            try:
+                                axesdict[x] = axesdict[x][y]
+                            except:
+                                raise ValueError("axesdict is"+repr(axesdict)+"and I want to set "+repr(x)+" subscript to its "+repr(y)+" value")
                 if errordict != None and errordict != array(None):
                     for x,y in slicedict.iteritems():
                         if errordict[x] != None:
@@ -3324,8 +4394,12 @@ class nddata (object):
                                     errordict[x] = errordict[x][y] # default
                                 except:
                                     raise CustomError('Trying to index',errordict,'-->',x,'=',errordict[x],'with',y,'error started as',self.axis_coords_error)
-                    errordict = self.mkd().update(errordict) # make everything none except the ones I've updated
-            return slicedict,axesdict,errordict
+            if unitsdict != None and unitsdict != array(None):
+                for x,y in slicedict.iteritems():
+                    if unitsdict[x] != None:
+                        if isscalar(y):
+                            unitsdict.pop(x)
+            return slicedict,axesdict,errordict,unitsdict
             #}}}
         else:
             raise CustomError('label your freaking dimensions! (type of args[0] is ',type(args[0]),'and it should be str!)')
@@ -3424,6 +4498,13 @@ class nddata (object):
         #}}}
         h5file.close()
     #}}}
+class testclass:
+    def __getitem__(self,*args,**kwargs):
+        print "you called __getitem__ with args",args,"and kwargs",kwargs
+        return
+    def __getattribute__(self,*args,**kwargs):
+        print "you called __getattribute__ with args",args,"and kwargs",kwargs
+        return
 class nddata_hdf5 (nddata):
     def __repr__(self):
         if hasattr(self,'_node_children'):
@@ -3604,9 +4685,12 @@ def spectrogram(waveform,f_start,f_stop,npoints_fdom=40,tdom_div=2):
 def image(A,x=[],y=[],**kwargs):
     #{{{ pull out kwargs for imagehsv
     imagehsvkwargs = {}
+    spacing = 1
     for k,v in kwargs.items():
         if k in ['black','logscale']:
             imagehsvkwargs[k] = kwargs.pop(k)
+        if k in ['spacing']:
+            spacing = kwargs.pop(k)
     #}}}
     setlabels = False
     if isinstance(A,nddata):
@@ -3617,9 +4701,7 @@ def image(A,x=[],y=[],**kwargs):
             x = list(A.getaxis(x_label))
         except:
             x = r_[0,ndshape(A)[x_label]]
-        xunits = A.units_texsafe(x_label)
-        if xunits is not None:
-            x_label = x_label + ' / ' + xunits
+        x_label = unitify_axis(A,x_label)
         templabels.pop(-1)
         y_label = ''
         if len(templabels) == 1:
@@ -3628,14 +4710,12 @@ def image(A,x=[],y=[],**kwargs):
                 y = list(A.getaxis(y_label))
             except:
                 y = r_[0:A.data.shape[A.axn(y_label)]]
-            yunits = A.units_texsafe(y_label)
-            if yunits is not None:
-                y_label = y_label + ' / ' + yunits
+            y_label = unitify_axis(A,y_label)
         else:
             while len(templabels)>0:
                 y_label += templabels.pop(0)
                 if len(templabels)>0:
-                    y_label += '$\\times$'
+                    y_label += '$\\otimes$'
         A = A.data
     if type(x) is list:
         x = array(x)
@@ -3649,8 +4729,10 @@ def image(A,x=[],y=[],**kwargs):
         y = [1,A.shape[0]]
     else:
         y = y.flatten()
-    myext = (x[0],x[-1],y[-1],y[0])
-    extralines = 0
+    dx = x[1]-x[0]
+    dy = y[1]-y[0]
+    myext = (x[0]-dx/2.,x[-1]+dx/2.,y[-1]+dy/2.,y[0]-dy/2.)
+    linecounter = 0
     origAndim = A.ndim
     if A.ndim > 2:
         ax = gca()
@@ -3660,27 +4742,30 @@ def image(A,x=[],y=[],**kwargs):
         # order according to how it's ordered in the memory
         # the innermost two will form the image -- first add a line to the end of the images we're going to join up
         tempsize = array(A.shape) # make a tuple the right shape
-        tempsize[-2] = 1 # all dims are the same except the image row, of which there is only one
+        if linecounter == 0 and spacing < 1.0:
+            spacing = round(prod(tempsize[0:-1])) # find the length of the thing not counting the columns
+        tempsize[-2] = 2*linecounter + spacing # all dims are the same except the image row, to which I add an increasing number of rows
+        #print "iterate (A.ndim=%d) -- now linecounter is "%A.ndim,linecounter
+        linecounter += tempsize[-2] # keep track of the extra lines at the end
         A = concatenate((A,nan*zeros(tempsize)),axis=(A.ndim-2)) # concatenate along the rows
         tempsize = r_[A.shape[0:-3],A.shape[-2:]]
         tempsize[-2] *= A.shape[-3]
         A = A.reshape(tempsize) # now join them up
-        ++extralines # keep track of the extra lines at the end
-    A = A[:A.shape[0]-extralines,:]
+    A = A[:A.shape[0]-linecounter,:] # really I should an extra counter besides linecounter now that I am using "spacing", but leave alone for now, to be sure I don't cute off data
     #line_mask = isnan(A)
     #A[line_mask] = A[logical_not(line_mask)].max()
     #A[line_mask] = 0
     if iscomplex(A).any():
         A = imagehsv(A,**imagehsvkwargs)
-        imshow(A,extent=myext,**kwargs)
+        retval = imshow(A,extent=myext,**kwargs)
     else:
-        imshow(A,extent=myext,**kwargs)
+        retval = imshow(A,extent=myext,**kwargs)
         colorbar()
     if setlabels:
         xlabel(x_label)
         #print y_label
         ylabel(y_label)
-    return
+    return retval
 def colormap(points,colors,n=256):
     r = interp(linspace(0,1,n),points,colors[:,0].flatten())
     g = interp(linspace(0,1,n),points,colors[:,1].flatten())
@@ -3708,7 +4793,10 @@ def imagehsv(A,logscale = False,black = False):
     if logscale:
         intensity = log10(intensity)
     if black:
-        colors = intensity*colors
+        if black is True:
+            colors = intensity*colors
+        else:
+            colors = intensity*colors*black + (1.0-black)
         colors[mask] = 1.0
     else:
         colors = 1.0-intensity*(1.0-colors)
@@ -3754,10 +4842,10 @@ class fitdata(nddata):
             else:
                 raise CustomError("I can't figure out the fit axis!")
         self.fit_axis = fit_axis
-        #{{{ in the class, only store the forced values and indeces they are set to
+        #{{{ in the class, only store the forced values and indices they are set to
         self.set_to = None
-        self.set_indeces = None
-        self.active_indeces = None
+        self.set_indices = None
+        self.active_indices = None
         #}}}
         return
     def parameter_derivatives(self,xvals,set = None,set_to = None,verbose = False):
@@ -3891,10 +4979,10 @@ class fitdata(nddata):
         for j in range(0,len(namelist)):
             self.__setattr__(namelist[j],vallist[j])
         return new
-    def gen_indeces(self,set,set_to):
+    def gen_indices(self,set,set_to):
         r'''pass this set and set\_to parameters, and it will return:
-        indeces,values,mask
-        indeces --> gives the indeces that are forced
+        indices,values,mask
+        indices --> gives the indices that are forced
         values --> the values they are forced to
         mask --> p[mask] are actually active in the fit'''
         if type(set) is not list:
@@ -3903,20 +4991,20 @@ class fitdata(nddata):
             set_to = [set_to]
         if len(set) != len(set_to):
             raise CustomError('length of set=',set,'and set_to',set_to,'are not the same!')
-        set_indeces = map(self.symbol_list.index,set) # calculate indeces once for efficiency
+        set_indices = map(self.symbol_list.index,set) # calculate indices once for efficiency
         active_mask = ones(len(self.symbol_list),dtype = bool)
-        active_mask[set_indeces] = False # generate the mask of indeces that are actively fit
-        return set_indeces,set_to,active_mask
+        active_mask[set_indices] = False # generate the mask of indices that are actively fit
+        return set_indices,set_to,active_mask
     def remove_inactive_p(self,p):
         return p[self.active_mask]
     def add_inactive_p(self,p):
-        if self.set_indeces != None:
+        if self.set_indices != None:
             #{{{ uncollapse the function
             temp = p.copy()
             p = zeros(len(self.symbol_list))
             p[self.active_mask] = temp
             #}}}
-            p[self.set_indeces] = self.set_to # then just set the forced values to their given values
+            p[self.set_indices] = self.set_to # then just set the forced values to their given values
         return p
     def fitfunc(self,p,x):
         r"this wraps fitfunc_raw (which gives the actual form of the fit function) to take care of forced variables"
@@ -3972,13 +5060,13 @@ class fitdata(nddata):
         if not hasattr(self,'fit_coeff') or self.fit_coeff is None:
             return None
         p = self.fit_coeff.copy()
-        if self.set_indeces != None:
+        if self.set_indices != None:
             #{{{ uncollapse the function
             temp = p.copy()
             p = zeros(len(self.symbol_list))
             p[self.active_mask] = temp
             #}}}
-            p[self.set_indeces] = self.set_to # then just set the forced values to their given values
+            p[self.set_indices] = self.set_to # then just set the forced values to their given values
             #print "DEBUG trying to uncollapse in fitfunc w/ ",self.symbol_list,"; from",temp,"to",p
         # this should also be generic
         if len(name) == 1:
@@ -3995,7 +5083,7 @@ class fitdata(nddata):
         return self.symbol_list.index(name)
     def _active_symbols(self):
         if not hasattr(self,'active_symbols'):
-            if self.set_indeces != None:
+            if self.set_indices != None:
                 self.active_symbols = [x for x in self.symbol_list if self.active_mask[self._pn(x)]]
             else:
                 self.active_symbols = list(self.symbol_list)
@@ -4026,8 +5114,8 @@ class fitdata(nddata):
                 recdata.append(make_rec(thisdata,recnames))
             return r_[tuple(recdata)]
         if len(names) > 0:
-            indeces = map(self._pn_active,names) # slice out only these rows and columns
-            return self.covariance[r_[indeces],:][:,r_[indeces]].copy()
+            indices = map(self._pn_active,names) # slice out only these rows and columns
+            return self.covariance[r_[indices],:][:,r_[indices]].copy()
         else:
             try:
                 return self.covariance.copy()
@@ -4090,10 +5178,10 @@ class fitdata(nddata):
             p = array([NaN]*len(self.symbol_list))
         #{{{ LOCALLY apply any forced values
         if set != None:
-            if self.set_indeces != None:
-                raise CustomError("your'e trying to set indeces in an eval function for a function that was fit constrained; this is not currently supported")
-            set_indeces,set_to,active_mask = self.gen_indeces(set,set_to)
-            p[set_indeces] = set_to
+            if self.set_indices != None:
+                raise CustomError("your'e trying to set indices in an eval function for a function that was fit constrained; this is not currently supported")
+            set_indices,set_to,active_mask = self.gen_indices(set,set_to)
+            p[set_indices] = set_to
         #}}}
         #{{{ make a new, blank array with the fit axis expanded to fit taxis
         newdata = ndshape(self)
@@ -4131,13 +5219,15 @@ class fitdata(nddata):
             sigma = ones(shape(y))
         p_ini = real(array(self.guess())) # need the numpy format to allow boolean mask
         if set != None:
-            self.set_indeces,self.set_to,self.active_mask = self.gen_indeces(set,set_to)
+            self.set_indices,self.set_to,self.active_mask = self.gen_indices(set,set_to)
             p_ini = self.remove_inactive_p(p_ini)
         leastsq_args = (self.errfunc, p_ini)
         leastsq_kwargs = {'args':(x,y,sigma),
                     'full_output':True}# 'maxfev':1000*(len(p_ini)+1)}
         if hasattr(self,'has_grad') and self.has_grad == True:
             leastsq_kwargs.update({'Dfun':self.parameter_gradient})
+        if 'Dfun' in leastsq_kwargs.keys():
+            print "yes, Dfun passed with arg",leastsq_kwargs['Dfun']
         try:
             p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
         #{{{ just give various explicit errors
@@ -4230,10 +5320,10 @@ class fitdata(nddata):
                 #{{{ now extend
                 number_to_replace = origsizecheck - thiscopy.data.size
                 #print 'DEBUG: number_to_replace',number_to_replace
-                random_indeces = int32((rand(number_to_replace)*(thiscopy.data.size-1.0)).round())
-                thiscopy.data = r_[thiscopy.data,thiscopy.data.copy()[random_indeces]]
-                thiscopy.labels([thiscopy.fit_axis],[r_[x,x.copy()[random_indeces]]])
-                thiscopy.set_error(r_[derr,derr.copy()[random_indeces]])
+                random_indices = int32((rand(number_to_replace)*(thiscopy.data.size-1.0)).round())
+                thiscopy.data = r_[thiscopy.data,thiscopy.data.copy()[random_indices]]
+                thiscopy.labels([thiscopy.fit_axis],[r_[x,x.copy()[random_indices]]])
+                thiscopy.set_error(r_[derr,derr.copy()[random_indices]])
                 #print 'DEBUG: size of data after extension',double(size(thiscopy.data))/origsizecheck
                 #}}}
                 try:
@@ -4359,5 +5449,33 @@ if paramset.myparams['figlist_type'] == 'figlistl':
     from fornotebook import *
     figlist_var = figlistl
 elif paramset.myparams['figlist_type'] == 'figlist':
-    from matlablike import *
+    def obsn(*x): #because this is used in fornotebook, and I want it defined
+        print ''.join(x),'\n'
+    def obs(*x): #because this is used in fornotebook, and I want it defined
+        print ''.join(map(repr,x))
+    def lrecordarray(*x,**kwargs):
+        print x # if I'm not using tex, it's easier to not use the formatting
     figlist_var = figlist
+    def lsafe(*string,**kwargs):
+        "replacement for normal lsafe -- no escaping"
+        if len(string) > 1:
+            lsafewkargs = lambda x: lsafe(x,**kwargs)
+            return ' '.join(list(map(lsafewkargs,string)))
+        else:
+            string = string[0]
+        #{{{ kwargs
+        spaces = False
+        if 'spaces' in kwargs.keys():
+            spaces = kwargs.pop('spaces')
+        if 'wrap' in kwargs.keys():
+            wrap = kwargs.pop('wrap')
+        else:
+            wrap = None
+        #}}}
+        if type(string) is not str:
+            string = repr(string)
+        if wrap is True:
+            wrap = 60
+        if wrap is not None:
+            string = '\n'.join(textwrap.wrap(string,wrap))
+        return string

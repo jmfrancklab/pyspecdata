@@ -1,6 +1,10 @@
 \ProvidesPackage{myparagraphformatting}
 \NeedsTeXFormat{LaTeX2e}[1994/12/01]
+<<<<<<< HEAD
+\DeclareOption{noparagraph}{\@ifundefined{noparagraph}{\newcommand{\noparagraph}{test}}{}}
+=======
 \DeclareOption{noparagraph}{\newcommand{\noparagraph}{test}}
+>>>>>>> public
 \DeclareOption{nohrule}{\newcommand{\nohrule}{test}}
 \ProcessOptions
 \RequirePackage[normalem]{ulem}
@@ -13,9 +17,15 @@
 \let\oldparagraph = \paragraph
 \let\oldsubparagraph = \subparagraph
 \newcommand{\outlineblank}[2][-->]{\phantomsection\addcontentsline{toc}{#2}{#1}}
+<<<<<<< HEAD
+\newcommand{\condhrule}[1]{\@ifundefined{nohrule}{\texorpdfstring{\color{#1}\hrulefill}{}}{}}
+\@ifundefined{noparagraph}{
+\renewcommand{\subsubsection}[1]{\oldsubsubsection{{\small #1}\condhrule{black}}}
+=======
 \newcommand{\condhrule}{\@ifundefined{nohrule}{\hrulefill}{}}
 \@ifundefined{noparagraph}{
 \renewcommand{\subsubsection}[1]{\oldsubsubsection{{\small #1}\condhrule}}
+>>>>>>> public
 %\renewcommand{\paragraph}[1]{\textsc{\oldparagraph{#1}}\textsc{\uline{#1}}\blacktext{$\Rightarrow$}\addcontentsline{toc}{paragraph}{#1}}
 %\renewcommand{\paragraph}[1]{\texttt{\oldparagraph{#1}}\texttt{\uline{#1}}\blacktext{$\Rightarrow$}\phantomsection\addcontentsline{toc}{paragraph}{#1}}
 \renewcommand{\paragraph}[1]{%uline on the inside!!!
@@ -26,9 +36,15 @@
 \let\mysubparagraph=\subparagraph
 %\renewcommand{\subparagraph}[1]{\textit{\small{\uline{#1}}}}
 }{
+<<<<<<< HEAD
+%\renewcommand{\subsubsection}[1]{\phantomsection\addcontentsline{toc}{subsubsection}{#1}
+%
+%}
+=======
 \renewcommand{\subsubsection}[1]{\phantomsection\addcontentsline{toc}{subsubsection}{#1}
 
 }
+>>>>>>> public
 \renewcommand{\paragraph}[1]{\phantomsection\addcontentsline{toc}{paragraph}{#1}
 
 }

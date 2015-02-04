@@ -258,6 +258,10 @@
     \newcounter{currentreferencecounter}%this tells me what reference I want to point AT
     \makeatletter
     \newcommand{\note}[2][blue]{% the first argument is the text to highlight and the second is the footnote
+<<<<<<< HEAD
+    %look at previous git versions to see where I added the ability to distinguish between columns, and draw the arrows correctly --> however, this didn't work so great, so I pulled it out
+=======
+>>>>>>> public
     \gdef\myarrowdir{-90}%should be able to use if@firstcolumn, but not able to
     \stepcounter{myreferencecounter}%whenever I call note, I create a new reference
     \stepcounter{mycommentstacksizecounter}%but, I have not yet used that to make a comment, debug follows: %(for note, reference counter is \themyreferencecounter\ and stack is \themycommentstacksizecounter\ deep)
@@ -375,6 +379,42 @@
 %}}} end arrow comments
 %{{{ map comment commands to printed comments
 \@ifundefined{commentsoff}{
+<<<<<<< HEAD
+%{{{ john
+\renewcommand{\johnmark}[1]{\note[\johnscolor]{#1}}
+\renewcommand{\johnbox}[2][180]{\showinlinesetcolor[#1]{\johnscolor}{{\tiny\textit{John:}}#2}}
+\renewcommand{\johnresp}[1]{\showrespbox{\johnscolor}{{\tiny\textit{John:}}#1}}
+\renewcommand{\johnbubble}[1]{\shownotesetcolor{\johnscolor}{{\tiny\textit{John:}}#1}}
+\renewcommand{\john}[2][]{\johnmark{#1}\johnbubble{#2}}
+\newcommand{\johntwocol}[2][]{\johnmark{#1}\inlinewrapfig{\johnbox[0]{#2}}}
+%}}}
+%{{{ need to do
+\newcommand{\ntdmark}[1]{\johnmark{#1}}
+\newcommand{\ntdbubble}[1]{\johnbubble{\textbf{I need to:} #1}}
+\newcommand{\ntdbox}[1]{\johnbox{\textbf{I need to:} #1}}
+\renewcommand{\ntd}[2][]{\ntdmark{#1}\ntdbubble{#2}}
+%}}}
+%{{{ songi
+\renewcommand{\songimark}[1]{\note[red]{#1}}
+\renewcommand{\songibox}[2][180]{\showinlinesetcolor[#1]{red}{{\tiny\textit{Songi:}}#2}}
+\renewcommand{\songibubble}[1]{\shownotesetcolor{red}{{\tiny\textit{Songi:}}#1}}
+\renewcommand{\songi}[2][]{\texorpdfstring{\songimark{#1}\songibubble{#2}}{#1}}
+\newcommand{\songitwocol}[2][]{\songimark{#1}\inlinewrapfig{\songibox[0]{#2}}}
+%}}}
+%{{{peter
+\renewcommand{\petermark}[1]{\note[\peterscolor]{#1}}
+\renewcommand{\peterbox}[1]{\showinlinesetcolor{\peterscolor}{{\tiny\textit{Peter:}}#1}}
+\renewcommand{\peterresp}[1]{
+
+\showrespbox{green}{{\tiny\textit{Peter:}}#1}}
+\renewcommand{\peterbubble}[1]{\shownotesetcolor{green}{{\tiny\textit{Peter:}}#1}}
+\renewcommand{\peter}[2][]{\petermark{#1}\peterbubble{#2}}
+%}}}
+%{{{yuan
+\renewcommand{\yuanmark}[1]{\note[\yuanscolor]{#1}}
+\renewcommand{\yuanbox}[1]{\showinlinesetcolor{\yuanscolor}{{\tiny\textit{Yuan:}}#1}}
+\renewcommand{\yuanbubble}[1]{\shownotesetcolor{\yuanscolor}{{\tiny\textit{Yuan:}}#1}}
+=======
 %{{{ need to do
 \renewcommand{\ntd}[2][]{\note[blue]{#1}\shownotesetcolor{blue}{{\tiny\textit{Need To Do:}}#2}}
 \newcommand{\ntdmark}[1]{\note[blue]{#1}}
@@ -405,6 +445,7 @@
 \newcommand{\yuanmark}[1]{\note[yellow]{#1}}
 \newcommand{\yuanbox}[1]{\showinlinesetcolor{yellow}{{\tiny\textit{Yuan:}}#1}}
 \newcommand{\yuanbubble}[1]{\shownotesetcolor{yellow}{{\tiny\textit{Yuan:}}#1}}
+>>>>>>> public
 \renewcommand{\yuan}[2][]{\yuanmark{#1}\yuanbubble{#2}}
 %}}} end yuan
 }{
@@ -414,4 +455,10 @@
 \renewcommand{\peter}[2][]{#1}
 \renewcommand{\yuan}[2][]{#1}
 }
+<<<<<<< HEAD
+
+\newcommand{\detectcolumn}{
+}
+=======
+>>>>>>> public
 %}}}

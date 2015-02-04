@@ -3,14 +3,25 @@
 %DIF UNDERLINE PREAMBLE %DIF PREAMBLE
 \usepackage{fancyhdr}
 \usepackage{wrapfig}
+\usepackage{indentfirst}
 \pdfpagewidth 8.5in
 \pdfpageheight 11in
+\bibliographystyle{unsrt}
 
 %\usepackage[nolabels]{new_mynotebook}
-\usepackage{new_mynotebook}
+\usepackage[nolabels]{mynotebook}
+\usepackage{cleveref}%for cref
+\crefname{equation}{Eq.}{Eqs.}
+%\crefname{section}{Section}{Sections}
+\crefname{section}{\S}{\S\S}
+\crefname{table}{Table}{Tables}
+\crefname{figure}{Fig.}{Figs.}
 \begin{document}
-%\input{allratios}
+\currenttime, \today 
 \input{inprocess/working_copy}
-%\input{protocols/gro_es}
 
+\let\section=\oldsection
+\begin{footnotesize}
+\bibliography{library_abbrev}
+\end{footnotesize}
 \end{document}
