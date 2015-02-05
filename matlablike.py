@@ -1064,7 +1064,11 @@ def dirformat(file):
         return file
 #}}}
 #{{{ old grid and tick
-def gridandtick(ax,rotation=(0,0),precision=(2,2),labelstring=('',''),gridcolor=r_[0,0,0],formatonly = False,fixed_y_locator = None,logarithmic = False,use_grid = True,spines = None,y = True):
+def gridandtick(ax,rotation=(0,0),precision=(2,2),
+        labelstring=('',''),gridcolor=r_[0,0,0],
+        formatonly = False,fixed_y_locator = None,
+        logarithmic = False,use_grid = True,
+        spines = None,y = True):
     #{{{ taken from matplotlib examples
     def adjust_spines(ax,spines):
         xlabel = ax.get_xlabel()
@@ -1617,6 +1621,36 @@ class figlist(object):
                 else:
                     self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]))
         return testdata
+    def adjust_spines(self,spines):
+        ax = gca()
+        #{{{ taken from matplotlib examples
+        for loc, spine in ax.spines.items():
+            if loc in spines:
+                spine.set_position(('outward',10)) # outward by 10 points
+                spine.set_smart_bounds(True)
+            else:
+                spine.set_color('none') # don't draw spine
+
+        # turn off ticks where there is no spine
+        if 'left' in spines:
+            ax.yaxis.set_ticks_position('left')
+        else:
+            # no yaxis ticks
+            ax.yaxis.set_ticks([])
+
+        if 'bottom' in spines:
+            ax.xaxis.set_ticks_position('bottom')
+        else:
+            # no xaxis ticks
+            ax.xaxis.set_ticks([])
+        #}}}
+    def grid(self):
+        ax = gca()
+        if self.black:
+            gridandtick(ax,gridcolor = r_[0.5,0.5,0.5])
+        else:
+            gridandtick(ax,gridcolor = r_[0,0,0])
+        return
     def image(self,*args,**kwargs):
         firstarg = self.check_units(args[0],-1,0) # check units, and if need be convert to human units, where x is the last dimension and y is the first
         if self.black and 'black' not in kwargs.keys():
@@ -2591,6 +2625,13 @@ class nddata (object):
         if retval.find('\\') > -1:
             retval = '$'+retval+'$'
         return retval
+    def replicate_units(self,other):
+        for thisaxis in self.dimlabels:
+            if other.get_units(thisaxis) is not None:
+                self.set_units(thisaxis,other.get_units(thisaxis))
+        if other.get_units() is not None:
+            self.set_units(other.get_units(thisaxis))
+        return self
     def get_units(self,*args):
         if len(args) == 1:
             if self.axis_coords_units == None:
@@ -4060,7 +4101,7 @@ class nddata (object):
             test_axis = ascontiguousarray(test_axis).flatten().view([('',test_axis.dtype)]*test_axis.shape[1])
             if all(test_axis == test_axis[0]):
                 self.axis_coords[axis_number] = self.axis_coords[axis_number][:,0].reshape(1,-1)
-                print "(chunk auto) collapsed to", self.axis_coords[axis_number]
+                if verbose: print "(chunk auto) collapsed to", self.axis_coords[axis_number]
             #}}}
             if self.axis_coords[axis_number].shape[0] == 1:# then this is a "valid" axis -- because, for each position of the new axis, there is only one value of the remainder axis
                 self.axis_coords[axis_number] = self.axis_coords[axis_number].reshape(-1)
