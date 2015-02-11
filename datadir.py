@@ -1,13 +1,10 @@
 import os
-<<<<<<< HEAD
-=======
 def dirformat(file):
         #{{{ format strings
         if file[-1]!='/':
             file += '/'
         #}}}
         return file
->>>>>>> public
 def grab_data_directory():
     'this checks if the environment variable for the python data directory, PYTHONDATADIR, is set, and that .matplotlib directory has been created\n if needed, it sets and creates them, respectively\n\t\treturns: grabbed_datadir_from_file --> it sucessfully pulled PYTHONDATADIR from the .datadir file\n\t\t\t datadir_error --> it couldn\'t figure out what the data directory was, and returns an appropriate error message'
     grabbed_datadir_from_file = False
@@ -44,8 +41,4 @@ def getDATADIR():
         if datadir_error is not False:
             raise RuntimeError(datadir_error)
         DATADIR = os.environ['PYTHONDATADIR']
-<<<<<<< HEAD
-    return DATADIR
-=======
     return dirformat(DATADIR)
->>>>>>> public

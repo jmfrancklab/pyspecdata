@@ -50,30 +50,17 @@ class my_widget_class (QtGui.QDialog):
         if not os.path.exists('auto_figures'):
             os.mkdir('auto_figures')
         if self.datadir_changed:
-<<<<<<< HEAD
             if os.path.exists(os.curdir+'/.datadir'):
                 fp = open(os.curdir+'/.datadir','r')
-=======
-            if os.path.exists('.datadir'):
-                fp = open('.datadir','r')
->>>>>>> public
                 print '.datadir originally said:',fp.read()
                 fp.close()
             fp = open(os.curdir+'/.datadir','w')
             fp.write(self.currently_displayed_datadir)
-<<<<<<< HEAD
-=======
-            fp.close()
->>>>>>> public
             fp = open('.datadir','r')
             print 'now, .datadir says:',fp.read()
             fp.close()
         if os.path.exists(self.currently_displayed_homedir+'/.latexmkrc'):
-<<<<<<< HEAD
             print 'I see that you already have a',self.currently_displayed_homedir+'/.datadir, so I\'m not going to overwrite it'
-=======
-            print 'I see that you already have a',self.currently_displayed_homedir+'/.latexmkrc, so I\'m not going to overwrite it'
->>>>>>> public
         else:
             print "I see that no latexmkrc exists in",self.currently_displayed_homedir,"so I will create one"
             QtGui.QMessageBox.warning(self,"testing installation","Since this seems to be the first time that you are running stuff, I'm going to try to open sumatrapdf --> if it comes up, just close it.")
@@ -188,7 +175,6 @@ $pdf_previewer=q/okular --unique/;''')
                         QtGui.QMessageBox.warning(self,"Done!","Script ran without any errors!")
                     dump_latex_finish(fp_out)
                     fp_out.close()
-<<<<<<< HEAD
                     proc = Popen(['pdflatex','-synctex=1','-shell-escape',file_to_gen],
                             shell = True)
                     proc.wait()
@@ -204,24 +190,6 @@ $pdf_previewer=q/okular --unique/;''')
                         'sumatrapdf',
                         '-reuse-instance',
                         file_to_gen_basename+'.pdf'],shell = True)
-=======
-                    proc = Popen(['pdflatex -synctex=1 -shell-escape %s'%file_to_gen],
-                            shell = True)
-                    proc.wait()
-                    proc = Popen(['bibtex %s'%file_to_gen_basename],
-                            shell = True)
-                    proc.wait()
-                    proc = Popen(['pdflatex -synctex=1 -shell-escape %s'%file_to_gen],
-                        shell = True)
-                    proc.wait()
-                    if os.name == 'nt':
-                        proc = Popen(['start',
-                            'sumatrapdf',
-                            '-reuse-instance',
-                            file_to_gen_basename+'.pdf'],shell = True)
-                    elif os.name == 'posix':# this is for Mac, actually, which we could further discriminate by running "uname -a"
-                        proc = Popen(['open %s'%file_to_gen_basename+'.pdf'],shell = True)
->>>>>>> public
                     proc.wait()
                 else:
                     raise ValueError("You selected a file that's not a python script!!")

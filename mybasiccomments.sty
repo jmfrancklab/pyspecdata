@@ -1,6 +1,5 @@
 \ProvidesPackage{mybasiccomments}
 \RequirePackage{xcolor}
-<<<<<<< HEAD
 \RequirePackage{soul}
 \RequirePackage{pdfcomment}
 
@@ -13,54 +12,14 @@
 \newcommand{\johnresp}[1]{{\color{\johnscolor}#1}}
 \newcommand{\ntd}[2][]{\nts{#1}\johnbubble{Need to do: #2}}
 
-\newcommand{\petermark}[1]{\hl{#1}}
-\newcommand{\peterscolor}{green}
-\newcommand{\peterbubble}[2][]{\pdfcomment[author={Peter Qin},subject={},color=\peterscolor,hspace=10pt]{#2}{\color{\peterscolor}\protect\footnote{\color{\peterscolor}#2}}}
-\newcommand{\peterbox}[2][]{\pdfcomment[author={Peter Qin},subject={},color=\peterscolor,hspace=10pt]{#2}{\color{\peterscolor}\protect\footnote{\color{\peterscolor}#2}}}
-\newcommand{\peterresp}[1]{{\color{\johnscolor}#1}}
-\newcommand{\peter}[2][]{\petermark{#1}\peterbubble{#2}}
-
-\newcommand{\yuanscolor}{orange}
-\newcommand{\yuanmark}[1]{\hl{#1}}
-\newcommand{\yuanbubble}[2][]{\pdfcomment[author={Yuan Ding},subject={},color=yuanscolor,hspace=10pt]{#2}{\color{yuanscolor}\protect\footnote{\color{yuanscolor}#2}}}
-\newcommand{\yuanbox}[2][]{\pdfcomment[author={Yuan Ding},subject={},color=yuanscolor,hspace=10pt]{#2}{\color{yuanscolor}\protect\footnote{\color{yuanscolor}#2}}}
-\newcommand{\yuan}[2][]{\yuanmark{#1}\yuanbubble{#2}}
-
-\newcommand{\songimark}[1]{\hl{#1}}
-\newcommand{\songibubble}[2][]{\pdfcomment[author={Songi Han},subject={},color=red,hspace=10pt]{#2}{\color{red}\protect\footnote{\color{red}#2}}}
-\newcommand{\songibox}[2][]{\pdfcomment[author={Songi Han},subject={},color=red,hspace=10pt]{#2}{\color{red}\protect\footnote{\color{red}#2}}}
-\newcommand{\songi}[2][]{\songimark{#1}\songibubble{#2}}
-
 \newcommand{\johncomment}[3]{\pdfcomment[author={John Franck #1},subject={},color=green,hspace=10pt]{#3}\index{#2#3}\quad}
 %\newcommand{\john}[1]{\pdfcomment[author={John Franck},subject={},color=blue,hspace=10pt]{#1}\quad}
 \newcommand{\johnnofoot}[2][]{\hl{#1}\pdfcomment[author={John Franck},subject={},color=green,hspace=10pt]{#2}}
-\newcommand{\adlin}[2][]{\hl{#1}\pdfcomment[author={Adlin},subject={},color=green,hspace=10pt]{#2}{\color{green}\protect\footnote{\color{green}#2}}}
 \newcommand{\johnemph}[2][]{\hl{#1}\pdfcomment[author={John Franck},subject={},color=red,hspace=10pt]{#2}{\color{red}\protect\footnote{\color{red}#2}}}
 \newcommand{\icomment}[2][]{\hl{#1}\pdfcomment[author={},subject={immediate change},color=red,hspace=10pt]{#2}\quad}
-\newcommand{\sunyia}[2][]{\hl{#1}\pdfcomment[author={sunyia},subject={},color=orange,hspace=10pt]{#2}\quad}
-\newcommand{\julia}[2][]{\hl{#1}\pdfcomment[author={julia},subject={},color=green,hspace=10pt]{#2}\quad}
-=======
-\RequirePackage{pdfcomment}
-\newcommand{\johncomment}[3]{\pdfcomment[author={John Franck #1},subject={},color=blue,hspace=10pt]{#3}\index{#2#3}\quad}
-%\newcommand{\john}[1]{\pdfcomment[author={John Franck},subject={},color=blue,hspace=10pt]{#1}\quad}
-\newcommand{\john}[2][]{#1\pdfcomment[author={John Franck},subject={},color=blue,hspace=10pt]{#2}{\color{blue}\protect\footnote{\color{blue}#2}}}
-\newcommand{\adlin}[2][]{#1\pdfcomment[author={Adlin},subject={},color=green,hspace=10pt]{#2}{\color{green}\protect\footnote{\color{green}#2}}}
-\newcommand{\johnemph}[2][]{#1\pdfcomment[author={John Franck},subject={},color=red,hspace=10pt]{#2}{\color{red}\protect\footnote{\color{red}#2}}}
-\newcommand{\icomment}[2][]{#1\pdfcomment[author={},subject={immediate change},color=red,hspace=10pt]{#2}\quad}
-\newcommand{\songi}[2][]{#1\pdfcomment[author={Songi Han},subject={},color=red,hspace=10pt]{#2}{\color{red}\protect\footnote{\protect\color{red}#2}}}
-\newcommand{\peter}[2][]{#1\pdfcomment[author={Peter Qin},subject={},color=green,hspace=10pt]{#2}{\color{green}\protect\footnote{\protect\color{green}#2}}}
-\newcommand{\yuan}[2][]{#1\pdfcomment[author={Yuan Ding},subject={},color=yellow,hspace=10pt]{#2}{\color{yellow}\protect\footnote{\protect\color{yellow}#2}}}
-\newcommand{\sunyia}[2][]{#1\pdfcomment[author={sunyia},subject={},color=orange,hspace=10pt]{#2}\quad}
-\newcommand{\julia}[2][]{#1\pdfcomment[author={julia},subject={},color=green,hspace=10pt]{#2}\quad}
->>>>>>> public
-\newcommand{\nandocomment}[3]{\pdfcomment[author={Nandini Ananth #1},subject={},color=pink,hspace=10pt]{#3}\index{#2#3}\quad}
 % need to show
 \newcommand{\nts}[1]{\xspace{\bf{\color{orange}#1}}}
 % need to do
-<<<<<<< HEAD
 \newcommand{\add}[1]{\textit{#1}}
 \newcommand{\command}[1]{{\tt #1}}
 \newcommand{\na}[1]{\begin{tiny}{\it{\color{mygray}#1}}\end{tiny}}
-=======
-\newcommand{\ntd}[1]{\xspace{\textit{\textbf{\color{orange}#1}}}}
->>>>>>> public

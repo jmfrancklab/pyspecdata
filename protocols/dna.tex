@@ -5,11 +5,7 @@ Here, we are looking at the DNP on CS14, which Katherine looked at before.
 This is the part that has the ligand, but is not bound to streptavidin.
 
 \subsubsection{initial setup}\maxminutes{57}
-<<<<<<< HEAD
 \paragraph{First Time}
-=======
-\paragraph{before leaving}
->>>>>>> public
 Be sure to carry over:
 \begin{itemize}
     \item microcentrifuge tubes
@@ -19,17 +15,13 @@ Be sure to carry over:
     \item magnifying glasses
 \end{itemize}
 
-<<<<<<< HEAD
 Attach air tube to temperature control, insert, turn on temp control.
 
-=======
->>>>>>> public
 \paragraph{always}
 Be sure to change section title and label!!!
 
 Copy section label to list for the day.
 
-<<<<<<< HEAD
 $B_0$ field off, air off.
 
 \paragraph{capillary prep}
@@ -49,22 +41,6 @@ Measure sample.
 
 Insert in probe.
 
-=======
-\paragraph{capillary prep}
-\subparagraph{using the sealed tubes from Yuan}
-Cut tube with a few mm space for critoseal.
-
-Measure sample.
-
-Insert in probe.
-
-Check probe marker marks.
-
-Put into tune mode before inserting sample, and turn down power.
-
-Put stuff back in fridge!
-
->>>>>>> public
 \subsubsection{Quick ESR in probe}\maxminutes{11}
 Put into tune mode, $40\;dB$ first.
 
@@ -119,7 +95,6 @@ fl.show(thisjobname()+'.pdf')
 \end{lstlisting}
 \end{tiny}
 
-<<<<<<< HEAD
 \paragraph{determine ratio}
 \ntd{I don't have git set up right here, but later, I should paste the ratio procedure here}
 \subsubsection{DNP Experimental Setup}
@@ -181,203 +156,6 @@ name = 'dna_cs19_bound_120419' # the name of the experiment directory
 path = DATADIR+'franck_cnsi/nmr/' # the name of the directory where you are storing your data
 # the following stays the same
 dnp_for_rho(path,name,[],expno=[],t1expnos = [101],
-=======
-\subsubsection{set up DNP}\maxminutes{38}
-
-\paragraph{insert probe and autotune}
-
-Turn off field.
-
-Check marker marks on probe.
-
-Insert probe with sample.
-
-Attach tuning box, then position and tighted screw.
-
-Turn up air to 10 SCFH.
-
-Press autotune.
-
-\paragraph{determine ratio (if desired)}
-
-\subparagraph{determine experimentally}
-Re-run ESR with probe.
-
-Copy template.
-\fn{dna_cs14_120314}
-
-\sout{ Wobb + just set sfo1 to bottom of dip. }
-sfo1 to 1.51671*frequency, regardless of exact nucleus.
-wobb + tune NMR.
-
-Tune EPR.
-
-Unclick g=2, and set mod amp high so I can get signal in a signal shot.
-
-Re-run EPR zoomed in to center peak.
-
-Turn modulation amp down to 1.5~G, and let it run a few averages.
-
-Set offset based on high and low peaks.
-
-Set field to zero-crossing of center peak on EPR.
-
-Set EPR to standby.
-
-jf\_zg.
-
-Set sfo1 to resonance.
-
-Increase aq to 2.0.  
-
-Unplug mod coil.
-
-jf\_zg and lightning bolt for o1.  
-
-jf\_zg to check.
-
-Copy microwave frequency from ESR and sfo1 from center frequency.  
-
-
-\begin{lstlisting}
-microwave_frequency = 9.790412 #(from file)
-field = 3488.9
-nmr_frequency = 14.8505980
-field = field * 1e-4
-chemical = 'R5a'
-#obs('previous:')
-#calcfielddata(microwave_frequency,chemical,'cnsi')
-obs('new:')
-save_data({chemical+'_elratiocnsi':microwave_frequency/field})
-save_data({chemical+'_nmrelratio':nmr_frequency/microwave_frequency})
-calcfielddata(microwave_frequency,chemical,'cnsi')
-\end{lstlisting}
-
-Set \texttt{aq} back to 0.5.
-
-\paragraph{Tune and set resonant field}
-Detach mod coil and hang in the plastic loop (here so that I don't potentially mess up microwave tune later!).
-
-Copy nmr template dataset.
-\fn{dna_cs14_bound_120314}
-
-Overwrite exp 1 with desired parameters.
-\fn{dna_cs14_rerun_120314}
-
-Round nearest 0.0005\GHz to get YIG frequency.
-
-Open first experiment and set NMR sfo1 to (1.5167)*(YIG frequency).
-
-Tune NMR with {\tt wobb}.
-
-\precaution{Run jf\_dnpconf if necessary -- specifically may need to decrease my attenuation settings by 2.7 $dB$ (or just round it to 3 $dB$).}
-
-Tune microwave by hand
-{\small (Simultaneously set:
-\begin{itemize}
-    \item bias (diode centered at 50 $dB$)
-    \item frequency (AFC)
-    \item phase (coarse: dip in tune mode; fine: furthest right diode w.r.t.signal phase while AFC remains locked)
-\end{itemize}
-up to 5 $dB$.)}
-\begin{lstlisting}
-calcfielddata(9.790400,'R5a','cnsi')
-\end{lstlisting}
-
-Check that YIG frequency is still good
-
-EPR to standby.
-
-\precaution{If frequency is really different for some reason, I will have to set the field here to the value given above.}
-
-\paragraph{ Match NMR + YIG frequencies}
-jf\_zg $\Rightarrow$ for 3.5 $\mu L$ sample, peak should 10-15 high.
-
-Check that the source is on, and reads 0.26 $A$ (rather than 0.54 $A$).
-
-Click lightning bolt to set o1 (while zoomed in with top window).
-
-Repeat jf\_zg to verify that field has stabilized (peak should be at 0).
-
-Set YIG frequency.
-
-Be sure the ppt value is set to the value above.
-
-\precaution{Test amp switch with jf\_setmw (leave other parameters as default).}
-Iteratively adjust the field.
-{\small
-\begin{enumerate}
-	\item jf\_setmw (31.5 $dB$, YIG frequency),
-	\item then if field offset is significant, adjust $B_0$, otherwise stop
-	\item jf\_zgm
-	\item then set sfo1 to NMR resonance (lightning bolt) + start over
-\end{enumerate}
-}
-
-\paragraph{90 time and ready amp}
-jf\_zg + zoom + dpl1 + run {\tt paropt} (p1,8,1,3)
-
-\precaution{This should go down to up at the full cycle;
-if problems, (p1,1,1,11).}
-\precaution{If you want to decrease the narrow noise spikes, minimize WinEPR + turn off bridge + put all bridge cables on top of dewar while paropt is running; could be obsolete with box?}
-Flip waveguide switch.
-
-Set + record $t_{90}$ (``\texttt{p1}'')=(length of full cycle [\us])/4 (At this point, you've determined the resonance frequency, resonant field, and $t_{90}$).
-
-\paragraph{Estimate $T_1$ (with heating)}
-
-\subparagraph{Estimate based on concentration {\tiny (if $T_1$ is available for a different concentration)}}
-
-\begin{lstlisting}
-# edit following
-oldconc = 2e-3 # set this to None if oldt1 is given at
-#the same concentration
-oldt1 = 0.89
-newconc = 10e-6
-# leave the following alone
-def estimate_t1(concentration,value,newconc):
-    water = 1./2.6
-    relaxivity = 1./value
-    relaxivity -= water
-    relaxivity /= concentration
-    relaxivity *= newconc
-    relaxivity += water
-    return 1./relaxivity
-def estimate_hot_t1(thist1):
-    water = 1./2.6
-    hot_water = 1./3.65 # this is for the
-    #new ``closed'' type probe # 7/8 adjusted this
-    thist1 = 1./thist1 # convert to a rate
-    thist1 -= water # figure out which part
-    #is from water
-    thist1 += hot_water # add back in for heating
-    return 1./thist1
-if oldconc == None:
-    t1 = oldt1
-else:
-    t1 = estimate_t1(oldconc,oldt1,newconc)
-    obs(dp(t1,2),r' $s$ without heating')
-obs(dp(estimate_hot_t1(t1),2),r' $s$ with heating')
-\end{lstlisting}
-
-\subparagraph{Estimate experimentally (from rough measurement of $T_1$ and known heating)}
-\texttt{jf\_t10} with default parameters (should be min 1,max 3,steps 5,min ratio 0.08 (should have been 0.05 to match), max ratio 4, pull from exp 4, put in exp 101).
-
-Copy the nmr data.
-
-Change file name!
-
-Process the $T_1$
-
-
-\begin{scriptsize}
-\begin{lstlisting}
-# these change
-name = 'dna_cs14_bound_120314'
-path = DATADIR+'cnsi_data/'
-# the following stays the same
-dnp_for_rho(path,name,[],expno=[],t1expnos = [501],
->>>>>>> public
         integration_width = 150,peak_within = 500,
         show_t1_raw = True,phnum = [4],
         phchannel = [-1],
@@ -387,11 +165,7 @@ dnp_for_rho(path,name,[],expno=[],t1expnos = [501],
 t1 = retrieve_T1series('t1_estimation_only.h5',name)
 def estimate_hot_t1(thist1):
     water = 1./2.6
-<<<<<<< HEAD
     hot_water = 1./4.2 # this is for the new ``closed''
-=======
-    hot_water = 1./3.8 # this is for the new ``closed''
->>>>>>> public
     #type probe # 7/8 adjustted this
     thist1 = 1./thist1 # convert to a rate
     thist1 -= water # figure out which part is from
@@ -401,7 +175,6 @@ def estimate_hot_t1(thist1):
 obs(r'Min $T_1\approx$',lsafe(t1['power',0]),r'\quad $T_{1,max}\approx$',
         lsafe(estimate_hot_t1(t1)),
         r' $s$ with heating')
-<<<<<<< HEAD
 \end{python}
 \end{scriptsize}
 \paragraph{determine $T_1(t)$}
@@ -489,32 +262,6 @@ Copy working\_copy into compilation for this project.
 
 Turn $B_0$ off, remove probe + look at sample.
 
-=======
-\end{lstlisting}
-\end{scriptsize}
-
-\paragraph{determine $T_1(t)$}
-Use jf\_dnp to determine number of points for a scan 17~min long:
-bound NL $\Rightarrow$ min of 2.5 max of 2.9
-unbound NL $\Rightarrow$ min of 2.0 max of 2.9
-
-Run jf\_t10s:
-Set 20 experiments for 4:40, exp 4$\Rightarrow$ 101.
-
-\paragraph{run DNP}
-Start jf\_dnp: Set minimum and maximum $T_1$ values based on $T_1$ estimate (with heating).
-Bound CS14 $\Rightarrow$ min 1.5, max 2.3
-Unbound CS14 $\Rightarrow$ min 1.7, max 2.6
-
-Set number of $T_1$ time to 17~min for this sample.
-
-Set watch timer for experiment time.
-
-\nts{consider closing and opening FTDI connection in the code, so the lock check works!}
-\subsubsection{wait for DNP to run}\maxminutes{90}
-
-\ntd{Here, I should be sure I'm including time for the 3 scans in addition to the ones that are counted.}
->>>>>>> public
 \paragraph{Process multiple $T_1$ data}
 Copy (or Git once that's ready) files.
 
@@ -523,7 +270,6 @@ Change all parameters at beginning.
 Run script
 
 \begin{scriptsize}
-<<<<<<< HEAD
 \begin{python}[off]
 # these change
 name = 'dna_cs19_nl_unbound_120418' # name of dataset
@@ -534,18 +280,6 @@ number_of_repeats = 30 # number of T1 experiments run
 start_exp = 501 # the experiment you started at
 # everything else stays the same
 path = DATADIR+'franck_cnsi/nmr/'
-=======
-\begin{lstlisting}
-# these change
-name = 'dna_cs14_nl_bound_120314'
-chemical = 'dna_cs14_bound'
-concentration = 0.0
-run_number = 120314
-number_of_repeats = 30
-start_exp = 101
-# everything else stays the same
-path = DATADIR+'cnsi_data/'
->>>>>>> public
 dnp_for_rho(path,name,[],expno=[],
     t1expnos = r_[start_exp:start_exp+number_of_repeats],
     integration_width = 150,peak_within = 500,
@@ -565,25 +299,8 @@ t1.rename('power','expno')
 t1.labels('expno',r_[1:1+number_of_repeats])
 plot(t1)
 lplot(name+'_t1_vs_time.pdf')
-<<<<<<< HEAD
 \end{python}
 \end{scriptsize}
-=======
-\end{lstlisting}
-\end{scriptsize}
-\paragraph{put back system}
-\subparagraph{Always}
-Field off.
-
-Hook up mod coil.
-
-Flip back ESR switch.
-
-Turn off the air + check rate.
-
-Pull out + inspect + measure sample with magnifying glasses.
-
->>>>>>> public
 \subsubsection{ESR}\maxminutes{11}
 
 (Here, I run ESR after the DNP, so I don't have to worry about timing, but still get the double integral)
@@ -642,20 +359,15 @@ Put into tune mode before removing sample, and turn down power.
 Run background scan.
 
 \subsubsection{wrap up}\maxminutes{18}
-<<<<<<< HEAD
 Turn off field and air and flip switch.
 
 Pull out and measure sample.
 
 Copy this file into compilation for the project.
-=======
-SVN, then copy working copy of notebook into compilation.
->>>>>>> public
 
 Clear + copy to protocol.
 
 \subparagraph{Run ESR background scan}
-<<<<<<< HEAD
 \subparagraph{Last experiment only}
 Put quartz tube in loops to right, reattach mod coil.
 
@@ -665,33 +377,5 @@ Find dip near 9.88~GHz (if without dewar) or 9.31~GHz (if with dewar), and autot
 
 Git commit again and Git push.
 
-=======
-Autotune + run ESR background scan.
-
-\subparagraph{Last experiment only}
-If done, remove air tube.
-
-Unscrew top collet + carry box w/ dewar around to back.
-
-Remove glass tube and replace dewar.
-
-Insert inner collet.
-
-Screw down top collet holder.
-
-Cap cavity.
-
-Tell software that bridge is on + switch to tune mode
-
-Check for dip near 9.88~GHz (if without dewar) or 9.31~GHz (if with dewar).
-
-Autotune + record Q.
-
-Remove tuning box.
-
-If done, magnet off, ESR off, chiller off, source output off.
-
-Be sure to take coolers and dewar back to lab.
->>>>>>> public
 
 \timeblockend

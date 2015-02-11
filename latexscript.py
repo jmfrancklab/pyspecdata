@@ -96,11 +96,7 @@ def see_if_run(script):
         catalog.append(numpy.array((thisindex,hashstring),script_catalog_type))
         #{{{ write the script
         fp_script = open('scripts/%d.py'%thisindex,'w')
-<<<<<<< HEAD
         fp_script.write('import paramset;paramset.myparams[\'figlist_type\'] = \'figlistl\';from h5nmr import *\n')
-=======
-        fp_script.write('from h5nmr import *\n')
->>>>>>> public
         fp_script.write(script)
         fp_script.close()
         #}}}
@@ -117,10 +113,7 @@ script = read_whole_file(scriptfile)
 has_been_run,script_number,catalog,hashstring = see_if_run(''.join(script))
 script_fname = 'scripts/%d.py'%script_number
 output_fname = script_fname + '.out'
-<<<<<<< HEAD
 intel_envvariables = os.environ # copy all environment variables, because otherwise some versions of windows cant find the DLL
-=======
->>>>>>> public
 if has_been_run:
     #{{{ check that the script matches what's stored here
     stored_script = read_whole_file(script_fname)[1:]
@@ -139,41 +132,24 @@ else:
         fp_out.write(r'\end{lstlisting}'+'\n')
 
     if os.name == 'posix':
-<<<<<<< HEAD
         temp = intel_envvariables
         temp.update({'PYTHONPATH':os.getcwd(),
                     'PYTHONDATADIR':os.environ['PYTHONDATADIR']})
-=======
->>>>>>> public
         proc = Popen(['python','-W','ignore',script_fname],
                 stdout = PIPE,
                 stdin = PIPE,
                 stderr = PIPE,
-<<<<<<< HEAD
                 env = temp)
     else: #windows should give os.name == 'nt'
         temp = intel_envvariables
         temp.update({'PYTHONPATH':os.getcwd(),
                     'MPLCONFIGDIR':os.getcwd()+'/.matplotlib',
                     'PYTHONDATADIR':os.environ['PYTHONDATADIR']})
-=======
-                env = {'PYTHONPATH':os.getcwd(),
-                    'PYTHONDATADIR':os.environ['PYTHONDATADIR']})
-    else: #windows should give os.name == 'nt'
->>>>>>> public
         proc = Popen(['python','-W','ignore',script_fname],
                 stdout = PIPE,
                 stdin = PIPE,
                 stderr = PIPE,
-<<<<<<< HEAD
                 env = temp)
-=======
-                env = {'PYTHONPATH':os.getcwd(),
-                    'SystemRoot':'C:\\Windows',
-                    'MPLCONFIGDIR':os.getcwd()+'/.matplotlib',
-                    'PATH':'',
-                    'PYTHONDATADIR':os.environ['PYTHONDATADIR']})
->>>>>>> public
     stdoutdata,stderrdata = proc.communicate()
     if os.name != 'posix':
         stdoutdata = stdoutdata.replace('\r','')
@@ -189,11 +165,7 @@ else:
             fp_out.write("\n\nThe data directory was"+"not"*(not grabbed_datadir_from_file)+"read from .datadir\n\n")
             fp_out.write("\\begin{tiny}\n")
             fp_out.write("\\begin{verbatim}\n")
-<<<<<<< HEAD
             #fp_out.write('...\n\t'.join(textwrap.wrap(stderrdata,80)))
-=======
-            fp_out.write('...\n\t'.join(textwrap.wrap(stderrdata,80)))
->>>>>>> public
             fp_out.write(stderrdata)
             fp_out.write("\\end{verbatim}\n")
             fp_out.write("\\end{tiny}\n")

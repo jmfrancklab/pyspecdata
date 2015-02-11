@@ -1,12 +1,7 @@
-<<<<<<< HEAD
-=======
-from fornotebook import *
->>>>>>> public
 from matlablike import *
 from nmr import *
 from nmrfit import *
 from interptau import interptau
-<<<<<<< HEAD
 #from fornotebook import lrecordarray
 import time
 from numpy.lib.recfunctions import rename_fields,drop_fields
@@ -18,12 +13,6 @@ bulk_xi_value = 0.27
 bulk_correltime = 54e-12
 bulk_ksigma_value = bulk_xi_value * bulk_krho_value
 bulk_klow_value = 5./3.*bulk_krho_value - 7./3.*bulk_ksigma_value
-=======
-import time
-from numpy.lib.recfunctions import rename_fields,drop_fields
-klow_name = r'k_{low}/k_{low,bulk}'
-ksmax_name = r'k_{\sigma}/k_{\sigma,bulk}'
->>>>>>> public
 #{{{ Classes to load and store stuff to the HDF5 file
 ##{{{ the parent
 class store_integrals:
@@ -63,10 +52,6 @@ class store_integrals:
             #print '\n\n'
             ####{{{ load the self and accompanying data
             self.auxiliary(fid_args,auxiliary_args) # tack on powers, delay times, etc.
-<<<<<<< HEAD
-            #print "about to call integrate function with arguments",dict(firstarg = dirformat(fid_args["path"])+fid_args["name"]+'/',secondarg = self.expno,first_figure = self.figurelist,pdfstring = self.integralnode_name,**integration_args)
-=======
->>>>>>> public
             self.integral,self.figurelist = integrate_function(dirformat(fid_args["path"])+fid_args["name"]+'/',self.expno,first_figure = self.figurelist,pdfstring = self.integralnode_name,**integration_args)
             if type(self.expno) in [list,ndarray]:
                 begin_and_end_files = [self.expno[0],self.expno[-1]]
@@ -104,11 +89,7 @@ class store_integrals:
 class store_Emax (store_integrals):
     def catalog(self):
         h5file,compilationroot_node = h5nodebypath(self.h5filename + '/compilations')
-<<<<<<< HEAD
         search_string = '(integrals == \'%s\')'%self.integralnode_name 
-=======
-        search_string = '(integrals == \'%s\')'%self.integralnode_name
->>>>>>> public
         if self.newrecord:
             Emax_table,self.index = h5addrow(compilationroot_node,'Emax_curves',[long(self.chemical_id),self.integralnode_name,expand_expno(self.expno),self.run_number],['chemical_id','integrals','experiments','run_number'],match_row = search_string)
             print 'DEBUG loaded row:\n\n',lrecordarray(Emax_table.readWhere('index == %d'%self.index),smoosh=True),'\n\n'
@@ -130,10 +111,6 @@ class store_Emax (store_integrals):
         else:
             power_file = auxiliary_args.pop('power_file')
             if fid_args['expno'] == 'auto' or fid_args['expno'] == 'Auto':
-<<<<<<< HEAD
-                #print "parse powers about to be called with arguments",path,fid_args['name'],power_file,auxiliary_args
-=======
->>>>>>> public
                 self.expno,dbm,self.figurelist = parse_powers(path,fid_args['name'],power_file,first_figure = self.figurelist,**auxiliary_args) # the 1 is because I'm not interested in the expnos it uses
                 fl = figlist_var()
                 fl.figurelist = self.figurelist
@@ -273,10 +250,6 @@ def parse_powers(path,name,power_file,expno = None,
     if templen > t_minlength:
        t_minlength = templen
     t_maxlen = scan_length+scanlength_estimation_error
-<<<<<<< HEAD
-    #print "about to pass auto_steps",figurelist
-=======
->>>>>>> public
     dbm,lastspike,figurelist = auto_steps(path+power_file,t_start = t_start*60,t_stop = t_stop,t_minlength = t_minlength,t_maxlen = t_maxlen,tolerance = tolerance, threshold = threshold,return_lastspike = True,first_figure = figurelist)
     downby = r_[-5:5]
     timetomakeup = (len(expno)-len(dbm))*60.0*scan_length+lastspike
@@ -421,11 +394,7 @@ def get_chemical_index(compilationroot_name,*args,**kwargs):
         raise CustomError('Chemical name is "None"!')
     ##{{{ identify the id in the solutions table corresponding to the chemical and concentration
     if concentration is None:
-<<<<<<< HEAD
         search_string = '(chemical == \'%s\')'%chemical_name 
-=======
-        search_string = '(chemical == \'%s\')'%chemical_name
->>>>>>> public
     else:
         search_string = '(chemical == \'%s\') &'%chemical_name + gensearch('concentration','%0.5g',concentration,1e-6)
     ###{{{ grab (or create) the table
@@ -487,11 +456,7 @@ def dnp_for_rho(path,
         t1powers = [], # for this and the next, remember that the no power scan is always added to the end
         t1_powers = None, # new format
         t1expnos = [],
-<<<<<<< HEAD
         t1_autovals = r_[2,3], 
-=======
-        t1_autovals = r_[2,3],
->>>>>>> public
         power_file = None,
         guessonly = False,
         chemical = None,
@@ -628,10 +593,6 @@ def dnp_for_rho(path,
                 first_figure = figurelist,# because I append this later!
                 auxiliary_args = auxiliary_args,
                 integration_args = integration_args)
-<<<<<<< HEAD
-        #print "store Emax called with args",h5file,concentration_id,fid_args,'aux:',auxiliary_args,'int:',integration_args
-=======
->>>>>>> public
         figurelist = emax_in_file.figurelist
         if verbose: print lsafen('DEBUG: figurelist after Emax load is',figurelist)
         if verbose: print lsafen('DEBUG: index is',emax_in_file.index,'for',emax_in_file.integralnode_name,'with experiments',emax_in_file.expno)
@@ -1272,7 +1233,6 @@ def dnp_for_rho(path,
                 title(r'$\xi s(p)$ by various methods')
                 ###}}}
     return figlistret(first_figure,figurelist,basename = fid_args['name'])
-<<<<<<< HEAD
 def T1_interpolation(t1dataset,
         t10_at_zero_power = 2.5,
         T1w = 2.4691,
@@ -1395,8 +1355,6 @@ def T1_interpolation(t1dataset,
         DeltaT10 = c_F_nonlinear[1]
         ###}}}
         return t1f,powers_forplot
-=======
->>>>>>> public
 ##}}}
 #}}}
 #{{{ retrieve the t1 power series results from an HDF file
@@ -1515,11 +1473,7 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
         temp = empty(len(t10subst),dtype = [('dataset','|S100'),('uses $T_{1,0}$ from','|S100')])
         temp['dataset'] = array(t10subst.keys())
         temp['uses $T_{1,0}$ from'] = array(t10subst.values())
-<<<<<<< HEAD
         lrecordarray(temp,std_sf = 7,scientific_notation = False)
-=======
-        lrecordarray(temp)
->>>>>>> public
         print '\n\n'
     h5file = tables.openFile(h5file) # open the HDF5 file
     #{{{ retrieve chemical information
@@ -1539,11 +1493,7 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
         additional_search = 'fit_type == "%s"'%fit_type)
     if verbose:
         print "All \\ksp data (data) I see are:\n\n"
-<<<<<<< HEAD
         lrecordarray(data,resizebox = True,std_sf = 7,scientific_notation = False)
-=======
-        lrecordarray(data,resizebox = True)
->>>>>>> public
         print '\n\n'
     #}}}
     #{{{ pull the T10 data
@@ -1588,11 +1538,7 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
     if verbose:
         print r"After joining the \tonen data onto the t10data array and averaging, it becomes:"
         print '\n\n'
-<<<<<<< HEAD
         lrecordarray(t10data,std_sf = 7,scientific_notation = False)
-=======
-        lrecordarray(t10data)
->>>>>>> public
         print '\n\n'
     #}}}
     #{{{ reorder the data, and specify this is the chemical ID for the spin labeled compound
@@ -1607,29 +1553,17 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
     if verbose:
         print r"Decorating the \ksp data with \texttt{t10data} gives \texttt{newdata} where there was a successfully identified \tonen:"
         print '\n\n'
-<<<<<<< HEAD
         lrecordarray(newdata,std_sf = 7,scientific_notation = False)
         print '\n\n'
         print r"and the dropped rows (\texttt{missing_t10s}):"
         print '\n\n'
         lrecordarray(missing_t10s,std_sf = 7,scientific_notation = False)
-=======
-        lrecordarray(newdata)
-        print '\n\n'
-        print r"and the dropped rows (\texttt{missing_t10s}):"
-        print '\n\n'
-        lrecordarray(missing_t10s)
->>>>>>> public
         print '\n\n'
     if missing_t10s is not None:
         #{{{ alert to, and take care of the missing t10 data
         obs('\n\n$T_{1,0}$ experiments are missing for the following chemical / run number pairs:\n\n')
         print r'{\color{red}'
-<<<<<<< HEAD
         lrecordarray(missing_t10s[['chemical','run_number']],std_sf = 7,scientific_notation = False)
-=======
-        lrecordarray(missing_t10s[['chemical','run_number']])
->>>>>>> public
         t10fields = list(t10data.dtype.names)
         print '\n\n',r'To rectify this, I make the following assignments','\n\n'
         missing_t10s = rename_fields(missing_t10s,{'run_number':'DNP_run_number'})
@@ -1638,22 +1572,14 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
             drop_rows = True)
         print r'}'
         missing_t10s = rename_fields(missing_t10s,{'run_number':'T10_run_number'})
-<<<<<<< HEAD
         lrecordarray(missing_t10s,resizebox = True,std_sf = 7,scientific_notation = False)
-=======
-        lrecordarray(missing_t10s,resizebox = True)
->>>>>>> public
         #{{{ put into the write format and average them
         print r'Then average for all degenerate entries of chemical and DNP run number:','\n\n'
         missing_t10s = rename_fields(missing_t10s,{'DNP_run_number':'run_number'})
         missing_t10s = missing_t10s[t10fields] # go back to fields used in the t10data function, because otherwise I have a string and it freaks out, and also because I need to put them together, below
         missing_t10s = reorder_rec(missing_t10s,t10fields)# because apparently, the above does not accomplish a reorder
         applyto_rec(mean,missing_t10s,['chemical','run_number'])
-<<<<<<< HEAD
         lrecordarray(missing_t10s,std_sf = 7,scientific_notation = False)
-=======
-        lrecordarray(missing_t10s)
->>>>>>> public
         print '\n\n'
         #}}}
         #{{{ Finally, add the second-choice T10's in, and retrieve the resulting data
@@ -1668,11 +1594,7 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
         if missing_t10s is not None:
             obsn('$T_{1,0}$ experiments are STILL missing for the following chemical / run number pairs!!')
             print r'{\color{red}'
-<<<<<<< HEAD
             lrecordarray(missing_t10s[['chemical','run_number']],std_sf = 7,scientific_notation = False)
-=======
-            lrecordarray(missing_t10s[['chemical','run_number']])
->>>>>>> public
             print r'}'
         #}}}
         #}}}
@@ -1693,11 +1615,7 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
     h5file.close() # close the HDF5 file, since all the rest is just spreadsheet math
     if verbose:
         print r"After joining the data for the spin-labeled $T_1$'s onto \texttt{data}, we have","\n\n"
-<<<<<<< HEAD
         lrecordarray(data,resizebox = 0.8,std_sf = 7,scientific_notation = False)
-=======
-        lrecordarray(data,resizebox = 0.8)
->>>>>>> public
         print '\n\n'
     if verbose: print r"Now, I use lambda\_rec~\ref{codelabel:lambda_rec} to calculate $k_\rho$, then $k_{low}$:"+'\n\n'
     #{{{ take the mean of the T10 values, so I only get one krho for data_nice
@@ -1737,18 +1655,13 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
     data_nice = reorder_rec(data_nice,['chemical','run_number','ksmax','klow',r'\xi'])
     data_nice = lambda_rec(data_nice,
         r'ksmax',
-<<<<<<< HEAD
         (lambda x: x/bulk_ksigma_value),
-=======
-        (lambda x: x/116.),
->>>>>>> public
         ['ksmax'])
     extra_factor = 1
     if divide_klow_by is not None:
         extra_factor = divide_klow_by
     data_nice = lambda_rec(data_nice,
         r'klow',
-<<<<<<< HEAD
         (lambda x: x/bulk_klow_value/extra_factor),
         ['klow'])
     data_nice = lambda_rec(data_nice,
@@ -1765,24 +1678,6 @@ def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_
                                 'ksmax':bulk_ksmax_name,
                                 'klow':bulk_klow_name_new})
     data_nice = reorder_rec(data_nice,['chemical','run_number',bulk_klow_name_new,bulk_ksmax_name,xi_name])
-=======
-        (lambda x: x/318./extra_factor),
-        ['klow'])
-    data_nice = lambda_rec(data_nice,
-        r'\xi',
-        (lambda x: x/0.33),
-        [r'\xi'])
-    #{{{ use clumsier but nicer names for my table
-    if divide_klow_by is None:
-        klow_name_new = klow_name
-    else:
-        klow_name_new = '%s/%d'%(klow_name,extra_factor)
-    xi_name = r'\xi/\xi_{bulk}'
-    data_nice = rename_fields(data_nice,{r'\xi':xi_name,
-                                'ksmax':ksmax_name,
-                                'klow':klow_name_new})
-    data_nice = reorder_rec(data_nice,['chemical','run_number',klow_name_new,ksmax_name,xi_name])
->>>>>>> public
     data_nice.sort()
     #}}}
     #}}}
