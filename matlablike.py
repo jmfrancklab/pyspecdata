@@ -2787,8 +2787,8 @@ class nddata (object):
             return A
         #{{{ shape and add
         A,B = self.aligndata(arg)
-        retval = A
-        retval.data = A.data + B.data
+        retval = A.copy()
+        retval.data += B.data
         #}}}
         Aerr = A.get_error()
         Berr = B.get_error()
