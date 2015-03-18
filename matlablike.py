@@ -2882,7 +2882,7 @@ class nddata (object):
             A,B = self.aligndata(arg)
         except:
             raise CustomError("Error aligning right (arg)",arg.name(),"with left (self)",self.name())
-        retval = A
+        retval = A.copy()
         retval.data = A.data * B.data
         #}}}
         #{{{ if we have error for both the sets of data, I should propagate that error
@@ -2926,7 +2926,7 @@ class nddata (object):
             A,B = self.aligndata(arg)
         except:
             raise CustomError("Error aligning right (arg) name:",arg.name(),"with left (self) name:",self.name(),"shapes are (resp):",ndshape(arg),ndshape(self))
-        retval = A
+        retval = A.copy()
         retval.data = A.data / B.data
         #{{{ if we have error for both the sets of data, I should propagate that error
         Aerr = A.get_error()
