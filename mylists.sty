@@ -176,10 +176,12 @@
 %{{{ things for putting items in toc
 \let\initialdescriptionlabel=\descriptionlabel
 \let\initialcheckmark=\checkmark
+\let\initialRightarrow=\Rightarrow
 \let\initialBox=\Box
 \let\initialsout=\sout
 \renewcommand\sout[1]{\texorpdfstring{\initialsout{#1}}{-------}}
 \renewcommand\checkmark{\texorpdfstring{\initialcheckmark}{X}}
+\renewcommand\Rightarrow{\texorpdfstring{\initialRightarrow}{-->}}
 \renewcommand\Box{\texorpdfstring{\initialBox}{\_}}
 \def\resetdescriptionlabel{\renewcommand{\descriptionlabel}{\initialdescriptionlabel}}
 \let\olddescription=\description

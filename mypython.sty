@@ -48,8 +48,8 @@
 \gdef\@pythonargument{#1} % this sets the argument to @pythonargument
 \def\mytestargument{off}%for some reason, just using off doesn't work
 \ifx\@pythonargument\mytestargument%
-\def\my@startcommand{\begingroup\color{dbluecolor}\verbatim}%
-\def\my@endcommand{\endverbatim\endgroup}%
+\def\my@startcommand{\begingroup\color{dbluecolor}\begingroup\tiny\verbatim}%
+\def\my@endcommand{\endverbatim\endgroup\endgroup}%
 \else%
 \def\my@startcommand{\@xpython}%
 \def\my@endcommand{}%

@@ -1,6 +1,7 @@
 from matlablike import *
 from nmr import *
 from nmrfit import *
+from datetime import datetime
 from interptau import interptau
 #from fornotebook import lrecordarray
 import time
@@ -24,7 +25,7 @@ class store_integrals:
             auxiliary_args = {},integration_args = {},integrate_function = integrate,
             lplotfigurekwargs = {},
             type_str = 'integral'):
-        self.figurelist = figlistini_old(first_figure)
+        self.figure_list = figlistini(first_figure)
         self.run_number = run_number
         self.type_str = type_str
         self.name = fid_args["name"]
@@ -52,7 +53,7 @@ class store_integrals:
             #print '\n\n'
             ####{{{ load the self and accompanying data
             self.auxiliary(fid_args,auxiliary_args) # tack on powers, delay times, etc.
-            self.integral,self.figurelist = integrate_function(dirformat(fid_args["path"])+fid_args["name"]+'/',self.expno,first_figure = self.figurelist,pdfstring = self.integralnode_name,**integration_args)
+            self.integral,self.figure_list = integrate_function(dirformat(fid_args["path"])+fid_args["name"]+'/',self.expno,first_figure = self.figure_list,pdfstring = self.integralnode_name,**integration_args)
             if type(self.expno) in [list,ndarray]:
                 begin_and_end_files = [self.expno[0],self.expno[-1]]
             else:
@@ -68,7 +69,7 @@ class store_integrals:
             try:
                 self.attach_aux()
             except:
-                lplotfigures(self.figurelist,'error_figures.pdf')
+                self.figure_list.show('error_figures.pdf')
                 raise CustomError('Look at the power meter graph to see if you can reset the extra_time parameter, or if there is something wrong with the power meter.')
             self.integral.hdf5_write(self.h5filename + '/integrals')
             self.newrecord = True
@@ -111,26 +112,18 @@ class store_Emax (store_integrals):
         else:
             power_file = auxiliary_args.pop('power_file')
             if fid_args['expno'] == 'auto' or fid_args['expno'] == 'Auto':
-                self.expno,dbm,self.figurelist = parse_powers(path,fid_args['name'],power_file,first_figure = self.figurelist,**auxiliary_args) # the 1 is because I'm not interested in the expnos it uses
-                fl = figlist_var()
-                fl.figurelist = self.figurelist
+                self.expno,dbm,self.figure_list = parse_powers(path,fid_args['name'],power_file,first_figure = self.figure_list,**auxiliary_args) # the 1 is because I'm not interested in the expnos it uses
                 mythreshold = -36
                 if 'threshold' in auxiliary_args.keys():
                     mythreshold = auxiliary_args['threshold']
-                fl = check_autosteps(mythreshold,dbm,figure_list = fl)
-                self.figurelist = list(fl.figurelist)
-                del fl
+                self.figure_list = check_autosteps(mythreshold,dbm,figure_list = self.figure_list)
             else:
                 self.expno = fid_args['expno']
-                junk,dbm,self.figurelist = parse_powers(path,fid_args['name'],power_file,expno = self.expno,first_figure = self.figurelist,**auxiliary_args) # the 1 is because I'm not interested in the expnos it uses
-                fl = figlist_var()
-                fl.figurelist = self.figurelist
+                junk,dbm,self.figure_list = parse_powers(path,fid_args['name'],power_file,expno = self.expno,first_figure = self.figure_list,**auxiliary_args) # the 1 is because I'm not interested in the expnos it uses
                 mythreshold = -36
                 if 'threshold' in auxiliary_args.keys():
                     mythreshold = auxiliary_args['threshold']
-                fl = check_autosteps(mythreshold,dbm,figure_list = fl)
-                self.figurelist = list(fl.figurelist)
-                del fl
+                self.figure_list = check_autosteps(mythreshold,dbm,figure_list = self.figure_list)
             print ''%(),r'\begin{minipage}{3in}','\npower log:\n\n',', '.join(map((lambda x: r'$%0.2f\;dBm$'%x),dbm)),r'\end{minipage}','\n\n'
             dbm = r_[-999,dbm] # 6/20/11, I get rid of the -10 here to make things less confusing, though I now for sure don't know what's right
         print 'len(dbm)',len(dbm)
@@ -227,7 +220,7 @@ def parse_powers(path,name,power_file,expno = None,
         tolerance = 2.0,
         first_figure = None,
         threshold = -36):
-    figurelist = figlistini_old(first_figure)
+    figure_list = figlistini(first_figure)
     fullpath = dirformat(dirformat(path)+name)+'%d/'%1
     fileinfo = load_acqu(fullpath)
     if expno == None:
@@ -250,12 +243,12 @@ def parse_powers(path,name,power_file,expno = None,
     if templen > t_minlength:
        t_minlength = templen
     t_maxlen = scan_length+scanlength_estimation_error
-    dbm,lastspike,figurelist = auto_steps(path+power_file,t_start = t_start*60,t_stop = t_stop,t_minlength = t_minlength,t_maxlen = t_maxlen,tolerance = tolerance, threshold = threshold,return_lastspike = True,first_figure = figurelist)
+    dbm,lastspike,figure_list.figurelist = auto_steps(path+power_file,t_start = t_start*60,t_stop = t_stop,t_minlength = t_minlength,t_maxlen = t_maxlen,tolerance = tolerance, threshold = threshold,return_lastspike = True,first_figure = figure_list.figurelist)
     downby = r_[-5:5]
     timetomakeup = (len(expno)-len(dbm))*60.0*scan_length+lastspike
     obs(lsafen(r"Assuming you have less scans than you need or just one too many, you are down by expno-1-dbm=%d and the last spike is %0.2f s from the end, which means your scan length is off by %0.2f, set extra_time from %0.2f to %0.2f"%(len(expno)-1-len(dbm),lastspike,timetomakeup,extra_time,extra_time + timetomakeup/(len(expno)-1))))
     #obs('If you have one scan too many, set extra\_time to',extra_time+lastspike/(len(expno)-1),'$s$\n\n')
-    return figlistret(first_figure,figurelist,expno,dbm)
+    return figlistret(first_figure,figure_list,expno,dbm)
 #}}}
 #{{{ functions to pull info out of file names
 ##{{{ chemical
@@ -429,20 +422,20 @@ def genexpname(name,expnos):
 ##{{{ linear dnp plot
 def emax_linearandplot(integral,first_figure = None,pdfstring = '',power_axis = 'power',max_invpower = inf,color_pair = ['r','k'],show_Evip_plot = True,**kwargs):
     "generates the 1/(1-E) plots for DNP"
-    figurelist = figlistini_old(first_figure)
+    figure_list = figlistini(first_figure)
     lineardata = integral.linear()
     lineardata = lineardata['1 / power',lambda x: x < max_invpower]
     x = lineardata.getaxis('1 / power').copy()
     if show_Evip_plot:
         ###{{{ show the linear plot
-        nextfigure(figurelist,'Evip'+pdfstring)
+        figure_list.next('Evip'+pdfstring)
         plot_updown(lineardata,'1 / power',color_pair[0],color_pair[1],nosemilog = True)
         ax = gca()
         ax.set_xlim([0,array(ax.get_xlim()).max()])
         Evipplot = integral.linear(r_[1/array(ax.get_xlim()).max(),1/x.min()],**kwargs)
         plot(Evipplot,color_pair[0]+'-',alpha = 0.1)
         ###}}}
-    return figlistret(first_figure,figurelist)
+    return figlistret(first_figure,figure_list)
 ##}}}
 ##{{{ DNP for rho
 def dnp_for_rho(path,
@@ -497,7 +490,7 @@ def dnp_for_rho(path,
         t1powers = t1_powers
     if expnos is not None and expno == []:
         expno = expnos
-    figurelist = figlistini_old(first_figure) # when I convert this to a new function, definitely convert to a new format
+    figure_list = figlistini(first_figure) # when I convert this to a new function, definitely convert to a new format
     if (type(t1powers) is list and len(t1powers) > 0) or (type(t1powers) is ndarray):
         t1powers = array(t1powers,dtype = 'double')
     if type(clear_nodes) is list:
@@ -585,18 +578,16 @@ def dnp_for_rho(path,
     ###}}}
     ###{{{ store the data as necessary
     #{{{ retrieve the store_Emax object emax_in_file
-    emax_figlist_start = len(figurelist)
-    figurelist.append({'print_string':r'\subparagraph{retrieve Emax data}'+'\n\n'})
+    figure_list.text(r'\subparagraph{retrieve Emax data}'+'\n\n')
     if len(expno) > 0:
         emax_in_file = store_Emax(h5file,concentration_id,
                 fid_args,
-                first_figure = figurelist,# because I append this later!
+                first_figure = figure_list,# because I append this later!
                 auxiliary_args = auxiliary_args,
                 integration_args = integration_args)
-        figurelist = emax_in_file.figurelist
-        if verbose: print lsafen('DEBUG: figurelist after Emax load is',figurelist)
+        figure_list = emax_in_file.figure_list
+        if verbose: print lsafen('DEBUG: figure_list after Emax load is',figure_list)
         if verbose: print lsafen('DEBUG: index is',emax_in_file.index,'for',emax_in_file.integralnode_name,'with experiments',emax_in_file.expno)
-    emax_figlist_stop = len(figurelist)
     #}}}
     ####{{{ grab any possible t1 args
     t1kwargs = {}
@@ -605,7 +596,7 @@ def dnp_for_rho(path,
             t1kwargs[argname] = integration_args.pop('t1_'+argname) # does the part before "or" even work???
     ####}}}
     ####{{{ loop through the T_1 experiments, processing and saving as necessary
-    figurelist.append({'print_string':r'\subparagraph{retrieve $T_1$ data}'+'\n\n'})
+    figure_list.text(r'\subparagraph{retrieve $T_1$ data}'+'\n\n')
     integration_args.update(t1kwargs) # copy over the t1 args
     if t1expnos == 'auto':
         t1expnos = r_[emax_in_file.expno[-1]+t1_autovals,304] #right now, set to three, but can easily add others later
@@ -638,26 +629,25 @@ def dnp_for_rho(path,
         #}}}
         fid_args.update({'expno':t1expno})
         if t1expno == 304:
-            figurelist.append({'print_string':'power off\n\n'})# t1expnos and t1_autovals should have the same indeces
+            figure_list.text('power off\n\n')# t1expnos and t1_autovals should have the same indeces
         else:# t1expnos and t1_autovals should have the same indeces
-            figurelist.append({'print_string':'$T_1$ expno %d\n\n'%(t1expno)})
+            figure_list.text('$T_1$ expno %d\n\n'%(t1expno))
             if len(t1_autovals) > j:
-                figurelist.append({'print_string':'$T_1$ autoval %d\n\n'%(t1_autovals[j])})
+                figure_list.text('$T_1$ autoval %d\n\n'%(t1_autovals[j]))
             if len(t1powers) > 0:
-                figurelist.append({'print_string':'$T_1$ power %g\n\n'%dbm_to_power(t1powers[j])})
+                figure_list.text('$T_1$ power %g\n\n'%dbm_to_power(t1powers[j]))
         try:
             t1info = store_T1(h5file,concentration_id,
                     fid_args,
-                    first_figure = figurelist,
+                    first_figure = figure_list,
                     auxiliary_args = auxiliary_args,
                     integration_args = integration_args,
                     run_number = run_number)
-            figurelist = t1info.figurelist
+            figure_list = t1info.figure_list
         except:
-            test = list(figurelist)
-            lplotfigures(figurelist,fid_args['name']+'.pdf') # in case it craps out, so I can still see the power plots
+            fl.show(fid_args['name']+'.pdf') # in case it craps out, so I can still see the power plots
             raise CustomError("Couldn't load T1 for",t1names_forerror[j],'you may just want to skip it; right now manual t1expnos',t1expnos,'and auto t1_autovals',t1_autovals)
-        figurelist.append({'print_string':'end $T_1$ dataset\n\n'})
+        figure_list.text('end $T_1$ dataset\n\n')
     if "t1power" in auxiliary_args.keys(): auxiliary_args.pop("t1power")
     integration_args = integration_args_save
     ####}}}
@@ -717,7 +707,7 @@ def dnp_for_rho(path,
         #{{{ Set all the T10 related values
         t10_at_zero_power = 2.5
         if t10dataset is not None:
-            t10_at_zero_power = t10dataset['power',0.0].data[0]
+            t10_at_zero_power = t10dataset['power':0.0].data
         T1w_inv_f = lambda x: nddata(1.0/(T1w+x*DeltaT1w),[-1],['power']).labels('power',x)
         print '\n\nlinear interpolation using $T_{1,0}(0)$ of %0.3f for $k_\\sigma$ analysis, which is'%t10_at_zero_power
         if t10dataset is None:
@@ -733,14 +723,16 @@ def dnp_for_rho(path,
             mask = zeros(size(t1dataset.getaxis('power')),dtype = 'bool8')
             for j in range(0,len(t1_bad_powers)):
                 mask |= abs(t1dataset.getaxis('power') - t1_bad_powers[j]) < abs(0.05*t1_bad_powers[j])
-                figurelist.append({'print_string':
-                    r"\textbf{I'm leaving out $T_1$'s with power %g, because you marked them as bad (there are %d of these)}"%(t1_bad_powers[j],sum(mask))})
+                figure_list.text(r"\textbf{I'm leaving out $T_1$'s with power %g, because you marked them as bad (there are %d of these)}"%(t1_bad_powers[j],sum(mask)))
             new_t1dataset = nddata(t1dataset.data[~mask],[sum(~mask)],['power'])
             new_t1dataset.labels('power',t1dataset.getaxis('power')[~mask])
             new_t1dataset.set_error(t1dataset.get_error()[~mask])
             t1dataset = new_t1dataset
         #}}}
-        t1_at_zero_power = t1dataset['power',0.0].data[0]
+        try:
+            t1_at_zero_power = t1dataset['power':0.0].data
+        except:
+            raise CustomError("the t1dataset looks like this",t1dataset)
         print '\n\nlinear interpolation using $T_1(0)$ of %0.3f for $k_\\sigma$ analysis\n\n'%t1_at_zero_power
         rho = (1./t1_at_zero_power) - (1./t10_at_zero_power)
         print '\n\nlinear interpolation using $\\rho$ of %0.5f for $k_\\sigma$ analysis\n\n'%rho
@@ -754,9 +746,8 @@ def dnp_for_rho(path,
                 list_of_different_t1_powers = r_[
                         list_of_different_t1_powers,
                         list_of_t1_powers[j]]
-        figurelist.append({'print_string':
-            r'I found %d different $T_1$ powers:'%len(list_of_different_t1_powers)
-            +lsafen(list_of_different_t1_powers)})
+        figure_list.text(r'I found %d different $T_1$ powers:'%len(list_of_different_t1_powers)
+            +lsafen(list_of_different_t1_powers))
         #}}}
         F_nonlinear = 1./(1./t1dataset.copy().set_error(None)
                 - Ck_HH
@@ -796,7 +787,7 @@ def dnp_for_rho(path,
         #{{{ just diagnosis
         #{{{ plot F_nonlinear directly
         #{{{ plot stuff
-        nextfigure(figurelist,'Fnonlinear' + pdfstring)
+        figure_list.next('Fnonlinear' + pdfstring)
         plot(F_nonlinear,'o',label = '$F_{nonlinear}$ points')
         #}}}
         powers_fordiagnose = linspace(0,t1dataset.getaxis('power').max(),100)
@@ -809,7 +800,7 @@ def dnp_for_rho(path,
         autolegend()
         #}}}
         #{{{ plot inverse of F_nonlinear
-        nextfigure(figurelist,'invFnonlinear' + pdfstring)
+        figure_list.next('invFnonlinear' + pdfstring)
         plot(T1w_inv_f(t1dataset.getaxis('power'))+rho,
                 '-',label = '$T_{1,w}^{-1}(p)+\\rho(0)$')
         plot(1.0/F_nonlinear,'o',alpha=0.8,label = '$F_{nonlinear}^{-1}(p)$')
@@ -842,22 +833,22 @@ def dnp_for_rho(path,
         else:
             fdata_exists = True
         #{{{ do the T1 stuff first, regardless
-        figurelist.append({'print_string':r'\subparagraph{$T_1$ data}'})
-        nextfigure(figurelist,'t1data' + pdfstring)
+        figure_list.text(r'\subparagraph{$T_1$ data}')
+        figure_list.next('t1data' + pdfstring)
         save_color_t1 = plot_color_counter()
         plot(1.0/t1dataset,'o', label = '$T_1^{-1}$ / $s^{-1}$')
         ylabel('various (see legend)')
         title(r'%s, run %0.2f'%(chemical,run_number))
         plot_color_counter(save_color_t1)
         plot(powers_forplot,1.0/t1f(powers_forplot).set_error(None),'-',linewidth = 3, alpha = 0.5)
-        nextfigure(figurelist,'M0data' + pdfstring)
+        figure_list.next('M0data' + pdfstring)
         plot_updown(-1*M0dataset,'power','k','r',symbol = 'o', label = r'$-M(0)$',alpha = 0.5)
         plot_updown(Minfdataset,'power','b','g',symbol = 'o', label = r'$M(\infty)$',alpha = 0.5)
         autolegend()
         ylabel('net magnetization')
         expand_y()
         expand_x()
-        nextfigure(figurelist,'t1data' + pdfstring)		
+        figure_list.next('t1data' + pdfstring)		
         #}}}
         if fdata_exists: # if I can calculate the leakage factor
             save_color_t10 = plot_color_counter()
@@ -935,8 +926,8 @@ def dnp_for_rho(path,
                     emax_unmod.getaxis('power')) / concentration * 1.51671e-3 # calculate k s(p)
             ksp_uncorr = (1.0 - emax_unmod.copy()) / t1f(
                     r_[0.0]) / concentration * 1.51671e-3 # calculate k s(p)
-            figurelist.append({'print_string':r'\subparagraph{ksp data}'})
-            nextfigure(figurelist,'ksp_corr')
+            figure_list.text(r'\subparagraph{ksp data}')
+            figure_list.next('ksp_corr')
             ksp_corr.rename('power','p')
             ksp_uncorr.rename('power','p')
             plot_updown(ksp_uncorr,'p','b','g',symbol = ksp_symbol,label = 'uncorrected')
@@ -950,6 +941,7 @@ def dnp_for_rho(path,
             ksp_uncorr.fit()
             plot(ksp_uncorr.eval(100),'b')
             ax = gca()
+            gridandtick(ax)
             text(0.25,0.75,ksp_uncorr.latex(),transform = ax.transAxes,size = 'x-large', horizontalalignment = 'center',color = 'b')
             plot(ksp_corr.eval(100),'k')
             text(0.75,0.25,ksp_corr.latex(),transform = ax.transAxes,size = 'x-large', horizontalalignment = 'center',color = 'k')
@@ -1064,20 +1056,20 @@ def dnp_for_rho(path,
         description = [r'Standard'] + description_simul
         ###}}}
         ###{{{ plot the Emax data
-        if verbose: print lsafen('DEBUG: before Emax, figurelist',figurelist)
+        if verbose: print lsafen('DEBUG: before Emax, figure_list',figure_list)
         ####{{{ set the order of the plots, before plotting to them
-        figurelist.append({'print_string':r'\subparagraph{Emax curves}'+'\n\n'})
-        nextfigure(figurelist,'Emax')
+        figure_list.text(r'\subparagraph{Emax curves}'+'\n\n')
+        figure_list.next('Emax')
         show_Evip_plot = False
         if show_Evip_plot:
-            nextfigure(figurelist,'Evip')
-        figurelist.append({'print_string':r'\Emax\ integration finished'+'\n\n'})
+            figure_list.next('Evip')
+        figure_list.text(r'\Emax\ integration finished'+'\n\n')
         ####}}}
-        if verbose: print lsafen('DEBUG: after Emax, figurelist',figurelist)
+        if verbose: print lsafen('DEBUG: after Emax, figure_list',figure_list)
         ax = gca()
         for j,v in enumerate(datasets):
             ####{{{ plot the data
-            nextfigure(figurelist,'Emax') # switch back to the Emax figure (after linear)
+            figure_list.next('Emax') # switch back to the Emax figure (after linear)
             if ignore_emax_error == True:
                 v.set_error(None)
             v = emax(v)
@@ -1138,8 +1130,8 @@ def dnp_for_rho(path,
                         r'$\tau_c$_error / ps' : tau_error/1e-12,
                         })
                 report_array = reorder_rec(report_array,['$E_{max}$' , '$E_{max}$_error' , '$T_1$' , '$T_1$_error' , '$T_{1,0}$' , '$T_{1,0}$_error' , r'$k_\rho$' , r'$k_\rho$_error' , r'$k_\sigma$' , r'$k_\sigma$_error' , r'$\xi$' , r'$\xi$_error'])
-                figurelist.append({'print_string':r'\subparagraph{Results of uncorrected analysis}'+'\n\n'+lrecordarray(report_array,resizebox = 1.0,return_only=True)})
-                figurelist.append({'print_string':r'\begin{tiny}(calculated as follows:) From above, the $T_1$ is '+lsafen(t1_w_error)+r'I find the \Emax to be '+lsafen(emax_w_error)+r'giving \ksm = '+lsafen(ksigma_w_error)+'and sfo1 is %0.4f'%sfo1+r'\end{tiny}'})
+                figure_list.text(r'\subparagraph{Results of uncorrected analysis}'+'\n\n'+lrecordarray(report_array,resizebox = 1.0,return_only=True))
+                figure_list.text(r'\begin{tiny}(calculated as follows:) From above, the $T_1$ is '+lsafen(t1_w_error)+r'I find the \Emax to be '+lsafen(emax_w_error)+r'giving \ksm = '+lsafen(ksigma_w_error)+'and sfo1 is %0.4f'%sfo1+r'\end{tiny}')
                 #}}}
                 ####{{{ tabulate it
                 h5file_node,compilationroot_node = h5nodebypath(h5file + '/compilations')
@@ -1163,8 +1155,8 @@ def dnp_for_rho(path,
             plot_newlinear = False
             if plot_newlinear:
                 ####{{{ new linear plot
-                figurelist.append({'legend':True})
-                nextfigure(figurelist,'newlinear')
+                figure_list.setprops(legend= True)
+                figure_list.next('newlinear')
                 thisemax = v.output(r'E_{max}')
                 print ndshape(v)
                 newlinear = (1.-thisemax)/(v.copy()-thisemax)
@@ -1177,7 +1169,7 @@ def dnp_for_rho(path,
                 xlabel('power / $W$')
                 ylabel(r'$\frac{1-E_{max}}{E-E_{max}}$')
                 ####}}}
-            figurelist = emax_linearandplot(v,first_figure = figurelist,max_invpower = 100, color_pair = color_pair[::-1],show_Evip_plot = show_Evip_plot)
+            figure_list = emax_linearandplot(v,first_figure = figure_list,max_invpower = 100, color_pair = color_pair[::-1],show_Evip_plot = show_Evip_plot)
         #gridandtick(gca())
         #autolegend()
         ###}}}
@@ -1192,7 +1184,7 @@ def dnp_for_rho(path,
                 description = [r'$(1-E(p))/f(0)$',r'$(1-E(p))/f(p)$'] + description_simul
                 fit_type = ['constant f','power dependent f'] + fit_types_simul
                 ####}}}
-                nextfigure(figurelist,'multifitxismax' + pdfstring)
+                figure_list.next('multifitxismax' + pdfstring)
                 ax = gca()
                 h5file_node,compilationroot_node = h5nodebypath(h5file + '/compilations')
                 if not dontfit:
@@ -1232,7 +1224,7 @@ def dnp_for_rho(path,
                 autolegend()
                 title(r'$\xi s(p)$ by various methods')
                 ###}}}
-    return figlistret(first_figure,figurelist,basename = fid_args['name'])
+    return figlistret(first_figure,figure_list,basename = fid_args['name'])
 def T1_interpolation(t1dataset,
         t10_at_zero_power = 2.5,
         T1w = 2.4691,
@@ -1253,14 +1245,13 @@ def T1_interpolation(t1dataset,
             mask = zeros(size(t1dataset.getaxis('power')),dtype = 'bool8')
             for j in range(0,len(t1_bad_powers)):
                 mask |= abs(t1dataset.getaxis('power') - t1_bad_powers[j]) < abs(0.05*t1_bad_powers[j])
-                figurelist.append({'print_string':
-                    r"\textbf{I'm leaving out $T_1$'s with power %g, because you marked them as bad (there are %d of these)}"%(t1_bad_powers[j],sum(mask))})
+                fl.text(r"\textbf{I'm leaving out $T_1$'s with power %g, because you marked them as bad (there are %d of these)}"%(t1_bad_powers[j],sum(mask)))
             new_t1dataset = nddata(t1dataset.data[~mask],[sum(~mask)],['power'])
             new_t1dataset.labels('power',t1dataset.getaxis('power')[~mask])
             new_t1dataset.set_error(t1dataset.get_error()[~mask])
             t1dataset = new_t1dataset
         #}}}
-        t1_at_zero_power = t1dataset['power',0.0].data[0]
+        t1_at_zero_power = t1dataset['power':0.0].data[0]
         print '\n\nlinear interpolation using $T_1(0)$ of %0.3f for $k_\\sigma$ analysis\n\n'%t1_at_zero_power
         rho = (1./t1_at_zero_power) - (1./t10_at_zero_power)
         print '\n\nlinear interpolation using $\\rho$ of %0.5f for $k_\\sigma$ analysis\n\n'%rho
@@ -1358,23 +1349,12 @@ def T1_interpolation(t1dataset,
 ##}}}
 #}}}
 #{{{ retrieve the t1 power series results from an HDF file
-def plot_t1series(path,name,t1expnos,dbm,h5file = 'temperature_paper.h5',gensvg = False,**kwargs):
+def plot_t1series(path,name,t1expnos,dbm,h5file = 'dnp.h5',gensvg = False,**kwargs):
     dnp_for_rho(path,name,[],expno = [],t1expnos = t1expnos,t1powers = dbm,**kwargs)
-    h5file = openFile(h5file,'r+')
-    T1_table = h5file.root.concentration_series.T1
-    print r'\begin{verbatim}'
-    search_string = '(chemical_name == "%s")'%pull_chemical_from_filename(name)
-    search_string += ' & '+gensearch('concentration','%0.8g',pull_concentration_from_filename(name),1e-6)
-    search_string += ' & '+gensearch('date','%0.3f',pull_date_from_filename(name),0.1)
-    results = T1_table.readWhere(search_string)
-    print results
-    print r'\end{verbatim}'
-    figure(100)
-    clf()
-    t1data = nddata(results['value'],[len(results),1],['power',r'$T_1$'])
-    #print 'powers are ',results['power']
-    t1data.labels(['power'],[dbm_to_power(results['power'])])
+    t1data,m0data,_ = retrieve_T1series(h5file,name,pull_chemical_from_filename(name),pull_concentration_from_filename(name),retcheckval = True)
+    print t1data.getaxis('power')
     t1data.sort('power')
+    print t1data.getaxis('power')
     c,straightline = t1data.polyfit('power')
     print r'found coeff \begin{verbatim}',c,r'\end{verbatim}'
     plot(straightline,'-')
@@ -1382,33 +1362,13 @@ def plot_t1series(path,name,t1expnos,dbm,h5file = 'temperature_paper.h5',gensvg 
     lplot('T1vp'+name+'_%d_%d.pdf'%(t1expnos[0],t1expnos[-1]),gensvg = gensvg)
     figure(101)
     clf()
-    m0data = nddata(results['Minf'],[len(results),1],['power',r'$M(\infty)$'])
-    m0data.labels(['power'],[dbm_to_power(results['power'])])
     m0data.sort('power')
-    m0data /= m0data['power',0]
+    m0data /= m0data['power',0].data
     plot(m0data,'o')
     lplot('T1vpMinf'+name+'_%d_%d.pdf'%(t1expnos[0],t1expnos[-1]))
     c_forstore = zeros(10)
     c_forstore[0:size(c)] = c.flatten()
     foundrow = False
-    T1fit_table = h5file.root.concentration_series.T1fit
-    for row in T1fit_table.where(search_string):
-        foundrow = True
-        row['chemical_name'] = pull_chemical_from_filename(name)
-        row['concentration'] = pull_concentration_from_filename(name)
-        row['date'] = pull_date_from_filename(name)
-        row['c_len'] = len(c)
-        row['c'] = c_forstore
-        row.update()
-    if not foundrow:
-        row = T1fit_table.row
-        row['chemical_name'] = pull_chemical_from_filename(name)
-        row['concentration'] = pull_concentration_from_filename(name)
-        row['date'] = pull_date_from_filename(name)
-        row['c_len'] = len(c)
-        row['c'] = c_forstore
-        row.append()
-    h5file.close()
     return m0data,c,straightline
 #}}}
 #{{{ stuff to deal with T1 vs. p data:
@@ -1433,7 +1393,7 @@ def t1vp(h5filename,expnos,dbm,fid_args = {},integration_args = {}, auxiliary_ar
     r'''this tries to load a series of T1 vs. power curves
     it uses expno and t1power to select the T1 files to load,
     and it calls store T1'''
-    figurelist = figlistini_old(first_figure)
+    figure_list = figlistini(first_figure)
     if len(expnos) != len(dbm):
         raise CustomError('len(expnos)=',len(expnos),'len(dbm)=',len(dbm),dbm)
     if chem_name is None:
@@ -1442,13 +1402,13 @@ def t1vp(h5filename,expnos,dbm,fid_args = {},integration_args = {}, auxiliary_ar
         chem_name = pull_chemical_from_filename(fid_args['name'])
         chem_conc = pull_concentration_from_filename(fid_args['name'])
     chemidx = get_chemical_index(h5filename+'/compilations/chemicals',chem_name,chem_conc)
-    figurelist.append({'print_string':r'\subparagraph{$T_1$ raw data}'+'\n\n'})
+    figure_list.text(r'\subparagraph{$T_1$ raw data}'+'\n\n')
     for j in range(0,len(expnos)):
         fid_args.update({'expno':expnos[j]})
         auxiliary_args.update({'t1power':dbm[j]})
         store_T1(h5filename,chemidx,
                 fid_args,
-                first_figure = figurelist,
+                first_figure = figure_list,
                 auxiliary_args = auxiliary_args,
                 integration_args = integration_args)
     h5file = tables.openFile(h5filename)
@@ -1463,8 +1423,9 @@ def t1vp(h5filename,expnos,dbm,fid_args = {},integration_args = {}, auxiliary_ar
     data = data['T_1'][:]
     data = nddata(data,[len(data)],['power'],data_error = errorbars,axis_coords = [dbm_to_power(powers)])
     print data
+    figure_list.next('T1vp')
     plot(data,'o')
-    lplot('T1vp_%s.pdf'%fid_args['name'])
+    figure_list.show(fid_args['name']+'.pdf')
 ##}}}
 #{{{ compile all the DNP data for a given chemical, etc
 def retrieve_DNP_set(chemical_list,h5file = 'dnp.h5',fit_type = 'corrected',t10_additional_search = '',verbose = False,divide_klow_by = None,t10subst = None):
@@ -1902,12 +1863,12 @@ def standard_epr(dir = None,
         if sample_len is None:
             if conc_calib is not None:
                 raise ValueError("If you want to set the concentration calibration, you need to give a sample length!")
-            legendtext += r', SNR %0.2g $\int\int=$ %0.3g sig. units'%(snr,doubleintegral[newname,-1].data[-1])
+            legendtext += r', SNR %0.2g $\int\int=$ %0.3g sig. units'%(snr,doubleintegral[newname,-1].data)
         else:
             if conc_calib is None:
-                legendtext += r', SNR %0.2g $\int\int=$ %0.3g sig. units / mm'%(snr,doubleintegral[newname,-1].data[-1]/double(sample_len))
+                legendtext += r', SNR %0.2g $\int\int=$ %0.3g sig. units / mm'%(snr,doubleintegral[newname,-1].data/double(sample_len))
             else:
-                thisconc = doubleintegral[newname,-1].data[-1]/double(sample_len)*double(conc_calib)
+                thisconc = doubleintegral[newname,-1].data/double(sample_len)*double(conc_calib)
                 legendtext += r', SNR %0.2g $\int\int=$ %0.3g mM'%(snr,thisconc)
                 if run_number is not None:
                     chem_id = get_chemical_index(h5file+'/compilations/chemicals',chemical_name,thisconc*1e-3)

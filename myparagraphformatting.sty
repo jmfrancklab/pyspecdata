@@ -1,4 +1,5 @@
 \ProvidesPackage{myparagraphformatting}
+\RequirePackage[compact]{titlesec}
 \NeedsTeXFormat{LaTeX2e}[1994/12/01]
 \DeclareOption{noparagraph}{\@ifundefined{noparagraph}{\newcommand{\noparagraph}{test}}{}}
 \DeclareOption{nohrule}{\newcommand{\nohrule}{test}}
@@ -15,20 +16,14 @@
 \newcommand{\outlineblank}[2][-->]{\phantomsection\addcontentsline{toc}{#2}{#1}}
 \newcommand{\condhrule}[1]{\@ifundefined{nohrule}{\texorpdfstring{\color{#1}\hrulefill}{}}{}}
 \@ifundefined{noparagraph}{
-\renewcommand{\subsubsection}[1]{\oldsubsubsection{{\small #1}\condhrule{black}}}
-%\renewcommand{\paragraph}[1]{\textsc{\oldparagraph{#1}}\textsc{\uline{#1}}\blacktext{$\Rightarrow$}\addcontentsline{toc}{paragraph}{#1}}
-%\renewcommand{\paragraph}[1]{\texttt{\oldparagraph{#1}}\texttt{\uline{#1}}\blacktext{$\Rightarrow$}\phantomsection\addcontentsline{toc}{paragraph}{#1}}
-\renewcommand{\paragraph}[1]{%uline on the inside!!!
+\titleformat{\subsubsection}[runin]{\color{gray}\normalfont\bfseries\small}{\thesubsubsection}{3pt}{}[\condhrule{lightgray}\normalcolor\\ ]%\titleformat{command}[shape (eg. runin)]{format}{label}{sep}{before}[after]
 
-\textbf{\uline{#1 \protect{\ensuremath{\Rightarrow}}}}\phantomsection\addcontentsline{toc}{paragraph}{#1}}
+\renewcommand{\theparagraph}{\thesubsubsection\Alph{paragraph}}
+\titleformat{\paragraph}[runin]{\normalfont\bfseries}{}{3pt}{\hspace{0.75em}\uline}[:]%\titleformat{command}[shape (eg. runin)]{format}{label}{sep}{before}[after]
 \let\myparagraph=\paragraph
 \renewcommand{\subparagraph}[1]{{\small\textbf{\uline{#1:}}}\phantomsection\addcontentsline{toc}{subparagraph}{#1}}
 \let\mysubparagraph=\subparagraph
-%\renewcommand{\subparagraph}[1]{\textit{\small{\uline{#1}}}}
 }{
-%\renewcommand{\subsubsection}[1]{\phantomsection\addcontentsline{toc}{subsubsection}{#1}
-%
-%}
 \renewcommand{\paragraph}[1]{\phantomsection\addcontentsline{toc}{paragraph}{#1}
 
 }

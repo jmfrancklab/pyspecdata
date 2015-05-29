@@ -18,6 +18,10 @@ def calcxi(omegaH,tau):
 	denom = 6.*J(omega-omegaH,tau)+3.*J(omegaH,tau)+J(omega+omegaH,tau)
 	xi = sigma/denom
 	return xi
+def calcsigma(omegaH,tau):
+	omega = omegaH/1.5171e-3
+	sigma = 6.*J(omega-omegaH,tau)-J(omega+omegaH,tau)
+	return sigma
 def calcrho(omegaH,tau):
 	omega = omegaH/1.5171e-3
 	denom = 6.*J(omega-omegaH,tau)+3.*J(omegaH,tau)+J(omega+omegaH,tau)

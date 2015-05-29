@@ -4,19 +4,22 @@
 \RequirePackage{pdfcomment}
 
 %\newcommand{\johnmark}[1]{\sethlcolor{green}\hl{#1}\sethlcolor{yellow}}
-\newcommand{\johnmark}[1]{\hl{#1}}
-\newcommand{\johnscolor}{blue}
-\newcommand{\johnbubble}[2][]{\pdfcomment[author={John Franck},subject={},color=\johnscolor,hspace=10pt]{#2}{\color{\johnscolor}\protect\footnote{\color{\johnscolor}#2}}}
-\newcommand{\johnbox}[2][]{\pdfcomment[author={John Franck},subject={},color=\johnscolor,hspace=10pt]{#2}{\color{\johnscolor}\protect\footnote{\color{\johnscolor}#2}}}
-\newcommand{\john}[2][]{\johnmark{#1}\johnbubble{#2}}
-\newcommand{\johnresp}[1]{{\color{\johnscolor}#1}}
+\newcommand{\basiccommentuser}[3]{%pass shorthand, full name, color
+\expandafter\newcommand\csname #1mark\endcsname[1]{\hl{##1}}
+\expandafter\newcommand\csname #1scolor\endcsname{#3}
+\expandafter\newcommand\csname #1bubble\endcsname[2][]{\pdfcomment[author={#2},subject={},color=\csname #1scolor\endcsname,hspace=10pt]{##2}{\color{\csname #1scolor\endcsname}\protect\footnote{\color{\csname #1scolor\endcsname}##2}}}
+\expandafter\newcommand\csname #1box\endcsname[2][]{\pdfcomment[author={#2},subject={},color=\csname #1scolor\endcsname,hspace=10pt]{##2}{\color{\csname #1scolor\endcsname}\protect\footnote{\color{\csname #1scolor\endcsname}##2}}}
+\expandafter\newcommand\csname #1\endcsname[2][]{\csname #1mark\endcsname{##1}\csname #1bubble\endcsname{##2}}
+\expandafter\newcommand\csname #1resp\endcsname[1]{{\color{\csname #1scolor\endcsname}##1}}
+}
+\basiccommentuser{john}{John Franck}{blue}
+\basiccommentuser{peter}{Peter Qin}{green}
+\basiccommentuser{yuan}{Yuan Ding}{orange}
+\basiccommentuser{songi}{Songi Han}{red}
+\basiccommentuser{adlin}{J. Adlin Scott}{red}
+
 \newcommand{\ntd}[2][]{\nts{#1}\johnbubble{Need to do: #2}}
 
-\newcommand{\johncomment}[3]{\pdfcomment[author={John Franck #1},subject={},color=green,hspace=10pt]{#3}\index{#2#3}\quad}
-%\newcommand{\john}[1]{\pdfcomment[author={John Franck},subject={},color=blue,hspace=10pt]{#1}\quad}
-\newcommand{\johnnofoot}[2][]{\hl{#1}\pdfcomment[author={John Franck},subject={},color=green,hspace=10pt]{#2}}
-\newcommand{\johnemph}[2][]{\hl{#1}\pdfcomment[author={John Franck},subject={},color=red,hspace=10pt]{#2}{\color{red}\protect\footnote{\color{red}#2}}}
-\newcommand{\icomment}[2][]{\hl{#1}\pdfcomment[author={},subject={immediate change},color=red,hspace=10pt]{#2}\quad}
 % need to show
 \newcommand{\nts}[1]{\xspace{\bf{\color{orange}#1}}}
 % need to do

@@ -7,6 +7,7 @@
 \DeclareOption{nopageformat}{\newcommand{\nopageformat}{test}}
 \DeclareOption{noheader}{\newcommand{\noheader}{test}}
 \ProcessOptions
+\RequirePackage[compact]{titlesec}
 \RequirePackage{mathrsfs}% for mathscr
 \RequirePackage{myhyperref}
 \RequirePackage{mypython}
@@ -225,7 +226,7 @@ mathescape=true
 \RequirePackage[noparagraph]{myparagraphformatting}
 }
 \newcommand{\blacktext}[1]{\texorpdfstring{{\color{black}#1}}{#1}}
-\renewcommand{\subsection}[1]{\color{darkgray}\oldsubsection{#1\condhrule{lightgray}}\normalcolor}
+\titleformat{\subsection}[runin]{\color{darkgray}\normalfont\bfseries}{\thesubsection}{3pt}{}[\condhrule{gray}\normalcolor\\ ]%\titleformat{command}[shape (eg. runin)]{format}{label}{sep}{before}[after]
 \renewcommand{\section}[2][]{\oldsection{#2\condhrule{black}{\tiny #1}}}
 
 \renewcommand{\o}[2][]{ {\color{mygreen}{\it #1}} {\color{blue} #2}}
@@ -371,11 +372,11 @@ Time block total:%
 % nest note that we don't schedule anything for only 6min
 \pgfmathparse{ifthenelse(\thistimeblock>=0.1,"TT","FT")}% character codes match (true) or don't (false)
 \if\pgfmathresult%(
-, \pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\poftotal}\%,%
+, {\tiny \pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\poftotal}\%},%
 \pgfmathparse{\obstimecounter+\runningTimeCounter}%
 \global\let\runningTimeCounter=\pgfmathresult%
 \pgfmathparse{safepercentage(\timeusedontask,\thistimeblock)}
-{\tiny \pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\pgfmathresult}\%}%
+\pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\pgfmathresult}\%%
 \fi%)
 })%
 }

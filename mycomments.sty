@@ -18,6 +18,7 @@
 \RequirePackage{wrapfig}
 \RequirePackage{setspace}
 \RequirePackage{soul}
+\RequirePackage{etex}% to avoid too many floats requested error in morefloats
 \RequirePackage[maxfloats=100]{morefloats}
 %%{{{ these are for solution 2 below, which doesn't work
 %\RequirePackage{zref-abspage}
@@ -376,14 +377,17 @@
 %}}} end arrow comments
 %{{{ map comment commands to printed comments
 \@ifundefined{commentsoff}{
-% I should really add the ability here to declare new "users" -- see jcp draft
-%{{{ john
-\renewcommand{\johnmark}[1]{\note[\johnscolor]{#1}}
-\renewcommand{\johnbox}[2][180]{\showinlinesetcolor[#1]{\johnscolor}{{\tiny\textit{John:}}#2}}
-\renewcommand{\johnresp}[1]{\showrespbox{\johnscolor}{{\tiny\textit{John:}}#1}}
-\renewcommand{\johnbubble}[1]{\shownotesetcolor{\johnscolor}{{\tiny\textit{John:}}#1}}
-\renewcommand{\john}[2][]{\johnmark{#1}\johnbubble{#2}}
-\newcommand{\johntwocol}[2][]{\johnmark{#1}\inlinewrapfig{\johnbox[0]{#2}}}
+%{{{ commands to define the comments
+\newcommand{\commentuser}[1]{%just the user, since the color is defined in mybasiccomments
+%inn the following, csname creates the command, and expandafter expands the token after the text
+%the double number expands to just #1, rather the substituting the name, while #1 expans to the first argument of commentuser
+\expandafter\renewcommand\csname #1mark\endcsname[1]{\note[\csname #1scolor\endcsname]{##1}}
+\expandafter\renewcommand\csname #1box\endcsname[2][180]{\showinlinesetcolor[##1]{\csname #1scolor\endcsname}{{\tiny\textit{#1:}}##2}}
+\expandafter\renewcommand\csname #1resp\endcsname[1]{\showrespbox{\csname #1scolor\endcsname}{{\tiny\textit{#1:}}##1}}
+\expandafter\renewcommand\csname #1bubble\endcsname[1]{\shownotesetcolor{\csname #1scolor\endcsname}{{\tiny\textit{#1:}}##1}}
+\expandafter\renewcommand\csname #1\endcsname[2][]{\csname #1mark\endcsname{##1}\csname #1bubble\endcsname{##2}}
+\expandafter\newcommand\csname #1twocol\endcsname[2][]{\csname #1mark\endcsname{##1}\inlinewrapfig{\csname #1box\endcsname[0]{##2}}}
+}
 %}}}
 %{{{ need to do
 \newcommand{\ntdmark}[1]{\johnmark{#1}}
@@ -391,6 +395,11 @@
 \newcommand{\ntdbox}[1]{\johnbox{\textbf{I need to:} #1}}
 \renewcommand{\ntd}[2][]{\ntdmark{#1}\ntdbubble{#2}}
 %}}}
+% in the following, add names that define the types of comments
+\commentuser{john}
+\commentuser{songi}
+\commentuser{peter}
+\commentuser{yuan}
 }{
 \renewcommand{\ntd}[2][]{#1}
 \renewcommand{\john}[2][]{#1}

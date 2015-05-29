@@ -53,7 +53,6 @@ hbar = 6.6260695729e-34/2./pi
 N_A = 6.02214179e23
 gamma_H = 4.258e7
 #}}}
-
 def mybasicfunction(first_figure = None):
     r'''this gives the format for doing the image thing
 note also
@@ -791,7 +790,14 @@ def h5remrows(bottomnode,tablename,searchstring):
                 thistable.remove()
                 counter += 1
             else:
-                thistable.removeRows(row.nrow - counter,None) # counter accounts for rows I have already removed.
+                try:
+                    thistable.removeRows(row.nrow - counter,row.nrow - counter + 1) # counter accounts for rows I have already removed.
+                except:
+                    print "you passed searchstring",searchstring
+                    print "trying to remove row",row
+                    print "trying to remove row with number",row.nrow
+                    print help(thistable.removeRows)
+                    raise RuntimeError("length of thistable is "+repr(len(thistable))+" calling removeRows with "+repr(row.nrow-counter))
                 counter += 1
         return counter,data
     except tables.NoSuchNodeError:
@@ -1094,7 +1100,7 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
         ax.set_ylabel(ylabel)
     #}}}
     if spines is not None:
-        adjust_spines(gca(),spines = spines)
+        adjust_spines(ax,spines = spines)
     if not formatonly:
         #{{{x ticks
         # determine the size
@@ -1266,63 +1272,65 @@ def autopad_figure(pad = 0.2,centered = False):
         pass #labelsets.append(('top',[title(ax.get_title())]))
     compto = {}
     def on_draw(event):
-       # find the sum of the widths of all things labeled with a 'y'
-       spkwargs = {}
-       compto['bottom'] = fig.subplotpars.bottom
-       compto['left'] = fig.subplotpars.left
-       compto['right'] = fig.subplotpars.right
-       compto['top'] = fig.subplotpars.top
-       for axisn in ['left','bottom','top','right']:
-           bboxes = []
-           labellist = [x[1] for x in labelsets if x[0] is axisn]
-           for labels in labellist:
-               for label in labels:
-                   if type(label) is Line2D:
-                       pass # just rely on the pad
-                       #if any(map(lambda x: x == label.get_transform(),[ax.transData,ax.transAxes,fig.transFigure,None])):
-                       #    print 'found it'
-                       #else:
-                       #    print 'didn not find it'
-                       #bbox = label.get_window_extent(fig.canvas).inverse_transformed(ax.transData).inverse_transformed(fig.transFigure)
-                   else:
-                       try:
-                           bbox = label.get_window_extent()
-                       except:
-                           raise CustomError('type of label = ',type(label))
-                   # the figure transform goes from relative coords->pixels and we
-                   # want the inverse of that
-                   bboxes.append(bbox)
-               # this is the bbox that bounds all the bboxes, again in relative
-               # figure coords
-           l = 0 
-           if len(labellist):
-               bbox = mtransforms.Bbox.union(bboxes)
-               bboxi = bbox.inverse_transformed(fig.transFigure)
-               if axisn in ['left','right']:
-                   l = bboxi.width
-               if axisn in ['top','bottom']:
-                   l = bboxi.height
-           l += pad
-           if axisn in ['top','right']:
-               l = 1-l
-               if compto[axisn] > l:
-                   spkwargs.update({axisn:l})
-           else:
-               if compto[axisn] < l:
-                   spkwargs.update({axisn:l})
-       try:
-           if len(spkwargs) > 0:
-               if centered and 'left' in spkwargs.keys() and 'right' in spkwargs.keys():
-                   big = max(r_[spkwargs['left'],1-spkwargs['right']])
-                   spkwargs.update({'left':big,'right':1-big})
-               fig.subplots_adjust(**spkwargs) # pad a little
-               #print "adjusted to",spkwargs
-               fig.canvas.draw()
-       except:
-           raise CustomError('spwargs = ',spkwargs)
-       return False
+        # find the sum of the widths of all things labeled with a 'y'
+        spkwargs = {}
+        compto['bottom'] = fig.subplotpars.bottom
+        compto['left'] = fig.subplotpars.left
+        compto['right'] = fig.subplotpars.right
+        compto['top'] = fig.subplotpars.top
+        for axisn in ['left','bottom','top','right']:
+            bboxes = []
+            labellist = [x[1] for x in labelsets if x[0] is axisn]
+            for labels in labellist:
+                for label in labels:
+                    if type(label) is Line2D:
+                        pass # just rely on the pad
+                        #if any(map(lambda x: x == label.get_transform(),[ax.transData,ax.transAxes,fig.transFigure,None])):
+                        #    print 'found it'
+                        #else:
+                        #    print 'didn not find it'
+                        #bbox = label.get_window_extent(fig.canvas).inverse_transformed(ax.transData).inverse_transformed(fig.transFigure)
+                    else:
+                        try:
+                            bbox = label.get_window_extent()
+                        except:
+                            raise CustomError('Can\'t get window extent: type of label = ',type(label))
+                    # the figure transform goes from relative coords->pixels and we
+                    # want the inverse of that
+                    bboxes.append(bbox)
+                # this is the bbox that bounds all the bboxes, again in relative
+                # figure coords
+            l = 0 
+            if len(labellist):
+                bbox = mtransforms.Bbox.union(bboxes)
+                bboxi = bbox.inverse_transformed(fig.transFigure)
+                if axisn in ['left','right']:
+                    l = bboxi.width
+                if axisn in ['top','bottom']:
+                    l = bboxi.height
+            l += pad
+            if axisn in ['top','right']:
+                l = 1-l
+                if compto[axisn] > l:
+                    spkwargs.update({axisn:l})
+            else:
+                if compto[axisn] < l:
+                    spkwargs.update({axisn:l})
+        if len(spkwargs) > 0:
+            if centered and 'left' in spkwargs.keys() and 'right' in spkwargs.keys():
+                big = max(r_[spkwargs['left'],1-spkwargs['right']])
+                spkwargs.update({'left':big,'right':1-big})
+            try:
+                fig.subplots_adjust(**spkwargs) # pad a little
+            except:
+                raise RuntimeError('failed to adjust subplots spwargs = ',spkwargs)
+            #print "adjusted to",spkwargs
+            fig.canvas.draw()# recurse
+        return False
     fig.canvas.mpl_connect('draw_event', on_draw)
     fig.subplots_adjust(left = 0, right = 1, top = 1, bottom =0)
+    fig.canvas.draw()# it needs this to generate the 'renderers'
+    fig.canvas.mpl_connect('draw_event', on_draw)
     fig.canvas.draw()
     #}}}
 def expand_x(*args):
@@ -1436,15 +1444,29 @@ def nextfigure(figurelist,name):
         if verbose: print lsafen('added, figure',len(figurelist)+1,'because not in figurelist',figurelist)
         figurelist.append(name)
     return figurelist
-def figlistret(first_figure,figurelist,*args,**kwargs):
-    if first_figure is None:
-        raise ValueError("Don't know how to do this when you run interactively")
+def figlistret(first_figure,figure_list,*args,**kwargs):
+    if 'basename' in kwargs.keys():
+        basename = kwargs['basename']
     else:
-        args += (figurelist,)
+        basename = thisjobname()
+    if first_figure is None:
+        figure_list.show(basename+'.pdf')
+        return args
+    else:
+        args += (figure_list,)
         if len(args) == 1:
             return args[0]
         else:
             return args
+def figlistini(first_figure):
+    r"""processes a figure list argument:
+    typically, you want to have a figure_list keyword argument for every function, which is by default set to None, then call this on the argument -- it always returns a figure list, creating a new one if required
+    similarly, somewhere I have another guy that processes the output, so that if it's set to None, it will by default dump and show the figure list,
+    and not return a figure list in the output"""
+    if first_figure is None:
+        return figlist_var() 
+    else:
+        return first_figure
 def figlistini_old(first_figure):
     if isinstance(first_figure,figlist_var):
         return first_figure
@@ -1522,15 +1544,19 @@ class figlist(object):
     def pop_marker(self):
         self.next(self.pushlist.pop())
         return
-    def next(self,name,legend = False,boundaries = None,twinx = None,**kwargs):
+    def next(self,input_name,legend = False,boundaries = None,twinx = None,**kwargs):
+        if not hasattr(self,'figdict'):
+            self.figdict = {}
         if self.basename is not None: #basename for groups of figures
-            name = self.basename + '_' + name
+            name = self.basename + ' ' + input_name
+        else:
+            name = input_name
         if name.find('/') > 0:
             raise ValueError("don't include slashes in the figure name, that's just too confusing")
         if self.verbose: print lsafe('DEBUG figurelist, called with',name)
         if name in self.figurelist:
             if hasattr(self,'mlab'):
-                fig = mlab.figure(self.figurelist.index(name)+1,bgcolor = (1,1,1),**kwargs)
+                fig = self.mlab.figure(self.figurelist.index(name)+1,bgcolor = (1,1,1),**kwargs)
                 fig.scene.render_window.aa_frames = 20
                 fig.scene.anti_aliasing_frames = 20
             else:
@@ -1545,8 +1571,9 @@ class figlist(object):
                 if 'figsize' not in kwargs.keys():
                     kwargs.update({'figsize':(12,6)})
                 if hasattr(self,'mlab'):
-                    fig = mlab.figure(len(self.figurelist)+1,bgcolor = (1,1,1),**kwargs)
-                    fig.scene.render_window.aa_frames = 8
+                    fig = self.mlab.figure(len(self.figurelist)+1,bgcolor = (1,1,1),**kwargs)
+                    fig.scene.render_window.aa_frames = 20
+                    fig.scene.anti_aliasing_frames = 20
                 else:
                     fig = figure(len(self.figurelist)+1,**kwargs)
                 fig.add_axes([0.075,0.2,0.7,0.7]) # l b w h
@@ -1555,7 +1582,8 @@ class figlist(object):
                 fig = figure(len(self.figurelist)+1,**kwargs)
                 if hasattr(self,'mlab'):
                     fig = self.mlab.figure(len(self.figurelist)+1,bgcolor = (1,1,1),**kwargs)
-                    fig.scene.render_window.aa_frames = 8
+                    fig.scene.render_window.aa_frames = 20
+                    fig.scene.anti_aliasing_frames = 20
                 else:
                     fig = figure(len(self.figurelist)+1,**kwargs)
                 if twinx is not None:
@@ -1571,6 +1599,7 @@ class figlist(object):
                 fig = gcf()
             else:
                 raise ValueError('If you pass twinx, pass 0 for the original or 1 for the right side')
+        self.figdict.update({self.current:fig})
         return fig
     def plot(self,*args,**kwargs):
         if 'label' in kwargs.keys():
@@ -1653,12 +1682,20 @@ class figlist(object):
         return
     def image(self,*args,**kwargs):
         firstarg = self.check_units(args[0],-1,0) # check units, and if need be convert to human units, where x is the last dimension and y is the first
+        interpolation = None
+        if 'interpolation' in kwargs:
+            interpolation = kwargs.pop('interpolation')
         if self.black and 'black' not in kwargs.keys():
             kwargs.update({'black':self.black})
         retval = image(*tuple((firstarg,)+args[1:]),**kwargs)#just a placeholder for now, will later keep units + such
-        ax = gca()
+        if 'ax' not in kwargs.keys():
+            ax = gca()
+        else:
+            ax = kwargs['ax']
         if ax.get_title() is None or len(ax.get_title()) == 0:
             title(self.current)
+        if interpolation is not None:
+            retval.set_interpolation(interpolation)
         return retval
     def text(self,mytext):
         self.setprops(print_string = mytext)
@@ -1684,13 +1721,19 @@ class figlist(object):
                         self.twinx(orig = True)
                         autolegend(**kwargs)
                     except:
-                        raise CustomError('error while trying to run autolegend for',k)
+                        raise CustomError('error while trying to run autolegend for',k,'\n\tfiglist is',self.figurelist)
     def show(self,*args,**kwargs):
+        self.basename = None # must be turned off, so it can cycle through lists, etc, on its own
         verbose = False
         if 'verbose' in kwargs.keys():
             verbose = kwargs.pop('verbose')
         if len(kwargs) > 0:
             raise ValueError("didn't understand kwargs "+repr(kwargs))
+        print '\n'
+        print "before show_prep, figlist is",self.figurelist
+        print '\n'
+        print "before show_prep, autolegend list is",self.autolegend_list
+        print '\n'
         self.show_prep()
         #{{{ just copy from fornnotebook to get the print string functionality
         kwargs = {}
@@ -1716,6 +1759,167 @@ class figlist(object):
         header_list = ['\\section','\\subsection','\\subsubsection','\\paragraph','\\subparagraph']
         self.text(header_list[number_above+1]+'{%s}'%input_string)
         return number_above + 1
+    def mesh(self,plotdata,Z_normalization = None,equal_scale = True,
+            lensoffset = 1e-3,
+            show_contours = False,
+            grey_surf = False):
+        plotdata = self.check_units(plotdata,0,1)
+        if hasattr(self,'mlab'):
+            fig = self.figdict[self.current]
+            fig.scene.disable_render = True
+            X,Y,Z,x_axis,y_axis = plotdata.matrices_3d(also1d = True)# return the axes, and also alter "plotdata" so it's downsampled
+            X_normalization = X.max()
+            X /= X_normalization
+            if equal_scale:
+                Y_normalization = X_normalization
+            else:
+                Y_normalization = Y.max()
+            Y /= Y_normalization
+            if Z_normalization is None:
+                Z_normalization = Z.flatten().max()
+            Z /= Z_normalization
+            surf_kwargs = {}
+            if grey_surf:
+                surf_kwargs.update(color = (0.5,0.5,0.5))# opacity and the contour lines don't play well, otherwise I would like to make this transluscent
+            self.mlab.surf(X,Y,Z,**surf_kwargs)
+            if show_contours:
+                contour_kwargs = {'line_width':24}
+                contour_kwargs.update(opacity = 0.5)
+                if not grey_surf:
+                    contour_kwargs.update(color = (1,1,1))
+                self.mlab.contour_surf(X,Y,Z+lensoffset,contours = r_[-1:1:10j].tolist(),**contour_kwargs)
+                contour_kwargs.update(opacity = 0.1)
+                self.mlab.contour_surf(X,Y,Z+lensoffset,contours = r_[-1:1:46j].tolist(),**contour_kwargs)# for some reason, 46 gives alignment (I think 9+1 and 9*5+1)
+            if equal_scale:
+                self.generate_ticks(plotdata,(x_axis,y_axis),X_normalization,Z_normalization,verbose = True)
+            else:
+                self.generate_ticks(plotdata,(x_axis,y_axis),X_normalization,Z_normalization,y_rescale = Y_normalization/X_normalization,verbose = True)
+            fig.scene.disable_render = False
+        else:
+            # this should be upgraded, or rather moved to here
+            plotdata.meshplot(alpha = 1.0,cmap = cm.jet)
+        return Z_normalization
+    def generate_ticks(self,plotdata,axes,rescale,z_norm = None,y_rescale = 1,text_scale = 0.05,verbose = False,follow_surface = False,
+            lensoffset = 0.5e-2,
+            line_width = 1e-3,
+            tube_radius = 1e-3,
+            fine_grid = False,
+            ):
+        'generate 3d ticks and grid for mayavi'
+        if follow_surface and z_norm is None:
+            raise ValueError("if you choose to generate the mesh -- i.e. follow the surface -- then you need to pass the z normalization")
+        x_axis,y_axis = axes
+        x_dim = plotdata.dimlabels[0]
+        y_dim = plotdata.dimlabels[1]
+        def gen_list(thisaxis,desired_ticks = 7.):
+            #{{{ out of the following list, choose the one that gives as close as possible to the desired ticks
+            axis_span = thisaxis.max() - thisaxis.min()
+            possible_iterators = r_[0.1,0.5,1,5,10,20,30,50,100,200,500,1000]
+            iterator = possible_iterators[argmin(abs(axis_span/desired_ticks -
+                possible_iterators))]
+            #}}}
+            if verbose: print 'iterator is',iterator
+            return iterator,r_[ceil(thisaxis.min()/iterator):
+                floor(thisaxis.max()/iterator)+1]*iterator
+        #{{{ now, I need to get the list of multiples that falls inside the axis span
+        xiterator,xlist = gen_list(x_axis)
+        yiterator,ylist = gen_list(y_axis)
+        if verbose: print 'range of x ',x_axis.min(),x_axis.max()
+        if verbose: print 'xlist',xlist
+        if verbose: print unitify_axis(plotdata,plotdata.dimlabels[0])
+        if verbose: print 'range of y ',y_axis.min(),y_axis.max()
+        if verbose: print 'ylist',ylist
+        if verbose: print unitify_axis(plotdata,plotdata.dimlabels[1])
+        #}}}
+        if xiterator < 1:
+            x_ticklabels = ['{:0.1f}'.format(j) for j in xlist]
+        else:
+            x_ticklabels = ['{:0.0f}'.format(j) for j in xlist]
+        if yiterator < 1:
+            y_ticklabels = ['{:0.1f}'.format(j) for j in ylist]
+        else:
+            y_ticklabels = ['{:0.0f}'.format(j) for j in ylist]
+        #{{{ rescale absolutely everything
+        xlist /= rescale
+        ylist /= (rescale*y_rescale)
+        x_axis /= rescale
+        y_axis /= (rescale*y_rescale)
+        #}}}
+        x_range = r_[x_axis.min(),x_axis.max()]
+        y_range = r_[y_axis.min(),y_axis.max()]
+        extension_factor = text_scale * 3
+        #{{{ y ticks
+        if follow_surface:
+            if fine_grid:
+                dy = ylist[1]-ylist[0]
+                finer_ylist = r_[ylist[0]-dy:ylist[-1]+dy:1j*((len(ylist)+2-1)*5+1)]
+                finer_ylist = finer_ylist[finer_ylist>=y_axis.min()]
+                finer_ylist = finer_ylist[finer_ylist<=y_axis.max()]
+            else:
+                finer_ylist = ylist
+            for j,y in enumerate(finer_ylist):
+                x_linedata = plotdata.getaxis(x_dim)/rescale
+                z_linedata = plotdata[y_dim:(y*rescale)].data.flatten()/z_norm
+                self.mlab.plot3d(x_linedata,y*ones_like(x_linedata),
+                        z_linedata+lensoffset,
+                        color = (0,0,0), line_width = line_width,
+                        tube_radius = tube_radius)
+        for j,y in enumerate(ylist):
+            self.mlab.plot3d(x_range+extension_factor*r_[-1,1],
+                    y*ones(2),zeros(2),
+                    color = (0,0,0), line_width = line_width,
+                    tube_radius = tube_radius)
+            self.mlab.text3d(x_range[0]-2*extension_factor, y, 0,
+                    y_ticklabels[j],color = (0,0,0),
+                    scale = text_scale # in figure units
+                    )
+            self.mlab.text3d(x_range[1]+2*extension_factor, y, 0,
+                    y_ticklabels[j],color = (0,0,0),
+                    scale = text_scale # in figure units
+                    )
+        self.mlab.text3d(x_range[1] + 3 * extension_factor,y_range.mean(), 0,
+                unitify_axis(plotdata,plotdata.dimlabels[1]), color = (0,0,0),
+                scale = text_scale,
+                orient_to_camera = False,
+                orientation = (0,0,90))# the last angle appears to be rotaiton about z
+        #}}}
+        #{{{ x ticks
+        if follow_surface:
+            if fine_grid:
+                dx = xlist[1]-xlist[0]
+                finer_xlist = r_[xlist[0]-dx:xlist[-1]+dx:1j*((len(xlist)+2-1)*5+1)]
+                finer_xlist = finer_xlist[finer_xlist>=x_axis.min()]
+                finer_xlist = finer_xlist[finer_xlist<=x_axis.max()]
+            else:
+                finer_xlist = xlist
+            for j,x in enumerate(finer_xlist):
+                y_linedata = plotdata.getaxis(y_dim)/(rescale*y_rescale)
+                z_linedata = plotdata[x_dim:(x*rescale)].data.flatten()/z_norm
+                self.mlab.plot3d(x*ones_like(y_linedata),y_linedata,
+                        z_linedata+lensoffset,
+                        color = (0,0,0), line_width = line_width,
+                        tube_radius = tube_radius)
+        for j,x in enumerate(xlist):
+            self.mlab.plot3d(x*ones(2),y_range+extension_factor*r_[-1,1],
+                    zeros(2),
+                    color = (0,0,0), line_width = line_width,
+                    tube_radius = tube_radius)
+            self.mlab.text3d(x, y_range[0]-2*extension_factor, 0,
+                    x_ticklabels[j],color = (0,0,0),
+                    scale = text_scale # in figure units
+                    )
+            self.mlab.text3d(x, y_range[1]+2*extension_factor, 0,
+                    x_ticklabels[j],color = (0,0,0),
+                    scale = text_scale # in figure units
+                    )
+        self.mlab.text3d(x_range.mean(), y_range[1] + 3 * extension_factor,
+                0,
+                unitify_axis(plotdata,plotdata.dimlabels[0]), color = (0,0,0),
+                scale = text_scale,
+                orient_to_camera = False,
+                orientation = (0,0,180))# the last angle appears to be rotaiton about z
+        #}}}
+        return
 def text_on_plot(x,y,thistext,coord = 'axes',**kwargs):
     ax = gca()
     if coord == 'axes':
@@ -2262,21 +2466,34 @@ class nddata (object):
         fp.close()
         return
     #{{{ sort and shape the data for 3d plotting
-    def sorted_and_xy(self):
-        sortedself = self.copy()
+    def sort_and_xy(self):
         self.sort(self.dimlabels[0])
         self.sort(self.dimlabels[1])
-        if len(sortedself.dimlabels) > 2:
+        if len(self.dimlabels) > 2:
             raise CustomError("I don't know how to handle something with more than two dimensions for a surface plot!")
         #{{{ shared to both
-        x_dim = sortedself.dimlabels[0]
-        y_dim = sortedself.dimlabels[1]
-        x_axis = sortedself.retaxis(x_dim).data
-        y_axis = sortedself.retaxis(y_dim).data
+        x_dim = self.dimlabels[0]
+        y_dim = self.dimlabels[1]
+        x_axis = self.retaxis(x_dim).data
+        y_axis = self.retaxis(y_dim).data
         #}}}
-        return sortedself,x_axis,y_axis
-    def matrices_3d(self,also1d = False,invert = False):
-        sortedself,x_axis,y_axis = self.sorted_and_xy()
+        return x_axis,y_axis
+    def matrices_3d(self,also1d = False,invert = False,max_dimsize = 1024,downsample_self = False):
+        ''' returns X,Y,Z,x_axis,y_axis
+        matrices X,Y,Z, are suitable for a variety of mesh plotting, etc, routines
+        x_axis and y_axis are the x and y axes
+        '''
+        this_size = array(self.data.shape)
+        sortedself = self.copy()
+        if any(this_size > max_dimsize):
+            print lsafen("Warning! The data is big (%s), so I'm automatically downsampling"%(ndshape(self)))
+            for j in where(this_size > max_dimsize):
+                downsampling = ceil(double(this_size[j]) / max_dimsize)
+                print 'downsampling',self.dimlabels[j],'by',downsampling
+                sortedself = sortedself[self.dimlabels[j],0::downsampling]
+            print lsafen("I reduced to a max of max_dimsize = %d so the data is now %s"%(max_dimsize,ndshape(sortedself)))
+
+        x_axis,y_axis = sortedself.sort_and_xy()
         if invert:
             print "trying to invert meshplot-like data"
         X = x_axis*ones(shape(y_axis))
@@ -2286,6 +2503,10 @@ class nddata (object):
             X = X[:,::-1]
             Y = Y[:,::-1]
             Z = Z[:,::-1]
+        if downsample_self:
+            self.data = sortedself.data
+            self.setaxis(self.dimlabels[0],x_axis)
+            self.setaxis(self.dimlabels[1],y_axis)
         if also1d:
             if invert:
                 return X,Y,Z,x_axis[::-1],y_axis[::-1]
@@ -2402,6 +2623,7 @@ class nddata (object):
         poly = PolyCollection(verts, facecolors = [color]*len(verts), edgecolors = edgecolor) # the individual facecolors would go here
         poly.set_alpha(alpha)
         fig = gcf()
+        #ax = fig.add_subplot(111,projection = '3d')
         ax.add_collection3d(poly,zs = ys, zdir = 'y')
         ax.set_zlim3d(self.data.min(),self.data.max())
         ax.set_xlim3d(xs.min(),xs.max())
@@ -2733,8 +2955,14 @@ class nddata (object):
     #}}}
     #{{{ display and other properties
     #{{{ set and get prop
-    def set_prop(self,propname,val):
-        self.other_info.update({propname:val})
+    def set_prop(self,*args):
+        if len(args) == 2:
+            propname,val = args
+            self.other_info.update({propname:val})
+        elif len(args) == 1 and type(args[0]) is dict:
+            self.other_info.update(args[0])
+        else:
+            raise ValueError("I don't know what you're passing to set prop!!!")
         return
     def get_prop(self,propname):
         if propname not in self.other_info.keys():
@@ -2788,7 +3016,7 @@ class nddata (object):
         #{{{ shape and add
         A,B = self.aligndata(arg)
         retval = A.copy()
-        retval.data += B.data
+        retval.data = A.data + B.data
         #}}}
         Aerr = A.get_error()
         Berr = B.get_error()
@@ -2922,10 +3150,7 @@ class nddata (object):
                 error = A.get_error()
                 error /= abs(arg)
             return A
-        try:
-            A,B = self.aligndata(arg)
-        except:
-            raise CustomError("Error aligning right (arg) name:",arg.name(),"with left (self) name:",self.name(),"shapes are (resp):",ndshape(arg),ndshape(self))
+        A,B = self.aligndata(arg)
         retval = A.copy()
         retval.data = A.data / B.data
         #{{{ if we have error for both the sets of data, I should propagate that error
@@ -2954,6 +3179,7 @@ class nddata (object):
             Rerr = sqrt(real(Rerr)) # convert back to stdev --> note that this has problems with complex numbers, hence the "abs" above
         except:
             raise CustomError("Rerr gave an attribute error when you passed",Rerr)
+        #print "DEBUG: step 3",Rerr
         #print "Rerr dtype",Rerr.dtype
         if Aerr == None and Berr == None:
             Rerr = None
@@ -2980,6 +3206,22 @@ class nddata (object):
         self.data = real(self.data)
         return self
     #}}}
+    def squeeze(self):
+        'squeeze singleton dimensions -- return a dictionary of the labels for the axes that are dropped'
+        mask = array(self.data.shape) > 1
+        print zip(mask,self.dimlabels)
+        self.data = self.data.squeeze()
+        if type(self.axis_coords) is list:
+            for v,k in [(self.dimlabels[j],self.axis_coords[j][0]) for j in range(len(self.dimlabels)) if not mask[j] and self.axis_coords[j] is not None]:
+                self.set_prop(v,k)
+        self.dimlabels = [v for j,v in enumerate(self.dimlabels) if mask[j]]
+        if type(self.axis_coords) is list:
+            self.axis_coords = [v for j,v in enumerate(self.axis_coords) if mask[j]]
+        if type(self.axis_coords_error) is list:
+            self.axis_coords_error = [v for j,v in enumerate(self.axis_coords_error) if mask[j]]
+        if type(self.axis_coords_units) is list:
+            self.axis_coords_units = [v for j,v in enumerate(self.axis_coords_units) if mask[j]]
+        return
     #{{{ align data
     def aligndata(self,arg):
         r'''This now just returns selfout,argout
@@ -2987,6 +3229,8 @@ class nddata (object):
         axis labels and axis errors for both'''
         #{{{ if zero dimensional, fake a singleton dimension and recurse
         #{{{ unless both are zero dimensional, in which case, just leave alone
+        if isscalar(arg) or type(arg) == ndarray:
+            arg = nddata(arg)
         if ndshape(self).zero_dimensional and ndshape(arg).zero_dimensional:
             return self.copy(),arg.copy()
         #}}}
@@ -3001,6 +3245,7 @@ class nddata (object):
             arg.data = arg.data.reshape(1)
             return self.aligndata(arg)
         #}}}
+        #print "DEBUG 1: shape of self",ndshape(self),"self data shape",self.data.shape,"shape of arg",ndshape(arg),"arg data shape",arg.data.shape
         augmentdims = [x for x in arg.dimlabels if x in set(self.dimlabels)^set(arg.dimlabels)] # dims in arg but now self, ordered as they were in arg
         newdims = self.dimlabels + augmentdims # this should return the new dimensions with the order of self preserved, followed by augmentdims
         selfout = self.copy() # copy self
@@ -3058,6 +3303,7 @@ class nddata (object):
             #{{{ transfer the errors and the axis labels
             #{{{ make dictionaries for both, and update with info from both, giving preference to self
             axesdict = selfout.mkd()
+            #print "DEBUG 4: original mkd",axesdict
             errordict = selfout.mkd()
             #{{{ add the axes and errors for B
             if type(arg.axis_coords) is list:
@@ -3315,12 +3561,29 @@ class nddata (object):
         self.data = self.data.reshape(thisshape)
         self._pop_axis_info(thisindex)
         return self
-    def cropped_log(self,magnitude = 4):
+    def cropped_log(self,subplot_axes = None,magnitude = 4):
         r'''For the purposes of plotting, this generates a copy where I take the log, spanning "magnitude" orders of magnitude
         This is designed to be called as abs(instance).cropped_log(), so it doesn't make a copy'''
-        self = self.run(log10)
-        self -= self.data.flatten().max() - 4 # span only 4 orders of magnitude
+        phaseinfo = None
+        if self.data.dtype == complex128:
+            absdata = abs(self)
+            phaseinfo = self/absdata
+            self.data = absdata.data
+        self.run(log10)
+        if subplot_axes is None:# then do all
+            self.data -= self.data.flatten().max() - magnitude # span only 4 orders of magnitude
+        else:
+            print "smooshing along subplot_axes",subplot_axes
+            newdata = self.copy().smoosh(subplot_axes,dimname = 'subplot')
+            print ndshape(newdata)
+            newdata.run(max,'subplot')
+            print newdata
+            newdata = self - newdata
+            self.data = newdata.data + magnitude
         self.data[self.data < 0] = 0
+        if phaseinfo is not None:
+            self.data = self.data * phaseinfo.data
+            print "check dtype",self.data.dtype
         return self
     def runcopy(self,*args):
         newdata = self.copy()
@@ -3392,7 +3655,9 @@ class nddata (object):
         filtershape = ones_like(self.data.shape)
         filtershape[thisaxis] = len(myfilter)
         myfilter = myfilter.reshape(filtershape)
+        #self.data = ifftshift(ifft(fftshift(fft(self.data,axis = thisaxis),axes = thisaxis)*fftshift(fft(myfilter,axis = thisaxis),axes=thisaxis),axis = thisaxis),axes = thisaxis) # for some reason fftconvolve doesn't work!
         self.data = ifft(fft(self.data,axis = thisaxis)*fft(myfilter,axis = thisaxis),axis = thisaxis)
+        #self.data = fftconvolve(self.data,myfilter,mode='same') # I need this, so the noise doesn't break up my blocks
         return self
     def _ft_conj(self,x):
         pairs = [('s','Hz'),('m',r'm^{-1}')]
@@ -3731,7 +3996,7 @@ class nddata (object):
                 if type(listofaxes[j]) not in [ndarray,list]:
                     raise TypeError('You passed an axis label of type '+repr(type(listofaxes[j]))+' for the axis '+listofstrings[j]+' to the labels method, which you can\'t do --> it must be an nddata')
                 if (len(listofaxes[j]) != ndshape(self)[listofstrings[j]]) and (len(listofaxes[j])!=0):
-                    raise IndexError("You're trying to attach an axis of len %d to the '%s' dimension, which has %d data points"%(len(listofaxes[j]),listofstrings[j],ndshape(self)[listofstrings[j]]))
+                    raise IndexError("You're trying to attach an axis of len %d to the '%s' dimension, which has %d data points (shape of self is %s)"%(len(listofaxes[j]),listofstrings[j],ndshape(self)[listofstrings[j]],repr(ndshape(self))))
                 #}}}
                 try:
                     self.axis_coords[self.dimlabels.index(listofstrings[j])] = listofaxes[j]
@@ -3766,7 +4031,10 @@ class nddata (object):
         thisaxis = self.axn(axisname)
         newshape[thisaxis] = self.data.shape[thisaxis]
         newshape = list(newshape)
-        return self.getaxis(axisname).copy().reshape(newshape)
+        retval = self.getaxis(axisname)
+        if retval is None:
+            raise AttributeError(axisname+" does not have axis labels!")
+        return retval.copy().reshape(newshape)
     def retaxis(self,axisname):
         thisaxis = self._axis_inshape(axisname)
         return nddata(thisaxis,thisaxis.shape,list(self.dimlabels)).labels(axisname,thisaxis.flatten())
@@ -3802,7 +4070,10 @@ class nddata (object):
         else:
             raise CustomError('Wrong number of arguments!!')
         if issympy(func):
-            func = sympy.lambdify(*tuple(map(sympy.var,axisnames) + [func,"numpy"]))
+            try:
+                func = sympy.lambdify(*tuple([map(sympy.var,axisnames)] + [func,"numpy"]))
+            except:
+                raise CustomError('Error parsing axis variables',map(sympy.var,axisnames),'that you passed and function',func,'that you passed')
         if func.func_code.co_argcount != len(axisnames):
             raise CustomError("The axisnames you passed and the argument count don't match")
         list_of_axes = [self._axis_inshape(x) for x in axisnames]
@@ -3969,17 +4240,22 @@ class nddata (object):
         if len(otherargs) == 2:
             axesout,shapesout = otherargs
         elif len(otherargs) == 1:
-            axesout = otherargs[0]
-            shapesout = ndshape(self)[axisin]**(1./len(axesout))
-            if abs(shapesout-round(shapesout)) > 1e-15: # there is some kind of roundoff error here
-                raise ValueError('''In order for chunk to be called with
-                        only a list of axes, the shape of the dimension you are
-                        trying to split (here %s) must be an Nth root of
-                        the original dimension size (here: %d), where N (here
-                        %d) is the number of dimensions you are trying to chunk into'''%(axisin,ndshape(self)[axisin],len(axesout)))
+            if type(otherargs[0]) is list:
+                axesout = otherargs[0]
+                shapesout = ndshape(self)[axisin]**(1./len(axesout))
+                if abs(shapesout-round(shapesout)) > 1e-15: # there is some kind of roundoff error here
+                    raise ValueError('''In order for chunk to be called with
+                            only a list of axes, the shape of the dimension you are
+                            trying to split (here %s) must be an Nth root of
+                            the original dimension size (here: %d), where N (here
+                            %d) is the number of dimensions you are trying to chunk into'''%(axisin,ndshape(self)[axisin],len(axesout)))
+                else:
+                    shapesout = round(shapesout)
+                shapesout = [shapesout] * len(axesout)
+            elif type(otherargs[0]) is dict:
+                axesout,shapesout = otherargs[0].keys(),otherargs[0].values()
             else:
-                shapesout = round(shapesout)
-            shapesout = [shapesout] * len(axesout)
+                raise ValueError("I don't know how to deal with this type!")
         else:
             raise ValueError("otherargs must be one or two arguments!")
         if any([j == -1 for j in shapesout]):
@@ -4132,6 +4408,7 @@ class nddata (object):
         print 'getslice! ',args
     def __setitem__(self,*args):
         righterrors = None
+        #print "DEBUG: types of args",map(type,args)
         A = args[0]
         if type(A) is nddata:
             _,B = self.aligndata(A)
@@ -4148,6 +4425,7 @@ class nddata (object):
             self.data[A] = args[1]
             return
         if isinstance(args[1],nddata):
+            #print "DEBUG: I found rightdata to be nddata"
             #{{{ reorder so the shapes match
             unshared_indices = list(set(args[1].dimlabels) ^ set(self.dimlabels))
             shared_indices = list(self.dimlabels)
@@ -4158,6 +4436,7 @@ class nddata (object):
             #}}}
             rightdata = args[1].data
             righterrors = args[1].get_error()
+            #print "DEBUG: and I convert it to",type(rightdata)
         else: # assume it's an ndarray
             rightdata = args[1]
             #{{{ if I just passed a function, assume that I'm applying some type of data-based mask
@@ -4270,7 +4549,7 @@ class nddata (object):
                         data_error = newerror,
                         other_info = self.other_info)
             except:
-                raise CustomError("likely some problem recasting the data when trying to initialize a new nddata: shape of self.data",self.data,"indexlist",indexlist)
+                raise CustomError("likely some problem recasting the data when trying to initialize a new nddata: shape of self.data",self.data.shape,"indexlist",indexlist)
             retval.axis_coords_units = axis_coords_units
             retval.data_units = self.data_units
             return retval
@@ -4326,9 +4605,9 @@ class nddata (object):
         trueslice = [] # this lets me distinguish from 'axisname',slice
         while j < len(args):
             if type(args[j]) is slice:
-                temp = args[j].start
-                args.insert(j,temp)
-                trueslice.append(temp)
+                this_dim_name = args[j].start
+                args.insert(j,this_dim_name)
+                trueslice.append(this_dim_name)
                 j+=1
             j+=2 # even only
         #}}}
@@ -4412,7 +4691,8 @@ class nddata (object):
                                     y = slicedict[x]
                                 else: #then I passed a single index
                                     temp = abs(axesdict[x] - y.stop).argmin()
-                                    slicedict[x] = slice(temp,temp+1,None)
+                                    #slicedict[x] = slice(temp,temp+1,None)
+                                    slicedict[x] = temp
                                     y = slicedict[x]
                         if axesdict[x] == []:
                             axesdict[x] = None
@@ -4775,7 +5055,10 @@ def image(A,x=[],y=[],**kwargs):
     linecounter = 0
     origAndim = A.ndim
     if A.ndim > 2:
-        ax = gca()
+        if 'ax' not in kwargs.keys():
+            ax = gca()
+        else:
+            ax = kwargs['ax']
         setp(ax.get_yticklabels(),visible = False)
         ax.yaxis.set_ticks_position("none")
     while A.ndim>2:# to substitude for imagehsvm, etc., so that we just need a ersion of ft
@@ -4795,6 +5078,8 @@ def image(A,x=[],y=[],**kwargs):
     #line_mask = isnan(A)
     #A[line_mask] = A[logical_not(line_mask)].max()
     #A[line_mask] = 0
+    if 'ax' in kwargs:
+        sca(kwargs.pop('ax'))
     if iscomplex(A).any():
         A = imagehsv(A,**imagehsvkwargs)
         retval = imshow(A,extent=myext,**kwargs)
@@ -4812,36 +5097,65 @@ def colormap(points,colors,n=256):
     b = interp(linspace(0,1,n),points,colors[:,2].flatten())
     return reshape(r_[r,g,b],(3,n)).T
 def imagehsv(A,logscale = False,black = False):
+    # compare to http://www.rapidtables.com/convert/color/hsv-to-rgb.htm
     n = 256
     mask = isnan(A)
     A[mask] = 0
-    theta = (n-1.)*mod(angle(A)/pi/2.0,1)# angle in 255*cycles
-    hsv = colormap(r_[0.,1./3.,2./3.,1.],double(array([
-        [1,0,0],
-        [0,1,0],
-        [0,0,1],
-        [1,0,0]])),n=n)
-    hsv_norm = sqrt(sum(hsv*hsv,axis=1))
-    hsv_norm = reshape(hsv_norm,(hsv_norm.size,1))
-    hsv = hsv/hsv_norm
-    colors = hsv[ix_(int32(theta.flatten().round()),[0,1,2])]
-    colors = reshape(colors,(A.shape[0],A.shape[1],3))
-    mask = mask.reshape(A.shape[0],A.shape[1],1) # reshape the mask into the 3 color shape as well
-    mask = tile(mask,(1,3)).reshape(mask.shape[0],mask.shape[1],3) # and copy the mask across all colors
-    intensity = abs(A).reshape(A.shape[0],A.shape[1],1)
+    mask = mask.reshape(-1,1)
+    intensity = abs(A).reshape(-1,1)
     intensity /= abs(A).max()
     if logscale:
         intensity = log10(intensity)
+    #theta = (n-1.)*mod(angle(A)/pi/2.0,1)# angle in 255*cycles
     if black:
         if black is True:
-            colors = intensity*colors
+            V = intensity
         else:
-            colors = intensity*colors*black + (1.0-black)
-        colors[mask] = 1.0
+            V = intensity*black + (1.0-black)
+        S = 1.0 # always
     else:
-        colors = 1.0-intensity*(1.0-colors)
-        colors[mask] = 0.0
-    return colors
+        S = intensity
+        V = 1.0 # always
+    C = V*S
+    H = (angle(-1*A).reshape(-1,1)+pi)/2./pi*6. # divide into 60 degree chunks -- the -1 is to rotate so red is at origin
+    X = C * (1-abs(mod(H,2)-1))
+    m = V-C
+    colors = ones(list(A.shape) + [3])
+    origshape = colors.shape
+    colors = colors.reshape(-1,3)
+    rightarray = c_[C, X, zeros_like(X)]
+    # http://en.wikipedia.org/wiki/HSL_and_HSV#From_HSV,
+    # except that the order was messed up
+    thismask = where(H<1)[0]
+    # C X 0
+    colors[ix_(thismask,[0,1,2])] = rightarray[ix_(thismask,[0,1,2])]
+    thismask = where(logical_and(H>=1,
+        H<2))[0]
+    # X C 0
+    colors[ix_(thismask,[1,0,2])] = rightarray[ix_(thismask,[0,1,2])]
+    thismask = where(logical_and(H>=2,
+        H<3))[0]
+    # X 0 C
+    colors[ix_(thismask,[1,2,0])] = rightarray[ix_(thismask,[0,1,2])]
+    thismask = where(logical_and(H>=3,
+        H<4))[0]
+    # 0 X C
+    colors[ix_(thismask,[2,1,0])] = rightarray[thismask,:]
+    thismask = where(logical_and(H>=4,
+        H<5))[0]
+    # 0 C X
+    colors[ix_(thismask,[2,0,1])] = rightarray[thismask,:]
+    thismask = where(H>5)[0]
+    # C 0 X
+    colors[ix_(thismask,[0,2,1])] = rightarray[thismask,:]
+    colors += m
+    colors *= (n-1)
+    if black:
+        colors[mask * r_[True,True,True]] = black
+    else:
+        colors[mask * r_[True,True,True]] = 1.0
+    colors = colors.reshape(origshape)
+    return uint8(colors.round())
 def myfilter(x,center = 250e3,sigma = 100e3):
     x = (x-center)**2
     x /= sigma**2
