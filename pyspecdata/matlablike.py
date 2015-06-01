@@ -1,9 +1,8 @@
-import paramset
+from . import paramset
 from os import listdir,environ
 if paramset.myparams['figlist_type'] == 'figlistl':
     environ['ETS_TOOLKIT'] = 'qt4'
     import matplotlib; matplotlib.use('Agg')
-from matlablike import *
 from pylab import *
 import textwrap
 import matplotlib.transforms as mtransforms
@@ -30,7 +29,7 @@ import numpy.lib.recfunctions as recf
 from inspect import getargspec
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
-from datadir import getDATADIR
+from .datadir import getDATADIR
 #rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
 rc('image',aspect='auto',interpolation='nearest')
 rcParams['xtick.direction'] = 'out'

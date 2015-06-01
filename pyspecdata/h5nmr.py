@@ -1,8 +1,8 @@
-from matlablike import *
-from nmr import *
-from nmrfit import *
+from .matlablike import *
+from .nmr import *
+from .nmrfit import *
 from datetime import datetime
-from interptau import interptau
+from .interptau import interptau
 #from fornotebook import lrecordarray
 import time
 from numpy.lib.recfunctions import rename_fields,drop_fields

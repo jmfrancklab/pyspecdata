@@ -1,6 +1,6 @@
 import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from matlablike import *
+from .matlablike import *
 from string import rstrip
 from scipy.io import savemat,loadmat
 from os.path import exists as path_exists
@@ -11,9 +11,9 @@ from scipy.misc import imresize
 from tables import openFile
 from datetime import datetime
 from time import mktime
-from datadir import grab_data_directory
+from .datadir import grab_data_directory
 from PIL import Image
-from nmr import *
+from .nmr import *
 import re
 
 golden_ratio = (1.0 + sqrt(5))/2.0

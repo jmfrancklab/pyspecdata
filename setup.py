@@ -1,18 +1,18 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='pySpecData',
     author='J. M. Franck',
-    version='0.2.0',
-    packages=['pyspecdata','pyspecdata.propagate'],
-    license='LICENSE.txt',
+    version='0.1.0',
+    packages=['pyspecdata'],
+    license='LICENSE.md',
     description='object-oriented N-dimensional data processing with notebook functionality',
-    long_description=open('README.txt').read(),
+    long_description=open('README.rst').read(),
     install_requires=[
         "sympy",
         "numpy",
         "scipy",
         "matplotlib",
-        "pytables",
+        "tables",
         ],
 )
