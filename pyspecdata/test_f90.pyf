@@ -1,0 +1,14 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module test_module ! in 
+    interface  ! in :test_module
+        subroutine hello ! in :test_module:test_f90.f90
+        end subroutine hello
+        subroutine otherhello ! in :test_module:anothertest.f90
+        end subroutine otherhello
+    end interface 
+end python module test_module
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/
