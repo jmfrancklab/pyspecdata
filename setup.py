@@ -8,6 +8,9 @@ from numpy.distutils.core import Extension,setup
 ext_test = Extension(name = 'test_f90',
         sources = ['test_f90.f90'])
 #f2py_options = ['--fcompiler=gnu95','--compiler=mingw32','-lmsvcr71'])
+ext_prop = Extension(name = 'propagator',
+        sources = ['propagator.f90'],
+        libraries = ['lapack','refblas'])
 
 setup(
     name='pySpecData',
@@ -24,5 +27,5 @@ setup(
         "matplotlib",
         "tables",
         ],
-    ext_modules = [ext_test],
+    ext_modules = [ext_test,ext_prop],
 )
