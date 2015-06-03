@@ -6,7 +6,9 @@ from numpy.distutils.core import Extension,setup
 #        f2py_options = '--fcompiler=gnu95 -llapack',
 #        )
 ext_test = Extension(name = 'pyspecdata.test_module',
-        sources = ['pyspecdata/test_f90.pyf','pyspecdata/test_f90.f90','pyspecdata/anothertest.f90'])
+        sources = ['pyspecdata/test_f90.pyf','pyspecdata/test_f90.f90','pyspecdata/anothertest.f90','pyspecdata/lprmpt.c','pyspecdata/fortrancall.h'],
+        define_macros = [('ADD_UNDERSCORE',None)],
+        )
 #f2py_options = ['--fcompiler=gnu95','--compiler=mingw32','-lmsvcr71'])
 ext_prop = Extension(name = 'pyspecdata.propagator',
         sources = ['pyspecdata/propagator.f90'],
