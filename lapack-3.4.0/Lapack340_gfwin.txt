@@ -1,0 +1,64 @@
+LAPACK 3.4.0 FOR GFORTRAN ON WINDOWS
+April 15 2012
+by Cumulo123
+copyright 2012, all rights to public domain
+
+
+				INTRODUCTION
+
+This collection of files will assist compilation of lapack 3.4.0 files to create reference  BLAS and LAPACK libraries on Windows machines with installed gfortran. An installed and working gfortran must be present. Separate CMake or MinGW installs are not required. 
+
+The processing uses a combination of batch and makefiles to create and test reference blas and lapack libraries and is specific for lapack version 3.4.0.  The makefile.inc is specific for gfortran. The variant libraries are also created but are not tested.
+
+Please note that these reference blas and lapack libraries are not optimized. While substantial performance gains are achieved using machine optimized libraries (see GOTOBLAS, ATLAS project...) these unoptimized libraries are quite satisfactory for medium sized problems and testing. In short you might as well start here. You'll know when you need the optimized libraries.
+
+				PROCEDURE
+
+1. Download and install gfortran  (see http://gcc.gnu.org/wiki/GFortranBinaries#Windows ). 
+
+2. Download lapack 3.4.0 available from netlib.org and unzip.  The top directory will be lapack-3.4.0 but may be renamed if desired. 
+
+3. Download lapack340_gfwin.zip (this collection) and unzip. Copy all files into the lapack top directory.
+
+4. CREATING LIBRARIES. Execute makelibs.bat (lapack top directory).  The lapack and blas libraries are created in the top directory.  Variant libraries are in \src\variants\lib.
+
+5. TESTING LIBRARIES. Execute testlibs.bat (lapack top directory). Test results and testing executables are in the \blas and \testing and \install directories.  Results appear in .out files. Variants are not tested. 
+
+				INFORMATION
+
+INCLUDED FILES (lapack340_gfwin)
+	make.inc
+	m_eigtst
+	m_lintst
+	makelib.bat
+	testlibs.bat
+	lapack340_gfwin.txt (this file)
+
+Modifications to lapack-3.4.0 files
+
+1.  MAKEFILE.INC
+
+	Locate "\install\makefile.inc.gfortran".
+	Edit to delete "/bin/sh" from the SHELL statement, leaving "SHELL = ".
+	Save as  "makefile.inc"
+
+2.  M_EIGTST
+
+	Locate "\testing\eig\makefile".
+	In lines 129-147  remove all after && in each line  (mv command fails)
+	save as "m_eigtst".
+
+
+3. M_LINTST
+
+	Locate "\testing\lin\makefile".
+	In lines 284-312 comment out  all mv commands  (mv command fails).
+	save as "m_lintst".
+
+
+3. OPTIONAL TIMING (fast machines)
+	Edit \install\secondtst.f and  \install\dsecndtst.f  line approx 38 parameter ITS
+	from " PARAMETER          ( NMAX = 1000, ITS = 50000 )"
+	  to " PARAMETER          ( NMAX = 1000, ITS = 500000 )"
+
+	PS - don't worry much about it, it mostly never seems to work properly anyway.
