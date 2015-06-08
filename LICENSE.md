@@ -1,6 +1,8 @@
 Copyright (c) 2015, jmfranck
 All rights reserved.
 
+(The majority of this software was developed in S. Han's lab, with some recent upgrades/additions at ACERT/JH Freed's lab.)
+
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
