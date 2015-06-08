@@ -24,25 +24,9 @@ def grab_data_directory():
         os.environ['PYTHONDATADIR'] = mydatadir
         fp_datadir.close()
         grabbed_datadir_from_file = True
-    elif os.path.exists('c:/Users/franck/.datadir'):
-        fp_datadir = open('c:/Users/franck/.datadir','r')
-        mydatadir = fp_datadir.read().strip()
-        if mydatadir[-1] not in ['/','\\']:
-            if os.name == 'posix':
-                mydatadir = mydatadir+'/'
-            else:
-                mydatadir = mydatadir+'\\'
-        os.environ['PYTHONDATADIR'] = mydatadir
-        fp_datadir.close()
-        grabbed_datadir_from_file = True
     else:
-        datadir_error = ('''Since this is your first time running the notebook code, you need to create a file called .datadir in the directory
-
-                %s
-
-                (your base notebook directory) that tells where all your data is stored
-                
-                '''%os.getcwd()).replace('\\','\\textbackslash ').replace('_','\\_')
+        mydatadir = os.path.expanduser('~') + os.path.sep + 'exp_data'
+        os.environ['PYTHONDATADIR'] = mydatadir
     return grabbed_datadir_from_file,datadir_error
 def getDATADIR():
     if 'PYTHONDATADIR' in os.environ.keys():
