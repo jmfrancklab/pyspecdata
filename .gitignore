@@ -3,3 +3,5 @@
 build/
 *.pyd
 .*.swp
+pyspecdata/propagator.so
+pyspecdata/test_module.so

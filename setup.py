@@ -16,7 +16,9 @@ ext_test = Extension(name = 'pyspecdata.test_module',
         )
 ext_modules = [ext_test]
 
+libraries = ['lapack']
 if os.name == 'nt':
+    libraries.append('refblas')
     print "It looks like you're on windows, so I'm going to build lapack (from http://netlib.org/) on MinGW."
     target = os.path.dirname(os.path.dirname(find_executable('gcc'))) + os.sep + 'lib' + os.sep + 'gcc' + os.sep
     if 'liblapack.a' in os.listdir(target) and 'librefblas.a' in os.listdir(target):
@@ -32,7 +34,7 @@ if os.name == 'nt':
         os.chdir('..')
 ext_prop = Extension(name = 'pyspecdata.propagator',
         sources = ['pyspecdata/propagator.f90'],
-        libraries = ['lapack','refblas'])
+        libraries = libraries)
 ext_modules.append(ext_prop)
 
 tryagain = True
@@ -73,3 +75,25 @@ while tryagain == True:
             sys.stdin.readline(1)
             ext_modules = []
             tryagain = True
+        elif len(ext_modules) == 0:
+            setup(
+                name='pySpecData',
+                author='J. M. Franck',
+                version='0.1.0',
+                packages=['pyspecdata'],
+                license='LICENSE.md',
+                description='object-oriented N-dimensional data processing with notebook functionality',
+                long_description=open('README.rst').read(),
+                install_requires=[
+                    "sympy",
+                    "numpy",
+                    "scipy",
+                    "matplotlib",
+                    "tables",
+                    "mayavi",
+                    ],
+                ext_modules = ext_modules,
+            #    entry_points=dict(
+            #        notebook_info=["data_dir = pyspecdata:datadir ["+os.path.expanduser('~')+os.path.sep+'exp_data]']
+            #        )
+            )
