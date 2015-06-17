@@ -1,4 +1,4 @@
-from pyspecdata import *
+from .core import *
 from matplotlib.collections import LineCollection
 from matplotlib.patches import Rectangle
 from nmr import phaseopt
