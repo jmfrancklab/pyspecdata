@@ -67,13 +67,6 @@ while tryagain == True:
                 "mayavi",
                 ],
             ext_modules = ext_modules,
-            entry_points=dict(
-                console_scripts=[
-                    "latex_cycle_files = pyspecdata.latexscript:cycle_files",
-                    "latex_notebook_script = pyspecdata.latexscript:main",
-                    ]
-                #        notebook_info=["data_dir = pyspecdata:datadir ["+os.path.expanduser('~')+os.path.sep+'exp_data]']
-                )
         )
         tryagain = False
     except:
@@ -107,11 +100,4 @@ while tryagain == True:
                     "mayavi",
                     ],
                 ext_modules = ext_modules,
-                entry_points=dict(
-                    console_scripts=[
-                        "latex_cycle_files = pyspecdata.latexscript:cycle_files",
-                        "latex_notebook_script = pyspecdata.latexscript:main",
-                        ]
-            #        notebook_info=["data_dir = pyspecdata:datadir ["+os.path.expanduser('~')+os.path.sep+'exp_data]']
-                    )
             )
