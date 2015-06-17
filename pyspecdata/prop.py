@@ -1,6 +1,6 @@
 from .propagator import *
 from time import *
-from .matlablike import *
+from .core import *
 class CustomError(Exception):
 	def __init__(self, *value):
 		if len(value)>1:

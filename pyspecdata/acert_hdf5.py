@@ -1,11 +1,12 @@
-from .matlablike import *
+from pyspecdata import *
 from matplotlib.collections import LineCollection
 from matplotlib.patches import Rectangle
-from .nmr import phaseopt
+from nmr import phaseopt
 from sympy import var
 import tables
 import re
 import os
+import scipy.io
 
 def gen_composite(basenames,collected_data,
     timeconst = 4e-9/1.8, 
@@ -714,3 +715,37 @@ def load_nutation_curve(main,background = None,fl = None,max_freq = 30e6,deadtim
     #xlims[0] = 5. #set to 5 ns, but don't delete the data, so I can pan over
     #xlim(xlims)
     return difference,fl
+
+def oscilloscope_data(*args):
+    r"""read in a set of data that was stored on the oscilloscope using record_scope_data.pyw
+    :param arguments: one or two file names.  if two are given, one should have `_bg` in the filename, indicating that it is a background scan (taken with the Tx attenuator turned all the way up)
+    :type arguments: strings
+    :return: a tuple of data:
+        - copolarized reflection
+        - modulator power
+        - tuning signal (complex for I/Q)
+    :rtype: tuple of 3 nddata objects
+    """
+    if len(args) == 2:
+        a = scipy.io.loadmat(getDATADIR('agilent_scope',args[0]))
+        b = scipy.io.loadmat(getDATADIR('agilent_scope',args[1]))
+        if '_bg' in args[0]:
+            mdata_bg,mdata = a,b
+        elif '_bg' in args[1]:
+            mdata_bg,mdata = b,a
+        else:
+            raise RuntimeError("can't figure out which is the background")
+        for variable in ['ch%d'%(j+1) for j in range(4)]:
+            mdata[variable] -= mdata_bg[variable]
+    elif len(args) == 1:
+        mdata = scipy.io.loadmat(args[0])
+    else:
+        raise RuntimeError("don't know what to do with that!")
+    copol_data = nddata(mdata['ch1'],[-1],['t']).labels('t',mdata['time'].flatten()).set_units('t','s')
+    mod_data = nddata(mdata['ch3'],[-1],['t']).labels('t',mdata['time'].flatten()).set_units('t','s')
+    tune_data = mdata['ch2'].flatten()+1j*mdata['ch4'].flatten()
+    tune_data = nddata(mdata['ch2']+1j*mdata['ch4'],[-1],['t']).labels('t',mdata['time'].flatten()).set_units('t','s')
+    tune_data.name('Voltage')
+    if real(tune_data.data).sum() < 0:
+        tune_data *= -1
+    return copol_data,mod_data,tune_data

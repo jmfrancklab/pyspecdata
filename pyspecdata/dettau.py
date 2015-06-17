@@ -1,4 +1,4 @@
-from matlablike import *
+from.core import *
 import sys
 import interptau
 if len(sys.argv) < 2:

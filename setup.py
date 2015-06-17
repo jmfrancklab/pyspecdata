@@ -5,6 +5,16 @@ from distutils.spawn import find_executable
 import subprocess
 import sys
 import os
+setup(
+    name='paramset_pyspecdata',
+    author='J. M. Franck',
+    version='0.1.0',
+    packages=['paramset_pyspecdata'],
+    license='LICENSE.md',
+    description='helper for pyspecdata',
+    long_description="just a module for storing global variables -- needed to change what's imported for notebook vs. graphical display",
+)
+
 try:
     import PyQt4.QtCore
     import PyQt4.QtGui
@@ -57,9 +67,13 @@ while tryagain == True:
                 "mayavi",
                 ],
             ext_modules = ext_modules,
-        #    entry_points=dict(
-        #        notebook_info=["data_dir = pyspecdata:datadir ["+os.path.expanduser('~')+os.path.sep+'exp_data]']
-        #        )
+            entry_points=dict(
+                console_scripts=[
+                    "latex_cycle_files = pyspecdata.latexscript:cycle_files",
+                    "latex_notebook_script = pyspecdata.latexscript:main",
+                    ]
+                #        notebook_info=["data_dir = pyspecdata:datadir ["+os.path.expanduser('~')+os.path.sep+'exp_data]']
+                )
         )
         tryagain = False
     except:
@@ -93,7 +107,11 @@ while tryagain == True:
                     "mayavi",
                     ],
                 ext_modules = ext_modules,
-            #    entry_points=dict(
+                entry_points=dict(
+                    console_scripts=[
+                        "latex_cycle_files = pyspecdata.latexscript:cycle_files",
+                        "latex_notebook_script = pyspecdata.latexscript:main",
+                        ]
             #        notebook_info=["data_dir = pyspecdata:datadir ["+os.path.expanduser('~')+os.path.sep+'exp_data]']
-            #        )
+                    )
             )

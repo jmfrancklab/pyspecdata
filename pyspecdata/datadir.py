@@ -1,8 +1,8 @@
 import os
 def dirformat(file):
         #{{{ format strings
-        if file[-1]!='/':
-            file += '/'
+        if file[-1]!=os.sep:
+            file += os.sep
         #}}}
         return file
 def grab_data_directory():
@@ -28,7 +28,7 @@ def grab_data_directory():
         mydatadir = os.path.expanduser('~') + os.path.sep + 'exp_data'
         os.environ['PYTHONDATADIR'] = mydatadir
     return grabbed_datadir_from_file,datadir_error
-def getDATADIR():
+def getDATADIR(*args):
     if 'PYTHONDATADIR' in os.environ.keys():
         DATADIR = os.environ['PYTHONDATADIR']
     else:
@@ -36,4 +36,7 @@ def getDATADIR():
         if datadir_error is not False:
             raise RuntimeError(datadir_error)
         DATADIR = os.environ['PYTHONDATADIR']
-    return dirformat(DATADIR)
+    if len(args)>0:
+        return dirformat(DATADIR)+os.sep.join(args)
+    else:
+        return dirformat(DATADIR)

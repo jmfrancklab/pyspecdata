@@ -1,6 +1,7 @@
-from . import paramset
+from paramset_pyspecdata import myparams
 from os import listdir,environ
-if paramset.myparams['figlist_type'] == 'figlistl':
+#if paramset.myparams['figlist_type'] == 'figlistl':
+if myparams['figlist_type'] == 'figlistl':
     environ['ETS_TOOLKIT'] = 'qt4'
     import matplotlib; matplotlib.use('Agg')
 from pylab import *
@@ -1376,7 +1377,7 @@ def plot_color_counter(*args,**kwargs):
             ax._get_lines.count = args[0] # set the value of the color counter
         except:
             ax._get_lines.color_cycle = args[0] # set the value of the color counter
-    try: # this is different depending on the version of matlablike
+    try: # this is different depending on the version of.core
         retval = ax._get_lines.count
     except:
         retval = ax._get_lines.color_cycle
@@ -2973,6 +2974,7 @@ class nddata (object):
            .name() --> Return the name"""
         if len(arg) == 1:
             self.set_prop('name',arg[0])
+            return self
         elif len(arg) == 0:
             return self.get_prop('name')
         else:
@@ -5730,13 +5732,13 @@ class fitdata(nddata):
         #}}}
         lastresidual = thisresidual
         for j in range(0,numguesssteps):
-            if super_verbose: print '\n\n(matlablike.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\end{verbatim}'
-            if super_verbose: print '\n\n(matlablike.guess) shape of parameter derivatives',shape(fprime),'shape of output',shape(y),'\n\n'
+            if super_verbose: print '\n\n.core.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\end{verbatim}'
+            if super_verbose: print '\n\n.core.guess) shape of parameter derivatives',shape(fprime),'shape of output',shape(y),'\n\n'
             regularization_bad = True
             alpha_max = 100.
             alpha_mult = 2.
             alpha = 0.1 # maybe I can rather estimate this based on the change in the residual, similar to in L-M?
-            if verbose: print '\n\n(matlablike.guess) value of residual before regularization %d:'%j,thisresidual
+            if verbose: print '\n\n.core.guess) value of residual before regularization %d:'%j,thisresidual
             while regularization_bad:
                 newguess = real(array(thisguess) + dot(pinvr(fprime.T,alpha),(y-f_at_guess)).flatten())
                 mask = newguess < self.guess_lb
@@ -5744,7 +5746,7 @@ class fitdata(nddata):
                 mask = newguess > self.guess_ub
                 newguess[mask] = self.guess_ub[mask]
                 if any(isnan(newguess)):
-                    if verbose: print '\n\n(matlablike.guess) Regularization blows up $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha
+                    if verbose: print '\n\n.core.guess) Regularization blows up $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha
                     alpha *= alpha_mult
                 else:
                     #{{{ evaluate f, fprime and residuals
@@ -5759,21 +5761,21 @@ class fitdata(nddata):
                     #}}}
                     if (thisresidual-lastresidual)/lastresidual > 0.10:
                         alpha *= alpha_mult
-                        if verbose: print '\n\n(matlablike.guess) Regularized Pinv gave a step uphill $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha
+                        if verbose: print '\n\n.core.guess) Regularized Pinv gave a step uphill $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha
                     else: # accept the step
                         regularization_bad = False
                         thisguess = newguess
                         lastresidual = thisresidual
                         fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
                 if alpha > alpha_max:
-                    print "\n\n(matlablike.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max
+                    print "\n\n.core.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max
                     if which_starting_guess >= len(self.starting_guesses)-1:
-                        print "\n\n(matlablike.guess) {\\color{red} Warning!!!} ran out of guesses!!!%d\n\n"%alpha_max
+                        print "\n\n.core.guess) {\\color{red} Warning!!!} ran out of guesses!!!%d\n\n"%alpha_max
                         return thisguess
                     else:
                         which_starting_guess += 1
                         thisguess = self.starting_guesses[which_starting_guess]
-                        print "\n\n(matlablike.guess) try a new starting guess:",lsafen(thisguess)
+                        print "\n\n.core.guess) try a new starting guess:",lsafen(thisguess)
                         j = 0 # restart the loop
                         #{{{ evaluate f, fprime and residuals for the new starting guess
                         guess_dict = dict(zip(self.symbol_list,list(thisguess)))
@@ -5786,8 +5788,8 @@ class fitdata(nddata):
                         thisresidual = sqrt((y-f_at_guess)**2).sum()
                         #}}}
                         regularization_bad = False # jump out of this loop
-            if verbose: print '\n\n(matlablike.guess) new value of guess after regularization:',lsafen(newguess)
-            if verbose: print '\n\n(matlablike.guess) value of residual after regularization:',thisresidual
+            if verbose: print '\n\n.core.guess) new value of guess after regularization:',lsafen(newguess)
+            if verbose: print '\n\n.core.guess) value of residual after regularization:',thisresidual
         return thisguess
 #}}}
 def sqrt(arg):
@@ -5798,10 +5800,10 @@ def sqrt(arg):
     else:
         return np_sqrt(arg)
 
-if paramset.myparams['figlist_type'] == 'figlistl':
+if myparams['figlist_type'] == 'figlistl':
     from fornotebook import *
     figlist_var = figlistl
-elif paramset.myparams['figlist_type'] == 'figlist':
+elif myparams['figlist_type'] == 'figlist':
     def obsn(*x): #because this is used in fornotebook, and I want it defined
         print ''.join(x),'\n'
     def obs(*x): #because this is used in fornotebook, and I want it defined

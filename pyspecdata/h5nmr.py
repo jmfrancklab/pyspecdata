@@ -1,8 +1,8 @@
-from .matlablike import *
+from .core import *# from . import * doesn't work
 from .nmr import *
 from .nmrfit import *
 from datetime import datetime
-from .interptau import interptau
+from interptau import interptau
 #from fornotebook import lrecordarray
 import time
 from numpy.lib.recfunctions import rename_fields,drop_fields
@@ -112,6 +112,7 @@ class store_Emax (store_integrals):
         else:
             power_file = auxiliary_args.pop('power_file')
             if fid_args['expno'] == 'auto' or fid_args['expno'] == 'Auto':
+                #print "parse powers about to be called with arguments",path,fid_args['name'],power_file,auxiliary_args
                 self.expno,dbm,self.figure_list = parse_powers(path,fid_args['name'],power_file,first_figure = self.figure_list,**auxiliary_args) # the 1 is because I'm not interested in the expnos it uses
                 mythreshold = -36
                 if 'threshold' in auxiliary_args.keys():
@@ -243,6 +244,7 @@ def parse_powers(path,name,power_file,expno = None,
     if templen > t_minlength:
        t_minlength = templen
     t_maxlen = scan_length+scanlength_estimation_error
+    #print "about to pass auto_steps",figure_list
     dbm,lastspike,figure_list.figurelist = auto_steps(path+power_file,t_start = t_start*60,t_stop = t_stop,t_minlength = t_minlength,t_maxlen = t_maxlen,tolerance = tolerance, threshold = threshold,return_lastspike = True,first_figure = figure_list.figurelist)
     downby = r_[-5:5]
     timetomakeup = (len(expno)-len(dbm))*60.0*scan_length+lastspike
@@ -585,6 +587,7 @@ def dnp_for_rho(path,
                 first_figure = figure_list,# because I append this later!
                 auxiliary_args = auxiliary_args,
                 integration_args = integration_args)
+        #print "store Emax called with args",h5file,concentration_id,fid_args,'aux:',auxiliary_args,'int:',integration_args
         figure_list = emax_in_file.figure_list
         if verbose: print lsafen('DEBUG: figure_list after Emax load is',figure_list)
         if verbose: print lsafen('DEBUG: index is',emax_in_file.index,'for',emax_in_file.integralnode_name,'with experiments',emax_in_file.expno)

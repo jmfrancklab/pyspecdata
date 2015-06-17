@@ -1,4 +1,5 @@
-from .matlablike import *
+from .core import *
+
 #import numpy
 
 # so essentially, __all__ is the namespace that is passed with an import *

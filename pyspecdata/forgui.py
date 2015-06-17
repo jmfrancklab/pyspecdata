@@ -1,4 +1,4 @@
-from matlablike import *
+from.core import *
 from string import rstrip
 from scipy.io import savemat,loadmat
 from os.path import exists as path_exists

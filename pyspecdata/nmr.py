@@ -1,6 +1,6 @@
 # just make this a library of all NMR reading software
-from matlablike import *
-from nmrfit import *
+from .core import *
+from .nmrfit import *
 import re
 import string
 import struct

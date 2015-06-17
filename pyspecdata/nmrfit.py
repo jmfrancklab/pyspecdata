@@ -1,4 +1,4 @@
-from matlablike import *
+from .core import *
 import sympy
 
 #{{{ different types of fit classes
