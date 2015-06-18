@@ -1,4 +1,4 @@
-from h5nmr import *
+from pyspecdata.h5nmr import *
 grab_data_directory()
 fl = figlistl()
 noe_roe = {'ubq_F4C':-0.5,

@@ -587,7 +587,7 @@ While the code can be many lines long,
     modifying it to process a new set of raw data should be easy.
 For instance, the standalone\_example code looks like this:\\ 
     \begin{lstlisting}
-from h5nmr import *
+from pyspecdata.h5nmr import *
 import textwrap
 grab_data_directory()
 ###########################{{{
@@ -2843,7 +2843,7 @@ collapse multiple dimensions into one dimension
     \end{description}
 \end{mykwargs}
 \begin{python}
-from acert_hdf5 import *
+from pyspecdata.acert_hdf5 import *
 fl = figlist_var()
 #{{{ load up the data
 base_name = 'receiver_test'
@@ -3432,7 +3432,7 @@ The following are functions used internally by routines in the fitdata class:
 
 \paragraph{$T_1$}
 \begin{python}
-from nmr import * # includes the t1curve class defined here
+from pyspecdata.nmr import * # includes the t1curve class defined here
 obs('Moved the guess function into the base class for 870')
 fl = figlistl() # make a figure list designed for output in latex
 t = double(r_[0.:2.:10j]) # a numpy array running from 0 to 1 second
@@ -3455,7 +3455,7 @@ fl.show('t1test120131.pdf') # dump out all our figures.
 \paragraph{test of \ksp}\label{sec:random_testofksp}
 
 \begin{python}
-from nmr import * # includes the t1curve class defined here
+from pyspecdata.nmr import * # includes the t1curve class defined here
 from nmrfit import * # includes the t1curve class defined here
 obs('having problems with pinv, rerun!')
 fl = figlistl() # make a figure list designed for output in latex

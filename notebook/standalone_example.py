@@ -1,4 +1,4 @@
-from h5nmr import *
+from pyspecdata.h5nmr import *
 import textwrap
 grab_data_directory()
 ###########################{{{

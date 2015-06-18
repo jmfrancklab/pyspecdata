@@ -5801,7 +5801,7 @@ def sqrt(arg):
         return np_sqrt(arg)
 
 if myparams['figlist_type'] == 'figlistl':
-    from fornotebook import *
+    from .fornotebook import *
     figlist_var = figlistl
 elif myparams['figlist_type'] == 'figlist':
     def obsn(*x): #because this is used in fornotebook, and I want it defined

@@ -1,4 +1,4 @@
-from h5nmr import *
+from .h5nmr import *
 def hindmant1(fitT,f,oxygen = 70e-3):
     'output the hindman model for temperatures fitT at nmr frequency f'
     expcor = r_[0.4554e-8 , 0.4787e4 , 0.6343e-3 , 0.1764e4]

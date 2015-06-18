@@ -8,7 +8,7 @@
 
 \begingroup \catcode `|=0 \catcode `[=1
 \catcode`]=2 \catcode `\{=12 \catcode `\}=12
-\catcode`\\=12 |gdef|@xpython#1\end{python}[|immediate|write|@out[from h5nmr import *]|immediate|write|@out[#1]|end[python]]
+\catcode`\\=12 |gdef|@xpython#1\end{python}[|immediate|write|@out[from pyspecdata.h5nmr import *]|immediate|write|@out[#1]|end[python]]
 |endgroup % changed by franck to add include file
 
 \def\python{\kernel@ifnextchar [{\@python}{\@python[]}}

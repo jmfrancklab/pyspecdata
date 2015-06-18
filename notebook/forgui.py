@@ -1,10 +1,10 @@
-from.core import *
+from pyspecdata import *
 from string import rstrip
 from scipy.io import savemat,loadmat
 from os.path import exists as path_exists
 from scipy.optimize import leastsq
 from scipy.signal import fftconvolve
-from nmr import *
+from pyspecdata.nmr import *
 # this file should be like fornotebook, except that thisjobname and lplot are stripped of the appropriate lines, so that rather than dumping a file and latex code, it just plots stuff
 
 def thisjobname():

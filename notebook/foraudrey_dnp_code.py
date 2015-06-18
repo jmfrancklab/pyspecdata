@@ -1,4 +1,4 @@
-from fornotebook import *
+from pyspecdata.fornotebook import *
 name = '100729_400nm_140CAT1_VitC'
 power_file = '400nm_vitC'
 path = '/home/ahammack/Data/'
