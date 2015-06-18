@@ -1694,7 +1694,7 @@ Aside from the figure names, we can also load special operating
     \paragraph{instance = figlistl()} initialize a new figure list,
         optionally loading format codes into the list.
     \paragraph{instance.plot(\ldots)}
-    This is uses the matlablike \texttt{plot()} function.
+    This is uses the pyspecdata \texttt{plot()} function.
     This is the preferred method $\Rightarrow$ storing in a figure list allows the figure list to keep track of and implement automatic unit scaling on the different axes.
     \paragraph{instance.setprops(key1 = value1,key2 = value2,\ldots)}
     This sets various properties of plots that are used by subsequent plots.
@@ -2444,7 +2444,7 @@ lplot('software_doc_mult3_image.pdf')
 \paragraph{inequalities}
 
 \begin{python}
-from matlablike import *
+from pyspecdata import *
 a = nddata(r_[0:10])
 b = nddata(5)
 print a < b
@@ -2461,7 +2461,7 @@ There are various ways to select data in nddata.
 \nts{be sure that when slicing I get views, rather than a copy}
 
 \begin{python}
-from matlablike import *
+from pyspecdata import *
 a = nddata(r_[0:10],[-1],['firstdim'])
 b = nddata(r_[0:4]*10,[-1],['seconddim'])
 c = nddata(r_[0,100],[-1],['thirddim'])
@@ -2618,7 +2618,7 @@ It takes (one or more) values of
 \end{mykwargs}
 
 \begin{python}
-from matlablike import *
+from pyspecdata import *
 fl = figlist_var(showbox = False,width = 0.5)
 t = r_[0:2.5:100j]
 x = nddata(t**2,[-1],['t']).labels('t',t)
@@ -2666,7 +2666,7 @@ A shortcut that can be used with just one axis.
 \subparagraph{example}
 
 \begin{python}
-from matlablike import *
+from pyspecdata import *
 fl = figlist_var()
 f = sympy.var('f')
 l = -1.0
@@ -2806,7 +2806,7 @@ Note that for now, by definition, no error is allowed on the axes.
 \ntd{Inside this function, there is a loop over the unique indices $\Rightarrow$ if I thought more carefully about it, this might not be necessary.}
 
 \begin{python}[on]
-from matlablike import *
+from pyspecdata import *
 a = r_[0:60.]
 d = nddata(a,[3,-1],['indirect','myaxis'])
 d.set_error(a*0.001)
@@ -3088,7 +3088,7 @@ newdata = concat([exampleinstance,exampleinstance],'myrows')
 print r'\begin{lstlisting}'+'\n'+repr(newdata)+'\n'+r'\end{lstlisting}'
 \end{python}
 \subsubsection{plotting functions}
-The ``matlablike.py'' module is design to be imported as ``from matlablike import *.''
+The ``pyspecdata.py'' module is design to be imported as ``from pyspecdata import *.''
 In this way the basic plot function is overwritten, and several plot functions are provided.
 \paragraph{plot(\ldots)}
 \paragraph{waterfall()}
@@ -3657,7 +3657,7 @@ Adiabatic pulses are a good example of a complex pulse that has a relatively sim
 \begin{python}
 # I copied this from for_crif.py
 from time import *
-from matlablike import *
+from pyspecdata import *
 from prop import *
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
