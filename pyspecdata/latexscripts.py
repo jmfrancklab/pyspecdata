@@ -5,6 +5,9 @@ import numpy
 import sys
 from shutil import copy2 as sh_copy2
 from subprocess import Popen,PIPE
+def wraplatex():
+    os.system(' '.join(['pdflatex']+sys.argv[1:]))
+    os.system('update_notebook_pythonscripts')
 def script_filename(scriptnum_as_str):
     return get_scripts_dir()+scriptnum_as_str+'.py'
 def cached_filename(hashstring,returndir = False):
