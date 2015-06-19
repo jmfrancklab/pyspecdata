@@ -3913,6 +3913,10 @@ class nddata (object):
         return None
     #{{{ functions to manipulate and return the axes
     def reorder(self,*axes,**kwargs):
+        r'''Reorder the dimensions
+        the first arguments are a list of dimensions
+        :param first: (default True) put this list of dimensions first, while False puts them last
+        '''
         first = True
         if 'first' in kwargs:
             first = kwargs.pop('first')
