@@ -94,15 +94,29 @@ def cache_output_if_needed(scriptnum_as_str,hashstring,showcode = False,show_err
                 fp_out.write("{\\small {\\color{red} {\\tt ---------------------------}}}\\\\\n")
         fp_out.close()
         return
+def flush_script(number):
+    file_name = cached_filename(sha_string(grab_script_string(number)))
+    print "removing:",file_name
+    if os.path.exists(file_name):
+        os.remove(file_name)
+        print "does it still exist?",os.path.exists(file_name)
+    else:
+        print "there is no cache for script",number
+    return
 def main():
     r'''This looks for `scripts/scriptsUsed.csv` inside the notebook directory, and checks whether or not it should be run
     if a command line argument of "flush" is passed, it flushes that script number from the cache'''
-    if len(sys.argv) == 3:
+    if len(sys.argv) > 2:
         if sys.argv[1] == 'flush':
-            print "removing:",cached_filename(sha_string(grab_script_string(sys.argv[2])))
-            os.remove(cached_filename(sha_string(grab_script_string(sys.argv[2]))))
-            print "does it still exist?",os.path.exists(cached_filename(sha_string(grab_script_string(sys.argv[2]))))
-            exit()
+            if len(sys.argv) == 3:
+                flush_script(sys.argv[2])
+                exit()
+            elif len(sys.argv) == 4:
+                for j in range(int(sys.argv[2]),int(sys.argv[3])+1):
+                    flush_script(str(j))
+                exit()
+            else:
+                raise RuntimeError("What did you pass me???")
     fp = open(get_scripts_dir() + 'scriptsUsed.csv')
     for line in fp.readlines():
         scriptnum_as_str = line.strip()
