@@ -2038,9 +2038,9 @@ def plot(*args,**kwargs):
             def thiserrbarplot(*tebargs,**tebkwargs):
                 if type(tebargs[-1]) is str:
                     tebkwargs.update({'fmt':tebargs[-1]})
-                    ax.errorbar(*tebargs[:-1],**tebkwargs)
+                    return ax.errorbar(*tebargs[:-1],**tebkwargs)
                 else:
-                    ax.errorbar(*tebargs,**tebkwargs)
+                    return ax.errorbar(*tebargs,**tebkwargs)
             myplotfunc = thiserrbarplot
             #{{{ pop any singleton dims
             myyerror = myy.get_error()
@@ -3501,8 +3501,8 @@ class nddata (object):
         if len(args) > 1:
             raise ValueError('you can\'t pass more than one argument!!')
         axes = self._possibly_one_axis(*args)
-        return_error = False
-        if return_error in kwargs.keys():
+        return_error = True
+        if 'return_error' in kwargs.keys():
             return_error = kwargs.pop('return_error')
         if len(kwargs) > 0:
             raise ValueError("I didn't understand the kwargs:",repr(kwargs))
@@ -3528,9 +3528,10 @@ class nddata (object):
                         axis=thisindex)
                 if isscalar(thiserror):
                     thiserror = r_[thiserror]
-                self.set_error(thiserror) # set the error to the standard deviation
             self.data = mean(self.data,
                     axis=thisindex)
+            if return_error: # this needs to go after the data setting
+                self.set_error(thiserror) # set the error to the standard deviation
             self._pop_axis_info(thisindex)
         return self
     def mean_nopop(self,axis):
@@ -3913,6 +3914,10 @@ class nddata (object):
         return None
     #{{{ functions to manipulate and return the axes
     def reorder(self,*axes,**kwargs):
+        r'''Reorder the dimensions
+        the first arguments are a list of dimensions
+        :param first: (default True) put this list of dimensions first, while False puts them last
+        '''
         first = True
         if 'first' in kwargs:
             first = kwargs.pop('first')
