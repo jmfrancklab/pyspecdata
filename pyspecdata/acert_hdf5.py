@@ -749,3 +749,38 @@ def oscilloscope_data(*args):
     if real(tune_data.data).sum() < 0:
         tune_data *= -1
     return copol_data,mod_data,tune_data
+def find_attenuation(attenuated_filename,
+        unattenuated_filename,
+        background_filename,
+        fl):
+    r'''This takes two identical oscilloscope readings that are different only by the attenuation, 
+    and it finds the attenuation
+    :returns: the attenuation (>1, on a linear scale)
+    :param fl: it adds a plot to figure list fl that shows the
+        attenuated and non-attenuated data, and allows you to check
+        that the modulator and copolarized reflection are the same and
+        that the attenuation correctly relates the detector channels
+        for both measurements'''
+    copol,mod,tune1 = oscilloscope_data(attenuated_filename,background_filename)
+
+    fl.next('determine attenuation')
+    fl.plot(copol*6,alpha = 0.5,label = 'copol. refl.',color = '#888800',linewidth = 2)
+    fl.plot(mod,alpha = 0.5,label = 'modulator',color = '#8800ff',linewidth = 2)
+    fl.plot(abs(tune1),'k',label='detector -- abs',alpha = 0.5,linewidth = 2)
+    #fl.plot(tune1.runcopy(real),'b',label='detector -- real',alpha = 0.5,linewidth = 1)
+    gridandtick(gca())
+
+    copol,mod,tune2 = oscilloscope_data(unattenuated_filename,background_filename)
+
+    fl.plot(copol*6,alpha = 0.5,label = 'copol. refl.',color = '#888800',linewidth = 2)
+    fl.plot(mod,alpha = 0.5,label = 'modulator',color = '#8800ff',linewidth = 2)
+    fl.plot(abs(tune2),'k',label='detector -- abs',alpha = 0.5,linewidth = 2)
+    #fl.plot(tune2.runcopy(real),'b',label='detector -- real',alpha = 0.5,linewidth = 1)
+    gridandtick(gca())
+
+    ratio = (abs(tune2)**2).mean('t') / (abs(tune1)**2).mean('t')
+    ratio = sqrt(ratio.data)
+
+    print "scaleup for this attenuation is",ratio
+    fl.plot(abs(tune1)*ratio,'r',label='test ratio -- rescaled',alpha = 0.3,linewidth = 2)
+    return ratio

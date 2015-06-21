@@ -3136,9 +3136,11 @@ class nddata (object):
             if x != None:
                 result.set_error(abs(x.copy()/(self.data**2)))
             return result
+        elif arg == 2:
+            return self * self
         else:
             if self.get_error() != None:
-                raise CustomError("nothing but -1 supported yet!")
+                raise CustomError("nothing but -1 and 2 supported yet! (you tried to raise to a power of "+repr(arg)+")")
             else:
                 result = self.copy()
                 result.data = result.data**arg
