@@ -4046,6 +4046,11 @@ class nddata (object):
     def retaxis(self,axisname):
         thisaxis = self._axis_inshape(axisname)
         return nddata(thisaxis,thisaxis.shape,list(self.dimlabels)).labels(axisname,thisaxis.flatten())
+    def toaxis(self,thisfunction,axisname):
+        r'This is similar to run, but it works on the axis labels.  It applies `thisfunction` to the axis identified by `axisname`.'
+        x = self.getaxis(axisname)
+        x[:] = thisfunction(x)
+        return self
     def fromaxis(self,*args,**kwargs):
         '''enter just the axis, to return the axis,
         or enter a list of axisnames, followed by a function to act on them'''
@@ -4057,7 +4062,8 @@ class nddata (object):
             as_array = True
         if len(args) == 1:
             if type(args[0]) is str:
-                retval = self.retaxis(args[0])
+                axisname = args[0]
+                retval = self.retaxis(axisname)
                 #{{{ copied from old retaxis function, then added the overwrite capability
                 thisaxis = self._axis_inshape(axisname)
                 if overwrite:
