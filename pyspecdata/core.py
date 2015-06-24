@@ -3354,16 +3354,19 @@ class nddata (object):
             '''
         if backwards is True:
             self.data = self[thisaxis,::-1].data
+        t = None
+        if len(self.axis_coords)>0:
+            t = self.getaxis(thisaxis)
+            dt = t[1]-t[0]
+        if t is None:
+            raise ValueError("You can't call integrate on an unlabeled axis")
         if cumulative:
             self.run_nopop(cumsum,thisaxis)
             if backwards is True:
                 self.data = self[thisaxis,::-1].data
         else:
             self.run(sum,thisaxis)
-        if len(self.axis_coords)>0:
-            t = self.getaxis(thisaxis)
-            dt = t[1]-t[0]
-            self.data *= dt
+        self.data *= dt
         return self
     def diff(self,thisaxis,backwards = False):
         if backwards is True:
@@ -4058,11 +4061,6 @@ class nddata (object):
     def retaxis(self,axisname):
         thisaxis = self._axis_inshape(axisname)
         return nddata(thisaxis,thisaxis.shape,list(self.dimlabels)).labels(axisname,thisaxis.flatten())
-    def toaxis(self,thisfunction,axisname):
-        r'This is similar to run, but it works on the axis labels.  It applies `thisfunction` to the axis identified by `axisname`.'
-        x = self.getaxis(axisname)
-        x[:] = thisfunction(x)
-        return self
     def fromaxis(self,*args,**kwargs):
         '''enter just the axis, to return the axis,
         or enter a list of axisnames, followed by a function to act on them'''
@@ -4133,6 +4131,12 @@ class nddata (object):
         else:
             return None
     def setaxis(self,axis,value):
+        r'''set the value of the axis
+        if you pass a function as the `value`, it will use the existing axis labels as the argument of the function, and then put the result into the axis labels'''
+        if type(value) is type(emptyfunction):
+            x = self.getaxis(axis)
+            x[:] = value(x)
+            return self
         if type(value) in [float,int,double,float64]:
            value = linspace(0.,value,self.axlen(axis))
         if type(value)is list:
