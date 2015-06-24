@@ -3343,11 +3343,23 @@ class nddata (object):
     #}}}
     #{{{ integrate, differentiate, and sum
     def integrate(self,thisaxis,backwards = False):
+        return self.integrate(self,thisaxis,backwards = backwards,cumulative = True)
+    def integrate(self,thisaxis,backwards = False,cumulative = False):
+        r'''this performs an integration -- which is similar to a sum, except that it takes the axis into account, i.e., it performs:
+            $\int f(x) dx$
+            rather than
+            $\sum_i f(x_i)$
+
+            Gaussian quadrature, etc, is planned for a future version.
+            '''
         if backwards is True:
             self.data = self[thisaxis,::-1].data
-        self.run_nopop(cumsum,thisaxis)
-        if backwards is True:
-            self.data = self[thisaxis,::-1].data
+        if cumulative:
+            self.run_nopop(cumsum,thisaxis)
+            if backwards is True:
+                self.data = self[thisaxis,::-1].data
+        else:
+            self.run(sum,thisaxis)
         if len(self.axis_coords)>0:
             t = self.getaxis(thisaxis)
             dt = t[1]-t[0]

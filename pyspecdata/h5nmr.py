@@ -1851,7 +1851,7 @@ def standard_epr(dir = None,
         snr = abs(data.data).max()/std(data.data[mask])
         integral = data.copy()
         integral.data -= integral.data.mean() # baseline correct it
-        integral.integrate(newname)
+        integral.integrate_cumulative(newname)
         figure_list.next('epr_int',legend = True,boundaries = False)
         pc = plot_color_counter()
         plot_color_counter(pc)
@@ -1862,7 +1862,7 @@ def standard_epr(dir = None,
             gfactor = h*v['MF']*1e9/mu_B/(centerfield*1e-4)
             legendtext += ', g=%0.03f'%gfactor
         doubleintegral = integral.copy()
-        doubleintegral.integrate(newname)
+        doubleintegral.integrate_cumulative(newname)
         if sample_len is None:
             if conc_calib is not None:
                 raise ValueError("If you want to set the concentration calibration, you need to give a sample length!")

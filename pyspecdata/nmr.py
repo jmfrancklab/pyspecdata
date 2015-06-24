@@ -1063,7 +1063,7 @@ def integrate(file,expno,
             plot(plot_noise['t2',intpoints:],'-',alpha=0.1)
         if show_integral:
             #{{{this does work to plot the integral
-            plot_newdata.integrate('t2') # this is apparently a function to do integral with all the correct bells and whistles
+            plot_newdata.integrate_cumulative('t2') # this is apparently a function to do integral with all the correct bells and whistles
             #gridandtick(gca())
             ax = gca()
             myxlim = copy(ax.get_xlim())

@@ -152,13 +152,13 @@ for index,file in enumerate(files):
    snrdata.append(snr)
    integral = data.copy()
    integral.data -= integral.data.mean() # baseline correct it
-   integral.integrate(newname)
+   integral.integrate_cumulative(newname)
    figure(2)
    plot(integral,alpha=0.5,linewidth=0.3)
    pc = plot_color_counter()
    ax = gca()
    #at = twinx()
-   integral.integrate(newname)
+   integral.integrate_cumulative(newname)
    #plot_color_counter(pc)
    #plot(integral,alpha=0.15,linewidth=0.3)
    axes(ax)
@@ -513,11 +513,11 @@ for index,file in enumerate(files):
    snr = abs(data.data).max()/std(data.data[mask])
    integral = data.copy()
    integral.data -= integral.data.mean() # baseline correct it
-   integral.integrate(newname)
+   integral.integrate_cumulative(newname)
    fl.next('epr_int')
    plot(integral,alpha=0.5,linewidth=0.3)
    pc = plot_color_counter()
-   integral.integrate(newname)
+   integral.integrate_cumulative(newname)
    fl.next('epr')
    if normalize_peak:
       normalization = abs(data).run_nopop(max,newname)
@@ -613,11 +613,11 @@ for index,file in enumerate(files):
    snr = abs(data.data).max()/std(data.data[mask])
    integral = data.copy()
    integral.data -= integral.data.mean() # baseline correct it
-   integral.integrate(newname)
+   integral.integrate_cumulative(newname)
    fl.next('epr_int')
    plot(integral,alpha=0.5,linewidth=0.3)
    pc = plot_color_counter()
-   integral.integrate(newname)
+   integral.integrate_cumulative(newname)
    fl.next('epr')
    if normalize_peak:
       normalization = abs(data).run_nopop(max,newname)
