@@ -53,6 +53,17 @@ hbar = 6.6260695729e-34/2./pi
 N_A = 6.02214179e23
 gamma_H = 4.258e7
 #}}}
+def process_kwargs(listoftuples,**kwargs):
+    'In order, return the value of keyword arguments `kwargs` named with key, value pairs in listoftuples'
+    kwargnames,kwargdefaultvals = zip(*listoftuples)
+    output = []
+    for j,val in enumerate(kwargnames):
+        output.append(kwargdefaultvals[j])
+        if val in kwargs.keys():
+            output[-1] = kwargs.pop(val)
+    if len(kwargs) > 0:
+        raise ValueError("I didn't understand the kwargs:",repr(kwargs))
+    return tuple(output)
 def mybasicfunction(first_figure = None):
     r'''this gives the format for doing the image thing
 note also
@@ -713,8 +724,28 @@ def gensearch(labelname,format = '%0.3f',value = None,precision = None):
     searchstring_low = '(%s > %s - (%s))'%tuple([labelname]+[format]*2)
     searchstring_low = searchstring_low%(value,precision)
     return searchstring_low + ' & ' + searchstring_high
-def h5searchstring(fieldname,value,format = '%g',precision = 0.01):
-    'search AROUND a certain value (overcomes some type conversion issues) optional arguments are the format specifier and the fractional precision'
+def h5searchstring(*args,**kwargs):
+    '''generate robust search strings
+    :parameter fieldname,value:
+    search AROUND a certain value (overcomes some type conversion issues) optional arguments are the format specifier and the fractional precision:
+    **OR**
+    :parameter field_and_value_dictionary:
+    generate a search string that matches one or more criteria'''
+    format,precision = process_kwargs([('format','%g'),
+        ('precision',0.01)],
+        **kwargs)
+    if len(args) == 2:
+        fieldname,value = args
+    elif len(args) == 1 and type(args[0]) is dict:
+        dict_arg = args[0]
+        condlist = []
+        for k,v in dict_arg.iteritems():
+            condlist.append(h5searchstring(k,v,format = format,precision = precision))
+        return ' & '.join(condlist)
+    else:
+        raise ValueError("pass either field,value pair or a dictionary!")
+    if type(value) is str:
+        raise ValueError("string matching in pytables is broken -- search by hand and then use the index")
     precision *= value
     searchstring_high = '(%s < %s + (%s))'%tuple([fieldname]+[format]*2)
     #print "\n\nDEBUG check format:\\begin{verbatim}",searchstring_high,r'\end{verbatim}'
@@ -778,6 +809,8 @@ def h5child(thisnode,childname,clear = False,create = None,verbose = False):
                 print lsafe('created',childname)
     return childnode
 def h5remrows(bottomnode,tablename,searchstring):
+    if type(searchstring) is dict:
+        searchstring = h5searchstring(searchstring)
     try:
         thistable = bottomnode.__getattr__(tablename)
         counter = 0
@@ -803,20 +836,10 @@ def h5remrows(bottomnode,tablename,searchstring):
     except tables.NoSuchNodeError:
         return False,None
 def h5addrow(bottomnode,tablename,*args,**kwargs):
-    'add a row to a table, creating it if necessary, but don\'t add if the data matches the search condition'
-    #{{{ process kwargs
-    match_row = None
-    if 'match_row' in kwargs.keys():
-        match_row = kwargs.pop('match_row')
-    verbose = False
-    if 'verbose' in kwargs.keys():
-        verbose = kwargs.pop('verbose')
-    only_last = True
-    if 'only_last' in kwargs.keys():
-        only_last = kwargs.pop('only_last')
-    if len(kwargs) != 0:
-        raise ValueError('kwargs'+repr(kwargs)+'not understood!!')
-    #}}}
+    '''add a row to a table, creating it if necessary, but don\'t add if the data matches the search condition indicated by `match_row`
+    `match_row` can be either text or a dictionary -- in the latter case it's passed to h5searchstring
+    '''
+    match_row,verbose,only_last = process_kwargs([('match_row',None),('verbose',False),('only_last',True)],**kwargs)
     try: # see if the table exists
         mytable = h5table(bottomnode,tablename,None)
         #{{{ auto-increment "index"
@@ -824,16 +847,27 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
         #}}}
         # here is where I would search for the existing data
         if match_row is not None:
+            if type(match_row) is dict:
+                match_row = h5searchstring(match_row)
+            if verbose: obs("trying to match row according to",match_row)
+            mytable.flush()
             try:
                 matches = mytable.readWhere(match_row)
-            except NameError:
-                raise CustomError('The columns available are',mytable.colnames)
+            except NameError as e:
+                raise NameError(' '.join(map(str,
+                    [e,'\nYou passed',match_row,'\nThe columns available are',mytable.colnames,"condvars are",condvars])))
+            except ValueError as e:
+                raise NameError(' '.join(map(str,
+                    [e,'\nYou passed',match_row,'\nThe columns available are',mytable.colnames])))
             if len(matches) > 0:
                 if only_last:
                     if verbose: print r'\o{',lsafen(len(matches),"rows match your search criterion, returning the last row"),'}'
                     return mytable,matches['index'][-1]
                 else:
                     return mytable,matches['index'][:]
+            else:
+                if verbose:
+                    obs("I found no matches")
         tableexists = True
     except CustomError: # if table doesn't exist, create it
         newindex = 1L
@@ -883,9 +917,11 @@ def h5table(bottomnode,tablename,tabledata):
     h5file = bottomnode._v_file
     if tablename not in bottomnode._v_children.keys():
         if tabledata is not None:
+            if type(tabledata) is dict:
+                tabledata = make_rec(tabledata)
             datatable = h5file.createTable(bottomnode,tablename,tabledata) # actually write the data to the table
         else:
-            raise CustomError('You passed no data, so I can\'t create table',tablename,'but it doesn\'t exist in',bottomnode,'which has children',bottomnode._v_children.keys())
+            raise RuntimeError(' '.join(map(str,['You passed no data, so I can\'t create table',tablename,'but it doesn\'t exist in',bottomnode,'which has children',bottomnode._v_children.keys()])))
     else:
         if tabledata is not None:
             raise CustomError('You\'re passing data to create the table, but the table already exists!')
@@ -3702,7 +3738,7 @@ class nddata (object):
             raise ValueError('you can\'t pass more than one argument!!')
         axes = self._possibly_one_axis(*args)
         #kwargs: shiftornot=False,shift=None,pad = False
-        shiftornot,shift,pad,automix = self._process_kwargs([('shiftornot',False),('shift',None),('pad',False),('automix',False)],**kwargs)
+        shiftornot,shift,pad,automix = process_kwargs([('shiftornot',False),('shift',None),('pad',False),('automix',False)],**kwargs)
         if shift != None:
             shiftornot = shift
         if (type(axes) is str):
@@ -3758,7 +3794,7 @@ class nddata (object):
             raise ValueError('you can\'t pass more than one argument!!')
         axes = self._possibly_one_axis(*args)
         #kwargs: shiftornot=False,shift=None,pad = False
-        shiftornot,shift,pad = self._process_kwargs([('shiftornot',False),('shift',None),('pad',False)],**kwargs)
+        shiftornot,shift,pad = process_kwargs([('shiftornot',False),('shift',None),('pad',False)],**kwargs)
         if shift != None:
             shiftornot = shift
         if (type(axes) is str):
@@ -4601,16 +4637,6 @@ class nddata (object):
             else:
                 raise ValueError("If you have more than one dimension, you need to tell me which one!!")
         return axes
-    def _process_kwargs(self,listoftuples,**kwargs):
-        kwargnames,kwargdefaultvals = zip(*listoftuples)
-        output = []
-        for j,val in enumerate(kwargnames):
-            output.append(kwargdefaultvals[j])
-            if val in kwargs.keys():
-                output[-1] = kwargs.pop(val)
-        if len(kwargs) > 0:
-            raise ValueError("I didn't understand the kwargs:",repr(kwargs))
-        return tuple(output)
     def _parse_slices(self,args):
         """This controls nddata slicing:
             it previously took

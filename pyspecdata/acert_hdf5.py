@@ -1,6 +1,7 @@
 from .core import *
 from matplotlib.collections import LineCollection
 from matplotlib.patches import Rectangle
+from .datadir import get_notebook_dir
 from nmr import phaseopt
 from sympy import var
 import tables
@@ -749,7 +750,8 @@ def oscilloscope_data(*args):
     if real(tune_data.data).sum() < 0:
         tune_data *= -1
     return copol_data,mod_data,tune_data
-def find_attenuation(attenuated_filename,
+def find_attenuation(basename,
+        attenuated_filename,
         unattenuated_filename,
         background_filename,
         fl):
@@ -782,5 +784,39 @@ def find_attenuation(attenuated_filename,
     ratio = sqrt(ratio.data)
 
     print "scaleup for this attenuation is",ratio
+    fp = tables.openFile(get_notebook_dir('reflection_tests.h5'),
+            mode = 'a',
+            title = 'reflection tests')
+    d = {'exp':basename,
+                'ratio':ratio}
+    try:
+        t = h5table(fp.root,'attenuation_calibration',None).read()
+        new_table = False
+    except:
+        h5addrow(fp.root,
+                'attenuation_calibration',
+                d,
+                verbose = True)
+        new_table = True
+        print "created a new table for",d
+    if not new_table:
+        if basename in t['exp']:
+            mask = t['exp'] == basename 
+            if t[mask] == ratio:
+                print "value already entered"
+            else: # remove the existing and add this one
+                h5remrows(fp.root,
+                        'attenuation_calibration',
+                        {'index':t[mask]['index'][0]})
+                h5addrow(fp.root,
+                        'attenuation_calibration',
+                        d,
+                        verbose = True)
+        else:
+            h5addrow(fp.root,
+                    'attenuation_calibration',
+                    d,
+                    verbose = True)
+    fp.close()
     fl.plot(abs(tune1)*ratio,'r',label='test ratio -- rescaled',alpha = 0.3,linewidth = 2)
     return ratio

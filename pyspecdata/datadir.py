@@ -1,7 +1,10 @@
 import os
-def get_notebook_dir():
+def get_notebook_dir(*arg):
     r'returns the notebook directory -- make this settable later'
-    return os.path.expanduser('~') + os.path.sep + 'notebook' + os.path.sep
+    if len(arg) == 0:
+        return os.path.expanduser('~') + os.path.sep + 'notebook' + os.path.sep
+    elif len(arg) > 0:
+        return os.path.expanduser('~') + os.path.sep + 'notebook' + os.path.sep + os.path.sep.join(arg)
 def dirformat(file):
         #{{{ format strings
         if file[-1]!=os.sep:
