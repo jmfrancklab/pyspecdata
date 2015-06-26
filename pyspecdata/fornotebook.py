@@ -152,7 +152,7 @@ def lrecordarray_broken(recordlist,rows=30,numwide= 5):
         retval += lrecordarray(recordlist[j+rows:],resizebox = True)+'\n'
         retval += r'\end{minipage}'
     return retval
-def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resizebox = False,showpipe = True,return_only=False,format = '%0.3f',std_sf = None,scientific_notation = True):
+def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resizebox = False,showpipe = True,return_only=False,format = '%0.3f',std_sf = 2,scientific_notation = True):
     r'''generate latex representation of a structured array
     if set to True, resizebox will automatically scale down the table so it fits on the page (but it will also scale up a small table to fit the width of the page)
     resizebox can also be a fractional number, so that it is resized to a fraction of the page'''

@@ -842,6 +842,11 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
     match_row,verbose,only_last = process_kwargs([('match_row',None),('verbose',False),('only_last',True)],**kwargs)
     try: # see if the table exists
         mytable = h5table(bottomnode,tablename,None)
+        tableexists = True
+    except RuntimeError: # if table doesn't exist, create it
+        newindex = 1L
+        tableexists = False
+    if tableexists:
         #{{{ auto-increment "index"
         newindex = mytable.read()['index'].max() + 1L
         #}}}
@@ -868,10 +873,6 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
             else:
                 if verbose:
                     obs("I found no matches")
-        tableexists = True
-    except CustomError: # if table doesn't exist, create it
-        newindex = 1L
-        tableexists = False
     if len(args) == 1 and (type(args[0]) is dict):
         listofnames,listofdata = map(list,zip(*tuple(args[0].items())))
     elif len(args) == 2 and type(args[0]) is list and type(args[1]) is list:
@@ -5864,7 +5865,7 @@ elif myparams['figlist_type'] == 'figlist':
     def obs(*x): #because this is used in fornotebook, and I want it defined
         print ''.join(map(repr,x))
     def lrecordarray(*x,**kwargs):
-        print x # if I'm not using tex, it's easier to not use the formatting
+        return repr(x) # if I'm not using tex, it's easier to not use the formatting
     figlist_var = figlist
     def lsafe(*string,**kwargs):
         "replacement for normal lsafe -- no escaping"

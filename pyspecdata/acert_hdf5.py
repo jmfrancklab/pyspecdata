@@ -790,16 +790,18 @@ def find_attenuation(basename,
     d = {'exp':basename,
                 'ratio':ratio}
     try:
-        t = h5table(fp.root,'attenuation_calibration',None).read()
+        tablenode = h5table(fp.root,'attenuation_calibration',None)
         new_table = False
     except:
+        new_table = True
+    if new_table:
+        print "trying to add row"
         h5addrow(fp.root,
                 'attenuation_calibration',
-                d,
-                verbose = True)
-        new_table = True
+                d)
         print "created a new table for",d
-    if not new_table:
+    else:
+        t = tablenode.read()
         if basename in t['exp']:
             mask = t['exp'] == basename 
             if t[mask] == ratio:
