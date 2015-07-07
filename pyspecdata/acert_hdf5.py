@@ -5,6 +5,7 @@ from .datadir import get_notebook_dir
 from nmr import phaseopt
 from sympy import var
 import tables
+import warnings
 import re
 import os
 import scipy.io
@@ -395,7 +396,7 @@ def postproc_generic(data):
     return data
 def postproc_eldor_3d(data):
     if data.get_prop('phasecycle') is None:
-        print "Warning!  There is no phase cycling information -- you should really fix this"
+        warnings.warn("Warning!  There is no phase cycling information -- you should really fix this")
         data.chunk('phcyc',['phcyc1','phcyc2','phcyc3'])
         #data.rename('indirect','t_e')
         data.ift('phcyc3')
@@ -407,7 +408,7 @@ def postproc_eldor_3d(data):
     return data
 def postproc_echo_T2(data):
     if data.get_prop('phasecycle') is None:
-        print "Warning!  There is no phase cycling information -- you should really fix this"
+        warnings.warn("Warning!  There is no phase cycling information -- you should really fix this")
         data.chunk('phcyc',['phcyc2','phcyc1']) # the second pulse is on the outside, and the first pulse is on the inside
         data.setaxis('phcyc1',r_[0:1:4j])
         data.setaxis('phcyc2',r_[0:1:4j])
@@ -562,7 +563,7 @@ def find_file(searchstring,
     if verbose: print "common dimensions",common_dimensions
     unlabeled_indirect = False
     if len(indirect_names_in_h5) == 0:
-        print lsafen('Warning!! The indirect dimension is not labeled!\nDimensions of the data:%s\nfilename: %s'%(repr(ndshape(data)),filename))
+        warnings.warn('Warning!! The indirect dimension is not labeled!\nDimensions of the data:%s\nfilename: %s'%(repr(ndshape(data)),filename))
         unlabeled_indirect = True
     if len(common_dimensions) != len(indirect_names_in_h5):
         h5_but_not_dimlabels = common_dimensions ^ set(indirect_names_in_h5)
@@ -570,7 +571,7 @@ def find_file(searchstring,
         if len(h5_but_not_dimlabels) == 1 and len(dimlabels_but_not_h5) == 1:
             real_name = h5_but_not_dimlabels.pop()
             dimlabels_name = dimlabels_but_not_h5.pop()
-            print lsafen("Warning! The dimlabels set in the HDF5 file have a dimension called %s and the arrays given in the HDF5 file have one called %s -- I'm assuming they're the same and using the name from the HDF5 file."%(dimlabels_name,real_name))
+            warnings.warn("Warning! The dimlabels set in the HDF5 file have a dimension called %s and the arrays given in the HDF5 file have one called %s -- I'm assuming they're the same and using the name from the HDF5 file."%(dimlabels_name,real_name))
             common_dimensions |= {real_name} # so the axis gets labeled below
             dimlabels[dimlabels.index(dimlabels_name)] = real_name
         elif dimlabels_but_not_h5 == {'indirect'}:# I need to split up the indirect dimension
@@ -600,7 +601,7 @@ def find_file(searchstring,
             forstruct.append((h5.root.experiment._v_children['bin_switch_times'])[0])
             forstruct_names.append(thisaxis)
         x = make_rec(forstruct,forstruct_names,zeros_like = h5.root.experiment._v_children['bin_switch_times'].shape)
-        print "detected a 'bin' dimension, and associating it with dtype",x.dtype
+        warnings.warn("detected a 'bin' dimension, and associating it with dtype "+repr(x.dtype))
         for thisaxis in forstruct_names:
             x[thisaxis] = array(h5.root.experiment._v_children[thisaxis])
         data.labels('bin',x)
