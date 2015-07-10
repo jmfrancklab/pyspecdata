@@ -1613,7 +1613,7 @@ class figlist(object):
                     fig.scene.anti_aliasing_frames = 20
                 else:
                     fig = figure(len(self.figurelist)+1,**kwargs)
-                fig.add_axes([0.075,0.2,0.7,0.7]) # l b w h
+                fig.add_axes([0.075,0.2,0.6,0.7]) # l b w h
                 self.use_autolegend('outside')
             else:
                 fig = figure(len(self.figurelist)+1,**kwargs)
