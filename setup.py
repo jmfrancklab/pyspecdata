@@ -28,26 +28,35 @@ ext_modules = [ext_test]
 
 libraries = ['lapack']
 lapack_success = False
+skip_prop = False
+
 if os.name == 'nt':
-    libraries.append('refblas')
-    print "It looks like you're on windows, so I'm going to build lapack (from http://netlib.org/) on MinGW."
-    target = os.path.dirname(os.path.dirname(find_executable('gcc'))) + os.sep + 'lib' + os.sep + 'gcc' + os.sep
-    if 'liblapack.a' in os.listdir(target) and 'librefblas.a' in os.listdir(target):
-        print "I see liblapack and librefblas in",target,"so I'm not going to rebuild"
-        lapack_success = True
+    if find_executable('make') is None:
+        print "It looks like you're on windows, but I can't find make, s I'm skipping lapack"
+        skip_prop = True
     else:
-        os.chdir('lapack-3.4.0')
-        subprocess.call("cmd /c makelibs.bat")
-        print "trying to move the built libraries to "+target
-        os.rename('liblapack.a',target+'liblapack.a')
-        os.rename('librefblas.a',target+'librefblas.a')
-        print "press enter..."
-        sys.stdin.readline(1)
-        os.chdir('..')
-ext_prop = Extension(name = 'pyspecdata.propagator',
-        sources = ['pyspecdata/propagator.f90'],
-        libraries = libraries)
-ext_modules.append(ext_prop)
+        libraries.append('refblas')
+        print "It looks like you're on windows, so I'm going to build lapack (from http://netlib.org/) on MinGW."
+        target = os.path.dirname(os.path.dirname(find_executable('gcc'))) + os.sep + 'lib' + os.sep + 'gcc' + os.sep
+        if not os.path.exists(target):
+            target = os.path.dirname(os.path.dirname(find_executable('gcc'))) + os.sep + 'libs' # works for anaconda
+        if 'liblapack.a' in os.listdir(target) and 'librefblas.a' in os.listdir(target):
+            print "I see liblapack and librefblas in",target,"so I'm not going to rebuild"
+            lapack_success = True
+        else:
+            os.chdir('lapack-3.4.0')
+            subprocess.call("cmd /c makelibs.bat")
+            print "trying to move the built libraries to "+target
+            os.rename('liblapack.a',target+'liblapack.a')
+            os.rename('librefblas.a',target+'librefblas.a')
+            print "press enter..."
+            sys.stdin.readline(1)
+            os.chdir('..')
+if not skip_prop:
+    ext_prop = Extension(name = 'pyspecdata.propagator',
+            sources = ['pyspecdata/propagator.f90'],
+            libraries = libraries)
+    ext_modules.append(ext_prop)
 
 tryagain = True
 while tryagain == True:
@@ -75,7 +84,7 @@ while tryagain == True:
                 ),
         )
         tryagain = False
-    except:
+    except (RuntimeError, TypeError, NameError),e:
         if not lapack_success and len(ext_modules) == 2:
             print "something went wrong, so I'm going to try to rebuild without lapack -- this means you won't be able to use the prop module"
             print "this is OK, but press enter to acknowledge"
@@ -83,6 +92,8 @@ while tryagain == True:
             ext_modules = [ext_test]
             tryagain = True
         elif not lapack_success and len(ext_modules) == 1:
+            print "Error message was:"
+            print e
             print "something STILL went wrong, so I'm rebuilding without the fortran test module"
             print "this is OK, but press enter to acknowledge"
             sys.stdin.readline(1)
