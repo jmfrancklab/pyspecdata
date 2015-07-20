@@ -107,7 +107,8 @@ def flush_script(number):
 def repeat_scons():
     r'This is just a function to run scons over and over again (e.g. so it can replace latexmk)'
     while(1):
-        os.system('scons')
+        os.system('scons --tree=all')
+        # here, I could grab the tree, and then I should be able to use watchdog to implement latexmk-like functionality
         time.sleep(0.1)
 def main():
     r'''This looks for `scripts/scriptsUsed.csv` inside the notebook directory, and checks whether or not it should be run
