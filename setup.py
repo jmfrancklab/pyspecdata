@@ -79,7 +79,8 @@ while tryagain == True:
                 ],
             ext_modules = ext_modules,
             entry_points=dict(console_scripts=
-                ['update_notebook_pythonscripts=pyspecdata.latexscripts:main',
+                ['scons_continuous=pyspecdata.latexscripts:repeat_scons',
+                'update_notebook_pythonscripts=pyspecdata.latexscripts:main',
                 'pdflatex_notebook_wrapper=pyspecdata.latexscripts:wraplatex']
                 ),
         )

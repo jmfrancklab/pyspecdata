@@ -3,6 +3,7 @@ import os.path
 import hashlib
 import numpy
 import sys
+import time
 from shutil import copy2 as sh_copy2
 from subprocess import Popen,PIPE
 def wraplatex():
@@ -103,6 +104,11 @@ def flush_script(number):
     else:
         print "there is no cache for script",number
     return
+def repeat_scons():
+    r'This is just a function to run scons over and over again (e.g. so it can replace latexmk)'
+    while(1):
+        os.system('scons')
+        time.sleep(0.1)
 def main():
     r'''This looks for `scripts/scriptsUsed.csv` inside the notebook directory, and checks whether or not it should be run
     if a command line argument of "flush" is passed, it flushes that script number from the cache'''
