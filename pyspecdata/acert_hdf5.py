@@ -502,11 +502,10 @@ def find_file(searchstring,
         raise RuntimeError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s"%(directory,searchstring))
     if len(files) == 0:
         raise ValueError("I can't find a file matching the regular expression "+searchstring+" in "+directory)
-    if verbose:
-        if len(files) > 1:
-            print 'found:',files,'and opening last'
-        elif print_result:
-            obsn("found only one file, and loading it:"+repr(files))
+    if len(files) > 1:
+        warnings.warn('found multiple files:\n'+repr(files)+'\nand opening last')
+    elif print_result and verbose:
+        obsn("found only one file, and loading it:"+repr(files))
     filename = directory + files[-1]
     h5 = tables.openFile(filename)
     #}}}

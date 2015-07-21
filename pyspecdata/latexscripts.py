@@ -11,24 +11,25 @@ from watchdog.observers import Observer
 
 class handle_dir_change (FileSystemEventHandler):
     def on_modified(self,event):
-        print "called 'on_modified'"
+        #print "called 'on_modified'"
         if event is None:# if I called it manually
             runornot = True
+            print "Scons signaled manually"
         else:
-            print "in event:",dir(event)
-            print event.event_type
-            print event.is_directory
-            print event.key
-            print event.src_path
+            #print "in event:",dir(event)
+            #print event.event_type
+            #print event.is_directory
+            #print event.key
+            #print event.src_path
             if event.src_path in ['.' + os.path.sep + j for j in self.dependencies]:
-                print "Yes,",event.src_path,"is a dependency"
+                print "Scons signaled on",event.src_path,", which is a dependency"
                 runornot = True
             else:
-                print "No,",event.src_path,"is not a dependency"
+                print "Modified",event.src_path,"which is not a dependency"
                 runornot = False
         if runornot:
             outstring = check_output(['scons','--tree=all'] + sys.argv[1:],shell = True)
-            print "outstring:\n",outstring
+            #print "outstring:\n",outstring
             self.dependencies = []
             for line in outstring.split(os.linesep):
                 # here, I grab the tree, and then I should be able to use watchdog to implement latexmk-like functionality
@@ -140,13 +141,15 @@ def flush_script(number):
     return
 def repeat_scons():
     r'This is just a function to run scons over and over again (e.g. so it can replace latexmk)'
+    for j in os.listdir('.'):
+        if j.endswith('.sconslog'):
+            os.remove(j)# by removing these, we force the PDF reader to open
     observer = Observer()
     myhandler = handle_dir_change()
     dependencies = myhandler.on_modified(None) # run once manually
-    print "dependencies are",dependencies
     for j in dependencies:
         fname = '.'+ os.path.sep + j
-        print "adding",os.path.dirname(fname),"for",fname
+        #print "adding",os.path.dirname(fname),"for",fname
         observer.schedule(myhandler,path = os.path.dirname(fname),recursive = False)
     observer.start()
     try:

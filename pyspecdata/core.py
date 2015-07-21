@@ -3812,18 +3812,34 @@ class nddata (object):
                 raise CustomError('error, dimlabels is: ',self.dimlabels)
             padded_length = self.data.shape[thisaxis]
             if pad is True:
-                padded_length = 2**(ceil(log2(padded_length)))
+                padded_length = int(2**(ceil(log2(padded_length))))
             elif pad:
                 padded_length = pad
             if bool(shiftornot[j]):
-                self.data = ifftshift(self.data,axes=[thisaxis])
+                newdata = list(shape(self.data))
+                newdata[thisaxis] = padded_length
+                newdata = zeros(tuple(newdata),dtype = self.data.dtype)
+                n = self.data.shape[thisaxis]
+                p2 = n - (n+1) // 2 # floordiv -- copied from scipy
+                sourceslice = [slice(None,None,None)] * len(self.data.shape)
+                targetslice = [slice(None,None,None)] * len(self.data.shape)
+                # move second half first
+                sourceslice[thisaxis] = slice(-n+p2,None)
+                targetslice[thisaxis] = slice(None,p2)
+                newdata[targetslice]  = self.data[sourceslice]
+                # move first half second (the negative frequencies)
+                sourceslice[thisaxis] = slice(None,p2)
+                targetslice[thisaxis] = slice(-p2,None)
+                newdata[targetslice]  = self.data[sourceslice]
+                self.data = newdata
+                #self.data = ifftshift(self.data,axes=[thisaxis])
             self.data = ifft(self.data,n = padded_length,axis=thisaxis)
             t = self.getaxis(axes[j])
             if t is not None:
                 dt = t[1]-t[0]
                 self.data *= size(t) * dt # here, the algorithm divides by N, so for integration, we need to not do that
                 #{{{ shiftornot specifies the shifting of the initial ft, not this result, so we always return a 0->1 time axis
-                self.axis_coords[thisaxis] = linspace(0,1./dt,size(t)) + self.ft_start_time # note that I offset by ft_start_time, which I pull from when I ft'd
+                self.axis_coords[thisaxis] = linspace(0,1./dt,padded_length) + self.ft_start_time # note that I offset by ft_start_time, which I pull from when I ft'd
                 #}}}
         return self
     #}}}
