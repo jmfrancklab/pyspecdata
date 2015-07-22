@@ -3598,10 +3598,11 @@ class nddata (object):
         self.dimlabels.pop(thisindex)
         if self.axis_coords!=[]:
             self.axis_coords.pop(thisindex)
-            try:
-                self.axis_coords_error.pop(thisindex)
-            except:
-                raise CustomError('trying to pop',thisindex,'from',self.axis_coords_error)
+            if self.axis_coords_error is not None and len(self.axis_coords_error) > 0:
+                try:
+                    self.axis_coords_error.pop(thisindex)
+                except:
+                    raise CustomError('trying to pop',thisindex,'from',self.axis_coords_error)
             if len(self.axis_coords_units) > 0:
                 try:
                     self.axis_coords_units.pop(thisindex)
