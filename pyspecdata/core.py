@@ -1863,10 +1863,10 @@ class figlist(object):
         yiterator,ylist = gen_list(y_axis)
         if verbose: print 'range of x ',x_axis.min(),x_axis.max()
         if verbose: print 'xlist',xlist
-        if verbose: print unitify_axis(plotdata,plotdata.dimlabels[0])
+        if verbose: print plotdata.unitify_axis(0)
         if verbose: print 'range of y ',y_axis.min(),y_axis.max()
         if verbose: print 'ylist',ylist
-        if verbose: print unitify_axis(plotdata,plotdata.dimlabels[1])
+        if verbose: print plotdata.unitify_axis(1)
         #}}}
         if xiterator < 1:
             x_ticklabels = ['{:0.1f}'.format(j) for j in xlist]
@@ -1915,7 +1915,7 @@ class figlist(object):
                     scale = text_scale # in figure units
                     )
         self.mlab.text3d(x_range[1] + 3 * extension_factor,y_range.mean(), 0,
-                unitify_axis(plotdata,plotdata.dimlabels[1]), color = (0,0,0),
+                plotdata.unitify_axis(1), color = (0,0,0),
                 scale = text_scale,
                 orient_to_camera = False,
                 orientation = (0,0,90))# the last angle appears to be rotaiton about z
@@ -1951,7 +1951,7 @@ class figlist(object):
                     )
         self.mlab.text3d(x_range.mean(), y_range[1] + 3 * extension_factor,
                 0,
-                unitify_axis(plotdata,plotdata.dimlabels[0]), color = (0,0,0),
+                plotdata.unitify_axis(0), color = (0,0,0),
                 scale = text_scale,
                 orient_to_camera = False,
                 orientation = (0,0,180))# the last angle appears to be rotaiton about z
@@ -1977,36 +1977,6 @@ def text_on_plot(x,y,thistext,coord = 'axes',**kwargs):
         kwargs.pop('match_data')
     newkwargs.update(kwargs)
     return text(x,y,thistext,**newkwargs)
-def unitify_axis(myy,axis_name,is_axis = True):
-    'this just generates an axis label with appropriate units'
-    if is_axis:
-        yunits = myy.units_texsafe(axis_name)
-        j = axis_name.find('_')
-        if j > -1:
-            prevword = axis_name[0:j]
-            if j+1< len(axis_name):
-                followword = axis_name[j+1:]
-            else:
-                followword = []
-            k = followword.find(' ')
-            if k > -1 and k < len(followword):
-                followword = followword[:k]
-            k = followword.find('_')
-            if len(followword) > 0:
-                if not (k > -1) and (len(prevword) < 2 or len(followword) < 2):
-                    if len(followword) > 1:
-                        axis_name = axis_name[:j+1+len(followword)]  + '}$' + axis_name[j+1+len(followword):]
-                        axis_name = axis_name[:j+1] + '{' + axis_name[j+1:]
-                    else:
-                        axis_name = axis_name[0:j+2] + '$' + axis_name[j+2:]
-                    axis_name = '$'+axis_name
-        if myy.get_prop('FT'):
-            axis_name = r'F{'+axis_name+r'}'
-    else:
-        yunits = myy.units_texsafe()
-    if yunits is not None:
-        axis_name = axis_name + ' / ' + yunits
-    return axis_name
 def plot(*args,**kwargs):
     global myplotfunc
     has_labels = False
@@ -2060,12 +2030,9 @@ def plot(*args,**kwargs):
             myylabel = myy.name()
         else:
             myylabel = 'data'
-        myylabel = unitify_axis(myy,myylabel,is_axis = False)
+        myylabel = myy.unitify_axis(myylabel,is_axis = False)
         if (len(myy.dimlabels)>0):
-            myxlabel = myy.dimlabels[0]
-            xunits = myy.units_texsafe(myxlabel)
-            if xunits is not None:
-                myxlabel += ' / ' + xunits
+            myxlabel = myy.unitify_axis(0)
         if (myx == None):
             try:
                 myx = myy.getaxis(myy.dimlabels[0])
@@ -2626,8 +2593,8 @@ class nddata (object):
         cs = contour(x*ones_like(y),ones_like(x)*y,self.data,levels = r_[self.data.min():self.data.max():30j])
         if levels:
             clabel(cs,inline = 1,fontsize = 10)
-        xlabel(unitify_axis(self,x_axis))
-        ylabel(unitify_axis(self,y_axis))
+        xlabel(self.unitify_axis(x_axis))
+        ylabel(self.unitify_axis(y_axis))
         return cs
     def waterfall(self,alpha = 0.3,ax = None,rotation = None,color = 'b',edgecolor = 'k'):
         if ax is None: 
@@ -2646,9 +2613,9 @@ class nddata (object):
             raise CustomError('trying to get the info on axis',x_dim,'which is',self.getaxis(x_dim))
         y_axis = self.retaxis(y_dim).data
         #}}}
-        ax.set_xlabel(unitify_axis(self,x_dim))
-        ax.set_ylabel(unitify_axis(self,y_dim))
-        ax.set_zlabel(unitify_axis(self,self.name(),is_axis = False))
+        ax.set_xlabel(self.unitify_axis(x_dim))
+        ax.set_ylabel(self.unitify_axis(y_dim))
+        ax.set_zlabel(self.unitify_axis(self.name(),is_axis = False))
         verts = []
         xs = x_axis.flatten()
         xs = r_[xs[0],xs,xs[-1]] # add points for the bottoms of the vertices
@@ -3724,6 +3691,42 @@ class nddata (object):
             return a[b.index(x)]
         else:
             return None
+    def unitify_axis(self,axis_name,is_axis = True):
+        'this just generates an axis label with appropriate units'
+        if type(axis_name) is int:
+            axis_name = self.dimlabels[axis_name]
+        if self.get_prop('FT') is not None and axis_name in self.get_prop('FT').keys() and self.get_prop('FT')[axis_name]:
+            isft = True
+        else:
+            isft = False
+        if is_axis:
+            yunits = self.units_texsafe(axis_name)
+            j = axis_name.find('_')
+            if j > -1:
+                prevword = axis_name[0:j]
+                if j+1< len(axis_name):
+                    followword = axis_name[j+1:]
+                else:
+                    followword = []
+                k = followword.find(' ')
+                if k > -1 and k < len(followword):
+                    followword = followword[:k]
+                k = followword.find('_')
+                if len(followword) > 0:
+                    if not (k > -1) and (len(prevword) < 2 or len(followword) < 2):
+                        if len(followword) > 1:
+                            axis_name = axis_name[:j+1+len(followword)]  + '}$' + axis_name[j+1+len(followword):]
+                            axis_name = axis_name[:j+1] + '{' + axis_name[j+1:]
+                        else:
+                            axis_name = axis_name[0:j+2] + '$' + axis_name[j+2:]
+                        axis_name = '$'+axis_name
+            if isft:
+                axis_name = r'F{'+axis_name+r'}'
+        else:
+            yunits = self.units_texsafe()
+        if yunits is not None:
+            axis_name = axis_name + ' / ' + yunits
+        return axis_name
     def ftshift(self,axis):
         self.data = fftshift(self.data,axes = self.axn(axis))
         x = self.getaxis(axis)
@@ -3733,17 +3736,24 @@ class nddata (object):
         x_subset -= x_subset[-1] + x[j+1] # zero and set to this
         return self
     def ft(self,*args,**kwargs):
-        self.set_prop('FT',True)
         #{{{ process arguments
         if len(args) > 1:
             raise ValueError('you can\'t pass more than one argument!!')
         axes = self._possibly_one_axis(*args)
+        if (type(axes) is str):
+            axes = [axes]
+        #{{{ set the FT property
+        x = self.get_prop('FT')
+        if x is None:
+            x = {}
+            self.set_prop('FT',x)
+        for j in axes:
+            x.update({j:True})
+        #}}}
         #kwargs: shiftornot=False,shift=None,pad = False
         shiftornot,shift,pad,automix = process_kwargs([('shiftornot',False),('shift',None),('pad',False),('automix',False)],**kwargs)
         if shift != None:
             shiftornot = shift
-        if (type(axes) is str):
-            axes = [axes]
         if not (type(shiftornot) is list):
             shiftornot = [bool(shiftornot)]*len(axes)
         #}}}
@@ -3789,17 +3799,24 @@ class nddata (object):
                 x += round(add_to_axis)*sw
         return self
     def ift(self,*args,**kwargs):
-        self.set_prop('FT',False)
         #{{{ process arguments
         if len(args) > 1:
             raise ValueError('you can\'t pass more than one argument!!')
         axes = self._possibly_one_axis(*args)
+        if (type(axes) is str):
+            axes = [axes]
+        #{{{ set the FT property
+        x = self.get_prop('FT')
+        if x is None:
+            x = {}
+            self.set_prop('FT',x)
+        for j in axes:
+            x.update({j:False})
+        #}}}
         #kwargs: shiftornot=False,shift=None,pad = False
         shiftornot,shift,pad = process_kwargs([('shiftornot',False),('shift',None),('pad',False)],**kwargs)
         if shift != None:
             shiftornot = shift
-        if (type(axes) is str):
-            axes = [axes]
         if not (type(shiftornot) is list):
             shiftornot = [bool(shiftornot)]*len(axes)
         #}}}
@@ -5094,7 +5111,7 @@ def image(A,x=[],y=[],**kwargs):
             x = list(A.getaxis(x_label))
         except:
             x = r_[0,ndshape(A)[x_label]]
-        x_label = unitify_axis(A,x_label)
+        x_label = A.unitify_axis(x_label)
         templabels.pop(-1)
         y_label = ''
         if len(templabels) == 1:
@@ -5103,7 +5120,7 @@ def image(A,x=[],y=[],**kwargs):
                 y = list(A.getaxis(y_label))
             except:
                 y = r_[0:A.data.shape[A.axn(y_label)]]
-            y_label = unitify_axis(A,y_label)
+            y_label = A.unitify_axis(y_label)
         else:
             while len(templabels)>0:
                 y_label += templabels.pop(0)
