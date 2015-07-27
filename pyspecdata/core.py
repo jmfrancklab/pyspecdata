@@ -854,7 +854,7 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
         if match_row is not None:
             if type(match_row) is dict:
                 match_row = h5searchstring(match_row)
-            if verbose: obs("trying to match row according to",match_row)
+            if verbose: obs("trying to match row according to",lsafen(match_row))
             mytable.flush()
             try:
                 matches = mytable.readWhere(match_row)
@@ -3837,12 +3837,12 @@ class nddata (object):
                 newdata[thisaxis] = padded_length
                 newdata = zeros(tuple(newdata),dtype = self.data.dtype)
                 n = self.data.shape[thisaxis]
-                p2 = n - (n+1) // 2 # floordiv -- copied from scipy
+                p2 = n - (n+1) // 2 # floordiv -- copied from scipy -- this essentially rounds up
                 sourceslice = [slice(None,None,None)] * len(self.data.shape)
                 targetslice = [slice(None,None,None)] * len(self.data.shape)
-                # move second half first
-                sourceslice[thisaxis] = slice(-n+p2,None)
-                targetslice[thisaxis] = slice(None,p2)
+                # move second half first -- the following are analogous to the numpy function, but uses slices instead
+                sourceslice[thisaxis] = slice(p2,n)
+                targetslice[thisaxis] = slice(None,n-p2)
                 newdata[targetslice]  = self.data[sourceslice]
                 # move first half second (the negative frequencies)
                 sourceslice[thisaxis] = slice(None,p2)
