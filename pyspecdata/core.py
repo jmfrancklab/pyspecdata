@@ -3606,7 +3606,6 @@ class nddata (object):
         self.data[self.data < 0] = 0
         if phaseinfo is not None:
             self.data = self.data * phaseinfo.data
-            print "check dtype",self.data.dtype
         return self
     def runcopy(self,*args):
         newdata = self.copy()
