@@ -648,6 +648,7 @@ def dnp_for_rho(path,
                     run_number = run_number)
             figure_list = t1info.figure_list
         except:
+            fl = figlist_var()
             fl.show(fid_args['name']+'.pdf') # in case it craps out, so I can still see the power plots
             raise CustomError("Couldn't load T1 for",t1names_forerror[j],'you may just want to skip it; right now manual t1expnos',t1expnos,'and auto t1_autovals',t1_autovals)
         figure_list.text('end $T_1$ dataset\n\n')
