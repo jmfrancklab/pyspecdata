@@ -3210,10 +3210,10 @@ class nddata (object):
         self.data = real(self.data)
         return self
     #}}}
-    def squeeze(self):
+    def squeeze(self,verbose = False):
         'squeeze singleton dimensions -- return a dictionary of the labels for the axes that are dropped'
         mask = array(self.data.shape) > 1
-        print zip(mask,self.dimlabels)
+        if verbose: print zip(mask,self.dimlabels)
         self.data = self.data.squeeze()
         if type(self.axis_coords) is list:
             for v,k in [(self.dimlabels[j],self.axis_coords[j][0]) for j in range(len(self.dimlabels)) if not mask[j] and self.axis_coords[j] is not None]:
@@ -4100,9 +4100,12 @@ class nddata (object):
     def check_axis_coords_errors(self):
         if len(self.axis_coords_error) > len(self.dimlabels):
             raise ValueError("this failed because there are more sets of axis errors than there are axes!\nlen(axis_coords_error) = %s\naxes = %s"%(repr(len(self.axis_coords_error)),repr(self.dimlabels)))
-    def sort(self,axisname):
+    def sort(self,axisname,reverse = False):
         whichaxis = self.dimlabels.index(axisname)
-        order = argsort(self.axis_coords[whichaxis])
+        if reverse:
+            order = argsort(-1*self.axis_coords[whichaxis])
+        else:
+            order = argsort(self.axis_coords[whichaxis])
         datacopy = self.copy()
         for j in range(0,len(order)): # do it this way, so that it deals with other dimensions correctly
             self.check_axis_coords_errors()
@@ -4215,6 +4218,7 @@ class nddata (object):
             self.axis_coords[self.axn(axis)] = value
         except:
             raise ValueError("I can't set this -- axis coords is",self.axis_coords)
+        return self
     def getaxisshape(self,axisname):
         thishape = ones(len(self.dimlabels))
         thisaxis = self.dimlabels.index(axisname) 
