@@ -53,8 +53,14 @@ hbar = 6.6260695729e-34/2./pi
 N_A = 6.02214179e23
 gamma_H = 4.258e7
 #}}}
-def process_kwargs(listoftuples,**kwargs):
-    'In order, return the value of keyword arguments `kwargs` named with key, value pairs in listoftuples'
+def autostringconvert(arg):
+    if type(arg) in [unicode,str_]:
+        return str(arg)
+    else:
+        return arg
+def process_kwargs(listoftuples,kwargs):
+    '''In order, return the value of keyword arguments `kwargs` named with key, value pairs in listoftuples
+    Note that having kwargs as an explicit argument avoids errors where the user forgets to pass the **kwargs.'''
     kwargnames,kwargdefaultvals = zip(*listoftuples)
     output = []
     for j,val in enumerate(kwargnames):
@@ -252,6 +258,7 @@ def lambda_rec(myarray,myname,myfunction,*varargs):
         myargs = [myname]
     else:
         raise CustomError("For the fourth argument, you must pass either a list with the names of the arguments, or nothing (to use the field itself as an argument)")
+    myargs = autostringconvert(myargs)
     if type(myargs) is str:
         myargs = (myargs,)
     if type(myargs) is not tuple:
@@ -490,19 +497,9 @@ def meanstd_rec(myarray,mylist,verbose = False,standard_error = False):
     return combined
 def make_rec(*args,**kwargs):
     r'input,names or a single argument, which is a dictionary\nstrlen = 100 gives length of the strings (which need to be specified in record arrays)\nyou can also specify (especially useful with the dictionary format) the list order = [str1,str2,...] which orders the output records with the field containing str1 first, then the field containing str2, then any remaining fields'
-    strlen = 100
-    if 'strlen' in kwargs.keys():
-        strlen = kwargs.pop('strlen')
-    if 'order' in kwargs.keys():
-        order = kwargs.pop('order')
-    else:
-        order = None
-    if 'zeros_like' in kwargs.keys():
-        zeros_like = kwargs.pop('zeros_like')
-    else:
-        zeros_like = False
-    if len(kwargs)>0:
-        raise CustomError("You have kwargs I don't understand!:",kwargs)
+    strlen,order,zeros_like = process_kwargs([('strlen',100),
+        ('order',None),
+        ('zeros_like',False)],kwargs)
     if len(args) == 1 and (type(args[0]) is dict):
         names = args[0].keys()
         input = args[0].values()
@@ -733,7 +730,7 @@ def h5searchstring(*args,**kwargs):
     generate a search string that matches one or more criteria'''
     format,precision = process_kwargs([('format','%g'),
         ('precision',0.01)],
-        **kwargs)
+        kwargs)
     if len(args) == 2:
         fieldname,value = args
     elif len(args) == 1 and type(args[0]) is dict:
@@ -839,7 +836,7 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
     '''add a row to a table, creating it if necessary, but don\'t add if the data matches the search condition indicated by `match_row`
     `match_row` can be either text or a dictionary -- in the latter case it's passed to h5searchstring
     '''
-    match_row,verbose,only_last = process_kwargs([('match_row',None),('verbose',False),('only_last',True)],**kwargs)
+    match_row,verbose,only_last = process_kwargs([('match_row',None),('verbose',False),('only_last',True)],kwargs)
     try: # see if the table exists
         mytable = h5table(bottomnode,tablename,None)
         tableexists = True
@@ -3751,7 +3748,7 @@ class nddata (object):
             x.update({j:True})
         #}}}
         #kwargs: shiftornot=False,shift=None,pad = False
-        shiftornot,shift,pad,automix = process_kwargs([('shiftornot',False),('shift',None),('pad',False),('automix',False)],**kwargs)
+        shiftornot,shift,pad,automix = process_kwargs([('shiftornot',False),('shift',None),('pad',False),('automix',False)],kwargs)
         if shift != None:
             shiftornot = shift
         if not (type(shiftornot) is list):
@@ -3814,7 +3811,7 @@ class nddata (object):
             x.update({j:False})
         #}}}
         #kwargs: shiftornot=False,shift=None,pad = False
-        shiftornot,shift,pad = process_kwargs([('shiftornot',False),('shift',None),('pad',False)],**kwargs)
+        shiftornot,shift,pad = process_kwargs([('shiftornot',False),('shift',None),('pad',False)],kwargs)
         if shift != None:
             shiftornot = shift
         if not (type(shiftornot) is list):
@@ -4070,6 +4067,7 @@ class nddata (object):
         if len(self.axis_coords) == 0:
             self.axis_coords = [[]]*len(self.dimlabels)
             self.axis_coords_error = [None]*len(self.dimlabels)
+        listofstrings = autostringconvert(listofstrings)
         if type(listofstrings) is str:
             listofstrings = [listofstrings]
             listofaxes = [listofaxes]

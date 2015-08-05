@@ -5,6 +5,7 @@ from .datadir import get_notebook_dir
 from nmr import phaseopt
 from sympy import var
 import tables
+import h5py
 import warnings
 import re
 import os
@@ -370,23 +371,23 @@ def open_cw_file(filename,fl = None,use_sweep = False,**kwargs):
             figname_append += '_'
     else:
         figname_append = ''
-    h5 = tables.openFile(filename)
+    h5 = h5py.File(filename,'r')
     #{{{ set up the complex number the hard way, for good form
-    data = empty_like(h5.root.experiment._v_children['data.r'],dtype = complex128)
+    data = empty_like(h5['experiment']['data.r'],dtype = complex128)
     data_introspect = data.view([('r',double),('i',double)])
     for i_or_r in ['i','r']:
-        data_introspect[i_or_r] = h5.root.experiment._v_children['data.'+i_or_r]
+        data_introspect[i_or_r] = h5['experiment']['data.'+i_or_r]
     #}}}
     if len(data.shape) == 1:
         if use_sweep:
-            data = nddata(data,data.size,['current']).labels('current',array(h5.root.experiment._v_children['sweep_currents']))
+            data = nddata(data,data.size,['current']).labels('current',array(h5['experiment']['sweep_currents']))
         else:
-            data = nddata(data,data.size,['field']).labels('field',array(h5.root.experiment._v_children['fields']))
+            data = nddata(data,data.size,['field']).labels('field',array(h5['experiment']['fields']))
     elif len(data.shape) == 2:
         if use_sweep:
-            data = nddata(data,data.shape,['repeats','current']).labels('current',array(h5.root.experiment._v_children['sweep_currents']))
+            data = nddata(data,data.shape,['repeats','current']).labels('current',array(h5['experiment']['sweep_currents']))
         else:
-            data = nddata(data,data.shape,['repeats','field']).labels('field',array(h5.root.experiment._v_children['fields']))
+            data = nddata(data,data.shape,['repeats','field']).labels('field',array(h5['experiment']['fields']))
     h5.close()
     return data
 def postproc_blank(data):
@@ -485,6 +486,7 @@ def find_file(searchstring,
             postproc = None,
             print_result = True,
             verbose = False,
+            prefilter = None,
             indirect_dimlabels = None,# in case "dimlabels" is not set properly, I can manually pass the value of "indirect_dimlabels"
             **kwargs):
     r'''find the file (assumed to be an h5 format file) given by the regular
@@ -507,13 +509,13 @@ def find_file(searchstring,
     elif print_result and verbose:
         obsn("found only one file, and loading it:"+repr(files))
     filename = directory + files[-1]
-    h5 = tables.openFile(filename)
+    h5 = h5py.File(filename,'r')
     #}}}
     #{{{ set up the complex number the hard way, for good form
-    data = empty_like(h5.root.experiment._v_children['data.r'],dtype = complex128)
+    data = empty_like(h5['experiment']['data.r'],dtype = complex128)
     data_introspect = data.view([('r',double),('i',double)])
     for i_or_r in ['i','r']:
-        data_introspect[i_or_r] = h5.root.experiment._v_children['data.'+i_or_r]
+        data_introspect[i_or_r] = h5['experiment']['data.'+i_or_r]
     #}}}
     #{{{ start with the dimensions used in the HDF5 file -- "indirect" is a placeholder (see below)
     if len(data.shape) == 4:
@@ -526,19 +528,10 @@ def find_file(searchstring,
         raise ValueError("I don't know how to interpret data of shape %d"%len(data.shape))
     data = nddata(data,list(data.shape),dimlabels)
     #}}}
-    #{{{ now, pull the dimlabels that we want
-    if 'dimlabels' in h5.root.experiment._v_attrs.__dict__.keys():
-        dimlabels = h5.root.experiment._v_attrs.__dict__['dimlabels'].tolist()
-    else:
-        print "You didn't set dimlabels in your pulse program -- the data is ambiguous and I'm taking my best guess!!!"
-    if indirect_dimlabels is not None:# in case it's not stored correctly in the file and I need to hard-code it
-        idx = dimlabels.index('indirect')
-        dimlabels = dimlabels[:idx] + indirect_dimlabels + dimlabels[idx+1:]
-    #}}}
     #{{{ put all further information into the nddata in a way such that it can be retrieved with "get_prop"
-    data.set_prop(dict([(k,v) for k,v in h5.root.experiment._v_attrs.__dict__.iteritems() if k[0] != '_' and k[0] != 'dimlabels']))
-    data.set_prop(dict([('execution_'+k,v) for k,v in h5.root.experiment.execution._v_attrs.__dict__.iteritems() if k[0] != '_']))
-    data.set_prop(dict([('description_'+k,v) for k,v in h5.root.experiment.description._v_attrs.__dict__.iteritems() if k[0] != '_']))
+    data.set_prop(dict([(k,v) for k,v in h5['experiment'].attrs.iteritems() if k[0] != '_' and k[0] != 'dimlabels']))
+    data.set_prop(dict([('execution_'+k,v) for k,v in h5['experiment']['execution'].attrs.iteritems() if k[0] != '_']))
+    data.set_prop(dict([('description_'+k,v) for k,v in h5['experiment']['description'].attrs.iteritems() if k[0] != '_']))
     #}}}
     #{{{ finish the t2 axis
     t2_steps = data.get_prop('t2_steps')
@@ -551,9 +544,21 @@ def find_file(searchstring,
         if verbose: print "warning, I couldn't find the t2 steps parameter"
         data.labels('t2',r_[0:ndshape(data)['t2']]*1e-9)
     data.set_units('t2','s')
+    if prefilter is not None:
+        data.ft('t2',shift = True)
+        data = data['t2':prefilter]
+    #}}}
+    #{{{ now, pull the dimlabels that we want
+    if 'dimlabels' in h5['experiment'].attrs.keys():
+        dimlabels = h5['experiment'].attrs['dimlabels'].tolist()
+    else:
+        print "You didn't set dimlabels in your pulse program -- the data is ambiguous and I'm taking my best guess!!!"
+    if indirect_dimlabels is not None:# in case it's not stored correctly in the file and I need to hard-code it
+        idx = dimlabels.index('indirect')
+        dimlabels = dimlabels[:idx] + indirect_dimlabels + dimlabels[idx+1:]
     #}}}
     #{{{ assign all the dimensions
-    indirect_names_in_h5 = [k for k,v in h5.root.experiment._v_children.iteritems() if k not in ['data.i','data.r','bin_switch_times','fields','sweep_currents'] and isinstance(v,tables.array.Array)]
+    indirect_names_in_h5 = [k for k,v in h5['experiment'].iteritems() if k not in ['data.i','data.r','bin_switch_times','fields','sweep_currents'] and type(v) == h5py.Dataset]
     if verbose: print "dimlabels are",dimlabels
     expected_dimlabels = set(dimlabels) - {'phcyc','t2','bin'} # we expect to find these axes stored in the HDF5
     if verbose: print "expected dimlabels",expected_dimlabels
@@ -582,12 +587,12 @@ def find_file(searchstring,
     if not unlabeled_indirect:
         if 'indirect' in data.dimlabels:# note that if there was only a single indirect dimension, it's already been used up
             #{{{ chunk the "indirect" dimension up appropriately, and assign the dimensions
-            chunk_dict = dict([(j,len(h5.root.experiment._v_children[j])) for j in dimlabels if j not in ['bin','phcyc','t2']])
+            chunk_dict = dict([(j,len(h5['experiment'][j])) for j in dimlabels if j not in ['bin','phcyc','t2']])
             if verbose: print ndshape(data)
             if verbose: print chunk_dict
             data.chunk('indirect',chunk_dict)
         for this_axis in common_dimensions:
-            axis_data = array(h5.root.experiment._v_children[this_axis])
+            axis_data = array(h5['experiment'][this_axis])
             data.labels(this_axis,axis_data)
         #}}}
     #}}}
@@ -596,13 +601,14 @@ def find_file(searchstring,
         #{{{ assign the labels for the bin dimension as a structured array
         forstruct = []
         forstruct_names = []
-        for thisaxis in [x for x in 'bin_switch_times','fields','sweep_currents' if x in h5.root.experiment._v_children.keys()]:
-            forstruct.append((h5.root.experiment._v_children['bin_switch_times'])[0])
+        for thisaxis in [x for x in 'bin_switch_times','fields','sweep_currents' if x in h5['experiment'].keys() and type(h5['experiment'][x]) is h5py.Dataset]:
+            forstruct.append((h5['experiment'][thisaxis])[0])
             forstruct_names.append(thisaxis)
-        x = make_rec(forstruct,forstruct_names,zeros_like = h5.root.experiment._v_children['bin_switch_times'].shape)
+        print "structure is",forstruct,"names",forstruct_names,"zeros like",h5['experiment']['bin_switch_times'].shape
+        x = make_rec(forstruct,forstruct_names,zeros_like = h5['experiment']['bin_switch_times'].shape)
         warnings.warn("detected a 'bin' dimension, and associating it with dtype "+repr(x.dtype))
         for thisaxis in forstruct_names:
-            x[thisaxis] = array(h5.root.experiment._v_children[thisaxis])
+            x[thisaxis] = h5['experiment'][thisaxis]
         data.labels('bin',x)
         #}}}
         if 'fields' in x.dtype.names:
