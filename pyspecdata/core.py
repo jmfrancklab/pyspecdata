@@ -2876,7 +2876,10 @@ class nddata (object):
 either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
     `error_for_data` can be a scalar, in which case, **all** the data errors are set to `error_for_data`'''
         if (len(args) is 1) and isscalar(args[0]):
-            args = (ones_like(self.data) * args[0],)
+            if args[0] == 0:
+                args = (zeros_like(self.data),)
+            else:
+                args = (ones_like(self.data) * args[0],)
         if (len(args) is 1) and (type(args[0]) is ndarray):
             self.data_error = reshape(args[0],shape(self.data))
         elif (len(args) is 1) and (type(args[0]) is list):
@@ -3948,6 +3951,11 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
                 axisvalues[axisvalues>oldaxis.max()] = past_bounds
         rdata = real(self.data)
         idata = imag(self.data)
+        thiserror = self.get_error()
+        if thiserror is not None:
+            rerrvar = real(thiserror)
+            if thiserror[0].dtype == 'complex128':
+                ierrvar = imag(thiserror)
         if 'kind' in kwargs.keys():
             thiskind = kwargs.pop('kind')
         else:
@@ -3958,15 +3966,24 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
                     thiskind = 'linear'
         thisaxis = self.axn(axis)
         if verbose: print 'Using %s interpolation'%thiskind
-        interpfunc =  interp1d(oldaxis,rdata,kind = thiskind,axis = thisaxis)
-        try:
-            rdata = interpfunc(axisvalues)
-        except:
-            raise CustomError("dtype of axis is"+repr(axisvalues.dtype))
-        interpfunc =  interp1d(oldaxis,idata,kind = thiskind,axis = thisaxis)
-        idata = interpfunc(axisvalues)
+        def local_interp_func(local_arg_data):
+            interpfunc =  interp1d(oldaxis,local_arg_data,kind = thiskind,axis = thisaxis)
+            try:
+                retval = interpfunc(axisvalues)
+            except:
+                raise CustomError("dtype of axis is"+repr(axisvalues.dtype))
+            return retval
+        rdata = local_interp_func(rdata)
+        idata = local_interp_func(idata)
         self.data = rdata + 1j * idata
         self.setaxis(axis,axisvalues)
+        if thiserror is not None:
+            rerrvar = local_interp_func(rerrvar) # calculate the error variance of the real part
+            if thiserror[0].dtype == 'complex128':
+                ierrvar = local_interp_func(ierrvar)
+                self.set_error(sqrt(rerrvar) + 1j * sqrt(ierrvar))
+            else:
+                self.set_error(sqrt(rerrvar))
         return self
     def invinterp(self,axis,values,**kwargs):
         'interpolate axis values given data values'
