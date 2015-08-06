@@ -58,7 +58,7 @@ def autostringconvert(arg):
         return str(arg)
     else:
         return arg
-def process_kwargs(listoftuples,kwargs):
+def process_kwargs(listoftuples,kwargs,pass_through = False):
     '''In order, return the value of keyword arguments `kwargs` named with key, value pairs in listoftuples
     Note that having kwargs as an explicit argument avoids errors where the user forgets to pass the **kwargs.'''
     kwargnames,kwargdefaultvals = zip(*listoftuples)
@@ -67,7 +67,7 @@ def process_kwargs(listoftuples,kwargs):
         output.append(kwargdefaultvals[j])
         if val in kwargs.keys():
             output[-1] = kwargs.pop(val)
-    if len(kwargs) > 0:
+    if not pass_through and len(kwargs) > 0:
         raise ValueError("I didn't understand the kwargs:",repr(kwargs))
     return tuple(output)
 def mybasicfunction(first_figure = None):
@@ -1978,19 +1978,13 @@ def plot(*args,**kwargs):
     global myplotfunc
     has_labels = False
     #{{{ deal with axes and some other kwargs
-    if 'ax' in kwargs.keys():
-        ax = kwargs.pop('ax')
-    else:
-        ax = gca()
-    human_units = False
-    if 'human_units' in kwargs.keys():
-        human_units = kwargs.pop('human_units')
+    ax,human_units,label_format_string,normalize,noerr = process_kwargs([('ax',gca()),
+        ('human_units',False),
+        ('label_format_string',None),
+        ('normalize',False),
+        ('noerr',False),
+        ],kwargs,pass_through = True)
     label_format_string = None
-    if 'label_format_string' in kwargs.keys():
-        label_format_string = kwargs.pop('label_format_string')
-    normalize = False
-    if 'normalize' in kwargs.keys():
-        normalize = kwargs.pop('normalize')
     #}}}
     myplotfunc = ax.plot # default
     #{{{ all possible properties
@@ -2035,7 +2029,7 @@ def plot(*args,**kwargs):
                 myx = myy.getaxis(myy.dimlabels[0])
             except:
                 myx = r_[0:myy.data.shape[0]]
-        if type(myy.data_error) is ndarray and len(myy.data_error)>0: #then this should be an errorbar plot
+        if not noerr and type(myy.data_error) is ndarray and len(myy.data_error)>0: #then this should be an errorbar plot
             def thiserrbarplot(*tebargs,**tebkwargs):
                 if type(tebargs[-1]) is str:
                     tebkwargs.update({'fmt':tebargs[-1]})
@@ -3953,9 +3947,9 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
         idata = imag(self.data)
         thiserror = self.get_error()
         if thiserror is not None:
-            rerrvar = real(thiserror)
+            rerrvar = real(thiserror)**2
             if thiserror[0].dtype == 'complex128':
-                ierrvar = imag(thiserror)
+                ierrvar = imag(thiserror)**2
         if 'kind' in kwargs.keys():
             thiskind = kwargs.pop('kind')
         else:
@@ -3966,8 +3960,8 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
                     thiskind = 'linear'
         thisaxis = self.axn(axis)
         if verbose: print 'Using %s interpolation'%thiskind
-        def local_interp_func(local_arg_data):
-            interpfunc =  interp1d(oldaxis,local_arg_data,kind = thiskind,axis = thisaxis)
+        def local_interp_func(local_arg_data,kind = thiskind):
+            interpfunc =  interp1d(oldaxis,local_arg_data,kind = kind,axis = thisaxis)
             try:
                 retval = interpfunc(axisvalues)
             except:
@@ -3978,12 +3972,14 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
         self.data = rdata + 1j * idata
         self.setaxis(axis,axisvalues)
         if thiserror is not None:
-            rerrvar = local_interp_func(rerrvar) # calculate the error variance of the real part
+            rerrvar = local_interp_func(rerrvar,kind = 'linear') # calculate the error variance of the real part, use linear to avoid nan problems
             if thiserror[0].dtype == 'complex128':
-                ierrvar = local_interp_func(ierrvar)
+                ierrvar = local_interp_func(ierrvar,kind = 'linear')
                 self.set_error(sqrt(rerrvar) + 1j * sqrt(ierrvar))
             else:
                 self.set_error(sqrt(rerrvar))
+            err_nanmask = isnan(self.get_error())
+            self.data[err_nanmask] = nan
         return self
     def invinterp(self,axis,values,**kwargs):
         'interpolate axis values given data values'
