@@ -2872,9 +2872,11 @@ class nddata (object):
     #}}}
     #{{{ set error
     def set_error(self,*args):
-        '''set the errors\neither set_error('axisname',error_for_axis) or set_error(error_for_data)'''
+        r'''set the errors:
+either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
+    `error_for_data` can be a scalar, in which case, **all** the data errors are set to `error_for_data`'''
         if (len(args) is 1) and isscalar(args[0]):
-            args = (r_[args[0]],)
+            args = (ones_like(self.data) * args[0],)
         if (len(args) is 1) and (type(args[0]) is ndarray):
             self.data_error = reshape(args[0],shape(self.data))
         elif (len(args) is 1) and (type(args[0]) is list):
@@ -3512,6 +3514,33 @@ class nddata (object):
         for dimname in self.dimlabels:
             if not (dimname in listofdims):
                 self.mean(dimname)
+        return self
+    def mean_weighted(self,axisname):
+        r"""perform  the weighted mean along `axisname` (use $\sigma$ from $\sigma = $self.get_error() do generate $1/\sigma$ weights)
+        for now, it clears the error of `self`, though it would be easy to calculate the new error, since everything is linear
+
+        unlike other functions, this creates working objects that are themselves nddata objects
+        this strategy is easier than coding out the raw numpy math, but probably less efficient"""
+        #{{{ the weighted mean, pyspecdata style
+        weight_matrix = self.copy().set_error(None)
+        weight_matrix.data = 1. / self.get_error().copy()
+        #{{{ find out where anything is nan, and set both error and weight to 0
+        nan_mask = isnan(self.data)
+        nan_mask |= isnan(weight_matrix.data)
+        weight_matrix.data[nan_mask] = 0
+        self.data[nan_mask] = 0
+        #}}}
+        #{{{ make sure there are no infinite values, because I wouldn't be sure how to deal with this
+        inf_mask = isinf(self.data)
+        inf_mask |= isinf(weight_matrix.data)
+        assert not any(inf_mask)
+        #}}}
+        normalization = weight_matrix.copy().run(sum,axisname)
+        weight_matrix /= normalization
+        self.data *= weight_matrix.data
+        self.set_error(None)
+        self.run(sum,axisname)
+        #}}}
         return self
     def mean(self,*args,**kwargs):
         r'Take the mean and set the error to the standard deviation'
