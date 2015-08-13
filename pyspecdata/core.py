@@ -1248,7 +1248,9 @@ global OLDplot
 OLDplot = plot
 global myplotfunc
 myplotfunc = OLDplot
-def whereblocks(a): # returns contiguous chunks where the condition is true
+def whereblocks(a):
+    """returns contiguous chunks where the condition is true
+    but, see the "contiguous" method, which is more OO"""
     parselist = where(a)[0]
     jumps_at = where(diff(parselist)>1)[0]+1
     retlist = []
@@ -2196,7 +2198,7 @@ class ndshape ():
         try:
             return self.dimlabels.index(axis)
         except:
-            raise CustomError('there is no axis named',axis,'all axes are named',self.dimlabels)
+            raise ValueError(' '.join(map(repr,['there is no axis named',axis,'all axes are named',self.dimlabels])))
     def copy(self):
         try:
             return deepcopy(self)
@@ -4029,6 +4031,27 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
             self.data = values
             self.setaxis(axis,cdata)
             return self
+    def contiguous(self,lambdafunc,axis = None,verbose = False): #adapted stackexchange http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-array
+        """lambdafunc is a function that operates on self
+this function returns the start and stop positions along the axis for the largest contiguous block for which lambdafunc returns true"""
+        if axis is None and len(self.dimlabels) == 1:
+            axis = self.dimlabels[0]
+        mask = lambdafunc(self)
+        idx, = np.diff(mask).nonzero()
+        idx += 1
+        if mask[0]:
+            # If the start of mask is True prepend a 0
+            idx = np.r_[0, idx]
+        if mask[-1]:
+            # If the end of mask is True, append the length of the array
+            idx = np.r_[idx, mask.size] # Edit
+        idx.shape = (-1,2)
+        #idx is 2x2 array of start,stop
+        if verbose: print 'DEBUG idx is',idx
+        if verbose: print "diffs for blocks",diff(idx,axis=1),
+        if verbose: print "with argmax",diff(idx,axis=0).argmax(),
+        if verbose: print "yielding",idx[:,diff(idx,axis=0).argmax()],self.getaxis(axis)[idx[:,diff(idx,axis=0).argmax()]]
+        return self.getaxis(axis)[idx[:,diff(idx,axis=0).argmax()]]
     #}}}
     def multimin(self,minfunc,axisname,filterwidth,numberofmins):
         cost = self.copy().convolve(axisname,filterwidth).run_nopop(minfunc)
