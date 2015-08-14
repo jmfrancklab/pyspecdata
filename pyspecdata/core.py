@@ -2727,7 +2727,7 @@ class nddata (object):
         try:
             return self.dimlabels.index(axis)
         except:
-            raise CustomError('there is no axis named',axis,'all axes are named',self.dimlabels)
+            raise ValueError(' '.join(map(repr,['there is no axis named',axis,'all axes are named',self.dimlabels])))
     #}}}
     #{{{ dictionary functions -- these convert between two formats:
     # dictionary -- stuff labeled according the dimension label.
@@ -4040,21 +4040,18 @@ this function returns the start and stop positions along the axis for the larges
         if axis is None and len(self.dimlabels) == 1:
             axis = self.dimlabels[0]
         mask = lambdafunc(self)
-        idx, = np.diff(mask).nonzero()
-        idx += 1
-        if mask[0]:
-            # If the start of mask is True prepend a 0
+        idx, = np.diff(mask).nonzero() # this gives a list of indices for the boundaries between true/false
+        idx += 1 # because diff only starts on index #1 rather than #0
+        if mask[0]: # because I want to indicate the boundaries of True, if I am starting on True, I need to make 0 a boundary
             idx = np.r_[0, idx]
-        if mask[-1]:
-            # If the end of mask is True, append the length of the array
+        if mask[-1]: # If the end of mask is True, then I need to add a boundary there as well
             idx = np.r_[idx, mask.size] # Edit
-        idx.shape = (-1,2)
-        #idx is 2x2 array of start,stop
+        idx.shape = (-1,2) #idx is 2x2 array of start,stop
         if verbose: print 'DEBUG idx is',idx
         if verbose: print "diffs for blocks",diff(idx,axis=1),
-        if verbose: print "with argmax",diff(idx,axis=0).argmax(),
-        if verbose: print "yielding",idx[:,diff(idx,axis=0).argmax()],self.getaxis(axis)[idx[:,diff(idx,axis=0).argmax()]]
-        return self.getaxis(axis)[idx[:,diff(idx,axis=0).argmax()]]
+        if verbose: print "with argmax",diff(idx,axis=1).argmax(),
+        if verbose: print "yielding",idx[diff(idx,axis=1).argmax(),:],self.getaxis(axis)[idx[diff(idx,axis=1).argmax(),:]]
+        return self.getaxis(axis)[idx[diff(idx,axis=1).argmax(),:]]
     #}}}
     def multimin(self,minfunc,axisname,filterwidth,numberofmins):
         cost = self.copy().convolve(axisname,filterwidth).run_nopop(minfunc)
