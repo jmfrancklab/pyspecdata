@@ -3212,13 +3212,16 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
         return self
     #}}}
     def squeeze(self,verbose = False):
-        'squeeze singleton dimensions -- return a dictionary of the labels for the axes that are dropped'
+        'squeeze singleton dimensions -- return a list of the labels for the axes that are dropped'
         mask = array(self.data.shape) > 1
         if verbose: print zip(mask,self.dimlabels)
         self.data = self.data.squeeze()
+        retval = []
         if type(self.axis_coords) is list:
-            for v,k in [(self.dimlabels[j],self.axis_coords[j][0]) for j in range(len(self.dimlabels)) if not mask[j] and self.axis_coords[j] is not None]:
-                self.set_prop(v,k)
+            for k,v in [(self.dimlabels[j],self.axis_coords[j]) for j in range(len(self.dimlabels)) if not mask[j]]:
+                retval.append(k)
+                if v is not None:
+                    self.set_prop(k,v[0])
         self.dimlabels = [v for j,v in enumerate(self.dimlabels) if mask[j]]
         if type(self.axis_coords) is list:
             self.axis_coords = [v for j,v in enumerate(self.axis_coords) if mask[j]]
@@ -3226,7 +3229,7 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
             self.axis_coords_error = [v for j,v in enumerate(self.axis_coords_error) if mask[j]]
         if type(self.axis_coords_units) is list:
             self.axis_coords_units = [v for j,v in enumerate(self.axis_coords_units) if mask[j]]
-        return
+        return retval
     #{{{ align data
     def aligndata(self,arg):
         r'''This now just returns selfout,argout
@@ -3510,8 +3513,8 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
         return self
     def mean_all_but(self,listofdims):
         'take the mean over all dimensions not in the list'
-        for dimname in self.dimlabels:
-            if not (dimname in listofdims):
+        for dimname in list(self.dimlabels):# I can't be popping from the list as I iterate over it
+            if not dimname in listofdims:
                 self.mean(dimname)
         return self
     def mean_weighted(self,axisname):
