@@ -31,6 +31,8 @@ from inspect import getargspec
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
 from .datadir import getDATADIR
+from . import fourier as this_fourier
+from .general_functions import *
 #rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
 rc('image',aspect='auto',interpolation='nearest')
 rcParams['xtick.direction'] = 'out'
@@ -53,23 +55,6 @@ hbar = 6.6260695729e-34/2./pi
 N_A = 6.02214179e23
 gamma_H = 4.258e7
 #}}}
-def autostringconvert(arg):
-    if type(arg) in [unicode,str_]:
-        return str(arg)
-    else:
-        return arg
-def process_kwargs(listoftuples,kwargs,pass_through = False):
-    '''In order, return the value of keyword arguments `kwargs` named with key, value pairs in listoftuples
-    Note that having kwargs as an explicit argument avoids errors where the user forgets to pass the **kwargs.'''
-    kwargnames,kwargdefaultvals = zip(*listoftuples)
-    output = []
-    for j,val in enumerate(kwargnames):
-        output.append(kwargdefaultvals[j])
-        if val in kwargs.keys():
-            output[-1] = kwargs.pop(val)
-    if not pass_through and len(kwargs) > 0:
-        raise ValueError("I didn't understand the kwargs:",repr(kwargs))
-    return tuple(output)
 def mybasicfunction(first_figure = None):
     r'''this gives the format for doing the image thing
 note also
@@ -3692,33 +3677,6 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
         return self
     #}}}
     #{{{ ft-related functions
-    def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*(y**2))))):
-        r'''perform a normalized convolution'''
-        #{{{ make a version of x that is oriented along the correct dimension
-        x = self.getaxis(axisname).copy()
-        x_centerpoint = (x[-1]+x[0])/2
-        x -= x_centerpoint # so that zero is in the center
-        x = ifftshift(x) # so that it's convolved about time 0
-        thisaxis = self.axn(axisname)
-        #}}}
-        myfilter = convfunc(x,filterwidth)
-        myfilter /= myfilter.sum()
-        filtershape = ones_like(self.data.shape)
-        filtershape[thisaxis] = len(myfilter)
-        myfilter = myfilter.reshape(filtershape)
-        #self.data = ifftshift(ifft(fftshift(fft(self.data,axis = thisaxis),axes = thisaxis)*fftshift(fft(myfilter,axis = thisaxis),axes=thisaxis),axis = thisaxis),axes = thisaxis) # for some reason fftconvolve doesn't work!
-        self.data = ifft(fft(self.data,axis = thisaxis)*fft(myfilter,axis = thisaxis),axis = thisaxis)
-        #self.data = fftconvolve(self.data,myfilter,mode='same') # I need this, so the noise doesn't break up my blocks
-        return self
-    def _ft_conj(self,x):
-        pairs = [('s','Hz'),('m',r'm^{-1}')]
-        a,b = zip(*tuple(pairs))
-        if x in a:
-            return b[a.index(x)]
-        elif x in b:
-            return a[b.index(x)]
-        else:
-            return None
     def unitify_axis(self,axis_name,is_axis = True):
         'this just generates an axis label with appropriate units'
         if type(axis_name) is int:
@@ -3755,138 +3713,13 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
         if yunits is not None:
             axis_name = axis_name + ' / ' + yunits
         return axis_name
-    def ftshift(self,axis):
-        self.data = fftshift(self.data,axes = self.axn(axis))
-        x = self.getaxis(axis)
-        x[:] = fftshift(x)
-        j = len(x)/2 # given the floor, this works out to be the central index
-        x_subset = x[:j]
-        x_subset -= x_subset[-1] + x[j+1] # zero and set to this
-        return self
-    def ft(self,*args,**kwargs):
-        #{{{ process arguments
-        if len(args) > 1:
-            raise ValueError('you can\'t pass more than one argument!!')
-        axes = self._possibly_one_axis(*args)
-        if (type(axes) is str):
-            axes = [axes]
-        #{{{ set the FT property
-        x = self.get_prop('FT')
-        if x is None:
-            x = {}
-            self.set_prop('FT',x)
-        for j in axes:
-            x.update({j:True})
-        #}}}
-        #kwargs: shiftornot=False,shift=None,pad = False
-        shiftornot,shift,pad,automix = process_kwargs([('shiftornot',False),('shift',None),('pad',False),('automix',False)],kwargs)
-        if shift != None:
-            shiftornot = shift
-        if not (type(shiftornot) is list):
-            shiftornot = [bool(shiftornot)]*len(axes)
-        #}}}
-        for j in range(0,len(axes)):
-            if self.get_units(axes[j]) is not None:
-                self.set_units(axes[j],self._ft_conj(self.get_units(axes[j])))
-            try:
-                thisaxis = self.dimlabels.index(axes[j])
-            except:
-                raise CustomError('error, dimlabels is: ',self.dimlabels)
-            padded_length = self.data.shape[thisaxis]
-            if pad is True:
-                padded_length = 2**(ceil(log2(padded_length)))
-            elif pad:
-                padded_length = pad
-            self.data = fft(self.data,n = padded_length,axis=thisaxis)
-            if bool(shiftornot[j]):
-                if automix:
-                    raise ValueError("You can't use automix and shift at the same time --> it doesn't make sense")
-                self.data = fftshift(self.data,axes=[thisaxis])
-            t = self.getaxis(axes[j])
-            if t is not None:
-                dt = t[1]-t[0] # the dwell gives the bandwidth, whether or not it has been zero padded
-                self.ft_start_time = t[0]
-                self.data *= dt
-                self.axis_coords[thisaxis] = linspace(0,1./dt,padded_length)
-                if bool(shiftornot[j]):
-                    mask = self.axis_coords[thisaxis] > 0.5/dt
-                    #{{{ just the axis part of ftshift
-                    x = self.axis_coords[thisaxis]
-                    x[:] = fftshift(x)
-                    j = len(x)/2 # given the floor, this works out to be the central index
-                    x_subset = x[:j]
-                    x_subset -= x_subset[-1] + x[j+1] # zero and set to this
-                    #}}}
-            if automix:
-                sw = 1.0/dt
-                carrier = abs(self).mean_all_but(axes[j]).argmax(axes[j]).data
-                print "I find carrier at",carrier
-                add_to_axis = (automix - carrier) / sw
-                print "which is",add_to_axis,"times the sw of",sw,"off from the automix value of",automix
-                x = self.getaxis(axes[j])
-                x += round(add_to_axis)*sw
-        return self
-    def ift(self,*args,**kwargs):
-        #{{{ process arguments
-        if len(args) > 1:
-            raise ValueError('you can\'t pass more than one argument!!')
-        axes = self._possibly_one_axis(*args)
-        if (type(axes) is str):
-            axes = [axes]
-        #{{{ set the FT property
-        x = self.get_prop('FT')
-        if x is None:
-            x = {}
-            self.set_prop('FT',x)
-        for j in axes:
-            x.update({j:False})
-        #}}}
-        #kwargs: shiftornot=False,shift=None,pad = False
-        shiftornot,shift,pad = process_kwargs([('shiftornot',False),('shift',None),('pad',False)],kwargs)
-        if shift != None:
-            shiftornot = shift
-        if not (type(shiftornot) is list):
-            shiftornot = [bool(shiftornot)]*len(axes)
-        #}}}
-        for j in range(0,len(axes)):
-            if self.get_units(axes[j]) is not None:
-                self.set_units(axes[j],self._ft_conj(self.get_units(axes[j])))
-            try:
-                thisaxis = self.dimlabels.index(axes[j])
-            except:
-                raise CustomError('error, dimlabels is: ',self.dimlabels)
-            padded_length = self.data.shape[thisaxis]
-            if pad is True:
-                padded_length = int(2**(ceil(log2(padded_length))))
-            elif pad:
-                padded_length = pad
-            if bool(shiftornot[j]):
-                newdata = list(shape(self.data))
-                newdata[thisaxis] = padded_length
-                newdata = zeros(tuple(newdata),dtype = self.data.dtype)
-                n = self.data.shape[thisaxis]
-                p2 = n - (n+1) // 2 # floordiv -- copied from scipy -- this essentially rounds up
-                sourceslice = [slice(None,None,None)] * len(self.data.shape)
-                targetslice = [slice(None,None,None)] * len(self.data.shape)
-                # move second half first -- the following are analogous to the numpy function, but uses slices instead
-                sourceslice[thisaxis] = slice(p2,n)
-                targetslice[thisaxis] = slice(None,n-p2)
-                newdata[targetslice]  = self.data[sourceslice]
-                # move first half second (the negative frequencies)
-                sourceslice[thisaxis] = slice(None,p2)
-                targetslice[thisaxis] = slice(-p2,None)
-                newdata[targetslice]  = self.data[sourceslice]
-                self.data = newdata
-                #self.data = ifftshift(self.data,axes=[thisaxis])
-            self.data = ifft(self.data,n = padded_length,axis=thisaxis)
-            t = self.getaxis(axes[j])
-            if t is not None:
-                dt = t[1]-t[0]
-                self.data *= size(t) * dt # here, the algorithm divides by N, so for integration, we need to not do that
-                #{{{ shiftornot specifies the shifting of the initial ft, not this result, so we always return a 0->1 time axis
-                self.axis_coords[thisaxis] = linspace(0,1./dt,padded_length) + self.ft_start_time # note that I offset by ft_start_time, which I pull from when I ft'd
-                #}}}
-        return self
+    #{{{ the following are all in the desired format -- the repetition at the end is because each function is in its own file (module) of the same name
+    _ft_conj = this_fourier._ft_conj._ft_conj
+    ft = this_fourier.ft.ft
+    ift = this_fourier.ift.ift
+    ftshift = this_fourier.ftshift.ftshift
+    convolve = this_fourier.convolve.convolve
+    #}}}
     #}}}
     #{{{ interpolation and binning
     def run_avg(self,thisaxisname,decimation = 20,centered = False):
