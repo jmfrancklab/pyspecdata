@@ -17,7 +17,11 @@ def ift(self,*args,**kwargs):
         x.update({j:False})
     #}}}
     #kwargs: shiftornot=False,shift=None,pad = False
-    shiftornot,shift,pad = process_kwargs([('shiftornot',False),('shift',None),('pad',False)],kwargs)
+    shiftornot,shift,pad = process_kwargs([
+        ('shiftornot',False),
+        ('shift',None),
+        ('pad',False)],
+        kwargs)
     if shift != None:
         shiftornot = shift
     if not (type(shiftornot) is list):

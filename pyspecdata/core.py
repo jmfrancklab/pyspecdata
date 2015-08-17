@@ -2375,7 +2375,9 @@ class nddata (object):
         else:
             self.__my_init__(args[0],[-1],['value'],**kwargs)
         return
-    def __my_init__(self,data,sizes,dimlabels,axis_coords=[],ft_start_time = 0.,data_error = None, axis_coords_error = None,axis_coords_units = None, data_units = None, other_info = {}):
+    def __my_init__(self,data,sizes,dimlabels,axis_coords=[],ft_start_time = None,data_error = None, axis_coords_error = None,axis_coords_units = None, data_units = None, other_info = {}):
+        if ft_start_time is not None:
+            raise ValueError('ft_start_time is obsolete -- you will want to pass a float value to the shift keyword argument of either .ft() or .ift()')
         self.genftpairs = False
         if not (type(data) is ndarray):
             #if (type(data) is float64) or (type(data) is complex128) or (type(data) is list):

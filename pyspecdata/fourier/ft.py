@@ -17,7 +17,12 @@ def ft(self,*args,**kwargs):
         x.update({j:True})
     #}}}
     #kwargs: shiftornot=False,shift=None,pad = False
-    shiftornot,shift,pad,automix = process_kwargs([('shiftornot',False),('shift',None),('pad',False),('automix',False)],kwargs)
+    shiftornot,shift,pad,automix = process_kwargs([
+        ('shiftornot',False),
+        ('shift',None),
+        ('pad',False),
+        ('automix',False)],
+        kwargs)
     if shift != None:
         shiftornot = shift
     if not (type(shiftornot) is list):
