@@ -11,6 +11,8 @@ def ft(self,axes,**kwargs):
     "NOT completely invertible (due to integration of the implied comb "
     "function??), and would require division by a factor of $\Delta f$ (the "
     "spectral width) in order to retrieve the original function\n"
+    "\tpre-FT, we use the axis to cyclically permute $t=0$ to the first "
+    "index\n"
     )
     #{{{ process arguments
     if len(args) > 1:
@@ -48,40 +50,53 @@ def ft(self,axes,**kwargs):
             padded_length = int(2**(ceil(log2(padded_length))))
         elif pad:
             padded_length = pad
-        t = self.getaxis(axes[j])
+        u = self.getaxis(axes[j]) # here, u is time
         #{{{ before anything else, store the start time
         startf_dict = self.get_prop("FT_start_time")
         if startf_dict is None:
-            self.set_prop("FT_start_time",{axes[j]:t[0]})
+            self.set_prop("FT_start_time",{axes[j]:u[0]})
         else:
-            startf_dict.update({axes[j]:t[0]})
+            startf_dict.update({axes[j]:u[0]})
         #}}}
         #{{{ the pre-FT shift
-        p2 = _find_zero_index(t)
+        p2 = _find_zero_index(u)
         self._ft_shift(p2)
         #}}}
         self.data = fft(self.data,
                             n = padded_length,
                             axis=thisaxis)
-        if t is not None:
-            dt = t[1]-t[0] # the dwell gives the bandwidth, whether or not it has been zero padded
+        if u is not None:
+            du = u[1]-u[0] # the dwell gives the bandwidth, whether or not it has been zero padded
             try:
-                assert all(diff(t) == dt)
+                assert all(diff(u) == du)
             except:
                 raise ValueError("In order to perform FT o IFT, the axis must be equally spaced and ascending")
-            self.data *= dt # this gives the units in the integral noted in the docstring
-            self.axis_coords[thisaxis] = linspace(0,1./dt,padded_length)
-            t = self.axis_coords[thisaxis]
+            self.data *= du # this gives the units in the integral noted in the docstring
+            self.axis_coords[thisaxis] = linspace(0,1./du,padded_length)
+            u = self.axis_coords[thisaxis]
         #{{{ the post-FT shift
-        if bool(shift[j]):
+        startt_dict = self.get_prop("FT_start_time")
+        if startt_dict is not None and axes[j] in startf_dict.keys():
+            if shift[j]:
+                raise ValueError("you are not allowed to shift an array for which the index for $f=0$ has already been determined!")
+            #{{{ the starting time is <0 and aliased over, and I want to shift it to 0
+            try:
+                assert startf_dict[axes[j]] < 0
+            except:
+                raise ValueError("while having a starting time great than zero makes sense, it's not yet supported")
+            p2 = argmin(u-(
+                        1/du + startf_dict[axes[j]]))
+            self._ft_shift(p2)
+            #}}}
+        elif shift[j]:
             if automix:
-                raise ValueError("You can't use automix and shift at the same time --> it doesn't make sense")
+                raise ValueError("You can'u use automix and shift at the same time --> it doesn'u make sense")
             n = self.data.shape[thisaxis]
             p2 = (n+1) // 2 # this is the starting index of what starts out as the second half (// is floordiv) -- copied from scipy -- this essentially rounds up (by default assigning more negative frequencies than positive ones)
             self._ft_shift(p2)
         #}}}
         if automix:
-            sw = 1.0/dt
+            sw = 1.0/du
             carrier = abs(self).mean_all_but(axes[j]).argmax(axes[j]).data
             print "I find carrier at",carrier
             add_to_axis = (automix - carrier) / sw

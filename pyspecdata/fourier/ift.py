@@ -51,30 +51,30 @@ def ift(self,axes,**kwargs):
             padded_length = int(2**(ceil(log2(padded_length))))
         elif pad:
             padded_length = pad
-        t = self.getaxis(axes[j])
+        u = self.getaxis(axes[j]) # here, u is frequency
         #{{{ before anything else, store the start frequency
         startf_dict = self.get_prop("FT_start_freq")
         if startf_dict is None:
-            self.set_prop("FT_start_freq",{axes[j]:t[0]})
+            self.set_prop("FT_start_freq",{axes[j]:u[0]})
         else:
-            startf_dict.update({axes[j]:t[0]})
+            startf_dict.update({axes[j]:u[0]})
         #}}}
         #{{{ the pre-IFT shift
-        p2 = _find_zero_index(t)
+        p2 = _find_zero_index(u)
         self._ft_shift(p2)
         #}}}
         self.data = ifft(self.data,
                             n = padded_length,
                             axis=thisaxis)
-        if t is not None:
-            dt = t[1]-t[0] # the dwell gives the bandwidth, whether or not it has been zero padded
+        if u is not None:
+            du = u[1]-u[0] # the dwell gives the bandwidth, whether or not it has been zero padded
             try:
-                assert all(diff(t) == dt)
+                assert all(diff(u) == du)
             except:
                 raise ValueError("In order to perform FT o IFT, the axis must be equally spaced and ascending")
-            self.data *= padded_length * dt # here, the algorithm divides by padded_length, so for integration, we need to not do that
-            self.axis_coords[thisaxis] = linspace(0,1./dt,padded_length)
-            t = self.axis_coords[thisaxis]
+            self.data *= padded_length * du # here, the algorithm divides by padded_length, so for integration, we need to not do that
+            self.axis_coords[thisaxis] = linspace(0,1./du,padded_length)
+            u = self.axis_coords[thisaxis]
         #{{{ the post-IFT shift
         startf_dict = self.get_prop("FT_start_freq")
         if startf_dict is not None and axes[j] in startf_dict.keys():
@@ -82,8 +82,8 @@ def ift(self,axes,**kwargs):
                 raise ValueError("you are not allowed to shift an array for which the index for $f=0$ has already been determined!")
             #{{{ the starting frequency is <0 and aliased over, and I want to shift it to 0
             assert startf_dict[axes[j]] < 0
-            p2 = argmin(t-(
-                        1/dt + startf_dict[axes[j]]))
+            p2 = argmin(u-(
+                        1/du + startf_dict[axes[j]]))
             self._ft_shift(p2)
             #}}}
         elif shift[j]:
