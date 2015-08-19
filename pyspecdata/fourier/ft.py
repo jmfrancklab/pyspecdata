@@ -1,6 +1,6 @@
 from ..general_functions import *
 from pylab import * 
-from ft_shift import _ft_shift
+from .ft_shift import _find_zero_index
 
 def ft(self,axes,**kwargs):
     ("This performs a fourier transform along the axes identified by the string or list of strings `axes`.\n"
@@ -26,18 +26,15 @@ def ft(self,axes,**kwargs):
     for j in axes:
         x.update({j:True})
     #}}}
-    #kwargs: shiftornot=False,shift=None,pad = False
     if 'shiftornot' in kwargs:
         raise ValueError("shiftornot is obsolete --> use shift instead")
     shift,pad,automix = process_kwargs([
-        ('shift',None),
+        ('shift',False),
         ('pad',False),
         ('automix',False)],
         kwargs)
-    if shift != None:
-        shiftornot = shift
-    if not (type(shiftornot) is list):
-        shiftornot = [bool(shiftornot)]*len(axes)
+    if not (type(shift) is list):
+        shift = [bool(shift)]*len(axes)
     #}}}
     for j in range(0,len(axes)):
         if self.get_units(axes[j]) is not None:
@@ -51,23 +48,38 @@ def ft(self,axes,**kwargs):
             padded_length = int(2**(ceil(log2(padded_length))))
         elif pad:
             padded_length = pad
-        #{{{ the pre-FT shift
+        t = self.getaxis(axes[j])
+        #{{{ before anything else, store the start time
+        startf_dict = self.get_prop("FT_start_time")
+        if startf_dict is None:
+            self.set_prop("FT_start_time",{axes[j]:t[0]})
+        else:
+            startf_dict.update({axes[j]:t[0]})
         #}}}
-        self.data = fft(self.data,n = padded_length,axis=thisaxis)
+        #{{{ the pre-FT shift
+        p2 = _find_zero_index(t)
+        self._ft_shift(p2)
+        #}}}
+        self.data = fft(self.data,
+                            n = padded_length,
+                            axis=thisaxis)
+        if t is not None:
+            dt = t[1]-t[0] # the dwell gives the bandwidth, whether or not it has been zero padded
+            try:
+                assert all(diff(t) == dt)
+            except:
+                raise ValueError("In order to perform FT o IFT, the axis must be equally spaced and ascending")
+            self.data *= dt # this gives the units in the integral noted in the docstring
+            self.axis_coords[thisaxis] = linspace(0,1./dt,padded_length)
+            t = self.axis_coords[thisaxis]
         #{{{ the post-FT shift
-        if bool(shiftornot[j]):
+        if bool(shift[j]):
             if automix:
                 raise ValueError("You can't use automix and shift at the same time --> it doesn't make sense")
             n = self.data.shape[thisaxis]
             p2 = (n+1) // 2 # this is the starting index of what starts out as the second half (// is floordiv) -- copied from scipy -- this essentially rounds up (by default assigning more negative frequencies than positive ones)
             self._ft_shift(p2)
         #}}}
-        t = self.getaxis(axes[j])
-        if t is not None:
-            dt = t[1]-t[0] # the dwell gives the bandwidth, whether or not it has been zero padded
-            self.ft_start_time = t[0]
-            self.data *= dt # this gives the units in the integral noted in the docstring
-            self.axis_coords[thisaxis] = linspace(0,1./dt,padded_length)
         if automix:
             sw = 1.0/dt
             carrier = abs(self).mean_all_but(axes[j]).argmax(axes[j]).data

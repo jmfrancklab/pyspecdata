@@ -3719,6 +3719,7 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
     _ft_conj = this_fourier._ft_conj._ft_conj
     ft = this_fourier.ft.ft
     ift = this_fourier.ift.ift
+    _ft_shift = this_fourier.ft_shift._ft_shift
     ftshift = this_fourier.ftshift.ftshift
     convolve = this_fourier.convolve.convolve
     #}}}
