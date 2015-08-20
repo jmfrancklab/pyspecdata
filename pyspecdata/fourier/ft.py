@@ -13,6 +13,13 @@ def ft(self,axes,**kwargs):
     "spectral width) in order to retrieve the original function\n"
     "\tpre-FT, we use the axis to cyclically permute $t=0$ to the first "
     "index\n"
+    "\t post-FT, we assume that the data has previously been IFT'd\n"
+    "\t\tIf this is the case, passing `shift`=True will cause an error\n"
+    "\t\tIf this is not the case, passing `shift`=True generates a standard fftshift\n"
+    "\t`pad` specifies a zero-filling.  If it's a number, then it gives the"
+    " length of the zero-filled dimension.  If it is just `True`, then the size"
+    " of the dimension is determined by rounding the dimension size up to the"
+    " nearest integral power of 2."
     )
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
@@ -56,6 +63,16 @@ def ft(self,axes,**kwargs):
         else:
             startt_dict.update({axes[j]:u[0]})
         #}}}
+        #{{{ need to do the zero-filling manually, so I can properly pre-shift the data
+        if not pad is False:
+            newdata = list(self.data.shape)
+            newdata[thisaxis] = padded_length
+            targetslice = [slice(None,None,None)] * len(newdata)
+            targetslice[thisaxis] = slice(None,self.data.shape[thisaxis])
+            newdata = zeros(newdata,dtype = self.data.dtype)
+            newdata[targetslice] = self.data
+            self.data = newdata
+        #}}}
         #{{{ the pre-FT shift
         p2 = _find_zero_index(u)
         self._ft_shift(thisaxis,p2)
@@ -83,8 +100,8 @@ def ft(self,axes,**kwargs):
                 assert startf_dict[axes[j]] < 0
             except:
                 raise ValueError("while having a starting time great than zero makes sense, it's not yet supported")
-            p2 = argmin(u-(
-                        1/du + startf_dict[axes[j]]))
+            p2 = argmin(abs(u-(
+                        1/du + startf_dict[axes[j]])))
             self._ft_shift(thisaxis,p2,shift_axis = True)
             #}}}
         elif shift[j]:

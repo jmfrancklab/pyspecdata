@@ -2397,7 +2397,6 @@ class nddata (object):
         #    testshape = data.shape
         #    if not all([len(axis_coords[j])==testshape[j] if axis_coords[j] is not None else True for j in range(0,len(axis_coords))]):
         #        raise IndexError('The length of your axis labels (axis_coords) (shape %s) and your axis data (shape %s) does not match!!!'%(repr([len(thiscoord) for thiscoord in axis_coords]),repr(data.shape)))
-        self.ft_start_time = ft_start_time
         self.data_error = data_error
         self.data_units = data_units
         self.other_info = dict(other_info)
@@ -5173,7 +5172,6 @@ class fitdata(nddata):
             #        args[0].data.shape,
             #        args[0].dimlabels,
             #        axis_coords = args[0].axis_coords,
-            #        ft_start_time = args[0].ft_start_time,
             #        data_error = args[0].data_error,
             #        axis_coords_error = args[0].axis_coords_error,
             #        axis_coords_units = args[0].axis_coords_units,

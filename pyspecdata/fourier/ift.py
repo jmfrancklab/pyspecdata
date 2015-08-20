@@ -14,7 +14,12 @@ def ift(self,axes,**kwargs):
     "\tpre-IFT, we use the axis to cyclically permute $f=0$ to the first "
     "index\n"
     "\t post-IFT, we assume that the data has previously been FT'd\n"
+    "\t\tIf this is the case, passing `shift`=True will cause an error\n"
     "\t\tIf this is not the case, passing `shift`=True generates a standard ifftshift\n"
+    "\t`pad` specifies a zero-filling.  If it's a number, then it gives the"
+    " length of the zero-filled dimension.  If it is just `True`, then the size"
+    " of the dimension is determined by rounding the dimension size up to the"
+    " nearest integral power of 2."
     )
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
@@ -57,6 +62,16 @@ def ift(self,axes,**kwargs):
         else:
             startf_dict.update({axes[j]:u[0]})
         #}}}
+        #{{{ need to do the zero-filling manually, so I can properly pre-shift the data
+        if not pad is False:
+            newdata = list(self.data.shape)
+            newdata[thisaxis] = padded_length
+            targetslice = [slice(None,None,None)] * len(newdata)
+            targetslice[thisaxis] = slice(None,self.data.shape[thisaxis])
+            newdata = zeros(newdata,dtype = self.data.dtype)
+            newdata[targetslice] = self.data
+            self.data = newdata
+        #}}}
         #{{{ the pre-IFT shift
         p2 = _find_zero_index(u)
         self._ft_shift(thisaxis,p2)
@@ -81,8 +96,8 @@ def ift(self,axes,**kwargs):
                 raise ValueError("you are not allowed to shift an array for which the index for $t=0$ has already been determined!")
             #{{{ the starting frequency is <0 and aliased over, and I want to shift it to 0
             assert startt_dict[axes[j]] < 0
-            p2 = argmin(u-(
-                        1/du + startt_dict[axes[j]]))
+            p2 = argmin(abs(u-(
+                        1/du + startt_dict[axes[j]])))
             self._ft_shift(thisaxis,p2,shift_axis = True)
             #}}}
         elif shift[j]:
