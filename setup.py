@@ -19,7 +19,11 @@ try:
     import PyQt4.QtCore
     import PyQt4.QtGui
 except:
-    raise RuntimeError("I couldn't import PyQt -- go install it first!!")
+    raise RuntimeError("I couldn't import PyQt -- go install it first!!\n(I'm doing this because dependency-based install of PyQt does not usually go well -- use your distro software (conda install ..., aptitude, etc) instead)")
+try:
+    import mayavi
+except:
+    raise RuntimeError("I couldn't import MayaVi -- go install it first!!\n(I'm doing this because dependency-based install of MayaVi does not usually go well -- use your distro (conda install ..., aptitude, etc) instead)")
 ext_test = Extension(name = 'pyspecdata.test_module',
         sources = ['pyspecdata/test_f90.pyf','pyspecdata/test_f90.f90','pyspecdata/anothertest.f90','pyspecdata/lprmpt.c','pyspecdata/fortrancall.h'],
         define_macros = [('ADD_UNDERSCORE',None)],
@@ -32,7 +36,7 @@ skip_prop = False
 
 if os.name == 'nt':
     if find_executable('make') is None:
-        print "It looks like you're on windows, but I can't find make, s I'm skipping lapack"
+        print "It looks like you're on windows, but I can't find make, so I'm skipping lapack"
         skip_prop = True
     else:
         libraries.append('refblas')

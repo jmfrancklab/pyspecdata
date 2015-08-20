@@ -5,8 +5,8 @@ from .ft_shift import _find_zero_index
 def ift(self,axes,**kwargs):
     ("This performs a fourier transform along the axes identified by the string or list of strings `axes`.\n"
     "   It adjusts normalization and units so that the result conforms to\n"
-    "   $$s(t)=\int_{x_min}^{x_max} \tilde{s}(t) e^{i 2 \pi f t} df$$\n"
-    "   Note that while the analytical integral this corresponds to is
+    r"   $$s(t)=\int_{x_min}^{x_max} \tilde{s}(t) e^{i 2 \pi f t} df$$"+'\n'
+    "   Note that while the analytical integral this corresponds to is "
     "normalized, performing .ft() followed by .ift() on a discrete sequence is "
     "NOT completely invertible (due to integration of the implied comb "
     "function??), and would require division by a factor of $\Delta f$ (the "
@@ -17,8 +17,6 @@ def ift(self,axes,**kwargs):
     "\t\tIf this is not the case, passing `shift`=True generates a standard ifftshift\n"
     )
     #{{{ process arguments
-    if len(args) > 1:
-        raise ValueError('you can\'t pass more than one argument!!')
     axes = self._possibly_one_axis(axes)
     if (type(axes) is str):
         axes = [axes]
@@ -61,7 +59,7 @@ def ift(self,axes,**kwargs):
         #}}}
         #{{{ the pre-IFT shift
         p2 = _find_zero_index(u)
-        self._ft_shift(p2)
+        self._ft_shift(thisaxis,p2)
         #}}}
         self.data = ifft(self.data,
                             n = padded_length,
@@ -69,26 +67,27 @@ def ift(self,axes,**kwargs):
         if u is not None:
             du = u[1]-u[0] # the dwell gives the bandwidth, whether or not it has been zero padded
             try:
-                assert all(diff(u) == du)
+                assert allclose(diff(u),du)
+                assert du > 0
             except:
                 raise ValueError("In order to perform FT o IFT, the axis must be equally spaced and ascending")
             self.data *= padded_length * du # here, the algorithm divides by padded_length, so for integration, we need to not do that
             self.axis_coords[thisaxis] = linspace(0,1./du,padded_length)
             u = self.axis_coords[thisaxis]
         #{{{ the post-IFT shift
-        startf_dict = self.get_prop("FT_start_freq")
-        if startf_dict is not None and axes[j] in startf_dict.keys():
+        startt_dict = self.get_prop("FT_start_time")
+        if startt_dict is not None and axes[j] in startt_dict.keys():
             if shift[j]:
-                raise ValueError("you are not allowed to shift an array for which the index for $f=0$ has already been determined!")
+                raise ValueError("you are not allowed to shift an array for which the index for $t=0$ has already been determined!")
             #{{{ the starting frequency is <0 and aliased over, and I want to shift it to 0
-            assert startf_dict[axes[j]] < 0
+            assert startt_dict[axes[j]] < 0
             p2 = argmin(u-(
-                        1/du + startf_dict[axes[j]]))
-            self._ft_shift(p2)
+                        1/du + startt_dict[axes[j]]))
+            self._ft_shift(thisaxis,p2,shift_axis = True)
             #}}}
         elif shift[j]:
             n = self.data.shape[thisaxis]
             p2 = n - (n+1) // 2 # this is the size of what starts out as the second half // is floordiv -- copied from scipy -- this whole thing essentially rounds down
-            self._ft_shift(p2)
+            self._ft_shift(thisaxis,p2,shift_axis = True)
         #}}}
     return self
