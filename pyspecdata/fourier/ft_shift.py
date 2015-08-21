@@ -1,5 +1,9 @@
 "shift-related helper functions"
-from numpy import zeros,r_,nonzero,isclose,empty_like
+from numpy import zeros,r_,nonzero,isclose,empty_like,argmin
+thinkaboutit_message = ("If you think about it, you"
+                        " probably don't want to do this.  You either want to fill with"
+                        " zeros from zero up to the start or you want to first set the"
+                        " start point to zero.")
 def _ft_shift(self,thisaxis,p2,shift_axis = None):
     ("perform a generalized fftshift along the axis indicated by the integer `thisaxis`, where `p2` gives the index that will become the first index"
     "\n this is derived from the numpy fftshift routine, but defines slices instead of index numbers"
@@ -17,7 +21,6 @@ def _ft_shift(self,thisaxis,p2,shift_axis = None):
     # move first half second (the negative frequencies)
     sourceslice[thisaxis] = slice(None,p2)
     targetslice[thisaxis] = slice(-p2,None)
-    print targetslice,sourceslice
     newdata[targetslice]  = self.data[sourceslice]
     self.data = newdata
     if shift_axis is not None and shift_axis:
@@ -38,12 +41,22 @@ def _ft_shift(self,thisaxis,p2,shift_axis = None):
     return self
 def _find_zero_index(t):
     "identify the index where zero lives"
-    p2 = nonzero(isclose(t,0.))[0]
+    assert t[0] <= 0, ("You seem to be trying to FT a sequence whose axis"
+                        " starts at a value greater than zero."+thinkaboutit_message)
+    p2 = nonzero(isclose(0.,t,atol = 0))[0]
     try:
-        assert len(p2) == 1
+        assert len(p2) == 1, ("The axis should have exactly one value that is equal to zero -- otherwise we're going to need to add code to (1) incorporate a carrier frequency or (2) add a phase shift")
     except:
+        print "------------extra info for error dump----------------"
         print "p2 gives",p2
-        print "t around the first value is",t[p2[0]-3:p2[0]+3]
-        raise ValueError("The axis should have exactly one value that is equal to zero -- otherwise we're going to need to add code to (1) incorporate a carrier frequency or (2) add a phase shift")
+        if len(p2) == 0:
+            print "t is",t
+            print "t values that are closest to zero are",
+            temp = argmin(abs(t-0))
+            print t[temp-2:temp+3]
+        else:
+            print "t is",t
+            print "t around the first value is",t[p2[0]-3:p2[0]+3]
+        raise
     p2 = p2[0]
     return p2

@@ -1,6 +1,6 @@
 from ..general_functions import *
 from pylab import * 
-from .ft_shift import _find_zero_index
+from .ft_shift import _find_zero_index,thinkaboutit_message
 
 def ft(self,axes,**kwargs):
     ("This performs a fourier transform along the axes identified by the string or list of strings `axes`.\n"
@@ -19,7 +19,10 @@ def ft(self,axes,**kwargs):
     "\t`pad` specifies a zero-filling.  If it's a number, then it gives the"
     " length of the zero-filled dimension.  If it is just `True`, then the size"
     " of the dimension is determined by rounding the dimension size up to the"
-    " nearest integral power of 2."
+    " nearest integral power of 2.\n"
+    "\t`automix` can be set to the approximate frequency value.  This is useful"
+    " for the specific case where the data has been captured on a sampling scope,"
+    " and it's severely aliased over.\n"
     )
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
@@ -82,11 +85,9 @@ def ft(self,axes,**kwargs):
                             axis=thisaxis)
         if u is not None:
             du = u[1]-u[0] # the dwell gives the bandwidth, whether or not it has been zero padded
-            try:
-                assert allclose(diff(u),du)
-                assert du > 0
-            except:
-                raise ValueError("In order to perform FT o IFT, the axis must be equally spaced and ascending")
+            thismsg = "In order to perform FT o IFT, the axis must be equally spaced and ascending"
+            assert allclose(diff(u),du,atol = 0), thismsg# absolute tolerance can be large relative to a du of ns
+            assert du > 0, thismsg
             self.data *= du # this gives the units in the integral noted in the docstring
             self.axis_coords[thisaxis] = linspace(0,1./du,padded_length)
             u = self.axis_coords[thisaxis]
@@ -95,11 +96,10 @@ def ft(self,axes,**kwargs):
         if startf_dict is not None and axes[j] in startf_dict.keys():
             if shift[j]:
                 raise ValueError("you are not allowed to shift an array for which the index for $f=0$ has already been determined!")
-            #{{{ the starting time is <0 and aliased over, and I want to shift it to 0
-            try:
-                assert startf_dict[axes[j]] < 0
-            except:
-                raise ValueError("while having a starting time great than zero makes sense, it's not yet supported")
+            #{{{ the starting frequency is <0 and aliased over, and I want to shift it to 0
+            assert startf_dict[axes[j]] <= 0 , ("Trying to reset to a frequency value greater than"
+                        " zero ("+repr(startf_dict[axes[j]])+") which is not"
+                        " supported.  "+thinkaboutit_message)
             p2 = argmin(abs(u-(
                         1/du + startf_dict[axes[j]])))
             self._ft_shift(thisaxis,p2,shift_axis = True)

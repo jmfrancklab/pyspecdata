@@ -4102,8 +4102,9 @@ this function returns the start and stop positions along the axis for the larges
         else:
             return None
     def setaxis(self,axis,value):
-        r'''set the value of the axis
-        if you pass a function as the `value`, it will use the existing axis labels as the argument of the function, and then put the result into the axis labels'''
+        ("set the value of the axis if you pass a function as the `value`, it"
+        " will use the existing axis labels as the argument of the function, and"
+        " then put the result into the axis labels")
         if type(value) is type(emptyfunction):
             x = self.getaxis(axis)
             x[:] = value(x)

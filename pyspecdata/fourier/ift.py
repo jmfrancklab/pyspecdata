@@ -1,6 +1,6 @@
 from ..general_functions import *
 from pylab import * 
-from .ft_shift import _find_zero_index
+from .ft_shift import _find_zero_index,thinkaboutit_message
 
 def ift(self,axes,**kwargs):
     ("This performs a fourier transform along the axes identified by the string or list of strings `axes`.\n"
@@ -81,11 +81,9 @@ def ift(self,axes,**kwargs):
                             axis=thisaxis)
         if u is not None:
             du = u[1]-u[0] # the dwell gives the bandwidth, whether or not it has been zero padded
-            try:
-                assert allclose(diff(u),du)
-                assert du > 0
-            except:
-                raise ValueError("In order to perform FT o IFT, the axis must be equally spaced and ascending")
+            thismsg = "In order to perform FT o IFT, the axis must be equally spaced and ascending"
+            assert allclose(diff(u),du,atol = 0), thismsg# absolute tolerance can be large relative to a du of ns
+            assert du > 0, thismsg
             self.data *= padded_length * du # here, the algorithm divides by padded_length, so for integration, we need to not do that
             self.axis_coords[thisaxis] = linspace(0,1./du,padded_length)
             u = self.axis_coords[thisaxis]
@@ -94,8 +92,10 @@ def ift(self,axes,**kwargs):
         if startt_dict is not None and axes[j] in startt_dict.keys():
             if shift[j]:
                 raise ValueError("you are not allowed to shift an array for which the index for $t=0$ has already been determined!")
-            #{{{ the starting frequency is <0 and aliased over, and I want to shift it to 0
-            assert startt_dict[axes[j]] < 0
+            #{{{ the starting time is <0 and aliased over, and I want to shift it to 0
+            assert startt_dict[axes[j]] <= 0 , ("Trying to reset to a time value greater than"
+                        " zero ("+repr(startt_dict[axes[j]])+") which is not"
+                        " supported.  "+thinkaboutit_message)
             p2 = argmin(abs(u-(
                         1/du + startt_dict[axes[j]])))
             self._ft_shift(thisaxis,p2,shift_axis = True)
