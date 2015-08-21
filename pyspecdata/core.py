@@ -2943,7 +2943,15 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
     #}}}
     #{{{ display and other properties
     #{{{ set and get prop
+    def unset_prop(self,arg):
+        "remove a 'property'"
+        self.other_info.pop(arg)
+        if len(self.other_info) == 0:
+            del self.other_info
+        return self
     def set_prop(self,*args):
+        r"""set a 'property' of the nddata
+        This is where you can put all unstructured information (e.g. experimental parameters, etc"""
         if len(args) == 2:
             propname,val = args
             self.other_info.update({propname:val})
@@ -3717,6 +3725,7 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
     #{{{ the following are all in the desired format -- the repetition at the end is because each function is in its own file (module) of the same name
     _ft_conj = this_fourier._ft_conj._ft_conj
     ft = this_fourier.ft.ft
+    ft_clear_startpoints = this_fourier.ft_shift.ft_clear_startpoints
     ift = this_fourier.ift.ift
     _ft_shift = this_fourier.ft_shift._ft_shift
     ftshift = this_fourier.ftshift.ftshift

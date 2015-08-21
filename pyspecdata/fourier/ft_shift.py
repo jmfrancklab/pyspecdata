@@ -39,6 +39,25 @@ def _ft_shift(self,thisaxis,p2,shift_axis = None):
         newaxis[targetslice]  = x[sourceslice]
         self.setaxis(axisname,newaxis)
     return self
+def ft_clear_startpoints(self,axis):
+    ("clears memory of where the origins in the time and frequency domain are"
+            " this is useful, e.g. when you want to ift and center about time=0"
+            " by setting shift=True")
+    startf_dict = self.get_prop("FT_start_freq")
+    if startf_dict is not None and axis in startf_dict.keys():
+        startf_dict.pop(axis)
+        if len(startf_dict) == 0:
+            self.unset_prop('FT_start_freq')
+        else:
+            self.set_prop('FT_start_freq',startf_dict)
+    startt_dict = self.get_prop("FT_start_time")
+    if startt_dict is not None and axis in startt_dict.keys():
+        startt_dict.pop(axis)
+        if len(startt_dict) == 0:
+            self.unset_prop('FT_start_time')
+        else:
+            self.set_prop('FT_start_time',startt_dict)
+    return self
 def _find_zero_index(t):
     "identify the index where zero lives"
     assert t[0] <= 0, ("You seem to be trying to FT a sequence whose axis"
