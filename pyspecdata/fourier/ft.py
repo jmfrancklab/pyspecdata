@@ -1,6 +1,6 @@
 from ..general_functions import *
 from pylab import * 
-from .ft_shift import _find_zero_index,thinkaboutit_message
+from .ft_shift import _find_index,thinkaboutit_message
 
 def ft(self,axes,**kwargs):
     ("This performs a fourier transform along the axes identified by the string or list of strings `axes`.\n"
@@ -77,7 +77,7 @@ def ft(self,axes,**kwargs):
             self.data = newdata
         #}}}
         #{{{ the pre-FT shift
-        p2,p2_pre_discrepancy = _find_zero_index(u)
+        p2,p2_pre_discrepancy = _find_index(u)
         self._ft_shift(thisaxis,p2)
         #}}}
         #{{{ calculate the post-FT shift -- calculate it first, in case it's non-integral
@@ -111,16 +111,16 @@ def ft(self,axes,**kwargs):
             p2 = (n+1) // 2 # this is the starting index of what starts out as the second half (// is floordiv) -- copied from scipy -- this essentially rounds up (by default assigning more negative frequencies than positive ones)
             no_shift = False
         #}}}
+        #{{{ if the axes that I want don't line up exactly with the natural axes, I need to add in a shift
+        if p2_post_discrepancy is not None:
+            self *= self.fromaxis(axes[j],lambda f: exp(-1j*2*pi*f*p2_post_discrepancy))
+        #}}}
         self.data = fft(self.data,
                             n = padded_length,
                             axis=thisaxis)
         #{{{ actually run the post-FT shift
         if not no_shift:
             self._ft_shift(thisaxis,p2,shift_axis = True)
-        #}}}
-        #{{{ if the axes that I want don't line up exactly with the natural axes, I need to add in a shift
-        if p2_post_discrepancy is not None:
-            self *= self.fromaxis(axes[j],lambda f: exp(-1j*2*pi*f*p2_post_discrepancy))
         #}}}
         #{{{ finally, I must allow for the possibility that "p2" in the pre-shift was not
         # actually at zero, but at some other value, and I must apply a phase

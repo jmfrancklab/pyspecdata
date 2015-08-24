@@ -1,6 +1,6 @@
 from ..general_functions import *
 from pylab import * 
-from .ft_shift import _find_zero_index,thinkaboutit_message
+from .ft_shift import _find_index,thinkaboutit_message
 
 def ift(self,axes,**kwargs):
     ("This performs a fourier transform along the axes identified by the string or list of strings `axes`.\n"
@@ -73,7 +73,8 @@ def ift(self,axes,**kwargs):
             self.data = newdata
         #}}}
         #{{{ the pre-IFT shift
-        p2,p2_pre_discrepancy = _find_zero_index(u)
+        print "check for p2_pre_discrepancy"
+        p2,p2_pre_discrepancy = _find_index(u)
         self._ft_shift(thisaxis,p2)
         #}}}
         #{{{ calculate the post-IFT shift -- calculate it first, in case it's non-integral
@@ -90,20 +91,23 @@ def ift(self,axes,**kwargs):
         if startt_dict is not None and axes[j] in startt_dict.keys():
             if shift[j]:
                 raise ValueError("you are not allowed to shift an array for which the index for $t=0$ has already been determined!")
-            #{{{ the starting time is <0 and aliased over, and I want to shift it to 0
-            assert startt_dict[axes[j]] <= 0 , ("Trying to reset to a time value greater than"
-                        " zero ("+repr(startt_dict[axes[j]])+") which is not"
-                        " supported.  "+thinkaboutit_message)
-            p2 = argmin(abs(u-(
-                        1/du + startt_dict[axes[j]])))
-            if not isclose(1/du + startt_dict[axes[j]],u[p2],atol = 0):
-                p2_post_discrepancy = u[p2] - (1/du + startt_dict[axes[j]]) # marks where the p2 position really is vs. where we want it to be
+            print "check for p2_post_discrepancy"
+            desired_startpoint = startt_dict[axes[j]]
+            if desired_startpoint < 0:
+                desired_startpoint += 1/du
+            p2,p2_post_discrepancy = _find_index(u,origin = desired_startpoint)
+            print p2,p2_post_discrepancy
             no_shift = False
-            #}}}
         elif shift[j]:
             n = self.data.shape[thisaxis]
             p2 = n - (n+1) // 2 # this is the size of what starts out as the second half // is floordiv -- copied from scipy -- this whole thing essentially rounds down
             no_shift = False
+        #}}}
+        #{{{ if the axes that I want don't line up exactly with the natural axes, I need to add in a shift
+        if p2_post_discrepancy is not None:
+            result = self * self.fromaxis(axes[j],lambda f: exp(1j*2*pi*f*p2_post_discrepancy))
+            self.data = result.data
+            # I move the time axis back in conjunction with the shift below
         #}}}
         self.data = ifft(self.data,
                             n = padded_length,
@@ -111,19 +115,19 @@ def ift(self,axes,**kwargs):
         #{{{ actually run the post-IFT shift
         if not no_shift:
             self._ft_shift(thisaxis,p2,shift_axis = True)
-        #}}}
-        #{{{ if the axes that I want don't line up exactly with the natural axes, I need to add in a shift
         if p2_post_discrepancy is not None:
-            self *= self.fromaxis(axes[j],lambda f: exp(1j*2*pi*f*p2_post_discrepancy))
-        #}}}
-        #{{{ finally, I must allow for the possibility that "p2" in the pre-shift was not
-        # actually at zero, but at some other value, and I must apply a phase
-        # shift to reflect the fact that I need to add back that time
-        if p2_pre_discrepancy is not None:
-            self *= self.fromaxis(axes[j],lambda f: exp(1j*2*pi*f*p2_pre_discrepancy))
+            u[:] += p2_post_discrepancy
         #}}}
         #{{{ adjust the normalization appropriately
         if u is not None:
             self.data *= padded_length * du # here, the algorithm divides by padded_length, so for integration, we need to not do that
+            #{{{ finally, I must allow for the possibility that "p2" in the pre-shift was not
+            # actually at zero, but at some other value, and I must apply a phase
+            # shift to reflect the fact that I need to add back that time
+            if p2_pre_discrepancy is not None:
+                self *= self.fromaxis(axes[j],lambda f: exp(1j*2*pi*f*p2_pre_discrepancy))
+            #}}}
+        else:
+            raise ValueError("how is u None??")
         #}}}
     return self
