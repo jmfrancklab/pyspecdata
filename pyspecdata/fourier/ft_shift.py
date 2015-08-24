@@ -59,23 +59,17 @@ def ft_clear_startpoints(self,axis):
             self.set_prop('FT_start_time',startt_dict)
     return self
 def _find_zero_index(t):
-    "identify the index where zero lives"
+    ("identify the index where zero lives -- if it finds a value exactly equal"
+            " to zero, returns (`p2`,`None`) -- otherwise, returns p2 and a"
+            " time-shift")
     assert t[0] <= 0, ("You seem to be trying to FT a sequence whose axis"
                         " starts at a value greater than zero."+thinkaboutit_message)
     p2 = nonzero(isclose(0.,t,atol = 0))[0]
-    try:
-        assert len(p2) == 1, ("The axis should have exactly one value that is equal to zero -- otherwise we're going to need to add code to (1) incorporate a carrier frequency or (2) add a phase shift")
-    except:
-        print "------------extra info for error dump----------------"
-        print "p2 gives",p2
-        if len(p2) == 0:
-            print "t is",t
-            print "t values that are closest to zero are",
-            temp = argmin(abs(t-0))
-            print t[temp-2:temp+3]
-        else:
-            print "t is",t
-            print "t around the first value is",t[p2[0]-3:p2[0]+3]
-        raise
-    p2 = p2[0]
-    return p2
+    if len(p2) == 1:
+        return p2[0],None
+    else:
+        idx = argmin(abs(t - 0.0))
+        assert count_nonzero(t[idx] == t) == 1, ("there seem to be"
+                " "+repr(count_nonzero(t[idx] == t))+" values equal"
+                " to "+repr(t[idx])+" but there should be only one")
+        return idx,t[idx]

@@ -77,8 +77,36 @@ def ft(self,axes,**kwargs):
             self.data = newdata
         #}}}
         #{{{ the pre-FT shift
-        p2 = _find_zero_index(u)
+        p2,p2_pre_discrepancy = _find_zero_index(u)
         self._ft_shift(thisaxis,p2)
+        #}}}
+        #{{{ calculate the post-FT shift -- calculate it first, in case it's non-integral
+        startf_dict = self.get_prop("FT_start_freq")
+        no_shift = True
+        p2_post_discrepancy = None
+        if startf_dict is not None and axes[j] in startf_dict.keys():
+            if shift[j]:
+                raise ValueError("you are not allowed to shift an array for which the index for $f=0$ has already been determined!")
+            #{{{ the starting frequency is <0 and aliased over, and I want to shift it to 0
+            assert startf_dict[axes[j]] <= 0 , ("Trying to reset to a frequency value greater than"
+                        " zero ("+repr(startf_dict[axes[j]])+") which is not"
+                        " supported.  "+thinkaboutit_message)
+            p2 = argmin(abs(u-(
+                        1/du + startf_dict[axes[j]])))
+            if not isclose(1/du + startf_dict[axes[j]],u[p2],atol = 0):
+                p2_post_discrepancy = u[p2] - (1/du + startf_dict[axes[j]]) # marks where the p2 position really is vs. where we want it to be
+            no_shift = False
+            #}}}
+        elif shift[j]:
+            if automix:
+                raise ValueError("You can't use automix and shift at the same time --> it doesn't make sense")
+            n = self.data.shape[thisaxis]
+            p2 = (n+1) // 2 # this is the starting index of what starts out as the second half (// is floordiv) -- copied from scipy -- this essentially rounds up (by default assigning more negative frequencies than positive ones)
+            no_shift = False
+        #}}}
+        #{{{ if the axes that I want don't line up exactly with the natural axes, I need to add in a shift
+        if p2_post_discrepancy is not None:
+            self *= self.fromaxis(axes[j],lambda f: exp(-1j*2*pi*f*p2_post_discrepancy))
         #}}}
         self.data = fft(self.data,
                             n = padded_length,
@@ -91,25 +119,13 @@ def ft(self,axes,**kwargs):
             self.data *= du # this gives the units in the integral noted in the docstring
             self.axis_coords[thisaxis] = linspace(0,1./du,padded_length)
             u = self.axis_coords[thisaxis]
-        #{{{ the post-FT shift
-        startf_dict = self.get_prop("FT_start_freq")
-        if startf_dict is not None and axes[j] in startf_dict.keys():
-            if shift[j]:
-                raise ValueError("you are not allowed to shift an array for which the index for $f=0$ has already been determined!")
-            #{{{ the starting frequency is <0 and aliased over, and I want to shift it to 0
-            assert startf_dict[axes[j]] <= 0 , ("Trying to reset to a frequency value greater than"
-                        " zero ("+repr(startf_dict[axes[j]])+") which is not"
-                        " supported.  "+thinkaboutit_message)
-            p2 = argmin(abs(u-(
-                        1/du + startf_dict[axes[j]])))
-            self._ft_shift(thisaxis,p2,shift_axis = True)
-            #}}}
-        elif shift[j]:
-            if automix:
-                raise ValueError("You can't use automix and shift at the same time --> it doesn't make sense")
-            n = self.data.shape[thisaxis]
-            p2 = (n+1) // 2 # this is the starting index of what starts out as the second half (// is floordiv) -- copied from scipy -- this essentially rounds up (by default assigning more negative frequencies than positive ones)
-            self._ft_shift(thisaxis,p2,shift_axis = True)
+        #{{{ actually run the post-FT shift
+        if not no_shift: self._ft_shift(thisaxis,p2,shift_axis = True)
+        #}}}
+        #{{{ finally, I must allow for the possibility that "p2" in the pre-shift was not
+        # actually at zero, but at some other value, and I must apply a phase
+        # shift to reflect the fact that I need to add back that time
+        self *= self.fromaxis(axes[j],lambda f: exp(-1j*2*pi*f*p2_pre_discrepancy))
         #}}}
         if automix:
             sw = 1.0/du
