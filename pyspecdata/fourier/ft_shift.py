@@ -1,5 +1,5 @@
 "shift-related helper functions"
-from numpy import zeros,r_,nonzero,isclose,empty_like,argmin
+from numpy import zeros,r_,nonzero,isclose,empty_like,argmin,count_nonzero
 thinkaboutit_message = ("If you think about it, you"
                         " probably don't want to do this.  You either want to fill with"
                         " zeros from zero up to the start or you want to first set the"
@@ -39,37 +39,57 @@ def _ft_shift(self,thisaxis,p2,shift_axis = None):
         newaxis[targetslice]  = x[sourceslice]
         self.setaxis(axisname,newaxis)
     return self
-def ft_clear_startpoints(self,axis):
+def ft_clear_startpoints(self,axis,t=None,f=None):
     ("clears memory of where the origins in the time and frequency domain are"
             " this is useful, e.g. when you want to ift and center about time=0"
-            " by setting shift=True")
-    startf_dict = self.get_prop("FT_start_freq")
-    if startf_dict is not None and axis in startf_dict.keys():
-        startf_dict.pop(axis)
-        if len(startf_dict) == 0:
-            self.unset_prop('FT_start_freq')
-        else:
-            self.set_prop('FT_start_freq',startf_dict)
-    startt_dict = self.get_prop("FT_start_time")
-    if startt_dict is not None and axis in startt_dict.keys():
-        startt_dict.pop(axis)
-        if len(startt_dict) == 0:
-            self.unset_prop('FT_start_time')
-        else:
-            self.set_prop('FT_start_time',startt_dict)
-    return self
-def _find_zero_index(t):
-    ("identify the index where zero lives -- if it finds a value exactly equal"
-            " to zero, returns (`p2`,`None`) -- otherwise, returns p2 and a"
-            " time-shift")
-    assert t[0] <= 0, ("You seem to be trying to FT a sequence whose axis"
-                        " starts at a value greater than zero."+thinkaboutit_message)
-    p2 = nonzero(isclose(0.,t,atol = 0))[0]
-    if len(p2) == 1:
-        return p2[0],None
+            " by setting shift=True you can also manually set the points:"
+            "\n\tkeyword arguments `t` and `f` can be set by (1) manually"
+            " setting the start point (2) using the string 'current' to leave the"
+            " current setting alone or (3) None, which clears the startpoint")
+    if f is 'current':
+        pass
     else:
-        idx = argmin(abs(t - 0.0))
-        assert count_nonzero(t[idx] == t) == 1, ("there seem to be"
-                " "+repr(count_nonzero(t[idx] == t))+" values equal"
-                " to "+repr(t[idx])+" but there should be only one")
-        return idx,t[idx]
+        startf_dict = self.get_prop("FT_start_freq")
+        if f is None: # then unset
+            if startf_dict is not None and axis in startf_dict.keys():
+                startf_dict.pop(axis)
+                if len(startf_dict) == 0:
+                    self.unset_prop('FT_start_freq')
+        elif startf_dict is None:
+            self.set_prop("FT_start_freq",{axis:f})
+        else:
+            startf_dict[axis] = f
+    if t is 'current':
+        pass
+    else:
+        startt_dict = self.get_prop("FT_start_time")
+        if t is None: # then unset
+            if startt_dict is not None and axis in startt_dict.keys():
+                startt_dict.pop(axis)
+                if len(startt_dict) == 0:
+                    self.unset_prop('FT_start_time')
+        elif startt_dict is None:
+            self.set_prop("FT_start_time",{axis:t})
+        else:
+            startt_dict[axis] = t
+    return self
+def _find_index(u,origin = 0.0,tolerance = 1e-5):
+    ("identify the index of `u` (represents either time or frequency) where"
+            " `origin` lives -- if it finds a value exactly equal"
+            " to `origin`, returns `(p2,None)` -- otherwise, `None` is replaced by"
+            " u-shift indicating how far the position"
+            " marked by `p2` is ahead of `origin`")
+    assert origin >= 0, ("The origin must be >=0.  If you want to find a"
+            " negative frequency that's aliased over, you need to add the"
+            " spectral width yourself")
+    p2 = argmin(abs(u-origin))
+    assert count_nonzero(u[p2] == u) == 1, ("there seem to be"
+            " "+repr(count_nonzero(u[p2] == u))+" values equal"
+            " to "+repr(u[p2])+" but there should be only one")
+    du = u[1]-u[0]
+    if abs(u[p2] - origin) > tolerance * max(abs(u[p2]),abs(origin)):
+        p2_discrepancy = u[p2] - origin # marks where the p2 position really is vs. where we want it to be
+    else:
+        p2_discrepancy = None
+    print "for origin",origin,"I am returning p2",p2,"and discrepancy",p2_discrepancy
+    return p2,p2_discrepancy
