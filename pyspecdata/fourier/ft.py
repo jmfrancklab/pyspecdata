@@ -2,7 +2,7 @@ from ..general_functions import *
 from pylab import * 
 from .ft_shift import _find_index,thinkaboutit_message
 
-def ft(self,axes,**kwargs):
+def ft(self,axes,verbose = False,**kwargs):
     ("This performs a fourier transform along the axes identified by the string or list of strings `axes`.\n"
     "   It adjusts normalization and units so that the result conforms to\n"
     r"   $$\tilde{s}(f)=\int_{x_min}^{x_max} s(t) e^{-i 2 \pi f t} dt$$"+'\n'
@@ -135,9 +135,9 @@ def ft(self,axes,**kwargs):
         if automix:
             sw = 1.0/du
             carrier = abs(self).mean_all_but(axes[j]).argmax(axes[j]).data
-            print "I find carrier at",carrier
+            if verbose: print "I find carrier at",carrier
             add_to_axis = (automix - carrier) / sw
-            print "which is",add_to_axis,"times the sw of",sw,"off from the automix value of",automix
+            if verbose: print "which is",add_to_axis,"times the sw of",sw,"off from the automix value of",automix
             x = self.getaxis(axes[j])
             x += round(add_to_axis)*sw
     return self

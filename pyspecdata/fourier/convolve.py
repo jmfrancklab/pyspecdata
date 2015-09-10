@@ -1,3 +1,5 @@
+from pylab import * 
+
 def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*(y**2))))):
     r'''perform a normalized convolution'''
     #{{{ make a version of x that is oriented along the correct dimension

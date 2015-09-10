@@ -4,7 +4,7 @@ thinkaboutit_message = ("If you think about it, you"
                         " probably don't want to do this.  You either want to fill with"
                         " zeros from zero up to the start or you want to first set the"
                         " start point to zero.")
-def _ft_shift(self,thisaxis,p2,shift_axis = None):
+def _ft_shift(self,thisaxis,p2,shift_axis = None,verbose = False):
     ("perform a generalized fftshift along the axis indicated by the integer `thisaxis`, where `p2` gives the index that will become the first index"
     "\n this is derived from the numpy fftshift routine, but defines slices instead of index numbers"
     "\n `shift_axis` is only used after the (i)fft.  It assumes that the axis labels start at zero, and it aliases them over in the same way the data was aliased")
@@ -39,7 +39,7 @@ def _ft_shift(self,thisaxis,p2,shift_axis = None):
         newaxis[targetslice]  = x[sourceslice]
         self.setaxis(axisname,newaxis)
     return self
-def ft_clear_startpoints(self,axis,t=None,f=None):
+def ft_clear_startpoints(self,axis,t=None,f=None, verbose=False):
     ("clears memory of where the origins in the time and frequency domain are"
             " this is useful, e.g. when you want to ift and center about time=0"
             " by setting shift=True you can also manually set the points:"
@@ -73,7 +73,7 @@ def ft_clear_startpoints(self,axis,t=None,f=None):
         else:
             startt_dict[axis] = t
     return self
-def _find_index(u,origin = 0.0,tolerance = 1e-5):
+def _find_index(u,origin = 0.0,tolerance = 1e-5,verbose = False):
     ("identify the index of `u` (represents either time or frequency) where"
             " `origin` lives -- if it finds a value exactly equal"
             " to `origin`, returns `(p2,None)` -- otherwise, `None` is replaced by"
@@ -91,5 +91,5 @@ def _find_index(u,origin = 0.0,tolerance = 1e-5):
         p2_discrepancy = u[p2] - origin # marks where the p2 position really is vs. where we want it to be
     else:
         p2_discrepancy = None
-    print "for origin",origin,"I am returning p2",p2,"and discrepancy",p2_discrepancy
+    if verbose: print "for origin",origin,"I am returning p2",p2,"and discrepancy",p2_discrepancy
     return p2,p2_discrepancy

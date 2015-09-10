@@ -2,7 +2,7 @@ from ..general_functions import *
 from pylab import * 
 from .ft_shift import _find_index,thinkaboutit_message
 
-def ift(self,axes,tolerance = 1e-5,**kwargs):
+def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
     ("This performs a fourier transform along the axes identified by the string"
     " or list of strings `axes`.\n"
     "It adjusts normalization and units so that the result conforms to\n\t"
@@ -22,8 +22,8 @@ def ift(self,axes,tolerance = 1e-5,**kwargs):
     " of the dimension is determined by rounding the dimension size up to the"
     " nearest integral power of 2."
     )
-    print "check the startt_dict",self.get_prop('FT_start_time')
-    print "check 1",self.data.dtype
+    if verbose: print "check the startt_dict",self.get_prop('FT_start_time')
+    if verbose: print "check 1",self.data.dtype
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
     if (type(axes) is str):
@@ -46,7 +46,7 @@ def ift(self,axes,tolerance = 1e-5,**kwargs):
         shift = [bool(shift)]*len(axes)
     #}}}
     for j in range(0,len(axes)):
-        print "check the startt_dict",self.get_prop('FT_start_time')
+        if verbose: print "check the startt_dict",self.get_prop('FT_start_time')
         do_post_shift = False
         p2_post_discrepancy = None
         p2_pre_discrepancy = None
@@ -88,20 +88,20 @@ def ift(self,axes,tolerance = 1e-5,**kwargs):
             v = linspace(0,1./du,padded_length) # v is the name of the *new*
             #   axis, which is only assigned right before the shift, below
         startt_dict = self.get_prop("FT_start_time")
-        print "pulled up the startt_dict",startt_dict,repr(startt_dict)
+        if verbose: print "pulled up the startt_dict",startt_dict,repr(startt_dict)
         if startt_dict is not None and axes[j] in startt_dict.keys():# FT_start_time is set
             if shift[j]:
                 raise ValueError("you are not allowed to shift an array for"
                         " which the index for $t=0$ has already been"
                         " determined!")
-            print "check for p2_post_discrepancy"
+            if verbose: print "check for p2_post_discrepancy"
             desired_startpoint = startt_dict[axes[j]]
-            print "desired startpoint",desired_startpoint
+            if verbose: print "desired startpoint",desired_startpoint
             if desired_startpoint < 0:
                 desired_startpoint += 1/du
-            print "aliased startpoint",desired_startpoint
+            if verbose: print "aliased startpoint",desired_startpoint
             p2,p2_post_discrepancy = _find_index(v,origin = desired_startpoint)
-            print p2,p2_post_discrepancy
+            if verbose: print p2,p2_post_discrepancy
             do_post_shift = True
         elif shift[j]: # a default fftshift
             n = self.data.shape[thisaxis]
@@ -127,7 +127,7 @@ def ift(self,axes,tolerance = 1e-5,**kwargs):
             self.data = newdata
         #}}}
         #{{{ pre-IFT shift so that we start at u=0
-        print "check for p2_pre_discrepancy"
+        if verbose: print "check for p2_pre_discrepancy"
         p2,p2_pre_discrepancy = _find_index(u)
         self._ft_shift(thisaxis,p2)
         #}}}
@@ -139,7 +139,7 @@ def ift(self,axes,tolerance = 1e-5,**kwargs):
         if do_post_shift:
             self._ft_shift(thisaxis,p2,shift_axis = True)
         if p2_post_discrepancy is not None:
-            print "adjusting axis by",p2_post_discrepancy,"where du is",u[1]-u[0]
+            if verbose: print "adjusting axis by",p2_post_discrepancy,"where du is",u[1]-u[0]
             self.axis_coords[thisaxis][:] += p2_post_discrepancy # reflect the
             #   p2_post_discrepancy that we have already incorporated via a
             #   phase-shift above
