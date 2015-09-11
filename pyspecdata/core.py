@@ -32,6 +32,7 @@ from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
 from .datadir import getDATADIR
 from . import fourier as this_fourier
+from . import plot_funcs as this_plotting
 from .general_functions import *
 #rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
 rc('image',aspect='auto',interpolation='nearest')
@@ -1701,23 +1702,7 @@ class figlist(object):
         else:
             gridandtick(ax,gridcolor = r_[0,0,0])
         return
-    def image(self,*args,**kwargs):
-        firstarg = self.check_units(args[0],-1,0) # check units, and if need be convert to human units, where x is the last dimension and y is the first
-        interpolation = None
-        if 'interpolation' in kwargs:
-            interpolation = kwargs.pop('interpolation')
-        if self.black and 'black' not in kwargs.keys():
-            kwargs.update({'black':self.black})
-        retval = image(*tuple((firstarg,)+args[1:]),**kwargs)#just a placeholder for now, will later keep units + such
-        if 'ax' not in kwargs.keys():
-            ax = gca()
-        else:
-            ax = kwargs['ax']
-        if ax.get_title() is None or len(ax.get_title()) == 0:
-            title(self.current)
-        if interpolation is not None:
-            retval.set_interpolation(interpolation)
-        return retval
+    image = this_plotting.image.fl_image
     def text(self,mytext):
         self.setprops(print_string = mytext)
     def setprops(self,**kwargs):
@@ -1746,15 +1731,15 @@ class figlist(object):
     def show(self,*args,**kwargs):
         self.basename = None # must be turned off, so it can cycle through lists, etc, on its own
         verbose = False
-        if 'verbose' in kwargs.keys():
+        if verbose in kwargs.keys():
             verbose = kwargs.pop('verbose')
         if len(kwargs) > 0:
             raise ValueError("didn't understand kwargs "+repr(kwargs))
-        print '\n'
-        print "before show_prep, figlist is",self.figurelist
-        print '\n'
-        print "before show_prep, autolegend list is",self.autolegend_list
-        print '\n'
+        if verbose: print '\n'
+        if verbose: print "before show_prep, figlist is",self.figurelist
+        if verbose: print '\n'
+        if verbose: print "before show_prep, autolegend list is",self.autolegend_list
+        if verbose: print '\n'
         self.show_prep()
         #{{{ just copy from fornnotebook to get the print string functionality
         kwargs = {}
@@ -2565,12 +2550,25 @@ class nddata (object):
             return
         else:
             return ax
-    def contour(self,levels = True):
+    def contour(self,labels = True,**kwargs):
+        """Contour plot -- kwargs are passed to the matplotlib
+        `contour` function.
+
+        See docstring of `figlist_var.image()` for an example
+
+        Attributes
+        ----------
+        labels : boolean
+            Whether or not the levels should be labeled.
+            Defaults to True
+        """
         x_axis,y_axis = self.dimlabels
         x = self.getaxis(x_axis)[:,None]
         y = self.getaxis(y_axis)[None,:]
-        cs = contour(x*ones_like(y),ones_like(x)*y,self.data,levels = r_[self.data.min():self.data.max():30j])
-        if levels:
+        if 'levels' not in kwargs.keys():
+            levels = r_[self.data.min():self.data.max():30j]
+        cs = contour(x*ones_like(y),ones_like(x)*y,self.data,**kwargs)
+        if labels:
             clabel(cs,inline = 1,fontsize = 10)
         xlabel(self.unitify_axis(x_axis))
         ylabel(self.unitify_axis(y_axis))
@@ -5004,160 +5002,12 @@ def spectrogram(waveform,f_start,f_stop,npoints_fdom=40,tdom_div=2):
     #image(specgram,y=f_axis/1e6,x=t_axis*1e6) # now do an imagehsv (see if we can make imagerybw) plot of the resulting spectrogram
     imshow(abs(specgram),extent=(t_axis[0]*1e6,t_axis[-1]*1e6,f_axis[-1]/1e6,f_axis[0]/1e6)) # now do an imagehsv (see if we can make imagerybw) plot of the resulting spectrogram
     return gca()
-def image(A,x=[],y=[],**kwargs):
-    #{{{ pull out kwargs for imagehsv
-    imagehsvkwargs = {}
-    spacing = 1
-    for k,v in kwargs.items():
-        if k in ['black','logscale']:
-            imagehsvkwargs[k] = kwargs.pop(k)
-        if k in ['spacing']:
-            spacing = kwargs.pop(k)
-    #}}}
-    setlabels = False
-    if isinstance(A,nddata):
-        setlabels = True
-        templabels = list(A.dimlabels)
-        x_label = templabels[-1]
-        try:
-            x = list(A.getaxis(x_label))
-        except:
-            x = r_[0,ndshape(A)[x_label]]
-        x_label = A.unitify_axis(x_label)
-        templabels.pop(-1)
-        y_label = ''
-        if len(templabels) == 1:
-            y_label = templabels[0]
-            try:
-                y = list(A.getaxis(y_label))
-            except:
-                y = r_[0:A.data.shape[A.axn(y_label)]]
-            y_label = A.unitify_axis(y_label)
-        else:
-            while len(templabels)>0:
-                y_label += templabels.pop(0)
-                if len(templabels)>0:
-                    y_label += '$\\otimes$'
-        A = A.data
-    if type(x) is list:
-        x = array(x)
-    if type(y) is list:
-        y = array(y)
-    if len(x)==0:
-        x = [1,A.shape[1]]
-    else:
-        x = x.flatten()
-    if len(y)==0:
-        y = [1,A.shape[0]]
-    else:
-        y = y.flatten()
-    dx = x[1]-x[0]
-    dy = y[1]-y[0]
-    myext = (x[0]-dx/2.,x[-1]+dx/2.,y[-1]+dy/2.,y[0]-dy/2.)
-    linecounter = 0
-    origAndim = A.ndim
-    if A.ndim > 2:
-        if 'ax' not in kwargs.keys():
-            ax = gca()
-        else:
-            ax = kwargs['ax']
-        setp(ax.get_yticklabels(),visible = False)
-        ax.yaxis.set_ticks_position("none")
-    while A.ndim>2:# to substitude for imagehsvm, etc., so that we just need a ersion of ft
-        # order according to how it's ordered in the memory
-        # the innermost two will form the image -- first add a line to the end of the images we're going to join up
-        tempsize = array(A.shape) # make a tuple the right shape
-        if linecounter == 0 and spacing < 1.0:
-            spacing = round(prod(tempsize[0:-1])) # find the length of the thing not counting the columns
-        tempsize[-2] = 2*linecounter + spacing # all dims are the same except the image row, to which I add an increasing number of rows
-        #print "iterate (A.ndim=%d) -- now linecounter is "%A.ndim,linecounter
-        linecounter += tempsize[-2] # keep track of the extra lines at the end
-        A = concatenate((A,nan*zeros(tempsize)),axis=(A.ndim-2)) # concatenate along the rows
-        tempsize = r_[A.shape[0:-3],A.shape[-2:]]
-        tempsize[-2] *= A.shape[-3]
-        A = A.reshape(tempsize) # now join them up
-    A = A[:A.shape[0]-linecounter,:] # really I should an extra counter besides linecounter now that I am using "spacing", but leave alone for now, to be sure I don't cute off data
-    #line_mask = isnan(A)
-    #A[line_mask] = A[logical_not(line_mask)].max()
-    #A[line_mask] = 0
-    if 'ax' in kwargs:
-        sca(kwargs.pop('ax'))
-    if iscomplex(A).any():
-        A = imagehsv(A,**imagehsvkwargs)
-        retval = imshow(A,extent=myext,**kwargs)
-    else:
-        retval = imshow(A,extent=myext,**kwargs)
-        colorbar()
-    if setlabels:
-        xlabel(x_label)
-        #print y_label
-        ylabel(y_label)
-    return retval
+image = this_plotting.image.image
 def colormap(points,colors,n=256):
     r = interp(linspace(0,1,n),points,colors[:,0].flatten())
     g = interp(linspace(0,1,n),points,colors[:,1].flatten())
     b = interp(linspace(0,1,n),points,colors[:,2].flatten())
     return reshape(r_[r,g,b],(3,n)).T
-def imagehsv(A,logscale = False,black = False):
-    # compare to http://www.rapidtables.com/convert/color/hsv-to-rgb.htm
-    n = 256
-    mask = isnan(A)
-    A[mask] = 0
-    mask = mask.reshape(-1,1)
-    intensity = abs(A).reshape(-1,1)
-    intensity /= abs(A).max()
-    if logscale:
-        intensity = log10(intensity)
-    #theta = (n-1.)*mod(angle(A)/pi/2.0,1)# angle in 255*cycles
-    if black:
-        if black is True:
-            V = intensity
-        else:
-            V = intensity*black + (1.0-black)
-        S = 1.0 # always
-    else:
-        S = intensity
-        V = 1.0 # always
-    C = V*S
-    H = (angle(-1*A).reshape(-1,1)+pi)/2./pi*6. # divide into 60 degree chunks -- the -1 is to rotate so red is at origin
-    X = C * (1-abs(mod(H,2)-1))
-    m = V-C
-    colors = ones(list(A.shape) + [3])
-    origshape = colors.shape
-    colors = colors.reshape(-1,3)
-    rightarray = c_[C, X, zeros_like(X)]
-    # http://en.wikipedia.org/wiki/HSL_and_HSV#From_HSV,
-    # except that the order was messed up
-    thismask = where(H<1)[0]
-    # C X 0
-    colors[ix_(thismask,[0,1,2])] = rightarray[ix_(thismask,[0,1,2])]
-    thismask = where(logical_and(H>=1,
-        H<2))[0]
-    # X C 0
-    colors[ix_(thismask,[1,0,2])] = rightarray[ix_(thismask,[0,1,2])]
-    thismask = where(logical_and(H>=2,
-        H<3))[0]
-    # X 0 C
-    colors[ix_(thismask,[1,2,0])] = rightarray[ix_(thismask,[0,1,2])]
-    thismask = where(logical_and(H>=3,
-        H<4))[0]
-    # 0 X C
-    colors[ix_(thismask,[2,1,0])] = rightarray[thismask,:]
-    thismask = where(logical_and(H>=4,
-        H<5))[0]
-    # 0 C X
-    colors[ix_(thismask,[2,0,1])] = rightarray[thismask,:]
-    thismask = where(H>5)[0]
-    # C 0 X
-    colors[ix_(thismask,[0,2,1])] = rightarray[thismask,:]
-    colors += m
-    colors *= (n-1)
-    if black:
-        colors[mask * r_[True,True,True]] = black
-    else:
-        colors[mask * r_[True,True,True]] = 1.0
-    colors = colors.reshape(origshape)
-    return uint8(colors.round())
 def myfilter(x,center = 250e3,sigma = 100e3):
     x = (x-center)**2
     x /= sigma**2
