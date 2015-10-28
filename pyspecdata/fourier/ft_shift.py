@@ -78,15 +78,23 @@ def _find_index(u,origin = 0.0,tolerance = 1e-5,verbose = False):
             " `origin` lives -- if it finds a value exactly equal"
             " to `origin`, returns `(p2,None)` -- otherwise, `None` is replaced by"
             " u-shift indicating how far the position"
-            " marked by `p2` is ahead of `origin`")
-    assert origin >= 0, ("The origin must be >=0.  If you want to find a"
-            " negative frequency that's aliased over, you need to add the"
-            " spectral width yourself")
+            " marked by `p2` is ahead of `origin`"
+            "\n\tIf `origin` is outside the range of `u`, it assumes that you want"
+            " to find the appropriate index in one of the higher or lower-frequency"
+            " replicates (*i.e.*, identical to within $n\\timesSW$, with $n$ integer")
+    assert u[-1] > u[0], ("Your axis is not ascending -- I'm confused!")
+    N = len(u)
+    du = u[1] - u[0]
+    SW = du*N # should be u[-1]+du
+    alias_number = 0
+    if not u[0] < origin < u[-1]:
+        alias_number = (origin - u[0]) // SW # subtracting this many SW's from origin
+        #                                     will land me back inside the range of u
+        origin -= alias_number * SW
     p2 = argmin(abs(u-origin))
     assert count_nonzero(u[p2] == u) == 1, ("there seem to be"
             " "+repr(count_nonzero(u[p2] == u))+" values equal"
             " to "+repr(u[p2])+" but there should be only one")
-    du = u[1]-u[0]
     if abs(u[p2] - origin) > tolerance * max(abs(u[p2]),abs(origin)):
         p2_discrepancy = u[p2] - origin # marks where the p2 position really is vs. where we want it to be
     else:

@@ -43,7 +43,7 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         ('pad',False)],
         kwargs)
     if not (type(shift) is list):
-        shift = [bool(shift)]*len(axes)
+        shift = [shift]*len(axes)
     #}}}
     for j in range(0,len(axes)):
         if verbose: print "check the startt_dict",self.get_prop('FT_start_time')
@@ -85,8 +85,9 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             #   allclose/isclose, since they are more recent numpy additions
             assert du > 0, thismsg
             #}}}
-            v = linspace(0,1./du,padded_length) # v is the name of the *new*
-            #   axis, which is only assigned right before the shift, below
+            dv = double(1) / du / double(padded_length) # so padded length gives the SW
+            v = r_[0:padded_length] * dv # v is the name of the *new* axis.  Note
+            #   that we stop one index before the SW, which is what we want
         startt_dict = self.get_prop("FT_start_time")
         if verbose: print "pulled up the startt_dict",startt_dict,repr(startt_dict)
         if startt_dict is not None and axes[j] in startt_dict.keys():# FT_start_time is set
@@ -97,15 +98,15 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             if verbose: print "check for p2_post_discrepancy"
             desired_startpoint = startt_dict[axes[j]]
             if verbose: print "desired startpoint",desired_startpoint
-            if desired_startpoint < 0:
-                desired_startpoint += 1/du
+            if desired_startpoint < 0: # if it's negative, just grab the replicate starting 1 SW away
+                desired_startpoint += 1/du # + SW
             if verbose: print "aliased startpoint",desired_startpoint
-            p2,p2_post_discrepancy = _find_index(v,origin = desired_startpoint)
-            if verbose: print p2,p2_post_discrepancy
+            p2_post,p2_post_discrepancy = _find_index(v,origin = desired_startpoint)
+            if verbose: print "p2_post,p2_post_discrepancy,v at p2_post, and v at p2_post-1:", p2_post, p2_post_discrepancy, v[p2_post], v[p2_post - 1]
             do_post_shift = True
         elif shift[j]: # a default fftshift
             n = self.data.shape[thisaxis]
-            p2 = n - (n+1) // 2 # this is the size of what starts out as the second half // is floordiv -- copied from scipy -- this whole thing essentially rounds down
+            p2_post = n - (n+1) // 2 # this is the size of what starts out as the second half // is floordiv -- copied from scipy -- this whole thing essentially rounds down
             do_post_shift = True
         #}}}
         #{{{ I might need to perform a phase-shift now...
@@ -128,16 +129,15 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         #}}}
         #{{{ pre-IFT shift so that we start at u=0
         if verbose: print "check for p2_pre_discrepancy"
-        p2,p2_pre_discrepancy = _find_index(u)
-        self._ft_shift(thisaxis,p2)
+        p2_pre,p2_pre_discrepancy = _find_index(u)
+        self._ft_shift(thisaxis,p2_pre)
         #}}}
         self.data = ifft(self.data,
-                            n = padded_length,
                             axis=thisaxis)
         self.axis_coords[thisaxis] = v
         #{{{ actually run the post-IFT shift
         if do_post_shift:
-            self._ft_shift(thisaxis,p2,shift_axis = True)
+            self._ft_shift(thisaxis,p2_post,shift_axis = True)
         if p2_post_discrepancy is not None:
             if verbose: print "adjusting axis by",p2_post_discrepancy,"where du is",u[1]-u[0]
             self.axis_coords[thisaxis][:] += p2_post_discrepancy # reflect the
@@ -148,7 +148,7 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         self.data *= padded_length * du # here, the algorithm divides by
         #       padded_length, so for integration, we need to not do that
         #}}}
-        #{{{ finally, if "p2" for the pre-shift didn't correspond exactly to
+        #{{{ finally, if "p2_pre" for the pre-shift didn't correspond exactly to
         #       zero, then the pre-ift data was shifted, and I must reflect
         #       that by performing a post-ift phase shift
         if p2_pre_discrepancy is not None:
