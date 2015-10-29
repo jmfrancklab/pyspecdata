@@ -47,7 +47,6 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         shift = [bool(shift)]*len(axes)
     #}}}
     for j in range(0,len(axes)):
-        if verbose: print "check the startf_dict",self.get_prop('FT_start_freq')
         do_post_shift = False
         p2_post_discrepancy = None
         p2_pre_discrepancy = None
@@ -65,14 +64,10 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             padded_length = pad
         u = self.getaxis(axes[j]) # here, u is time
         #}}}
-        #{{{ before anything else, store the start time
-        startt_dict = self.get_prop("FT_start_time")
-        if startt_dict is None:
-            self.set_prop("FT_start_time",{axes[j]:u[0]})
-        else:
-            startt_dict.update({axes[j]:u[0]})
-        #}}}
-        #{{{ calculate the post-FT shift -- calculate it first, in case it's non-integral
+        self.set_ft_prop(axes[j],['start','time'],u[0]) # before anything else, store the start time
+        #{{{ calculate new axis and post-IFT shift..
+        #       Calculate it first, in case it's non-integral.  Also note that
+        #       I calculate the post-discrepancy here
         if u is None:
             raise ValueError("seems to be no axis for"+repr(axes[j])+"set an axis before you try to FT")
         else:
@@ -87,20 +82,15 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             dv = double(1) / du / double(padded_length) # so padded length gives the SW
             v = r_[0:padded_length] * dv # v is the name of the *new* axis.  Note
             #   that we stop one index before the SW, which is what we want
-        startf_dict = self.get_prop("FT_start_freq")
-        if verbose: print "pulled up the startf_dict",startf_dict,repr(startf_dict)
-        if startf_dict is not None and axes[j] in startf_dict.keys():
+        desired_startpoint = self.get_ft_prop(axes[j],['start','freq'])
+        if desired_startpoint is not None:# FT_start_time is set
             if shift[j]:
                 raise ValueError("you are not allowed to shift an array for"
                         " which the index for $f=0$ has already been"
                         " determined!")
             if verbose: print "check for p2_post_discrepancy"
-            desired_startpoint = startt_dict[axes[j]]
             if verbose: print "desired startpoint",desired_startpoint
-            if desired_startpoint < 0: # if it's negative, just grab the replicate starting 1 SW away
-                desired_startpoint += 1/du # + SW
-            if verbose: print "aliased startpoint",desired_startpoint
-            p2_post,p2_post_discrepancy = _find_index(v,origin = desired_startpoint)
+            p2_post,p2_post_discrepancy,alias_shift_post = _find_index(v,origin = desired_startpoint)
             if verbose: print "p2_post,p2_post_discrepancy,v at p2_post, and v at p2_post-1:", p2_post, p2_post_discrepancy, v[p2_post], v[p2_post - 1]
             do_post_shift = True
         elif shift[j]: # a default fftshift
@@ -108,6 +98,7 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
                 raise ValueError("You can't use automix and shift at the same time --> it doesn't make sense")
             n = self.data.shape[thisaxis]
             p2_post = (n+1) // 2 # this is the starting index of what starts out as the second half (// is floordiv) -- copied from scipy -- this essentially rounds up (by default assigning more negative frequencies than positive ones)
+            alias_shift_post = 0
             do_post_shift = True
         #}}}
         #{{{ I might need to perform a phase-shift now...
@@ -118,7 +109,7 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
                     lambda q: exp(1j*2*pi*q*p2_post_discrepancy))
             self.data *= phaseshift.data
         #}}}
-        #{{{ need to do the zero-filling manually, so I can properly pre-shift the data
+        #{{{ do zero-filling manually and first, so I can properly pre-shift the data
         if not pad is False:
             newdata = list(self.data.shape)
             newdata[thisaxis] = padded_length
@@ -128,8 +119,8 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             newdata[targetslice] = self.data
             self.data = newdata
         #}}}
-        #{{{ the pre-FT shift
-        p2_pre,p2_pre_discrepancy = _find_index(u)
+        #{{{ pre-FT shift so that we start at u=0
+        p2_pre,p2_pre_discrepancy,alias_shift_pre = _find_index(u)
         self._ft_shift(thisaxis,p2_pre)
         #}}}
         self.data = fft(self.data,
@@ -138,11 +129,13 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         #{{{ actually run the post-FT shift
         if do_post_shift:
             self._ft_shift(thisaxis,p2_post,shift_axis = True)
+            if alias_shift_post != 0:
+                self.axis_coords[thisaxis] += alias_shift_post
         #}}}
-        #{{{ finally, I must allow for the possibility that "p2_post" in the pre-shift was not
-        #    actually at zero, but at some other value, and I must apply
-        #    a phase shift to reflect the fact that I need to add back
-        #    that time
+        #{{{ finally, I must allow for the possibility that "p2_post" in the
+        #    pre-shift was not actually at zero, but at some other value, and I
+        #    must apply a phase shift to reflect the fact that I need to add
+        #    back that time
         if p2_post_discrepancy is not None:
             if verbose: print "adjusting axis by",p2_post_discrepancy,"where du is",u[1]-u[0]
             self.axis_coords[thisaxis][:] += p2_post_discrepancy # reflect the

@@ -4,6 +4,37 @@ thinkaboutit_message = ("If you think about it, you"
                         " probably don't want to do this.  You either want to fill with"
                         " zeros from zero up to the start or you want to first set the"
                         " start point to zero.")
+def get_ft_prop(self,axis,propname):
+    ("Gets the FT property given by `propname`.  For both setting"
+            " and getting, `None` is equivalent to an unset value")
+    if type(propname) is str:
+        propname = [propname]
+    key_name = '_'.join(['FT'] + propname)
+    this_dict = self.get_prop(key_name)
+    if this_dict is None:
+        return None
+    elif axis in this_dict.keys():
+        return this_dict[axis]
+    else:
+        return None
+def set_ft_prop(self,axis,propname,value):
+    ("Sets the FT property given by `propname`.  For both setting"
+            " and getting, `None` is equivalent to an unset value")
+    if type(propname) is str:
+        propname = [propname]
+    key_name = '_'.join(['FT'] + propname)
+    this_dict = self.get_prop(key_name)
+    if value is None:# unset
+        if this_dict is not None and axis in this_dict.keys():
+            this_dict.pop(axis)
+            if len(this_dict) == 0:
+                self.unset_prop(key_name)
+    else:
+        if this_dict is None:
+            self.set_prop(key_name,{axis:value})
+        else:
+            this_dict[axis] = value
+    return
 def _ft_shift(self,thisaxis,p2,shift_axis = None,verbose = False):
     ("perform a generalized fftshift along the axis indicated by the integer `thisaxis`, where `p2` gives the index that will become the first index"
     "\n this is derived from the numpy fftshift routine, but defines slices instead of index numbers"
@@ -49,29 +80,11 @@ def ft_clear_startpoints(self,axis,t=None,f=None, verbose=False):
     if f is 'current':
         pass
     else:
-        startf_dict = self.get_prop("FT_start_freq")
-        if f is None: # then unset
-            if startf_dict is not None and axis in startf_dict.keys():
-                startf_dict.pop(axis)
-                if len(startf_dict) == 0:
-                    self.unset_prop('FT_start_freq')
-        elif startf_dict is None:
-            self.set_prop("FT_start_freq",{axis:f})
-        else:
-            startf_dict[axis] = f
+        self.set_ft_prop(axis,['start_freq'],f)
     if t is 'current':
         pass
     else:
-        startt_dict = self.get_prop("FT_start_time")
-        if t is None: # then unset
-            if startt_dict is not None and axis in startt_dict.keys():
-                startt_dict.pop(axis)
-                if len(startt_dict) == 0:
-                    self.unset_prop('FT_start_time')
-        elif startt_dict is None:
-            self.set_prop("FT_start_time",{axis:t})
-        else:
-            startt_dict[axis] = t
+        self.set_ft_prop(axis,['start_time'],t)
     return self
 def _find_index(u,origin = 0.0,tolerance = 1e-5,verbose = False):
     ("identify the index of `u` (represents either time or frequency) where"
@@ -90,7 +103,11 @@ def _find_index(u,origin = 0.0,tolerance = 1e-5,verbose = False):
     if not u[0] < origin < u[-1]:
         alias_number = (origin - u[0]) // SW # subtracting this many SW's from origin
         #                                     will land me back inside the range of u
+        print "range of axis:",u[0],u[-1]
+        print "alias number is",alias_number
+        print "set origin from",origin,
         origin -= alias_number * SW
+        print "to",origin
     p2 = argmin(abs(u-origin))
     assert count_nonzero(u[p2] == u) == 1, ("there seem to be"
             " "+repr(count_nonzero(u[p2] == u))+" values equal"
@@ -100,4 +117,5 @@ def _find_index(u,origin = 0.0,tolerance = 1e-5,verbose = False):
     else:
         p2_discrepancy = None
     if verbose: print "for origin",origin,"I am returning p2",p2,"and discrepancy",p2_discrepancy
-    return p2,p2_discrepancy
+    alias_number += 1 # because the way that _ft_shift works essentially entails one aliasing
+    return p2,p2_discrepancy,alias_number*SW

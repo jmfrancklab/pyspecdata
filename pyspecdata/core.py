@@ -3723,6 +3723,8 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
     #{{{ the following are all in the desired format -- the repetition at the end is because each function is in its own file (module) of the same name
     _ft_conj = this_fourier._ft_conj._ft_conj
     ft = this_fourier.ft.ft
+    set_ft_prop = this_fourier.ft_shift.set_ft_prop
+    get_ft_prop = this_fourier.ft_shift.get_ft_prop
     ft_clear_startpoints = this_fourier.ft_shift.ft_clear_startpoints
     ift = this_fourier.ift.ift
     _ft_shift = this_fourier.ft_shift._ft_shift

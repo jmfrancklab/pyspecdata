@@ -22,7 +22,6 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
     " of the dimension is determined by rounding the dimension size up to the"
     " nearest integral power of 2."
     )
-    if verbose: print "check the startt_dict",self.get_prop('FT_start_time')
     if verbose: print "check 1",self.data.dtype
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
@@ -46,7 +45,6 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         shift = [shift]*len(axes)
     #}}}
     for j in range(0,len(axes)):
-        if verbose: print "check the startt_dict",self.get_prop('FT_start_time')
         do_post_shift = False
         p2_post_discrepancy = None
         p2_pre_discrepancy = None
@@ -64,13 +62,7 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             padded_length = pad
         u = self.getaxis(axes[j]) # here, u is frequency
         #}}}
-        #{{{ before anything else, store the start frequency
-        startf_dict = self.get_prop("FT_start_freq")
-        if startf_dict is None:
-            self.set_prop("FT_start_freq",{axes[j]:u[0]})
-        else:
-            startf_dict.update({axes[j]:u[0]})
-        #}}}
+        self.set_ft_prop(axes[j],['start','freq'],u[0]) # before anything else, store the start frequency
         #{{{ calculate new axis and post-IFT shift..
         #       Calculate it first, in case it's non-integral.  Also note that
         #       I calculate the post-discrepancy here
@@ -88,25 +80,21 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             dv = double(1) / du / double(padded_length) # so padded length gives the SW
             v = r_[0:padded_length] * dv # v is the name of the *new* axis.  Note
             #   that we stop one index before the SW, which is what we want
-        startt_dict = self.get_prop("FT_start_time")
-        if verbose: print "pulled up the startt_dict",startt_dict,repr(startt_dict)
-        if startt_dict is not None and axes[j] in startt_dict.keys():# FT_start_time is set
+        desired_startpoint = self.get_ft_prop(axes[j],['start','time'])
+        if desired_startpoint is not None:# FT_start_time is set
             if shift[j]:
                 raise ValueError("you are not allowed to shift an array for"
                         " which the index for $t=0$ has already been"
                         " determined!")
             if verbose: print "check for p2_post_discrepancy"
-            desired_startpoint = startt_dict[axes[j]]
             if verbose: print "desired startpoint",desired_startpoint
-            if desired_startpoint < 0: # if it's negative, just grab the replicate starting 1 SW away
-                desired_startpoint += 1/du # + SW
-            if verbose: print "aliased startpoint",desired_startpoint
-            p2_post,p2_post_discrepancy = _find_index(v,origin = desired_startpoint)
+            p2_post,p2_post_discrepancy,alias_shift_post = _find_index(v,origin = desired_startpoint)
             if verbose: print "p2_post,p2_post_discrepancy,v at p2_post, and v at p2_post-1:", p2_post, p2_post_discrepancy, v[p2_post], v[p2_post - 1]
             do_post_shift = True
         elif shift[j]: # a default fftshift
             n = self.data.shape[thisaxis]
             p2_post = n - (n+1) // 2 # this is the size of what starts out as the second half // is floordiv -- copied from scipy -- this whole thing essentially rounds down
+            alias_shift_post = 0
             do_post_shift = True
         #}}}
         #{{{ I might need to perform a phase-shift now...
@@ -128,8 +116,7 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             self.data = newdata
         #}}}
         #{{{ pre-IFT shift so that we start at u=0
-        if verbose: print "check for p2_pre_discrepancy"
-        p2_pre,p2_pre_discrepancy = _find_index(u)
+        p2_pre,p2_pre_discrepancy,alias_shift_pre = _find_index(u)
         self._ft_shift(thisaxis,p2_pre)
         #}}}
         self.data = ifft(self.data,
@@ -138,6 +125,13 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         #{{{ actually run the post-IFT shift
         if do_post_shift:
             self._ft_shift(thisaxis,p2_post,shift_axis = True)
+            if alias_shift_post != 0:
+                self.axis_coords[thisaxis] += alias_shift_post
+        #}}}
+        #{{{ finally, I must allow for the possibility that "p2_post" in the
+        #    pre-shift was not actually at zero, but at some other value, and I
+        #    must apply a phase shift to reflect the fact that I need to add
+        #    back that frequency
         if p2_post_discrepancy is not None:
             if verbose: print "adjusting axis by",p2_post_discrepancy,"where du is",u[1]-u[0]
             self.axis_coords[thisaxis][:] += p2_post_discrepancy # reflect the
