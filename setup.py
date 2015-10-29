@@ -37,6 +37,10 @@ skip_prop = False
 if os.name == 'nt':
     if find_executable('make') is None:
         print "It looks like you're on windows, but I can't find make, so I'm skipping lapack"
+        print "- If you have python(x,y), make should be installed, so this is a problem with your path"
+        print "- If you have anaconda, you can install make with `conda install unxutils`"
+        print "\nPress enter to acknowledge or Cntrl-C to break, fix this and try again"
+        sys.stdin.readline(1)
         skip_prop = True
     else:
         libraries.append('refblas')
