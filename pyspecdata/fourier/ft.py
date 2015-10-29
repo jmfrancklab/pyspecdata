@@ -100,11 +100,19 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             p2_post = (n+1) // 2 # this is the starting index of what starts out as the second half (// is floordiv) -- copied from scipy -- this essentially rounds up (by default assigning more negative frequencies than positive ones)
             alias_shift_post = 0
             do_post_shift = True
+            self.set_ft_prop(axes[j],'freq_not_aliased',True)
         #}}}
         #{{{ I might need to perform a phase-shift now...
         #          in order to adjust for a final u-axis that doesn't pass
         #          exactly through zero
         if p2_post_discrepancy is not None:
+            assert self.get_ft_prop(axes[j],['time','not','aliased']),("in order to"
+                " shift by a time that is not integral w.r.t. the dwell time, you need"
+                " to be sure that the time-domain spectrum is not aliased.  This"
+                " is typically achieved by starting from a time domain spectrum and"
+                " generating the time domain by an FT.  If you **know** by other"
+                " means that the time-domain spectrum is not aliased, you can also"
+                " set the `time_not_aliased` FT property to `True`")
             phaseshift =  self.fromaxis(axes[j],
                     lambda q: exp(1j*2*pi*q*p2_post_discrepancy))
             self.data *= phaseshift.data

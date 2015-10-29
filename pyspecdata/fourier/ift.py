@@ -21,6 +21,11 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
     " length of the zero-filled dimension.  If it is just `True`, then the size"
     " of the dimension is determined by rounding the dimension size up to the"
     " nearest integral power of 2."
+    "\tIt uses the `start_time` ft property to determine the start of the axis.  To"
+    " do this, it assumes that it is a stationary signal (convolved with infinite comb"
+    " function).  The value of `start_time` can differ from by a non-integral multiple"
+    " of $\Delta t$, though the routine will check whether or not it is safe to do"
+    " this."
     )
     if verbose: print "check 1",self.data.dtype
     #{{{ process arguments
@@ -96,11 +101,19 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             p2_post = n - (n+1) // 2 # this is the size of what starts out as the second half // is floordiv -- copied from scipy -- this whole thing essentially rounds down
             alias_shift_post = 0
             do_post_shift = True
+            self.set_ft_prop(axes[j],'time_not_aliased',True)
         #}}}
         #{{{ I might need to perform a phase-shift now...
         #          in order to adjust for a final u-axis that doesn't pass
         #          exactly through zero
         if p2_post_discrepancy is not None:
+            assert self.get_ft_prop(axes[j],['freq','not','aliased']),("in order to"
+                " shift by a time that is not integral w.r.t. the dwell time, you need"
+                " to be sure that the frequency-domain spectrum is not aliased.  This"
+                " is typically achieved by starting from a time domain spectrum and"
+                " generating the frequency domain by an FT.  If you **know** by other"
+                " means that the frequency-domain spectrum is not aliased, you can also"
+                " set the `freq_not_aliased` FT property to `True`")
             phaseshift =  self.fromaxis(axes[j],
                     lambda q: exp(1j*2*pi*q*p2_post_discrepancy))
             self.data *= phaseshift.data

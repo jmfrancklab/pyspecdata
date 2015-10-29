@@ -81,10 +81,12 @@ def ft_clear_startpoints(self,axis,t=None,f=None, verbose=False):
         pass
     else:
         self.set_ft_prop(axis,['start_freq'],f)
+        self.set_ft_prop(axis,['freq','not','aliased'],None)
     if t is 'current':
         pass
     else:
         self.set_ft_prop(axis,['start_time'],t)
+        self.set_ft_prop(axis,['time','not','aliased'],None)
     return self
 def _find_index(u,origin = 0.0,tolerance = 1e-5,verbose = False):
     ("identify the index of `u` (represents either time or frequency) where"
@@ -113,7 +115,7 @@ def _find_index(u,origin = 0.0,tolerance = 1e-5,verbose = False):
             " "+repr(count_nonzero(u[p2] == u))+" values equal"
             " to "+repr(u[p2])+" but there should be only one")
     if abs(u[p2] - origin) > tolerance * max(abs(u[p2]),abs(origin)):
-        p2_discrepancy = u[p2] - origin # marks where the p2 position really is vs. where we want it to be
+        p2_discrepancy = origin - u[p2]
     else:
         p2_discrepancy = None
     if verbose: print "for origin",origin,"I am returning p2",p2,"and discrepancy",p2_discrepancy
