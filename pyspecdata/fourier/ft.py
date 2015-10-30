@@ -137,7 +137,7 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             assert abs(p2_post_discrepancy)<1,("I expect the discrepancy to be"
                     "smaller than 1 -- what's going on??")
             phaseshift =  self.fromaxis(axes[j],
-                    lambda q: exp(1j*2*pi*q*p2_post_discrepancy))
+                    lambda q: exp(-1j*2*pi*q*p2_post_discrepancy))
             self.data *= phaseshift.data
         #}}}
         #{{{ do zero-filling manually and first, so I can properly pre-shift the data

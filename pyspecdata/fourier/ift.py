@@ -187,7 +187,7 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             assert abs(p2_pre_discrepancy)<1,("I expect the discrepancy to be"
                     "smaller than 1 -- what's going on??")
             result = self * self.fromaxis(axes[j],
-                    lambda f: exp(1j*2*pi*f*p2_pre_discrepancy))
+                    lambda f: exp(-1j*2*pi*f*p2_pre_discrepancy))
             self.data = result.data
         #}}}
     return self
