@@ -50,6 +50,20 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         do_post_shift = False
         p2_post_discrepancy = None
         p2_pre_discrepancy = None
+        #{{{ if this is NOT the source data, I need to mark it as not alias-safe!
+        if self.get_ft_prop(axes[j],['start','freq']) is None:#  this is the same
+            #           as saying that I have NOT run .ift() on this data yet,
+            #           meaning that I must have started with time as the
+            #           source data, and am now constructing an artificial and
+            #           possibly aliased frequency-domain
+            self.set_ft_prop(axes[j],['freq','not','aliased'],False)
+            #{{{ but on the other hand, I am taking the time as the
+            #    not-aliased "source", so as long as I haven't explicitly set it as
+            #    unsafe, declare it "safe"
+            if self.get_ft_prop(axes[j],['time','not','aliased']) is not False:
+                self.set_ft_prop(axes[j],['time','not','aliased'])
+            #}}}
+        #}}}
         #{{{ grab the axes, set the units, and determine padded_length
         if self.get_units(axes[j]) is not None:
             self.set_units(axes[j],self._ft_conj(self.get_units(axes[j])))
@@ -92,7 +106,10 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             if verbose: print "desired startpoint",desired_startpoint
             p2_post,p2_post_discrepancy,alias_shift_post = _find_index(v,origin = desired_startpoint)
             if verbose: print "p2_post,p2_post_discrepancy,v at p2_post, and v at p2_post-1:", p2_post, p2_post_discrepancy, v[p2_post], v[p2_post - 1]
-            do_post_shift = True
+            if p2_post != 0 or p2_post_discrepancy is not None:
+                do_post_shift = True
+            else:
+                do_post_shift = False
         elif shift[j]: # a default fftshift
             if automix:
                 raise ValueError("You can't use automix and shift at the same time --> it doesn't make sense")
@@ -100,7 +117,11 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             p2_post = (n+1) // 2 # this is the starting index of what starts out as the second half (// is floordiv) -- copied from scipy -- this essentially rounds up (by default assigning more negative frequencies than positive ones)
             alias_shift_post = 0
             do_post_shift = True
-            self.set_ft_prop(axes[j],'freq_not_aliased',True)
+            #{{{ if I start with an alias-safe axis, and perform a
+            #    traditional shift, I get an alias-safe axis
+            if self.get_ft_prop(axes[j],'time_not_aliased'):
+                self.set_ft_prop(axes[j],'freq_not_aliased')
+            #}}}
         #}}}
         #{{{ I might need to perform a phase-shift now...
         #          in order to adjust for a final u-axis that doesn't pass
@@ -113,6 +134,8 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
                 " generating the time domain by an FT.  If you **know** by other"
                 " means that the time-domain spectrum is not aliased, you can also"
                 " set the `time_not_aliased` FT property to `True`")
+            assert abs(p2_post_discrepancy)<1,("I expect the discrepancy to be"
+                    "smaller than 1 -- what's going on??")
             phaseshift =  self.fromaxis(axes[j],
                     lambda q: exp(1j*2*pi*q*p2_post_discrepancy))
             self.data *= phaseshift.data
@@ -131,9 +154,11 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         p2_pre,p2_pre_discrepancy,alias_shift_pre = _find_index(u)
         self._ft_shift(thisaxis,p2_pre)
         #}}}
+        #{{{ the actual (I)FFT portion of the routine
         self.data = fft(self.data,
                             axis=thisaxis)
         self.axis_coords[thisaxis] = v
+        #}}}
         #{{{ actually run the post-FT shift
         if do_post_shift:
             self._ft_shift(thisaxis,p2_post,shift_axis = True)
@@ -151,13 +176,14 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             #   phase-shift above
         #}}}
         #{{{ adjust the normalization appropriately
-        if u is not None:
-            self.data *= du # this gives the units in the integral noted in the docstring
+        self.data *= du # this gives the units in the integral noted in the docstring
         #}}}
         #{{{ finally, if "p2_pre" for the pre-shift didn't correspond exactly to
         #       zero, then the pre-ift data was shifted, and I must reflect
         #       that by performing a post-ift phase shift
         if p2_pre_discrepancy is not None:
+            assert abs(p2_pre_discrepancy)<1,("I expect the discrepancy to be"
+                    "smaller than 1 -- what's going on??")
             result = self * self.fromaxis(axes[j],
                     lambda f: exp(1j*2*pi*f*p2_pre_discrepancy))
             self.data = result.data

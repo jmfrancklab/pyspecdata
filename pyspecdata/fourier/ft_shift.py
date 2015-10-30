@@ -17,9 +17,15 @@ def get_ft_prop(self,axis,propname):
         return this_dict[axis]
     else:
         return None
-def set_ft_prop(self,axis,propname,value):
+def set_ft_prop(self,axis,propname,*value):
     ("Sets the FT property given by `propname`.  For both setting"
             " and getting, `None` is equivalent to an unset value")
+    if len(value) == 0:
+        value = True
+    elif len(value) == 1:
+        value = value[0]
+    else:
+        raise ValueError("You need to set one value, or have it implied to be true")
     if type(propname) is str:
         propname = [propname]
     key_name = '_'.join(['FT'] + propname)
