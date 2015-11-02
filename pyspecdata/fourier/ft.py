@@ -104,8 +104,8 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
                         " determined!")
             if verbose: print "check for p2_post_discrepancy"
             if verbose: print "desired startpoint",desired_startpoint
-            p2_post,p2_post_discrepancy,alias_shift_post = _find_index(v,origin = desired_startpoint)
-            if verbose: print "p2_post,p2_post_discrepancy,v at p2_post, and v at p2_post-1:", p2_post, p2_post_discrepancy, v[p2_post], v[p2_post - 1]
+            p2_post,p2_post_discrepancy,alias_shift_post = _find_index(v,origin = desired_startpoint,verbose = verbose)
+            if verbose: print "p2_post,p2_post_discrepancy,alias_shift_post,v at p2_post, and v at p2_post-1:", p2_post, p2_post_discrepancy, alias_shift_post, v[p2_post], v[p2_post - 1]
             if p2_post != 0 or p2_post_discrepancy is not None:
                 do_post_shift = True
             else:
@@ -134,8 +134,9 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
                 " generating the time domain by an FT.  If you **know** by other"
                 " means that the time-domain spectrum is not aliased, you can also"
                 " set the `time_not_aliased` FT property to `True`")
-            assert abs(p2_post_discrepancy)<1,("I expect the discrepancy to be"
-                    "smaller than 1 -- what's going on??")
+            assert abs(p2_post_discrepancy)<abs(dv),("I expect the discrepancy to be"
+                    " smaller than dv ({:0.2f}), but it's {:0.2f} -- what's going"
+                    " on??").format(dv,p2_post_discrepancy)
             phaseshift =  self.fromaxis(axes[j],
                     lambda q: exp(-1j*2*pi*q*p2_post_discrepancy))
             self.data *= phaseshift.data
@@ -151,7 +152,7 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             self.data = newdata
         #}}}
         #{{{ pre-FT shift so that we start at u=0
-        p2_pre,p2_pre_discrepancy,alias_shift_pre = _find_index(u)
+        p2_pre,p2_pre_discrepancy,alias_shift_pre = _find_index(u,verbose = verbose)
         self._ft_shift(thisaxis,p2_pre)
         #}}}
         #{{{ the actual (I)FFT portion of the routine
@@ -182,8 +183,9 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         #       zero, then the pre-ift data was shifted, and I must reflect
         #       that by performing a post-ift phase shift
         if p2_pre_discrepancy is not None:
-            assert abs(p2_pre_discrepancy)<1,("I expect the discrepancy to be"
-                    "smaller than 1 -- what's going on??")
+            assert abs(p2_pre_discrepancy)<abs(du),("I expect the discrepancy to be"
+                    " smaller than du ({:0.2f}), but it's {:0.2f} -- what's going"
+                    " on??").format(du,p2_pre_discrepancy)
             result = self * self.fromaxis(axes[j],
                     lambda f: exp(1j*2*pi*f*p2_pre_discrepancy))
             self.data = result.data

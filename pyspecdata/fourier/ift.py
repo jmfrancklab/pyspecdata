@@ -135,8 +135,9 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
                 " generating the frequency domain by an FT.  If you **know** by other"
                 " means that the frequency-domain spectrum is not aliased, you can also"
                 " set the `freq_not_aliased` FT property to `True`")
-            assert abs(p2_post_discrepancy)<1,("I expect the discrepancy to be"
-                    "smaller than 1 -- what's going on??")
+            assert abs(p2_post_discrepancy)<abs(dv),("I expect the discrepancy to be"
+                    " smaller than dv ({:0.2f}), but it's {:0.2f} -- what's going"
+                    " on??").format(dv,p2_post_discrepancy)
             phaseshift =  self.fromaxis(axes[j],
                     lambda q: exp(1j*2*pi*q*p2_post_discrepancy))
             self.data *= phaseshift.data
@@ -184,8 +185,9 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         #       zero, then the pre-ift data was shifted, and I must reflect
         #       that by performing a post-ift phase shift
         if p2_pre_discrepancy is not None:
-            assert abs(p2_pre_discrepancy)<1,("I expect the discrepancy to be"
-                    "smaller than 1 -- what's going on??")
+            assert abs(p2_pre_discrepancy)<abs(du),("I expect the discrepancy to be"
+                    " smaller than du ({:0.2f}), but it's {:0.2f} -- what's going"
+                    " on??").format(du,p2_pre_discrepancy)
             result = self * self.fromaxis(axes[j],
                     lambda f: exp(-1j*2*pi*f*p2_pre_discrepancy))
             self.data = result.data
