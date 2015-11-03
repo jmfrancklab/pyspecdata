@@ -151,6 +151,7 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             newdata = zeros(newdata,dtype = self.data.dtype)
             newdata[targetslice] = self.data
             self.data = newdata
+            u = r_[0:padded_length] * du + u[0]
         #}}}
         #{{{ pre-IFT shift so that we start at u=0
         p2_pre,p2_pre_discrepancy,alias_shift_pre = _find_index(u)

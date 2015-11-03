@@ -27,7 +27,9 @@
    shift along :math:`u`.
 
 #. Zero-fill before any pre-shifting, since zeros should be placed at
-   large positive frequencies.
+   large positive frequencies;
+   :math:`u` needs to be re-calculated here
+   based on original starting :math:`u` and :math:`\Delta u`.
 
 #. Pre-shift to place the origin at the beginning of the axis, aliasing
    the negative frequencies to the right of the largest positive
