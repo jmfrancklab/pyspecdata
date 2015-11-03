@@ -111,11 +111,11 @@ def _find_index(u,origin = 0.0,tolerance = 1e-5,verbose = False):
     if not u[0] < origin < u[-1]:
         alias_number = (origin - u[0]) // SW # subtracting this many SW's from origin
         #                                     will land me back inside the range of u
-        if verbose: print"(_find_index) range of axis:",u[0],u[-1]
-        if verbose: print"(_find_index) alias number is",alias_number
-        if verbose: print"(_find_index) set origin from",origin,
+        if verbose: print "(_find_index) range of axis:",u[0],u[-1]
+        if verbose: print "(_find_index) alias number is",alias_number
+        if verbose: print "(_find_index) set origin from",origin,
         origin -= alias_number * SW
-        if verbose: print"(_find_index) to",origin
+        if verbose: print "to",origin
     p2 = argmin(abs(u-origin))
     assert count_nonzero(u[p2] == u) == 1, ("there seem to be"
             " "+repr(count_nonzero(u[p2] == u))+" values equal"
@@ -124,6 +124,6 @@ def _find_index(u,origin = 0.0,tolerance = 1e-5,verbose = False):
         p2_discrepancy = origin - u[p2]
     else:
         p2_discrepancy = None
-    if verbose: print"(_find_index) for origin",origin,"I am returning p2",p2,"and discrepancy",p2_discrepancy
+    if verbose: print "(_find_index) for origin",origin,"I am returning p2",p2,"out of",N,"and discrepancy",p2_discrepancy
     alias_number += 1 # because the way that _ft_shift works essentially entails one aliasing
     return p2,p2_discrepancy,alias_number*SW
