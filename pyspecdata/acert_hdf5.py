@@ -828,3 +828,185 @@ def find_attenuation(basename,
     fp.close()
     fl.plot(abs(tune1)*ratio,'r',label='test ratio -- rescaled',alpha = 0.3,linewidth = 2)
     return ratio
+def secsy_format(list_of_exp,
+        zerofill = False,
+        time_shifts = (0,0),
+        field_dep_shift = None,
+        deadtime = 29e-9,
+        SW = (None,None),
+        verbose = True,
+        fl = None):
+    ("""Generate the "SECSY-format" signal that's manually phased -- """
+     "`time_shifts` is a (t1,t2) pair of numbers\n"
+     """`field_dep_shift` is an additional, field-dependent phase shift
+     though it's not entirely clear to me why this should be allowed\n"""
+     "`SW`=(`f1_limits`,`f2_limits`) is a tuple pair of tuple pairs and gives the limits on "
+     "the spectral window for $\mathcal{F}[t_1]$ and $\mathcal{F}[t_2]$, respectively\n"
+     "If there is a bin dimension, it chunks it to separate out any field "
+     "dimension, and then averages along any remaining bin dimension\n\n"
+     "(upgrade note): previously, this selected out a particular field and/or T "
+     "value, but it doesn't do that anymore")
+    if fl is None:
+        fl = figlist_var()
+    retval_list = []
+    t1_timeshift, t2_timeshift = time_shifts
+    for j,info in enumerate(list_of_exp):
+        subdir,date,short_basename = info
+        fl.basename = short_basename #almost forgot about this -- only need to do this once, and it adds to all the other names!
+        if SW[1] is not None:
+            data = find_file(date+'%s\.'%short_basename,subdirectory = dirformat(subdir),
+                    prefilter = SW[1]) # prefilter leaves it shifted
+            data.ift('t2')
+        else:
+            data = find_file(date+'%s\.'%short_basename,subdirectory = dirformat(subdir))
+            #{{{ this sets it up for a shift -- obviously, this is screwy, but leave it be for now
+            data.ft('t2',shift = True)
+            data.ift('t2')
+            #}}}
+        #{{{ take various experiments, and convert them uniformly into t1 x t2 2D experiments
+        if 'bin' in data.dimlabels:
+            if verbose: print "taking the mean along multiple bins"
+            data.chunk_auto('bin','fields')
+        dropped_labels = data.squeeze()
+        if 'bin' in data.dimlabels:
+            if verbose: print "taking the mean along multiple bins"
+            data.run(mean,'bin')
+        if 't1' in data.dimlabels:
+            assert data.get_units('t1') == 's'
+        if 'T' in data.dimlabels:
+            assert data.get_units('T') == 's'
+        if data.get_prop('description_class') in ['ELDOR','ELDOR_3D']:
+            signal_slice = data['phcyc1',1,'phcyc2',-1,'phcyc3',-1]
+        elif data.get_prop('description_class') == 'echo_T2':
+            signal_slice = data['phcyc1',1,'phcyc2',-2]
+            if 'te' not in dropped_labels:
+                data.rename('te','t1')
+        else:
+            raise ValueError("I can't deal with this type of experiment!")
+        #}}}
+        if deadtime > 0:
+            signal_slice = signal_slice['t2':(deadtime,inf)]
+        fl.next('signal slice before timing correction (cropped log)')
+        fl.image(abs(signal_slice).cropped_log())
+        #{{{ set up the values of the indirect dimensions that we iterate over in the phase plots
+        if 'te' not in dropped_labels:
+            echos_toplot = r_[signal_slice.getaxis('t1')[0]:
+                    signal_slice.getaxis('t1')[-1]:
+                    5j][1:-1]
+        else:
+            echos_toplot = [None]
+        if 'fields' in signal_slice.dimlabels:
+            fields_toplot = signal_slice.getaxis('fields')
+        else:
+            fields_toplot = [None]
+        #}}}
+        #{{{ phase correct and ft
+        #{{{ shift back by the pulse length
+        if signal_slice.get_prop('t90') is not None:
+            t2_timeshift -= signal_slice.get_prop('t90')*2/pi
+            if verbose: print "pulse length timeshift is",signal_slice.get_prop('t90')*2/pi
+        elif signal_slice.get_prop('pulse_length') is not None:
+            t2_timeshift -= signal_slice.get_prop('pulse_length')*2/pi
+            if verbose: print "pulse length timeshift is",signal_slice.get_prop('pulse_length')*2/pi
+        else:
+            raise ValueError("I can't find the length of the pulse (to apply the appropriate phase correction")
+        #}}}
+        signal_slice.setaxis('t2',lambda x: x+t2_timeshift)
+        signal_slice.ft('t2')
+        #{{{ shift back by the echo time
+        if 'te' in dropped_labels:
+            echo_time = signal_slice.get_prop('te')
+            signal_slice *= signal_slice.fromaxis('t2',lambda t2: exp(1j*2*pi*echo_time*t2)) # positive time shift corrects positive slope
+        else:
+            signal_slice *= signal_slice.fromaxis(['t1','t2'],lambda t1,t2: exp(1j*2*pi*t1*t2))
+            t_start = signal_slice.getaxis('t1')[0]
+        #}}}
+        if field_dep_shift is not None:
+            signal_slice *= signal_slice.fromaxis('fields',
+                    lambda f: exp(-1j*2*pi*field_dep_shift*f)) # negative shift corrects negative slope
+        if not 'te' in dropped_labels:
+            #{{{ apply filtering and timeshift along t1
+            if verbose: print "the starting value of t1 is",signal_slice.getaxis('t1')[0]
+            if zerofill:
+                signal_slice.ft('t1',shift = True,pad = 512)
+            else:
+                signal_slice.ft('t1',shift = True)
+            if SW[0] is not None:
+                signal_slice = signal_slice['t1':SW[0]]
+            if verbose: print 'applied a t1 timeshift: t_start=',t_start/1e-9,'manual=',t1_timeshift/1e-9
+            signal_slice.ift('t1')
+            signal_slice.setaxis('t1',lambda x: x+t1_timeshift)
+            #}}}
+        #{{{ check that the timing correction looks OK
+        fl.next('check timing correction')
+        forplot = signal_slice.copy()
+        if not 'te' in dropped_labels:
+            forplot.ft('t1') # ft along t1 so I can clear the startpoint, below
+        forplot.ft_clear_startpoints('t2')
+        if not 'te' in dropped_labels:
+            forplot.ft_clear_startpoints('t1')
+            forplot.ift('t1') # start at zero here
+        forplot.ift('t2',shift = True) # get a centered echo here
+        fl.image(forplot)
+        #}}}
+        #{{{ correct the zeroth order
+        phase = signal_slice.copy().mean_all_but([None]).data
+        assert isscalar(phase),' '.join(
+                map(repr,["Error, phase is",phase])) # to make
+                #    sure I'm not phasing anything differently
+        phase /= abs(phase)
+        signal_slice /= phase
+        #}}}
+        #}}}
+        #{{{ various plots to check the phasing
+        fl.next('phased data')
+        fl.image(signal_slice, interpolation = 'bicubic')
+        fl.next('cropped log -- to check phasing along $t_2$')
+        fl.image(signal_slice.copy().cropped_log())
+        fl.grid()
+        fl.next('and select real')
+        fl.image(signal_slice.runcopy(real),interpolation = 'bicubic')
+        #}}}
+        #{{{ phase plot from 3553
+        fl.next('SECSY:\nplot the phase at different $t_1$')
+        signal_slice.reorder('t2') # make t2 x
+        max_abs = abs(signal_slice.data).flatten().max()
+        for this_field in fields_toplot:
+            for this_echotime in echos_toplot:
+                forplot = signal_slice
+                this_label = []
+                if this_field is not None:
+                    forplot = forplot['fields':(this_field)]
+                    this_label.append('%.2f T'%(this_field))
+                if this_echotime is not None:
+                    forplot = signal_slice['t1':(this_echotime)]
+                    this_label.append('%d ns'%(this_echotime/1e-9))
+                fl.plot(forplot[lambda x:
+                    abs(x) > 0.1*max_abs
+                    ].runcopy(angle)/pi,'.',alpha = 0.5,
+                    markersize = 3,label = ', '.join(this_label),
+                    human_units = False) # set human_units to false because
+                #                          the units don't match
+        fl.phaseplot_finalize()
+        #}}}
+        if not 'te' in dropped_labels:# there is a t1 dimension
+            #{{{ check phasing along the indirect dimension
+            signal_slice.ft('t1')
+            fl.next('secsy mode')
+            fl.image(signal_slice)
+            #{{{ phase plot from 3553
+            fl.next('secsy:\nplot the phase at different $F_2$')
+            def half_of_max(arg):# returns a mask for half of maximum
+                retval = abs(arg).run(sum,'t1').data
+                return retval > 0.5*retval.max()
+            f_start,f_stop = signal_slice.contiguous(half_of_max,'t2')
+            signal_slice.reorder('t1') # make t1 x
+            max_abs = abs(signal_slice.data).flatten().max()
+            for this_freq in r_[f_start:f_stop:5j]:
+                fl.plot(signal_slice['t2':(this_freq)][lambda x: abs(x) > 0.075*max_abs].runcopy(angle)/pi,'.',alpha = 0.5,markersize = 3,label = '%d MHz'%(this_freq/1e6))
+                #fl.plot(signal_slice['t2':(this_freq)].runcopy(angle)/pi,'.',alpha = 0.5,markersize = 3,label = '%d MHz'%(this_freq/1e6))
+            fl.phaseplot_finalize()
+            #}}}
+            #}}}
+        retval_list.append(signal_slice)
+    return retval_list

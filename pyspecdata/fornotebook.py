@@ -59,7 +59,7 @@ class figlistl (figlist):
             if hasattr(self,'mlab') and self.mlab:
                 kwargs.update({'mlab':self.mlab})
                 mlab = True
-        for j,figname in enumerate(self.figurelist):
+        for figname in self.figurelist:
             if verbose: print "showing figure"+lsafen(figname)
             if type(figname) is dict:
                 kwargs.update(figname)
@@ -68,6 +68,7 @@ class figlistl (figlist):
                     print kwargs.pop('print_string')
                     print '\n\n'
             else:
+                j = self.get_fig_number(figname)
                 if mlab:
                     #self.mlab.options.offscreen = True
                     thefigure = self.figdict[figname] # an object
@@ -76,7 +77,7 @@ class figlistl (figlist):
                     fig.scene.anti_aliasing_frames = 0
                     #fig.scene.off_screen_rendering = True
                 else:
-                    figure(j+1)
+                    figure(j)
                 sep = ''
                 if len(string)>0:
                     sep = '_'

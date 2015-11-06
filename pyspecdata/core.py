@@ -1528,7 +1528,7 @@ class figlist(object):
         self.basename = None
         return
     def twinx(self,autopad = True,orig = False,color = None):
-        #self.figurelist.insert(self.figurelist.index(self.current),{'autopad':False}) #doesn't work because it changes the figure number; I can get the number with fig = gcf(); fig.number, but I can't set it; it would be best to switch to using a list that contains all the figure numbers to match all their names -- or alternatively, note that matplotlib allows you to give them names, though I don't know how that works
+        #self.figurelist.insert(self.get_fig_number(self.current)-1,{'autopad':False}) #doesn't work because it changes the figure number; I can get the number with fig = gcf(); fig.number, but I can't set it; it would be best to switch to using a list that contains all the figure numbers to match all their names -- or alternatively, note that matplotlib allows you to give them names, though I don't know how that works
         if self.current in self.twinx_list.keys():
             ax1,ax2 = self.twinx_list[self.current]
         else:
@@ -1566,6 +1566,9 @@ class figlist(object):
     def pop_marker(self):
         self.next(self.pushlist.pop())
         return
+    def get_fig_number(self,name):
+        cleanlist = filter(lambda x: type(x) is str,self.figurelist)
+        return cleanlist.index(name)+1
     def next(self,input_name,legend = False,boundaries = None,twinx = None,**kwargs):
         if not hasattr(self,'figdict'):
             self.figdict = {}
@@ -1578,14 +1581,18 @@ class figlist(object):
         if self.verbose: print lsafe('DEBUG figurelist, called with',name)
         if name in self.figurelist:
             if hasattr(self,'mlab'):
-                fig = self.mlab.figure(self.figurelist.index(name)+1,bgcolor = (1,1,1),**kwargs)
+                fig = self.mlab.figure(self.get_fig_number(name),bgcolor = (1,1,1),**kwargs)
                 fig.scene.render_window.aa_frames = 20
                 fig.scene.anti_aliasing_frames = 20
             else:
-                fig = figure(self.figurelist.index(name)+1,**kwargs)
+                fig = figure(self.get_fig_number(name),**kwargs)
             self.current = name
-            if self.verbose: print lsafen('in',self.figurelist,'at figure',self.figurelist.index(name)+1,'switched figures')
-        else:
+            if self.verbose: print lsafen('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures')
+        else:# figure doesn't exist yet
+            if hasattr(self,'current'):
+                last_figure_number = self.get_fig_number(self.current)
+            else:
+                last_figure_number = 0
             self.current = name
             if boundaries == False:
                 self.setprops(boundaries = False)
@@ -1593,21 +1600,21 @@ class figlist(object):
                 if 'figsize' not in kwargs.keys():
                     kwargs.update({'figsize':(12,6)})
                 if hasattr(self,'mlab'):
-                    fig = self.mlab.figure(len(self.figurelist)+1,bgcolor = (1,1,1),**kwargs)
+                    fig = self.mlab.figure(last_figure_number+1,bgcolor = (1,1,1),**kwargs)
                     fig.scene.render_window.aa_frames = 20
                     fig.scene.anti_aliasing_frames = 20
                 else:
-                    fig = figure(len(self.figurelist)+1,**kwargs)
+                    fig = figure(last_figure_number+1,**kwargs)
                 fig.add_axes([0.075,0.2,0.6,0.7]) # l b w h
                 self.use_autolegend('outside')
             else:
-                fig = figure(len(self.figurelist)+1,**kwargs)
+                fig = figure(last_figure_number+1,**kwargs)
                 if hasattr(self,'mlab'):
-                    fig = self.mlab.figure(len(self.figurelist)+1,bgcolor = (1,1,1),**kwargs)
+                    fig = self.mlab.figure(last_figure_number+1,bgcolor = (1,1,1),**kwargs)
                     fig.scene.render_window.aa_frames = 20
                     fig.scene.anti_aliasing_frames = 20
                 else:
-                    fig = figure(len(self.figurelist)+1,**kwargs)
+                    fig = figure(last_figure_number+1,**kwargs)
                 if twinx is not None:
                     fig.add_subplot(111)
             if self.verbose: print lsafen('added, figure',len(self.figurelist)+1,'because not in figurelist',self.figurelist)
@@ -1645,6 +1652,18 @@ class figlist(object):
             except:
                 title('untitled')
         return retval
+    def phaseplot_finalize(self):
+        ("Performs plot decorations that are typically desired for a manual phasing"
+        " plot.  This assumes that the ``y``-axis is given in units of half-cycles"
+        " ($\pi$ radians).")
+        ax = gca()
+        ylim(-1,1)
+        gridandtick(ax)
+        ylabel(r'$\phi / \pi$')
+        # now show the pi/2 lines
+        axhline(y = 0.5,color = 'r',alpha = 0.5,linewidth = 2)
+        axhline(y = -0.5,color = 'r',alpha = 0.5,linewidth = 2)
+        return
     def check_units(self,testdata,x_index,y_index):
         if isinstance(testdata,nddata):
             testdata = testdata.copy().human_units()
@@ -1743,7 +1762,7 @@ class figlist(object):
         self.show_prep()
         #{{{ just copy from fornnotebook to get the print string functionality
         kwargs = {}
-        for j,figname in enumerate(self.figurelist):
+        for figname in self.figurelist:
             if verbose: print "showing figure"+lsafen(figname)
             if type(figname) is dict:
                 kwargs.update(figname)
