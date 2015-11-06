@@ -85,6 +85,7 @@ def gen_composite(basenames,collected_data,
         plot(thisdata.getaxis('t2')/1e-9,log10(thisdata.data),'.',label = thisname)
     return composite_ringdown,amplification_list,saturation_point
 def plot_comparison(input_data,date,fl,phase = True):
+    "Compare a series of cw experiments"
     list_of_cw_files, mod_amp = zip(*input_data)
     single_date = True
     if date is None:
@@ -1010,3 +1011,92 @@ def secsy_format(list_of_exp,
             #}}}
         retval_list.append(signal_slice)
     return retval_list
+def plot_oned_v_field(thisdata,
+        oned_plot_name = '1D spectrum from SECSY',
+        field = None,
+        fl = None
+        ):
+    r"""take a dataset and plot it as a function of field
+    if no field is specified, assume this is not a field-swept experiment, and pull the field from the dataset's properties
+    to avoid issues, this does create a copy of the data
+    (most of this is copied from 3946)
+
+    `thisdata` can be a single slice with dimension `t2`, or it can be:
+    - a list of nddata objects
+        (here, each one is passed recursively to `plot_oned_v_field`)
+    - an nddata with dimensions `t2`x`fields`
+        (here, each field is passed and the with the `field` kwarg set appropriately)
+    """
+    if fl is None:
+        fl = figlist_var()
+    if type(thisdata) is list:
+        for j in thisdata:
+            plot_oned_v_field(j,
+                    oned_plot_name = oned_plot_name,
+                    field = field,
+                    fl = fl)
+        return
+    elif 'fields' in thisdata.dimlabels:
+        x = thisdata.getaxis('fields')
+        for j in range(ndshape(thisdata)['fields']):
+            plot_oned_v_field(thisdata['fields',j],
+                    oned_plot_name = oned_plot_name,
+                    field = x[j],
+                    fl = fl)
+        return
+    else:
+        thisdata = thisdata.copy() # because I screw with the axis
+        #{{{ axis conversion
+        if field is None:
+            field = thisdata.get_prop('field')
+        x = thisdata.getaxis('t2')
+        x[:] = field + x / 2.807e10
+        #}}}
+        fl.next(oned_plot_name)
+        lines = fl.plot(thisdata.runcopy(abs),'-',alpha = 0.5,label = 'abs')
+        color = lines[-1].get_color()
+        realy = thisdata.runcopy(real)
+        fl.plot(realy,'--',color = color,alpha = 0.5,label = 'Re')
+        fl.plot(thisdata.runcopy(imag),':',color = color,alpha = 0.5,label = 'Im')
+        #{{{ just show the field this spectrum was acquired at
+        y_at_field = realy['t2':field].data
+        fl.plot(field,y_at_field,'o',color = color,alpha = 0.5)
+        text(field,y_at_field,'%0.4f T'%field,alpha=0.5,color = color,size = 'xx-small',ha='left',va='bottom',rotation=45)
+        #}}}
+        xlabel(r'($B_0$ / $T$) + $\Delta f$ / ($2.807\times 10^{10}$ $\frac{Hz}{T}$)')
+        return
+def plot_oned_v_offset(thisdata,
+        oned_plot_name = '1D offset spectrum from SECSY',
+        fl = None
+        ):
+    r"""this is similar to plot_oned_v_field, but it plots *vs.* offset, rather than field
+
+    like for plot_oned_v_field, `thisdata` can be a single slice with dimension `t2`, or it can be:
+    - a list of nddata objects
+        (here, each one is passed recursively to `plot_oned_v_field`)
+    - an nddata with dimensions `t2`x`fields`
+        (here, each field is passed and the with the `field` kwarg set appropriately)
+    """
+    if fl is None:
+        fl = figlist_var()
+    if type(thisdata) is list:
+        for j in thisdata:
+            plot_oned_v_offset(j,
+                    oned_plot_name = oned_plot_name,
+                    fl = fl)
+        return
+    elif 'fields' in thisdata.dimlabels:
+        x = thisdata.getaxis('fields')
+        for j in range(ndshape(thisdata)['fields']):
+            plot_oned_v_offset(thisdata['fields',j],
+                    oned_plot_name = oned_plot_name,
+                    fl = fl)
+        return
+    else:
+        fl.next(oned_plot_name)
+        lines = fl.plot(thisdata.runcopy(abs),'-',alpha = 0.5,label = 'abs')
+        color = lines[-1].get_color()
+        realy = thisdata.runcopy(real)
+        fl.plot(realy,'--',color = color,alpha = 0.5,label = 'Re')
+        fl.plot(thisdata.runcopy(imag),':',color = color,alpha = 0.5,label = 'Im')
+        return

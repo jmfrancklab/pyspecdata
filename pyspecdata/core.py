@@ -1629,6 +1629,8 @@ class figlist(object):
             else:
                 raise ValueError('If you pass twinx, pass 0 for the original or 1 for the right side')
         self.figdict.update({self.current:fig})
+        if boundaries == False:
+            self.setprops(boundaries = True)# set this back
         return fig
     def plot(self,*args,**kwargs):
         if 'label' in kwargs.keys():
