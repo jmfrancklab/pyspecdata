@@ -1,5 +1,6 @@
 from paramset_pyspecdata import myparams
 from os import listdir,environ
+from os.path import sep as path_sep
 #if paramset.myparams['figlist_type'] == 'figlistl':
 if myparams['figlist_type'] == 'figlistl':
     environ['ETS_TOOLKIT'] = 'qt4'
@@ -1084,8 +1085,8 @@ def h5join(firsttuple,secondtuple,
 #{{{ add slashes for dir's
 def dirformat(file):
         #{{{ format strings
-        if file[-1]!='/':
-            file += '/'
+        if file[-1] not in ['/',path_sep]:
+            file += path_sep
         #}}}
         return file
 #}}}

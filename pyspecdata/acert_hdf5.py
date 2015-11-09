@@ -472,18 +472,31 @@ def postproc_eldor_file(data,fl = None):
     data.labels('t_1',x)
     data.set_units('t_1','s')
     return data
-def search_freed_file(searchstring,exptype,directory = getDATADIR()):
-    directory = dirformat(directory + exptype)
-    files = re.findall('.*' + searchstring + '.*','\n'.join(os.listdir(directory)))
+def search_freed_file(searchstring,exp_type,
+        directory = dirformat(getDATADIR()+'95GHz'),
+        print_result = False,
+        verbose = False):
+    ("this searches in the 95GHz subdirectory of the data directory in order to"
+    " find the appropriate file\n"
+    "Returns\n"
+    "-------\n"
+    " str\n"
+    "     The name of the file matching the search string\n")
+    directory = dirformat(directory + exp_type)
+    if os.path.isdir(directory):
+        files = re.findall('.*' + searchstring + '.*','\n'.join(os.listdir(directory)))
+    else:
+        raise RuntimeError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s"%(directory,searchstring))
     if len(files) == 0:
-        raise ValueError("I can't find a file matching the regular expression"+searchstring)
+        raise ValueError("I can't find a file matching the regular expression {:s} in {:s}".format(searchstring,directory))
     else:
         if len(files) > 1:
-            print 'found:',files,'and opening last\n\n'
+            warnings.warn('found multiple files:\n'+repr(files)+'\nand opening last')
+        elif print_result and verbose:
+            obsn("found only one file, and loading it:"+repr(files))
     return directory + files[-1]
 def find_file(searchstring,
-            base_directory = getDATADIR(),
-            subdirectory =  'b1_fid/',
+            exp_type = 'b1_fid',
             postproc = None,
             print_result = True,
             verbose = False,
@@ -497,19 +510,9 @@ def find_file(searchstring,
     If "postproc" is not set, it's chosen based on the value of
     (h5 root).experiment.description['class']'''
     #{{{ actually find one file and load it into the h5 object
-    directory = base_directory + subdirectory
-    filename_re = re.compile('.*' + searchstring + '.*')
-    if os.path.isdir(directory):
-        files = filename_re.findall('\n'.join(os.listdir(directory)))
-    else:
-        raise RuntimeError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s"%(directory,searchstring))
-    if len(files) == 0:
-        raise ValueError("I can't find a file matching the regular expression "+searchstring+" in "+directory)
-    if len(files) > 1:
-        warnings.warn('found multiple files:\n'+repr(files)+'\nand opening last')
-    elif print_result and verbose:
-        obsn("found only one file, and loading it:"+repr(files))
-    filename = directory + files[-1]
+    if 'subdirectory' in kwargs.keys():
+        raise ValueError("The `subdirectory` keyword argument is not longer valid -- use `exp_type` instead!")
+    filename = search_freed_file(searchstring,exp_type,print_result = print_result,verbose = verbose)
     h5 = h5py.File(filename,'r')
     #}}}
     #{{{ set up the complex number the hard way, for good form
@@ -949,6 +952,9 @@ def secsy_format(list_of_exp,
             forplot.ift('t1') # start at zero here
         forplot.ift('t2',shift = True) # get a centered echo here
         fl.image(forplot)
+        #ax = gca()
+        #ax.axvline(x = 0,color = 'w',alpha = 0.25,linewidth = 1)
+        #ax.axhline(y = 0,color = 'w',alpha = 0.25,linewidth = 1)
         #}}}
         #{{{ correct the zeroth order
         phase = signal_slice.copy().mean_all_but([None]).data
