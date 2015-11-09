@@ -169,7 +169,8 @@ def plot_coherence_diagram(ax1,list_of_DeltaC,list_of_sizes,plotidx,outof):
             fallback_pathway.append(selectedcohlevel)
         show_coherence_pathway(ax1,time_points,fallback_pathway,yscale,gridpos)
     return
-def show_coherence_pathway(ax1,time_points,coherence_levels,yscale,gridpos,linewidth = 1):
+def show_coherence_pathway(ax1, time_points, coherence_levels,
+        yscale, gridpos, linewidth = 1):
     pulse_width = 0.3
     coherence_levels = array(coherence_levels)
     coherence_levels = r_[coherence_levels,coherence_levels[-1]]
@@ -189,7 +190,17 @@ def show_coherence_pathway(ax1,time_points,coherence_levels,yscale,gridpos,linew
     redlines = []
     for j in range(len(mask)):
         if mask[j] and mask[j-1]:
-            redlines[-1] += [(x[j],y[j]*yscale+gridpos)]
+            if j == 0:
+                raise IndexError("You're trying to continue a"
+                        " line when no line has been started!")
+            try:
+                redlines[-1] += [(x[j],y[j]*yscale+gridpos)]
+            except IndexError, e:
+                raise IndexError(repr(e)+"\n"+("the length of x is"
+                    " {:d}, of y is {:d},"
+                    " and redlines is {:s}, trying to index"
+                    " {:d}").format(
+                        len(x),len(y),repr(redlines),j))
         elif mask[j]:# start a new line
             redlines += [[(x[j],y[j]*yscale+gridpos)]]
     #print 'redlines:',redlines
@@ -221,18 +232,24 @@ def show_coherence_pathway(ax1,time_points,coherence_levels,yscale,gridpos,linew
     ##}}}
     return
 def show_pathways(ax1,plotdata,
-        selected_pulses = None # if given, this is a dictionary like {'phcyc3':(-1,2)}, where the second element of the tuple is the number of phase cycle steps selected
+        selected_pulses = None, # if given, this is a dictionary like {'phcyc3':(-1,2)}, where the second element of the tuple is the number of phase cycle steps selected
+        verbose = False
         ):
+    ("Plots the coherence pathway diagrams associated with `plotdata`."
+            " It assumes that the phase-cycling dimensions of `plotdata` are"
+            " named like ``phcyc1``, ``phcyc2``, *etc.*")
+    if verbose: print "(show_pathways): shape of input data",ndshape(plotdata)
     pulseaxes = [j for j in plotdata.dimlabels if j[:5]=='phcyc']
+    if verbose: print "(show_pathways): determined the following to be pulse axes",pulseaxes
+    if len(pulseaxes) == 0:
+        raise ValueError("I can't find any phase cycling dimensions, so I don't"
+                " know what you want me to do!!")
     netshape = ones(len(plotdata.data.shape),dtype = int)
-    #for thisaxis in pulseaxes:
-    #    x = plotdata.getaxis(thisaxis)
-    #    axis_size = plotdata.shape[plotdata.axn(thisaxis)]
-    #    #x[x>axis_size/2] = x[x>2]-4
     #{{{ now, figure out the shape of the matrix where I knock out everything but the phcyc dims -- seems there should be an nddata-like way to do this
     for j in pulseaxes:
         thisindex = plotdata.dimlabels.index(j)
         netshape[thisindex] = plotdata.data.shape[thisindex]
+    if verbose: print "(show_pathways): and the shapes of those axes are",netshape
     #}}}
     if selected_pulses is not None:
         pulseaxes += selected_pulses.keys()
@@ -245,7 +262,7 @@ def show_pathways(ax1,plotdata,
             x = selected_pulses[thisaxis][0]
         pulseindex = pulseaxes_sorted.index(thisaxis)
         coherence_changes[:,pulseindex] = (x*ones(netshape)).flatten()
-    #print "coherence changes:",coherence_changes
+    if verbose: print "(show_pathways): coherence changes",coherence_changes
     for j in range(coherence_changes.shape[0]):
         #print "about to pass list",coherence_changes[j,:]
         plot_coherence_diagram(ax1,coherence_changes[j,:],
