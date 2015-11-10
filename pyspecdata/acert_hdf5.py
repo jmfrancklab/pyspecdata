@@ -241,7 +241,7 @@ def show_pathways(ax1,plotdata,
     if verbose: print "(show_pathways): shape of input data",ndshape(plotdata)
     pulseaxes = [j for j in plotdata.dimlabels if j[:5]=='phcyc']
     if verbose: print "(show_pathways): determined the following to be pulse axes",pulseaxes
-    if len(pulseaxes) == 0:
+    if len(pulseaxes) == 0 and selected_pulses is None:
         raise ValueError("I can't find any phase cycling dimensions, so I don't"
                 " know what you want me to do!!")
     netshape = ones(len(plotdata.data.shape),dtype = int)
