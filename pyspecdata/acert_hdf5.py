@@ -865,6 +865,7 @@ def secsy_format(list_of_exp,
      "the spectral window for $\mathcal{F}[t_1]$ and $\mathcal{F}[t_2]$, respectively\n"
      "If there is a bin dimension, it chunks it to separate out any field "
      "dimension, and then averages along any remaining bin dimension\n\n"
+     "loads the file(s) given by `list_of_exp`, which consists of a list of experiment type, date (regexp), basename (regexp) tuples, and where basename is assumed to give the pattern up to the end of the filename\n"
      "(upgrade note): previously, this selected out a particular field and/or T "
      "value, but it doesn't do that anymore")
     if fl is None:
@@ -872,14 +873,14 @@ def secsy_format(list_of_exp,
     retval_list = []
     t1_timeshift, t2_timeshift = time_shifts
     for j,info in enumerate(list_of_exp):
-        subdir,date,short_basename = info
+        exp_type,date,short_basename = info
         fl.basename = short_basename #almost forgot about this -- only need to do this once, and it adds to all the other names!
         if SW[1] is not None:
-            data = find_file(date+'%s\.'%short_basename,subdirectory = dirformat(subdir),
+            data = find_file(date+'%s\.'%short_basename,exp_type = exp_type,
                     prefilter = SW[1]) # prefilter leaves it shifted
             data.ift('t2')
         else:
-            data = find_file(date+'%s\.'%short_basename,subdirectory = dirformat(subdir))
+            data = find_file(date+'%s\.'%short_basename,exp_type = exp_type)
             #{{{ this sets it up for a shift -- obviously, this is screwy, but leave it be for now
             data.ft('t2',shift = True)
             data.ift('t2')
@@ -901,7 +902,7 @@ def secsy_format(list_of_exp,
         elif data.get_prop('description_class') == 'echo_T2':
             signal_slice = data['phcyc1',1,'phcyc2',-2]
             if 'te' not in dropped_labels:
-                data.rename('te','t1')
+                signal_slice.rename('te','t1')
         else:
             raise ValueError("I can't deal with this type of experiment!")
         #}}}
