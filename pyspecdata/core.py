@@ -3901,23 +3901,48 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
             self.setaxis(axis,cdata)
             return self
     def contiguous(self,lambdafunc,axis = None,verbose = False): #adapted stackexchange http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-array
-        """lambdafunc is a function that operates on self
-this function returns the start and stop positions along the axis for the largest contiguous block for which lambdafunc returns true"""
-        if axis is None and len(self.dimlabels) == 1:
-            axis = self.dimlabels[0]
-        mask = lambdafunc(self)
+        """this function returns the start and stop positions along the
+        axis for the largest contiguous block for which lambdafunc returns
+        true
+
+        Parameters
+        ----------
+
+        lambdafunc : types.FunctionType
+            a function that operates on a copy of `self` to generate the
+            mask used here 
+            use `lambdafunc`(`self`) if `axis` is ``None``,
+            otherwise use `lambdafunc`(`self`,`axis`)
+        axis : {None,str}
+            the name of the axis along which you want to find contiguous
+            blocks
+
+        Returns
+        -------
+        """
+        print "shape of self inside contiguous",ndshape(self)
+        if axis is None:
+            if len(self.dimlabels) == 1:
+                axis = self.dimlabels[0]
+                mask = lambdafunc(self.copy()).data
+            else:
+                raise TypeError("If there is more than one dimension, `axis` must be set to something other than ``None``")
+        else:
+            mask = lambdafunc(self.copy(),axis).data
+        print "shape of mask",mask.shape
         idx, = np.diff(mask).nonzero() # this gives a list of indices for the boundaries between true/false
         idx += 1 # because diff only starts on index #1 rather than #0
         if mask[0]: # because I want to indicate the boundaries of True, if I am starting on True, I need to make 0 a boundary
             idx = np.r_[0, idx]
         if mask[-1]: # If the end of mask is True, then I need to add a boundary there as well
             idx = np.r_[idx, mask.size] # Edit
-        idx.shape = (-1,2) #idx is 2x2 array of start,stop
+        idx.shape = (-1,2) # idx is 2x2 array of start,stop
         if verbose: print 'DEBUG idx is',idx
         if verbose: print "diffs for blocks",diff(idx,axis=1),
         if verbose: print "with argmax",diff(idx,axis=1).argmax(),
         if verbose: print "yielding",idx[diff(idx,axis=1).argmax(),:],self.getaxis(axis)[idx[diff(idx,axis=1).argmax(),:]]
-        return self.getaxis(axis)[idx[diff(idx,axis=1).argmax(),:]]
+        return self.getaxis(axis)[idx[diff(idx,
+            axis=1).flatten().argsort()[::-1],:]]
     #}}}
     def multimin(self,minfunc,axisname,filterwidth,numberofmins):
         cost = self.copy().convolve(axisname,filterwidth).run_nopop(minfunc)

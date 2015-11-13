@@ -1004,7 +1004,7 @@ def secsy_format(list_of_exp,
                     forplot = forplot['fields':(this_field)]
                     this_label.append('%.2f T'%(this_field))
                 if this_echotime is not None:
-                    forplot = signal_slice['t1':(this_echotime)]
+                    forplot = forplot['t1':(this_echotime)]
                     this_label.append('%d ns'%(this_echotime/1e-9))
                 fl.plot(forplot[lambda x:
                     abs(x) > 0.1*max_abs
@@ -1021,16 +1021,38 @@ def secsy_format(list_of_exp,
             fl.image(signal_slice)
             #{{{ phase plot from 3553
             fl.next('secsy:\nplot the phase at different $F_2$')
-            def half_of_max(arg):# returns a mask for half of maximum
-                retval = abs(arg).run(sum,'t1').data
-                return retval > 0.5*retval.max()
-            f_start,f_stop = signal_slice.contiguous(half_of_max,'t2')
-            signal_slice.reorder('t1') # make t1 x
-            max_abs = abs(signal_slice.data).flatten().max()
-            for this_freq in r_[f_start:f_stop:5j]:
-                fl.plot(signal_slice['t2':(this_freq)][lambda x: abs(x) > 0.075*max_abs].runcopy(angle)/pi,'.',alpha = 0.5,markersize = 3,label = '%d MHz'%(this_freq/1e6))
-                #fl.plot(signal_slice['t2':(this_freq)].runcopy(angle)/pi,'.',alpha = 0.5,markersize = 3,label = '%d MHz'%(this_freq/1e6))
-            fl.phaseplot_finalize()
+            def half_of_max(arg,axis):# returns a mask for half of maximum
+                return arg > 0.5*arg.runcopy(max,axis)
+            for this_field in fields_toplot:
+                forplot = signal_slice
+                this_label = []
+                if this_field is not None:
+                    forplot = forplot['fields':(this_field)]
+                    this_label.append('%.2f T'%(this_field))
+                sum_for_contiguous = abs(forplot).mean('t1')
+                #{{{ debugging block
+                fl.next("test contiguous")
+                fl.plot(sum_for_contiguous)
+                print sum_for_contiguous > 0.5*sum_for_contiguous.runcopy(max,'t2')
+                retval = sum_for_contiguous.contiguous(half_of_max,'t2')
+                print "contiguous range:",retval
+                fl.show()
+                exit()
+                #}}}
+                f_start,f_stop = sum_for_contiguous.contiguous(half_of_max,'t2')
+                f_start = forplot.getaxis('t2').min()
+                f_stop = forplot.getaxis('t2').min()
+                forplot.reorder('t1') # make t1 x
+                max_abs = abs(forplot.data).flatten().max()
+                this_label.append('')
+                for this_freq in r_[f_start:f_stop:5j]:
+                    this_label[-1] = '%d MHz'%(this_freq/1e6)
+                    fl.plot(forplot['t2':(this_freq)][lambda x:
+                        abs(x) > 0.075*max_abs].runcopy(angle)/pi, '.',
+                        alpha = 0.5, markersize = 3,
+                        label = ', '.join(this_label))
+                    #fl.plot(forplot['t2':(this_freq)].runcopy(angle)/pi,'.',alpha = 0.5,markersize = 3,label = '%d MHz'%(this_freq/1e6))
+                fl.phaseplot_finalize()
             #}}}
             #}}}
         retval_list.append(signal_slice)
