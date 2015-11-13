@@ -3251,76 +3251,106 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
         axis labels and axis errors for both'''
         #{{{ if zero dimensional, fake a singleton dimension and recurse
         #{{{ unless both are zero dimensional, in which case, just leave alone
+        print "starting aligndata"
         if isscalar(arg) or type(arg) == ndarray:
             arg = nddata(arg)
         if ndshape(self).zero_dimensional and ndshape(arg).zero_dimensional:
+            print "(1) yes, I found something zero dimensional"
             return self.copy(),arg.copy()
         #}}}
         elif ndshape(self).zero_dimensional:
+            print "(2) yes, I found something zero dimensional"
+            print "yes, I found something zero dimensional"
             A = self.copy()
             A.dimlabels = [arg.dimlabels[0]]
             A.data = A.data.reshape(1)
             return A.aligndata(arg)
         elif ndshape(arg).zero_dimensional:
+            print "(3) yes, I found something zero dimensional"
+            print "yes, I found something zero dimensional"
             arg = arg.copy()
             arg.dimlabels = [self.dimlabels[0]]
             arg.data = arg.data.reshape(1)
             return self.aligndata(arg)
         #}}}
-        #print "DEBUG 1: shape of self",ndshape(self),"self data shape",self.data.shape,"shape of arg",ndshape(arg),"arg data shape",arg.data.shape
-        augmentdims = [x for x in arg.dimlabels if x in set(self.dimlabels)^set(arg.dimlabels)] # dims in arg but now self, ordered as they were in arg
-        newdims = self.dimlabels + augmentdims # this should return the new dimensions with the order of self preserved, followed by augmentdims
         selfout = self.copy() # copy self
-        if len(selfout.data.shape) == 0:
-            if len(selfout.dimlabels) == 1:
-                selfout.data.reshape(1)
-            else:
-                raise ValueError("This instance is zero dimensional (It's %s)!!!"%repr(self))
-        selfshape = list(selfout.data.shape)+list(ones(len(augmentdims))) # there is no need to transpose self, since its order is preserved
-        new_arg_labels = [x for x in newdims if x in arg.dimlabels] # only the labels valid for B, ordered as they are in newdims
+        assert len(selfout.data.shape) != 0 and len(arg.data.shape) != 0, ("neither"
+         " self nor arg should be zero dimensional at this point (previous code"
+         " should have taken care of that")
+        # {{{create newdims, consisting of dimlabels for self, followed by the
+        # names of the dimensions in arg that are not also in self -- order for
+        # both is important; then create a matching selfshape
+        augmentdims = [x for x in arg.dimlabels if x in
+                set(self.dimlabels)^set(arg.dimlabels)] # dims in arg
+        #                   but not self, ordered as they were in arg
+        newdims = self.dimlabels + augmentdims
+        selfshape = list(selfout.data.shape)+list(
+                ones(len(augmentdims))) # there is no need to
+        #       transpose self, since its order is preserved
+        # }}}
         argout = arg.copy()
-        if len(argout.data.shape) == 0:
-            if len(argout.dimlabels) == 1:
-                argout.data = argout.data.reshape(1)
-                if argout.get_error() is not None:
-                    try:
-                        argout.set_error(argout.get_error().reshape(1))
-                    except:
-                        raise ValueError("error was"+repr(argout.get_error()))
-                #print "DEBUG: I reshaped argout, so that it now has shape",argout.data.shape,"dimlabels",argout.dimlabels,"and ndshape",ndshape(argout)
-            else:
-                raise ValueError("The argument is zero dimensional (It's %s), but the self is not (It's %s)!!!"%(repr(arg),repr(self)))
+        # {{{ now create argshape for the reshaped argument
+        new_arg_labels = [x for x in newdims if x in
+                arg.dimlabels] #  only the labels valid for arg, ordered
+        #                         as they are in newdims
         argshape = list(ones(len(newdims)))
-        #print "DEBUG 2: shape of self",ndshape(self),"self data shape",self.data.shape,"shape of arg",ndshape(arg),"arg data shape",arg.data.shape
-        #print "DEBUG 3: shape of selfout",ndshape(selfout),"selfout data shape",selfout.data.shape,"shape of argout",ndshape(argout),"argout data shape",argout.data.shape
-        #{{{ wherever the dimension exists in arg, pull the shape from arg
+        print "DEBUG 2: shape of self",ndshape(self),"self data shape",self.data.shape,"shape of arg",ndshape(arg),"arg data shape",arg.data.shape
+        print "DEBUG 3: shape of selfout",ndshape(selfout),"selfout data shape",selfout.data.shape,"shape of argout",ndshape(argout),"argout data shape",argout.data.shape
+        #{{{ wherever the dimension already exists in arg, pull the shape from arg
         for j,k in enumerate(newdims):
             if k in argout.dimlabels:
                 try:
                     argshape[j] = argout.data.shape[argout.axn(k)]
                 except:
-                    raise CustomError("There seems to be a problem because the shape of argout is now len:%d "%len(argout.data.shape),argout.data.shape,"while the dimlabels is len:%d "%len(argout.dimlabels),argout.dimlabels)
-        #}}}
-        argorder = map(argout.dimlabels.index,new_arg_labels) # for each new dimension, determine the position of the original dimension
-        selfout.data = selfout.data.reshape(selfshape) # and reshape to its new shape
+                    raise ValueError("There seems to be a problem because the" +
+                            "shape of argout is now len:%d"%len(argout.data.shape),
+                            argout.data.shape,"while the dimlabels is len:%d"%len(
+                                argout.dimlabels),argout.dimlabels)
+        # }}}
+        # }}}
+        # {{{ transpose arg to match newshape
+        argorder = map(argout.dimlabels.index,new_arg_labels) # for
+        #          each new dimension, determine the position of the
+        #          original dimension
+        selfout.data = selfout.data.reshape(selfshape) # and reshape
+        #          to its new shape
         selfout.dimlabels = newdims
         try:
-            argout.data = argout.data.transpose(argorder).reshape(argshape) # and reshape the data
+            argout.data = argout.data.transpose(argorder
+                    ).reshape(argshape) # and reshape the data
         except ValueError,Argument:
-            raise ValueError('the shape of the data is '+repr(argout.data.shape)+' the transpose '+repr(argorder)+' and the new shape '+repr(argshape)+' original arg: '+repr(Argument))
+            raise ValueError('the shape of the data is ' +
+                    repr(argout.data.shape) + ' the transpose ' +
+                    repr(argorder) + ' and the new shape ' +
+                    repr(argshape) + ' original arg: ' +
+                    repr(Argument))
         argout.dimlabels = newdims
+        # }}}
+        # {{{ transpose the data errors appropriately
         if selfout.get_error() != None:
             try:
                 temp = selfout.get_error().copy().reshape(selfshape)
             except ValueError,Argument:
-                raise ValueError("The instance (selfout) has a shape of "+repr(selfout.data.shape)+" but its error has a shape of"+repr(selfout.get_error().shape)+"!!!\n\n(original argument:\n"+repr(Argument)+"\n)")
+                raise ValueError("The instance (selfout) has a shape of "
+                        + repr(selfout.data.shape) +
+                        " but its error has a shape of" +
+                        repr(selfout.get_error().shape) +
+                        "!!!\n\n(original argument:\n" +
+                        repr(Argument) + "\n)")
             selfout.set_error(temp)
         if argout.get_error() != None:
             try:
                 temp = argout.get_error().copy().transpose(argorder).reshape(argshape)
             except ValueError,Argument:
-                raise ValueError("The argument (argout) has a shape of "+repr(argout.data.shape)+" but its error has a shape of"+repr(argout.get_error().shape)+"(it's "+repr(argout.get_error())+")!!!\n\n(original argument:\n"+repr(Argument)+"\n)")
+                raise ValueError("The argument (argout) has a shape of "
+                        + repr(argout.data.shape)
+                        + " but its error has a shape of" +
+                        repr(argout.get_error().shape) + "(it's " +
+                        repr(argout.get_error()) +
+                        ")!!!\n\n(original argument:\n" +
+                        repr(Argument) + "\n)")
             argout.set_error(temp)
+        # }}}
         if (len(selfout.axis_coords)>0) or (len(argout.axis_coords)>0):
             #{{{ transfer the errors and the axis labels
             #{{{ make dictionaries for both, and update with info from both, giving preference to self
@@ -3919,6 +3949,29 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
 
         Returns
         -------
+        retval : ndarray
+            An ``N``x2 matrix, where the ``N`` rows correspond to pairs of axis
+            label that give ranges over which `lambdafunc` evaluates to `True`.
+            These are ordered according to descending range width.
+
+        Examples
+        --------
+
+        > #{{{ debugging block
+        > sum_for_contiguous = abs(forplot).mean('t1')
+        > fl.next("test contiguous")
+        > forplot = sum_for_contiguous.copy().set_error(None)
+        > fl.plot(forplot,alpha = 0.25,linewidth = 3)
+        > print "this is what the max looks like",0.5*sum_for_contiguous.set_error(None).runcopy(max,'t2')
+        > print sum_for_contiguous > 0.5*sum_for_contiguous.runcopy(max,'t2')
+        > retval = sum_for_contiguous.contiguous(quarter_of_max,'t2')
+        > print "contiguous range / 1e6:",retval/1e6
+        > for j in range(retval.shape[0]):
+        >     a,b = retval[j,:]
+        >     fl.plot(forplot['t2':(a,b)])
+        > fl.show()
+        > exit()
+        > #}}}
         """
         print "shape of self inside contiguous",ndshape(self)
         if axis is None:

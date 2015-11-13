@@ -1021,27 +1021,18 @@ def secsy_format(list_of_exp,
             fl.image(signal_slice)
             #{{{ phase plot from 3553
             fl.next('secsy:\nplot the phase at different $F_2$')
-            def half_of_max(arg,axis):# returns a mask for half of maximum
-                return arg > 0.5*arg.runcopy(max,axis)
+            def quarter_of_max(arg,axis):# returns a mask for half of maximum
+                return arg > 0.25*arg.runcopy(max,axis)
             for this_field in fields_toplot:
                 forplot = signal_slice
                 this_label = []
                 if this_field is not None:
                     forplot = forplot['fields':(this_field)]
                     this_label.append('%.2f T'%(this_field))
-                sum_for_contiguous = abs(forplot).mean('t1')
-                #{{{ debugging block
-                fl.next("test contiguous")
-                fl.plot(sum_for_contiguous)
-                print sum_for_contiguous > 0.5*sum_for_contiguous.runcopy(max,'t2')
-                retval = sum_for_contiguous.contiguous(half_of_max,'t2')
-                print "contiguous range:",retval
-                fl.show()
-                exit()
-                #}}}
-                f_start,f_stop = sum_for_contiguous.contiguous(half_of_max,'t2')
-                f_start = forplot.getaxis('t2').min()
-                f_stop = forplot.getaxis('t2').min()
+                sum_for_contiguous = abs(forplot).mean('t1').set_error(None)
+                f_start,f_stop = sum_for_contiguous.contiguous(
+                        quarter_of_max,'t2')[0,:]#  pull the first row, which is
+                #                                   the largest block
                 forplot.reorder('t1') # make t1 x
                 max_abs = abs(forplot.data).flatten().max()
                 this_label.append('')
@@ -1052,7 +1043,7 @@ def secsy_format(list_of_exp,
                         alpha = 0.5, markersize = 3,
                         label = ', '.join(this_label))
                     #fl.plot(forplot['t2':(this_freq)].runcopy(angle)/pi,'.',alpha = 0.5,markersize = 3,label = '%d MHz'%(this_freq/1e6))
-                fl.phaseplot_finalize()
+            fl.phaseplot_finalize()
             #}}}
             #}}}
         retval_list.append(signal_slice)
