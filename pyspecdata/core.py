@@ -3245,29 +3245,29 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
             self.axis_coords_units = [v for j,v in enumerate(self.axis_coords_units) if mask[j]]
         return retval
     #{{{ align data
-    def aligndata(self,arg):
+    def aligndata(self,arg,verbose = False):
         r'''This now just returns selfout,argout
         which are aligned to each other, and which contain
         axis labels and axis errors for both'''
         #{{{ if zero dimensional, fake a singleton dimension and recurse
         #{{{ unless both are zero dimensional, in which case, just leave alone
-        print "starting aligndata"
+        if verbose: print "starting aligndata"
         if isscalar(arg) or type(arg) == ndarray:
             arg = nddata(arg)
         if ndshape(self).zero_dimensional and ndshape(arg).zero_dimensional:
-            print "(1) yes, I found something zero dimensional"
+            if verbose: print "(1) yes, I found something zero dimensional"
             return self.copy(),arg.copy()
         #}}}
         elif ndshape(self).zero_dimensional:
-            print "(2) yes, I found something zero dimensional"
-            print "yes, I found something zero dimensional"
+            if verbose: print "(2) yes, I found something zero dimensional"
+            if verbose: print "yes, I found something zero dimensional"
             A = self.copy()
             A.dimlabels = [arg.dimlabels[0]]
             A.data = A.data.reshape(1)
             return A.aligndata(arg)
         elif ndshape(arg).zero_dimensional:
-            print "(3) yes, I found something zero dimensional"
-            print "yes, I found something zero dimensional"
+            if verbose: print "(3) yes, I found something zero dimensional"
+            if verbose: print "yes, I found something zero dimensional"
             arg = arg.copy()
             arg.dimlabels = [self.dimlabels[0]]
             arg.data = arg.data.reshape(1)
@@ -3294,8 +3294,8 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
                 arg.dimlabels] #  only the labels valid for arg, ordered
         #                         as they are in newdims
         argshape = list(ones(len(newdims)))
-        print "DEBUG 2: shape of self",ndshape(self),"self data shape",self.data.shape,"shape of arg",ndshape(arg),"arg data shape",arg.data.shape
-        print "DEBUG 3: shape of selfout",ndshape(selfout),"selfout data shape",selfout.data.shape,"shape of argout",ndshape(argout),"argout data shape",argout.data.shape
+        if verbose: print "DEBUG 2: shape of self",ndshape(self),"self data shape",self.data.shape,"shape of arg",ndshape(arg),"arg data shape",arg.data.shape
+        if verbose: print "DEBUG 3: shape of selfout",ndshape(selfout),"selfout data shape",selfout.data.shape,"shape of argout",ndshape(argout),"argout data shape",argout.data.shape
         #{{{ wherever the dimension already exists in arg, pull the shape from arg
         for j,k in enumerate(newdims):
             if k in argout.dimlabels:
@@ -3973,7 +3973,7 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
         > exit()
         > #}}}
         """
-        print "shape of self inside contiguous",ndshape(self)
+        if verbose: print "shape of self inside contiguous",ndshape(self)
         if axis is None:
             if len(self.dimlabels) == 1:
                 axis = self.dimlabels[0]
@@ -3982,7 +3982,7 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
                 raise TypeError("If there is more than one dimension, `axis` must be set to something other than ``None``")
         else:
             mask = lambdafunc(self.copy(),axis).data
-        print "shape of mask",mask.shape
+        if verbose: print "shape of mask",mask.shape
         idx, = np.diff(mask).nonzero() # this gives a list of indices for the boundaries between true/false
         idx += 1 # because diff only starts on index #1 rather than #0
         if mask[0]: # because I want to indicate the boundaries of True, if I am starting on True, I need to make 0 a boundary

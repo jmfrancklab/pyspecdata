@@ -856,6 +856,7 @@ def secsy_format(list_of_exp,
         deadtime = 29e-9,
         SW = (None,None),
         verbose = True,
+        phaseplot_thresholds = (0,0),#phaseplot_thresholds = (0.075,0.1),
         fl = None):
     ("""Generate the "SECSY-format" signal that's manually phased -- """
      "`time_shifts` is a (t1,t2) pair of numbers\n"
@@ -874,7 +875,7 @@ def secsy_format(list_of_exp,
     t1_timeshift, t2_timeshift = time_shifts
     for j,info in enumerate(list_of_exp):
         exp_type,date,short_basename = info
-        fl.basename = short_basename #almost forgot about this -- only need to do this once, and it adds to all the other names!
+        fl.basename = short_basename+'\n' #almost forgot about this -- only need to do this once, and it adds to all the other names!
         if SW[1] is not None:
             data = find_file(date+'%s\.'%short_basename,exp_type = exp_type,
                     prefilter = SW[1]) # prefilter leaves it shifted
@@ -909,7 +910,7 @@ def secsy_format(list_of_exp,
         if deadtime > 0:
             signal_slice = signal_slice['t2':(deadtime,inf)]
         fl.next('signal slice before timing correction (cropped log)')
-        fl.image(abs(signal_slice).cropped_log())
+        fl.image(abs(signal_slice).cropped_log(), interpolation = 'bicubic')
         #{{{ set up the values of the indirect dimensions that we iterate over in the phase plots
         if 'te' not in dropped_labels:
             echos_toplot = r_[signal_slice.getaxis('t1')[0]:
@@ -969,7 +970,7 @@ def secsy_format(list_of_exp,
             forplot.ft_clear_startpoints('t1')
             forplot.ift('t1') # start at zero here
         forplot.ift('t2',shift = True) # get a centered echo here
-        fl.image(forplot)
+        fl.image(forplot, interpolation = 'bicubic')
         #ax = gca()
         #ax.axvline(x = 0,color = 'w',alpha = 0.25,linewidth = 1)
         #ax.axhline(y = 0,color = 'w',alpha = 0.25,linewidth = 1)
@@ -987,13 +988,13 @@ def secsy_format(list_of_exp,
         fl.next('phased data')
         fl.image(signal_slice, interpolation = 'bicubic')
         fl.next('cropped log -- to check phasing along $t_2$')
-        fl.image(signal_slice.copy().cropped_log())
+        fl.image(signal_slice.copy().cropped_log(), interpolation = 'bicubic')
         fl.grid()
         fl.next('and select real')
         fl.image(signal_slice.runcopy(real),interpolation = 'bicubic')
         #}}}
         #{{{ phase plot from 3553
-        fl.next('SECSY:\nplot the phase at different $t_1$')
+        fl.next('SECSY:\nplot the phase at different $t_1$',legend = True)
         signal_slice.reorder('t2') # make t2 x
         max_abs = abs(signal_slice.data).flatten().max()
         for this_field in fields_toplot:
@@ -1007,7 +1008,7 @@ def secsy_format(list_of_exp,
                     forplot = forplot['t1':(this_echotime)]
                     this_label.append('%d ns'%(this_echotime/1e-9))
                 fl.plot(forplot[lambda x:
-                    abs(x) > 0.1*max_abs
+                    abs(x) > phaseplot_thresholds[1]*max_abs
                     ].runcopy(angle)/pi,'.',alpha = 0.5,
                     markersize = 3,label = ', '.join(this_label),
                     human_units = False) # set human_units to false because
@@ -1018,9 +1019,9 @@ def secsy_format(list_of_exp,
             #{{{ check phasing along the indirect dimension
             signal_slice.ft('t1')
             fl.next('secsy mode')
-            fl.image(signal_slice)
+            fl.image(signal_slice, interpolation = 'bicubic')
             #{{{ phase plot from 3553
-            fl.next('secsy:\nplot the phase at different $F_2$')
+            fl.next('secsy:\nplot the phase at different $F_2$',legend = True)
             def quarter_of_max(arg,axis):# returns a mask for half of maximum
                 return arg > 0.25*arg.runcopy(max,axis)
             for this_field in fields_toplot:
@@ -1039,7 +1040,7 @@ def secsy_format(list_of_exp,
                 for this_freq in r_[f_start:f_stop:5j]:
                     this_label[-1] = '%d MHz'%(this_freq/1e6)
                     fl.plot(forplot['t2':(this_freq)][lambda x:
-                        abs(x) > 0.075*max_abs].runcopy(angle)/pi, '.',
+                        abs(x) > phaseplot_thresholds[0]*max_abs].runcopy(angle)/pi, '.',
                         alpha = 0.5, markersize = 3,
                         label = ', '.join(this_label))
                     #fl.plot(forplot['t2':(this_freq)].runcopy(angle)/pi,'.',alpha = 0.5,markersize = 3,label = '%d MHz'%(this_freq/1e6))
@@ -1089,9 +1090,15 @@ def plot_oned_v_field(thisdata,
         x = thisdata.getaxis('t2')
         x[:] = field + x / 2.807e10
         #}}}
-        fl.next(oned_plot_name)
+        fl.next(oned_plot_name, legend = True)
         lines = fl.plot(thisdata.runcopy(abs),'-',alpha = 0.5,label = 'abs')
-        color = lines[-1].get_color()
+        try:
+            color = lines[-1].get_color()
+        except:
+            print "lines is",lines
+            print "has attributes",dir(lines[-1])
+            print ndshape(thisdata),thisdata.get_prop('FT')
+            raise RuntimeError("problem with getting the color -- possibly, you  are passing data with too many dimensions")
         realy = thisdata.runcopy(real)
         fl.plot(realy,'--',color = color,alpha = 0.5,label = 'Re')
         fl.plot(thisdata.runcopy(imag),':',color = color,alpha = 0.5,label = 'Im')
@@ -1136,4 +1143,6 @@ def plot_oned_v_offset(thisdata,
         realy = thisdata.runcopy(real)
         fl.plot(realy,'--',color = color,alpha = 0.5,label = 'Re')
         fl.plot(thisdata.runcopy(imag),':',color = color,alpha = 0.5,label = 'Im')
+        axis('tight')
+        expand_y()
         return
