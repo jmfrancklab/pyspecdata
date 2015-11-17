@@ -476,7 +476,7 @@ def postproc_b1_fid_file(data,fl = None,**kwargs):
     fl.next(figname_append+'shifted and phase cycled')
     data.ft('t2',shift = True)
     data *= data.fromaxis(['t2','plen'],lambda x,y: exp(2j*pi*x*(y*0.5)))
-    data.ift('t2',shift = True)
+    data.ift('t2')
     data.ft('phcyc')
     fl.image(data)
     return data['phcyc',1],fl
@@ -689,7 +689,7 @@ def load_nutation_curve(main,background = None,fl = None,max_freq = 30e6,deadtim
         difference = data
     fl.next('ft')
     difference = difference['t2',lambda x: x>deadtime]
-    difference.ft('t2',shift = True)
+    difference.ft('t2')
     difference = difference['t2',lambda x: abs(x)<max_freq]
     difference.set_units('t2','Hz')
     difference.set_units('plen','s')
