@@ -605,17 +605,21 @@ def find_file(searchstring,
             raise ValueError("This file has dimensions that I can't just automatically sort!:\n\tDimensions in the file: %s\n\tDimensions listed in dimlabels %s\n\tDimensions of the data: %s\n\tDimensions in hdf5 but not dimlabels: %s\n\tDimensions in dimlabels but not HDF5: %s"%(repr(indirect_names_in_h5),repr(dimlabels),repr(ndshape(data)),repr(h5_but_not_dimlabels),repr(dimlabels_but_not_h5)))
     #}}}
     if verbose: print "now dimlabels are",dimlabels,"and indirect_names_in_h5 is",indirect_names_in_h5
+    #{{{ chunk the "indirect" dimension up appropriately, and assign the dimensions
     if not unlabeled_indirect:
         if 'indirect' in data.dimlabels:# note that if there was only a single indirect dimension, it's already been used up
-            #{{{ chunk the "indirect" dimension up appropriately, and assign the dimensions
             chunk_dict = dict([(j,len(h5['experiment'][j])) for j in dimlabels if j not in ['bin','phcyc','t2']])
             if verbose: print ndshape(data)
             if verbose: print chunk_dict
             data.chunk('indirect',chunk_dict)
         for this_axis in common_dimensions:
             axis_data = array(h5['experiment'][this_axis])
+            temp = ndshape(data)[this_axis]
+            if len(axis_data) > temp:
+                warnings.warn("Warning: the length of the axis '"+str(this_axis)+"' seems to exceed the length of the data!")
+                axis_data = axis_data[0:temp]
             data.labels(this_axis,axis_data)
-        #}}}
+    #}}}
     #}}}
     #{{{ label the bin dimension, and chunk it up appropriately
     if 'bin' in data.dimlabels:
