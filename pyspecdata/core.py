@@ -1350,10 +1350,10 @@ def autopad_figure(pad = 0.2,centered = False):
             #print "adjusted to",spkwargs
             fig.canvas.draw()# recurse
         return False
-    fig.canvas.mpl_connect('draw_event', on_draw)
+    #fig.canvas.mpl_connect('draw_event', on_draw)
     fig.subplots_adjust(left = 0, right = 1, top = 1, bottom =0)
     fig.canvas.draw()# it needs this to generate the 'renderers'
-    fig.canvas.mpl_connect('draw_event', on_draw)
+    #fig.canvas.mpl_connect('draw_event', on_draw)
     fig.canvas.draw()
     #}}}
 def expand_x(*args):
@@ -5510,18 +5510,20 @@ class fitdata(nddata):
             self.fit_axis = new
         nddata.rename(self,previous,new)
         return self
-    def fit(self,set = None, set_to = None, force_analytical = False):
+    def fit(self,set = None, set_to = None, force_analytical = False, silent = False):
         r'''actually run the fit'''
+        if not silent: print "\n"
+        if not silent: print r'\resizebox*{!}{3in}{\begin{minipage}{\linewidth}'
         if type(set) is dict:
             set_to = set.values()
             set = set.keys()
         x = self.getaxis(self.fit_axis)
         if iscomplex(self.data.flatten()[0]):
-            print lsafen('Warning, taking only real part of fitting data!')
+            if not silent: print lsafen('Warning, taking only real part of fitting data!')
         y = real(self.data)
         sigma = self.get_error()
         if sigma is None:
-            print '{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n'
+            if not silent: print '{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n'
             warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
             sigma = ones(shape(y))
         p_ini = real(array(self.guess())) # need the numpy format to allow boolean mask
@@ -5534,7 +5536,7 @@ class fitdata(nddata):
         if hasattr(self,'has_grad') and self.has_grad == True:
             leastsq_kwargs.update({'Dfun':self.parameter_gradient})
         if 'Dfun' in leastsq_kwargs.keys():
-            print "yes, Dfun passed with arg",leastsq_kwargs['Dfun']
+            if not silent: print "yes, Dfun passed with arg",leastsq_kwargs['Dfun']
         try:
             p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
         #{{{ just give various explicit errors
@@ -5557,8 +5559,8 @@ class fitdata(nddata):
                 p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
                 if success != 1:
                     if mesg.find('two consecutive iterates'):
-                        print r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n'
-                        print r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n'
+                        if not silent: print r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n'
+                        if not silent: print r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n'
                         infodict_keys = infodict.keys()
                         infodict_vals = infodict.values()
                         if 'nfev' in infodict_keys:
@@ -5572,7 +5574,7 @@ class fitdata(nddata):
                         if 'qtf' in infodict_keys:
                             infodict_keys[infodict_keys.index('qtf')] = 'qtf, the vector (transpose(q)*fvec)'
                         for k,v in zip(infodict_keys,infodict_vals):
-                            print r'{\color{red}{\bf %s:}%s}'%(k,v),'\n\n'
+                            if not silent: print r'{\color{red}{\bf %s:}%s}'%(k,v),'\n\n'
                         #self.fit_coeff = None
                         #self.settoguess()
                         #return
@@ -5582,9 +5584,10 @@ class fitdata(nddata):
             else:
                 raise CustomError('leastsq finished with an error message:',mesg)
         else:
-            print r'{\color{blue}'
-            print lsafen("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg))
-            print r'}'
+            if not silent: print r'{\color{blue}'
+            if not silent: print lsafen("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg))
+            if not silent: print r'}'
+            if not silent: print "\n"
         self.fit_coeff = p_out # note that this is stored in HIDDEN form
         dof = len(x) - len(p_out)
         if hasattr(self,'symbolic_x') and force_analytical:
@@ -5593,7 +5596,7 @@ class fitdata(nddata):
             if force_analytical: raise CustomError("I can't take the analytical covariance!  This is problematic.")
             if cov == None:
                 #raise CustomError('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success)
-                print r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success),'}\n'
+                if not silent: print r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success),'}\n'
             self.covariance = cov
         if self.covariance is not None:
             try:
@@ -5603,6 +5606,7 @@ class fitdata(nddata):
                         "type(infodict[fvec])",type(infodict["fvec"]),
                         "type(dof)",type(dof))
         #print lsafen("DEBUG: at end of fit covariance is shape",shape(self.covariance),"fit coeff shape",shape(self.fit_coeff))
+        if not silent: print r'\end{minipage}}'
         return
     def bootstrap(self,points,swap_out = exp(-1.0),seedval = 10347,minbounds = {},maxbounds = {}):
         print r'\begin{verbatim}'

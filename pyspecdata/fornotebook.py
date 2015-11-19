@@ -335,7 +335,11 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
     else:
         retval += '\n'.join(final_retval)
         return retval
-def lplot(fname,width=0.33,figure=False,dpi=72,grid=False,alsosave=None,gensvg = False,print_string = None,centered = False,equal_aspect = False,autopad = True,bytextwidth = None,showbox = True,boundaries = True,genpng = False,mlab = False,fig = None,verbose = False):
+def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
+        alsosave=None, gensvg=False, print_string=None, centered=False,
+        equal_aspect=False, autopad=True, bytextwidth=None,
+        showbox=True, boundaries=True, genpng=False, mlab=False,
+        fig=None, verbose=False):
     '''
     used with python.sty instead of savefig
     
@@ -411,7 +415,11 @@ def lplot(fname,width=0.33,figure=False,dpi=72,grid=False,alsosave=None,gensvg =
         if equal_aspect:
             ax.set_aspect('equal')
         fig.autofmt_xdate()
-        if autopad: autopad_figure(centered = centered)
+        if autopad:
+            try:
+                autopad_figure(centered = centered)
+            except:
+                warnings.warn("Tried to autopad {:s}, but failed".format(fname))
     # replaced outer_legend with appropriate modification to the "legend" option of figlist.show_prep(), same with legend option
         if not boundaries:
             ax = gca()

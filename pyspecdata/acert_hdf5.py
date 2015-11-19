@@ -853,6 +853,69 @@ def find_attenuation(basename,
     fp.close()
     fl.plot(abs(tune1)*ratio,'r',label='test ratio -- rescaled',alpha = 0.3,linewidth = 2)
     return ratio
+def echo_display(data,
+        fl = None,
+        decimation = 4,
+        bw = 200e6,
+        plot_title = '',
+        ):
+    r'''Prepare frequency domain data for time-domain display:
+
+        * ift the data
+        * use the last quarter of the data in order to determine the extra peak that occurs at zero frequency along the direct dimension, and subtract it out
+        * reorder the dimensions to put the direct dimension first
+        * filter to select only ..math::`\pm` `bw`
+        * reduce the number of points along `t1` while improving their SNR:
+            * convolve by 1ns (should later just be the sampling time) mult. by `decimation`
+            * sample one every `decimation` points
+        * manually rename axes as ..math::`f (direct)` and ..math::`t_{echo}`, with units of MHz and ns (respectively)
+        * generate a waterfall plot
+        
+        Parameters
+        ----------
+        data : nddata
+            input data
+        bw : float, optional
+            bandwidth over which to plot ..math::`t_2`
+        fl : figlist_var
+            the figure to which it plots
+        decimation : int, optional
+            the decimation (downsampling) that is used -- note that we throw away points without throwing away SNR
+        plot_title : str, optional
+            title of the plot -- usually the experiment name
+
+        Returns
+        -------
+        the data shown in the waterfall plot
+        '''
+    if fl is None:
+        raise ValueError("You need to pass a figure list")
+    data = data.copy()
+    data.ift('t1')
+    #{{{ subtract the axial peak
+    value = data['t2':0]
+    value = value['t1':(data.getaxis('t1').max()*0.75,inf)]
+    print 'mean value:',value.mean('t1').set_error(None)
+    data['t2':0] -= value
+    #}}}
+    data.reorder(['t2','t1'])# put t2 first
+    data = data['t2',lambda x: abs(x)<bw]
+    #{{{ here, I use the approximation that a gaussian is "about 0" at 6 sigma
+    data.convolve('t1',1e-9/decimation)
+    data = data['t1',decimation::decimation]
+    #}}}
+    #fl.image(data)
+    x = data.getaxis('t2')
+    x /= 1e6
+    data.rename('t2','f (direct) / MHz')
+    x = data.getaxis('t1')
+    x /= 1e-9
+    data.rename('t1','$t_{echo}$ / ns')
+    data.name('signal (arb.u)')
+    fl.next('3D view of abs data')
+    abs(data).waterfall(alpha = 0.8,color = 'w',rotation = (60,20))
+    title(plot_title)
+    return data
 def secsy_format(list_of_exp,
         zerofill = False,
         time_shifts = (0,0),
@@ -880,16 +943,15 @@ def secsy_format(list_of_exp,
     for j,info in enumerate(list_of_exp):
         exp_type,date,short_basename = info
         fl.basename = short_basename+'\n' #almost forgot about this -- only need to do this once, and it adds to all the other names!
-        if SW[1] is not None:
-            data = find_file(date+'%s\.'%short_basename,exp_type = exp_type,
-                    prefilter = SW[1]) # prefilter leaves it shifted
-            data.ift('t2')
+        if SW[1] is None:
+            tempkwargs = {}
         else:
-            data = find_file(date+'%s\.'%short_basename,exp_type = exp_type)
-            #{{{ this sets it up for a shift -- obviously, this is screwy, but leave it be for now
+            tempkwargs = {'prefilter':SW[1]} # prefilter leaves it shifted
+        data = find_file(date+'.*[\-_]%s\.'%short_basename,exp_type = exp_type,
+                **tempkwargs)
+        if SW[1] is None:
             data.ft('t2',shift = True)
-            data.ift('t2')
-            #}}}
+        data.ift('t2')
         #{{{ take various experiments, and convert them uniformly into t1 x t2 2D experiments
         if 'bin' in data.dimlabels:
             if verbose: print "taking the mean along multiple bins"
