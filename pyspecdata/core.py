@@ -1353,8 +1353,13 @@ def autopad_figure(pad = 0.2,centered = False):
     #fig.canvas.mpl_connect('draw_event', on_draw)
     fig.subplots_adjust(left = 0, right = 1, top = 1, bottom =0)
     fig.canvas.draw()# it needs this to generate the 'renderers'
-    #fig.canvas.mpl_connect('draw_event', on_draw)
-    fig.canvas.draw()
+    try:
+        fig.canvas.mpl_connect('draw_event', on_draw)
+        fig.canvas.draw()
+    except Exception, e:
+        warnings.warn("needed to disconnect the autopad callback due to error\n"+str(e))
+        fig.canvas.mpl_disconnect('draw_event', on_draw)
+        fig.canvas.draw()
     #}}}
 def expand_x(*args):
     # this is matplotlib code to expand the x axis
