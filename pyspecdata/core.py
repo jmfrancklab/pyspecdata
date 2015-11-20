@@ -1277,7 +1277,7 @@ def autolegend(*args,**kwargs):
                     txt.set_color(line.get_color())  
                     txt.set_alpha(line.get_alpha())  
     return lg
-def autopad_figure(pad = 0.2,centered = False):
+def autopad_figure(pad = 0.2,centered = False,figname = 'unknown'):
     #{{{ solve the axis issue --> this does just the left
     fig = gcf()
     ax = gca()
@@ -1316,8 +1316,8 @@ def autopad_figure(pad = 0.2,centered = False):
                     else:
                         try:
                             bbox = label.get_window_extent()
-                        except:
-                            raise CustomError('Can\'t get window extent: type of label = ',type(label))
+                        except Exception,e:
+                            warnings.warn("I wasn't able to run autopad on figure"+figname+"\nGetting window extent throws error"+str(e))
                     # the figure transform goes from relative coords->pixels and we
                     # want the inverse of that
                     bboxes.append(bbox)
@@ -1350,16 +1350,12 @@ def autopad_figure(pad = 0.2,centered = False):
             #print "adjusted to",spkwargs
             fig.canvas.draw()# recurse
         return False
-    #fig.canvas.mpl_connect('draw_event', on_draw)
+    fig.canvas.mpl_connect('draw_event', on_draw)
     fig.subplots_adjust(left = 0, right = 1, top = 1, bottom =0)
     fig.canvas.draw()# it needs this to generate the 'renderers'
-    try:
-        fig.canvas.mpl_connect('draw_event', on_draw)
-        fig.canvas.draw()
-    except Exception, e:
-        warnings.warn("needed to disconnect the autopad callback due to error\n"+str(e))
-        fig.canvas.mpl_disconnect('draw_event', on_draw)
-        fig.canvas.draw()
+    fig.canvas.mpl_connect('draw_event', on_draw)
+    fig.canvas.draw()
+    return
     #}}}
 def expand_x(*args):
     # this is matplotlib code to expand the x axis

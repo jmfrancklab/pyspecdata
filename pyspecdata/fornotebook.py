@@ -416,10 +416,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
             ax.set_aspect('equal')
         fig.autofmt_xdate()
         if autopad:
-            try:
-                autopad_figure(centered = centered)
-            except:
-                warnings.warn("Tried to autopad {:s}, but failed".format(fname))
+            autopad_figure(centered = centered,figname = fname)
     # replaced outer_legend with appropriate modification to the "legend" option of figlist.show_prep(), same with legend option
         if not boundaries:
             ax = gca()
