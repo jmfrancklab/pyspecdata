@@ -17,6 +17,7 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
     "\t post-IFT, we assume that the data has previously been FT'd\n"
     "\t\tIf this is the case, passing `shift`=True will cause an error\n"
     "\t\tIf this is not the case, passing `shift`=True generates a standard ifftshift\n"
+    "\t\t`shift`=None will choose True, if and only if this is not the case\n"
     "\t`pad` specifies a zero-filling.  If it's a number, then it gives the"
     " length of the zero-filled dimension.  If it is just `True`, then the size"
     " of the dimension is determined by rounding the dimension size up to the"
@@ -113,7 +114,7 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
                 do_post_shift = True
             else:
                 do_post_shift = False
-        elif shift[j]: # a default fftshift
+        elif shift[j] or shift[j] is None: # a default fftshift
             n = self.data.shape[thisaxis]
             p2_post = n - (n+1) // 2 # this is the size of what starts out as the second half // is floordiv -- copied from scipy -- this whole thing essentially rounds down
             alias_shift_post = 0

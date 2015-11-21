@@ -245,7 +245,7 @@ def fl_image(self,A,**kwargs):
         ],kwargs,pass_through = True)
     if self.black and 'black' not in kwargs.keys():
         kwargs.update({'black':self.black})
-    retval = image(A,**kwargs)#just a placeholder for now, will later keep units + such
+    retval = image(firstarg,**kwargs)#just a placeholder for now, will later keep units + such
     if ax.get_title() is None or len(ax.get_title()) == 0:
         title(self.current)
     if interpolation is not None:

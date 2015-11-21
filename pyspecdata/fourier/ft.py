@@ -16,6 +16,7 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
     "\t post-FT, we assume that the data has previously been IFT'd\n"
     "\t\tIf this is the case, passing `shift`=True will cause an error\n"
     "\t\tIf this is not the case, passing `shift`=True generates a standard fftshift\n"
+    "\t\t`shift`=None will choose True, if and only if this is not the case\n"
     "\t`pad` specifies a zero-filling.  If it's a number, then it gives the"
     " length of the zero-filled dimension.  If it is just `True`, then the size"
     " of the dimension is determined by rounding the dimension size up to the"
@@ -44,7 +45,7 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         ('automix',False)],
         kwargs)
     if not (type(shift) is list):
-        shift = [bool(shift)]*len(axes)
+        shift = [shift]*len(axes)
     #}}}
     for j in range(0,len(axes)):
         do_post_shift = False
@@ -110,7 +111,7 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
                 do_post_shift = True
             else:
                 do_post_shift = False
-        elif shift[j]: # a default fftshift
+        elif shift[j] or shift[j] is None: # a default fftshift
             if automix:
                 raise ValueError("You can't use automix and shift at the same time --> it doesn't make sense")
             n = self.data.shape[thisaxis]

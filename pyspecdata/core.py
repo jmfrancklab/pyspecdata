@@ -3783,6 +3783,7 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
     _ft_shift = this_fourier.ft_shift._ft_shift
     ftshift = this_fourier.ftshift.ftshift
     convolve = this_fourier.convolve.convolve
+    skew = this_fourier.skew.skew
     #}}}
     #}}}
     #{{{ interpolation and binning
@@ -3933,7 +3934,7 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
             return self
     def contiguous(self,lambdafunc,axis = None,verbose = False): #adapted stackexchange http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-array
         """this function returns the start and stop positions along the
-        axis for the largest contiguous block for which lambdafunc returns
+        axis for the contiguous blocks for which lambdafunc returns
         true
 
         Parameters
