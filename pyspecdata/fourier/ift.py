@@ -60,7 +60,9 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             #           meaning that I must have started with frequency as the
             #           source data, and am now constructing an artificial and
             #           possibly aliased time-domain
-            self.set_ft_prop(axes[j],['time','not','aliased'],False)
+            if self.get_ft_prop(axes[j],['time','not','aliased']) is not True:#
+                #                              has been manually set/overridden
+                self.set_ft_prop(axes[j],['time','not','aliased'],False)
             #{{{ but on the other hand, I am taking the frequency as the
             #    not-aliased "source", so as long as I haven't explicitly set it as
             #    unsafe, declare it "safe"
