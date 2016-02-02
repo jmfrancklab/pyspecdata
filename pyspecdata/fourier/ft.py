@@ -57,7 +57,10 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             #           meaning that I must have started with time as the
             #           source data, and am now constructing an artificial and
             #           possibly aliased frequency-domain
-            self.set_ft_prop(axes[j],['freq','not','aliased'],False)
+            print "DBG FT1: seems that ift has not yet been run"
+            if self.get_ft_prop(axes[j],['freq','not','aliased']) is not True:#
+                #                              has been manually set/overridden
+                self.set_ft_prop(axes[j],['freq','not','aliased'],False)
             #{{{ but on the other hand, I am taking the time as the
             #    not-aliased "source", so as long as I haven't explicitly set it as
             #    unsafe, declare it "safe"

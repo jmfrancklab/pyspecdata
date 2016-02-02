@@ -34,11 +34,14 @@ def skew(self,altered_axis,by_amount,propto_axis,zero_fill = True):
     default_kwargs = {'pad':False}
     kwargs = dict(default_kwargs)
     calc_double_zero_fill(altered_axis,zero_fill,kwargs)
+    print "DBG 1: is frequency not aliased?",self.get_ft_prop('t2',['freq','not','aliased'])
     self.ft(altered_axis,verbose = True,**kwargs)
     #phaseshift = self.fromaxis([altered_axis,propto_axis],
     #        lambda x,y: exp(-2j*pi*by_amount*x*y))
     #self.data *= phaseshift.data
     #kwargs = dict(default_kwargs)
     calc_double_zero_fill(altered_axis,zero_fill,kwargs)
+    print "DBG 2: is frequency not aliased?",self.get_ft_prop('t2',['freq','not','aliased'])
     self.ift(altered_axis,**kwargs)
+    print "DBG 3: is frequency not aliased?",self.get_ft_prop('t2',['freq','not','aliased'])
     return self
