@@ -30,18 +30,14 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
     if (type(axes) is str):
         axes = [axes]
     #{{{ check and set the FT property
-    x = self.get_prop('FT')
-    if x is None:
-        x = {}
-        self.set_prop('FT',x)
     for j in axes:
-        if j in x.keys() and x[j] is True:
+        if self.get_ft_prop(j):
             errmsg = "This data has been FT'd along "+str(j)
             raise ValueError(errmsg + "-- you can't FT"
                     " again unless you explicitly"
                     " .set_prop('FT',None), which is"
                     " probably not what you want to do")
-        x.update({j:True})
+        self.set_ft_prop(j) # sets the "FT" property to "true"
     #}}}
     if 'shiftornot' in kwargs:
         raise ValueError("shiftornot is obsolete --> use shift instead")

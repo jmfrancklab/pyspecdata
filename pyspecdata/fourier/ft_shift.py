@@ -4,10 +4,15 @@ thinkaboutit_message = ("If you think about it, you"
                         " probably don't want to do this.  You either want to fill with"
                         " zeros from zero up to the start or you want to first set the"
                         " start point to zero.")
-def get_ft_prop(self,axis,propname):
+def get_ft_prop(self,axis,propname = None):
     ("Gets the FT property given by `propname`.  For both setting"
-            " and getting, `None` is equivalent to an unset value")
-    if type(propname) is str:
+            " and getting, `None` is equivalent to an unset value"
+            " if no `propname` is given, this just sets the"
+            " `FT` property, which tells if a dimension is"
+            " frequency or time domain")
+    if propname is None:
+        propname = []
+    elif type(propname) is str:
         propname = [propname]
     key_name = '_'.join(['FT'] + propname)
     this_dict = self.get_prop(key_name)
@@ -17,16 +22,22 @@ def get_ft_prop(self,axis,propname):
         return this_dict[axis]
     else:
         return None
-def set_ft_prop(self,axis,propname,*value):
+def set_ft_prop(self,axis,propname = None,value = True):
     ("Sets the FT property given by `propname`.  For both setting"
-            " and getting, `None` is equivalent to an unset value")
-    if len(value) == 0:
-        value = True
-    elif len(value) == 1:
-        value = value[0]
-    else:
-        raise ValueError("You need to set one value, or have it implied to be true")
-    if type(propname) is str:
+            " and getting, `None` is equivalent to an unset value"
+            " if `propname` is a boolean, and `value` is True"
+            " (the default), it's assumed that propname is"
+            " actually None, and that `value` is set to the"
+            " `propname` argument (this allows us to set the"
+            " `FT` property more easily)")
+    #{{{ if I pass no propname, but a value
+    if type(propname) is bool and value is True:
+        value = propname
+        propname = None
+    #}}}
+    if propname is None:
+        propname = []
+    elif type(propname) is str:
         propname = [propname]
     key_name = '_'.join(['FT'] + propname)
     this_dict = self.get_prop(key_name)
