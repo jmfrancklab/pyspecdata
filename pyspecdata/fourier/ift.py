@@ -39,6 +39,12 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         x = {}
         self.set_prop('FT',x)
     for j in axes:
+        if j in x.keys() and x[j] is False:
+            errmsg = "This data has been IFT'd along "+str(j)
+            raise ValueError("This data has already been"
+                    " again unless you explicitly"
+                    " .set_prop('IFT',None), which is"
+                    " probably not what you want to do")
         x.update({j:False})
     #}}}
     if 'shiftornot' in kwargs:
