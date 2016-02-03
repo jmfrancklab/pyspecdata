@@ -33,7 +33,7 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
     axes = self._possibly_one_axis(axes)
     if (type(axes) is str):
         axes = [axes]
-    #{{{ set the FT property
+    #{{{ check and set the FT property
     x = self.get_prop('FT')
     if x is None:
         x = {}
@@ -41,9 +41,9 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
     for j in axes:
         if j in x.keys() and x[j] is False:
             errmsg = "This data has been IFT'd along "+str(j)
-            raise ValueError("This data has already been"
+            raise ValueError(errmsg + "-- you can't IFT"
                     " again unless you explicitly"
-                    " .set_prop('IFT',None), which is"
+                    " .set_prop('FT',None), which is"
                     " probably not what you want to do")
         x.update({j:False})
     #}}}
@@ -117,7 +117,7 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             if verbose: print "check for p2_post_discrepancy"
             if verbose: print "desired startpoint",desired_startpoint
             p2_post,p2_post_discrepancy,alias_shift_post = _find_index(v,origin = desired_startpoint,verbose = verbose)
-            if verbose: print "p2_post,p2_post_discrepancy,v at p2_post, and v at p2_post-1:", p2_post, p2_post_discrepancy, v[p2_post], v[p2_post - 1]
+            if verbose: print "p2_post,p2_post_discrepancy,alias_shift_post,v at p2_post, and v at p2_post-1:", p2_post, p2_post_discrepancy, alias_shift_post, v[p2_post], v[p2_post - 1]
             if p2_post != 0 or p2_post_discrepancy is not None:
                 do_post_shift = True
             else:
@@ -138,7 +138,7 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         #          exactly through zero
         if p2_post_discrepancy is not None:
             assert self.get_ft_prop(axes[j],['freq','not','aliased']),("in order to"
-                " shift by a time that is not integral w.r.t. the dwell time, you need"
+                " shift by a frequency that is not integral w.r.t. the frequency resolution step, you need"
                 " to be sure that the frequency-domain spectrum is not aliased.  This"
                 " is typically achieved by starting from a time domain spectrum and"
                 " generating the frequency domain by an FT.  If you **know** by other"

@@ -29,7 +29,7 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
     axes = self._possibly_one_axis(axes)
     if (type(axes) is str):
         axes = [axes]
-    #{{{ set the FT property
+    #{{{ check and set the FT property
     x = self.get_prop('FT')
     if x is None:
         x = {}
@@ -63,7 +63,6 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             #           meaning that I must have started with time as the
             #           source data, and am now constructing an artificial and
             #           possibly aliased frequency-domain
-            print "DBG FT1: seems that ift has not yet been run"
             if self.get_ft_prop(axes[j],['freq','not','aliased']) is not True:#
                 #                              has been manually set/overridden
                 self.set_ft_prop(axes[j],['freq','not','aliased'],False)
@@ -107,7 +106,7 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             v = r_[0:padded_length] * dv # v is the name of the *new* axis.  Note
             #   that we stop one index before the SW, which is what we want
         desired_startpoint = self.get_ft_prop(axes[j],['start','freq'])
-        if desired_startpoint is not None:# FT_start_time is set
+        if desired_startpoint is not None:# FT_start_freq is set
             if shift[j]:
                 raise ValueError("you are not allowed to shift an array for"
                         " which the index for $f=0$ has already been"
@@ -141,7 +140,7 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
                 " shift by a time that is not integral w.r.t. the dwell time, you need"
                 " to be sure that the time-domain spectrum is not aliased.  This"
                 " is typically achieved by starting from a time domain spectrum and"
-                " generating the time domain by an FT.  If you **know** by other"
+                " generating the frequency domain by an FT.  If you **know** by other"
                 " means that the time-domain spectrum is not aliased, you can also"
                 " set the `time_not_aliased` FT property to `True`")
             assert abs(p2_post_discrepancy)<abs(dv),("I expect the discrepancy to be"
@@ -191,8 +190,8 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         self.data *= du # this gives the units in the integral noted in the docstring
         #}}}
         #{{{ finally, if "p2_pre" for the pre-shift didn't correspond exactly to
-        #       zero, then the pre-ift data was shifted, and I must reflect
-        #       that by performing a post-ift phase shift
+        #       zero, then the pre-ft data was shifted, and I must reflect
+        #       that by performing a post-ft phase shift
         if p2_pre_discrepancy is not None:
             assert abs(p2_pre_discrepancy)<abs(du),("I expect the discrepancy to be"
                     " smaller than du ({:0.2f}), but it's {:0.2f} -- what's going"
