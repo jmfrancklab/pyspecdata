@@ -33,29 +33,33 @@ def skew(self,altered_axis,by_amount,propto_axis,zero_fill = True):
         n = int(2**(ceil(log2(n))))
         n *= 2
         return n
-    pad_kwarg = None
-    if zero_fill:
-        pad_kwarg = calc_double_zero_fill(altered_axis)
-
-    if self.get_ft_prop(altered_axis):
+    if self.get_ft_prop(altered_axis) and self.get_ft_prop(propto_axis):
         frequency_domain = True
-    else:
+    elif (self.get_ft_prop(altered_axis) == False) and (self.get_ft_prop(propto_axis) == False):
         frequency_domain = False
+    else:
+        raise ValueError("In order to skew, both dimensions must be in the same (time vs. frequency) domain")
 
     if frequency_domain:
-        self.ift(altered_axis,
-                pad = pad_kwarg)
-        #phaseshift = self.fromaxis([altered_axis,propto_axis],
-        #        lambda x,y: exp(2j*pi*by_amount*x*y))
-        #self.data *= phaseshift.data
-        self.ft(altered_axis,
-                pad = pad_kwarg)
+        print "entering time domain for",altered_axis
+        if zero_fill:
+            pad_kwarg = calc_double_zero_fill(propto_axis)
+            self.ift(propto_axis) # create more room along the time dimension
+            self.ft(propto_axis,pad = pad_kwarg)
+        self.ift(altered_axis)
+        print "applying phase shift"
+        phaseshift = self.fromaxis([altered_axis,propto_axis],
+                lambda x,y: exp(2j*pi*by_amount*x*y))
+        self.data *= phaseshift.data
+        print "back to frequency domain"
+        self.ft(altered_axis)
     else:
-        self.ft(altered_axis,
-                pad = pad_kwarg)
-        #phaseshift = self.fromaxis([altered_axis,propto_axis],
-        #        lambda x,y: exp(-2j*pi*by_amount*x*y))
-        #self.data *= phaseshift.data
-        self.ift(altered_axis,
-                pad = pad_kwarg)
+        print "entering time domain for",altered_axis
+        self.ft(altered_axis)
+        print "applying phase shift"
+        phaseshift = self.fromaxis([altered_axis,propto_axis],
+                lambda x,y: exp(-2j*pi*by_amount*x*y))
+        self.data *= phaseshift.data
+        print "back to frequency domain"
+        self.ift(altered_axis)
     return self
