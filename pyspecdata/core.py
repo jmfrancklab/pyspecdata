@@ -3783,7 +3783,7 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
     _ft_shift = this_fourier.ft_shift._ft_shift
     ftshift = this_fourier.ftshift.ftshift
     convolve = this_fourier.convolve.convolve
-    skew = this_fourier.skew.skew
+    shear = this_fourier.skew.shear
     #}}}
     #}}}
     #{{{ interpolation and binning
@@ -4213,11 +4213,11 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
         else:
             return None
     def extend_to_match(self,a,b,skew_amount):
-        "this is a helper function for `.fourier.skew`"
+        "this is a helper function for `.fourier.shear`"
         #{{{ in the time domain, b is the one that's altered (and
-        #       needs to be expanded), while the shearing is proportional to
+        #       needs to be extended), while the shearing is proportional to
         #       -by_amount*a
-        print "expanding to account for the conjugate domain shear along ",b,"by",skew_amount,"which gives lesser and greater expansion amounts of",
+        print "extending to account for the conjugate domain shear along ",b,"by",skew_amount,"which gives lesser and greater expansion amounts of",
         shear_displacement = -skew_amount * self.getaxis(a
                 )[r_[0,-1]]
         shear_displacement = sort(shear_displacement) # this gives the lesser
@@ -4225,7 +4225,7 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
         #       of the two shear displacements, so that I know how to extend.
         #       I need to manually sort, because I don't know if skew_amount is
         #       negative or positive.
-        #{{{ actually expand: leave alone if zero.
+        #{{{ actually extend: leave alone if zero.
         print " and ".join(map(str,shear_displacement))
         for j in [0,-1]:
             if shear_displacement[j] != 0.:
