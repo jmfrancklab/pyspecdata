@@ -3783,7 +3783,7 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
     _ft_shift = this_fourier.ft_shift._ft_shift
     ftshift = this_fourier.ftshift.ftshift
     convolve = this_fourier.convolve.convolve
-    shear = this_fourier.skew.shear
+    shear = this_fourier.shear.shear
     #}}}
     #}}}
     #{{{ interpolation and binning

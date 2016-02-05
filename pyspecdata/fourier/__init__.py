@@ -3,7 +3,7 @@ __all__ = [ "_ft_conj",
             "convolve",
             "ft",
             "ftshift",
-            "skew",
+            "shear",
             "ift",
             ]
 

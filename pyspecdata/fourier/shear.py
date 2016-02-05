@@ -2,12 +2,26 @@ from ..general_functions import *
 from pylab import * 
 
 def shear(self,altered_axis,by_amount,propto_axis,zero_fill = False,start_in_conj = False):
-    r'''Use the Fourier shift theorem to shear the data:
-    ..math: `f(x,y) \rightarrow f(x+ay,y)`
+    r'''Use the Fourier shift theorem to shear the data :math:`s`:
 
-    If `altered_axis` is in the frequency domain, the shift
-    will be performed in the time domain, and vice versa.
+    ..math: `s(x',y,z) = s(x+ay,y,z)`
 
+    where :math:`x` is the `altered_axis` and :math:`y` is the
+    `propto_axis`.  (Actually typically 2D, but :math:`z` included
+    just to illustrate other dimensions that aren't involved)
+
+    This is equivalent to the following in the conjugate domain:
+
+    ..math: `\tilde{s}(f_x,f'_y,z) = \tilde{s}(f_x,f_y-af_x,f_z)`
+
+    Because of this, the algorithm **also** automatically `extend`s the data in `f_y`
+    axis.  Equivalently, it increases the resolution (decreases the interval
+    between points) in the `propto_axis` dimension.  This prevents aliasing in
+    the conjugate domain, which will corrupt the data *w.r.t.* successive
+    transformations. *However*, by default (unless you set `zero_fill`), it
+    does *not* expand the data in the current domain (*i.e.* frequency *vs.*
+    time).  The data in the current domain might alias, but you can see this
+    happen.
 
     Parameters
     ----------
