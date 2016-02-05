@@ -96,7 +96,7 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             #{{{ need to calculate du and all checks here so I can calculate new u
             du = u[1]-u[0] # the dwell gives the bandwidth, whether or not it has been zero padded
             thismsg = "In order to perform FT or IFT, the axis must be equally spaced and ascending"
-            assert all(abs(diff(u) - du) < tolerance), thismsg# absolute
+            assert all(abs(diff(u) - du)/du < tolerance), thismsg# absolute
             #   tolerance can be large relative to a du of ns -- don't use
             #   allclose/isclose, since they are more recent numpy additions
             assert du > 0, thismsg

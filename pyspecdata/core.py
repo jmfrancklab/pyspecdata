@@ -4212,6 +4212,70 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
             return retval
         else:
             return None
+    def expand(self,axis,extent,fill_with = 0,tolerance = 1e-5):
+        r"""If `axis` is uniformly ascending with spacing :math:`dx`,
+        then extend by adding a point every :math:`dx` until the axis
+        includes the point `extent`.  Fill the newly created datapoints with `fill_with`.
+
+        Parameters
+        ----------
+
+        axis : str
+            name of the axis to extend
+        extent : double
+            extend the axis `axis` out to this point
+        fill_with : double
+            fill the new data points with this value (defaults to 0)
+        tolerance : double
+            when checking for ascending axis labels, etc.,
+            values/differences must match to within tolerance
+            (assumed to represent the actual precision, given
+            various errors, etc.)
+        """
+        # check for uniformly ascending
+        u = self.getaxis(axis)
+        thismsg = "In order to expand, the axis must be equally spaced (and ascending)"
+        du = (u[-1] - u[0])/(len(u)-1.)
+        assert all(abs(diff(u) - du)/du < tolerance), thismsg# absolute
+        # figure out how many points I need to add, and on which side of the axis
+        thismsg = "In order to expand, the axis must be ascending (and equally spaced)"
+        assert du > 0, thismsg# ascending
+        start_index = 0
+        stop_index = len(u)
+        if extent < u[0]:
+            start_index = int(-(u[0] - extent) // du) # the part after the negative is positive
+            if (start_index * du + (u[0] - extent))/du < -tolerance:# the first quantity here is negative
+                start_index -= 1
+        elif extent > u[-1]:
+            stop_index_addto = int((extent - u[-1]) // du)
+            if ((extent - u[-1]) - du * stop_index_addto)/du > tolerance:# the first quantity here is negative
+                stop_index_addto += 1
+            stop_index += stop_index_addto
+        else:
+            raise RuntimeError("extent needs to be further than the bounds on '"+str(axis)+"', which are "+str(u[0])+" and "+str(u[1]))
+        #{{{ create a new array, and put self.data into it
+        newdata = list(self.data.shape)
+        newdata[self.axn(axis)] = stop_index - start_index
+        if fill_with == 0:
+            newdata = zeros(newdata,dtype = self.data.dtype)
+        else:
+            newdata = fill_with * ones(newdata,dtype = self.data.dtype)
+        newdata_slice = [slice(None,None,None)] * len(newdata.shape)
+        newdata_slice[self.axn(axis)] = slice(-start_index,len(u)-start_index,None)
+        print "-------------------------"
+        print "shape of newdata",newdata.shape
+        print "shape of self.data",self.data.shape
+        print "len of u",len(u)
+        print "start index",start_index
+        print "shape of slice",newdata[newdata_slice].shape
+        print "-------------------------"
+        newdata[newdata_slice] = self.data
+        self.data = newdata
+        #}}}
+        # construct the new axis
+        new_u = u[0] + du * r_[start_index:stop_index]
+        self.setaxis(axis,new_u)
+        return self
     def setaxis(self,axis,value):
         ("set the value of the axis if you pass a function as the `value`, it"
         " will use the existing axis labels as the argument of the function, and"
