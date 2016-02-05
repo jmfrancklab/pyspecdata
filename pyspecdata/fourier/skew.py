@@ -28,25 +28,18 @@ def skew(self,altered_axis,by_amount,propto_axis,zero_fill = True):
         with the `propto_axis` and `altered_axis` dimensions
         flipped.
     '''
-    def calc_double_zero_fill(thisaxis):
-        n = self.data.shape[self.axn(thisaxis)]
-        n = int(2**(ceil(log2(n))))
-        n *= 2
-        return n
     if self.get_ft_prop(altered_axis) and self.get_ft_prop(propto_axis):
         frequency_domain = True
     elif (self.get_ft_prop(altered_axis) == False) and (self.get_ft_prop(propto_axis) == False):
         frequency_domain = False
     else:
         raise ValueError("In order to skew, both dimensions must be in the same (time vs. frequency) domain")
-
     if frequency_domain:
         print "entering time domain for",altered_axis
-        if zero_fill:
-            pad_kwarg = calc_double_zero_fill(propto_axis)
-            self.ift(propto_axis) # create more room along the time dimension
-            self.ft(propto_axis,pad = pad_kwarg)
         self.ift(altered_axis)
+        self.ift(propto_axis) # before expansion
+        self.extend_to_match(altered_axis,propto_axis,by_amount)
+        self.ft(propto_axis) # after expansion
         print "applying phase shift"
         phaseshift = self.fromaxis([altered_axis,propto_axis],
                 lambda x,y: exp(2j*pi*by_amount*x*y))
@@ -56,6 +49,9 @@ def skew(self,altered_axis,by_amount,propto_axis,zero_fill = True):
     else:
         print "entering time domain for",altered_axis
         self.ft(altered_axis)
+        self.ft(propto_axis) # before expansion
+        self.extend_to_match(altered_axis,propto_axis,by_amount)
+        self.ift(propto_axis) # after expansion
         print "applying phase shift"
         phaseshift = self.fromaxis([altered_axis,propto_axis],
                 lambda x,y: exp(-2j*pi*by_amount*x*y))

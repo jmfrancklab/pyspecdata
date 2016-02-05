@@ -91,8 +91,10 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             raise ValueError("seems to be no axis for"+repr(axes[j])+"set an axis before you try to FT")
         else:
             #{{{ need to calculate du and all checks here so I can calculate new u
-            du = u[1]-u[0] # the dwell gives the bandwidth, whether or not it has been zero padded
-            thismsg = "In order to perform FT or IFT, the axis must be equally spaced and ascending"
+            du = (u[-1]-u[0])/(len(u)-1.) # the dwell gives the bandwidth, whether or not it has been zero padded -- I calculate this way for better accuracy
+            thismsg = "In order to perform FT or IFT, the axis must be ascending (and equally spaced)"
+            assert du > 0, thismsg
+            thismsg = "In order to perform FT or IFT, the axis must be equally spaced (and ascending)"
             assert all(abs(diff(u) - du)/du < tolerance), thismsg# absolute
             #   tolerance can be large relative to a du of ns -- don't use
             #   allclose/isclose, since they are more recent numpy additions
