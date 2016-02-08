@@ -82,7 +82,9 @@ def image(A,x=[],y=[],**kwargs):
         A = imagehsv(A,**imagehsvkwargs)
         retval = imshow(A,extent=myext,**kwargs)
     else:
-        retval = imshow(A,extent=myext,**kwargs)
+        retval = imshow(real(A),extent=myext,**kwargs)# real is needed, because
+        #           if it's just complex with a zero imaginary part, matplotlib
+        #           will freak out
         colorbar()
     if setlabels:
         xlabel(x_label)
