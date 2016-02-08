@@ -3784,6 +3784,7 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
     ftshift = this_fourier.ftshift.ftshift
     convolve = this_fourier.convolve.convolve
     shear = this_fourier.shear.shear
+    extend_for_shear = this_fourier.shear.extend_for_shear
     #}}}
     #}}}
     #{{{ interpolation and binning
@@ -4212,35 +4213,6 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
             return retval
         else:
             return None
-    def extend_to_match(self,b,a,skew_amount,verbose = False):
-        "this is a helper function for `.fourier.shear`"
-        #{{{ in the time domain, b is the one that's altered (and
-        #       needs to be extended), while the shearing is proportional to
-        #       -by_amount*a
-        if verbose: print "extending to account for the shear along ",b,"by",skew_amount,"which gives lesser and greater expansion amounts of",
-        shear_displacement = skew_amount * self.getaxis(a
-                )[r_[0,-1]]
-        shear_displacement = sort(shear_displacement) # this gives the lesser
-        #       and greater, respectively (i.e. le, gt -- not smaller/bigger),
-        #       of the two shear displacements, so that I know how to extend.
-        #       I need to manually sort, because I don't know if skew_amount is
-        #       negative or positive.
-        #{{{ actually extend: leave alone if zero.
-        if verbose: print " and ".join(map(str,shear_displacement))
-        for j in [0,-1]:
-            if shear_displacement[j] != 0.:
-                if verbose: print ' '.join(map(str,("preparing to extend b",
-                        self.getaxis(b)[r_[0,-1]], "to",
-                        self.getaxis(b)[j] + shear_displacement[j],
-                        "along the", ['lesser','greater'][j],"side of",
-                        "b (",self.getaxis(b)[j],")")))
-                self.extend(b, self.getaxis(b)[j] +
-                        shear_displacement[j])# match greater with greater and
-                #       lesser with lesser (doesn't matter to me which side of
-                #       a that they came from)
-        #}}}
-        #}}}
-        return self
     def extend(self,axis,extent,fill_with = 0,tolerance = 1e-5):
         r"""If `axis` is uniformly ascending with spacing :math:`dx`,
         then extend by adding a point every :math:`dx` until the axis

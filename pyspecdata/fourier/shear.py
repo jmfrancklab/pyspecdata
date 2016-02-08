@@ -1,6 +1,36 @@
 from ..general_functions import *
 from pylab import * 
 
+def extend_for_shear(self,b,a,skew_amount,verbose = False):
+    "this is a helper function for `.fourier.shear`"
+    #{{{ in the time domain, b is the one that's altered (and
+    #       needs to be extended), while the shearing is proportional to
+    #       -by_amount*a
+    if verbose: print "extending to account for the shear along ",b,"by",skew_amount,"which gives lesser and greater expansion amounts of",
+    shear_displacement = skew_amount * self.getaxis(a
+            )[r_[0,-1]]
+    shear_displacement = sort(shear_displacement) # this gives the lesser
+    #       and greater, respectively (i.e. le, gt -- not smaller/bigger),
+    #       of the two shear displacements, so that I know how to extend.
+    #       I need to manually sort, because I don't know if skew_amount is
+    #       negative or positive.
+    #{{{ actually extend: leave alone if zero.
+    if verbose: print " and ".join(map(str,shear_displacement))
+    for j in [0,-1]:
+        if shear_displacement[j] != 0.:
+            if verbose: print ' '.join(map(str,("preparing to extend b",
+                    self.getaxis(b)[r_[0,-1]], "to",
+                    self.getaxis(b)[j] + shear_displacement[j],
+                    "along the", ['lesser','greater'][j],"side of",
+                    "b (",self.getaxis(b)[j],")")))
+            self.extend(b, self.getaxis(b)[j] +
+                    shear_displacement[j])# match greater with greater and
+            #       lesser with lesser (doesn't matter to me which side of
+            #       a that they came from)
+    #}}}
+    #}}}
+    return self
+
 def shear(self,altered_axis,by_amount,propto_axis,zero_fill = False,start_in_conj = False):
     r'''Use the Fourier shift theorem to shear the data :math:`s`:
 
@@ -80,14 +110,14 @@ def shear(self,altered_axis,by_amount,propto_axis,zero_fill = False,start_in_con
         print "entering time domain for",altered_axis
         if not start_in_conj:
             if zero_fill:
-                self.extend_to_match(altered_axis,propto_axis,by_amount)
+                self.extend_for_shear(altered_axis,propto_axis,by_amount)
             self.ift(altered_axis)
             self.ift(propto_axis) # before expansion
         else:
             if zero_fill:
                 raise ValueError("I can't zero fill  because you chose to start in the conjugate dimension")
         print "conjugate domain extension:"
-        self.extend_to_match(propto_axis,altered_axis,-by_amount) # in
+        self.extend_for_shear(propto_axis,altered_axis,-by_amount) # in
         #       the time domain, propto_axis is the one that's altered
         #       (and needs to be extended), while the shearing is
         #       proportional to -by_amount*altered_axis
@@ -102,14 +132,14 @@ def shear(self,altered_axis,by_amount,propto_axis,zero_fill = False,start_in_con
         print "entering time domain for",altered_axis
         if not start_in_conj:
             if zero_fill:
-                self.extend_to_match(altered_axis,propto_axis,by_amount)
+                self.extend_for_shear(altered_axis,propto_axis,by_amount)
             self.ft(altered_axis)
             self.ft(propto_axis) # before expansion
         else:
             if zero_fill:
                 raise ValueError("I can't zero fill  because you chose to start in the conjugate dimension")
         print "conjugate domain extension:"
-        self.extend_to_match(propto_axis,altered_axis,-by_amount) # in
+        self.extend_for_shear(propto_axis,altered_axis,-by_amount) # in
         #       the time domain, propto_axis is the one that's altered
         #       (and needs to be extended), while the shearing is
         #       proportional to -by_amount*altered_axis
