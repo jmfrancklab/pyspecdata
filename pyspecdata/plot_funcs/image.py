@@ -24,10 +24,10 @@ def image(A,x=[],y=[],**kwargs):
         setlabels = True
         templabels = list(A.dimlabels)
         x_label = templabels[-1]
-        try:
-            x = list(A.getaxis(x_label))
-        except:
+        if A.getaxis(x_label) is None:
             x = r_[0,ndshape(A)[x_label]]
+        else:
+            x = list(A.getaxis(x_label))
         x_label = A.unitify_axis(x_label)
         templabels.pop(-1)
         y_label = ''
