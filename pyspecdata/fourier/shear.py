@@ -61,15 +61,16 @@ def shear(self,altered_axis,by_amount,propto_axis,zero_fill = False,start_in_con
         in the conjugate domain that the data is in at the end of the
         function call.
     '''
-    if zero_fill:
-        raise ValueError("zero_fill is put here so that I can avoid aliasing in the domain that I see (by adding another extend), but it's not yet supported")
     #{{{ see if it's in the frequency or time domain
     if self.get_ft_prop(altered_axis) and self.get_ft_prop(propto_axis):
         frequency_domain = True
-    elif (self.get_ft_prop(altered_axis) == False) and (self.get_ft_prop(propto_axis) == False):
+    elif not self.get_ft_prop(altered_axis) and not self.get_ft_prop(propto_axis):
         frequency_domain = False
     else:
-        raise ValueError("In order to shear, both dimensions must be in the same (time vs. frequency) domain")
+        raise ValueError("In order to shear, both dimensions must be in the same (time vs. frequency) domain.  Currently, they are {:s} for {:s} and {:s} for {:s}.".format(
+            self.get_ft_prop(altered_axis),altered_axis,
+            self.get_ft_prop(propto_axis),propto_axis
+            ))
     if start_in_conj:# then I want to actually specify the shear in the other
         #               domain than the one I start in, and just skip the
         #               beginning
@@ -78,9 +79,18 @@ def shear(self,altered_axis,by_amount,propto_axis,zero_fill = False,start_in_con
     if frequency_domain:
         print "entering time domain for",altered_axis
         if not start_in_conj:
+            if zero_fill:
+                self.extend_to_match(altered_axis,propto_axis,by_amount)
             self.ift(altered_axis)
             self.ift(propto_axis) # before expansion
-        self.extend_to_match(altered_axis,propto_axis,by_amount)
+        else:
+            if zero_fill:
+                raise ValueError("I can't zero fill  because you chose to start in the conjugate dimension")
+        print "conjugate domain extension:"
+        self.extend_to_match(propto_axis,altered_axis,-by_amount) # in
+        #       the time domain, propto_axis is the one that's altered
+        #       (and needs to be extended), while the shearing is
+        #       proportional to -by_amount*altered_axis
         self.ft(propto_axis) # after expansion
         print "applying phase shift"
         phaseshift = self.fromaxis([altered_axis,propto_axis],
@@ -91,9 +101,18 @@ def shear(self,altered_axis,by_amount,propto_axis,zero_fill = False,start_in_con
     else:
         print "entering time domain for",altered_axis
         if not start_in_conj:
+            if zero_fill:
+                self.extend_to_match(altered_axis,propto_axis,by_amount)
             self.ft(altered_axis)
             self.ft(propto_axis) # before expansion
-        self.extend_to_match(altered_axis,propto_axis,by_amount)
+        else:
+            if zero_fill:
+                raise ValueError("I can't zero fill  because you chose to start in the conjugate dimension")
+        print "conjugate domain extension:"
+        self.extend_to_match(propto_axis,altered_axis,-by_amount) # in
+        #       the time domain, propto_axis is the one that's altered
+        #       (and needs to be extended), while the shearing is
+        #       proportional to -by_amount*altered_axis
         self.ift(propto_axis) # after expansion
         print "applying phase shift"
         phaseshift = self.fromaxis([altered_axis,propto_axis],
