@@ -31,7 +31,7 @@ def extend_for_shear(self,b,a,skew_amount,verbose = False):
     #}}}
     return self
 
-def shear(self,altered_axis,by_amount,propto_axis,zero_fill = False,start_in_conj = False):
+def shear(self,altered_axis,propto_axis,by_amount,zero_fill = False,start_in_conj = False):
     r'''Use the Fourier shift theorem to shear the data :math:`s`:
 
     ..math: `s(x',y,z) = s(x+ay,y,z)`

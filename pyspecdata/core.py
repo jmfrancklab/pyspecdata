@@ -33,6 +33,7 @@ from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
 from .datadir import getDATADIR
 from . import fourier as this_fourier
+from . import axis_manipulation
 from . import plot_funcs as this_plotting
 from .general_functions import *
 #rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
@@ -3783,7 +3784,7 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
     _ft_shift = this_fourier.ft_shift._ft_shift
     ftshift = this_fourier.ftshift.ftshift
     convolve = this_fourier.convolve.convolve
-    shear = this_fourier.shear.shear
+    shear = axis_manipulation.shear.shear
     extend_for_shear = this_fourier.shear.extend_for_shear
     #}}}
     #}}}
