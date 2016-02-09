@@ -114,9 +114,8 @@ def _find_index(u,origin = 0.0,tolerance = 1e-5,verbose = False):
             "\n\tIf `origin` is outside the range of `u`, it assumes that you want"
             " to find the appropriate index in one of the higher or lower-frequency"
             " replicates (*i.e.*, identical to within $n\\timesSW$, with $n$ integer")
-    assert u[-1] > u[0], ("Your axis is not ascending -- I'm confused!")
+    du = check_ascending_axis(u,tolerance,"In order to determine the FT shift index")
     N = len(u)
-    du = u[1] - u[0]
     SW = du*N # should be u[-1]+du
     alias_number = 0
     if not u[0] < origin < u[-1]:

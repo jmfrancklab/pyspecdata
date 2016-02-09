@@ -78,13 +78,11 @@ def image(A,x=[],y=[],**kwargs):
         tempsize[-2] *= A.shape[-3]
         A = A.reshape(tempsize) # now join them up
     A = A[:A.shape[0]-linecounter,:] # really I should an extra counter besides linecounter now that I am using "spacing", but leave alone for now, to be sure I don't cute off data
-    if iscomplex(A).any():
+    if iscomplexobj(A):# this just tests the datatype
         A = imagehsv(A,**imagehsvkwargs)
         retval = imshow(A,extent=myext,**kwargs)
     else:
-        retval = imshow(real(A),extent=myext,**kwargs)# real is needed, because
-        #           if it's just complex with a zero imaginary part, matplotlib
-        #           will freak out
+        retval = imshow(A,extent=myext,**kwargs)
         colorbar()
     if setlabels:
         xlabel(x_label)

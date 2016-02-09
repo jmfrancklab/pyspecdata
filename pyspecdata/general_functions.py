@@ -19,3 +19,36 @@ def autostringconvert(arg):
         return str(arg)
     else:
         return arg
+def check_ascending_axis(u,tolerance = 1e-7,additional_message = []):
+    r"""Check that the array `u` is ascending and equally spaced, and return the
+    spacing, `du`.  This is a common check needed for FT functions, shears,
+    etc.
+    
+    Parameters
+    ----------
+
+    tolerance : double
+        The relative variation in `du` that is allowed.
+        Defaults to 1e-7.
+
+    additional_message : str
+        So that the user can easily figure out where the assertion error is
+        coming from, supply some extra text for the respective message.
+
+    Returns
+    -------
+
+    du : double
+        the spacing between the elements of u
+    """
+    if type(additional_message) is str:
+        additional_message = [additional_message]
+    du = (u[-1]-u[0])/(len(u)-1.) # the dwell gives the bandwidth, whether or not it has been zero padded -- I calculate this way for better accuracy
+    thismsg = ', '.join(additional_message + ["the axis must be ascending (and equally spaced)"])
+    assert du > 0, thismsg
+    thismsg = ', '.join(additional_message + ["the axis must be equally spaced (and ascending)"])
+    assert all(abs(diff(u) - du)/du < tolerance), thismsg# absolute
+    #   tolerance can be large relative to a du of ns -- don't use
+    #   allclose/isclose, since they are more recent numpy additions
+    assert du > 0, thismsg
+    return du
