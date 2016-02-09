@@ -32,65 +32,7 @@ def extend_for_shear(self,b,a,skew_amount,verbose = False):
     return self
 
 def shear(self,altered_axis,propto_axis,by_amount,zero_fill = False,start_in_conj = False):
-    r'''Use the Fourier shift theorem to shear the data :math:`s`:
-
-    ..math: `s(x',y,z) = s(x+ay,y,z)`
-
-    where :math:`x` is the `altered_axis` and :math:`y` is the
-    `propto_axis`.  (Actually typically 2D, but :math:`z` included
-    just to illustrate other dimensions that aren't involved)
-
-    This is equivalent to the following in the conjugate domain:
-
-    ..math: `\tilde{s}(f_x,f'_y,z) = \tilde{s}(f_x,f_y-af_x,f_z)`
-
-    Because of this, the algorithm **also** automatically `extend`s the data in `f_y`
-    axis.  Equivalently, it increases the resolution (decreases the interval
-    between points) in the `propto_axis` dimension.  This prevents aliasing in
-    the conjugate domain, which will corrupt the data *w.r.t.* successive
-    transformations. *However*, by default (unless you set `zero_fill`), it
-    does *not* expand the data in the current domain (*i.e.* frequency *vs.*
-    time).  The data in the current domain might alias, but you can see this
-    happen.
-
-    Parameters
-    ----------
-
-    altered_axis : str
-
-        The coordinate for which data is altered, *i.e.*
-        ..math: `x` such that ..math: `f(x+ay,y)`.
-
-    by_amount : double
-
-        The amount of the shear (..math: `a` in the previous)
-
-    propto_axis : str
-
-        The shift along the `altered_axis` dimension is
-        proportional to the shift along `propto_axis`.
-        The position of data relative to the `propto_axis` is not
-        changed.
-        Note that by the shift theorem, in the frequency domain,
-        an equivalent magnitude, opposite sign, shear is applied
-        with the `propto_axis` and `altered_axis` dimensions
-        flipped.
-
-    start_in_conj : {False, True}, optional
-
-        Defaults to False
-
-        For efficiency, one can replace a double (I)FT call followed by a
-        shear call with a single shear call where `start_in_conj` is set.
-
-        `self` before the call is given in the conjugate domain  (*i.e.*,
-        :math:`f` *vs.* :math:`t`) along both dimensions from the one that's
-        desired.  This means: (1) `self` after the function call transformed
-        into the conjugate domain from that before the call and (2)
-        `by_amount`, `altered_axis`, and `propto_axis` all refer to the shear
-        in the conjugate domain that the data is in at the end of the
-        function call.
-    '''
+    'the fourier shear method -- see .shear() documentation'
     #{{{ see if it's in the frequency or time domain
     if self.get_ft_prop(altered_axis) and self.get_ft_prop(propto_axis):
         frequency_domain = True
