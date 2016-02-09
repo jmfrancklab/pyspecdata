@@ -3784,8 +3784,9 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
     _ft_shift = this_fourier.ft_shift._ft_shift
     ftshift = this_fourier.ftshift.ftshift
     convolve = this_fourier.convolve.convolve
-    shear = axis_manipulation.shear.shear
     extend_for_shear = this_fourier.shear.extend_for_shear
+    linear_shear = axis_manipulation.shear.linear_shear
+    fourier_shear = this_fourier.shear.shear
     #}}}
     #}}}
     #{{{ interpolation and binning
@@ -4297,6 +4298,16 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
         except:
             raise ValueError("I can't set this -- axis coords is",self.axis_coords)
         return self
+    def shear(self, along_axis, propto_axis, shear_amnt,
+            zero_fill=True, method='linear'):
+        if method == 'fourier':
+            return self.fourier_shear(along_axis, propto_axis,
+                    shear_amnt, zero_fill=zero_fill)
+        elif method == 'linear':
+            return self.linear_shear(along_axis, propto_axis,
+                    shear_amnt, zero_fill=zero_fill)
+        else:
+            raise ValueError("The shear method must be either linear or fourier")
     def getaxisshape(self,axisname):
         thishape = ones(len(self.dimlabels))
         thisaxis = self.dimlabels.index(axisname) 

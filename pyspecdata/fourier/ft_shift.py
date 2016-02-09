@@ -1,5 +1,6 @@
 "shift-related helper functions"
 from numpy import zeros,r_,nonzero,isclose,empty_like,argmin,count_nonzero
+from ..general_functions import *
 thinkaboutit_message = ("If you think about it, you"
                         " probably don't want to do this.  You either want to fill with"
                         " zeros from zero up to the start or you want to first set the"

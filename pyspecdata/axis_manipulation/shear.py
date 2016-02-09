@@ -1,10 +1,9 @@
 from ..general_functions import *
 from pylab import * 
-def shear(self,along_axis,propto_axis,shear_amnt,zero_fill = True):
+def linear_shear(self,along_axis,propto_axis,shear_amnt,zero_fill = True):
+    r"the linear shear -- see `self.shear` for documentation"
     if zero_fill:
         self.extend_for_shear(along_axis,propto_axis,shear_amnt)
-    print self.data
-    print type(self.data)
     u_propto  = self.getaxis(propto_axis)# we will iterate along the propto dimension
     du_propto = check_ascending_axis(u_propto,additional_message="In order to implement a linearly interpolated skew with propto dimension %s"%propto_axis)
     du_along = check_ascending_axis(self.getaxis(along_axis),additional_message="In order to implement a linearly interpolated skew with along dimension %s"%along_axis)
