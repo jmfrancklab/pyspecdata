@@ -52,7 +52,7 @@ def set_ft_prop(self,axis,propname = None,value = True):
             self.set_prop(key_name,{axis:value})
         else:
             this_dict[axis] = value
-    return
+    return self# important, so that I can chain operations
 def _ft_shift(self,thisaxis,p2,shift_axis = None,verbose = False):
     ("perform a generalized fftshift along the axis indicated by the integer `thisaxis`, where `p2` gives the index that will become the first index"
     "\n this is derived from the numpy fftshift routine, but defines slices instead of index numbers"

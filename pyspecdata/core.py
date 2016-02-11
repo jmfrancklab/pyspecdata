@@ -3786,6 +3786,8 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
     convolve = this_fourier.convolve.convolve
     extend_for_shear = this_fourier.shear.extend_for_shear
     linear_shear = axis_manipulation.shear.linear_shear
+    inhomog_coords = axis_manipulation.inhomog_coords.inhomog_coords
+    register_axis = axis_manipulation.register_axis.register_axis
     fourier_shear = this_fourier.shear.shear
     #}}}
     #}}}
