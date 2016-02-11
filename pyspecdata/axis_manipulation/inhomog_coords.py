@@ -1,0 +1,39 @@
+from ..general_functions import *
+from pylab import * 
+
+def inhomog_coords(self, direct_dim, indirect_dim, tolerance = 1e-5,
+        method = 'linear', plot_name = None, fl = None):
+    du = check_ascending_axis(self.getaxis(direct_dim),tolerance,"In order to perform the required rotations")
+    print "first point along t2",self.getaxis(direct_dim)[0]
+    assert abs(self.getaxis(direct_dim)[0]/du) < tolerance, "the "+direct_dim+"axis needs to start exactly at 0 -- you could try doing a sinc interpolation like this:\n\t" + "self.ft(direct_dim).ft_clear_startpoints(direct_dim,t=0,f='current').ift(direct_dim)"
+    #{{{ and rotate!
+    if fl is not None: fl.next(plot_name+', rotated')
+    #{{{ calculate rotation parameters
+    a = sqrt(2)-1. # = tan(pi/4./2.)
+    b = -1./sqrt(2) # = -sin(pi/4.)
+    #}}}
+    self.shear(direct_dim, indirect_dim, a, method = method)
+    self.shear(indirect_dim, direct_dim, b, method = method)
+    self.shear(direct_dim, indirect_dim, a, method = method)
+    if fl is not None: fl.image(self)
+    #}}}
+    if fl is not None: fl.next(r'left side')
+    if method == 'fourier':
+        self.register_axis({direct_dim:0})
+    left_data = self.copy()
+    left_data[direct_dim,lambda x: x>0] = 0
+    if fl is not None: fl.image(left_data)
+    if fl is not None: fl.next(plot_name+': left side -- flipped')
+    left_data.ft([indirect_dim,direct_dim])
+    left_data.run(conj)
+    left_data.ift([indirect_dim,direct_dim])
+    if fl is not None: fl.image(left_data)
+    if fl is not None: fl.next(plot_name+': right side')
+    self[direct_dim,lambda x: x<0] = 0
+    if fl is not None: fl.image(self)
+    newdata = self[direct_dim,lambda x: x>=0]
+    newdata += left_data[direct_dim,lambda x: x>=0]
+    self.data = newdata.data
+    self.setaxis(direct_dim,newdata.getaxis(direct_dim))
+    print "At END: first point along t2",self.getaxis(direct_dim)[0]
+    return self
