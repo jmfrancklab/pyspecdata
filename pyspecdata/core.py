@@ -4012,6 +4012,22 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
             #}}}
     def repwlabels(self,axis):
         return None
+    def add_noise(self,intensity):
+        '''Add Gaussian (box-muller) noise to the data.
+
+        Parameters
+        ==========
+        intensity : double OR function
+            
+            If a double, gives the standard deviation of the noise.
+            If a function, used to calculate the standard deviation of the noise from the data:
+                *e.g.* ``lambda x: max(abs(x))/10.``
+            
+        '''
+        if type(intensity) is type(emptyfunction):
+            intensity = intensity(lambda x: self.data)
+        self.data += box_muller(self.data.size).reshape(self.data.shape) * intensity
+        return self
     #{{{ functions to manipulate and return the axes
     def reorder(self,*axes,**kwargs):
         r'''Reorder the dimensions

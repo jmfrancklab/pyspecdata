@@ -3,14 +3,40 @@
 from pylab import *
 
 def process_kwargs(listoftuples,kwargs,pass_through = False):
-    '''In order, return the value of keyword arguments `kwargs` named with key, value pairs in listoftuples
-    Note that having kwargs as an explicit argument avoids errors where the user forgets to pass the **kwargs.'''
+    '''This function allows dynamically processed (*i.e.* function definitions with `**kwargs`) kwargs (keyword arguments) to be dealt with in a fashion more like standard kwargs.
+    The defaults set in `listoftuples` are used to process `kwargs`, which are then returned as a set of values (that are set to defaults as needed).
+
+    Note that having `kwargs` as an explicit argument avoids errors where the user forgets to pass the `kwargs`.
+    
+    Parameters
+    ==========
+    kwargs : **dictionary
+
+        The keyword arguments that you want to process.
+
+    listoftuples : list of tuple pairs
+
+        Tuple pairs, consisting of ``('param_name',param_value)``, that give the default values for the various parameters.
+
+    pass_through : bool
+
+        Defaults to False.  If it's true, then it's OK not to process all the kwargs here.
+        In that case, the used kwargs are popped out of the dictionary, and you are expected to pass the unprocessed values (in the dictionary after the call) on to subsequent processing.
+        Importantly, you should *always* end with a `pass_through`=`False` call of this function, or by passing **kwargs to a standard function in the standard way.
+        Otherwise it's possible for the user to pass kwargs that are never processed!
+
+    return : tuple
+
+        It's expected that the output is assigned to variables with the **exact same** names as the string in the first half of the tuples, in the **exact same** order.
+        These parameters will then be set to the appropriate values.
+    '''
     kwargnames,kwargdefaultvals = zip(*listoftuples)
     output = []
     for j,val in enumerate(kwargnames):
-        output.append(kwargdefaultvals[j])
         if val in kwargs.keys():
-            output[-1] = kwargs.pop(val)
+            output.append(kwargs.pop(val))
+        else:
+            output.append(kwargdefaultvals[j])
     if not pass_through and len(kwargs) > 0:
         raise ValueError("I didn't understand the kwargs:",repr(kwargs))
     return tuple(output)
