@@ -45,9 +45,9 @@ if os.name == 'nt':
     else:
         libraries.append('refblas')
         print "It looks like you're on windows, so I'm going to build lapack (from http://netlib.org/) on MinGW."
-        target = os.path.dirname(os.path.dirname(find_executable('gcc'))) + os.sep + 'lib' + os.sep + 'gcc' + os.sep
+        target = os.path.dirname(os.path.dirname(find_executable('gfortran'))) + os.sep + 'lib' + os.sep + 'gcc' # switched to gfortran because if you have two gcc's (eg. haskell from pandoc compile), this breaks
         if not os.path.exists(target):
-            target = os.path.dirname(os.path.dirname(find_executable('gcc'))) + os.sep + 'libs' # works for anaconda
+            target = os.path.dirname(os.path.dirname(find_executable('gfortran'))) + os.sep + 'libs' # works for anaconda -- switched to gfortran because if you have two gcc's (eg. haskell from pandoc compile), this breaks
         if 'liblapack.a' in os.listdir(target) and 'librefblas.a' in os.listdir(target):
             print "I see liblapack and librefblas in",target,"so I'm not going to rebuild"
             lapack_success = True
@@ -55,8 +55,8 @@ if os.name == 'nt':
             os.chdir('lapack-3.4.0')
             subprocess.call("cmd /c makelibs.bat")
             print "trying to move the built libraries to "+target
-            os.rename('liblapack.a',target+'liblapack.a')
-            os.rename('librefblas.a',target+'librefblas.a')
+            os.rename('liblapack.a',target + os.sep +'liblapack.a')
+            os.rename('librefblas.a',target + os.sep +'librefblas.a')
             print "press enter..."
             sys.stdin.readline(1)
             os.chdir('..')
