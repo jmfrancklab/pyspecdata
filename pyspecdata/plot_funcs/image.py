@@ -9,7 +9,8 @@ def image(A,x=[],y=[],**kwargs):
     #}}}
     spacing,ax,x_first = process_kwargs([('spacing',1),
         ('ax',gca()),
-        ('x_first',False)],kwargs)
+        ('x_first',False)],kwargs,
+        pass_through = True)
     if x_first: # then the first dimension should be the column
         # dimesion (i.e. last)
         if hasattr(A,'dimlabels'):# if I try to use isinstance, I get a circular import
