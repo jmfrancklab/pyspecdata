@@ -3557,6 +3557,27 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
                     axis=thisindex)]
             self._pop_axis_info(thisindex)
         return self
+    def cdf(self,normalized = True,max_bins = 500):
+        """calculate the Cumulative Distribution Function for the data along `axis_name`
+
+        only for 1D data right now
+        
+        Returns
+        =======
+        A new nddata object with an axis labeled `values`, and data corresponding to the CDF.
+        """
+        thisaxis = 0
+        n_bins = self.data.shape[thisaxis]
+        if n_bins > max_bins: n_bins = max_bins # otherwise this takes a while
+        bins, vals = histogram(self.data,
+                bins = n_bins)
+        retval = nddata(double(bins),[-1],['values']).labels('values',
+                vals[:-1]+(vals[1]-vals[0])*0.5)
+        retval.run_nopop(cumsum,'values')
+        if normalized:
+            print 'final value',retval['values',-1]
+            retval /= retval['values',-1]
+        return retval
     def mean_all_but(self,listofdims):
         'take the mean over all dimensions not in the list'
         for dimname in list(self.dimlabels):# I can't be popping from the list as I iterate over it
