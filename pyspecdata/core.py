@@ -7,6 +7,7 @@ if myparams['figlist_type'] == 'figlistl':
     import matplotlib; matplotlib.use('Agg')
 from pylab import *
 import textwrap
+import matplotlib
 import matplotlib.transforms as mtransforms
 from numpy import sqrt as np_sqrt
 from numpy.lib.recfunctions import rename_fields,drop_fields
@@ -1393,19 +1394,56 @@ def addlabels(labelstring,x,y,labels):
     for j in range(0,len(labels)):
         text(x[j],y[j],labelstring%labels[j],alpha=0.5,color='g',ha='left',va='top',rotation=0)
 def plot_color_counter(*args,**kwargs):
-    if 'ax' in kwargs.keys():
-        ax = kwargs.pop('ax')
-    else:
-        ax = gca()
+    """if passed an argument: make it so that the next line will have the properties given by the argument
+
+    if not passed an argument: just return the current plot properties,so that I can cycle back to it"""
+    ax, = process_kwargs([('ax',gca())],kwargs)
     if len(args)>0:
-        try:
-            ax._get_lines.count = args[0] # set the value of the color counter
-        except:
-            ax._get_lines.color_cycle = args[0] # set the value of the color counter
-    try: # this is different depending on the version of.core
-        retval = ax._get_lines.count
-    except:
-        retval = ax._get_lines.color_cycle
+        if matplotlib.__version__ >= 1.5:
+            # {{{ find the element before the one we want
+            retval = args[0]
+            penultimate = ax._get_lines.prop_cycler.next()
+            j = ax._get_lines.prop_cycler.next()
+            not_in_list_counter = 1000.
+            while j != args[0]:
+                penultimate = j
+                j = ax._get_lines.prop_cycler.next()
+                not_in_list_counter -= 1
+                if not_in_list_counter == 0:
+                    raise ValueError("the value isn't in the cycler!")
+            # }}}
+            # {{{ now, set to the element before
+            not_in_list_counter = 1000.
+            while j != penultimate:
+                j = ax._get_lines.prop_cycler.next()
+                not_in_list_counter -= 1
+                if not_in_list_counter == 0:
+                    raise ValueError("the value isn't in the cycler!")
+            # }}}
+        else:
+            try:
+                ax._get_lines.count = args[0] # set the value of the color counter
+            except:
+                ax._get_lines.color_cycle = args[0] # set the value of the color counter
+    else:
+        if matplotlib.__version__ >= 1.5:
+            # {{{ I want to return the current element of the cycle
+            one_too_far = ax._get_lines.prop_cycler.next()
+            j = ax._get_lines.prop_cycler.next()
+            not_in_list_counter = 1000.
+            while j != one_too_far:
+                penultimate = j
+                j = ax._get_lines.prop_cycler.next()
+                not_in_list_counter -= 1
+                if not_in_list_counter == 0:
+                    raise ValueError("the value isn't in the cycler!")
+            retval = penultimate
+            # }}}
+        else:
+            try: # this is different depending on the version of.core
+                retval = ax._get_lines.count
+            except:
+                retval = ax._get_lines.color_cycle
     return retval
 def contour_plot(xvals,yvals,zvals,color = 'k',alpha = 1.0,npts = 300,**kwargs):
     if 'inline_spacing' in kwargs.keys():

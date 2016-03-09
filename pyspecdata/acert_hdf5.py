@@ -759,8 +759,8 @@ def oscilloscope_data(*args):
     :rtype: tuple of 3 nddata objects
     """
     if len(args) == 2:
-        a = scipy.io.loadmat(getDATADIR('agilent_scope',args[0]))
-        b = scipy.io.loadmat(getDATADIR('agilent_scope',args[1]))
+        a = scipy.io.loadmat(getDATADIR('95GHz/agilent_scope',args[0]))
+        b = scipy.io.loadmat(getDATADIR('95GHz/agilent_scope',args[1]))
         if '_bg' in args[0]:
             mdata_bg,mdata = a,b
         elif '_bg' in args[1]:
