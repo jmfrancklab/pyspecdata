@@ -759,8 +759,10 @@ def oscilloscope_data(*args):
     :rtype: tuple of 3 nddata objects
     """
     if len(args) == 2:
-        a = scipy.io.loadmat(getDATADIR('95GHz/agilent_scope',args[0]))
-        b = scipy.io.loadmat(getDATADIR('95GHz/agilent_scope',args[1]))
+        file1 = getDATADIR('95GHz','agilent_scope',args[0])
+        file2 = getDATADIR('95GHz','agilent_scope',args[1])
+        a = scipy.io.loadmat(file1) # because 0.17 crashes in anaconda, needed to downgrade anaconda scipy with conda install scipy=0.16
+        b = scipy.io.loadmat(file2)
         if '_bg' in args[0]:
             mdata_bg,mdata = a,b
         elif '_bg' in args[1]:
@@ -858,6 +860,7 @@ def echo_display(data,
         decimation = 4,
         bw = 200e6,
         plot_title = '',
+        truncate_t2 = None,
         ):
     r'''Prepare frequency domain data for time-domain display:
 
@@ -880,9 +883,13 @@ def echo_display(data,
         fl : figlist_var
             the figure to which it plots
         decimation : int, optional
-            the decimation (downsampling) that is used -- note that we throw away points without throwing away SNR
+            the decimation (downsampling) that is used -- note that we throw
+            away points without throwing away SNR
         plot_title : str, optional
             title of the plot -- usually the experiment name
+        truncate_t2 : double, optional
+            truncate the t2 dimension to this value (typically, the value after
+            which only noise remains)
 
         Returns
         -------
@@ -898,6 +905,10 @@ def echo_display(data,
     print 'mean value:',value.mean('t1').set_error(None)
     data['t2':0] -= value
     #}}}
+    if truncate_t2 is not None:
+        data.ift('t2')
+        data = data['t2',lambda x: x<400e-9]
+        data.ft('t2')
     data.reorder(['t2','t1'])# put t2 first
     data = data['t2',lambda x: abs(x)<bw]
     #{{{ here, I use the approximation that a gaussian is "about 0" at 6 sigma
@@ -925,17 +936,32 @@ def secsy_format(list_of_exp,
         verbose = True,
         phaseplot_thresholds = (0,0),#phaseplot_thresholds = (0.075,0.1),
         fl = None):
-    ("""Generate the "SECSY-format" signal that's manually phased -- """
-     "`time_shifts` is a (t1,t2) pair of numbers\n"
-     """`field_dep_shift` is an additional, field-dependent phase shift
-     though it's not entirely clear to me why this should be allowed\n"""
-     "`SW`=(`f1_limits`,`f2_limits`) is a tuple pair of tuple pairs and gives the limits on "
-     "the spectral window for $\mathcal{F}[t_1]$ and $\mathcal{F}[t_2]$, respectively\n"
-     "If there is a bin dimension, it chunks it to separate out any field "
-     "dimension, and then averages along any remaining bin dimension\n\n"
-     "loads the file(s) given by `list_of_exp`, which consists of a list of experiment type, date (regexp), basename (regexp) tuples, and where basename is assumed to give the pattern up to the end of the filename\n"
-     "(upgrade note): previously, this selected out a particular field and/or T "
-     "value, but it doesn't do that anymore")
+    r""" Generate the "SECSY-format" signal that's manually phased:
+
+    Loads the file(s) given by `list_of_exp`, applying the phase corrections indicated by `time_shifts`.
+
+    Parameters
+    ==========
+    list_of_exp : list of 3-tuples
+        ``[(a1,b1,c1),(a2,b2,c2),``...``]`` where
+        `a1` : experiement type (*eg.* ``echo_t2``)
+        `a2` : date (regexp, no leading/trailing .*)
+        `a3` : file base name (regexp, gives the pattern up to the end of the file)
+    time_shifts : tuple pair
+        a (t1,t2) pair of numbers
+    field_dep_shift : double
+        an additional, field-dependent phase shift
+        (though it's not entirely clear to me why this should be allowed)
+    SW : tuple pair of tuple pairs
+        (`f1_limits`,`f2_limits`) is a tuple pair of tuple pairs, where 
+        `f1_limits` gives the limits on the spectral window for $\mathcal{F}[t_1]$
+        and `f2_limits` gives those for $\mathcal{F}[t_2]$
+
+    If there is a bin dimension, it chunks it to separate out any field dimension, and then averages along any remaining bin dimension.
+
+    (upgrade note): previously, this selected out a particular field and/or T va
+lue, but it doesn't do that anymore
+    """
     if fl is None:
         fl = figlist_var()
     retval_list = []

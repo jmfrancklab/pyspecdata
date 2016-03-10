@@ -2931,7 +2931,7 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
         elif (len(args) is 1) and args[0] is None:
             self.data_error = None
         else:
-            raise CustomError('Not a valid argument to set_error:',map(type,args))
+            raise TypeError(' '.join(map(repr,['Not a valid argument to set_error:',map(type,args)])))
         return self
     #}}}
     #{{{ random mask -- throw out points
