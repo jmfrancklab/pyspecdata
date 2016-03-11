@@ -611,6 +611,12 @@ def find_file(searchstring,
             chunk_dict = dict([(j,len(h5['experiment'][j])) for j in dimlabels if j not in ['bin','phcyc','t2']])
             if verbose: print ndshape(data)
             if verbose: print chunk_dict
+            # {{{ if an experiment with a single dimension was abandoned early, we know what to do about that
+            if (len(chunk_dict) == 1 and chunk_dict.values()[0] >
+                    data.data.shape[data.axn('indirect')]):
+                chunk_dict[chunk_dict.keys()[0]] = data.data.shape[data.axn('indirect')]
+                warnings.warn("Warning: the length of the 'indirect' axis seems to exceed the length of the data!")
+            # }}}
             data.chunk('indirect',chunk_dict)
         for this_axis in common_dimensions:
             axis_data = array(h5['experiment'][this_axis])
@@ -907,7 +913,7 @@ def echo_display(data,
     #}}}
     if truncate_t2 is not None:
         data.ift('t2')
-        data = data['t2',lambda x: x<400e-9]
+        data = data['t2',lambda x: x<truncate_t2]
         data.ft('t2')
     data.reorder(['t2','t1'])# put t2 first
     data = data['t2',lambda x: abs(x)<bw]
@@ -923,9 +929,12 @@ def echo_display(data,
     x /= 1e-9
     data.rename('t1','$t_{echo}$ / ns')
     data.name('signal (arb.u)')
-    fl.next('3D view of abs data')
+    fl.next('3D view of abs data\n'+plot_title)
     abs(data).waterfall(alpha = 0.8,color = 'w',rotation = (60,20))
-    title(plot_title)
+    plot_title_str = plot_title
+    if fl.basename is not None:
+        plot_title_str += ' ('+fl.basename+')'
+    title(plot_title_str)
     return data
 def secsy_format(list_of_exp,
         zerofill = False,
@@ -934,11 +943,21 @@ def secsy_format(list_of_exp,
         deadtime = 29e-9,
         SW = (None,None),
         verbose = True,
+        show_origin = True,
         phaseplot_thresholds = (0,0),#phaseplot_thresholds = (0.075,0.1),
         fl = None):
     r""" Generate the "SECSY-format" signal that's manually phased:
 
     Loads the file(s) given by `list_of_exp`, applying the phase corrections indicated by `time_shifts`.
+
+
+    To phase a spectrum from scratch:
+
+    1. Start by calling with `time_shifts`=(0.0,0.0)
+    2. Look at the second plot, called "check timing correction".  Adjust the
+        time shifts so that the beginning of the signal is labeled as
+        approximately :math:`t_1=0` :math:`t_2=0`.
+        * A negative shift corresponds to moving the signal left (up).
 
     Parameters
     ==========
@@ -956,6 +975,9 @@ def secsy_format(list_of_exp,
         (`f1_limits`,`f2_limits`) is a tuple pair of tuple pairs, where 
         `f1_limits` gives the limits on the spectral window for $\mathcal{F}[t_1]$
         and `f2_limits` gives those for $\mathcal{F}[t_2]$
+    show_origin : bool, optional
+        Show white cross-hairs at the origin.
+        Defaults to true.
 
     If there is a bin dimension, it chunks it to separate out any field dimension, and then averages along any remaining bin dimension.
 
@@ -996,13 +1018,15 @@ lue, but it doesn't do that anymore
             signal_slice = data['phcyc1',1,'phcyc2',-2]
             if 'te' not in dropped_labels:
                 signal_slice.rename('te','t1')
+                signal_slice.set_units('t1','s')
         else:
             raise ValueError("I can't deal with this type of experiment!")
         #}}}
         if deadtime > 0:
             signal_slice = signal_slice['t2':(deadtime,inf)]
-        fl.next('signal slice before timing correction (cropped log)')
+        fl.next('signal slice\nbefore timing correction (cropped log)')
         fl.image(abs(signal_slice).cropped_log(), interpolation = 'bicubic')
+        ax = gca(); ax.title.set_fontsize('small')
         #{{{ set up the values of the indirect dimensions that we iterate over in the phase plots
         if 'te' not in dropped_labels:
             echos_toplot = r_[signal_slice.getaxis('t1')[0]:
@@ -1063,9 +1087,10 @@ lue, but it doesn't do that anymore
             forplot.ift('t1') # start at zero here
         forplot.ift('t2',shift = True) # get a centered echo here
         fl.image(forplot, interpolation = 'bicubic')
-        #ax = gca()
-        #ax.axvline(x = 0,color = 'w',alpha = 0.25,linewidth = 1)
-        #ax.axhline(y = 0,color = 'w',alpha = 0.25,linewidth = 1)
+        ax = gca(); ax.title.set_fontsize('small')
+        if show_origin:
+            ax.axvline(x = 0,color = 'w',alpha = 0.25,linewidth = 3)
+            ax.axhline(y = 0,color = 'w',alpha = 0.25,linewidth = 3)
         #}}}
         #{{{ correct the zeroth order
         phase = signal_slice.copy().mean_all_but([None]).data
