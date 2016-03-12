@@ -3167,6 +3167,11 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
             A,B = self.aligndata(arg)
         except:
             raise CustomError("Error aligning right (arg)",arg.name(),"with left (self)",self.name())
+        print "after aligndata"
+        print "A------------------"
+        print A
+        print "B------------------"
+        print B
         retval = A.copy()
         retval.data = A.data * B.data
         #}}}
@@ -3405,7 +3410,7 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
                 if len(arg.axis_coords_error) > 0 and not all([x is None for x in arg.axis_coords_error]):
                     errordict.update(arg.mkd(arg.axis_coords_error))
             #}}}
-            #{{{ add the errors for A
+            #{{{ add the axes and errors for A
             if type(self.axis_coords) is list:
                 if len(self.axis_coords) > 0:
                     axesdict.update(self.mkd(self.axis_coords))
