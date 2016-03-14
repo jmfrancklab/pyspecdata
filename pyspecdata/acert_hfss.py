@@ -1,6 +1,6 @@
-#from .core import *
-#from scipy.interpolate import griddata
-#from matplotlib.tri import Triangulation, UniformTriRefiner
+from .core import *
+from scipy.interpolate import griddata
+from matplotlib.tri import Triangulation, UniformTriRefiner
 r'Helper functions for processing HFSS field data'
 
 z_shift = 0.0
