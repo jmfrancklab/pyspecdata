@@ -43,9 +43,44 @@ if haswatchdog:
                         self.dependencies.append(line[x:])
                 self.dependencies.pop(0) # this is the file itself
                 return self.dependencies
+def det_new_pdf_name(thisargv):
+    'based on an original tex or pdf name, determine the original basename (i.e., no extension), as well as one with the final word after the underscore removed'
+    tex_basename = filter(lambda x: x[0] != '-',
+            thisargv)[-1]
+    if tex_basename[-4:] == '.tex': tex_basename = tex_basename[:-4]
+    elif tex_basename[-4:] == '.pdf': tex_basename = tex_basename[:-4]
+    orig_tex_basename = tex_basename
+    tex_basename = tex_basename.split('_')
+    if len(tex_basename) > 1:
+        new_pdf_basename = '_'.join(tex_basename[:-1])
+    return orig_tex_basename,new_pdf_basename
 def wraplatex():
+    '''runs the python scripts after running latex also creates a copy of latex without the final portion under the underscore
+    This prevents the viewer from hanging while it's waiting for a refresh.
+    This can be used in combination with wrapviewer() and latexmk by using a ``~/.latexmkrc`` file that looks like this:
+
+
+    .. code-block:: perl
+
+        $pdflatex=q/pdflatex_notebook_wrapper %O -synctex=1 %S/;# calls this function
+        $pdf_previewer=q/pdflatex_notebook_view_wrapper/;# calls the wrapviewer function
+    '''
     os.system(' '.join(['pdflatex']+sys.argv[1:]))
     os.system('update_notebook_pythonscripts')
+    orig_tex_basename,new_pdf_basename = det_new_pdf_name(sys.argv)
+    os.system('cp '+orig_tex_basename+'.pdf '+new_pdf_basename+'.pdf')
+    os.system('cp '+orig_tex_basename+'.synctex.gz '
+            +new_pdf_basename+'.synctex.gz')
+    return
+def wrapviewer():
+    'see :func:`wraplatex <pyspecdata.latexscripts.wraplatex>`'
+    pdf_basename = filter(lambda x: x[0] != '-',
+            sys.argv)[-1]
+    orig_tex_basename,new_pdf_basename = det_new_pdf_name(sys.argv)
+    os.system('start sumatrapdf -reuse-instance '+new_pdf_basename+'.pdf')
+    if new_pdf_basename == 'lists':
+        os.system('cp lists.pdf "'+os.path.expanduser('~')+os.path.sep+'Seafile'+os.path.sep+'My Library'+os.path.sep+'lists.pdf"')
+    return
 def script_filename(scriptnum_as_str):
     return get_scripts_dir()+scriptnum_as_str+'.py'
 def cached_filename(hashstring,returndir = False):

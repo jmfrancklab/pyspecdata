@@ -1,3 +1,6 @@
+Fourier Functions
+=================
+
 #. Use the `FT` property to check that I'm not trying to ft frequency-domain
    data or to ift time domain data.  To start with the data is marked as
    “neither” by having `FT` set to `None`, and the first operation marks it as

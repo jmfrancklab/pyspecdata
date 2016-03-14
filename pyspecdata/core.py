@@ -2914,9 +2914,11 @@ class nddata (object):
     #}}}
     #{{{ set error
     def set_error(self,*args):
-        r'''set the errors:
-either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
-    `error_for_data` can be a scalar, in which case, **all** the data errors are set to `error_for_data`'''
+        r'''set the errors: either
+        
+        `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
+
+        `error_for_data` can be a scalar, in which case, **all** the data errors are set to `error_for_data`'''
         if (len(args) is 1) and isscalar(args[0]):
             if args[0] == 0:
                 args = (zeros_like(self.data),)
@@ -3286,9 +3288,23 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
         return retval
     #{{{ align data
     def aligndata(self,arg,verbose = False):
-        r'''This now just returns selfout,argout
-        which are aligned to each other, and which contain
-        axis labels and axis errors for both'''
+        r'''This is a fundamental method used by all of the arithmetic operations.
+        It uses the dimension labels of `self` (the current instance) and `arg` (an nddata passed to this method) to generate two corresponding output nddatas that I refer to here, respectively, as `A` and `B`.  `A` and `B` have dimensions that are "aligned" -- that is, they are identical except for singleton dimensions (note that numpy automatically tiles singleton dimensions).  Regardless of how the dimensions of `self.data` and `arg.data` (the underlying numpy data) were ordered, `A.data` and `B.data` are now ordered identically, where dimensions with the same label (`.dimlabel`) correspond to the same numpy index.  This allows you do do math.
+
+        Note that, currently, both `A` and `B` are given a full set of axis labels, even for singleton dimensions.  This is because we're assuming you're going to do math with them, and that the singleton dimensions will be expanded.
+
+        Parameters
+        ==========
+        arg : nddata
+            the nddata that you want to align to `self`
+
+        Returns
+        =======
+        A : nddata
+            realigned version of `self`
+        B : nddata
+            realigned version of `arg` (the argument)
+        '''
         #{{{ if zero dimensional, fake a singleton dimension and recurse
         #{{{ unless both are zero dimensional, in which case, just leave alone
         if verbose: print "starting aligndata"
@@ -3397,18 +3413,28 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
             axesdict = selfout.mkd()
             #print "DEBUG 4: original mkd",axesdict
             errordict = selfout.mkd()
+            # {{{ define a function that allows me to only update non-zero axes
+            def non_empty_axes(input_data,ret_err = False):
+                if ret_err:
+                    temp_dict = input_data.mkd(input_data.axis_coords_error)
+                else:
+                    temp_dict = input_data.mkd(input_data.axis_coords)
+                temp_dict = {k:v for k,v in temp_dict.iteritems()
+                        if v is not None and len(v) > 0}
+                return temp_dict
+            # }}}
             #{{{ add the axes and errors for B
             if type(arg.axis_coords) is list:
                 if len(arg.axis_coords) > 0:
-                    axesdict.update(arg.mkd(arg.axis_coords))
+                    axesdict.update(non_empty_axes(arg))
             if type(arg.axis_coords_error) is list:
                 if len(arg.axis_coords_error) > 0 and not all([x is None for x in arg.axis_coords_error]):
                     errordict.update(arg.mkd(arg.axis_coords_error))
             #}}}
-            #{{{ add the errors for A
+            #{{{ add the axes and errors for A
             if type(self.axis_coords) is list:
                 if len(self.axis_coords) > 0:
-                    axesdict.update(self.mkd(self.axis_coords))
+                    axesdict.update(non_empty_axes(self))
             if type(self.axis_coords_error) is list:
                 if len(self.axis_coords_error) > 0 and not all([x is None for x in self.axis_coords_error]):
                     errordict.update(self.mkd(self.axis_coords_error))
@@ -3997,7 +4023,7 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
             self.setaxis(axis,cdata)
             return self
     def contiguous(self,lambdafunc,axis = None,verbose = False): #adapted stackexchange http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-array
-        """this function returns the start and stop positions along the
+        r"""this function returns the start and stop positions along the
         axis for the contiguous blocks for which lambdafunc returns
         true
 
@@ -4016,7 +4042,7 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
         Returns
         -------
         retval : ndarray
-            An ``N``x2 matrix, where the ``N`` rows correspond to pairs of axis
+            An :math:`N\times 2` matrix, where the :math:`N` rows correspond to pairs of axis
             label that give ranges over which `lambdafunc` evaluates to `True`.
             These are ordered according to descending range width.
 
@@ -4075,12 +4101,11 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
         '''Add Gaussian (box-muller) noise to the data.
 
         Parameters
-        ==========
+        ----------
         intensity : double OR function
-            
             If a double, gives the standard deviation of the noise.
             If a function, used to calculate the standard deviation of the noise from the data:
-                *e.g.* ``lambda x: max(abs(x))/10.``
+            *e.g.* ``lambda x: max(abs(x))/10.``
             
         '''
         if type(intensity) is type(emptyfunction):
@@ -4470,11 +4495,19 @@ either `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
     #}}}
     #{{{ breaking up and combining axes
     def smoosh(self,dimstocollapse,dimname = 0,verbose = False):
-        r'''collapse multiple dimensions into one dimension
-        if dimname is:
-            None, create a new (direct product) name,
-            a number, lump the existing dimension into the number given, in the list
-            a string, same as the previous, where the string can be part of the list or not
+        r'''Collapse multiple dimensions into one dimension.
+
+        Parameters
+        ----------
+        dimstocollapse : list of strings
+            the dimensions you want to collapse to one
+        dimname : None, string, integer
+
+            if dimname is:
+
+            * None: create a new (direct product) name,
+            * a number: lump the existing dimension into the number given, in the list
+            * a string: same as the previous, where the string can be part of the list or not
         '''
         #{{{ first, put them all at the end, in order given here
         retained_dims = list(self.dimlabels)

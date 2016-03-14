@@ -80,3 +80,9 @@ have been previously cached (under the same or a different script
 number).  If the python code is in the cache, it just pulls the
 cached output.  If not, it runs the file, and stores the result
 in the cache.
+
+.. toctree::
+    :maxdepth: 2
+
+    pyspecdata.rst
+    latexscripts.rst
