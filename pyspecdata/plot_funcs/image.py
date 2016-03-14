@@ -1,4 +1,5 @@
 from ..general_functions import *
+from ..ndshape import ndshape_base as ndshape
 def image(A,x=[],y=[],**kwargs):
     r"Please don't call image directly anymore -- use the image method of figurelist"
     #{{{ pull out kwargs for imagehsv
