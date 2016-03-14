@@ -13,6 +13,7 @@ Contents:
 
     fourier.rst
     notebook.rst
+    hfss.rst
 
 
 Indices and tables
