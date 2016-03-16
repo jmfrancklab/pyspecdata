@@ -946,49 +946,56 @@ def secsy_format(list_of_exp,
         show_origin = True,
         phaseplot_thresholds = (0,0),#phaseplot_thresholds = (0.075,0.1),
         fl = None):
-    r""" Generate the "SECSY-format" signal that's manually phased:
+    r""" Generate "SECSY-format" signal that's manually phased through selection of the appropriate :math:`t_1` and :math:`t_2` time-shifts.
 
     Loads the file(s) given by `list_of_exp`, applying the phase corrections indicated by `time_shifts`.
-
+    If there is a bin dimension, it chunks it to separate out any field dimension, and then averages along any remaining bin dimension.
+    (Upgrade note) previously, this selected out a particular field and/or $T$ value, but it doesn't do that anymore
 
     To phase a spectrum from scratch:
 
-    1. Start by calling with `time_shifts`=(0.0,0.0)
+    1. Start by calling with ``time_shifts=(0.0,0.0)``
     2. Look at the second plot, called "check timing correction".  Adjust the
         time shifts so that the beginning of the signal is labeled as
         approximately :math:`t_1=0` :math:`t_2=0`.
+
         * A negative shift corresponds to moving the signal left (up).
 
     Parameters
-    ==========
+    ----------
+
     list_of_exp : list of 3-tuples
-        ``[(a1,b1,c1),(a2,b2,c2),``...``]`` where
-        `a1` : experiement type (*eg.* ``echo_t2``)
-        `a2` : date (regexp, no leading/trailing .*)
-        `a3` : file base name (regexp, gives the pattern up to the end of the file)
+        ``[(e1,d1,b1),(e2,d2,b2),...]`` where
+
+        :`e1`: experiment type (*eg.* ``echo_t2``)
+        :`d1`: date (regexp, no leading/trailing ``.*``)
+        :`b1`: file base name (regexp, gives the pattern up to the end of the file)
     time_shifts : tuple pair
-        a (t1,t2) pair of numbers
+        a (:math:`t_1`,:math:`t_2`) pair of numbers that are used to determine
+        the linear phase correction.  These are *in addition* to a
+        :math:`\frac{\pi}{2}t_{pulse}` correction that is applied to correct
+        for evolution during the pulse.
     field_dep_shift : double
         an additional, field-dependent phase shift
         (though it's not entirely clear to me why this should be allowed)
     SW : tuple pair of tuple pairs
         (`f1_limits`,`f2_limits`) is a tuple pair of tuple pairs, where 
-        `f1_limits` gives the limits on the spectral window for $\mathcal{F}[t_1]$
-        and `f2_limits` gives those for $\mathcal{F}[t_2]$
+        `f1_limits` gives the limits on the spectral window for
+        :math:`\mathcal{F}[t_1]`
+        and `f2_limits` gives those for
+        :math:`\mathcal{F}[t_2]`
     show_origin : bool, optional
         Show white cross-hairs at the origin.
         Defaults to true.
-
-    If there is a bin dimension, it chunks it to separate out any field dimension, and then averages along any remaining bin dimension.
-
-    (upgrade note): previously, this selected out a particular field and/or T va
-lue, but it doesn't do that anymore
     """
+    # {{{ load the parameters
     if fl is None:
         fl = figlist_var()
     retval_list = []
     t1_timeshift, t2_timeshift = time_shifts
+    # }}}
     for j,info in enumerate(list_of_exp):
+        # {{{ load the data and make sure that it's set up for shifted ft
         exp_type,date,short_basename = info
         fl.basename = short_basename+'\n' #almost forgot about this -- only need to do this once, and it adds to all the other names!
         if SW[1] is None:
@@ -998,13 +1005,18 @@ lue, but it doesn't do that anymore
         data = find_file(date+'.*[\-_]%s\.'%short_basename,exp_type = exp_type,
                 **tempkwargs)
         if SW[1] is None:
-            data.ft('t2',shift = True)
+            data.ft('t2',shift = True)# this seems redundant with the next line, but needed to ensure that subsequent shifts give symmetric signal
         data.ift('t2')
-        #{{{ take various experiments, and convert them uniformly into t1 x t2 2D experiments
+        # }}}
+        #{{{ select the appropriate coherence pathways (depending on the experiment) to generate a uniformly formatted t1 x t2 2D experiments
         if 'bin' in data.dimlabels:
             if verbose: print "taking the mean along multiple bins"
             data.chunk_auto('bin','fields')
         dropped_labels = data.squeeze()
+        if 'te' in dropped_labels or 't1' in dropped_labels:
+            has_indirect = False
+        else:
+            has_indirect = True
         if 'bin' in data.dimlabels:
             if verbose: print "taking the mean along multiple bins"
             data.run(mean,'bin')
@@ -1016,19 +1028,19 @@ lue, but it doesn't do that anymore
             signal_slice = data['phcyc1',1,'phcyc2',-1,'phcyc3',-1]
         elif data.get_prop('description_class') == 'echo_T2':
             signal_slice = data['phcyc1',1,'phcyc2',-2]
-            if 'te' not in dropped_labels:
+            if has_indirect:
                 signal_slice.rename('te','t1')
                 signal_slice.set_units('t1','s')
         else:
             raise ValueError("I can't deal with this type of experiment!")
-        #}}}
         if deadtime > 0:
             signal_slice = signal_slice['t2':(deadtime,inf)]
+        #}}}
         fl.next('signal slice\nbefore timing correction (cropped log)')
         fl.image(abs(signal_slice).cropped_log(), interpolation = 'bicubic')
         ax = gca(); ax.title.set_fontsize('small')
         #{{{ set up the values of the indirect dimensions that we iterate over in the phase plots
-        if 'te' not in dropped_labels:
+        if has_indirect:
             echos_toplot = r_[signal_slice.getaxis('t1')[0]:
                     signal_slice.getaxis('t1')[-1]:
                     5j][1:-1]
@@ -1050,20 +1062,24 @@ lue, but it doesn't do that anymore
         else:
             raise ValueError("I can't find the length of the pulse (to apply the appropriate phase correction")
         #}}}
+        # {{{ apply the t2 timeshift
         signal_slice.setaxis('t2',lambda x: x+t2_timeshift)
         signal_slice.ft('t2')
+        # }}}
+        # {{{ apply the field-dependent shift
+        if field_dep_shift is not None:
+            signal_slice *= signal_slice.fromaxis('fields',
+                    lambda f: exp(-1j*2*pi*field_dep_shift*f)) # negative shift corrects negative slope
+        # }}}
         #{{{ shift back by the echo time
-        if 'te' in dropped_labels:
+        if not has_indirect:
             echo_time = signal_slice.get_prop('te')
             signal_slice *= signal_slice.fromaxis('t2',lambda t2: exp(1j*2*pi*echo_time*t2)) # positive time shift corrects positive slope
         else:
             signal_slice *= signal_slice.fromaxis(['t1','t2'],lambda t1,t2: exp(1j*2*pi*t1*t2))
             t_start = signal_slice.getaxis('t1')[0]
         #}}}
-        if field_dep_shift is not None:
-            signal_slice *= signal_slice.fromaxis('fields',
-                    lambda f: exp(-1j*2*pi*field_dep_shift*f)) # negative shift corrects negative slope
-        if not 'te' in dropped_labels:
+        if has_indirect:
             #{{{ apply filtering and timeshift along t1
             if verbose: print "the starting value of t1 is",signal_slice.getaxis('t1')[0]
             if zerofill:
@@ -1079,10 +1095,10 @@ lue, but it doesn't do that anymore
         #{{{ check that the timing correction looks OK
         fl.next('check timing correction')
         forplot = signal_slice.copy()
-        if not 'te' in dropped_labels:
+        if has_indirect:
             forplot.ft('t1') # ft along t1 so I can clear the startpoint, below
         forplot.ft_clear_startpoints('t2')
-        if not 'te' in dropped_labels:
+        if has_indirect:
             forplot.ft_clear_startpoints('t1')
             forplot.ift('t1') # start at zero here
         forplot.ift('t2',shift = True) # get a centered echo here
@@ -1132,7 +1148,7 @@ lue, but it doesn't do that anymore
                 #                          the units don't match
         fl.phaseplot_finalize()
         #}}}
-        if not 'te' in dropped_labels:# there is a t1 dimension
+        if has_indirect:# there is a t1 dimension
             #{{{ check phasing along the indirect dimension
             signal_slice.ft('t1')
             fl.next('secsy mode')

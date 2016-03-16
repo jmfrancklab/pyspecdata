@@ -14,6 +14,7 @@ Contents:
     fourier.rst
     notebook.rst
     hfss.rst
+    acert_hdf.rst
 
 
 Indices and tables
