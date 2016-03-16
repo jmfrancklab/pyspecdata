@@ -1,5 +1,3 @@
-from ..general_functions import *
-from pylab import * 
 def linear_shear(self,along_axis,propto_axis,shear_amnt,zero_fill = True):
     r"the linear shear -- see `self.shear` for documentation"
     if zero_fill:

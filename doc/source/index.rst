@@ -15,6 +15,7 @@ Contents:
     notebook.rst
     hfss.rst
     acert_hdf.rst
+    nddata.rst
 
 
 Indices and tables

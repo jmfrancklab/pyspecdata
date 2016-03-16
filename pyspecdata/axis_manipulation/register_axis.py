@@ -1,6 +1,3 @@
-from ..general_functions import *
-from pylab import * 
-
 def register_axis(self,arg):
     for k,v in arg.iteritems():
         x = self.getaxis(k)

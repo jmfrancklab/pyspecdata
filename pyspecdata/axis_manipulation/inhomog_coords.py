@@ -1,9 +1,21 @@
-from ..general_functions import *
-from pylab import * 
-
 def inhomog_coords(self, direct_dim, indirect_dim, tolerance = 1e-5,
         method = 'linear', plot_name = None, fl = None,
         debug_kwargs = {}):
+    r'''Apply the "inhomogeneity transform," which rotates the data by :math:`45^{\circ}`, and then mirrors the portion with :math:`t_2<0` in order to transform from a :math:`(t_1,t_2)` coordinate system to a :math:`(t_{inh},t_{homog})` coordinate system.
+    
+    Parameters
+    ----------
+    method : 'linear', 'fourier'
+        The interpolation method used to rotate the data and to mirror the data.
+        **Note** currently, both use a fourier-based mirroring method.
+    plot_name : str
+        the base name for the plots that are generated
+    fl : figlist_var
+    debug_kwargs : dict
+        with keys:
+
+        :`correct_overlap`: if False, doesn't correct for the overlap error that occurs during mirroring
+        '''
     correct_overlap = process_kwargs([('correct_overlap',True)],debug_kwargs)
     du = check_ascending_axis(self.getaxis(direct_dim),tolerance,"In order to perform the required rotations")
     print "first point along t2",self.getaxis(direct_dim)[0]
