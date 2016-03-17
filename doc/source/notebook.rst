@@ -44,7 +44,7 @@ will send you to the tex output, which is stored in
 corresponding to the script, and the python source used to
 generate it is stored in ``scripts/*.py``.
 
-Each snippet of unique code is run **only once**, making the
+Each snippet of unique code is run **only once**, **ever** making the
 notebook fast and efficient.
 For now, an important drawback to this is that if you change modules or
 libraries called by the script, the resulting PDF output will not
@@ -63,7 +63,8 @@ How it works
 * ``pdflatex_notebook_wrapper`` just calls ``pdflatex`` followed
   by ``update_notebook_pythonscripts`` 
 
-### The LaTeX end
+The LaTeX end
+`````````````
 
 The file `mypython.sty` looks for the `python` environment, it pulls the relevant
 code, outputs it to ``scripts/*.py`` and then writes a command to
@@ -72,7 +73,8 @@ the ``.aux`` file that tells LaTeX where to find the
 The ``scripts/*.tex`` output is only updated once
 ``update_notebook_pythonscripts`` (without arguments) is run.
 
-### The python end
+The python end
+``````````````
 
 ``update_notebook_pythonscripts`` runs through the various
 ``scripts/*.py`` files, checks and checks whether or not they

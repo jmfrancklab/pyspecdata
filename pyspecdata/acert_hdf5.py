@@ -1079,8 +1079,8 @@ def secsy_format(list_of_exp,
             signal_slice *= signal_slice.fromaxis(['t1','t2'],lambda t1,t2: exp(1j*2*pi*t1*t2))
             t_start = signal_slice.getaxis('t1')[0]
         #}}}
+        #{{{ apply filtering and timeshift along t1
         if has_indirect:
-            #{{{ apply filtering and timeshift along t1
             if verbose: print "the starting value of t1 is",signal_slice.getaxis('t1')[0]
             if zerofill:
                 signal_slice.ft('t1',shift = True,pad = 512)
@@ -1091,7 +1091,7 @@ def secsy_format(list_of_exp,
             if verbose: print 'applied a t1 timeshift: t_start=',t_start/1e-9,'manual=',t1_timeshift/1e-9
             signal_slice.ift('t1')
             signal_slice.setaxis('t1',lambda x: x+t1_timeshift)
-            #}}}
+        #}}}
         #{{{ check that the timing correction looks OK
         fl.next('check timing correction')
         forplot = signal_slice.copy()
@@ -1126,7 +1126,7 @@ def secsy_format(list_of_exp,
         fl.next('and select real')
         fl.image(signal_slice.runcopy(real),interpolation = 'bicubic')
         #}}}
-        #{{{ phase plot from 3553
+        #{{{ check phasing along t2: phase plot from 3553
         fl.next('SECSY:\nplot the phase at different $t_1$',legend = True)
         signal_slice.reorder('t2') # make t2 x
         max_abs = abs(signal_slice.data).flatten().max()
@@ -1148,8 +1148,8 @@ def secsy_format(list_of_exp,
                 #                          the units don't match
         fl.phaseplot_finalize()
         #}}}
+        #{{{ check phasing along the indirect dimension
         if has_indirect:# there is a t1 dimension
-            #{{{ check phasing along the indirect dimension
             signal_slice.ft('t1')
             fl.next('secsy mode')
             fl.image(signal_slice, interpolation = 'bicubic')
@@ -1179,7 +1179,7 @@ def secsy_format(list_of_exp,
                     #fl.plot(forplot['t2':(this_freq)].runcopy(angle)/pi,'.',alpha = 0.5,markersize = 3,label = '%d MHz'%(this_freq/1e6))
             fl.phaseplot_finalize()
             #}}}
-            #}}}
+        #}}}
         retval_list.append(signal_slice)
     return retval_list
 def plot_oned_v_field(thisdata,
