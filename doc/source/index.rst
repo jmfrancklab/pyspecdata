@@ -11,11 +11,10 @@ Contents:
 .. toctree::
     :maxdepth: 2
 
-    fourier.rst
     notebook.rst
     hfss.rst
     acert_hdf.rst
-    nddata.rst
+    pyspecdata.rst
 
 
 Indices and tables
