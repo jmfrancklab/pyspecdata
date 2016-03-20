@@ -5,6 +5,10 @@ def inhomog_coords(self, direct_dim, indirect_dim, tolerance = 1e-5,
     
     Parameters
     ----------
+    direct_dim : str
+        Label of the direct dimension (typically :math:`t_2`)
+    indirect_dim : str
+        Label of the indirect dimension (typically :math:`t_1`)
     method : 'linear', 'fourier'
         The interpolation method used to rotate the data and to mirror the data.
         **Note** currently, both use a fourier-based mirroring method.
