@@ -100,7 +100,7 @@ def grab_script_string(scriptnum_as_str):
     fp_script.close()
     return script_string
 def get_scripts_dir():
-    return get_notebook_dir() + 'scripts' + os.path.sep
+    return os.path.sep.join([os.getcwd(),'scripts',''])
 def sha_string(script):
     'convert the sha hash to a string'
     s = hashlib.sha256()
