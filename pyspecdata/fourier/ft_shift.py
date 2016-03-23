@@ -5,6 +5,20 @@ thinkaboutit_message = ("If you think about it, you"
                         " probably don't want to do this.  You either want to fill with"
                         " zeros from zero up to the start or you want to first set the"
                         " start point to zero.")
+def ft_state_to_str(self,*axes):
+    """Return a string that lists the FT domain for the given axes.
+    
+    :math:`u` refers to the original domain (typically time) and :math:`v` refers to the FT'd domain (typically frequency)
+    If no axes are passed as arguments, it does this for all axes."""
+    retstr = []
+    if len(axes) == 0:
+        axes = self.dimlabels
+    for j in axes:
+        if self.get_ft_prop(j):
+            retstr.append(j+' --> v (typ. freq) domain')
+        else:
+            retstr.append(j+' --> u (typ. time) domain')
+    return '\n'.join(retstr)
 def get_ft_prop(self,axis,propname = None):
     ("Gets the FT property given by `propname`.  For both setting"
             " and getting, `None` is equivalent to an unset value"

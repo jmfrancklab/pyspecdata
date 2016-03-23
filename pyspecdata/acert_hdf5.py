@@ -1071,14 +1071,6 @@ def secsy_format(list_of_exp,
             signal_slice *= signal_slice.fromaxis('fields',
                     lambda f: exp(-1j*2*pi*field_dep_shift*f)) # negative shift corrects negative slope
         # }}}
-        #{{{ shift back by the echo time
-        if not has_indirect:
-            echo_time = signal_slice.get_prop('te')
-            signal_slice *= signal_slice.fromaxis('t2',lambda t2: exp(1j*2*pi*echo_time*t2)) # positive time shift corrects positive slope
-        else:
-            signal_slice *= signal_slice.fromaxis(['t1','t2'],lambda t1,t2: exp(1j*2*pi*t1*t2))
-            t_start = signal_slice.getaxis('t1')[0]
-        #}}}
         #{{{ apply filtering and timeshift along t1
         if has_indirect:
             if verbose: print "the starting value of t1 is",signal_slice.getaxis('t1')[0]
@@ -1088,26 +1080,32 @@ def secsy_format(list_of_exp,
                 signal_slice.ft('t1',shift = True)
             if SW[0] is not None:
                 signal_slice = signal_slice['t1':SW[0]]
-            if verbose: print 'applied a t1 timeshift: t_start=',t_start/1e-9,'manual=',t1_timeshift/1e-9
             signal_slice.ift('t1')
             signal_slice.setaxis('t1',lambda x: x+t1_timeshift)
         #}}}
+        t_start = signal_slice.getaxis('t1')[0]
+        if verbose: print 'applied a t1 timeshift: t_start=',t_start/1e-9,'manual=',t1_timeshift/1e-9
+        del t_start
         #{{{ check that the timing correction looks OK
-        fl.next('check timing correction')
+        fl.next('check timing correction\n(0,0) is aliased to center and echo  is sheared')
         forplot = signal_slice.copy()
+        print "t1 ft prop",forplot.get_ft_prop('t1')
+        print "t2 ft prop",forplot.get_ft_prop('t2')
+        forplot.shear('t2','t1',-1.0)
         if has_indirect:
             forplot.ft('t1') # ft along t1 so I can clear the startpoint, below
         forplot.ft_clear_startpoints('t2')
         if has_indirect:
             forplot.ft_clear_startpoints('t1')
             forplot.ift('t1') # start at zero here
-        forplot.ift('t2',shift = True) # get a centered echo here
+        forplot.ift(['t1','t2'],shift = True) # get a centered echo here
         fl.image(forplot, interpolation = 'bicubic')
         ax = gca(); ax.title.set_fontsize('small')
         if show_origin:
             ax.axvline(x = 0,color = 'w',alpha = 0.25,linewidth = 3)
             ax.axhline(y = 0,color = 'w',alpha = 0.25,linewidth = 3)
         #}}}
+        signal_slice.secsy_transform_manual('t2','t1',has_indirect = has_indirect)
         #{{{ correct the zeroth order
         phase = signal_slice.copy().mean_all_but([None]).data
         assert isscalar(phase),' '.join(

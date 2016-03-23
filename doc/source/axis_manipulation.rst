@@ -13,6 +13,7 @@ Axis Manipulation Functions
     inhomog_coords.inhomog_coords
     shear.linear_shear
     register_axis.register_axis
+    secsy.secsy_transform_manual
 
 .. comment
     here, I have generated stub pages, and after a bit of experimentation, figure out that I do need to point to the actual source of the functions

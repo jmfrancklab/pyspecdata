@@ -4,6 +4,7 @@ from pylab import *
 # here I list the modules that I'm importing
 __all__ = [ "shear",
         "inhomog_coords",
+        "secsy",
         "register_axis",
         ]
 

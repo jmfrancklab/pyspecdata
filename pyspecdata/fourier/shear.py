@@ -1,13 +1,13 @@
 from ..general_functions import *
 from pylab import * 
 
-def extend_for_shear(self,b,a,skew_amount,verbose = False):
-    "this is a helper function for `.fourier.shear`"
-    #{{{ in the time domain, b is the one that's altered (and
+def extend_for_shear(self,altered_axis,propto_axis,skew_amount,verbose = True):
+    "this is propto_axis helper function for `.fourier.shear`"
+    #{{{ in the time domain, altered_axis is the one that's altered (and
     #       needs to be extended), while the shearing is proportional to
-    #       -by_amount*a
-    if verbose: print "extending to account for the shear along ",b,"by",skew_amount,"which gives lesser and greater expansion amounts of",
-    shear_displacement = skew_amount * self.getaxis(a
+    #       -by_amount*propto_axis
+    if verbose: print "extending to account for the shear along ",altered_axis,"by",skew_amount,"which gives lesser and greater expansion amounts of",
+    shear_displacement = skew_amount * self.getaxis(propto_axis
             )[r_[0,-1]]
     shear_displacement = sort(shear_displacement) # this gives the lesser
     #       and greater, respectively (i.e. le, gt -- not smaller/bigger),
@@ -18,15 +18,16 @@ def extend_for_shear(self,b,a,skew_amount,verbose = False):
     if verbose: print " and ".join(map(str,shear_displacement))
     for j in [0,-1]:
         if shear_displacement[j] != 0.:
-            if verbose: print ' '.join(map(str,("preparing to extend b",
-                    self.getaxis(b)[r_[0,-1]], "to",
-                    self.getaxis(b)[j] + shear_displacement[j],
+            if verbose: print ' '.join(map(str,("preparing to extend altered_axis",
+                    self.getaxis(altered_axis)[r_[0,-1]], "to",
+                    self.getaxis(altered_axis)[j] + shear_displacement[j],
                     "along the", ['lesser','greater'][j],"side of",
-                    "b (",self.getaxis(b)[j],")")))
-            self.extend(b, self.getaxis(b)[j] +
+                    "altered_axis (",self.getaxis(altered_axis)[j],") by adding",
+                    shear_displacement[j],"to it")))
+            self.extend(altered_axis, self.getaxis(altered_axis)[j] +
                     shear_displacement[j])# match greater with greater and
             #       lesser with lesser (doesn't matter to me which side of
-            #       a that they came from)
+            #       propto_axis that they came from)
     #}}}
     #}}}
     return self

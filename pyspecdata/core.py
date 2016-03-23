@@ -3747,6 +3747,7 @@ class nddata (object):
     ft = this_fourier.ft.ft
     set_ft_prop = this_fourier.ft_shift.set_ft_prop
     get_ft_prop = this_fourier.ft_shift.get_ft_prop
+    ft_state_to_str = this_fourier.ft_shift.ft_state_to_str
     ft_clear_startpoints = this_fourier.ft_shift.ft_clear_startpoints
     ift = this_fourier.ift.ift
     _ft_shift = this_fourier.ft_shift._ft_shift
@@ -3755,6 +3756,7 @@ class nddata (object):
     extend_for_shear = this_fourier.shear.extend_for_shear
     linear_shear = axis_manipulation.shear.linear_shear
     inhomog_coords = axis_manipulation.inhomog_coords.inhomog_coords
+    secsy_transform_manual = axis_manipulation.secsy.secsy_transform_manual
     register_axis = axis_manipulation.register_axis.register_axis
     fourier_shear = this_fourier.shear.shear
     #}}}
@@ -4240,7 +4242,7 @@ class nddata (object):
                 stop_index_addto += 1
             stop_index += stop_index_addto
         else:
-            raise RuntimeError("extent (",extent,") needs to be further than the bounds on '"+str(axis)+"', which are "+str(u[0])+" and "+str(u[-1]))
+            raise RuntimeError("extent ({:g}) needs to be further than the bounds on '{:s}', which are {:g} and {:g}".format(extent,axis,u[0],u[-1]))
         #{{{ create a new array, and put self.data into it
         newdata = list(self.data.shape)
         newdata[self.axn(axis)] = stop_index - start_index
@@ -4284,10 +4286,10 @@ class nddata (object):
             raise ValueError("I can't set this -- axis coords is",self.axis_coords)
         return self
     def shear(self, along_axis, propto_axis, shear_amnt,
-            zero_fill=True, method='linear'):
+            zero_fill=True, start_in_conj=False, method='linear'):
         r'''Shear the data :math:`s`:
 
-        ..math: `s(x',y,z) = s(x+ay,y,z)`
+        :math:`s(x',y,z) = s(x+ay,y,z)`
 
         where :math:`x` is the `altered_axis` and :math:`y` is the
         `propto_axis`.  (Actually typically 2D, but :math:`z` included
@@ -4353,6 +4355,11 @@ class nddata (object):
             in the conjugate domain that the data is in at the end of the
             function call.
         '''
+        if (self.get_ft_prop(along_axis) ^ self.get_ft_prop(propto_axis)) ^ start_in_conj:
+            if start_in_conj:
+                raise ValueError("if you pass start_in_conj, the two dimensions need to be in conjugate domains, but you have: "+self.ft_state_to_str(along_axis,propto_axis))
+            else:
+                raise ValueError("(unless you intended to pass start_in_conj) the two dimensions need to be in the same domain, but you have: "+self.ft_state_to_str(along_axis,propto_axis))
         if method == 'fourier':
             return self.fourier_shear(along_axis, propto_axis,
                     shear_amnt, zero_fill=zero_fill)
