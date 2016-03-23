@@ -4295,6 +4295,11 @@ class nddata (object):
         `propto_axis`.  (Actually typically 2D, but :math:`z` included
         just to illustrate other dimensions that aren't involved)
 
+        .. note: Unfortunately, currently, when the data is automatically extended,
+            if both the start and endpoint of `along_axis` are on the same side
+            of zero, some unnecessary padding will be added between the
+            beginning of `along_axis` and zero.
+
         Parameters
         ----------
 

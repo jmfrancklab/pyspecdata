@@ -18,16 +18,21 @@ def extend_for_shear(self,altered_axis,propto_axis,skew_amount,verbose = True):
     if verbose: print " and ".join(map(str,shear_displacement))
     for j in [0,-1]:
         if shear_displacement[j] != 0.:
-            if verbose: print ' '.join(map(str,("preparing to extend altered_axis",
+            if verbose: print ' '.join(map(str,("preparing to extend altered_axis (",
+                    altered_axis,")",
                     self.getaxis(altered_axis)[r_[0,-1]], "to",
                     self.getaxis(altered_axis)[j] + shear_displacement[j],
                     "along the", ['lesser','greater'][j],"side of",
                     "altered_axis (",self.getaxis(altered_axis)[j],") by adding",
                     shear_displacement[j],"to it")))
-            self.extend(altered_axis, self.getaxis(altered_axis)[j] +
-                    shear_displacement[j])# match greater with greater and
-            #       lesser with lesser (doesn't matter to me which side of
-            #       propto_axis that they came from)
+            if ((self.getaxis(altered_axis)[j]>0) ^
+                    (shear_displacement[j]>0)):
+                if verbose: print "skipping this extension, since the shear seems to be trying to push the axis back towards zero"
+            else:
+                self.extend(altered_axis, self.getaxis(altered_axis)[j] +
+                        shear_displacement[j])# match greater with greater and
+                #       lesser with lesser (doesn't matter to me which side of
+                #       propto_axis that they came from)
     #}}}
     #}}}
     return self

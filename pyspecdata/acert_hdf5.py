@@ -987,6 +987,8 @@ def secsy_format(list_of_exp,
     show_origin : bool, optional
         Show white cross-hairs at the origin.
         Defaults to true.
+    deadtime : double
+        Throw out the signal before `deadtime`.
     """
     # {{{ load the parameters
     if fl is None:
@@ -1033,9 +1035,11 @@ def secsy_format(list_of_exp,
                 signal_slice.set_units('t1','s')
         else:
             raise ValueError("I can't deal with this type of experiment!")
+        #}}}
+        # {{{ throw out the signal before `deadtime`
         if deadtime > 0:
             signal_slice = signal_slice['t2':(deadtime,inf)]
-        #}}}
+        # }}}
         fl.next('signal slice\nbefore timing correction (cropped log)')
         fl.image(abs(signal_slice).cropped_log(), interpolation = 'bicubic')
         ax = gca(); ax.title.set_fontsize('small')
@@ -1051,8 +1055,7 @@ def secsy_format(list_of_exp,
         else:
             fields_toplot = [None]
         #}}}
-        #{{{ phase correct and ft
-        #{{{ shift back by the pulse length
+        #{{{ shift the time axis to account for evolution during the pulse
         if signal_slice.get_prop('t90') is not None:
             t2_timeshift -= signal_slice.get_prop('t90')*2/pi
             if verbose: print "pulse length timeshift is",signal_slice.get_prop('t90')*2/pi
@@ -1064,12 +1067,13 @@ def secsy_format(list_of_exp,
         #}}}
         # {{{ apply the t2 timeshift
         signal_slice.setaxis('t2',lambda x: x+t2_timeshift)
-        signal_slice.ft('t2')
         # }}}
         # {{{ apply the field-dependent shift
+        signal_slice.ft('t2')
         if field_dep_shift is not None:
             signal_slice *= signal_slice.fromaxis('fields',
                     lambda f: exp(-1j*2*pi*field_dep_shift*f)) # negative shift corrects negative slope
+        signal_slice.ift('t2')
         # }}}
         #{{{ apply filtering and timeshift along t1
         if has_indirect:
@@ -1092,20 +1096,23 @@ def secsy_format(list_of_exp,
         print "t1 ft prop",forplot.get_ft_prop('t1')
         print "t2 ft prop",forplot.get_ft_prop('t2')
         forplot.shear('t2','t1',-1.0)
+        forplot.ft('t2')
+        forplot.ft_clear_startpoints('t2')
+        forplot.ift('t2',shift = True) # get a centered echo here
         if has_indirect:
             forplot.ft('t1') # ft along t1 so I can clear the startpoint, below
-        forplot.ft_clear_startpoints('t2')
-        if has_indirect:
             forplot.ft_clear_startpoints('t1')
-            forplot.ift('t1') # start at zero here
-        forplot.ift(['t1','t2'],shift = True) # get a centered echo here
+            forplot.ift('t1',shift = True) # generate a centered echo here
         fl.image(forplot, interpolation = 'bicubic')
+        del forplot
         ax = gca(); ax.title.set_fontsize('small')
         if show_origin:
             ax.axvline(x = 0,color = 'w',alpha = 0.25,linewidth = 3)
             ax.axhline(y = 0,color = 'w',alpha = 0.25,linewidth = 3)
         #}}}
+        # at this point, signal_slice is in the time domain 
         signal_slice.secsy_transform_manual('t2','t1',has_indirect = has_indirect)
+        signal_slice.ft(['t1','t2'])
         #{{{ correct the zeroth order
         phase = signal_slice.copy().mean_all_but([None]).data
         assert isscalar(phase),' '.join(
@@ -1114,23 +1121,24 @@ def secsy_format(list_of_exp,
         phase /= abs(phase)
         signal_slice /= phase
         #}}}
-        #}}}
         #{{{ various plots to check the phasing
         fl.next('phased data')
         fl.image(signal_slice, interpolation = 'bicubic')
-        fl.next('cropped log -- to check phasing along $t_2$')
+        fl.next('phased data\ncropped log -- to check phasing along $t_2$')
         fl.image(signal_slice.copy().cropped_log(), interpolation = 'bicubic')
         fl.grid()
-        fl.next('and select real')
+        fl.next('phased data\nselect real, for pure absorption')
         fl.image(signal_slice.runcopy(real),interpolation = 'bicubic')
         #}}}
+        # {{{ generate the linear plots that I use to adjust the timing corrections
         #{{{ check phasing along t2: phase plot from 3553
-        fl.next('SECSY:\nplot the phase at different $t_1$',legend = True)
-        signal_slice.reorder('t2') # make t2 x
-        max_abs = abs(signal_slice.data).flatten().max()
+        fl.next('plot the phase at different $t_1$',legend = True)
+        forplot = signal_slice.copy()
+        forplot.ift('t1')
+        forplot.reorder('t2') # make t2 x
+        max_abs = abs(forplot.data).flatten().max()
         for this_field in fields_toplot:
             for this_echotime in echos_toplot:
-                forplot = signal_slice
                 this_label = []
                 if this_field is not None:
                     forplot = forplot['fields':(this_field)]
@@ -1146,13 +1154,10 @@ def secsy_format(list_of_exp,
                 #                          the units don't match
         fl.phaseplot_finalize()
         #}}}
-        #{{{ check phasing along the indirect dimension
+        #{{{ check phasing along t1 as a function of t2 frequency offset
         if has_indirect:# there is a t1 dimension
-            signal_slice.ft('t1')
-            fl.next('secsy mode')
-            fl.image(signal_slice, interpolation = 'bicubic')
             #{{{ phase plot from 3553
-            fl.next('secsy:\nplot the phase at different $F_2$',legend = True)
+            fl.next('plot the phase at different $F_2$',legend = True)
             def quarter_of_max(arg,axis):# returns a mask for half of maximum
                 return arg > 0.25*arg.runcopy(max,axis)
             for this_field in fields_toplot:
@@ -1178,6 +1183,7 @@ def secsy_format(list_of_exp,
             fl.phaseplot_finalize()
             #}}}
         #}}}
+        # }}}
         retval_list.append(signal_slice)
     return retval_list
 def plot_oned_v_field(thisdata,

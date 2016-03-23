@@ -1,3 +1,6 @@
+from ..general_functions import *
+from pylab import * 
+
 def inhomog_coords(self, direct_dim, indirect_dim, tolerance = 1e-5,
         method = 'linear', plot_name = None, fl = None,
         debug_kwargs = {}):
