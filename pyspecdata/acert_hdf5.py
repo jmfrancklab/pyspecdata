@@ -1091,7 +1091,7 @@ def secsy_format(list_of_exp,
         if verbose: print 'applied a t1 timeshift: t_start=',t_start/1e-9,'manual=',t1_timeshift/1e-9
         del t_start
         #{{{ check that the timing correction looks OK
-        fl.next('check timing correction\n(0,0) is aliased to center and echo  is sheared')
+        fl.next('(pre-transform) check timing correction\n(0,0) is aliased to center and echo  is sheared')
         forplot = signal_slice.copy()
         print "t1 ft prop",forplot.get_ft_prop('t1')
         print "t2 ft prop",forplot.get_ft_prop('t2')
@@ -1103,7 +1103,7 @@ def secsy_format(list_of_exp,
             forplot.ft('t1') # ft along t1 so I can clear the startpoint, below
             forplot.ft_clear_startpoints('t1')
             forplot.ift('t1',shift = True) # generate a centered echo here
-        fl.image(forplot, interpolation = 'bicubic')
+        fl.image(forplot, interpolation = 'nearest')
         del forplot
         ax = gca(); ax.title.set_fontsize('small')
         if show_origin:
@@ -1124,6 +1124,8 @@ def secsy_format(list_of_exp,
         #{{{ various plots to check the phasing
         fl.next('phased data')
         fl.image(signal_slice, interpolation = 'bicubic')
+        fl.next('phased data -- time domain t1')
+        fl.image(signal_slice.copy().ift('t1'), interpolation = 'bicubic')
         fl.next('phased data\ncropped log -- to check phasing along $t_2$')
         fl.image(signal_slice.copy().cropped_log(), interpolation = 'bicubic')
         fl.grid()
@@ -1132,14 +1134,16 @@ def secsy_format(list_of_exp,
         #}}}
         # {{{ generate the linear plots that I use to adjust the timing corrections
         #{{{ check phasing along t2: phase plot from 3553
+        forplot_ini = signal_slice.copy()
+        forplot_ini.ift('t1')
         fl.next('plot the phase at different $t_1$',legend = True)
-        forplot = signal_slice.copy()
-        forplot.ift('t1')
-        forplot.reorder('t2') # make t2 x
-        max_abs = abs(forplot.data).flatten().max()
+        forplot_ini.reorder('t2') # make t2 x
+        max_abs = abs(forplot_ini.data).flatten().max()
         for this_field in fields_toplot:
             for this_echotime in echos_toplot:
                 this_label = []
+                forplot = forplot_ini.copy()
+                # {{{ select the slice out of forplot_ini that I want
                 if this_field is not None:
                     forplot = forplot['fields':(this_field)]
                     this_label.append('%.2f T'%(this_field))
@@ -1152,14 +1156,17 @@ def secsy_format(list_of_exp,
                     markersize = 3,label = ', '.join(this_label),
                     human_units = False) # set human_units to false because
                 #                          the units don't match
+                # }}}
         fl.phaseplot_finalize()
+        del forplot
+        del forplot_ini
         #}}}
         #{{{ check phasing along t1 as a function of t2 frequency offset
         if has_indirect:# there is a t1 dimension
             #{{{ phase plot from 3553
-            fl.next('plot the phase at different $F_2$',legend = True)
             def quarter_of_max(arg,axis):# returns a mask for half of maximum
                 return arg > 0.25*arg.runcopy(max,axis)
+            fl.next('plot the phase at different $F_2$',legend = True)
             for this_field in fields_toplot:
                 forplot = signal_slice
                 this_label = []
@@ -1175,6 +1182,11 @@ def secsy_format(list_of_exp,
                 this_label.append('')
                 for this_freq in r_[f_start:f_stop:5j]:
                     this_label[-1] = '%d MHz'%(this_freq/1e6)
+                    # {{{ show where I pull the slices
+                    fl.next('phased data')
+                    gca().axvline(x = this_freq/1e6,color = 'w',alpha = 0.25)
+                    # }}}
+                    fl.next('plot the phase at different $F_2$',legend = True)
                     fl.plot(forplot['t2':(this_freq)][lambda x:
                         abs(x) > phaseplot_thresholds[0]*max_abs].runcopy(angle)/pi, '.',
                         alpha = 0.5, markersize = 3,

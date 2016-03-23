@@ -1,7 +1,7 @@
 from ..general_functions import *
 from pylab import * 
 
-def extend_for_shear(self,altered_axis,propto_axis,skew_amount,verbose = True):
+def extend_for_shear(self,altered_axis,propto_axis,skew_amount,verbose = False):
     "this is propto_axis helper function for `.fourier.shear`"
     #{{{ in the time domain, altered_axis is the one that's altered (and
     #       needs to be extended), while the shearing is proportional to
