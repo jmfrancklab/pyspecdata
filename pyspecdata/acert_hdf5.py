@@ -868,39 +868,47 @@ def echo_display(data,
         plot_title = '',
         truncate_t2 = None,
         ):
-    r'''Prepare frequency domain data for time-domain display:
+    r'''Prepare frequency domain data and display the
+    time-domain decay of the echo signal as a function of :math:`t_1`.
+
+    It a assumes that the data is given as Fourier conjugate domains of
+    :math:`t_1` and :math:`t_2`, *i.e.*, ``t1`` and ``t2``.
+    Likely, this means that it was created with :func:`load_formatted_data <pyspecdata.acert_hdf5.load_formatted_data>`
+
+    It follows this procedure:
 
         * ift the data
         * use the last quarter of the data in order to determine the extra peak that occurs at zero frequency along the direct dimension, and subtract it out
         * reorder the dimensions to put the direct dimension first
-        * filter to select only ..math::`\pm` `bw`
+        * filter to select only :math:`\pm \text{bw}` along :math:`t_2`
         * reduce the number of points along `t1` while improving their SNR:
             * convolve by 1ns (should later just be the sampling time) mult. by `decimation`
             * sample one every `decimation` points
         * manually rename axes as ..math::`f (direct)` and ..math::`t_{echo}`, with units of MHz and ns (respectively)
         * generate a waterfall plot
-        
-        Parameters
-        ----------
-        data : nddata
-            input data
-        bw : float, optional
-            bandwidth over which to plot ..math::`t_2`
-        fl : figlist_var
-            the figure to which it plots
-        decimation : int, optional
-            the decimation (downsampling) that is used -- note that we throw
-            away points without throwing away SNR
-        plot_title : str, optional
-            title of the plot -- usually the experiment name
-        truncate_t2 : double, optional
-            truncate the t2 dimension to this value (typically, the value after
-            which only noise remains)
 
-        Returns
-        -------
+    Parameters
+    ----------
+    data : nddata
+        input data
+    bw : float, optional
+        bandwidth over which to plot ..math::`t_2`
+    fl : figlist_var
+        the figure to which it plots
+    decimation : int, optional
+        the decimation (downsampling) that is used -- note that we throw
+        away points without throwing away SNR
+    plot_title : str, optional
+        title of the plot -- usually the experiment name
+    truncate_t2 : double, optional
+        truncate the t2 dimension to this value (typically, the value after
+        which only noise remains)
+
+    Returns
+    -------
+    nddata
         the data shown in the waterfall plot
-        '''
+    '''
     if fl is None:
         raise ValueError("You need to pass a figure list")
     data = data.copy()
@@ -1111,7 +1119,15 @@ def secsy_format(list_of_exp,
             ax.axhline(y = 0,color = 'w',alpha = 0.25,linewidth = 3)
         #}}}
         # at this point, signal_slice is in the time domain 
-        signal_slice.secsy_transform_manual('t2','t1',has_indirect = has_indirect)
+        # {{{ do whatever transformation we have selected
+        fl.next('after transform')
+        method = 'secsy'
+        if method == 'manual secsy':
+            signal_slice.secsy_transform_manual('t2','t1',has_indirect = has_indirect)
+        elif method == 'secsy':
+            signal_slice.secsy_transform('t2','t1',has_indirect = has_indirect)
+        fl.image(signal_slice)
+        # }}}
         signal_slice.ft(['t1','t2'])
         #{{{ correct the zeroth order
         phase = signal_slice.copy().mean_all_but([None]).data
@@ -1129,8 +1145,14 @@ def secsy_format(list_of_exp,
         fl.next('phased data\ncropped log -- to check phasing along $t_2$')
         fl.image(signal_slice.copy().cropped_log(), interpolation = 'bicubic')
         fl.grid()
-        fl.next('phased data\nselect real, for pure absorption')
-        fl.image(signal_slice.runcopy(real),interpolation = 'bicubic')
+        if method == 'inh':
+            fl.next('phased data\nselect real, for pure absorption')
+            fl.image(signal_slice.runcopy(real),interpolation = 'bicubic')
+        elif method == 'secsy':
+            fl.next('phased data\ndouble real ft')
+            forplot = signal_slice.copy().ift(['t1','t2']).ft('t1').run(real).ft('t2').run(real)
+            fl.image(forplot,interpolation = 'bicubic')
+            del forplot
         #}}}
         # {{{ generate the linear plots that I use to adjust the timing corrections
         #{{{ check phasing along t2: phase plot from 3553

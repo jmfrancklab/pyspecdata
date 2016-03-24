@@ -3757,6 +3757,7 @@ class nddata (object):
     linear_shear = axis_manipulation.shear.linear_shear
     inhomog_coords = axis_manipulation.inhomog_coords.inhomog_coords
     secsy_transform_manual = axis_manipulation.secsy.secsy_transform_manual
+    secsy_transform = axis_manipulation.secsy.secsy_transform
     register_axis = axis_manipulation.register_axis.register_axis
     fourier_shear = this_fourier.shear.shear
     #}}}
