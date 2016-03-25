@@ -944,7 +944,7 @@ def echo_display(data,
         plot_title_str += ' ('+fl.basename+')'
     title(plot_title_str)
     return data
-def secsy_format(list_of_exp,
+def load_and_format(list_of_exp,
         zerofill = False,
         time_shifts = (0,0),
         field_dep_shift = None,
@@ -952,13 +952,15 @@ def secsy_format(list_of_exp,
         SW = (None,None),
         verbose = True,
         show_origin = True,
+        format = 'secsy',
         phaseplot_thresholds = (0,0),#phaseplot_thresholds = (0.075,0.1),
         fl = None):
-    r""" Generate "SECSY-format" signal that's manually phased through selection of the appropriate :math:`t_1` and :math:`t_2` time-shifts.
+    r""" Generate formatted signal that's manually phased through selection of the appropriate :math:`t_1` and :math:`t_2` time-shifts.
 
     Loads the file(s) given by `list_of_exp`, applying the phase corrections indicated by `time_shifts`.
     If there is a bin dimension, it chunks it to separate out any field dimension, and then averages along any remaining bin dimension.
-    (Upgrade note) previously, this selected out a particular field and/or $T$ value, but it doesn't do that anymore
+    Finally, formats the data (*e.g.* inhomogeneity format or SECSY format) by applying the appropriate transform.
+    .. note:: (Upgrade) previously, this selected out a particular field and/or $T$ value, but it doesn't do that anymore
 
     To phase a spectrum from scratch:
 
@@ -979,7 +981,7 @@ def secsy_format(list_of_exp,
         :`d1`: date (regexp, no leading/trailing ``.*``)
         :`b1`: file base name (regexp, gives the pattern up to the end of the file)
     time_shifts : tuple pair
-        a (:math:`t_1`,:math:`t_2`) pair of numbers that are used to determine
+        a :math:`(t_1,t_2)` pair of numbers that are used to determine
         the linear phase correction.  These are *in addition* to a
         :math:`\frac{\pi}{2}t_{pulse}` correction that is applied to correct
         for evolution during the pulse.
@@ -987,22 +989,32 @@ def secsy_format(list_of_exp,
         an additional, field-dependent phase shift
         (though it's not entirely clear to me why this should be allowed)
     SW : tuple pair of tuple pairs
-        (`f1_limits`,`f2_limits`) is a tuple pair of tuple pairs, where 
-        `f1_limits` gives the limits on the spectral window for
+        ``((f1_start,f1_stop),(f2_start,f2_stop))`` is a tuple pair of tuple pairs, where 
+        ``(f1_start,f1_stop)`` gives the limits on the spectral window for
         :math:`\mathcal{F}[t_1]`
-        and `f2_limits` gives those for
+        and ``(f2_start,f2_stop)`` gives those for
         :math:`\mathcal{F}[t_2]`
     show_origin : bool, optional
         Show white cross-hairs at the origin.
         Defaults to true.
     deadtime : double
         Throw out the signal before `deadtime`.
+    format : str (case insensitive)
+        Determines the final format of the time-domain data.  Note that `SECSY`
+        will only pull one coherence pathway :math:`S_{c-}`, while
+        `inhomogeneity` will pull the full hypercomplex set (:math:`S_{c+}`
+        stacked on top of :math:`S_{c-}`)
+
+        :SECSY: Apply the SECSY format, which selects the :math:`S_{c-}` and throws out the first half of the echo.  Performs skew with :func:`skew <pyspecdata.skew>` to make sure there is no aliasing in either the current or Fourier conjugate dimension.
+        :manual SECSY: Like SECSY, but rather than calling skew manually applies a frequency-dependent phase shift to accomplish the skew, potentially leading to aliasing. 
+        :inhomogeneity: Applies the inhomogeneity transform (a :math:`45^\circ` rotation, followed by mirroring the data that falls to the left of the axis).
     """
     # {{{ load the parameters
     if fl is None:
         fl = figlist_var()
     retval_list = []
     t1_timeshift, t2_timeshift = time_shifts
+    format = format.lower()
     # }}}
     for j,info in enumerate(list_of_exp):
         # {{{ load the data and make sure that it's set up for shifted ft
@@ -1121,10 +1133,9 @@ def secsy_format(list_of_exp,
         # at this point, signal_slice is in the time domain 
         # {{{ do whatever transformation we have selected
         fl.next('after transform')
-        method = 'secsy'
-        if method == 'manual secsy':
+        if format == 'manual secsy':
             signal_slice.secsy_transform_manual('t2','t1',has_indirect = has_indirect)
-        elif method == 'secsy':
+        elif format == 'secsy':
             signal_slice.secsy_transform('t2','t1',has_indirect = has_indirect)
         fl.image(signal_slice)
         # }}}
@@ -1145,10 +1156,10 @@ def secsy_format(list_of_exp,
         fl.next('phased data\ncropped log -- to check phasing along $t_2$')
         fl.image(signal_slice.copy().cropped_log(), interpolation = 'bicubic')
         fl.grid()
-        if method == 'inh':
+        if format == 'inh':
             fl.next('phased data\nselect real, for pure absorption')
             fl.image(signal_slice.runcopy(real),interpolation = 'bicubic')
-        elif method == 'secsy':
+        elif format == 'secsy':
             fl.next('phased data\ndouble real ft')
             forplot = signal_slice.copy().ift(['t1','t2']).ft('t1').run(real).ft('t2').run(real)
             fl.image(forplot,interpolation = 'bicubic')

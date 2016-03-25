@@ -9,6 +9,7 @@ from pylab import *
 import textwrap
 import matplotlib
 import matplotlib.transforms as mtransforms
+from distutils.version import LooseVersion
 from numpy import sqrt as np_sqrt
 from numpy.lib.recfunctions import rename_fields,drop_fields
 from mpl_toolkits.mplot3d import axes3d
@@ -1421,7 +1422,7 @@ def plot_color_counter(*args,**kwargs):
     if not passed an argument: just return the current plot properties,so that I can cycle back to it"""
     ax, = process_kwargs([('ax',gca())],kwargs)
     if len(args)>0:
-        if matplotlib.__version__ >= 1.5:
+        if LooseVersion(matplotlib.__version__) >= LooseVersion("1.5"):
             # {{{ find the element before the one we want
             retval = args[0]
             penultimate = ax._get_lines.prop_cycler.next()
@@ -1447,8 +1448,9 @@ def plot_color_counter(*args,**kwargs):
                 ax._get_lines.count = args[0] # set the value of the color counter
             except:
                 ax._get_lines.color_cycle = args[0] # set the value of the color counter
+            retval = args[0]
     else:
-        if matplotlib.__version__ >= 1.5:
+        if LooseVersion(matplotlib.__version__) >= LooseVersion("1.5"):
             # {{{ I want to return the current element of the cycle
             one_too_far = ax._get_lines.prop_cycler.next()
             j = ax._get_lines.prop_cycler.next()

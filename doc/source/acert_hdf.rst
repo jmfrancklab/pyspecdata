@@ -11,6 +11,7 @@ ACERT functions for processing spectrometer data
 
 .. currentmodule:: pyspecdata.acert_hdf5
 .. autosummary::
+    :toctree: generated
 
     automagical_phasecycle
     cw
@@ -19,6 +20,7 @@ ACERT functions for processing spectrometer data
     find_attenuation
     find_file
     gen_composite
+    load_and_format
     load_nutation_curve
     open_cw_file
     oscilloscope_data
@@ -34,7 +36,6 @@ ACERT functions for processing spectrometer data
     postproc_eldor_old
     postproc_generic
     search_freed_file
-    secsy_format
     show_coherence_pathway
     show_pathways
 
