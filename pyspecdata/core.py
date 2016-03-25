@@ -1361,29 +1361,50 @@ def autopad_figure(pad = 0.2,centered = False,figname = 'unknown'):
     return
     #}}}
 def expand_x(*args):
+    r'''expand the axes.  If an argument is passed, then it refers to the position relative to the current coordinates.  Values can be:
+        :0: set this side of the axis to 0
+        :None: leave this side of the axis alone
+        :a double: rescale the distance from the center of the axis to this side by this number'''
     # this is matplotlib code to expand the x axis
     ax = gca()
     xlims = array(ax.get_xlim())
-    xlims.sort()
     width = abs(diff(xlims))
+    thismean = mean(xlims)
     xlims[0] -= width/10
     xlims[1] += width/10
     if len(args) > 0:
         if len(args) == 1 and type(args) is tuple:
             args = args[0]
-        xlims = [xlims[j] if args[j] is None else args[j] for j in range(0,2)]
+        for j in range(2):
+            if args[j] is None:
+                pass
+            elif args[j] is 0:
+                xlims[j] = 0
+            else:
+                xlims[j] = args[j]*(xlims[j]-thismean) + thismean
     ax.set_xlim(xlims)
 def expand_y(*args):
+    r'''expand the axes.  If an argument is passed, then it refers to the position relative to the current coordinates.  Values can be:
+        :0: set this side of the axis to 0
+        :None: leave this side of the axis alone
+        :a double: rescale the distance from the center of the axis to this side by this number'''
     # this is matplotlib code to expand the x axis
     ax = gca()
     ylims = array(ax.get_ylim())
     width = abs(diff(ylims))
+    thismean = mean(ylims)
     ylims[0] -= width/10
     ylims[1] += width/10
     if len(args) > 0:
         if len(args) == 1 and type(args) is tuple:
             args = args[0]
-        ylims = [ylims[j] if args[j] is None else args[j] for j in range(0,2)]
+        for j in range(2):
+            if args[j] is None:
+                pass
+            elif args[j] is 0:
+                ylims[j] = 0
+            else:
+                ylims[j] = args[j]*(ylims[j]-thismean) + thismean
     ax.set_ylim(ylims)
 def plot_label_points(x,y,labels,**kwargs_passed):
     kwargs = {'alpha':0.5,'color':'g','ha':'left','va':'center','rotation':0,'size':14}

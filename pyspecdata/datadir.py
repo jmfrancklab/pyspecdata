@@ -35,6 +35,8 @@ def grab_data_directory():
         os.environ['PYTHONDATADIR'] = mydatadir
     return grabbed_datadir_from_file,datadir_error
 def getDATADIR(*args):
+    r'''The data directory is set through the PYTHONDATADIR environment variable.
+    This assumes that the arguments are a series of subdirectories under that directory, and returns the resulting path, with trailing backslash/slash as appropriate.'''
     if 'PYTHONDATADIR' in os.environ.keys():
         DATADIR = os.environ['PYTHONDATADIR']
     else:
@@ -43,6 +45,6 @@ def getDATADIR(*args):
             raise RuntimeError(datadir_error)
         DATADIR = os.environ['PYTHONDATADIR']
     if len(args)>0:
-        return dirformat(DATADIR)+os.sep.join(args)
+        return dirformat(dirformat(DATADIR)+os.sep.join(args))
     else:
         return dirformat(DATADIR)
