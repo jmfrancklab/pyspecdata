@@ -503,9 +503,9 @@ def search_freed_file(searchstring,exp_type,
     if os.path.isdir(directory):
         files = re.findall('.*' + searchstring + '.*','\n'.join(os.listdir(directory)))
     else:
-        raise RuntimeError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s"%(directory,searchstring))
+        raise IOError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s"%(directory,searchstring))
     if len(files) == 0:
-        raise ValueError("I can't find a file matching the regular expression {:s} in {:s}".format(searchstring,directory))
+        raise IOError("I can't find a file matching the regular expression {:s} in {:s}".format(searchstring,directory))
     else:
         if len(files) > 1:
             warnings.warn('found multiple files:\n'+repr(files)+'\nand opening last')
