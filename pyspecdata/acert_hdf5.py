@@ -490,7 +490,7 @@ def postproc_eldor_file(data,fl = None):
     data.set_units('t_1','s')
     return data
 def search_freed_file(searchstring,exp_type,
-        directory = dirformat(getDATADIR()+'95GHz'),
+        directory = getDATADIR('95GHz'),
         print_result = False,
         verbose = False):
     ("this searches in the 95GHz subdirectory of the data directory in order to"
@@ -765,8 +765,8 @@ def oscilloscope_data(*args):
     :rtype: tuple of 3 nddata objects
     """
     if len(args) == 2:
-        file1 = getDATADIR('95GHz','agilent_scope',args[0])
-        file2 = getDATADIR('95GHz','agilent_scope',args[1])
+        file1 = getDATADIR('95GHz','agilent_scope')+args[0]
+        file2 = getDATADIR('95GHz','agilent_scope')+args[1]
         a = scipy.io.loadmat(file1) # because 0.17 crashes in anaconda, needed to downgrade anaconda scipy with conda install scipy=0.16
         b = scipy.io.loadmat(file2)
         if '_bg' in args[0]:
