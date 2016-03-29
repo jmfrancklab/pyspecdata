@@ -2680,6 +2680,14 @@ class nddata (object):
             return self.dimlabels.index(axis)
         except:
             raise ValueError(' '.join(map(repr,['there is no axis named',axis,'all axes are named',self.dimlabels])))
+    def indices(self,axis_name,values):
+        r'Return a string of indeces that most closely match the axis labels corresponding to values. Filter them to make sure they are unique.'
+        x = self.getaxis(axis_name)
+        retval = []
+        for j in values:
+            retval.append(argmin(abs(x - j)))
+        retval = array(retval)
+        return unique(retval)
     #}}}
     #{{{ dictionary functions -- these convert between two formats:
     # dictionary -- stuff labeled according the dimension label.

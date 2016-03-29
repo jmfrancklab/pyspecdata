@@ -41,10 +41,9 @@ def image(A,x=[],y=[],**kwargs):
                 y = r_[0:A.data.shape[A.axn(y_label)]]
             y_label = A.unitify_axis(y_label)
         else:
-            while len(templabels)>0:
-                y_label += templabels.pop(0)
-                if len(templabels)>0:
-                    y_label += '$\\otimes$'
+            these_dimsizes = map(lambda x: str(ndshape(A)[x]),templabels)
+            y_label = '$\\otimes$'.join(templabels)
+            y_label += ' $^{('+r'\times'.join(these_dimsizes)+')}$'
         A = A.data
     if type(x) is list:
         x = array(x)

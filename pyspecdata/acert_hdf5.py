@@ -960,7 +960,10 @@ def load_and_format(list_of_exp,
     Loads the file(s) given by `list_of_exp`, applying the phase corrections indicated by `time_shifts`.
     If there is a bin dimension, it chunks it to separate out any field dimension, and then averages along any remaining bin dimension.
     Finally, formats the data (*e.g.* inhomogeneity format or SECSY format) by applying the appropriate transform.
-    .. note:: (Upgrade) previously, this selected out a particular field and/or $T$ value, but it doesn't do that anymore
+
+    .. versionchanged:: beta
+
+        Previously, this selected out a particular field and/or :math:`T` value, but it doesn't do that anymore.
 
     To phase a spectrum from scratch:
 
@@ -1009,28 +1012,46 @@ def load_and_format(list_of_exp,
         :manual SECSY: Like SECSY, but rather than calling skew manually applies a frequency-dependent phase shift to accomplish the skew, potentially leading to aliasing. 
         :inhomogeneity: Applies the inhomogeneity transform (a :math:`45^\circ` rotation, followed by mirroring the data that falls to the left of the axis).
     fl : figlist_var
-        Figure list used to generate plots that aid in manual phasing.  The plots are:
+        Figure list used to generate plots that aid in manual phasing.
+
+        .. note::
+            The following parameters are generated on the fly and used to determine these plots.  The corresponding variables store the *indices* (rather than axis labels) corresponding to the values described below:
+
+            :fields_toplot: select 5 evenly spaced fields that span the range of the "fields" axis labels, and then select the central 3 out of those.
+            :field_at_max: take the abs, mean both :math:`t_1` and :math:`t_2` and find the field with max signal.
+            :echos_toplot: select 5 evenly spaced fields that span the range of :math:`t_1`, and then select the central 3 out of those.
+            :F2_toplot: Take the mean of the absolute value along :math:`F_1`, then use :func:`contiguous <pyspecdata.nddata.contiguous>` to select the largest peak along :math:`F_2`, then then select 5 evenly spaced frequencies along that peak.  Determine this only for the first field indexed by `fields_toplot`.
+            
+        The plots are:
 
         :signal slice before timing correction: A cropped log plot of the selected coherence pathway
         :(pre-transform) check timing correction: (0,0) is aliased to center and echo is sheared.  By default (if ``show_origin==True``), shows cross-hairs that should align with the apparent time origin of the signal.
+
+            * show signal only for `field_at_max`
+
         :after transform: Shows the time-domain signal after the 
         :phased data: there are several plots with this label. The first three are used to check the phase roll along :math:`t_2`:
 
-            * a plot that is in the frequency domain
+            * a plot that is in the frequency domain.
+                * White lines are used to mark the positions given by `F2_toplot`.
+                * Selects a subset of data given by `fields_toplot`.
             * a plot that is in the time domain along :math:`t_1`
+                * Selects a subset of data given by `fields_toplot`.
             * a frequency domain cropped-log plot
+                * Selects a subset of data given by `fields_toplot`.
 
-            Then there is *one* of the following:
+            Then there is *one* of the following, which is used to show what the final output looks like:
 
             * select real, for pure absorption
             * double real ft
 
-            which is used to show what the final output looks like.
+        :plot the phase: Finally, for detailed phasing are the following two plots. These phase plots use :func:`contiguous <pyspecdata.nddata.contiguous>` to selectively plot the phase over the frequencies that are a quarter of the maximum signal:
 
-        :plot the phase: Finally, for detailed phasing are the following two plots:
+            * plot the phase at different :math:`t_1`.
+                * Selects a subset of the data as indicated by `fields_toplot` and `echos_toplot`
+            * plot the phase at different :math:`F_2`.
+                * Selects a subset of the data as indicated by `fields_toplot` and `F2_toplot`.
 
-            * plot the phase at different :math:`t_1`
-            * plot the phase at different :math:`F_2`
     """
     # {{{ load the parameters
     if fl is None:
@@ -1091,12 +1112,18 @@ def load_and_format(list_of_exp,
             echos_toplot = r_[signal_slice.getaxis('t1')[0]:
                     signal_slice.getaxis('t1')[-1]:
                     5j][1:-1]
+            echos_toplot = signal_slice.indices('t1',echos_toplot)
         else:
             echos_toplot = [None]
         if 'fields' in signal_slice.dimlabels:
             fields_toplot = signal_slice.getaxis('fields')
+            if len(fields_toplot) > 3:
+                fields_toplot = r_[fields_toplot[0]:fields_toplot[-1]:5j][1:-1]
+            fields_toplot = signal_slice.indices('fields',fields_toplot)
+            field_at_max = abs(signal_slice).mean('t1').mean('t2').argmax('fields', raw_index=True).data
         else:
             fields_toplot = [None]
+            field_at_max = None
         #}}}
         #{{{ shift the time axis to account for evolution during the pulse
         if signal_slice.get_prop('t90') is not None:
@@ -1146,7 +1173,10 @@ def load_and_format(list_of_exp,
             forplot.ft('t1') # ft along t1 so I can clear the startpoint, below
             forplot.ft_clear_startpoints('t1')
             forplot.ift('t1',shift = True) # generate a centered echo here
-        fl.image(forplot, interpolation = 'nearest')
+        if field_at_max is None:
+            fl.image(forplot, interpolation = 'nearest')
+        else:
+            fl.image(forplot['fields',field_at_max], interpolation = 'nearest')
         del forplot
         ax = gca(); ax.title.set_fontsize('small')
         if show_origin:
@@ -1173,11 +1203,11 @@ def load_and_format(list_of_exp,
         #}}}
         #{{{ various plots to check the phasing
         fl.next('phased data')
-        fl.image(signal_slice, interpolation = 'bicubic')
+        fl.image(signal_slice['fields',fields_toplot], interpolation = 'bicubic')
         fl.next('phased data -- time domain t1')
-        fl.image(signal_slice.copy().ift('t1'), interpolation = 'bicubic')
+        fl.image(signal_slice.copy().ift('t1')['fields',fields_toplot], interpolation = 'bicubic')
         fl.next('phased data\ncropped log -- to check phasing along $t_2$')
-        fl.image(signal_slice.copy().cropped_log(), interpolation = 'bicubic')
+        fl.image(signal_slice.copy().cropped_log()['fields',fields_toplot], interpolation = 'bicubic')
         fl.grid()
         if transform == 'inh':
             fl.next('phased data\nselect real, for pure absorption')
@@ -1195,17 +1225,17 @@ def load_and_format(list_of_exp,
         fl.next('plot the phase at different $t_1$',legend = True)
         forplot_ini.reorder('t2') # make t2 x
         max_abs = abs(forplot_ini.data).flatten().max()
-        for this_field in fields_toplot:
-            for this_echotime in echos_toplot:
+        for this_field_idx in fields_toplot:
+            for echo_idx in echos_toplot:
                 this_label = []
                 forplot = forplot_ini.copy()
                 # {{{ select the slice out of forplot_ini that I want
-                if this_field is not None:
-                    forplot = forplot['fields':(this_field)]
-                    this_label.append('%.2f T'%(this_field))
-                if this_echotime is not None:
-                    forplot = forplot['t1':(this_echotime)]
-                    this_label.append('%d ns'%(this_echotime/1e-9))
+                if this_field_idx is not None:
+                    this_label.append('%.2f T'%(forplot.getaxis('fields')[this_field_idx]))
+                    forplot = forplot['fields',this_field_idx]
+                if echo_idx is not None:
+                    this_label.append('%d ns'%(forplot.getaxis('t1')[echo_idx]/1e-9))
+                    forplot = forplot['t1',echo_idx]
                 fl.plot(forplot[lambda x:
                     abs(x) > phaseplot_thresholds[1]*max_abs
                     ].runcopy(angle)/pi,'.',alpha = 0.5,
@@ -1223,31 +1253,33 @@ def load_and_format(list_of_exp,
             def quarter_of_max(arg,axis):# returns a mask for half of maximum
                 return arg > 0.25*arg.runcopy(max,axis)
             fl.next('plot the phase at different $F_2$',legend = True)
-            for this_field in fields_toplot:
+            for j,this_field_idx in enumerate(fields_toplot):
                 forplot = signal_slice
                 this_label = []
-                if this_field is not None:
-                    forplot = forplot['fields':(this_field)]
-                    this_label.append('%.2f T'%(this_field))
+                if this_field_idx is not None:
+                    this_label.append('%.2f T'%(forplot.getaxis('fields')[this_field_idx]))
+                    forplot = forplot['fields',this_field_idx]
                 sum_for_contiguous = abs(forplot).mean('t1').set_error(None)
                 f_start,f_stop = sum_for_contiguous.contiguous(
                         quarter_of_max,'t2')[0,:]#  pull the first row, which is
                 #                                   the largest block
+                if j == 0:
+                    F2_toplot = forplot.indices('t2',r_[f_start:f_stop:5j])
                 forplot.reorder('t1') # make t1 x
                 max_abs = abs(forplot.data).flatten().max()
                 this_label.append('')
-                for this_freq in r_[f_start:f_stop:5j]:
+                for this_freq_idx in F2_toplot:
+                    this_freq = forplot.getaxis('t2')[this_freq_idx]
                     this_label[-1] = '%d MHz'%(this_freq/1e6)
                     # {{{ show where I pull the slices
                     fl.next('phased data')
                     gca().axvline(x = this_freq/1e6,color = 'w',alpha = 0.25)
                     # }}}
                     fl.next('plot the phase at different $F_2$',legend = True)
-                    fl.plot(forplot['t2':(this_freq)][lambda x:
+                    fl.plot(forplot['t2',this_freq_idx][lambda x:
                         abs(x) > phaseplot_thresholds[0]*max_abs].runcopy(angle)/pi, '.',
                         alpha = 0.5, markersize = 3,
                         label = ', '.join(this_label))
-                    #fl.plot(forplot['t2':(this_freq)].runcopy(angle)/pi,'.',alpha = 0.5,markersize = 3,label = '%d MHz'%(this_freq/1e6))
             fl.phaseplot_finalize()
             #}}}
         #}}}
