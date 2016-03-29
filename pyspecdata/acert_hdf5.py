@@ -952,7 +952,7 @@ def load_and_format(list_of_exp,
         SW = (None,None),
         verbose = True,
         show_origin = True,
-        format = 'secsy',
+        transform = 'secsy',
         phaseplot_thresholds = (0,0),#phaseplot_thresholds = (0.075,0.1),
         fl = None):
     r""" Generate formatted signal that's manually phased through selection of the appropriate :math:`t_1` and :math:`t_2` time-shifts.
@@ -999,22 +999,45 @@ def load_and_format(list_of_exp,
         Defaults to true.
     deadtime : double
         Throw out the signal before `deadtime`.
-    format : str (case insensitive)
+    transform : str (case insensitive)
         Determines the final format of the time-domain data.  Note that `SECSY`
         will only pull one coherence pathway :math:`S_{c-}`, while
         `inhomogeneity` will pull the full hypercomplex set (:math:`S_{c+}`
         stacked on top of :math:`S_{c-}`)
 
-        :SECSY: Apply the SECSY format, which selects the :math:`S_{c-}` and throws out the first half of the echo.  Performs skew with :func:`skew <pyspecdata.skew>` to make sure there is no aliasing in either the current or Fourier conjugate dimension.
+        :SECSY: Apply the SECSY transform, which selects the :math:`S_{c-}` and throws out the first half of the echo.  Performs skew with :func:`skew <pyspecdata.skew>` to make sure there is no aliasing in either the current or Fourier conjugate dimension.
         :manual SECSY: Like SECSY, but rather than calling skew manually applies a frequency-dependent phase shift to accomplish the skew, potentially leading to aliasing. 
         :inhomogeneity: Applies the inhomogeneity transform (a :math:`45^\circ` rotation, followed by mirroring the data that falls to the left of the axis).
+    fl : figlist_var
+        Figure list used to generate plots that aid in manual phasing.  The plots are:
+
+        :signal slice before timing correction: A cropped log plot of the selected coherence pathway
+        :(pre-transform) check timing correction: (0,0) is aliased to center and echo is sheared.  By default (if ``show_origin==True``), shows cross-hairs that should align with the apparent time origin of the signal.
+        :after transform: Shows the time-domain signal after the 
+        :phased data: there are several plots with this label. The first three are used to check the phase roll along :math:`t_2`:
+
+            * a plot that is in the frequency domain
+            * a plot that is in the time domain along :math:`t_1`
+            * a frequency domain cropped-log plot
+
+            Then there is *one* of the following:
+
+            * select real, for pure absorption
+            * double real ft
+
+            which is used to show what the final output looks like.
+
+        :plot the phase: Finally, for detailed phasing are the following two plots:
+
+            * plot the phase at different :math:`t_1`
+            * plot the phase at different :math:`F_2`
     """
     # {{{ load the parameters
     if fl is None:
         fl = figlist_var()
     retval_list = []
     t1_timeshift, t2_timeshift = time_shifts
-    format = format.lower()
+    transform = transform.lower()
     # }}}
     for j,info in enumerate(list_of_exp):
         # {{{ load the data and make sure that it's set up for shifted ft
@@ -1133,9 +1156,9 @@ def load_and_format(list_of_exp,
         # at this point, signal_slice is in the time domain 
         # {{{ do whatever transformation we have selected
         fl.next('after transform')
-        if format == 'manual secsy':
+        if transform == 'manual secsy':
             signal_slice.secsy_transform_manual('t2','t1',has_indirect = has_indirect)
-        elif format == 'secsy':
+        elif transform == 'secsy':
             signal_slice.secsy_transform('t2','t1',has_indirect = has_indirect)
         fl.image(signal_slice)
         # }}}
@@ -1156,12 +1179,12 @@ def load_and_format(list_of_exp,
         fl.next('phased data\ncropped log -- to check phasing along $t_2$')
         fl.image(signal_slice.copy().cropped_log(), interpolation = 'bicubic')
         fl.grid()
-        if format == 'inh':
+        if transform == 'inh':
             fl.next('phased data\nselect real, for pure absorption')
             fl.image(signal_slice.runcopy(real),interpolation = 'bicubic')
-        elif format == 'secsy':
+        elif transform == 'secsy':
             fl.next('phased data\ndouble real ft')
-            forplot = signal_slice.copy().ift(['t1','t2']).ft('t1').run(real).ft('t2').run(real)
+            forplot = signal_slice.copy().ift(['t1','t2']).ft('t1').run(lambda x: complex128(real(x))).ft('t2').run(real)
             fl.image(forplot,interpolation = 'bicubic')
             del forplot
         #}}}

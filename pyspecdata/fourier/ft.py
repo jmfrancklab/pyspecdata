@@ -139,7 +139,13 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
                     " on??").format(dv,p2_post_discrepancy)
             phaseshift =  self.fromaxis(axes[j],
                     lambda q: exp(-1j*2*pi*q*p2_post_discrepancy))
-            self.data *= phaseshift.data
+            try:
+                self.data *= phaseshift.data
+            except TypeError,e:
+                if self.data.dtype != 'complex128':
+                    raise TypeError("You tried to ft nddata that was of type "+str(self.data.dtype))
+                else:
+                    raise TypeError(e)
         #}}}
         #{{{ do zero-filling manually and first, so I can properly pre-shift the data
         if not pad is False:
