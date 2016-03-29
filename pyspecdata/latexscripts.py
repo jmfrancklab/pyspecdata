@@ -154,7 +154,7 @@ def cache_output_if_needed(scriptnum_as_str,hashstring,showcode = False,show_err
         #fp_out.write('\n\n$\\Rightarrow$ end of output\n\n')
         if show_error:
             if stderrdata is not None and len(stderrdata) > 0:
-                fp_out.write("\\quad\\\\ {\\small {\\color{red} {\\tt ERRORS---------------------} \\verb|%s|}}\\\\\n"%script_fname)
+                fp_out.write("\\quad\\\\ {\\small {\\color{red} {\\tt ERRORS---------------------} "+r'\makeatletter\fn{scripts/\thepy@codenum.py}\makeatother'+"}}\\\\\n")
                 fp_out.write("\n\nThe current directory is \\verb|%s|\n\n"%os.getcwd())
                 fp_out.write("\n\nThe data directory was set to: \\verb|"+getDATADIR()+"|\n\n")
                 fp_out.write("\n\nThe notebook directory was set to: \\verb|"+get_notebook_dir()+"|\n\n")
@@ -168,6 +168,10 @@ def cache_output_if_needed(scriptnum_as_str,hashstring,showcode = False,show_err
         fp_out.close()
         return
 def flush_script(number):
+    tex_name = get_notebook_dir('scripts')+number+'.tex'
+    print "removing:",tex_name
+    if os.path.exists(tex_name):
+        os.remove(tex_name)
     file_name = cached_filename(sha_string(grab_script_string(number)))
     print "removing:",file_name
     if os.path.exists(file_name):

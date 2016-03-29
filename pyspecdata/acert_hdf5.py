@@ -823,7 +823,7 @@ def find_attenuation(basename,
     ratio = sqrt(ratio.data)
 
     print "scaleup for this attenuation is",ratio
-    fp = tables.openFile(get_notebook_dir('reflection_tests.h5'),
+    fp = tables.openFile(get_notebook_dir()+'reflection_tests.h5',
             mode = 'a',
             title = 'reflection tests')
     d = {'exp':basename,
