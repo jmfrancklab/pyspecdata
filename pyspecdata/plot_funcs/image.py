@@ -160,6 +160,7 @@ def fl_image(self,A,**kwargs):
     Note that this code just wraps the figlist properties, and
     the heavy lifting is done by the `image(` function.
     Together, the effect is as follows:
+
     - `check_units` converts to human-readable units, and
       makes sure they match the units already used in the plot.
     - if `A` has more than two dimensions, the final dimension in
@@ -171,18 +172,18 @@ def fl_image(self,A,**kwargs):
       create the direct product is finished iterating.
     - If `A` consists of complex data, then an HSV plot
       (misnomer, actually an HV plot) is used:
-      - convert to polar form: $z=\rho \exp(i \phi)$
-      - $\phi$ determines the color (Hue)
-        - Color wheel is cyclical, like $\exp(i \phi)$
-        - red is taken as $\phi=0$, purely real and positive
-        - green-blue is $pi$ radians out of phase with red and
+      - convert to polar form: :math:`z=\rho \exp(i \phi)`
+      - :math:`\phi` determines the color (Hue)
+        - Color wheel is cyclical, like :math:`\exp(i \phi)`
+        - red is taken as :math:`\phi=0`, purely real and positive
+        - green-blue is :math:`pi` radians out of phase with red and
           therefore negative real
-      - $\rho$ determines the intensity (value)
+      - :math:`\rho` determines the intensity (value)
         - Depending on whether or not `black` is set (either as a
           keyword argument, or `fl.black`, the background will be
-          black with high $\rho$ values "lit up" (intended for
+          black with high :math:`\rho` values "lit up" (intended for
           screen plotting) or the background will be white with
-          the high $\rho$ values "colored in" (intended for
+          the high :math:`\rho` values "colored in" (intended for
           printing)
     - If the data type (`dtype`) of the data in `A` is real
       (typically achieved by calling `abs(A)` or

@@ -948,7 +948,7 @@ def load_and_format(list_of_exp,
         zerofill = False,
         time_shifts = (0,0),
         field_dep_shift = None,
-        deadtime = 29e-9,
+        deadtime = 0e-9,
         SW = (None,None),
         verbose = True,
         show_origin = True,
@@ -973,6 +973,24 @@ def load_and_format(list_of_exp,
         approximately :math:`t_1=0` :math:`t_2=0`.
 
         * A negative shift corresponds to moving the signal left (up).
+        * Note that the :math:`x`-axis is :math:`t_2-t_1`, so it's easiest to adjust the :math:`t_1` time-shift first, before messing with :math:`t_2`.
+
+    3. Look at the plot that shows the phased data with :math:`t_1` in the time domain, 
+        and if there are :math:`>1` cycles in the phase (color)
+        along :math:`\mathcal{F}[t_2]`.
+
+        * Add a positive time-shift to correct for a
+            left --> right roll of magenta --> red --> yellow (since this is
+            positive increase).
+        * The time-shift can be calculated as (phase shift [cyc])/(range of x-axis [cyc/s])
+    4. Look at the plot that gives
+        the phase *vs.* :math:`\mathcal{F}[t_2]`,
+        and apply any additional corrections:
+
+        * Positive phase corrects positive slope -- the 2 (or 0.05 for division) here adjusts for the y units (pi rad) vs. cycles
+        * The time-shift can be calculated as (0.5 [cyc/:math:`\pi` rad])\*(phase shift [:math:`\pi` rad])/(range of x-axis [cyc/s])
+        * For causal signal, the red lines show the phase where the signal should start (top/left) and end (bottom/right).  However (**why?**), the phase may turn around and come back to zero shortly after it reaches the furthest point from zero.
+    5. In order to apply the same correction along :math:`t_1`, it's typically necessary to set a reasonable ``SW`` for :math:`t_1` and to set ``zero_fill`` to ``True``.
 
     Parameters
     ----------
@@ -1010,7 +1028,7 @@ def load_and_format(list_of_exp,
 
         :SECSY: Apply the SECSY transform, which selects the :math:`S_{c-}` and throws out the first half of the echo.  Performs skew with :func:`skew <pyspecdata.skew>` to make sure there is no aliasing in either the current or Fourier conjugate dimension.
         :manual SECSY: Like SECSY, but rather than calling skew manually applies a frequency-dependent phase shift to accomplish the skew, potentially leading to aliasing. 
-        :inhomogeneity: Applies the inhomogeneity transform (a :math:`45^\circ` rotation, followed by mirroring the data that falls to the left of the axis).
+        :inh: Applies the inhomogeneity transform (a :math:`45^\circ` rotation, followed by mirroring the data that falls to the left of the axis).
     fl : figlist_var
         Figure list used to generate plots that aid in manual phasing.
 
@@ -1020,7 +1038,7 @@ def load_and_format(list_of_exp,
             :fields_toplot: select 5 evenly spaced fields that span the range of the "fields" axis labels, and then select the central 3 out of those.
             :field_at_max: take the abs, mean both :math:`t_1` and :math:`t_2` and find the field with max signal.
             :echos_toplot: select 5 evenly spaced fields that span the range of :math:`t_1`, and then select the central 3 out of those.
-            :F2_toplot: Take the mean of the absolute value along :math:`F_1`, then use :func:`contiguous <pyspecdata.nddata.contiguous>` to select the largest peak along :math:`F_2`, then then select 5 evenly spaced frequencies along that peak.  Determine this only for the first field indexed by `fields_toplot`.
+            :F2_toplot: Take the mean of the absolute value along :math:`\mathcal{F}[t_1]`, then use :func:`contiguous <pyspecdata.nddata.contiguous>` to select the largest peak along :math:`\mathcal{F}[t_2]`, then then select 5 evenly spaced frequencies along that peak.  Determine this only for the first field indexed by `fields_toplot`.
             
         The plots are:
 
@@ -1029,8 +1047,8 @@ def load_and_format(list_of_exp,
 
             * show signal only for `field_at_max`
 
-        :after transform: Shows the time-domain signal after the 
-        :phased data: there are several plots with this label. The first three are used to check the phase roll along :math:`t_2`:
+        :after transform: Shows the time-domain signal after the selected transform has been applied.
+        :phased data: there are several plots with this label. The first three are used to check the phase roll along :math:`t_2`:.  These are all plotted without interpolation.
 
             * a plot that is in the frequency domain.
                 * White lines are used to mark the positions given by `F2_toplot`.
@@ -1049,7 +1067,7 @@ def load_and_format(list_of_exp,
 
             * plot the phase at different :math:`t_1`.
                 * Selects a subset of the data as indicated by `fields_toplot` and `echos_toplot`
-            * plot the phase at different :math:`F_2`.
+            * plot the phase at different :math:`\mathcal{F}[t_2]`.
                 * Selects a subset of the data as indicated by `fields_toplot` and `F2_toplot`.
 
     """
@@ -1105,7 +1123,7 @@ def load_and_format(list_of_exp,
             signal_slice = signal_slice['t2':(deadtime,inf)]
         # }}}
         fl.next('signal slice\nbefore timing correction (cropped log)')
-        fl.image(abs(signal_slice).cropped_log(), interpolation = 'bicubic')
+        fl.image(signal_slice.copy().cropped_log(), interpolation = 'bicubic')
         ax = gca(); ax.title.set_fontsize('small')
         #{{{ set up the values of the indirect dimensions that we iterate over in the phase plots
         if has_indirect:
@@ -1173,6 +1191,7 @@ def load_and_format(list_of_exp,
             forplot.ft('t1') # ft along t1 so I can clear the startpoint, below
             forplot.ft_clear_startpoints('t1')
             forplot.ift('t1',shift = True) # generate a centered echo here
+        forplot.rename('t2',r'$t_2-t_1$')
         if field_at_max is None:
             fl.image(forplot, interpolation = 'nearest')
         else:
@@ -1203,11 +1222,12 @@ def load_and_format(list_of_exp,
         #}}}
         #{{{ various plots to check the phasing
         fl.next('phased data')
-        fl.image(signal_slice['fields',fields_toplot], interpolation = 'bicubic')
-        fl.next('phased data -- time domain t1')
-        fl.image(signal_slice.copy().ift('t1')['fields',fields_toplot], interpolation = 'bicubic')
-        fl.next('phased data\ncropped log -- to check phasing along $t_2$')
-        fl.image(signal_slice.copy().cropped_log()['fields',fields_toplot], interpolation = 'bicubic')
+        fl.image(signal_slice['fields',fields_toplot])
+        fl.next('phased data -- time domain $t_1$\nto check phasing along $t_2$')
+        fl.image(signal_slice.copy().ift('t1')['fields',fields_toplot])
+        fl.next('phased data -- time domain $t_2$\ncropped log -- to check phasing along $t_1$')
+        fl.image(signal_slice.copy().ift('t2')['fields',fields_toplot
+            ].reorder('t1',first = False))
         fl.grid()
         if transform == 'inh':
             fl.next('phased data\nselect real, for pure absorption')

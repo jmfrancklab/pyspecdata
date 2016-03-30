@@ -3939,10 +3939,13 @@ class nddata (object):
             self.data = values
             self.setaxis(axis,cdata)
             return self
-    def contiguous(self,lambdafunc,axis = None,verbose = False): #adapted stackexchange http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-array
+    def contiguous(self,lambdafunc,axis = None,verbose = False):
         r"""this function returns the start and stop positions along the
         axis for the contiguous blocks for which lambdafunc returns
         true
+        
+        .. note::
+            adapted from stackexchange post http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-array
 
         Parameters
         ----------
@@ -3982,7 +3985,7 @@ class nddata (object):
         > exit()
         > #}}}
         """
-        if verbose: print "shape of self inside contiguous",ndshape(self)
+        if verbose: print "(contiguous) shape of self inside contiguous",ndshape(self)
         if axis is None:
             if len(self.dimlabels) == 1:
                 axis = self.dimlabels[0]
@@ -3991,20 +3994,20 @@ class nddata (object):
                 raise TypeError("If there is more than one dimension, `axis` must be set to something other than ``None``")
         else:
             mask = lambdafunc(self.copy(),axis).data
-        if verbose: print "shape of mask",mask.shape
+        if verbose: print "(contiguous) shape of mask",mask.shape
         idx, = np.diff(mask).nonzero() # this gives a list of indices for the boundaries between true/false
         idx += 1 # because diff only starts on index #1 rather than #0
         if mask[0]: # because I want to indicate the boundaries of True, if I am starting on True, I need to make 0 a boundary
             idx = np.r_[0, idx]
         if mask[-1]: # If the end of mask is True, then I need to add a boundary there as well
-            idx = np.r_[idx, mask.size] # Edit
+            idx = np.r_[idx, mask.size-1] # Edit
         idx.shape = (-1,2) # idx is 2x2 array of start,stop
-        if verbose: print 'DEBUG idx is',idx
-        if verbose: print "diffs for blocks",diff(idx,axis=1),
-        if verbose: print "with argmax",diff(idx,axis=1).argmax(),
-        if verbose: print "yielding",idx[diff(idx,axis=1).argmax(),:],self.getaxis(axis)[idx[diff(idx,axis=1).argmax(),:]]
-        return self.getaxis(axis)[idx[diff(idx,
-            axis=1).flatten().argsort()[::-1],:]]
+        if verbose: print '(contiguous) DEBUG idx is',idx
+        if verbose: print "(contiguous) diffs for blocks",diff(idx,axis=1),
+        block_order = diff(idx, axis=1).flatten().argsort()[::-1]
+        if verbose: print "(contiguous) in descending order, the blocks are therefore",idx[block_order,:]
+        #if verbose: print "yielding",idx[diff(idx,axis=1).argmax(),:],self.getaxis(axis)[idx[diff(idx,axis=1).argmax(),:]]
+        return self.getaxis(axis)[idx[block_order,:]]
     #}}}
     def multimin(self,minfunc,axisname,filterwidth,numberofmins):
         cost = self.copy().convolve(axisname,filterwidth).run_nopop(minfunc)
@@ -4033,7 +4036,15 @@ class nddata (object):
     def reorder(self,*axes,**kwargs):
         r'''Reorder the dimensions
         the first arguments are a list of dimensions
-        :param first: (default True) put this list of dimensions first, while False puts them last
+
+        Parameters
+        ----------
+        *axes : str
+            Accept any number of arguments that gives the dimensions, in the
+            order that you want thee.
+        first : bool
+            (default True)
+            Put this list of dimensions first, while False puts them last (where they then come in the order given).
         '''
         first = True
         if 'first' in kwargs:
@@ -4047,13 +4058,13 @@ class nddata (object):
         if type(axes) is str:
             axes = [axes]
         if len(axes) < len(self.dimlabels):
+            oldorder = list(self.dimlabels)
+            for thisaxis in axes:
+                oldorder.pop(oldorder.index(thisaxis))
             if first:
-                oldorder = list(self.dimlabels)
-                for thisaxis in axes:
-                    oldorder.pop(oldorder.index(thisaxis))
                 axes = axes + oldorder
             else:
-                raise ValueError("False (to put these axes at the end) is not yet supported")
+                axes = oldorder + axes
         try:
             neworder = map(self.dimlabels.index,axes)
         except ValueError:
