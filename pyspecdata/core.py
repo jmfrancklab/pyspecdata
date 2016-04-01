@@ -4179,12 +4179,8 @@ class nddata (object):
     def fromaxis(self,*args,**kwargs):
         '''enter just the axis, to return the axis,
         or enter a list of axisnames, followed by a function to act on them'''
-        overwrite = False
-        if 'overwrite' in kwargs.keys() and kwargs['overwrite'] == True:
-            overwrite = True
-        as_array = False
-        if 'as_array' in kwargs.keys() and kwargs['as_array'] == True:
-            as_array = True
+        overwrite,as_array = process_kwargs([('overwrite',False),
+            ('as_array',False)],kwargs)
         if len(args) == 1:
             if type(args[0]) is str:
                 axisname = args[0]
@@ -4209,14 +4205,20 @@ class nddata (object):
         else:
             raise CustomError('Wrong number of arguments!!')
         if issympy(func):
+            mat2array = [{'ImmutableMatrix': array}, 'numpy']# returns arrays rather than the stupid matrix class
             try:
-                func = sympy.lambdify(*tuple([map(sympy.var,axisnames)] + [func,"numpy"]))
+                lambdified_func = sympy.lambdify(map(sympy.var,axisnames), func,
+                        modules=mat2array)
             except:
                 raise CustomError('Error parsing axis variables',map(sympy.var,axisnames),'that you passed and function',func,'that you passed')
+            func = lambdified_func
         if func.func_code.co_argcount != len(axisnames):
             raise CustomError("The axisnames you passed and the argument count don't match")
         list_of_axes = [self._axis_inshape(x) for x in axisnames]
         retval = func(*list_of_axes)
+        if issympy(retval):
+            raise RuntimeError("The sympy function that you passed doesn't match the automatically generated axis variables (obtained by mapping sympy.var onto the axis variables, without any kwargs). The atoms left over are:\n"+str(func.atoms))
+        print "type of retval",type(retval)
         newshape = ones_like(list_of_axes[0].shape)
         for j in list_of_axes:
             newshape *= array(j.shape)
