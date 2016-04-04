@@ -1603,7 +1603,6 @@ class figlist(object):
             ax2 = gca()
             self.twinx_list[self.current] = (ax1,ax2)
             if color is not None:
-                print ax2.spines
                 ax2.tick_params(axis = 'y',colors = color)
                 ax2.yaxis.label.set_color(color)
                 ax2.spines['right'].set_color(color)
@@ -4218,7 +4217,6 @@ class nddata (object):
         retval = func(*list_of_axes)
         if issympy(retval):
             raise RuntimeError("The sympy function that you passed doesn't match the automatically generated axis variables (obtained by mapping sympy.var onto the axis variables, without any kwargs). The atoms left over are:\n"+str(func.atoms))
-        print "type of retval",type(retval)
         newshape = ones_like(list_of_axes[0].shape)
         for j in list_of_axes:
             newshape *= array(j.shape)
