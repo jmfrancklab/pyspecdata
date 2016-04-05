@@ -99,8 +99,16 @@ def grab_script_string(scriptnum_as_str):
             reading = True
     fp_script.close()
     return script_string
+def check_image_path():
+    image_path = os.path.sep.join([os.getcwd(),'auto_figures'])
+    if not os.path.exists(image_path):
+        os.mkdir(image_path)
+    return
 def get_scripts_dir():
-    return os.path.sep.join([os.getcwd(),'scripts',''])
+    script_path = os.path.sep.join([os.getcwd(),'scripts',''])
+    if not os.path.exists(script_path):
+        os.mkdir(os.path.sep.join([os.getcwd(),'scripts']))
+    return script_path
 def sha_string(script):
     'convert the sha hash to a string'
     s = hashlib.sha256()
@@ -204,6 +212,7 @@ if haswatchdog:
 def main():
     r'''This looks for `scripts/scriptsUsed.csv` inside the notebook directory, and checks whether or not it should be run
     if a command line argument of "flush" is passed, it flushes that script number from the cache'''
+    check_image_path()
     if len(sys.argv) > 2:
         if sys.argv[1] == 'flush':
             if len(sys.argv) == 3:
