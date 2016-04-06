@@ -1,22 +1,17 @@
-The Figure List
-===============
-
-.. commment generated the following with (adding appropriate spaces):
-    .. currentmodule:: pyspecdata
-    .. autosummary::
-        :toctree: generated
-        core.figlist
+pyspecdata.core.figlist
+=======================
 
 .. currentmodule:: pyspecdata.core
 
 .. autoclass:: figlist
+
    
    .. automethod:: __init__
 
+   
    .. rubric:: Methods
 
    .. autosummary::
-       :toctree: generated
    
       ~figlist.__init__
       ~figlist.adjust_spines
@@ -38,3 +33,9 @@ The Figure List
       ~figlist.text
       ~figlist.twinx
       ~figlist.use_autolegend
+   
+   
+
+   
+   
+   
