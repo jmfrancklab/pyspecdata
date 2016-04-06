@@ -42,8 +42,12 @@ def image(A,x=[],y=[],**kwargs):
             y_label = A.unitify_axis(y_label)
         else:
             these_dimsizes = map(lambda x: str(ndshape(A)[x]),templabels)
-            y_label = '$\\otimes$'.join(templabels)
-            y_label += ' $^{('+r'\times'.join(these_dimsizes)+')}$'
+            templabels = map((lambda x: # below, I turn off math mode for the axis names
+                '[$ '+A.unitify_axis(x)+r' $^{{{:.3g}\rightarrow{:.3g}}}]'.format(
+                    *(A.getaxis(x)[r_[0,-1]]))), templabels)
+            y_label = '\\otimes'.join(templabels)
+            y_label = ' _{('+r'\times'.join(these_dimsizes)+')}' + y_label
+            y_label = '$'+y_label+'$'# whole expression is in math mode
         A = A.data
     if type(x) is list:
         x = array(x)
