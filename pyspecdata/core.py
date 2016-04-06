@@ -1625,18 +1625,47 @@ class figlist(object):
     def push_marker(self):
         if not hasattr(self,'pushlist'):
             self.pushlist = []
+        if not hasattr(self,'pushbasenamelist'):
+            self.pushbasenamelist = []
         self.pushlist.append(self.current)
+        self.pushbasenamelist.append(self.basename)
         return
     def pop_marker(self):
+        self.basename = self.pushbasenamelist.pop()
         self.next(self.pushlist.pop())
         return
     def get_fig_number(self,name):
         cleanlist = filter(lambda x: type(x) is str,self.figurelist)
         return cleanlist.index(name)+1
-    def next(self,input_name,legend = False,boundaries = None,twinx = None,**kwargs):
+    def next(self,input_name, legend=False, boundaries=None, twinx=None, **kwargs):
+        r"""Switch to the figure given by input_name, which is used not only as
+        a string-based name for the figure, but also as a default title and as
+        a base name for resulting figure files.
+
+        **In the future, we actually want this to track the appropriate axis object!**
+
+        Parameters
+        ----------
+        legend : bool
+            If this is set, a legend is created *outside* the figure.
+        twinx : {0,1}
+            :1: plots on an overlayed axis (the matplotlib twinx) whose y axis
+                is labeled on the right when you set this for the first time, you
+                can also set a `color` kwarg that controls the coloring of the
+                right axis. 
+            :0: used to switch back to the left (default) axis
+        boundaries :
+            **need to add description**
+        kwargs : dict
+            Any other keyword arguments are passed to the matplotlib (mayavi)
+            figure() function that's used to switch (create) figures.
+        """
         if not hasattr(self,'figdict'):
             self.figdict = {}
-        if self.basename is not None: #basename for groups of figures
+        if (self.basename is not None #basename for groups of figures
+                # I need to check that the basename hasn't already been added
+                and len(input_name) > len(self.basename)
+                and input_name[:len(self.basename)] != self.basename):
             name = self.basename + ' ' + input_name
         else:
             name = input_name
@@ -1652,6 +1681,10 @@ class figlist(object):
                 fig = figure(self.get_fig_number(name),**kwargs)
             self.current = name
             if self.verbose: print lsafen('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures')
+            if boundaries == False:
+                raise ValueError("only call boundaries=False the first time around!")
+            if legend:
+                raise ValueError("only set the legend kwarg the first time around!")
         else:# figure doesn't exist yet
             if hasattr(self,'current'):
                 last_figure_number = self.get_fig_number(self.current)
@@ -1683,6 +1716,9 @@ class figlist(object):
                     fig.add_subplot(111)
             if self.verbose: print lsafen('added, figure',len(self.figurelist)+1,'because not in figurelist',self.figurelist)
             self.figurelist.append(name)
+            self.figdict.update({self.current:fig})
+            if boundaries == False:
+                self.setprops(boundaries = True)# set this back
         if twinx is not None:
             if twinx == 0:
                 self.twinx(orig = True)
@@ -1692,9 +1728,7 @@ class figlist(object):
                 fig = gcf()
             else:
                 raise ValueError('If you pass twinx, pass 0 for the original or 1 for the right side')
-        self.figdict.update({self.current:fig})
-        if boundaries == False:
-            self.setprops(boundaries = True)# set this back
+            self.figdict.update({self.current:fig})
         return fig
     def plot(self,*args,**kwargs):
         if 'label' in kwargs.keys():

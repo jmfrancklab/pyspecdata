@@ -950,6 +950,7 @@ def load_and_format(list_of_exp,
         field_dep_shift = None,
         deadtime = 0e-9,
         SW = (None,None),
+        t2_limit = 100e-9,
         verbose = True,
         show_origin = True,
         transform = 'secsy',
@@ -1015,6 +1016,9 @@ def load_and_format(list_of_exp,
         :math:`\mathcal{F}[t_1]`
         and ``(f2_start,f2_stop)`` gives those for
         :math:`\mathcal{F}[t_2]`
+    t2_limit : double
+        Defaults to 100 ns.  Most spectra will die off relatively quickly, so
+        only plot t2 up to a certain value.
     show_origin : bool, optional
         Show white cross-hairs at the origin.
         Defaults to true.
@@ -1071,6 +1075,8 @@ def load_and_format(list_of_exp,
                 * Selects a subset of the data as indicated by `fields_toplot` and `F2_toplot`.
 
     """
+    plt_chk_t1ph = 'phased data (lines check phasing along $t_1$)'
+    plt_chk_t2ph = 'phased data -- time domain $t_1$\nto check phasing along $t_2$'
     # {{{ load the parameters
     if fl is None:
         fl = figlist_var()
@@ -1130,7 +1136,7 @@ def load_and_format(list_of_exp,
             echos_toplot = r_[signal_slice.getaxis('t1')[0]:
                     signal_slice.getaxis('t1')[-1]:
                     5j][1:-1]
-            echos_toplot = signal_slice.indices('t1',echos_toplot)
+            # need to convert to indices only after we zero fill
         else:
             echos_toplot = [None]
         if 'fields' in signal_slice.dimlabels:
@@ -1166,6 +1172,7 @@ def load_and_format(list_of_exp,
         #{{{ apply filtering and timeshift along t1
         if has_indirect:
             if verbose: print "the starting value of t1 is",signal_slice.getaxis('t1')[0]
+            original_t1_max = signal_slice.getaxis('t1')[-1]
             if zerofill:
                 signal_slice.ft('t1',shift = True,pad = 512)
             else:
@@ -1174,6 +1181,7 @@ def load_and_format(list_of_exp,
                 signal_slice = signal_slice['t1':SW[0]]
             signal_slice.ift('t1')
             signal_slice.setaxis('t1',lambda x: x+t1_timeshift)
+            echos_toplot = signal_slice.indices('t1',echos_toplot)
         #}}}
         t_start = signal_slice.getaxis('t1')[0]
         if verbose: print 'applied a t1 timeshift: t_start=',t_start/1e-9,'manual=',t1_timeshift/1e-9
@@ -1209,9 +1217,18 @@ def load_and_format(list_of_exp,
             signal_slice.secsy_transform_manual('t2','t1',has_indirect = has_indirect)
         elif transform == 'secsy':
             signal_slice.secsy_transform('t2','t1',has_indirect = has_indirect)
-        fl.image(signal_slice)
+        if has_indirect:
+            fl.image(signal_slice['t1':(None,original_t1_max)]['t2':(None,t2_limit)])
+        else:
+            fl.image(signal_slice['t2':(None,t2_limit)])
         # }}}
+        # {{{ before continuing, re-apply the filters, if needed
+        # (because I fill when performing a skew, this can be necessary)
         signal_slice.ft(['t1','t2'])
+        for j,val in enumerate(SW):
+            if val is not None:
+                signal_slice = signal_slice['t{:d}'.format(j+1):SW[j]]
+        # }}}
         #{{{ correct the zeroth order
         phase = signal_slice.copy().mean_all_but([None]).data
         assert isscalar(phase),' '.join(
@@ -1221,12 +1238,16 @@ def load_and_format(list_of_exp,
         signal_slice /= phase
         #}}}
         #{{{ various plots to check the phasing
-        fl.next('phased data')
+        fl.next(plt_chk_t1ph)
         fl.image(signal_slice['fields',fields_toplot])
-        fl.next('phased data -- time domain $t_1$\nto check phasing along $t_2$')
-        fl.image(signal_slice.copy().ift('t1')['fields',fields_toplot])
+        fl.next(plt_chk_t2ph)
+        if has_indirect:
+            fl.image(signal_slice.copy().ift('t1')['fields',fields_toplot,'t1':(None,original_t1_max)
+                ].reorder('t1',first = False))
+        else:
+            fl.image(signal_slice.copy().ift('t1')['fields',fields_toplot])
         fl.next('phased data -- time domain $t_2$\ncropped log -- to check phasing along $t_1$')
-        fl.image(signal_slice.copy().ift('t2')['fields',fields_toplot
+        fl.image(signal_slice.copy().ift('t2')['fields',fields_toplot,'t2':(None,t2_limit)
             ].reorder('t1',first = False))
         fl.grid()
         if transform == 'inh':
@@ -1254,8 +1275,15 @@ def load_and_format(list_of_exp,
                     this_label.append('%.2f T'%(forplot.getaxis('fields')[this_field_idx]))
                     forplot = forplot['fields',this_field_idx]
                 if echo_idx is not None:
-                    this_label.append('%d ns'%(forplot.getaxis('t1')[echo_idx]/1e-9))
+                    this_echo_time = forplot.getaxis('t1')[echo_idx]/1e-9
+                    this_label.append('%d ns'%(this_echo_time))
                     forplot = forplot['t1',echo_idx]
+                    # {{{ show where I pull the slices
+                    fl.push_marker()
+                    fl.next(plt_chk_t2ph)
+                    gca().axvline(x = this_echo_time,color = 'w',alpha = 0.25)
+                    fl.pop_marker()
+                    # }}}
                 fl.plot(forplot[lambda x:
                     abs(x) > phaseplot_thresholds[1]*max_abs
                     ].runcopy(angle)/pi,'.',alpha = 0.5,
@@ -1292,10 +1320,11 @@ def load_and_format(list_of_exp,
                     this_freq = forplot.getaxis('t2')[this_freq_idx]
                     this_label[-1] = '%d MHz'%(this_freq/1e6)
                     # {{{ show where I pull the slices
-                    fl.next('phased data')
+                    fl.push_marker()
+                    fl.next(plt_chk_t1ph)
                     gca().axvline(x = this_freq/1e6,color = 'w',alpha = 0.25)
+                    fl.pop_marker()
                     # }}}
-                    fl.next('plot the phase at different $F_2$',legend = True)
                     fl.plot(forplot['t2',this_freq_idx][lambda x:
                         abs(x) > phaseplot_thresholds[0]*max_abs].runcopy(angle)/pi, '.',
                         alpha = 0.5, markersize = 3,
@@ -1347,7 +1376,7 @@ def plot_oned_v_field(thisdata,
         x = thisdata.getaxis('t2')
         x[:] = field + x / 2.807e10
         #}}}
-        fl.next(oned_plot_name, legend = True)
+        fl.next(oned_plot_name)
         lines = fl.plot(thisdata.runcopy(abs),'-',alpha = 0.5,label = 'abs')
         try:
             color = lines[-1].get_color()
