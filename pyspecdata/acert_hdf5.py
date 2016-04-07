@@ -1041,7 +1041,7 @@ def load_and_format(list_of_exp,
 
             :fields_toplot: select 5 evenly spaced fields that span the range of the "fields" axis labels, and then select the central 3 out of those.
             :field_at_max: take the abs, mean both :math:`t_1` and :math:`t_2` and find the field with max signal.
-            :echos_toplot: select 5 evenly spaced fields that span the range of :math:`t_1`, and then select the central 3 out of those.
+            :echos_toplot: take the abs, mean both :math:`t_1` and :math:`fields` and find the time with max signal, then take five evenly spaced points from there to the end, and drop the last one.
             :F2_toplot: Take the mean of the absolute value along :math:`\mathcal{F}[t_1]`, then use :func:`contiguous <pyspecdata.nddata.contiguous>` to select the largest peak along :math:`\mathcal{F}[t_2]`, then then select 5 evenly spaced frequencies along that peak.  Determine this only for the first field indexed by `fields_toplot`.
             
         The plots are:
@@ -1133,9 +1133,10 @@ def load_and_format(list_of_exp,
         ax = gca(); ax.title.set_fontsize('small')
         #{{{ set up the values of the indirect dimensions that we iterate over in the phase plots
         if has_indirect:
-            echos_toplot = r_[signal_slice.getaxis('t1')[0]:
+            time_w_max_signal = abs(signal_slice).set_error(None).mean('fields').mean('t2').argmax('t1').data
+            echos_toplot = r_[time_w_max_signal:
                     signal_slice.getaxis('t1')[-1]:
-                    5j][1:-1]
+                    5j][:-1]
             # need to convert to indices only after we zero fill
         else:
             echos_toplot = [None]
