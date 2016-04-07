@@ -4279,7 +4279,8 @@ class nddata (object):
             return retval
         else:
             return None
-    def extend(self,axis,extent,fill_with = 0,tolerance = 1e-5):
+    def extend(self,axis,extent, fill_with=0, tolerance=1e-5,
+            verbose=False):
         r"""If `axis` is uniformly ascending with spacing :math:`dx`,
         then extend by adding a point every :math:`dx` until the axis
         includes the point `extent`.  Fill the newly created datapoints with `fill_with`.
@@ -4329,13 +4330,13 @@ class nddata (object):
             newdata = fill_with * ones(newdata,dtype = self.data.dtype)
         newdata_slice = [slice(None,None,None)] * len(newdata.shape)
         newdata_slice[self.axn(axis)] = slice(-start_index,len(u)-start_index,None)
-        print "-------------------------"
-        print "shape of newdata",newdata.shape
-        print "shape of self.data",self.data.shape
-        print "len of u",len(u)
-        print "start index",start_index
-        print "shape of slice",newdata[newdata_slice].shape
-        print "-------------------------"
+        if verbose: print "-------------------------"
+        if verbose: print "shape of newdata",newdata.shape
+        if verbose: print "shape of self.data",self.data.shape
+        if verbose: print "len of u",len(u)
+        if verbose: print "start index",start_index
+        if verbose: print "shape of slice",newdata[newdata_slice].shape
+        if verbose: print "-------------------------"
         newdata[newdata_slice] = self.data
         self.data = newdata
         #}}}
