@@ -43,7 +43,7 @@ def image(A,x=[],y=[],**kwargs):
         else:
             these_dimsizes = map(lambda x: str(ndshape(A)[x]),templabels)
             templabels = map((lambda x: # below, I turn off math mode for the axis names
-                '[$ '+A.unitify_axis(x)+r' $^{{{:.3g}\rightarrow{:.3g}}}]'.format(
+                '[$ '+A.unitify_axis(x)+r' $_{{{:.3g}\rightarrow{:.3g}}}]'.format(
                     *(A.getaxis(x)[r_[0,-1]]))), templabels)
             y_label = '\\otimes'.join(templabels)
             y_label = ' _{('+r'\times'.join(these_dimsizes)+')}' + y_label

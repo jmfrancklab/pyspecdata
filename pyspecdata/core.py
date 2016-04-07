@@ -1625,9 +1625,13 @@ class figlist(object):
     def push_marker(self):
         if not hasattr(self,'pushlist'):
             self.pushlist = []
+        if not hasattr(self,'pushbasenamelist'):
+            self.pushbasenamelist = []
         self.pushlist.append(self.current)
+        self.pushbasenamelist.append(self.basename)
         return
     def pop_marker(self):
+        self.basename = self.pushbasenamelist.pop()
         self.next(self.pushlist.pop())
         return
     def get_fig_number(self,name):
@@ -1658,7 +1662,10 @@ class figlist(object):
         """
         if not hasattr(self,'figdict'):
             self.figdict = {}
-        if self.basename is not None: #basename for groups of figures
+        if (self.basename is not None #basename for groups of figures
+                # I need to check that the basename hasn't already been added
+                and len(input_name) > len(self.basename)
+                and input_name[:len(self.basename)] != self.basename):
             name = self.basename + ' ' + input_name
         else:
             name = input_name

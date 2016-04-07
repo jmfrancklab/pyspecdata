@@ -988,7 +988,7 @@ def load_and_format(list_of_exp,
         the phase *vs.* :math:`\mathcal{F}[t_2]`,
         and apply any additional corrections:
 
-        * Positive phase corrects positive slope -- the 2 (or 0.05 for division) here adjusts for the y units (pi rad) vs. cycles
+        * Positive phase corrects positive slope -- the 2 here adjusts for the y units (pi rad) vs. cycles
         * The time-shift can be calculated as (0.5 [cyc/:math:`\pi` rad])\*(phase shift [:math:`\pi` rad])/(range of x-axis [cyc/s])
         * For causal signal, the red lines show the phase where the signal should start (top/left) and end (bottom/right).  However (**why?**), the phase may turn around and come back to zero shortly after it reaches the furthest point from zero.
     5. In order to apply the same correction along :math:`t_1`, it's typically necessary to set a reasonable ``SW`` for :math:`t_1` and to set ``zero_fill`` to ``True``.
@@ -1260,46 +1260,50 @@ def load_and_format(list_of_exp,
             del forplot
         #}}}
         # {{{ generate the linear plots that I use to adjust the timing corrections
-        #{{{ check phasing along t2: phase plot from 3553
+        def quarter_of_max(arg,axis):# returns a mask for half of maximum
+            return arg > 0.25*arg.runcopy(max,axis)
+        #{{{ check phasing along t2: phase plot from 3553 -- modified to show the magnitude reference
         forplot_ini = signal_slice.copy()
         forplot_ini.ift('t1')
         fl.next('plot the phase at different $t_1$',legend = True)
         forplot_ini.reorder('t2') # make t2 x
         max_abs = abs(forplot_ini.data).flatten().max()
         for this_field_idx in fields_toplot:
+            forplot = forplot_ini.copy()
+            # {{{ select the slice out of forplot_ini that I want
+            field_label = ''
+            if this_field_idx is not None:
+                field_label += '%.2f T'%(forplot.getaxis('fields')[this_field_idx])
+                forplot = forplot['fields',this_field_idx]
+            # }}}
             for echo_idx in echos_toplot:
                 this_label = []
-                forplot = forplot_ini.copy()
-                # {{{ select the slice out of forplot_ini that I want
-                if this_field_idx is not None:
-                    this_label.append('%.2f T'%(forplot.getaxis('fields')[this_field_idx]))
-                    forplot = forplot['fields',this_field_idx]
+                if len(field_label) > 0: this_label.append(field_label)
+                # {{{ show the magnitude reference
+                magnitude_reference = abs(forplot).mean('t1').set_error(None)
+                fl.plot(magnitude_reference/max(magnitude_reference.data)-0.5,
+                        'k', linewidth=3,
+                        alpha=0.1)
+                # }}}
                 if echo_idx is not None:
                     this_echo_time = forplot.getaxis('t1')[echo_idx]/1e-9
                     this_label.append('%d ns'%(this_echo_time))
-                    forplot = forplot['t1',echo_idx]
-                    ## {{{ show where I pull the slices
-                    #fl.push_marker()
-                    #fl.next(plt_chk_t2ph)
-                    #gca().axvline(x = this_echo_time,color = 'w',alpha = 0.25)
-                    #fl.pop_marker()
-                    ## }}}
-                fl.plot(forplot[lambda x:
+                    # {{{ show where I pull the slices
+                    fl.push_marker()
+                    fl.next(plt_chk_t2ph)
+                    gca().axvline(x = this_echo_time,color = 'w',alpha = 0.25)
+                    fl.pop_marker()
+                    # }}}
+                fl.plot(forplot['t1',echo_idx][lambda x:
                     abs(x) > phaseplot_thresholds[1]*max_abs
                     ].runcopy(angle)/pi,'.',alpha = 0.5,
-                    markersize = 3,label = ', '.join(this_label),
-                    human_units = False) # set human_units to false because
-                #                          the units don't match
-                # }}}
+                    markersize = 3,label = ', '.join(this_label))
         fl.phaseplot_finalize()
-        del forplot
-        del forplot_ini
+        del forplot,forplot_ini
         #}}}
         #{{{ check phasing along t1 as a function of t2 frequency offset
         if has_indirect:# there is a t1 dimension
-            #{{{ phase plot from 3553
-            def quarter_of_max(arg,axis):# returns a mask for half of maximum
-                return arg > 0.25*arg.runcopy(max,axis)
+            #{{{ phase plot from 3553 -- modified to add amplitude
             fl.next('plot the phase at different $F_2$',legend = True)
             for j,this_field_idx in enumerate(fields_toplot):
                 forplot = signal_slice
@@ -1307,6 +1311,12 @@ def load_and_format(list_of_exp,
                 if this_field_idx is not None:
                     this_label.append('%.2f T'%(forplot.getaxis('fields')[this_field_idx]))
                     forplot = forplot['fields',this_field_idx]
+                # {{{ show the magnitude reference
+                magnitude_reference = abs(forplot).mean('t2').set_error(None)
+                fl.plot(magnitude_reference/max(magnitude_reference.data)-0.5,
+                        'k', linewidth=2,
+                        alpha=0.25)
+                # }}}
                 sum_for_contiguous = abs(forplot).mean('t1').set_error(None)
                 f_start,f_stop = sum_for_contiguous.contiguous(
                         quarter_of_max,'t2')[0,:]#  pull the first row, which is
@@ -1325,7 +1335,6 @@ def load_and_format(list_of_exp,
                     gca().axvline(x = this_freq/1e6,color = 'w',alpha = 0.25)
                     fl.pop_marker()
                     # }}}
-                    #fl.next('plot the phase at different $F_2$',legend = True)
                     fl.plot(forplot['t2',this_freq_idx][lambda x:
                         abs(x) > phaseplot_thresholds[0]*max_abs].runcopy(angle)/pi, '.',
                         alpha = 0.5, markersize = 3,
