@@ -31,7 +31,7 @@ def secsy_transform(self,
         direct_dim,
         indirect_dim,
         has_indirect = True,
-        method = 'fourier',
+        method = 'linear',
         truncate = True):
     r'''Shift the time-domain data backwards by the echo time.
 
