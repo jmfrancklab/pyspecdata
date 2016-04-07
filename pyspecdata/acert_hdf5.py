@@ -1174,13 +1174,17 @@ def load_and_format(list_of_exp,
         if has_indirect:
             if verbose: print "the starting value of t1 is",signal_slice.getaxis('t1')[0]
             original_t1_max = signal_slice.getaxis('t1')[-1]
+            print "DEBUG: dt for t1",diff(signal_slice.getaxis('t1')[r_[0,1]])
             if zerofill:
                 signal_slice.ft('t1',shift = True,pad = 512)
+                print "DEBUG 1: range of t1",signal_slice.getaxis('t1')[r_[0,-1]]
             else:
                 signal_slice.ft('t1',shift = True)
+                print "DEBUG 1: range of t1",signal_slice.getaxis('t1')[r_[0,-1]]
             if SW[0] is not None:
                 signal_slice = signal_slice['t1':SW[0]]
             signal_slice.ift('t1')
+            print "DEBUG again: dt for t1",diff(signal_slice.getaxis('t1')[r_[0,1]])
             signal_slice.setaxis('t1',lambda x: x+t1_timeshift)
             echos_toplot = signal_slice.indices('t1',echos_toplot)
         #}}}
@@ -1192,32 +1196,38 @@ def load_and_format(list_of_exp,
         forplot = signal_slice.copy()
         print "t1 ft prop",forplot.get_ft_prop('t1')
         print "t2 ft prop",forplot.get_ft_prop('t2')
-        forplot.shear('t2','t1',-1.0)
-        forplot.ft('t2')
-        forplot.ft_clear_startpoints('t2')
-        forplot.ift('t2',shift = True) # get a centered echo here
-        if has_indirect:
-            forplot.ft('t1') # ft along t1 so I can clear the startpoint, below
-            forplot.ft_clear_startpoints('t1')
-            forplot.ift('t1',shift = True) # generate a centered echo here
-        forplot.rename('t2',r'$t_2-t_1$')
-        if field_at_max is None:
-            fl.image(forplot, interpolation = 'nearest')
-        else:
-            fl.image(forplot['fields',field_at_max], interpolation = 'nearest')
-        del forplot
+        forplot.shear('t2','t1',-1.0,method='linear')
+        #forplot.ft('t2')
+        #forplot.ft_clear_startpoints('t2',f='current')
+        #forplot.ift('t2',shift = True) # get a centered echo here
+        #if has_indirect:
+        #    forplot.ft('t1') # ft along t1 so I can clear the startpoint, below
+        #    forplot.ft_clear_startpoints('t1',f='current')
+        #    forplot.ift('t1',shift = True) # generate a centered echo here
+        sheared_t2_name = r'$t_2-t_1$' 
+        forplot.rename('t2',sheared_t2_name)
+        if field_at_max is not None:
+            forplot = forplot['fields',field_at_max]
+        fl.image(forplot, interpolation = 'nearest')
         ax = gca(); ax.title.set_fontsize('small')
         if show_origin:
             ax.axvline(x = 0,color = 'w',alpha = 0.25,linewidth = 3)
             ax.axhline(y = 0,color = 'w',alpha = 0.25,linewidth = 3)
+        fl.next('check the sheared FT')
+        forplot.ft(['t1',sheared_t2_name])
+        fl.image(forplot)
+        del forplot
         #}}}
         # at this point, signal_slice is in the time domain 
         # {{{ do whatever transformation we have selected
         fl.next('after transform')
+        print "DEBUG: dt for t1 immediately before transform",diff(signal_slice.getaxis('t1')[r_[0,1]])
         if transform == 'manual secsy':
             signal_slice.secsy_transform_manual('t2','t1',has_indirect = has_indirect)
         elif transform == 'secsy':
             signal_slice.secsy_transform('t2','t1',has_indirect = has_indirect)
+            print "DEBUG again 2: dt for t1",diff(signal_slice.getaxis('t1')[r_[0,1]])
+            print "DEBUG FT startpoint",signal_slice.get_ft_prop('t1',['start','freq'])
         if has_indirect:
             fl.image(signal_slice['t1':(None,original_t1_max)]['t2':(None,t2_limit)])
         else:
@@ -1226,6 +1236,7 @@ def load_and_format(list_of_exp,
         # {{{ before continuing, re-apply the filters, if needed
         # (because I fill when performing a skew, this can be necessary)
         signal_slice.ft(['t1','t2'])
+        print "DEBUG 2: range of t1",signal_slice.getaxis('t1')[r_[0,-1]]
         for j,val in enumerate(SW):
             if val is not None:
                 signal_slice = signal_slice['t{:d}'.format(j+1):SW[j]]

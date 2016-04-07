@@ -59,9 +59,10 @@ def secsy_transform(self,
         self.extend(direct_dim,self.getaxis(direct_dim)[0]-echo_time)
         self *= self.fromaxis(direct_dim,lambda t2: exp(1j*2*pi*echo_time*t2)) # positive time shift corrects positive slope
     if truncate:
-        self.register_axis({direct_dim:0.})
-        #self = self[direct_dim:(0.,)] 
-        newdata = self[direct_dim:(0.,)] 
-        self.data = newdata.data
-        self.setaxis(direct_dim,newdata.getaxis(direct_dim))
+        for thisaxis in [direct_dim,indirect_dim]:
+            self.register_axis({thisaxis:0.})
+            #self = self[thisaxis:(0.,)] 
+            newdata = self[thisaxis:(0.,)] 
+            self.data = newdata.data
+            self.setaxis(thisaxis,newdata.getaxis(thisaxis))
     return self
