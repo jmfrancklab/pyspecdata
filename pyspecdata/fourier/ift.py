@@ -114,7 +114,7 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
             else:
                 do_post_shift = False
         elif shift[j] or shift[j] is None: # a default fftshift
-            n = self.data.shape[thisaxis]
+            n = padded_length
             p2_post = n - (n+1) // 2 # this is the size of what starts out as the second half // is floordiv -- copied from scipy -- this whole thing essentially rounds down
             alias_shift_post = 0
             do_post_shift = True

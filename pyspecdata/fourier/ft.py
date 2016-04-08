@@ -113,7 +113,7 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         elif shift[j] or shift[j] is None: # a default fftshift
             if automix:
                 raise ValueError("You can't use automix and shift at the same time --> it doesn't make sense")
-            n = self.data.shape[thisaxis]
+            n = padded_length
             p2_post = (n+1) // 2 # this is the starting index of what starts out as the second half (// is floordiv) -- copied from scipy -- this essentially rounds up (by default assigning more negative frequencies than positive ones)
             alias_shift_post = 0
             do_post_shift = True

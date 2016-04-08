@@ -1,6 +1,41 @@
 Fourier Functions
 =================
 
+Conventions
+-----------
+
+In the following, and in the code, :math:`u` always refer to the axis before
+the (i)ft, while :math:`v` always refers to the axis after the (i)ft.
+Generally, in the code/functions here, `ft` is said to move data from `t` or
+`time` domain to `f` or `freq` domain (whether or not this corresponds to the
+units employed) -- and *vice versa* for `ift`.
+
+(Also note the lowercase `ift` and `ft`, with single `f`, which specifically
+refers to the routines in this library.)
+
+What's The Point?
+-----------------
+
+The algorithms of use the numpy `fft` routines, but include extra decoration
+that allows the user to jump seamlessly between the frequency and time domain
+as many times as needed while keeping track of the axes, and also applying any
+linear (*i.e.* time- or frequency- dependent) phase shifts that are needed to
+reflect changes in the axes.
+
+Thus, for example, in magnetic resonance, you can apply a timing correction
+simply by correcting the time axis before the FT, rather than calculating and
+applying a frequency-dependent phase shift.
+
+Additionally, the routines (**1**) include some amount of control for aliasing,
+and allow (by using :func:`set_ft_prop <pyspecdata.fourier.ft_shift.set_ft_prop>`
+to set ``'start_time'`` or ``'start_freq'``) (**2**) sinc interpolation onto a
+new axis (also see :func:`register_axis <pyspecdata.axis_manipulation.register_axis>`),
+or (**3**) selection of the aliased image of the stationary signal at any
+time/frequency outside the range of the current axis.
+
+(i)ft Algorithm Outline
+-----------------------
+
 #. Use the `FT` property to check that I'm not trying to ft frequency-domain
    data or to ift time domain data.  To start with the data is marked as
    “neither” by having `FT` set to `None`, and the first operation marks it as
@@ -10,7 +45,7 @@ Fourier Functions
 #. Identify whether the :math:`u` or :math:`v` domain is the original
    “source” of the signal, and which is derived from the source. By
    default assume that the source is not aliased. In this way, I can
-   automatically marked whether an axis is assumed to be “safe” (i.e.
+   automatically mark whether an axis is assumed to be “safe” (i.e.
    “not aliased”) or not. This is relevant when performing time-
    (frequency-)shifts that are not integral multiples of
    :math:`\Delta u` (:math:`\Delta v`).
@@ -21,8 +56,6 @@ Fourier Functions
 #. Determine the padded length of the new axis.  If keyword argument `pad` is
    simply set to `True`, round up to the nearest power of 2, otherwise set it
    to `pad`.
-
-#. Use :math:`\Delta u`.
 
 #. Use :math:`\Delta u` and the padded length to calculate (only) the initial
    :math:`v`-axis, which starts at 0.  Then calculate:
@@ -39,6 +72,9 @@ Fourier Functions
    - If I apply a traditional shift (*i.e.*, like `fftshift`), mark as
      `FT_[v]_not_aliased` (where *[v]* is time or frequency), *i.e.* “safe,” since the
      :math:`v`-domain is balanced about 0.
+
+   - The code to run the traditional shift is copied from the numpy `fftshift`
+     routine, so should function in the same way.
 
 #. If there is a post-transform-shift discrepancy, deal with it before I start to mess with the :math:`u`-axis:
 
