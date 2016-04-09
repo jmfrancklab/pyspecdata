@@ -62,7 +62,12 @@ def secsy_transform(self,
         for thisaxis in [direct_dim,indirect_dim]:
             self.register_axis({thisaxis:0.})
             #self = self[thisaxis:(0.,)] 
-            newdata = self[thisaxis:(0.,)] 
-            self.data = newdata.data
-            self.setaxis(thisaxis,newdata.getaxis(thisaxis))
+            keep_zeros = False # just for debugging
+            if keep_zeros:
+                self[thisaxis,
+                        lambda x: x<0] = 0.
+            else:
+                newdata = self[thisaxis:(0.,)] 
+                self.data = newdata.data
+                self.setaxis(thisaxis,newdata.getaxis(thisaxis))
     return self

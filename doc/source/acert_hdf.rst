@@ -1,5 +1,7 @@
+ACERT spectrometer data
+=======================
+
 ACERT functions for processing spectrometer data
-================================================
 
 .. (comment) here, I use a search and replace to generate the list below, and then running sphinx-autogen -o generated acert_hdf.rst generates stub files for all my functions 
     I have to run make twice for the result to build

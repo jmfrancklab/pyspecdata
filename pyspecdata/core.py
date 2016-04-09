@@ -2960,7 +2960,7 @@ class nddata (object):
         return self
     def set_prop(self,*args):
         r"""set a 'property' of the nddata
-        This is where you can put all unstructured information (e.g. experimental parameters, etc"""
+        This is where you can put all unstructured information (e.g. experimental parameters, etc)"""
         if len(args) == 2:
             propname,val = args
             self.other_info.update({propname:val})
@@ -2968,7 +2968,7 @@ class nddata (object):
             self.other_info.update(args[0])
         else:
             raise ValueError("I don't know what you're passing to set prop!!!")
-        return
+        return self
     def get_prop(self,propname):
         if propname not in self.other_info.keys():
             return None
@@ -4130,7 +4130,7 @@ class nddata (object):
         return
     def labels(self,*args):
         r'''label the dimensions, given in listofstrings with the axis labels given in listofaxes -- listofaxes must be a numpy array;
-        you can pass either a list or a axis name (string)/axis label (numpy array) pair'''
+        you can pass either a dictionary or a axis name (string)/axis label (numpy array) pair'''
         if len(args) == 2:
             listofstrings,listofaxes = args
         elif len(args) == 1 and type(args[0]) is dict:

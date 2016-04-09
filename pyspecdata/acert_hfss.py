@@ -44,24 +44,48 @@ def w_index(u_index,v_index):
     'given indeces (0,1,2 for x,y,z) for u and v, return the index for the remaining axis -- *i.e.* "w"'
     return list(set([0,1,2])^set([u_index,v_index]))[0]
 def construct_axes_from_positions(positions):
-    'take the array of `positions`, and use it to generate 1D axes for u and v'
+    r"""Take the array of `positions`, and use it to generate axes.
+    Here, :math:`w` is the dimension along which the slice is taken, and :math:`u` and :math:`v` are the other two dimensions (typically in alphabetical order). 
+
+    Parameters
+    ----------
+    positions : array
+        an Nx3 array list of positions
+
+    Returns
+    -------
+    w_axis_pos : double
+        The position of the cross-sectional slice.
+    u_index : int
+        An index (0,1,2 for :math:`x`,:math:`y`,:math:`z`) that gives the
+        identity of the first non-cross-sectional slice.
+    u_axis : array
+        A 1-D array giving the axis corresponding to `u_index`.
+    v_index : int
+        An index (0,1,2 for :math:`x`,:math:`y`,:math:`z`) that gives the
+        identity of the second non-cross-sectional slice.
+    v_axis : array
+        A 1-D array giving the axis corresponding to `v_index`.
+    """
     #{{{ construct the axes
     list_of_axes = [unique(positions[:,j]) for j in range(0,3)]
     list_of_indeces = [0,1,2]
     for j in range(0,len(list_of_axes)):
         if len(list_of_axes[j]) == 1:
-            list_of_axes.pop(j)
+            w_axis_pos = list_of_axes.pop(j)[0]
             list_of_indeces.pop(j)
             break
     [u_axis,v_axis] = list_of_axes
     [u_index,v_index] = list_of_indeces
-    return u_index,v_index,u_axis,v_axis
+    return w_axis_pos,u_index,v_index,u_axis,v_axis
     #}}}
-def load_hfss_vectors(filename,show_valid = False,verbose = False):
-    r"""open an HFSS .fld file that contains vector data:
+def load_hfss_vectors(filename,show_valid = False,verbose = True):
+    r"""Used by the main function, :func:`load_fields <pyspecdata.acert_hfss.load_fields>`, to open an HFSS .fld file that contains vector data:
 
     Returns
     =======
+    w_axis_pos : double
+        The position of the cross-sectional slice.
     u_index: uint
     u_axis: 
         :math:`u` and :math:`v` are the two axes (for, *e.g.*, an :math:`x-z` plane)
@@ -84,7 +108,8 @@ def load_hfss_vectors(filename,show_valid = False,verbose = False):
         vals = [double(x) for x in line.strip().split(" ") if len(x)>0]
         positions[j,:] = vals[0:3]
         vec_vals[j,:] = vals[3:]
-    u_index,v_index,u_axis,v_axis = construct_axes_from_positions(positions)
+    w_axis_pos,u_index,v_index,u_axis,v_axis = construct_axes_from_positions(positions)
+    if verbose: print "the position along the $w$-axis (where $w$ is the cross-section dimension) is ",w_axis_pos
     #{{{ show the datapoints and which are valid
     if show_valid:
         fl.next('show valid values')
@@ -100,10 +125,9 @@ def load_hfss_vectors(filename,show_valid = False,verbose = False):
         u_i = where(u_axis == positions[j,u_index])[0][0]
         v_i = where(v_axis == positions[j,v_index])[0][0]
         data[u_i,v_i,:] = vec_vals[j,:]
-    return u_index,u_axis,v_index,v_axis,data
+    return w_axis_pos,u_index,u_axis,v_index,v_axis,data
 def load_hfss_scalar(filename,verbose = False):
-    ("like load_hfss_vectors, but returns a scalar, so the third"
-    "(spatial) dimension is dropped")
+    r"""Used by the main function, :func:`load_fields <pyspecdata.acert_hfss.load_fields>`.  Like load_hfss_vectors, but returns a scalar, so the third (spatial) dimension is dropped"""
     fp = open(filename,'r')
     data = fp.readlines()
     fp.close()
@@ -117,23 +141,15 @@ def load_hfss_scalar(filename,verbose = False):
         vals = [double(x) for x in line.strip().split(" ") if len(x)>0]
         positions[j,:] = vals[0:3]
         value[j] = vals[3]
-    u_index,v_index,u_axis,v_axis = construct_axes_from_positions(positions)
+    w_axis_pos,u_index,v_index,u_axis,v_axis = construct_axes_from_positions(positions)
     data = empty((len(u_axis),len(v_axis)),dtype = 'double')
     for j in range(0,positions.shape[0]):
         u_i = where(u_axis == positions[j,u_index])[0][0]
         v_i = where(v_axis == positions[j,v_index])[0][0]
         data[u_i,v_i] = value[j]
-    return u_index,u_axis,v_index,v_axis,data
-def load_fields(basename = 'mesh_only_140129',slicename = 'xz',fieldname = 'poynting',has_mesh = True):
-    r"""Finds the fld files named by `basename`, `slicename`, and `fieldname`, and loads them appropriately.
-
-    It assumes that there is a file called ``[fieldname]_real_[slicename]_[basename].fld``, as well as one for the imaginary part, as well as one for the real dielectric (used to determine the model) and (if `has_mesh` is `True`), one for the mesh domain (in general, this can be any conductor domain that's called 'mesh domain' and is also used to determine the model, since the dielectric isn't usually sufficient)
-
-    It does this with relatively few lines of code, relying on
-    :func:`load_hfss_vectors <pyspecdata.acert_hfss.load_hfss_vectors>`
-    and
-    :func:`load_hfss_scalar <pyspecdata.acert_hfss.load_hfss_scalar>`
-    to do the heavy lifting.
+    return w_axis_pos,u_index,u_axis,v_index,v_axis,data
+def load_fields_numpyversion(basename = 'mesh_only_140129',slicename = 'xz',fieldname = 'poynting',has_mesh = True):
+    r"""this is obsolete -- was the original version of load_fields, where I was not using nddata
 
     Returns
     =======
@@ -149,23 +165,81 @@ def load_fields(basename = 'mesh_only_140129',slicename = 'xz',fieldname = 'poyn
         array giving the 2D model data stored in the .fld file
     """
     def load_hfss_complex_vectors(filename):
-        u_index,u_axis,v_index,v_axis,data_real = load_hfss_vectors(filename%"real")
-        u_index,u_axis,v_index,v_axis,data_imag = load_hfss_vectors(filename%"imag")
+        w_axis_pos,u_index,u_axis,v_index,v_axis,data_real = load_hfss_vectors(filename%"real")
+        w_axis_pos,u_index,u_axis,v_index,v_axis,data_imag = load_hfss_vectors(filename%"imag")
         data = data_real + 1j*data_imag
         return u_index,u_axis,v_index,v_axis,data
 
     u_index,u_axis,v_index,v_axis,data = load_hfss_complex_vectors(getDATADIR()+'HFSS_jmf356/'+fieldname+'_%s_'+slicename+'_'+basename+'.fld') # format string where "real" and "imag" go
-    junk1,junk2,junk3,junk4,temp = load_hfss_scalar(getDATADIR()+'HFSS_jmf356/real_dielectric_'+slicename+'_'+basename+'.fld')
+    _,_,_,_,_,temp = load_hfss_scalar(getDATADIR()+'HFSS_jmf356/real_dielectric_'+slicename+'_'+basename+'.fld')
     temp[~isfinite(temp)] = -1
     model_data = zeros_like(temp,dtype = [('mesh','d'),('dielectric','d')])
     model_data['dielectric'] = temp
     if has_mesh:
-        junk1,junk2,junk3,junk4,temp = load_hfss_scalar(getDATADIR()+'HFSS_jmf356/mesh_domain_'+slicename+'_'+basename+'.fld')
+        _,_,_,_,_,temp = load_hfss_scalar(getDATADIR()+'HFSS_jmf356/mesh_domain_'+slicename+'_'+basename+'.fld')
         temp[~isfinite(temp)] = -1
         model_data['mesh'] = temp
     U = u_axis[:,None]*ones(len(v_axis))[None,:]
     V = v_axis[None,:]*ones(len(u_axis))[:,None]
     return u_index,v_index,U,V,data,model_data
+def load_fields(basename = 'mesh_only_140129',slicename = 'xz',fieldname = 'poynting',has_mesh = True):
+    r"""Finds the fld files named by `basename`, `slicename`, and `fieldname`, and loads them appropriately.
+
+    It assumes that there are the following files:
+
+        #. ``[fieldname]_real_[slicename]_[basename].fld`` where ``[fieldname]`` is something like "poynting" or "E," while "slicename" is something like "xy" or "xy_zoom"
+        #. same format, with ``real`` :math:`\rightarrow` ``imag``, for the imaginary part
+        #. ``[fieldname]_real`` :math:`\rightarrow` ``real_dielectric`` for the real dielectric (used to determine the model) 
+        #. (if `has_mesh` is `True`) ``[fieldname]_real`` :math:`\rightarrow` ``mesh_domain`` for the mesh domain (in general, this can be any conductor domain that's called 'mesh domain' and is also used to determine the model, since the dielectric isn't usually sufficient)
+
+    It does this with relatively few lines of code, relying on
+    :func:`load_hfss_vectors <pyspecdata.acert_hfss.load_hfss_vectors>`
+    and
+    :func:`load_hfss_scalar <pyspecdata.acert_hfss.load_hfss_scalar>`
+    to do the heavy lifting,
+    but it should be the function typically used.
+
+    Returns
+    =======
+    data: nddata
+        array giving the 2D data stored in the .fld file, with the following properties set:
+            :w_name: The name of the slice dimension (*e.g.*, if `data` has two dimensions `x` and `y`, then this is :math:`z`.
+            :w_slice_position: The position of the slice along the dimension given by `w_name`
+        Aside from the two spacial dimensions, it has a third dimension, called
+        `vector`, which gives the three vector components (:math:`x`,:math:`y`,
+        and :math:`z`) at the particular coordinate.
+    model_data: nddata
+        In the same format as data, except that it has no `vector` dimension.
+        Rather, the data is a structured numpy array with the field names
+        `mesh` and `dielectric`, which give the location of the mesh and
+        dielectric model elements.
+    """
+    def cartesian_bynumber(a):
+        return ['x','y','z'][a]
+    def load_hfss_complex_vectors(filename):
+        w_axis_pos,u_index,u_axis,v_index,v_axis,data_real = load_hfss_vectors(filename%"real")
+        w_axis_pos,u_index,u_axis,v_index,v_axis,data_imag = load_hfss_vectors(filename%"imag")
+        data = data_real + 1j*data_imag
+        return u_index,u_axis,v_index,v_axis,data
+
+    u_index,u_axis,v_index,v_axis,data = load_hfss_complex_vectors(getDATADIR()+'HFSS_jmf356/'+fieldname+'_%s_'+slicename+'_'+basename+'.fld') # format string where "real" and "imag" go
+    _,_,_,_,_,temp = load_hfss_scalar(getDATADIR()+'HFSS_jmf356/real_dielectric_'+slicename+'_'+basename+'.fld')
+    temp[~isfinite(temp)] = -1
+    model_data = zeros_like(temp,dtype = [('mesh','d'),('dielectric','d')])
+    model_data['dielectric'] = temp
+    if has_mesh:
+        _,_,_,_,_,temp = load_hfss_scalar(getDATADIR()+'HFSS_jmf356/mesh_domain_'+slicename+'_'+basename+'.fld')
+        temp[~isfinite(temp)] = -1
+        model_data['mesh'] = temp
+    uv_names = map(cartesian_bynumber,[u_index,v_index])
+    return nddata(data,data.shape,uv_names+['vector']).set_prop(dict(
+            w_name = cartesian_bynumber(w_index(u_index,v_index))),
+            w_slice_position = w_axis_pos
+            ).labels(uv_names,[u_axis,v_axis]), nddata(
+                    model_data,model_data.shape,uv_names).set_prop(dict(
+                        w_name = cartesian_bynumber(w_index(u_index,v_index))),
+                        w_slice_position = w_axis_pos
+                        ).labels(uv_names,[u_axis,v_axis])
 def contour_power(basename=None, slicename=None,
         rotate=False, direction_of_power=None,
         number_of_arrows=1, figsize=None, amount_above=0.1,
@@ -173,6 +247,7 @@ def contour_power(basename=None, slicename=None,
         fl = None,
         **kwargs):
     r"""Plot the magnitude of the power flow, determined from the Poynting vector (:math:`\vec{S}`), along with a contour intended to indicate a Gaussian beam radius.
+    Can also plot (currently plots only) the residual with a Gaussian beam.
 
     It does this by calling :func:`load_fields <pyspecdata.acert_hfss.load_fields>`, placing the result into an appropriate nddata function, and then plotting the power density using an image function, and a contour using an nddata :func:`contour <pyspecdata.nddata.contour>` method.
 
