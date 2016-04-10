@@ -245,10 +245,14 @@ def fl_image(self,A,**kwargs):
 
         fl.show('compare_image_contour_150911.pdf')
     """
-    firstarg = self.check_units(A,-1,0) # check units, and if need be convert to human units, where x is the last dimension and y is the first
-    interpolation,ax = process_kwargs([('interpolation',None),
+    interpolation,ax,human_units = process_kwargs([('interpolation',None),
         ('ax',gca()),
+        ('human_units',True),
         ],kwargs,pass_through = True)
+    if human_units:
+        firstarg = self.check_units(A,-1,0) # check units, and if need be convert to human units, where x is the last dimension and y is the first
+    else:
+        firstarg = A
     if self.black and 'black' not in kwargs.keys():
         kwargs.update({'black':self.black})
     retval = image(firstarg,**kwargs)#just a placeholder for now, will later keep units + such

@@ -43,6 +43,9 @@ def gaussian_over(power_density,power_scale = None):
 def w_index(u_index,v_index):
     'given indeces (0,1,2 for x,y,z) for u and v, return the index for the remaining axis -- *i.e.* "w"'
     return list(set([0,1,2])^set([u_index,v_index]))[0]
+def det_w_name(u_label,v_label):
+    'given labels x,y, and/or z for u and v, return the label of the remaining axis -- *i.e.* "w"'
+    return ({'x','y','z'}^{u_label,v_label}).pop() # since there's only one element in the list, pop gives it
 def construct_axes_from_positions(positions):
     r"""Take the array of `positions`, and use it to generate axes.
     Here, :math:`w` is the dimension along which the slice is taken, and :math:`u` and :math:`v` are the other two dimensions (typically in alphabetical order). 
@@ -206,13 +209,15 @@ def load_fields(basename = 'mesh_only_140129',slicename = 'xz',fieldname = 'poyn
             :w_name: The name of the slice dimension (*e.g.*, if `data` has two dimensions `x` and `y`, then this is :math:`z`.
             :w_slice_position: The position of the slice along the dimension given by `w_name`
         Aside from the two spacial dimensions, it has a third dimension, called
-        `vector`, which gives the three vector components (:math:`x`,:math:`y`,
+        `vector`, which gives the three vector components (:math:`x`, :math:`y`,
         and :math:`z`) at the particular coordinate.
+        Sets the `name` property to ``basename+' '+slicename``.
     model_data: nddata
         In the same format as data, except that it has no `vector` dimension.
         Rather, the data is a structured numpy array with the field names
         `mesh` and `dielectric`, which give the location of the mesh and
         dielectric model elements.
+        Sets the `name` property to ``basename+' '+slicename``.
     """
     def cartesian_bynumber(a):
         return ['x','y','z'][a]
@@ -220,9 +225,9 @@ def load_fields(basename = 'mesh_only_140129',slicename = 'xz',fieldname = 'poyn
         w_axis_pos,u_index,u_axis,v_index,v_axis,data_real = load_hfss_vectors(filename%"real")
         w_axis_pos,u_index,u_axis,v_index,v_axis,data_imag = load_hfss_vectors(filename%"imag")
         data = data_real + 1j*data_imag
-        return u_index,u_axis,v_index,v_axis,data
+        return w_axis_pos,u_index,u_axis,v_index,v_axis,data
 
-    u_index,u_axis,v_index,v_axis,data = load_hfss_complex_vectors(getDATADIR()+'HFSS_jmf356/'+fieldname+'_%s_'+slicename+'_'+basename+'.fld') # format string where "real" and "imag" go
+    w_axis_pos,u_index,u_axis,v_index,v_axis,data = load_hfss_complex_vectors(getDATADIR()+'HFSS_jmf356/'+fieldname+'_%s_'+slicename+'_'+basename+'.fld') # format string where "real" and "imag" go
     _,_,_,_,_,temp = load_hfss_scalar(getDATADIR()+'HFSS_jmf356/real_dielectric_'+slicename+'_'+basename+'.fld')
     temp[~isfinite(temp)] = -1
     model_data = zeros_like(temp,dtype = [('mesh','d'),('dielectric','d')])
@@ -233,37 +238,44 @@ def load_fields(basename = 'mesh_only_140129',slicename = 'xz',fieldname = 'poyn
         model_data['mesh'] = temp
     uv_names = map(cartesian_bynumber,[u_index,v_index])
     return nddata(data,data.shape,uv_names+['vector']).set_prop(dict(
-            w_name = cartesian_bynumber(w_index(u_index,v_index))),
-            w_slice_position = w_axis_pos
-            ).labels(uv_names,[u_axis,v_axis]), nddata(
-                    model_data,model_data.shape,uv_names).set_prop(dict(
-                        w_name = cartesian_bynumber(w_index(u_index,v_index))),
-                        w_slice_position = w_axis_pos
-                        ).labels(uv_names,[u_axis,v_axis])
-def contour_power(basename=None, slicename=None,
+        w_name = cartesian_bynumber(w_index(u_index,v_index)),
+        w_slice_position = w_axis_pos)
+        ).labels(uv_names,[u_axis,v_axis]).name(basename+' '+slicename), nddata(
+                model_data,model_data.shape,uv_names).set_prop(dict(
+                    w_name = cartesian_bynumber(w_index(u_index,v_index)),
+                    w_slice_position = w_axis_pos)
+                    ).labels(uv_names,[u_axis.copy(),v_axis.copy()]).name(basename+' '+slicename)
+def contour_power(S_data, model_data,
         rotate=False, direction_of_power=None,
         number_of_arrows=1, figsize=None, amount_above=0.1,
-        power_scale = None,
-        fl = None,
+        power_scale=None, fl=None, z_shift=None, residual=True,
         **kwargs):
     r"""Plot the magnitude of the power flow, determined from the Poynting vector (:math:`\vec{S}`), along with a contour intended to indicate a Gaussian beam radius.
-    Can also plot (currently plots only) the residual with a Gaussian beam.
+    Plots either the HFSS field or a `residual` with a Gaussian beam (the residual is the default -- see below).
 
     It does this by calling :func:`load_fields <pyspecdata.acert_hfss.load_fields>`, placing the result into an appropriate nddata function, and then plotting the power density using an image function, and a contour using an nddata :func:`contour <pyspecdata.nddata.contour>` method.
 
     Parameters
     ----------
+    S_data : nddata
+        The Poynting vector data, in a format as generated by load_fields.
+    model_data : nddata
+        The model data, in a format as generated by load_fields.
+    residual : bool
+        Show the residual with a Gaussian beam determined by :func:`gaussian_over <pyspecdata.acert_hfss.gaussian_over>`
     z_shift : double
-        Set the :math:`z` value `z_shift` as the origin on the plot
+        (in mm) Set the :math:`z` value `z_shift` as the origin on the plot
     rotate : boolean
         rotate the plot by 90 degrees relative to its default
         orientation
-    direction_of_power : integer
-        by default, it determines power flow along
-        :math:`u \times v`,
-        but this allows you to override
+    direction_of_power : {0,1,2,'x','y','z'}
+        by default, it determines power flow along :math:`u \times v`, but this
+        allows you to override by setting the direction of power to x, y, z, or
+        the corresponding integer.
     power_scale : None or double
         optionally used to scale the overall power
+    fl : figlist_var
+        The figure list to plot to.  Use the `S_data.name()` as the figure name.
 
     Returns
     -------
@@ -272,41 +284,48 @@ def contour_power(basename=None, slicename=None,
     """
     if fl is None:
         raise ValueError('please just pass a figure list (fl)')
-    u_index,v_index,U,V,S_data,model_data = load_fields(basename = basename,slicename = slicename,fieldname = 'poynting',**kwargs)
-    U /= 1e-3
-    V /= 1e-3
-    V -= z_shift
+    for thisaxis in S_data.dimlabels:
+        if thisaxis != 'vector':
+            S_data.set_units(thisaxis,'mm')
+            model_data.set_units(thisaxis,'mm')
+            S_data.setaxis(thisaxis,lambda x: x/1e-3)
+            model_data.setaxis(thisaxis,lambda x: x/1e-3)
+    if z_shift is not None:
+        if 'z' in S_data.dimlabels:
+            S_data.setaxis('z',lambda x: x-z_shift)
+            model_data.setaxis('z',lambda x: x-z_shift)
+        else:
+            raise ValueError("You're trying to set z_shift, but the axes here are"+' and '.join(self.dimlabels))
     if rotate:
-        u_index,v_index = v_index,u_index
-        U,V = V.T,U.T
-        S_data = S_data.transpose([1,0,2])
-        model_data = model_data.T
+        S_data.reorder(S_data.dimlabels[1])
+        model_data.reorder(model_data.dimlabels[1])
         if figsize is None:
-            fl.next(basename+' '+slicename,figsize = (5,6))
+            fl.next(S_data.name(),figsize = (5,6))
     else:
         if figsize is None:
-            fl.next(basename+' '+slicename,figsize = (5,12))
+            fl.next(S_data.name(),figsize = (5,12))
     if figsize is not None:
-        fl.next(basename+' '+slicename,figsize = figsize)
+            fl.next(S_data.name(),figsize = figsize)
     #{{{ calculate the normalized power density
     normalize_byslice = False # i.e. assume power is flowing
     #                   through the plane, so we want to
     #                   normalize against the *overall* max
     if direction_of_power is None:
-        direction_of_power = w_index(u_index,v_index)
+        direction_of_power_str = det_w_name(*tuple(model_data.dimlabels))# use model data, since S_data also include the vector dimension
     else:
-        if direction_of_power != w_index(u_index,v_index):
+        if type(direction_of_power) is str:
+            direction_of_power_str = direction_of_power
+        else:
+            direction_of_power_str = ['x','y','z'][direction_of_power]
+        if direction_of_power_str != det_w_name(*tuple(model_data.dimlabels)):
             normalize_byslice = True
-    power_density = real(S_data[:,:,direction_of_power])#  taking
+    direction_of_power = ['x','y','z'].index(direction_of_power_str)
+    power_density = S_data['vector',direction_of_power].runcopy(real) #  taking
     #                            just the perpendicular component
     #}}}
-    axis_labels = map(lambda x: ['x','y','z'][x],[u_index,v_index])
-    power_density = nddata(power_density, shape(power_density),
-            axis_labels).labels(axis_labels,[U[:,0],V[0,:]])
     max_power = power_density.copy()
     max_power[lambda x: ~isfinite(x)] = 0
-    direction_of_power_str = ['x','y','z'][direction_of_power]
-    for j in axis_labels:
+    for j in power_density.dimlabels:
         if j != direction_of_power_str:
             max_power.run(max,j)
     normalized_power_density = power_density / max_power
@@ -316,9 +335,13 @@ def contour_power(basename=None, slicename=None,
             power_scale = overall_max_power
     if power_scale is not None:
         overall_max_power = power_scale
-    power_density_residual = power_density - gaussian_over(power_density,power_scale = overall_max_power)
-    power_density_residual *= 100. / overall_max_power
-    fl.image(power_density_residual,x_first = True)
+    if residual:
+        power_density_residual = power_density - gaussian_over(power_density,power_scale = overall_max_power)
+        power_density_residual *= 100. / overall_max_power
+        forplot = power_density_residual
+    else:
+        forplot = power_density
+    fl.image(forplot,x_first = True)
     normalized_power_density.contour(colors='w', alpha=0.75,
             labels=False, levels=[exp(-2.0)], linewidths=3)
     if len(max_power.data.shape) < 1:
