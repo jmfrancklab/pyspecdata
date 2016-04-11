@@ -41,6 +41,9 @@ from .general_functions import *
 from .ndshape import ndshape_base
 #rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
 rc('image',aspect='auto',interpolation='nearest')
+#rcParams['text.usetex'] = True
+rc('font', family='Arial')# I need this to render unicode
+rcParams['text.latex.unicode'] = True
 rcParams['xtick.direction'] = 'out'
 rcParams['xtick.major.size'] = 12
 rcParams['xtick.minor.size'] = 6
