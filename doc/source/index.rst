@@ -16,6 +16,7 @@ Contents:
     acert_hdf.rst
     pyspecdata.rst
     figlist.rst
+    units.rst
 
 
 Indices and tables
