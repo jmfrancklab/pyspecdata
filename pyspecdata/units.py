@@ -170,9 +170,12 @@ class units (object):
                 overlap_units = set(self.derived_units.dtype.names) & set(self.base_dtype.names)
                 temp_prefix = zeros((1,1),dtype = self.base_dtype)
                 for this_base_unit in overlap_units:
-                    temp_prefix[this_base_unit] = un_np[this_base_unit]
+                    temp_prefix[this_base_unit] = oom_np[this_base_unit]
                 if not sum(temp_prefix.view(float16) * self.unit_vec.view(float16)) == net_prefix:
+                    print 'net oom out:',sum(temp_prefix.view(float16) * self.unit_vec.view(float16))
+                    print 'net oom in:',net_prefix
                     raise RuntimeError("I can't get the prefixes to match trivially -- some upgrading needed")
+                self.prefix_vec.view(float16)[:] += temp_prefix.view(float16).flatten()
             elif j=='1':
                 pass #don't do anything
             else:
