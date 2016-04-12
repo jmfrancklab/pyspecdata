@@ -2,6 +2,17 @@ from numpy import *
 import re
 from itertools import chain
 
+unicode_superscript = {
+        '0':u'\u2070',
+        '1':u'\u00b9',
+        '2':u'\u00b2',
+        '3':u'\u00b3',
+        '+':u'\u00ba',
+        '-':u'\u00bb',
+        '-':u'\u00b7'}
+for j in range(4,10):
+    unicode_superscript.update({str(j):(u'\\u207'+str(j)).decode('unicode_escape')})
+
 class units (object):
     r"""Each instance of this object stores a numerical representation of a single set of units, and there are routines to set units by
     (*i.e.* :func:`parsing <pyspecdata.units.parse>`) strings to units
@@ -19,7 +30,7 @@ class units (object):
     """
     def __init__(self,*args):
         "If an argument is passed, it's passed to :func:`parse <pyspecdata.units.parse>`"
-        self.base_dtype = dtype(map(lambda x: (x, float16), ['m', 'g', 's', 'A',
+        self.base_dtype = dtype(map(lambda x: (str(x), float16), ['m', 'g', 's', 'A',# str is needed because it doesn't understand unicode
             'K', 'mol', 'cd', 'rad']))
         self.oom_names =   ['T' , 'G' , 'M' , 'k' , 'c' , 'm' , u'\u03bc' , 'n' , 'p']
         oom_values =      r_[12 , 9   , 6   , 3   , -2  , -3  , -6     , -9  , -12]
@@ -51,7 +62,7 @@ class units (object):
         definition_list = [('T','kg/A*s^2')]#, ('N','kg*m/s^2'), ('C','A*s'),]
         self.derived_dtype = dtype(map(lambda x: (x, float16),
             list(self.base_dtype.names) + map(lambda y:
-                y[0],definition_list)))
+                str(y[0]),definition_list)))
         new_derived_units = zeros((len(self.base_dtype.names) +
                 len(definition_list),1),self.base_dtype)
         new_derived_units[:len(self.derived_units)] = self.derived_units
@@ -171,13 +182,22 @@ class units (object):
                 # {{{ we need to start by adding up the net oom (oom times the
                 # dimensions/powers of each unit, and then we divide out by the
                 # dimensions/powers at the end
+                # {{{ first, calculate just the net order of magnitude that
+                # comes from the conversion
                 base_prefix_rep = dot(self.derived_units_oom.view(float16),
-                        oom_np.view(float16).reshape(-1,1))
-                if verbose: print "in base units:\n",self.base_dtype.names
+                        un_np.view(float16).reshape(-1,1))
+                if verbose: print "in base units, from conversion:\n",self.base_dtype.names
                 if verbose: print r_[base_unit_rep.T,base_prefix_rep.T] 
                 base_prefix_rep *= base_unit_rep
-                if verbose: print "after taking net oom:"
+                # }}}
+                # {{{ now, I need to add the oom that comes from the prefixes
+                if verbose: print "after taking net oom from conversion:"
                 if verbose: print r_[base_unit_rep.T,base_prefix_rep.T] 
+                base_prefix_rep += dot(self.derived_units.view(float16),
+                        oom_np.view(float16).reshape(-1,1))
+                if verbose: print "after adding prefixes:"
+                if verbose: print r_[base_unit_rep.T,base_prefix_rep.T] 
+                # }}}
                 self.prefix_vec.view(float16)[:] += base_prefix_rep.flatten()
                 # }}}
             elif j=='1':
@@ -194,7 +214,9 @@ class units (object):
         if verbose: print self.unit_vec.dtype.names
         if verbose: print r_[self.unit_vec,self.prefix_vec] 
         return self
-    def str(self,number):
+    def __unicode__(self):# like __str__
+        return self.str(1,using_unicode = True)# might not work, because some characters not included
+    def str(self,number,using_unicode = False):
         r"""Give a string that prints `number`, which has the units
         given by the current instance of the class.
         Choose the simplest possible expression for the units.
@@ -227,10 +249,19 @@ class units (object):
                 if j == 1:
                     reduced_unit_power_strings.append('')
                 else:
-                    reduced_unit_power_strings.append('^{:g}'.format(j))
+                    if using_unicode:
+                        temp = u'{:g}'.format(j)
+                        temp = u''.join(map(lambda x: unicode_superscript[x],list(temp)))
+                        reduced_unit_power_strings.append(temp)
+                    else:
+                        reduced_unit_power_strings.append('^{:g}'.format(j))
             reduced_prefixes = map(oom_tostr,self.prefix_vec[nonzero_fields].view(float16))
             print "reduced unit powers",reduced_unit_powers,"for",nonzero_fields,"with prefixes",reduced_prefixes
-            retval = ' '.join(map(lambda x: x[0]+x[1]+x[2],zip(reduced_prefixes,nonzero_fields,reduced_unit_power_strings)))
+            if using_unicode:
+                this_space = u' '
+            else:
+                this_space = ' '
+            retval = this_space.join(map(lambda x: x[0]+x[1]+x[2],zip(reduced_prefixes,nonzero_fields,reduced_unit_power_strings)))
             # }}}
             return retval
         # {{{ render a numerator and denominator
@@ -246,9 +277,36 @@ class units (object):
         # }}}
         return retval
     def __mul__(self,arg):
+        r"""Multiply units.
+
+        As also done in the parse routine, we need to accumulate a net prefix
+        (product of powers and prefixes) before we sum and then divide by the
+        powers at the end."""
         retval = units()
-        retval.unit_vec.view(float16)[:] = self.unit_vec.view(float16) + arg.unit_vec.view(float16)
-        retval.prefix_vec.view(float16)[:] = self.prefix_vec.view(float16) + arg.prefix_vec.view(float16)
+        retval_unitvec = self.unit_vec.view(float16) + arg.unit_vec.view(float16)
+        retval.unit_vec.view(float16)[:] = retval_unitvec
+        self_net_prefix = self.prefix_vec.view(float16) * self.unit_vec.view(float16)
+        arg_net_prefix = arg.prefix_vec.view(float16) * arg.unit_vec.view(float16)
+        retval_net_prefix =  self_net_prefix + arg_net_prefix
+        nonzero_mask = retval_unitvec != 0
+        retval_net_prefix[nonzero_mask] /= retval_unitvec[nonzero_mask]
+        retval.prefix_vec.view(float16)[:] = retval_net_prefix
+        return retval
+    def __div__(self,arg):
+        r"""Divide units.
+
+        As also done in the parse routine, we need to accumulate a net prefix
+        (product of powers and prefixes) before we sum and then divide by the
+        powers at the end."""
+        retval = units()
+        retval_unitvec = self.unit_vec.view(float16) - arg.unit_vec.view(float16)
+        retval.unit_vec.view(float16)[:] = retval_unitvec
+        self_net_prefix = self.prefix_vec.view(float16) * self.unit_vec.view(float16)
+        arg_net_prefix = arg.prefix_vec.view(float16) * arg.unit_vec.view(float16)
+        retval_net_prefix =  self_net_prefix - arg_net_prefix
+        nonzero_mask = retval_unitvec != 0
+        retval_net_prefix[nonzero_mask] /= retval_unitvec[nonzero_mask]
+        retval.prefix_vec.view(float16)[:] = retval_net_prefix
         return retval
     def __pow__(self,thisnumber):
         retval = units()
