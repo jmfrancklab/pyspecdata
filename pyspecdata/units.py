@@ -162,24 +162,34 @@ class units (object):
                 un_np[unit] = unit_powers[n]
                 if prefix is not None:
                     oom_np[unit] = self.oom_dict[prefix]
-                if verbose: print 'in:\n',self.derived_dtype.names
+                if verbose: print j,'---------------------'
+                if verbose: print 'in derived units:\n',self.derived_dtype.names
                 if verbose: print r_[un_np,oom_np] 
-                self.unit_vec.view(float16)[:] += dot(self.derived_units.view(float16),
-                        un_np.view(float16).reshape(-1,1)).flatten()
-                net_prefix = sum(un_np.view(float16)*oom_np.view(float16)) # gives the overall prefix order
-                overlap_units = set(self.derived_units.dtype.names) & set(self.base_dtype.names)
-                temp_prefix = zeros((1,1),dtype = self.base_dtype)
-                for this_base_unit in overlap_units:
-                    temp_prefix[this_base_unit] = oom_np[this_base_unit]
-                if not sum(temp_prefix.view(float16) * self.unit_vec.view(float16)) == net_prefix:
-                    print 'net oom out:',sum(temp_prefix.view(float16) * self.unit_vec.view(float16))
-                    print 'net oom in:',net_prefix
-                    raise RuntimeError("I can't get the prefixes to match trivially -- some upgrading needed")
-                self.prefix_vec.view(float16)[:] += temp_prefix.view(float16).flatten()
+                base_unit_rep = dot(self.derived_units.view(float16),
+                        un_np.view(float16).reshape(-1,1))
+                self.unit_vec.view(float16)[:] += base_unit_rep.flatten()
+                # {{{ we need to start by adding up the net oom (oom times the
+                # dimensions/powers of each unit, and then we divide out by the
+                # dimensions/powers at the end
+                base_prefix_rep = dot(self.derived_units_oom.view(float16),
+                        oom_np.view(float16).reshape(-1,1))
+                if verbose: print "in base units:\n",self.base_dtype.names
+                if verbose: print r_[base_unit_rep.T,base_prefix_rep.T] 
+                base_prefix_rep *= base_unit_rep
+                if verbose: print "after taking net oom:"
+                if verbose: print r_[base_unit_rep.T,base_prefix_rep.T] 
+                self.prefix_vec.view(float16)[:] += base_prefix_rep.flatten()
+                # }}}
             elif j=='1':
                 pass #don't do anything
             else:
                 raise ValueError(' '.join(["couldn't match:",repr(j),"to a unit"]))
+        if verbose: print "net ooms are:",self.prefix_vec
+        # {{{ here, we have accumulated the net oom, so divide out by the
+        # dimensions/powers of the units
+        units_nonzero = self.unit_vec.view(float16) != 0
+        self.prefix_vec.view(float16)[units_nonzero] /= self.unit_vec.view(float16)[units_nonzero]
+        # }}}
         if verbose: print "leading to:"
         if verbose: print self.unit_vec.dtype.names
         if verbose: print r_[self.unit_vec,self.prefix_vec] 
