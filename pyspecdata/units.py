@@ -26,16 +26,15 @@ class units (object):
         self.oom_dict = dict(zip(self.oom_names,oom_values))
         self.unit_vec = zeros(1,dtype = self.base_dtype)
         self.prefix_vec = zeros(1,dtype = self.base_dtype)
-        # {{{ load the base units into the derived units dictionary
+        # {{{ load the base units into the derived units matrix
         identity_matrix = eye(len(self.base_dtype.names),dtype=float16).view(self.base_dtype)
-        zero_matrix = zeros(len(self.base_dtype.names),dtype=self.base_dtype)
-        self.derived_units = {}
-        self.derived_units_oom = {}
-        for n,j in enumerate(self.base_dtype.names):
-            self.derived_units[j] = identity_matrix[n]
-            self.derived_units_oom[j] = zero_matrix[n]
+        zero_matrix = zeros((len(self.base_dtype.names),1),dtype=self.base_dtype)
+        self.derived_units = identity_matrix
+        self.derived_units_oom = zero_matrix
         # }}}
+        self.derived_dtype = self.base_dtype
         if len(args) > 0:
+            self.load_derived()
             if len(args) > 1:
                 raise ValueError("only one argument allowed")
             self.parse(args[0])
@@ -49,17 +48,37 @@ class units (object):
         Then, (not yet done), based on the dictionary that this generates, it
         will generate a matrix that converts from the derived dtype vector to
         the base dtype vector."""
-        definition_list = [('T','kg/A*s^2')]
-        self.derived_dtype = dtype(map(lambda x: (x, float16), self.derived_units.keys()))
+        definition_list = [('T','kg/A*s^2')]#, ('N','kg*m/s^2'), ('C','A*s'),]
+        self.derived_dtype = dtype(map(lambda x: (x, float16),
+            list(self.base_dtype.names) + map(lambda y:
+                y[0],definition_list)))
+        new_derived_units = zeros((len(self.base_dtype.names) +
+                len(definition_list),1),self.base_dtype)
+        new_derived_units[:len(self.derived_units)] = self.derived_units
+        self.derived_units = new_derived_units
+        # at this point, base units are along the rows and derived
+        # units along the columns
+        self.derived_units = ascontiguousarray(
+                self.derived_units.view(float16).T) # transpose maps
+        print "shape of derived units",self.derived_units.shape
+        #        from derived to base, and ascontiguousarray is needed
+        #        to allow the subsequent view command
+        self.derived_units = self.derived_units.view(
+                self.derived_dtype) # the view converts this into a
+        #       structured array
+        self.derived_units_oom = zeros((len(self.base_dtype.names),1),self.derived_dtype)# just re-use the dtype
         # {{{ this is a lot of calculation that can be saved in the future by loading from a file
         temp = units()
-        for j in definition_list:#, ('N','kg*m/s^2'), ('C','A*s'),]:
+        for j in definition_list:
             thisunit,thismath = j
             temp.parse(thismath)
-            self.derived_units[thisunit] = temp.unit_vec
-            self.derived_units_oom[thismath] = temp.prefix_vec
+            self.derived_units[thisunit] = temp.unit_vec.view(float16).reshape(-1,1)
+            print "for",thisunit,"prefix vector is",temp.prefix_vec
+            self.derived_units_oom[thisunit] = temp.prefix_vec.view(float16).reshape(-1,1)
         # }}}
-        return
+        print self.derived_units_oom.dtype.names
+        print self.derived_units_oom
+        return self
     def parse(self,in_str, verbose=True):
         u"""Take `in_str` and parse it as a unit or series of units, and set the units associated with the current instance to the result.
 
@@ -127,7 +146,7 @@ class units (object):
                 unit_powers = list(chain(*unit_powers))
         if verbose: print "Final result:"
         if verbose: print unit_powers
-        oom_regexp = r'^('+'|'.join(self.oom_names)+'){0,1}'+'('+'|'.join(self.derived_units.keys())+r')$'
+        oom_regexp = r'^('+'|'.join(self.oom_names)+'){0,1}'+'('+'|'.join(self.derived_dtype.names)+r')$'
         if verbose: print "oom_regexp",repr(oom_regexp)
         oom_regexp = re.compile(oom_regexp)
         if verbose: print working_list
@@ -138,19 +157,28 @@ class units (object):
             m = oom_regexp.match(j)
             if m:
                 prefix,unit = m.groups()
-                un_np = zeros(1,dtype = self.base_dtype)
-                oom_np = zeros(1,dtype = self.base_dtype)
+                un_np = zeros(1,dtype = self.derived_dtype)
+                oom_np = zeros(1,dtype = self.derived_dtype)
                 un_np[unit] = unit_powers[n]
                 if prefix is not None:
                     oom_np[unit] = self.oom_dict[prefix]
+                if verbose: print 'in:\n',self.derived_dtype.names
                 if verbose: print r_[un_np,oom_np] 
-                self.unit_vec.view(float16)[:] += un_np.view(float16)
-                self.prefix_vec.view(float16)[:] += oom_np.view(float16)
+                self.unit_vec.view(float16)[:] += dot(self.derived_units.view(float16),
+                        un_np.view(float16).reshape(-1,1)).flatten()
+                net_prefix = sum(un_np.view(float16)*oom_np.view(float16)) # gives the overall prefix order
+                overlap_units = set(self.derived_units.dtype.names) & set(self.base_dtype.names)
+                temp_prefix = zeros((1,1),dtype = self.base_dtype)
+                for this_base_unit in overlap_units:
+                    temp_prefix[this_base_unit] = un_np[this_base_unit]
+                if not sum(temp_prefix.view(float16) * self.unit_vec.view(float16)) == net_prefix:
+                    raise RuntimeError("I can't get the prefixes to match trivially -- some upgrading needed")
             elif j=='1':
                 pass #don't do anything
             else:
                 raise ValueError(' '.join(["couldn't match:",repr(j),"to a unit"]))
         if verbose: print "leading to:"
+        if verbose: print self.unit_vec.dtype.names
         if verbose: print r_[self.unit_vec,self.prefix_vec] 
         return self
     def str(self,number):
