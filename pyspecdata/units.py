@@ -195,7 +195,7 @@ class units (object):
                 if verbose: print r_[base_unit_rep.T,base_prefix_rep.T] 
                 base_prefix_rep += dot(self.derived_units.view(float16),
                         oom_np.view(float16).reshape(-1,1))
-                if verbose: print "after adding prefixes:"
+                if verbose: print "after adding prefixes on derived units:"
                 if verbose: print r_[base_unit_rep.T,base_prefix_rep.T] 
                 # }}}
                 self.prefix_vec.view(float16)[:] += base_prefix_rep.flatten()

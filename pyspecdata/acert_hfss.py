@@ -28,8 +28,10 @@ def gaussian_over(power_density,power_scale = None):
     if 'z' in power_density.dimlabels and 'x' in power_density.dimlabels:
         a = power_density.fromaxis('z',lambda z: sqrt(a0**2+(z-z0)**2))
         r = power_density.fromaxis('x')
-    elif 'x' in power_density.dimlabels and 'y' in power_density.dimlabels:
-        a = 1.
+    elif power_density.get_prop('w_name') == 'z':
+        z = power_density.get_prop('w_slice_position')/1e-3 # convert to mm
+        print "pulled slice position as",z
+        a = sqrt(a0**2+(z-z0)**2)
         r = power_density.fromaxis(['x','y'],lambda x,y:
                 sqrt((x)**2+(y)**2))
     else:
