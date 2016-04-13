@@ -5,10 +5,28 @@ r'Helper functions for processing HFSS field data'
 
 z_shift = 0.0
 
-def gaussian_over(power_density,power_scale = None):
+def gaussian_over(power_density,power_scale = None,
+        f = 95e9,
+        unit_scaling = 1e-3,# length units of mm
+        w0 = 2.0,
+        z0 = 148., # the z offset -- i.e. the z-value where the waist is
+        ):
     r'''In order to compare the results of a simulation to a Gaussian beam,
     generate the power corresponding to a Gaussian beam over the same
     coordinates used in `power_density`.
+    Following [1]_ (Chpt 2), the parameters used here are the *only* parameters needed
+    to determine the fields for a Gaussian beam in free space.
+    We use the condensed form [2]_:
+
+    .. math::
+
+        P=\frac{k^2}{2 a^2 \pi} \exp\left(\frac{-k^2 r^2}{2 a^2}\right)
+
+    where
+
+    .. math::
+
+        a\equiv \sqrt{\left(\frac{1}{2} k w_0\right)^2+(z-z_0)^2}
 
     Parameters
     ==========
@@ -18,12 +36,28 @@ def gaussian_over(power_density,power_scale = None):
     power_scale : None or double
         If given, this sets the maximum power (at the center of the waist) of
         the resulting Gaussian beam.
+        This is the same as replacing :math:`\frac{k^2}{2 a^2 \pi}` above with
+        power_scale.
+    f : double
+        The frequency of the radiation in Hz.
+    unit_scaling : double
+        Determines the units that `w0` and `z0` are specified in.
+        ``1e-3`` gives mm.
+    z0 : double
+        :math:`z_0`: The :math:`z` position of the beam waist (the
+        narrowest part of the Gaussian beam).
+    w0 : double
+        :math:`w_0`: The beam waist radius, which is the radius of the
+        beam at `z0`.
     
+    References
+    ----------
+    .. [1] Goldsmith, P. Quasioptical Systems: Gaussian Beam Quasioptical Propogation and Applications; Wiley-IEEE Press, 1998.
+    .. [2] Franck, J.M and Freed J.H. Resonator Design for High :math:`B_1` fields at 95 GHz *In Preparation* 2016
     '''
-    k = 2*pi/3e-3 # in SI
-    k *= 1e-3 # length units of mm
-    w0 = 2.0
-    z0 = 148. # the z offset -- i.e. the z-value where the waist is
+    c = 2.99792458e8
+    k = 2*pi*f/c # in SI
+    k *= unit_scaling
     a0 = 0.5*k*w0 # just a at z=0, which is just the raleigh length
     if 'z' in power_density.dimlabels and 'x' in power_density.dimlabels:
         a = power_density.fromaxis('z',lambda z: sqrt(a0**2+(z-z0)**2))
@@ -251,6 +285,7 @@ def contour_power(S_data, model_data,
         rotate=False, direction_of_power=None,
         number_of_arrows=1, figsize=None, amount_above=0.1,
         power_scale=None, fl=None, z_shift=None, residual=True,
+        z_limit=None,
         **kwargs):
     r"""Plot the magnitude of the power flow, determined from the Poynting vector (:math:`\vec{S}`), along with a contour intended to indicate a Gaussian beam radius.
     Plots either the HFSS field or a `residual` with a Gaussian beam (the residual is the default -- see below).
@@ -278,6 +313,9 @@ def contour_power(S_data, model_data,
         optionally used to scale the overall power
     fl : figlist_var
         The figure list to plot to.  Use the `S_data.name()` as the figure name.
+    kwargs : dict
+        the remaining keyword arguments are passed on to
+        :func:`gaussian_over <pyspecdata.acert_hfss.gaussian_over>`
 
     Returns
     -------
@@ -331,6 +369,7 @@ def contour_power(S_data, model_data,
         if j != direction_of_power_str:
             max_power.run(max,j)
     normalized_power_density = power_density / max_power
+    overall_max_power = None
     if normalize_byslice: # power flows parallel to the plot
         overall_max_power = max_power.data.max()
         if power_scale is None:
@@ -338,16 +377,31 @@ def contour_power(S_data, model_data,
     if power_scale is not None:
         overall_max_power = power_scale
     if residual:
-        power_density_residual = power_density - gaussian_over(power_density,power_scale = overall_max_power)
+        power_density_residual = power_density - gaussian_over(power_density,power_scale = overall_max_power,**kwargs)
         power_density_residual *= 100. / overall_max_power
         forplot = power_density_residual
     else:
         forplot = power_density
+    if z_limit is not None and 'z' in forplot.dimlabels:
+        print "applying z limit",z_limit
+        forplot = forplot['z':(z_limit,)]
     fl.image(forplot,x_first = True)
+    if z_limit is not None and 'z' in forplot.dimlabels:
+        normalized_power_density = normalized_power_density['z':(z_limit,)]
     normalized_power_density.contour(colors='w', alpha=0.75,
             labels=False, levels=[exp(-2.0)], linewidths=3)
+    if overall_max_power is not None:
+        textstr = 'max power {:g}'.format(overall_max_power)
+        if residual:
+            textstr += '\nvalues give % residual'
+        text(0.3*amount_above, 0.0 + 0.3*amount_above,# these say from the left and from the bottom of the figure -- 1.05 allows space for the title
+                textstr,
+                horizontalalignment = 'left',
+                verticalalignment = 'bottom',
+                size = 'x-small',
+                transform = gca().transAxes)
     if len(max_power.data.shape) < 1:
-        text(1.0, 1.0 + amount_above,# these say from the left and from the bottom of the figure -- 1.05 allows space for the title
+        text(1.0, 1.0 - amount_above,# these say from the left and from the bottom of the figure -- 1.05 allows space for the title
                 'max power along %s (normalized) is %g'%(['x','y','z'][direction_of_power],max_power.data),
                 horizontalalignment = 'right',
                 verticalalignment = 'bottom',
