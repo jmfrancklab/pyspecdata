@@ -288,7 +288,7 @@ def contour_power(S_data, model_data,
         rotate=False, direction_of_power=None,
         number_of_arrows=1, figsize=None, amount_above=0.1,
         power_scale=None, fl=None, z_shift=None, residual=True,
-        z_limit=None,
+        z_limit=None, A=1.0,
         **kwargs):
     r"""Plot the magnitude of the power flow, determined from the Poynting vector (:math:`\vec{S}`), along with a contour intended to indicate a Gaussian beam radius.
     Plots either the HFSS field or a `residual` with a Gaussian beam (the residual is the default -- see below).
@@ -315,6 +315,8 @@ def contour_power(S_data, model_data,
         the corresponding integer.
     power_scale : None or double
         optionally used to scale the overall power
+    A : double
+        After (optionally) applying `power_scale`, multiply the overall power of the Gaussian beam by `A`.
     fl : figlist_var
         The figure list to plot to.  Use the `S_data.name()` as the figure name.
     kwargs : dict
@@ -382,10 +384,13 @@ def contour_power(S_data, model_data,
             power_scale = overall_max_power
     if power_scale is not None:
         overall_max_power = power_scale
+    only_beam = False # show only the beam, not the residual
     if residual:
-        power_density_residual = gaussian_over(power_density,power_scale = overall_max_power,**kwargs) - power_density
-        #power_density_residual = gaussian_over(power_density,power_scale = overall_max_power,**kwargs)
-        power_density_residual *= 100. / overall_max_power
+        if only_beam:
+            power_density_residual = A*gaussian_over(power_density,power_scale = overall_max_power,**kwargs)
+        else:
+            power_density_residual = A*gaussian_over(power_density,power_scale = overall_max_power,**kwargs) - power_density
+            power_density_residual *= 100. / overall_max_power
         forplot = power_density_residual
     else:
         forplot = power_density
