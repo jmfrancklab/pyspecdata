@@ -4232,22 +4232,30 @@ class nddata (object):
                     return retval
                 #}}}
             else:
-                raise CustomError("I don't know what to do!")
-        if len(args) == 2:
+                if issympy(args[0]):
+                    func = args[0]
+                    symbols_in_func = func.atoms(sympy.Symbol)
+                    symbols_not_in_dimlabels = set(map(str,symbols_in_func))-set(self.dimlabels)
+                    if len(symbols_not_in_dimlabels)>0:
+                        raise ValueError("You passed a symbolic function, but the symbols"+str(symbols_not_in_dimlabels)+" are not axes")
+                else:
+                    raise ValueError("I don't know what to do with this type of argument!")
+        elif len(args) == 2:
             axisnames = args[0]
             func = args[1]
             if type(axisnames) is not list:
                 axisnames = [axisnames]
         else:
-            raise CustomError('Wrong number of arguments!!')
+            raise ValueError('Wrong number of arguments!! -- you passed '+repr(len(args))+' arguments!')
         if issympy(func):
             mat2array = [{'ImmutableMatrix': array}, 'numpy']# returns arrays rather than the stupid matrix class
             try:
-                lambdified_func = sympy.lambdify(map(sympy.var,axisnames), func,
+                lambdified_func = sympy.lambdify(list(symbols_in_func), func,
                         modules=mat2array)
             except:
                 raise CustomError('Error parsing axis variables',map(sympy.var,axisnames),'that you passed and function',func,'that you passed')
             func = lambdified_func
+            axisnames = map(str,symbols_in_func)
         if func.func_code.co_argcount != len(axisnames):
             raise CustomError("The axisnames you passed and the argument count don't match")
         list_of_axes = [self._axis_inshape(x) for x in axisnames]
