@@ -6,6 +6,7 @@ if myparams['figlist_type'] == 'figlistl':
     environ['ETS_TOOLKIT'] = 'qt4'
     import matplotlib; matplotlib.use('Agg')
 from pylab import *
+from types import FunctionType as function
 import textwrap
 import matplotlib
 import matplotlib.transforms as mtransforms
@@ -76,7 +77,7 @@ nextfigure({'lplotproperty':value})
 
 def issympy(x):
     'tests if something is sympy (based on the module name)'
-    return repr(x.__class__.__module__)[1:-1].split('.')[0] == 'sympy'
+    return isinstance(x,sympy.Expr)
 
 #{{{ function trickery
 def mydiff(data,axis = -1):
@@ -4213,8 +4214,36 @@ class nddata (object):
         thisaxis = self._axis_inshape(axisname)
         return nddata(thisaxis,thisaxis.shape,list(self.dimlabels)).labels(axisname,thisaxis.flatten())
     def fromaxis(self,*args,**kwargs):
-        '''enter just the axis, to return the axis,
-        or enter a list of axisnames, followed by a function to act on them'''
+        '''Generate an nddata object from one of the axis labels.
+
+        Can be used in one of several ways:
+
+        * ``self.fromaxis('axisname')``: Returns an nddata where `retval.data` consists of the given axis values.
+        * ``self.fromaxis('axisname',inputfunc)``: use `axisname` as the input for `inputfunc`, and load the result into `retval.data`
+        * ``self.fromaxis(inputsymbolic)``: Evaluate `inputsymbolic` and load the result into `retval.data`
+
+        Parameters
+        ==========
+        axisname : str | list
+            The axis (or list of axes) to that is used as the argument of `inputfunc` or the function represented by `inputsymbolic`.
+            If this is the only argument, it cannot be a list.
+        inputsymbolic : sympy.Expr
+            A sympy expression whose only symbols are the names of axes.
+            It is preferred, though not required, that this is passed
+            without an `axisname` argument -- the axis names are then
+            inferred from the symbolic expression.
+        inputfunc : function
+            A function (typically a lambda function) that taxes the values of the axis given by `axisname` as input.
+        overwrite : bool
+            Defaults to `False`. If set to `True`, it overwrites `self` with `retval`.
+        as_array : bool
+            Defaults to `False`. If set to `True`, `retval` is a properly dimensioned numpy ndarray rather than an nddata.
+
+        Returns
+        =======
+        retval : nddata | ndarray
+            An expression calculated from the axis(es) given by `axisname` or inferred from `inputsymbolic`.
+        '''
         overwrite,as_array = process_kwargs([('overwrite',False),
             ('as_array',False)],kwargs)
         if len(args) == 1:
@@ -4225,6 +4254,7 @@ class nddata (object):
                 thisaxis = self._axis_inshape(axisname)
                 if overwrite:
                     self.data = thisaxis
+                    return self
                 else:
                     retval = nddata(thisaxis,thisaxis.shape,list(self.dimlabels)).labels(axisname,thisaxis.flatten())
                     retval.axis_coords_units = list(self.axis_coords_units)
