@@ -77,7 +77,10 @@ def wrapviewer():
     pdf_basename = filter(lambda x: x[0] != '-',
             sys.argv)[-1]
     orig_tex_basename,new_pdf_basename = det_new_pdf_name(sys.argv)
-    os.system('start sumatrapdf -reuse-instance '+new_pdf_basename+'.pdf')
+    if os.name == 'posix':
+        os.system('new_evince b '+new_pdf_basename+'.pdf')# really, I should pull all this code and wrap it in here, since it's all just python code
+    else:
+        os.system('start sumatrapdf -reuse-instance '+new_pdf_basename+'.pdf')
     if new_pdf_basename == 'lists':
         os.system('cp lists.pdf "'+os.path.expanduser('~')+os.path.sep+'Seafile'+os.path.sep+'My Library'+os.path.sep+'lists.pdf"')
     return
