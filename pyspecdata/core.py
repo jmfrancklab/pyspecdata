@@ -4259,6 +4259,7 @@ class nddata (object):
                     retval = nddata(thisaxis,thisaxis.shape,list(self.dimlabels)).labels(axisname,thisaxis.flatten())
                     retval.axis_coords_units = list(self.axis_coords_units)
                     retval.data_units = self.data_units
+                    retval.name(self.name())
                     return retval
                 #}}}
             else:
@@ -4308,6 +4309,7 @@ class nddata (object):
                                 [self.getaxis(x).copy() for x in axisnames])
                 retval.axis_coords_units = list(self.axis_coords_units)
                 retval.data_units = self.data_units
+                retval.name(self.name())
                 return retval
     def getaxis(self,axisname):
         if self.axis_coords is None or len(self.axis_coords) == 0:
