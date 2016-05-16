@@ -4287,6 +4287,8 @@ class nddata (object):
                 raise CustomError('Error parsing axis variables',map(sympy.var,axisnames),'that you passed and function',func,'that you passed')
             func = lambdified_func
             axisnames = map(str,symbols_in_func)
+        elif not hasattr(func,'func_code'):
+            raise ValueError("I can't interpret the second argument as a function!")
         if func.func_code.co_argcount != len(axisnames):
             raise CustomError("The axisnames you passed and the argument count don't match")
         list_of_axes = [self._axis_inshape(x) for x in axisnames]
