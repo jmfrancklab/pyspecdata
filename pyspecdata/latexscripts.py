@@ -78,7 +78,30 @@ def wrapviewer():
             sys.argv)[-1]
     orig_tex_basename,new_pdf_basename = det_new_pdf_name(sys.argv)
     if os.name == 'posix':
-        os.system('new_evince b '+new_pdf_basename+'.pdf')# really, I should pull all this code and wrap it in here, since it's all just python code
+        # {{{ this plays the role of the function that I used to call "new_evince" with argument "b"
+        which_command = 'b'
+        full_pdf_name = new_pdf_basename+'.pdf'
+        full_tex_name = orig_tex_basename+'.tex'
+	if which_command is 'f':#forward
+            # no longer used, but make this functional, in case I want it later
+	    #3/29/14 -- replaced '+sys.argv[2]+' w/ default
+	    cmdstring = 'evince_vim_dbus.py EVINCE '+full_pdf_name+' 1 '+full_tex_name 
+	    print cmdstring
+	    os.system(cmdstring)
+	elif which_command is 'i':#inverse
+	    cmdstring = 'evince_vim_dbus.py GVIM default '+full_pdf_name+' '+full_tex_name
+	    print cmdstring
+	    os.system(cmdstring)
+	elif which_command is 'b':#both
+	    cmdstring = '~/silentfork.sh evince_vim_dbus.py EVINCE '+full_pdf_name+' 1 '+full_tex_name 
+	    print cmdstring
+	    os.system(cmdstring)
+	    time.sleep(0.75)
+	    cmdstring = '~/silentfork.sh evince_vim_dbus.py GVIM default '+full_pdf_name+' '+full_tex_name
+	    print cmdstring
+	    os.system(cmdstring)
+        # }}}
+
     else:
         os.system('start sumatrapdf -reuse-instance '+new_pdf_basename+'.pdf')
     if new_pdf_basename == 'lists':
