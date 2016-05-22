@@ -1421,9 +1421,14 @@ def addlabels(labelstring,x,y,labels):
     for j in range(0,len(labels)):
         text(x[j],y[j],labelstring%labels[j],alpha=0.5,color='g',ha='left',va='top',rotation=0)
 def plot_color_counter(*args,**kwargs):
-    """if passed an argument: make it so that the next line will have the properties given by the argument
+    """Try not to use this function any more -- the version-to-version support for capturing and setting color cycles in matplotlib is very very bad.  (And, the cycler object in newer versions of matplolib is confusing.) So, just import `cycle` from `itertools`, and use it to build a cycle that you directly call to set your properties.
 
-    if not passed an argument: just return the current plot properties,so that I can cycle back to it"""
+    .. note::
+        previous description:
+
+        if passed an argument: make it so that the next line will have the properties given by the argument
+
+        if not passed an argument: just return the current plot properties,so that I can cycle back to it"""
     ax, = process_kwargs([('ax',gca())],kwargs)
     if len(args)>0:
         if LooseVersion(matplotlib.__version__) >= LooseVersion("1.5"):
@@ -1572,6 +1577,21 @@ def figlistini_old(first_figure):
         if verbose: print lsafen(first_figure.figurelist)
         return first_figure
 class figlist(object):
+    r"""
+        This maintains and deals with the following attributes:
+            :basename:
+                A basename that can be changed to generate different sets of figures with different basenames.
+                For example, this is useful if you are looping over different sets of data,
+                and generating the same set of figures for each set of data (which would correspond to a basename).
+            :figurelist:
+                A list of the figure names
+            :figdict:
+                A dictionary containing the figurelist and the figure numbers or objects that they correspond to.
+                Keys of this dictionary must be elements of `figurelist`.
+            :propdict:
+                Maintains various properties for each element in figurelist.
+                Keys of this dictionary must be elements of `figurelist`.
+    """
     def __init__(self,*arg,**kwargs):
         self.verbose = False
         self.black = 0.9
@@ -1600,6 +1620,15 @@ class figlist(object):
         #self.figurelist.insert(self.get_fig_number(self.current)-1,{'autopad':False}) #doesn't work because it changes the figure number; I can get the number with fig = gcf(); fig.number, but I can't set it; it would be best to switch to using a list that contains all the figure numbers to match all their names -- or alternatively, note that matplotlib allows you to give them names, though I don't know how that works
         if self.current in self.twinx_list.keys():
             ax1,ax2 = self.twinx_list[self.current]
+            if color is not None:
+                if 'twinx_color' not in self.propdict[self.current].keys():
+                        ax2.tick_params(axis = 'y',colors = color)
+                        ax2.yaxis.label.set_color(color)
+                        ax2.spines['right'].set_color(color)
+                        self.propdict[self.current]['twinx_color'] = color
+                else:
+                    if color != self.propdict[self.current]['twinx_color']:
+                        raise ValueError("conflicting values for the twinx color have been given!!")
         else:
             autopad_figure()
             ax1 = gca()
@@ -1610,6 +1639,7 @@ class figlist(object):
                 ax2.tick_params(axis = 'y',colors = color)
                 ax2.yaxis.label.set_color(color)
                 ax2.spines['right'].set_color(color)
+                self.propdict[self.current]['twinx_color'] = color
         if orig:
             sca(ax1)
             return ax1
@@ -1665,7 +1695,9 @@ class figlist(object):
             figure() function that's used to switch (create) figures.
         """
         if not hasattr(self,'figdict'):
-            self.figdict = {}
+            self.figdict = {} # the dictionary of the various figures
+        if not hasattr(self,'propdict'):
+            self.propdict = {} # the properties belonging to those same figures
         if (self.basename is not None #basename for groups of figures
                 # I need to check that the basename hasn't already been added
                 and len(input_name) > len(self.basename)
@@ -1685,19 +1717,25 @@ class figlist(object):
                 fig = figure(self.get_fig_number(name),**kwargs)
             self.current = name
             if self.verbose: print lsafen('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures')
-            if boundaries == False:
-                raise ValueError("only call boundaries=False the first time around!")
+            if boundaries is not None:
+                if 'boundaries' not in self.propdict[self.current].keys() or self.propdict[self.current]['boundaries'] != boundaries:
+                    raise ValueError("You're giving conflicting values for boundaries")
             if legend:
-                raise ValueError("only set the legend kwarg the first time around!")
+                if 'legend' not in self.propdict[self.current].keys() or self.propdict[self.current]['legend'] != legend:
+                    raise ValueError("You're giving conflicting values for legend")
         else:# figure doesn't exist yet
             if hasattr(self,'current'):
                 last_figure_number = self.get_fig_number(self.current)
             else:
                 last_figure_number = 0
             self.current = name
+            if self.current not in self.propdict.keys():
+                self.propdict[self.current] = {}
             if boundaries == False:
+                self.propdict[self.current]['boundaries'] = False
                 self.setprops(boundaries = False)
             if legend:
+                self.propdict[self.current]['legend'] = True
                 if 'figsize' not in kwargs.keys():
                     kwargs.update({'figsize':(12,6)})
                 if hasattr(self,'mlab'):
@@ -1709,6 +1747,7 @@ class figlist(object):
                 fig.add_axes([0.075,0.2,0.6,0.7]) # l b w h
                 self.use_autolegend('outside')
             else:
+                self.propdict[self.current]['legend'] = False
                 fig = figure(last_figure_number+1,**kwargs)
                 if hasattr(self,'mlab'):
                     fig = self.mlab.figure(last_figure_number+1,bgcolor = (1,1,1),**kwargs)
@@ -1724,6 +1763,7 @@ class figlist(object):
             if boundaries == False:
                 self.setprops(boundaries = True)# set this back
         if twinx is not None:
+            self.propdict[self.current]['twinx'] = True
             if twinx == 0:
                 self.twinx(orig = True)
                 fig = gcf()
@@ -1735,6 +1775,19 @@ class figlist(object):
             self.figdict.update({self.current:fig})
         return fig
     def plot(self,*args,**kwargs):
+        r"""
+        Parameters
+        ----------
+        linestyle: {':','--','.','etc.'}
+            the style of the line
+        plottype: {'semilogy','semilogx','loglog'}
+            Select a logarithmic plotting style.
+        nosemilog: True
+            Typically, if you supply a log-spaced axis,
+            a semilogx plot will be automatically selected.
+            This overrides that behavior.
+            Defaults to False.
+        """
         if 'label' in kwargs.keys():
             self.use_autolegend()
         human_units = True
