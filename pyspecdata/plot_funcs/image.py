@@ -61,8 +61,8 @@ def image(A,x=[],y=[],**kwargs):
         y = [1,A.shape[0]]
     else:
         y = y.flatten()
-    dx = x[1]-x[0]
-    dy = y[1]-y[0]
+    dx = (x[-1]-x[0])/A.shape[1]
+    dy = (y[-1]-y[0])/A.shape[0]
     myext = (x[0]-dx/2.,x[-1]+dx/2.,y[-1]+dy/2.,y[0]-dy/2.)
     linecounter = 0
     origAndim = A.ndim
