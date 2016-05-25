@@ -721,8 +721,8 @@ def load_nutation_curve(main,background = None,fl = None,max_freq = 30e6,deadtim
             color = 'k'
         axvline(x = -intwidth/1e6,alpha = 0.5,linewidth = 3,color = color)
         axvline(x = +intwidth/1e6,alpha = 0.5,linewidth = 3,color = color)
-    fl.next('abs ft')
-    fl.image(abs(difference))
+    fl.next('ft')
+    fl.image(difference)
     double_ft = double_ft['plen':(4e-9,)] # because the other stuff is junk
     double_ft.ft('plen',shift = True,pad = 512)
     if double_ft.get_units('plen') == 'Hz':
