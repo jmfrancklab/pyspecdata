@@ -413,6 +413,12 @@ def postproc_blank(data):
 def postproc_generic(data):
     data = automagical_phasecycle(data)
     return data
+def postproc_B1_se(data):
+    data = automagical_phasecycle(data)
+    data.rename('indirect','pulse_length')
+    data.labels('pulse_length',
+            data.get_prop('L_min')+r_[0:data.get_prop('L_step')]*data.get_prop('L_inc'))
+    return data
 def postproc_eldor_3d(data):
     if data.get_prop('phasecycle') is None:
         warnings.warn("Warning!  There is no phase cycling information -- you should really fix this")
@@ -672,6 +678,8 @@ def find_file(searchstring,
             data = postproc_generic(data)
         elif data.get_prop('description_class') == 'echo_T2':
             data = postproc_echo_T2(data)
+        elif data.get_prop('description_class') == 'B1_se':
+            data = postproc_B1_se(data)
         else:
             raise ValueError('postprocessing not defined for file with description-->class'+repr(data.get_prop('description_class')))
         return data

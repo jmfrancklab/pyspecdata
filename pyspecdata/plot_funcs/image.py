@@ -42,9 +42,13 @@ def image(A,x=[],y=[],**kwargs):
             y_label = A.unitify_axis(y_label)
         else:
             these_dimsizes = map(lambda x: str(ndshape(A)[x]),templabels)
-            templabels = map((lambda x: # below, I turn off math mode for the axis names
-                '[$ '+A.unitify_axis(x)+r' $_{{{:.3g}\rightarrow{:.3g}}}]'.format(
-                    *(A.getaxis(x)[r_[0,-1]]))), templabels)
+            def axis_labeler(x): # below, I turn off math mode for the axis names
+                if A.getaxis(x) is not None:
+                    return '[$ '+A.unitify_axis(x)+r' $_{{{:.3g}\rightarrow{:.3g}}}]'.format(
+                        *(A.getaxis(x)[r_[0,-1]]))
+                else:
+                    return ' UNLABELED '
+            templabels = map(axis_labeler, templabels)
             y_label = '\\otimes'.join(templabels)
             y_label = ' _{('+r'\times'.join(these_dimsizes)+')}' + y_label
             y_label = '$'+y_label+'$'# whole expression is in math mode
@@ -61,8 +65,8 @@ def image(A,x=[],y=[],**kwargs):
         y = [1,A.shape[0]]
     else:
         y = y.flatten()
-    dx = (x[-1]-x[0])/A.shape[1]
-    dy = (y[-1]-y[0])/A.shape[0]
+    dx = (x[-1]-x[0])/len(x)
+    dy = (y[-1]-y[0])/len(y)
     myext = (x[0]-dx/2.,x[-1]+dx/2.,y[-1]+dy/2.,y[0]-dy/2.)
     linecounter = 0
     origAndim = A.ndim
