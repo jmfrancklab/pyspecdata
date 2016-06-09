@@ -84,7 +84,7 @@ def gen_composite(basenames,collected_data,
         thisdata = thisdata['t2':(thisdata.get_prop('execution_deadtime'),125e-9)] # stop at 125, just so I'm not skewed by the baseline
         plot(thisdata.getaxis('t2')/1e-9,log10(thisdata.data),'.',label = thisname)
     return composite_ringdown,amplification_list,saturation_point
-def plot_comparison(input_data,date,fl,phase = True):
+def plot_comparison(input_data,date,fl,phase = True,discard_error = True):
     "Compare a series of cw experiments"
     list_of_cw_files, mod_amp = zip(*input_data)
     single_date = True
@@ -98,6 +98,7 @@ def plot_comparison(input_data,date,fl,phase = True):
             data = cw('%s.*'%date + short_basename + '\\.', phase = phase)
         else:
             data = cw('%s.*'%date[j] + short_basename + '\\.', phase = phase)
+        if discard_error: data.set_error(None)
         data /= mod_amp[j]
         if j == 0:
             data_shape = ndshape(data)
@@ -117,13 +118,14 @@ def plot_comparison(input_data,date,fl,phase = True):
             data = cw('%s.*'%date + short_basename + '\\.', phase = phase)
         else:
             data = cw('%s.*'%date[j] + short_basename + '\\.', phase = phase)
+        if discard_error: data.set_error(None)
         data /= mod_amp[j]
         next_color = next(color_cycle)
         fl.plot(data.runcopy(real)/normalization + 2*j,
                 alpha = 0.75,color = next_color,label = collected_data.getaxis('indirect')[j])
         autolegend()
         fl.plot(data.runcopy(imag)/normalization + 2*j,
-                alpha = 0.5,color = next_color)
+                alpha = 0.25,color = next_color)
 def plot_coherence_diagram(ax1,list_of_DeltaC,list_of_sizes,plotidx,outof):
     #print "new coherence diagram"
     aliases_to_search = [0,-1,1,-2,2]
