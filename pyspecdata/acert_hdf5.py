@@ -672,18 +672,18 @@ def find_file(searchstring,
     if 'indirect' in temp.dimlabels and temp['indirect'] == 1:
         data = data['indirect',0]
     if postproc is None:
-        if data.get_prop('description_class') == 'ELDOR':
-            data = postproc_eldor_old(data)
-        elif data.get_prop('description_class') == 'ELDOR_3D':
-            data = postproc_eldor_3d(data)
-        elif data.get_prop('description_class') == 'FID':
-            data = postproc_generic(data)
-        elif data.get_prop('description_class') == 'echo_T2':
-            data = postproc_echo_T2(data)
-        elif data.get_prop('description_class') == 'B1_se':
-            data = postproc_B1_se(data)
+        postproc_dict = {
+                'ELDOR':postproc_eldor_old,
+                'ELDOR_3D':postproc_eldor_3d,
+                'FID':postproc_generic,
+                'echo_T2':postproc_echo_T2,
+                'B1_se':postproc_B1_se,
+                }
+        desc_class = data.get_prop('description_class')
+        if desc_class in postproc_dict.keys():
+            data = postproc_dict[desc_class](data)
         else:
-            raise ValueError('postprocessing not defined for file with description-->class'+repr(data.get_prop('description_class')))
+            raise ValueError('postprocessing not defined for file with description-->class '+str(data.get_prop('description_class')))
         return data
     else:
         return postproc(data,**kwargs)
