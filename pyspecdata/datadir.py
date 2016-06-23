@@ -41,18 +41,20 @@ class MyConfig(object):
     def set_setting(self,this_section,this_key,this_value):
         "set `this_key` to `this_value` inside section `this_section`, creating it if necessary"
         if self._config_parser is None:
-            self._config_parser = ConfigParser.ConfigParser()
+            self._config_parser = ConfigParser.SafeConfigParser()
             read_cfg = self._config_parser.read(self.config_location)
             if not read_cfg:
                 print "\nWarning!! There was no file at",self.config_location,"so I'm creating one"
-        if not self._config_parser.has_section(section):
-            self._config_parser.add_section(section)
+        if not self._config_parser.has_section(this_section):
+            self._config_parser.add_section(this_section)
         self._config_parser.set(this_section,this_key,this_value)
+        return
     def __exit__(self):
         self.__del__()
     def __del__(self):
-        with open(self.config_location,'w') as fp:
-            self._config_parser.write(fp)
+        if self._config_parser is not None:
+            with open(self.config_location,'w') as fp:
+                self._config_parser.write(fp)
     def get_setting(self,this_key,environ = None,default = None,section = 'General'):
         """Get a settings from the "General" group.
         If the file does not exist, or the option is not set, then set the option, creating the file as needed.
@@ -95,14 +97,14 @@ class MyConfig(object):
                 retval = os.environ[environ]
         else:
             if self._config_parser is None:
-                self._config_parser = ConfigParser.ConfigParser()
+                self._config_parser = ConfigParser.SafeConfigParser()
                 read_cfg = self._config_parser.read(self.config_location)
                 if not read_cfg:
                     print "\nWarning!! There was no file at",self.config_location,"so I'm creating one"
             if self._config_parser.has_section(section):
                 try:
                     retval = self._config_parser.get(section,this_key)
-                except NoOptionError:
+                except ConfigParser.NoOptionError:
                     retval = None
             else:
                 self._config_parser.add_section(section)
@@ -127,52 +129,34 @@ class MyConfig(object):
         self.config_vars[this_key] = retval
         return retval
 _my_config = MyConfig()
-def get_notebook_dir(*arg):
+def get_notebook_dir(*args):
     r'''Returns the notebook directory.  If arguments are passed, it returns the directory underneath the notebook directory, ending in a trailing (back)slash
     
     It is determined by a call to `MyConfig.get_setting` with the environment variable set to ``PYTHON_NOTEBOOK_DIR`` and default ``~/notebook``.
     '''
     base_notebook_dir = _my_config.get_setting('notebook_directory',environ = 'PYTHON_NOTEBOOK_DIR',default = '~/notebook')
-    retval = (base_notebook_dir,) + arg
+    retval = (base_notebook_dir,) + args
     if len(retval[-1]) != 0:
         retval = retval + ('',)
     return os.path.join(*retval)
 def dirformat(file):
-        #{{{ format strings
-        if file[-1]!=os.sep:
-            file += os.sep
-        #}}}
-        return file
+    raise ValueError("dirformat should now be obsolete, and replaced by the ability to pass a list of subdirectories to getDATADIR or get_notebook_dir")
 def grab_data_directory():
-    'this checks if the environment variable for the python data directory, PYTHONDATADIR, is set, and that .matplotlib directory has been created\n if needed, it sets and creates them, respectively\n\t\treturns: grabbed_datadir_from_file --> it sucessfully pulled PYTHONDATADIR from the .datadir file\n\t\t\t datadir_error --> it couldn\'t figure out what the data directory was, and returns an appropriate error message'
-    grabbed_datadir_from_file = False
-    datadir_error = False
-    if not os.path.exists(os.getcwd()+'/.matplotlib'):
-        os.mkdir(os.getcwd()+'/.matplotlib')
-    if 'PYTHONDATADIR' in os.environ.keys():
-        pass
-    elif os.path.exists('.datadir'):
-        fp_datadir = open('.datadir','r')
-        mydatadir = fp_datadir.read().strip()
-        if mydatadir[-1] not in ['/','\\']:
-            if os.name == 'posix':
-                mydatadir = mydatadir+'/'
-            else:
-                mydatadir = mydatadir+'\\'
-        os.environ['PYTHONDATADIR'] = mydatadir
-        fp_datadir.close()
-        grabbed_datadir_from_file = True
-    else:
-        mydatadir = os.path.expanduser('~') + os.path.sep + 'exp_data'
-        os.environ['PYTHONDATADIR'] = mydatadir
-    return grabbed_datadir_from_file,datadir_error
+    raise RuntimeError("This used to return two arguments,"
+            +"\n\t(1) if it successfully grabbed the data directory from"
+            +"a file and set the PYTHONDATADIR environment variable"
+            +"\n\t(2) set to true if it couldn't figure out where the"
+            +"data directory was"
+            +"\nAll the functionality of this function should now be"
+            +"replaced by getDATADIR")
 def getDATADIR(*args,**kwargs):
     r'''Returns the base directory where you put all your data.  If arguments
     are passed, it returns the directory underneath the data directory, ending
     in a trailing (back)slash
     
-    It is determined by a call to `MyConfig.get_setting` with the environment
-    variable set to ``PYTHON_DATA_DIR`` and default ``~/experimental_data``.
+    It is determined by a call to `MyConfig.get_setting` with the setting name
+    `experimental_data` and the environment variable set to ``PYTHON_DATA_DIR``
+    and default ``~/experimental_data``.
 
     Parameters
     ----------
@@ -181,12 +165,25 @@ def getDATADIR(*args,**kwargs):
         It searches for `exp_type` in this order:
 
         * Look in the ``ExpTypes`` section of the config file.
+            * Note that by using this, you can store data in locations other
+                than your `experimental_data` directory.
+                For example, consider the following section of the
+                ``~/.pyspecdata`` config file:
+                ```
+                [ExpTypes]
+                alternate_base = /opt/other_data
+                alternate_type_one = %(alternate_base)s/type_one
+                ```
+                which would find data with `exp_type` ``alternate_type_one`` in
+                ``/opt/other_data/type_one``.
         * use `os.walk` to search for a directory with this name,
+            starting from the data identified by `experimental_data`.
             excluding things that start with '.', '_' or
             containing '.hfssresults', always choosing the
             thing that's highest up in the tree.
     '''
-    exp_type = process_kwargs(('exp_type',None),kwargs)
+    exp_type, = process_kwargs([('exp_type',None)],kwargs)
+    print "exp_type is",exp_type
     base_data_dir = _my_config.get_setting('data_directory',environ = 'PYTHON_DATA_DIR',default = '~/experimental_data')
     if exp_type is not None:
         # {{{ determine the experiment subdirectory
@@ -216,25 +213,16 @@ def getDATADIR(*args,**kwargs):
                 exp_directory = grab_smallest(containing_matches)
             else:
                 raise ValueError("I found no directory matches for exp_type "+exp_type)
+            # {{{ I would like to do something like the following, but it's not allowed in either ConfigParser or SafeConfigParser
+            #base_dir = _my_config.get_setting('ExpTypes','base')
+            #if base_dir is None: _my_config.set_setting('ExpTypes','base',base_dir)
+            #if base_dir in exp_directory: exp_directory = [exp_directory.replace(base_dir,'%(base)s')]
+            # }}}
             _my_config.set_setting('ExpTypes',exp_type,exp_directory)
-        retval = (exp_directory,) + arg
+        retval = (exp_directory,) + args
         # }}}
     else:
-        retval = (base_data_dir,) + arg
+        retval = (base_data_dir,) + args
     if len(retval[-1]) != 0:
         retval = retval + ('',)
     return os.path.join(*retval)
-def getDATADIR(*args):
-    r'''The data directory is set through the PYTHONDATADIR environment variable.
-    This assumes that the arguments are a series of subdirectories under that directory, and returns the resulting path, with trailing backslash/slash as appropriate.'''
-    if 'PYTHONDATADIR' in os.environ.keys():
-        DATADIR = os.environ['PYTHONDATADIR']
-    else:
-        grabbed_datadir_from_file,datadir_error = grab_data_directory()
-        if datadir_error is not False:
-            raise RuntimeError(datadir_error)
-        DATADIR = os.environ['PYTHONDATADIR']
-    if len(args)>0:
-        return dirformat(dirformat(DATADIR)+os.sep.join(args))
-    else:
-        return dirformat(DATADIR)

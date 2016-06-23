@@ -11,7 +11,6 @@ from scipy.misc import imresize
 from tables import openFile
 from datetime import datetime
 from time import mktime
-#from datadir import grab_data_directory
 from PIL import Image
 from .nmr import *
 import re

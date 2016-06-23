@@ -112,3 +112,11 @@ while tryagain == True:
         else:
             print "I failed with no extension modules or with lapack_success"
             raise
+
+# Later, I should probably use the setuptools equivalent of install_data to do both this and the lapack stuff
+print "\n\nNow that everything else is set up, I'm going to check your notebook and data directories, possibly asking you to set them."
+import pyspecdata.datadir as d
+print "Trying to grab the data directory:"
+d.getDATADIR()
+print "Trying to grab the notebook directory:"
+d.get_notebook_dir()
