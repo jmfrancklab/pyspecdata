@@ -161,7 +161,7 @@ def cache_output_if_needed(scriptnum_as_str,hashstring,showcode = False,show_err
         temp = os.environ
         print "about to run python"
         if os.name == 'posix':
-            temp.update({'PYTHONDATADIR':getDATADIR()})
+            temp.update({'PYTHON_DATA_DIR':getDATADIR()})
             proc = Popen(['python','-W','ignore',script_fname],
                     stdout = PIPE,
                     stdin = PIPE,
@@ -169,7 +169,7 @@ def cache_output_if_needed(scriptnum_as_str,hashstring,showcode = False,show_err
                     env = temp)
         else: #windows should give os.name == 'nt'
             temp.update({'MPLCONFIGDIR':os.getcwd()+'/.matplotlib',
-                        'PYTHONDATADIR':getDATADIR()})
+                        'PYTHON_DATA_DIR':getDATADIR()})
             proc = Popen(['python','-W','ignore',script_fname],
                     stdout = PIPE,
                     stdin = PIPE,

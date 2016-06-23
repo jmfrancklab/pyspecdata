@@ -5,6 +5,8 @@ from PyQt4 import QtGui, QtCore
 from install_gui import Ui_Dialog
 from py_compile import compile
 from subprocess import Popen,PIPE,call
+from python.datadir import getDATADIR
+import os
 #{{{ stuff for explicit latex generation
 def dump_latex_preamble(fp):
     fp.write(r'''\documentclass[10pt]{book}
@@ -18,30 +20,7 @@ def dump_latex_finish(fp):
 #}}}
 # found this here http://hohohuhu.blogspot.com/search/label/PyQt
 def get_homedir():# taken from latexscript.py
-    for teststring in [ 'HOME', 'USERPROFILE', 'HOMEDIR' ]:
-        if teststring in os.environ.keys():
-            print 'found home directory from',teststring,'and it is',os.environ[teststring]
-            return os.environ[teststring]
-    print "I found no home directory"
-    return ""
-def get_datadir():# taken from latexscript.py
-    if 'PYTHONDATADIR' in os.environ.keys():
-        return os.environ['PYTHONDATADIR']
-    elif os.path.exists('.datadir'):
-        fp_datadir = open('.datadir','r')
-        mydatadir = fp_datadir.read().strip()
-        if mydatadir[-1] not in ['/','\\']:
-            if os.name == 'posix':
-                mydatadir = mydatadir+'/'
-            else:
-                mydatadir = mydatadir+'\\'
-        os.environ['PYTHONDATADIR'] = mydatadir
-        fp_datadir.close()
-        grabbed_datadir_from_file = True
-        return os.environ['PYTHONDATADIR']
-    else:
-        return ""
-
+    return os.path.expanduser('~')
 app = QtGui.QApplication(sys.argv)
 class my_widget_class (QtGui.QDialog):
     # here, I use the QDialog class, which has accept and reject, and I add the following custom routines, which I can call as slots
@@ -88,9 +67,9 @@ $pdf_previewer=q/okular --unique/;''')
                     print 'now, I will also compile '+os.getcwd()+'/latexscript.py...'
                     compile(os.getcwd()+'/latexscript.py')
     def my_initialize_directories(self):
-        self.emit(QtCore.SIGNAL("my_change_datadir(QString)"),get_datadir())
+        self.emit(QtCore.SIGNAL("my_change_datadir(QString)"),getDATADIR())
         self.emit(QtCore.SIGNAL("my_change_homedir(QString)"),get_homedir())
-        self.currently_displayed_datadir = get_datadir()
+        self.currently_displayed_datadir = getDATADIR()
         self.currently_displayed_homedir = get_homedir()
         self.datadir_changed = False
         self.homedir_changed = False
