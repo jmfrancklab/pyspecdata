@@ -183,7 +183,6 @@ def getDATADIR(*args,**kwargs):
             thing that's highest up in the tree.
     '''
     exp_type, = process_kwargs([('exp_type',None)],kwargs)
-    print "exp_type is",exp_type
     base_data_dir = _my_config.get_setting('data_directory',environ = 'PYTHON_DATA_DIR',default = '~/experimental_data')
     if exp_type is not None:
         # {{{ determine the experiment subdirectory

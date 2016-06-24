@@ -1,6 +1,7 @@
 # just make this a library of all NMR reading software
 from .core import *
 from .nmrfit import *
+from .general_functions import process_kwargs
 import re
 import string
 import struct
@@ -301,16 +302,11 @@ def format_listofexps(args):
 def load_file(*args,**kwargs):
     'load a file or series of files; load as load_file(filename) or load_file(dirname,expnos)'
     args = list(args)
-    #{{{ manually do kwargs
-    dimname = '' 
-    if 'dimname' in kwargs.keys(): dimname = kwargs['dimname']
-    calibration = 1.0
-    if 'calibration' in kwargs.keys(): calibration = kwargs['calibration']
-    add_sizes = []
-    if 'add_sizes' in kwargs.keys(): add_sizes = kwargs['add_sizes']
-    add_dims = []
-    if 'add_dims' in kwargs.keys(): add_dims = kwargs['add_dims']
-    #}}}
+    dimname, calibration, add_sizes, add_dims = process_kwargs(
+            [('dimname',''),
+                ('calibration',1.0),
+                ('add_sizes',[]),
+                ('add_dims',[])],kwargs)
     filenames = format_listofexps(args)
     #{{{load all the data into a list
     data = [load_indiv_file(filenames[0],dimname=dimname,add_sizes = add_sizes,add_dims = add_dims)]
