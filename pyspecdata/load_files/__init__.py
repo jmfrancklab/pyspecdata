@@ -91,6 +91,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
     open it."""
     #to search for kwargs when separating: \<dimname\>\|\<return_acq\>\|\<add_sizes\>\|\<add_dims\>
     # {{{ first, we search for the file magic to determine the filetype
+    file_signatures = {'\x89\x48\x44\x46\x0d\x0a\x1a\x0a':'HDF5'}
     filetype,twod = det_type(filename)
     # }}}
     if filetype == 'winepr':
