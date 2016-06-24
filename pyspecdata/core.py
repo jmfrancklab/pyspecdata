@@ -1090,14 +1090,6 @@ def h5join(firsttuple,secondtuple,
 #}}}
 #{{{ indices to slice
 #}}}
-#{{{ add slashes for dir's
-def dirformat(file):
-        #{{{ format strings
-        if file[-1] not in ['/',path_sep]:
-            file += path_sep
-        #}}}
-        return file
-#}}}
 #{{{ old grid and tick
 def gridandtick(ax,rotation=(0,0),precision=(2,2),
         labelstring=('',''),gridcolor=r_[0,0,0],
