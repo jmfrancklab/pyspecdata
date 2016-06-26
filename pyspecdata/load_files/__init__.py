@@ -1,7 +1,7 @@
 "the file-loading subroutines are stored here"
-import .bruker_nmr as bnmr
+import .bruker_nmr as bruker_nmr
 import .prospa as prospa
-import .bruker_esr as besr
+import .bruker_esr as bruker_esr
 import .acert as acert
 from ..general_functions import process_kwargs
 from ..core import *
@@ -177,4 +177,11 @@ def load_indiv_file(filename, dimname='', return_acq=False,
         return data
     #}}}
 
-__all__ = ['find_file','load_indiv_file','format_listofexps']
+__all__ = ['find_file',
+        'load_indiv_file',
+        'format_listofexps',
+        'bruker_nmr',
+        'bruker_esr',
+        'acert',
+        'prospa',
+        ]

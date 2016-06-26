@@ -5,6 +5,7 @@ from os.path import exists as path_exists
 from scipy.optimize import leastsq
 from scipy.signal import fftconvolve
 from pyspecdata.nmr import *
+from pyspecdata.load_files import *
 # this file should be like fornotebook, except that thisjobname and lplot are stripped of the appropriate lines, so that rather than dumping a file and latex code, it just plots stuff
 
 def thisjobname():
@@ -260,7 +261,7 @@ def calcfielddata(freq,substance):
 	save_data({'current_frequency':freq})
 	save_data({'current_ppt':data[substance+'_nmrelratio']})
 def cpmgseries(filename,plotlabel,tau=None,alpha=None,alphaselect=None):
-	data = prospa_load_datafile(filename,dims=2)
+	data = prospa.load_datafile(filename,dims=2)
 	plot(data)
 	lplot(plotlabel+'.pdf')
 	#data = load_2d(filename)
