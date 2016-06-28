@@ -74,13 +74,14 @@ def load_file(*args,**kwargs):
     #}}}
     # for the following, I used to have a condition, but this is incompatible with the pop statement at the end
     newdata = concat(data,dimname) # allocate the size of the indirect array
-    #print 'DEBUG concatenated list = ',data
     newdata_shape = ndshape(newdata)
-    if all(map((lambda x:det_type(x)[0]=='prospa'),filenames)):
-        if hasattr(data[0],'want_to_prospa_decim_correct'):
+    # {{{ because the "want_to_prospa_decim_correct" attribute is special --
+    #     probably want to get rid of it eventually
+    if hasattr(data[0],'want_to_prospa_decim_correct'):
+        if all(map(hasattr(x,'want_to_prospa_decim_correct'),data)):
             if data[0].want_to_prospa_decim_correct is True:
                 newdata = prospa_decim_correct(newdata)
-    #print 'DEBUG concatenated list before pop = ',data
+    # }}}
     if newdata_shape[dimname]==1:
         newdata.popdim(dimname)
     return newdata*calibration
