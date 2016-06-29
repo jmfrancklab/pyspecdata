@@ -86,11 +86,39 @@ def gen_composite(basenames,collected_data,
     return composite_ringdown,amplification_list,saturation_point
 def plot_comparison(input_data,date,fl,phase = True,discard_error = True):
     "Compare a series of cw experiments"
+    # {{{ load initial info
     list_of_cw_files, mod_amp = zip(*input_data)
     single_date = True
     if date is None:
         mod_amp,date = zip(*mod_amp)
         single_date = False
+    # }}}
+    # {{{ compare the noise levels
+    for complex_type in ['real','imag']:
+        fl.next('compare noise level %s'%complex_type,
+                legend=True)
+    ax = gca()
+    color_cycle = ax._get_lines.color_cycle
+    normalization = 1e-6 # a standard number
+    for j in range(0,len(list_of_cw_files)):# I end up looping back over and reloading because they might have different axes, though in an older format, I did this all in one batch
+        next_color = next(color_cycle)
+        short_basename = list_of_cw_files[j]
+        if single_date:
+            file_regexp = ('%s.*'%date + short_basename + '\\.')
+        else:
+            print "note single date -- searching for"
+            file_regexp = ('%s.*'%date[j] + short_basename + '\\.')
+        data = open_cw_file(search_freed_file(file_regexp,'cw'))['repeats',0]
+        for complex_type in ['real','imag']:
+            fl.next('compare noise level %s'%complex_type)
+            if complex_type == 'real':
+                plotdata = data.runcopy(real)
+            else:
+                plotdata = data.runcopy(imag)
+            fl.plot(plotdata/normalization + 2*j,
+                    alpha=0.75, color=next_color,
+                    label=short_basename)
+    # }}}
     short_basename = list_of_cw_files[0]
     for j in range(0,len(list_of_cw_files)):
         short_basename = list_of_cw_files[j]
