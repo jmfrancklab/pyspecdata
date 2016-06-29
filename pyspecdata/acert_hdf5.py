@@ -84,7 +84,10 @@ def gen_composite(basenames,collected_data,
         thisdata = thisdata['t2':(thisdata.get_prop('execution_deadtime'),125e-9)] # stop at 125, just so I'm not skewed by the baseline
         plot(thisdata.getaxis('t2')/1e-9,log10(thisdata.data),'.',label = thisname)
     return composite_ringdown,amplification_list,saturation_point
-def plot_comparison(input_data,date,fl,phase = True,discard_error = True):
+def plot_comparison(input_data,
+        date, fl, phase=True,
+        discard_error=True,
+        scale=1.0):
     "Compare a series of cw experiments"
     # {{{ load initial info
     list_of_cw_files, mod_amp = zip(*input_data)
@@ -115,7 +118,7 @@ def plot_comparison(input_data,date,fl,phase = True,discard_error = True):
                 plotdata = data.runcopy(real)
             else:
                 plotdata = data.runcopy(imag)
-            fl.plot(plotdata/normalization + 2*j,
+            fl.plot(plotdata/normalization - 2*j,
                     alpha=0.75, color=next_color,
                     label=short_basename)
     # }}}
@@ -138,6 +141,7 @@ def plot_comparison(input_data,date,fl,phase = True,discard_error = True):
     fl.next('cw plots -- real + imag',legend = True,boundaries = False)
     normalization = abs(collected_data.runcopy(real)).run(max,'field').run(max,'indirect').data
     normalization = max(r_[abs(collected_data.runcopy(imag)).run(max,'field').run(max,'indirect').data,normalization])
+    normalization /= scale
     ax = gca()
     color_cycle = ax._get_lines.color_cycle
     for j in range(0,len(list_of_cw_files)):# I end up looping back over and reloading because they might have different axes, though in an older format, I did this all in one batch
@@ -149,10 +153,10 @@ def plot_comparison(input_data,date,fl,phase = True,discard_error = True):
         if discard_error: data.set_error(None)
         data /= mod_amp[j]
         next_color = next(color_cycle)
-        fl.plot(data.runcopy(real)/normalization + 2*j,
+        fl.plot(data.runcopy(real)/normalization - 2*j,
                 alpha = 0.75,color = next_color,label = collected_data.getaxis('indirect')[j])
         autolegend()
-        fl.plot(data.runcopy(imag)/normalization + 2*j,
+        fl.plot(data.runcopy(imag)/normalization - 2*j,
                 alpha = 0.25,color = next_color)
 def plot_coherence_diagram(ax1,list_of_DeltaC,list_of_sizes,plotidx,outof):
     #print "new coherence diagram"
