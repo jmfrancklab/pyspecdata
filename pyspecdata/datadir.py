@@ -109,7 +109,7 @@ class MyConfig(object):
             else:
                 self._config_parser.add_section(section)
                 retval = None
-            if retval is None:# it wasn't found from the config file
+            if retval in [None,'']:# it wasn't found from the config file
                 if default is None:
                     return None
                 default = default.split('/')
