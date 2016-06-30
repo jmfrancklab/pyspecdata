@@ -578,7 +578,7 @@ def calcfielddata(freq,substance,spec=''):
     save_data({'current_frequency':freq})
     save_data({'current_ppt':data[substance+'_nmrelratio']})
 def cpmgseries(filename,plotlabel,tau=None,alpha=None,alphaselect=None):
-    data = prospa_load_datafile(filename,dims=2)
+    data = load_file.prospa.load_datafile(filename,dims=2)
     plot(data)
     lplot(plotlabel+'.pdf')
     #data = load_2d(filename)

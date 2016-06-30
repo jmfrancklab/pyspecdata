@@ -1,7 +1,7 @@
 "the file-loading subroutines are stored here"
-import .bruker_nmr as bnmr
+import .bruker_nmr as bruker_nmr
 import .prospa as prospa
-import .bruker_esr as besr
+import .bruker_esr as bruker_esr
 import .acert as acert
 from ..general_functions import process_kwargs
 from ..core import *
@@ -74,13 +74,14 @@ def load_file(*args,**kwargs):
     #}}}
     # for the following, I used to have a condition, but this is incompatible with the pop statement at the end
     newdata = concat(data,dimname) # allocate the size of the indirect array
-    #print 'DEBUG concatenated list = ',data
     newdata_shape = ndshape(newdata)
-    if all(map((lambda x:det_type(x)[0]=='prospa'),filenames)):
-        if hasattr(data[0],'want_to_prospa_decim_correct'):
+    # {{{ because the "want_to_prospa_decim_correct" attribute is special --
+    #     probably want to get rid of it eventually
+    if hasattr(data[0],'want_to_prospa_decim_correct'):
+        if all(map(hasattr(x,'want_to_prospa_decim_correct'),data)):
             if data[0].want_to_prospa_decim_correct is True:
                 newdata = prospa_decim_correct(newdata)
-    #print 'DEBUG concatenated list before pop = ',data
+    # }}}
     if newdata_shape[dimname]==1:
         newdata.popdim(dimname)
     return newdata*calibration
@@ -178,4 +179,11 @@ def load_indiv_file(filename, dimname='', return_acq=False,
         return data
     #}}}
 
-__all__ = ['find_file','load_indiv_file','format_listofexps']
+__all__ = ['find_file',
+        'load_indiv_file',
+        'format_listofexps',
+        'bruker_nmr',
+        'bruker_esr',
+        'acert',
+        'prospa',
+        ]
