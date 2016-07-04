@@ -68,6 +68,13 @@ def load_datafile(file,dims=1):
     data = data[:,0]+1j*data[:,1]
     fp.close()
     return data
+def load_1D(filename):
+    v = prospa_load_acqu(filename)
+    data = prospa_load_datafile(filename,dims=1)/v['nrScans']#added this 2/20/13 to allow automatic signal averaging
+    data = nddata(data,[v['nrPnts']],['t2'])
+    taxis = linspace(0,1,v['nrPnts'])*v['acqTime']/1e3
+    data.labels(['t2'],[taxis])
+    return data
 def load_2D(filename, dimname=''):
     #{{{ Prospa 2D
     if twod == 't1_sub':

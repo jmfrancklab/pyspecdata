@@ -44,6 +44,32 @@ def series(filename, dimname=''):
     data.circshift('t2',shiftpoints)
     data.set_units('t2','s')
     data.set_units('digital')
-    data.other_info['title'] = bruker_load_title(filename)
+    data.set_prop('title',
+            bruker_load_title(filename))
     #print 'DEBUG 2: data from bruker file =',data
     #}}}
+def load_1D(filename, dimname=''):
+    v = bruker_load_acqu(filename)
+    td2 = int(v['TD'])
+    td1 = 1
+    td2_zf = int(ceil(td2/256.)*256) # round up to 256 points, which is how it's stored
+    fp = open(filename+'fid','rb')
+    data = fp.read()
+    data = array(
+            struct.unpack('>%di'%(len(data)/4),data),
+            dtype='complex128')
+    data = data[0::2]+1j*data[1::2]
+    rg = bruker_det_rg(v['RG'])
+    data /= rg
+    data = nddata(data,[td1,td2_zf/2],[dimname,'t2'])
+    data = data['t2',0:td2/2] # now, chop out their zero filling
+    t2axis = 1./v['SW_h']*r_[1:td2/2+1]
+    t1axis = r_[1]
+    data.labels([dimname,'t2'],[t1axis,t2axis])
+    shiftpoints = int(bruker_det_phcorr(v)) # use the canned routine to calculate the second order phase shift
+    #print 'shiftpoints = ',shiftpoints
+    data.circshift('t2',shiftpoints)
+    # finally, I will probably need to add in the first order phase shift for the decimation --> just translate this
+    data.set_prop('title',
+            bruker_load_title(filename))
+    return data
