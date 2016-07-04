@@ -96,38 +96,12 @@ def load_indiv_file(filename, dimname='', return_acq=False,
     filetype,twod = det_type(filename)
     # }}}
     if filetype == 'winepr':
-        data = bruker_esr.winepr(filename,dimname=dimname)
+        data = bruker_esr.winepr(filename, dimname=dimname)
     filename = dirformat(filename)
     if twod and filetype == 'bruker':
         data = bruker_nmr.series(filename,dimname=dimname)
     elif twod and filetype == 'prospa':
-        #{{{ Prospa 2D
-        if twod == 't1_sub':
-            v = prospa_load_acqu(filename+'../') # if it's subdirectory format, the file comes from one directory up
-            indirect_dim_len = [1]
-            indirect_dim_name = [dimname]
-            dimshere = 1
-        else:
-            v = prospa_load_acqu(filename)
-            indirect_dim_name = []
-            indirect_dim_len = []
-            dimshere = 2
-        taxis = linspace(0,1,v['nrPnts'])*v['acqTime']/1e3 # this is the t2 dimension, and so is always true
-        data = prospa_load_datafile(filename,dims=dimshere)/v['nrScans']#added this 2/20/13 to allow automatic signal averaging
-        #{{{ Prospa CPMG
-        if v['experiment'].find('cpmg') > -1:
-            data = nddata(data,indirect_dim_len+[v['nrEchoes'],v['nrPnts']],indirect_dim_name+['echo','t2'])
-            echotime = (r_[0:v['nrEchoes']]+0.5)*v['echoTime']/1e6
-            data.labels(indirect_dim_name+['echo','t2'],indirect_dim_len+[echotime,taxis])
-            data.want_to_prospa_decim_correct = False
-        #}}}
-        #{{{ Prospa where 1D subscan is not CPMG
-        else:
-            data = nddata(data,indirect_dim_len+[v['nrPnts']],indirect_dim_name+['t2'])
-            data.labels([dimname,'t2'],[r_[1],taxis])
-            data.want_to_prospa_decim_correct = True
-        #}}}
-        #}}}
+        data = prospa.load_2D(filename, dimname=dimname)
         #{{{ bruker 1D
     else:
         if filetype == 'bruker':
