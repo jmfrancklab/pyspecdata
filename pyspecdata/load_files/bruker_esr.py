@@ -1,3 +1,4 @@
+from ..core import *
 def winepr(filename, dimname=''):
     "For opening WinEPR files"
     fp = open(filename+'.spc','rb')

@@ -1,4 +1,5 @@
 "routines specific to loading information from prospa files"
+from ..core import *
 def decim_correct(data):
     #{{{ get rid of the finite rise time    
     data_abs = abs(data)

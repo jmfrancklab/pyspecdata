@@ -1,7 +1,7 @@
 # just make this a library of all NMR reading software
-from .core import *
+from ..core import *
 from .nmrfit import *
-from .general_functions import process_kwargs
+from ..general_functions import process_kwargs
 import re
 import string
 import struct
@@ -236,23 +236,6 @@ def error_plot(*arg):
 b0 = r'$B_0$'
 def show_acqu(vars):
     print '\\begin{verbatim}',vars.__repr__().replace(',','\n'),'\\end{verbatim}\n\n'
-#{{{ load the pulse sequence parameters
-def load_acqu(filename,whichdim='',return_s = None):
-    filename = dirformat(filename)
-    if det_type(filename)[0] == 'bruker':
-        if return_s is not None:
-            return bruker_load_acqu(filename,whichdim=whichdim,return_s = return_s)
-        else:
-            return bruker_load_acqu(filename,whichdim=whichdim)
-    elif det_type(filename)[0] == 'prospa':
-        if det_type(filename)[1] == 't1_sub':
-            filename = dirformat(filename)
-            return prospa.load_acqu(filename+'../')
-        else:
-            return prospa.load_acqu(filename)
-    else:
-        raise CustomError(det_type(filename),'is not yet supported')
-#}}}
 #{{{ is this (bruker or prospa, 1d or nd)?
 def det_type(filename):
     filetype = None
@@ -294,7 +277,7 @@ def bruker_det_rg(a):
 #{{{ t1 axis
 def load_t1_axis(file):
     if det_type(file)[0] == 'bruker':
-        return bruker_load_t1_axis(file)
+        return bruker.load_t1_axis(file)
     elif det_type(file)[0] == 'prospa':
         return prospa.t1_info(file)[1]
     else:
@@ -315,7 +298,7 @@ def bruker_load_t1_axis(files):
         if thisfiletype[0] == 'prospa':
             print 'need to copy over code from prospa'
         if thisfiletype[0] == 'bruker':
-            wait_time += [bruker_load_vdlist(thisfile)]
+            wait_time += [bruker.load_vdlist(thisfile)]
         else:
             print 'couldn\'t determine thisfile type'
     return array(wait_time).flatten()
@@ -359,83 +342,12 @@ def bruker_match_line(line,number_re,string_re,array_re):
             else:
                 retval = (3,line)
     return retval
-#{{{ bruker_load_vdlist
-def bruker_load_vdlist(file):
-    fp = open(file+'vdlist')
-    lines = fp.readlines()
-    lines = map(string.rstrip,lines)
-    lines = map((lambda x: x.replace('m','e-3')),lines)
-    lines = map((lambda x: x.replace('s','')),lines)
-    lines = map((lambda x: x.replace('u','e-6')),lines)
-    lines = map(double,lines)
-    return array(lines)
-#}}}
 #{{{ bruker_load_acqu
 def load_title(file):
     if det_type(file)[0] == 'bruker':
-        return bruker_load_title(file)
+        return bruker.load_title(file)
     else:
         return ''
-def bruker_load_title(file):
-    file = dirformat(file)
-    fp = open(file+'pdata/1/title')
-    lines = fp.readlines()
-    emptystring = '\r\n'
-    while emptystring in lines:
-        lines.pop(lines.index(emptystring))
-    emptystring = '\n'
-    while emptystring in lines:
-        lines.pop(lines.index(emptystring))
-    return ''.join(lines)
-def bruker_load_acqu(file,whichdim='',return_s = True):
-    if return_s:
-        fp = open(file+'acqu'+whichdim+'s')# this is what I am initially doing, and what works with the matched filtering, etc, as is, but it's actually wrong
-    else:
-        fp = open(file+'acqu'+whichdim)# this is actually right, but doesn't work with the matched filtering, etc.
-    lines = fp.readlines()
-    vars = {}
-    number_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *([0-9\-\.]+)')
-    string_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *<(.*)')
-    array_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *\(([0-9]+)\.\.([0-9]+)\)(.*)')
-    lines = map(string.rstrip,lines)
-    j=0
-    retval =  bruker_match_line(lines[j],number_re,string_re,array_re)
-    j = j+1
-    retval2 =  bruker_match_line(lines[j],number_re,string_re,array_re) #always grab the second line
-    while j < len(lines):
-        isdata = False
-        if retval[0]==1 or retval[0]==2:
-            name = retval[1]
-            thislen = retval[2]
-            data = retval[3]
-            while (retval2[0] == 3) and (j<len(lines)): # eat up the following lines
-                data += ' '+retval2[1]
-                j = j+1
-                retval2 =  bruker_match_line(lines[j],number_re,string_re,array_re)
-            isdata = True
-        elif retval[0]==0:
-            name = retval[1]
-            data = retval[2]
-            isdata = True
-        #else:
-        #   print 'not a data line:',retval[1]
-        if(isdata):
-            if retval[0]==2: #if it's an array
-                data = data.split(' ')
-                if len(data)>0:
-                    while '' in data:
-                        data.remove('')
-                    data = map(double,data)
-                    if len(data)-1!= thislen[1]:
-                        print 'error:',len(data)-1,'!=',thislen[1]
-            vars.update({name:data})
-        # at this point, the string or array data is loaded into data and we have something in retval2 which is definitely a new line
-        retval = retval2
-        j = j+1
-        if j<len(lines):
-            retval2 =  bruker_match_line(lines[j],number_re,string_re,array_re)
-    fp.close()
-    return vars
 #}}}
 #{{{ winepr_load_acqu
 def winepr_load_acqu(file):
@@ -797,7 +709,7 @@ def print_info(filename,also = {}):
     'print the info for a file: to add other parameters, call with the "also" dictionary, with the description as a key, and the variable name or variable name, index number pair as the key'
     filetype,twod = det_type(filename)
     if filetype == 'bruker':
-        v = bruker_load_acqu(dirformat(filename))
+        v = bruker.load_acqu(dirformat(filename))
         f = open(dirformat(filename)+'pulseprogram','r')
         ppginfo = f.read()
         f.close()
@@ -1155,7 +1067,7 @@ def plot_noise(path,j,calibration,mask_start,mask_stop,rgmin=0,k_B = None,smooth
     data.ft('t2',shift = True)
     newt2 = r'F2 / $Hz$'
     data.rename('t2',newt2)
-    v = bruker_load_acqu(r'%s%d/'%(path,j))
+    v = bruker.load_acqu(r'%s%d/'%(path,j))
     dw = 1/v['SW_h']
     dwov = dw/v['DECIM']
     rg = v['RG']
@@ -1176,7 +1088,7 @@ def plot_noise(path,j,calibration,mask_start,mask_stop,rgmin=0,k_B = None,smooth
         retval = []
         if both or not smoothing:
             pval = plot(plotdata,'-',alpha=0.5,plottype = plottype)
-            retval += ['%d: '%j+bruker_load_title(r'%s%d'%(path,j))+'$t_{dw}$ %0.1f $t_{dwov}$ %0.1f RG %d, DE %0.2f, mean %0.1f'%(dw*1e6,dwov*1e6,rg,de,avg)]
+            retval += ['%d: '%j+bruker.load_title(r'%s%d'%(path,j))+'$t_{dw}$ %0.1f $t_{dwov}$ %0.1f RG %d, DE %0.2f, mean %0.1f'%(dw*1e6,dwov*1e6,rg,de,avg)]
             axis('tight')
         if smoothing:
             # begin convolution
@@ -1192,7 +1104,7 @@ def plot_noise(path,j,calibration,mask_start,mask_stop,rgmin=0,k_B = None,smooth
             t[:] = originalt
             # end convolution
             pval = plot(plotdata,'-',alpha=0.5,plottype = plottype)
-            retval += ['%d: '%j+bruker_load_title(r'%s%d'%(path,j))+' $t_{dwov}$ %0.1f RG %d, DE %0.2f, mean %0.1f'%(dwov*1e6,rg,de,avg)]
+            retval += ['%d: '%j+bruker.load_title(r'%s%d'%(path,j))+' $t_{dwov}$ %0.1f RG %d, DE %0.2f, mean %0.1f'%(dwov*1e6,rg,de,avg)]
             axis('tight')
         if retplot:
             return pval,retval

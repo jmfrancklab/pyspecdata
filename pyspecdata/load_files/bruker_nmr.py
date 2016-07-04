@@ -1,8 +1,9 @@
+from ..core import *
 def series(filename, dimname=''):
     "For opening Bruker ser files"
     #{{{ Bruker 2D
-    v = bruker_load_acqu(filename)
-    v2 = bruker_load_acqu(filename,whichdim='2')
+    v = load_acqu(filename)
+    v2 = load_acqu(filename,whichdim='2')
     td2 = int(v['TD'])
     rg = bruker_det_rg(float(v['RG']))
     td1 = int(v2['TD'])
@@ -45,11 +46,12 @@ def series(filename, dimname=''):
     data.set_units('t2','s')
     data.set_units('digital')
     data.set_prop('title',
-            bruker_load_title(filename))
+            load_title(filename))
     #print 'DEBUG 2: data from bruker file =',data
     #}}}
+    return data
 def load_1D(filename, dimname=''):
-    v = bruker_load_acqu(filename)
+    v = load_acqu(filename)
     td2 = int(v['TD'])
     td1 = 1
     td2_zf = int(ceil(td2/256.)*256) # round up to 256 points, which is how it's stored
@@ -71,5 +73,74 @@ def load_1D(filename, dimname=''):
     data.circshift('t2',shiftpoints)
     # finally, I will probably need to add in the first order phase shift for the decimation --> just translate this
     data.set_prop('title',
-            bruker_load_title(filename))
+            load_title(filename))
     return data
+def load_vdlist(file):
+    fp = open(file+'vdlist')
+    lines = fp.readlines()
+    lines = map(string.rstrip,lines)
+    lines = map((lambda x: x.replace('m','e-3')),lines)
+    lines = map((lambda x: x.replace('s','')),lines)
+    lines = map((lambda x: x.replace('u','e-6')),lines)
+    lines = map(double,lines)
+    return array(lines)
+def load_acqu(file,whichdim='',return_s = True):
+    if return_s:
+        fp = open(file+'acqu'+whichdim+'s')# this is what I am initially doing, and what works with the matched filtering, etc, as is, but it's actually wrong
+    else:
+        fp = open(file+'acqu'+whichdim)# this is actually right, but doesn't work with the matched filtering, etc.
+    lines = fp.readlines()
+    vars = {}
+    number_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *([0-9\-\.]+)')
+    string_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *<(.*)')
+    array_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *\(([0-9]+)\.\.([0-9]+)\)(.*)')
+    lines = map(string.rstrip,lines)
+    j=0
+    retval =  bruker_match_line(lines[j],number_re,string_re,array_re)
+    j = j+1
+    retval2 =  bruker_match_line(lines[j],number_re,string_re,array_re) #always grab the second line
+    while j < len(lines):
+        isdata = False
+        if retval[0]==1 or retval[0]==2:
+            name = retval[1]
+            thislen = retval[2]
+            data = retval[3]
+            while (retval2[0] == 3) and (j<len(lines)): # eat up the following lines
+                data += ' '+retval2[1]
+                j = j+1
+                retval2 =  bruker_match_line(lines[j],number_re,string_re,array_re)
+            isdata = True
+        elif retval[0]==0:
+            name = retval[1]
+            data = retval[2]
+            isdata = True
+        #else:
+        #   print 'not a data line:',retval[1]
+        if(isdata):
+            if retval[0]==2: #if it's an array
+                data = data.split(' ')
+                if len(data)>0:
+                    while '' in data:
+                        data.remove('')
+                    data = map(double,data)
+                    if len(data)-1!= thislen[1]:
+                        print 'error:',len(data)-1,'!=',thislen[1]
+            vars.update({name:data})
+        # at this point, the string or array data is loaded into data and we have something in retval2 which is definitely a new line
+        retval = retval2
+        j = j+1
+        if j<len(lines):
+            retval2 =  bruker_match_line(lines[j],number_re,string_re,array_re)
+    fp.close()
+    return vars
+def load_title(file):
+    file = dirformat(file)
+    fp = open(file+'pdata/1/title')
+    lines = fp.readlines()
+    emptystring = '\r\n'
+    while emptystring in lines:
+        lines.pop(lines.index(emptystring))
+    emptystring = '\n'
+    while emptystring in lines:
+        lines.pop(lines.index(emptystring))
+    return ''.join(lines)
