@@ -233,10 +233,45 @@ def postproc_eldor_file(data,fl = None):
     data.labels('t_1',x)
     data.set_units('t_1','s')
     return data
+def postproc_cw(file_regexp,phase = True,use_sweep = False):
+    r'this opens the cw data, using search_freed_file and open_cw_file, and then autophases it'
+    if use_sweep:
+        otherdim = 'current'
+    else:
+        otherdim = 'field'
+    print "looking for "+lsafen(search_freed_file(file_regexp,'cw'))
+    data = open_cw_file(search_freed_file(file_regexp,'cw'),use_sweep = use_sweep)
+    if 'repeats' in data.dimlabels:
+        print "found",ndshape(data)['repeats'],"averages"
+        data.mean('repeats')
+    #{{{ phase the spectrum
+    baseline = (data[otherdim,0:2].mean().data + data[otherdim,-3:-1].mean().data)/2.0
+    data -= baseline
+    if phase:
+        testphases = r_[0:2*pi:100j]
+        result = zeros_like(testphases)
+        for j,ph in enumerate(testphases):
+            test = data.copy()
+            test *= exp(-1j*ph)
+            test_denom = test.runcopy(imag)
+            test_denom.mean(otherdim)
+            test.run(real)
+            test.mean(otherdim)
+            result[j] = abs(test.data)**2/abs(test_denom.data)**2
+        data *= exp(-1j*testphases[argmin(result)])
+        index = argmax(abs(imag(data.data)))
+        data *= -1*sign(imag(data.data[index]))
+    if use_sweep:
+        data.set_units('current','A')
+    else:
+        data.set_units('field','T')
+    #}}}
+    return data
 postproc_lookup = {
         'ELDOR':postproc_eldor_old,
         'ELDOR_3D':postproc_eldor_3d,
         'FID':postproc_generic,
         'echo_T2':postproc_echo_T2,
         'B1_se':postproc_B1_se,
+        'CW':postproc_cw,
         }

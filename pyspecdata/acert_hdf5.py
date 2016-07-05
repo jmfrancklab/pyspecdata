@@ -347,40 +347,6 @@ def automagical_phasecycle(data,verbose = False):
         data.setaxis(j,r_[0:1:1j*len(x)])
         data.ift(j)
     return data
-def cw(file_regexp,phase = True,use_sweep = False):
-    r'this opens the cw data, using search_freed_file and open_cw_file, and then autophases it'
-    if use_sweep:
-        otherdim = 'current'
-    else:
-        otherdim = 'field'
-    print "looking for "+lsafen(search_freed_file(file_regexp,'cw'))
-    data = open_cw_file(search_freed_file(file_regexp,'cw'),use_sweep = use_sweep)
-    if 'repeats' in data.dimlabels:
-        print "found",ndshape(data)['repeats'],"averages"
-        data.mean('repeats')
-    #{{{ phase the spectrum
-    baseline = (data[otherdim,0:2].mean().data + data[otherdim,-3:-1].mean().data)/2.0
-    data -= baseline
-    if phase:
-        testphases = r_[0:2*pi:100j]
-        result = zeros_like(testphases)
-        for j,ph in enumerate(testphases):
-            test = data.copy()
-            test *= exp(-1j*ph)
-            test_denom = test.runcopy(imag)
-            test_denom.mean(otherdim)
-            test.run(real)
-            test.mean(otherdim)
-            result[j] = abs(test.data)**2/abs(test_denom.data)**2
-        data *= exp(-1j*testphases[argmin(result)])
-        index = argmax(abs(imag(data.data)))
-        data *= -1*sign(imag(data.data[index]))
-    if use_sweep:
-        data.set_units('current','A')
-    else:
-        data.set_units('field','T')
-    #}}}
-    return data
 def open_cw_file(filename,fl = None,use_sweep = False,**kwargs):
     if fl is None:
         fl = figlist_var()

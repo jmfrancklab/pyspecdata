@@ -274,15 +274,6 @@ def bruker_det_rg(a):
     '''determine the actual voltage correction from the value of rg for a bruker NMR file'''
     return a
 #}}}
-#{{{ t1 axis
-def load_t1_axis(file):
-    if det_type(file)[0] == 'bruker':
-        return bruker.load_t1_axis(file)
-    elif det_type(file)[0] == 'prospa':
-        return prospa.t1_info(file)[1]
-    else:
-        raise CustomError('Trying to load T1 axis on a file of unrecognized format!')
-#}}}
 #}}}
 #{{{ lower level functions
 #{{{ routines specific to Bruker

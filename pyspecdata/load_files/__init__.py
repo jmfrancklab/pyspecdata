@@ -229,6 +229,16 @@ def load_acqu(filename,whichdim='',return_s = None):
         # }}}
     else:
         raise CustomError(det_type(filename),'is not yet supported')
+#def load_t1_axis(file):
+#    raise RuntimeError("don't use load_t1_axis anymore, the t1 axis should be available as an nddata property called wait_time")
+#def bruker_load_t1_axis(file):
+#    raise RuntimeError("don't use bruker_load_t1_axis anymore, the t1 axis should be available as an nddata property called wait_time")
+#def prospa_t1_info(file):
+#    raise RuntimeError("don't use prospa_t1_info anymore, the t1 axis should be available as an nddata property called wait_time")
+#def bruker_load_title(file):
+#    raise RuntimeError("don't use bruker_load_title -- this should now be loaded as the nddata name")
+#def cw(file,**kwargs):
+#    raise RuntimeError("don't use the cw method anymore -- just use find_file")
 
 __all__ = ['find_file',
         'load_indiv_file',
@@ -237,4 +247,9 @@ __all__ = ['find_file',
         'bruker_esr',
         'acert',
         'prospa',
+#        'load_t1_axis',
+#        'bruker_load_t1_axis',
+#        'prospa_t1_info',
+#        'bruker_load_title',
+#        'cw',
         ]
