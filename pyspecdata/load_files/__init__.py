@@ -6,6 +6,7 @@ from . import acert
 from ..datadir import getDATADIR
 from ..general_functions import process_kwargs
 from ..core import *
+import warnings
 
 #{{{ add slashes for dir's
 def _dirformat(file):
@@ -169,44 +170,87 @@ def load_file(*args,**kwargs):
     if newdata_shape[dimname]==1:
         newdata.popdim(dimname)
     return newdata*calibration
+def _check_signature(filename):
+    """Check the filetype by its signature (the leading part of the file).
+    If the first several characters are all ASCII, return the string ``TXT``.
+
+    Returns
+    -------
+    str
+        Either
+        a short string identifying the filetype
+        (currently HDF5 or TXT)
+        OR `None` if the type is unknown.
+    """
+    file_signatures = {'\x89\x48\x44\x46\x0d\x0a\x1a\x0a':'HDF5'}
+    max_sig_length = max(map(len,file_signatures.keys()))
+    with fp as open(filename,'rb'):
+        inistring = fp.read(max_sig_length)
+        if any(thiskey in inistring for thiskey in
+                file_signatures.keys()):
+            retval = file_signatures[thiskey]
+            print "Found magic signature, returning",retval
+            return retval
+        else:
+            if all(ord(char)<128 for char in inistring):
+                return 'TXT'
+            else:
+                return None
 def load_indiv_file(filename, dimname='', return_acq=False,
         add_sizes=[], add_dims=[]):
     """Open the file given by `filename`, use magic (broadly defined)
     to identify the file type, and call the appropriate function to
     open it."""
     #to search for kwargs when separating: \<dimname\>\|\<return_acq\>\|\<add_sizes\>\|\<add_dims\>
+    if not os.path.exists(filename):
+        if os.path.exists(filename+'.par'):
+            # {{{ legacy support for WinEPR without extension
+            filetype, twod = ('winepr',True)
+            warnings.warn("Don't call load_indiv_file anymore with the"
+                    " incomplete filename to try to load the ESR spectrum."
+                    " Rather, supply the full name of the .par file.")
+            # }}}
+        else:
+            raise IOError("%s does not exist"%filename)
     # {{{ first, we search for the file magic to determine the filetype
-    file_signatures = {'\x89\x48\x44\x46\x0d\x0a\x1a\x0a':'HDF5'}
     filetype = None
-    #{{{ WinEPR
-    if os.path.exists(filename+'.spc'):
-        return ('winepr',True)
-    #}}}
-    else:
+    if os.path.isdir(filename):# Bruker, prospa, etc, datasets are stored as directories
         filename = dirformat(filename)
         files_in_dir = os.listdir(filename)
         #{{{ Bruker 2D
         if os.path.exists(filename+'ser'):
-            return ('bruker',True)
+            filetype, twod = ('bruker',True)
         #}}}
         #{{{ Prospa generic 2D
         elif os.path.exists(filename+'data.2d'):
-            return ('prospa',True)
+            filetype, twod = ('prospa',True)
         #}}}
         #{{{ specific Prospa formats
         elif any(map((lambda x:'Delay' in x),files_in_dir)):
-            return ('prospa','t1')
+            filetype, twod = ('prospa','t1')
         elif os.path.exists(filename+'acqu.par'):
-            return ('prospa',False)
+            filetype, twod = ('prospa',False)
         elif os.path.exists(filename+'../acqu.par'):
-            return ('prospa','t1_sub')
+            filetype, twod = ('prospa','t1_sub')
         #}}}
         #{{{ Bruker 1D
         elif os.path.exists(filename+'acqus'):
-            return ('bruker',False)
+            filetype, twod = ('bruker',False)
         #}}}
         else:
-            raise CustomError('WARNING! unidentified file type '+filename)
+            raise RuntimeError('WARNING! unidentified file type '+filename)
+    else:
+        type_by_signature = _check_signature(filename)
+        if type_by_signature:
+            if type_by_signature == 'HDF5':
+                # we can have the normal ACERT Pulse experiment or the ACERT CW format
+            elif type_by_signature == 'TXT':
+                # par identifies the old-format WinEPR parameter file, and spc the binary spectrum
+                # DSC identifies the new-format XEpr parameter file, and DTA the binary spectrum
+            else:
+                raise RuntimeError("Type %s not yet supported!"%type_by_signature)
+        else:
+            raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
     # }}}
     if filetype == 'winepr':
         data = bruker_esr.winepr(filename, dimname=dimname)
@@ -268,6 +312,8 @@ def load_acqu(filename,whichdim='',return_s = None):
 #    raise RuntimeError("don't use bruker_load_title -- this should now be loaded as the nddata name")
 #def cw(file,**kwargs):
 #    raise RuntimeError("don't use the cw method anymore -- just use find_file")
+#def det_type(file,**kwargs):
+#    raise RuntimeError("det_type is deprecated, and should be handled by the file magic inside load_indiv_file.  THE ONE EXCEPTION to this is the fact that det_type would return a second argument that allowed you to classify different types of prospa files.  This is not handled currently")
 
 __all__ = ['find_file',
         'load_indiv_file',

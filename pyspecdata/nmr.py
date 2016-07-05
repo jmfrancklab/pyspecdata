@@ -236,39 +236,6 @@ def error_plot(*arg):
 b0 = r'$B_0$'
 def show_acqu(vars):
     print '\\begin{verbatim}',vars.__repr__().replace(',','\n'),'\\end{verbatim}\n\n'
-#{{{ is this (bruker or prospa, 1d or nd)?
-def det_type(filename):
-    filetype = None
-    #{{{ WinEPR
-    if os.path.exists(filename+'.spc'):
-        return ('winepr',True)
-    #}}}
-    else:
-        filename = dirformat(filename)
-        files_in_dir = os.listdir(filename)
-        #{{{ Bruker 2D
-        if os.path.exists(filename+'ser'):
-            return ('bruker',True)
-        #}}}
-        #{{{ Prospa generic 2D
-        elif os.path.exists(filename+'data.2d'):
-            return ('prospa',True)
-        #}}}
-        #{{{ specific Prospa formats
-        elif any(map((lambda x:'Delay' in x),files_in_dir)):
-            return ('prospa','t1')
-        elif os.path.exists(filename+'acqu.par'):
-            return ('prospa',False)
-        elif os.path.exists(filename+'../acqu.par'):
-            return ('prospa','t1_sub')
-        #}}}
-        #{{{ Bruker 1D
-        elif os.path.exists(filename+'acqus'):
-            return ('bruker',False)
-        #}}}
-        else:
-            raise CustomError('WARNING! unidentified file type '+filename)
-#}}}
 #{{{ load an nddata structure for a 2d set -- give the data needed to load
 def bruker_det_rg(a):
     '''determine the actual voltage correction from the value of rg for a bruker NMR file'''
