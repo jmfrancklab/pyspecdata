@@ -192,9 +192,11 @@ def _check_signature(filename):
             print "Found magic signature, returning",retval
             return retval
         else:
-            if all(ord(char)<128 for char in inistring):
+            try:
+                inistring.decode('ascii')
                 return 'TXT'
-            else:
+            except UnicodeDecodeError:
+                # if it failed, it's because the string is not ASCII
                 return None
 def load_indiv_file(filename, dimname='', return_acq=False,
         add_sizes=[], add_dims=[]):
