@@ -177,7 +177,36 @@ def load_indiv_file(filename, dimname='', return_acq=False,
     #to search for kwargs when separating: \<dimname\>\|\<return_acq\>\|\<add_sizes\>\|\<add_dims\>
     # {{{ first, we search for the file magic to determine the filetype
     file_signatures = {'\x89\x48\x44\x46\x0d\x0a\x1a\x0a':'HDF5'}
-    filetype,twod = det_type(filename)
+    filetype = None
+    #{{{ WinEPR
+    if os.path.exists(filename+'.spc'):
+        return ('winepr',True)
+    #}}}
+    else:
+        filename = dirformat(filename)
+        files_in_dir = os.listdir(filename)
+        #{{{ Bruker 2D
+        if os.path.exists(filename+'ser'):
+            return ('bruker',True)
+        #}}}
+        #{{{ Prospa generic 2D
+        elif os.path.exists(filename+'data.2d'):
+            return ('prospa',True)
+        #}}}
+        #{{{ specific Prospa formats
+        elif any(map((lambda x:'Delay' in x),files_in_dir)):
+            return ('prospa','t1')
+        elif os.path.exists(filename+'acqu.par'):
+            return ('prospa',False)
+        elif os.path.exists(filename+'../acqu.par'):
+            return ('prospa','t1_sub')
+        #}}}
+        #{{{ Bruker 1D
+        elif os.path.exists(filename+'acqus'):
+            return ('bruker',False)
+        #}}}
+        else:
+            raise CustomError('WARNING! unidentified file type '+filename)
     # }}}
     if filetype == 'winepr':
         data = bruker_esr.winepr(filename, dimname=dimname)
