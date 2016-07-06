@@ -357,24 +357,23 @@ def open_cw_file(filename,fl = None,use_sweep = False,**kwargs):
             figname_append += '_'
     else:
         figname_append = ''
-    h5 = h5py.File(filename,'r')
-    #{{{ set up the complex number the hard way, for good form
-    data = empty_like(h5['experiment']['data.r'],dtype = complex128)
-    data_introspect = data.view([('r',double),('i',double)])
-    for i_or_r in ['i','r']:
-        data_introspect[i_or_r] = h5['experiment']['data.'+i_or_r]
-    #}}}
-    if len(data.shape) == 1:
-        if use_sweep:
-            data = nddata(data,data.size,['current']).labels('current',array(h5['experiment']['sweep_currents']))
-        else:
-            data = nddata(data,data.size,['field']).labels('field',array(h5['experiment']['fields']))
-    elif len(data.shape) == 2:
-        if use_sweep:
-            data = nddata(data,data.shape,['repeats','current']).labels('current',array(h5['experiment']['sweep_currents']))
-        else:
-            data = nddata(data,data.shape,['repeats','field']).labels('field',array(h5['experiment']['fields']))
-    h5.close()
+    with h5py.File(filename,'r') as h5:
+        #{{{ set up the complex number the hard way, for good form
+        data = empty_like(h5['experiment']['data.r'],dtype = complex128)
+        data_introspect = data.view([('r',double),('i',double)])
+        for i_or_r in ['i','r']:
+            data_introspect[i_or_r] = h5['experiment']['data.'+i_or_r]
+        #}}}
+        if len(data.shape) == 1:
+            if use_sweep:
+                data = nddata(data,data.size,['current']).labels('current',array(h5['experiment']['sweep_currents']))
+            else:
+                data = nddata(data,data.size,['field']).labels('field',array(h5['experiment']['fields']))
+        elif len(data.shape) == 2:
+            if use_sweep:
+                data = nddata(data,data.shape,['repeats','current']).labels('current',array(h5['experiment']['sweep_currents']))
+            else:
+                data = nddata(data,data.shape,['repeats','field']).labels('field',array(h5['experiment']['fields']))
     return data
 def load_nutation_curve(main,background = None,fl = None,max_freq = 30e6,deadtime = 0e-6,intwidth = 2e6,**kwargs):
     if fl is None:

@@ -97,7 +97,7 @@ def find_file(searchstring,
             if postproc_type in loader_module.postproc_lookup.keys():
                 data = loader_module.postproc_lookup[desc_class](data)
             else:
-                raise ValueError('postprocessing not defined for file with description-->class '+str(data.get_prop('description_class')))
+                raise ValueError('postprocessing not defined for file with postproc_type'+postproc_type)
             return data
 def format_listofexps(args):
     """This is an auxiliary function that's used to decode the experiment list.
@@ -170,6 +170,9 @@ def load_file(*args,**kwargs):
     if newdata_shape[dimname]==1:
         newdata.popdim(dimname)
     return newdata*calibration
+def _check_extension(filename):
+    "Just return the file extension in caps"
+    return filename.split('.')[-1].upper()
 def _check_signature(filename):
     """Check the filetype by its signature (the leading part of the file).
     If the first several characters are all ASCII, return the string ``TXT``.
@@ -179,12 +182,13 @@ def _check_signature(filename):
     str
         Either
         a short string identifying the filetype
-        (currently HDF5 or TXT)
+        (currently "HDF5", "DOS Format"  or "TXT")
         OR `None` if the type is unknown.
     """
-    file_signatures = {'\x89\x48\x44\x46\x0d\x0a\x1a\x0a':'HDF5'}
+    file_signatures = {'\x89\x48\x44\x46\x0d\x0a\x1a\x0a':'HDF5',
+            'DOS  Format':'DOS Format'}
     max_sig_length = max(map(len,file_signatures.keys()))
-    with fp as open(filename,'rb'):
+    with open(filename,'rb') as fp:
         inistring = fp.read(max_sig_length)
         if any(thiskey in inistring for thiskey in
                 file_signatures.keys()):
@@ -207,7 +211,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
     if not os.path.exists(filename):
         if os.path.exists(filename+'.par'):
             # {{{ legacy support for WinEPR without extension
-            filetype, twod = ('winepr',True)
+            data = bruker_esr.winepr(filename, dimname=dimname)
             warnings.warn("Don't call load_indiv_file anymore with the"
                     " incomplete filename to try to load the ESR spectrum."
                     " Rather, supply the full name of the .par file.")
@@ -217,61 +221,70 @@ def load_indiv_file(filename, dimname='', return_acq=False,
     # {{{ first, we search for the file magic to determine the filetype
     filetype = None
     if os.path.isdir(filename):# Bruker, prospa, etc, datasets are stored as directories
-        filename = dirformat(filename)
         files_in_dir = os.listdir(filename)
-        #{{{ Bruker 2D
-        if os.path.exists(filename+'ser'):
-            filetype, twod = ('bruker',True)
-        #}}}
-        #{{{ Prospa generic 2D
-        elif os.path.exists(filename+'data.2d'):
-            filetype, twod = ('prospa',True)
-        #}}}
-        #{{{ specific Prospa formats
+        if os.path.exists(os.path.join(filename,'ser')):
+            #{{{ Bruker 2D
+            data = bruker_nmr.series(filename, dimname=dimname)
+            #}}}
+        elif os.path.exists(os.path.join(filename,'acqus')):
+            #{{{ Bruker 1D
+            data = bruker_nmr.load_1D(filename, dimname=dimname)
+            #}}}
+        elif os.path.exists(os.path.join(filename,'data.2d')):
+            #{{{ Prospa generic 2D
+            data = prospa.load_2D(filename, dimname=dimname)
+            #}}}
+            #{{{ specific Prospa formats
         elif any(map((lambda x:'Delay' in x),files_in_dir)):
-            filetype, twod = ('prospa','t1')
-        elif os.path.exists(filename+'acqu.par'):
-            filetype, twod = ('prospa',False)
-        elif os.path.exists(filename+'../acqu.par'):
-            filetype, twod = ('prospa','t1_sub')
-        #}}}
-        #{{{ Bruker 1D
-        elif os.path.exists(filename+'acqus'):
-            filetype, twod = ('bruker',False)
-        #}}}
+            data = prospa.load_2D(filename, dimname=dimname)
+            twod = 't1' # this was set by det_type, not sure what's done with it now
+        elif os.path.exists(os.path.join(filename,'acqu.par')):
+            data = prospa.load_1D(filename)
+        elif os.path.exists(os.path.join(filename,'..','acqu.par')):
+            data = prospa.load_2D(filename, dimname=dimname)
+            twod = 't1_sub' # this was set by det_type, not sure what's done with it now
+            #}}}
         else:
             raise RuntimeError('WARNING! unidentified file type '+filename)
     else:
         type_by_signature = _check_signature(filename)
+        type_by_extension = _check_extension(filename)
         if type_by_signature:
             if type_by_signature == 'HDF5':
                 # we can have the normal ACERT Pulse experiment or the ACERT CW format
+                with h5py.File(filename,'r') as h5:
+                    try:
+                        description_class = h5['experiment']['description']['class']
+                    except:
+                        raise IOError("I am assuming this is an ACERT datafile,"
+                                " but can't identify type, because I can't find"
+                                " experiment.description['class']")
+                if description_class == 'CW':
+                    data = acert.load_cw(filename)
+                else:
+                    data = acert.load_pulse(filename)
+            elif type_by_signature == 'DOS Format':
+                if type_by_extension == 'PAR':
+                    # par identifies the old-format WinEPR parameter file, and spc the binary spectrum
+                    data = bruker_esr.winepr(filename, dimname=dimname)
+                else:
+                    raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
             elif type_by_signature == 'TXT':
-                # par identifies the old-format WinEPR parameter file, and spc the binary spectrum
-                # DSC identifies the new-format XEpr parameter file, and DTA the binary spectrum
+                if type_by_extension == 'DSC':
+                    # DSC identifies the new-format XEpr parameter file, and DTA the binary spectrum
+                    data = bruker_esr.winepr(filename, dimname=dimname)
+                else:
+                    raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
             else:
                 raise RuntimeError("Type %s not yet supported!"%type_by_signature)
         else:
-            raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
+            if type_by_extension == 'SPC':
+                pass # ignore SPC, and leave the reading to the PAR file
+            elif type_by_extension == 'DTA':
+                pass # ignore DTA and load the reading to the DSC file
+            else:
+                raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
     # }}}
-    if filetype == 'winepr':
-        data = bruker_esr.winepr(filename, dimname=dimname)
-    filename = dirformat(filename)
-    if twod and filetype == 'bruker':
-        data = bruker_nmr.series(filename, dimname=dimname)
-    elif twod and filetype == 'prospa':
-        data = prospa.load_2D(filename, dimname=dimname)
-    else:
-        if filetype == 'bruker':
-            #{{{ bruker 1D
-            data = bruker_nmr.load_1D(filename, dimname=dimname)
-            #}}}
-        elif filetype == 'prospa':
-            #{{{ prospa 1d
-            data = prospa.load_1D(filename)
-            #}}}
-        else:
-            raise CustomError("can't load this file type $\\rightarrow$ \\verb+%s+"%filename)
     #{{{ return, and if necessary, reorganize
     if len(add_sizes)>0:
         data.labels([dimname],[[]]) # remove the axis, so we can reshape
@@ -298,7 +311,7 @@ def load_acqu(filename,whichdim='',return_s = None):
         # {{{ somehow, I need to deal with the t1_sub within prospa
         if det_type(filename)[1] == 't1_sub':
             filename = dirformat(filename)
-            return prospa.load_acqu(filename+'../')
+            return prospa.load_acqu(os.path.join(filename,'..'))
         else:
             return prospa.load_acqu(filename)
         # }}}
