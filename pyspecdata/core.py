@@ -4724,7 +4724,11 @@ class nddata (object):
         self.dimlabels = newnames
         return self
     def chunkoff(self,axisin,newaxes,newshapes):
-        r'''chunks up axisin, dividing it into newaxes with newshapes on the inside'''
+        r'''Break chunks off of the dimension given by `axisin`.
+
+        Specifically, subdivide it into several dimensions given by
+        the names `newaxes` with `newshapes`.  If the shape of the
+        data allows, retain `axisin` as the "outer" dimension.'''
         axesout = [axisin]+newaxes
         shapesout = [ndshape(self)[axisin]/prod(newshapes)]+newshapes
         return self.chunk(axisin,axesout,shapesout)

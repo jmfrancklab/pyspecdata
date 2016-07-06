@@ -22,7 +22,6 @@ def find_file(searchstring,
             print_result = True,
             verbose = False,
             prefilter = None,
-            indirect_dimlabels = None,# in case "dimlabels" is not set properly, I can manually pass the value of "indirect_dimlabels"
             **kwargs):
     r'''Find the file  given by the regular expression `searchstring` inside the directory identified by `exp_type`, load the nddata object, and postprocess with the function `postproc`.
 
@@ -62,10 +61,18 @@ def find_file(searchstring,
         it sets `postproc_type` to the value of
         ``(h5 root).experiment.description['class']``.
         This, in turn, is used to choose the type of post-processing.
+    indirect_dimlabels : 
+        passed through to :func:`acert.load_pulse`
+    use_sweep : 
+        passed through to :func:`acert.load_cw`
         '''
     # {{{ legacy warning
     if 'subdirectory' in kwargs.keys():
         raise ValueError("The `subdirectory` keyword argument is not longer valid -- use `exp_type` instead!")
+    # }}}
+    # {{{ 
+    indirect_dimlabels, use_sweep = process_kwargs([('indirect_dimlabels',None),
+        ('use_sweep',False)], kwargs, pass_through=True)
     # }}}
     #{{{ actually find one file and load it into the h5 object
     directory = getDATADIR(exp_type=exp_type)
@@ -203,10 +210,29 @@ def _check_signature(filename):
                 # if it failed, it's because the string is not ASCII
                 return None
 def load_indiv_file(filename, dimname='', return_acq=False,
-        add_sizes=[], add_dims=[]):
+        add_sizes=[], add_dims=[], use_sweep = None):
     """Open the file given by `filename`, use magic (broadly defined)
     to identify the file type, and call the appropriate function to
-    open it."""
+    open it.
+    
+    Parameters
+    ----------
+    dimname : str
+        When there is a single indirect dimension composed of several scans,
+        call it this.
+    return_acq : DEPRECATED
+    add_sizes : list
+        the sizes associated with the dimensions in add_dims
+    add_dims : list
+        Can only be used with `dimname`.
+        Break the dimension `dimname` into several dimensions,
+        with the names given by the list `add_dims` and sizes given by `add_sizes`.
+        If the product of the sizes is not the same as the original dimension
+        given by `dimname`,
+        retain it as the "outermost" (leftmost) dimension. 
+        :func:`pyspecdata.core.chunkoff` is used to do this, like so:
+        ``data.chunkoff(dimname,add_dims,add_sizes)``
+    """
     #to search for kwargs when separating: \<dimname\>\|\<return_acq\>\|\<add_sizes\>\|\<add_dims\>
     if not os.path.exists(filename):
         if os.path.exists(filename+'.par'):
@@ -260,9 +286,9 @@ def load_indiv_file(filename, dimname='', return_acq=False,
                                 " but can't identify type, because I can't find"
                                 " experiment.description['class']")
                 if description_class == 'CW':
-                    data = acert.load_cw(filename)
+                    data = acert.load_cw(filename, use_sweep=use_sweep)
                 else:
-                    data = acert.load_pulse(filename)
+                    data = acert.load_pulse(filename, indirect_dimlabels=indirect_dimlabels)
             elif type_by_signature == 'DOS Format':
                 if type_by_extension == 'PAR':
                     # par identifies the old-format WinEPR parameter file, and spc the binary spectrum
@@ -272,7 +298,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             elif type_by_signature == 'TXT':
                 if type_by_extension == 'DSC':
                     # DSC identifies the new-format XEpr parameter file, and DTA the binary spectrum
-                    data = bruker_esr.winepr(filename, dimname=dimname)
+                    data = bruker_esr.xepr(filename, dimname=dimname)
                 else:
                     raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
             else:

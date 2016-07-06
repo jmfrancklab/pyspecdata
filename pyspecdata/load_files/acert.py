@@ -10,7 +10,16 @@ experiment names set in
 ``(h5 root).experiment.description['class']``)
 '''        
 from ..core import *
-def load(filename):
+def load_pulse(filename,
+        indirect_dimlabels = None,
+        ):
+    """Load ACERT pulse data from the 95 GHz.
+
+    Parameters
+    ----------
+    indirect_dimlabels : str or None
+        In case `dimlabels` is not set properly, I can manually pass the value of `indirect_dimlabels`.
+    """
     with h5py.File(filename,'r') as h5:
         #{{{ set up the complex number the hard way, for good form
         data = empty_like(h5['experiment']['data.r'],dtype = complex128)
@@ -144,6 +153,32 @@ def load(filename):
         data = data['indirect',0]
     data.set_prop('postproc_type',
             data.get_prop('description_class'))
+    return data
+def load_cw(filename,use_sweep = False):
+    """load the cw file given by filename
+    
+    Parameters
+    ----------
+    use_sweep : bool
+        If true, return the axis labeled by sweep current rather than by field.
+    """
+    with h5py.File(filename,'r') as h5:
+        #{{{ set up the complex number the hard way, for good form
+        data = empty_like(h5['experiment']['data.r'],dtype = complex128)
+        data_introspect = data.view([('r',double),('i',double)])
+        for i_or_r in ['i','r']:
+            data_introspect[i_or_r] = h5['experiment']['data.'+i_or_r]
+        #}}}
+        if len(data.shape) == 1:
+            if use_sweep:
+                data = nddata(data,data.size,['current']).labels('current',array(h5['experiment']['sweep_currents']))
+            else:
+                data = nddata(data,data.size,['field']).labels('field',array(h5['experiment']['fields']))
+        elif len(data.shape) == 2:
+            if use_sweep:
+                data = nddata(data,data.shape,['repeats','current']).labels('current',array(h5['experiment']['sweep_currents']))
+            else:
+                data = nddata(data,data.shape,['repeats','field']).labels('field',array(h5['experiment']['fields']))
     return data
 def postproc_blank(data):
     return data
