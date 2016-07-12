@@ -7,8 +7,14 @@ def extend_for_shear(self,altered_axis,propto_axis,skew_amount,verbose = False):
     #       needs to be extended), while the shearing is proportional to
     #       -by_amount*propto_axis
     if verbose: print "extending to account for the shear along ",altered_axis,"by",skew_amount,"which gives lesser and greater expansion amounts of",
-    shear_displacement = skew_amount * self.getaxis(propto_axis
-            )[r_[0,-1]]
+    try:
+        shear_displacement = skew_amount * self.getaxis(propto_axis
+                )[r_[0,-1]]
+    except Exception,e:
+        if self.getaxis(propto_axis) is None:
+            raise RuntimeError("propto_axis ("+propto_axis+") is not set")
+        else:
+            raise e
     shear_displacement = sort(shear_displacement) # this gives the lesser
     #       and greater, respectively (i.e. le, gt -- not smaller/bigger),
     #       of the two shear displacements, so that I know how to extend.

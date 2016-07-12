@@ -4536,11 +4536,15 @@ class nddata (object):
             in the conjugate domain that the data is in at the end of the
             function call.
         '''
-        if (self.get_ft_prop(along_axis) ^ self.get_ft_prop(propto_axis)) ^ start_in_conj:
-            if start_in_conj:
-                raise ValueError("if you pass start_in_conj, the two dimensions need to be in conjugate domains, but you have: "+self.ft_state_to_str(along_axis,propto_axis))
-            else:
-                raise ValueError("(unless you intended to pass start_in_conj) the two dimensions need to be in the same domain, but you have: "+self.ft_state_to_str(along_axis,propto_axis))
+        if not (
+                self.get_ft_prop(along_axis) is None
+                and
+                self.get_ft_prop(propto_axis) is None):
+            if (self.get_ft_prop(along_axis) ^ self.get_ft_prop(propto_axis)) ^ start_in_conj:
+                if start_in_conj:
+                    raise ValueError("if you pass start_in_conj, the two dimensions need to be in conjugate domains, but you have: "+self.ft_state_to_str(along_axis,propto_axis))
+                else:
+                    raise ValueError("(unless you intended to pass start_in_conj) the two dimensions need to be in the same domain, but you have: "+self.ft_state_to_str(along_axis,propto_axis))
         if method == 'fourier':
             return self.fourier_shear(along_axis, propto_axis,
                     shear_amnt, zero_fill=zero_fill)
