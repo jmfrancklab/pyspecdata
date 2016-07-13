@@ -119,10 +119,11 @@ def plot_comparison(input_data,
             else:
                 plotdata = data.runcopy(imag)
             fl.plot(plotdata/normalization - 2*j,
-                    alpha=0.75, color=next_color,
+                    alpha=0.5, color=next_color,
                     label=short_basename)
     # }}}
     short_basename = list_of_cw_files[0]
+    collected_data = []
     for j in range(0,len(list_of_cw_files)):
         short_basename = list_of_cw_files[j]
         if single_date:
@@ -134,13 +135,13 @@ def plot_comparison(input_data,
         if j == 0:
             data_shape = ndshape(data)
             data_shape.add_correctly((len(list_of_cw_files),'indirect'))
-            collected_data = data_shape.alloc()
-            collected_data.set_units('field',data.get_units('field'))
-            collected_data.labels(['indirect','field',],[array(list_of_cw_files),data.getaxis('field')])
-        collected_data['indirect',j] = data
+        print ndshape(data)
+        collected_data.append(data)
     fl.next('cw plots -- real + imag',legend = True,boundaries = False)
-    normalization = abs(collected_data.runcopy(real)).run(max,'field').run(max,'indirect').data
-    normalization = max(r_[abs(collected_data.runcopy(imag)).run(max,'field').run(max,'indirect').data,normalization])
+    normalization = max(r_[array(
+            map(lambda x:
+                x.runcopy(real).run(abs).data.max(),
+                    collected_data)).mean(),normalization])
     normalization /= scale
     ax = gca()
     color_cycle = ax._get_lines.color_cycle
@@ -154,7 +155,7 @@ def plot_comparison(input_data,
         data /= mod_amp[j]
         next_color = next(color_cycle)
         fl.plot(data.runcopy(real)/normalization - 2*j,
-                alpha = 0.75,color = next_color,label = collected_data.getaxis('indirect')[j])
+                alpha = 0.75,color = next_color,label = list_of_cw_files[j])
         autolegend()
         fl.plot(data.runcopy(imag)/normalization - 2*j,
                 alpha = 0.25,color = next_color)
