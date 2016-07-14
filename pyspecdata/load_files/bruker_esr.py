@@ -70,7 +70,7 @@ def winepr(filename, dimname=''):
     return data
 def winepr_load_acqu(filename):
     "Load the parameters for the winepr filename"
-    for open(filename,'rU') as fp:# the U automatically converts dos format
+    with open(filename,'rU') as fp:# the U automatically converts dos format
         lines = fp.readlines()
     vars = {}
     line_re = re.compile(r'([_A-Za-z0-9]+) +(.*)')

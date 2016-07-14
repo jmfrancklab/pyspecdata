@@ -6,7 +6,9 @@ from . import acert
 from ..datadir import getDATADIR
 from ..general_functions import process_kwargs
 from ..core import *
-import warnings
+from __builtin__ import any # numpy has an "any" function, which is very annoying
+from itertools import tee
+import warnings,os,h5py
 
 #{{{ add slashes for dir's
 def _dirformat(file):
@@ -198,8 +200,10 @@ def _check_signature(filename):
     with open(filename,'rb') as fp:
         inistring = fp.read(max_sig_length)
         if any(thiskey in inistring for thiskey in
-                file_signatures.keys()):
-            retval = file_signatures[thiskey]
+                file_signatures.keys()):# this will fail without overriding the numpy any( above
+            retval = file_signatures[(thiskey for thiskey in
+                file_signatures.keys() if thiskey in
+                inistring).next()]
             print "Found magic signature, returning",retval
             return retval
         else:
@@ -211,9 +215,9 @@ def _check_signature(filename):
                 return None
 def load_indiv_file(filename, dimname='', return_acq=False,
         add_sizes=[], add_dims=[], use_sweep = None):
-    """Open the file given by `filename`, use magic (broadly defined)
-    to identify the file type, and call the appropriate function to
-    open it.
+    """Open the file given by `filename`, use file signature magic and/or
+    filename extension(s) to identify the file type, and call the appropriate
+    function to open it.
     
     Parameters
     ----------
@@ -280,10 +284,11 @@ def load_indiv_file(filename, dimname='', return_acq=False,
                 # we can have the normal ACERT Pulse experiment or the ACERT CW format
                 with h5py.File(filename,'r') as h5:
                     try:
-                        description_class = h5['experiment']['description']['class']
+                        description_class = h5['experiment']['description'].attrs['class']
                     except:
                         raise IOError("I am assuming this is an ACERT datafile,"
-                                " but can't identify type, because I can't find"
+                                " but can't identify the type, because"
+                                " I can't find"
                                 " experiment.description['class']")
                 if description_class == 'CW':
                     data = acert.load_cw(filename, use_sweep=use_sweep)

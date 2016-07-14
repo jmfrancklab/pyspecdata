@@ -1,7 +1,7 @@
 # just make this a library of all NMR reading software
-from ..core import *
+from .core import *
 from .nmrfit import *
-from ..general_functions import process_kwargs
+from .general_functions import process_kwargs
 import re
 import string
 import os
