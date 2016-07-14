@@ -214,7 +214,8 @@ def _check_signature(filename):
                 # if it failed, it's because the string is not ASCII
                 return None
 def load_indiv_file(filename, dimname='', return_acq=False,
-        add_sizes=[], add_dims=[], use_sweep = None):
+        add_sizes=[], add_dims=[], use_sweep=None,
+        indirect_dimlabels=None):
     """Open the file given by `filename`, use file signature magic and/or
     filename extension(s) to identify the file type, and call the appropriate
     function to open it.
@@ -236,6 +237,8 @@ def load_indiv_file(filename, dimname='', return_acq=False,
         retain it as the "outermost" (leftmost) dimension. 
         :func:`pyspecdata.core.chunkoff` is used to do this, like so:
         ``data.chunkoff(dimname,add_dims,add_sizes)``
+    indirect_dimlabels : str or None
+        passed through to `acert.load_pulse` (names an indirect dimension when dimlabels isn't provided)
     """
     #to search for kwargs when separating: \<dimname\>\|\<return_acq\>\|\<add_sizes\>\|\<add_dims\>
     if not os.path.exists(filename):

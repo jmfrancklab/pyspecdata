@@ -10,15 +10,23 @@ experiment names set in
 ``(h5 root).experiment.description['class']``)
 '''        
 from ..core import *
+import h5py
 def load_pulse(filename,
-        indirect_dimlabels = None,
+        indirect_dimlabels=None,
+        prefilter=None,
+        verbose=False,# rather than using verbose, I really should be using logging
         ):
     """Load ACERT pulse data from the 95 GHz.
 
     Parameters
     ----------
-    indirect_dimlabels : str or None
+    indirect_dimlabels : str
         In case `dimlabels` is not set properly, I can manually pass the value of `indirect_dimlabels`.
+    prefilter : tuple
+        If prefilter is set,
+        FT the result, and select a specific slice.
+        I should think of a more general way of doing this,
+        where I pass an ndshape-based slice, instead.
     """
     with h5py.File(filename,'r') as h5:
         #{{{ set up the complex number the hard way, for good form
