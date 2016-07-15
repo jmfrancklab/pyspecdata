@@ -4,11 +4,12 @@ from . import prospa
 from . import bruker_esr
 from . import acert
 from ..datadir import getDATADIR
+from ..datadir import _my_config
 from ..general_functions import process_kwargs
 from ..core import *
 from __builtin__ import any # numpy has an "any" function, which is very annoying
 from itertools import tee
-import warnings,os,h5py
+import warnings, os, h5py, re
 
 #{{{ add slashes for dir's
 def _dirformat(file):
@@ -24,6 +25,10 @@ def find_file(searchstring,
             print_result = True,
             verbose = False,
             prefilter = None,
+            load_indiv_file = None,
+            dimname='', return_acq=False,
+            add_sizes=[], add_dims=[], use_sweep=None,
+            indirect_dimlabels=None,
             **kwargs):
     r'''Find the file  given by the regular expression `searchstring` inside the directory identified by `exp_type`, load the nddata object, and postprocess with the function `postproc`.
 
@@ -63,10 +68,18 @@ def find_file(searchstring,
         it sets `postproc_type` to the value of
         ``(h5 root).experiment.description['class']``.
         This, in turn, is used to choose the type of post-processing.
-    indirect_dimlabels : 
-        passed through to :func:`acert.load_pulse`
-    use_sweep : 
-        passed through to :func:`acert.load_cw`
+        dimname:
+            passed to :func:`load_indiv_file`
+        return_acq:
+            passed to :func:`load_indiv_file`
+        add_sizes:
+            passed to :func:`load_indiv_file`
+        add_dims:
+            passed to :func:`load_indiv_file`
+        use_sweep:
+            passed to :func:`load_indiv_file`
+        indirect_dimlabels:
+            passed to :func:`load_indiv_file`
         '''
     # {{{ legacy warning
     if 'subdirectory' in kwargs.keys():
@@ -81,7 +94,7 @@ def find_file(searchstring,
     if os.path.isdir(directory):
         files = re.findall('.*' + searchstring + '.*','\n'.join(os.listdir(directory)))
     else:
-        raise IOError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s"%(directory,searchstring))
+        raise IOError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s\nYou might need to change the value associated with this exp_type in %s"%(directory,searchstring,_my_config.config_location))
     if len(files) == 0:
         raise IOError("I can't find a file matching the regular expression {:s} in {:s}".format(searchstring,directory))
     else:
@@ -92,8 +105,10 @@ def find_file(searchstring,
     filename = directory + files[-1]
     #}}}
     # {{{ file loaded here
-    loader_module = acert
-    data = loader_module.load(filename)
+    load_indiv_file(filename,
+        dimname=dimname, return_acq=return_acq,
+        add_sizes=add_sizes, add_dims=add_dims, use_sweep=use_sweep,
+        indirect_dimlabels=indirect_dimlabels)
     # }}}
     if hasattr(postproc,'__call__'):
         return postproc(data,**kwargs)
@@ -240,6 +255,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
     indirect_dimlabels : str or None
         passed through to `acert.load_pulse` (names an indirect dimension when dimlabels isn't provided)
     """
+    print "load_indiv_file sees indirect_dimlabels",indirect_dimlabels
     #to search for kwargs when separating: \<dimname\>\|\<return_acq\>\|\<add_sizes\>\|\<add_dims\>
     if not os.path.exists(filename):
         if os.path.exists(filename+'.par'):

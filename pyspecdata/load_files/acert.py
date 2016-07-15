@@ -28,6 +28,7 @@ def load_pulse(filename,
         I should think of a more general way of doing this,
         where I pass an ndshape-based slice, instead.
     """
+    print "load_pulse sees indirect_dimlabels",indirect_dimlabels
     with h5py.File(filename,'r') as h5:
         #{{{ set up the complex number the hard way, for good form
         data = empty_like(h5['experiment']['data.r'],dtype = complex128)
