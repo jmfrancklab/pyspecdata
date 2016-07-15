@@ -296,57 +296,6 @@ def diagnostic_plot(fl,plotdata,figname = 'diagnostic',show_abs = True,selected_
         newdata = plotdata.copy().cropped_log()
     imgplot = fl.image(newdata,interpolation = interpolation,ax = ax2)
     return
-def automagical_phasecycle(data,verbose = False):
-    "Use the phase cycle list to determine the phase cycles, and then ift them to return coherence skips"
-    if verbose: print "shape of data",ndshape(data)
-    if verbose: print data.other_info['phasecycle']
-    phasecyc_origindeces = r_[0:data.other_info['phasecycle'].shape[0]]
-    phase_cycles = data.other_info['phasecycle']
-    this_dtype = phase_cycles.dtype.descr * phase_cycles.shape[1]
-    #{{{ construct the new phase cycle set
-    new_fields = ['phcyc%d'%(j+1) for j in range(phase_cycles.shape[1])]
-    phase_cycles =  phase_cycles.view(this_dtype).squeeze()
-    phase_cycles.dtype.names = new_fields
-    #}}}
-    prod_of_nuniqueinfield = array([len(unique(phase_cycles[j])) for j in phase_cycles.dtype.names]).prod()
-    if verbose: print 'product of unique elements in each field',prod_of_nuniqueinfield
-    if verbose: print 'actual unique tuples',len(unique(phase_cycles))
-    redundancy = prod_of_nuniqueinfield/len(unique(phase_cycles))
-    if verbose: print 'redundancy',redundancy
-    final_field = phase_cycles.dtype.names[-1]
-    if verbose: print "before rotation",data['indirect',0]
-    if redundancy == 2:
-        mask = phase_cycles[final_field] == 90
-        mask |= phase_cycles[final_field] == 270
-        if verbose: print "these match",phase_cycles[mask]
-        phase_cycles[final_field][mask] -= 90 
-        data['phcyc',mask] *= exp(-1j*pi/2) # pulse was rotated 90 forward, which makes signal 90 backwards
-        if verbose: print "after rotation",data['indirect',0]
-    if verbose: print "argsort:",argsort(phase_cycles,order = phase_cycles.dtype.names)
-    if verbose: print "argsorted:"
-    for j in phase_cycles[argsort(phase_cycles)]:
-        if verbose: print j
-    if verbose: print ndshape(data)
-    #{{{ actually assign and chunk the phase cycle dimension
-    data.setaxis('phcyc',phase_cycles)
-    sorted_indeces = argsort(phase_cycles)
-    if verbose: print 'sorted indeces are',sorted_indeces
-    data = data['phcyc',sorted_indeces]
-    if verbose: print data.getaxis('phcyc')
-    #for phcyc_i in [phase_cycles.dtype.names[0]]: # for debugging, just do the first
-    for phcyc_i in phase_cycles.dtype.names[:-1]:
-        if verbose: print 'chunking out',phcyc_i
-        if verbose: print 'with axis label',data.getaxis('phcyc')
-        data.chunk_auto('phcyc',phcyc_i,dimname = 'phcyc')
-        if verbose: print 'just did',phcyc_i,'and got',ndshape(data)
-    data.rename('phcyc',phase_cycles.dtype.names[-1])
-    if verbose: print 'finalized and got',ndshape(data)
-    #}}}
-    for j in phase_cycles.dtype.names:
-        x = data.getaxis(j)
-        data.setaxis(j,r_[0:1:1j*len(x)])
-        data.ift(j)
-    return data
 def open_cw_file(filename,fl = None,use_sweep = False,**kwargs):
     if fl is None:
         fl = figlist_var()

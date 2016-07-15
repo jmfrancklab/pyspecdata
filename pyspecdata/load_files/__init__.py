@@ -25,7 +25,6 @@ def find_file(searchstring,
             print_result = True,
             verbose = False,
             prefilter = None,
-            load_indiv_file = None,
             dimname='', return_acq=False,
             add_sizes=[], add_dims=[], use_sweep=None,
             indirect_dimlabels=None,
@@ -81,13 +80,10 @@ def find_file(searchstring,
         indirect_dimlabels:
             passed to :func:`load_indiv_file`
         '''
+    print "find_file sees indirect_dimlabels",indirect_dimlabels
     # {{{ legacy warning
     if 'subdirectory' in kwargs.keys():
         raise ValueError("The `subdirectory` keyword argument is not longer valid -- use `exp_type` instead!")
-    # }}}
-    # {{{ 
-    indirect_dimlabels, use_sweep = process_kwargs([('indirect_dimlabels',None),
-        ('use_sweep',False)], kwargs, pass_through=True)
     # }}}
     #{{{ actually find one file and load it into the h5 object
     directory = getDATADIR(exp_type=exp_type)
@@ -105,7 +101,7 @@ def find_file(searchstring,
     filename = directory + files[-1]
     #}}}
     # {{{ file loaded here
-    load_indiv_file(filename,
+    data = load_indiv_file(filename,
         dimname=dimname, return_acq=return_acq,
         add_sizes=add_sizes, add_dims=add_dims, use_sweep=use_sweep,
         indirect_dimlabels=indirect_dimlabels)
@@ -115,13 +111,13 @@ def find_file(searchstring,
     else:
         if postproc is None:
             postproc_type = data.get_prop('postproc_type')
-        if postproc is None:
+        if postproc_type is None:
             return data
         else:
-            if postproc_type in loader_module.postproc_lookup.keys():
-                data = loader_module.postproc_lookup[desc_class](data)
+            if postproc_type in postproc_lookup.keys():
+                data = postproc_lookup[postproc_type](data)
             else:
-                raise ValueError('postprocessing not defined for file with postproc_type'+postproc_type)
+                raise ValueError('postprocessing not defined for file with postproc_type %s --> it should be defined in the postproc_type dictionary in load_files.__init__.py'+postproc_type)
             return data
 def format_listofexps(args):
     """This is an auxiliary function that's used to decode the experiment list.
@@ -367,6 +363,15 @@ def load_acqu(filename,whichdim='',return_s = None):
         # }}}
     else:
         raise CustomError(det_type(filename),'is not yet supported')
+
+postproc_lookup = {
+        'ELDOR':acert.postproc_eldor_old,
+        'ELDOR_3D':acert.postproc_eldor_3d,
+        'FID':acert.postproc_generic,
+        'echo_T2':acert.postproc_echo_T2,
+        'B1_se':acert.postproc_B1_se,
+        'CW':acert.postproc_cw,
+        }
 #def load_t1_axis(file):
 #    raise RuntimeError("don't use load_t1_axis anymore, the t1 axis should be available as an nddata property called wait_time")
 #def bruker_load_t1_axis(file):
