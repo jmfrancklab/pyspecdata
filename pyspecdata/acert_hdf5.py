@@ -102,7 +102,7 @@ def plot_comparison(input_data,
                 legend=True)
     ax = gca()
     color_cycle = ax._get_lines.color_cycle
-    normalization = 1e-6 # a standard number
+    normalization = 1e-7 # a standard number
     for j in range(0,len(list_of_cw_files)):# I end up looping back over and reloading because they might have different axes, though in an older format, I did this all in one batch
         next_color = next(color_cycle)
         short_basename = list_of_cw_files[j]
