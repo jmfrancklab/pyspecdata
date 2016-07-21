@@ -4675,8 +4675,7 @@ class nddata (object):
         #}}}
         return self
     def chunk(self,axisin,*otherargs):
-        r'''chunks axisin into multiple new axes
-        arguments:
+        r'''"Chunking" is defined here to be the opposite of taking a direct product, increasing the number of dimensions by the inverse of the process by which taking a direct product decreases the number of dimensions.  This function chunks axisin into multiple new axes arguments.:
             axesout -- gives the names of the output axes
             shapesout -- optional -- if not given, it assumes equal length -- if given, one of the values can be -1, which is assumed length'''
         if len(otherargs) == 2:

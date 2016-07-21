@@ -10,11 +10,11 @@ experiment names set in
 ``(h5 root).experiment.description['class']``)
 '''        
 from ..core import *
+from ..general_functions import *
 import h5py
 def load_pulse(filename,
         indirect_dimlabels=None,
         prefilter=None,
-        verbose=False,# rather than using verbose, I really should be using logging
         ):
     """Load ACERT pulse data from the 95 GHz.
 
@@ -60,7 +60,7 @@ def load_pulse(filename,
                 raise ValueError("There is a problem, because the dimensions of your data don't match the value given by t2_steps")
             data.labels('t2',r_[0:t2_steps]*t2_inc)
         else:
-            if verbose: print "warning, I couldn't find the t2 steps parameter"
+            logger.info(strm("warning, I couldn't find the t2 steps parameter"))
             data.labels('t2',r_[0:ndshape(data)['t2']]*1e-9)
         data.set_units('t2','s')
         if prefilter is not None:
@@ -78,12 +78,12 @@ def load_pulse(filename,
         #}}}
         #{{{ assign all the dimensions
         indirect_names_in_h5 = [k for k,v in h5['experiment'].iteritems() if k not in ['data.i','data.r','bin_switch_times','fields','sweep_currents'] and type(v) == h5py.Dataset]
-        if verbose: print "dimlabels are",dimlabels
+        logger.info(strm("dimlabels are",dimlabels))
         expected_dimlabels = set(dimlabels) - {'phcyc','t2','bin'} # we expect to find these axes stored in the HDF5
-        if verbose: print "expected dimlabels",expected_dimlabels
+        logger.info(strm("expected dimlabels",expected_dimlabels))
         common_dimensions = expected_dimlabels & set(indirect_names_in_h5)
         #{{{ deal with the case where dimlabels and the stored axes don't match up correctly 
-        if verbose: print "common dimensions",common_dimensions
+        logger.info(strm("common dimensions",common_dimensions))
         unlabeled_indirect = False
         if len(indirect_names_in_h5) == 0:
             warnings.warn('Warning!! The indirect dimension is not labeled!\nDimensions of the data:%s\nfilename: %s'%(repr(ndshape(data)),filename))
@@ -102,13 +102,13 @@ def load_pulse(filename,
             else:
                 raise ValueError("This file has dimensions that I can't just automatically sort!:\n\tDimensions in the file: %s\n\tDimensions listed in dimlabels %s\n\tDimensions of the data: %s\n\tDimensions in hdf5 but not dimlabels: %s\n\tDimensions in dimlabels but not HDF5: %s"%(repr(indirect_names_in_h5),repr(dimlabels),repr(ndshape(data)),repr(h5_but_not_dimlabels),repr(dimlabels_but_not_h5)))
         #}}}
-        if verbose: print "now dimlabels are",dimlabels,"and indirect_names_in_h5 is",indirect_names_in_h5
+        logger.info(strm("now dimlabels are",dimlabels,"and indirect_names_in_h5 is",indirect_names_in_h5))
         #{{{ chunk the "indirect" dimension up appropriately, and assign the dimensions
         if not unlabeled_indirect:
             if 'indirect' in data.dimlabels:# note that if there was only a single indirect dimension, it's already been used up
                 chunk_dict = dict([(j,len(h5['experiment'][j])) for j in dimlabels if j not in ['bin','phcyc','t2']])
-                if verbose: print ndshape(data)
-                if verbose: print chunk_dict
+                logger.info(strm(ndshape(data)))
+                logger.info(strm(chunk_dict))
                 # {{{ if an experiment with a single dimension was abandoned early, we know what to do about that
                 if (len(chunk_dict) == 1 and chunk_dict.values()[0] >
                         data.data.shape[data.axn('indirect')]):
@@ -142,7 +142,7 @@ def load_pulse(filename,
             #}}}
             if 'fields' in x.dtype.names:
                 fields,indeces = unique(x['fields'],return_index = True)
-                if verbose: print "number of fields",len(fields),"number of unique fields",len(x['fields']),'unique fields are',x['fields']
+                logger.info(strm("number of fields",len(fields),"number of unique fields",len(x['fields']),'unique fields are',x['fields']))
                 if len(fields) != len(x['fields']):
                     spacing = diff(indeces)
                     if all(spacing == spacing[0]):
@@ -312,8 +312,8 @@ def postproc_cw(file_regexp,phase = True,use_sweep = False):
     return data
 def automagical_phasecycle(data,verbose = False):
     "Use the phase cycle list to determine the phase cycles, and then ift them to return coherence skips"
-    if verbose: print "shape of data",ndshape(data)
-    if verbose: print data.other_info['phasecycle']
+    logger.info(strm("shape of data",ndshape(data)))
+    logger.info(strm(data.other_info['phasecycle']))
     phasecyc_origindeces = r_[0:data.other_info['phasecycle'].shape[0]]
     phase_cycles = data.other_info['phasecycle']
     this_dtype = phase_cycles.dtype.descr * phase_cycles.shape[1]
@@ -323,38 +323,38 @@ def automagical_phasecycle(data,verbose = False):
     phase_cycles.dtype.names = new_fields
     #}}}
     prod_of_nuniqueinfield = array([len(unique(phase_cycles[j])) for j in phase_cycles.dtype.names]).prod()
-    if verbose: print 'product of unique elements in each field',prod_of_nuniqueinfield
-    if verbose: print 'actual unique tuples',len(unique(phase_cycles))
+    logger.info(strm('product of unique elements in each field',prod_of_nuniqueinfield))
+    logger.info(strm('actual unique tuples',len(unique(phase_cycles))))
     redundancy = prod_of_nuniqueinfield/len(unique(phase_cycles))
-    if verbose: print 'redundancy',redundancy
+    logger.info(strm('redundancy',redundancy))
     final_field = phase_cycles.dtype.names[-1]
-    if verbose: print "before rotation",data['indirect',0]
+    #logger.info(strm("before rotation",data['indirect',0]))
     if redundancy == 2:
         mask = phase_cycles[final_field] == 90
         mask |= phase_cycles[final_field] == 270
-        if verbose: print "these match",phase_cycles[mask]
+        logger.info(strm("these match",phase_cycles[mask]))
         phase_cycles[final_field][mask] -= 90 
         data['phcyc',mask] *= exp(-1j*pi/2) # pulse was rotated 90 forward, which makes signal 90 backwards
-        if verbose: print "after rotation",data['indirect',0]
-    if verbose: print "argsort:",argsort(phase_cycles,order = phase_cycles.dtype.names)
-    if verbose: print "argsorted:"
+        logger.info(strm("after rotation",data['indirect',0]))
+    logger.info(strm("argsort:",argsort(phase_cycles,order = phase_cycles.dtype.names)))
+    logger.info(strm("argsorted:"))
     for j in phase_cycles[argsort(phase_cycles)]:
-        if verbose: print j
-    if verbose: print ndshape(data)
+        logger.info(strm(j))
+    logger.info(strm(ndshape(data)))
     #{{{ actually assign and chunk the phase cycle dimension
     data.setaxis('phcyc',phase_cycles)
     sorted_indeces = argsort(phase_cycles)
-    if verbose: print 'sorted indeces are',sorted_indeces
+    logger.info(strm('sorted indeces are',sorted_indeces))
     data = data['phcyc',sorted_indeces]
-    if verbose: print data.getaxis('phcyc')
+    logger.info(strm(data.getaxis('phcyc')))
     #for phcyc_i in [phase_cycles.dtype.names[0]]: # for debugging, just do the first
     for phcyc_i in phase_cycles.dtype.names[:-1]:
-        if verbose: print 'chunking out',phcyc_i
-        if verbose: print 'with axis label',data.getaxis('phcyc')
+        logger.info(strm('chunking out',phcyc_i))
+        logger.info(strm('with axis label',data.getaxis('phcyc')))
         data.chunk_auto('phcyc',phcyc_i,dimname = 'phcyc')
-        if verbose: print 'just did',phcyc_i,'and got',ndshape(data)
+        logger.info(strm('just did',phcyc_i,'and got',ndshape(data)))
     data.rename('phcyc',phase_cycles.dtype.names[-1])
-    if verbose: print 'finalized and got',ndshape(data)
+    logger.info(strm('finalized and got',ndshape(data)))
     #}}}
     for j in phase_cycles.dtype.names:
         x = data.getaxis(j)
