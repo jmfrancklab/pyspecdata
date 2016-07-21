@@ -84,14 +84,46 @@ def gen_composite(basenames,collected_data,
         thisdata = thisdata['t2':(thisdata.get_prop('execution_deadtime'),125e-9)] # stop at 125, just so I'm not skewed by the baseline
         plot(thisdata.getaxis('t2')/1e-9,log10(thisdata.data),'.',label = thisname)
     return composite_ringdown,amplification_list,saturation_point
-def plot_comparison(input_data,date,fl,phase = True,discard_error = True):
+def plot_comparison(input_data,
+        date, fl, phase=True,
+        discard_error=True,
+        scale=1.0):
     "Compare a series of cw experiments"
+    # {{{ load initial info
     list_of_cw_files, mod_amp = zip(*input_data)
     single_date = True
     if date is None:
         mod_amp,date = zip(*mod_amp)
         single_date = False
+    # }}}
+    # {{{ compare the noise levels
+    for complex_type in ['real','imag']:
+        fl.next('compare noise level %s'%complex_type,
+                legend=True)
+    ax = gca()
+    color_cycle = ax._get_lines.color_cycle
+    normalization = 1e-7 # a standard number
+    for j in range(0,len(list_of_cw_files)):# I end up looping back over and reloading because they might have different axes, though in an older format, I did this all in one batch
+        next_color = next(color_cycle)
+        short_basename = list_of_cw_files[j]
+        if single_date:
+            file_regexp = ('%s.*'%date + short_basename + '\\.')
+        else:
+            print "note single date -- searching for"
+            file_regexp = ('%s.*'%date[j] + short_basename + '\\.')
+        data = open_cw_file(search_freed_file(file_regexp,'cw'))['repeats',0]
+        for complex_type in ['real','imag']:
+            fl.next('compare noise level %s'%complex_type)
+            if complex_type == 'real':
+                plotdata = data.runcopy(real)
+            else:
+                plotdata = data.runcopy(imag)
+            fl.plot(plotdata/normalization - 2*j,
+                    alpha=0.5, color=next_color,
+                    label=short_basename)
+    # }}}
     short_basename = list_of_cw_files[0]
+    collected_data = []
     for j in range(0,len(list_of_cw_files)):
         short_basename = list_of_cw_files[j]
         if single_date:
@@ -103,13 +135,14 @@ def plot_comparison(input_data,date,fl,phase = True,discard_error = True):
         if j == 0:
             data_shape = ndshape(data)
             data_shape.add_correctly((len(list_of_cw_files),'indirect'))
-            collected_data = data_shape.alloc()
-            collected_data.set_units('field',data.get_units('field'))
-            collected_data.labels(['indirect','field',],[array(list_of_cw_files),data.getaxis('field')])
-        collected_data['indirect',j] = data
+        print ndshape(data)
+        collected_data.append(data)
     fl.next('cw plots -- real + imag',legend = True,boundaries = False)
-    normalization = abs(collected_data.runcopy(real)).run(max,'field').run(max,'indirect').data
-    normalization = max(r_[abs(collected_data.runcopy(imag)).run(max,'field').run(max,'indirect').data,normalization])
+    normalization = max(r_[array(
+            map(lambda x:
+                x.runcopy(real).run(abs).data.max(),
+                    collected_data)).mean(),normalization])
+    normalization /= scale
     ax = gca()
     color_cycle = ax._get_lines.color_cycle
     for j in range(0,len(list_of_cw_files)):# I end up looping back over and reloading because they might have different axes, though in an older format, I did this all in one batch
@@ -121,10 +154,10 @@ def plot_comparison(input_data,date,fl,phase = True,discard_error = True):
         if discard_error: data.set_error(None)
         data /= mod_amp[j]
         next_color = next(color_cycle)
-        fl.plot(data.runcopy(real)/normalization + 2*j,
-                alpha = 0.75,color = next_color,label = collected_data.getaxis('indirect')[j])
+        fl.plot(data.runcopy(real)/normalization - 2*j,
+                alpha = 0.75,color = next_color,label = list_of_cw_files[j])
         autolegend()
-        fl.plot(data.runcopy(imag)/normalization + 2*j,
+        fl.plot(data.runcopy(imag)/normalization - 2*j,
                 alpha = 0.25,color = next_color)
 def plot_coherence_diagram(ax1,list_of_DeltaC,list_of_sizes,plotidx,outof):
     #print "new coherence diagram"

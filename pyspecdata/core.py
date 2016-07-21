@@ -3782,9 +3782,15 @@ class nddata (object):
             axis = args[1]
             try:
                 thisindex = self.dimlabels.index(axis)
-            except:
+            except Error,e:
                 if type(axis) is not str:
                     raise ValueError('The format of run is run(func,"axisname"), but you didn\'t give a string as the second argument -- maybe you fed the arguments backwards?')
+                elif axis not in self.dimlabels:
+                    raise ValueError("axis "+axis+
+                            " is not in dimlabels ("+
+                            repr(self.dimlabels)+")")
+                else:
+                    raise e
             self.data = func(self.data,axis=thisindex)
             self._pop_axis_info(thisindex)
         else:
@@ -4528,11 +4534,15 @@ class nddata (object):
             in the conjugate domain that the data is in at the end of the
             function call.
         '''
-        if (self.get_ft_prop(along_axis) ^ self.get_ft_prop(propto_axis)) ^ start_in_conj:
-            if start_in_conj:
-                raise ValueError("if you pass start_in_conj, the two dimensions need to be in conjugate domains, but you have: "+self.ft_state_to_str(along_axis,propto_axis))
-            else:
-                raise ValueError("(unless you intended to pass start_in_conj) the two dimensions need to be in the same domain, but you have: "+self.ft_state_to_str(along_axis,propto_axis))
+        if not (
+                self.get_ft_prop(along_axis) is None
+                and
+                self.get_ft_prop(propto_axis) is None):
+            if (self.get_ft_prop(along_axis) ^ self.get_ft_prop(propto_axis)) ^ start_in_conj:
+                if start_in_conj:
+                    raise ValueError("if you pass start_in_conj, the two dimensions need to be in conjugate domains, but you have: "+self.ft_state_to_str(along_axis,propto_axis))
+                else:
+                    raise ValueError("(unless you intended to pass start_in_conj) the two dimensions need to be in the same domain, but you have: "+self.ft_state_to_str(along_axis,propto_axis))
         if method == 'fourier':
             return self.fourier_shear(along_axis, propto_axis,
                     shear_amnt, zero_fill=zero_fill)
