@@ -31,53 +31,72 @@ def xepr(filename, dimname=''):
     # }}}
     # {{{ load the data
     with open(filename_spc,'rb') as fp:
-        data = fp.read()
-    data = fromstring(data,'>f8')
+        data = fromstring(fp.read(),'>f8')
     # }}}
     # load the parameters
     v = xepr_load_acqu(filename_par)
+    # {{{ flatten the dictionary (remove the uppermost/block
+    #     level)
+    new_v = {}
     for k_a,v_a in v.iteritems():
-        for k_b,v_b in v_a.iteritems():
-            data.set_prop(k_b,v_b)
-    print v
-    exit()
+        new_v.update(v_a)
+    v = new_v
+    # }}}
     # {{{ use the parameters to determine the axes
-    xpoints = v['RES']
-    ypoints = len(data)/xpoints
-    if ypoints>1:
-        if ypoints != v['REY']:
+    #     pop parameters that are just part of the axes
+    x_points = v.pop('XPTS')
+    print (x_points)
+    x_axis = r_[0:x_points]
+    # the following is NOT the same as *=, which preserves the
+    # type (=bad!)!!!
+    x_axis = x_axis*v.pop('XWID')/x_axis[-1] # wouldn't be a huge
+    #         difference, but I'm not sure if this is correct
+    #         (I think so)
+    x_axis += v.pop('XMIN')
+    y_points = len(data)/x_points
+    if 'YPTS' in v.keys():
+        raise ValueError("I looks like this is a 2D file, which I"
+                " just haven't bothered to program yet")
+    if y_points>1:
+        raise ValueError("I looks like this is a 2D file, which I"
+                " just haven't bothered to program yet -- the"
+                " code here is just copied from the WinEPR"
+                " reader")
+        if y_points != v['REY']:
             raise CustomError('I thought REY was the indirect dim, guess not')
         if dimname=='':
             dimname = v['JEY']
-        data = nddata(data,[ypoints,xpoints],[dimname,b0_texstr])
+        data = nddata(data,[y_points,x_points],[dimname,b0_texstr])
     else:
-        data = nddata(data,[xpoints],[b0_texstr])
-    xlabels = linspace(v['HCF']-v['HSW']/2.,v['HCF']+v['HSW']/2.,xpoints)
+        data = nddata(data,[x_points],[b0_texstr])
     if len(data.dimlabels)>1:
-        yaxis = r_[0:v['REY']]
-        if dimname == 'mw-power-sweep':
-            yaxis *= v['MPS']
-            yaxis += v['XYLB'] # the starting attenuation
-            yaxis = 10**(-yaxis/10.) # convert to linear power
-            yaxis *= v['MP']/yaxis[0] # the initial power
-            yaxis *= 1e-3 # convert from mW to W
-            data.rename('mw-power-sweep','power')
-            dimname = 'power'
-        data.labels([dimname,b0_texstr],[yaxis,xlabels])
-        data.reorder([b0_texstr,dimname])
+        raise ValueError("Code below is just copied from winepr"
+                " -- need to update")
+        #yaxis = r_[0:v['REY']]
+        #if dimname == 'mw-power-sweep':
+        #    yaxis *= v['MPS']
+        #    yaxis += v['XYLB'] # the starting attenuation
+        #    yaxis = 10**(-yaxis/10.) # convert to linear power
+        #    yaxis *= v['MP']/yaxis[0] # the initial power
+        #    yaxis *= 1e-3 # convert from mW to W
+        #    data.rename('mw-power-sweep','power')
+        #    dimname = 'power'
+        #data.labels([dimname,b0_texstr],[yaxis,x_axis])
+        #data.reorder([b0_texstr,dimname])
     else:
-        data.labels([b0_texstr],[xlabels])
+        data.labels([b0_texstr],[x_axis])
     # }}}
     # {{{ use the parameters to rescale the data
-    rg = v['RRG']
-    data /= rg
-    modulation = v['RMA']
+    logger.info("There is a parameter called DModGain as well as"
+            " Gain -- not sure what that is")
+    rg = v.pop('Gain')
+    if isscalar(rg) or rg[1] != 'dB':
+        raise ValueError(strm("The gain from the file is not given in"
+                " dB -- not sure what's up.  I get",rg,"for gain"))
+    #data /= 10**(rg[0]/10.0)
     #data /= modulation
-    try:
-        data /= v['JNS'] # divide by number of scans
-    except:
-        pass
-    #data /= v['MP'] # divide by power <-- weird, don't do this!
+    # here, for winepr, I divided by the number of scans, but I'm
+    # fairly sure I don't wan to do that
     # }}}
     data.other_info.update(v)
     return data
@@ -203,8 +222,15 @@ def xepr_load_acqu(filename):
         automatic type conversion -- note that strings with
         spaces will be returned as a record array it appears to
         need this StringIO function rather than a string because
-        it's designed to read directly from a file'''
-        return genfromtxt(StringIO(x),dtype=None)
+        it's designed to read directly from a file.  The tolist
+        converts the record array to a list.'''
+        if len(x):
+            try:
+                return genfromtxt(StringIO(x),dtype=None).tolist()
+            except:
+                raise ValueError("genfromtxt chokes on "+repr(x))
+        else:
+            return None
     which_block = None
     block_re = re.compile(r'^ *#(\w+)')
     comment_re = re.compile(r'^ *\*')
@@ -239,7 +265,8 @@ def xepr_load_acqu(filename):
                                 # }}}
                             else:
                                 block_list.append((m.groups()[0],
-                                        m.groups()[1]))
+                                        auto_string_convert(
+                                            m.groups()[1])))
                         else:
                             raise ValueError("I don't know what to do with the line:\n"+line)
         blocks.update({which_block:dict(block_list)})
