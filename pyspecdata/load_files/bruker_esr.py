@@ -2,7 +2,85 @@ from ..core import *
 from ..general_functions import strm
 from numpy import fromstring
 import re, string
+from StringIO import StringIO
 b0_texstr = r'$B_0$'
+def xepr(filename, dimname=''):
+    """For opening Xepr files.
+    
+    Parameters
+    ----------
+    filename : str
+        The filename that ends with either ``.dsc`` or ``.dta``.
+    """
+    # {{{ determine the pair of filenames that we need
+    filename = filename[:-4]+filename[-4:].upper()# case insensitive extension
+    if filename[-4:] == '.DTA':
+        filename_spc,filename_par = filename,filename.replace('.DTA','.DSC')
+    elif filename[-4:] == '.DSC':
+        filename_spc,filename_par = filename.replace('.DSC','.DTA'),filename
+    else:
+        raise ValueError(strm("When guessing that the filename is a"
+                " WinEPR file, the extension must be either .SPC or"
+                " .PAR\n"
+                "This one is called",repr(filename)))
+    # {{{ check if the extension is upper or lowercase
+    if not os.path.exists(filename_spc):
+        filename_spc = filename_spc[:-4] + filename_spc[-4:].lower()
+        filename_par = filename_par[:-4] + filename_par[-4:].lower()
+    # }}}
+    # }}}
+    # {{{ load the data
+    with open(filename_spc,'rb') as fp:
+        data = fp.read()
+    data = fromstring(data,'>f8')
+    # }}}
+    # load the parameters
+    v = xepr_load_acqu(filename_par)
+    for k_a,v_a in v.iteritems():
+        for k_b,v_b in v_a.iteritems():
+            data.set_prop(k_b,v_b)
+    print v
+    exit()
+    # {{{ use the parameters to determine the axes
+    xpoints = v['RES']
+    ypoints = len(data)/xpoints
+    if ypoints>1:
+        if ypoints != v['REY']:
+            raise CustomError('I thought REY was the indirect dim, guess not')
+        if dimname=='':
+            dimname = v['JEY']
+        data = nddata(data,[ypoints,xpoints],[dimname,b0_texstr])
+    else:
+        data = nddata(data,[xpoints],[b0_texstr])
+    xlabels = linspace(v['HCF']-v['HSW']/2.,v['HCF']+v['HSW']/2.,xpoints)
+    if len(data.dimlabels)>1:
+        yaxis = r_[0:v['REY']]
+        if dimname == 'mw-power-sweep':
+            yaxis *= v['MPS']
+            yaxis += v['XYLB'] # the starting attenuation
+            yaxis = 10**(-yaxis/10.) # convert to linear power
+            yaxis *= v['MP']/yaxis[0] # the initial power
+            yaxis *= 1e-3 # convert from mW to W
+            data.rename('mw-power-sweep','power')
+            dimname = 'power'
+        data.labels([dimname,b0_texstr],[yaxis,xlabels])
+        data.reorder([b0_texstr,dimname])
+    else:
+        data.labels([b0_texstr],[xlabels])
+    # }}}
+    # {{{ use the parameters to rescale the data
+    rg = v['RRG']
+    data /= rg
+    modulation = v['RMA']
+    #data /= modulation
+    try:
+        data /= v['JNS'] # divide by number of scans
+    except:
+        pass
+    #data /= v['MP'] # divide by power <-- weird, don't do this!
+    # }}}
+    data.other_info.update(v)
+    return data
 def winepr(filename, dimname=''):
     """For opening WinEPR files.
     
@@ -35,17 +113,8 @@ def winepr(filename, dimname=''):
     # }}}
     # load the parameters
     v = winepr_load_acqu(filename_par)
-    # {{{ use the parameters to rescale the data and determine the axes
+    # {{{ use the parameters to determine the axes
     xpoints = v['RES']
-    rg = v['RRG']
-    data /= rg
-    modulation = v['RMA']
-    #data /= modulation
-    try:
-        data /= v['JNS'] # divide by number of scans
-    except:
-        pass
-    #data /= v['MP'] # divide by power <-- weird, don't do this!
     ypoints = len(data)/xpoints
     if ypoints>1:
         if ypoints != v['REY']:
@@ -70,6 +139,17 @@ def winepr(filename, dimname=''):
         data.reorder([b0_texstr,dimname])
     else:
         data.labels([b0_texstr],[xlabels])
+    # }}}
+    # {{{ use the parameters to rescale the data
+    rg = v['RRG']
+    data /= rg
+    modulation = v['RMA']
+    #data /= modulation
+    try:
+        data /= v['JNS'] # divide by number of scans
+    except:
+        pass
+    #data /= v['MP'] # divide by power <-- weird, don't do this!
     # }}}
     data.other_info.update(v)
     return data
@@ -108,3 +188,60 @@ def winepr_load_acqu(filename):
     values = map(bool,values)
     v.update(dict(zip(parameters,values)))
     return v
+def xepr_load_acqu(filename):
+    '''Load the Xepr acquisition parameter file, which should be a .dsc extension.
+
+    Returns
+    -------
+    A dictionary of the relevant results.
+    Because of the format of the .dsc files, this is a dictionary of
+    dictionaries, where the top-level keys are the hash-block (*i.e.*
+    ``#DESC``, *etc.*).
+    '''
+    def auto_string_convert(x):
+        '''genfromtxt is from numpy -- with dtype=None, it does
+        automatic type conversion -- note that strings with
+        spaces will be returned as a record array it appears to
+        need this StringIO function rather than a string because
+        it's designed to read directly from a file'''
+        return genfromtxt(StringIO(x),dtype=None)
+    which_block = None
+    block_re = re.compile(r'^ *#(\w+)')
+    comment_re = re.compile(r'^ *\*')
+    variable_re = re.compile(r'^ *([^\s]*)\s+(.*?) *$')
+    comma_re = re.compile(r'\s*,\s*')
+    with open(filename,'r') as fp:
+        blocks = {}
+        # {{{ read lines and assign to the appropriate block
+        for line in fp:
+            m = comment_re.search(line)
+            if m:
+                pass
+            else:
+                m = block_re.search(line)
+                if m:
+                    if which_block is not None:
+                        blocks.update({which_block:dict(block_list)})
+                    which_block = m.groups()[0]
+                    block_list = []
+                else:
+                    if which_block is None:
+                        raise ValueError("Appears to be stuff outside the first hashed block which, as far as I know, should not be allowed.  The first non-comment line I see is: "+repr(line))
+                    else:
+                        m = variable_re.search(line)
+                        if m:
+                            if ',' in m.groups()[1]:
+                                # {{{ break into lists
+                                block_list.append((m.groups()[0],
+                                        map(auto_string_convert,
+                                            comma_re.split(
+                                                m.groups()[1]))))
+                                # }}}
+                            else:
+                                block_list.append((m.groups()[0],
+                                        m.groups()[1]))
+                        else:
+                            raise ValueError("I don't know what to do with the line:\n"+line)
+        blocks.update({which_block:dict(block_list)})
+        # }}}
+    return blocks
