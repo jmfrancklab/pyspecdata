@@ -232,7 +232,6 @@ def error_plot(*arg):
 #}}}
 #}}}
 #{{{ wrappers/generic functions to load acq and data files
-b0 = r'$B_0$'
 def show_acqu(vars):
     print '\\begin{verbatim}',vars.__repr__().replace(',','\n'),'\\end{verbatim}\n\n'
 #{{{ load an nddata structure for a 2d set -- give the data needed to load

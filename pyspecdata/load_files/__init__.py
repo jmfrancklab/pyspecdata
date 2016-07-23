@@ -5,7 +5,7 @@ from . import bruker_esr
 from . import acert
 from ..datadir import getDATADIR
 from ..datadir import _my_config
-from ..general_functions import process_kwargs
+from ..general_functions import process_kwargs,logger,strm
 from ..core import *
 from __builtin__ import any # numpy has an "any" function, which is very annoying
 from itertools import tee
@@ -80,12 +80,13 @@ def find_file(searchstring,
         indirect_dimlabels:
             passed to :func:`load_indiv_file`
         '''
-    print "find_file sees indirect_dimlabels",indirect_dimlabels
+    logger.info(strm("find_file sees indirect_dimlabels",
+        indirect_dimlabels))
     # {{{ legacy warning
     if 'subdirectory' in kwargs.keys():
         raise ValueError("The `subdirectory` keyword argument is not longer valid -- use `exp_type` instead!")
     # }}}
-    #{{{ actually find one file and load it into the h5 object
+    #{{{ actually find the files
     directory = getDATADIR(exp_type=exp_type)
     if os.path.isdir(directory):
         files = re.findall('.*' + searchstring + '.*','\n'.join(os.listdir(directory)))
@@ -98,14 +99,20 @@ def find_file(searchstring,
             warnings.warn('found multiple files:\n'+repr(files)+'\nand opening last')
         elif print_result and verbose:
             obsn("found only one file, and loading it:"+repr(files))
-    filename = directory + files[-1]
     #}}}
-    # {{{ file loaded here
-    data = load_indiv_file(filename,
-        dimname=dimname, return_acq=return_acq,
-        add_sizes=add_sizes, add_dims=add_dims, use_sweep=use_sweep,
-        indirect_dimlabels=indirect_dimlabels)
-    # }}}
+    data = None
+    while data is None and len(files) > 0:
+        filename = directory + files.pop(-1)
+        # {{{ file loaded here
+        logger.debug(strm("about to call load_indiv_file on",filename))
+        data = load_indiv_file(filename,
+            dimname=dimname, return_acq=return_acq,
+            add_sizes=add_sizes, add_dims=add_dims, use_sweep=use_sweep,
+            indirect_dimlabels=indirect_dimlabels)
+        # }}}
+    if data is None:
+        raise ValueError(strm(
+            "I found no data matching the regexp", searchstring))
     if hasattr(postproc,'__call__'):
         return postproc(data,**kwargs)
     else:
@@ -176,6 +183,10 @@ def load_file(*args,**kwargs):
     data = [load_indiv_file(filenames[0],dimname=dimname,add_sizes = add_sizes,add_dims = add_dims)]
     for filename in filenames[1:]:
         data += [load_indiv_file(filename,dimname=dimname,add_sizes = add_sizes,add_dims = add_dims)]
+    data = filter(lambda x: x is not None, data)
+    if len(data) == 0:
+        raise ValueError(
+                strm("I found no data files matching",filenames))
     #}}}
     # for the following, I used to have a condition, but this is incompatible with the pop statement at the end
     newdata = concat(data,dimname) # allocate the size of the indirect array
@@ -215,7 +226,8 @@ def _check_signature(filename):
             retval = file_signatures[(thiskey for thiskey in
                 file_signatures.keys() if thiskey in
                 inistring).next()]
-            print "Found magic signature, returning",retval
+            logger.info(strm("Found magic signature, returning",
+                retval))
             return retval
         else:
             try:
@@ -250,12 +262,21 @@ def load_indiv_file(filename, dimname='', return_acq=False,
         ``data.chunkoff(dimname,add_dims,add_sizes)``
     indirect_dimlabels : str or None
         passed through to `acert.load_pulse` (names an indirect dimension when dimlabels isn't provided)
+
+    Returns
+    -------
+    nddata or None
+        the nddata containing the data,
+        or else, `None`, indicating that this is part of a pair of
+        files that should be skipped
     """
-    print "load_indiv_file sees indirect_dimlabels",indirect_dimlabels
+    logger.debug(strm("load_indiv_file sees indirect_dimlabels",
+        indirect_dimlabels))
     #to search for kwargs when separating: \<dimname\>\|\<return_acq\>\|\<add_sizes\>\|\<add_dims\>
     if not os.path.exists(filename):
         if os.path.exists(filename+'.par'):
             # {{{ legacy support for WinEPR without extension
+            logger.debug("legacy support for WinEPR without extension")
             data = bruker_esr.winepr(filename, dimname=dimname)
             warnings.warn("Don't call load_indiv_file anymore with the"
                     " incomplete filename to try to load the ESR spectrum."
@@ -266,6 +287,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
     # {{{ first, we search for the file magic to determine the filetype
     filetype = None
     if os.path.isdir(filename):# Bruker, prospa, etc, datasets are stored as directories
+        logger.debug(strm("the path",filename,"is a directory"))
         files_in_dir = os.listdir(filename)
         if os.path.exists(os.path.join(filename,'ser')):
             #{{{ Bruker 2D
@@ -292,9 +314,12 @@ def load_indiv_file(filename, dimname='', return_acq=False,
         else:
             raise RuntimeError('WARNING! unidentified file type '+filename)
     else:
+        logger.debug(strm("the path",filename,"is a file"))
         type_by_signature = _check_signature(filename)
         type_by_extension = _check_extension(filename)
+        logger.debug(strm("signature and extension checks are done"))
         if type_by_signature:
+            logger.debug(strm("determining type by signature"))
             if type_by_signature == 'HDF5':
                 # we can have the normal ACERT Pulse experiment or the ACERT CW format
                 with h5py.File(filename,'r') as h5:
@@ -312,6 +337,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             elif type_by_signature == 'DOS Format':
                 if type_by_extension == 'PAR':
                     # par identifies the old-format WinEPR parameter file, and spc the binary spectrum
+                    logger.debug("old-format WinEPR parameter file")
                     data = bruker_esr.winepr(filename, dimname=dimname)
                 else:
                     raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
@@ -324,10 +350,13 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             else:
                 raise RuntimeError("Type %s not yet supported!"%type_by_signature)
         else:
+            logger.debug(strm("determining type by extension"))
             if type_by_extension == 'SPC':
-                pass # ignore SPC, and leave the reading to the PAR file
+                logger.info(strm("skipping SPC file",filename))
+                return None # ignore SPC, and leave the reading to the PAR file
             elif type_by_extension == 'DTA':
-                pass # ignore DTA and load the reading to the DSC file
+                logger.info(strm("skipping DTA file",filename))
+                return None # ignore DTA and load the reading to the DSC file
             else:
                 raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
     # }}}
@@ -341,6 +370,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
                 [r_[0:x] for x in add_sizes])
     if return_acq:
         raise ValueError('return_acq is deprecated!! All properties are now set directly to the nddata using the set_prop function')
+    logger.debug("done with load_indiv_file")
     return data
     #}}}
 def load_acqu(filename,whichdim='',return_s = None):

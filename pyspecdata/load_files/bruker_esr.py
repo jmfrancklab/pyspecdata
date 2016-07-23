@@ -1,5 +1,8 @@
 from ..core import *
+from ..general_functions import strm
 from numpy import fromstring
+import re, string
+b0_texstr = r'$B_0$'
 def winepr(filename, dimname=''):
     """For opening WinEPR files.
     
@@ -10,13 +13,15 @@ def winepr(filename, dimname=''):
     """
     # {{{ determine the pair of filenames that we need
     filename = filename[:-4]+filename[-4:].upper()# case insensitive extension
-    if filename[:-4] == '.SPC':
+    if filename[-4:] == '.SPC':
         filename_spc,filename_par = filename,filename.replace('.SPC','.PAR')
-    elif filename[:-4] == '.PAR':
+    elif filename[-4:] == '.PAR':
         filename_spc,filename_par = filename.replace('.PAR','.SPC'),filename
     else:
-        raise ValueError("When guessing that the filename is a WinEPR file, the"
-                " extension must be either .SPC or .PAR")
+        raise ValueError(strm("When guessing that the filename is a"
+                " WinEPR file, the extension must be either .SPC or"
+                " .PAR\n"
+                "This one is called",repr(filename)))
     # {{{ check if the extension is upper or lowercase
     if not os.path.exists(filename_spc):
         filename_spc = filename_spc[:-4] + filename_spc[-4:].lower()
@@ -47,9 +52,9 @@ def winepr(filename, dimname=''):
             raise CustomError('I thought REY was the indirect dim, guess not')
         if dimname=='':
             dimname = v['JEY']
-        data = nddata(data,[ypoints,xpoints],[dimname,b0])
+        data = nddata(data,[ypoints,xpoints],[dimname,b0_texstr])
     else:
-        data = nddata(data,[xpoints],[b0])
+        data = nddata(data,[xpoints],[b0_texstr])
     xlabels = linspace(v['HCF']-v['HSW']/2.,v['HCF']+v['HSW']/2.,xpoints)
     if len(data.dimlabels)>1:
         yaxis = r_[0:v['REY']]
@@ -61,10 +66,10 @@ def winepr(filename, dimname=''):
             yaxis *= 1e-3 # convert from mW to W
             data.rename('mw-power-sweep','power')
             dimname = 'power'
-        data.labels([dimname,b0],[yaxis,xlabels])
-        data.reorder([b0,dimname])
+        data.labels([dimname,b0_texstr],[yaxis,xlabels])
+        data.reorder([b0_texstr,dimname])
     else:
-        data.labels([b0],[xlabels])
+        data.labels([b0_texstr],[xlabels])
     # }}}
     data.other_info.update(v)
     return data

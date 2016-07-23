@@ -82,12 +82,12 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = []):
     return du
 
 logger = logging.getLogger('root')
-FORMAT = "--> %(filename)s:(%(lineno)s) %(funcName)20s\n%(levelname)s: %(message)s"
+FORMAT = "--> %(filename)s:(%(lineno)s) %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"
 logging.basicConfig(format=FORMAT,
         filename=os.path.join(os.path.expanduser('~'),'pyspecdata.log'),
         filemode='w'
         )
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 def strm(*args):
     return ' '.join(map(str,args))
