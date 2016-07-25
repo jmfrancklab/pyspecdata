@@ -1,6 +1,8 @@
 "These are general functions that need to be accessible to everything inside pyspecdata.core.  I can't just put these inside pyspecdata.core, because that would lead to cyclic imports, and e.g. submodules of pyspecdata can't find them."
 
 from pylab import *
+import logging
+import os
 
 def process_kwargs(listoftuples,kwargs,pass_through = False):
     '''This function allows dynamically processed (*i.e.* function definitions with `**kwargs`) kwargs (keyword arguments) to be dealt with in a fashion more like standard kwargs.
@@ -78,3 +80,14 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = []):
     #   allclose/isclose, since they are more recent numpy additions
     assert du > 0, thismsg
     return du
+
+logger = logging.getLogger('root')
+FORMAT = "--> %(filename)s:(%(lineno)s) %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"
+logging.basicConfig(format=FORMAT,
+        filename=os.path.join(os.path.expanduser('~'),'pyspecdata.log'),
+        filemode='w'
+        )
+logger.setLevel(logging.INFO)
+
+def strm(*args):
+    return ' '.join(map(str,args))

@@ -1090,14 +1090,6 @@ def h5join(firsttuple,secondtuple,
 #}}}
 #{{{ indices to slice
 #}}}
-#{{{ add slashes for dir's
-def dirformat(file):
-        #{{{ format strings
-        if file[-1] not in ['/',path_sep]:
-            file += path_sep
-        #}}}
-        return file
-#}}}
 #{{{ old grid and tick
 def gridandtick(ax,rotation=(0,0),precision=(2,2),
         labelstring=('',''),gridcolor=r_[0,0,0],
@@ -4683,8 +4675,7 @@ class nddata (object):
         #}}}
         return self
     def chunk(self,axisin,*otherargs):
-        r'''chunks axisin into multiple new axes
-        arguments:
+        r'''"Chunking" is defined here to be the opposite of taking a direct product, increasing the number of dimensions by the inverse of the process by which taking a direct product decreases the number of dimensions.  This function chunks axisin into multiple new axes arguments.:
             axesout -- gives the names of the output axes
             shapesout -- optional -- if not given, it assumes equal length -- if given, one of the values can be -1, which is assumed length'''
         if len(otherargs) == 2:
@@ -4742,7 +4733,11 @@ class nddata (object):
         self.dimlabels = newnames
         return self
     def chunkoff(self,axisin,newaxes,newshapes):
-        r'''chunks up axisin, dividing it into newaxes with newshapes on the inside'''
+        r'''Break chunks off of the dimension given by `axisin`.
+
+        Specifically, subdivide it into several dimensions given by
+        the names `newaxes` with `newshapes`.  If the shape of the
+        data allows, retain `axisin` as the "outer" dimension.'''
         axesout = [axisin]+newaxes
         shapesout = [ndshape(self)[axisin]/prod(newshapes)]+newshapes
         return self.chunk(axisin,axesout,shapesout)
