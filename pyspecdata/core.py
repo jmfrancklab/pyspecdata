@@ -922,25 +922,28 @@ def h5table(bottomnode,tablename,tabledata):
             pass
     return bottomnode._v_children[tablename]
     #}}}
-def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_only = False):
+def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_only = False,directory='.'):
     r'''return the node based on an absolute path, including the filename'''
     if verbose: print lsafen("DEBUG: called h5nodebypath on",h5path)
     h5path = h5path.split('/')
     #{{{ open the file / check if it exists
     if verbose: print lsafen('h5path=',h5path)
+    logger.info(strm('the h5path is',h5path))
     try:
-        if h5path[0] in listdir('.'):
+        if h5path[0] in listdir(directory):
             if verbose: print 'DEBUG: file exists\n\n'
         else:
             if check_only: raise CustomError("You're checking for a node in a file that does not exist")
             if verbose: print 'DEBUG: file does not exist\n\n'
         mode = 'a'
         #if check_only: mode = 'r'
-        h5file = tables.openFile(h5path[0],mode = mode,title = 'test file')
+        logger.info(strm('so I look for the file',h5path[0],'in directory',directory))
+        h5file = tables.openFile(os.path.join(directory,h5path[0]),mode = mode,title = 'test file')
     except IOError:
         raise CustomError('I think the HDF5 file has not been created yet, and there is a bug pytables that makes it freak out, but you can just run again.')
     #}}}
     currentnode = h5file.getNode('/') # open the root node
+    logger.debug('ready to step down search path')
     for pathlevel in range(1,len(h5path)):#{{{ step down the path
             clear = False
             create = True
@@ -959,8 +962,10 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
                         create = create,
                         clear = clear)
                 if verbose: print lsafen("searching for node path: descended to node",currentnode)
+                logger.info(strm("searching for node path: descended to node",currentnode))
             except:
                 if verbose: print lsafen("searching for node path: got caught searching for node",h5path[pathlevel])
+                logger.info(strm("searching for node path: got caught searching for node",h5path[pathlevel]))
                 h5file.close()
                 #print lsafen("DEBUG: Yes, I closed the file")
                 raise CustomError('Problem trying to load node ',h5path)
@@ -5160,7 +5165,7 @@ class nddata (object):
             raise CustomError('label your freaking dimensions! (type of args[0] is ',type(args[0]),'and it should be str!)')
     #}}}
     #{{{ hdf5 write
-    def hdf5_write(self,h5path,verbose = False):
+    def hdf5_write(self, h5path, directory='.', verbose=False):
         #{{{ add the final node based on the name stored in the nddata structure
         if h5path[-1] != '/': h5path += '/' # make sure it ends in a slash first
         try:
@@ -5171,7 +5176,7 @@ class nddata (object):
             h5path += thisname
         else:
             raise CustomError("problem trying to store HDF5 file; you need to set the ``name'' property of the nddata object to a string first!")
-        h5file,bottomnode = h5nodebypath(h5path) # open the file and move to the right node
+        h5file,bottomnode = h5nodebypath(h5path, directory=directory) # open the file and move to the right node
         #print 'DEBUG 1: bottomnode is',bottomnode
         #}}}
         #{{{ print out the attributes of the data
@@ -5272,10 +5277,11 @@ class nddata_hdf5 (nddata):
             del self.h5file
             del self.datanode
         return
-    def __init__(self,pathstring):
+    def __init__(self,pathstring,directory='.'):
         self.pathstring = pathstring
         try:
-            self.h5file,self.datanode = h5nodebypath(pathstring,check_only = True)
+            self.h5file,self.datanode = h5nodebypath(pathstring,
+                    check_only=True, directory=directory)
         except:
             raise IndexError("I can't find the node"+pathstring)
         self._init_datanode(self.datanode)
@@ -5304,6 +5310,7 @@ class nddata_hdf5 (nddata):
         if 'axes' in datadict.keys():
             myaxiscoords = [None]*len(mydimlabels)
             myaxiscoordserror = [None]*len(mydimlabels)
+            logger.info(strm("about to read out the various axes:",datadict['axes'].keys()))
             for axisname in datadict['axes'].keys():
                 try:
                     axisnumber = mydimlabels.index(axisname)
@@ -5323,6 +5330,7 @@ class nddata_hdf5 (nddata):
             raise CustomError("The current version uses the axis labels to figure out the shape of the data\nBecause you stored unlabeled data, I can\'t figure out the shape of the data!!")
             # the reshaping this refers to is done below
         #}}}
+        logger.info(strm("about to initialize data with shape",mydata.shape,"labels",mydimlabels,"and kwargs",kwargs))
         nddata.__init__(self,
                 mydata,
                 mydata.shape,
@@ -5339,7 +5347,12 @@ class nddata_hdf5 (nddata):
                 if type(temp) is ndarray:
                     temp = len(temp)
                 det_shape.append(temp)
-            self.data = self.data.reshape(tuple([len(self.getaxis(x)) for x in mydimlabels]))
+            try:
+                self.data = self.data.reshape(tuple([len(self.getaxis(x)) for x in mydimlabels]))
+            except:
+                raise RuntimeError(strm("The data is of shape", self.data.shape,
+                    "and I try to reshape it into", tuple([len(self.getaxis(x))
+                        for x in mydimlabels]), "corresponding to the dimensions",mydimlabels,"--> this fails!"))
         #}}}
         for remainingattribute in datadict.keys():
             self.__setattr__(remainingattribute,datadict[remainingattribute])

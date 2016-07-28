@@ -81,7 +81,7 @@ def load_pulse(filename,
         logger.info(strm("dimlabels are",dimlabels))
         expected_dimlabels = set(dimlabels) - {'phcyc','t2','bin'} # we expect to find these axes stored in the HDF5
         logger.info(strm("expected dimlabels",expected_dimlabels))
-        common_dimensions = expected_dimlabels & set(indirect_names_in_h5)
+        common_dimensions = expected_dimlabels & set(indirect_names_in_h5) # common dimensions are expected, and are also labeled in the HDF5
         #{{{ deal with the case where dimlabels and the stored axes don't match up correctly 
         logger.info(strm("common dimensions",common_dimensions))
         unlabeled_indirect = False
@@ -106,7 +106,12 @@ def load_pulse(filename,
         #{{{ chunk the "indirect" dimension up appropriately, and assign the dimensions
         if not unlabeled_indirect:
             if 'indirect' in data.dimlabels:# note that if there was only a single indirect dimension, it's already been used up
-                chunk_dict = dict([(j,len(h5['experiment'][j])) for j in dimlabels if j not in ['bin','phcyc','t2']])
+                filtered_dims = [j for j in dimlabels if j not in  ['bin','phcyc','t2']]
+                chunk_dict = dict([(j,len(h5['experiment'][j])) if j in h5['experiment'].keys()
+                    else (j,len(h5['experiment'].attrs[j]))
+                    for j in filtered_dims])
+                common_dimensions |= set(chunk_dict.keys())
+                logger.info(strm("updated common dimensions to include dimensions I pulled from attributes:",common_dimensions))
                 logger.info(strm(ndshape(data)))
                 logger.info(strm(chunk_dict))
                 # {{{ if an experiment with a single dimension was abandoned early, we know what to do about that
@@ -117,7 +122,10 @@ def load_pulse(filename,
                 # }}}
                 data.chunk('indirect',chunk_dict)
             for this_axis in common_dimensions:
-                axis_data = array(h5['experiment'][this_axis])
+                if this_axis in h5['experiment'].keys():
+                    axis_data = array(h5['experiment'][this_axis])
+                else:
+                    axis_data = array(h5['experiment'].attrs[this_axis])
                 temp = ndshape(data)[this_axis]
                 if len(axis_data) > temp:
                     warnings.warn("Warning: the length of the axis '"+str(this_axis)+"' seems to exceed the length of the data!")
