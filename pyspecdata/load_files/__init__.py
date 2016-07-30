@@ -113,16 +113,22 @@ def find_file(searchstring,
     if data is None:
         raise ValueError(strm(
             "I found no data matching the regexp", searchstring))
+    logger.debug("about to look at postproc")
     if hasattr(postproc,'__call__'):
+        logger.debug("postproc passed explicitly")
         return postproc(data,**kwargs)
     else:
         if postproc is None:
             postproc_type = data.get_prop('postproc_type')
+            logger.debug(strm("found postproc_type",postproc_type))
+        else:
+            logger.debug("found no postproc_type")
         if postproc_type is None:
+            logger.debug("got a postproc_type value of None")
             return data
         else:
             if postproc_type in postproc_lookup.keys():
-                data = postproc_lookup[postproc_type](data)
+                data = postproc_lookup[postproc_type](data,**kwargs)
             else:
                 raise ValueError('postprocessing not defined for file with postproc_type %s --> it should be defined in the postproc_type dictionary in load_files.__init__.py'+postproc_type)
             return data
@@ -402,18 +408,18 @@ postproc_lookup = {
         'B1_se':acert.postproc_B1_se,
         'CW':acert.postproc_cw,
         }
-#def load_t1_axis(file):
-#    raise RuntimeError("don't use load_t1_axis anymore, the t1 axis should be available as an nddata property called wait_time")
-#def bruker_load_t1_axis(file):
-#    raise RuntimeError("don't use bruker_load_t1_axis anymore, the t1 axis should be available as an nddata property called wait_time")
-#def prospa_t1_info(file):
-#    raise RuntimeError("don't use prospa_t1_info anymore, the t1 axis should be available as an nddata property called wait_time")
-#def bruker_load_title(file):
-#    raise RuntimeError("don't use bruker_load_title -- this should now be loaded as the nddata name")
-#def cw(file,**kwargs):
-#    raise RuntimeError("don't use the cw method anymore -- just use find_file")
-#def det_type(file,**kwargs):
-#    raise RuntimeError("det_type is deprecated, and should be handled by the file magic inside load_indiv_file.  THE ONE EXCEPTION to this is the fact that det_type would return a second argument that allowed you to classify different types of prospa files.  This is not handled currently")
+def load_t1_axis(file):
+    raise RuntimeError("don't use load_t1_axis anymore, the t1 axis should be available as an nddata property called wait_time")
+def bruker_load_t1_axis(file):
+    raise RuntimeError("don't use bruker_load_t1_axis anymore, the t1 axis should be available as an nddata property called wait_time")
+def prospa_t1_info(file):
+    raise RuntimeError("don't use prospa_t1_info anymore, the t1 axis should be available as an nddata property called wait_time")
+def bruker_load_title(file):
+    raise RuntimeError("don't use bruker_load_title -- this should now be loaded as the nddata name")
+def cw(file,**kwargs):
+    raise RuntimeError("don't use the cw method anymore -- just use find_file")
+def det_type(file,**kwargs):
+    raise RuntimeError("det_type is deprecated, and should be handled by the file magic inside load_indiv_file.  THE ONE EXCEPTION to this is the fact that det_type would return a second argument that allowed you to classify different types of prospa files.  This is not handled currently")
 
 __all__ = ['find_file',
         'load_indiv_file',
@@ -422,9 +428,9 @@ __all__ = ['find_file',
         'bruker_esr',
         'acert',
         'prospa',
-#        'load_t1_axis',
-#        'bruker_load_t1_axis',
-#        'prospa_t1_info',
-#        'bruker_load_title',
-#        'cw',
+        'load_t1_axis',
+        'bruker_load_t1_axis',
+        'prospa_t1_info',
+        'bruker_load_title',
+        'cw',
         ]

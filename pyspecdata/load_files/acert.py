@@ -168,8 +168,9 @@ def load_pulse(filename,
     temp = ndshape(data)
     if 'indirect' in temp.dimlabels and temp['indirect'] == 1:
         data = data['indirect',0]
-    data.set_prop('postproc_type',
-            data.get_prop('description_class'))
+    if data.get_prop('postproc_type') is None:
+        data.set_prop('postproc_type',
+                data.get_prop('description_class'))
     return data
 def load_cw(filename,use_sweep = False):
     """load the cw file given by filename
@@ -196,6 +197,14 @@ def load_cw(filename,use_sweep = False):
                 data = nddata(data,data.shape,['repeats','current']).labels('current',array(h5['experiment']['sweep_currents']))
             else:
                 data = nddata(data,data.shape,['repeats','field']).labels('field',array(h5['experiment']['fields']))
+        #{{{ put all further information into the nddata in a way such that it can be retrieved with "get_prop"
+        data.set_prop(dict([(k,v) for k,v in h5['experiment'].attrs.iteritems() if k[0] != '_' and k[0] != 'dimlabels']))
+        data.set_prop(dict([('execution_'+k,v) for k,v in h5['experiment']['execution'].attrs.iteritems() if k[0] != '_']))
+        data.set_prop(dict([('description_'+k,v) for k,v in h5['experiment']['description'].attrs.iteritems() if k[0] != '_']))
+        #}}}
+    if data.get_prop('postproc_type') is None:
+        data.set_prop('postproc_type','CW')
+        logger.debug(strm("set postproc type for cw to",data.get_prop("postproc_type")))
     return data
 def postproc_blank(data):
     return data
@@ -284,16 +293,14 @@ def postproc_eldor_file(data,fl = None):
     data.labels('t_1',x)
     data.set_units('t_1','s')
     return data
-def postproc_cw(file_regexp,phase = True,use_sweep = False):
+def postproc_cw(data,phase = True,use_sweep = False):
     r'this opens the cw data, using search_freed_file and open_cw_file, and then autophases it'
     if use_sweep:
         otherdim = 'current'
     else:
         otherdim = 'field'
-    print "looking for "+lsafen(search_freed_file(file_regexp,'cw'))
-    data = open_cw_file(search_freed_file(file_regexp,'cw'),use_sweep = use_sweep)
     if 'repeats' in data.dimlabels:
-        print "found",ndshape(data)['repeats'],"averages"
+        logger.info(strm("found",ndshape(data)['repeats'],"averages"))
         data.mean('repeats')
     #{{{ phase the spectrum
     baseline = (data[otherdim,0:2].mean().data + data[otherdim,-3:-1].mean().data)/2.0
