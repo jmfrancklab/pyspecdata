@@ -4,7 +4,7 @@ from pylab import *
 import logging
 import os
 
-def process_kwargs(listoftuples,kwargs,pass_through = False):
+def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
     '''This function allows dynamically processed (*i.e.* function definitions with `**kwargs`) kwargs (keyword arguments) to be dealt with in a fashion more like standard kwargs.
     The defaults set in `listoftuples` are used to process `kwargs`, which are then returned as a set of values (that are set to defaults as needed).
 
@@ -26,6 +26,9 @@ def process_kwargs(listoftuples,kwargs,pass_through = False):
         In that case, the used kwargs are popped out of the dictionary, and you are expected to pass the unprocessed values (in the dictionary after the call) on to subsequent processing.
         Importantly, you should *always* end with a `pass_through`=`False` call of this function, or by passing **kwargs to a standard function in the standard way.
         Otherwise it's possible for the user to pass kwargs that are never processed!
+    as_attr : bool, object
+
+        Defaults to False. If not False, it must be an object whose attributes are set to the value of the respective kwargs.
 
     return : tuple
 

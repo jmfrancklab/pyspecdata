@@ -98,6 +98,10 @@ class figlistl (figlist):
     def obsn(self,*args):
         self.text(obs_repr(*args)+'\n\n')
         return
+    def __enter__(self):
+        if not hasattr(self,'file_name'):
+            raise ValueError("You can't use a with statement if you don't pass the initialization a file name")
+        return self
 figlist = figlistl
 def lplotfigures(figurelist,string,**kwargs):
     'obsolete, use the class!'

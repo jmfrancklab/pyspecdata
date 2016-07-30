@@ -1575,30 +1575,48 @@ def figlistini_old(first_figure):
         return first_figure
 class figlist(object):
     r"""
-        This maintains and deals with the following attributes:
-            :basename:
-                A basename that can be changed to generate different sets of figures with different basenames.
-                For example, this is useful if you are looping over different sets of data,
-                and generating the same set of figures for each set of data (which would correspond to a basename).
-            :figurelist:
-                A list of the figure names
-            :figdict:
-                A dictionary containing the figurelist and the figure numbers or objects that they correspond to.
-                Keys of this dictionary must be elements of `figurelist`.
-            :propdict:
-                Maintains various properties for each element in figurelist.
-                Keys of this dictionary must be elements of `figurelist`.
+    Attributes
+    ----------
+    basename : str
+        A basename that can be changed to generate different sets of figures with different basenames.
+        For example, this is useful if you are looping over different sets of data,
+        and generating the same set of figures for each set of data (which would correspond to a basename).
+    figurelist : list
+        A list of the figure names
+    figdict : dict
+        A dictionary containing the figurelist and the figure numbers or objects that they correspond to.
+        Keys of this dictionary must be elements of `figurelist`.
+    propdict : dict
+        Maintains various properties for each element in figurelist.
+        Keys of this dictionary must be elements of `figurelist`.
     """
     def __init__(self,*arg,**kwargs):
-        self.verbose = False
-        self.black = 0.9
-        self.env = ''
-        if 'mlab' in kwargs.keys():
-            self.mlab = kwargs.pop('mlab')
-        if 'env' in kwargs.keys():
-            self.env = kwargs.pop('env')
-        if 'verbose' in kwargs.keys():
-            self.verbose = kwargs.pop('verbose')
+        r"""Initialize a figure list, which can be used to generate a series of
+        figures from the command line or prompt.  Then the same code (if
+        `figlist_var` is used) can be included inside a ``python`` environment
+        in a latex document.
+
+        Parameters
+        ----------
+        black : double
+            A fractional number giving how "black" "black" is. Typically 1.0 is
+            actually too dark and makes things hard to see.
+        mlab : object
+            If you want to use mayavi, this should be the mlab (module?)
+        file_name : str
+            This is the argument passed to :func:`self.show`, and used to
+            construct the file names.
+        """
+        self.verbose, self.black, self.env, self.mlab, self.file_name = process_kwargs([
+            ('verbose',False),
+            ('black',0.9),
+            ('env',''),
+            ('mlab','BLANK'),
+            ('file_name','BLANK'),
+            ],
+                kwargs, pass_through=False)
+        if self.mlab == 'BLANK': del self.mlab
+        if self.file_name == 'BLANK': del self.file_name
         if self.verbose: print lsafe('DEBUG: initialize figlist')
         if len(arg) == 0:
             if self.verbose: print lsafen('empty')
@@ -2098,6 +2116,14 @@ class figlist(object):
                 orient_to_camera = False,
                 orientation = (0,0,180))# the last angle appears to be rotaiton about z
         #}}}
+        return
+    def __enter__(self):
+        return self
+    def __exit__(self, exception_type, exception_value, traceback):
+        if hasattr(self,'file_name'):
+            self.show(self.file_name)
+        else:
+            self.show()
         return
 def text_on_plot(x,y,thistext,coord = 'axes',**kwargs):
     ax = gca()
