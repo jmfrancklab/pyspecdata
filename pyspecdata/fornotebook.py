@@ -58,6 +58,8 @@ class figlistl (figlist):
             if hasattr(self,'mlab') and self.mlab:
                 kwargs.update({'mlab':self.mlab})
                 mlab = True
+        if hasattr(self,'lplot_kwargs'):
+            kwargs.update(self.lplot_kwargs)
         for figname in self.figurelist:
             if verbose: print "showing figure"+lsafen(figname)
             if type(figname) is dict:

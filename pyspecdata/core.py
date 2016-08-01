@@ -1614,7 +1614,9 @@ class figlist(object):
             ('mlab','BLANK'),
             ('file_name','BLANK'),
             ],
-                kwargs, pass_through=False)
+                kwargs, pass_through=True)
+        if len(kwargs) > 0:
+            self.lplot_kwargs = kwargs
         if self.mlab == 'BLANK': del self.mlab
         if self.file_name == 'BLANK': del self.file_name
         if self.verbose: print lsafe('DEBUG: initialize figlist')
