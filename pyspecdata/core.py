@@ -1058,7 +1058,7 @@ def h5join(firsttuple,secondtuple,
     for thistableindex,thisstructarrayindex in zip(tableindices,mystructarrayindices):
         if thisstructarrayindex not in mystructarray.dtype.names:
             raise ValueError(repr(thisstructarrayindex)+" is not in "+repr(mystructarray.dtype.names))
-        if type(mystructarray[thisstructarrayindex][0]) in [str,str_]:
+        if isinstance(mystructarray[thisstructarrayindex][0],basestring):
             search_string.append(["(%s == '%s')"%(thistableindex,x) for x in mystructarray[thisstructarrayindex]])
         elif type(mystructarray[thisstructarrayindex][0]) in [int,double,float,float64,float32,int32,int64]:
             search_string.append(["(%s == %s)"%(thistableindex,str(x)) for x in mystructarray[thisstructarrayindex]])
@@ -4240,7 +4240,7 @@ class nddata (object):
             raise TypeError("the arguments passed to the .labels() method must be a list of the axis names followed by the list of the axis arrays")
         elif all(map(( lambda x: type(x) is str_ ),listofstrings)):
             listofstrings = map(str,listofstrings)
-        elif not all(map(( lambda x: type(x) in [str,str_] ),listofstrings)):
+        elif not all(map(( lambda x: isinstance(x,basestring) ),listofstrings)):
             raise TypeError("the arguments passed to the .labels() method must be a list of the axis names followed by the list of the axis arrays")
         for j in range(0,len(listofstrings)):
             if listofaxes[j] is None:

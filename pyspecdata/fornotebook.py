@@ -250,7 +250,7 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
             else:
                 return "an array:"+lsafe(str(x))
         else:
-            if type(x) in [str_,str]:
+            if isinstance(x,basestring):
                 return lsafe(this_format_function(x,error))
             else:
                 return '$'+this_format_function(x,error)+'$'

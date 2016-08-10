@@ -46,7 +46,7 @@ def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
         raise ValueError("I didn't understand the kwargs:",repr(kwargs))
     return tuple(output)
 def autostringconvert(arg):
-    if type(arg) in [unicode,str_]:
+    if isinstance(arg,basestring):
         return str(arg)
     else:
         return arg
