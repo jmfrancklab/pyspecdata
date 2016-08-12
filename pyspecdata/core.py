@@ -998,9 +998,19 @@ def h5attachattributes(node,listofattributes,myvalues):
             thisval = None
             listout.remove(thisattr)
         else:
+            # {{{ pytables hates <U24 which is created from unicode
+            if type(thisval) in [list,tuple]:
+                if any(map(lambda x: isinstance(x,unicode),thisval)):
+                    logger.info(strm("going to convert",thisval,"to strings"))
+                    thisval = [str(x) if isinstance(x,unicode) else x for x in thisval]
+                    logger.info(strm("now it looks like this:",thisval))
             thisval = make_ndarray(thisval,name_forprint = thisattr)
+            # }}}
         if thisval is not None:
-            node._v_attrs.__setattr__(thisattr,thisval)
+            try:
+                node._v_attrs.__setattr__(thisattr,thisval)
+            except Exception,e:
+                raise RuntimeError("PyTables freaks out when trying to attach attribute "+repr(thisattr)+" with value "+repr(thisval)+"\nOriginal error was:\n"+str(e))
             listout.remove(thisattr)
     listofattributes[:] = listout # pointer
 def h5inlist(columnname,mylist):
@@ -4778,6 +4788,11 @@ class nddata (object):
         r'''assuming that axis "axis_name" is currently labeled with a structured array, choose one field ("which_field") of that structured array to generate a new dimension
         Note that for now, by definition, no error is allowed on the axes.
         However, once I upgrade to using structured arrays to handle axis and data errors, I will want to deal with that appropriately here.'''
+        def check_data(a):
+            "we need this because other things expect dimlabels to be a list of strings"
+            if isinstance(a.dimlabels,recarray):
+                a.dimlabels = [str(j[0]) if len(j) == 1 else j for j in a.dimlabels.tolist()]
+            return a
         axis_number = self.axn(axis_name)
         new_axis,indices = unique(self.getaxis(axis_name)[which_field],
                 return_inverse = True) # we are essentially creating a hash table for the axis.  According to numpy documentation, the hash indices that this returns should also be sorted sorted.
@@ -4863,9 +4878,9 @@ class nddata (object):
                 if len(self.axis_coords[axis_number].dtype) == 1: # only one field, which by the previous line will be named appropriately, so drop the structured array name
                     new_dtype = self.axis_coords[axis_number].dtype.descr[0][1]
                     self.axis_coords[axis_number] = array(self.axis_coords[axis_number],dtype = new_dtype) # probably more efficiently done with a view, but leave alone for now
-                return self
+                return check_data(self)
             else:
-                #{{{ generate an index list to label the remainder axis, and generate a new nddata with the actual values (which are note copied across the new dimension that matches which_field)
+                #{{{ generate an index list to label the remainder axis, and generate a new nddata with the actual values (which are not copied across the new dimension that matches which_field)
                 remainder_axis_index_list = r_[0:self.axis_coords[axis_number].shape[0]]
                 new_data = nddata(self.axis_coords[axis_number],
                         self.axis_coords[axis_number].shape,
@@ -4875,7 +4890,7 @@ class nddata (object):
                         [self.axis_coords[axis_number].copy(),self.axis_coords[axis_number + 1].copy()])
                 self.dimlabels[axis_number] = remainder_axis_name + '_INDEX'
                 #}}}
-                return self,new_data
+                return check_data(self),check_data(new_data)
             #}}}
         else:
             raise ValueError("Along the axis '"+axis_name+"', the field '"+which_field+"' does not represent an axis that is repeated one or more times!  The counts for how many times each element along the field is used is "+repr(index_count))
@@ -5268,12 +5283,9 @@ class nddata (object):
         if len(myotherattrs) > 0:
             #print 'DEBUG 4: bottomnode is',bottomnode
             test = repr(bottomnode) # somehow, this prevents it from claiming that the bottomnode is None --> some type of bug?
-            try:
-                h5attachattributes(bottomnode,
-                    [j for j in myotherattrs if not self._contains_symbolic(j)],
-                    self)
-            except:
-                raise CustomError('Problem trying to attach attributes',myotherattrs,'of self to node',bottomnode)
+            h5attachattributes(bottomnode,
+                [j for j in myotherattrs if not self._contains_symbolic(j)],
+                self)
             warnlist = [j for j in myotherattrs if (not self._contains_symbolic(j)) and type(self.__getattribute__(j)) is dict]
             #{{{ to avoid pickling, test that none of the attributes I'm trying to write are dictionaries or lists
             if len(warnlist) > 0:
