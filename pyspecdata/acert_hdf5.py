@@ -1,4 +1,5 @@
 from .core import *
+from .load_files import *
 from matplotlib.collections import LineCollection
 from matplotlib.patches import Rectangle
 from .datadir import get_notebook_dir
@@ -111,7 +112,7 @@ def plot_comparison(input_data,
         else:
             print "note single date -- searching for"
             file_regexp = ('%s.*'%date[j] + short_basename + '\\.')
-        data = open_cw_file(search_freed_file(file_regexp,'cw'))['repeats',0]
+        data = find_file(file_regexp, exp_type='cw', postproc=acert.postproc_blank)['repeats',0]
         for complex_type in ['real','imag']:
             fl.next('compare noise level %s'%complex_type)
             if complex_type == 'real':
@@ -127,9 +128,9 @@ def plot_comparison(input_data,
     for j in range(0,len(list_of_cw_files)):
         short_basename = list_of_cw_files[j]
         if single_date:
-            data = cw('%s.*'%date + short_basename + '\\.', phase = phase)
+            data = find_file('%s.*'%date + short_basename + '\\.', exp_type='cw', phase=phase)
         else:
-            data = cw('%s.*'%date[j] + short_basename + '\\.', phase = phase)
+            data = find_file('%s.*'%date[j] + short_basename + '\\.', exp_type='cw', phase=phase)
         if discard_error: data.set_error(None)
         data /= mod_amp[j]
         if j == 0:
@@ -148,9 +149,9 @@ def plot_comparison(input_data,
     for j in range(0,len(list_of_cw_files)):# I end up looping back over and reloading because they might have different axes, though in an older format, I did this all in one batch
         short_basename = list_of_cw_files[j]
         if single_date:
-            data = cw('%s.*'%date + short_basename + '\\.', phase = phase)
+            data = find_file('%s.*'%date + short_basename + '\\.', exp_type='cw', phase=phase)
         else:
-            data = cw('%s.*'%date[j] + short_basename + '\\.', phase = phase)
+            data = find_file('%s.*'%date[j] + short_basename + '\\.', exp_type='cw', phase=phase)
         if discard_error: data.set_error(None)
         data /= mod_amp[j]
         next_color = next(color_cycle)
@@ -330,33 +331,7 @@ def diagnostic_plot(fl,plotdata,figname = 'diagnostic',show_abs = True,selected_
     imgplot = fl.image(newdata,interpolation = interpolation,ax = ax2)
     return
 def open_cw_file(filename,fl = None,use_sweep = False,**kwargs):
-    if fl is None:
-        fl = figlist_var()
-    if type(fl) is list and len(fl) == 2:
-        figname_append = fl[1]
-        fl = fl[0]
-        if figname_append[-1] != '_':
-            figname_append += '_'
-    else:
-        figname_append = ''
-    with h5py.File(filename,'r') as h5:
-        #{{{ set up the complex number the hard way, for good form
-        data = empty_like(h5['experiment']['data.r'],dtype = complex128)
-        data_introspect = data.view([('r',double),('i',double)])
-        for i_or_r in ['i','r']:
-            data_introspect[i_or_r] = h5['experiment']['data.'+i_or_r]
-        #}}}
-        if len(data.shape) == 1:
-            if use_sweep:
-                data = nddata(data,data.size,['current']).labels('current',array(h5['experiment']['sweep_currents']))
-            else:
-                data = nddata(data,data.size,['field']).labels('field',array(h5['experiment']['fields']))
-        elif len(data.shape) == 2:
-            if use_sweep:
-                data = nddata(data,data.shape,['repeats','current']).labels('current',array(h5['experiment']['sweep_currents']))
-            else:
-                data = nddata(data,data.shape,['repeats','field']).labels('field',array(h5['experiment']['fields']))
-    return data
+    raise RuntimeError("open_cw_file is deprecated -- use find_file with no post-processing instead")
 def load_nutation_curve(main,background = None,fl = None,max_freq = 30e6,deadtime = 0e-6,intwidth = 2e6,**kwargs):
     if fl is None:
         fl = figlist_var()
