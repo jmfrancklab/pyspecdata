@@ -59,18 +59,26 @@ def wraplatex():
     This prevents the viewer from hanging while it's waiting for a refresh.
     This can be used in combination with wrapviewer() and latexmk by using a ``~/.latexmkrc`` file that looks like this:
 
+    If you pass the ``--xelatex`` argument, xelatex is used instead of pdflatex
+    (note that if you're using latexmk, you need to add this in the latexmkrc file).
 
     .. code-block:: perl
 
         $pdflatex=q/pdflatex_notebook_wrapper %O -synctex=1 %S/;# calls this function
         $pdf_previewer=q/pdflatex_notebook_view_wrapper/;# calls the wrapviewer function
     '''
-    os.system(' '.join(['pdflatex']+sys.argv[1:]))
+    proc_args = list(sys.argv)
+    if '--xelatex' in proc_args:
+        proc_args.pop(proc_args.index('--xelatex'))
+        os.system(' '.join(['xelatex']+proc_args[1:]))
+    else:
+        os.system(' '.join(['pdflatex']+proc_args[1:]))
     os.system('update_notebook_pythonscripts')
-    orig_tex_basename,new_pdf_basename = det_new_pdf_name(sys.argv)
+    orig_tex_basename,new_pdf_basename = det_new_pdf_name(proc_args)
     os.system('cp '+orig_tex_basename+'.pdf '+new_pdf_basename+'.pdf')
-    os.system('cp '+orig_tex_basename+'.synctex.gz '
-            +new_pdf_basename+'.synctex.gz')
+    if orig_tex_basename != new_pdf_basename:
+        os.system('cp '+orig_tex_basename+'.synctex.gz '
+                +new_pdf_basename+'.synctex.gz')
     return
 def wrapviewer():
     'see :func:`wraplatex <pyspecdata.latexscripts.wraplatex>`'

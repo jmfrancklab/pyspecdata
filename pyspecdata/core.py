@@ -2325,11 +2325,11 @@ def plot(*args,**kwargs):
             #print 'DEBUG plotting with args',plotargs,'and kwargs',kwargs,'\n\n'
             retval = myplotfunc(*plotargs,**kwargs)
         except:
-            raise CustomError('error trying to plot',myplotfunc,
+            raise RuntimeError(strm('error trying to plot',type(myplotfunc),'with value',myplotfunc,
                     '\nlength of the ndarray arguments:',['shape:'+repr(shape(j)) if type(j) is ndarray else j for j in plotargs],
                     '\nsizes of ndarray kwargs',dict([(j,shape(kwargs[j])) if type(kwargs[j]) is ndarray else (j,kwargs[j]) for j in kwargs.keys()]),
                     '\narguments = ',plotargs,
-                    '\nkwargs =',kwargs)
+                    '\nkwargs =',kwargs))
     #{{{ attach labels and such
     if (myxlabel!=None):
         ax.set_xlabel(myxlabel)
