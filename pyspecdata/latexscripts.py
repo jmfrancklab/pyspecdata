@@ -47,8 +47,11 @@ def det_new_pdf_name(thisargv):
     'based on an original tex or pdf name, determine the original basename (i.e., no extension), as well as one with the final word after the underscore removed'
     tex_basename = filter(lambda x: x[0] != '-',
             thisargv)[-1]
-    if tex_basename[-4:] == '.tex': tex_basename = tex_basename[:-4]
-    elif tex_basename[-4:] == '.pdf': tex_basename = tex_basename[:-4]
+    tex_basename = os.path.basename(tex_basename)
+    if tex_basename[-4:] == '.tex':
+        tex_basename = tex_basename[:-4]
+    elif tex_basename[-4:] == '.pdf':
+        tex_basename = tex_basename[:-4]
     orig_tex_basename = tex_basename
     tex_basename = tex_basename.split('_')
     if len(tex_basename) > 1:
@@ -77,8 +80,9 @@ def wraplatex():
         os.system(' '.join(['pdflatex']+proc_args[1:]))
     os.system('update_notebook_pythonscripts')
     orig_tex_basename,new_pdf_basename = det_new_pdf_name(proc_args)
-    os.system('cp '+orig_tex_basename+'.pdf '+new_pdf_basename+'.pdf')
     if orig_tex_basename != new_pdf_basename:
+        print "preparing to:",'cp '+orig_tex_basename+'.pdf '+new_pdf_basename+'.pdf'
+        os.system('cp '+orig_tex_basename+'.pdf '+new_pdf_basename+'.pdf')
         os.system('cp '+orig_tex_basename+'.synctex.gz '
                 +new_pdf_basename+'.synctex.gz')
     return
