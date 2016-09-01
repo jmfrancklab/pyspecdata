@@ -53,6 +53,8 @@ def det_new_pdf_name(thisargv):
     tex_basename = tex_basename.split('_')
     if len(tex_basename) > 1:
         new_pdf_basename = '_'.join(tex_basename[:-1])
+    else:
+        new_pdf_basename = tex_basename[0]
     return orig_tex_basename,new_pdf_basename
 def wraplatex():
     '''runs the python scripts after running latex also creates a copy of latex without the final portion under the underscore
