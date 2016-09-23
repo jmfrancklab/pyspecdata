@@ -4,7 +4,6 @@
 #  November 2011                                                   #
 ####################################################################
 #
-SHELL =
 #  
 #  Modify the FORTRAN and OPTS definitions to refer to the
 #  compiler and desired compiler options for your machine.  NOOPT
@@ -12,6 +11,7 @@ SHELL =
 #  selected.  Define LOADER and LOADOPTS to refer to the loader and 
 #  desired load options for your machine.
 #
+SHELL = /usr/bin/bash
 FORTRAN  = gfortran
 OPTS     = -O2
 DRVOPTS  = $(OPTS)

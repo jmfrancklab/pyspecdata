@@ -3,7 +3,7 @@
 #  Version 3.4.0
 #  November 2011
 #
-
+SHELL=/usr/bin/bash
 include make.inc
 
 all: lapack_install lib blas_testing lapack_testing 

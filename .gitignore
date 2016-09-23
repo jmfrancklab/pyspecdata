@@ -1,3 +1,4 @@
+.scf
 *.egg-info
 *.pyc
 build/
