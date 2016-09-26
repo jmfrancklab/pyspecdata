@@ -43,29 +43,32 @@ if os.name == 'nt':
         sys.stdin.readline(1)
         skip_prop = True
     else:
-        skip_prop = True #because I can't get either the .bat or the .sh file to run without complaining that the command line is too long
-    #    libraries.append('refblas')
-    #    print "It looks like you're on windows, so I'm going to build lapack (from http://netlib.org/) on MinGW."
-    #    gfortran_name = find_executable('gfortran')
-    #    if gfortran_name is None:
-    #        raise ValueError("Install gfortran!\nFor Anaconda on windows, that means you probably need to run 'conda install libpython'")
-    #    target = os.path.dirname(os.path.dirname(gfortran_name)) + os.sep + 'lib' + os.sep + 'gcc' # switched to gfortran because if you have two gcc's (eg. haskell from pandoc compile), this breaks
-    #    if not os.path.exists(target):
-    #        target = os.path.dirname(os.path.dirname(find_executable('gfortran'))) + os.sep + 'libs' # works for anaconda -- switched to gfortran because if you have two gcc's (eg. haskell from pandoc compile), this breaks
-    #    if 'liblapack.a' in os.listdir(target) and 'librefblas.a' in os.listdir(target):
-    #        print "I see liblapack and librefblas in",target,"so I'm not going to rebuild"
-    #        lapack_success = True
-    #    else:
-    #        os.chdir('lapack-3.4.0')
-    #        subprocess.call("cmd /c makelibs.bat")
-    #        # possibly replace with start
-    #        # possibly look at this: https://gcc.gnu.org/wiki/LAPACK%20on%20Windows
-    #        print "trying to move the built libraries to "+target
-    #        os.rename('liblapack.a',target + os.sep +'liblapack.a')
-    #        os.rename('librefblas.a',target + os.sep +'librefblas.a')
-    #        print "press enter..."
-    #        sys.stdin.readline(1)
-    #        os.chdir('..')
+        libraries.append('refblas')
+        print "It looks like you're on windows, so I'm going to build lapack (from http://netlib.org/) on MinGW."
+        gfortran_name = find_executable('gfortran')
+        if gfortran_name is None:
+            raise ValueError("Install gfortran!\nFor Anaconda on windows, that means you probably need to run 'conda install libpython'")
+        target = os.path.dirname(os.path.dirname(gfortran_name)) + os.sep + 'lib' + os.sep + 'gcc' # switched to gfortran because if you have two gcc's (eg. haskell from pandoc compile), this breaks
+        if not os.path.exists(target):
+            target = os.path.dirname(os.path.dirname(find_executable('gfortran'))) + os.sep + 'libs' # works for anaconda -- switched to gfortran because if you have two gcc's (eg. haskell from pandoc compile), this breaks
+        if 'liblapack.a' in os.listdir(target) and 'librefblas.a' in os.listdir(target):
+            print "I see liblapack and librefblas in",target,"so I'm not going to rebuild"
+            lapack_success = True
+        else:
+            os.chdir('lapack-3.4.0')
+            my_env = os.environ.copy()
+            ar_directory = os.path.dirname(find_executable('ar'))
+            my_env['PATH'] += ';'+ar_directory
+            print "new path is",my_env['PATH']
+            subprocess.Popen("cmd /c makelibs.bat",env = my_env).wait()
+            # possibly replace with start
+            # possibly look at this: https://gcc.gnu.org/wiki/LAPACK%20on%20Windows
+            print "trying to move the built libraries to "+target
+            os.rename('liblapack.a',target + os.sep +'liblapack.a')
+            os.rename('librefblas.a',target + os.sep +'librefblas.a')
+            print "press enter..."
+            sys.stdin.readline(1)
+            os.chdir('..')
 if not skip_prop:
     ext_prop = Extension(name = 'pyspecdata.propagator',
             sources = ['pyspecdata/propagator.f90'],

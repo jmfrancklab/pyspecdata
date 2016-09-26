@@ -10,7 +10,6 @@ REM MACHINE DEPENDENT TEST SUITE
 echo machine dependent routines and testing
 cd install
 make
-del *.o
 REM run machine dependent tests
 testlsame > testlsame.out
 testslamch > testslamch.out
@@ -25,21 +24,18 @@ echo creating blas library
 echo
 cd blas\src
 make
-del *.o
 cd ..\..\
 REM  CREATE VARIANTS LIBRARIES
 echo creating variants libraries
 echo
 cd src\variants
 make
-del *.o
 cd ..\..\
 REM CREATE LAPACK LIBRARY
 echo creating lapack library
 echo
 cd src
 make
-del *.o
 cd ..\
 echo done creating blas-lapack libraries
 pause

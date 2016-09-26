@@ -394,6 +394,9 @@ endif
 ALLOBJ = $(SLASRC) $(DLASRC) $(DSLASRC) $(CLASRC) $(ZLASRC) $(ZCLASRC) \
    $(SCLAUX) $(DZLAUX) $(ALLAUX)
 
+REDUCEDALLOBJ = $(DLASRC) $(DSLASRC) $(ZLASRC) $(ZCLASRC) \
+   $(DZLAUX)
+
 ifdef USEXBLAS
 ALLXOBJ = $(SXLASRC) $(DXLASRC) $(CXLASRC) $(ZXLASRC)
 endif
@@ -401,7 +404,10 @@ endif
 all: ../$(LAPACKLIB)
 
 ../$(LAPACKLIB): $(ALLOBJ) $(ALLXOBJ)
-	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ) $(ALLXOBJ)
+	# previously, did this
+	#$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ) $(ALLXOBJ)
+	# in the following, I removed several classes of functions -- in principle, I should be able to build several such archives then concat them with "ar crsT libcombined.a libA.lib libB.lib"
+	$(ARCH) $(ARCHFLAGS) $@ $(REDUCEDALLOBJ)
 	$(RANLIB) $@
 
 single: $(SLASRC) $(DSLASRC) $(SXLASRC) $(SCLAUX) $(ALLAUX)
