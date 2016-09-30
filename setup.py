@@ -19,7 +19,7 @@ try:
     import PyQt4.QtCore
     import PyQt4.QtGui
 except:
-    raise RuntimeError("I couldn't import PyQt -- go install it first!!\n(I'm doing this because dependency-based install of PyQt does not usually go well -- use your distro software (conda install ..., aptitude, etc) instead)")
+    raise RuntimeError("I couldn't import PyQt -- go install it first!!\n(I'm doing this because dependency-based install of PyQt does not usually go well -- use your distro software (conda install ..., aptitude, etc) instead)\nIn fact, you probably want to install:\n\tpyqt, mayavi, unxutils, and libpython")
 try:
     import mayavi
 except:
