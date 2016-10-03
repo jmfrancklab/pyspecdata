@@ -396,6 +396,7 @@ ALLOBJ = $(SLASRC) $(DLASRC) $(DSLASRC) $(CLASRC) $(ZLASRC) $(ZCLASRC) \
 
 REDUCEDALLOBJ = $(DLASRC) $(DSLASRC) $(ZLASRC) $(ZCLASRC) \
    $(DZLAUX)
+REMAINDERALLOBJ = $(SLASRC) $(CLASRC) $(SCLAUX) $(DZLAUX) $(ALLAUX)
 
 ifdef USEXBLAS
 ALLXOBJ = $(SXLASRC) $(DXLASRC) $(CXLASRC) $(ZXLASRC)
@@ -407,7 +408,11 @@ all: ../$(LAPACKLIB)
 	# previously, did this
 	#$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ) $(ALLXOBJ)
 	# in the following, I removed several classes of functions -- in principle, I should be able to build several such archives then concat them with "ar crsT libcombined.a libA.lib libB.lib"
-	$(ARCH) $(ARCHFLAGS) $@ $(REDUCEDALLOBJ)
+	mkdir arch_collection
+	$(ARCH) $(ARCHFLAGS) arch_collection/red_objs.a $(REDUCEDALLOBJ)
+	$(ARCH) $(ARCHFLAGS) arch_collection/rem_objs.a $(REMAINDERALLOBJ)
+	$(ARCH) $(ARCHFLAGS) arch_collection/xobjs.a $(ALLXOBJ)
+	ar crsT $@ arch_collection/red_objs.a arch_collection/rem_objs.a arch_collection/xobjs.a
 	$(RANLIB) $@
 
 single: $(SLASRC) $(DSLASRC) $(SXLASRC) $(SCLAUX) $(ALLAUX)

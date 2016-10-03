@@ -15,15 +15,20 @@ setup(
     long_description="just a module for storing global variables -- needed to change what's imported for notebook vs. graphical display",
 )
 
+general_error = "I couldn't import {:s} -- go install it first!!\n(I'm doing this because dependency-based install of PyQt, mayavi, and some others does not usually go well -- use your distro software (conda install ..., aptitude, etc) instead)\nIn fact, you probably want to install:\n\tpyqt, mayavi, unxutils, matplotlib, and libpython"
 try:
-    import PyQt4.QtCore
-    import PyQt4.QtGui
+    import PyQt5.QtCore
+    import PyQt5.QtGui
 except:
-    raise RuntimeError("I couldn't import PyQt -- go install it first!!\n(I'm doing this because dependency-based install of PyQt does not usually go well -- use your distro software (conda install ..., aptitude, etc) instead)\nIn fact, you probably want to install:\n\tpyqt, mayavi, unxutils, and libpython")
+    raise RuntimeError(general_error.format('PyQt5')+"\n\nIf you already have PyQt installed, it might be necessary to update to PyQt4")
 try:
     import mayavi
 except:
-    raise RuntimeError("I couldn't import MayaVi -- go install it first!!\n(I'm doing this because dependency-based install of MayaVi does not usually go well -- use your distro (conda install ..., aptitude, etc) instead)")
+    raise RuntimeError(general_error.format('mayavi'))
+try:
+    import matplotlib
+except:
+    raise RuntimeError(general_error.format('matplotlib'))
 ext_test = Extension(name = 'pyspecdata.test_module',
         sources = ['pyspecdata/test_f90.pyf','pyspecdata/test_f90.f90','pyspecdata/anothertest.f90','pyspecdata/lprmpt.c','pyspecdata/fortrancall.h'],
         define_macros = [('ADD_UNDERSCORE',None)],
