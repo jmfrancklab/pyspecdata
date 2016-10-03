@@ -10,5 +10,6 @@ pyspecdata/test_module.so
 lapack-3.4.0/INSTALL
 lapack-3.4.0/BLAS/SRC/*.o
 lapack-3.4.0/SRC/*.o
+lapack-3.4.0/SRC/arch_collection
 lapack-3.4.0/SRC/VARIANTS/cholesky/RL/*.o
 tags

@@ -20,7 +20,7 @@ try:
     import PyQt5.QtCore
     import PyQt5.QtGui
 except:
-    raise RuntimeError(general_error.format('PyQt5')+"\n\nIf you already have PyQt installed, it might be necessary to update to PyQt4")
+    raise RuntimeError(general_error.format('PyQt5')+"\n\nIf you already have PyQt installed, it might be necessary to update to PyQt5")
 try:
     import mayavi
 except:
