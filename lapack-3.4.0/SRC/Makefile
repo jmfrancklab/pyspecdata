@@ -413,15 +413,30 @@ arch_collection/xobj: arch_collection
 	mkdir arch_collection/xobj
 arch_collection:
 	mkdir arch_collection
-../$(LAPACKLIB): $(ALLOBJ) $(ALLXOBJ) arch_collection/red arch_collection/rem arch_collection/xobj
-	# previously, did this
-	#$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ) $(ALLXOBJ)
-	# in the following, I removed several classes of functions -- in principle, I should be able to build several such archives then concat them with "ar crsT libcombined.a libA.lib libB.lib"
-	cp $(REDUCEDALLOBJ) arch_collection/red
-	cp $(REMAINDERALLOBJ) arch_collection/rem
-	#cp $(ALLXOBJ) arch_collection/xobj
-	$(ARCH) $(ARCHFLAGS) $@ arch_collection/red/*.o arch_collection/rem/*.o
+../$(LAPACKLIB): $(ALLOBJ) $(ALLXOBJ)
+	echo "path is"
+	echo $(PATH)
+	$(ARCH) $(ARCHFLAGS) red_objs.a $(REDUCEDALLOBJ)
+	$(ARCH) $(ARCHFLAGS) rem_objs.a $(REMAINDERALLOBJ)
+	$(ARCH) $(ARCHFLAGS) xobjs.a $(ALLXOBJ)
+	$(ARCH) crsT $@ red_objs.a rem_objs.a xobjs.a
+	echo "create $@" > lapack.mri
+	echo "addlib red_objs.a" >> lapack.mri
+	echo "addlib rem_objs.a" >> lapack.mri
+	echo "addlib xobjs.a" >> lapack.mri
+	echo "save" >> lapack.mri
+	echo "end" >> lapack.mri
+	ar -M <lapack.mri
 	$(RANLIB) $@
+#../$(LAPACKLIB): $(ALLOBJ) $(ALLXOBJ) arch_collection/red arch_collection/rem arch_collection/xobj
+#	# previously, did this
+#	#$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ) $(ALLXOBJ)
+#	# in the following, I removed several classes of functions -- in principle, I should be able to build several such archives then concat them with "ar crsT libcombined.a libA.lib libB.lib"
+#	cp $(REDUCEDALLOBJ) arch_collection/red
+#	cp $(REMAINDERALLOBJ) arch_collection/rem
+#	#cp $(ALLXOBJ) arch_collection/xobj
+#	$(ARCH) $(ARCHFLAGS) $@ arch_collection/red/*.o arch_collection/rem/*.o
+#	$(RANLIB) $@
 
 single: $(SLASRC) $(DSLASRC) $(SXLASRC) $(SCLAUX) $(ALLAUX)
 	$(ARCH) $(ARCHFLAGS) ../$(LAPACKLIB) $(SLASRC) $(DSLASRC) \

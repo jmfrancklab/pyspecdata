@@ -6,7 +6,7 @@ from .general_functions import process_kwargs
 if platform.platform().startswith('Windows'):
     import win32console
     _stdin = win32console.GetStdHandle(win32console.STD_INPUT_HANDLE)
-    def rlinput(prompt, default=''):
+    def rlinput_forwindows(prompt, default=''):
         keys = []
         for c in unicode(default):
             evt = win32console.PyINPUT_RECORDType(win32console.KEY_EVENT)
@@ -17,6 +17,15 @@ if platform.platform().startswith('Windows'):
 
         _stdin.WriteConsoleInput(keys)
         return raw_input(prompt)
+    def rlinput(prompt, default=''):
+        try:
+            rlinput_forwindows(prompt, default='')# doesn't work from inside the newer git window
+        except:
+            print "My guess:",default
+            result = raw_input(prompt+"\nMy guess: "+default+'\n')
+            if result.strip() == '':
+                result = default
+            return default
 else:
     def rlinput(prompt, prefill=''):
         import readline
