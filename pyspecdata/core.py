@@ -1643,7 +1643,7 @@ class figlist(object):
         self.twinx_list = {}
         self.basename = None
         return
-    def twinx(self,autopad = True,orig = False,color = None):
+    def twinx(self,autopad = False,orig = False,color = None):
         #self.figurelist.insert(self.get_fig_number(self.current)-1,{'autopad':False}) #doesn't work because it changes the figure number; I can get the number with fig = gcf(); fig.number, but I can't set it; it would be best to switch to using a list that contains all the figure numbers to match all their names -- or alternatively, note that matplotlib allows you to give them names, though I don't know how that works
         if self.current in self.twinx_list.keys():
             ax1,ax2 = self.twinx_list[self.current]
@@ -1657,7 +1657,7 @@ class figlist(object):
                     if color != self.propdict[self.current]['twinx_color']:
                         raise ValueError("conflicting values for the twinx color have been given!!")
         else:
-            autopad_figure()
+            if autopad: autopad_figure()
             ax1 = gca()
             twinx()
             ax2 = gca()
