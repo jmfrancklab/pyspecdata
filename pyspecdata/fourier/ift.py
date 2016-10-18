@@ -78,7 +78,8 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         try:
             thisaxis = self.dimlabels.index(axes[j])
         except:
-            raise CustomError('error, dimlabels is: ',self.dimlabels)
+            raise RuntimeError(strm("I can't find",axes[j],
+                "dimlabels is: ",self.dimlabels))
         padded_length = self.data.shape[thisaxis]
         if pad is True:
             padded_length = int(2**(ceil(log2(padded_length))))
