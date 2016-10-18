@@ -1971,7 +1971,8 @@ class figlist(object):
     def mesh(self,plotdata,Z_normalization = None,equal_scale = True,
             lensoffset = 1e-3,
             show_contours = False,
-            grey_surf = False):
+            grey_surf = False,
+            **kwargs):
         plotdata = self.check_units(plotdata,0,1)
         if hasattr(self,'mlab'):
             fig = self.figdict[self.current]
@@ -2006,7 +2007,7 @@ class figlist(object):
             fig.scene.disable_render = False
         else:
             # this should be upgraded, or rather moved to here
-            plotdata.meshplot(alpha = 1.0,cmap = cm.jet)
+            plotdata.meshplot(alpha=1.0, cmap=cm.jet, **kwargs)
         return Z_normalization
     def generate_ticks(self,plotdata,axes,rescale,z_norm = None,y_rescale = 1,text_scale = 0.05,verbose = False,follow_surface = False,
             lensoffset = 0.5e-2,
@@ -2582,7 +2583,7 @@ class nddata (object):
         s = surf(X,Y,Z)
         return s
     #{{{ 3D mesh plot
-    def meshplot(self,stride = None,alpha = 0.3,onlycolor = False,light = None,rotation = None,cmap = cm.gray,ax = None,invert = False,**kwargs):
+    def meshplot(self,stride = None,alpha = 1.0,onlycolor = False,light = None,rotation = None,cmap = cm.gray,ax = None,invert = False,**kwargs):
         r'''takes both rotation and light as elevation, azimuth
         only use the light kwarg to generate a black and white shading display'''
         X,Y,Z = self.matrices_3d()
