@@ -13,3 +13,7 @@ lapack-3.4.0/SRC/*.o
 lapack-3.4.0/SRC/arch_collection
 lapack-3.4.0/SRC/VARIANTS/cholesky/RL/*.o
 tags
+lapack-3.4.0/SRC/lapack.mri
+lapack-3.4.0/SRC/red_objs.a
+lapack-3.4.0/SRC/rem_objs.a
+lapack-3.4.0/SRC/xobjs.a
