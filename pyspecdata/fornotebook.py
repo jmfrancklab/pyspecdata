@@ -42,15 +42,21 @@ class figlistl (figlist):
         super(figlistl,self).__init__(*args,**kwargs)
         self.black = False
         return
-    def show(self,string,**kwargs):
-        'latexify the series of figures, where "string" gives the base file name'
+    def show(self,string,line_spacing=True,**kwargs):
+        '''latexify the series of figures, where "string" gives the base file name
+        
+        Parameters
+        ----------
+        line_spacing : bool
+            if false, suppress empty lines between output
+        '''
         self.basename = None # must be turned off, so it can cycle through lists, etc, on its own
         #{{{ process kwargs
         verbose = False
         if 'verbose' in kwargs.keys():
             verbose = kwargs.pop('verbose')
         #}}}
-        print '\n\n'
+        if line_spacing: print '\n\n'
         self.show_prep()
         if not len(kwargs):
             kwargs = {}
@@ -65,9 +71,9 @@ class figlistl (figlist):
             if type(figname) is dict:
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
-                    print '\n\n'
+                    if line_spacing: print '\n\n'
                     print kwargs.pop('print_string')
-                    print '\n\n'
+                    if line_spacing: print '\n\n'
             else:
                 j = self.get_fig_number(figname)
                 if mlab:

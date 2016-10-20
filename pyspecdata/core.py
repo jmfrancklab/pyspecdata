@@ -1617,18 +1617,20 @@ class figlist(object):
             This is the argument passed to :func:`self.show`, and used to
             construct the file names.
         """
-        self.verbose, self.black, self.env, self.mlab, self.file_name = process_kwargs([
+        self.verbose, self.black, self.env, self.mlab, self.file_name, self.line_spacing = process_kwargs([
             ('verbose',False),
             ('black',0.9),
             ('env',''),
             ('mlab','BLANK'),
             ('file_name','BLANK'),
+            ('line_spacing','BLANK'),
             ],
                 kwargs, pass_through=True)
         if len(kwargs) > 0:
             self.lplot_kwargs = kwargs
         if self.mlab == 'BLANK': del self.mlab
         if self.file_name == 'BLANK': del self.file_name
+        if self.line_spacing == 'BLANK': del self.line_spacing
         if self.verbose: print lsafe('DEBUG: initialize figlist')
         if len(arg) == 0:
             if self.verbose: print lsafen('empty')
@@ -2134,7 +2136,8 @@ class figlist(object):
         return self
     def __exit__(self, exception_type, exception_value, traceback):
         if hasattr(self,'file_name'):
-            self.show(self.file_name)
+            if hasattr(self,'line_spacing'):
+                self.show(self.file_name,line_spacing = self.line_spacing)
         else:
             self.show()
         return
