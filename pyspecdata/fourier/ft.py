@@ -2,7 +2,7 @@ from ..general_functions import *
 from pylab import * 
 from .ft_shift import _find_index,thinkaboutit_message
 
-def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
+def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
     ("This performs a fourier transform along the axes identified by the string or list of strings `axes`.\n"
     "   It adjusts normalization and units so that the result conforms to\n"
     r"   $$\tilde{s}(f)=\int_{x_min}^{x_max} s(t) e^{-i 2 \pi f t} dt$$"+'\n'
@@ -24,6 +24,7 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
     "\t`automix` can be set to the approximate frequency value.  This is useful"
     " for the specific case where the data has been captured on a sampling scope,"
     " and it's severely aliased over.\n"
+    "'cosine' yields a sum of the fft and ifft, for a cosine transform"
     )
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
@@ -164,8 +165,14 @@ def ft(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         self._ft_shift(thisaxis,p2_pre)
         #}}}
         #{{{ the actual (I)FFT portion of the routine
-        self.data = fft(self.data,
+        if cosine:
+            self.data = fft(self.data,
+                    axis=thisaxis) + ifft(self.data,
                             axis=thisaxis)
+            self.data *= 0.5
+        else:
+            self.data = fft(self.data,
+                                axis=thisaxis)
         self.axis_coords[thisaxis] = v
         #}}}
         #{{{ actually run the post-FT shift

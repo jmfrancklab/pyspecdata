@@ -19,7 +19,7 @@ if platform.platform().startswith('Windows'):
         return raw_input(prompt)
     def rlinput(prompt, default=''):
         try:
-            rlinput_forwindows(prompt, default='')# doesn't work from inside the newer git window
+            return rlinput_forwindows(prompt, default='')# doesn't work from inside the newer git window
         except:
             print "My guess:",default
             result = raw_input(prompt+"\nMy guess: "+default+'\n')
@@ -32,6 +32,8 @@ else:
         readline.set_startup_hook(lambda: readline.insert_text(prefill))
         try:
             return raw_input('\n'+prompt)
+        except:
+            raise ValueError("raw input didn't work!")
         finally:
             readline.set_startup_hook()
 # }}}
