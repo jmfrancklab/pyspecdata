@@ -25,7 +25,7 @@ if platform.platform().startswith('Windows'):
             result = raw_input(prompt+"\nMy guess: "+default+'\n')
             if result.strip() == '':
                 result = default
-            return default
+            return result
 else:
     def rlinput(prompt, prefill=''):
         import readline
