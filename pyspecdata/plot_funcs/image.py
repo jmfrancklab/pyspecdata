@@ -8,9 +8,10 @@ def image(A,x=[],y=[],**kwargs):
         if k in ['black','logscale']:
             imagehsvkwargs[k] = kwargs.pop(k)
     #}}}
-    spacing,ax,x_first = process_kwargs([('spacing',1),
+    spacing,ax,x_first,origin = process_kwargs([('spacing',1),
         ('ax',gca()),
-        ('x_first',False)],kwargs,
+        ('x_first',False),
+        ('origin','lower')],kwargs,
         pass_through = True)
     if x_first: # then the first dimension should be the column
         # dimesion (i.e. last)
@@ -67,7 +68,13 @@ def image(A,x=[],y=[],**kwargs):
         y = y.flatten()
     dx = (x[-1]-x[0])/len(x)
     dy = (y[-1]-y[0])/len(y)
-    myext = (x[0]-dx/2.,x[-1]+dx/2.,y[-1]+dy/2.,y[0]-dy/2.)
+    if origin == 'lower':
+        myext = (x[0]-dx/2.,x[-1]+dx/2.,y[0]-dy/2.,y[-1]+dy/2.)
+    elif origin == 'upper':
+        myext = (x[0]-dx/2.,x[-1]+dx/2.,y[-1]+dy/2.,y[0]-dy/2.)
+    else:
+        raise ValueError("I don't understand the value you've set for the origin keyword argument")
+    kwargs['origin'] = origin# required so that imshow now displays the image correctly
     linecounter = 0
     origAndim = A.ndim
     if A.ndim > 2:
