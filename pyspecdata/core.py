@@ -5366,7 +5366,7 @@ class nddata_hdf5 (nddata):
                     myaxiscoordserror[axisnumber] = recordarrayofaxis['error']
                 datadict['axes'][axisname].pop('data')
                 for k in datadict['axes'][axisname].keys():
-                    print lsafen("Warning, attribute",k,"of axis table",axisname,"remains, but the code to load this is not yet supported")
+                    logger.debug(strm("Warning, attribute",k,"of axis table",axisname,"remains, but the code to load this is not yet supported"))
                 datadict['axes'].pop(axisname)
             kwargs.update({"axis_coords":myaxiscoords})
             kwargs.update({"axis_coords_error":myaxiscoordserror})

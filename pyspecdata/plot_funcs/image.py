@@ -72,6 +72,10 @@ def image(A,x=[],y=[],**kwargs):
         myext = (x[0]-dx/2.,x[-1]+dx/2.,y[0]-dy/2.,y[-1]+dy/2.)
     elif origin == 'upper':
         myext = (x[0]-dx/2.,x[-1]+dx/2.,y[-1]+dy/2.,y[0]-dy/2.)
+    elif origin == 'flip':
+        # {{{ need to flip
+        myext = (x[-1]+dx/2.,x[0]-dx/2.,y[-1]+dy/2.,y[0]-dy/2.)
+        # }}}
     else:
         raise ValueError("I don't understand the value you've set for the origin keyword argument")
     kwargs['origin'] = origin# required so that imshow now displays the image correctly
@@ -94,6 +98,12 @@ def image(A,x=[],y=[],**kwargs):
         tempsize[-2] *= A.shape[-3]
         A = A.reshape(tempsize) # now join them up
     A = A[:A.shape[0]-linecounter,:] # really I should an extra counter besides linecounter now that I am using "spacing", but leave alone for now, to be sure I don't cute off data
+    if origin == 'flip':
+        # {{{ if origin is "flip", we need to manually flip the data
+        A = A[::-1,:]
+        A = A[:,::-1]
+        kwargs['origin'] = 'lower'
+        # }}}
     if iscomplexobj(A):# this just tests the datatype
         A = imagehsv(A,**imagehsvkwargs)
         retval = imshow(A,extent=myext,**kwargs)
@@ -233,6 +243,9 @@ def fl_image(self,A,**kwargs):
         the Axis object where the plot should go.
     all remaning :
         are passed through to matplotlib `imshow`
+    origin : {'upper', 'lower', 'flip'}
+        upper and lower are passed to matplotlib.
+        Flip is for 2D nmr, and flips the data manually.
 
     .. code-block:: python
         from pyspecdata import *
