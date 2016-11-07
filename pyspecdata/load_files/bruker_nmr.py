@@ -10,14 +10,20 @@ def det_phcorr(v):
         decimarray=array([2,3,4,6,8,12,16,24,32,48,64,96,128,192,256,384,512,768,1024]) # the -1 is because this is an index, and copied from matlab code!!!
         dspfvs = v['DSPFVS']
         decim = v['DECIM']
-        try:
-            retval = gdparray[dspfvs,where(decimarray==decim)[0]]/2/decim
-        except:
-            #if len(where(decimarray==decim)[0]) == 0:
-            #    raise CustomError("Not able to find decim",decim,"in decimarray")
-            #raise CustomError('Problem returning',dspfvs,where(decimarray==decim)[0],'elements of gdparray from gdparray of size',shape(gdparray),'because decimarray is of size',shape(decimarray))
-            retval = 0
-        return retval
+        if 'GRPDLY' not in v.keys():
+            grpdly = -1
+        grpdly = v['GRPDLY'] # later versions of topspin
+        if grpdly == -1:
+            try:
+                retval = gdparray[dspfvs,where(decimarray==decim)[0]]/2/decim
+            except:
+                if len(where(decimarray==decim)[0]) == 0:
+                    raise CustomError("Not able to find decim",decim,"in decimarray")
+                raise CustomError('Problem returning',dspfvs,where(decimarray==decim)[0],'elements of gdparray from gdparray of size',shape(gdparray),'because decimarray is of size',shape(decimarray))
+                retval = 0
+            return retval
+        else:
+            return grpdly
     else:
         return array([0])
 def det_rg(a):
@@ -65,8 +71,11 @@ def series(filename, dimname=''):
     td2_zf = int(ceil(td2/256.)*256) # round up to 256 points, which is how it's stored
     fp = open(filename+'ser','rb')
     data = fp.read()
-    data = array(struct.unpack('>%di'%(len(data)/4),data),
-            dtype='complex128')
+    if int(v['BYTORDA']) == 1:
+        data = fromstring(data, dtype=dtype('>i4'), count=(len(data)/4))
+    else:
+        data = fromstring(data, dtype=dtype('<i4'), count=(len(data)/4))
+    data = complex128(data)
     data = data[0::2]+1j*data[1::2]
     data /= rg
     mydimsizes = [td1,td2_zf/2]
@@ -113,9 +122,11 @@ def load_1D(filename, dimname=''):
     td2_zf = int(ceil(td2/256.)*256) # round up to 256 points, which is how it's stored
     fp = open(filename+'fid','rb')
     data = fp.read()
-    data = array(
-            struct.unpack('>%di'%(len(data)/4),data),
-            dtype='complex128')
+    if int(v['BYTORDA']) == 1:
+        data = fromstring(data, dtype=dtype('>i4'), count=(len(data)/4))
+    else:
+        data = fromstring(data, dtype=dtype('<i4'), count=(len(data)/4))
+    data = complex128(data)
     data = data[0::2]+1j*data[1::2]
     rg = det_rg(v['RG'])
     data /= rg
@@ -177,13 +188,11 @@ def load_acqu(file,whichdim='',return_s = True):
         elif retval[0]==0:
             name = retval[1]
             data = retval[2]
-            print "this line is",name,data
             isdata = True
         #else:
         #   print 'not a data line:',retval[1]
         if(isdata):
             if retval[0]==2: #if it's an array
-                print "data is",data
                 data = data.split(' ')
                 if len(data)>0:
                     while '' in data:
