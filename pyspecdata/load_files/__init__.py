@@ -200,7 +200,7 @@ def load_file(*args,**kwargs):
     # {{{ because the "want_to_prospa_decim_correct" attribute is special --
     #     probably want to get rid of it eventually
     if hasattr(data[0],'want_to_prospa_decim_correct'):
-        if all(map(hasattr(x,'want_to_prospa_decim_correct'),data)):
+        if all(map(lambda x: hasattr(x,'want_to_prospa_decim_correct'),data)):
             if data[0].want_to_prospa_decim_correct is True:
                 newdata = prospa_decim_correct(newdata)
     # }}}

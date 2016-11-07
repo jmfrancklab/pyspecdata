@@ -235,9 +235,6 @@ def error_plot(*arg):
 def show_acqu(vars):
     print '\\begin{verbatim}',vars.__repr__().replace(',','\n'),'\\end{verbatim}\n\n'
 #{{{ load an nddata structure for a 2d set -- give the data needed to load
-def bruker_det_rg(a):
-    '''determine the actual voltage correction from the value of rg for a bruker NMR file'''
-    return a
 #}}}
 #}}}
 #{{{ lower level functions
@@ -260,44 +257,8 @@ def bruker_load_t1_axis(files):
     return array(wait_time).flatten()
 #}}}
 #{{{ calculate decimation correction
-def bruker_det_phcorr(v):
-    if v['DIGMOD']==1:
-        gdparray=array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[179,201,533,709,1097,1449,2225,2929,4481,5889,8993,11809,18017,23649,36065,47329,72161,94689,144353,189409,288737],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[184,219,384,602,852,1668,2292,3368,4616,6768,9264,13568,18560,27392,36992,55040,73856,110336,147584,220928,295040]])
-        decimarray=array([2,3,4,6,8,12,16,24,32,48,64,96,128,192,256,384,512,768,1024]) # the -1 is because this is an index, and copied from matlab code!!!
-        dspfvs = v['DSPFVS']
-        decim = v['DECIM']
-        try:
-            retval = gdparray[dspfvs,where(decimarray==decim)[0]]/2/decim
-        except:
-            print r'\begin{tiny}'
-            print r'\begin{verbatim}'
-            print CustomError('Problem returning',dspfvs,where(decimarray==decim)[0],'from gdparray of size',shape(gdparray),'because decimarray is of size',shape(decimarray))
-            print r'\end{verbatim}'
-            print r'\end{tiny}'
-            retval = 0
-        return retval
-    else:
-        return array([0])
 #}}}
 #{{{ load acqu
-def bruker_match_line(line,number_re,string_re,array_re):
-    m = number_re.match(line)
-    if m:
-        retval = (0,m.groups()[0],double(m.groups()[1]))
-    else:
-        m = string_re.match(line)
-        if m:
-            retstring = m.groups()[1]
-            if retstring[-1]=='>':
-                retstring = retstring[:-1]
-            retval = (1,m.groups()[0],0,retstring)
-        else:
-            m = array_re.match(line)
-            if m:
-                retval = (2,m.groups()[0],(double(m.groups()[1]),double(m.groups()[2])),m.groups()[3])
-            else:
-                retval = (3,line)
-    return retval
 #{{{ bruker_load_acqu
 def load_title(file):
     if det_type(file)[0] == 'bruker':
