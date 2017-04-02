@@ -2293,7 +2293,7 @@ def plot(*args,**kwargs):
     if normalize:
         myy /= myy.max()
     #{{{ hsv plots when we have multiple lines
-    if len(shape(myy))>1 and sum(array(shape(myy))>1):
+    if len(shape(myy.squeeze()))>1 and sum(array(shape(myy))>1):
         #{{{ hsv plots
         hold(True)
         retval = []
