@@ -32,6 +32,9 @@ def find_file(searchstring,
             **kwargs):
     r'''Find the file  given by the regular expression `searchstring` inside the directory identified by `exp_type`, load the nddata object, and postprocess with the function `postproc`.
 
+    It looks at the top level of the directory first, and if that fails, starts to look recursively.
+    Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
+
     It calls `load_indiv_file`, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.
 
     Parameters
@@ -97,10 +100,19 @@ def find_file(searchstring,
     # }}}
     #{{{ actually find the files
     directory = getDATADIR(exp_type=exp_type)
-    if os.path.isdir(directory):
-        files = re.findall('.*' + searchstring + '.*','\n'.join(os.listdir(directory)))
-    else:
-        raise IOError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s\nYou might need to change the value associated with this exp_type in %s"%(directory,searchstring,_my_config.config_location))
+    def look_inside(inp_directory):
+        dirlist = os.listdir(inp_directory)
+        if os.path.isdir(inp_directory):
+            files = re.findall('.*' + searchstring + '.*','\n'.join(dirlist))
+        else:
+            raise IOError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s\nYou might need to change the value associated with this exp_type in %s"%(inp_directory,searchstring,_my_config.config_location))
+        if len(files) == 0:
+            files = []
+            for [j in dirlist if os.path.isdir(j)]:
+                files += look_inside(j)
+        else:
+            return files
+    files = look_inside(directory)
     if len(files) == 0:
         raise IOError("I can't find a file matching the regular expression {:s} in {:s}".format(searchstring,directory))
     else:
