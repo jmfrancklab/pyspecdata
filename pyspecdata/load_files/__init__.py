@@ -108,7 +108,7 @@ def find_file(searchstring,
             raise IOError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s\nYou might need to change the value associated with this exp_type in %s"%(inp_directory,searchstring,_my_config.config_location))
         if len(files) == 0:
             files = []
-            for [j in dirlist if os.path.isdir(j)]:
+            for j in [k for k in dirlist if os.path.isdir(k)]:
                 files += look_inside(j)
         else:
             return files

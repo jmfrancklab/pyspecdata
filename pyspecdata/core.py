@@ -2251,11 +2251,12 @@ def plot(*args,**kwargs):
         myy = squeeze(myy.data)
     #}}}
     #{{{ semilog where appropriate
-    if (myx != None) and (len(myx)>1): # by doing this and making myplotfunc global, we preserve the plot style if we want to tack on one point
+    if (myx is not None) and (len(myx)>1) and all(myx>0): # by doing this and making myplotfunc global, we preserve the plot style if we want to tack on one point
         try:
             b = diff(log10(myx))
         except:
             raise CustomError('likely a problem with the type of the x label, which is',myx)
+        print "b[0] is",b[0]
         if (size(b)>3) and all(abs((b-b[0])/b[0])<1e-4) and not ('nosemilog' in kwargs.keys()):
             myplotfunc = ax.semilogx
     if ('nosemilog' in kwargs.keys()):
@@ -2323,9 +2324,7 @@ def plot(*args,**kwargs):
         #}}}
         #}}}
     else:
-        plotargs = [myx,real(myy),myformat]
-        while None in plotargs:
-            plotargs.remove(None)
+        plotargs = [j for j in [myx,real(myy),myformat] if j is not None]
         try:
             #print 'DEBUG plotting with args',plotargs,'and kwargs',kwargs,'\n\n'
             retval = myplotfunc(*plotargs,**kwargs)
@@ -2767,27 +2766,27 @@ class nddata (object):
     #}}}
     #{{{ error-related functions
     def normalize(self,axis,first_figure = None):#,whichpoint = slice(0,1,None)):
-       x = self.data
-       n = len(x)
-       S = sparse.lil_matrix((n,n))
-       S.setdiag((self.get_error())**2)
-       self.set_error(None)
-       first_point = self[axis,0:1].copy() # this makes another instance that contains just the first point, for error propagation
-       B = sparse.lil_matrix((n,n))
-       B.setdiag(1./x)
-       B[0,:] = -x/(x[0]**2) # Sparse seems to only support row assignment, so make the transpose to give it what it wants
-       B[0,0] = 0.0
-       B = B.T
-       E = B * S * (B.T) # verified that this is matrix multiplication
-       self /= first_point # this gives the experimentally measured E
-       #{{{ now, chop out the first point, which is meaningless
-       self = self[axis,1:]
-       E = E[1:,1:]
-       #}}}
-       self.set_error(sqrt(E.diagonal()))
-       E.setdiag(zeros(n-1))
-       self.data_covariance = E
-       return self
+        x = self.data
+        n = len(x)
+        S = sparse.lil_matrix((n,n))
+        S.setdiag((self.get_error())**2)
+        self.set_error(None)
+        first_point = self[axis,0:1].copy() # this makes another instance that contains just the first point, for error propagation
+        B = sparse.lil_matrix((n,n))
+        B.setdiag(1./x)
+        B[0,:] = -x/(x[0]**2) # Sparse seems to only support row assignment, so make the transpose to give it what it wants
+        B[0,0] = 0.0
+        B = B.T
+        E = B * S * (B.T) # verified that this is matrix multiplication
+        self /= first_point # this gives the experimentally measured E
+        #{{{ now, chop out the first point, which is meaningless
+        self = self[axis,1:]
+        E = E[1:,1:]
+        #}}}
+        self.set_error(sqrt(E.diagonal()))
+        E.setdiag(zeros(n-1))
+        self.data_covariance = E
+        return self
     def get_covariance(self):
         '''this returns the covariance matrix of the data'''
         if hasattr(self,'data_covariance'):
@@ -3307,9 +3306,9 @@ class nddata (object):
         return -1*self
     def __rdiv__(self,arg):
         return arg * (self**(-1))
-    def real(self):
-        self.data = real(self.data)
-        return self
+    #def real(self):
+    #    self.data = real(self.data)
+    #    return self
     #}}}
     def squeeze(self,verbose = False):
         'squeeze singleton dimensions -- return a list of the labels for the axes that are dropped'
@@ -4963,6 +4962,41 @@ class nddata (object):
         lefterror = self.get_error()
         if lefterror is not None:
             lefterror[tuple(leftindex)] = righterrors.squeeze()
+    # {{{ real, imag and angle properties
+    @property
+    def angle(self):
+        "Return the angle component of the data"
+        retval = nddata(angle(self.data),self.data.shape,self.dimlabels)
+        retval.other_info = self.other_info
+        retval.axis_coords = self.axis_coords
+        retval.axis_coords_error = self.axis_coords_error
+        return retval
+    @angle.setter
+    def angle(self):
+        raise ValueError("Can't independently set the angle component yet")
+    @property
+    def imag(self):
+        "Return the imag component of the data"
+        retval = nddata(self.data.imag,self.data.shape,self.dimlabels)
+        retval.other_info = self.other_info
+        retval.axis_coords = self.axis_coords
+        retval.axis_coords_error = self.axis_coords_error
+        return retval
+    @imag.setter
+    def imag(self):
+        raise ValueError("Can't independently set the imag component yet")
+    @property
+    def real(self):
+        "Return the real component of the data"
+        retval = nddata(self.data.real,self.data.shape,self.dimlabels)
+        retval.other_info = self.other_info
+        retval.axis_coords = self.axis_coords
+        retval.axis_coords_error = self.axis_coords_error
+        return retval
+    @real.setter
+    def real(self):
+        raise ValueError("Can't independently set the real component yet")
+    # }}}
     def copy(self):
         return deepcopy(self)
     def __getitem__(self,args):

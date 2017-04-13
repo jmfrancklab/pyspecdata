@@ -111,6 +111,9 @@ def series(filename, dimname=''):
     data.set_units('digital')
     data.set_prop('title',
             load_title(filename))
+    v.update(v2)
+    data.set_prop('acq',
+            v)
     #print 'DEBUG 2: data from bruker file =',data
     #}}}
     return data
@@ -141,6 +144,8 @@ def load_1D(filename, dimname=''):
     # finally, I will probably need to add in the first order phase shift for the decimation --> just translate this
     data.set_prop('title',
             load_title(filename))
+    data.set_prop('acq',
+            v)
     return data
 def load_vdlist(file):
     fp = open(file+'vdlist')
