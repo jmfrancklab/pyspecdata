@@ -25,6 +25,7 @@ def find_file(searchstring,
             print_result = True,
             verbose = False,
             prefilter = None,
+            expno = None,
             dimname='', return_acq=False,
             add_sizes=[], add_dims=[], use_sweep=None,
             indirect_dimlabels=None,
@@ -42,6 +43,14 @@ def find_file(searchstring,
         More generally, it is a regular expression,
         where ``.*searchstring.*`` matches a filename inside the
         directory appropriate for `exp_type`.
+    expno : int
+        For Bruker files, *etc.*, where the files are stored in numbered
+        subdirectories,
+        give the number of the subdirectory that you want.
+        If this is not given, it assumes that the name you give is the name
+        of a file, rather than a directory.
+        If it finds multiple files that match the regular expression,
+        it will try to load this experiment number from all the directories.
     exp_type : str
         Since the function assumes that you have different types of
         experiments sorted into different directories, this argument
@@ -103,6 +112,8 @@ def find_file(searchstring,
     data = None
     while data is None and len(files) > 0:
         filename = directory + files.pop(-1)
+        if expno is not None:
+            filename = os.path.join(filename,str(expno))
         # {{{ file loaded here
         logger.debug(strm("about to call load_indiv_file on",filename))
         data = load_indiv_file(filename,
