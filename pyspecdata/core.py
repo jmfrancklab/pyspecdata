@@ -973,7 +973,8 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
             #}}}
     return h5file,currentnode
 def h5attachattributes(node,listofattributes,myvalues):
-    #print "DEBUG 5: node passed to h5attachattributes",node
+    listofattributes = [j for j in listofattributes # need to exclude the properties
+            if j not in ['angle','real','imag']]
     if node is None:
         raise CustomError('Problem!, node passed to h5attachattributes: ',node,'is None!')
     h5file = node._v_file
@@ -5259,83 +5260,85 @@ class nddata (object):
         else:
             raise CustomError("problem trying to store HDF5 file; you need to set the ``name'' property of the nddata object to a string first!")
         h5file,bottomnode = h5nodebypath(h5path, directory=directory) # open the file and move to the right node
-        #print 'DEBUG 1: bottomnode is',bottomnode
-        #}}}
-        #{{{ print out the attributes of the data
-        myattrs = normal_attrs(self)
-        #{{{ separate them into data and axes
-        mydataattrs = filter((lambda x: x[0:4] == 'data'),myattrs)
-        myotherattrs = filter((lambda x: x[0:4] != 'data'),myattrs)
-        myaxisattrs = filter((lambda x: x[0:4] == 'axis'),myotherattrs)
-        myotherattrs = filter((lambda x: x[0:4] != 'axis'),myotherattrs)
-        if verbose: print lsafe('data attributes:',zip(mydataattrs,map(lambda x: type(self.__getattribute__(x)),mydataattrs))),'\n\n'
-        if verbose: print lsafe('axis attributes:',zip(myaxisattrs,map(lambda x: type(self.__getattribute__(x)),myaxisattrs))),'\n\n'
-        if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
-        #}}}
-        #}}}
-        #{{{ write the data table
-        if 'data' in mydataattrs:
-            if 'data_error' in mydataattrs and self.get_error() is not None and len(self.get_error()) > 0:
-                thistable = rec.fromarrays([self.data,self.get_error()],names='data,error')
-                mydataattrs.remove('data_error')
-            else:
-                thistable = rec.fromarrays([self.data],names='data')
-            mydataattrs.remove('data')
-            datatable = h5table(bottomnode,'data',thistable)
-            #print 'DEBUG 2: bottomnode is',bottomnode
-            #print 'DEBUG 2: datatable is',datatable
-            if verbose: print "Writing remaining axis attributes\n\n"
-            if len(mydataattrs) > 0:
-                h5attachattributes(datatable,mydataattrs,self)
-        else:
-            raise CustomError("I can't find the data object when trying to save the HDF5 file!!")
-        #}}}
-        #{{{ write the axes tables
-        if 'axis_coords' in myaxisattrs:
-            if len(self.axis_coords) > 0:
-                #{{{ create an 'axes' node
-                axesnode = h5child(bottomnode, # current node
-                        'axes', # the child
-                        verbose = False,
-                        create = True)
-                #}}}
-                for j,axisname in enumerate(self.dimlabels): # make a table for each different dimension
-                    myaxisattrsforthisdim = dict([(x,self.__getattribute__(x)[j])
-                        for x in list(myaxisattrs) if len(self.__getattribute__(x)) > 0]) # collect the attributes for this dimension and their values
-                    if verbose: print lsafe('for axis',axisname,'myaxisattrsforthisdim=',myaxisattrsforthisdim)
-                    if 'axis_coords' in myaxisattrsforthisdim.keys() and myaxisattrsforthisdim['axis_coords'] is not None:
-                        if 'axis_coords_error' in myaxisattrsforthisdim.keys() and myaxisattrsforthisdim['axis_coords_error'] is not None and len(myaxisattrsforthisdim['axis_coords_error']) > 0: # this is needed to avoid all errors, though I guess I could use try/except
-                            thistable = rec.fromarrays([myaxisattrsforthisdim['axis_coords'],myaxisattrsforthisdim['axis_coords_error']],names='data,error')
-                            myaxisattrsforthisdim.pop('axis_coords_error')
-                        else:
-                            thistable = rec.fromarrays([myaxisattrsforthisdim['axis_coords']],names='data')
-                        myaxisattrsforthisdim.pop('axis_coords')
-                    datatable = h5table(axesnode,axisname,thistable)
-                    #print 'DEBUG 3: axesnode is',axesnode
-                    if verbose: print "Writing remaining axis attributes for",axisname,"\n\n"
-                    if len(myaxisattrsforthisdim) > 0:
-                        h5attachattributes(datatable,myaxisattrsforthisdim.keys(),myaxisattrsforthisdim.values())
-        #}}}
-        #{{{ Check the remaining attributes.
-        if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
-        if verbose: print "Writing remaining other attributes\n\n"
-        if len(myotherattrs) > 0:
-            #print 'DEBUG 4: bottomnode is',bottomnode
-            test = repr(bottomnode) # somehow, this prevents it from claiming that the bottomnode is None --> some type of bug?
-            h5attachattributes(bottomnode,
-                [j for j in myotherattrs if not self._contains_symbolic(j)],
-                self)
-            warnlist = [j for j in myotherattrs if (not self._contains_symbolic(j)) and type(self.__getattribute__(j)) is dict]
-            #{{{ to avoid pickling, test that none of the attributes I'm trying to write are dictionaries or lists
-            if len(warnlist) > 0:
-                print "WARNING!!, attributes",warnlist,"are dictionaries!"
-            warnlist = [j for j in myotherattrs if (not self._contains_symbolic(j)) and type(self.__getattribute__(j)) is list]
-            if len(warnlist) > 0:
-                print "WARNING!!, attributes",warnlist,"are lists!"
+        try:
+            #print 'DEBUG 1: bottomnode is',bottomnode
             #}}}
+            #{{{ print out the attributes of the data
+            myattrs = normal_attrs(self)
+            #{{{ separate them into data and axes
+            mydataattrs = filter((lambda x: x[0:4] == 'data'),myattrs)
+            myotherattrs = filter((lambda x: x[0:4] != 'data'),myattrs)
+            myaxisattrs = filter((lambda x: x[0:4] == 'axis'),myotherattrs)
+            myotherattrs = filter((lambda x: x[0:4] != 'axis'),myotherattrs)
+            if verbose: print lsafe('data attributes:',zip(mydataattrs,map(lambda x: type(self.__getattribute__(x)),mydataattrs))),'\n\n'
+            if verbose: print lsafe('axis attributes:',zip(myaxisattrs,map(lambda x: type(self.__getattribute__(x)),myaxisattrs))),'\n\n'
             if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
-        #}}}
-        h5file.close()
+            #}}}
+            #}}}
+            #{{{ write the data table
+            if 'data' in mydataattrs:
+                if 'data_error' in mydataattrs and self.get_error() is not None and len(self.get_error()) > 0:
+                    thistable = rec.fromarrays([self.data,self.get_error()],names='data,error')
+                    mydataattrs.remove('data_error')
+                else:
+                    thistable = rec.fromarrays([self.data],names='data')
+                mydataattrs.remove('data')
+                datatable = h5table(bottomnode,'data',thistable)
+                #print 'DEBUG 2: bottomnode is',bottomnode
+                #print 'DEBUG 2: datatable is',datatable
+                if verbose: print "Writing remaining axis attributes\n\n"
+                if len(mydataattrs) > 0:
+                    h5attachattributes(datatable,mydataattrs,self)
+            else:
+                raise CustomError("I can't find the data object when trying to save the HDF5 file!!")
+            #}}}
+            #{{{ write the axes tables
+            if 'axis_coords' in myaxisattrs:
+                if len(self.axis_coords) > 0:
+                    #{{{ create an 'axes' node
+                    axesnode = h5child(bottomnode, # current node
+                            'axes', # the child
+                            verbose = False,
+                            create = True)
+                    #}}}
+                    for j,axisname in enumerate(self.dimlabels): # make a table for each different dimension
+                        myaxisattrsforthisdim = dict([(x,self.__getattribute__(x)[j])
+                            for x in list(myaxisattrs) if len(self.__getattribute__(x)) > 0]) # collect the attributes for this dimension and their values
+                        if verbose: print lsafe('for axis',axisname,'myaxisattrsforthisdim=',myaxisattrsforthisdim)
+                        if 'axis_coords' in myaxisattrsforthisdim.keys() and myaxisattrsforthisdim['axis_coords'] is not None:
+                            if 'axis_coords_error' in myaxisattrsforthisdim.keys() and myaxisattrsforthisdim['axis_coords_error'] is not None and len(myaxisattrsforthisdim['axis_coords_error']) > 0: # this is needed to avoid all errors, though I guess I could use try/except
+                                thistable = rec.fromarrays([myaxisattrsforthisdim['axis_coords'],myaxisattrsforthisdim['axis_coords_error']],names='data,error')
+                                myaxisattrsforthisdim.pop('axis_coords_error')
+                            else:
+                                thistable = rec.fromarrays([myaxisattrsforthisdim['axis_coords']],names='data')
+                            myaxisattrsforthisdim.pop('axis_coords')
+                        datatable = h5table(axesnode,axisname,thistable)
+                        #print 'DEBUG 3: axesnode is',axesnode
+                        if verbose: print "Writing remaining axis attributes for",axisname,"\n\n"
+                        if len(myaxisattrsforthisdim) > 0:
+                            h5attachattributes(datatable,myaxisattrsforthisdim.keys(),myaxisattrsforthisdim.values())
+            #}}}
+            #{{{ Check the remaining attributes.
+            if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
+            if verbose: print "Writing remaining other attributes\n\n"
+            if len(myotherattrs) > 0:
+                #print 'DEBUG 4: bottomnode is',bottomnode
+                test = repr(bottomnode) # somehow, this prevents it from claiming that the bottomnode is None --> some type of bug?
+                h5attachattributes(bottomnode,
+                    [j for j in myotherattrs if not self._contains_symbolic(j)],
+                    self)
+                warnlist = [j for j in myotherattrs if (not self._contains_symbolic(j)) and type(self.__getattribute__(j)) is dict]
+                #{{{ to avoid pickling, test that none of the attributes I'm trying to write are dictionaries or lists
+                if len(warnlist) > 0:
+                    print "WARNING!!, attributes",warnlist,"are dictionaries!"
+                warnlist = [j for j in myotherattrs if (not self._contains_symbolic(j)) and type(self.__getattribute__(j)) is list]
+                if len(warnlist) > 0:
+                    print "WARNING!!, attributes",warnlist,"are lists!"
+                #}}}
+                if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
+            #}}}
+        finally:
+            h5file.close()
     #}}}
 class testclass:
     def __getitem__(self,*args,**kwargs):
