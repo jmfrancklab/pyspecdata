@@ -392,7 +392,8 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
         temp = fig.scene.anti_aliasing_frames
         fig.scene.disable_render = True
         fig.scene.anti_aliasing_frames = 0 # mayavi antialiasing is terrible, so just acquire at a high dpi setting
-        mlab.savefig(fname,magnification = dpi/72)
+        mlab.savefig(fname, magnification=dpi/72,
+                bbox_inches='tight')
         #{{{ convert to transparent, find red pixels, and change them to transparent
         data = imread(fname)
         data_shape = list(data.shape)
@@ -444,14 +445,18 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
             if len(this_ylabel) > 0:
                 ax.set_ylabel(this_ylabel + r" $\rightarrow$")
         try:
-            savefig(fname,dpi=dpi,facecolor = (1,1,1,0))
+            savefig(fname, dpi=dpi,
+                    facecolor=(1,1,1,0),
+                    bbox_inches='tight')
         except ValueError,exc_string:
             if exc_string.find('finite numbers') > -1:
                 raise ValueError("It gives this error because you're trying to do a bar graph with zero width")
             else:
                 raise ValueError(exc_string)
         if alsosave != None:
-            savefig(alsosave,dpi=dpi,facecolor = (1,1,1,0))
+            savefig(alsosave,
+                    dpi=dpi,
+                    facecolor=(1,1,1,0))
     if figure:
         print r"""
         \begin{figure}[h]
