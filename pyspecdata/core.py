@@ -1852,10 +1852,15 @@ class figlist(object):
         axhline(y = 0.5,color = 'r',alpha = 0.5,linewidth = 2)
         axhline(y = -0.5,color = 'r',alpha = 0.5,linewidth = 2)
         return
-    def check_units(self,testdata,x_index,y_index):
+    def check_units(self, testdata, x_index, y_index,
+            verbose=False):
+        if verbose: print "-"*30
+        if verbose: print "called check_units for figure",self.current
         if isinstance(testdata,nddata):
+            if verbose: print "(check_units) it's nddata"
             testdata = testdata.copy().human_units()
             if len(testdata.dimlabels) > 1:
+                if verbose: print "(check_units) more than one dimension"
                 if not hasattr(self,'current'):
                     raise ValueError("give your plot a name (using .next()) first! (this is used for naming the PDF's etc)")
                 if self.current in self.units.keys():
@@ -1866,6 +1871,7 @@ class figlist(object):
                     if isinstance(testdata,nddata):
                         self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
             else:
+                if verbose: print "(check_units) only one dimension"
                 if not hasattr(self,'current'):
                     self.next('default')
                 if self.current in self.units.keys():
@@ -1878,6 +1884,7 @@ class figlist(object):
                             raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(theseunits,self.units[self.current]))
                 else:
                     self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]))
+        if verbose: print "-"*30
         return testdata
     def adjust_spines(self,spines):
         ax = gca()
@@ -2877,7 +2884,7 @@ class nddata (object):
         else:
             raise CustomError(".set_units() takes data units or 'axis' and axis units")
         return self
-    def human_units(self,verbose = False):
+    def human_units(self, verbose=False):
         prev_label = self.get_units()
         oom_names =   ['T' , 'G' , 'M' , 'k' , '' , 'm' , '\\mu ' , 'n' , 'p']
         oom_values = r_[12 , 9   , 6   , 3   , 0  , -3  , -6     , -9  , -12]
@@ -2894,7 +2901,7 @@ class nddata (object):
             if verbose: print "(human units): for data I round this to",average_oom
             oom_index = argmin(abs(average_oom-oom_values))
             if verbose: print "(human units): for data, selected an oom value of",oom_values[oom_index]
-            self.data[:] /= 10**oom_values[oom_index]
+            self.data[:] /= 10.**oom_values[oom_index]
             self.set_units(oom_names[oom_index]+prev_label)
         else:
             if verbose: print 'data does not have a unit label'
@@ -2908,7 +2915,7 @@ class nddata (object):
                     except:
                         raise CustomError('data_to_test is',data_to_test,'isfinite is',isfinite(data_to_test))
                     #{{{ find the average order of magnitude, rounded down to the nearest power of 3
-                    average_oom = log10(abs(data_to_test))/3.
+                    average_oom = log10(abs(data_to_test[data_to_test>0]))/3.
                     average_oom = average_oom[isfinite(average_oom)].mean()
                     #}}}
                     if verbose: print "(human units): for axis",thisaxis,"the average oom is",average_oom*3
@@ -2917,7 +2924,7 @@ class nddata (object):
                     oom_index = argmin(abs(average_oom-oom_values))
                     if verbose: print "(human units): for axis",thisaxis,"selected an oom value of",oom_values[oom_index]
                     x = self.getaxis(thisaxis)
-                    x[:] /= 10**oom_values[oom_index]
+                    x[:] /= 10.**oom_values[oom_index]
                     self.setaxis(thisaxis,x)
                     self.set_units(thisaxis,oom_names[oom_index]+prev_label)
                 else:
