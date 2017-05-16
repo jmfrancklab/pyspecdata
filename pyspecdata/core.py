@@ -1917,6 +1917,20 @@ class figlist(object):
             gridandtick(ax,gridcolor = r_[0,0,0])
         return
     image = this_plotting.image.fl_image
+    def marked_text(self,marker,input_text="",sep='\n'):
+        """Creates a named `marker` where we can place text.   If `marker`
+        has been used, goes back and places text there."""
+        if not hasattr(self,'textdict'):
+            self.textdict = {}
+        if marker in self.textdict.keys():
+            idx = self.textdict[marker]
+            self.figurelist[idx]['print_string'] = (
+                    self.figurelist[idx]['print_string']
+                    + sep + input_text )
+        else:
+            self.setprops(print_string=input_text)
+            idx = len(self.figurelist)-1
+            self.textdict[marker] = idx
     def text(self,mytext):
         self.setprops(print_string = mytext)
     def setprops(self,**kwargs):
