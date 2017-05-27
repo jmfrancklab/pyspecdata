@@ -15,12 +15,17 @@ setup(
     long_description="just a module for storing global variables -- needed to change what's imported for notebook vs. graphical display",
 )
 
-general_error = "I couldn't import {:s} -- go install it first!!\n(I'm doing this because dependency-based install of PyQt, mayavi, and some others does not usually go well -- use your distro software (conda install ..., aptitude, etc) instead)\nIn fact, you probably want to install:\n\tpyqt, mayavi, unxutils, matplotlib, and libpython"
+general_error = "I couldn't import {:s} -- go install it first!!\n(I'm doing this because dependency-based install of PyQt, mayavi, and some others does not usually go well -- use your distro software (conda install ..., aptitude, etc) instead)\nIn fact, you probably want to install:\n\tpyqt, mayavi, unxutils, matplotlib, mingw, and libpython"
 try:
-    import PyQt5.QtCore
-    import PyQt5.QtGui
+    import PyQt4.QtCore
+    import PyQt4.QtGui
 except:
-    raise RuntimeError(general_error.format('PyQt5')+"\n\nIf you already have PyQt installed, it might be necessary to update to PyQt5")
+    print "Failed to import PyQt4, trying PyQt5..."
+    try:
+        import PyQt5.QtCore
+        import PyQt5.QtGui
+    except:
+        raise RuntimeError(general_error.format('PyQt5'))
 try:
     import mayavi
 except:
