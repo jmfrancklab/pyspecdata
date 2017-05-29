@@ -119,7 +119,7 @@ def wrapviewer():
     else:
         os.system('start sumatrapdf -reuse-instance '+new_pdf_basename+'.pdf')
     if new_pdf_basename == 'lists':
-        os.system('cp lists.pdf "'+os.path.expanduser('~')+os.path.sep+'Seafile'+os.path.sep+'My Library'+os.path.sep+'lists.pdf"')
+        os.system('cp lists.pdf "'+os.path.join(os.path.expanduser('~'),'Dropbox','lists.pdf'))
     return
 def script_filename(scriptnum_as_str):
     return get_scripts_dir()+scriptnum_as_str+'.py'
