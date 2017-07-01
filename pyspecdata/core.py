@@ -1,4 +1,5 @@
 from paramset_pyspecdata import myparams
+from sys import exc_info
 from os import listdir,environ
 from os.path import sep as path_sep
 #if paramset.myparams['figlist_type'] == 'figlistl':
@@ -672,20 +673,23 @@ def lsafe(*string,**kwargs):
     string = string.replace('|',r'$|$')
     return string
 #{{{ errors
+def explain_error(e):
+    '''Allows you to wrap existing errors with more explanation
+
+    For example:
+
+    >    except BaseException  as e:
+    >        raise IndexError("I can't find the node "+pathstring+explain_error(e))
+    >                + '\n'.join(['>\t'+j for j in str(e).split('\n')]))# this indents
+    '''
+    exc_type,exc_obj,exc_tb = exc_info()
+    code_loc = strm(os.path.relpath(exc_tb.tb_frame.f_code.co_filename,os.getcwd()), 'line', exc_tb.tb_lineno)
+    return ('\n> Original error (%s -- %s):\n'%(exc_type,code_loc)
+            + '\n'.join(['>\t'+j
+                for j in str(e).split('\n')]))# this indents
 class CustomError(Exception):
     def __init__(self, *value, **kwargs):
-        if 'figurelist' in kwargs.keys():
-            lplotfigures(kwargs.pop('figurelist'),'error_plots.pdf')
-        if len(value)>1:
-            retval = map(str,value)
-        else:
-            retval = str(value)
-        retval = map(str,value)
-        retval = ' '.join(retval)
-        retval = '\n'+'\n'.join(textwrap.wrap(retval,90,replace_whitespace = False))
-        if traceback.format_exc() != 'None':
-            retval += '\n\nOriginal Traceback:\n'+''.join(['V']*40)+'\n'+traceback.format_exc() + '\n' + ''.join(['^']*40) + '\n'
-        Exception.__init__(self,retval)
+        raise NotImplementedError("You should get rid of CustomError and use explain_error instead")
         return
 def copy_maybe_none(input):
     if input == None:
@@ -707,7 +711,7 @@ def maprep(*mylist):
 def gensearch(labelname,format = '%0.3f',value = None,precision = None):
     'obsolete -- use h5gensearch'
     if value == None:
-        raise CustomError('You must pass a value to gensearch')
+        raise ValueError('You must pass a value to gensearch')
     if precision == None:
         precision = value*0.01 # the precision is 1% of the value, if we don't give an argument
     searchstring_high = '(%s < %s + (%s))'%tuple([labelname]+[format]*2)
@@ -758,25 +762,25 @@ def h5loaddict(thisnode,verbose = False):
     if type(thisnode) is tables.table.Table:#{{{ load any table data
         if verbose: print "It's a table\n\n"
         if 'data' in retval.keys():
-            raise CustomError('There\'s an attribute called data --> this should not happen!')
+            raise AttributeError('There\'s an attribute called data --> this should not happen!')
         retval.update({'data':thisnode.read()})
     elif type(thisnode) is tables.group.Group:
         #{{{ load any sub-nodes as dictionaries
         mychildren = thisnode._v_children
         for thischild in mychildren.keys():
             if thischild in retval.keys():
-                raise CustomError('There\'s an attribute called ',thischild,' and also a sub-node called the',thischild,'--> this should not happen!')
+                raise AttributeError('There\'s an attribute called ',thischild,' and also a sub-node called the',thischild,'--> this should not happen!')
             retval.update({thischild:h5loaddict(mychildren[thischild])})
         #}}}
     else:
-        raise CustomError("I don't know what to do with this node:",thisnode)
+        raise AttributeError(strm("I don't know what to do with this node:",thisnode))
     #}}}
     return retval
 def h5child(thisnode,childname,clear = False,create = None,verbose = False):
     r'''grab the child, optionally clearing it and/or (by default) creating it'''
     #{{{ I can't create and clear at the same time
     if create and clear:
-        raise CustomError("You can't call clear and create at the same time!\nJust call h5child twice, once with clear, once with create")
+        raise ValueError("You can't call clear and create at the same time!\nJust call h5child twice, once with clear, once with create")
     if create is None:
         if clear == True:
             create = False
@@ -791,9 +795,9 @@ def h5child(thisnode,childname,clear = False,create = None,verbose = False):
         if clear:
             childnode._f_remove(recursive = True)
             childnode = None
-    except tables.NoSuchNodeError:
+    except tables.NoSuchNodeError as e:
         if create is False and not clear:
-            raise CustomError('Trying to grab a node that does not exist with create = False')
+            raise RuntimeError('Trying to grab a node that does not exist with create = False'+explain_error(e))
         elif clear:
             childnode = None
         else:
@@ -809,8 +813,9 @@ def h5remrows(bottomnode,tablename,searchstring):
         counter = 0
         try:
             data = thistable.readWhere(searchstring).copy()
-        except:
-            raise CustomError('Problem trying to remove rows using search string',searchstring,'in',thistable)
+        except Exception as e:
+            raise RuntimeError(strm('Problem trying to remove rows using search
+                    string', searchstring, 'in', thistable, explain_error(e)))
         for row in thistable.where(searchstring):
             if len(thistable) == 1:
                 thistable.remove()
@@ -882,18 +887,14 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
     if tableexists:
         try:
             mytable.append(myrowdata)
-        except ValueError:
+        except ValueError as e:
             print lsafen("I'm about to flag an error, but it looks like there was an issue appending",myrowdata)
             tabledforerr = mytable.read()
-            #raise CustomError('Value of table',tabledforerr.dtype.,'while value of row',myrowdata.dtype)
-            raise CustomError('Value of table -- compare names and values table data vs. the row you are trying to add\n','\n'.join(map(repr,zip(mytable.read().dtype.fields.keys(),
-                        mytable.read().dtype.fields.values(),
-                        myrowdata.dtype.fields.keys(),
-                        myrowdata.dtype.fields.values()))))
-            #raise CustomError('Value of table',mytable.read().dtype,'while value of row',myrowdata.dtype,'data in row:',myrowdata,
-            #        'the one that doesn\'t match is',[mytable.read().dtype.descr[x]
-            #            for x in list(myrowdata.dtype)
-            #            if mytable.read().dtype.descr[x]==myrowdata.dtype.descr[x]])
+            raise AttributeError(strm('Compare names and values table data vs. the row you are trying to add\n',
+                '\n'.join(map(repr,zip(mytable.read().dtype.fields.keys(),
+                mytable.read().dtype.fields.values(),
+                myrowdata.dtype.fields.keys(),
+                myrowdata.dtype.fields.values())))),explain_error(e))
         mytable.flush()
     else:
         recorddata = myrowdata
@@ -901,8 +902,10 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
             mytable = h5table(bottomnode,
                     tablename,
                     recorddata)
-        except:
-            raise CustomError('Error trying to write record array:',repr(recorddata),'from listofdata',listofdata,'and names',listofnames)
+        except Exception as e:
+            raise RuntimeError(strm('Error trying to write record array:',
+                repr(recorddata),'from listofdata',listofdata,'and names',listofnames,
+                explain_error(e)))
         mytable.flush()
     return mytable,newindex
 def h5table(bottomnode,tablename,tabledata):
@@ -918,7 +921,7 @@ def h5table(bottomnode,tablename,tabledata):
             raise RuntimeError(' '.join(map(str,['You passed no data, so I can\'t create table',tablename,'but it doesn\'t exist in',bottomnode,'which has children',bottomnode._v_children.keys()])))
     else:
         if tabledata is not None:
-            raise CustomError('You\'re passing data to create the table, but the table already exists!')
+            raise ValueError('You\'re passing data to create the table, but the table already exists!')
         else:
             pass
     return bottomnode._v_children[tablename]
@@ -934,14 +937,14 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
         if h5path[0] in listdir(directory):
             if verbose: print 'DEBUG: file exists\n\n'
         else:
-            if check_only: raise CustomError("You're checking for a node in a file that does not exist")
+            if check_only: raise AttributeError("You're checking for a node in a file that does not exist")
             if verbose: print 'DEBUG: file does not exist\n\n'
         mode = 'a'
         #if check_only: mode = 'r'
         logger.info(strm('so I look for the file',h5path[0],'in directory',directory))
         h5file = tables.openFile(os.path.join(directory,h5path[0]),mode = mode,title = 'test file')
-    except IOError:
-        raise CustomError('I think the HDF5 file has not been created yet, and there is a bug pytables that makes it freak out, but you can just run again.')
+    except IOError as e:
+        raise IOError('I think the HDF5 file has not been created yet, and there is a bug pytables that makes it freak out, but you can just run again.'+explain_error(e))
     #}}}
     currentnode = h5file.getNode('/') # open the root node
     logger.debug('ready to step down search path')
@@ -964,26 +967,26 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
                         clear = clear)
                 if verbose: print lsafen("searching for node path: descended to node",currentnode)
                 logger.info(strm("searching for node path: descended to node",currentnode))
-            except:
+            except BaseException as e:
                 if verbose: print lsafen("searching for node path: got caught searching for node",h5path[pathlevel])
                 logger.info(strm("searching for node path: got caught searching for node",h5path[pathlevel]))
                 h5file.close()
                 #print lsafen("DEBUG: Yes, I closed the file")
-                raise CustomError('Problem trying to load node ',h5path)
+                raise IndexError(strm('Problem trying to load node ',h5path,explain_error(e)))
             #}}}
     return h5file,currentnode
 def h5attachattributes(node,listofattributes,myvalues):
     listofattributes = [j for j in listofattributes # need to exclude the properties
             if j not in ['angle','real','imag']]
     if node is None:
-        raise CustomError('Problem!, node passed to h5attachattributes: ',node,'is None!')
+        raise IndexError('Problem!, node passed to h5attachattributes: ',node,'is None!')
     h5file = node._v_file
     if isinstance(myvalues,nddata):
         attributevalues = map(lambda x: myvalues.__getattribute__(x),listofattributes)
     elif type(myvalues) is list:
         attributevalues = myvalues
     else:
-        raise CustomError("I don't understand the type of myvalues, which much be a list or a nddata object, from which the attribute values are retrieved")
+        raise TypeError("I don't understand the type of myvalues, which much be a list or a nddata object, from which the attribute values are retrieved")
     listout = list(listofattributes)
     for j,thisattr in enumerate(listofattributes):
         thisval = attributevalues[j]
@@ -1090,8 +1093,10 @@ def h5join(firsttuple,secondtuple,
     # here I'm debugging the join function, again, and again, and agin
     try:
         retval = decorate_rec((retval,tableindices),(mystructarray,mystructarrayindices)) # this must be the problem, since the above looks fine
-    except:
-        raise CustomError('Some problems trying to decorate the table',retval,'of dtype',retval.dtype,'with the structured array',mystructarray,'of dtype',mystructarray.dtype)
+    except Exception as e:
+        raise Exception(strm('Some problems trying to decorate the table',
+            retval, 'of dtype', retval.dtype, 'with the structured array',
+            mystructarray, 'of dtype', mystructarray.dtype, explain_error(e)))
     if pop_fields is not None:
         if select_fields is not None:
             raise ValueError("It doesn't make sense to specify pop_fields and select_fields at the same time!!")
@@ -1100,8 +1105,9 @@ def h5join(firsttuple,secondtuple,
         if verbose: print '\n\nh5join original indices',lsafen(retval.dtype.names)
         try:
             retval = retval[select_fields]
-        except ValueError:
-            raise CustomError('One of the fields',select_fields,'is not in',retval.dtype.names)
+        except ValueError as e:
+            raise ValueError(strm('One of the fields', select_fields, 'is not in',
+                retval.dtype.names, explain_error(e)))
     #}}}
     return retval
 #}}}
@@ -1144,7 +1150,7 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
         # determine the size
         width = abs(diff(ax.get_xlim()))
         if width==0:
-            raise CustomError('x axis width is zero')
+            raise ValueError('x axis width is zero')
         widthexp = floor(log(width)/log(10.))-1
         scalefactor = 10**widthexp
         width /= scalefactor
@@ -1160,7 +1166,7 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
             #{{{ y ticks
             width = abs(diff(ax.get_ylim()))
             if width==0:
-                raise CustomError('y axis width is zero')
+                raise ValueError('y axis width is zero')
             widthexp = floor(log(width)/log(10.))-1
             scalefactor = 10**widthexp
             width /= scalefactor
@@ -1509,8 +1515,8 @@ def contour_plot(xvals,yvals,zvals,color = 'k',alpha = 1.0,npts = 300,**kwargs):
     try:
         CS = contour(xi,yi,zi,levels,colors = color,
             alpha = alpha,**kwargs)
-    except:
-        raise CustomError("Is there something wrong with your levels?:",levels,"min z",zi_min,"max z",zi_max)
+    except Exception as e:
+        raise Exception(strm("Is there something wrong with your levels?:",levels,"min z",zi_min,"max z",zi_max,explain_error(e)))
     clabel(CS,fontsize = 9,inline = 1,
         #fmt = r'$k_\sigma/k_{\sigma,bulk} = %0.2f$',
         fmt = r'%0.2f',
@@ -1954,8 +1960,8 @@ class figlist(object):
                     try:
                         self.twinx(orig = True)
                         autolegend(**kwargs)
-                    except:
-                        raise CustomError('error while trying to run autolegend for',k,'\n\tfiglist is',self.figurelist)
+                    except Exception as e:
+                        raise Exception(strm('error while trying to run autolegend for',k,'\n\tfiglist is',self.figurelist,explain_error(e)))
     def show(self,*args,**kwargs):
         self.basename = None # must be turned off, so it can cycle through lists, etc, on its own
         verbose = False
@@ -2180,7 +2186,7 @@ def text_on_plot(x,y,thistext,coord = 'axes',**kwargs):
         if color is not None:
             newkwargs.update({'color':color})
         else:
-            raise CustomError('You passed match_data to text_on_plot, but I can\'t find a color in the object')
+            raise ValueError('You passed match_data to text_on_plot, but I can\'t find a color in the object')
         kwargs.pop('match_data')
     newkwargs.update(kwargs)
     return text(x,y,thistext,**newkwargs)
@@ -2276,8 +2282,8 @@ def plot(*args,**kwargs):
     if (myx is not None) and (len(myx)>1) and all(myx>0): # by doing this and making myplotfunc global, we preserve the plot style if we want to tack on one point
         try:
             b = diff(log10(myx))
-        except:
-            raise CustomError('likely a problem with the type of the x label, which is',myx)
+        except Exception as e:
+            raise Exception(strm('likely a problem with the type of the x label, which is',myx,explain_error(e)))
         print "b[0] is",b[0]
         if (size(b)>3) and all(abs((b-b[0])/b[0])<1e-4) and not ('nosemilog' in kwargs.keys()):
             myplotfunc = ax.semilogx
@@ -2341,7 +2347,11 @@ def plot(*args,**kwargs):
                 retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
                 #print "\n\n\\begin{verbatim}DEBUG plot:",plotargs,'\nkwargs:\n',newkwargs,'\\end{verbatim}'
             except: 
-                raise CustomError("Error trying to plot using function",myplotfunc,len(plotargs),"arguments",plotargs,"of len",map(len,plotargs),"and",len(newkwargs),"options",newkwargs,"of len",map(len,newkwargs.values()))
+                raise RuntimeError(strm("Error trying to plot using function",
+                    myplotfunc, len(plotargs), "arguments", plotargs, "of len",
+                    map(len, plotargs), "and", len(newkwargs),
+                    "options", newkwargs, "of len",
+                    map(len, newkwargs.values()),explain_error(e)))
         #hold(False)
         #}}}
         #}}}
@@ -2363,8 +2373,13 @@ def plot(*args,**kwargs):
         ax.set_ylabel(myylabel)
     try:
         ax.axis('tight')
-    except:
-        raise CustomError('error trying to set axis tight after plot',myplotfunc,'with arguments',plotargs,'and kwargs',kwargs,'\nsizes of arguments:',[shape(j) for j in plotargs],'\nsizes of ndarray kwargs:',dict([(j,shape(kwargs[j])) for j in kwargs.keys() if type(kwargs[j]) is ndarray]))
+    except Exception as e:
+        raise Exception(strm('error trying to set axis tight after plot',
+            myplotfunc, 'with arguments', plotargs, 'and kwargs', kwargs,
+            '\nsizes of arguments:', [shape(j) for j in plotargs],
+            '\nsizes of ndarray kwargs:',
+            dict([(j, shape(kwargs[j])) for j in
+                kwargs.keys() if type(kwargs[j]) is ndarray])))
     #grid(True)
     #}}}
     return retval
@@ -5382,11 +5397,11 @@ class nddata_hdf5 (nddata):
         return
     def __init__(self,pathstring,directory='.'):
         self.pathstring = pathstring
-        try:
-            self.h5file,self.datanode = h5nodebypath(pathstring,
-                    check_only=True, directory=directory)
-        except:
-            raise IndexError("I can't find the node"+pathstring)
+        #try:
+        self.h5file,self.datanode = h5nodebypath(pathstring,
+                check_only=True, directory=directory)
+        #except BaseException  as e:
+        #    raise IndexError("I can't find the node "+pathstring+explain_error(e))
         self._init_datanode(self.datanode)
     def _init_datanode(self,datanode,verbose = False,**kwargs):
         datadict = h5loaddict(datanode)
