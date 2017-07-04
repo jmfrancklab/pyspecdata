@@ -814,8 +814,8 @@ def h5remrows(bottomnode,tablename,searchstring):
         try:
             data = thistable.readWhere(searchstring).copy()
         except Exception as e:
-            raise RuntimeError(strm('Problem trying to remove rows using search
-                    string', searchstring, 'in', thistable, explain_error(e)))
+            raise RuntimeError(strm('Problem trying to remove rows using search string',
+                searchstring, 'in', thistable, explain_error(e)))
         for row in thistable.where(searchstring):
             if len(thistable) == 1:
                 thistable.remove()
