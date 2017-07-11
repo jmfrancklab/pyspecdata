@@ -57,7 +57,7 @@ def xepr(filename, dimname=''):
     for j,jval in enumerate(['1st','2nd','3rd','4th','5th']):
         for k,kval in enumerate(['','90']):
             thiskey = 'Enable'+jval+'Harm'+kval
-            if thiskey in v.keys():
+            if thiskey in v.keys() and v[thiskey]:
                 harmonics[k,j] = True
     n_harmonics = sum(harmonics)
     y_points = len(data)/x_points/n_harmonics
@@ -67,8 +67,8 @@ def xepr(filename, dimname=''):
     dimname_list = [b0_texstr]
     dimsize_list = [x_points]
     if n_harmonics > 1:
-        dimname_list = ['harmonics'] + dimname_list
-        dimsize_list = [n_harmonics] + dimsize_list
+        dimname_list = dimname_list + ['harmonic']
+        dimsize_list = dimsize_list + [n_harmonics]
         # {{{ generate a grid of labels and mask out the ones we want
         harmonic_axes = array([[(1,0),(2,0),(3,0),(4,0),(5,0)],
             [(1,90),(2,90),(3,90),(4,90),(5,90)]],
@@ -85,10 +85,10 @@ def xepr(filename, dimname=''):
             raise CustomError('I thought REY was the indirect dim, guess not')
         if dimname=='':
             dimname = v['JEY']
-        data = nddata(data,[y_points,x_points],[dimname,b0_texstr])
-    else:
-        data = nddata(data,[x_points],[b0_texstr])
-    if len(data.dimlabels)>1:
+        dimname_list = [dimname] + dimname_list
+        dimsize_list = [y_points] + dimsize_list
+    data = nddata(data,dimsize_list,dimname_list)
+    if len(set(data.dimlabels)^{'harmonic'})>1:
         raise ValueError("Code below is just copied from winepr"
                 " -- need to update")
         #yaxis = r_[0:v['REY']]
@@ -118,6 +118,7 @@ def xepr(filename, dimname=''):
     # fairly sure I don't wan to do that
     # }}}
     data.other_info.update(v)
+    data.reorder(b0_texstr)
     return data
 def winepr(filename, dimname=''):
     """For opening WinEPR files.
