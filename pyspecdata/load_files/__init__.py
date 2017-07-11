@@ -113,11 +113,14 @@ def find_file(searchstring,
         else:
             return files
     files = look_inside(directory)
-    if len(files) == 0:
-        raise IOError("I can't find a file matching the regular expression {:s} in {:s}".format(searchstring,directory))
+    if files is None or len(files) == 0:
+        exptype_msg = ""
+        if exp_type is None:
+            exptype_msg = "\nYou probably need to set exp_type so I know where inside {1:s} to find the file."
+        raise IOError(("I can't find a file matching the regular expression {0:s} in {1:s}"+exptype_msg).format(searchstring,directory))
     else:
         if len(files) > 1:
-            warnings.warn('found multiple files:\n'+repr(files)+'\nand opening last')
+            warnings.warn('found multiple files:\n'+'\n\t'.join(files)+'\nand opening last')
         elif print_result and verbose:
             obsn("found only one file, and loading it:"+repr(files))
     #}}}

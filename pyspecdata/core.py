@@ -2509,7 +2509,7 @@ class nddata (object):
         try:
             self.data = reshape(data,sizes)
         except:
-            raise CustomError("trying to reshape a ",data.shape,"array with list of sizes",sizes)
+            raise ValueError("trying to reshape a ",data.shape,"array with list of sizes",sizes)
         self.dimlabels = dimlabels
         self.axis_coords = axis_coords
         #if len(axis_coords) > 0:
