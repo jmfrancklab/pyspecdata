@@ -53,23 +53,42 @@ def xepr(filename, dimname=''):
     #         difference, but I'm not sure if this is correct
     #         (I think so)
     x_axis += v.pop('XMIN')
-    y_points = len(data)/x_points
+    harmonics = array([[False] * 5]*2) # outer dimension for the 90 degree phase
+    for j,jval in enumerate(['1st','2nd','3rd','4th','5th']):
+        for k,kval in enumerate(['','90']):
+            thiskey = 'Enable'+jval+'Harm'+kval
+            if thiskey in v.keys() and v[thiskey]:
+                harmonics[k,j] = True
+    n_harmonics = sum(harmonics)
+    y_points = len(data)/x_points/n_harmonics
     if 'YPTS' in v.keys():
-        raise ValueError("I looks like this is a 2D file, which I"
-                " just haven't bothered to program yet")
+        raise ValueError(strm("I looks like this is a 2D file YPTS=",v['YPTS'],", which I"
+            " just haven't bothered to program yet"))
+    dimname_list = [b0_texstr]
+    dimsize_list = [x_points]
+    if n_harmonics > 1:
+        dimname_list = dimname_list + ['harmonic']
+        dimsize_list = dimsize_list + [n_harmonics]
+        # {{{ generate a grid of labels and mask out the ones we want
+        harmonic_axes = array([[(1,0),(2,0),(3,0),(4,0),(5,0)],
+            [(1,90),(2,90),(3,90),(4,90),(5,90)]],
+            dtype=[('harmonic','int'),('phase','int')])
+        harmonic_axes = harmonic_axes[harmonics]
+        print "I found multiple harmonics, and am loading them into the 'harmonics' axis.  This is experimental.  You most likely will want to select the 0th element of the harmonic axis."
+        # }}}
     if y_points>1:
-        raise ValueError("I looks like this is a 2D file, which I"
-                " just haven't bothered to program yet -- the"
-                " code here is just copied from the WinEPR"
-                " reader")
+        raise ValueError(strm("I looks like this is a 2D file len(data)/x_points/n_harmonics=",y_points,", which I"
+            " just haven't bothered to program yet -- the"
+            " code here is just copied from the WinEPR"
+            " reader"))
         if y_points != v['REY']:
             raise CustomError('I thought REY was the indirect dim, guess not')
         if dimname=='':
             dimname = v['JEY']
-        data = nddata(data,[y_points,x_points],[dimname,b0_texstr])
-    else:
-        data = nddata(data,[x_points],[b0_texstr])
-    if len(data.dimlabels)>1:
+        dimname_list = [dimname] + dimname_list
+        dimsize_list = [y_points] + dimsize_list
+    data = nddata(data,dimsize_list,dimname_list)
+    if len(set(data.dimlabels)^{'harmonic'})>1:
         raise ValueError("Code below is just copied from winepr"
                 " -- need to update")
         #yaxis = r_[0:v['REY']]
@@ -99,6 +118,7 @@ def xepr(filename, dimname=''):
     # fairly sure I don't wan to do that
     # }}}
     data.other_info.update(v)
+    data.reorder(b0_texstr)
     return data
 def winepr(filename, dimname=''):
     """For opening WinEPR files.

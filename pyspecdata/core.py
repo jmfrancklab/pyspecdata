@@ -2509,7 +2509,11 @@ class nddata (object):
         try:
             self.data = reshape(data,sizes)
         except:
-            raise CustomError("trying to reshape a ",data.shape,"array with list of sizes",sizes)
+            try:
+                error_string = strm("While initializing nddata, you are trying trying to reshape a",data.shape,"array (",data.size,"data elements) with list of sizes",sizes,"(implying that there are ",prod(sizes),"data elements)")
+            except TypeError:
+                error_string = strm("While initializing nddata, you are trying trying to reshape a",data.shape,"array (",data.size,"data elements) with list of sizes",sizes)
+            raise ValueError(error_string)
         self.dimlabels = dimlabels
         self.axis_coords = axis_coords
         #if len(axis_coords) > 0:
