@@ -2,6 +2,7 @@
 *.egg-info
 *.pyc
 build/
+dist/
 *.pyd
 .*.swp
 *.pyo

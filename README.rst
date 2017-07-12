@@ -2,6 +2,10 @@
 pySpecData
 ===========
 
+Note that version is currently 0.9.1 -- currently intended just for collaborators, *etc.*
+A general-use version 1.0.0 is planned within a year.
+*(Note that the email currently linked to the PyPI account is infrequently checked --if you have interest in this software, please find J. Franck's website and contact by that email.)*
+
 Object-oriented Python package for processing spectral data -- or in general, *n*-dimensional data with labeled axes (i.e. *n*-Dimensional gridded data like an HDF SDS).  If you are working in a lab developing new spectroscopic methodologies, then this package is definitely for you.  If you deal with multi-dimensional data of some other form, then it's likely for you.
 
 * Labeled axes allow one to manipulate datasets (potentially with different dimensions) without having to explicitly keep track of what the different dimensions correspond to.  Code becomes more legible.  Also, tiling, direct product, and griding functions become obsolete.

@@ -160,6 +160,11 @@ def cache_output_if_needed(scriptnum_as_str,hashstring,showcode = False,show_err
     r'if needed, run the python script numbered by scriptnum_as_str that hashes to hashstring, and output the result to the cache ONLY'
     output_fname = cached_filename(hashstring)
     script_fname = script_filename(scriptnum_as_str)
+    # {{{ interpret the "NOerr" directive
+    with open(script_fname,'r') as fp:
+        firstline = fp.readline()
+        if firstline.startswith('### NOerr'): show_error = False
+    # }}}
     if os.path.exists(output_fname):
         print output_fname,"already exists, so I will just use it"
     else:

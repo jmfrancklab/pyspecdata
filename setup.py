@@ -5,15 +5,6 @@ from distutils.spawn import find_executable
 import subprocess
 import sys
 import os
-setup(
-    name='paramset_pyspecdata',
-    author='J. M. Franck',
-    version='0.1.0',
-    packages=['paramset_pyspecdata'],
-    license='LICENSE.md',
-    description='helper for pyspecdata',
-    long_description="just a module for storing global variables -- needed to change what's imported for notebook vs. graphical display",
-)
 
 general_error = "I couldn't import {:s} -- go install it first!!\n(I'm doing this because dependency-based install of PyQt, mayavi, and some others does not usually go well -- use your distro software (conda install ..., aptitude, etc) instead)\nIn fact, you probably want to install:\n\tpyqt, mayavi, unxutils, matplotlib, mingw, and libpython"
 try:
@@ -43,9 +34,11 @@ ext_modules = [ext_test]
 setup(
     name='pySpecData',
     author='J. M. Franck',
-    version='0.2.0',
+    version='0.9.1',
     packages=['pyspecdata'],
     license='LICENSE.md',
+    author_email='jmfranck@notgiven.com',
+    url='http://github.com/jmfranck/pyspecdata',
     description='object-oriented N-dimensional data processing with notebook functionality',
     long_description=open('README.rst').read(),
     install_requires=[
@@ -66,13 +59,13 @@ setup(
 )
 tryagain = False
 
-# Later, I should probably use the setuptools equivalent of install_data to do both this and the lapack stuff
-print "\n\nNow that everything else is set up, I'm going to check your notebook and data directories, possibly asking you to set them."
-print "\n--> The notebook directory is the root directory where you store tex files for your notebook."
-print "\n--> The data directory is the root directory where you store your data."
-print "\nFor the notebook and data directory, I'm going to assume that there is one root directory with, possibly many, subfolders underneath.  But, you must choose directories that exist.  Note that you can use ~ for your home directory, even on windows."
-import pyspecdata.datadir as d
-print "Trying to grab the data directory:"
-d.getDATADIR()
-print "Trying to grab the notebook directory:"
-d.get_notebook_dir()
+## Later, I should probably use the setuptools equivalent of install_data to do both this and the lapack stuff
+#print "\n\nNow that everything else is set up, I'm going to check your notebook and data directories, possibly asking you to set them."
+#print "\n--> The notebook directory is the root directory where you store tex files for your notebook."
+#print "\n--> The data directory is the root directory where you store your data."
+#print "\nFor the notebook and data directory, I'm going to assume that there is one root directory with, possibly many, subfolders underneath.  But, you must choose directories that exist.  Note that you can use ~ for your home directory, even on windows."
+#import pyspecdata.datadir as d
+#print "Trying to grab the data directory:"
+#d.getDATADIR()
+#print "Trying to grab the notebook directory:"
+#d.get_notebook_dir()
