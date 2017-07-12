@@ -2,7 +2,7 @@
 pySpecData
 ===========
 
-Note that version is currently 0.9.1 -- currently intended just for collaborators, *etc.*
+Note that version is currently 0.9.2 -- currently intended just for collaborators, *etc.*
 A general-use version 1.0.0 is planned within a year.
 *(Note that the email currently linked to the PyPI account is infrequently checked --if you have interest in this software, please find J. Franck's website and contact by that email.)*
 
@@ -16,15 +16,16 @@ Object-oriented Python package for processing spectral data -- or in general, *n
 
 * Reading and writing to HDF5.
 
-* The code is written so that it can be integrated into a latex lab notebook.  The same code that generates pop-up windows with plots from the command line can be embedded into a Latex document. Extension to other output formats, such as HTML or markdown, should be relatively straightforward.
+* The code is written so that it can be integrated into a LaTeX lab notebook.  The same code that generates pop-up windows with plots from the command line can be embedded into a Latex document. Extension to other output formats, such as HTML or markdown, should be relatively straightforward.
 
-Web documentation will be coming soon.
+More detailed web documentation will be coming soon.
 
 NMR/ESR specific
-=========
+================
+
 Because it was written primarily for NMR data, it also includes:
 
 * Routines for reading commercial raw data into objects with all relevant information.
 
-* A basic compiled routine for propagating density matrices that can be used to predict the response to shaped pulses.
+* (Not yet in packaged version) A basic compiled routine for propagating density matrices that can be used to predict the response to shaped pulses.
 

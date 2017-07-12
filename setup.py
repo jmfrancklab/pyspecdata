@@ -34,7 +34,7 @@ ext_modules = [ext_test]
 setup(
     name='pySpecData',
     author='J. M. Franck',
-    version='0.9.1',
+    version='0.9.2',
     packages=['pyspecdata'],
     license='LICENSE.md',
     author_email='jmfranck@notgiven.com',
