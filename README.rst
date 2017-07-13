@@ -1,9 +1,77 @@
+If you already know that you want to install -- you can skip to the quick-start_.
+
 ===========
 pySpecData
 ===========
 
-Installation
-============
+Object-oriented Python package for processing spectral data -- or in general, *n*-dimensional data with labeled axes (i.e. *N*-dimensional gridded data or "nddata").
+It depends on numpy, which provides very fast manipulations of *N*-dimensional gridded arrays ("ndarray").
+
+If you are working in a lab developing new spectroscopic methodologies, then this package is definitely for you.
+If you deal with multi-dimensional data of some other form, then it's likely for you.
+Features include:
+
+* Labeled axes allow one to manipulate datasets (potentially with different dimensions) without having to explicitly keep track of what the different dimensions correspond to.  Code becomes more legible.  Also, tiling, direct product, and gridding functions become obsolete.
+
+* Fourier transformation with automatic manipulation of axes.
+
+* Automatic error propagation.
+
+* Commands like ``plot(data)`` will generate a plot with automatically labeled
+  axes, errors, and units.
+  All of this information is also written to HDF5 when the data is saved.
+
+* Simplified curve fitting that takes advantage of labeled axes and Python's symbolic algebra package (sympy).
+
+* The code is written so that it can be integrated into a nicely formatted PDF lab notebook.
+
+    * The same code can be run on the command line (to generate pop-up plot windows) and embedded into a LaTeX document.
+
+    * Extension to other output formats, such as HTML or markdown, should be relatively straightforward.
+
+More detailed web documentation will be coming soon.
+
+NMR/ESR specific
+================
+
+Because it was written primarily for NMR and ESR data, it also includes:
+
+* Routines for reading commercial raw data (*e.g.* Bruker, Kea) into nddata objects with all relevant information.
+
+* (Not yet in packaged version) A basic compiled routine for propagating density matrices that can be used to predict the response to shaped pulses.
+
+Version Notes
+=============
+
+Note that the current version (0.9.5) is intended just for collaborators, *etc.*
+A general-use version 1.0.0 is planned within a year, and will include documentation.
+*(Note that the email currently linked to the PyPI account is infrequently checked --if you have interest in this software, please find J. Franck's website and contact by that email.)*
+
+Roadmap
+-------
+
+0.9.5
+    First version distributed on pypi.python.org.
+
+0.9.5.2
+    Comma-separated indexing to work correctly with all indexing types.
+    (0.9.5 requires sequential brackets rather than comma-separated indexing for some combined range selections.)
+
+0.9.5.4
+    GUI for setting configuration directories.
+
+0.9.5.5
+    Bruker DSP phase correction for raw data from newer versions of Topspin that is in sync with the code from nmrglue.
+
+0.9.5.8
+    Package a make-less copy of lapack to allow a cross-platform build of density matrix propagation routines.
+
+1.1.0
+    Integrate with ACERT NLSL Python package for simulation and fitting of ESR spectra.
+
+
+Installation Notes
+==================
 
 *Highly Recommended:* 
 If installing with `pip` install the following packages with your system, rather than relying on `pip` to install them:
@@ -22,43 +90,117 @@ If installing with `pip` install the following packages with your system, rather
 
 * h5py
 
-For example, on windows with `Anaconda 2.7 <https://www.continuum.io/downloads>`_.
+For example, on Windows with `Anaconda 2.7`_.
 -- just run
 ``conda install numpy scipy sympy pyqt pytables matplotlib h5py``.
 
 (If you don't install these packages with your system `pip` will try to install them, and there is a good chance it will fail -- it's known not to work great with several of these).
 
-*mayavi*: Mayavi can be used (and gives very nice graphics), but can be difficult to install.
-This package doesn't depend on mayavi.  Rather, you import it and pass it to the figure list that you initialize:
+*mayavi*: Mayavi can be used (and gives very nice graphics), but frequently lags behind common Python distros.
+Therefore, this package was written so that it doesn't depend on mayavi.
+Rather, you can just import ``mayavi.mlab`` and pass it to any figure list that you initialize:
 ``figlist_var(mlab = mayavi.mlab)``
 
-Version Notes
-=============
+If you are installing from github (or generally using ``python setup.py install``
+or ``python setup.py develop``), you will need some additional packages to enable compilation:
 
-Note that version is currently 0.9.4 -- currently intended just for collaborators, *etc.*
-A general-use version 1.0.0 is planned within a year.
-*(Note that the email currently linked to the PyPI account is infrequently checked --if you have interest in this software, please find J. Franck's website and contact by that email.)*
+* libpython
 
-Object-oriented Python package for processing spectral data -- or in general, *n*-dimensional data with labeled axes (i.e. *n*-Dimensional gridded data like an HDF SDS).  If you are working in a lab developing new spectroscopic methodologies, then this package is definitely for you.  If you deal with multi-dimensional data of some other form, then it's likely for you.
+* unxutils
 
-* Labeled axes allow one to manipulate datasets (potentially with different dimensions) without having to explicitly keep track of what the different dimensions correspond to.  Code becomes more legible.  Also, tiling, direct product, and griding functions become obsolete.
+* mingw
 
-* Fourier transformation with automatic manipulation of axes.
+The last two are specific to Windows, and provide things like the ``gcc`` and ``gfortran`` compiler, as well as ``make``.
+(to install from github, just ``git clone https://github.com/jmfranck/pyspecdata.git`` then move to the directory where setup.py lives,
+and do
+``python setup_paramset.py develop``
+followed by
+``python setup.py develop``)
 
-* Automatic error propagation.
+Quick-Start
+===========
 
-* Reading and writing to HDF5.
+To get started with this code:
 
-* The code is written so that it can be integrated into a LaTeX lab notebook.  The same code that generates pop-up windows with plots from the command line can be embedded into a Latex document. Extension to other output formats, such as HTML or markdown, should be relatively straightforward.
+1. Install a good Python 2.7 distribution
 
-More detailed web documentation will be coming soon.
+   * On Windows or MacOS: `Anaconda 2.7 <https://www.continuum.io/downloads>`_.  When installing select "install for all users."
 
-NMR/ESR specific
-================
+2. Install libraries that pyspecdata depends on. (If you're interested in why you need to do this first, see installation notes below.)
 
-Because it was written primarily for NMR data, it also includes:
+   * On Windows or MacOS: in the Anaconda Prompt, run ``conda install numpy scipy sympy pyqt pytables matplotlib h5py``.
 
-* Routines for reading commercial raw data into objects with all relevant information.
+   * On Linux, just use your package manager (``aptitude``, ``yum``, *etc.*) to install these libraries.
 
-* (Not yet in packaged version) A basic compiled routine for propagating density matrices that can be used to predict the response to shaped pulses.
+3. Install `pyspecdata`: ``pip install pyspecdata``
+
+4. Set up directories -- create a file in your home directory
+   called ``_pyspecdata`` (Windows  -- note the underscore)
+   or ``.pyspecdata`` (Mac or Linux).
+   Here is an example -- you can copy and paste it as a starting point:
+
+   ::
+
+        [General]
+        data_directory = c:/Users/yourusername/exp_data
+        notebook_directory = c:/Users/yourusername/notebook
+
+   Note that any backslashes are substituted with forward slashes.
+   Also note that you will
+   need to change the directories to refer to real directories that already
+   exist or that you create on your hard drive (see below).
+   Note that on Windows, you can use notebook, *etc.* to create this file,
+   but it cannot have a .txt, *etc.* `extension <http://www.wikihow.com/Change-a-File-Extension>`_.
+
+   * Where is my "home directory"? (Where do I put the `_pyspecdata` file?)
+
+       * On Windows, your home directory is likely something like
+         ``C:\Users\yourusername``.
+         You can access your home directory by opening any file folder window, and
+         starting to type your name in the address bar -- it's the first folder that shows up
+         underneath.
+
+       * On MacOS and Linux, it's the directory indicated by ``~``.  On Linux,
+         this typically expands to ``/home/yourusername``.
+
+   * What are these directories? → You can either create them or point to existing directories.
+
+       * ``data_directory`` must be set.  It is a directory, anywhere on the
+         hard drive, where you store all your raw experimental data.  It must
+         contain at least one subdirectory -- each subdirectory stores
+         different "experiment types," typically acquired on different instruments
+         (*e.g.* you might have subdirectories named ``400MHz_NMR``,
+         ``500MHz_NMR``, ``95GHz_ESR``, and ``Xband_ESR``).
+
+           * Data is assumed to be **unpacked** (*i.e.* as it is on the spectrometer -- not in .zip or .tgz files)
+
+           * If you're setting up a lab, you might want to separately sync each different
+             experiment type folders using `seafile <https://www.seafile.com/en/home/>`_.
+
+             Or you can sync the whole data directory with dropbox.
+
+       * If set, the ``notebook_directory`` is intended to contain latex
+         files with embedded python code, as well as some processed
+         output.
+
+   * *If your directory names contain spaces*, you probably need to either put
+     the whole path in quotes or add a backslash (``\``) before every space.
+
+   * Note that on Windows, your desktop folder is typically in ``C:\Users\yourusername\Desktop``
+
+   * Why do I need to do this?
+
+       * Setting this configuration allows you to move code between different
+         computers (*e.g.* a spectrometer computer, a desktop, and a laptop),
+         and re-use the same code, even though the locations of the files are
+         changing.  This should work even across different operating systems.
+
+       * It specifically enables functions like ``find_file(...)``,
+         ``get_datadir(...)``, *etc.* that can search the data directory for a
+         file name matching some basic criteria.
+         You should always use these to load your data,
+         and *never* use the absolute path.
+
+       * The GUI tool that will allow you to set up ``_pyspecdata`` by pointing
+         and clicking has not yet been set up.
 
