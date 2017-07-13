@@ -4,7 +4,7 @@ from numpy import fromstring
 import re, string
 from StringIO import StringIO
 b0_texstr = r'$B_0$'
-def xepr(filename, dimname=''):
+def xepr(filename, dimname='', verbose=False):
     """For opening Xepr files.
     
     Parameters
@@ -45,7 +45,6 @@ def xepr(filename, dimname=''):
     # {{{ use the parameters to determine the axes
     #     pop parameters that are just part of the axes
     x_points = v.pop('XPTS')
-    print (x_points)
     x_axis = r_[0:x_points]
     # the following is NOT the same as *=, which preserves the
     # type (=bad!)!!!
@@ -74,7 +73,7 @@ def xepr(filename, dimname=''):
             [(1,90),(2,90),(3,90),(4,90),(5,90)]],
             dtype=[('harmonic','int'),('phase','int')])
         harmonic_axes = harmonic_axes[harmonics]
-        print "I found multiple harmonics, and am loading them into the 'harmonics' axis.  This is experimental.  You most likely will want to select the 0th element of the harmonic axis."
+        if verbose: print "I found multiple harmonics, and am loading them into the 'harmonics' axis.  This is experimental.  You most likely will want to select the 0th element of the harmonic axis."
         # }}}
     if y_points>1:
         raise ValueError(strm("I looks like this is a 2D file len(data)/x_points/n_harmonics=",y_points,", which I"

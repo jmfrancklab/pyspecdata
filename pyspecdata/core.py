@@ -2284,7 +2284,6 @@ def plot(*args,**kwargs):
             b = diff(log10(myx))
         except Exception as e:
             raise Exception(strm('likely a problem with the type of the x label, which is',myx,explain_error(e)))
-        print "b[0] is",b[0]
         if (size(b)>3) and all(abs((b-b[0])/b[0])<1e-4) and not ('nosemilog' in kwargs.keys()):
             myplotfunc = ax.semilogx
     if ('nosemilog' in kwargs.keys()):
@@ -2320,7 +2319,7 @@ def plot(*args,**kwargs):
         if len(myformat) == 0:
             myformat = None
     #}}}
-    if normalize:
+    if normalize is not None and normalize:
         myy /= myy.max()
     #{{{ hsv plots when we have multiple lines
     if len(shape(myy.squeeze()))>1 and sum(array(shape(myy))>1):
@@ -2329,9 +2328,7 @@ def plot(*args,**kwargs):
         retval = []
         for j in range(0,myy.shape[1]):
             #{{{ this is the way to assign plot arguments
-            plotargs = [myx,myy[:,j],myformat]
-            while None in plotargs:
-                plotargs.remove(None)
+            plotargs = [k for k in (myx,myy[:,j],myformat) if k is not None]
             #}}}
             #{{{ here, i update the kwargs to include the specific color for this line
             newkwargs = kwargs.copy() # kwargs is a dict
