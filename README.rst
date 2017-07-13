@@ -2,7 +2,36 @@
 pySpecData
 ===========
 
-Note that version is currently 0.9.2 -- currently intended just for collaborators, *etc.*
+Installation
+============
+
+*Highly Recommended:* 
+If installing with `pip` install the following packages with your system, rather than relying on `pip` to install them:
+
+* numpy
+
+* scipy
+
+* sympy
+
+* pyqt
+
+* pytables
+
+* matplotlib
+
+* h5py
+
+For example, on windows with `Anaconda 2.7 <https://www.continuum.io/downloads>`_.
+-- just run
+``conda install numpy scipy sympy pyqt pytables matplotlib h5py``.
+
+(If you don't install these packages with your system `pip` will try to install them, and there is a good chance it will fail -- it's known not to work great with several of these).
+
+Version Notes
+=============
+
+Note that version is currently 0.9.4 -- currently intended just for collaborators, *etc.*
 A general-use version 1.0.0 is planned within a year.
 *(Note that the email currently linked to the PyPI account is infrequently checked --if you have interest in this software, please find J. Franck's website and contact by that email.)*
 

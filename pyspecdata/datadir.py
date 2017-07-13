@@ -3,29 +3,14 @@ import ConfigParser
 import platform
 from .general_functions import process_kwargs
 # {{{ http://stackoverflow.com/questions/2533120/show-default-value-for-editing-on-python-input-possible
+# doesn't work great cross-platform, so going to move to Qt
 if platform.platform().startswith('Windows'):
-    import win32console
-    _stdin = win32console.GetStdHandle(win32console.STD_INPUT_HANDLE)
-    def rlinput_forwindows(prompt, default=''):
-        keys = []
-        for c in unicode(default):
-            evt = win32console.PyINPUT_RECORDType(win32console.KEY_EVENT)
-            evt.Char = c
-            evt.RepeatCount = 1
-            evt.KeyDown = True
-            keys.append(evt)
-
-        _stdin.WriteConsoleInput(keys)
-        return raw_input(prompt)
     def rlinput(prompt, default=''):
-        try:
-            return rlinput_forwindows(prompt, default='')# doesn't work from inside the newer git window
-        except:
-            print "My guess:",default
-            result = raw_input(prompt+"\nMy guess: "+default+'\n')
-            if result.strip() == '':
-                result = default
-            return result
+        print "My guess:",default
+        result = raw_input(prompt+"\nMy guess: "+default+'\n')
+        if result.strip() == '':
+            result = default
+        return result
 else:
     def rlinput(prompt, prefill=''):
         import readline

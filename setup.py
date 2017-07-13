@@ -6,7 +6,7 @@ import subprocess
 import sys
 import os
 
-general_error = "I couldn't import {:s} -- go install it first!!\n(I'm doing this because dependency-based install of PyQt, mayavi, and some others does not usually go well -- use your distro software (conda install ..., aptitude, etc) instead)\nIn fact, you probably want to install:\n\tpyqt, mayavi, unxutils, matplotlib, mingw, and libpython"
+general_error = "I couldn't import {:s} -- go install it first!!\n(I'm doing this because dependency-based install of PyQt, and some others does not usually go well -- use your distro software (conda install ..., aptitude, etc) instead)\nIn fact, you probably want to install:\n\tpyqt, unxutils, matplotlib, mingw, and libpython"
 try:
     import PyQt4.QtCore
     import PyQt4.QtGui
@@ -17,10 +17,6 @@ except:
         import PyQt5.QtGui
     except:
         raise RuntimeError(general_error.format('PyQt5'))
-try:
-    import mayavi
-except:
-    raise RuntimeError(general_error.format('mayavi'))
 try:
     import matplotlib
 except:
@@ -34,20 +30,21 @@ ext_modules = [ext_test]
 setup(
     name='pySpecData',
     author='J. M. Franck',
-    version='0.9.2',
-    packages=['pyspecdata'],
+    version='0.9.5',
+    packages=setuptools.find_packages(exclude=['paramset_pyspecdata',]),
     license='LICENSE.md',
     author_email='jmfranck@notgiven.com',
     url='http://github.com/jmfranck/pyspecdata',
     description='object-oriented N-dimensional data processing with notebook functionality',
     long_description=open('README.rst').read(),
     install_requires=[
+        "paramset_pyspecdata",
         "sympy",
         "numpy",
         "scipy",
+        "h5py",
         "matplotlib",
         "tables",
-        "mayavi",
         ],
     ext_modules = ext_modules,
     entry_points=dict(console_scripts=

@@ -2622,9 +2622,10 @@ class nddata (object):
             return X,Y,Z
     #}}}
     def mayavi_surf(self):
-        from mayavi.mlab import surf
+        """use the mayavi surf function, assuming that we've already loaded mlab
+        during initialization"""
         X,Y,Z = self.matrices_3d()
-        s = surf(X,Y,Z)
+        s = self.mlab.surf(X,Y,Z)
         return s
     #{{{ 3D mesh plot
     def meshplot(self,stride = None,alpha = 1.0,onlycolor = False,light = None,rotation = None,cmap = cm.gray,ax = None,invert = False,**kwargs):
