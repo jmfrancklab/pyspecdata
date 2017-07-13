@@ -44,7 +44,9 @@ Version Notes
 =============
 
 Note that the current version (0.9.5) is intended just for collaborators, *etc.*
-A general-use version 1.0.0 is planned within a year, and will include documentation.
+(Though, if you do really want to use it for interesting science,
+we are happy to work with you to make it work for your purposes.)
+A public-use version 1.0.0 is planned within a year, and will include documentation.
 *(Note that the email currently linked to the PyPI account is infrequently checked --if you have interest in this software, please find J. Franck's website and contact by that email.)*
 
 Roadmap
@@ -69,12 +71,15 @@ Roadmap
 1.1.0
     Integrate with ACERT NLSL Python package for simulation and fitting of ESR spectra.
 
+1.2.0
+    Implement a version of figure list that can be interfaced with Qt.
+
 
 Installation Notes
 ==================
 
 *Highly Recommended:* 
-If installing with `pip` install the following packages with your system, rather than relying on `pip` to install them:
+Install the following packages using a good package-management system (conda or linux package manager), rather than relying on `pip` or `setuptools` to install them:
 
 * numpy
 
@@ -94,14 +99,14 @@ For example, on Windows with `Anaconda 2.7`_.
 -- just run
 ``conda install numpy scipy sympy pyqt pytables matplotlib h5py``.
 
-(If you don't install these packages with your system `pip` will try to install them, and there is a good chance it will fail -- it's known not to work great with several of these).
+(If you don't install these packages with your system `pip` will try to install them, and there is a good chance it will fail -- it's known not to work great with several of these; `setuptools` should error out and tell you to install the packages.)
 
 *mayavi*: Mayavi can be used (and gives very nice graphics), but frequently lags behind common Python distros.
 Therefore, this package was written so that it doesn't depend on mayavi.
 Rather, you can just import ``mayavi.mlab`` and pass it to any figure list that you initialize:
 ``figlist_var(mlab = mayavi.mlab)``
 
-If you are installing from github (or generally using ``python setup.py install``
+If you are installing from github (or generally using setuptools -- *i.e.* ``python setup.py install``
 or ``python setup.py develop``), you will need some additional packages to enable compilation:
 
 * libpython
@@ -111,7 +116,9 @@ or ``python setup.py develop``), you will need some additional packages to enabl
 * mingw
 
 The last two are specific to Windows, and provide things like the ``gcc`` and ``gfortran`` compiler, as well as ``make``.
-(to install from github, just ``git clone https://github.com/jmfranck/pyspecdata.git`` then move to the directory where setup.py lives,
+
+(Once these are installed,
+to install from github, just ``git clone https://github.com/jmfranck/pyspecdata.git`` then move to the directory where setup.py lives,
 and do
 ``python setup_paramset.py develop``
 followed by
