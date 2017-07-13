@@ -35,11 +35,14 @@ This package doesn't depend on mayavi.  Rather, you import it and pass it to the
 Version Notes
 =============
 
-Note that version is currently 0.9.4 -- currently intended just for collaborators, *etc.*
-A general-use version 1.0.0 is planned within a year.
+Note that the current version is intended just for collaborators, *etc.*
+A general-use version 1.0.0, to be accompanied with useful demonstrations, is planned within the near future.
 *(Note that the email currently linked to the PyPI account is infrequently checked --if you have interest in this software, please find J. Franck's website and contact by that email.)*
 
 Object-oriented Python package for processing spectral data -- or in general, *n*-dimensional data with labeled axes (i.e. *n*-Dimensional gridded data like an HDF SDS).  If you are working in a lab developing new spectroscopic methodologies, then this package is definitely for you.  If you deal with multi-dimensional data of some other form, then it's likely for you.
+
+Features
+========
 
 * Labeled axes allow one to manipulate datasets (potentially with different dimensions) without having to explicitly keep track of what the different dimensions correspond to.  Code becomes more legible.  Also, tiling, direct product, and griding functions become obsolete.
 
@@ -47,7 +50,7 @@ Object-oriented Python package for processing spectral data -- or in general, *n
 
 * Automatic error propagation.
 
-* Reading and writing to HDF5.
+* Reading and writing to HDF5 (with names and values of axis labels).
 
 * The code is written so that it can be integrated into a LaTeX lab notebook.  The same code that generates pop-up windows with plots from the command line can be embedded into a Latex document. Extension to other output formats, such as HTML or markdown, should be relatively straightforward.
 
@@ -59,6 +62,10 @@ NMR/ESR specific
 Because it was written primarily for NMR data, it also includes:
 
 * Routines for reading commercial raw data into objects with all relevant information.
+
+* The object-oriented features make it much easier to process raw phase-cycled data and to simultaneously view multiple (potentially interfering) coherence pathways.
+
+* Contains functions for baseline correction, peak integration, *etc.*
 
 * (Not yet in packaged version) A basic compiled routine for propagating density matrices that can be used to predict the response to shaped pulses.
 
