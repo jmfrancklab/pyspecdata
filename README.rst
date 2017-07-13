@@ -28,6 +28,10 @@ For example, on windows with `Anaconda 2.7 <https://www.continuum.io/downloads>`
 
 (If you don't install these packages with your system `pip` will try to install them, and there is a good chance it will fail -- it's known not to work great with several of these).
 
+*mayavi*: Mayavi can be used (and gives very nice graphics), but can be difficult to install.
+This package doesn't depend on mayavi.  Rather, you import it and pass it to the figure list that you initialize:
+``figlist_var(mlab = mayavi.mlab)``
+
 Version Notes
 =============
 
