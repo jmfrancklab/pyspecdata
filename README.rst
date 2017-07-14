@@ -29,6 +29,11 @@ Features include:
 
     * Extension to other output formats, such as HTML or markdown, should be relatively straightforward.
 
+* In a multimedia environment like jupyter, you don't need a separate plot
+  command.  The code can automatically choose a plotting style appropriate to
+  the code (eventually, the general preferences for this can just be configured
+  at the beginning of the jupyter notebook).
+
 More detailed web documentation will be coming soon.
 
 NMR/ESR specific

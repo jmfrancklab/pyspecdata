@@ -12,11 +12,9 @@ from sympy.interactive import printing
 printing.init_printing(use_latex=True,
                        wrap_line=False,
                        num_columns=10000)
-try:
-    import pyspecdata
-    has_pyspec = True
-except:
-    has_pyspec = False
+from .core import image as pyspec_image
+from .core import plot as pyspec_plot
+from .core import nddata as pyspec_nddata
 
 import re
 from IPython.display import Math
@@ -102,20 +100,18 @@ def load_ipython_extension(ip):
                 d.display(d.Markdown("***numpy ND array*** $N>3$ dimensions ($"+r'\times'.join(map(str,arg.shape))+"$), so I'm just giving the text representation:"))
                 d.display(str(arg))
     from IPython.display import display
-    if has_pyspec:
-        def _print_plain_override_for_nddata(arg,p,cycle):
-            """caller for pretty, for use in IPython 0.11"""
-            import IPython.display as d
-            if len(arg.dimlabels) == 1:
-                pyspecdata.plot(arg)
-            elif (len(arg.dimlabels) == 2 and any([j < 50 for j in arg.data.shape])):
-                arg.reorder(arg.dimlabels[array(arg.data.shape).argmin()])
-                pyspecdata.plot(arg)
-            else:
-                pyspecdata.image(arg)
+    def _print_plain_override_for_nddata(arg,p,cycle):
+        """caller for pretty, for use in IPython 0.11"""
+        import IPython.display as d
+        if len(arg.dimlabels) == 1:
+            pyspec_plot(arg)
+        elif (len(arg.dimlabels) == 2 and any([j < 50 for j in arg.data.shape])):
+            arg.reorder(arg.dimlabels[array(arg.data.shape).argmin()])
+            pyspec_plot(arg)
+        else:
+            pyspec_image(arg)
 
     plain_formatters.for_type(numpy.ndarray,_print_plain_override_for_ndarray)
-    if has_pyspec:
-        plain_formatters.for_type(pyspecdata.nddata,_print_plain_override_for_nddata)
+    plain_formatters.for_type(pyspec_nddata,_print_plain_override_for_nddata)
 def unload_ipython_extension(ip):
     print "I will not not go gentle into that good night!!!"
