@@ -1,4 +1,5 @@
 from pylab import *
+from .general_functions import *
 
 class ndshape_base ():
     r'''The base ndshape class, which doesn't include an allocation method.'''
@@ -86,8 +87,9 @@ class ndshape_base ():
     def __getitem__(self,args):
         try:
             mydict = dict(zip(self.dimlabels,self.shape))
-        except:
-            raise CustomError("either dimlabels=",self.dimlabels,"or shape",self.shape,"not in the correct format")
+        except Exception as e:
+            raise ValueError(strm("either dimlabels=",self.dimlabels,"or shape",
+                self.shape,"not in the correct format") + explain_error(e))
         try:
             return mydict[args]
         except:
