@@ -2528,7 +2528,7 @@ class nddata (object):
 
                     ndarray storing the data -- reduced to 1D
 
-                    A single dimension, called "VALUE" is set.
+                    A single dimension, called "INDEX" is set.
                     This suppresses the printing of axis labels.
 
                     This is used to store numbers and arrays
@@ -2555,7 +2555,7 @@ class nddata (object):
             else:
                 raise ValueError("???")
         else:
-            self.__my_init__(args[0],[-1],['VALUE'],**kwargs)
+            self.__my_init__(args[0],[-1],['INDEX'],**kwargs)
         return
     def __my_init__(self, data, sizes, dimlabels, axis_coords=[],
             ft_start_time=None, data_error=None, axis_coords_error=None,
@@ -2611,7 +2611,7 @@ class nddata (object):
         retval = show_array(self.data) 
         retval += '\n\t\t+/-'
         retval += show_array(self.get_error())
-        if len(self.dimlabels) > 1 or self.dimlabels[0] != "VALUE":
+        if len(self.dimlabels) > 1 or self.dimlabels[0] != "INDEX":
             retval += '\n\tdimlabels='
             retval += repr(self.dimlabels)
             retval += '\n\taxes='
@@ -4363,9 +4363,6 @@ class nddata (object):
         for j in range(0,len(listofaxes)):
             if type(listofaxes[j]) is list:
                 listofaxes[j] = array(listofaxes[j])
-        if len(self.axis_coords) == 0:
-            self.axis_coords = [[]]*len(self.dimlabels)
-            self.axis_coords_error = [None]*len(self.dimlabels)
         listofstrings = autostringconvert(listofstrings)
         if type(listofstrings) is str:
             listofstrings = [listofstrings]
@@ -4378,7 +4375,7 @@ class nddata (object):
             raise TypeError("the arguments passed to the .labels() method must be a list of the axis names followed by the list of the axis arrays")
         for j in range(0,len(listofstrings)):
             if listofaxes[j] is None:
-                self.axis_coords[self.axn(listofstrings[j])] = None
+                self.setaxis(listofstrings[j],None)
             else:
                 #{{{ test that the axis is the right size
                 if isscalar(listofaxes[j]):#interpret as a timestep
@@ -4388,13 +4385,7 @@ class nddata (object):
                 if (len(listofaxes[j]) != ndshape(self)[listofstrings[j]]) and (len(listofaxes[j])!=0):
                     raise IndexError("You're trying to attach an axis of len %d to the '%s' dimension, which has %d data points (shape of self is %s)"%(len(listofaxes[j]),listofstrings[j],ndshape(self)[listofstrings[j]],repr(ndshape(self))))
                 #}}}
-                try:
-                    self.axis_coords[self.dimlabels.index(listofstrings[j])] = listofaxes[j]
-                except:
-                    try:
-                        raise CustomError("Can't assign the coordinates to "+listofstrings[j]+" as "+listofaxes[j].__repr__())
-                    except:
-                        raise CustomError("length of listofaxes (",len(listofaxes),") isn't same length as ",listofstrings)
+                self.setaxis(listofstrings[j],listofaxes[j])
         return self
     def check_axis_coords_errors(self):
         if len(self.axis_coords_error) > len(self.dimlabels):
@@ -4611,6 +4602,8 @@ class nddata (object):
         ("set the value of the axis if you pass a function as the `value`, it"
         " will use the existing axis labels as the argument of the function, and"
         " then put the result into the axis labels")
+        if axis == 'INDEX':
+            raise ValueError("Axes that are called INDEX are special, and you are not allowed to label them!")
         if type(value) is type(emptyfunction):
             x = self.getaxis(axis)
             x[:] = value(x)
@@ -4619,8 +4612,9 @@ class nddata (object):
            value = linspace(0.,value,self.axlen(axis))
         if type(value)is list:
             value = array(value)
-        if ( self.axis_coords is None ) or self.axis_coords == []:
-            self.axis_coords = [None] * len(self.dimlabels)
+        if self.axis_coords is None or len(self.axis_coords) == 0:
+            self.axis_coords = [None]*len(self.dimlabels)
+            self.axis_coords_error = [None]*len(self.dimlabels)
         try:
             self.axis_coords[self.axn(axis)] = value
         except:

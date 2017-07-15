@@ -15,6 +15,7 @@ printing.init_printing(use_latex=True,
 from .core import image as pyspec_image
 from .core import plot as pyspec_plot
 from .core import nddata as pyspec_nddata
+from .core import gca
 
 import re
 from IPython.display import Math
@@ -105,11 +106,13 @@ def load_ipython_extension(ip):
         import IPython.display as d
         if len(arg.dimlabels) == 1:
             pyspec_plot(arg)
-        elif (len(arg.dimlabels) == 2 and any([j < 50 for j in arg.data.shape])):
-            arg.reorder(arg.dimlabels[array(arg.data.shape).argmin()])
+        elif (len(arg.dimlabels) == 2 and any([j < 10 for j in arg.data.shape])):
+            arg.reorder(arg.dimlabels[numpy.array(arg.data.shape).argmin()])
             pyspec_plot(arg)
         else:
             pyspec_image(arg)
+            if arg.name() is not None:
+                gca().set_title(arg.name())
 
     plain_formatters.for_type(numpy.ndarray,_print_plain_override_for_ndarray)
     plain_formatters.for_type(pyspec_nddata,_print_plain_override_for_nddata)
