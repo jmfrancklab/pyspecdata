@@ -78,6 +78,7 @@ def wraplatex():
         os.system(' '.join(['xelatex']+proc_args[1:]))
     else:
         os.system(' '.join(['pdflatex']+proc_args[1:]))
+    print "about to update the python script outputs...."
     os.system('update_notebook_pythonscripts')
     orig_tex_basename,new_pdf_basename = det_new_pdf_name(proc_args)
     if orig_tex_basename != new_pdf_basename:

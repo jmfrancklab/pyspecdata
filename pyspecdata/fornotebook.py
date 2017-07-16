@@ -448,11 +448,13 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
             savefig(fname, dpi=dpi,
                     facecolor=(1,1,1,0),
                     bbox_inches='tight')
-        except ValueError,exc_string:
+        except ValueError as exc_string:
             if exc_string.find('finite numbers') > -1:
                 raise ValueError("It gives this error because you're trying to do a bar graph with zero width")
             else:
                 raise ValueError(exc_string)
+        except IOError as e:
+            raise IOError("This is giving an IOError -- check that you haven't maybe changed directories" + os.getcwd().replace('\\','/'))
         if alsosave != None:
             savefig(alsosave,
                     dpi=dpi,
