@@ -4,6 +4,39 @@ from .general_functions import *
 class ndshape_base ():
     r'''The base ndshape class, which doesn't include an allocation method.'''
     def __init__(self,*args):
+        """Create an nddata in one of various ways.  Values are
+        always copies of the values they were created from
+        (changing the shape of the initialization parameters will
+        not change/update the new nddata that's created).
+
+        >>> nddata_instance = ndshape(shapes,dimlabels)
+
+        >>> nddata_instance = ndshape(list_of_pairs)
+
+        or 
+
+        >>> nddata_instance = ndshape(nddata_instance)
+
+        Parameters
+        ==========
+        
+        shapes : list of int
+
+            the sizes of the dimensions, in order
+
+        dimlabels : list of str
+            
+            the names of the dimensions, in order
+
+        list_of_pairs : list of tuples
+
+            zip(dimlabels,shapes)
+
+        nddata_instance : nddata
+            
+            determine the shape of the nddata,
+            and return it
+        """
         self.zero_dimensional = False
         if len(args) == 2:
             self.shape = list(args[0])
@@ -15,6 +48,8 @@ class ndshape_base ():
                 if len(self.shape) == 0 and len(self.dimlabels) == 0:
                     self.zero_dimensional = True
                     return
+            elif type(args[0]) is list:
+                self.dimlabels, self.shape = map(list,zip(*args[0]))
             else:
                 raise ValueError('If you pass a single argument, it must be an nddata')
         return

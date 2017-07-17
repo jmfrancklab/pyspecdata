@@ -2343,12 +2343,15 @@ def plot(*args,**kwargs):
             try:
                 retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
                 #print "\n\n\\begin{verbatim}DEBUG plot:",plotargs,'\nkwargs:\n',newkwargs,'\\end{verbatim}'
-            except: 
+            except Exception as e:
                 raise RuntimeError(strm("Error trying to plot using function",
-                    myplotfunc, len(plotargs), "arguments", plotargs, "of len",
+                    myplotfunc, '\nwith',len(plotargs), "arguments",
+                    '\nwhich were\n',plotargs, "\nand had len\n",
                     map(len, plotargs), "and", len(newkwargs),
-                    "options", newkwargs, "of len",
-                    map(len, newkwargs.values()),explain_error(e)))
+                    "\noptions", newkwargs, "of len",
+                    ', '.join([str(type(j)) + " " + str(j) if isscalar(j)
+                        else str(len(j)) for j in newkwargs.values()]),
+                    explain_error(e)))
         #hold(False)
         #}}}
         #}}}
