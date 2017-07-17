@@ -2284,7 +2284,6 @@ def plot(*args,**kwargs):
             b = diff(log10(myx))
         except Exception as e:
             raise Exception(strm('likely a problem with the type of the x label, which is',myx,explain_error(e)))
-        print "b[0] is",b[0]
         if (size(b)>3) and all(abs((b-b[0])/b[0])<1e-4) and not ('nosemilog' in kwargs.keys()):
             myplotfunc = ax.semilogx
     if ('nosemilog' in kwargs.keys()):
@@ -2320,7 +2319,7 @@ def plot(*args,**kwargs):
         if len(myformat) == 0:
             myformat = None
     #}}}
-    if normalize:
+    if normalize is not None and normalize:
         myy /= myy.max()
     #{{{ hsv plots when we have multiple lines
     if len(shape(myy.squeeze()))>1 and sum(array(shape(myy))>1):
@@ -2329,9 +2328,7 @@ def plot(*args,**kwargs):
         retval = []
         for j in range(0,myy.shape[1]):
             #{{{ this is the way to assign plot arguments
-            plotargs = [myx,myy[:,j],myformat]
-            while None in plotargs:
-                plotargs.remove(None)
+            plotargs = [k for k in (myx,myy[:,j],myformat) if k is not None]
             #}}}
             #{{{ here, i update the kwargs to include the specific color for this line
             newkwargs = kwargs.copy() # kwargs is a dict
@@ -2481,20 +2478,88 @@ def concat(datalist,dimname,chop = False,verbose = False):
 #}}}
 class nddata (object):
     want_to_prospa_decim_correct = False
-    def __init__(self,*args,**kwargs):
+    def __init__(self, *args, **kwargs):
+        """initialize nddata -- several options.
+        Can be done with several sizes of arguments:
+
+        3 arguments::
+            nddata(inputarray, shape, dimlabels)::
+
+                :inputarray:
+
+                    ndarray storing the data -- note that the size is ignored
+                    and the data is reshaped as needed
+
+                :shape:
+
+                    a list (or array, *etc.*) giving the size of each dimension, in order
+
+                :dimlabels:
+
+                    a list giving the names of each dimension, in order
+
+        2 arguments::
+            nddata(inputarray, dimlabels)::
+
+                :inputarray:
+
+                    ndarray storing the data -- the data is *not* reshaped
+
+                :dimlabels:
+
+                    a list giving the names of each dimension, in order
+
+        2 arguments::
+            nddata(inputarray, single_dimlabel)::
+
+                :inputarray:
+
+                    ndarray storing the data -- must be 1D
+
+                    inputarray is *also* used to label the single axis
+
+                :single_dimlabel:
+
+                    a list giving the name of the single axis
+        1 argument::
+            nddata(inputarray, shape, dimlabels)::
+
+                :inputarray:
+
+                    ndarray storing the data -- reduced to 1D
+
+                    A single dimension, called "INDEX" is set.
+                    This suppresses the printing of axis labels.
+
+                    This is used to store numbers and arrays
+                    that might have error and units,
+                    but aren't gridded data.
+
+
+        keyword arguments::
+            these can be used to set the labels, etc, and are passed to `__my_init__`
+
+        """
         if len(args) > 1:
             if len(args) == 2:
                 if len(args[0].shape) == 1 and type(args[1]) is str:
                     self.__my_init__(args[0],[len(args[0])],[args[1]])
                     self.labels(args[1],args[0])
+                elif all([type(j) is str for j in args[1]]):
+                    self.__my_init__(args[0],
+                            list(args[0].shape),args[1])
                 else:
                     raise ValueError('You can pass two arguments only if you pass a 1d ndarray and a name for the axis') 
-            else:
+            elif len(args) == 3:
                 self.__my_init__(args[0],args[1],args[2],**kwargs)
+            else:
+                raise ValueError("???")
         else:
-            self.__my_init__(args[0],[-1],['value'],**kwargs)
+            self.__my_init__(args[0],[-1],['INDEX'],**kwargs)
         return
-    def __my_init__(self,data,sizes,dimlabels,axis_coords=[],ft_start_time = None,data_error = None, axis_coords_error = None,axis_coords_units = None, data_units = None, other_info = {}):
+    def __my_init__(self, data, sizes, dimlabels, axis_coords=[],
+            ft_start_time=None, data_error=None, axis_coords_error=None,
+            axis_coords_units=None, data_units=None, other_info={}):
         if ft_start_time is not None:
             raise ValueError('ft_start_time is obsolete -- you will want to pass a float value to the shift keyword argument of either .ft() or .ift()')
         self.genftpairs = False
@@ -2503,9 +2568,9 @@ class nddata (object):
             if isscalar(data) or (type(data) is list) or (type(data) is tuple):
                 data = array(data)
             else:
-                raise CustomError('data is not an array, it\'s',type(data),'!')
+                raise TypeError(strm('data is not an array, it\'s',type(data),'!'))
         if not (type(dimlabels) is list):
-            raise CustomError('labels are not a list')
+            raise TypeError('labels are not a list')
         try:
             self.data = reshape(data,sizes)
         except:
@@ -2535,19 +2600,27 @@ class nddata (object):
     def _contains_symbolic(self,string):
         return string[:9] == 'symbolic_' and hasattr(self,string)
     #{{{ for printing
-    def __repr__(self):
-        retval = repr(self.data) 
+    def __str__(self):
+        def show_array(x,indent = ''):
+            x = repr(x)
+            if x.startswith('array('):
+                x = x.split('\n')
+                # need to remove the "array(" and aligning spaces
+                return ('\n'+indent).join(j[6:-1] for j in x)
+            else: return x
+        retval = show_array(self.data) 
         retval += '\n\t\t+/-'
-        retval += repr(self.get_error())
-        retval += '\n\tdimlabels=['
-        retval += repr(self.dimlabels)
-        retval += ']\n\taxes='
-        def rep_this_dict(starting_indent,thisdict,errordict):
-            dictrep = []
-            for k,v in thisdict.iteritems():
-                dictrep.append('`'+k+'\':'+repr(v)+starting_indent+'\t\t+/-'+repr(errordict[k]))
-            return '{'+(','+starting_indent+'\t').join(dictrep)+'}' # separate with an extra comma, the existing indent, and a tab
-        retval += rep_this_dict('\n\t',self.mkd(self.axis_coords),self.mkd(self.axis_coords_error))
+        retval += show_array(self.get_error())
+        if len(self.dimlabels) > 1 or self.dimlabels[0] != "INDEX":
+            retval += '\n\tdimlabels='
+            retval += repr(self.dimlabels)
+            retval += '\n\taxes='
+            def rep_this_dict(starting_indent,thisdict,errordict):
+                dictrep = []
+                for k,v in thisdict.iteritems():
+                    dictrep.append('`'+k+'\':'+show_array(v,starting_indent)+starting_indent+'\t\t+/-'+repr(errordict[k]))
+                return '{'+(','+starting_indent+'\t').join(dictrep)+'}' # separate with an extra comma, the existing indent, and a tab
+            retval += rep_this_dict('\n\t',self.mkd(self.axis_coords),self.mkd(self.axis_coords_error))
         #retval += '\n\t\t+/-'
         #retval += rep_this_dict('\n\t\t',self.mkd(self.axis_coords_error))
         retval += '\n'
@@ -2576,7 +2649,7 @@ class nddata (object):
         self.sort(self.dimlabels[0])
         self.sort(self.dimlabels[1])
         if len(self.dimlabels) > 2:
-            raise CustomError("I don't know how to handle something with more than two dimensions for a surface plot!")
+            raise ValueError("I don't know how to handle something with more than two dimensions for a surface plot!")
         #{{{ shared to both
         x_dim = self.dimlabels[0]
         y_dim = self.dimlabels[1]
@@ -2719,14 +2792,16 @@ class nddata (object):
             if rotation is not None:
                 raise ValueError("you can only set the rotation once!")
         if len(self.dimlabels) > 2:
-            raise CustomError("I don't know how to handle something with more than two dimensions for a surface plot!")
+            raise ValueError("I don't know how to handle something with more than two dimensions for a surface plot!")
         #{{{ shared to both
         x_dim = self.dimlabels[0]
         y_dim = self.dimlabels[1]
         try:
             x_axis = self.retaxis(x_dim).data
-        except:
-            raise CustomError('trying to get the info on axis',x_dim,'which is',self.getaxis(x_dim))
+        except Error as e:
+            raise ValueError(strm('trying to get the info on axis', x_dim, 'which is',
+                self.getaxis(x_dim))
+                +explain_error(e))
         y_axis = self.retaxis(y_dim).data
         #}}}
         ax.set_xlabel(self.unitify_axis(x_dim))
@@ -2779,7 +2854,7 @@ class nddata (object):
         ax = sortedself.meshplot(linewidth = 0,light = light,ax = ax,invert = invert)
         #return
         if len(sortedself.dimlabels) > 2:
-            raise CustomError("I don't know how to handle something with more than two dimensions for a surface plot!")
+            raise ValueError("I don't know how to handle something with more than two dimensions for a surface plot!")
         #{{{ shared to both
         x_dim = sortedself.dimlabels[0]
         y_dim = sortedself.dimlabels[1]
@@ -2838,8 +2913,8 @@ class nddata (object):
             E = sparse.lil_matrix((n,n))
         try:
             E.setdiag(self.get_error()**2)
-        except:
-            raise CustomError('Problem getting error because error is',self.get_error())
+        except Error as e:
+            raise ValueError(strm('Problem getting covariance because error is',self.get_error())+explain_error(e))
         return E.toarray()
     #}}}
     #{{{ shortcuts for axes
@@ -2871,7 +2946,7 @@ class nddata (object):
             if 'give_None' in kwargs.keys():
                 give_None = kwargs.pop('give_None')
         if len(kwargs) > 0:
-            raise CustomError("you passed mkd kwargs I didn't understand:",kwargs)
+            raise ValueError(strm("you passed mkd kwargs I didn't understand:",kwargs))
         #}}}
         if len(arg) == 1:
             if emptytest(arg[0]):
@@ -2895,11 +2970,11 @@ class nddata (object):
                 #}}}
         elif len(arg) == 0:
             if not give_None:
-                raise CustomError("You can't tell me not to give none and then not pass me anything!!")
+                raise ValueError("You can't tell me not to give none and then not pass me anything!!")
             return dict(zip(self.dimlabels,
                 [None]*len(self.dimlabels)))
         else:
-            raise CustomError('.mkd() doesn\'t know what to do with %d arguments',len(arg))
+            raise ValueError(strm('.mkd() doesn\'t know what to do with %d arguments',len(arg)))
     def fld(self,dict_in,noscalar = False):
         'flatten dictionary -- return list'
         return [dict_in[x] for x in self.dimlabels]
@@ -2916,7 +2991,7 @@ class nddata (object):
             unitval = args[0] # later, have some type of processing bojive
             self.data_units = unitval
         else:
-            raise CustomError(".set_units() takes data units or 'axis' and axis units")
+            raise TypeError(".set_units() takes data units or 'axis' and axis units")
         return self
     def human_units(self, verbose=False):
         prev_label = self.get_units()
@@ -2947,7 +3022,7 @@ class nddata (object):
                     try:
                         data_to_test = data_to_test[isfinite(data_to_test)]
                     except:
-                        raise CustomError('data_to_test is',data_to_test,'isfinite is',isfinite(data_to_test))
+                        raise ValueError(strm('data_to_test is',data_to_test,'isfinite is',isfinite(data_to_test)))
                     #{{{ find the average order of magnitude, rounded down to the nearest power of 3
                     average_oom = log10(abs(data_to_test[data_to_test>0]))/3.
                     average_oom = average_oom[isfinite(average_oom)].mean()
@@ -2991,11 +3066,11 @@ class nddata (object):
             try:
                 return self.axis_coords_units[self.axn(args[0])]
             except:
-                raise CustomError('problem getting units for',args[0],'dimension',self.dimlabels,self.axis_coords_units)
+                raise RuntimeError(strm('problem getting units for',args[0],'dimension',self.dimlabels,self.axis_coords_units))
         elif len(args) == 0:
             return self.data_units
         else:
-            raise CustomError(".set_units() takes axis or nothing")
+            raise ValueError(".set_units() takes axis or nothing")
     #}}}
     #{{{ set error
     def set_error(self,*args):
@@ -3045,8 +3120,9 @@ class nddata (object):
                 if len(self.axis_coords_error) == 0: self.axis_coords_error = [None] * len(self.dimlabels) # is we have an empty axis_coords_error, need to fill with None's
                 try:
                     errorforthisaxis = self.axis_coords_error[self.axn(thearg)]
-                except:
-                    raise CustomError('Problem trying to load error',self.axn(thearg),'for axis',thearg,'out of',self.axis_coords_error)
+                except Error as e:
+                    raise RuntimeError(strm('Problem trying to load error',self.axn(thearg),'for axis',thearg,'out of',self.axis_coords_error)
+                            +explain_error(e))
                 if errorforthisaxis is None:
                     return None
                 else:
@@ -3059,7 +3135,7 @@ class nddata (object):
                     else:
                         return real(self.axis_coords_error[self.axn(thearg)])
         else:
-            raise CustomError('Not a valid argument to get_error: *args=',args,'map(type,args)=',map(type,args))
+            raise ValueError(strm('Not a valid argument to get_error: *args=',args,'map(type,args)=',map(type,args)))
         #}}}
     #}}}
     #{{{ match dims --
@@ -3138,7 +3214,7 @@ class nddata (object):
             try:
                 thiscolor = colordict[thiscolor]
             except:
-                raise CustomError('Color',thiscolor,'not in dictionary')
+                raise ValueError(strm('Color',thiscolor,'not in dictionary'))
         self.other_info.update({'plot_color':thiscolor})
         return
     def get_plot_color(self):
@@ -3253,7 +3329,7 @@ class nddata (object):
         try:
             A,B = self.aligndata(arg)
         except:
-            raise CustomError("Error aligning right (arg)",arg.name(),"with left (self)",self.name())
+            raise ValueError(strm("Error aligning right (arg)",arg.name(),"with left (self)",self.name()))
         retval = A.copy()
         retval.data = A.data * B.data
         #}}}
@@ -3283,11 +3359,13 @@ class nddata (object):
             return self * self
         else:
             if self.get_error() != None:
-                raise CustomError("nothing but -1 and 2 supported yet! (you tried to raise to a power of "+repr(arg)+")")
+                raise ValueError(strm("nothing but -1 and 2 supported yet! (you tried to raise to a power of "+repr(arg)+")"))
             else:
                 result = self.copy()
                 result.data = result.data**arg
                 return result
+    def __truediv__(self,arg):
+        return self.__div__(arg)
     def __div__(self,arg):
         if isscalar(arg):
             A = self.copy()
@@ -3316,15 +3394,15 @@ class nddata (object):
                 try:
                     Rerr += (A.data*Berr/(B.data**2))**2
                 except:
-                    raise CustomError('self was',self,
-                            'arg was',arg,
-                            'dtype of A.data',A.data.dtype,
-                            'dtype of Berr',Berr.dtype,
-                            'dtype of B.data',Berr)
+                    raise ValueError(strm('self was',self,
+                        'arg was',arg,
+                        'dtype of A.data',A.data.dtype,
+                        'dtype of Berr',Berr.dtype,
+                        'dtype of B.data',Berr) + explain_error(e))
         try:
             Rerr = sqrt(real(Rerr)) # convert back to stdev --> note that this has problems with complex numbers, hence the "abs" above
-        except:
-            raise CustomError("Rerr gave an attribute error when you passed",Rerr)
+        except AttributeError as e:
+            raise AttributeError(strm("Rerr gave an attribute error when you passed",Rerr) + explain_error(e))
         #print "DEBUG: step 3",Rerr
         #print "Rerr dtype",Rerr.dtype
         if Aerr == None and Berr == None:
@@ -3787,7 +3865,7 @@ class nddata (object):
                     self.data_error = sqrt(sum((self.data*self.data_error)**2,
                             axis=thisindex)/(this_axis_length**2))
                 except:
-                    raise CustomError('shape of data',shape(self.data),'shape of data error',shape(self.data_error))
+                    raise ValueError(strm('shape of data',shape(self.data),'shape of data error',shape(self.data_error)))
             if return_error: # since I think this is causing an error
                 thiserror = std(self.data,
                         axis=thisindex)
@@ -3812,8 +3890,8 @@ class nddata (object):
             if self.axis_coords_error is not None and len(self.axis_coords_error) > 0:
                 try:
                     self.axis_coords_error.pop(thisindex)
-                except:
-                    raise CustomError('trying to pop',thisindex,'from',self.axis_coords_error)
+                except Error as e:
+                    raise RuntimeError(strm('trying to pop',thisindex,'from',self.axis_coords_error) + explain_error(e))
             if len(self.axis_coords_units) > 0:
                 try:
                     self.axis_coords_units.pop(thisindex)
@@ -3871,7 +3949,7 @@ class nddata (object):
             axis = args[1]
             try:
                 thisindex = self.dimlabels.index(axis)
-            except Error,e:
+            except Error as e:
                 if type(axis) is not str:
                     raise ValueError('The format of run is run(func,"axisname"), but you didn\'t give a string as the second argument -- maybe you fed the arguments backwards?')
                 elif axis not in self.dimlabels:
@@ -4285,9 +4363,6 @@ class nddata (object):
         for j in range(0,len(listofaxes)):
             if type(listofaxes[j]) is list:
                 listofaxes[j] = array(listofaxes[j])
-        if len(self.axis_coords) == 0:
-            self.axis_coords = [[]]*len(self.dimlabels)
-            self.axis_coords_error = [None]*len(self.dimlabels)
         listofstrings = autostringconvert(listofstrings)
         if type(listofstrings) is str:
             listofstrings = [listofstrings]
@@ -4300,7 +4375,7 @@ class nddata (object):
             raise TypeError("the arguments passed to the .labels() method must be a list of the axis names followed by the list of the axis arrays")
         for j in range(0,len(listofstrings)):
             if listofaxes[j] is None:
-                self.axis_coords[self.axn(listofstrings[j])] = None
+                self.setaxis(listofstrings[j],None)
             else:
                 #{{{ test that the axis is the right size
                 if isscalar(listofaxes[j]):#interpret as a timestep
@@ -4310,13 +4385,7 @@ class nddata (object):
                 if (len(listofaxes[j]) != ndshape(self)[listofstrings[j]]) and (len(listofaxes[j])!=0):
                     raise IndexError("You're trying to attach an axis of len %d to the '%s' dimension, which has %d data points (shape of self is %s)"%(len(listofaxes[j]),listofstrings[j],ndshape(self)[listofstrings[j]],repr(ndshape(self))))
                 #}}}
-                try:
-                    self.axis_coords[self.dimlabels.index(listofstrings[j])] = listofaxes[j]
-                except:
-                    try:
-                        raise CustomError("Can't assign the coordinates to "+listofstrings[j]+" as "+listofaxes[j].__repr__())
-                    except:
-                        raise CustomError("length of listofaxes (",len(listofaxes),") isn't same length as ",listofstrings)
+                self.setaxis(listofstrings[j],listofaxes[j])
         return self
     def check_axis_coords_errors(self):
         if len(self.axis_coords_error) > len(self.dimlabels):
@@ -4533,6 +4602,8 @@ class nddata (object):
         ("set the value of the axis if you pass a function as the `value`, it"
         " will use the existing axis labels as the argument of the function, and"
         " then put the result into the axis labels")
+        if axis == 'INDEX':
+            raise ValueError("Axes that are called INDEX are special, and you are not allowed to label them!")
         if type(value) is type(emptyfunction):
             x = self.getaxis(axis)
             x[:] = value(x)
@@ -4541,8 +4612,9 @@ class nddata (object):
            value = linspace(0.,value,self.axlen(axis))
         if type(value)is list:
             value = array(value)
-        if ( self.axis_coords is None ) or self.axis_coords == []:
-            self.axis_coords = [None] * len(self.dimlabels)
+        if self.axis_coords is None or len(self.axis_coords) == 0:
+            self.axis_coords = [None]*len(self.dimlabels)
+            self.axis_coords_error = [None]*len(self.dimlabels)
         try:
             self.axis_coords[self.axn(axis)] = value
         except:
@@ -4656,7 +4728,7 @@ class nddata (object):
         return self
     #}}}
     #{{{ breaking up and combining axes
-    def smoosh(self,dimstocollapse,dimname = 0,verbose = False):
+    def smoosh(self,dimstocollapse, dimname=0, noaxis=False, verbose=False):
         r'''Collapse multiple dimensions into one dimension.
 
         Parameters
@@ -4670,6 +4742,10 @@ class nddata (object):
             * None: create a new (direct product) name,
             * a number: lump the existing dimension into the number given, in the list
             * a string: same as the previous, where the string can be part of the list or not
+
+        noaxis : bool
+            if set, then just skip calculating the axis for the new dimension,
+            which otherwise is typically a complicated record array
         '''
         #{{{ first, put them all at the end, in order given here
         retained_dims = list(self.dimlabels)
@@ -4707,52 +4783,57 @@ class nddata (object):
         #{{{ now for the tricky part -- deal with the axis labels
         #{{{ in order, make a list of the relevant axis names, dtypes, and sizes
         axes_with_labels = [j for j in dimstocollapse if self.getaxis(j) is not None] # specifically, I am only concerned with the ones I am collapsing that have labels
-        axes_with_labels_haserror = [self.get_error(j) is not None for j in axes_with_labels]
-        axes_with_labels_dtype = [(j,self.getaxis(j).dtype) for j in axes_with_labels]
-        axes_with_labels_size = [self.getaxis(j).size for j in axes_with_labels]
-        #}}}
-        if verbose: print "the dtype that I want is:",axes_with_labels_dtype
-        if verbose: print "the axes that have labels are:",axes_with_labels
-        if verbose: print "the axes that have labels have sizes:",axes_with_labels_size
-        multidim_axis_error = None
-        if len(axes_with_labels_dtype) > 0:
-            # create a new axis of the appropriate shape and size
-            multidim_axis_label = empty(axes_with_labels_size,dtype = axes_with_labels_dtype)
-            if any(axes_with_labels_haserror):
-                multidim_axis_error = empty(axes_with_labels_size,
-                        dtype = [(axes_with_labels[j],self.getaxis(axes_with_labels[j]).dtype)
-                            for j in range(len(axes_with_labels)) if axes_with_labels_haserror[j]])
-            # one at a time index the relevant dimension, and load in the information
-            full_slice = [slice(None,None,None)]*len(axes_with_labels_dtype)
-            for this_index,thisdim in enumerate(axes_with_labels):
-                axis_for_thisdim = self.getaxis(thisdim)
-                if axes_with_labels_haserror[this_index]:
-                    axis_error_for_thisdim = self.get_error(thisdim)
-                if verbose: print "the axis for",thisdim,"is",axis_for_thisdim
-                for j in range(axes_with_labels_size[this_index]):
-                    this_slice = list(full_slice)
-                    this_slice[this_index] = j # set this element
-                    multidim_axis_label[thisdim][tuple(this_slice)] = axis_for_thisdim[j]
+        if not noaxis:
+            axes_with_labels_haserror = [self.get_error(j) is not None for j in axes_with_labels]
+            axes_with_labels_dtype = [(j,self.getaxis(j).dtype) for j in axes_with_labels]
+            axes_with_labels_size = [self.getaxis(j).size for j in axes_with_labels]
+            #}}}
+            if verbose: print "the dtype that I want is:",axes_with_labels_dtype
+            if verbose: print "the axes that have labels are:",axes_with_labels
+            if verbose: print "the axes that have labels have sizes:",axes_with_labels_size
+            multidim_axis_error = None
+            if len(axes_with_labels_dtype) > 0:
+                # create a new axis of the appropriate shape and size
+                multidim_axis_label = empty(axes_with_labels_size,dtype = axes_with_labels_dtype)
+                if any(axes_with_labels_haserror):
+                    multidim_axis_error = empty(axes_with_labels_size,
+                            dtype = [(axes_with_labels[j],self.getaxis(axes_with_labels[j]).dtype)
+                                for j in range(len(axes_with_labels)) if axes_with_labels_haserror[j]])
+                # one at a time index the relevant dimension, and load in the information
+                full_slice = [slice(None,None,None)]*len(axes_with_labels_dtype)
+                for this_index,thisdim in enumerate(axes_with_labels):
+                    axis_for_thisdim = self.getaxis(thisdim)
                     if axes_with_labels_haserror[this_index]:
-                        multidim_axis_error[thisdim][tuple(this_slice)] = axis_error_for_thisdim[j]
-            if verbose: print "shape of multidim_axis_label is now",multidim_axis_label.shape,"(",axes_with_labels,")"
-            if verbose: print "multidim_axis_label is:\n",repr(multidim_axis_label)
-            multidim_axis_label = multidim_axis_label.flatten() # then flatten the axis
-            if verbose: print "shape of multidim_axis_label is now",multidim_axis_label.shape
-            if verbose: print "multidim_axis_label is:\n",repr(multidim_axis_label)
-            #{{{ create a new axis dictionary with the new info
-            axis_coords_dict = self.mkd(self.axis_coords)
-            axis_coords_error_dict = self.mkd(self.axis_coords_error)
+                        axis_error_for_thisdim = self.get_error(thisdim)
+                    if verbose: print "the axis for",thisdim,"is",axis_for_thisdim
+                    for j in range(axes_with_labels_size[this_index]):
+                        this_slice = list(full_slice)
+                        this_slice[this_index] = j # set this element
+                        multidim_axis_label[thisdim][tuple(this_slice)] = axis_for_thisdim[j]
+                        if axes_with_labels_haserror[this_index]:
+                            multidim_axis_error[thisdim][tuple(this_slice)] = axis_error_for_thisdim[j]
+                if verbose: print "shape of multidim_axis_label is now",multidim_axis_label.shape,"(",axes_with_labels,")"
+                if verbose: print "multidim_axis_label is:\n",repr(multidim_axis_label)
+                multidim_axis_label = multidim_axis_label.flatten() # then flatten the axis
+                if verbose: print "shape of multidim_axis_label is now",multidim_axis_label.shape
+                if verbose: print "multidim_axis_label is:\n",repr(multidim_axis_label)
+        #{{{ create a new axis dictionary with the new info
+        axis_coords_dict = self.mkd(self.axis_coords)
+        axis_coords_error_dict = self.mkd(self.axis_coords_error)
+        if noaxis:
+            axis_coords_dict[dimname] = None
+            axis_coords_error_dict[dimname] = None
+        else:
             axis_coords_dict[dimname] = multidim_axis_label
             axis_coords_error_dict[dimname] = multidim_axis_error
-            if verbose: print "end up with axis_coords_dict",axis_coords_dict
-            if verbose: print "end up with axis_coords_error_dict",axis_coords_error_dict
-            #}}}
+        if verbose: print "end up with axis_coords_dict",axis_coords_dict
+        if verbose: print "end up with axis_coords_error_dict",axis_coords_error_dict
+        #}}}
         #}}}
         #{{{ make new dimlabels, and where relevant, project the new dictionary onto these dimlabels
         self.dimlabels = retained_dims + [dimname]
         if verbose: print "new dimlabels",self.dimlabels
-        if len(axes_with_labels_dtype) > 0:
+        if len(axes_with_labels) > 0:
             self.axis_coords = self.fld(axis_coords_dict)
             self.axis_coords_error = self.fld(axis_coords_error_dict)
         if verbose: print "new axis coords",self.axis_coords
