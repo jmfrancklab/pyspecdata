@@ -11,6 +11,9 @@ If you are working in a lab developing new spectroscopic methodologies, then thi
 If you deal with multi-dimensional data of some other form, then it's likely for you.
 Features include:
 
+Features
+========
+
 * Labeled axes allow one to manipulate datasets (potentially with different dimensions) without having to explicitly keep track of what the different dimensions correspond to.  Code becomes more legible.  Also, tiling, direct product, and gridding functions become obsolete.
 
 * Fourier transformation with automatic manipulation of axes.
@@ -41,17 +44,25 @@ NMR/ESR specific
 
 Because it was written primarily for NMR and ESR data, it also includes:
 
-* Routines for reading commercial raw data (*e.g.* Bruker, Kea) into nddata objects with all relevant information.
+* Routines for reading commercial raw data (*e.g.* Bruker, Kea) into nddata
+  objects with all relevant information.
 
-* (Not yet in packaged version) A basic compiled routine for propagating density matrices that can be used to predict the response to shaped pulses.
+* The object-oriented features make it much easier to process raw phase-cycled
+  data and to simultaneously view multiple (potentially interfering) coherence
+  pathways.
+
+* Contains functions for baseline correction, peak integration, *etc.*
+
+* (Not yet in packaged version) A basic compiled routine for propagating
+  density matrices that can be used to predict the response to shaped pulses.
 
 Version Notes
 =============
 
-Note that the current version (0.9.5) is intended just for collaborators, *etc.*
+Note that the current version is intended just for collaborators, *etc.*
 (Though, if you do really want to use it for interesting science,
 we are happy to work with you to make it work for your purposes.)
-A public-use version 1.0.0 is planned within a year, and will include documentation.
+A public-use version 1.0.0, to be accompanied by useful demonstrations, is planned within a year.
 *(Note that the email currently linked to the PyPI account is infrequently checked --if you have interest in this software, please find J. Franck's website and contact by that email.)*
 
 Roadmap
@@ -215,4 +226,3 @@ To get started with this code:
 
        * The GUI tool that will allow you to set up ``_pyspecdata`` by pointing
          and clicking has not yet been set up.
-
