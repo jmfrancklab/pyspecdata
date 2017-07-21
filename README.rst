@@ -72,7 +72,7 @@ Roadmap
     First version distributed on pypi.python.org.
 
 **0.9.5.1.1**
-    Some important debugging, and also added `pyspecdata.ipy` → executing the following at the type of a jupyter notebook:
+    Some important debugging, and also added `pyspecdata.ipy` → executing the following at the top of a jupyter notebook:
 
     .. code-block:: python
 
