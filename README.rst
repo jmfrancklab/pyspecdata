@@ -71,6 +71,16 @@ Roadmap
 0.9.5
     First version distributed on pypi.python.org.
 
+**0.9.5.1.1**
+    Some important debugging, and also added `pyspecdata.ipy` → executing the following at the type of a jupyter notebook:
+
+    .. code-block:: python
+
+        %pylab inline
+        %load_ext pyspecdata.ipy
+
+    will cause nddata to "display" as labeled plots.
+
 0.9.5.2
     Comma-separated indexing to work correctly with all indexing types.
     (0.9.5 requires sequential brackets rather than comma-separated indexing for some combined range selections.)
@@ -206,8 +216,8 @@ To get started with this code:
          files with embedded python code, as well as some processed
          output.
 
-   * *If your directory names contain spaces*, you probably need to either put
-     the whole path in quotes or add a backslash (``\``) before every space.
+   * *Do not* use quotes to surround the directory name.  Even if it contains
+     spaces, do not use quotes, and do not escape spaces with backslashes.
 
    * Note that on Windows, your desktop folder is typically in ``C:\Users\yourusername\Desktop``
 

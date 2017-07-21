@@ -87,9 +87,12 @@ def xepr(filename, dimname='', verbose=False):
         dimname_list = [dimname] + dimname_list
         dimsize_list = [y_points] + dimsize_list
     data = nddata(data,dimsize_list,dimname_list)
-    if len(set(data.dimlabels)^{'harmonic'})>1:
-        raise ValueError("Code below is just copied from winepr"
-                " -- need to update")
+    extra_dims = set(data.dimlabels)-{'harmonic',b0_texstr}
+    if len(extra_dims)>0:
+        raise ValueError(strm("You seem to have one or more extra dimension(s)"
+            "called",str(extra_dims),
+            "(Code below is just copied from winepr"
+            " -- need to update)"))
         #yaxis = r_[0:v['REY']]
         #if dimname == 'mw-power-sweep':
         #    yaxis *= v['MPS']
