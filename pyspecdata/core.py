@@ -2578,7 +2578,7 @@ class nddata (object):
             self.data = reshape(data,sizes)
         except:
             try:
-                error_string = strm("While initializing nddata, you are trying trying to reshape a",data.shape,"array (",data.size,"data elements) with list of sizes",sizes,"(implying that there are ",prod(sizes),"data elements)")
+                error_string = strm("While initializing nddata, you are trying trying to reshape a",data.shape,"array (",data.size,"data elements) with list of sizes",zip(dimlabels,sizes),"(implying that there are ",prod(sizes),"data elements)")
             except TypeError:
                 error_string = strm("While initializing nddata, you are trying trying to reshape a",data.shape,"array (",data.size,"data elements) with list of sizes",sizes)
             raise ValueError(error_string)

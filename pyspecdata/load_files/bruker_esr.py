@@ -51,7 +51,7 @@ def xepr(filename, dimname='', verbose=False):
     x_axis = x_axis*v.pop('XWID')/x_axis[-1] # wouldn't be a huge
     #         difference, but I'm not sure if this is correct
     #         (I think so)
-    x_axis += v.pop('XMIN')
+    x_axis += v.pop('XMIN') # actually using pop is better than calling these, so that we don't have redundant information
     harmonics = array([[False] * 5]*2) # outer dimension for the 90 degree phase
     for j,jval in enumerate(['1st','2nd','3rd','4th','5th']):
         for k,kval in enumerate(['','90']):
@@ -59,12 +59,19 @@ def xepr(filename, dimname='', verbose=False):
             if thiskey in v.keys() and v[thiskey]:
                 harmonics[k,j] = True
     n_harmonics = sum(harmonics)
-    y_points = len(data)/x_points/n_harmonics
-    if 'YPTS' in v.keys():
-        raise ValueError(strm("I looks like this is a 2D file YPTS=",v['YPTS'],", which I"
-            " just haven't bothered to program yet"))
+    y_points_calcd = len(data)/x_points/n_harmonics
     dimname_list = [b0_texstr]
     dimsize_list = [x_points]
+    dims_accounted_for = {b0_texstr}
+    dims_to_label = {b0_texstr:x_axis}
+    def interpret_units(un_key):
+        retval = v.pop(un_key)
+        if retval[0] == "'": retval = retval.replace("'","")
+        return retval
+    if 'XUNI' in v.keys():
+        dim_units = {b0_texstr:interpret_units('XUNI')}
+    else:
+        dim_units = {}
     if n_harmonics > 1:
         dimname_list = dimname_list + ['harmonic']
         dimsize_list = dimsize_list + [n_harmonics]
@@ -73,39 +80,62 @@ def xepr(filename, dimname='', verbose=False):
             [(1,90),(2,90),(3,90),(4,90),(5,90)]],
             dtype=[('harmonic','int'),('phase','int')])
         harmonic_axes = harmonic_axes[harmonics]
+        dims_to_label.update({'harmonic':harmonic_axes})
         if verbose: print "I found multiple harmonics, and am loading them into the 'harmonics' axis.  This is experimental.  You most likely will want to select the 0th element of the harmonic axis."
+        dims_accounted_for |= {'harmonic'}
         # }}}
-    if y_points>1:
-        raise ValueError(strm("I looks like this is a 2D file len(data)/x_points/n_harmonics=",y_points,", which I"
-            " just haven't bothered to program yet -- the"
-            " code here is just copied from the WinEPR"
-            " reader"))
-        if y_points != v['REY']:
-            raise CustomError('I thought REY was the indirect dim, guess not')
-        if dimname=='':
-            dimname = v['JEY']
-        dimname_list = [dimname] + dimname_list
-        dimsize_list = [y_points] + dimsize_list
+    y_dim_name = None
+    if y_points_calcd>1:
+        if 'YPTS' in v.keys():
+            assert v['YPTS']==y_points_calcd, ("y points left over after"
+                    " reshaping according to harmonics (y_points_calcd="
+                    + str(y_points_calcd)
+                    + ") doesn't match the number of data points")
+            assert 'YTYP' in v.keys(), ("No parameter YTYP -- how do you expect me to know the type of 2D dataset??")
+            if v['YTYP'] == 'IGD':
+                logger.info('Found YTYP=IGD, assuming this is a power series')
+                assert 'YNAM' in v.keys(), ("No parameter YNAM -- how do you expect me to know the name of the second dimension??")
+                y_dim_name = v.pop('YNAM')
+                if type(y_dim_name) is list:
+                    y_dim_name = ' '.join(y_dim_name) # it gets split into a list, which for XEpr files shouldn't be happening, but fix later
+                    if y_dim_name[0] == "'": y_dim_name = y_dim_name.replace("'","")
+                assert 'YUNI' in v.keys(), ("No parameter YUNI -- how do you expect me to know the units of the second dimension??")
+                dim_units.update({y_dim_name:interpret_units('YUNI')})
+                filename_ygf = filename_par[:-4] + '.YGF'
+                if not os.path.exists(filename_ygf):
+                    filename_ygf = filename_ygf[:-4] + filename_ygf[-4:].lower()
+                assert os.path.exists(filename_ygf), "I can't find the YGF file ("+filename_ygf+") that stores the powers"
+                with open(filename_ygf,'rb') as fp:
+                    y_axis = fp.read()
+                y_axis = fromstring(y_axis,'>f8')
+                assert len(y_axis)==y_points_calcd, "Length of the power axis doesn't seem to match!"
+            else:
+                raise ValueError(strm("found YTYP=",v['YTYP']," which is not currently programmed"))
+        else:
+            logger.info("y_points_calcd is greater than 1, but YPTS is not set, so assuming WinEPR style")
+            assert y_points_calcd == v['REY'], 'Trying WinEPR style and I thought REY was the indirect dim, guess not'
+            if dimname=='':
+                y_dim_name = v['JEY']
+            dimsize_list = [y_points_calcd] + dimsize_list
+            y_axis = r_[0:v['REY']]
+            y_axis *= v['MPS']
+            y_axis += v['XYLB'] # the starting attenuation
+            y_axis = 10**(-yaxis/10.) # convert to linear power
+            y_axis *= v['MP']/yaxis[0] # the initial power
+            y_axis *= 1e-3 # convert from mW to W
+        dimsize_list = [y_points_calcd] + dimsize_list
+        dimname_list = [y_dim_name] + dimname_list
+        dims_accounted_for |= {y_dim_name}
+        dims_to_label.update({y_dim_name:y_axis})
     data = nddata(data,dimsize_list,dimname_list)
-    extra_dims = set(data.dimlabels)-{'harmonic',b0_texstr}
-    if len(extra_dims)>0:
-        raise ValueError(strm("You seem to have one or more extra dimension(s)"
+    extra_dims = set(data.dimlabels) - dims_accounted_for
+    assert len(extra_dims)==0, strm("You seem to have one or more extra dimension(s)"
             "called",str(extra_dims),
             "(Code below is just copied from winepr"
-            " -- need to update)"))
-        #yaxis = r_[0:v['REY']]
-        #if dimname == 'mw-power-sweep':
-        #    yaxis *= v['MPS']
-        #    yaxis += v['XYLB'] # the starting attenuation
-        #    yaxis = 10**(-yaxis/10.) # convert to linear power
-        #    yaxis *= v['MP']/yaxis[0] # the initial power
-        #    yaxis *= 1e-3 # convert from mW to W
-        #    data.rename('mw-power-sweep','power')
-        #    dimname = 'power'
-        #data.labels([dimname,b0_texstr],[yaxis,x_axis])
-        #data.reorder([b0_texstr,dimname])
-    else:
-        data.labels([b0_texstr],[x_axis])
+            " -- need to update)")
+    data.labels(dims_to_label)
+    for k,val in dim_units.iteritems():
+        data.set_units(k,val)
     # }}}
     # {{{ use the parameters to rescale the data
     logger.info("There is a parameter called DModGain as well as"
@@ -159,7 +189,7 @@ def winepr(filename, dimname=''):
     ypoints = len(data)/xpoints
     if ypoints>1:
         if ypoints != v['REY']:
-            raise CustomError('I thought REY was the indirect dim, guess not')
+            raise RuntimeError('I thought REY was the indirect dim, guess not')
         if dimname=='':
             dimname = v['JEY']
         data = nddata(data,[ypoints,xpoints],[dimname,b0_texstr])

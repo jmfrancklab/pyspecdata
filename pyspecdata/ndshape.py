@@ -128,7 +128,7 @@ class ndshape_base ():
         try:
             return mydict[args]
         except:
-            raise CustomError("one or more of the dimensions named",args,"do not exist in",self.dimlabels)
+            raise ValueError(strm("one or more of the dimensions named",args,"do not exist in",self.dimlabels))
     def pop(self,label):
         r'remove a dimension'
         thisindex = self.axn(label)
