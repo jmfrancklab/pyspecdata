@@ -75,6 +75,9 @@ History/Roadmap
 
 0.9.5.1
 
+    - 0.9.5.1.3
+      XEpr data loaded with dBm units rather than W units
+
     - **0.9.5.1.2**
       added ability to load power saturation 2D data from Bruker
 
@@ -94,6 +97,11 @@ History/Roadmap
 
 0.9.5.4
     GUI for setting configuration directories.
+
+    Means for dealing with non-linearly spaced data in image plots
+    (0.9.5 auto-detects log spacing in 1D plots,
+    but pretends that image plots are linear -- we will implement linear spline
+    interpolation algorithm)
 
 0.9.5.5
     Bruker DSP phase correction for raw data from newer versions of Topspin that is in sync with the code from nmrglue.
