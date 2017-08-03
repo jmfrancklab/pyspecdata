@@ -65,21 +65,28 @@ we are happy to work with you to make it work for your purposes.)
 A public-use version 1.0.0, to be accompanied by useful demonstrations, is planned within a year.
 *(Note that the email currently linked to the PyPI account is infrequently checked --if you have interest in this software, please find J. Franck's website and contact by that email.)*
 
-Roadmap
--------
+History/Roadmap
+---------------
+
+(Current version in bold) 
 
 0.9.5
     First version distributed on pypi.python.org.
 
-**0.9.5.1.1**
-    Some important debugging, and also added `pyspecdata.ipy` → executing the following at the top of a jupyter notebook:
+0.9.5.1
 
-    .. code-block:: python
+    - **0.9.5.1.2**
+      added ability to load power saturation 2D data from Bruker
 
-        %pylab inline
-        %load_ext pyspecdata.ipy
+    - 0.9.5.1.1
+      Some important debugging, and also added `pyspecdata.ipy` → executing the following at the top of a jupyter notebook:
 
-    will cause nddata to "display" as labeled plots.
+        .. code-block:: python
+
+            %pylab inline
+            %load_ext pyspecdata.ipy
+
+      will cause nddata to "display" as labeled plots.
 
 0.9.5.2
     Comma-separated indexing to work correctly with all indexing types.
