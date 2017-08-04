@@ -84,20 +84,19 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
         elif pad:
             padded_length = pad
         u = self.getaxis(axes[j]) # here, u is time
+        if u is None:
+            raise ValueError("seems to be no axis for"+repr(axes[j])+"set an axis before you try to FT")
         #}}}
         self.set_ft_prop(axes[j],['start','time'],u[0]) # before anything else, store the start time
         #{{{ calculate new axis and post-IFT shift..
         #       Calculate it first, in case it's non-integral.  Also note that
         #       I calculate the post-discrepancy here
-        if u is None:
-            raise ValueError("seems to be no axis for"+repr(axes[j])+"set an axis before you try to FT")
-        else:
-            #{{{ need to calculate du and all checks here so I can calculate new u
-            du = check_ascending_axis(u,tolerance,"In order to perform FT or IFT")
-            #}}}
-            dv = double(1) / du / double(padded_length) # so padded length gives the SW
-            v = r_[0:padded_length] * dv # v is the name of the *new* axis.  Note
-            #   that we stop one index before the SW, which is what we want
+        #{{{ need to calculate du and all checks here so I can calculate new u
+        du = check_ascending_axis(u,tolerance,"In order to perform FT or IFT")
+        #}}}
+        dv = double(1) / du / double(padded_length) # so padded length gives the SW
+        v = r_[0:padded_length] * dv # v is the name of the *new* axis.  Note
+        #   that we stop one index before the SW, which is what we want
         desired_startpoint = self.get_ft_prop(axes[j],['start','freq'])
         if desired_startpoint is not None:# FT_start_freq is set
             if shift[j]:

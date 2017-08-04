@@ -2229,6 +2229,11 @@ def plot(*args,**kwargs):
     #{{{ parse nddata
     if isinstance(myy,nddata):
         myy = myy.copy()
+        # {{{ automatically reduce any singleton dimensions
+        if any(array(myy.data.shape) == 1):
+            for singleton_dim in [lb for j,lb in enumerate(myy.dimlabels) if myy.data.shape[j] == 1]:
+                myy = myy[singleton_dim,0]
+        # }}}
         if human_units: myy = myy.human_units()
         if myy.get_plot_color() is not None\
             and 'color' not in kwargs.keys():# allow override
@@ -2362,7 +2367,7 @@ def plot(*args,**kwargs):
             retval = myplotfunc(*plotargs,**kwargs)
         except:
             raise RuntimeError(strm('error trying to plot',type(myplotfunc),'with value',myplotfunc,
-                    '\nlength of the ndarray arguments:',['shape:'+repr(shape(j)) if type(j) is ndarray else j for j in plotargs],
+                    '\nlength of the ndarray arguments:',['shape:'+str(shape(j)) if type(j) is ndarray else j for j in plotargs],
                     '\nsizes of ndarray kwargs',dict([(j,shape(kwargs[j])) if type(kwargs[j]) is ndarray else (j,kwargs[j]) for j in kwargs.keys()]),
                     '\narguments = ',plotargs,
                     '\nkwargs =',kwargs))
@@ -2556,7 +2561,7 @@ class nddata (object):
             elif len(args) == 3:
                 self.__my_init__(args[0],args[1],args[2],**kwargs)
             else:
-                raise ValueError("???")
+                raise ValueError(strm("You passed",len(args),"to nddata.  I don't know what to do with this."))
         else:
             self.__my_init__(args[0],[-1],['INDEX'],**kwargs)
         return
@@ -5175,7 +5180,7 @@ class nddata (object):
             try:
                 slicedict,axesdict,errordict,unitsdict = self._parse_slices(args)
             except:
-                raise CustomError('error trying to get slices given by',args)
+                raise ValueError(strm('error trying to get slices given by',args))
             if type(args) is not slice and type(args[1]) is list and type(args[0]) is str and len(args) == 2:
                 return concat([self[args[0],x] for x in args[1]],args[0])
             indexlist = tuple(self.fld(slicedict))
@@ -5212,7 +5217,10 @@ class nddata (object):
             retval.data_units = self.data_units
             return retval
         else:
-            retval = nddata(self.data[indexlist],self.data[indexlist].shape,newlabels,self.other_info)
+            retval = nddata(self.data[indexlist],
+                    self.data[indexlist].shape,
+                    newlabels,
+                    other_info = self.other_info)
             retval.axis_coords_units = self.axis_coords_units
             retval.data_units = self.data_units
             return retval
