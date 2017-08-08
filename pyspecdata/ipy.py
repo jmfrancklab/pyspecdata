@@ -105,7 +105,18 @@ def load_ipython_extension(ip):
         """caller for pretty, for use in IPython 0.11"""
         import IPython.display as d
         if len(arg.dimlabels) == 1:
-            pyspec_plot(arg)
+            if arg.data.dtype == numpy.complex128:
+                pyspec_plot(arg.real,'g',alpha=0.5)
+                pyspec_plot(arg.imag,'y',alpha=0.5)
+            else:
+                pyspec_plot(arg)
+        elif len(arg.dimlabels) == 2 and any([j == 1 for j in arg.data.shape]):
+            arg.reorder(arg.dimlabels[numpy.array(arg.data.shape).argmin()])
+            if arg.data.dtype == numpy.complex128:
+                pyspec_plot(arg.real,'g',alpha=0.5)
+                pyspec_plot(arg.imag,'y',alpha=0.5)
+            else:
+                pyspec_plot(arg)
         elif (len(arg.dimlabels) == 2 and any([j < 10 for j in arg.data.shape])):
             arg.reorder(arg.dimlabels[numpy.array(arg.data.shape).argmin()])
             pyspec_plot(arg)

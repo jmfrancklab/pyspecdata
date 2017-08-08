@@ -114,6 +114,8 @@ def series(filename, dimname=''):
     v.update(v2)
     data.set_prop('acq',
             v)
+    data.set_prop('filename',
+            filename)
     #print 'DEBUG 2: data from bruker file =',data
     #}}}
     return data
@@ -146,6 +148,8 @@ def load_1D(filename, dimname=''):
             load_title(filename))
     data.set_prop('acq',
             v)
+    data.set_prop('filename',
+            filename)
     return data
 def load_vdlist(file):
     fp = open(file+'vdlist')
@@ -156,8 +160,16 @@ def load_vdlist(file):
     lines = map((lambda x: x.replace('u','e-6')),lines)
     lines = map(double,lines)
     return array(lines)
-def load_acqu(file,whichdim='',return_s = True):
-    file = dirformat(file)
+def load_acqu(filename,whichdim='',return_s = True):
+    "based on filename, determine the jcamp file that stores the acquisition info, and load it"
+    filename = dirformat(filename)
+    if return_s:
+        filename += 'acqu'+whichdim+'s' # this is what I am initially doing, and what works with the matched filtering, etc, as is, but it's actually wrong
+    else:
+        filename += 'acqu'+whichdim # this is actually right, but doesn't work with the matched filtering, etc.
+    return load_jcamp(filename)
+def load_jcamp(filename):
+    "return a dictionary with information for a jcamp file"
     def convert_to_num(val):
         if val == '<>':
             return NaN
@@ -165,54 +177,50 @@ def load_acqu(file,whichdim='',return_s = True):
             return val[1:-1]
         else:
             return double(val)
-    if return_s:
-        fp = open(file+'acqu'+whichdim+'s')# this is what I am initially doing, and what works with the matched filtering, etc, as is, but it's actually wrong
-    else:
-        fp = open(file+'acqu'+whichdim)# this is actually right, but doesn't work with the matched filtering, etc.
-    lines = fp.readlines()
-    vars = {}
-    number_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *([0-9\-\.]+)')
-    string_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *<(.*)')
-    array_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *\(([0-9]+)\.\.([0-9]+)\)(.*)')
-    lines = map(string.rstrip,lines)
-    j=0
-    retval =  match_line(lines[j],number_re,string_re,array_re)
-    j = j+1
-    retval2 =  match_line(lines[j],number_re,string_re,array_re) #always grab the second line
-    while j < len(lines):
-        isdata = False
-        if retval[0]==1 or retval[0]==2:
-            name = retval[1]
-            thislen = retval[2]
-            data = retval[3]
-            while (retval2[0] == 3) and (j<len(lines)): # eat up the following lines
-                data += ' '+retval2[1]
-                j = j+1
-                retval2 =  match_line(lines[j],number_re,string_re,array_re)
-            isdata = True
-        elif retval[0]==0:
-            name = retval[1]
-            data = retval[2]
-            isdata = True
-        #else:
-        #   print 'not a data line:',retval[1]
-        if(isdata):
-            if retval[0]==2: #if it's an array
-                data = data.split(' ')
-                if len(data)>0:
-                    while '' in data:
-                        data.remove('')
-                    data = map(convert_to_num,data)
-                    if len(data)-1!= thislen[1]:
-                        print 'error:',len(data)-1,'!=',thislen[1]
-            vars.update({name:data})
-        # at this point, the string or array data is loaded into data and we have something in retval2 which is definitely a new line
-        retval = retval2
+    with open(filename) as fp:
+        lines = fp.readlines()
+        vars = {}
+        number_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *([0-9\-\.]+)')
+        string_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *<(.*)')
+        array_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *\(([0-9]+)\.\.([0-9]+)\)(.*)')
+        lines = map(string.rstrip,lines)
+        j=0
+        retval =  match_line(lines[j],number_re,string_re,array_re)
         j = j+1
-        if j<len(lines):
-            retval2 =  match_line(lines[j],number_re,string_re,array_re)
-    fp.close()
-    return vars
+        retval2 =  match_line(lines[j],number_re,string_re,array_re) #always grab the second line
+        while j < len(lines):
+            isdata = False
+            if retval[0]==1 or retval[0]==2:
+                name = retval[1]
+                thislen = retval[2]
+                data = retval[3]
+                while (retval2[0] == 3) and (j<len(lines)): # eat up the following lines
+                    data += ' '+retval2[1]
+                    j = j+1
+                    retval2 =  match_line(lines[j],number_re,string_re,array_re)
+                isdata = True
+            elif retval[0]==0:
+                name = retval[1]
+                data = retval[2]
+                isdata = True
+            #else:
+            #   print 'not a data line:',retval[1]
+            if(isdata):
+                if retval[0]==2: #if it's an array
+                    data = data.split(' ')
+                    if len(data)>0:
+                        while '' in data:
+                            data.remove('')
+                        data = map(convert_to_num,data)
+                        if len(data)-1!= thislen[1]:
+                            print 'error:',len(data)-1,'!=',thislen[1]
+                vars.update({name:data})
+            # at this point, the string or array data is loaded into data and we have something in retval2 which is definitely a new line
+            retval = retval2
+            j = j+1
+            if j<len(lines):
+                retval2 =  match_line(lines[j],number_re,string_re,array_re)
+        return vars
 def load_title(file):
     file = dirformat(file)
     fp = open(file+'pdata/1/title')
