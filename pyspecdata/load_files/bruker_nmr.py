@@ -4,6 +4,9 @@ import os.path
 import re
 import string
 import struct
+
+bruker_data = nddata # should work by inheritance but doesn't
+
 def det_phcorr(v):
     if v['DIGMOD']==1:
         gdparray=array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[179,201,533,709,1097,1449,2225,2929,4481,5889,8993,11809,18017,23649,36065,47329,72161,94689,144353,189409,288737],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[184,219,384,602,852,1668,2292,3368,4616,6768,9264,13568,18560,27392,36992,55040,73856,110336,147584,220928,295040]])
@@ -82,13 +85,13 @@ def series(filename, dimname=''):
     mydimnames = [dimname]+['t2']
     #print 'DEBUG: data going to nddata =',data
     try:
-        data = nddata(data,mydimsizes,mydimnames)
+        data = bruker_data(data,mydimsizes,mydimnames)
     except:
         size_it_should_be = array(mydimsizes).prod()
         if size_it_should_be > len(data):
             zero_filled_data = zeros(size_it_should_be)
             zero_filled_data[0:len(data)] = data
-            data = nddata(zero_filled_data,mydimsizes,mydimnames)
+            data = bruker_data(zero_filled_data,mydimsizes,mydimnames)
         else:
             new_guess = len(data)/(td2_zf/2)
             print lsafen("WARNING!, chopping the length of the data to fit the specified td1 of ",td1,"points!\n(specified ",zip(mydimnames,mydimsizes),' td2_zf=%d)'%td2_zf)
@@ -97,7 +100,7 @@ def series(filename, dimname=''):
             #size_it_might_be = array(mydimsizes).prod()
             #print "maybe this works:",size_it_might_be == len(data)
             data = data[0:size_it_should_be]
-            data = nddata(data,mydimsizes,mydimnames)
+            data = bruker_data(data,mydimsizes,mydimnames)
             #raise CustomError("found td1=",td1,"for",filename,"which I don't think is right, because the product of the dimensions",zip(mydimnames,mydimsizes),'=',size_it_should_be,'does not equal the length of the data',len(data),'I think that it should be',len(data)/(td2_zf/2))
     #print 'DEBUG: data straight from nddata =',data
     data = data['t2',0:td2/2] # now, chop out their zero filling
@@ -116,10 +119,18 @@ def series(filename, dimname=''):
             v)
     data.set_prop('filename',
             filename)
+    proc_filename = os.path.join(filename,
+            'pdata','1','proc')
+    if os.path.exists(proc_filename):
+        data.set_prop('proc',
+                load_jcamp(proc_filename))
     #print 'DEBUG 2: data from bruker file =',data
     #}}}
     return data
 def load_1D(filename, dimname=''):
+    """Load 1D bruker data into a file.  Load acquisition parameters into
+    property 'acq' and processing parameters *from procno 1 only* into
+    'proc'"""
     filename = dirformat(filename)
     v = load_acqu(filename)
     td2 = int(v['TD'])
@@ -135,7 +146,7 @@ def load_1D(filename, dimname=''):
     data = data[0::2]+1j*data[1::2]
     rg = det_rg(v['RG'])
     data /= rg
-    data = nddata(data,[td1,td2_zf/2],[dimname,'t2'])
+    data = bruker_data(data,[td1,td2_zf/2],[dimname,'t2'])
     data = data['t2',0:td2/2] # now, chop out their zero filling
     t2axis = 1./v['SW_h']*r_[1:td2/2+1]
     t1axis = r_[1]
@@ -150,6 +161,11 @@ def load_1D(filename, dimname=''):
             v)
     data.set_prop('filename',
             filename)
+    proc_filename = os.path.join(filename,
+            'pdata','1','proc')
+    if os.path.exists(proc_filename):
+        data.set_prop('proc',
+                load_jcamp(proc_filename))
     return data
 def load_vdlist(file):
     fp = open(file+'vdlist')

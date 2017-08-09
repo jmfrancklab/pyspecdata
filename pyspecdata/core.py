@@ -4285,6 +4285,31 @@ class nddata (object):
         if verbose: print "(contiguous) in descending order, the blocks are therefore",idx[block_order,:]
         #if verbose: print "yielding",idx[diff(idx,axis=1).argmax(),:],self.getaxis(axis)[idx[diff(idx,axis=1).argmax(),:]]
         return self.getaxis(axis)[idx[block_order,:]]
+    def to_ppm(self,axis):
+        """Convert axis to ppm, FTing if needed. 
+        Only applicable to bruker data.  Apply PHC0 if present.
+        
+        .. todo::
+
+            Figure out what the units of PHC1 in Topspin are (degrees per *what??*), and apply those as well.
+
+            Verify whether or not my sign of sf-sfo1 is correct
+        """
+        if self.get_prop('ppm_converted'): return self
+        self.set_prop('ppm_converted',True)
+        sf = self.get_prop('proc')['SF']
+        sfo1 = self.get_prop('acq')['SFO1']
+        o1 = self.get_prop('acq')['O1']
+        if not self.get_ft_prop(axis):
+            self.ft(axis, shift=True) # this fourier transforms along t2, overwriting the data that was in self
+        phc0 = exp(1j*pi*self.get_prop('proc')['PHC0']/180.0)
+        phc0 = abs(phc0)/phc0
+        self.run(lambda x: x*phc0)
+        self.setaxis(axis, lambda x:
+                (x+o1+sf-sfo1)/sfo1).set_units(axis,'ppm') # possible that
+                # the sign of sf is wrong
+        self.set_prop('x_inverted',True)
+        return self
     #}}}
     def multimin(self,minfunc,axisname,filterwidth,numberofmins):
         cost = self.copy().convolve(axisname,filterwidth).run_nopop(minfunc)
