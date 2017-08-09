@@ -104,27 +104,29 @@ def load_ipython_extension(ip):
     def _print_plain_override_for_nddata(arg,p,cycle):
         """caller for pretty, for use in IPython 0.11"""
         import IPython.display as d
-        if len(arg.dimlabels) == 1:
-            if arg.data.dtype == numpy.complex128:
-                pyspec_plot(arg.real,'g',alpha=0.5)
-                pyspec_plot(arg.imag,'y',alpha=0.5)
+        arg_copy = arg.copy()
+        if len(arg_copy.dimlabels) == 1:
+            if arg_copy.data.dtype == numpy.complex128:
+                pyspec_plot(arg_copy.real,'g',alpha=0.5)
+                pyspec_plot(arg_copy.imag,'y',alpha=0.5)
             else:
-                pyspec_plot(arg)
-        elif len(arg.dimlabels) == 2 and any([j == 1 for j in arg.data.shape]):
-            arg.reorder(arg.dimlabels[numpy.array(arg.data.shape).argmin()])
-            if arg.data.dtype == numpy.complex128:
-                pyspec_plot(arg.real,'g',alpha=0.5)
-                pyspec_plot(arg.imag,'y',alpha=0.5)
+                pyspec_plot(arg_copy)
+        elif len(arg_copy.dimlabels) == 2 and any([j == 1 for j in arg_copy.data.shape]):
+            arg_copy.reorder(arg_copy.dimlabels[numpy.array(arg_copy.data.shape).argmin()],
+                    first=False)
+            if arg_copy.data.dtype == numpy.complex128:
+                pyspec_plot(arg_copy.real,'g',alpha=0.5)
+                pyspec_plot(arg_copy.imag,'y',alpha=0.5)
             else:
-                pyspec_plot(arg)
-        elif (len(arg.dimlabels) == 2 and any([j < 10 for j in arg.data.shape])):
-            arg.reorder(arg.dimlabels[numpy.array(arg.data.shape).argmin()])
-            pyspec_plot(arg)
+                pyspec_plot(arg_copy)
+        elif len(arg_copy.dimlabels) == 2 and any([j < 10 for j in arg_copy.data.shape]):
+            arg_copy.reorder(arg_copy.dimlabels[numpy.array(arg_copy.data.shape).argmin()],
+                    first=False)
+            pyspec_plot(arg_copy)
         else:
-            pyspec_image(arg)
-            if arg.name() is not None:
-                gca().set_title(arg.name())
-
+            pyspec_image(arg_copy)
+            if arg_copy.name() is not None:
+                gca().set_title(arg_copy.name())
     plain_formatters.for_type(numpy.ndarray,_print_plain_override_for_ndarray)
     plain_formatters.for_type(pyspec_nddata,_print_plain_override_for_nddata)
 def unload_ipython_extension(ip):

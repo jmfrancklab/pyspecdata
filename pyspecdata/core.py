@@ -2226,6 +2226,7 @@ def plot(*args,**kwargs):
     if isscalar(myy):
         myy = array([myy])
     #}}}
+    x_inverted = False
     #{{{ parse nddata
     if isinstance(myy,nddata):
         myy = myy.copy()
@@ -2281,7 +2282,14 @@ def plot(*args,**kwargs):
                     yaxislabels = [label_format_string%j for j in yaxislabels]
                     has_labels = True
         #}}}
+        # {{{ add label if name is present, and squeeze -- could do this instead of ylabel, above
+        if myy.get_prop('x_inverted'):
+            x_inverted=True
+        #myy_name = myy.name()
         myy = squeeze(myy.data)
+        #if len(myy.data) == 1 and 'label' not in kwargs.keys() and myy_name is not None:
+        #    kwargs.update('label',myy_name)
+        # }}}
     #}}}
     #{{{ semilog where appropriate
     if (myx is not None) and (len(myx)>1) and all(myx>0): # by doing this and making myplotfunc global, we preserve the plot style if we want to tack on one point
@@ -2357,6 +2365,9 @@ def plot(*args,**kwargs):
                     ', '.join([str(type(j)) + " " + str(j) if isscalar(j)
                         else str(len(j)) for j in newkwargs.values()]),
                     explain_error(e)))
+            if x_inverted:
+                these_xlims = ax.get_xlim()
+                ax.set_xlim((max(these_xlims),min(these_xlims)))
         #hold(False)
         #}}}
         #}}}
@@ -2371,6 +2382,9 @@ def plot(*args,**kwargs):
                     '\nsizes of ndarray kwargs',dict([(j,shape(kwargs[j])) if type(kwargs[j]) is ndarray else (j,kwargs[j]) for j in kwargs.keys()]),
                     '\narguments = ',plotargs,
                     '\nkwargs =',kwargs))
+        if x_inverted:
+            these_xlims = ax.get_xlim()
+            ax.set_xlim((max(these_xlims),min(these_xlims)))
     #{{{ attach labels and such
     if (myxlabel!=None):
         ax.set_xlabel(myxlabel)
