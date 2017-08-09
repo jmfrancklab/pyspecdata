@@ -151,6 +151,9 @@ def xepr(filename, dimname='', verbose=False):
     # }}}
     data.other_info.update(v)
     data.reorder(b0_texstr)
+    if 'Microwave Power' in data.dimlabels:
+        # convert from W to dBm
+        data.setaxis('Microwave Power',lambda x: 10*log10(x)).set_units('Microwave Power','dBm')
     return data
 def winepr(filename, dimname=''):
     """For opening WinEPR files.

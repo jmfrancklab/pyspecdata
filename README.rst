@@ -74,11 +74,15 @@ History/Roadmap
     First version distributed on pypi.python.org.
 
 0.9.5.1
+    - 0.9.5.1.7
+      ``to_ppm`` should only be a method of inherited class
 
-    - 0.9.5.1.3
+    - **0.9.5.1.3**
       XEpr data loaded with dBm units rather than W units
 
-    - **0.9.5.1.2**
+      added ``to_ppm`` function for Bruker files
+
+    - 0.9.5.1.2
       added ability to load power saturation 2D data from Bruker
 
     - 0.9.5.1.1
