@@ -124,6 +124,11 @@ def series(filename, dimname=''):
     if os.path.exists(proc_filename):
         data.set_prop('proc',
                 load_jcamp(proc_filename))
+    if os.path.exists(dirformat(filename)+'vdlist'):
+        data.set_prop('vd',
+                load_vdlist(dirformat(filename)))
+    else:
+        print "vdlist doesn't exist",dirformat(filename)+'vdlist'
     #print 'DEBUG 2: data from bruker file =',data
     #}}}
     return data
@@ -167,8 +172,8 @@ def load_1D(filename, dimname=''):
         data.set_prop('proc',
                 load_jcamp(proc_filename))
     return data
-def load_vdlist(file):
-    fp = open(file+'vdlist')
+def load_vdlist(filename):
+    fp = open(filename+'vdlist')
     lines = fp.readlines()
     lines = map(string.rstrip,lines)
     lines = map((lambda x: x.replace('m','e-3')),lines)

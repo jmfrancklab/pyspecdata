@@ -4923,7 +4923,7 @@ class nddata (object):
             else:
                 shapesout[j] = int(round(ndshape(self)[axisin]/prod(shapesout[0:j])))
         if prod(shapesout) != ndshape(self)[axisin]:
-            raise CustomError("The size of the axis (%s) you're trying to split (%s) doesn't match the size of the axes you're trying to split it into (%s = %s)"%(repr(axisin),repr(ndshape(self)[axisin]),repr(axesout),repr(shapesout)))
+            raise ValueError("The size of the axis (%s) you're trying to split (%s) doesn't match the size of the axes you're trying to split it into (%s = %s)"%(repr(axisin),repr(ndshape(self)[axisin]),repr(axesout),repr(shapesout)))
         thisaxis = self.axn(axisin)
         if self.getaxis(axisin) is not None and len(self.getaxis(axisin)) > 0:
             raise CustomError("You cannot chunk data with labels! Try 'chunk_by' instead!")
