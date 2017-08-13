@@ -5,11 +5,12 @@ from . import bruker_esr
 from . import acert
 from ..datadir import getDATADIR
 from ..datadir import _my_config
-from ..general_functions import process_kwargs,logger,strm
+from ..general_functions import process_kwargs,strm
 from ..core import *
 from __builtin__ import any # numpy has an "any" function, which is very annoying
 from itertools import tee
 import warnings, os, h5py, re
+logger = logging.getLogger('file_loading')
 
 #{{{ add slashes for dir's
 def _dirformat(file):
