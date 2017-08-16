@@ -64,8 +64,8 @@ mu_B = 9.27400968e-24#Bohr magneton
 epsilon_0 = 8.854187817e-12
 hbar = 6.6260695729e-34/2./pi
 N_A = 6.02214179e23
-gamma_H = 4.258e7
-gamma_e = 2.807e10
+gammabar_H = 4.258e7
+gammabar_e = 2.807e10
 #}}}
 def mybasicfunction(first_figure = None):
     r'''this gives the format for doing the image thing
