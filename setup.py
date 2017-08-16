@@ -21,11 +21,7 @@ try:
     import matplotlib
 except:
     raise RuntimeError(general_error.format('matplotlib'))
-ext_test = Extension(name = 'pyspecdata.test_module',
-        sources = ['pyspecdata/test_f90.pyf','pyspecdata/test_f90.f90','pyspecdata/anothertest.f90','pyspecdata/lprmpt.c','pyspecdata/fortrancall.h'],
-        define_macros = [('ADD_UNDERSCORE',None)],
-        )
-ext_modules = [ext_test]
+ext_modules = []
 
 setup(
     name='pySpecData',
