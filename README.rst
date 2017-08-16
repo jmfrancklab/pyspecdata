@@ -151,8 +151,16 @@ Therefore, this package was written so that it doesn't depend on mayavi.
 Rather, you can just import ``mayavi.mlab`` and pass it to any figure list that you initialize:
 ``figlist_var(mlab = mayavi.mlab)``
 
+For compiled extensions
+-----------------------
+
+All compiled extensions are currently stripped out, but will be slowly
+    added back in.
+
 If you are installing from github (or generally using setuptools -- *i.e.* ``python setup.py install``
-or ``python setup.py develop``), you will need some additional packages to enable compilation:
+or ``python setup.py develop``).
+
+If you are on windows, you will need some additional packages to enable compilation:
 
 * libpython
 
@@ -161,6 +169,9 @@ or ``python setup.py develop``), you will need some additional packages to enabl
 * mingw
 
 The last two are specific to Windows, and provide things like the ``gcc`` and ``gfortran`` compiler, as well as ``make``.
+
+Installation for developers
+---------------------------
 
 (Once these are installed,
 to install from github, just ``git clone https://github.com/jmfranck/pyspecdata.git`` then move to the directory where setup.py lives,
