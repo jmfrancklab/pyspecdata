@@ -8,15 +8,9 @@ import os
 
 general_error = "I couldn't import {:s} -- go install it first!!\n(I'm doing this because dependency-based install of PyQt, and some others does not usually go well -- use your distro software (conda install ..., aptitude, etc) instead)\nIn fact, you probably want to install:\n\tpyqt, unxutils, matplotlib, mingw, and libpython"
 try:
-    import PyQt4.QtCore
-    import PyQt4.QtGui
+    import paramset_pyspecdata
 except:
-    print "Failed to import PyQt4, trying PyQt5..."
-    try:
-        import PyQt5.QtCore
-        import PyQt5.QtGui
-    except:
-        raise RuntimeError(general_error.format('PyQt5'))
+    raise RuntimeError("install the paramset_pyspecdata package first!\nIf using setup.py, run 'python setup_paramset.py install'")
 try:
     import matplotlib
 except:
