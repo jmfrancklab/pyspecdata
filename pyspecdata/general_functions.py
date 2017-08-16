@@ -86,9 +86,14 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = []):
 
 def init_logging(level=logging.INFO):
     FORMAT = "--> %(filename)s:(%(lineno)s) %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"
+    log_filename = os.path.join(os.path.expanduser('~'),'pyspecdata.log')
+    if os.path.exists(log_filename):
+        # manually remove, and then use append -- otherwise, it won't write to
+        # file immediately
+        os.remove(log_filename)
     logging.basicConfig(format=FORMAT,
-            filename=os.path.join(os.path.expanduser('~'),'pyspecdata.log'),
-            filemode='w',
+            filename=log_filename,
+            filemode='a',
             level=level,
             )
 
