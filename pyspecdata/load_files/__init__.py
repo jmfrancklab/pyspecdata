@@ -10,7 +10,7 @@ from ..core import *
 from __builtin__ import any # numpy has an "any" function, which is very annoying
 from itertools import tee
 import warnings, os, h5py, re
-logger = logging.getLogger('file_loading')
+logger = logging.getLogger('pyspecdata.load_files')
 
 #{{{ add slashes for dir's
 def _dirformat(file):

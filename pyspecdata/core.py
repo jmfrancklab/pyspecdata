@@ -56,7 +56,7 @@ rcParams['ytick.minor.size'] = 6
 rcParams['legend.fontsize'] = 12
 rcParams['axes.grid'] = False
 rcParams['font.size'] = 18
-DATADIR = getDATADIR() 
+logger = logging.getLogger('pyspecdata.core')
 #{{{ constants
 k_B = 1.380648813e-23
 mu_0 = 4e-7*pi
