@@ -374,7 +374,7 @@ def load_nutation_curve(main,background = None,fl = None,max_freq = 30e6,deadtim
     double_ft.ft('plen',shift = True,pad = 512)
     if double_ft.get_units('plen') == 'Hz':
         x = double_ft.getaxis('plen')
-        x[:] /= 2.807e6 #2.807 MHz/G
+        x[:] /= gammabar_e/1e4 #2.807 MHz/G
         double_ft.set_units('plen','G')
     else:
         raise ValueError('At this point, units should be in Hz, but they are in %s!!'%double_ft.get_units('plen'))
@@ -1051,7 +1051,7 @@ def plot_oned_v_field(thisdata,
         if field is None:
             field = thisdata.get_prop('field')
         x = thisdata.getaxis('t2')
-        x[:] = field + x / 2.807e10
+        x[:] = field + x / gammabar_e
         #}}}
         fl.next(oned_plot_name)
         lines = fl.plot(thisdata.runcopy(abs),'-',alpha = 0.5,label = 'abs')
@@ -1070,7 +1070,7 @@ def plot_oned_v_field(thisdata,
         fl.plot(field,y_at_field,'o',color = color,alpha = 0.5)
         text(field,y_at_field,'%0.4f T'%field,alpha=0.5,color = color,size = 'xx-small',ha='left',va='bottom',rotation=45)
         #}}}
-        xlabel(r'($B_0$ / $T$) + $\Delta f$ / ($2.807\times 10^{10}$ $\frac{Hz}{T}$)')
+        xlabel(r'($B_0$ / $T$) + $\Delta f$ / ($%0.3f\times 10^{10}$ $\frac{Hz}{T}$)'%(gammabar_e/1e10))
         return
 def plot_oned_v_offset(thisdata,
         oned_plot_name = '1D offset spectrum from SECSY',

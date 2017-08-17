@@ -799,10 +799,10 @@ def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'ref
     signalexpno = []
     plotlabel = name+'_noise'
     #
-    path_list += [DATADIR+'%s/nmr/popem_4mM_5p_pct_110610/'%data_subdir]
+    path_list += [getDATADIR()+'%s/nmr/popem_4mM_5p_pct_110610/'%data_subdir]
     explabel += ['control without shield']
     noiseexpno += [3] # 3 is the noise scan 2 is the reference
-    path_list += [DATADIR+'%s/nmr/noisetest100916/'%data_subdir] + [DATADIR+path+name+'/']*len(expnos)
+    path_list += [getDATADIR()+'%s/nmr/noisetest100916/'%data_subdir] + [getDATADIR()+path+name+'/']*len(expnos)
     explabel += ['']+[r'$\mathbf{this experiment}$']*len(expnos)
     noiseexpno += [2]+expnos # 3 is the noise scan 2 is the reference
     #

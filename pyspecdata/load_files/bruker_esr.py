@@ -3,6 +3,7 @@ from ..general_functions import strm
 from numpy import fromstring
 import re, string
 from StringIO import StringIO
+logger = logging.getLogger('pyspecdata.load_files.bruker_esr')
 b0_texstr = r'$B_0$'
 def xepr(filename, dimname='', verbose=False):
     """For opening Xepr files.

@@ -12,6 +12,7 @@ experiment names set in
 from ..core import *
 from ..general_functions import *
 import h5py
+logger = logging.getLogger('pyspecdata.load_files.acert')
 def load_pulse(filename,
         indirect_dimlabels=None,
         prefilter=None,
