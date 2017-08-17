@@ -928,7 +928,7 @@ def h5table(bottomnode,tablename,tabledata):
     #}}}
 def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_only = False,directory='.'):
     r'''return the node based on an absolute path, including the filename'''
-    if verbose: print lsafen("DEBUG: called h5nodebypath on",h5path)
+    logger.debug(strm("DEBUG: called h5nodebypath on",h5path))
     h5path = h5path.split('/')
     #{{{ open the file / check if it exists
     if verbose: print lsafen('h5path=',h5path)
@@ -947,7 +947,7 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
         raise IOError('I think the HDF5 file has not been created yet, and there is a bug pytables that makes it freak out, but you can just run again.'+explain_error(e))
     #}}}
     currentnode = h5file.getNode('/') # open the root node
-    logger.debug('ready to step down search path')
+    logger.debug(strm("I have grabbe node",currentnode,"of file",h5file,'ready to step down search path'))
     for pathlevel in range(1,len(h5path)):#{{{ step down the path
             clear = False
             create = True
@@ -1995,6 +1995,25 @@ class figlist(object):
         else:
             #print "not running mlab show!"
             show()
+    def label_point(self,data,axis,value,thislabel, xscale=1, **new_kwargs):
+        """only works for 1D data: assume you've passed a single-point nddata, and label it
+
+        xscale gives the unit scaling
+
+        ..todo::
+
+            Improve the unit scaling, so that this would also work.
+
+            Allow it to include a format string that would use the value.
+        """
+        kwargs = {'alpha':0.5,'color':'k','ha':'left','va':'bottom','rotation':45,'size':14}
+        kwargs.update(new_kwargs)
+        y = double(data[axis:value].data)
+        x_ind = argmin(abs(data.getaxis(axis)-value))
+        x = data.getaxis(axis)[x_ind]
+        text(x/xscale, y, thislabel, **kwargs)
+        plot(x/xscale,y,'o', color=kwargs["color"], alpha=kwargs["alpha"])
+        return
     def header(self,number_above,input_string):
         header_list = ['\\section','\\subsection','\\subsubsection','\\paragraph','\\subparagraph']
         self.text(header_list[number_above+1]+'{%s}'%input_string)
