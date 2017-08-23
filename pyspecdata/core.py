@@ -2005,14 +2005,24 @@ class figlist(object):
             Improve the unit scaling, so that this would also work.
 
             Allow it to include a format string that would use the value.
+        Parameters
+        ----------
+
+        show_point : bool
+
+            Defaults to `True`. Actually generate a point (circle), *vs.*
+            just the label.
         """
+        show_point = process_kwargs([('show_point',True)],new_kwargs,
+                pass_through=True)
         kwargs = {'alpha':0.5,'color':'k','ha':'left','va':'bottom','rotation':45,'size':14}
         kwargs.update(new_kwargs)
         y = double(data[axis:value].data)
         x_ind = argmin(abs(data.getaxis(axis)-value))
         x = data.getaxis(axis)[x_ind]
         text(x/xscale, y, thislabel, **kwargs)
-        plot(x/xscale,y,'o', color=kwargs["color"], alpha=kwargs["alpha"])
+        if show_point:
+            plot(x/xscale,y,'o', color=kwargs["color"], alpha=kwargs["alpha"])
         return
     def header(self,number_above,input_string):
         header_list = ['\\section','\\subsection','\\subsubsection','\\paragraph','\\subparagraph']
