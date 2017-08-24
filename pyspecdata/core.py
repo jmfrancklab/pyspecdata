@@ -1390,8 +1390,6 @@ def expand_x(*args):
     xlims = array(ax.get_xlim())
     width = abs(diff(xlims))
     thismean = mean(xlims)
-    xlims[0] -= width/10
-    xlims[1] += width/10
     if len(args) > 0:
         if len(args) == 1 and type(args) is tuple:
             args = args[0]
@@ -1402,6 +1400,9 @@ def expand_x(*args):
                 xlims[j] = 0
             else:
                 xlims[j] = args[j]*(xlims[j]-thismean) + thismean
+    else:
+        xlims[0] -= width/10
+        xlims[1] += width/10
     ax.set_xlim(xlims)
 def expand_y(*args):
     r'''expand the axes.  If an argument is passed, then it refers to the position relative to the current coordinates.  Values can be:
@@ -1413,8 +1414,6 @@ def expand_y(*args):
     ylims = array(ax.get_ylim())
     width = abs(diff(ylims))
     thismean = mean(ylims)
-    ylims[0] -= width/10
-    ylims[1] += width/10
     if len(args) > 0:
         if len(args) == 1 and type(args) is tuple:
             args = args[0]
@@ -1425,6 +1424,9 @@ def expand_y(*args):
                 ylims[j] = 0
             else:
                 ylims[j] = args[j]*(ylims[j]-thismean) + thismean
+    else:
+        ylims[0] -= width/10
+        ylims[1] += width/10
     ax.set_ylim(ylims)
 def plot_label_points(x,y,labels,**kwargs_passed):
     kwargs = {'alpha':0.5,'color':'g','ha':'left','va':'center','rotation':0,'size':14}
@@ -1995,7 +1997,8 @@ class figlist(object):
         else:
             #print "not running mlab show!"
             show()
-    def label_point(self,data,axis,value,thislabel, xscale=1, **new_kwargs):
+    def label_point(self, data, axis, value, thislabel,
+            show_point=True, xscale=1, **new_kwargs):
         """only works for 1D data: assume you've passed a single-point nddata, and label it
 
         xscale gives the unit scaling
@@ -2013,8 +2016,6 @@ class figlist(object):
             Defaults to `True`. Actually generate a point (circle), *vs.*
             just the label.
         """
-        show_point = process_kwargs([('show_point',True)],new_kwargs,
-                pass_through=True)
         kwargs = {'alpha':0.5,'color':'k','ha':'left','va':'bottom','rotation':45,'size':14}
         kwargs.update(new_kwargs)
         y = double(data[axis:value].data)
@@ -2022,7 +2023,8 @@ class figlist(object):
         x = data.getaxis(axis)[x_ind]
         text(x/xscale, y, thislabel, **kwargs)
         if show_point:
-            plot(x/xscale,y,'o', color=kwargs["color"], alpha=kwargs["alpha"])
+            plot(x/xscale, y, 'o', color=kwargs["color"],
+                    alpha=kwargs["alpha"])
         return
     def header(self,number_above,input_string):
         header_list = ['\\section','\\subsection','\\subsubsection','\\paragraph','\\subparagraph']
