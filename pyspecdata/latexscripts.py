@@ -89,9 +89,12 @@ def wraplatex():
                 use_xelatex = False
             thisline = fp.readline()
     if use_xelatex:
-        os.system(' '.join(['xelatex']+proc_args[1:]))
+        shellcmd = ' '.join(['xelatex']+proc_args[1:])
     else:
-        os.system(' '.join(['pdflatex']+proc_args[1:]))
+        shellcmd = ' '.join(['pdflatex']+proc_args[1:])
+    print "executing:",shellcmd
+    os.system(shellcmd)
+    print "executing:",'update_notebook_pythonscripts'
     os.system('update_notebook_pythonscripts')
     if orig_tex_basename != new_pdf_basename:
         print "preparing to:",'cp '+orig_tex_basename+'.pdf '+new_pdf_basename+'.pdf'
