@@ -75,12 +75,24 @@ def wraplatex():
     proc_args = list(sys.argv)
     if '--xelatex' in proc_args:
         proc_args.pop(proc_args.index('--xelatex'))
+        use_xelatex = True
+    else:
+        use_xelatex = False
+    print "about to update the python script outputs...."
+    orig_tex_basename,new_pdf_basename = det_new_pdf_name(proc_args)
+    with open(orig_tex_basename+'.tex','r') as fp:
+        thisline = fp.readline()
+        while thisline.startswith('%!'):# in case we want to allow multiple directives
+            if 'xelatex' in thisline:
+                use_xelatex = True
+            elif 'pdflatex' in thisline:
+                use_xelatex = False
+            thisline = fp.readline()
+    if use_xelatex:
         os.system(' '.join(['xelatex']+proc_args[1:]))
     else:
         os.system(' '.join(['pdflatex']+proc_args[1:]))
-    print "about to update the python script outputs...."
     os.system('update_notebook_pythonscripts')
-    orig_tex_basename,new_pdf_basename = det_new_pdf_name(proc_args)
     if orig_tex_basename != new_pdf_basename:
         print "preparing to:",'cp '+orig_tex_basename+'.pdf '+new_pdf_basename+'.pdf'
         os.system('cp '+orig_tex_basename+'.pdf '+new_pdf_basename+'.pdf')
