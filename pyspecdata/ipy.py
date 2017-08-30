@@ -6,6 +6,7 @@
 
 # I should implement this as an extension module
 # https://mindtrove.info/4-ways-to-extend-jupyter-notebook/
+get_ipython().magic(u'pylab inline')
 import numpy
 import sympy
 from sympy.interactive import printing
@@ -105,6 +106,7 @@ def load_ipython_extension(ip):
         """caller for pretty, for use in IPython 0.11"""
         import IPython.display as d
         arg_copy = arg.copy()
+        arg_copy.human_units()
         if len(arg_copy.dimlabels) == 1:
             if arg_copy.data.dtype == numpy.complex128:
                 pyspec_plot(arg_copy.real,'g',alpha=0.5)
@@ -131,3 +133,4 @@ def load_ipython_extension(ip):
     plain_formatters.for_type(pyspec_nddata,_print_plain_override_for_nddata)
 def unload_ipython_extension(ip):
     print "I will not not go gentle into that good night!!!"
+
