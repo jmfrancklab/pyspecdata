@@ -1,0 +1,17 @@
+e:\programdata\anaconda2\lib\site-packages\pySpecData-0.9.5.1.3-py2.7.egg
+E:\ProgramData\Anaconda2\Scripts\pdflatex_notebook_view_wrapper-script.py
+E:\ProgramData\Anaconda2\Scripts\pdflatex_notebook_view_wrapper.exe
+E:\ProgramData\Anaconda2\Scripts\scons_continuous-script.py
+E:\ProgramData\Anaconda2\Scripts\scons_continuous.exe
+E:\ProgramData\Anaconda2\Scripts\update_notebook_pythonscripts-script.py
+E:\ProgramData\Anaconda2\Scripts\update_notebook_pythonscripts.exe
+E:\ProgramData\Anaconda2\Scripts\pdflatex_notebook_wrapper-script.py
+E:\ProgramData\Anaconda2\Scripts\pdflatex_notebook_wrapper.exe
+E:\ProgramData\Anaconda2\Scripts\ptdump-script.py
+E:\ProgramData\Anaconda2\Scripts\ptdump.exe
+E:\ProgramData\Anaconda2\Scripts\ptrepack-script.py
+E:\ProgramData\Anaconda2\Scripts\ptrepack.exe
+E:\ProgramData\Anaconda2\Scripts\pt2to3-script.py
+E:\ProgramData\Anaconda2\Scripts\pt2to3.exe
+E:\ProgramData\Anaconda2\Scripts\pttree-script.py
+E:\ProgramData\Anaconda2\Scripts\pttree.exe
