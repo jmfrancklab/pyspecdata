@@ -74,17 +74,6 @@ History/Roadmap
     First version distributed on pypi.python.org.
 
 0.9.5.1
-    - 0.9.5.1.7
-      ``to_ppm`` should only be a method of inherited class
-
-    - **0.9.5.1.3**
-      XEpr data loaded with dBm units rather than W units
-
-      added ``to_ppm`` function for Bruker files
-
-    - 0.9.5.1.2
-      added ability to load power saturation 2D data from Bruker
-
     - 0.9.5.1.1
       Some important debugging, and also added `pyspecdata.ipy` → executing the following at the top of a jupyter notebook:
 
@@ -94,6 +83,28 @@ History/Roadmap
             %load_ext pyspecdata.ipy
 
       will cause nddata to "display" as labeled plots.
+
+    - 0.9.5.1.2
+      added ability to load power saturation 2D data from Bruker
+
+    - 0.9.5.1.3
+      XEpr data loaded with dBm units rather than W units
+
+      added ``to_ppm`` function for Bruker files
+
+    - **0.9.5.1.4**
+      Improved internal logging, and started to remove gratuitous dependencies,
+      ``%load_ext pyspecdata.ipy`` includes
+      ``%pylab inline``, so that only
+
+        .. code-block:: python
+
+            %load_ext pyspecdata.ipy
+
+        is required for jupyter.
+
+    - 0.9.5.1.7
+      ``to_ppm`` should only be a method of inherited class
 
 0.9.5.2
     Comma-separated indexing to work correctly with all indexing types.
