@@ -84,9 +84,9 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = []):
     assert du > 0, thismsg
     return du
 
-def init_logging(level=logging.INFO):
+def init_logging(level=logging.INFO, filename='pyspecdata.log'):
     FORMAT = "--> %(filename)s(%(lineno)s):%(name)s %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"
-    log_filename = os.path.join(os.path.expanduser('~'),'pyspecdata.log')
+    log_filename = os.path.join(os.path.expanduser('~'),filename)
     if os.path.exists(log_filename):
         # manually remove, and then use append -- otherwise, it won't write to
         # file immediately
