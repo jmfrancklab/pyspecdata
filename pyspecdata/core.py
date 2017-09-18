@@ -1746,7 +1746,11 @@ class figlist(object):
         return
     def get_fig_number(self,name):
         cleanlist = filter(lambda x: type(x) is str,self.figurelist)
-        return cleanlist.index(name)+1
+        try:
+            return cleanlist.index(name)+1
+        except ValueError:
+            raise ValueError(strm("You are looking for",name,
+                "which isn't in the list of figures",cleanlist))
     def next(self,input_name, legend=False, boundaries=None, twinx=None, **kwargs):
         r"""Switch to the figure given by input_name, which is used not only as
         a string-based name for the figure, but also as a default title and as
@@ -1783,7 +1787,7 @@ class figlist(object):
             name = input_name
         if name.find('/') > 0:
             raise ValueError("don't include slashes in the figure name, that's just too confusing")
-        if self.verbose: print lsafe('DEBUG figurelist, called with',name)
+        logger.debug(strm('figurelist, called with',name))
         if name in self.figurelist:
             if hasattr(self,'mlab'):
                 fig = self.mlab.figure(self.get_fig_number(name),bgcolor = (1,1,1),**kwargs)
@@ -1833,7 +1837,7 @@ class figlist(object):
                     fig = figure(last_figure_number+1,**kwargs)
                 if twinx is not None:
                     fig.add_subplot(111)
-            if self.verbose: print lsafen('added, figure',len(self.figurelist)+1,'because not in figurelist',self.figurelist)
+            logger.debug(strm('added, figure',len(self.figurelist)+1,'because not in figurelist',self.figurelist))
             self.figurelist.append(name)
             self.figdict.update({self.current:fig})
             if boundaries == False:
@@ -2444,12 +2448,12 @@ def plot(*args,**kwargs):
         try:
             #print 'DEBUG plotting with args',plotargs,'and kwargs',kwargs,'\n\n'
             retval = myplotfunc(*plotargs,**kwargs)
-        except:
+        except Error as e:
             raise RuntimeError(strm('error trying to plot',type(myplotfunc),'with value',myplotfunc,
                     '\nlength of the ndarray arguments:',['shape:'+str(shape(j)) if type(j) is ndarray else j for j in plotargs],
                     '\nsizes of ndarray kwargs',dict([(j,shape(kwargs[j])) if type(kwargs[j]) is ndarray else (j,kwargs[j]) for j in kwargs.keys()]),
                     '\narguments = ',plotargs,
-                    '\nkwargs =',kwargs))
+                    '\nkwargs =',kwargs)+explain_error(e))
         if x_inverted:
             these_xlims = ax.get_xlim()
             ax.set_xlim((max(these_xlims),min(these_xlims)))
