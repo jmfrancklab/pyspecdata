@@ -1680,10 +1680,8 @@ class figlist(object):
         if self.line_spacing == 'BLANK': del self.line_spacing
         if self.verbose: print lsafe('DEBUG: initialize figlist')
         if len(arg) == 0:
-            if self.verbose: print lsafen('empty')
             self.figurelist = []
         else:
-            if self.verbose: print lsafen(arg[0])
             self.figurelist = arg[0]
         if len(kwargs) > 0:
             self.figurelist.append(kwargs)
@@ -1787,7 +1785,7 @@ class figlist(object):
             name = input_name
         if name.find('/') > 0:
             raise ValueError("don't include slashes in the figure name, that's just too confusing")
-        logger.debug(strm('figurelist, called with',name))
+        logger.debug(strm('called with',name))
         if name in self.figurelist:
             if hasattr(self,'mlab'):
                 fig = self.mlab.figure(self.get_fig_number(name),bgcolor = (1,1,1),**kwargs)

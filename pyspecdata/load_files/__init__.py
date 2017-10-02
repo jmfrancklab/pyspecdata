@@ -121,7 +121,11 @@ def find_file(searchstring,
         raise IOError(("I can't find a file matching the regular expression {0:s} in {1:s}"+exptype_msg).format(searchstring,directory))
     else:
         if len(files) > 1:
-            warnings.warn('found multiple files:\n'+'\n\t'.join(files)+'\nand opening last')
+            basenames,exts = map(set,zip(*[j.rsplit('.',1) for j in files if len(j.rsplit('.',1))>1]))
+            if len(basenames) == 1 and len(exts) == len(files):
+                pass
+            else:
+                warnings.warn('found multiple files:\n'+'\n\t'.join(files)+'\nand opening last')
         elif print_result and verbose:
             obsn("found only one file, and loading it:"+repr(files))
     #}}}
@@ -390,6 +394,9 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             elif type_by_extension == 'DTA':
                 logger.info(strm("skipping DTA file",filename))
                 return None # ignore DTA and load the reading to the DSC file
+            elif type_by_extension == 'YGF':
+                logger.info(strm("skipping YGA file",filename))
+                return None # ignore YGA and load the reading to the DSC file
             else:
                 raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
     # }}}
