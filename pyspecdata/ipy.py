@@ -17,7 +17,10 @@ for minimal guidance if you're interested.'''
 
 # I should implement this as an extension module
 # https://mindtrove.info/4-ways-to-extend-jupyter-notebook/
-get_ipython().magic(u'pylab inline')
+try:
+    get_ipython().magic(u'pylab inline')
+except:
+    print "WARNING!!! (pyspecdata.ipy) %pylab inline failed!"
 import numpy
 import sympy
 from sympy.interactive import printing

@@ -21,6 +21,8 @@ pyspecdata.core.figlist
       ~figlist.grid
       ~figlist.header
       ~figlist.image
+      ~figlist.label_point
+      ~figlist.marked_text
       ~figlist.mesh
       ~figlist.next
       ~figlist.phaseplot_finalize

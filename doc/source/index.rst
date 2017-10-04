@@ -11,9 +11,9 @@ Contents:
 .. toctree::
     :maxdepth: 2
 
+    
+    modules.rst
     notebook.rst
-    hfss.rst
-    acert_hdf.rst
     pyspecdata.rst
     figlist.rst
     units.rst

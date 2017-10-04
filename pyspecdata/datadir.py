@@ -2,8 +2,6 @@ r'''Allows the user to run the same code on different machines,
 even though the location of the raw spectral data might change.
 
 This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file.
-
-..automodule::
 '''
 import os
 import ConfigParser
