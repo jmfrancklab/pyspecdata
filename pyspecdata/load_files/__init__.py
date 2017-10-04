@@ -1,4 +1,13 @@
-"the file-loading subroutines are stored here"
+r"""This subpackage holds all the routines for reading raw data in proprietary formats.
+It's intended to be accessed entirely through the function :func:`find_file`,
+which uses :module:`datadir` to search for the filename, then automatically identifies
+the file type and calls the appropriate module to load the data into an nddata.
+
+Currently, Bruker file formats (both ESR and NMR) are supported, as well as
+(at least some earlier iteration) of Magritek file formats.
+
+Users/developers are very strongly encouraged to add support for new file types.
+"""
 from . import bruker_nmr
 from . import prospa
 from . import bruker_esr

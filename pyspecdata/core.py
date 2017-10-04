@@ -1,8 +1,36 @@
+r'''Provides the core components of pyspecdata.
+Currently, this is a very large file that we will slowly break down into separate modules or packages.
+
+The classes :class:`nddata`, :class:`nddata_hdf`, :class:`ndshape`, the
+function :func:`plot`, and the class :class:`fitdata`
+are the core components of the N-Dimensional processing routines.
+Start by familiarizing yourself with those.
+
+The :class:`figlist` is the base class for "Figure lists."
+Figure lists allows you to organize plots and text and to refer to plots
+by name, rather than number.
+They are designed so that same code can be used seamlessly from within
+ipython, jupyter, a python script, or a python environment within latex
+(JMF can also distribute latex code for this -- nice python based
+installer is planned).
+The user does not initialize the figlist class directly,
+but rather initializes ``figlist_var``.
+At the end of this file,
+there is a snippet of code that sets
+``figlist_var`` to choice that's appropriate for the working environment
+(*i.e.*, python, latex environment, *etc.)
+
+There are many helper and utility functions that need to be sorted an documented by JMF,
+and can be ignored.
+These are somewhat wide-ranging in nature.
+For example, :func:`box_muller` is a helper function (based on numerical recipes) used by :func:`nddata.add_noise`,
+while h5 functions are helper functions for using pytables in a fashion that
+will hopefull be intuitive to those familiar with SQL, etc.
+'''
 from paramset_pyspecdata import myparams
 from sys import exc_info
 from os import listdir,environ
 from os.path import sep as path_sep
-#if paramset.myparams['figlist_type'] == 'figlistl':
 if myparams['figlist_type'] == 'figlistl':
     environ['ETS_TOOLKIT'] = 'qt4'
     import matplotlib; matplotlib.use('Agg')

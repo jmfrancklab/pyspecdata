@@ -1,3 +1,9 @@
+r'''Provides the ``pdflatex_notebook_wrapper`` shell/dos command, which you run
+instead of your normal Latex command to build a lab notebook.
+The results of python environments are **cached** and **only re-run if the code changes**,
+even if the python environments are moved around.
+This makes the compilation of a Latex lab notebook extremely efficient.
+'''
 from .datadir import get_notebook_dir,getDATADIR
 import os.path
 import hashlib

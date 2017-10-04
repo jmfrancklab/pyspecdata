@@ -1,3 +1,4 @@
+r'''Not yet implemented -- a preliminary idea for how to handle actual unit conversion.  (Currently, we only do s to Hz during FT and order of magnitude prefixes when plotting.)'''
 from numpy import *
 import re
 from itertools import chain

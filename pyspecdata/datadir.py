@@ -1,3 +1,10 @@
+r'''Allows the user to run the same code on different machines,
+even though the location of the raw spectral data might change.
+
+This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file.
+
+..automodule::
+'''
 import os
 import ConfigParser
 import platform
@@ -23,6 +30,10 @@ else:
             readline.set_startup_hook()
 # }}}
 class MyConfig(object):
+    r'''Provides an easy interface to the pyspecdata configuration file.
+    Only one instance _my_config should be created -- this instance is used by
+    the other functions in this module.
+    '''
     def __init__(self):
         self._config_parser = None
         if platform.platform().startswith('Windows'):

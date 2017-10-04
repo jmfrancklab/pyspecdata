@@ -1,4 +1,7 @@
-"These are general functions that need to be accessible to everything inside pyspecdata.core.  I can't just put these inside pyspecdata.core, because that would lead to cyclic imports, and e.g. submodules of pyspecdata can't find them."
+r"""These are general functions that need to be accessible to everything inside
+pyspecdata.core.  I can't just put these inside pyspecdata.core, because that
+would lead to cyclic imports, and e.g. submodules of pyspecdata can't find
+them."""
 
 from pylab import *
 import logging

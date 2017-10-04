@@ -1,8 +1,19 @@
-# Code by JF that overrides plain text representation
-# of numpy arrays with latex representation that we build ourselves
-# or pull from sympy
-# see [O'Reilly Book](https://www.safaribooksonline.com/blog/2014/02/11/altering-display-existing-classes-ipython/)
-# for minimal guidance if you're interested
+r'''Provides the jupyter extension:
+
+    %load_ext pyspecdata.ipy
+
+That allows for fancy representation nddata instances -- *i.e.* you can type the name of
+an instance and hit shift-Enter, and a plot will appear rather than some text
+representation.
+
+Also overrides plain text representation
+of numpy arrays with latex representation that we build ourselves
+or pull from sympy.
+
+Also known as "generalized jupyter awesomeness" in only ~150 lines of code!
+
+See [O'Reilly Book](https://www.safaribooksonline.com/blog/2014/02/11/altering-display-existing-classes-ipython/)
+for minimal guidance if you're interested.'''
 
 # I should implement this as an extension module
 # https://mindtrove.info/4-ways-to-extend-jupyter-notebook/
