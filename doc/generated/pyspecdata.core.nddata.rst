@@ -1,5 +1,5 @@
-pyspecdata.core.nddata
-======================
+pyspecdata\.core\.nddata
+========================
 
 .. currentmodule:: pyspecdata.core
 
@@ -114,14 +114,5 @@ pyspecdata.core.nddata
    
 
    
-   
-   .. rubric:: Attributes
-
-   .. autosummary::
-   
-      ~nddata.angle
-      ~nddata.imag
-      ~nddata.real
-      ~nddata.want_to_prospa_decim_correct
    
    

@@ -1,6 +1,6 @@
-pyspecdata.core.figlist.show_prep
+pyspecdata\.core\.figlist\.header
 =================================
 
 .. currentmodule:: pyspecdata.core
 
-.. automethod:: figlist.show_prep
+.. automethod:: figlist.header

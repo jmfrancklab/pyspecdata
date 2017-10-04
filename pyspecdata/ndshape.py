@@ -1,5 +1,4 @@
 r'''The :class:`ndshape` class allows you to allocate arrays and determine the shape of existing arrays.'''
-from pylab import *
 from .general_functions import *
 
 class ndshape_base ():

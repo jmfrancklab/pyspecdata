@@ -1,5 +1,5 @@
-pyspecdata.core.figlist.plot
-============================
+pyspecdata\.core\.figlist\.plot
+===============================
 
 .. currentmodule:: pyspecdata.core
 

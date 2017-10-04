@@ -1,6 +1,6 @@
-pyspecdata.core.figlist.push_marker
+pyspecdata\.core\.figlist\.setprops
 ===================================
 
 .. currentmodule:: pyspecdata.core
 
-.. automethod:: figlist.push_marker
+.. automethod:: figlist.setprops

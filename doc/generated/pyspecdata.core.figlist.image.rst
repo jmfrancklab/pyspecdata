@@ -1,5 +1,5 @@
-pyspecdata.core.figlist.image
-=============================
+pyspecdata\.core\.figlist\.image
+================================
 
 .. currentmodule:: pyspecdata.core
 

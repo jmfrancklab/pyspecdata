@@ -1,6 +1,6 @@
-pyspecdata.core.figlist.setprops
+pyspecdata\.core\.figlist\.twinx
 ================================
 
 .. currentmodule:: pyspecdata.core
 
-.. automethod:: figlist.setprops
+.. automethod:: figlist.twinx

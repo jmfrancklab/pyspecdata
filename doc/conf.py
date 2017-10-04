@@ -18,7 +18,7 @@ import shlex
 from pyspecdata.version import __version__
 import mock
  
-MOCK_MODULES = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_toolkits']
+MOCK_MODULES = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_toolkits', 'pylab.vonmises']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 

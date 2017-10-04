@@ -1,6 +1,6 @@
-pyspecdata.core.figlist.adjust_spines
+pyspecdata\.core\.figlist\.show\_prep
 =====================================
 
 .. currentmodule:: pyspecdata.core
 
-.. automethod:: figlist.adjust_spines
+.. automethod:: figlist.show_prep

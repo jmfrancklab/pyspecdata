@@ -6,8 +6,6 @@ List of Modules and Sub-Packages
 datadir
 -------
 
-Why does this say automodule at the end?
-
 .. automodule:: pyspecdata.datadir
 
 core

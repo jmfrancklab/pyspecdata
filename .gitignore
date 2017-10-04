@@ -1,6 +1,7 @@
 .scf
 *.egg-info
 *.pyc
+_build/
 build/
 dist/
 *.pyd
