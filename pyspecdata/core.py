@@ -2265,6 +2265,8 @@ class figlist(object):
         if hasattr(self,'file_name'):
             if hasattr(self,'line_spacing'):
                 self.show(self.file_name,line_spacing = self.line_spacing)
+            else:
+                self.show(self.file_name)
         else:
             self.show()
         return

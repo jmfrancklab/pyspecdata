@@ -14,7 +14,7 @@ Contents:
     
     modules.rst
     notebook.rst
-    pyspecdata.rst
+    nddata.rst
     figlist.rst
     units.rst
 

@@ -18,9 +18,7 @@ import shlex
 from pyspecdata.version import __version__
 import mock
  
-MOCK_MODULES = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_toolkits', 'pylab.vonmises']
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = mock.Mock()
+autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_toolkits', 'get_ipython']
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

@@ -1,24 +1,7 @@
-N-dimensional Data (nddata)
-===========================
-
-By Topic
---------
-
-.. toctree::
-    :maxdepth: 1
-
-    axis_manipulation.rst
-    fourier.rst
-    nddata.rst
-
-Full list of `nddata` methods
-=============================
+pyspecdata\.nddata
+==================
 
 .. currentmodule:: pyspecdata
-.. comment generated the following with 
-    .. autosummary:: 
-        :toctree: generated
-        core.nddata
 
 .. autoclass:: nddata
 
@@ -58,6 +41,7 @@ Full list of `nddata` methods
       ~nddata.fromaxis
       ~nddata.ft
       ~nddata.ft_clear_startpoints
+      ~nddata.ft_state_to_str
       ~nddata.ftshift
       ~nddata.get_covariance
       ~nddata.get_error
@@ -72,6 +56,7 @@ Full list of `nddata` methods
       ~nddata.histogram
       ~nddata.human_units
       ~nddata.ift
+      ~nddata.indices
       ~nddata.inhomog_coords
       ~nddata.integrate
       ~nddata.interp
@@ -95,7 +80,6 @@ Full list of `nddata` methods
       ~nddata.polyfit
       ~nddata.popdim
       ~nddata.random_mask
-      ~nddata.real
       ~nddata.register_axis
       ~nddata.rename
       ~nddata.reorder
@@ -106,6 +90,8 @@ Full list of `nddata` methods
       ~nddata.run_avg
       ~nddata.run_nopop
       ~nddata.runcopy
+      ~nddata.secsy_transform
+      ~nddata.secsy_transform_manual
       ~nddata.set_error
       ~nddata.set_ft_prop
       ~nddata.set_plot_color
@@ -119,6 +105,7 @@ Full list of `nddata` methods
       ~nddata.squeeze
       ~nddata.sum
       ~nddata.sum_nopop
+      ~nddata.to_ppm
       ~nddata.unitify_axis
       ~nddata.units_texsafe
       ~nddata.unset_prop
@@ -128,12 +115,4 @@ Full list of `nddata` methods
 
    
    
-   .. rubric:: Attributes
-
-   .. autosummary::
    
-      ~nddata.want_to_prospa_decim_correct
-
-.. autoclass:: nddata
-    :members:
-.. (comment) the :members: properties is needed so it pulls all the members of the class
