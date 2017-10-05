@@ -2262,14 +2262,20 @@ class figlist(object):
     def __enter__(self):
         return self
     def __exit__(self, exception_type, exception_value, traceback):
-        if hasattr(self,'file_name'):
-            if hasattr(self,'line_spacing'):
-                self.show(self.file_name,line_spacing = self.line_spacing)
+        r'''show the plots, unless there are errors.
+
+        Because this is executed before raising any errors, we want to avoid showing any plots if there are errors.
+        Otherwise, it gets very confusing.
+        '''
+        if exception_type is None:
+            if hasattr(self,'file_name'):
+                if hasattr(self,'line_spacing'):
+                    self.show(self.file_name,line_spacing = self.line_spacing)
+                else:
+                    self.show(self.file_name)
             else:
-                self.show(self.file_name)
-        else:
-            self.show()
-        return
+                self.show()
+            return
 def text_on_plot(x,y,thistext,coord = 'axes',**kwargs):
     ax = gca()
     if coord == 'axes':

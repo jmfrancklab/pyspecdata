@@ -420,6 +420,8 @@ def load_indiv_file(filename, dimname='', return_acq=False,
     if return_acq:
         raise ValueError('return_acq is deprecated!! All properties are now set directly to the nddata using the set_prop function')
     logger.debug("done with load_indiv_file")
+    if '' in data.dimlabels:
+        data = data['',0]
     return data
     #}}}
 def load_acqu(filename,whichdim='',return_s = None):
