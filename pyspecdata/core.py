@@ -3057,9 +3057,29 @@ class nddata (object):
     #}}}
     #{{{ shortcuts for axes
     def axlen(self,axis):
+        r"""return the size (length) of an axis, by name
+        
+        Parameters
+        ----------
+
+        axis: str
+            name of the axis whos length you are interested in
+        """
         return shape(self.data)[self.axn(axis)]
     def axn(self,axis):
-        r'return the number for the axis with the name "axis"'
+        r'''Return the index number for the axis with the name "axis"
+
+        This is used by many other methods.
+        As a simple example,
+        self.:func:`axlen`(axis) (the axis length) returns
+        ``shape(self.data)[self.axn(axis)]``
+
+        Parameters
+        ----------
+
+        axis: str
+            name of the axis
+        '''
         try:
             return self.dimlabels.index(axis)
         except:
@@ -3322,6 +3342,24 @@ class nddata (object):
             raise ValueError("I don't know what you're passing to set prop!!!")
         return self
     def get_prop(self,propname):
+        r'''return arbitrary ND-data properties (typically acquisition parameters *etc.*) by name (`propname`)
+        
+        In order to allow ND-data to store acquisition parameters and other info that accompanies the data,
+        but might not be structured in a gridded format, nddata instances
+        always have a `other_info` dictionary attribute,
+        which stores these properties by name.
+
+        If the property doesn't exist, this returns `None`.
+        
+        Parameters
+        ----------
+        propname: str
+            name of the property that you're want returned
+
+        Returns
+        -------
+        The value of the property (can by any type) or `None` if the property doesn't exist.
+        '''
         if propname not in self.other_info.keys():
             return None
         return self.other_info[propname]
@@ -4337,7 +4375,9 @@ class nddata (object):
             self.setaxis(axis,cdata)
             return self
     def contiguous(self,lambdafunc,axis = None,verbose = False):
-        r"""this function returns the start and stop positions along the
+        r"""Return contiguous blocks that satisfy the condition given by `lambdafunc`
+        
+        this function returns the start and stop positions along the
         axis for the contiguous blocks for which lambdafunc returns
         true
         
@@ -5294,6 +5334,11 @@ class nddata (object):
         raise ValueError("Can't independently set the real component yet")
     # }}}
     def copy(self):
+        r'''Return a full copy of this instance.
+        
+        Because methods typically change the data in place, you might want to
+        use this frequently.
+        '''
         return deepcopy(self)
     def __getitem__(self,args):
         if type(args) is type(emptyfunction):

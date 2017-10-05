@@ -35,6 +35,7 @@ Full list of `nddata` methods
       ~nddata.aligndata
       ~nddata.argmax
       ~nddata.argmin
+      ~nddata.angle
       ~nddata.axis
       ~nddata.axlen
       ~nddata.axn
