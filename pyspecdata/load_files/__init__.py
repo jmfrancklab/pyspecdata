@@ -7,6 +7,11 @@ Currently, Bruker file formats (both ESR and NMR) are supported, as well as
 (at least some earlier iteration) of Magritek file formats.
 
 Users/developers are very strongly encouraged to add support for new file types.
+
+.. currentmodule:: pyspecdata.load_files
+
+.. autofunction:: find_file
+
 """
 from . import bruker_nmr
 from . import prospa
@@ -45,7 +50,7 @@ def find_file(searchstring,
     It looks at the top level of the directory first, and if that fails, starts to look recursively.
     Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
 
-    It calls `load_indiv_file`, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.
+    It calls :func:`~pyspecdata.load_files.load_indiv_file`, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.
 
     Parameters
     ----------
@@ -67,7 +72,7 @@ def find_file(searchstring,
     exp_type : str
         Since the function assumes that you have different types of
         experiments sorted into different directories, this argument
-        specifies the type of experiment see :func:`getDATADIR` for
+        specifies the type of experiment see :func:`~pyspecdata.datadir.getDATADIR` for
         more info.
     postproc : function, str, or None
         This function is fed the nddata data and the remaining keyword
@@ -89,18 +94,17 @@ def find_file(searchstring,
         it sets `postproc_type` to the value of
         ``(h5 root).experiment.description['class']``.
         This, in turn, is used to choose the type of post-processing.
-        dimname:
-            passed to :func:`load_indiv_file`
-        return_acq:
-            passed to :func:`load_indiv_file`
-        add_sizes:
-            passed to :func:`load_indiv_file`
-        add_dims:
-            passed to :func:`load_indiv_file`
-        use_sweep:
-            passed to :func:`load_indiv_file`
-        indirect_dimlabels:
-            passed to :func:`load_indiv_file`
+
+        :dimname:
+            passed to :func:`~pyspecdata.load_files.load_indiv_file`
+
+        :return_acq:
+            passed to :func:`~pyspecdata.load_files.load_indiv_file`
+
+        :add_sizes: passed to :func:`~pyspecdata.load_files.load_indiv_file`
+        :add_dims: passed to :func:`~pyspecdata.load_files.load_indiv_file`
+        :use_sweep: passed to :func:`~pyspecdata.load_files.load_indiv_file`
+        :indirect_dimlabels: passed to :func:`~pyspecdata.load_files.load_indiv_file`
         '''
     logger.info(strm("find_file sees indirect_dimlabels",
         indirect_dimlabels))
@@ -293,7 +297,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
     ----------
     dimname : str
         When there is a single indirect dimension composed of several scans,
-        call it this.
+        call the indirect dimension `dimname`.
     return_acq : DEPRECATED
     add_sizes : list
         the sizes associated with the dimensions in add_dims
