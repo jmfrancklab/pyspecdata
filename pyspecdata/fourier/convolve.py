@@ -13,9 +13,14 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*
         width of the convolution function.
 
     convfunc: function
+        A function that takes two arguments -- the first are the axis coordinates and the second is `filterwidth`.
         Default is a normalized Gaussian of width (:math:`\sigma`)
         `filterwidth`
         :math:`\frac{1}{2 \sigma^2}\exp\left( - \frac{x^2}{2 \sigma^2} \right)`
+        For example if you want a complex lorentzian with `filterwidth` controlled by the rate $R$, 
+        *i.e.*
+        :math:`\frac{-1}{-i 2 \pi f - R}`
+        then ``convfunc = lambda f,R: -1./(-1j*2*pi*f-R)``
     '''
     #{{{ make a version of x that is oriented along the correct dimension
     x = self.getaxis(axisname).copy()

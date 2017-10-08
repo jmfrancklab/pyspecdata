@@ -1255,8 +1255,9 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
             #for the minor ticks, use no labels; default NullFormatter
             ax.yaxis.set_minor_locator(minorLocator)
             #}}}
-    grid(use_grid,which='major',color=gridcolor,alpha=0.15,linestyle='-')
-    grid(use_grid,which='minor',color=gridcolor,alpha=0.125,linestyle='-')
+    ax.yaxis.grid(use_grid,which='major',color=gridcolor,alpha=0.15,linestyle='-')
+    ax.yaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.125,linestyle='-')
+    ax.xaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.125,linestyle='-')
     labels = ax.get_xticklabels()
     setp(labels,rotation=rotation[0],fontsize=10)
     if y:
