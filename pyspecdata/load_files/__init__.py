@@ -34,6 +34,57 @@ def _dirformat(file):
         #}}}
         return file
 #}}}
+def search_filename(searchstring,exp_type,
+        print_result=True):
+    r"""Use regular expression `searchstring` to find a file inside the directory indicated by `exp_type`
+
+    Parameters
+    ----------
+    searchstring : str
+        Most commonly, this is just a fragment of the file name,
+        with any literal ``*``, ``.``, or ``?`` characters preceded by
+        a backslash.
+        More generally, it is a regular expression,
+        where ``.*searchstring.*`` matches a filename inside the
+        directory appropriate for `exp_type`.
+    exp_type : str
+        Since the function assumes that you have different types of
+        experiments sorted into different directories, this argument
+        specifies the type of experiment see :func:`~pyspecdata.datadir.getDATADIR` for
+        more info.
+    """
+    #{{{ actually find the files
+    directory = getDATADIR(exp_type=exp_type)
+    def look_inside(inp_directory):
+        dirlist = os.listdir(inp_directory)
+        if os.path.isdir(inp_directory):
+            files = re.findall('.*' + searchstring + '.*','\n'.join(dirlist))
+        else:
+            raise IOError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s\nYou might need to change the value associated with this exp_type in %s"%(inp_directory,searchstring,_my_config.config_location))
+        if len(files) == 0:
+            files = []
+            for j in [k for k in dirlist if os.path.isdir(k)]:
+                files += look_inside(j)
+        else:
+            return files
+    files = look_inside(directory)
+    if files is None or len(files) == 0:
+        exptype_msg = ""
+        if exp_type is None:
+            exptype_msg = "\nYou probably need to set exp_type so I know where inside {1:s} to find the file."
+        raise IOError(("I can't find a file matching the regular expression {0:s} in {1:s}"+exptype_msg).format(searchstring,directory))
+    else:
+        if len(files) > 1:
+            basenames,exts = map(set,zip(*[j.rsplit('.',1) for j in files if len(j.rsplit('.',1))>1]))
+            if len(basenames) == 1 and len(exts) == len(files):
+                pass
+            else:
+                warnings.warn('found multiple files:\n'+'\n\t'.join(files)+'\nand opening last')
+        elif print_result:
+            logger.info("found only one file, and loading it:"+repr(files))
+    #}}}
+    return [directory+j for j in files]
+
 def find_file(searchstring,
             exp_type = None,
             postproc = None,
@@ -112,39 +163,10 @@ def find_file(searchstring,
     if 'subdirectory' in kwargs.keys():
         raise ValueError("The `subdirectory` keyword argument is not longer valid -- use `exp_type` instead!")
     # }}}
-    #{{{ actually find the files
-    directory = getDATADIR(exp_type=exp_type)
-    def look_inside(inp_directory):
-        dirlist = os.listdir(inp_directory)
-        if os.path.isdir(inp_directory):
-            files = re.findall('.*' + searchstring + '.*','\n'.join(dirlist))
-        else:
-            raise IOError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s\nYou might need to change the value associated with this exp_type in %s"%(inp_directory,searchstring,_my_config.config_location))
-        if len(files) == 0:
-            files = []
-            for j in [k for k in dirlist if os.path.isdir(k)]:
-                files += look_inside(j)
-        else:
-            return files
-    files = look_inside(directory)
-    if files is None or len(files) == 0:
-        exptype_msg = ""
-        if exp_type is None:
-            exptype_msg = "\nYou probably need to set exp_type so I know where inside {1:s} to find the file."
-        raise IOError(("I can't find a file matching the regular expression {0:s} in {1:s}"+exptype_msg).format(searchstring,directory))
-    else:
-        if len(files) > 1:
-            basenames,exts = map(set,zip(*[j.rsplit('.',1) for j in files if len(j.rsplit('.',1))>1]))
-            if len(basenames) == 1 and len(exts) == len(files):
-                pass
-            else:
-                warnings.warn('found multiple files:\n'+'\n\t'.join(files)+'\nand opening last')
-        elif print_result and verbose:
-            obsn("found only one file, and loading it:"+repr(files))
-    #}}}
+    files = search_filename(searchstring, exp_type, print_result=print_result)
     data = None
     while data is None and len(files) > 0:
-        filename = directory + files.pop(-1)
+        filename = files.pop(-1)
         if expno is not None:
             filename = os.path.join(filename,str(expno))
         # {{{ file loaded here
@@ -425,7 +447,13 @@ def load_indiv_file(filename, dimname='', return_acq=False,
         raise ValueError('return_acq is deprecated!! All properties are now set directly to the nddata using the set_prop function')
     logger.debug("done with load_indiv_file")
     if '' in data.dimlabels:
-        data = data['',0]
+        if ndshape(data)[''] < 2:
+            data = data['',0]
+        else:
+            if 'indirect' in data.dimlabels:
+                raise ValueError("Was going to rename unnamed dimension 'indirect', but there's already one called that!")
+            else:
+                data.rename('','indirect')
     return data
     #}}}
 def load_acqu(filename,whichdim='',return_s = None):
@@ -471,6 +499,7 @@ def det_type(file,**kwargs):
     raise RuntimeError("det_type is deprecated, and should be handled by the file magic inside load_indiv_file.  THE ONE EXCEPTION to this is the fact that det_type would return a second argument that allowed you to classify different types of prospa files.  This is not handled currently")
 
 __all__ = ['find_file',
+        'search_filename',
         'load_indiv_file',
         'format_listofexps',
         'bruker_nmr',

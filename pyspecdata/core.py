@@ -4629,7 +4629,10 @@ class nddata (object):
         retval = self.getaxis(axisname)
         if retval is None:
             raise AttributeError(axisname+" does not have axis labels!")
-        return retval.copy().reshape(newshape)
+        try:
+            return retval.copy().reshape(newshape)
+        except ValueError as e:
+            raise ValueError(strm("Trying to reshape axis from",retval.shape,"to",newshape,"so I can manipulate it like data"))
     def retaxis(self,axisname):
         thisaxis = self._axis_inshape(axisname)
         return nddata(thisaxis,thisaxis.shape,list(self.dimlabels)).labels(axisname,thisaxis.flatten())

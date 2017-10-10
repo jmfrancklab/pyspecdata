@@ -128,7 +128,7 @@ def series(filename, dimname=''):
         data.set_prop('vd',
                 load_vdlist(dirformat(filename)))
     else:
-        print "vdlist doesn't exist",dirformat(filename)+'vdlist'
+        logger.info(strm("vdlist doesn't exist",dirformat(filename)+'vdlist'))
     #print 'DEBUG 2: data from bruker file =',data
     #}}}
     return data
