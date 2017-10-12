@@ -2034,21 +2034,16 @@ class figlist(object):
                         raise Exception(strm('error while trying to run autolegend for',k,'\n\tfiglist is',self.figurelist,explain_error(e)))
     def show(self,*args,**kwargs):
         self.basename = None # must be turned off, so it can cycle through lists, etc, on its own
-        verbose = False
-        if verbose in kwargs.keys():
-            verbose = kwargs.pop('verbose')
+        if 'line_spacing' in kwargs.keys(): kwargs.pop('line_spacing')# for latex only
         if len(kwargs) > 0:
             raise ValueError("didn't understand kwargs "+repr(kwargs))
-        if verbose: print '\n'
-        if verbose: print "before show_prep, figlist is",self.figurelist
-        if verbose: print '\n'
-        if verbose: print "before show_prep, autolegend list is",self.autolegend_list
-        if verbose: print '\n'
+        logger.debug(strm("before show_prep, figlist is",self.figurelist))
+        logger.debug(strm("before show_prep, autolegend list is",self.autolegend_list))
         self.show_prep()
         #{{{ just copy from fornnotebook to get the print string functionality
         kwargs = {}
         for figname in self.figurelist:
-            if verbose: print "showing figure"+lsafen(figname)
+            logger.debug(strm("showing figure"+lsafen(figname)))
             if type(figname) is dict:
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
@@ -4202,7 +4197,16 @@ class nddata (object):
                             axis_name = axis_name[0:j+2] + '$' + axis_name[j+2:]
                         axis_name = '$'+axis_name
             if isft:
-                axis_name = r'F{'+axis_name+r'}'
+                t_idx = axis_name.find('t')
+                if t_idx>-1:
+                    if t_idx+1 < len(axis_name) and axis_name[t_idx+1].isalpha():
+                        axis_name = r'F{'+axis_name+r'}'
+                    else:
+                        axis_name = axis_name.replace('t','\\nu ')
+                        if axis_name[0] != '$':
+                            axis_name = '$' + axis_name + '$'
+                else:
+                    axis_name = r'F{'+axis_name+r'}'
         else:
             yunits = self.units_texsafe()
         if yunits is not None:
@@ -5306,10 +5310,8 @@ class nddata (object):
     @property
     def angle(self):
         "Return the angle component of the data"
-        retval = nddata(angle(self.data),self.data.shape,self.dimlabels)
-        retval.other_info = self.other_info
-        retval.axis_coords = self.axis_coords
-        retval.axis_coords_error = self.axis_coords_error
+        retval = self.copy(data=False)
+        retval.data = angle(self.data)
         return retval
     @angle.setter
     def angle(self):
@@ -5317,10 +5319,8 @@ class nddata (object):
     @property
     def imag(self):
         "Return the imag component of the data"
-        retval = nddata(self.data.imag,self.data.shape,self.dimlabels)
-        retval.other_info = self.other_info
-        retval.axis_coords = self.axis_coords
-        retval.axis_coords_error = self.axis_coords_error
+        retval = self.copy(data=False)
+        retval.data = self.data.imag
         return retval
     @imag.setter
     def imag(self):
@@ -5328,22 +5328,48 @@ class nddata (object):
     @property
     def real(self):
         "Return the real component of the data"
-        retval = nddata(self.data.real,self.data.shape,self.dimlabels)
-        retval.other_info = self.other_info
-        retval.axis_coords = self.axis_coords
-        retval.axis_coords_error = self.axis_coords_error
+        retval = self.copy(data=False)
+        retval.data = self.data.real
         return retval
     @real.setter
     def real(self):
         raise ValueError("Can't independently set the real component yet")
     # }}}
-    def copy(self):
+    def copy(self,data=True):
         r'''Return a full copy of this instance.
         
         Because methods typically change the data in place, you might want to
         use this frequently.
+
+        Parameters
+        ----------
+        data : boolean
+            Default to True.
+            False doesn't copy the data -- this is for internal use,
+            *e.g.* when you want to copy all the metadata and perform a
+            calculation on the data.
+
+            The code for this also provides the definitive list of the
+            nddata metadata.
         '''
-        return deepcopy(self)
+        if data:
+            return deepcopy(self)
+        else:
+            retval =  nddata(0) # empty
+            # {{{ data info
+            retval.dimlabels = list(self.dimlabels)
+            retval.data = None
+            retval.data_error = None
+            retval.data_units = None
+            retval.data_covariance = None
+            # }}}
+            # {{{ axes
+            retval.axis_coords = deepcopy(self.axis_coords)
+            retval.axis_coords_error = deepcopy(self.axis_coords_error)
+            retval.axis_coords_units = deepcopy(self.axis_coords_units)
+            # }}}
+            retval.other_info = deepcopy(self.other_info)
+            return retval
     def __getitem__(self,args):
         if type(args) is type(emptyfunction):
             #{{{ just a lambda function operates on the data
