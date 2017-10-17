@@ -93,7 +93,7 @@ epsilon_0 = 8.854187817e-12
 hbar = 6.6260695729e-34/2./pi
 N_A = 6.02214179e23
 gammabar_H = 4.258e7
-gammabar_e = 2.807e10
+gammabar_e = 2.807e10 # this is for a nitroxide
 #}}}
 def mybasicfunction(first_figure = None):
     r'''this gives the format for doing the image thing
