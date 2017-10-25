@@ -240,7 +240,10 @@ def load_jcamp(filename):
             retval = retval2
             j = j+1
             if j<len(lines):
-                retval2 =  match_line(lines[j],number_re,string_re,array_re)
+                try:
+                    retval2 =  match_line(lines[j],number_re,string_re,array_re)
+                except:
+                    raise RuntimeError(strm('matching line "',lines[j],'"',"in file",filename))
         return vars
 def load_title(file):
     file = dirformat(file)
