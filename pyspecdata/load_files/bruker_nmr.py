@@ -120,7 +120,7 @@ def series(filename, dimname=''):
     data.set_prop('filename',
             filename)
     proc_filename = os.path.join(filename,
-            'pdata','1','proc')
+            'pdata','1','procs')
     if os.path.exists(proc_filename):
         data.set_prop('proc',
                 load_jcamp(proc_filename))
@@ -135,7 +135,10 @@ def series(filename, dimname=''):
 def load_1D(filename, dimname=''):
     """Load 1D bruker data into a file.  Load acquisition parameters into
     property 'acq' and processing parameters *from procno 1 only* into
-    'proc'"""
+    'proc'
+    
+    Note that is uses the 'procs' file, which appears to contain the correct data
+    """
     filename = dirformat(filename)
     v = load_acqu(filename)
     td2 = int(v['TD'])
@@ -167,7 +170,7 @@ def load_1D(filename, dimname=''):
     data.set_prop('filename',
             filename)
     proc_filename = os.path.join(filename,
-            'pdata','1','proc')
+            'pdata','1','procs')
     if os.path.exists(proc_filename):
         data.set_prop('proc',
                 load_jcamp(proc_filename))
