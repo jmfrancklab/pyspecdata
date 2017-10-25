@@ -2745,7 +2745,7 @@ class nddata (object):
         retval = show_array(self.data) 
         retval += '\n\t\t+/-'
         retval += show_array(self.get_error())
-        if len(self.dimlabels) > 1 or self.dimlabels[0] != "INDEX":
+        if len(self.dimlabels) > 1 or len(self.dimlabels) == 0 or self.dimlabels[0] != "INDEX":
             retval += '\n\tdimlabels='
             retval += repr(self.dimlabels)
             retval += '\n\taxes='
