@@ -6,6 +6,7 @@ them."""
 from pylab import *
 import logging
 import os
+from paramset_pyspecdata import myparams
 
 def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
     '''This function allows dynamically processed (*i.e.* function definitions with `**kwargs`) kwargs (keyword arguments) to be dealt with in a fashion more like standard kwargs.
@@ -88,6 +89,9 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = []):
     return du
 
 def init_logging(level=logging.INFO, filename='pyspecdata.log'):
+    "Initialize logging on pyspecdata.log -- do NOT log if run from within a notebook (it's fair to assume that you will run first before embedding)"
+    if myparams['figlist_type'] == 'figlistl':
+        return
     FORMAT = "--> %(filename)s(%(lineno)s):%(name)s %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"
     log_filename = os.path.join(os.path.expanduser('~'),filename)
     if os.path.exists(log_filename):
