@@ -5302,7 +5302,31 @@ class nddata (object):
         lefterror = self.get_error()
         if lefterror is not None:
             lefterror[tuple(leftindex)] = righterrors.squeeze()
-    # {{{ real, imag and angle properties
+    # {{{ standard trig functions
+    #def exp(self):
+    #    retval = self.copy()
+    #    retval.data = exp(retval.data)
+    #    return retval
+    def __getattr__(self,arg):
+        fundict = {'exp':exp,
+                'sin':sin,
+                'cos':cos,
+                'tan':tan,
+                'sinh':sinh,
+                'cosh':cosh,
+                'tanh':tanh,
+                }
+        if arg in fundict.keys():
+            print "found arg"
+            argf = fundict[arg]
+            def retfun():
+                retval = self.copy()
+                retval.data = argf(retval.data)
+                return retval
+            return retfun
+        else:
+            retval = getattr(super(nddata,self),arg)
+            return retval
     @property
     def angle(self):
         "Return the angle component of the data"
