@@ -226,8 +226,8 @@ def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,verbose = Fa
                     yerr = thiserror,#just to test
                     ecolor = 'k',
                     label = '$%s$'%thisfield))
-        except Error as e:
-            raise RuntimeErorr(strm('Problem with bar graph: there are %d indices, but %d pieces of data'%(len(indices),
+        except Exception as e:
+            raise RuntimeError(strm('Problem with bar graph: there are %d indices, but %d pieces of data'%(len(indices),
                 len(mystructarray[thisfield])),
                 'indices:', indices, 'data',mystructarray[thisfield])+explain_error(e))
     ax.set_xticks(indices+indiv_width/2)
@@ -266,7 +266,7 @@ def lookup_rec(A,B,indexpair):
 def reorder_rec(myarray,listofnames,first = True):
     try:
         indices_to_move = [myarray.dtype.names.index(j) for j in listofnames]
-    except Error as e:
+    except Exception as e:
         stuff_not_found = [j for j in listofnames if j not in myarray.dtype.names]
         if len(stuff_not_found) > 0:
             raise IndexError(strm(stuff_not_found,'is/are in the list you passed,',
@@ -375,7 +375,7 @@ def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
             'are not the same,  which is going to create problems!'))
     try:
         list_of_matching = [nonzero(B_reduced == j)[0] for j in A_reduced]
-    except Error as e:
+    except Exception as e:
         raise RuntimeError(strm('When trying to decorate,  A_reduced=', A_reduced,
             'with B_reduced=', B_reduced,
             'one or more of the following is an empty tuple,  which is wrong!:',
@@ -423,7 +423,7 @@ def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
     if verbose: print "(decorate\\_rec):: new dtypes:",repr(new_dtypes)
     try:
         retval = newcol_rec(retval,new_dtypes)
-    except Error as e:
+    except Exception as e:
         raise ValueError(strm("Problem trying to add new columns with the dtypes",
             new_dtypes)+explain_error(e))
     #}}}
@@ -480,7 +480,7 @@ def applyto_rec(myfunc,myarray,mylist,verbose = False):
         for thisfield in list(other_fields):
             try:
                 newrow[thisfield] = myfunc(myarray_subset[thisfield])
-            except Error as e:
+            except Exception as e:
                 raise ValueError(strm("error in applyto_rec:  You usually get this",
                     "when one of the fields that you have NOT passed in the",
                     "second argument is a string.  The fields and types",
@@ -591,7 +591,7 @@ def make_rec(*args,**kwargs):
             types[j] = k.dtype
     try:
         mydtype = dtype(zip(names,types,shapes))
-    except Error as e:
+    except Exception as e:
         raise ValueError(strm('problem trying to make names',names,' types',
             types,'shapes',shapes)+explain_error(e))
     if zeros_like:
@@ -602,7 +602,7 @@ def make_rec(*args,**kwargs):
         for j,thisname in enumerate(names):
             try:
                 retval[thisname][:] = input[j][:]
-            except Error as e:
+            except Exception as e:
                 raise RuntimeError("error trying to load input for '"+thisname
                         +"' of shape "+repr(shape(input[j]))+" into retval field of shape "
                         +repr(shape(retval[thisname])))
@@ -2478,7 +2478,7 @@ def plot(*args,**kwargs):
         try:
             #print 'DEBUG plotting with args',plotargs,'and kwargs',kwargs,'\n\n'
             retval = myplotfunc(*plotargs,**kwargs)
-        except Error as e:
+        except Exception as e:
             raise RuntimeError(strm('error trying to plot',type(myplotfunc),'with value',myplotfunc,
                     '\nlength of the ndarray arguments:',['shape:'+str(shape(j)) if type(j) is ndarray else j for j in plotargs],
                     '\nsizes of ndarray kwargs',dict([(j,shape(kwargs[j])) if type(kwargs[j]) is ndarray else (j,kwargs[j]) for j in kwargs.keys()]),
@@ -2533,7 +2533,7 @@ def concat(datalist,dimname,chop = False,verbose = False):
     #print 'DEBUG: type(datalist)',type(datalist)
     try:
         shapes = map(ndshape,datalist)
-    except Error as e:
+    except Exception as e:
         if type(datalist) is not list:
             raise TypeError(strm('You didn\'t pass a list, you passed a',type(datalist)))
         raise RuntimeError(strm('Problem with what you passed to concat, list of types,',
@@ -2603,7 +2603,7 @@ def concat(datalist,dimname,chop = False,verbose = False):
         axis_coords += [r_[0:newdimsize]]
         try:
             newdatalist.labels(dimlabels,axis_coords)
-        except Error as e:
+        except Exception as e:
             raise ValueError(strm("trying to attach axes of lengths",
                 map(len,axis_coords),"to",dimlabels)+explain_error(e))
     #}}}
@@ -2932,7 +2932,7 @@ class nddata (object):
         y_dim = self.dimlabels[1]
         try:
             x_axis = self.retaxis(x_dim).data
-        except Error as e:
+        except Exception as e:
             raise ValueError(strm('trying to get the info on axis', x_dim, 'which is',
                 self.getaxis(x_dim))
                 +explain_error(e))
@@ -3047,7 +3047,7 @@ class nddata (object):
             E = sparse.lil_matrix((n,n))
         try:
             E.setdiag(self.get_error()**2)
-        except Error as e:
+        except Exception as e:
             raise ValueError(strm('Problem getting covariance because error is',self.get_error())+explain_error(e))
         return E.toarray()
     #}}}
@@ -3274,7 +3274,7 @@ class nddata (object):
                 if len(self.axis_coords_error) == 0: self.axis_coords_error = [None] * len(self.dimlabels) # is we have an empty axis_coords_error, need to fill with None's
                 try:
                     errorforthisaxis = self.axis_coords_error[self.axn(thearg)]
-                except Error as e:
+                except Exception as e:
                     raise RuntimeError(strm('Problem trying to load error',self.axn(thearg),'for axis',thearg,'out of',self.axis_coords_error)
                             +explain_error(e))
                 if errorforthisaxis is None:
@@ -4062,7 +4062,7 @@ class nddata (object):
             if self.axis_coords_error is not None and len(self.axis_coords_error) > 0:
                 try:
                     self.axis_coords_error.pop(thisindex)
-                except Error as e:
+                except Exception as e:
                     raise RuntimeError(strm('trying to pop',thisindex,'from',self.axis_coords_error) + explain_error(e))
             if len(self.axis_coords_units) > 0:
                 try:
@@ -4122,7 +4122,7 @@ class nddata (object):
             axis = args[1]
             try:
                 thisindex = self.dimlabels.index(axis)
-            except Error as e:
+            except Exception as e:
                 if type(axis) is not str:
                     raise ValueError('The format of run is run(func,"axisname"), but you didn\'t give a string as the second argument -- maybe you fed the arguments backwards?')
                 elif axis not in self.dimlabels:
@@ -4140,7 +4140,7 @@ class nddata (object):
         func = self._wrapaxisfuncs(func)
         try:
             thisaxis = self.dimlabels.index(axis)
-        except Error as e:
+        except Exception as e:
             raise IndexError(strm("I couldn't find the dimension",axis,
                 "in the list of axes",self.dimlabels))
         temp = list(self.data.shape)
@@ -4362,7 +4362,7 @@ class nddata (object):
         interpfunc =  interp1d(origdata,rdata,kind = thiskind)
         try:
             rdata = interpfunc(values)
-        except Error as e:
+        except Exception as e:
             raise ValueError(strm('You passed',values,'and the data spans from',
                     origdata.min(),'to',origdata.max())+explain_error(e))
         interpfunc =  interp1d(origdata,idata,kind = thiskind)
@@ -4536,7 +4536,7 @@ class nddata (object):
         if len(self.axis_coords)>0:
             try:
                 self.axis_coords = map(self.axis_coords.__getitem__,neworder)
-            except Error as e:
+            except Exception as e:
                 raise IndexError(strm('problem mapping',map(len,self.axis_coords),'onto',neworder)
                         + explain_error(e))
             if len(self.axis_coords_units)>0:
@@ -4706,7 +4706,7 @@ class nddata (object):
             try:
                 lambdified_func = sympy.lambdify(list(symbols_in_func), func,
                         modules=mat2array)
-            except Error as e:
+            except Exception as e:
                 raise ValueError(strm('Error parsing axis variables',map(sympy.var,axisnames),
                     'that you passed and function',func,'that you passed') +
                     explain_error(e))
@@ -5317,7 +5317,6 @@ class nddata (object):
                 'tanh':tanh,
                 }
         if arg in fundict.keys():
-            print "found arg"
             argf = fundict[arg]
             def retfun():
                 retval = self.copy()
@@ -5471,7 +5470,7 @@ class nddata (object):
                         axis_coords_error = axis_coords_error,
                         data_error = newerror,
                         other_info = self.other_info)
-            except Error as e:
+            except Exception as e:
                 raise ValueError(strm("likely some problem recasting the data when"
                     "trying to initialize a new nddata: shape of"
                     "self.data",self.data.shape,"indexlist",indexlist))
@@ -6035,7 +6034,7 @@ class fitdata(nddata):
             #print r'$\frac{\partial %s}{\partial %s}=%s$'%(self.function_name,repr(thisvar),sympy.latex(mydiff).replace('$','')),'\n\n'
             try:
                 mydiff = mydiff_sym[j].subs(solution_list)
-            except Error as e:
+            except Exception as e:
                 raise ValueError(strm('error trying to substitute', mydiff_sym[j],
                     'with', solution_list) + explain_error(e))
             try:
@@ -6046,7 +6045,7 @@ class fitdata(nddata):
                     'shape(xvals)',shape(xvals),'the thing I\'m trying to',
                     'compute looks like this',
                     [mydiff.subs(x,xvals[k]) for k in range(0,len(xvals))]))
-            except Error as e:
+            except Exception as e:
                 raise ValueError(strm('Trying to set index',j,
                     'shape(fprime)',shape(fprime),
                     'shape(xvals)',shape(xvals))+explain_error(e))
@@ -6435,7 +6434,7 @@ class fitdata(nddata):
             raise ValueError(strm('leastsq failed with "',err,
                 '", maybe there is something wrong with the input:',
                 self))
-        except Error as e:
+        except Exception as e:
             raise ValueError('leastsq failed; I don\'t know why'+explain_error(e))
         #}}}
         if success not in [1,2,3,4]:
