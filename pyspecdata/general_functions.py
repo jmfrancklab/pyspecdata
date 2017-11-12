@@ -7,6 +7,7 @@ from pylab import *
 import logging
 import os
 from paramset_pyspecdata import myparams
+import re
 
 def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
     '''This function allows dynamically processed (*i.e.* function definitions with `**kwargs`) kwargs (keyword arguments) to be dealt with in a fashion more like standard kwargs.
@@ -106,3 +107,44 @@ def init_logging(level=logging.INFO, filename='pyspecdata.log'):
 
 def strm(*args):
     return ' '.join(map(str,args))
+
+exp_re = re.compile(r'(.*)e([+\-])0*([0-9]+)')
+def reformat_exp(arg):
+    "reformat scientific notation in a nice latex format -- used in both pdf and jupyter notebooks"
+    m = exp_re.match(arg)
+    if 'i' not in arg and float(arg) == 0:
+        return ''
+    if m:
+        retstr,pm,fin_numb = m.groups()
+        retstr += r'\times 10^{'
+        retstr += pm
+        #retstr += pm if pm == '-' else ''
+        retstr += fin_numb
+        retstr += '}'
+        return retstr
+    else:
+        return arg
+def complex_str(arg, fancy_format=False,format_code = '%.4g'):
+    "render a complex string -- leaving out imaginary if it's real"
+    retval = [format_code%arg.real]
+    if arg.imag != 0.0:
+        retval.append((format_code+"i")%arg.imag)
+    retval = [reformat_exp(j) for j in retval]
+    if len(retval)>1 and retval[1][0] not in '+-':
+        retval[1] = '+'+retval[1]
+    return ''.join(retval)
+def render_matrix(arg):
+    "return latex string representing 2D matrix"
+    math_str = r'\begin{bmatrix}'
+    math_str += '\n'
+    if hasattr(arg.dtype,'fields') and arg.dtype.fields is not None:
+        math_str += '\\\\\n'.join([' & '.join([', '.join([r'\text{'+f[0]+r'}\!=\!\text{"'+elem[f[0]]+'"}'
+                                                          if isinstance(elem[f[0]],str)
+                                                          else r'\text{%s}\!=\!%g'%(f[0],elem[f[0]])
+                                                          for f in arg.dtype.descr])# f[0] is the name (vs. size)
+                                               for elem in arg[k,:]]) for k in range(arg.shape[0])])
+    else:
+        math_str += '\\\\\n'.join([' & '.join([complex_str(j) for j in arg[k,:]]) for k in range(arg.shape[0])])
+    math_str += '\n'
+    math_str += r'\end{bmatrix}'
+    return math_str
