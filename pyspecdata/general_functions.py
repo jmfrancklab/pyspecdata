@@ -124,7 +124,7 @@ def reformat_exp(arg):
         return retstr
     else:
         return arg
-def complex_str(arg, fancy_format=False,format_code = '%.4g'):
+def complex_str(arg, fancy_format=False, format_code='%.4g'):
     "render a complex string -- leaving out imaginary if it's real"
     retval = [format_code%arg.real]
     if arg.imag != 0.0:
@@ -133,7 +133,7 @@ def complex_str(arg, fancy_format=False,format_code = '%.4g'):
     if len(retval)>1 and retval[1][0] not in '+-':
         retval[1] = '+'+retval[1]
     return ''.join(retval)
-def render_matrix(arg):
+def render_matrix(arg, format_code='%.4g'):
     "return latex string representing 2D matrix"
     math_str = r'\begin{bmatrix}'
     math_str += '\n'
@@ -144,7 +144,7 @@ def render_matrix(arg):
                                                           for f in arg.dtype.descr])# f[0] is the name (vs. size)
                                                for elem in arg[k,:]]) for k in range(arg.shape[0])])
     else:
-        math_str += '\\\\\n'.join([' & '.join([complex_str(j) for j in arg[k,:]]) for k in range(arg.shape[0])])
+        math_str += '\\\\\n'.join([' & '.join([complex_str(j, format_code=format_code) for j in arg[k,:]]) for k in range(arg.shape[0])])
     math_str += '\n'
     math_str += r'\end{bmatrix}'
     return math_str
