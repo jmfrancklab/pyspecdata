@@ -7,7 +7,8 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
 
     It adjusts normalization and units so that the result conforms to
             :math:`s(t)=\int_{x_min}^{x_max} \tilde{s}(t) e^{i 2 \pi f t} df`
-    Note that while the analytical integral this corresponds to is normalized, performing :func:`ft` followed by :func:`ift` on a discrete sequence is NOT completely invertible
+    Note that while the analytical integral this corresponds to is normalized, performing
+    :func:`ft` followed by :func:`ift` on a discrete sequence is NOT completely invertible
     (due to integration of the implied comb function??),
     and would require division by a factor of $\Delta f$ (the spectral width) in order
     to retrieve the original function
@@ -95,20 +96,19 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         elif pad:
             padded_length = pad
         u = self.getaxis(axes[j]) # here, u is frequency
+        if u is None:
+            raise ValueError("seems to be no axis for"+repr(axes[j])+"set an axis before you try to FT")
         #}}}
         self.set_ft_prop(axes[j],['start','freq'],u[0]) # before anything else, store the start frequency
         #{{{ calculate new axis and post-IFT shift..
         #       Calculate it first, in case it's non-integral.  Also note that
         #       I calculate the post-discrepancy here
-        if u is None:
-            raise ValueError("seems to be no axis for"+repr(axes[j])+"set an axis before you try to FT")
-        else:
-            #{{{ need to calculate du and all checks here so I can calculate new u
-            du = check_ascending_axis(u,tolerance,"In order to perform FT or IFT")
-            #}}}
-            dv = double(1) / du / double(padded_length) # so padded length gives the SW
-            v = r_[0:padded_length] * dv # v is the name of the *new* axis.  Note
-            #   that we stop one index before the SW, which is what we want
+        #{{{ need to calculate du and all checks here so I can calculate new u
+        du = check_ascending_axis(u,tolerance,"In order to perform FT or IFT")
+        #}}}
+        dv = double(1) / du / double(padded_length) # so padded length gives the SW
+        v = r_[0:padded_length] * dv # v is the name of the *new* axis.  Note
+        #   that we stop one index before the SW, which is what we want
         desired_startpoint = self.get_ft_prop(axes[j],['start','time'])
         if desired_startpoint is not None:# FT_start_time is set
             if shift[j]:

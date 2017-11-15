@@ -3,29 +3,37 @@ from pylab import *
 from .ft_shift import _find_index,thinkaboutit_message
 
 def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
-    ("This performs a fourier transform along the axes identified by the string or list of strings `axes`.\n"
-    "   It adjusts normalization and units so that the result conforms to\n"
-    r"   $$\tilde{s}(f)=\int_{x_min}^{x_max} s(t) e^{-i 2 \pi f t} dt$$"+'\n'
-    "   Note that while the analytical integral this corresponds to is "
-    "normalized, performing .ft() followed by .ift() on a discrete sequence is "
-    "NOT completely invertible (due to integration of the implied comb "
-    "function??), and would require division by a factor of $\Delta f$ (the "
-    "spectral width) in order to retrieve the original function\n"
-    "\tpre-FT, we use the axis to cyclically permute $t=0$ to the first "
-    "index\n"
-    "\t post-FT, we assume that the data has previously been IFT'd\n"
-    "\t\tIf this is the case, passing `shift`=True will cause an error\n"
-    "\t\tIf this is not the case, passing `shift`=True generates a standard fftshift\n"
-    "\t\t`shift`=None will choose True, if and only if this is not the case\n"
-    "\t`pad` specifies a zero-filling.  If it's a number, then it gives the"
-    " length of the zero-filled dimension.  If it is just `True`, then the size"
-    " of the dimension is determined by rounding the dimension size up to the"
-    " nearest integral power of 2.\n"
-    "\t`automix` can be set to the approximate frequency value.  This is useful"
-    " for the specific case where the data has been captured on a sampling scope,"
-    " and it's severely aliased over.\n"
-    "'cosine' yields a sum of the fft and ifft, for a cosine transform"
-    )
+    r"""This performs a Fourier transform along the axes identified by the string or list of strings `axes`.
+
+    It adjusts normalization and units so that the result conforms to
+            :math:`\tilde{s}(f)=\int_{x_min}^{x_max} s(t) e^{-i 2 \pi f t} dt`
+    Note that while the analytical integral this corresponds to is normalized, performing
+    :func:`ft` followed by :func:`ift` on a discrete sequence is NOT completely invertible
+    (due to integration of the implied comb function??),
+    and would require division by a factor of $\Delta f$ (the spectral width) in order
+    to retrieve the original function
+
+    **pre-FT**, we use the axis to cyclically permute :math:`t=0` to the first index
+
+    **post-FT**, we assume that the data has previously been IFT'd
+    If this is the case, passing ``shift=True`` will cause an error
+    If this is not the case, passing ``shift=True`` generates a standard fftshift
+    ``shift=None`` will choose True, if and only if this is not the case
+
+    Parameters
+    ----------
+    pad : int or boolean
+        `pad` specifies a zero-filling.  If it's a number, then it gives
+        the length of the zero-filled dimension.  If it is just `True`,
+        then the size of the dimension is determined by rounding the
+        dimension size up to the nearest integral power of 2.
+    automix : double
+        `automix` can be set to the approximate frequency value.  This is
+        useful for the specific case where the data has been captured on a
+        sampling scope, and it's severely aliased over.
+    cosine : boolean
+        yields a sum of the fft and ifft, for a cosine transform
+    """
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
     if (type(axes) is str):
@@ -45,7 +53,8 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
     shift,pad,automix = process_kwargs([
         ('shift',False),
         ('pad',False),
-        ('automix',False)],
+        ('automix',False),
+        ],
         kwargs)
     if not (type(shift) is list):
         shift = [shift]*len(axes)
@@ -128,13 +137,17 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
         #          in order to adjust for a final u-axis that doesn't pass
         #          exactly through zero
         if p2_post_discrepancy is not None:
-            assert self.get_ft_prop(axes[j],['time','not','aliased']),("in order to"
-                " shift by a time that is not integral w.r.t. the dwell time, you need"
-                " to be sure that the time-domain spectrum is not aliased.  This"
-                " is typically achieved by starting from a time domain spectrum and"
-                " generating the frequency domain by an FT.  If you **know** by other"
-                " means that the time-domain spectrum is not aliased, you can also"
-                " set the `time_not_aliased` FT property to `True`")
+            asrt_msg = r"""You are trying to shift the time axis by (%d+%g) du (%g).
+
+            In order to shift by a time that is not
+            integral w.r.t. the dwell time, you need to be sure
+            that the time-domain spectrum is not aliased.
+            This is typically achieved by starting from a time domain spectrum and
+            generating the frequency domain by an FT.
+            If you **know** by other means that the time-domain spectrum
+            is not aliased, you can also set the `time_not_aliased` FT property
+            to `True`."""%(p2_post, p2_post_discrepancy, du)
+            assert self.get_ft_prop(axes[j],['time','not','aliased']),(asrt_msg)
             assert abs(p2_post_discrepancy)<abs(dv),("I expect the discrepancy to be"
                     " smaller than dv ({:0.2f}), but it's {:0.2f} -- what's going"
                     " on??").format(dv,p2_post_discrepancy)

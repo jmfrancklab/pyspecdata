@@ -92,7 +92,7 @@ History/Roadmap
 
       added ``to_ppm`` function for Bruker files
 
-    - **0.9.5.1.4**
+    - 0.9.5.1.4
       Improved internal logging, and started to remove gratuitous dependencies,
       ``%load_ext pyspecdata.ipy`` includes
       ``%pylab inline``, so that only
@@ -102,6 +102,14 @@ History/Roadmap
             %load_ext pyspecdata.ipy
 
         is required for jupyter.
+  
+    - **0.9.5.1.6**
+      - Removed several legacy modules, and added docstrings for the remaining modules.
+      - Begin phasing out earlier `CustomError` class.
+      - Make `numpy` pretty printing available from the `general_functions` module.
+      - Add xelatex support to the notebook wrapper.
+      - Start to move file search routines away from demanding a single "data directory."
+      - Improved support for 2D Bruker XEPR
 
     - 0.9.5.1.7
       ``to_ppm`` should only be a method of inherited class
