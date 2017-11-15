@@ -3,31 +3,40 @@ from pylab import *
 from .ft_shift import _find_index,thinkaboutit_message
 
 def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
-    ("This performs a fourier transform along the axes identified by the string"
-    " or list of strings `axes`.\n"
-    "It adjusts normalization and units so that the result conforms to\n\t"
-    r"$$s(t)=\int_{x_min}^{x_max} \tilde{s}(t) e^{i 2 \pi f t} df$$"+'\n'
-    "   Note that while the analytical integral this corresponds to is "
-    "normalized, performing .ft() followed by .ift() on a discrete sequence is "
-    "NOT completely invertible (due to integration of the implied comb "
-    "function??), and would require division by a factor of $\Delta f$ (the "
-    "spectral width) in order to retrieve the original function\n"
-    "\tpre-IFT, we use the axis to cyclically permute $f=0$ to the first "
-    "index\n"
-    "\t post-IFT, we assume that the data has previously been FT'd\n"
-    "\t\tIf this is the case, passing `shift`=True will cause an error\n"
-    "\t\tIf this is not the case, passing `shift`=True generates a standard ifftshift\n"
-    "\t\t`shift`=None will choose True, if and only if this is not the case\n"
-    "\t`pad` specifies a zero-filling.  If it's a number, then it gives the"
-    " length of the zero-filled dimension.  If it is just `True`, then the size"
-    " of the dimension is determined by rounding the dimension size up to the"
-    " nearest integral power of 2."
-    "\tIt uses the `start_time` ft property to determine the start of the axis.  To"
-    " do this, it assumes that it is a stationary signal (convolved with infinite comb"
-    " function).  The value of `start_time` can differ from by a non-integral multiple"
-    " of $\Delta t$, though the routine will check whether or not it is safe to do"
-    " this."
-    )
+    r"""This performs a Fourier transform along the axes identified by the string or list of strings `axes`.
+
+    It adjusts normalization and units so that the result conforms to
+            :math:`s(t)=\int_{x_min}^{x_max} \tilde{s}(t) e^{i 2 \pi f t} df`
+    Note that while the analytical integral this corresponds to is normalized, performing :func:`ft` followed by :func:`ift` on a discrete sequence is NOT completely invertible
+    (due to integration of the implied comb function??),
+    and would require division by a factor of $\Delta f$ (the spectral width) in order
+    to retrieve the original function
+
+    **pre-IFT**, we use the axis to cyclically permute $f=0$ to the first index
+
+    **post-IFT**, we assume that the data has previously been FT'd
+    If this is the case, passing ``shift=True`` will cause an error
+    If this is not the case, passing ``shift=True`` generates a standard ifftshift
+    ``shift=None`` will choose True, if and only if this is not the case
+
+    Parameters
+    ----------
+    pad : int or boolean
+        `pad` specifies a zero-filling.  If it's a number, then it gives
+        the length of the zero-filled dimension.  If it is just `True`,
+        then the size of the dimension is determined by rounding the
+        dimension size up to the nearest integral power of 2.   It uses the
+        `start_time` ft property to determine the start of the axis.  To
+        do this, it assumes that it is a stationary signal
+        (convolved with infinite comb function).
+        The value of `start_time` can differ from by a non-integral multiple of
+        :math:`\Delta t`, though the routine will check whether or not it is safe to
+        do this.
+
+        ..note ::
+            In the code, this is controlled by `p2_post` (the integral
+            :math:`\Delta t` and `p2_post_discrepancy` -- the non-integral.
+    """
     if verbose: print "check 1",self.data.dtype
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
@@ -129,13 +138,17 @@ def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
         #          in order to adjust for a final u-axis that doesn't pass
         #          exactly through zero
         if p2_post_discrepancy is not None:
-            assert self.get_ft_prop(axes[j],['freq','not','aliased']),("in order to"
-                " shift by a frequency that is not integral w.r.t. the frequency resolution step, you need"
-                " to be sure that the frequency-domain spectrum is not aliased.  This"
-                " is typically achieved by starting from a time domain spectrum and"
-                " generating the frequency domain by an FT.  If you **know** by other"
-                " means that the frequency-domain spectrum is not aliased, you can also"
-                " set the `freq_not_aliased` FT property to `True`")
+            asrt_msg = r"""You are trying to shift the time axis by (%d+%g) du (%g).
+
+            In order to shift by a frequency that is not
+            integral w.r.t. the frequency resolution step, you need to be sure
+            that the frequency-domain spectrum is not aliased.
+            This is typically achieved by starting from a time domain spectrum and
+            generating the frequency domain by an FT.
+            If you **know** by other means that the frequency-domain spectrum
+            is not aliased, you can also set the `freq_not_aliased` FT property
+            to `True`."""%(p2_post, p2_post_discrepancy, du)
+            assert self.get_ft_prop(axes[j],['freq','not','aliased']),(asrt_msg)
             assert abs(p2_post_discrepancy)<abs(dv),("I expect the discrepancy to be"
                     " smaller than dv ({:0.2f}), but it's {:0.2f} -- what's going"
                     " on??").format(dv,p2_post_discrepancy)

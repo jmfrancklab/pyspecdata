@@ -1,4 +1,18 @@
-"the file-loading subroutines are stored here"
+r"""This subpackage holds all the routines for reading raw data in proprietary formats.
+It's intended to be accessed entirely through the function :func:`find_file`,
+which uses :module:`datadir` to search for the filename, then automatically identifies
+the file type and calls the appropriate module to load the data into an nddata.
+
+Currently, Bruker file formats (both ESR and NMR) are supported, as well as
+(at least some earlier iteration) of Magritek file formats.
+
+Users/developers are very strongly encouraged to add support for new file types.
+
+.. currentmodule:: pyspecdata.load_files
+
+.. autofunction:: find_file
+
+"""
 from . import bruker_nmr
 from . import prospa
 from . import bruker_esr
@@ -20,23 +34,9 @@ def _dirformat(file):
         #}}}
         return file
 #}}}
-def find_file(searchstring,
-            exp_type = None,
-            postproc = None,
-            print_result = True,
-            verbose = False,
-            prefilter = None,
-            expno = None,
-            dimname='', return_acq=False,
-            add_sizes=[], add_dims=[], use_sweep=None,
-            indirect_dimlabels=None,
-            **kwargs):
-    r'''Find the file  given by the regular expression `searchstring` inside the directory identified by `exp_type`, load the nddata object, and postprocess with the function `postproc`.
-
-    It looks at the top level of the directory first, and if that fails, starts to look recursively.
-    Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
-
-    It calls `load_indiv_file`, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.
+def search_filename(searchstring,exp_type,
+        print_result=True):
+    r"""Use regular expression `searchstring` to find a file inside the directory indicated by `exp_type`
 
     Parameters
     ----------
@@ -47,58 +47,12 @@ def find_file(searchstring,
         More generally, it is a regular expression,
         where ``.*searchstring.*`` matches a filename inside the
         directory appropriate for `exp_type`.
-    expno : int
-        For Bruker files, *etc.*, where the files are stored in numbered
-        subdirectories,
-        give the number of the subdirectory that you want.
-        If this is not given, it assumes that the name you give is the name
-        of a file, rather than a directory.
-        If it finds multiple files that match the regular expression,
-        it will try to load this experiment number from all the directories.
     exp_type : str
         Since the function assumes that you have different types of
         experiments sorted into different directories, this argument
-        specifies the type of experiment see :func:`getDATADIR` for
+        specifies the type of experiment see :func:`~pyspecdata.datadir.getDATADIR` for
         more info.
-    postproc : function, str, or None
-        This function is fed the nddata data and the remaining keyword
-        arguments (`kwargs`) as arguments.
-        It's assumed that each module for each different file type
-        provides a dictionary called `postproc_lookup`.
-        If `postproc` is a string,
-        it looks up the string inside the `postproc_lookup`
-        dictionary that's appropriate for the file type.
-        If `postproc` is None,
-        it checks to see if the any of the loading functions that were
-        called set the `postproc_type` property
-        -- *i.e.* it checks the value of
-        ``data.get_prop('postproc_type')`` --
-        if this is set, it uses this as a key
-        to pull the corresponding value from `postproc_lookup`.
-
-        For instance, when the acert module loads an ACERT HDF5 file,
-        it sets `postproc_type` to the value of
-        ``(h5 root).experiment.description['class']``.
-        This, in turn, is used to choose the type of post-processing.
-        dimname:
-            passed to :func:`load_indiv_file`
-        return_acq:
-            passed to :func:`load_indiv_file`
-        add_sizes:
-            passed to :func:`load_indiv_file`
-        add_dims:
-            passed to :func:`load_indiv_file`
-        use_sweep:
-            passed to :func:`load_indiv_file`
-        indirect_dimlabels:
-            passed to :func:`load_indiv_file`
-        '''
-    logger.info(strm("find_file sees indirect_dimlabels",
-        indirect_dimlabels))
-    # {{{ legacy warning
-    if 'subdirectory' in kwargs.keys():
-        raise ValueError("The `subdirectory` keyword argument is not longer valid -- use `exp_type` instead!")
-    # }}}
+    """
     #{{{ actually find the files
     directory = getDATADIR(exp_type=exp_type)
     def look_inside(inp_directory):
@@ -121,13 +75,98 @@ def find_file(searchstring,
         raise IOError(("I can't find a file matching the regular expression {0:s} in {1:s}"+exptype_msg).format(searchstring,directory))
     else:
         if len(files) > 1:
-            warnings.warn('found multiple files:\n'+'\n\t'.join(files)+'\nand opening last')
-        elif print_result and verbose:
-            obsn("found only one file, and loading it:"+repr(files))
+            basenames,exts = map(set,zip(*[j.rsplit('.',1) for j in files if len(j.rsplit('.',1))>1]))
+            if len(basenames) == 1 and len(exts) == len(files):
+                pass
+            else:
+                warnings.warn('found multiple files:\n'+'\n\t'.join(files)+'\nand opening last')
+        elif print_result:
+            logger.info("found only one file, and loading it:"+repr(files))
     #}}}
+    return [directory+j for j in files]
+
+def find_file(searchstring,
+            exp_type = None,
+            postproc = None,
+            print_result = True,
+            verbose = False,
+            prefilter = None,
+            expno = None,
+            dimname='', return_acq=False,
+            add_sizes=[], add_dims=[], use_sweep=None,
+            indirect_dimlabels=None,
+            **kwargs):
+    r'''Find the file  given by the regular expression `searchstring` inside the directory identified by `exp_type`, load the nddata object, and postprocess with the function `postproc`.
+
+    It looks at the top level of the directory first, and if that fails, starts to look recursively.
+    Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
+
+    It calls :func:`~pyspecdata.load_files.load_indiv_file`, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.
+
+    Parameters
+    ----------
+    searchstring : str
+        Most commonly, this is just a fragment of the file name,
+        with any literal ``*``, ``.``, or ``?`` characters preceded by
+        a backslash.
+        More generally, it is a regular expression,
+        where ``.*searchstring.*`` matches a filename inside the
+        directory appropriate for `exp_type`.
+    expno : int
+        For Bruker files, *etc.*, where the files are stored in numbered
+        subdirectories,
+        give the number of the subdirectory that you want.
+        If this is not given, it assumes that the name you give is the name
+        of a file, rather than a directory.
+        If it finds multiple files that match the regular expression,
+        it will try to load this experiment number from all the directories.
+    exp_type : str
+        Since the function assumes that you have different types of
+        experiments sorted into different directories, this argument
+        specifies the type of experiment see :func:`~pyspecdata.datadir.getDATADIR` for
+        more info.
+    postproc : function, str, or None
+        This function is fed the nddata data and the remaining keyword
+        arguments (`kwargs`) as arguments.
+        It's assumed that each module for each different file type
+        provides a dictionary called `postproc_lookup`.
+        If `postproc` is a string,
+        it looks up the string inside the `postproc_lookup`
+        dictionary that's appropriate for the file type.
+        If `postproc` is None,
+        it checks to see if the any of the loading functions that were
+        called set the `postproc_type` property
+        -- *i.e.* it checks the value of
+        ``data.get_prop('postproc_type')`` --
+        if this is set, it uses this as a key
+        to pull the corresponding value from `postproc_lookup`.
+
+        For instance, when the acert module loads an ACERT HDF5 file,
+        it sets `postproc_type` to the value of
+        ``(h5 root).experiment.description['class']``.
+        This, in turn, is used to choose the type of post-processing.
+
+        :dimname:
+            passed to :func:`~pyspecdata.load_files.load_indiv_file`
+
+        :return_acq:
+            passed to :func:`~pyspecdata.load_files.load_indiv_file`
+
+        :add_sizes: passed to :func:`~pyspecdata.load_files.load_indiv_file`
+        :add_dims: passed to :func:`~pyspecdata.load_files.load_indiv_file`
+        :use_sweep: passed to :func:`~pyspecdata.load_files.load_indiv_file`
+        :indirect_dimlabels: passed to :func:`~pyspecdata.load_files.load_indiv_file`
+        '''
+    logger.info(strm("find_file sees indirect_dimlabels",
+        indirect_dimlabels))
+    # {{{ legacy warning
+    if 'subdirectory' in kwargs.keys():
+        raise ValueError("The `subdirectory` keyword argument is not longer valid -- use `exp_type` instead!")
+    # }}}
+    files = search_filename(searchstring, exp_type, print_result=print_result)
     data = None
     while data is None and len(files) > 0:
-        filename = directory + files.pop(-1)
+        filename = files.pop(-1)
         if expno is not None:
             filename = os.path.join(filename,str(expno))
         # {{{ file loaded here
@@ -280,7 +319,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
     ----------
     dimname : str
         When there is a single indirect dimension composed of several scans,
-        call it this.
+        call the indirect dimension `dimname`.
     return_acq : DEPRECATED
     add_sizes : list
         the sizes associated with the dimensions in add_dims
@@ -390,6 +429,9 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             elif type_by_extension == 'DTA':
                 logger.info(strm("skipping DTA file",filename))
                 return None # ignore DTA and load the reading to the DSC file
+            elif type_by_extension == 'YGF':
+                logger.info(strm("skipping YGA file",filename))
+                return None # ignore YGA and load the reading to the DSC file
             else:
                 raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
     # }}}
@@ -404,6 +446,14 @@ def load_indiv_file(filename, dimname='', return_acq=False,
     if return_acq:
         raise ValueError('return_acq is deprecated!! All properties are now set directly to the nddata using the set_prop function')
     logger.debug("done with load_indiv_file")
+    if '' in data.dimlabels:
+        if ndshape(data)[''] < 2:
+            data = data['',0]
+        else:
+            if 'indirect' in data.dimlabels:
+                raise ValueError("Was going to rename unnamed dimension 'indirect', but there's already one called that!")
+            else:
+                data.rename('','indirect')
     return data
     #}}}
 def load_acqu(filename,whichdim='',return_s = None):
@@ -449,6 +499,7 @@ def det_type(file,**kwargs):
     raise RuntimeError("det_type is deprecated, and should be handled by the file magic inside load_indiv_file.  THE ONE EXCEPTION to this is the fact that det_type would return a second argument that allowed you to classify different types of prospa files.  This is not handled currently")
 
 __all__ = ['find_file',
+        'search_filename',
         'load_indiv_file',
         'format_listofexps',
         'bruker_nmr',

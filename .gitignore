@@ -1,7 +1,9 @@
 .scf
 *.egg-info
 *.pyc
+_build/
 build/
+doc/auto_api/
 dist/
 *.pyd
 .*.swp

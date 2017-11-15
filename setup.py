@@ -16,11 +16,12 @@ try:
 except:
     raise RuntimeError(general_error.format('matplotlib'))
 ext_modules = []
+execfile('pyspecdata/version.py')
 
 setup(
     name='pySpecData',
     author='J. M. Franck',
-    version='0.9.5.1.4',
+    version=__version__,
     packages=setuptools.find_packages(exclude=['paramset_pyspecdata',]),
     license='LICENSE.md',
     author_email='jmfranck@notgiven.com',

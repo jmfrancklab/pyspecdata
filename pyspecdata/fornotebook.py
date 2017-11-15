@@ -1,3 +1,9 @@
+r'''This provides :class:`figlistl`, the Latex figure list.
+Any other functions here are helper functions for the class.
+:class:`figlist` is generally **not chosen manually**,
+but ``figlist_var`` will be assigned to :class:`figlistl` when
+python code is embedded in a python environment inside latex.
+'''
 import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from .core import *
@@ -377,6 +383,8 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
     fname = fname.replace('*','_star_')
     fname = fname.replace(':','')
     fname = fname.replace('^','')
+    fname = fname.replace('}','')
+    fname = fname.replace('{','')
     fname = r'auto_figures/'+fname
     if alsosave != None:
         alsosave = r'auto_figures/'+alsosave

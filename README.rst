@@ -204,6 +204,12 @@ To get started with this code:
 
    * On Windows or MacOS: in the Anaconda Prompt, run ``conda install numpy scipy sympy pyqt pytables matplotlib h5py``.
 
+   * For Mac, you can also use homebrew.
+     Note that, in the current version python is renamed to `python2`,
+     and `pip` to `pip2`.
+     Most packages can just be installed with `pip2` under homebrew.
+     If you want HDF5 functionality, you will need to run `brew tap homebrew/science` followed by `brew install hdf5`.
+
    * On Linux, just use your package manager (``aptitude``, ``yum``, *etc.*) to install these libraries.
 
 3. Install `pyspecdata`: ``pip install pyspecdata``

@@ -11,7 +11,7 @@ def xepr(filename, dimname='', verbose=False):
     Parameters
     ----------
     filename : str
-        The filename that ends with either ``.dsc`` or ``.dta``.
+        The filename that ends with ``.DSC``, ``.DTA``, or ``.YGF``.
     """
     # {{{ determine the pair of filenames that we need
     filename = filename[:-4]+filename[-4:].upper()# case insensitive extension
@@ -19,6 +19,8 @@ def xepr(filename, dimname='', verbose=False):
         filename_spc,filename_par = filename,filename.replace('.DTA','.DSC')
     elif filename[-4:] == '.DSC':
         filename_spc,filename_par = filename.replace('.DSC','.DTA'),filename
+    elif filename[-4:] == '.YGF':
+        filename_spc,filename_par = filename.replace('.YGF','.DSC'),filename.replace('.YGF','.DTA')
     else:
         raise ValueError(strm("When guessing that the filename is a"
                 " WinEPR file, the extension must be either .SPC or"
@@ -155,6 +157,7 @@ def xepr(filename, dimname='', verbose=False):
     if 'Microwave Power' in data.dimlabels:
         # convert from W to dBm
         data.setaxis('Microwave Power',lambda x: 10*log10(x)).set_units('Microwave Power','dBm')
+    if data.get_units(b0_texstr) == 's': data.rename(b0_texstr,'t')
     return data
 def winepr(filename, dimname=''):
     """For opening WinEPR files.

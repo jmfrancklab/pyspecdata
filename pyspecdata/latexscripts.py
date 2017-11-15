@@ -1,3 +1,9 @@
+r'''Provides the ``pdflatex_notebook_wrapper`` shell/dos command, which you run
+instead of your normal Latex command to build a lab notebook.
+The results of python environments are **cached** and **only re-run if the code changes**,
+even if the python environments are moved around.
+This makes the compilation of a Latex lab notebook extremely efficient.
+'''
 from .datadir import get_notebook_dir,getDATADIR
 import os.path
 import hashlib
@@ -75,12 +81,27 @@ def wraplatex():
     proc_args = list(sys.argv)
     if '--xelatex' in proc_args:
         proc_args.pop(proc_args.index('--xelatex'))
-        os.system(' '.join(['xelatex']+proc_args[1:]))
+        use_xelatex = True
     else:
-        os.system(' '.join(['pdflatex']+proc_args[1:]))
+        use_xelatex = False
     print "about to update the python script outputs...."
-    os.system('update_notebook_pythonscripts')
     orig_tex_basename,new_pdf_basename = det_new_pdf_name(proc_args)
+    with open(orig_tex_basename+'.tex','r') as fp:
+        thisline = fp.readline()
+        while thisline.startswith('%!'):# in case we want to allow multiple directives
+            if 'xelatex' in thisline:
+                use_xelatex = True
+            elif 'pdflatex' in thisline:
+                use_xelatex = False
+            thisline = fp.readline()
+    if use_xelatex:
+        shellcmd = ' '.join(['xelatex']+proc_args[1:])
+    else:
+        shellcmd = ' '.join(['pdflatex']+proc_args[1:])
+    print "executing:",shellcmd
+    os.system(shellcmd)
+    print "executing:",'update_notebook_pythonscripts'
+    os.system('update_notebook_pythonscripts')
     if orig_tex_basename != new_pdf_basename:
         print "preparing to:",'cp '+orig_tex_basename+'.pdf '+new_pdf_basename+'.pdf'
         os.system('cp '+orig_tex_basename+'.pdf '+new_pdf_basename+'.pdf')
