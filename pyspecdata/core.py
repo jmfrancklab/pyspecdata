@@ -5303,10 +5303,6 @@ class nddata (object):
         if lefterror is not None:
             lefterror[tuple(leftindex)] = righterrors.squeeze()
     # {{{ standard trig functions
-    #def exp(self):
-    #    retval = self.copy()
-    #    retval.data = exp(retval.data)
-    #    return retval
     def __getattr__(self,arg):
         fundict = {'exp':exp,
                 'sin':sin,

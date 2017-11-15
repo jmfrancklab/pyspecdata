@@ -104,12 +104,20 @@ History/Roadmap
         is required for jupyter.
   
     - **0.9.5.1.6**
-      - Removed several legacy modules, and added docstrings for the remaining modules.
-      - Begin phasing out earlier `CustomError` class.
-      - Make `numpy` pretty printing available from the `general_functions` module.
-      - Add xelatex support to the notebook wrapper.
-      - Start to move file search routines away from demanding a single "data directory."
-      - Improved support for 2D Bruker XEPR
+
+        - Removed several legacy modules, and added docstrings for the remaining modules.
+
+        - Begin phasing out earlier `CustomError` class.
+
+        - Make `numpy` pretty printing available from the `general_functions` module.
+
+        - Add xelatex support to the notebook wrapper.
+
+        - Start to move file search routines away from demanding a single "data directory."
+
+        - Improved support for 2D Bruker XEPR
+
+        - Made it possible to call standard trig functions with `nddata` as an argument.
 
     - 0.9.5.1.7
       ``to_ppm`` should only be a method of inherited class
