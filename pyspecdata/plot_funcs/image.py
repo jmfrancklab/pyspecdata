@@ -96,7 +96,11 @@ def image(A,x=[],y=[],**kwargs):
         A = concatenate((A,nan*zeros(tempsize)),axis=(A.ndim-2)) # concatenate along the rows
         tempsize = r_[A.shape[0:-3],A.shape[-2:]]
         tempsize[-2] *= A.shape[-3]
-        A = A.reshape(tempsize) # now join them up
+        try:
+            A = A.reshape(int64(tempsize)) # now join them up
+        except:
+            raise IndexError(strm("problem with tempsize",tempsize,
+                "of type",type(tempsize),"dtype",tempsize.dtype))
     A = A[:A.shape[0]-linecounter,:] # really I should an extra counter besides linecounter now that I am using "spacing", but leave alone for now, to be sure I don't cute off data
     if origin == 'flip':
         # {{{ if origin is "flip", we need to manually flip the data
