@@ -1002,7 +1002,7 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
         if h5path[0] in listdir(directory):
             if verbose: print 'DEBUG: file exists\n\n'
         else:
-            if check_only: raise AttributeError("You're checking for a node in a file that does not exist")
+            if check_only: raise AttributeError("You're checking for a node in a file (%s) that does not exist"%h5path[0])
             if verbose: print 'DEBUG: file does not exist\n\n'
         mode = 'a'
         #if check_only: mode = 'r'
@@ -2678,7 +2678,7 @@ class nddata (object):
             if len(args) == 2:
                 if len(args[0].shape) == 1 and type(args[1]) is str:
                     self.__my_init__(args[0],[len(args[0])],[args[1]])
-                    self.labels(args[1],args[0])
+                    self.labels(args[1],args[0].copy())# needs to be a copy, or when we write data, we will change the axis
                 elif all([type(j) is str for j in args[1]]):
                     self.__my_init__(args[0],
                             list(args[0].shape),args[1])
@@ -5323,6 +5323,13 @@ class nddata (object):
             retval = getattr(super(nddata,self),arg)
             return retval
     @property
+    def C(self):
+        "shortcut for copy"
+        return self.copy()
+    @C.setter
+    def C(self):
+        raise ValueError("You can't set the C property -- it's used to generate a copy")
+    @property
     def angle(self):
         "Return the angle component of the data"
         retval = self.copy(data=False)
@@ -5848,7 +5855,16 @@ class nddata_hdf5 (nddata):
 class ndshape (ndshape_base):
     r'''The ndshape class, including the allocation method''' 
     def alloc(self,dtype='complex128',labels = False,format = 0):
-        r'Use the shape object to allocate an empty nddata object.'
+        r'''Use the shape object to allocate an empty nddata object.
+
+        Parameters
+        ----------
+        labels : 
+            Needs documentation
+        format : 0, 1, or None
+            What goes in the allocated array.
+            `None` uses numpy empty.
+        '''
         try:
             if format == 0:
                 try:
