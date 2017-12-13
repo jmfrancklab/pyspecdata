@@ -16,9 +16,15 @@ Numpy allows you to create multi-dimensional arrays of data.
 The nddata class labels the dimensions (with a short text identifier)
 and allows you to associate
 axes, units, and errors with the data.
-These are carried along with the nddata object,
-and *are correctly transformed* when you perform arithmetic operations.
-Having dimension labels also makes many common tasks easier.
+These attributes
+*are correctly transformed* when you perform arithmetic operations
+or Fourier transforms,
+and are used to automatically format plots.
+
+Below, we outline how you can use
+dimension labels to make code more legible and make many common tasks easier.
+Then, we note how slicing operations are different (and easier) for nddata than for standard numpy arrays.
+Finally, we outline several classes of methods by sub-topic.
 
 Dimension labels
 ----------------
@@ -32,7 +38,8 @@ When you do arithmetic with two arrays,
 pyspecdata will first reshape the arrays
 so that dimensions with the same names are aligned with each other.
 Furthermore,
-if a dimension is present in one array of an arithmetic operation,
+during an arithmetic operation,
+if a dimension is present in one array
 but not the other,
 pyspecdata will simply tile the smaller array along the missing dimension(s).
 
@@ -67,19 +74,21 @@ and
 which are arrays of data organized along two *different* dimensions.
 
 You can refer to a time dimension, such as `t1`, `t_1`, `t_direct`, *etc.*
-    as `f1`, `f_1`, *etc.* in order to retrieve the Fourier transform.
+as `f1`, `f_1`, *etc.* in order to retrieve the Fourier transform.
 You can set the pairs ...
 
 .. note::
     error propagation for trig functions doesn't yet work;
     t--f not yet done
 
-Item selection
---------------
+Item selection and slicing
+--------------------------
 
-Pyspecdata offers several types of nddata item selection,
-which are outlined below.
-A series of these can be combined in a single square bracket, in the usual way.
+Pyspecdata offers several different synataxes 
+for item selection and slicing
+that can be used to select subsets of the data,
+and which are outlined below.
+These can be combined in a single square bracket, separated by commas.
 
 Numpy Index Slicing
 ~~~~~~~~~~~~~~~~~~~
@@ -117,6 +126,10 @@ You can use functions that return logical values to select
 
 >>> d['t2',lambda x: abs(x-2)<5]
 
+When this is done, nddata will check to see if slices along any dimension are uniformly missing.
+If they are, the dataset will be trimmed to remove them.
+
+When the deselected data are scattered throughout, a mask is used instead.
 
 Fourier domain
 ~~~~~~~~~~~~~~
@@ -125,8 +138,21 @@ Fourier domain
 
 switches to the frequency dimension (shift by default -- shift should be a property)
 
-Sub-Topics
-----------
+Methods by Sub-Topic
+--------------------
+
+It's important to note that, in contrast to standard numpy,
+    nddata routines are designed to be called as methods,
+    rather than independent functions.
+Also, these methods **modify the data in-place** rather than returning a copy.
+For example, after executing
+``d.ft('t2')``, the object ``d`` will contain the *Fourier transformed* data.
+There is not need to assign the result to a new variable.
+Alternatively, the property ``C`` offers easy access to a copy:
+``a = d.C.ft('t2')`` leaves ``d`` alone, and returns the FT as a new object
+called ``a``.
+
+This encourages a style where methods are chained together, *e.g.* ``d.ft('t2').mean('t1')``.
 
 A selection of the methods noted below are broken down by sub-topic.
 
