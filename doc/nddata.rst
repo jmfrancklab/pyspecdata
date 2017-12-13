@@ -77,9 +77,9 @@ You can refer to a time dimension, such as `t1`, `t_1`, `t_direct`, *etc.*
 as `f1`, `f_1`, *etc.* in order to retrieve the Fourier transform.
 You can set the pairs ...
 
-.. note::
+.. warning::
     error propagation for trig functions doesn't yet work;
-    t--f not yet done
+    automatic t *vs.* f naming not yet implemented.
 
 Item selection and slicing
 --------------------------
@@ -133,6 +133,9 @@ When the deselected data are scattered throughout, a mask is used instead.
 
 Fourier domain
 ~~~~~~~~~~~~~~
+
+.. warning::
+    this feature is planned, not yet implemented.
 
 >>> d['f2':(-1e6,1e6)]
 
