@@ -5311,6 +5311,8 @@ class nddata (object):
                 'sinh':sinh,
                 'cosh':cosh,
                 'tanh':tanh,
+                'log':log,
+                'log10':log10,
                 }
         if arg in fundict.keys():
             argf = fundict[arg]
