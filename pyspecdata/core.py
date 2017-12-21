@@ -3697,6 +3697,7 @@ class nddata (object):
                             "shape of argout is now len:%d"%len(argout.data.shape),
                             argout.data.shape,"while the dimlabels is len:%d"%len(
                                 argout.dimlabels),argout.dimlabels)
+        argshape = int64(argshape) # need to explicitly convert for newer versions of numpy
         # }}}
         # }}}
         # {{{ transpose arg to match newshape
