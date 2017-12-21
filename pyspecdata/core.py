@@ -3684,7 +3684,7 @@ class nddata (object):
         new_arg_labels = [x for x in newdims if x in
                 arg.dimlabels] #  only the labels valid for arg, ordered
         #                         as they are in newdims
-        argshape = list(ones(len(newdims)))
+        argshape = list(ones(len(newdims), dtype=int64))# should be a better solution
         if verbose: print "DEBUG 2: shape of self",ndshape(self),"self data shape",self.data.shape,"shape of arg",ndshape(arg),"arg data shape",arg.data.shape
         if verbose: print "DEBUG 3: shape of selfout",ndshape(selfout),"selfout data shape",selfout.data.shape,"shape of argout",ndshape(argout),"argout data shape",argout.data.shape
         #{{{ wherever the dimension already exists in arg, pull the shape from arg
@@ -3697,7 +3697,6 @@ class nddata (object):
                             "shape of argout is now len:%d"%len(argout.data.shape),
                             argout.data.shape,"while the dimlabels is len:%d"%len(
                                 argout.dimlabels),argout.dimlabels)
-        argshape = int64(argshape) # need to explicitly convert for newer versions of numpy
         # }}}
         # }}}
         # {{{ transpose arg to match newshape
