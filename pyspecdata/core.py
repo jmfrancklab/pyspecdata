@@ -3707,6 +3707,7 @@ class nddata (object):
         #          to its new shape
         selfout.dimlabels = newdims
         try:
+            argshape = int64(argshape)
             argout.data = argout.data.transpose(argorder
                     ).reshape(argshape) # and reshape the data
         except ValueError,Argument:
@@ -5642,6 +5643,24 @@ class nddata (object):
     #}}}
     #{{{ hdf5 write
     def hdf5_write(self, h5path, directory='.', verbose=False):
+        r"""Write the nddata to an HDF5 file.
+
+        `h5path` is the name of the file followed by the node path where
+        you want to put it -- it does **not** include the directory where
+        the file lives.
+        The directory can be passed to the `directory` argument.
+        
+        Parameters
+        ----------
+        h5path : str
+            The name of the file followed by the node path where
+            you want to put it -- it does **not** include the directory where
+            the file lives.
+            (Because HDF5 files contain an internal directory-like group
+            structure.)
+        directory : str
+            the directory where the HDF5 file lives.
+        """
         #{{{ add the final node based on the name stored in the nddata structure
         if h5path[-1] != '/': h5path += '/' # make sure it ends in a slash first
         try:
