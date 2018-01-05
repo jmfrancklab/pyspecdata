@@ -2611,67 +2611,51 @@ def concat(datalist,dimname,chop = False,verbose = False):
     return newdatalist
 #}}}
 class nddata (object):
+    """This is the detailed API reference.
+    For an introduction on how to use ND-Data, see the :ref:`Main ND-Data Documentation <nddata-summary-label>`.
+    """
     want_to_prospa_decim_correct = False
     def __init__(self, *args, **kwargs):
         """initialize nddata -- several options.
-        Can be done with several sizes of arguments:
+        Depending on the information available, one of several formats can be used.
 
-        3 arguments::
-            nddata(inputarray, shape, dimlabels)::
+        3 arguments:
+            ``nddata(inputarray, shape, dimlabels)``
 
-                :inputarray:
+            :inputarray:
+                ndarray storing the data -- note that the size is ignored
+                and the data is reshaped as needed
+            :shape:
+                a list (or array, *etc.*) giving the size of each dimension, in order
+            :dimlabels:
+                a list giving the names of each dimension, in order
+        2 arguments:
+            ``nddata(inputarray, dimlabels)``
 
-                    ndarray storing the data -- note that the size is ignored
-                    and the data is reshaped as needed
+            :inputarray:
+                ndarray storing the data -- the data is *not* reshaped
+            :dimlabels:
+                a list giving the names of each dimension, in order
+        2 arguments:
+            ``nddata(inputarray, single_dimlabel)``
 
-                :shape:
+            :inputarray:
+                ndarray storing the data -- must be 1D  
+                inputarray is *also* used to label the single axis
+            :single_dimlabel:
+                a list giving the name of the single axis
+        1 argument:
+            ``nddata(inputarray, shape, dimlabels)``
 
-                    a list (or array, *etc.*) giving the size of each dimension, in order
-
-                :dimlabels:
-
-                    a list giving the names of each dimension, in order
-
-        2 arguments::
-            nddata(inputarray, dimlabels)::
-
-                :inputarray:
-
-                    ndarray storing the data -- the data is *not* reshaped
-
-                :dimlabels:
-
-                    a list giving the names of each dimension, in order
-
-        2 arguments::
-            nddata(inputarray, single_dimlabel)::
-
-                :inputarray:
-
-                    ndarray storing the data -- must be 1D
-
-                    inputarray is *also* used to label the single axis
-
-                :single_dimlabel:
-
-                    a list giving the name of the single axis
-        1 argument::
-            nddata(inputarray, shape, dimlabels)::
-
-                :inputarray:
-
-                    ndarray storing the data -- reduced to 1D
-
-                    A single dimension, called "INDEX" is set.
-                    This suppresses the printing of axis labels.
-
-                    This is used to store numbers and arrays
-                    that might have error and units,
-                    but aren't gridded data.
-
-
-        keyword arguments::
-            these can be used to set the labels, etc, and are passed to `__my_init__`
+            :inputarray:
+                ndarray storing the data -- reduced to 1D  
+                A single dimension, called "INDEX" is set.
+                This suppresses the printing of axis labels.  
+                This is used to store numbers and arrays
+                that might have error and units,
+                but aren't gridded data.
+        keyword args
+            these can be used to set the labels, etc, and are passed to :func:`__my_init__`
 
         """
         if len(args) > 1:
