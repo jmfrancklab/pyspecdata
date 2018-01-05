@@ -10,6 +10,7 @@ import hashlib
 import numpy
 import sys
 import time
+import platform
 from shutil import copy2 as sh_copy2
 from subprocess import Popen,PIPE,check_output
 haswatchdog = False
@@ -65,6 +66,26 @@ def det_new_pdf_name(thisargv):
     else:
         new_pdf_basename = tex_basename[0]
     return orig_tex_basename,new_pdf_basename
+def genconfig():
+    '''creates a template configuration directory'''
+    if platform.platform().startswith('Windows'):
+        hide_start = '_' # the default hidden/config starter for vim, mingw applications, etc
+    else:
+        hide_start = '.'
+    with open(os.path.join(os.path.expanduser('~'),hide_start+'pyspecdata'),'w') as fp:
+        fp.write('[General]\n')
+        fp.write('# replace the following with your default data location (this is just a suggestion)\n')
+        possible_data = [x for x in next(os.walk(os.path.expanduser('~')))[1] if 'data' in x.lower() and 'app' not in x.lower()]
+        fp.write('data_directory = ')
+        if len(possible_data) > 0:
+            fp.write(os.path.join(os.path.expanduser('~'),possible_data[0])+'\n')
+        else:
+            fp.write(os.path.join(os.path.expanduser('~'),'???')+'\n')
+        fp.write('\n')
+        fp.write('[ExpTypes]\n')
+        fp.write('# in this section, you can place specific subdirectories (for faster access, or if they live elsewhere\n') 
+        print "now edit "+hide_start+"pyspecdata in your home directory"
+
 def wraplatex():
     '''runs the python scripts after running latex also creates a copy of latex without the final portion under the underscore
     This prevents the viewer from hanging while it's waiting for a refresh.
