@@ -21,6 +21,16 @@ These attributes
 or Fourier transforms,
 and are used to automatically format plots.
 
+Note that, if all else fails,
+you can always use numpy directly:
+*The `data` attribute of an nddata object is just a standard numpy array.*
+For example, if you have an nddata object called ``mydata``,
+then ``mydata.data`` is just a **standard numpy array**.
+For beginning users,
+this can be a very helpful fall back.
+But, note that -- in most cases -- it should be more beneficial if you don't
+directly access the `data` attribute.
+
 Below, we outline how you can use
 dimension labels to make code more legible and make many common tasks easier.
 Then, we note how slicing operations are different (and easier) for nddata than for standard numpy arrays.
@@ -145,8 +155,8 @@ Methods by Sub-Topic
 --------------------
 
 It's important to note that, in contrast to standard numpy,
-    nddata routines are designed to be called as methods,
-    rather than independent functions.
+nddata routines are designed to be called as methods,
+rather than independent functions.
 Also, these methods **modify the data in-place** rather than returning a copy.
 For example, after executing
 ``d.ft('t2')``, the object ``d`` will contain the *Fourier transformed* data.
