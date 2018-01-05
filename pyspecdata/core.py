@@ -4266,32 +4266,40 @@ class nddata (object):
                 raise ValueError("I don't know what funny business you're up to passing me a"+repr(type(args[0])))
         else:
             raise ValueError("should eventually support array, label pair, but doesn't yet")
-    def interp(self,axis,axisvalues,past_bounds = None,verbose = False,**kwargs):
-        'interpolate data values given axis values'
+    def interp(self,axis,axisvalues, past_bounds=None, verbose=False, return_func=False, **kwargs):
+        '''interpolate data values given axis values
+        
+        Parameters
+        ==========
+        return_func : boolean
+            defaults to False.  If True, it returns a function that accepts
+            axis values and returns a data value.
+        '''
         oldaxis = self.getaxis(axis)
-        if (type(axisvalues) is int) or (type(axisvalues) is int32):
-            axisvalues = linspace(oldaxis[0],oldaxis[-1],axisvalues)
-        elif isscalar(axisvalues):
-            axisvalues = r_[axisvalues]
-        elif (type(axisvalues) not in [ndarray,tuple]):
-            raise ValueError("You passed a target axis of type"+repr(type(axisvalues))+"which I don't get")
-        if any(imag(axisvalues) > 1e-38):
-            raise ValueError("I can't interpolate imaginary values")
-        else:
-            axisvalues = real(axisvalues)
-        if past_bounds == None:
-            axisvalues[axisvalues<oldaxis.min()] = oldaxis.min()
-            axisvalues[axisvalues>oldaxis.max()] = oldaxis.max()
-        elif not (past_bounds == 'fail'):
-            if type(past_bounds) is tuple:
-                if len(past_bounds) == 2:
-                    axisvalues[axisvalues<oldaxis.min()] = past_bounds[0]
-                    axisvalues[axisvalues>oldaxis.max()] = past_bounds[1]
-                else:
-                    raise TypeError('If you pass axisvalues as a tuple, it must be of length 2!')
+        if not return_func:
+            if (type(axisvalues) is int) or (type(axisvalues) is int32):
+                axisvalues = linspace(oldaxis[0],oldaxis[-1],axisvalues)
+            elif isscalar(axisvalues):
+                axisvalues = r_[axisvalues]
+            elif (type(axisvalues) not in [ndarray,tuple]):
+                raise ValueError("You passed a target axis of type"+repr(type(axisvalues))+"which I don't get")
+            if any(imag(axisvalues) > 1e-38):
+                raise ValueError("I can't interpolate imaginary values")
             else:
-                axisvalues[axisvalues<oldaxis.min()] = past_bounds
-                axisvalues[axisvalues>oldaxis.max()] = past_bounds
+                axisvalues = real(axisvalues)
+            if past_bounds == None:
+                axisvalues[axisvalues<oldaxis.min()] = oldaxis.min()
+                axisvalues[axisvalues>oldaxis.max()] = oldaxis.max()
+            elif not (past_bounds == 'fail'):
+                if type(past_bounds) is tuple:
+                    if len(past_bounds) == 2:
+                        axisvalues[axisvalues<oldaxis.min()] = past_bounds[0]
+                        axisvalues[axisvalues>oldaxis.max()] = past_bounds[1]
+                    else:
+                        raise TypeError('If you pass axisvalues as a tuple, it must be of length 2!')
+                else:
+                    axisvalues[axisvalues<oldaxis.min()] = past_bounds
+                    axisvalues[axisvalues>oldaxis.max()] = past_bounds
         rdata = real(self.data)
         idata = imag(self.data)
         thiserror = self.get_error()
@@ -4316,6 +4324,10 @@ class nddata (object):
             except:
                 raise TypeError("dtype of axis is"+repr(axisvalues.dtype))
             return retval
+        if return_func:
+            rfunc = interp1d(oldaxis, rdata, kind=thiskind, axis=thisaxis, bounds_error=False, fill_value=tuple(rdata[r_[0,-1]].tolist()))
+            ifunc = interp1d(oldaxis, idata, kind=thiskind, axis=thisaxis, bounds_error=False, fill_value=tuple(idata[r_[0,-1]].tolist()))
+            return lambda x: rfunc(x) + 1j*ifunc(x)
         rdata = local_interp_func(rdata)
         idata = local_interp_func(idata)
         self.data = rdata + 1j * idata
