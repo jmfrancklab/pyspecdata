@@ -7,26 +7,6 @@ import os
 import ConfigParser
 import platform
 from .general_functions import process_kwargs
-# {{{ http://stackoverflow.com/questions/2533120/show-default-value-for-editing-on-python-input-possible
-# doesn't work great cross-platform, so going to move to Qt
-if platform.platform().startswith('Windows'):
-    def rlinput(prompt, default=''):
-        print "My guess:",default
-        result = raw_input(prompt+"\nMy guess: "+default+'\n')
-        if result.strip() == '':
-            result = default
-        return result
-else:
-    def rlinput(prompt, prefill=''):
-        import readline
-        readline.set_startup_hook(lambda: readline.insert_text(prefill))
-        try:
-            return raw_input('\n'+prompt)
-        except:
-            raise ValueError("raw input didn't work!")
-        finally:
-            readline.set_startup_hook()
-# }}}
 class MyConfig(object):
     r'''Provides an easy interface to the pyspecdata configuration file.
     Only one instance _my_config should be created -- this instance is used by
@@ -122,12 +102,9 @@ class MyConfig(object):
                     if default[j][0] == '.':
                         default[j] = self.hide_start + default[j][1:]
                 default = os.path.sep.join(default)
-                retval = rlinput("\nI didn't find the value corresponding to "+this_key
-                        +" in the environment variable "+repr(environ)
-                        +" or in the config file, so confirm what value you would like here:\t",default)
-                if '~' in retval:
-                    retval = os.path.expanduser(retval)
-                    retval = rlinput("\nI detected a tilde (~) character -- check that this looks like what you meant and edit it or (more likely) just press enter:\t",retval)
+                raise RuntimeError("\nI didn't find the value corresponding to "+this_key
+                        +" in the environment variable "+repr(environ)+'\n'+
+                        "--> You probably want to run the command-line tool pyspecdata_dataconfig to set up a configuration file")
                 self._config_parser.set(section,this_key,retval)
             if environ is not None:
                 os.environ[environ] = retval
@@ -160,8 +137,7 @@ def getDATADIR(*args,**kwargs):
     in a trailing (back)slash
     
     It is determined by a call to `MyConfig.get_setting` with the setting name
-    `experimental_data` and the environment variable set to ``PYTHON_DATA_DIR``
-    and default ``~/experimental_data``.
+    `data_directory` and the environment variable set to ``PYTHON_DATA_DIR``.
 
     Parameters
     ----------
@@ -171,7 +147,7 @@ def getDATADIR(*args,**kwargs):
 
         * Look in the ``ExpTypes`` section of the config file.
             * Note that by using this, you can store data in locations other
-                than your `experimental_data` directory.
+                than your main data directory.
                 For example, consider the following section of the
                 ``~/.pyspecdata`` config file:
                 ```

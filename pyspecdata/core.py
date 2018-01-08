@@ -1002,7 +1002,7 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
         if h5path[0] in listdir(directory):
             if verbose: print 'DEBUG: file exists\n\n'
         else:
-            if check_only: raise AttributeError("You're checking for a node in a file that does not exist")
+            if check_only: raise AttributeError("You're checking for a node in a file (%s) that does not exist"%h5path[0])
             if verbose: print 'DEBUG: file does not exist\n\n'
         mode = 'a'
         #if check_only: mode = 'r'
@@ -2611,74 +2611,58 @@ def concat(datalist,dimname,chop = False,verbose = False):
     return newdatalist
 #}}}
 class nddata (object):
+    """This is the detailed API reference.
+    For an introduction on how to use ND-Data, see the :ref:`Main ND-Data Documentation <nddata-summary-label>`.
+    """
     want_to_prospa_decim_correct = False
     def __init__(self, *args, **kwargs):
         """initialize nddata -- several options.
-        Can be done with several sizes of arguments:
+        Depending on the information available, one of several formats can be used.
 
-        3 arguments::
-            nddata(inputarray, shape, dimlabels)::
+        3 arguments:
+            ``nddata(inputarray, shape, dimlabels)``
 
-                :inputarray:
+            :inputarray:
+                ndarray storing the data -- note that the size is ignored
+                and the data is reshaped as needed
+            :shape:
+                a list (or array, *etc.*) giving the size of each dimension, in order
+            :dimlabels:
+                a list giving the names of each dimension, in order
+        2 arguments:
+            ``nddata(inputarray, dimlabels)``
 
-                    ndarray storing the data -- note that the size is ignored
-                    and the data is reshaped as needed
+            :inputarray:
+                ndarray storing the data -- the data is *not* reshaped
+            :dimlabels:
+                a list giving the names of each dimension, in order
+        2 arguments:
+            ``nddata(inputarray, single_dimlabel)``
 
-                :shape:
+            :inputarray:
+                ndarray storing the data -- must be 1D  
+                inputarray is *also* used to label the single axis
+            :single_dimlabel:
+                a list giving the name of the single axis
+        1 argument:
+            ``nddata(inputarray, shape, dimlabels)``
 
-                    a list (or array, *etc.*) giving the size of each dimension, in order
-
-                :dimlabels:
-
-                    a list giving the names of each dimension, in order
-
-        2 arguments::
-            nddata(inputarray, dimlabels)::
-
-                :inputarray:
-
-                    ndarray storing the data -- the data is *not* reshaped
-
-                :dimlabels:
-
-                    a list giving the names of each dimension, in order
-
-        2 arguments::
-            nddata(inputarray, single_dimlabel)::
-
-                :inputarray:
-
-                    ndarray storing the data -- must be 1D
-
-                    inputarray is *also* used to label the single axis
-
-                :single_dimlabel:
-
-                    a list giving the name of the single axis
-        1 argument::
-            nddata(inputarray, shape, dimlabels)::
-
-                :inputarray:
-
-                    ndarray storing the data -- reduced to 1D
-
-                    A single dimension, called "INDEX" is set.
-                    This suppresses the printing of axis labels.
-
-                    This is used to store numbers and arrays
-                    that might have error and units,
-                    but aren't gridded data.
-
-
-        keyword arguments::
-            these can be used to set the labels, etc, and are passed to `__my_init__`
+            :inputarray:
+                ndarray storing the data -- reduced to 1D  
+                A single dimension, called "INDEX" is set.
+                This suppresses the printing of axis labels.  
+                This is used to store numbers and arrays
+                that might have error and units,
+                but aren't gridded data.
+        keyword args
+            these can be used to set the labels, etc, and are passed to :func:`__my_init__`
 
         """
         if len(args) > 1:
             if len(args) == 2:
                 if len(args[0].shape) == 1 and type(args[1]) is str:
                     self.__my_init__(args[0],[len(args[0])],[args[1]])
-                    self.labels(args[1],args[0])
+                    self.labels(args[1],args[0].copy())# needs to be a copy, or when we write data, we will change the axis
                 elif all([type(j) is str for j in args[1]]):
                     self.__my_init__(args[0],
                             list(args[0].shape),args[1])
@@ -3684,7 +3668,7 @@ class nddata (object):
         new_arg_labels = [x for x in newdims if x in
                 arg.dimlabels] #  only the labels valid for arg, ordered
         #                         as they are in newdims
-        argshape = list(ones(len(newdims)))
+        argshape = list(ones(len(newdims), dtype=int64))# should be a better solution
         if verbose: print "DEBUG 2: shape of self",ndshape(self),"self data shape",self.data.shape,"shape of arg",ndshape(arg),"arg data shape",arg.data.shape
         if verbose: print "DEBUG 3: shape of selfout",ndshape(selfout),"selfout data shape",selfout.data.shape,"shape of argout",ndshape(argout),"argout data shape",argout.data.shape
         #{{{ wherever the dimension already exists in arg, pull the shape from arg
@@ -4267,32 +4251,40 @@ class nddata (object):
                 raise ValueError("I don't know what funny business you're up to passing me a"+repr(type(args[0])))
         else:
             raise ValueError("should eventually support array, label pair, but doesn't yet")
-    def interp(self,axis,axisvalues,past_bounds = None,verbose = False,**kwargs):
-        'interpolate data values given axis values'
+    def interp(self,axis,axisvalues, past_bounds=None, verbose=False, return_func=False, **kwargs):
+        '''interpolate data values given axis values
+        
+        Parameters
+        ==========
+        return_func : boolean
+            defaults to False.  If True, it returns a function that accepts
+            axis values and returns a data value.
+        '''
         oldaxis = self.getaxis(axis)
-        if (type(axisvalues) is int) or (type(axisvalues) is int32):
-            axisvalues = linspace(oldaxis[0],oldaxis[-1],axisvalues)
-        elif isscalar(axisvalues):
-            axisvalues = r_[axisvalues]
-        elif (type(axisvalues) not in [ndarray,tuple]):
-            raise ValueError("You passed a target axis of type"+repr(type(axisvalues))+"which I don't get")
-        if any(imag(axisvalues) > 1e-38):
-            raise ValueError("I can't interpolate imaginary values")
-        else:
-            axisvalues = real(axisvalues)
-        if past_bounds == None:
-            axisvalues[axisvalues<oldaxis.min()] = oldaxis.min()
-            axisvalues[axisvalues>oldaxis.max()] = oldaxis.max()
-        elif not (past_bounds == 'fail'):
-            if type(past_bounds) is tuple:
-                if len(past_bounds) == 2:
-                    axisvalues[axisvalues<oldaxis.min()] = past_bounds[0]
-                    axisvalues[axisvalues>oldaxis.max()] = past_bounds[1]
-                else:
-                    raise TypeError('If you pass axisvalues as a tuple, it must be of length 2!')
+        if not return_func:
+            if (type(axisvalues) is int) or (type(axisvalues) is int32):
+                axisvalues = linspace(oldaxis[0],oldaxis[-1],axisvalues)
+            elif isscalar(axisvalues):
+                axisvalues = r_[axisvalues]
+            elif (type(axisvalues) not in [ndarray,tuple]):
+                raise ValueError("You passed a target axis of type"+repr(type(axisvalues))+"which I don't get")
+            if any(imag(axisvalues) > 1e-38):
+                raise ValueError("I can't interpolate imaginary values")
             else:
-                axisvalues[axisvalues<oldaxis.min()] = past_bounds
-                axisvalues[axisvalues>oldaxis.max()] = past_bounds
+                axisvalues = real(axisvalues)
+            if past_bounds == None:
+                axisvalues[axisvalues<oldaxis.min()] = oldaxis.min()
+                axisvalues[axisvalues>oldaxis.max()] = oldaxis.max()
+            elif not (past_bounds == 'fail'):
+                if type(past_bounds) is tuple:
+                    if len(past_bounds) == 2:
+                        axisvalues[axisvalues<oldaxis.min()] = past_bounds[0]
+                        axisvalues[axisvalues>oldaxis.max()] = past_bounds[1]
+                    else:
+                        raise TypeError('If you pass axisvalues as a tuple, it must be of length 2!')
+                else:
+                    axisvalues[axisvalues<oldaxis.min()] = past_bounds
+                    axisvalues[axisvalues>oldaxis.max()] = past_bounds
         rdata = real(self.data)
         idata = imag(self.data)
         thiserror = self.get_error()
@@ -4317,6 +4309,10 @@ class nddata (object):
             except:
                 raise TypeError("dtype of axis is"+repr(axisvalues.dtype))
             return retval
+        if return_func:
+            rfunc = interp1d(oldaxis, rdata, kind=thiskind, axis=thisaxis, bounds_error=False, fill_value=tuple(rdata[r_[0,-1]].tolist()))
+            ifunc = interp1d(oldaxis, idata, kind=thiskind, axis=thisaxis, bounds_error=False, fill_value=tuple(idata[r_[0,-1]].tolist()))
+            return lambda x: rfunc(x) + 1j*ifunc(x)
         rdata = local_interp_func(rdata)
         idata = local_interp_func(idata)
         self.data = rdata + 1j * idata
@@ -5312,6 +5308,8 @@ class nddata (object):
                 'sinh':sinh,
                 'cosh':cosh,
                 'tanh':tanh,
+                'log':log,
+                'log10':log10,
                 }
         if arg in fundict.keys():
             argf = fundict[arg]
@@ -5323,6 +5321,13 @@ class nddata (object):
         else:
             retval = getattr(super(nddata,self),arg)
             return retval
+    @property
+    def C(self):
+        "shortcut for copy"
+        return self.copy()
+    @C.setter
+    def C(self):
+        raise ValueError("You can't set the C property -- it's used to generate a copy")
     @property
     def angle(self):
         "Return the angle component of the data"
@@ -5867,7 +5872,16 @@ class nddata_hdf5 (nddata):
 class ndshape (ndshape_base):
     r'''The ndshape class, including the allocation method''' 
     def alloc(self,dtype='complex128',labels = False,format = 0):
-        r'Use the shape object to allocate an empty nddata object.'
+        r'''Use the shape object to allocate an empty nddata object.
+
+        Parameters
+        ----------
+        labels : 
+            Needs documentation
+        format : 0, 1, or None
+            What goes in the allocated array.
+            `None` uses numpy empty.
+        '''
         try:
             if format == 0:
                 try:
