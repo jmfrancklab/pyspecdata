@@ -4382,6 +4382,7 @@ class nddata (object):
         this function returns the start and stop positions along the
         axis for the contiguous blocks for which lambdafunc returns
         true
+        **Currently only supported for 1D data**
         
         .. note::
             adapted from stackexchange post http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-array
@@ -4390,10 +4391,13 @@ class nddata (object):
         ----------
 
         lambdafunc : types.FunctionType
-            a function that operates on a copy of `self` to generate the
-            mask used here 
-            use `lambdafunc`(`self`) if `axis` is ``None``,
-            otherwise use `lambdafunc`(`self`,`axis`)
+            If only one argument (lambdafunc) is given,
+            then lambdafunc is
+            a function that accepts a copy of the current nddata object
+            (`self`) as the argument.
+            If two arguments are given,
+            the second is `axis`, and lambdafunc has two arguments,
+            `self` and the value of `axis`.
         axis : {None,str}
             the name of the axis along which you want to find contiguous
             blocks
@@ -4434,7 +4438,10 @@ class nddata (object):
         else:
             mask = lambdafunc(self.copy(),axis).data
         if verbose: print "(contiguous) shape of mask",mask.shape
-        idx, = np.diff(mask).nonzero() # this gives a list of indices for the boundaries between true/false
+        if axis is None:
+            idx, = np.diff(mask).nonzero() # this gives a list of indices for the boundaries between true/false
+        else:
+            idx, = np.diff(mask, axis=self.axn(axis)).nonzero() # this gives a list of indices for the boundaries between true/false
         idx += 1 # because diff only starts on index #1 rather than #0
         if mask[0]: # because I want to indicate the boundaries of True, if I am starting on True, I need to make 0 a boundary
             idx = np.r_[0, idx]
@@ -5689,6 +5696,7 @@ class nddata (object):
             #{{{ separate them into data and axes
             mydataattrs = filter((lambda x: x[0:4] == 'data'),myattrs)
             myotherattrs = filter((lambda x: x[0:4] != 'data'),myattrs)
+            myotherattrs = filter(lambda x: x not in ['C','sin','cos','exp','log10'],myotherattrs)
             myaxisattrs = filter((lambda x: x[0:4] == 'axis'),myotherattrs)
             myotherattrs = filter((lambda x: x[0:4] != 'axis'),myotherattrs)
             if verbose: print lsafe('data attributes:',zip(mydataattrs,map(lambda x: type(self.__getattribute__(x)),mydataattrs))),'\n\n'
