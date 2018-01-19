@@ -35,7 +35,7 @@ if myparams['figlist_type'] == 'figlistl':
     environ['ETS_TOOLKIT'] = 'qt4'
     import matplotlib; matplotlib.use('Agg')
 from pylab import *
-from types import FunctionType as function
+from types import FunctionType, MethodType
 import textwrap
 import matplotlib
 import matplotlib.transforms as mtransforms
@@ -1042,7 +1042,7 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
     return h5file,currentnode
 def h5attachattributes(node,listofattributes,myvalues):
     listofattributes = [j for j in listofattributes # need to exclude the properties
-            if j not in ['angle','real','imag']]
+            if j not in self._nosave]
     if node is None:
         raise IndexError('Problem!, node passed to h5attachattributes: ',node,'is None!')
     h5file = node._v_file
@@ -2615,6 +2615,22 @@ class nddata (object):
     For an introduction on how to use ND-Data, see the :ref:`Main ND-Data Documentation <nddata-summary-label>`.
     """
     want_to_prospa_decim_correct = False
+    _nosave = [
+            'angle',
+            'imag',
+            'real',
+            'C',
+            'exp',
+            'sin',
+            'cos',
+            'tan',
+            'sinh',
+            'cosh',
+            'tanh',
+            'log',
+            'log10',
+            'genftpairs',
+            'want_to_prospa_decim_correct']
     def __init__(self, *args, **kwargs):
         """initialize nddata -- several options.
         Depending on the information available, one of several formats can be used.
@@ -5308,6 +5324,7 @@ class nddata (object):
             lefterror[tuple(leftindex)] = righterrors.squeeze()
     # {{{ standard trig functions
     def __getattr__(self,arg):
+        # these must all be defined in _nosave
         fundict = {'exp':exp,
                 'sin':sin,
                 'cos':cos,
@@ -5653,7 +5670,15 @@ class nddata (object):
             raise ValueError(strm('label your freaking dimensions! (type of args[0] is ',
                 type(args[0]),'and it should be str!)'))
     #}}}
-    #{{{ hdf5 write
+    #{{{ file writing
+    def __getstate__(self):
+        """This function is called when pickling.  More generally we use it to convert to a dictionary format."""
+        for thisattr in dir(self):
+            if thisattr not in self._nosave and thisattr[0] != '_':
+                if type(getattr(self,thisattr)) != MethodType:
+                    print thisattr
+        #for nosave in self._nosave:
+        #    if hasattr(retval,nosave):
     def hdf5_write(self, h5path, directory='.', verbose=False):
         r"""Write the nddata to an HDF5 file.
 
@@ -5696,7 +5721,7 @@ class nddata (object):
             #{{{ separate them into data and axes
             mydataattrs = filter((lambda x: x[0:4] == 'data'),myattrs)
             myotherattrs = filter((lambda x: x[0:4] != 'data'),myattrs)
-            myotherattrs = filter(lambda x: x not in ['C','sin','cos','exp','log10'],myotherattrs)
+            myotherattrs = filter(lambda x: x not in self._nosave,myotherattrs)
             myaxisattrs = filter((lambda x: x[0:4] == 'axis'),myotherattrs)
             myotherattrs = filter((lambda x: x[0:4] != 'axis'),myotherattrs)
             if verbose: print lsafe('data attributes:',zip(mydataattrs,map(lambda x: type(self.__getattribute__(x)),mydataattrs))),'\n\n'
