@@ -82,7 +82,7 @@ class ndshape_base ():
         self.shape = [1] * len(addeddims) + list(self.shape)
         #}}}
         return self
-    def __add__(self,arg):
+    def __radd__(self,arg):
         'take list of shape,dimlabels'
         shape = arg[0]
         dimlabels = arg[1]
@@ -99,7 +99,7 @@ class ndshape_base ():
         self.shape = shape + self.shape
         self.dimlabels = dimlabels + self.dimlabels
         return self
-    def add_correctly(self,arg):
+    def __add__(self,arg):
         '''take list of shape,dimlabels
         this is the correct function, until I can fix my back-references for add, which does it backwards'''
         shape = arg[0]

@@ -748,7 +748,8 @@ def explain_error(e):
     >                + '\n'.join(['>\t'+j for j in str(e).split('\n')]))# this indents
     '''
     exc_type,exc_obj,exc_tb = exc_info()
-    code_loc = strm(os.path.relpath(exc_tb.tb_frame.f_code.co_filename,os.getcwd()), 'line', exc_tb.tb_lineno)
+    #code_loc = strm(os.path.relpath(exc_tb.tb_frame.f_code.co_filename,os.getcwd()), 'line', exc_tb.tb_lineno)
+    code_loc = strm(exc_tb.tb_frame.f_code.co_filename, 'line', exc_tb.tb_lineno)
     return ('\n> Original error (%s -- %s):\n'%(exc_type,code_loc)
             + '\n'.join(['>\t'+j
                 for j in str(e).split('\n')]))# this indents
