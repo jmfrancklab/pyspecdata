@@ -6,7 +6,7 @@ Overview of ND-Data for Development
 Here we give an overview of the attributes that are used to store
 the various nddata components:
 
-dimlabels
+:dimlabels:
     An ordered list of the dimension names.
     **In general, the order of other list objects must be given
     in the same order, with the order given by the order given by
@@ -20,7 +20,7 @@ dimlabels
     explicitly indicate that the axes are unlabeled.
     (see :func:`nddata.__init__`)
 
-axis_coords
+:axis_coords:
     The axis labels (*x-*, *y-*, *z-*, and higher-dimensional
     coordinates).  This can be set to:
 
@@ -33,33 +33,33 @@ axis_coords
       - Note that the numpy array axis is explicitly allowed to
         be a structured array → see :func:`chunk_auto`.
 
-axis_coords_error
+:axis_coords_error:
     The errors associated with the axis labels.  This can be set
     to the same datatypes as the axis labels themselves.  In
     general, error should only be supplied when coordinates are
     also supplied.
 
-axis_coords_units
+:axis_coords_units:
     The units associated with the axis labels.  Currently, this
     is just a text string, but will be upgraded to a fancier type
     of object that supports conversion.
 
-data
+:data:
     The data itself.
     The number of dimensions must match the length of dimlabels,
     or untowards things will happen!
 
-data_error
+:data_error:
     The same size as `data` → stores the uncertainty associated
     with data.
 
     There some future plans to extend this to a
     higher-dimensional object that could store correlated errors.
 
-data_units
+:data_units:
     The units of the data → again, a string, plans on upgrading.
 
-other_info
+:other_info:
     This is a dictionary of data that stores any other
     information.
     For example, information pertaining to the state of the axes
