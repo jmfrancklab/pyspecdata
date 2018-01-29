@@ -3093,7 +3093,9 @@ class nddata (object):
     # dictionary -- stuff labeled according the dimension label.
     # list -- same information, but it's assumed they are listed in the order given by "dimlabels"
     def mkd(self,*arg,**kwargs):
-        'make dictionary format'
+        r'''This is an internal function that accepts one of the internal attributes (axis_coords, etc) that are stored as lists, and return a list that is labeled with the dimlabels.
+        
+        Note that the inverse of this function is :func:`self.fld`'''
         #{{{ process kwargs
         give_None = True
         if len(kwargs) > 0:
@@ -3130,7 +3132,7 @@ class nddata (object):
         else:
             raise ValueError(strm('.mkd() doesn\'t know what to do with %d arguments',len(arg)))
     def fld(self,dict_in,noscalar = False):
-        'flatten dictionary -- return list'
+        'flatten dictionary -- return list.  This is the inverse of :func:`nddata.mkd`'
         return [dict_in[x] for x in self.dimlabels]
     #}}}
     #{{{ set + get the error + units

@@ -175,3 +175,5 @@ A selection of the methods noted below are broken down by sub-topic.
     axis_manipulation.rst
     fourier.rst
 
+To understand where everything is stored internally,
+see :ref:`nddata_devel`.
