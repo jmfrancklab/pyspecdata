@@ -1806,10 +1806,10 @@ class figlist(object):
             self.figdict = {} # the dictionary of the various figures
         if not hasattr(self,'propdict'):
             self.propdict = {} # the properties belonging to those same figures
+        logger.debug(strm("for plot",input_name,"basename is",self.basename))
         if (self.basename is not None #basename for groups of figures
                 # I need to check that the basename hasn't already been added
-                and len(input_name) > len(self.basename)
-                and input_name[:len(self.basename)] != self.basename):
+                and not input_name.startswith(self.basename)):
             name = self.basename + ' ' + input_name
         else:
             name = input_name
