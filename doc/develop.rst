@@ -69,6 +69,9 @@ the various nddata components:
     The data is accessed through :func:`nddata.get_prop` and
     :func:`nddata.set_prop`.
 
+:_nosave:
+    Attributes that are not saved to file (functions, *etc.*).
+
 Of these, only `data` and `dimlabels` *must* be set → if the
 others are missing, they are assumed not to exist.
 

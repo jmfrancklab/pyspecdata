@@ -90,7 +90,21 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = []):
     return du
 
 def init_logging(level=logging.INFO, filename='pyspecdata.log'):
-    "Initialize logging on pyspecdata.log -- do NOT log if run from within a notebook (it's fair to assume that you will run first before embedding)"
+    r"""Initialize logging on pyspecdata.log -- do NOT log if run from within a notebook (it's fair to assume that you will run first before embedding)
+
+    To simplify things, note that you can pass a string to the "level" argument:
+
+    Parameters
+    ==========
+    level: logging.object or str
+        can be string 'info', 'debug', or 'critical'
+    """
+    if level == 'info':
+        level = logging.INFO
+    elif level == 'debug':
+        level = logging.DEBUG
+    elif level == 'critical':
+        level = logging.CRITICAL
     if myparams['figlist_type'] == 'figlistl':
         return
     FORMAT = "--> %(filename)s(%(lineno)s):%(name)s %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"
@@ -104,6 +118,7 @@ def init_logging(level=logging.INFO, filename='pyspecdata.log'):
             filemode='a',
             level=level,
             )
+    return log_filename
 
 def strm(*args):
     return ' '.join(map(str,args))

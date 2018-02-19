@@ -1040,9 +1040,9 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
                 raise IndexError(strm('Problem trying to load node ',h5path,explain_error(e)))
             #}}}
     return h5file,currentnode
-def h5attachattributes(node,listofattributes,myvalues):
+def h5attachattributes(node,listofattributes,myvalues,exclusions):
     listofattributes = [j for j in listofattributes # need to exclude the properties
-            if j not in self._nosave]
+            if j not in exclusions]
     if node is None:
         raise IndexError('Problem!, node passed to h5attachattributes: ',node,'is None!')
     h5file = node._v_file
@@ -1064,7 +1064,8 @@ def h5attachattributes(node,listofattributes,myvalues):
                     create = True)
             h5attachattributes(dictnode,
                     thisval.keys(),
-                    thisval.values())
+                    thisval.values(),
+                    exclusions)
             thisval = None
             listout.remove(thisattr)
         else:
@@ -2616,20 +2617,21 @@ class nddata (object):
     """
     want_to_prospa_decim_correct = False
     _nosave = [
-            'angle',
-            'imag',
-            'real',
             'C',
-            'exp',
-            'sin',
+            '_nosave',
+            'angle',
             'cos',
-            'tan',
-            'sinh',
             'cosh',
-            'tanh',
+            'exp',
+            'genftpairs',
+            'imag',
             'log',
             'log10',
-            'genftpairs',
+            'real',
+            'sin',
+            'sinh',
+            'tan',
+            'tanh',
             'want_to_prospa_decim_correct']
     def __init__(self, *args, **kwargs):
         """initialize nddata -- several options.
@@ -5674,13 +5676,30 @@ class nddata (object):
     #}}}
     #{{{ file writing
     def __getstate__(self):
-        """This function is called when pickling.  More generally we use it to convert to a dictionary format."""
-        for thisattr in dir(self):
+        """This function is called when pickling.  More generally we use it to convert to a dictionary format.
+        
+        In keeping with the original HDF5 format,
+        it returns the following sub-dictionaries:
+
+        'axes'
+        """
+        retval = {}
+        all_attributes = dir(self)
+        if 'axis_coords' in all_attributes:
+            all_attributes.remove('axis_coords')
+            retval['axes'] = self.mkd(self.axis_coords)
+            if 'axis_coords_units' in all_attributes:
+                all_attributes.remove('axis_coords_units')
+                units = self.mkd(self.axis_coords_units)
+                for j in retval['axes'].keys():
+                    retval['axes']['axis_coords_units'] = units[j]
+        for thisattr in all_attributes:
             if thisattr not in self._nosave and thisattr[0] != '_':
-                if type(getattr(self,thisattr)) != MethodType:
-                    print thisattr
-        #for nosave in self._nosave:
-        #    if hasattr(retval,nosave):
+                the_attr = getattr(self,thisattr)
+                if type(the_attr) != MethodType:
+                    logger.debug(strm('converting:',thisattr))
+                    retval[thisattr] = the_attr
+        return retval
     def hdf_save_dict_to_group(group,data):
         '''
         Copied as-is from ACERT hfesr code
@@ -5773,7 +5792,7 @@ class nddata (object):
                 #print 'DEBUG 2: datatable is',datatable
                 if verbose: print "Writing remaining axis attributes\n\n"
                 if len(mydataattrs) > 0:
-                    h5attachattributes(datatable,mydataattrs,self)
+                    h5attachattributes(datatable,mydataattrs,self, self._nosave)
             else:
                 raise ValueError("I can't find the data object when trying to save the HDF5 file!!")
             #}}}
@@ -5801,7 +5820,7 @@ class nddata (object):
                         #print 'DEBUG 3: axesnode is',axesnode
                         if verbose: print "Writing remaining axis attributes for",axisname,"\n\n"
                         if len(myaxisattrsforthisdim) > 0:
-                            h5attachattributes(datatable,myaxisattrsforthisdim.keys(),myaxisattrsforthisdim.values())
+                            h5attachattributes(datatable,myaxisattrsforthisdim.keys(),myaxisattrsforthisdim.values(), self._nosave)
             #}}}
             #{{{ Check the remaining attributes.
             if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
@@ -5811,7 +5830,8 @@ class nddata (object):
                 test = repr(bottomnode) # somehow, this prevents it from claiming that the bottomnode is None --> some type of bug?
                 h5attachattributes(bottomnode,
                     [j for j in myotherattrs if not self._contains_symbolic(j)],
-                    self)
+                    self,
+                    self._nosave)
                 warnlist = [j for j in myotherattrs if (not self._contains_symbolic(j)) and type(self.__getattribute__(j)) is dict]
                 #{{{ to avoid pickling, test that none of the attributes I'm trying to write are dictionaries or lists
                 if len(warnlist) > 0:
