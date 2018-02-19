@@ -818,6 +818,7 @@ def h5searchstring(*args,**kwargs):
     return '(' + searchstring_low + ' & ' + searchstring_high + ')'
 #}}}
 def h5loaddict(thisnode,verbose = False):
+    "Load nddata structure from hdf5 file using pytables and return the result as a dictionary"
     #{{{ load all attributes of the node
     retval = dict([(x,thisnode._v_attrs.__getattribute__(x))
         for x in thisnode._v_attrs._f_list('user')])
@@ -5873,6 +5874,7 @@ class nddata_hdf5 (nddata):
         #    raise IndexError("I can't find the node "+pathstring+explain_error(e))
         self._init_datanode(self.datanode)
     def _init_datanode(self,datanode,verbose = False,**kwargs):
+        "Take a pytables HDF5 node and convert it to nddata"
         datadict = h5loaddict(datanode)
         #{{{ load the data, and pop it from datadict
         try:
