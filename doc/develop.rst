@@ -9,14 +9,13 @@ the various nddata components:
 :dimlabels:
     An ordered list of the dimension names.
     **In general, the order of other list objects must be given
-    in the same order, with the order given by the order given by
     dimlabels.**
 
     If the data is zero-dimensional, this should be set to an
     empty list, in which case `ndshape(...).zero_dimensional`
     will return `True`.
 
-    A dimension label of ``'INDEX'`` is special, and is used to
+    A dimension name of ``'INDEX'`` is special, and is used to
     explicitly indicate that the axes are unlabeled.
     (see :func:`nddata.__init__`)
 
@@ -28,6 +27,7 @@ the various nddata components:
        have been explicitly labeled.
     - A list of numpy arrays, which correspond to the axis
       labels.
+
       - One or more of these can be set to `None`, meaning that
         the axis isn't explicitly labeled.
       - Note that the numpy array axis is explicitly allowed to
