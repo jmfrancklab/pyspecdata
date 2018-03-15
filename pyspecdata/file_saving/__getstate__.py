@@ -1,5 +1,7 @@
 from ..general_functions import *
 from pylab import * 
+from types import MethodType
+logger = logging.getLogger('pyspecdata.__getstate__')
 
 def __getstate__(self):
     """This function is called when pickling.  More generally we use it to convert to a dictionary format.
@@ -12,6 +14,7 @@ def __getstate__(self):
     """
     retval = {}
     all_attributes = dir(self)
+    logger.debug(strm("entered getstate!"))
     # {{{ process the data and, optionally, the error
     error_processed = False
     if 'data_error' in all_attributes:
@@ -38,9 +41,30 @@ def __getstate__(self):
         error_processed = True
     all_attributes.remove('data')
     # }}}
+    logger.debug(strm("about to test for axis coords"))
     if 'axis_coords' in all_attributes:
+        logger.debug(strm("yes, I found axis coords"))
         all_attributes.remove('axis_coords')
         retval['axes'] = self.mkd(self.axis_coords)
+        logger.debug(strm("the keys of 'axes' at this point are",retval['axes'].keys()))
+        if 'axis_coords_error' in all_attributes:
+            for this_axis in retval['axes'].keys():
+                logger.debug(strm("processing axis",this_axis))
+                if self.get_error(this_axis) is not None and len(self.get_error(this_axis)) > 0:
+                    if len(retval['axes'][this_axis].dtype.descr)>1 or len(self.get_error(this_axis).dtype.descr) > 1:
+                        raise ValueError("The dtype of your data axis for"+this_axis+" seems to be"+str(len(retval['axes'][this_axis].dtype.descr))+", which implies a structured array.\nNot yet supporting data that is a structured array, though this should be fairly easy to implement")
+                    error_temp = self.get_error(this_axis)
+                    data_temp = retval['axes'][this_axis]
+                    # {{{ a simple two-column data structure with data and error
+                    data_dtype = (
+                            [('data',) + data_temp.dtype.descr[0][1:]]
+                            +[('error',) + self.get_error(this_axis).dtype.descr[0][1:]])
+                    # }}}
+                    retval['axes'][this_axis] = empty(retval['axes'][this_axis].shape, dtype=data_dtype)
+                    retval['axes'][this_axis]['data'] = data_temp 
+                    retval['axes'][this_axis]['error'] = self.get_error()
+            all_attributes.remove('axis_coords_error')
+
         if 'axis_coords_units' in all_attributes:
             all_attributes.remove('axis_coords_units')
             units = self.mkd(self.axis_coords_units)

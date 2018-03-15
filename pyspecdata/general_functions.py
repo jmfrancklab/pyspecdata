@@ -8,6 +8,7 @@ import logging
 import os
 from paramset_pyspecdata import myparams
 import re
+from inspect import ismethod
 
 def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
     '''This function allows dynamically processed (*i.e.* function definitions with `**kwargs`) kwargs (keyword arguments) to be dealt with in a fashion more like standard kwargs.
@@ -223,3 +224,8 @@ def unmake_ndarray(array_to_conv,name_forprint = 'unknown',verbose = False):
         retval = array_to_conv
     return retval
 #}}}
+def normal_attrs(obj):
+    '''Return a list of "normal" attributes (as opposed to methods or attributes with a double underscore in the name)'''
+    myattrs = filter(lambda x: not ismethod(obj.__getattribute__(x)),dir(obj))
+    myattrs = filter(lambda x: not x[0:2] == '__',myattrs)
+    return myattrs

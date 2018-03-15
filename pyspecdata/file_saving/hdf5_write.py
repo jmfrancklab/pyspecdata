@@ -1,5 +1,6 @@
 from ..general_functions import *
 from pylab import * 
+from ..pytables_helper import *
 
 def hdf5_write(self, h5path, directory='.', verbose=False):
     r"""Write the nddata to an HDF5 file.

@@ -35,7 +35,6 @@ if myparams['figlist_type'] == 'figlistl':
     environ['ETS_TOOLKIT'] = 'qt4'
     import matplotlib; matplotlib.use('Agg')
 from pylab import *
-from types import FunctionType, MethodType
 import textwrap
 import matplotlib
 import matplotlib.transforms as mtransforms
@@ -49,7 +48,6 @@ from matplotlib.lines import Line2D
 from scipy.interpolate import griddata as scipy_griddata
 import warnings
 from pytables_helper import *
-from inspect import ismethod
 from numpy.core import rec
 from matplotlib.pyplot import cm
 from copy import deepcopy 
@@ -122,10 +120,6 @@ def mydiff(data,axis = -1):
     #newdata[indices] = newdata[setfrom]
     return newdata
 #}}}
-def normal_attrs(obj):
-    myattrs = filter(lambda x: not ismethod(obj.__getattribute__(x)),dir(obj))
-    myattrs = filter(lambda x: not x[0:2] == '__',myattrs)
-    return myattrs
 def showtype(x):
     if type(x) is ndarray:
         return ndarray,x.dtype
@@ -5209,202 +5203,9 @@ class nddata (object):
                 type(args[0]),'and it should be str!)'))
     #}}}
     #{{{ file writing
-    def __getstate__(self):
-        """This function is called when pickling.  More generally we use it to convert to a dictionary format.
-        
-        In keeping with the original HDF5 format,
-        it returns the following sub-dictionaries:
-
-        :axes:
-            A dictionary containing the 
-        """
-        retval = {}
-        all_attributes = dir(self)
-        # {{{ process the data and, optionally, the error
-        error_processed = False
-        if 'data_error' in all_attributes:
-            if self.get_error() is not None and len(self.get_error()) > 0:
-                if len(self.data.dtype.descr)>1 or len(self.get_error().dtype.descr) > 1:
-                    raise ValueError("The dtype of your data seems to be"+str(len(self.data.dtype.descr))+", which implies a structured array.\nNot yet supporting data that is a structured array, though this should be fairly easy to implement")
-                error_temp = self.get_error()
-                # {{{ a simple two-column data structure with data and error
-                data_dtype = (
-                        [('data',) + self.data.dtype.descr[0][1:]]
-                        +[('error',) + self.get_error().dtype.descr[0][1:]])
-                # }}}
-                retval['data'] = empty(self.data.shape, dtype=data_dtype)
-                retval['data']['data'] = self.data
-                retval['data']['error'] = self.get_error()
-                error_processed = True
-            all_attributes.remove('data_error')
-        if not error_processed:
-            data_dtype = self.data.dtype.descr
-            # just add "data" to the field description, for when the file is saved
-            data_dtype = [('data',) + self.data.dtype.descr[0][1:]]
-            retval['data'] = empty(self.data.shape, dtype=data_dtype)
-            retval['data']['data'] = self.data
-            error_processed = True
-        all_attributes.remove('data')
-        # }}}
-        if 'axis_coords' in all_attributes:
-            all_attributes.remove('axis_coords')
-            retval['axes'] = self.mkd(self.axis_coords)
-            if 'axis_coords_units' in all_attributes:
-                all_attributes.remove('axis_coords_units')
-                units = self.mkd(self.axis_coords_units)
-                for j in retval['axes'].keys():
-                    retval['axes']['axis_coords_units'] = units[j]
-        for thisattr in all_attributes:
-            if thisattr not in self._nosave and thisattr[0] != '_':
-                the_attr = getattr(self,thisattr)
-                if type(the_attr) != MethodType:
-                    logger.debug(strm('converting:',thisattr))
-                    retval[thisattr] = the_attr
-        return retval
-    def hdf_save_dict_to_group(group,data):
-        '''
-        Copied as-is from ACERT hfesr code
-        All numpy arrays are datasets.
-        '''
-        for k,v in data.items():
-            if issubclass(type(v),np.ndarray):
-                logger.debug('Dataset type %s'%str(v.dtype))
-                # Split complex into real and imaginary because Matlab
-                # function cannot handle compound data types.
-                if np.issubdtype(v.dtype,np.complex):
-                    logger.debug('Adding %s=%s %s as real and imag datasets' % \
-                                (k,str(v.shape),str(v.dtype)))
-                    group.create_dataset('%s.r'%k,data=v.real)
-                    group.create_dataset('%s.i'%k,data=v.imag)
-                else:
-                    logger.debug('Adding %s=%s as dataset' % (k,v))
-                    group.create_dataset(k,data=v,dtype=v.dtype)
-                    
-            elif issubclass(type(v),dict):
-                subgroup=group.create_group(k)
-                hdf_save_dict_to_group(subgroup,v)
-                
-            else:
-                if ok_hdf(v):
-                    logger.debug('Adding %s=%s to experiment' % (k,v))
-                    group.attrs[k]=v
-                else:
-                    logger.debug('NOT adding %s=%s to experiment' % (k,v))    
-    def hdf5_write(self, h5path, directory='.', verbose=False):
-        r"""Write the nddata to an HDF5 file.
-
-        `h5path` is the name of the file followed by the node path where
-        you want to put it -- it does **not** include the directory where
-        the file lives.
-        The directory can be passed to the `directory` argument.
-        
-        Parameters
-        ----------
-        h5path : str
-            The name of the file followed by the node path where
-            you want to put it -- it does **not** include the directory where
-            the file lives.
-            (Because HDF5 files contain an internal directory-like group
-            structure.)
-        directory : str
-            the directory where the HDF5 file lives.
-        """
-        #{{{ add the final node based on the name stored in the nddata structure
-        if h5path[-1] != '/': h5path += '/' # make sure it ends in a slash first
-        try:
-            thisname = self.get_prop('name')
-        except:
-            raise ValueError(strm("You're trying to save an nddata object which",
-                    "does not yet have a name, and you can't do this! Run",
-                    "yourobject.name('setname')"))
-        if type(thisname) is str:
-            h5path += thisname
-        else:
-            raise ValueError(strm("problem trying to store HDF5 file; you need to",
-                "set the ``name'' property of the nddata object to a string",
-                "first!"))
-        h5file,bottomnode = h5nodebypath(h5path, directory=directory) # open the file and move to the right node
-        try:
-            #print 'DEBUG 1: bottomnode is',bottomnode
-            #}}}
-            #{{{ print out the attributes of the data
-            myattrs = normal_attrs(self)
-            #{{{ separate them into data and axes
-            mydataattrs = filter((lambda x: x[0:4] == 'data'),myattrs)
-            myotherattrs = filter((lambda x: x[0:4] != 'data'),myattrs)
-            myotherattrs = filter(lambda x: x not in self._nosave,myotherattrs)
-            myaxisattrs = filter((lambda x: x[0:4] == 'axis'),myotherattrs)
-            myotherattrs = filter((lambda x: x[0:4] != 'axis'),myotherattrs)
-            if verbose: print lsafe('data attributes:',zip(mydataattrs,map(lambda x: type(self.__getattribute__(x)),mydataattrs))),'\n\n'
-            if verbose: print lsafe('axis attributes:',zip(myaxisattrs,map(lambda x: type(self.__getattribute__(x)),myaxisattrs))),'\n\n'
-            if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
-            #}}}
-            #}}}
-            #{{{ write the data table
-            if 'data' in mydataattrs:
-                if 'data_error' in mydataattrs and self.get_error() is not None and len(self.get_error()) > 0:
-                    thistable = rec.fromarrays([self.data,self.get_error()],names='data,error')
-                    mydataattrs.remove('data_error')
-                else:
-                    thistable = rec.fromarrays([self.data],names='data')
-                mydataattrs.remove('data')
-                datatable = h5table(bottomnode,'data',thistable)
-                #print 'DEBUG 2: bottomnode is',bottomnode
-                #print 'DEBUG 2: datatable is',datatable
-                if verbose: print "Writing remaining axis attributes\n\n"
-                if len(mydataattrs) > 0:
-                    h5attachattributes(datatable,mydataattrs,self, self._nosave)
-            else:
-                raise ValueError("I can't find the data object when trying to save the HDF5 file!!")
-            #}}}
-            #{{{ write the axes tables
-            if 'axis_coords' in myaxisattrs:
-                if len(self.axis_coords) > 0:
-                    #{{{ create an 'axes' node
-                    axesnode = h5child(bottomnode, # current node
-                            'axes', # the child
-                            verbose = False,
-                            create = True)
-                    #}}}
-                    for j,axisname in enumerate(self.dimlabels): # make a table for each different dimension
-                        myaxisattrsforthisdim = dict([(x,self.__getattribute__(x)[j])
-                            for x in list(myaxisattrs) if len(self.__getattribute__(x)) > 0]) # collect the attributes for this dimension and their values
-                        if verbose: print lsafe('for axis',axisname,'myaxisattrsforthisdim=',myaxisattrsforthisdim)
-                        if 'axis_coords' in myaxisattrsforthisdim.keys() and myaxisattrsforthisdim['axis_coords'] is not None:
-                            if 'axis_coords_error' in myaxisattrsforthisdim.keys() and myaxisattrsforthisdim['axis_coords_error'] is not None and len(myaxisattrsforthisdim['axis_coords_error']) > 0: # this is needed to avoid all errors, though I guess I could use try/except
-                                thistable = rec.fromarrays([myaxisattrsforthisdim['axis_coords'],myaxisattrsforthisdim['axis_coords_error']],names='data,error')
-                                myaxisattrsforthisdim.pop('axis_coords_error')
-                            else:
-                                thistable = rec.fromarrays([myaxisattrsforthisdim['axis_coords']],names='data')
-                            myaxisattrsforthisdim.pop('axis_coords')
-                        datatable = h5table(axesnode,axisname,thistable)
-                        #print 'DEBUG 3: axesnode is',axesnode
-                        if verbose: print "Writing remaining axis attributes for",axisname,"\n\n"
-                        if len(myaxisattrsforthisdim) > 0:
-                            h5attachattributes(datatable,myaxisattrsforthisdim.keys(),myaxisattrsforthisdim.values(), self._nosave)
-            #}}}
-            #{{{ Check the remaining attributes.
-            if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
-            if verbose: print "Writing remaining other attributes\n\n"
-            if len(myotherattrs) > 0:
-                #print 'DEBUG 4: bottomnode is',bottomnode
-                test = repr(bottomnode) # somehow, this prevents it from claiming that the bottomnode is None --> some type of bug?
-                h5attachattributes(bottomnode,
-                    [j for j in myotherattrs if not self._contains_symbolic(j)],
-                    self,
-                    self._nosave)
-                warnlist = [j for j in myotherattrs if (not self._contains_symbolic(j)) and type(self.__getattribute__(j)) is dict]
-                #{{{ to avoid pickling, test that none of the attributes I'm trying to write are dictionaries or lists
-                if len(warnlist) > 0:
-                    print "WARNING!!, attributes",warnlist,"are dictionaries!"
-                warnlist = [j for j in myotherattrs if (not self._contains_symbolic(j)) and type(self.__getattribute__(j)) is list]
-                if len(warnlist) > 0:
-                    print "WARNING!!, attributes",warnlist,"are lists!"
-                #}}}
-                if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
-            #}}}
-        finally:
-            h5file.close()
+    __getstate__ = file_saving.__getstate__.__getstate__
+    hdf_save_dict_to_group = file_saving.hdf_save_dict_to_group.hdf_save_dict_to_group
+    hdf5_write = file_saving.hdf5_write.hdf5_write
     #}}}
 class testclass:
     def __getitem__(self,*args,**kwargs):
