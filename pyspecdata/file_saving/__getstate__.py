@@ -14,7 +14,6 @@ def __getstate__(self):
     """
     retval = {}
     all_attributes = dir(self)
-    logger.debug(strm("entered getstate!"))
     # {{{ process the data and, optionally, the error
     error_processed = False
     if 'data_error' in all_attributes:
@@ -41,9 +40,7 @@ def __getstate__(self):
         error_processed = True
     all_attributes.remove('data')
     # }}}
-    logger.debug(strm("about to test for axis coords"))
     if 'axis_coords' in all_attributes:
-        logger.debug(strm("yes, I found axis coords"))
         all_attributes.remove('axis_coords')
         retval['axes'] = self.mkd(self.axis_coords)
         logger.debug(strm("the keys of 'axes' at this point are",retval['axes'].keys()))
@@ -58,22 +55,22 @@ def __getstate__(self):
                     # {{{ a simple two-column data structure with data and error
                     data_dtype = (
                             [('data',) + data_temp.dtype.descr[0][1:]]
-                            +[('error',) + self.get_error(this_axis).dtype.descr[0][1:]])
+                            +[('error',) + error_temp.dtype.descr[0][1:]])
                     # }}}
-                    retval['axes'][this_axis] = empty(retval['axes'][this_axis].shape, dtype=data_dtype)
+                    retval['axes'][this_axis] = empty(error_temp.shape,
+                            dtype=data_dtype)
                     retval['axes'][this_axis]['data'] = data_temp 
-                    retval['axes'][this_axis]['error'] = self.get_error()
+                    retval['axes'][this_axis]['error'] = error_temp
             all_attributes.remove('axis_coords_error')
-
         if 'axis_coords_units' in all_attributes:
             all_attributes.remove('axis_coords_units')
-            units = self.mkd(self.axis_coords_units)
-            for j in retval['axes'].keys():
-                retval['axes']['axis_coords_units'] = units[j]
+            retval['axes']['units'] = self.mkd(self.axis_coords_units)
+    logger.debug(strm("the keys of 'axes' at this point are",retval['axes'].keys()))
     for thisattr in all_attributes:
         if thisattr not in self._nosave and thisattr[0] != '_':
             the_attr = getattr(self,thisattr)
             if type(the_attr) != MethodType:
                 logger.debug(strm('converting:',thisattr))
                 retval[thisattr] = the_attr
+    logger.debug(strm("the keys of 'axes' at this point are",retval['axes'].keys()))
     return retval
