@@ -1812,17 +1812,19 @@ class figlist(object):
                 and not input_name.startswith(self.basename)):
             name = self.basename + ' ' + input_name
         else:
+            logger.debug(strm("not using a basename",self.basename is not None))
             name = input_name
         if name.find('/') > 0:
             raise ValueError("don't include slashes in the figure name, that's just too confusing")
         logger.debug(strm('called with',name))
-        if name in self.figurelist:
+        if name in self.figurelist:# figure already exists
             if hasattr(self,'mlab'):
-                fig = self.mlab.figure(self.get_fig_number(name),bgcolor = (1,1,1),**kwargs)
+                # with this commit, I removed the kwargs and bgcolor, not sure why
+                fig = self.mlab.figure(self.get_fig_number(name))
                 fig.scene.render_window.aa_frames = 20
                 fig.scene.anti_aliasing_frames = 20
             else:
-                fig = figure(self.get_fig_number(name),**kwargs)
+                fig = figure(self.get_fig_number(name))
             self.current = name
             if self.verbose: print lsafen('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures')
             if boundaries is not None:
@@ -2025,14 +2027,19 @@ class figlist(object):
                     if v == 'outside':
                         kwargs.update(dict(bbox_to_anchor=(1.05,1),loc = 2,borderaxespad=0.))
                 self.next(k)
+                logger.debug(strm("I am about to assign a legend for ",k,". Is it in the figurelist?:",k in self.figurelist))
+                logger.debug(strm("print out the legend object:",gca().legend()))
                 try:
                     autolegend(**kwargs)
                 except:
                     try:
                         self.twinx(orig = True)
+                    except Exception as e:
+                        raise Exception(strm('error while trying to run twinx to place legend for',k,'\n\tfiglist is',self.figurelist,explain_error(e)))
+                    try:
                         autolegend(**kwargs)
                     except Exception as e:
-                        raise Exception(strm('error while trying to run autolegend for',k,'\n\tfiglist is',self.figurelist,explain_error(e)))
+                        raise Exception(strm('error while trying to run autolegend function for',k,'\n\tfiglist is',self.figurelist,explain_error(e)))
     def show(self,*args,**kwargs):
         self.basename = None # must be turned off, so it can cycle through lists, etc, on its own
         if 'line_spacing' in kwargs.keys(): kwargs.pop('line_spacing')# for latex only
@@ -2353,6 +2360,8 @@ def plot(*args,**kwargs):
             try:
                 myx = myy.getaxis(myy.dimlabels[0])
             except:
+                if len(myy.data.shape) == 0:
+                    raise ValueError("I can't plot zero-dimensional data (typically arises when you have a dataset with one point)")
                 myx = r_[0:myy.data.shape[0]]
         if not noerr and type(myy.data_error) is ndarray and len(myy.data_error)>0: #then this should be an errorbar plot
             def thiserrbarplot(*tebargs,**tebkwargs):
