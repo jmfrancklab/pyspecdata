@@ -1,7 +1,0 @@
-include *.rst
-include *.md
-include *.txt
-include pyspecdata/*.f90
-include *.f90
-recursive-include docs *.txt
-recursive-include docs *.pdf

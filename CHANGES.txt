@@ -1,1 +1,0 @@
-v0.9.5, 7/12/15 first version distributed on pip that has been tested to install from pip into a sandbox
