@@ -1,0 +1,606 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyspecdata.nddata &mdash; pySpecData 0.9.5.1.6 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="pySpecData 0.9.5.1.6 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pySpecData
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5.1.6
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pySpecData</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>pyspecdata.nddata</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/generated/pyspecdata.nddata.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pyspecdata-nddata">
+<h1>pyspecdata.nddata<a class="headerlink" href="#pyspecdata-nddata" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pyspecdata.nddata">
+<em class="property">class </em><code class="descclassname">pyspecdata.</code><code class="descname">nddata</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the detailed API reference.
+For an introduction on how to use ND-Data, see the <a class="reference internal" href="../nddata.html#nddata-summary-label"><span class="std std-ref">Main ND-Data Documentation</span></a>.</p>
+<dl class="method">
+<dt id="pyspecdata.nddata.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>initialize nddata – several options.
+Depending on the information available, one of several formats can be used.</p>
+<dl class="docutils">
+<dt>3 arguments:</dt>
+<dd><p class="first"><code class="docutils literal"><span class="pre">nddata(inputarray,</span> <span class="pre">shape,</span> <span class="pre">dimlabels)</span></code></p>
+<table class="last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">inputarray:</th><td class="field-body">ndarray storing the data – note that the size is ignored
+and the data is reshaped as needed</td>
+</tr>
+<tr class="field-even field"><th class="field-name">shape:</th><td class="field-body">a list (or array, <em>etc.</em>) giving the size of each dimension, in order</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">dimlabels:</th><td class="field-body">a list giving the names of each dimension, in order</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>2 arguments:</dt>
+<dd><p class="first"><code class="docutils literal"><span class="pre">nddata(inputarray,</span> <span class="pre">dimlabels)</span></code></p>
+<table class="last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">inputarray:</th><td class="field-body">ndarray storing the data – the data is <em>not</em> reshaped</td>
+</tr>
+<tr class="field-even field"><th class="field-name">dimlabels:</th><td class="field-body">a list giving the names of each dimension, in order</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>2 arguments:</dt>
+<dd><p class="first"><code class="docutils literal"><span class="pre">nddata(inputarray,</span> <span class="pre">single_dimlabel)</span></code></p>
+<table class="last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">inputarray:</th><td class="field-body">ndarray storing the data – must be 1D
+inputarray is <em>also</em> used to label the single axis</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">single_dimlabel:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">a list giving the name of the single axis</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>1 argument:</dt>
+<dd><p class="first"><code class="docutils literal"><span class="pre">nddata(inputarray,</span> <span class="pre">shape,</span> <span class="pre">dimlabels)</span></code></p>
+<table class="last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">inputarray:</th><td class="field-body">ndarray storing the data – reduced to 1D
+A single dimension, called “INDEX” is set.
+This suppresses the printing of axis labels.
+This is used to store numbers and arrays
+that might have error and units,
+but aren’t gridded data.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>keyword args</dt>
+<dd>these can be used to set the labels, etc, and are passed to <code class="xref py py-func docutils literal"><span class="pre">__my_init__()</span></code></dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.__init__" title="pyspecdata.nddata.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>initialize nddata – several options.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.add_noise" title="pyspecdata.nddata.add_noise"><code class="xref py py-obj docutils literal"><span class="pre">add_noise</span></code></a>(intensity)</td>
+<td>Add Gaussian (box-muller) noise to the data.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.aligndata" title="pyspecdata.nddata.aligndata"><code class="xref py py-obj docutils literal"><span class="pre">aligndata</span></code></a>(arg[,&nbsp;verbose])</td>
+<td>This is a fundamental method used by all of the arithmetic operations.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.argmax" title="pyspecdata.nddata.argmax"><code class="xref py py-obj docutils literal"><span class="pre">argmax</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>find the max along a particular axis, and get rid of that axis, replacing it with the index number of the max value</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.argmin" title="pyspecdata.nddata.argmin"><code class="xref py py-obj docutils literal"><span class="pre">argmin</span></code></a>(axes[,&nbsp;raw_index])</td>
+<td>find the min along a particular axis, and get rid of that axis, replacing it with the index number of the min value</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.axis" title="pyspecdata.nddata.axis"><code class="xref py py-obj docutils literal"><span class="pre">axis</span></code></a>(axisname)</td>
+<td>returns a 1-D axis for further manipulation</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.axlen" title="pyspecdata.nddata.axlen"><code class="xref py py-obj docutils literal"><span class="pre">axlen</span></code></a>(axis)</td>
+<td>return the size (length) of an axis, by name</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.axn" title="pyspecdata.nddata.axn"><code class="xref py py-obj docutils literal"><span class="pre">axn</span></code></a>(axis)</td>
+<td>Return the index number for the axis with the name “axis”</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.cdf" title="pyspecdata.nddata.cdf"><code class="xref py py-obj docutils literal"><span class="pre">cdf</span></code></a>([normalized,&nbsp;max_bins])</td>
+<td>calculate the Cumulative Distribution Function for the data along <cite>axis_name</cite></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.check_axis_coords_errors.html#pyspecdata.nddata.check_axis_coords_errors" title="pyspecdata.nddata.check_axis_coords_errors"><code class="xref py py-obj docutils literal"><span class="pre">check_axis_coords_errors</span></code></a>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.chunk" title="pyspecdata.nddata.chunk"><code class="xref py py-obj docutils literal"><span class="pre">chunk</span></code></a>(axisin,&nbsp;*otherargs)</td>
+<td>“Chunking” is defined here to be the opposite of taking a direct product, increasing the number of dimensions by the inverse of the process by which taking a direct product decreases the number of dimensions.  This function chunks axisin into multiple new axes arguments.:</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.chunk_auto" title="pyspecdata.nddata.chunk_auto"><code class="xref py py-obj docutils literal"><span class="pre">chunk_auto</span></code></a>(axis_name,&nbsp;which_field[,&nbsp;…])</td>
+<td>assuming that axis “axis_name” is currently labeled with a structured array, choose one field (“which_field”) of that structured array to generate a new dimension</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.chunkoff" title="pyspecdata.nddata.chunkoff"><code class="xref py py-obj docutils literal"><span class="pre">chunkoff</span></code></a>(axisin,&nbsp;newaxes,&nbsp;newshapes)</td>
+<td>Break chunks off of the dimension given by <cite>axisin</cite>.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.circshift.html#pyspecdata.nddata.circshift" title="pyspecdata.nddata.circshift"><code class="xref py py-obj docutils literal"><span class="pre">circshift</span></code></a>(axis,&nbsp;amount)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.contiguous" title="pyspecdata.nddata.contiguous"><code class="xref py py-obj docutils literal"><span class="pre">contiguous</span></code></a>(lambdafunc[,&nbsp;axis,&nbsp;verbose])</td>
+<td>Return contiguous blocks that satisfy the condition given by <cite>lambdafunc</cite></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.contour" title="pyspecdata.nddata.contour"><code class="xref py py-obj docutils literal"><span class="pre">contour</span></code></a>([labels])</td>
+<td>Contour plot – kwargs are passed to the matplotlib <cite>contour</cite> function.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.convolve" title="pyspecdata.nddata.convolve"><code class="xref py py-obj docutils literal"><span class="pre">convolve</span></code></a>(axisname,&nbsp;filterwidth[,&nbsp;convfunc])</td>
+<td>Perform a convolution.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.copy" title="pyspecdata.nddata.copy"><code class="xref py py-obj docutils literal"><span class="pre">copy</span></code></a>([data])</td>
+<td>Return a full copy of this instance.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.nddata.copyaxes.html#pyspecdata.nddata.copyaxes" title="pyspecdata.nddata.copyaxes"><code class="xref py py-obj docutils literal"><span class="pre">copyaxes</span></code></a>(other)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.cropped_log" title="pyspecdata.nddata.cropped_log"><code class="xref py py-obj docutils literal"><span class="pre">cropped_log</span></code></a>([subplot_axes,&nbsp;magnitude])</td>
+<td>For the purposes of plotting, this generates a copy where I take the log, spanning “magnitude” orders of magnitude</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.nddata.diff.html#pyspecdata.nddata.diff" title="pyspecdata.nddata.diff"><code class="xref py py-obj docutils literal"><span class="pre">diff</span></code></a>(thisaxis[,&nbsp;backwards])</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.extend" title="pyspecdata.nddata.extend"><code class="xref py py-obj docutils literal"><span class="pre">extend</span></code></a>(axis,&nbsp;extent[,&nbsp;fill_with,&nbsp;tolerance,&nbsp;…])</td>
+<td>If <cite>axis</cite> is uniformly ascending with spacing <span class="math">\(dx\)</span>, then extend by adding a point every <span class="math">\(dx\)</span> until the axis includes the point <cite>extent</cite>.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.extend_for_shear" title="pyspecdata.nddata.extend_for_shear"><code class="xref py py-obj docutils literal"><span class="pre">extend_for_shear</span></code></a>(altered_axis,&nbsp;propto_axis,&nbsp;…)</td>
+<td>this is propto_axis helper function for <cite>.fourier.shear</cite></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.fld" title="pyspecdata.nddata.fld"><code class="xref py py-obj docutils literal"><span class="pre">fld</span></code></a>(dict_in[,&nbsp;noscalar])</td>
+<td>flatten dictionary – return list.  This is the inverse of <a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.mkd" title="pyspecdata.nddata.mkd"><code class="xref py py-func docutils literal"><span class="pre">nddata.mkd()</span></code></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.fourier_shear" title="pyspecdata.nddata.fourier_shear"><code class="xref py py-obj docutils literal"><span class="pre">fourier_shear</span></code></a>(altered_axis,&nbsp;propto_axis,&nbsp;…)</td>
+<td>the fourier shear method – see .shear() documentation</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.fromaxis" title="pyspecdata.nddata.fromaxis"><code class="xref py py-obj docutils literal"><span class="pre">fromaxis</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Generate an nddata object from one of the axis labels.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft"><code class="xref py py-obj docutils literal"><span class="pre">ft</span></code></a>(axes[,&nbsp;tolerance,&nbsp;cosine,&nbsp;verbose])</td>
+<td>This performs a Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ft_clear_startpoints" title="pyspecdata.nddata.ft_clear_startpoints"><code class="xref py py-obj docutils literal"><span class="pre">ft_clear_startpoints</span></code></a>(axis[,&nbsp;t,&nbsp;f,&nbsp;verbose])</td>
+<td>clears memory of where the origins in the time and frequency domain are this is useful, e.g. when you want to ift and center about time=0 by setting shift=True you can also manually set the points:</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ft_state_to_str" title="pyspecdata.nddata.ft_state_to_str"><code class="xref py py-obj docutils literal"><span class="pre">ft_state_to_str</span></code></a>(*axes)</td>
+<td>Return a string that lists the FT domain for the given axes.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ftshift" title="pyspecdata.nddata.ftshift"><code class="xref py py-obj docutils literal"><span class="pre">ftshift</span></code></a>(axis,&nbsp;value)</td>
+<td>FT-based shift.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.get_covariance" title="pyspecdata.nddata.get_covariance"><code class="xref py py-obj docutils literal"><span class="pre">get_covariance</span></code></a>()</td>
+<td>this returns the covariance matrix of the data</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.get_error" title="pyspecdata.nddata.get_error"><code class="xref py py-obj docutils literal"><span class="pre">get_error</span></code></a>(*args)</td>
+<td>get a copy of the errors</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.get_ft_prop" title="pyspecdata.nddata.get_ft_prop"><code class="xref py py-obj docutils literal"><span class="pre">get_ft_prop</span></code></a>(axis[,&nbsp;propname])</td>
+<td>Gets the FT property given by <cite>propname</cite>.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.get_plot_color.html#pyspecdata.nddata.get_plot_color" title="pyspecdata.nddata.get_plot_color"><code class="xref py py-obj docutils literal"><span class="pre">get_plot_color</span></code></a>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.get_prop" title="pyspecdata.nddata.get_prop"><code class="xref py py-obj docutils literal"><span class="pre">get_prop</span></code></a>(propname)</td>
+<td>return arbitrary ND-data properties (typically acquisition parameters <em>etc.</em>) by name (<cite>propname</cite>)</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.get_units.html#pyspecdata.nddata.get_units" title="pyspecdata.nddata.get_units"><code class="xref py py-obj docutils literal"><span class="pre">get_units</span></code></a>(*args)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.nddata.getaxis.html#pyspecdata.nddata.getaxis" title="pyspecdata.nddata.getaxis"><code class="xref py py-obj docutils literal"><span class="pre">getaxis</span></code></a>(axisname)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.getaxisshape.html#pyspecdata.nddata.getaxisshape" title="pyspecdata.nddata.getaxisshape"><code class="xref py py-obj docutils literal"><span class="pre">getaxisshape</span></code></a>(axisname)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.nddata.gnuplot_save.html#pyspecdata.nddata.gnuplot_save" title="pyspecdata.nddata.gnuplot_save"><code class="xref py py-obj docutils literal"><span class="pre">gnuplot_save</span></code></a>(filename)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.hdf5_write" title="pyspecdata.nddata.hdf5_write"><code class="xref py py-obj docutils literal"><span class="pre">hdf5_write</span></code></a>(h5path[,&nbsp;directory,&nbsp;verbose])</td>
+<td>Write the nddata to an HDF5 file.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.nddata.histogram.html#pyspecdata.nddata.histogram" title="pyspecdata.nddata.histogram"><code class="xref py py-obj docutils literal"><span class="pre">histogram</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.human_units.html#pyspecdata.nddata.human_units" title="pyspecdata.nddata.human_units"><code class="xref py py-obj docutils literal"><span class="pre">human_units</span></code></a>([verbose])</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift"><code class="xref py py-obj docutils literal"><span class="pre">ift</span></code></a>(axes[,&nbsp;tolerance,&nbsp;verbose])</td>
+<td>This performs a Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.indices" title="pyspecdata.nddata.indices"><code class="xref py py-obj docutils literal"><span class="pre">indices</span></code></a>(axis_name,&nbsp;values)</td>
+<td>Return a string of indeces that most closely match the axis labels corresponding to values.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.inhomog_coords" title="pyspecdata.nddata.inhomog_coords"><code class="xref py py-obj docutils literal"><span class="pre">inhomog_coords</span></code></a>(direct_dim,&nbsp;indirect_dim[,&nbsp;…])</td>
+<td>Apply the “inhomogeneity transform,” which rotates the data by <span class="math">\(45^{\circ}\)</span>, and then mirrors the portion with <span class="math">\(t_2&lt;0\)</span> in order to transform from a <span class="math">\((t_1,t_2)\)</span> coordinate system to a <span class="math">\((t_{inh},t_{homog})\)</span> coordinate system.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.integrate" title="pyspecdata.nddata.integrate"><code class="xref py py-obj docutils literal"><span class="pre">integrate</span></code></a>(thisaxis[,&nbsp;backwards,&nbsp;cumulative])</td>
+<td>this performs an integration – which is similar to a sum, except that it takes the axis into account, i.e., it performs:</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.interp" title="pyspecdata.nddata.interp"><code class="xref py py-obj docutils literal"><span class="pre">interp</span></code></a>(axis,&nbsp;axisvalues[,&nbsp;past_bounds,&nbsp;…])</td>
+<td>interpolate data values given axis values</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.invinterp" title="pyspecdata.nddata.invinterp"><code class="xref py py-obj docutils literal"><span class="pre">invinterp</span></code></a>(axis,&nbsp;values,&nbsp;**kwargs)</td>
+<td>interpolate axis values given data values</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.labels" title="pyspecdata.nddata.labels"><code class="xref py py-obj docutils literal"><span class="pre">labels</span></code></a>(*args)</td>
+<td>label the dimensions, given in listofstrings with the axis labels given in listofaxes – listofaxes must be a numpy array;</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.linear_shear" title="pyspecdata.nddata.linear_shear"><code class="xref py py-obj docutils literal"><span class="pre">linear_shear</span></code></a>(along_axis,&nbsp;propto_axis,&nbsp;shear_amnt)</td>
+<td>the linear shear – see <cite>self.shear</cite> for documentation</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.matchdims" title="pyspecdata.nddata.matchdims"><code class="xref py py-obj docutils literal"><span class="pre">matchdims</span></code></a>(other)</td>
+<td>add any dimensions to self that are not present in other</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.matrices_3d" title="pyspecdata.nddata.matrices_3d"><code class="xref py py-obj docutils literal"><span class="pre">matrices_3d</span></code></a>([also1d,&nbsp;invert,&nbsp;max_dimsize,&nbsp;…])</td>
+<td>returns X,Y,Z,x_axis,y_axis</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.mayavi_surf" title="pyspecdata.nddata.mayavi_surf"><code class="xref py py-obj docutils literal"><span class="pre">mayavi_surf</span></code></a>()</td>
+<td>use the mayavi surf function, assuming that we’ve already loaded mlab</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.mean" title="pyspecdata.nddata.mean"><code class="xref py py-obj docutils literal"><span class="pre">mean</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Take the mean and set the error to the standard deviation</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.mean_all_but" title="pyspecdata.nddata.mean_all_but"><code class="xref py py-obj docutils literal"><span class="pre">mean_all_but</span></code></a>(listofdims)</td>
+<td>take the mean over all dimensions not in the list</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.mean_nopop.html#pyspecdata.nddata.mean_nopop" title="pyspecdata.nddata.mean_nopop"><code class="xref py py-obj docutils literal"><span class="pre">mean_nopop</span></code></a>(axis)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.mean_weighted" title="pyspecdata.nddata.mean_weighted"><code class="xref py py-obj docutils literal"><span class="pre">mean_weighted</span></code></a>(axisname)</td>
+<td>perform  the weighted mean along <cite>axisname</cite> (use $sigma$ from $sigma = $self.get_error() do generate $1/sigma$ weights)</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.meshplot" title="pyspecdata.nddata.meshplot"><code class="xref py py-obj docutils literal"><span class="pre">meshplot</span></code></a>([stride,&nbsp;alpha,&nbsp;onlycolor,&nbsp;light,&nbsp;…])</td>
+<td>takes both rotation and light as elevation, azimuth</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.mkd" title="pyspecdata.nddata.mkd"><code class="xref py py-obj docutils literal"><span class="pre">mkd</span></code></a>(*arg,&nbsp;**kwargs)</td>
+<td>This is an internal function that accepts one of the internal attributes (axis_coords, etc) that are stored as lists, and return a list that is labeled with the dimlabels.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.multimin.html#pyspecdata.nddata.multimin" title="pyspecdata.nddata.multimin"><code class="xref py py-obj docutils literal"><span class="pre">multimin</span></code></a>(minfunc,&nbsp;axisname,&nbsp;filterwidth,&nbsp;…)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.name" title="pyspecdata.nddata.name"><code class="xref py py-obj docutils literal"><span class="pre">name</span></code></a>(*arg)</td>
+<td>args:</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.normalize.html#pyspecdata.nddata.normalize" title="pyspecdata.nddata.normalize"><code class="xref py py-obj docutils literal"><span class="pre">normalize</span></code></a>(axis[,&nbsp;first_figure])</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.nddata.oldtimey.html#pyspecdata.nddata.oldtimey" title="pyspecdata.nddata.oldtimey"><code class="xref py py-obj docutils literal"><span class="pre">oldtimey</span></code></a>([alpha,&nbsp;ax,&nbsp;linewidth,&nbsp;…])</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.plot_labels" title="pyspecdata.nddata.plot_labels"><code class="xref py py-obj docutils literal"><span class="pre">plot_labels</span></code></a>(labels[,&nbsp;fmt])</td>
+<td>this only works for one axis now</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.polyfit" title="pyspecdata.nddata.polyfit"><code class="xref py py-obj docutils literal"><span class="pre">polyfit</span></code></a>(axis[,&nbsp;order,&nbsp;force_y_intercept])</td>
+<td>return the coefficients and the fit –&gt; later, should probably branch this off as a new type of fit class</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.popdim.html#pyspecdata.nddata.popdim" title="pyspecdata.nddata.popdim"><code class="xref py py-obj docutils literal"><span class="pre">popdim</span></code></a>(dimname)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.random_mask" title="pyspecdata.nddata.random_mask"><code class="xref py py-obj docutils literal"><span class="pre">random_mask</span></code></a>(axisname[,&nbsp;threshold,&nbsp;inversion])</td>
+<td>generate a random mask with about ‘threshold’ of the points thrown out</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.register_axis" title="pyspecdata.nddata.register_axis"><code class="xref py py-obj docutils literal"><span class="pre">register_axis</span></code></a>(arg)</td>
+<td>Interpolate the data so that the given axes are in register with a set of specified values.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.nddata.rename.html#pyspecdata.nddata.rename" title="pyspecdata.nddata.rename"><code class="xref py py-obj docutils literal"><span class="pre">rename</span></code></a>(previous,&nbsp;new)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.reorder" title="pyspecdata.nddata.reorder"><code class="xref py py-obj docutils literal"><span class="pre">reorder</span></code></a>(*axes,&nbsp;**kwargs)</td>
+<td>Reorder the dimensions</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.nddata.replicate_units.html#pyspecdata.nddata.replicate_units" title="pyspecdata.nddata.replicate_units"><code class="xref py py-obj docutils literal"><span class="pre">replicate_units</span></code></a>(other)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.repwlabels.html#pyspecdata.nddata.repwlabels" title="pyspecdata.nddata.repwlabels"><code class="xref py py-obj docutils literal"><span class="pre">repwlabels</span></code></a>(axis)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.nddata.retaxis.html#pyspecdata.nddata.retaxis" title="pyspecdata.nddata.retaxis"><code class="xref py py-obj docutils literal"><span class="pre">retaxis</span></code></a>(axisname)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.run.html#pyspecdata.nddata.run" title="pyspecdata.nddata.run"><code class="xref py py-obj docutils literal"><span class="pre">run</span></code></a>(*args)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.run_avg" title="pyspecdata.nddata.run_avg"><code class="xref py py-obj docutils literal"><span class="pre">run_avg</span></code></a>(thisaxisname[,&nbsp;decimation,&nbsp;centered])</td>
+<td>a simple running average</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.run_nopop.html#pyspecdata.nddata.run_nopop" title="pyspecdata.nddata.run_nopop"><code class="xref py py-obj docutils literal"><span class="pre">run_nopop</span></code></a>(func,&nbsp;axis)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.nddata.runcopy.html#pyspecdata.nddata.runcopy" title="pyspecdata.nddata.runcopy"><code class="xref py py-obj docutils literal"><span class="pre">runcopy</span></code></a>(*args)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.secsy_transform" title="pyspecdata.nddata.secsy_transform"><code class="xref py py-obj docutils literal"><span class="pre">secsy_transform</span></code></a>(direct_dim,&nbsp;indirect_dim[,&nbsp;…])</td>
+<td>Shift the time-domain data backwards by the echo time.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.secsy_transform_manual" title="pyspecdata.nddata.secsy_transform_manual"><code class="xref py py-obj docutils literal"><span class="pre">secsy_transform_manual</span></code></a>(direct_dim,&nbsp;indirect_dim)</td>
+<td>Shift the time-domain data backwards by the echo time.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.set_error" title="pyspecdata.nddata.set_error"><code class="xref py py-obj docutils literal"><span class="pre">set_error</span></code></a>(*args)</td>
+<td>set the errors: either</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.set_ft_prop" title="pyspecdata.nddata.set_ft_prop"><code class="xref py py-obj docutils literal"><span class="pre">set_ft_prop</span></code></a>(axis[,&nbsp;propname,&nbsp;value])</td>
+<td>Sets the FT property given by <cite>propname</cite>.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.set_plot_color.html#pyspecdata.nddata.set_plot_color" title="pyspecdata.nddata.set_plot_color"><code class="xref py py-obj docutils literal"><span class="pre">set_plot_color</span></code></a>(thiscolor)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.set_prop" title="pyspecdata.nddata.set_prop"><code class="xref py py-obj docutils literal"><span class="pre">set_prop</span></code></a>(*args)</td>
+<td>set a ‘property’ of the nddata</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.set_units.html#pyspecdata.nddata.set_units" title="pyspecdata.nddata.set_units"><code class="xref py py-obj docutils literal"><span class="pre">set_units</span></code></a>(*args)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.setaxis" title="pyspecdata.nddata.setaxis"><code class="xref py py-obj docutils literal"><span class="pre">setaxis</span></code></a>(axis,&nbsp;value)</td>
+<td>set the value of the axis if you pass a function as the <cite>value</cite>, it will use the existing axis labels as the argument of the function, and then put the result into the axis labels</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.shear" title="pyspecdata.nddata.shear"><code class="xref py py-obj docutils literal"><span class="pre">shear</span></code></a>(along_axis,&nbsp;propto_axis,&nbsp;shear_amnt[,&nbsp;…])</td>
+<td>Shear the data <span class="math">\(s\)</span>:</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.smoosh" title="pyspecdata.nddata.smoosh"><code class="xref py py-obj docutils literal"><span class="pre">smoosh</span></code></a>(dimstocollapse[,&nbsp;dimname,&nbsp;noaxis,&nbsp;…])</td>
+<td>Collapse multiple dimensions into one dimension.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.sort.html#pyspecdata.nddata.sort" title="pyspecdata.nddata.sort"><code class="xref py py-obj docutils literal"><span class="pre">sort</span></code></a>(axisname[,&nbsp;reverse])</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.nddata.sort_and_xy.html#pyspecdata.nddata.sort_and_xy" title="pyspecdata.nddata.sort_and_xy"><code class="xref py py-obj docutils literal"><span class="pre">sort_and_xy</span></code></a>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.squeeze" title="pyspecdata.nddata.squeeze"><code class="xref py py-obj docutils literal"><span class="pre">squeeze</span></code></a>([verbose])</td>
+<td>squeeze singleton dimensions – return a list of the labels for the axes that are dropped</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.nddata.sum.html#pyspecdata.nddata.sum" title="pyspecdata.nddata.sum"><code class="xref py py-obj docutils literal"><span class="pre">sum</span></code></a>(axes)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.nddata.sum_nopop.html#pyspecdata.nddata.sum_nopop" title="pyspecdata.nddata.sum_nopop"><code class="xref py py-obj docutils literal"><span class="pre">sum_nopop</span></code></a>(axes)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.to_ppm" title="pyspecdata.nddata.to_ppm"><code class="xref py py-obj docutils literal"><span class="pre">to_ppm</span></code></a>()</td>
+<td>Function that converts from Hz to ppm using Bruker parameters</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.unitify_axis" title="pyspecdata.nddata.unitify_axis"><code class="xref py py-obj docutils literal"><span class="pre">unitify_axis</span></code></a>(axis_name[,&nbsp;is_axis])</td>
+<td>this just generates an axis label with appropriate units</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.nddata.units_texsafe.html#pyspecdata.nddata.units_texsafe" title="pyspecdata.nddata.units_texsafe"><code class="xref py py-obj docutils literal"><span class="pre">units_texsafe</span></code></a>(*args)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.unset_prop" title="pyspecdata.nddata.unset_prop"><code class="xref py py-obj docutils literal"><span class="pre">unset_prop</span></code></a>(arg)</td>
+<td>remove a ‘property’</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.nddata.waterfall.html#pyspecdata.nddata.waterfall" title="pyspecdata.nddata.waterfall"><code class="xref py py-obj docutils literal"><span class="pre">waterfall</span></code></a>([alpha,&nbsp;ax,&nbsp;rotation,&nbsp;color,&nbsp;…])</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, John M. Franck.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.9.5.1.6',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

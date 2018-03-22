@@ -1,0 +1,281 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyspecdata.axis_manipulation.shear.linear_shear &mdash; pySpecData 0.9.5.1.6 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="pySpecData 0.9.5.1.6 documentation" href="../index.html"/>
+        <link rel="up" title="Axis Manipulation Functions" href="../axis_manipulation.html"/>
+        <link rel="next" title="pyspecdata.axis_manipulation.register_axis.register_axis" href="pyspecdata.axis_manipulation.register_axis.register_axis.html"/>
+        <link rel="prev" title="pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords" href="pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pySpecData
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5.1.6
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../notebook.html#setting-up-the-notebook">Setting up the notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebook.html#running-the-notebook">Running the notebook</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../notebook.html#how-it-works">How it works</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../notebook.html#the-latex-end">The LaTeX end</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../notebook.html#the-python-end">The python end</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../pyspecdata.html">N-dimensional Data (nddata)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pyspecdata.html#full-list-of-nddata-methods">Full list of <cite>nddata</cite> methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../latexscripts.html">Documentation of Notebook Helper Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../nddata.html">ND-Data</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../nddata.html#dimension-labels">Dimension labels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nddata.html#item-selection-and-slicing">Item selection and slicing</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../nddata.html#methods-by-sub-topic">Methods by Sub-Topic</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../axis_manipulation.html">Axis Manipulation Functions</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords.html">pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">pyspecdata.axis_manipulation.shear.linear_shear</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyspecdata.axis_manipulation.register_axis.register_axis.html">pyspecdata.axis_manipulation.register_axis.register_axis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyspecdata.axis_manipulation.secsy.secsy_transform_manual.html">pyspecdata.axis_manipulation.secsy.secsy_transform_manual</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../fourier.html">Fourier Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pySpecData</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../notebook.html">LaTeX Notebook Functionality</a> &raquo;</li>
+        
+          <li><a href="../pyspecdata.html">N-dimensional Data (nddata)</a> &raquo;</li>
+        
+          <li><a href="../axis_manipulation.html">Axis Manipulation Functions</a> &raquo;</li>
+        
+      <li>pyspecdata.axis_manipulation.shear.linear_shear</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/generated/pyspecdata.axis_manipulation.shear.linear_shear.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pyspecdata-axis-manipulation-shear-linear-shear">
+<h1>pyspecdata.axis_manipulation.shear.linear_shear<a class="headerlink" href="#pyspecdata-axis-manipulation-shear-linear-shear" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="pyspecdata.axis_manipulation.shear.linear_shear">
+<code class="descclassname">pyspecdata.axis_manipulation.shear.</code><code class="descname">linear_shear</code><span class="sig-paren">(</span><em>self</em>, <em>along_axis</em>, <em>propto_axis</em>, <em>shear_amnt</em>, <em>zero_fill=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.shear.linear_shear" title="Permalink to this definition">¶</a></dt>
+<dd><p>the linear shear – see <cite>self.shear</cite> for documentation</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pyspecdata.axis_manipulation.register_axis.register_axis.html" class="btn btn-neutral float-right" title="pyspecdata.axis_manipulation.register_axis.register_axis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords.html" class="btn btn-neutral" title="pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, John M. Franck.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.9.5.1.6',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

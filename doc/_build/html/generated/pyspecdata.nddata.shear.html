@@ -1,0 +1,289 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyspecdata.nddata.shear &mdash; pySpecData 0.9.5.1.6 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="pySpecData 0.9.5.1.6 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pySpecData
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5.1.6
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pySpecData</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>pyspecdata.nddata.shear</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/generated/pyspecdata.nddata.shear.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pyspecdata-nddata-shear">
+<h1>pyspecdata.nddata.shear<a class="headerlink" href="#pyspecdata-nddata-shear" title="Permalink to this headline">¶</a></h1>
+<dl class="method">
+<dt id="pyspecdata.nddata.shear">
+<code class="descclassname">nddata.</code><code class="descname">shear</code><span class="sig-paren">(</span><em>along_axis</em>, <em>propto_axis</em>, <em>shear_amnt</em>, <em>zero_fill=True</em>, <em>start_in_conj=False</em>, <em>method='linear'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.shear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shear the data <span class="math">\(s\)</span>:</p>
+<p><span class="math">\(s(x',y,z) = s(x+ay,y,z)\)</span></p>
+<p>where <span class="math">\(x\)</span> is the <cite>altered_axis</cite> and <span class="math">\(y\)</span> is the
+<cite>propto_axis</cite>.  (Actually typically 2D, but <span class="math">\(z\)</span> included
+just to illustrate other dimensions that aren’t involved)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>method</strong> (<em>{'fourier'</em><em>,</em><em>'linear'}</em>) – <dl class="docutils">
+<dt>fourier</dt>
+<dd>Use the Fourier shift theorem (<em>i.e.</em>, sinc interpolation).  A
+shear is equivalent to the following in the conjugate domain:<p>..math: <cite>tilde{s}(f_x,f’_y,z) = tilde{s}(f_x,f_y-af_x,f_z)</cite></p>
+<p class="last">Because of this, the algorithm <strong>also</strong>
+automatically <cite>extend`s the data in `f_y</cite> axis.
+Equivalently, it increases the resolution
+(decreases the interval between points) in the
+<cite>propto_axis</cite> dimension.  This prevents aliasing
+in the conjugate domain, which will corrupt the
+data <em>w.r.t.</em> successive transformations. It does
+this whether or not <cite>zero_fill</cite> is set
+(<cite>zero_fill</cite> only controls filling in the
+“current” dimension)</p>
+</dd>
+<dt>linear</dt>
+<dd>Use simple linear interpolation.</dd>
+</dl>
+</li>
+<li><strong>altered_axis</strong> (<a class="reference internal" href="../units.html#pyspecdata.units.units.str" title="pyspecdata.units.units.str"><em>str</em></a>) – The coordinate for which data is altered, <em>i.e.</em>
+..math: <cite>x</cite> such that ..math: <cite>f(x+ay,y)</cite>.</li>
+<li><strong>by_amount</strong> (<em>double</em>) – The amount of the shear (..math: <cite>a</cite> in the previous)</li>
+<li><strong>propto_axis</strong> (<a class="reference internal" href="../units.html#pyspecdata.units.units.str" title="pyspecdata.units.units.str"><em>str</em></a>) – The shift along the <cite>altered_axis</cite> dimension is
+proportional to the shift along <cite>propto_axis</cite>.
+The position of data relative to the <cite>propto_axis</cite> is not
+changed.
+Note that by the shift theorem, in the frequency domain,
+an equivalent magnitude, opposite sign, shear is applied
+with the <cite>propto_axis</cite> and <cite>altered_axis</cite> dimensions
+flipped.</li>
+<li><strong>start_in_conj</strong> (<em>{False</em><em>, </em><em>True}</em><em>, </em><em>optional</em>) – <p>Defaults to False</p>
+<p>For efficiency, one can replace a double (I)FT call followed by a
+shear call with a single shear call where <cite>start_in_conj</cite> is set.</p>
+<p><cite>self</cite> before the call is given in the conjugate domain  (<em>i.e.</em>,
+<span class="math">\(f\)</span> <em>vs.</em> <span class="math">\(t\)</span>) along both dimensions from the one that’s
+desired.  This means: (1) <cite>self</cite> after the function call transformed
+into the conjugate domain from that before the call and (2)
+<cite>by_amount</cite>, <cite>altered_axis</cite>, and <cite>propto_axis</cite> all refer to the shear
+in the conjugate domain that the data is in at the end of the
+function call.</p>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, John M. Franck.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.9.5.1.6',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

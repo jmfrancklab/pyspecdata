@@ -1,0 +1,326 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Overview of ND-Data for Development &mdash; pySpecData 0.9.5.1.6 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="pySpecData 0.9.5.1.6 documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pySpecData
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5.1.6
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pySpecData</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Overview of ND-Data for Development</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/develop.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="overview-of-nd-data-for-development">
+<span id="nddata-devel"></span><h1>Overview of ND-Data for Development<a class="headerlink" href="#overview-of-nd-data-for-development" title="Permalink to this headline">¶</a></h1>
+<p>Here we give an overview of the attributes that are used to store
+the various nddata components:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">dimlabels:</th><td class="field-body"><p class="first">An ordered list of the dimension names.
+<strong>In general, the order of other list objects must be given
+dimlabels.</strong></p>
+<p>If the data is zero-dimensional, this should be set to an
+empty list, in which case <cite>ndshape(…).zero_dimensional</cite>
+will return <cite>True</cite>.</p>
+<p>A dimension name of <code class="docutils literal"><span class="pre">'INDEX'</span></code> is special, and is used to
+explicitly indicate that the axes are unlabeled.
+(see <code class="xref py py-func docutils literal"><span class="pre">nddata.__init__()</span></code>)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">axis_coords:</th><td class="field-body"><p class="first">The axis labels (<em>x-</em>, <em>y-</em>, <em>z-</em>, and higher-dimensional
+coordinates).  This can be set to:</p>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt><cite>None</cite> or an empty list, meaning that none of the axes</dt>
+<dd>have been explicitly labeled.</dd>
+</dl>
+</li>
+<li>A list of numpy arrays, which correspond to the axis
+labels.<ul>
+<li>One or more of these can be set to <cite>None</cite>, meaning that
+the axis isn’t explicitly labeled.</li>
+<li>Note that the numpy array axis is explicitly allowed to
+be a structured array → see <code class="xref py py-func docutils literal"><span class="pre">chunk_auto()</span></code>.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">axis_coords_error:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first">The errors associated with the axis labels.  This can be set
+to the same datatypes as the axis labels themselves.  In
+general, error should only be supplied when coordinates are
+also supplied.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">axis_coords_units:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">The units associated with the axis labels.  Currently, this
+is just a text string, but will be upgraded to a fancier type
+of object that supports conversion.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">data:</th><td class="field-body"><p class="first">The data itself.
+The number of dimensions must match the length of dimlabels,
+or untowards things will happen!</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">data_error:</th><td class="field-body"><p class="first">The same size as <cite>data</cite> → stores the uncertainty associated
+with data.</p>
+<p>There some future plans to extend this to a
+higher-dimensional object that could store correlated errors.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">data_units:</th><td class="field-body"><p class="first">The units of the data → again, a string, plans on upgrading.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">other_info:</th><td class="field-body"><p class="first">This is a dictionary of data that stores any other
+information.
+For example, information pertaining to the state of the axes
+before/after Fourier transformation is stored here,
+as well the acquisition parameters that are read from a data
+file.
+The data is accessed through <code class="xref py py-func docutils literal"><span class="pre">nddata.get_prop()</span></code> and
+<code class="xref py py-func docutils literal"><span class="pre">nddata.set_prop()</span></code>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">_nosave:</th><td class="field-body"><p class="first last">Attributes that are not saved to file (functions, <em>etc.</em>).</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Of these, only <cite>data</cite> and <cite>dimlabels</cite> <em>must</em> be set → if the
+others are missing, they are assumed not to exist.</p>
+<p>Note that these attributes are in general <strong>not</strong> intended to be
+directly manipulated – certainly not but the user, and (when
+possible) not even by internal functions.
+To help in manipulating the data,
+various internal helper functions are supplied.</p>
+<div class="section" id="relevant-functions">
+<h2>Relevant functions<a class="headerlink" href="#relevant-functions" title="Permalink to this headline">¶</a></h2>
+<p><code class="xref py py-func docutils literal"><span class="pre">nddata.axn()</span></code> is used to get the index number associated
+with the various dimensions.
+For example, <code class="docutils literal"><span class="pre">self.axis_coords_units[self.axn('t2')]</span></code> would
+give the units associated with the axis labels for the dimension
+called ‘t2’.</p>
+<p><code class="xref py py-func docutils literal"><span class="pre">nddata.mkd()</span></code> (make dictionary) takes one of the list
+objects noted above and transforms it into a dictionary,
+where the keys are the elements of dimlabels.
+This makes the objects easier to manipulate.  To return the final
+result as a list, use <code class="xref py py-func docutils literal"><span class="pre">nddata.fld()</span></code> (flatten dictionary).</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, John M. Franck.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.9.5.1.6',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
