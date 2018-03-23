@@ -12,11 +12,11 @@ Contents:
     :maxdepth: 2
 
     
-    modules.rst
-    notebook.rst
     nddata.rst
+    modules.rst
     figlist.rst
     units.rst
+    notebook.rst
 
 
 Indices and tables
