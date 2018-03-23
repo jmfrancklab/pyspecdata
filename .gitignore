@@ -1,0 +1,6 @@
+build/
+dist/
+paramset_pyspecdata.egg-info/
+paramset_pyspecdata/
+pySpecData.egg-info/
+pyspecdata/
