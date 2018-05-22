@@ -3859,7 +3859,33 @@ class nddata (object):
     #}}}
     #{{{ poly. fit
     def polyfit(self,axis,order=1,force_y_intercept = None):
-        'return the coefficients and the fit --> later, should probably branch this off as a new type of fit class'
+        '''polynomial fitting routine -- return the coefficients and the fit
+        ..note:
+            later, should probably branch this off as a new type of fit class
+
+        ..warning:
+            for some reason, this version doesn't use orthogonal polynomials,
+            as the numpy routine does -- we had diagnosed and determined that
+            that creates noticeably different results, so fix that here.
+
+        Parameters
+        ----------
+        axis: str
+            name of the axis that you want to fit along
+            (not sure if this is currently tested for multi-dimensional data,
+            but the idea should be that multiple fits would be returned.)
+        order: int
+            the order of the polynomial to be fit
+        force_y_intercept: double or None
+            force the y intercept to a particular value (e.g. 0)
+
+        Returns
+        -------
+        c: ndarray
+            a standard numpy array containing the coefficients (in ascending polynomial order)
+        formult: nddata
+            an nddata containing the result of the fit
+        '''
         x = self.getaxis(axis).copy().reshape(-1,1)
         #{{{ make a copy of self with the relevant dimension second to last (i.e. rows)
         formult = self.copy()
