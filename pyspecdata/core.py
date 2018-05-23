@@ -1513,7 +1513,7 @@ def plot_color_counter(*args,**kwargs):
         if passed an argument: make it so that the next line will have the properties given by the argument
 
         if not passed an argument: just return the current plot properties,so that I can cycle back to it"""
-    ax, = process_kwargs([('ax',gca())],kwargs)
+    ax = process_kwargs([('ax',gca())],kwargs)
     if len(args)>0:
         if LooseVersion(matplotlib.__version__) >= LooseVersion("1.5"):
             # {{{ find the element before the one we want
@@ -4032,16 +4032,20 @@ class nddata (object):
         #}}}
         return self
     def mean(self,*args,**kwargs):
-        r'Take the mean and set the error to the standard deviation'
+        r'''Take the mean and set the error to the standard deviation
+
+        Parameters
+        ----------
+        return_error: bool
+            whether or note to return the standard deviation as an error
+        '''
+        print "entered the mean function"
         #{{{ process arguments
         if len(args) > 1:
             raise ValueError('you can\'t pass more than one argument!!')
         axes = self._possibly_one_axis(*args)
-        return_error = True
-        if 'return_error' in kwargs.keys():
-            return_error = kwargs.pop('return_error')
-        if len(kwargs) > 0:
-            raise ValueError("I didn't understand the kwargs:",repr(kwargs))
+        return_error = process_kwargs([('return_error',True)],kwargs)
+        print "return error is",return_error
         if (type(axes) is str):
             axes = [axes]
         #}}}
@@ -4069,6 +4073,7 @@ class nddata (object):
             if return_error: # this needs to go after the data setting
                 self.set_error(thiserror) # set the error to the standard deviation
             self._pop_axis_info(thisindex)
+            print "return error is",return_error
         return self
     def mean_nopop(self,axis):
         self = self.run_nopop(mean,axis=axis)
@@ -5709,6 +5714,9 @@ class nddata (object):
         directory : str
             the directory where the HDF5 file lives.
         """
+        for thisax in self.dimlabels:
+            if self.getaxis(thisax) is None or len(self.getaxis(thisax)) == 0:
+                raise ValueError(strm("The axis",thisax,"appears not to have a label!  I refuse to save data to HDF5 if you do not label all your axes!!"))
         #{{{ add the final node based on the name stored in the nddata structure
         if h5path[-1] != '/': h5path += '/' # make sure it ends in a slash first
         try:
