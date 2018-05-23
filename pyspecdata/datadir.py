@@ -6,7 +6,9 @@ This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file.
 import os
 import ConfigParser
 import platform
-from .general_functions import process_kwargs
+from .general_functions import process_kwargs, strm
+import logging
+logger = logging.getLogger('pyspecdata.datadir')
 class MyConfig(object):
     r'''Provides an easy interface to the pyspecdata configuration file.
     Only one instance _my_config should be created -- this instance is used by
@@ -157,48 +159,75 @@ def getDATADIR(*args,**kwargs):
                 ```
                 which would find data with `exp_type` ``alternate_type_one`` in
                 ``/opt/other_data/type_one``.
-        * use `os.walk` to search for a directory with this name,
-            starting from the data identified by `experimental_data`.
+        * use `os.walk` to search for a directory with this name
+            inside the directory identified by `experimental_data`.
             excluding things that start with '.', '_' or
             containing '.hfssresults', always choosing the
             thing that's highest up in the tree.
+            If it doesn't find a directory inside `experimental_data`, it will
+            search inside all the directories already listed in `ExpTypes`.
+            Currently, in both attempts, it will only walk 2 levels deep (since NMR directories
+            can be rather complex, and otherwise it would take forever).
     '''
+    # the following is from https://stackoverflow.com/questions/229186/os-walk-without-digging-into-directories-below
+    def walklevel(some_dir, level=1):
+        some_dir = some_dir.rstrip(os.path.sep)
+        assert os.path.isdir(some_dir),strm(some_dir,"is not a directory (probably an invalid entry in your pyspecdata config file)")
+        num_sep = some_dir.count(os.path.sep)
+        for root, dirs, files in os.walk(some_dir):
+            yield root, dirs, files
+            num_sep_this = root.count(os.path.sep)
+            if num_sep + level <= num_sep_this:
+                del dirs[:]
+    def walk_and_grab_best_match(walking_top_dir):
+        logger.info(strm("Walking inside",walking_top_dir,"to find",exp_type,"will only walk 2 directories deep!"))
+        equal_matches = []
+        containing_matches = []
+        for d,s,_ in walklevel(walking_top_dir, level=2):
+            logger.debug(strm("walking: ",d,s))
+            s[:] = [j for j in s if j[0]
+                    not in ['.','_']
+                    and '.hfssresults' not in j]# prune the walk
+            equal_matches.extend([os.path.join(d,j) for j in s if j == exp_type])
+            containing_matches.extend([os.path.join(d,j) for j in s if exp_type.lower() in j.lower()])
+        def grab_smallest(matches):
+            if len(matches) > 0:
+                if len(matches) == 1:
+                    return matches[0]
+                else:
+                    min_length_match = min(map(len,matches))
+                    matches = filter(lambda x: len(x) == min_length_match,matches)
+                    if len(matches) != 1:
+                        raise ValueError("I found multiple equivalent matches when searching for exp_type: "+repr(matches))
+                    return matches[0]
+        if len(equal_matches) > 0:
+            exp_directory = grab_smallest(equal_matches)
+        elif len(containing_matches) > 0:
+            exp_directory = grab_smallest(containing_matches)
+        else:
+            return None
+        # {{{ I would like to do something like the following, but it's not allowed in either ConfigParser or SafeConfigParser
+        #base_dir = _my_config.get_setting('ExpTypes','base')
+        #if base_dir is None: _my_config.set_setting('ExpTypes','base',base_dir)
+        #if base_dir in exp_directory: exp_directory = [exp_directory.replace(base_dir,'%(base)s')]
+        # }}}
+        _my_config.set_setting('ExpTypes',exp_type,exp_directory)
+        return exp_directory
     exp_type = process_kwargs([('exp_type',None)],kwargs)
     base_data_dir = _my_config.get_setting('data_directory',environ = 'PYTHON_DATA_DIR',default = '~/experimental_data')
     if exp_type is not None:
         # {{{ determine the experiment subdirectory
-        exp_directory = _my_config.get_setting(exp_type,section = 'ExpTypes')
+        exp_directory = _my_config.get_setting(exp_type, section='ExpTypes')
         if exp_directory is None:
-            equal_matches = []
-            containing_matches = []
-            for d,s,_ in os.walk(base_data_dir):
-                s[:] = [j for j in s if j[0]
-                        not in ['.','_']
-                        and '.hfssresults' not in j]# prune the walk
-                equal_matches.extend([os.path.join(d,j) for j in s if j == exp_type])
-                containing_matches.extend([os.path.join(d,j) for j in s if exp_type.lower() in j.lower()])
-            def grab_smallest(matches):
-                if len(matches) > 0:
-                    if len(matches) == 1:
-                        return matches[0]
-                    else:
-                        min_length_match = min(map(len,matches))
-                        matches = filter(lambda x: len(x) == min_length_match,matches)
-                        if len(matches) != 1:
-                            raise ValueError("I found multiple equivalent matches when searching for exp_type: "+repr(matches))
-                        return matches[0]
-            if len(equal_matches) > 0:
-                exp_directory = grab_smallest(equal_matches)
-            elif len(containing_matches) > 0:
-                exp_directory = grab_smallest(containing_matches)
-            else:
-                raise ValueError("I found no directory matches for exp_type "+exp_type)
-            # {{{ I would like to do something like the following, but it's not allowed in either ConfigParser or SafeConfigParser
-            #base_dir = _my_config.get_setting('ExpTypes','base')
-            #if base_dir is None: _my_config.set_setting('ExpTypes','base',base_dir)
-            #if base_dir in exp_directory: exp_directory = [exp_directory.replace(base_dir,'%(base)s')]
-            # }}}
-            _my_config.set_setting('ExpTypes',exp_type,exp_directory)
+            exp_directory = walk_and_grab_best_match(base_data_dir)
+            if exp_directory is None:
+                logger.info(strm("I found no directory matches for exp_type "+exp_type+", so now I want to look inside all the known exptypes"))
+                for t,d in dict(_my_config._config_parser.items('ExpTypes')).iteritems():
+                    exp_directory = walk_and_grab_best_match(d)
+                    if exp_directory is not None:
+                        break
+                if exp_directory is None:
+                    raise ValueError(strm("I found no directory matches for exp_type "+exp_type+", even after searching inside all the known exptypes"))
         retval = (exp_directory,) + args
         # }}}
     else:
