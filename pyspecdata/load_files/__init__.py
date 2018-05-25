@@ -199,12 +199,14 @@ def find_file(searchstring,
             logger.debug("found no postproc_type")
         if postproc_type is None:
             logger.debug("got a postproc_type value of None")
+            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're not postprocessing"
             return data
         else:
             if postproc_type in postproc_lookup.keys():
                 data = postproc_lookup[postproc_type](data,**kwargs)
             else:
                 raise ValueError('postprocessing not defined for file with postproc_type %s --> it should be defined in the postproc_type dictionary in load_files.__init__.py'+postproc_type)
+            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing"
             return data
 def format_listofexps(args):
     """This is an auxiliary function that's used to decode the experiment list.
