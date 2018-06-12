@@ -56,18 +56,25 @@ def search_filename(searchstring,exp_type,
     #{{{ actually find the files
     directory = getDATADIR(exp_type=exp_type)
     def look_inside(inp_directory):
+        logger.debug(strm("looking inside directory",inp_directory))
         dirlist = os.listdir(inp_directory)
+        logger.debug(strm("dirlist inside",inp_directory,"is",dirlist))
         if os.path.isdir(inp_directory):
             files = re.findall('.*' + searchstring + '.*','\n'.join(dirlist))
         else:
             raise IOError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s\nYou might need to change the value associated with this exp_type in %s"%(inp_directory,searchstring,_my_config.config_location))
+        logger.debug(strm("after running findall, files is",files))
         if len(files) == 0:
             files = []
-            for j in [k for k in dirlist if os.path.isdir(k)]:
-                files += look_inside(j)
+            directories_inside = [k for k in dirlist if os.path.isdir(inp_directory+k)]
+            logger.debug(strm("I found no matches, but I found the directories",directories_inside))
+            for j in directories_inside:
+                files += [j+os.path.sep+k for k in look_inside(inp_directory+j)]
+            return files
         else:
             return files
     files = look_inside(directory)
+    logger.debug(strm("look_inside found the files",files))
     if files is None or len(files) == 0:
         exptype_msg = ""
         if exp_type is None:

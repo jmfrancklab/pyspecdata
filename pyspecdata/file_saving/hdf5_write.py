@@ -21,6 +21,9 @@ def hdf5_write(self, h5path, directory='.', verbose=False):
     directory : str
         the directory where the HDF5 file lives.
     """
+    for thisax in self.dimlabels:
+        if self.getaxis(thisax) is None or len(self.getaxis(thisax)) == 0:
+            raise ValueError(strm("The axis",thisax,"appears not to have a label!  I refuse to save data to HDF5 if you do not label all your axes!!"))
     #{{{ add the final node based on the name stored in the nddata structure
     if h5path[-1] != '/': h5path += '/' # make sure it ends in a slash first
     try:

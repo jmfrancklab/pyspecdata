@@ -26,6 +26,57 @@ success.)
 Setting up the notebook
 -----------------------
 
+Requirements
+------------
+
+1.  latex packages
+
+    You need to put the texmf tree in a location where it can be found by your latex installation.
+
+    * Under Windows, add the texmf tree to "miktex settings" under the "roots" tab.
+    * (To do) We should use `this guide
+      <http://ctan.math.washington.edu/tex-archive/info/dtxtut/dtxtut.pdf>`_ or
+      or `this package <https://ctan.org/pkg/makedtx>`_ to package the code and include it here.
+
+    Once you've done this, the shell command ``kpsewhich mypython.sty``
+    should return a result
+    (if you have miktex installed on windows, this should work from either the git
+    bash prompt or the dos or powershell prompt).
+2.  The pyspecdata package.
+    
+    Proves the commands `pdflatex_notebook_wrapper` and
+    `update_notebook_pythonscripts`, described below under "Running the
+    notebook."
+
+    Also provies the command `pdflatex_notebook_view_wrapper`, which is used to
+    determine the output PDF and call an appropriate viewer.
+3.  A standard latex compilation system:
+
+    You can use latexmk (shipped with miktex) with `Sumatrapdf <https://www.sumatrapdfreader.org/free-pdf-reader.html>`_
+    (Sumatrapdf allows you to edit the PDF while it's open in Sumatrapdf, while Adobe Acrobat *does not*).
+    Here is a ``~/.latexmkrc`` file that works on windows:
+
+    .. code-block:: perl
+
+        $pdflatex=q/pdflatex_notebook_wrapper %O -synctex=1 --xelatex %S/;
+        $pdf_previewer=q/pdflatex_notebook_view_wrapper/;#calls the wrapviewer function
+
+    **It should also be possible to use TeXworks** by adding pdflatex_notebook_wrapper to
+    preferences → typesetting → processing tools.
+
+    .. todo::
+
+        Alec, can you check this out and update documentation??
+4.  The `'paramset_pyspecdata'` module.
+    Just run ``python setup_paramset.py install`` from repository root directory (the same directory where you run
+    ``python setup.py install``
+    or
+    ``python setup.py develop``)
+
+    (This external module is simply used
+    to store the context in which the code is called -- *i.e.*, from within
+    python *vs.* from the command line.)
+
 Running the notebook
 --------------------
 
@@ -55,11 +106,25 @@ flush 10 21``  -- which will flush script numbers 10 to 21.
 Manually deleting the ``.py`` files inside the scripts directory
 will **not** have the same effect.
 
+.. todo:: 
+    To limit downtime for the PDF, pdflatex_notebook_wrapper currently copies
+    the final pdf to a truncated filename (assuming that the filename consists
+    of words separated by underscores, it drops the last word).
+
+    It would be much better to copy the source PDF into a subdirectory, build it there, and then copy the pdf back into the main directory.
+    This would entail changing the paths of the various files
+
+    ``\RequirePackage[log]{snapshot}`` might be helpful to log files here.
+
+    probably we will just want to add commands to renewcommand for input as well as the graphicx root.
+
+
 How it works
 ------------
 
 * Note that the code works a bit differently than in previous
-  versions -- while it previously required LaTeX to be run with 
+  versions -- while it previously required LaTeX to be run with shell-escape enabled,
+  ``pdflatex_notebook_wrapper`` doesn't require this.
 * ``pdflatex_notebook_wrapper`` just calls ``pdflatex`` followed
   by ``update_notebook_pythonscripts`` 
 

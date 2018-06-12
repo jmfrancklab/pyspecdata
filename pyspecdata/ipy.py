@@ -142,6 +142,7 @@ def load_ipython_extension(ip):
                 gca().set_title(arg_copy.name())
     plain_formatters.for_type(numpy.ndarray,_print_plain_override_for_ndarray)
     plain_formatters.for_type(pyspec_nddata,_print_plain_override_for_nddata)
+    ip.ex("fancy_legend = lambda: legend(**dict(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.))")
+    ip.ex("from pyspecdata import *")
 def unload_ipython_extension(ip):
     print "I will not not go gentle into that good night!!!"
-

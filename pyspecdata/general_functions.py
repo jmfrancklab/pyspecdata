@@ -50,7 +50,10 @@ def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
             output.append(kwargdefaultvals[j])
     if not pass_through and len(kwargs) > 0:
         raise ValueError("I didn't understand the kwargs:",repr(kwargs))
-    return tuple(output)
+    if len(output) > 1:
+        return tuple(output)
+    elif len(output) == 1:
+        return output[0]
 def autostringconvert(arg):
     if isinstance(arg,basestring):
         return str(arg)

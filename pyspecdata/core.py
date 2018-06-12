@@ -1939,7 +1939,8 @@ def plot(*args,**kwargs):
         except Exception as e:
             raise Exception(strm('likely a problem with the type of the x label, which is',myx,explain_error(e)))
         if (size(b)>3) and all(abs((b-b[0])/b[0])<1e-4) and not ('nosemilog' in kwargs.keys()):
-            myplotfunc = ax.semilogx
+            if 'plottype' not in kwargs.keys():
+                myplotfunc = ax.semilogx
     if ('nosemilog' in kwargs.keys()):
         #print 'this should pop nosemilog'
         kwargs.pop('nosemilog')
@@ -1950,6 +1951,10 @@ def plot(*args,**kwargs):
             myplotfunc = ax.semilogx
         elif kwargs['plottype'] == 'loglog':
             myplotfunc = ax.loglog
+        elif kwargs['plottype'] == 'linear':
+            myplotfunc = ax.plot
+        else:
+            raise ValueError(strm("plot type",kwargs['plottype'],"not allowed!"))
         kwargs.pop('plottype')
     #}}}
     #{{{ take care of manual colors
@@ -3407,7 +3412,33 @@ class nddata (object):
     #}}}
     #{{{ poly. fit
     def polyfit(self,axis,order=1,force_y_intercept = None):
-        'return the coefficients and the fit --> later, should probably branch this off as a new type of fit class'
+        '''polynomial fitting routine -- return the coefficients and the fit
+        ..note:
+            later, should probably branch this off as a new type of fit class
+
+        ..warning:
+            for some reason, this version doesn't use orthogonal polynomials,
+            as the numpy routine does -- we had diagnosed and determined that
+            that creates noticeably different results, so fix that here.
+
+        Parameters
+        ----------
+        axis: str
+            name of the axis that you want to fit along
+            (not sure if this is currently tested for multi-dimensional data,
+            but the idea should be that multiple fits would be returned.)
+        order: int
+            the order of the polynomial to be fit
+        force_y_intercept: double or None
+            force the y intercept to a particular value (e.g. 0)
+
+        Returns
+        -------
+        c: ndarray
+            a standard numpy array containing the coefficients (in ascending polynomial order)
+        formult: nddata
+            an nddata containing the result of the fit
+        '''
         x = self.getaxis(axis).copy().reshape(-1,1)
         #{{{ make a copy of self with the relevant dimension second to last (i.e. rows)
         formult = self.copy()
@@ -3554,16 +3585,20 @@ class nddata (object):
         #}}}
         return self
     def mean(self,*args,**kwargs):
-        r'Take the mean and set the error to the standard deviation'
+        r'''Take the mean and set the error to the standard deviation
+
+        Parameters
+        ----------
+        return_error: bool
+            whether or note to return the standard deviation as an error
+        '''
+        print "entered the mean function"
         #{{{ process arguments
         if len(args) > 1:
             raise ValueError('you can\'t pass more than one argument!!')
         axes = self._possibly_one_axis(*args)
-        return_error = True
-        if 'return_error' in kwargs.keys():
-            return_error = kwargs.pop('return_error')
-        if len(kwargs) > 0:
-            raise ValueError("I didn't understand the kwargs:",repr(kwargs))
+        return_error = process_kwargs([('return_error',True)],kwargs)
+        print "return error is",return_error
         if (type(axes) is str):
             axes = [axes]
         #}}}
@@ -3591,6 +3626,7 @@ class nddata (object):
             if return_error: # this needs to go after the data setting
                 self.set_error(thiserror) # set the error to the standard deviation
             self._pop_axis_info(thisindex)
+            print "return error is",return_error
         return self
     def mean_nopop(self,axis):
         self = self.run_nopop(mean,axis=axis)

@@ -18,7 +18,6 @@ from tables import openFile
 from datetime import datetime
 from time import mktime
 from PIL import Image
-from .nmr import *
 import re
 
 golden_ratio = (1.0 + sqrt(5))/2.0
