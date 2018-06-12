@@ -196,11 +196,15 @@ which would find data with <cite>exp_type</cite> <code class="docutils literal">
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt>use <cite>os.walk</cite> to search for a directory with this name,</dt>
-<dd>starting from the data identified by <cite>experimental_data</cite>.
+<dt>use <cite>os.walk</cite> to search for a directory with this name</dt>
+<dd>inside the directory identified by <cite>experimental_data</cite>.
 excluding things that start with ‘.’, ‘_’ or
 containing ‘.hfssresults’, always choosing the
-thing that’s highest up in the tree.</dd>
+thing that’s highest up in the tree.
+If it doesn’t find a directory inside <cite>experimental_data</cite>, it will
+search inside all the directories already listed in <cite>ExpTypes</cite>.
+Currently, in both attempts, it will only walk 2 levels deep (since NMR directories
+can be rather complex, and otherwise it would take forever).</dd>
 </dl>
 </li>
 </ul>

@@ -95,6 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="notebook.html#setting-up-the-notebook">Setting up the notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebook.html#requirements">Requirements</a></li>
 <li class="toctree-l2"><a class="reference internal" href="notebook.html#running-the-notebook">Running the notebook</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="notebook.html#how-it-works">How it works</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="notebook.html#the-latex-end">The LaTeX end</a></li>
@@ -464,7 +465,7 @@ but aren’t gridded data.</td>
 <td>this only works for one axis now</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="#pyspecdata.nddata.polyfit" title="pyspecdata.nddata.polyfit"><code class="xref py py-obj docutils literal"><span class="pre">polyfit</span></code></a>(axis[,&nbsp;order,&nbsp;force_y_intercept])</td>
-<td>return the coefficients and the fit –&gt; later, should probably branch this off as a new type of fit class</td>
+<td>polynomial fitting routine – return the coefficients and the fit</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/pyspecdata.nddata.popdim.html#pyspecdata.nddata.popdim" title="pyspecdata.nddata.popdim"><code class="xref py py-obj docutils literal"><span class="pre">popdim</span></code></a>(dimname)</td>
 <td></td>
@@ -1219,6 +1220,14 @@ during initialization</p>
 <dt id="pyspecdata.nddata.mean">
 <code class="descname">mean</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.mean" title="Permalink to this definition">¶</a></dt>
 <dd><p>Take the mean and set the error to the standard deviation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>return_error</strong> (<em>bool</em>) – whether or note to return the standard deviation as an error</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -1267,7 +1276,38 @@ only use the light kwarg to generate a black and white shading display</p>
 <dl class="method">
 <dt id="pyspecdata.nddata.polyfit">
 <code class="descname">polyfit</code><span class="sig-paren">(</span><em>axis</em>, <em>order=1</em>, <em>force_y_intercept=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.polyfit" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the coefficients and the fit –&gt; later, should probably branch this off as a new type of fit class</p>
+<dd><p>polynomial fitting routine – return the coefficients and the fit
+..note:</p>
+<blockquote>
+<div>later, should probably branch this off as a new type of fit class</div></blockquote>
+<dl class="docutils">
+<dt>..warning:</dt>
+<dd>for some reason, this version doesn’t use orthogonal polynomials,
+as the numpy routine does – we had diagnosed and determined that
+that creates noticeably different results, so fix that here.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>axis</strong> (<a class="reference internal" href="units.html#pyspecdata.units.units.str" title="pyspecdata.units.units.str"><em>str</em></a>) – name of the axis that you want to fit along
+(not sure if this is currently tested for multi-dimensional data,
+but the idea should be that multiple fits would be returned.)</li>
+<li><strong>order</strong> (<em>int</em>) – the order of the polynomial to be fit</li>
+<li><strong>force_y_intercept</strong> (<em>double</em><em> or </em><em>None</em>) – force the y intercept to a particular value (e.g. 0)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>c</strong> (<em>ndarray</em>) – a standard numpy array containing the coefficients (in ascending polynomial order)</li>
+<li><strong>formult</strong> (<em>nddata</em>) – an nddata containing the result of the fit</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -1503,6 +1543,11 @@ which otherwise is typically a complicated record array</li>
 <dt id="pyspecdata.nddata.to_ppm">
 <code class="descname">to_ppm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.to_ppm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function that converts from Hz to ppm using Bruker parameters</p>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p>Figure out what the units of PHC1 in Topspin are (degrees per <em>what??</em>), and apply those as well.</p>
+<p class="last">make this part of an inherited bruker class</p>
+</div>
 </dd></dl>
 
 <dl class="method">
