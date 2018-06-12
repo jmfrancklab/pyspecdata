@@ -151,6 +151,14 @@ Fourier domain
 
 switches to the frequency dimension (shift by default -- shift should be a property)
 
+Basic Examples
+--------------
+
+* Apply a filter (fromaxis).
+* Slicing.
+* Aliasing of FT.
+  
+
 Methods by Sub-Topic
 --------------------
 
