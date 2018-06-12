@@ -987,7 +987,7 @@ def h5table(bottomnode,tablename,tabledata):
             raise RuntimeError(' '.join(map(str,['You passed no data, so I can\'t create table',tablename,'but it doesn\'t exist in',bottomnode,'which has children',bottomnode._v_children.keys()])))
     else:
         if tabledata is not None:
-            raise ValueError('You\'re passing data to create the table, but the table already exists!')
+            raise ValueError(strm('You\'re passing data to create the table,',tablename,' but the table already exists!'))
         else:
             pass
     return bottomnode._v_children[tablename]
@@ -2410,7 +2410,8 @@ def plot(*args,**kwargs):
         except Exception as e:
             raise Exception(strm('likely a problem with the type of the x label, which is',myx,explain_error(e)))
         if (size(b)>3) and all(abs((b-b[0])/b[0])<1e-4) and not ('nosemilog' in kwargs.keys()):
-            myplotfunc = ax.semilogx
+            if 'plottype' not in kwargs.keys():
+                myplotfunc = ax.semilogx
     if ('nosemilog' in kwargs.keys()):
         #print 'this should pop nosemilog'
         kwargs.pop('nosemilog')
@@ -2421,6 +2422,10 @@ def plot(*args,**kwargs):
             myplotfunc = ax.semilogx
         elif kwargs['plottype'] == 'loglog':
             myplotfunc = ax.loglog
+        elif kwargs['plottype'] == 'linear':
+            myplotfunc = ax.plot
+        else:
+            raise ValueError(strm("plot type",kwargs['plottype'],"not allowed!"))
         kwargs.pop('plottype')
     #}}}
     #{{{ take care of manual colors
