@@ -17,7 +17,13 @@ for minimal guidance if you're interested.'''
 
 # I should implement this as an extension module
 # https://mindtrove.info/4-ways-to-extend-jupyter-notebook/
-get_ipython().magic(u'pylab inline')
+# {{{ this allows me to skip if I called from sphinx
+from .general_functions import inside_sphinx
+if inside_sphinx():
+    pass # called from sphinx
+else:
+    get_ipython().magic(u'pylab inline')
+# }}}
 import numpy
 import sympy
 from sympy.interactive import printing

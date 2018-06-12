@@ -61,6 +61,8 @@ The figure list gives us three things:
             and finally call autolegend, unless the legend is supressed
     *   The "plottype" (currently an argument to the plot function) should be an attribute of the axis object
 """
+from .plot_funcs import image as this_image
+
 class figlist(object):
     r"""
     Attributes
@@ -396,7 +398,7 @@ class figlist(object):
         else:
             gridandtick(ax,gridcolor = r_[0,0,0])
         return
-    image = this_plotting.image.fl_image
+    image = this_image.fl_image
     def marked_text(self,marker,input_text="",sep='\n'):
         """Creates a named `marker` where we can place text.   If `marker`
         has been used, goes back and places text there."""
