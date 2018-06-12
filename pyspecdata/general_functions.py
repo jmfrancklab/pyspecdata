@@ -9,7 +9,13 @@ import os
 from paramset_pyspecdata import myparams
 import re
 from inspect import ismethod
+import sys
 
+def inside_sphinx():
+    if len(sys.argv) > 0:
+        return os.path.basename(sys.argv[0]) == "sphinx-build"
+    else:
+        return False
 def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
     '''This function allows dynamically processed (*i.e.* function definitions with `**kwargs`) kwargs (keyword arguments) to be dealt with in a fashion more like standard kwargs.
     The defaults set in `listoftuples` are used to process `kwargs`, which are then returned as a set of values (that are set to defaults as needed).

@@ -1,6 +1,7 @@
 from .general_functions import *
 from .core import *
 from .load_files import *
+from .figlist import *
 
 #import numpy
 
