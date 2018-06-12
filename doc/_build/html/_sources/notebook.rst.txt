@@ -77,6 +77,9 @@ Requirements
     to store the context in which the code is called -- *i.e.*, from within
     python *vs.* from the command line.)
 
+5.  It's assumed that your latex files are stored in a "notebook directory."
+    In some cases, during the first run, an explanatory error will appear -- just follow the instructions.
+
 Running the notebook
 --------------------
 
