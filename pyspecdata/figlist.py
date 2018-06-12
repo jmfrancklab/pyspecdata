@@ -13,9 +13,7 @@ The figure list gives us three things:
 *   Ability to handle mayavi plots and matplotlib plots (switch to glumpy, etc.?)
     *   potential planned future ability to handle gnuplot
 
-.. note::
-
-    **Planned change** (AB -- are you up to taking care of this?)
+.. todo:: 
 
     Currently the "items" that the list tracks correspond to either plot formatting directives (see :func:`figlist.setprops`), text, or figures.
 
@@ -61,6 +59,7 @@ The figure list gives us three things:
             pyspecdata.core.plot on each dataset
             (in matplotlib, this should be done with a formatting statement rather than by manipulating the axes themselves)
             and finally call autolegend, unless the legend is supressed
+    *   The "plottype" (currently an argument to the plot function) should be an attribute of the axis object
 """
 class figlist(object):
     r"""
