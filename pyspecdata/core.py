@@ -34,7 +34,11 @@ from os.path import sep as path_sep
 if myparams['figlist_type'] == 'figlistl':
     environ['ETS_TOOLKIT'] = 'qt4'
     import matplotlib; matplotlib.use('Agg')
-from pylab import *
+from .general_functions import inside_sphinx
+if not inside_sphinx():
+    from pylab import *
+else:
+    pi = 3.14
 from types import FunctionType as function
 import textwrap
 import matplotlib

@@ -3,18 +3,37 @@ pyspecdata.core.  I can't just put these inside pyspecdata.core, because that
 would lead to cyclic imports, and e.g. submodules of pyspecdata can't find
 them."""
 
-from pylab import *
-import logging
 import os
-from paramset_pyspecdata import myparams
-import re
 import sys
-
 def inside_sphinx():
     if len(sys.argv) > 0:
         return os.path.basename(sys.argv[0]) == "sphinx-build"
     else:
         return False
+if not inside_sphinx():
+    from pylab import *
+else:
+    # {{{ sphinx dummy objects
+    #      there is a better way of doing sphinx dummy objects, but this seems to work
+    def exp(*args,**kwargs):
+        return None
+    def rc(*args,**kwargs):
+        return None
+    def plot(*args,**kwargs):
+        return None
+    rcParams = {}
+    class rclass (object):
+        def __init__(self):
+            print "initializing"
+            return
+        def __getitem__(self,*args,**kwargs):
+            return
+    r_ = rclass()
+    # }}}
+import logging
+from paramset_pyspecdata import myparams
+import re
+
 def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
     '''This function allows dynamically processed (*i.e.* function definitions with `**kwargs`) kwargs (keyword arguments) to be dealt with in a fashion more like standard kwargs.
     The defaults set in `listoftuples` are used to process `kwargs`, which are then returned as a set of values (that are set to defaults as needed).
