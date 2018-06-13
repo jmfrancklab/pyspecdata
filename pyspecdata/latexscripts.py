@@ -5,6 +5,7 @@ even if the python environments are moved around.
 This makes the compilation of a Latex lab notebook extremely efficient.
 '''
 from .datadir import get_notebook_dir,getDATADIR
+from distutils.spawn import find_executable
 import os.path
 import hashlib
 import numpy
@@ -139,24 +140,24 @@ def wrapviewer():
         which_command = 'b'
         full_pdf_name = new_pdf_basename+'.pdf'
         full_tex_name = orig_tex_basename+'.tex'
-	if which_command is 'f':#forward
+        if which_command is 'f':#forward
             # no longer used, but make this functional, in case I want it later
-	    #3/29/14 -- replaced '+sys.argv[2]+' w/ default
-	    cmdstring = 'evince_vim_dbus.py EVINCE '+full_pdf_name+' 1 '+full_tex_name 
-	    print cmdstring
-	    os.system(cmdstring)
-	elif which_command is 'i':#inverse
-	    cmdstring = 'evince_vim_dbus.py GVIM default '+full_pdf_name+' '+full_tex_name
-	    print cmdstring
-	    os.system(cmdstring)
-	elif which_command is 'b':#both
-	    cmdstring = '~/silentfork.sh evince_vim_dbus.py EVINCE '+full_pdf_name+' 1 '+full_tex_name 
-	    print cmdstring
-	    os.system(cmdstring)
-	    time.sleep(0.75)
-	    cmdstring = '~/silentfork.sh evince_vim_dbus.py GVIM default '+full_pdf_name+' '+full_tex_name
-	    print cmdstring
-	    os.system(cmdstring)
+            #3/29/14 -- replaced '+sys.argv[2]+' w/ default
+            cmdstring = 'evince_vim_dbus.py EVINCE '+full_pdf_name+' 1 '+full_tex_name 
+            print cmdstring
+            os.system(cmdstring)
+        elif which_command is 'i':#inverse
+            cmdstring = 'evince_vim_dbus.py GVIM default '+full_pdf_name+' '+full_tex_name
+            print cmdstring
+            os.system(cmdstring)
+        elif which_command is 'b':#both
+            cmdstring = '~/silentfork.sh evince_vim_dbus.py EVINCE '+full_pdf_name+' 1 '+full_tex_name 
+            print cmdstring
+            os.system(cmdstring)
+            time.sleep(0.75)
+            cmdstring = '~/silentfork.sh evince_vim_dbus.py GVIM default '+full_pdf_name+' '+full_tex_name
+            print cmdstring
+            os.system(cmdstring)
         # }}}
 
     else:
@@ -222,9 +223,13 @@ def cache_output_if_needed(scriptnum_as_str,hashstring,showcode = False,show_err
             fp_out.write(r'\end{lstlisting}'+'\n')
         temp = os.environ
         print "about to run python"
+        python_name = 'python'
         if os.name == 'posix':
             temp.update({'PYTHON_DATA_DIR':getDATADIR()})
-            proc = Popen(['python','-W','ignore',script_fname],
+            # on mac, we frequently want to use python2
+            if find_executable('python2'):
+                python_name = 'python2'
+            proc = Popen([python_name,'-W','ignore',script_fname],
                     stdout = PIPE,
                     stdin = PIPE,
                     stderr = PIPE,
@@ -232,7 +237,7 @@ def cache_output_if_needed(scriptnum_as_str,hashstring,showcode = False,show_err
         else: #windows should give os.name == 'nt'
             temp.update({'MPLCONFIGDIR':os.getcwd()+'/.matplotlib',
                         'PYTHON_DATA_DIR':getDATADIR()})
-            proc = Popen(['python','-W','ignore',script_fname],
+            proc = Popen([python_name,'-W','ignore',script_fname],
                     stdout = PIPE,
                     stdin = PIPE,
                     stderr = PIPE,

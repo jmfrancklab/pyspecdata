@@ -36,6 +36,7 @@ setup(
         "h5py",
         "matplotlib",
         "tables",
+        "pillow",
         ],
     ext_modules = ext_modules,
     entry_points=dict(console_scripts=

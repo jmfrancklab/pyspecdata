@@ -5169,6 +5169,7 @@ class nddata (object):
                 self.axis_coords_units.insert(thisaxis,None)
         #}}}
         newshape = list(self.data.shape[0:thisaxis]) + shapesout + list(self.data.shape[thisaxis+1:])
+        newshape = map(int,newshape)
         newnames = list(self.dimlabels[0:thisaxis]) + axesout + list(self.dimlabels[thisaxis+1:])
         self.data = self.data.reshape(newshape)
         self.dimlabels = newnames
