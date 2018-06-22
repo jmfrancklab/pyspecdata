@@ -24,6 +24,7 @@ from ..core import *
 from __builtin__ import any # numpy has an "any" function, which is very annoying
 from itertools import tee
 import warnings, os, h5py, re
+from zipfile import ZipFile, is_zipfile
 logger = logging.getLogger('pyspecdata.load_files')
 
 #{{{ add slashes for dir's
@@ -362,6 +363,17 @@ def load_indiv_file(filename, dimname='', return_acq=False,
                     " Rather, supply the full name of the .par file.")
             # }}}
         else:
+            filename_one_up = os.path.normpath(filename).split(os.path.sep)[:-1]
+            abspath_zipname = os.path.sep.join(filename_one_up)
+            if is_zipfile(abspath_zipname):
+                print "this is a zip file"
+                with ZipFile(abspath_zipname) as zf:
+                    list_of_files = [j.split('/') for j in zf.namelist()]
+                    basename = filename_one_up[-1].split('.')[0]
+                    assert all([j[0] == basename for j in list_of_files]), strm("I expected that the zip file contains a directory called ",basename,"which contains your NMR data -- this appears not to be the case")
+                    raise RuntimeError("I found that this file is a properly formatted zip file, but this is "
+                            "not yet implemented -- just need to add a conditional wherever "
+                            "an open statement occurs")
             raise IOError("%s does not exist"%filename)
     # {{{ first, we search for the file magic to determine the filetype
     filetype = None
