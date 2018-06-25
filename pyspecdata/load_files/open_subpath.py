@@ -19,7 +19,6 @@ def open_subpath(file_reference,*subpath,**kwargs):
         ('test_only',False)],kwargs)
     if isinstance(file_reference,basestring):
         if test_only:
-            print "testing",(file_reference,) + subpath
             full_path = os.path.join(file_reference, *subpath)
             if os.path.exists(full_path):
                 return True
