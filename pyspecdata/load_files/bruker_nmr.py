@@ -128,9 +128,9 @@ def series(file_reference, *subpath, **kwargs):
         data.set_prop('proc',
                 load_jcamp(file_reference, *(subpath +
                     ('pdata','1','procs'))))
-    if open_subpath(file_reference, 'vdlist', test_only=True):
+    if open_subpath(file_reference, *(subpath+('vdlist',)), test_only=True):
         data.set_prop('vd',
-                load_vdlist(file_reference))
+                load_vdlist(file_reference, *subpath))
     else:
         logger.info(strm("vdlist doesn't exist",file_reference,'vdlist'))
     logger.debug(strm('data from bruker file =',data))
@@ -184,8 +184,9 @@ def load_1D(file_reference, *subpath, **kwargs):
                 load_jcamp(file_reference,
                     *(subpath+('pdata','1','procs'))))
     return data
-def load_vdlist(file_reference):
-    fp = open_subpath(file_reference,'vdlist')
+def load_vdlist(file_reference, *subpath):
+    subpath += ('vdlist',)
+    fp = open_subpath(file_reference,*subpath)
     lines = fp.readlines()
     lines = map(string.rstrip,lines)
     lines = map((lambda x: x.replace('m','e-3')),lines)
