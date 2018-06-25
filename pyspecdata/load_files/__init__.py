@@ -17,6 +17,7 @@ from . import bruker_nmr
 from . import prospa
 from . import bruker_esr
 from . import acert
+from .open_subpath import open_subpath
 from ..datadir import getDATADIR
 from ..datadir import _my_config
 from ..general_functions import process_kwargs,strm
@@ -121,11 +122,10 @@ def find_file(searchstring,
         where ``.*searchstring.*`` matches a filename inside the
         directory appropriate for `exp_type`.
     expno : int
-        For Bruker files, *etc.*, where the files are stored in numbered
+        For Bruker NMR and Prospa files, where the files are stored in numbered
         subdirectories,
         give the number of the subdirectory that you want.
-        If this is not given, it assumes that the name you give is the name
-        of a file, rather than a directory.
+        Currently, this parameter is needed to load Bruker and Kea files.
         If it finds multiple files that match the regular expression,
         it will try to load this experiment number from all the directories.
     exp_type : str
@@ -175,14 +175,13 @@ def find_file(searchstring,
     data = None
     while data is None and len(files) > 0:
         filename = files.pop(-1)
-        if expno is not None:
-            filename = os.path.join(filename,str(expno))
         # {{{ file loaded here
         logger.debug(strm("about to call load_indiv_file on",filename))
         data = load_indiv_file(filename,
             dimname=dimname, return_acq=return_acq,
             add_sizes=add_sizes, add_dims=add_dims, use_sweep=use_sweep,
-            indirect_dimlabels=indirect_dimlabels)
+            indirect_dimlabels=indirect_dimlabels,
+            expno=expno)
         # }}}
     if data is None:
         raise ValueError(strm(
@@ -318,7 +317,7 @@ def _check_signature(filename):
                 return None
 def load_indiv_file(filename, dimname='', return_acq=False,
         add_sizes=[], add_dims=[], use_sweep=None,
-        indirect_dimlabels=None):
+        indirect_dimlabels=None, expno=None):
     """Open the file given by `filename`, use file signature magic and/or
     filename extension(s) to identify the file type, and call the appropriate
     function to open it.
@@ -363,47 +362,61 @@ def load_indiv_file(filename, dimname='', return_acq=False,
                     " Rather, supply the full name of the .par file.")
             # }}}
         else:
-            filename_one_up = os.path.normpath(filename).split(os.path.sep)[:-1]
-            abspath_zipname = os.path.sep.join(filename_one_up)
-            if is_zipfile(abspath_zipname):
-                print "this is a zip file"
-                with ZipFile(abspath_zipname) as zf:
-                    list_of_files = [j.split('/') for j in zf.namelist()]
-                    basename = filename_one_up[-1].split('.')[0]
-                    assert all([j[0] == basename for j in list_of_files]), strm("I expected that the zip file contains a directory called ",basename,"which contains your NMR data -- this appears not to be the case")
-                    raise RuntimeError("I found that this file is a properly formatted zip file, but this is "
-                            "not yet implemented -- just need to add a conditional wherever "
-                            "an open statement occurs")
             raise IOError("%s does not exist"%filename)
     # {{{ first, we search for the file magic to determine the filetype
     filetype = None
-    if os.path.isdir(filename):# Bruker, prospa, etc, datasets are stored as directories
-        logger.debug(strm("the path",filename,"is a directory"))
-        files_in_dir = os.listdir(filename)
-        if os.path.exists(os.path.join(filename,'ser')):
+    if os.path.isdir(filename) or is_zipfile(filename):# Bruker, prospa, etc, datasets are stored as directories
+        if expno is None:
+            raise ValueError("currently, you must specify the experiment number when trying to load a directory-style file")
+        else:
+            expno_as_str = '%d'%expno
+        if is_zipfile(filename):
+            zf = ZipFile(filename)
+            list_of_files = [j.split('/') for j in zf.namelist()]
+            basename = os.path.normpath(filename).split(os.path.sep)[-1].split('.')[0]
+            assert all([j[0] == basename for j in list_of_files]), strm("I expected that the zip file contains a directory called ",basename,"which contains your NMR data -- this appears not to be the case.  (Note that with future extensions, other formats will be possible.)")
+            file_reference = (zf,
+                    filename,
+                    basename)
+            raise RuntimeError("I found that this file is a properly formatted zip file, but this is "
+                    "not yet implemented -- just need to add a conditional wherever "
+                    "an open statement occurs")
+        else:
+            file_reference = filename
+        if open_subpath(file_reference, expno_as_str, 'ser', test_only=True):
             #{{{ Bruker 2D
-            data = bruker_nmr.series(filename, dimname=dimname)
+            logger.debug('Identified a bruker series file')
+            data = bruker_nmr.series(file_reference, expno_as_str, 'ser', dimname=dimname)
             #}}}
-        elif os.path.exists(os.path.join(filename,'acqus')):
+        elif open_subpath(file_reference, expno_as_str, 'acqus', test_only=True):
+            logger.debug('Identified a bruker 1d file')
             #{{{ Bruker 1D
-            data = bruker_nmr.load_1D(filename, dimname=dimname)
-            #}}}
-        elif os.path.exists(os.path.join(filename,'data.2d')):
-            #{{{ Prospa generic 2D
-            data = prospa.load_2D(filename, dimname=dimname)
-            #}}}
-            #{{{ specific Prospa formats
-        elif any(map((lambda x:'Delay' in x),files_in_dir)):
-            data = prospa.load_2D(filename, dimname=dimname)
-            twod = 't1' # this was set by det_type, not sure what's done with it now
-        elif os.path.exists(os.path.join(filename,'acqu.par')):
-            data = prospa.load_1D(filename)
-        elif os.path.exists(os.path.join(filename,'..','acqu.par')):
-            data = prospa.load_2D(filename, dimname=dimname)
-            twod = 't1_sub' # this was set by det_type, not sure what's done with it now
+            data = bruker_nmr.load_1D(file_reference, expno_as_str, dimname=dimname)
             #}}}
         else:
-            raise RuntimeError('WARNING! unidentified file type '+filename)
+            logger.debug('Identified a potential prospa file')
+            # the rest are for prospa
+            # even though I've made steps towards supporting zipped prospa (by
+            # using open_subpath), that's not yet done -- diff against this commit
+            # to see what the previous code looked like
+            file_reference += '/' + expno_as_str
+            files_in_dir = os.listdir(file_reference)
+            if open_subpath(file_reference, 'data.2d', test_only=True):
+                #{{{ Prospa generic 2D
+                data = prospa.load_2D(file_reference, dimname=dimname)
+                #}}}
+                #{{{ specific Prospa formats
+            elif any(map((lambda x:'Delay' in x),files_in_dir)):
+                data = prospa.load_2D(file_reference, dimname=dimname)
+                twod = 't1' # this was set by det_type, not sure what's done with it now
+            elif open_subpath(file_reference, 'acqu.par', test_only=True):
+                data = prospa.load_1D(file_reference)
+            elif os.path.exists(os.path.join(file_reference,'..','acqu.par')):
+                data = prospa.load_2D(file_reference, dimname=dimname)
+                twod = 't1_sub' # this was set by det_type, not sure what's done with it now
+                #}}}
+            else:
+                raise RuntimeError('WARNING! unidentified file type '+file_reference)
     else:
         logger.debug(strm("the path",filename,"is a file"))
         type_by_signature = _check_signature(filename)

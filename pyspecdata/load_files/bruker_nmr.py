@@ -1,5 +1,6 @@
 from ..core import *
 from ..datadir import dirformat
+from .open_subpath import open_subpath
 import os.path
 import re
 import string
@@ -53,63 +54,7 @@ def match_line(line,number_re,string_re,array_re):
             else:
                 retval = (3,line)
     return retval
-def dirformat(file_reference):
-    "adds a path separator at the end of the file as needed"
-    if os.path.isdir(file_reference):
-        thislist = list(os.path.split(file_reference))
-        thislist = filter(lambda x: len(x)>0,thislist)
-        thislist = thislist + ['']
-    else:
-        raise ValueError(strm(file_reference,"doesn't appear to be a directory!!"))
-    return os.path.sep.join(thislist)
-def open_subpath(file_reference,*args,**kwargs):
-    """
-    Parameters
-    ----------
-    filename: str or tuple
-        If a string, then it's the name of a directory.
-        If it's a tuple, then, it has three elements: the ZipFile object, the
-        basename of the zip file, and the name of the file we're interested in
-        within the zip file.
-    test_only: bool
-        just test if the path exists
-    """
-    mode,test_only = process_kwargs([('mode','r'),
-        ('test_only',False)],kwargs)
-    if isinstance(file_reference,basestring):
-        file_reference = dirformat(file_reference)
-        file_is_zipped = False
-        if test_only:
-            if os.path.exists(file_reference):
-                return True
-            else:
-                return False
-        else:
-            fp = open(os.path.join(*((file_reference,)+args)),mode)
-    else:
-        if type(file_reference) == tuple:
-            if len(file_reference) == 3 and type(file_reference[0]) is ZipFile:
-                file_is_zipped = False
-                zip_obj = file_reference[0]
-                zip_basename = file_reference[1]
-                name_inside_zip = file_reference[2]
-                zf = ZipFile(file_reference,mode)
-                subfile = '/'.join(*((zip_basename,)+args))
-                if test_only:
-                    if subfile in zf.namelist():
-                        return True
-                    else:
-                        return False
-                if subfile in zf.namelist():
-                    return zf.open(subfile)
-                else:
-                    raise ValueError(subfile+" not found in zip file")
-            else:
-                raise ValueError("open_subpath doesn't understand the format of the tuple passe to file_reference")
-        else:
-            raise ValueError("open_subpath doesn't understand the type of the file_reference")
-    return fp
-def series(file_reference, dimname=''):
+def series(file_reference, *subpath, **kwargs):
     """For opening Bruker ser files
     
     Parameters
@@ -117,6 +62,8 @@ def series(file_reference, dimname=''):
     filename:
         see :func:`open_subpath`
     """
+    dimname = process_kwargs([('dimname',''),
+        ],kwargs)
     #{{{ Bruker 2D
     v = load_acqu(file_reference)
     v2 = load_acqu(file_reference,whichdim='2')
@@ -124,7 +71,7 @@ def series(file_reference, dimname=''):
     rg = det_rg(float(v['RG']))
     td1 = int(v2['TD'])
     td2_zf = int(ceil(td2/256.)*256) # round up to 256 points, which is how it's stored
-    fp = open_subpath(file_reference,'ser')
+    fp = open_subpath(file_reference,*(subpath+('ser',)))
     data = fp.read()
     fp.close()
     if int(v['BYTORDA']) == 1:
@@ -179,9 +126,9 @@ def series(file_reference, dimname=''):
                     'pdata','1','procs'))
     if open_subpath(file_reference, 'vdlist', test_only=True):
         data.set_prop('vd',
-                load_vdlist(dirformat(file_reference)))
+                load_vdlist(file_reference))
     else:
-        logger.info(strm("vdlist doesn't exist",dirformat(file_reference)+'vdlist'))
+        logger.info(strm("vdlist doesn't exist",file_reference,'vdlist'))
     logger.debug(strm('data from bruker file =',data))
     #}}}
     return data
@@ -220,8 +167,12 @@ def load_1D(file_reference, dimname=''):
             load_title(file_reference))
     data.set_prop('acq',
             v)
-    data.set_prop('file_reference',
-            file_reference)
+    if type(file_reference) is tuple:
+        data.set_prop('filename',
+                file_reference[1])
+    else:
+        data.set_prop('filename',
+                file_reference)
     proc_filename = os.path.join(file_reference,
             'pdata','1','procs')
     if os.path.exists(proc_filename):
