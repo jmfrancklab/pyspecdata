@@ -1,6 +1,7 @@
 from ..core import *
 from ..datadir import dirformat
 import os.path
+from zipfile import ZipFile
 
 def open_subpath(file_reference,*args,**kwargs):
     """
@@ -28,11 +29,10 @@ def open_subpath(file_reference,*args,**kwargs):
     else:
         if type(file_reference) == tuple:
             if len(file_reference) == 3 and type(file_reference[0]) is ZipFile:
-                zip_obj = file_reference[0]
+                zf = file_reference[0]
                 zip_basename = file_reference[1]
                 name_inside_zip = file_reference[2]
-                zf = ZipFile(file_reference,mode)
-                subfile = '/'.join(*((name_inside_zip,)+args))
+                subfile = '/'.join((name_inside_zip,)+args)
                 if test_only:
                     if subfile in zf.namelist():
                         return True

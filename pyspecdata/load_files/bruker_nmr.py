@@ -55,18 +55,22 @@ def match_line(line,number_re,string_re,array_re):
                 retval = (3,line)
     return retval
 def series(file_reference, *subpath, **kwargs):
-    """For opening Bruker ser files
+    """For opening Bruker ser files.  Note that the expno is included as part of the subpath.
     
     Parameters
     ----------
     filename:
         see :func:`open_subpath`
+    subpath:
+        the path within the directory or zip file that's one level up
+        from the ser file storing the raw data
+        (this is typically a numbered directory).
     """
     dimname = process_kwargs([('dimname',''),
         ],kwargs)
     #{{{ Bruker 2D
-    v = load_acqu(file_reference)
-    v2 = load_acqu(file_reference,whichdim='2')
+    v = load_acqu(file_reference, *subpath)
+    v2 = load_acqu(file_reference, *subpath, whichdim='2')
     td2 = int(v['TD'])
     rg = det_rg(float(v['RG']))
     td1 = int(v2['TD'])
@@ -108,7 +112,7 @@ def series(file_reference, *subpath, **kwargs):
     data.set_units('t2','s')
     data.set_units('digital')
     data.set_prop('title',
-            load_title(file_reference))
+            load_title(file_reference, *subpath))
     v.update(v2)
     data.set_prop('acq',
             v)
@@ -119,11 +123,11 @@ def series(file_reference, *subpath, **kwargs):
         # if it's a zip file
         data.set_prop('file_reference',
                 file_reference[1])
-    if open_subpath(file_reference,
-            'pdata','1','procs', test_only=True):
+    if open_subpath(file_reference, *(subpath +
+        ('pdata','1','procs')), test_only=True):
         data.set_prop('proc',
-                load_jcamp(file_reference,
-                    'pdata','1','procs'))
+                load_jcamp(file_reference, *(subpath +
+                    ('pdata','1','procs'))))
     if open_subpath(file_reference, 'vdlist', test_only=True):
         data.set_prop('vd',
                 load_vdlist(file_reference))
@@ -132,19 +136,19 @@ def series(file_reference, *subpath, **kwargs):
     logger.debug(strm('data from bruker file =',data))
     #}}}
     return data
-def load_1D(file_reference, dimname=''):
+def load_1D(file_reference, *subpath, **kwargs):
     """Load 1D bruker data into a file.  Load acquisition parameters into
     property 'acq' and processing parameters *from procno 1 only* into
     'proc'
     
     Note that is uses the 'procs' file, which appears to contain the correct data
     """
-    file_reference = dirformat(file_reference)
-    v = load_acqu(file_reference)
+    dimname = process_kwargs([('dimname','')], kwargs)
+    v = load_acqu(file_reference, *subpath)
     td2 = int(v['TD'])
     td1 = 1
     td2_zf = int(ceil(td2/256.)*256) # round up to 256 points, which is how it's stored
-    fp = open(file_reference+'fid','rb')
+    fp = open_subpath(file_reference, *(subpath+('fid',)),mode='rb')
     data = fp.read()
     if int(v['BYTORDA']) == 1:
         data = fromstring(data, dtype=dtype('>i4'), count=(len(data)/4))
@@ -164,7 +168,7 @@ def load_1D(file_reference, dimname=''):
     data.circshift('t2',shiftpoints)
     # finally, I will probably need to add in the first order phase shift for the decimation --> just translate this
     data.set_prop('title',
-            load_title(file_reference))
+            load_title(file_reference,*subpath))
     data.set_prop('acq',
             v)
     if type(file_reference) is tuple:
@@ -173,11 +177,12 @@ def load_1D(file_reference, dimname=''):
     else:
         data.set_prop('filename',
                 file_reference)
-    proc_filename = os.path.join(file_reference,
-            'pdata','1','procs')
-    if os.path.exists(proc_filename):
+    if open_subpath(file_reference,
+            *(subpath+('pdata','1','procs')),
+            test_only=True):
         data.set_prop('proc',
-                load_jcamp(proc_filename))
+                load_jcamp(file_reference,
+                    *(subpath+('pdata','1','procs'))))
     return data
 def load_vdlist(file_reference):
     fp = open_subpath(file_reference,'vdlist')
@@ -206,9 +211,9 @@ def load_acqu(file_reference,*subpath,**kwargs):
     whichdim, return_s = process_kwargs([('whichdim',''),
         ('return_s',True)],kwargs)
     if return_s:
-        subpath += 'acqu'+whichdim+'s' # this is what I am initially doing, and what works with the matched filtering, etc, as is, but it's actually wrong
+        subpath += ('acqu'+whichdim+'s',) # this is what I am initially doing, and what works with the matched filtering, etc, as is, but it's actually wrong
     else:
-        subpath += 'acqu'+whichdim # this is actually right, but doesn't work with the matched filtering, etc.
+        subpath += ('acqu'+whichdim,) # this is actually right, but doesn't work with the matched filtering, etc.
     return load_jcamp(file_reference,*subpath)
 def load_jcamp(file_reference,*subpath):
     "return a dictionary with information for a jcamp file"
@@ -279,5 +284,5 @@ def load_title(file_reference,*subpath):
         emptystring = '\n'
         while emptystring in lines:
             lines.pop(lines.index(emptystring))
-        fl.close()
+        fp.close()
         return ''.join(lines)

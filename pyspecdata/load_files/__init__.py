@@ -206,7 +206,9 @@ def find_file(searchstring,
                 raise ValueError('postprocessing not defined for file with postproc_type %s --> it should be defined in the postproc_type dictionary in load_files.__init__.py'+postproc_type)
             return data
 def format_listofexps(args):
-    """This is an auxiliary function that's used to decode the experiment list.
+    """**Phased out**: leaving documentation so we can interpret and update old code
+
+    This is an auxiliary function that's used to decode the experiment list.
 
     Parameters
     ----------
@@ -225,25 +227,9 @@ def format_listofexps(args):
         :``(exp_name)`` or ``(exp_name,[])``: works for a single
             experiment
     """
-    if type(args[0]) is str: # even if it's just a string, make it a list
-        args[0] = [args[0]]
-    if len(args) > 1 and ((not isscalar(args[1]))
-            and len(args[1]) == 0): args.pop(1)
-    if len(args) == 2:
-        if isscalar(args[1]):
-            if type(args[1]) is str:
-                filenames = args
-            else:
-                args[1] = [args[1]] # if the second argument is a single file number, make it into a list
-        if not isscalar(args[1]):
-            if len(args[0]) > 1:
-                raise ValueError("Invalid arguments to specify a list of experiments (see documentation)")
-            filenames = [_dirformat(args[0][0]) + '%d'%x for x in args[1]]
-    else:
-        filenames = args
-    return filenames
+    raise ValueError("format_listofexps was a legacy function that was used to specify multiple experiments to load -- this should be accomplished manually or (once supported) by passing multiple expno values")
 def load_file(*args,**kwargs):
-    """Load a file or series of files into a single dataset.
+    """**Phased out** -- this was used to concatenate files stored in different experiments
 
     Parameters
     ----------
@@ -251,35 +237,7 @@ def load_file(*args,**kwargs):
         The files are specified using the format given by
         :func:`format_listofexps`
     """
-    args = list(args)
-    dimname, calibration, add_sizes, add_dims = process_kwargs(
-            [('dimname',''),
-                ('calibration',1.0),
-                ('add_sizes',[]),
-                ('add_dims',[])],kwargs)
-    filenames = format_listofexps(args)
-    #{{{load all the data into a list
-    data = [load_indiv_file(filenames[0],dimname=dimname,add_sizes = add_sizes,add_dims = add_dims)]
-    for filename in filenames[1:]:
-        data += [load_indiv_file(filename,dimname=dimname,add_sizes = add_sizes,add_dims = add_dims)]
-    data = filter(lambda x: x is not None, data)
-    if len(data) == 0:
-        raise ValueError(
-                strm("I found no data files matching",filenames))
-    #}}}
-    # for the following, I used to have a condition, but this is incompatible with the pop statement at the end
-    newdata = concat(data,dimname) # allocate the size of the indirect array
-    newdata_shape = ndshape(newdata)
-    # {{{ because the "want_to_prospa_decim_correct" attribute is special --
-    #     probably want to get rid of it eventually
-    if hasattr(data[0],'want_to_prospa_decim_correct'):
-        if all(map(lambda x: hasattr(x,'want_to_prospa_decim_correct'),data)):
-            if data[0].want_to_prospa_decim_correct is True:
-                newdata = prospa_decim_correct(newdata)
-    # }}}
-    if newdata_shape[dimname]==1:
-        newdata.popdim(dimname)
-    return newdata*calibration
+    raise ValueError("load_file was a legacy function that was used to concatenate several experiments into a 2D dataset -- this should be accomplished manually or (once supported) by passing multiple expno values")
 def _check_extension(filename):
     "Just return the file extension in caps"
     return filename.split('.')[-1].upper()
@@ -378,9 +336,6 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             file_reference = (zf,
                     filename,
                     basename)
-            raise RuntimeError("I found that this file is a properly formatted zip file, but this is "
-                    "not yet implemented -- just need to add a conditional wherever "
-                    "an open statement occurs")
         else:
             file_reference = filename
         if open_subpath(file_reference, expno_as_str, 'ser', test_only=True):
@@ -488,27 +443,6 @@ def load_indiv_file(filename, dimname='', return_acq=False,
                 data.rename('','indirect')
     return data
     #}}}
-def load_acqu(filename,whichdim='',return_s = None):
-    "This should be deleted -- a placeholder"
-    filename = dirformat(filename)
-    if det_type(filename)[0] == 'bruker':
-        # {{{ this should be OK, since load_acqu from within bruker already calls bruker.load_acqu
-        if return_s is not None:
-            return bruker.load_acqu(filename,whichdim=whichdim,return_s = return_s)
-        else:
-            return bruker.load_acqu(filename,whichdim=whichdim)
-        # }}}
-    elif det_type(filename)[0] == 'prospa':
-        # {{{ somehow, I need to deal with the t1_sub within prospa
-        if det_type(filename)[1] == 't1_sub':
-            filename = dirformat(filename)
-            return prospa.load_acqu(os.path.join(filename,'..'))
-        else:
-            return prospa.load_acqu(filename)
-        # }}}
-    else:
-        raise CustomError(det_type(filename),'is not yet supported')
-
 postproc_lookup = {
         'ELDOR':acert.postproc_eldor_old,
         'ELDOR_3D':acert.postproc_eldor_3d,
