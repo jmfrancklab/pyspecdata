@@ -75,7 +75,7 @@ def series(file_reference, *subpath, **kwargs):
     rg = det_rg(float(v['RG']))
     td1 = int(v2['TD'])
     td2_zf = int(ceil(td2/256.)*256) # round up to 256 points, which is how it's stored
-    fp = open_subpath(file_reference,*(subpath+('ser',)))
+    fp = open_subpath(file_reference,*(subpath+('ser',)), mode='rb')
     data = fp.read()
     fp.close()
     if int(v['BYTORDA']) == 1:
