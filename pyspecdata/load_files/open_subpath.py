@@ -3,7 +3,7 @@ from ..datadir import dirformat
 import os.path
 from zipfile import ZipFile
 
-def open_subpath(file_reference,*args,**kwargs):
+def open_subpath(file_reference,*subpath,**kwargs):
     """
     Parameters
     ----------
@@ -18,21 +18,22 @@ def open_subpath(file_reference,*args,**kwargs):
     mode,test_only = process_kwargs([('mode','r'),
         ('test_only',False)],kwargs)
     if isinstance(file_reference,basestring):
-        file_reference = dirformat(file_reference)
         if test_only:
-            if os.path.exists(file_reference):
+            print "testing",(file_reference,) + subpath
+            full_path = os.path.join(file_reference, *subpath)
+            if os.path.exists(full_path):
                 return True
             else:
                 return False
         else:
-            fp = open(os.path.join(*((file_reference,)+args)),mode)
+            fp = open(os.path.join(file_reference,*subpath),mode)
     else:
         if type(file_reference) == tuple:
             if len(file_reference) == 3 and type(file_reference[0]) is ZipFile:
                 zf = file_reference[0]
                 zip_basename = file_reference[1]
                 name_inside_zip = file_reference[2]
-                subfile = '/'.join((name_inside_zip,)+args)
+                subfile = '/'.join((name_inside_zip,)+subpath)
                 if test_only:
                     if subfile in zf.namelist():
                         return True

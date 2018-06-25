@@ -119,6 +119,10 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = []):
 
 def init_logging(level=logging.INFO, filename='pyspecdata.log'):
     "Initialize logging on pyspecdata.log -- do NOT log if run from within a notebook (it's fair to assume that you will run first before embedding)"
+    if level.lower() == 'info':
+        level=logging.INFO
+    elif level.lower() == 'debug':
+        level=logging.DEBUG
     if myparams['figlist_type'] == 'figlistl':
         return
     FORMAT = "--> %(filename)s(%(lineno)s):%(name)s %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"

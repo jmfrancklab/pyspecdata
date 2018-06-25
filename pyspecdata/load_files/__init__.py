@@ -341,7 +341,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
         if open_subpath(file_reference, expno_as_str, 'ser', test_only=True):
             #{{{ Bruker 2D
             logger.debug('Identified a bruker series file')
-            data = bruker_nmr.series(file_reference, expno_as_str, 'ser', dimname=dimname)
+            data = bruker_nmr.series(file_reference, expno_as_str, dimname=dimname)
             #}}}
         elif open_subpath(file_reference, expno_as_str, 'acqus', test_only=True):
             logger.debug('Identified a bruker 1d file')
