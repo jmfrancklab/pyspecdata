@@ -171,6 +171,10 @@ For example, on Windows with `Anaconda 2.7`_.
 -- just run
 ``conda install numpy scipy sympy pyqt pytables matplotlib h5py``.
 
+On CentOS7, we've tested
+``yum install python-matplotlib python-matplotlib-qt4 python-devel sympy h5py python-tables scipy``
+(after running ``yum install epel-release`` to install the EPEL distribution)
+
 (If you don't install these packages with your system `pip` will try to install them, and there is a good chance it will fail -- it's known not to work great with several of these; `setuptools` should error out and tell you to install the packages.)
 
 *mayavi*: Mayavi can be used (and gives very nice graphics), but frequently lags behind common Python distros.

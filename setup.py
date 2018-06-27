@@ -49,6 +49,7 @@ setup(
 )
 tryagain = False
 
+print "You can now run pyspecdata_dataconfig to generate a template configuration file (which will show up in your home directory)."
 ## Later, I should probably use the setuptools equivalent of install_data to do both this and the lapack stuff
 #print "\n\nNow that everything else is set up, I'm going to check your notebook and data directories, possibly asking you to set them."
 #print "\n--> The notebook directory is the root directory where you store tex files for your notebook."
