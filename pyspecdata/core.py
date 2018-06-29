@@ -4049,13 +4049,13 @@ class nddata (object):
         return_error: bool
             whether or note to return the standard deviation as an error
         '''
-        print "entered the mean function"
+        logger.debug("entered the mean function")
         #{{{ process arguments
         if len(args) > 1:
             raise ValueError('you can\'t pass more than one argument!!')
         axes = self._possibly_one_axis(*args)
         return_error = process_kwargs([('return_error',True)],kwargs)
-        print "return error is",return_error
+        logger.debug(strm("return error is",return_error))
         if (type(axes) is str):
             axes = [axes]
         #}}}
@@ -4063,8 +4063,8 @@ class nddata (object):
             try:
                 thisindex = self.dimlabels.index(axes[j])
             except:
-                print 'error, dimlabels is: ',self.dimlabels
-                print "doesn't contain: ",axes[j]
+                logger.debug(strm('error, dimlabels is: ',self.dimlabels))
+                logger.debug(strm("doesn't contain: ",axes[j]))
                 raise
             if self.data_error is not None:
                 this_axis_length = self.data.shape[thisindex]
@@ -4083,7 +4083,7 @@ class nddata (object):
             if return_error: # this needs to go after the data setting
                 self.set_error(thiserror) # set the error to the standard deviation
             self._pop_axis_info(thisindex)
-            print "return error is",return_error
+            logger.debug(strm("return error is",return_error))
         return self
     def mean_nopop(self,axis):
         self = self.run_nopop(mean,axis=axis)
@@ -5958,7 +5958,7 @@ class ndshape (ndshape_base):
             else:
                 emptyar = format*ones(tuple(self.shape),dtype=dtype)
         except TypeError as e:
-            raise TypeError(strm('Wrong type for self.shape',map(type,self.shape)))
+            raise TypeError(strm('Wrong type for self.shape',map(type,self.shape),'this probably means that you swapped the size and name arguments -- ',self.shape,'should be numbers, not names'))
         retval = nddata(emptyar,self.shape,self.dimlabels)
         if labels:
             retval.labels(self.dimlabels,map(lambda x: double(r_[0:x]),self.shape))
