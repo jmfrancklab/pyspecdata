@@ -88,6 +88,7 @@ rcParams['ytick.minor.size'] = 6
 rcParams['legend.fontsize'] = 12
 rcParams['axes.grid'] = False
 rcParams['font.size'] = 18
+rcParams['image.cmap'] = 'jet'
 logger = logging.getLogger('pyspecdata.core')
 #{{{ constants
 k_B = 1.380648813e-23
