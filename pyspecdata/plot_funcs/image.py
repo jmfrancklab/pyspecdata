@@ -177,9 +177,12 @@ def imagehsv(A,logscale = False,black = False):
     colors += m
     colors *= (n-1)
     if black:
-        colors[mask * r_[True,True,True]] = black
+        # if the background is black, make the separators white
+        # here, we have to remember that we're already scaled up to a scale of 0--255
+        colors[mask * r_[True,True,True]] = 255.0
     else:
-        colors[mask * r_[True,True,True]] = 1.0
+        # if the background is white, make the separators black
+        colors[mask * r_[True,True,True]] = 0.0
     colors = colors.reshape(origshape)
     return uint8(colors.round())
 
