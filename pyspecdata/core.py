@@ -5440,8 +5440,10 @@ class nddata (object):
             retval.dimlabels = list(self.dimlabels)
             retval.data = None
             retval.data_error = None
-            retval.data_units = None
-            retval.data_covariance = None
+            if hasattr(self,'data_units'):
+                retval.data_units = deepcopy(self.data_units)
+            if hasattr(self,'data_covariance'):
+                retval.data_covariance = deepcopy(self.data_covariance)
             # }}}
             # {{{ axes
             retval.axis_coords = deepcopy(self.axis_coords)
