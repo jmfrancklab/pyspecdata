@@ -3707,7 +3707,7 @@ class nddata (object):
         argorder = map(argout.dimlabels.index,new_arg_labels) # for
         #          each new dimension, determine the position of the
         #          original dimension
-        selfout.data = selfout.data.reshape(selfshape) # and reshape
+        selfout.data = selfout.data.reshape(int64(selfshape)) # and reshape
         #          to its new shape
         selfout.dimlabels = newdims
         try:
