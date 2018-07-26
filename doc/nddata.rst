@@ -21,6 +21,9 @@ These attributes
 or Fourier transforms,
 and are used to automatically format plots.
 
+.. todo::
+    also implement with blocks for working in the Fourier domain
+
 Note that, if all else fails,
 you can always use numpy directly:
 *The `data` attribute of an nddata object is just a standard numpy array.*

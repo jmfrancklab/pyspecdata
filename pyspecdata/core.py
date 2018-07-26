@@ -3504,8 +3504,12 @@ class nddata (object):
         #{{{ shape and multiply
         try:
             A,B = self.aligndata(arg)
-        except:
-            raise ValueError(strm("Error aligning right (arg)",arg.name(),"with left (self)",self.name()))
+        except Exception as e:
+            if arg.name() is not None and self.name() is not None:
+                raise ValueError(strm("Error aligning right (arg)", arg.name(),
+                    "with left (self)", self.name())+explain_error(e))
+            else:
+                raise ValueError("Error aligning"+explain_error(e))
         retval = A.copy()
         retval.data = A.data * B.data
         #}}}
@@ -5501,8 +5505,9 @@ class nddata (object):
         else:
             try:
                 slicedict,axesdict,errordict,unitsdict = self._parse_slices(args)
-            except:
-                raise ValueError(strm('error trying to get slices given by',args))
+            except Exception as e:
+                raise ValueError(strm('error trying to get slices given by',args)
+                        +explain_error(e))
             if type(args) is not slice and type(args[1]) is list and type(args[0]) is str and len(args) == 2:
                 return concat([self[args[0],x] for x in args[1]],args[0])
             indexlist = tuple(self.fld(slicedict))
@@ -5629,7 +5634,7 @@ class nddata (object):
                                 if type(y.stop) is tuple: #then I passed a single index
                                     temp = diff(axesdict[x]) 
                                     if not all(temp*sign(temp[0])>0):
-                                        raise ValueError("you can only use the range format on data where the axis is in consecutively increasing or decreasing order")
+                                        raise ValueError(strm("you can only use the range format on data where the axis is in consecutively increasing or decreasing order, and the differences that I see are",temp*sign(temp[0])))
                                     del temp
                                     if len(y.stop) > 2:
                                         raise ValueError("range with more than two values not currently supported")
