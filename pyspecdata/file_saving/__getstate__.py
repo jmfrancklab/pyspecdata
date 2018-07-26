@@ -30,7 +30,11 @@ def __getstate__(self):
             retval['data']['data'] = self.data
             retval['data']['error'] = self.get_error()
             error_processed = True
+        else:
+            raise ValueError("found a data_error attribute but it doesn't seem to be sensible")
         all_attributes.remove('data_error')
+    elif self.get_error() is not None:
+        raise ValueError("get_error is not None, but I didn't find a data_error attribute")
     if not error_processed:
         data_dtype = self.data.dtype.descr
         # just add "data" to the field description, for when the file is saved
