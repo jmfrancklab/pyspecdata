@@ -1,5 +1,6 @@
 from ..general_functions import *
 from pylab import * 
+logger = logging.getLogger('pyspecdata.hdf_save_dict_to_group')
 
 def hdf_save_dict_to_group(group,data):
     '''
@@ -19,14 +20,10 @@ def hdf_save_dict_to_group(group,data):
             else:
                 logger.debug('Adding %s=%s as dataset' % (k,v))
                 group.create_dataset(k,data=v,dtype=v.dtype)
-                
         elif issubclass(type(v),dict):
             subgroup=group.create_group(k)
             hdf_save_dict_to_group(subgroup,v)
-            
         else:
-            if ok_hdf(v):
-                logger.debug('Adding %s=%s to experiment' % (k,v))
+            if v is not None and len(v) > 0:
+                logger.debug('Adding %s=%s as attribute' % (k,v))
                 group.attrs[k]=v
-            else:
-                logger.debug('NOT adding %s=%s to experiment' % (k,v))    

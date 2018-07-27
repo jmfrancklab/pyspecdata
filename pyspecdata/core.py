@@ -2267,8 +2267,10 @@ class nddata (object):
         else:
             self.axis_coords_error = axis_coords_error
         if axis_coords_units == None:
+            logger.debug('called with axis_coords_units set to None')
             self.axis_coords_units = [None]*len(axis_coords)
         else:
+            logger.debug(strm('called with axis_coords_units set to',axis_coords_units))
             self.axis_coords_units = axis_coords_units 
         return
     def _contains_symbolic(self,string):
@@ -5271,6 +5273,10 @@ class nddata_hdf5 (nddata):
             myaxiscoords = [None]*len(mydimlabels)
             myaxiscoordserror = [None]*len(mydimlabels)
             logger.info(strm("about to read out the various axes:",datadict['axes'].keys()))
+            has_axis_units = False
+            if 'units' in datadict['axes'].keys():
+                unit_dict = datadict['axes'].pop('units')
+                has_axis_units = True
             for axisname in datadict['axes'].keys():
                 try:
                     axisnumber = mydimlabels.index(axisname)
@@ -5285,6 +5291,11 @@ class nddata_hdf5 (nddata):
                 for k in datadict['axes'][axisname].keys():
                     logger.debug(strm("Warning, attribute",k,"of axis table",axisname,"remains, but the code to load this is not yet supported"))
                 datadict['axes'].pop(axisname)
+            if has_axis_units:
+                myaxiscoordunits = [None] * len(mydimlabels)
+                for k,v in unit_dict.iteritems():
+                    myaxiscoordunits[mydimlabels.index(k)] = v
+                kwargs.update({"axis_coords_units":myaxiscoordunits})
             kwargs.update({"axis_coords":myaxiscoords})
             kwargs.update({"axis_coords_error":myaxiscoordserror})
         elif len(mydimlabels)>1:
