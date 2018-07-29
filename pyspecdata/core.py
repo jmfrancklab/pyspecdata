@@ -1777,6 +1777,9 @@ class figlist(object):
         self.basename = self.pushbasenamelist.pop()
         self.next(self.pushlist.pop())
         return
+    def get_num_figures(self):
+        cleanlist = filter(lambda x: type(x) is str,self.figurelist)
+        return len(cleanlist)
     def get_fig_number(self,name):
         cleanlist = filter(lambda x: type(x) is str,self.figurelist)
         try:
@@ -1807,6 +1810,7 @@ class figlist(object):
             Any other keyword arguments are passed to the matplotlib (mayavi)
             figure() function that's used to switch (create) figures.
         """
+        # {{{ basic setup
         if not hasattr(self,'figdict'):
             self.figdict = {} # the dictionary of the various figures
         if not hasattr(self,'propdict'):
@@ -1819,6 +1823,7 @@ class figlist(object):
         else:
             logger.debug(strm("not using a basename",self.basename is not None))
             name = input_name
+        # }}}
         if name.find('/') > 0:
             raise ValueError("don't include slashes in the figure name, that's just too confusing")
         logger.debug(strm('called with',name))
@@ -1829,9 +1834,11 @@ class figlist(object):
                 fig.scene.render_window.aa_frames = 20
                 fig.scene.anti_aliasing_frames = 20
             else:
-                fig = figure(self.get_fig_number(name))
+                logging.debug(strm("I'm changing to figure",self.get_fig_number(name),"for",name))
+                fig = self.figdict[name]
+                figure(self.figdict[name].number)
             self.current = name
-            if self.verbose: print lsafen('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures')
+            logging.debug(strm('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures'))
             if boundaries is not None:
                 if 'boundaries' not in self.propdict[self.current].keys() or self.propdict[self.current]['boundaries'] != boundaries:
                     raise ValueError("You're giving conflicting values for boundaries")
@@ -1839,10 +1846,7 @@ class figlist(object):
                 if 'legend' not in self.propdict[self.current].keys() or self.propdict[self.current]['legend'] != legend:
                     raise ValueError("You're giving conflicting values for legend")
         else:# figure doesn't exist yet
-            if hasattr(self,'current'):
-                last_figure_number = self.get_fig_number(self.current)
-            else:
-                last_figure_number = 0
+            num_figs_before_add = self.get_num_figures()
             self.current = name
             if self.current not in self.propdict.keys():
                 self.propdict[self.current] = {}
@@ -1854,25 +1858,24 @@ class figlist(object):
                 if 'figsize' not in kwargs.keys():
                     kwargs.update({'figsize':(12,6)})
                 if hasattr(self,'mlab'):
-                    fig = self.mlab.figure(last_figure_number+1,bgcolor = (1,1,1),**kwargs)
+                    fig = self.mlab.figure(num_figs_before_add+1,bgcolor = (1,1,1),**kwargs)
                     fig.scene.render_window.aa_frames = 20
                     fig.scene.anti_aliasing_frames = 20
                 else:
-                    fig = figure(last_figure_number+1,**kwargs)
+                    fig = figure(num_figs_before_add+1,**kwargs)
                 fig.add_axes([0.075,0.2,0.6,0.7]) # l b w h
                 self.use_autolegend('outside')
             else:
                 self.propdict[self.current]['legend'] = False
-                fig = figure(last_figure_number+1,**kwargs)
                 if hasattr(self,'mlab'):
-                    fig = self.mlab.figure(last_figure_number+1,bgcolor = (1,1,1),**kwargs)
+                    fig = self.mlab.figure(num_figs_before_add+1,bgcolor = (1,1,1),**kwargs)
                     fig.scene.render_window.aa_frames = 20
                     fig.scene.anti_aliasing_frames = 20
                 else:
-                    fig = figure(last_figure_number+1,**kwargs)
+                    fig = figure(num_figs_before_add+1,**kwargs)
                 if twinx is not None:
                     fig.add_subplot(111)
-            logger.debug(strm('added, figure',len(self.figurelist)+1,'because not in figurelist',self.figurelist))
+            logger.debug(strm('added figure',len(self.figurelist)+1,'because not in figurelist',self.figurelist))
             self.figurelist.append(name)
             self.figdict.update({self.current:fig})
             if boundaries == False:
@@ -4748,6 +4751,7 @@ class nddata (object):
                 if issympy(args[0]):
                     func = args[0]
                     symbols_in_func = func.atoms(sympy.Symbol)
+                    logger.debug(strm('identified this as a sympy expression (',func,') with symbols',symbols_in_func))
                     symbols_not_in_dimlabels = set(map(str,symbols_in_func))-set(self.dimlabels)
                     if len(symbols_not_in_dimlabels)>0:
                         raise ValueError("You passed a symbolic function, but the symbols"+str(symbols_not_in_dimlabels)+" are not axes")
@@ -4761,6 +4765,7 @@ class nddata (object):
         else:
             raise ValueError('Wrong number of arguments!! -- you passed '+repr(len(args))+' arguments!')
         if issympy(func):
+            logging.debug(strm("about to run sympy lambdify, symbols_in_func is",symbols_in_func))
             mat2array = [{'ImmutableMatrix': array}, 'numpy']# returns arrays rather than the stupid matrix class
             try:
                 lambdified_func = sympy.lambdify(list(symbols_in_func), func,
@@ -4773,12 +4778,18 @@ class nddata (object):
             axisnames = map(str,symbols_in_func)
         elif not hasattr(func,'func_code'):
             raise ValueError("I can't interpret the second argument as a function!")
-        if func.func_code.co_argcount != len(axisnames):
-            raise ValueError("The axisnames you passed and the argument count don't match")
+        # I can't do the following for sympy, because the argument count is always zero
+        if not issympy(args[0]) and func.func_code.co_argcount != len(axisnames):
+            raise ValueError(strm("The axisnames you passed",axisnames,
+                "and the argument count",func.func_code.co_argcount,"don't match"))
         list_of_axes = [self._axis_inshape(x) for x in axisnames]
         retval = func(*list_of_axes)
         if issympy(retval):
             raise RuntimeError("The sympy function that you passed doesn't match the automatically generated axis variables (obtained by mapping sympy.var onto the axis variables, without any kwargs). The atoms left over are:\n"+str(func.atoms))
+        logging.debug(strm("at this point, list of axes is:",list_of_axes))
+        if len(list_of_axes) == 0:
+            return nddata(float(func()))
+            #raise ValueError(strm("Doesn't seem like there are axes -- the axis names that you passed are",axisnames))
         newshape = ones_like(list_of_axes[0].shape)
         for j in list_of_axes:
             newshape *= array(j.shape)
@@ -5326,10 +5337,15 @@ class nddata (object):
             #{{{ reorder so the shapes match
             unshared_indices = list(set(args[1].dimlabels) ^ set(self.dimlabels))
             shared_indices = list(self.dimlabels)
+            if 'INDEX' in unshared_indices:
+                unshared_indices.remove('INDEX')
             for j in unshared_indices:
-                shared_indices.remove(j)
+                try:
+                    shared_indices.remove(j)
+                except:
+                    raise ValueError(strm("Error trying to remove",j,"from list of shared indices",shared_indices))
             if len(args[1].dimlabels) != len(shared_indices) or (not all([args[1].dimlabels[j] == shared_indices[j] for j in range(0,len(shared_indices))])):
-                args[1].reorder[shared_indices]
+                args[1].reorder(shared_indices)
             #}}}
             rightdata = args[1].data
             righterrors = args[1].get_error()
