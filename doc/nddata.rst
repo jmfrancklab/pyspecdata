@@ -24,6 +24,37 @@ and are used to automatically format plots.
 .. todo::
     also implement with blocks for working in the Fourier domain
 
+Very importantly, most pyspecdata functions are designed to operate on the data *in place*, meaning that
+rather than doing something like:
+
+>>> data = data.mean() # numpy
+
+you simply do:
+
+>>> data.mean('axisname')
+
+and ``data`` is modified from here out.
+We do this because we are typically processing multidimensional datasets that consist of many points,
+and we subject them to a series of steps to process them.
+We don't want to use up memory with lots of copies of the data.
+Also, this allows us to string together several operation, e.g.:
+
+>>> data.ft('axis1').sum('axis2')['axis1':(0,3)].mean('axis3')
+
+So, while this general setup is different than the standard numpy setup,
+*etc.*, it should lead to you writing more efficient code, with less variables
+to keep track of, and generally also leads to far more compact code,
+and you should probably not try to bypass it by creating copies of your data.
+
+In rare circumstances, you *need* to create a copy of your data
+(I think there is only one case where this is true:
+when you
+need to process the same data in parallel in two different ways to generate two results,
+and then perform math that uses both results).
+For these cases, you can use an easy shortcut for the copy method: `C` (as in `data.C`).
+
+**say something about slicing and copies here**
+
 Note that, if all else fails,
 you can always use numpy directly:
 *The `data` attribute of an nddata object is just a standard numpy array.*

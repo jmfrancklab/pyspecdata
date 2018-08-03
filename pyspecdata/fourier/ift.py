@@ -2,12 +2,14 @@ from ..general_functions import *
 from pylab import * 
 from .ft_shift import _find_index,thinkaboutit_message
 
-def ift(self,axes,tolerance = 1e-5,verbose = False,**kwargs):
+def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
     r"""This performs a Fourier transform along the axes identified by the string or list of strings `axes`.
 
     It adjusts normalization and units so that the result conforms to
-            :math:`s(t)=\int_{x_min}^{x_max} \tilde{s}(t) e^{i 2 \pi f t} df`
-    Note that while the analytical integral this corresponds to is normalized, performing
+            :math:`s(t)=t_{dw} \int_{x_min}^{x_max} \tilde{s}(t) e^{i 2 \pi f t} df`
+    Where :math:`t_{dw}=\frac{1}{\Delta f}`, is the dwell time (with :math:`\Delta f` the spectral width).
+
+    *Why do we do this?* Note that while the analytical integral this corresponds to is normalized, performing
     :func:`ft` followed by :func:`ift` on a discrete sequence is NOT completely invertible
     (due to integration of the implied comb function??),
     and would require division by a factor of $\Delta f$ (the spectral width) in order

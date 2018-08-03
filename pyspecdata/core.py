@@ -3687,7 +3687,7 @@ class nddata (object):
         #                   but not self, ordered as they were in arg
         newdims = self.dimlabels + augmentdims
         selfshape = list(selfout.data.shape)+list(
-                ones(len(augmentdims))) # there is no need to
+                ones(len(augmentdims),dtype=uint64)) # there is no need to
         #       transpose self, since its order is preserved
         # }}}
         argout = arg.copy()
