@@ -3530,6 +3530,13 @@ class nddata (object):
         #}}}
         retval.set_error(Rerr)
         return retval
+    def __rpow__(self,arg):
+        result = self.copy()
+        result.set_error(None)
+        logger.info("error propagation for right power not currently supported (do you need this, really?)")
+        assert isscalar(arg) or type(arg) is ndarray, "currently right power only supported for ndarray and scalars -- do you really need something else??"
+        result.data = arg**self.data
+        return result
     def __pow__(self,arg):
         if arg == -1:
             x = self.get_error()
