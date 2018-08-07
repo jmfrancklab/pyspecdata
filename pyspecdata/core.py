@@ -2529,13 +2529,16 @@ def plot(*args,**kwargs):
     return retval
 #}}}
 #{{{general functions
-def box_muller(length):
+def box_muller(length, return_complex=True):
     r'''algorithm to generate normally distributed noise'''
     s1 = rand(length)
     s2 = rand(length)
     n1 = sqrt(-2*log(s1))*cos(2*pi*s2)
-    n2 = sqrt(-2*log(s1))*sin(2*pi*s2)
-    return (n1 + 1j * n2)*0.5
+    if return_complex:
+        n2 = sqrt(-2*log(s1))*sin(2*pi*s2)
+        return (n1 + 1j * n2)*0.5
+    else:
+        return (n1)*0.5
 #}}}
 
 #{{{nddata
@@ -4562,7 +4565,8 @@ class nddata (object):
         '''
         if type(intensity) is type(emptyfunction):
             intensity = intensity(lambda x: self.data)
-        self.data += box_muller(self.data.size).reshape(self.data.shape) * intensity
+        return_complex = iscomplexobj(self.data)
+        self.data += box_muller(self.data.size, return_complex=return_complex).reshape(self.data.shape) * intensity
         return self
     #{{{ functions to manipulate and return the axes
     def reorder(self,*axes,**kwargs):
