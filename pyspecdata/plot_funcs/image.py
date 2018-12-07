@@ -48,8 +48,10 @@ def image(A,x=[],y=[],**kwargs):
                 if A.getaxis(x) is not None:
                     return '[$ '+A.unitify_axis(x)+r' $_{{{:.3g}\rightarrow{:.3g}}}]'.format(
                         *(A.getaxis(x)[r_[0,-1]]))
+                #elif A.get_units(x) is not None:
+                #    return '[$ '+A.unitify_axis(x)+ '$]'
                 else:
-                    return ' UNLABELED '
+                    return '[$ '+A.unitify_axis(x)+ '$]'
             templabels = map(axis_labeler, templabels)
             y_label = '\\otimes'.join(templabels)
             y_label = ' _{('+r'\times'.join(these_dimsizes)+')}' + y_label

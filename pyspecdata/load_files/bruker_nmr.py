@@ -114,6 +114,9 @@ def series(file_reference, *subpath, **kwargs):
     data.set_prop('title',
             load_title(file_reference, *subpath))
     v.update(v2)
+    with open_subpath(file_reference, *(subpath+('pulseprogram',)),mode='r') as fp:
+        ppg = fp.read()
+        data.set_prop('pulprog',ppg)
     data.set_prop('acq',
             v)
     if isinstance(file_reference,basestring):
