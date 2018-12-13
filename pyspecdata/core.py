@@ -860,7 +860,7 @@ def h5child(thisnode,childname,clear = False,create = None,verbose = False):
     #}}}
     h5file = thisnode._v_file
     try:
-        childnode = h5file.getNode(thisnode,childname)
+        childnode = h5file.get_node(thisnode,childname)
         if verbose:
             print lsafe('found',childname)
         if clear:
@@ -872,7 +872,7 @@ def h5child(thisnode,childname,clear = False,create = None,verbose = False):
         elif clear:
             childnode = None
         else:
-            childnode = h5file.createGroup(thisnode,childname)
+            childnode = h5file.create_group(thisnode,childname)
             if verbose:
                 print lsafe('created',childname)
     return childnode
@@ -883,7 +883,7 @@ def h5remrows(bottomnode,tablename,searchstring):
         thistable = bottomnode.__getattr__(tablename)
         counter = 0
         try:
-            data = thistable.readWhere(searchstring).copy()
+            data = thistable.read_where(searchstring).copy()
         except Exception as e:
             raise RuntimeError(strm('Problem trying to remove rows using search string',
                 searchstring, 'in', thistable, explain_error(e)))
@@ -893,13 +893,13 @@ def h5remrows(bottomnode,tablename,searchstring):
                 counter += 1
             else:
                 try:
-                    thistable.removeRows(row.nrow - counter,row.nrow - counter + 1) # counter accounts for rows I have already removed.
+                    thistable.remove_rows(row.nrow - counter,row.nrow - counter + 1) # counter accounts for rows I have already removed.
                 except:
                     print "you passed searchstring",searchstring
                     print "trying to remove row",row
                     print "trying to remove row with number",row.nrow
-                    print help(thistable.removeRows)
-                    raise RuntimeError("length of thistable is "+repr(len(thistable))+" calling removeRows with "+repr(row.nrow-counter))
+                    print help(thistable.remove_rows)
+                    raise RuntimeError("length of thistable is "+repr(len(thistable))+" calling remove_rows with "+repr(row.nrow-counter))
                 counter += 1
         return counter,data
     except tables.NoSuchNodeError:
@@ -926,7 +926,7 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
             if verbose: obs("trying to match row according to",lsafen(match_row))
             mytable.flush()
             try:
-                matches = mytable.readWhere(match_row)
+                matches = mytable.read_where(match_row)
             except NameError as e:
                 raise NameError(' '.join(map(str,
                     [e,'\nYou passed',match_row,'\nThe columns available are',mytable.colnames,"condvars are",condvars])))
@@ -987,7 +987,7 @@ def h5table(bottomnode,tablename,tabledata):
         if tabledata is not None:
             if type(tabledata) is dict:
                 tabledata = make_rec(tabledata)
-            datatable = h5file.createTable(bottomnode,tablename,tabledata) # actually write the data to the table
+            datatable = h5file.create_table(bottomnode,tablename,tabledata) # actually write the data to the table
         else:
             raise RuntimeError(' '.join(map(str,['You passed no data, so I can\'t create table',tablename,'but it doesn\'t exist in',bottomnode,'which has children',bottomnode._v_children.keys()])))
     else:
@@ -1013,11 +1013,11 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
         mode = 'a'
         #if check_only: mode = 'r'
         logger.info(strm('so I look for the file',h5path[0],'in directory',directory))
-        h5file = tables.openFile(os.path.join(directory,h5path[0]),mode = mode,title = 'test file')
+        h5file = tables.open_file(os.path.join(directory,h5path[0]),mode = mode,title = 'test file')
     except IOError as e:
         raise IOError('I think the HDF5 file has not been created yet, and there is a bug pytables that makes it freak out, but you can just run again.'+explain_error(e))
     #}}}
-    currentnode = h5file.getNode('/') # open the root node
+    currentnode = h5file.get_node('/') # open the root node
     logger.debug(strm("I have grabbe node",currentnode,"of file",h5file,'ready to step down search path'))
     for pathlevel in range(1,len(h5path)):#{{{ step down the path
             clear = False
@@ -1159,7 +1159,7 @@ def h5join(firsttuple,secondtuple,
         additional_search = " & (%s)"%additional_search
         search_string = search_string + additional_search
     if verbose: print '\n\nh5join generated the search string:',lsafen(search_string)
-    retval = tablenode.readWhere(search_string)
+    retval = tablenode.read_where(search_string)
     #{{{ then join the data together
     # here I'm debugging the join function, again, and again, and agin
     try:
