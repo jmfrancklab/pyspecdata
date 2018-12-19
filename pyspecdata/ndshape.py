@@ -129,6 +129,11 @@ class ndshape_base ():
             return mydict[args]
         except:
             raise ValueError(strm("one or more of the dimensions named",args,"do not exist in",self.dimlabels))
+    def rename(self,before,after):
+        r'rename a dimension'
+        thisindex = self.axn(before)
+        self.dimlabels[thisindex] = after
+        return self
     def pop(self,label):
         r'remove a dimension'
         thisindex = self.axn(label)

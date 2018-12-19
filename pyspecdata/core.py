@@ -715,7 +715,7 @@ def lsafe(*string,**kwargs):
         wrap = None
     #}}}
     if type(string) is not str:
-        string = repr(string)
+        string = str(string)
     if wrap is True:
         wrap = 60
     if wrap is not None:
