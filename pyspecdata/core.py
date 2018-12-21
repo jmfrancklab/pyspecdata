@@ -3959,7 +3959,14 @@ class nddata (object):
         return func
         #}}}
     def argmax(self,*args,**kwargs):
-        r'find the max along a particular axis, and get rid of that axis, replacing it with the index number of the max value'
+        r"""find the max along a particular axis, and get rid of that axis, replacing it with the index number of the max value
+        
+        Parameters
+        ==========
+        raw_index: bool
+            return the raw (ndarray) numerical index, rather than the corresponding axis value
+            Note that the result returned is still, however, an nddata (rather than numpy ndarray) object.
+        """
         #{{{ process arguments
         axes = self._possibly_one_axis(*args)
         raw_index = False
@@ -3986,7 +3993,14 @@ class nddata (object):
             self._pop_axis_info(thisindex)
         return self
     def argmin(self,axes,raw_index = False):
-        r'find the min along a particular axis, and get rid of that axis, replacing it with the index number of the min value'
+        r"""find the min along a particular axis, and get rid of that axis, replacing it with the index number of the max value
+        
+        Parameters
+        ==========
+        raw_index: bool
+            Return the raw (ndarray) numerical index, rather than the corresponding axis value.
+            Note that the result returned is still, however, an nddata (rather than numpy ndarray) object.
+        """
         if (type(axes) is str):
             axes = [axes]
         for j in range(0,len(axes)):
