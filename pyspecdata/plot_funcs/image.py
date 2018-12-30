@@ -2,6 +2,7 @@ from ..general_functions import *
 from ..ndshape import ndshape_base as ndshape
 def image(A,x=[],y=[],**kwargs):
     r"Please don't call image directly anymore -- use the image method of figurelist"
+    x_inverted = False
     A.squeeze()# drop any singleton dimensions, which cause problems
     #{{{ pull out kwargs for imagehsv
     imagehsvkwargs = {}
@@ -27,6 +28,8 @@ def image(A,x=[],y=[],**kwargs):
     if hasattr(A,'dimlabels'):
         setlabels = True
         templabels = list(A.dimlabels)
+        if A.get_prop('x_inverted'):
+            x_inverted = True
         x_label = templabels[-1]
         if A.getaxis(x_label) is None:
             x = r_[0,ndshape(A)[x_label]]
@@ -121,6 +124,9 @@ def image(A,x=[],y=[],**kwargs):
         xlabel(x_label)
         #print y_label
         ylabel(y_label)
+    if x_inverted:
+        these_xlims = ax.get_xlim()
+        ax.set_xlim((max(these_xlims),min(these_xlims)))
     return retval
 
 def imagehsv(A,logscale = False,black = False):

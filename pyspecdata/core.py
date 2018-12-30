@@ -1605,7 +1605,7 @@ def plot_updown(data,axis,color1,color2,symbol = '',**kwargs):
     changemask = change > 0
     if 'force_color' in kwargs.keys() and kwargs['force_color'] == True:
         if hasattr(data,'other_info'):
-            if 'plot_color' in data.other_info.keys():
+            if 'plot_color' in data.get_prop():
                 data.other_info.pop('plot_color')
     plot(data[axis,changemask],color1+symbol,**kwargs)
     if len(kwargs) > 0 and 'label' in kwargs.keys(): kwargs.pop('label') # if I'm doing a legend, I want it on the first
@@ -3188,7 +3188,12 @@ class nddata (object):
                     except:
                         raise ValueError(strm('data_to_test is',data_to_test,'isfinite is',isfinite(data_to_test)))
                     #{{{ find the average order of magnitude, rounded down to the nearest power of 3
-                    average_oom = log10(abs(data_to_test[data_to_test>0]))/3.
+
+                    average_oom = log10(abs(data_to_test))/3.
+                    if verbose:
+                        print "(human_units) for axis: dtype",data_to_test.dtype
+                        print "(human_units) for axis: dtype",data_to_test
+                        print "(human units) for axis: oom:",average_oom
                     average_oom = average_oom[isfinite(average_oom)].mean()
                     #}}}
                     if verbose: print "(human units): for axis",thisaxis,"the average oom is",average_oom*3
@@ -3347,7 +3352,13 @@ class nddata (object):
         else:
             raise ValueError("I don't know what you're passing to set prop!!!")
         return self
-    def get_prop(self,propname):
+    def copy_props(self,other):
+        r"""Copy all properties (see :func:`get_prop`) from another nddata
+        object -- note that these include properties pertaining the the FT
+        status of various dimensions."""
+        self.other_info.update(other.other_info.copy())
+        return self
+    def get_prop(self,propname=None):
         r'''return arbitrary ND-data properties (typically acquisition parameters *etc.*) by name (`propname`)
         
         In order to allow ND-data to store acquisition parameters and other info that accompanies the data,
@@ -3360,12 +3371,16 @@ class nddata (object):
         Parameters
         ----------
         propname: str
-            name of the property that you're want returned
+            Name of the property that you're want returned.
+            If this is left out or set to "None", the names of the available
+            properties are returned.
 
         Returns
         -------
         The value of the property (can by any type) or `None` if the property doesn't exist.
         '''
+        if propname is None:
+            return self.other_info.keys()
         if propname not in self.other_info.keys():
             return None
         return self.other_info[propname]
@@ -3400,7 +3415,7 @@ class nddata (object):
         self.other_info.update({'plot_color':thiscolor})
         return
     def get_plot_color(self):
-        if 'plot_color' in self.other_info.keys():
+        if 'plot_color' in self.get_prop():
             return self.other_info['plot_color']
         else:
             return None
@@ -4917,7 +4932,7 @@ class nddata (object):
             raise ValueError("Axes that are called INDEX are special, and you are not allowed to label them!")
         if type(value) is type(emptyfunction):
             x = self.getaxis(axis)
-            x[:] = value(x)
+            x[:] = value(x.copy())
             return self
         if type(value) in [float,int,double,float64]:
            value = linspace(0.,value,self.axlen(axis))
