@@ -5055,28 +5055,43 @@ class nddata (object):
         return self
     #}}}
     #{{{ breaking up and combining axes
-    def smoosh(self,dimstocollapse, dimname=0, noaxis=False, verbose=False):
-        r'''Collapse multiple dimensions into one dimension.
+    def smoosh(self,dimstocollapse, dimname=0, noaxis=False):
+        r'''Collapse (smoosh) multiple dimensions into one dimension.
 
         Parameters
         ----------
         dimstocollapse : list of strings
-            the dimensions you want to collapse to one
-        dimname : None, string, integer
+            the dimensions you want to collapse to one result dimension
+        dimname : None, string, integer (default 0)
 
             if dimname is:
 
             * None: create a new (direct product) name,
-            * a number: lump the existing dimension into the number given, in the list
-            * a string: same as the previous, where the string can be part of the list or not
+            * a number: an index to the ``dimstocollapse`` list.  The resulting smooshed dimension will be named ``dimstocollapse[dimname]``. Because the default is the number 0, the new dimname will be the first dimname given in the list.
+            * a string: the name of the resulting smooshed dimension (can be part of the ``dimstocollapse`` list or not)
 
         noaxis : bool
             if set, then just skip calculating the axis for the new dimension,
             which otherwise is typically a complicated record array
+
+        Returns
+        -------
+        self: nddata
+            the dimensions `dimstocollapse` are smooshed into a single dimension,
+            whose name is determined by `dimname`.
+            The axis for the resulting, smooshed dimension is a structured
+            array consisting of two fields that give the labels along the
+            original axes.
+
+        ..todo::
+            when we transition to axes that are stored using a
+            slice/linspace-like format, 
+            allow for smooshing to determine a new axes that is standard
+            (not a structured array) and that increases linearly.
         '''
         #{{{ first, put them all at the end, in order given here
         retained_dims = list(self.dimlabels)
-        if verbose: print "old order",retained_dims
+        logger.debug(strm("old order",retained_dims))
         #{{{ if I'm using a dimension here, be sure to grab its current position
         if dimname is None:
             final_position = -1
@@ -5090,81 +5105,97 @@ class nddata (object):
             else:
                 final_position = -1
         #}}}
+        # {{{ store the dictionaries for later use
+        axis_coords_dict = self.mkd(self.axis_coords)
+        axis_coords_error_dict = self.mkd(self.axis_coords_error)
+        # }}}
         for this_name in dimstocollapse:
-            retained_dims.pop(retained_dims.index(this_name))
+            this_idx = retained_dims.index(this_name)
+            retained_dims.pop(this_idx)
+            axis_coords_error_dict.pop(this_name)
+            axis_coords_dict.pop(this_name)
+            if this_idx < final_position:
+                final_position -= 1
+        # this might be sub-optimal, but put the dims to collapse at the end, and move them back later if we want
         new_order = retained_dims + dimstocollapse
         self.reorder(new_order)
-        if verbose: print "new order",new_order
+        logger.debug(strm("new order",new_order))
         #}}}
         #{{{ then, reshape the data (and error)
-        if verbose: print "old shape",self.data.shape
+        logger.debug(strm("old shape",self.data.shape))
         new_shape = list(self.data.shape)[:-len(dimstocollapse)]
-        if verbose: print "dimensions to keep",new_shape
+        logger.debug(strm("dimensions to keep",new_shape))
         dimstocollapse_shapes = array(self.data.shape[-len(dimstocollapse):])
         new_shape += [dimstocollapse_shapes.prod()]
         self.data = self.data.reshape(new_shape)
         if self.get_error() is not None:
             self.set_error(self.get_error().reshape(new_shape))
-        if verbose: print "new shape",self.data.shape
+        logger.debug(strm("new shape",self.data.shape))
         #}}}
         #{{{ now for the tricky part -- deal with the axis labels
         #{{{ in order, make a list of the relevant axis names, dtypes, and sizes
         axes_with_labels = [j for j in dimstocollapse if self.getaxis(j) is not None] # specifically, I am only concerned with the ones I am collapsing that have labels
-        if not noaxis:
+        if noaxis:
+            logger.debug('noaxis was specified')
+        else:
+            logger.debug('starting construction of the smooshed axis')
             axes_with_labels_haserror = [self.get_error(j) is not None for j in axes_with_labels]
-            axes_with_labels_dtype = [(j,self.getaxis(j).dtype) for j in axes_with_labels]
+            axes_with_labels_dtype = [(j,self.getaxis(j).dtype) for
+                    j in axes_with_labels]# an appropriate spec. for a structured array
             axes_with_labels_size = [self.getaxis(j).size for j in axes_with_labels]
             #}}}
-            if verbose: print "the dtype that I want is:",axes_with_labels_dtype
-            if verbose: print "the axes that have labels are:",axes_with_labels
-            if verbose: print "the axes that have labels have sizes:",axes_with_labels_size
+            logger.debug(strm("the dtype that I want is:",axes_with_labels_dtype))
+            logger.debug(strm("the axes that have labels are:",axes_with_labels))
+            logger.debug(strm("the axes that have labels have sizes:",axes_with_labels_size))
+            # {{{ we construct a multidimensional axis
             multidim_axis_error = None
             if len(axes_with_labels_dtype) > 0:
                 # create a new axis of the appropriate shape and size
-                multidim_axis_label = empty(axes_with_labels_size,dtype = axes_with_labels_dtype)
+                multidim_axis_label = empty(axes_with_labels_size,
+                        dtype=axes_with_labels_dtype)
                 if any(axes_with_labels_haserror):
                     multidim_axis_error = empty(axes_with_labels_size,
-                            dtype = [(axes_with_labels[j],self.getaxis(axes_with_labels[j]).dtype)
-                                for j in range(len(axes_with_labels)) if axes_with_labels_haserror[j]])
+                            dtype = [(axes_with_labels[j],
+                                self.getaxis(axes_with_labels[j]).dtype)
+                                for j in range(len(axes_with_labels))
+                                if axes_with_labels_haserror[j]])
                 # one at a time index the relevant dimension, and load in the information
                 full_slice = [slice(None,None,None)]*len(axes_with_labels_dtype)
                 for this_index,thisdim in enumerate(axes_with_labels):
                     axis_for_thisdim = self.getaxis(thisdim)
                     if axes_with_labels_haserror[this_index]:
                         axis_error_for_thisdim = self.get_error(thisdim)
-                    if verbose: print "the axis for",thisdim,"is",axis_for_thisdim
+                    logger.debug(strm("the axis for",thisdim,"is",axis_for_thisdim))
                     for j in range(axes_with_labels_size[this_index]):
                         this_slice = list(full_slice)
                         this_slice[this_index] = j # set this element
                         multidim_axis_label[thisdim][tuple(this_slice)] = axis_for_thisdim[j]
                         if axes_with_labels_haserror[this_index]:
                             multidim_axis_error[thisdim][tuple(this_slice)] = axis_error_for_thisdim[j]
-                if verbose: print "shape of multidim_axis_label is now",multidim_axis_label.shape,"(",axes_with_labels,")"
-                if verbose: print "multidim_axis_label is:\n",repr(multidim_axis_label)
+                logger.debug(strm("shape of multidim_axis_label is now",multidim_axis_label.shape,"(",axes_with_labels,")"))
+                logger.debug(strm("multidim_axis_label is:\n",repr(multidim_axis_label)))
                 multidim_axis_label = multidim_axis_label.flatten() # then flatten the axis
-                if verbose: print "shape of multidim_axis_label is now",multidim_axis_label.shape
-                if verbose: print "multidim_axis_label is:\n",repr(multidim_axis_label)
-        #{{{ create a new axis dictionary with the new info
-        axis_coords_dict = self.mkd(self.axis_coords)
-        axis_coords_error_dict = self.mkd(self.axis_coords_error)
+                logger.debug(strm("shape of multidim_axis_label is now",multidim_axis_label.shape))
+                logger.debug(strm("multidim_axis_label is:\n",repr(multidim_axis_label)))
+            # }}}
+        #{{{ update axis dictionary with the new info
         if noaxis:
             axis_coords_dict[dimname] = None
             axis_coords_error_dict[dimname] = None
         else:
             axis_coords_dict[dimname] = multidim_axis_label
             axis_coords_error_dict[dimname] = multidim_axis_error
-        if verbose: print "end up with axis_coords_dict",axis_coords_dict
-        if verbose: print "end up with axis_coords_error_dict",axis_coords_error_dict
+        logger.debug(strm("end up with axis_coords_dict (%d)"%len(axis_coords_dict),axis_coords_dict))
+        logger.debug(strm("end up with axis_coords_error_dict (%d)"%len(axis_coords_error_dict),axis_coords_error_dict))
         #}}}
         #}}}
         #{{{ make new dimlabels, and where relevant, project the new dictionary onto these dimlabels
         self.dimlabels = retained_dims + [dimname]
-        if verbose: print "new dimlabels",self.dimlabels
-        if len(axes_with_labels) > 0:
-            self.axis_coords = self.fld(axis_coords_dict)
-            self.axis_coords_error = self.fld(axis_coords_error_dict)
-        if verbose: print "new axis coords",self.axis_coords
-        if verbose: print "new axis coords errors",self.axis_coords_error
+        logger.debug(strm("end up with dimlabels",self.dimlabels,"and shape",self.data.shape))
+        self.axis_coords = self.fld(axis_coords_dict)
+        self.axis_coords_error = self.fld(axis_coords_error_dict)
+        logger.debug(strm("new axis coords (%d)"%len(self.axis_coords),self.axis_coords))
+        logger.debug(strm("new axis coords errors (%d)"%len(self.axis_coords_error),self.axis_coords_error))
         #}}}
         #{{{ then deal with the units
         #}}}
@@ -5174,7 +5205,17 @@ class nddata (object):
     def chunk(self,axisin,*otherargs):
         r'''"Chunking" is defined here to be the opposite of taking a direct product, increasing the number of dimensions by the inverse of the process by which taking a direct product decreases the number of dimensions.  This function chunks axisin into multiple new axes arguments.:
             axesout -- gives the names of the output axes
-            shapesout -- optional -- if not given, it assumes equal length -- if given, one of the values can be -1, which is assumed length'''
+            shapesout -- optional -- if not given, it assumes equal length -- if given, one of the values can be -1, which is assumed length
+
+        ..todo::
+            when we transition to axes that are stored using a
+            slice/linspace-like format, 
+            allow for chunking to assume that the axes of the new dimensions
+            are nested -- *e.g.*, chunk a dimension with axis: 
+            [1,2,3,4,5,6,7,8,9,10]
+            into dimensions with axes:
+            [0,1,2,3,4], [1,6]
+            '''
         if len(otherargs) == 2:
             axesout,shapesout = otherargs
         elif len(otherargs) == 1:
@@ -5559,11 +5600,7 @@ class nddata (object):
                 raise ValueError(errmsg)
             #}}}
         else:
-            try:
-                slicedict,axesdict,errordict,unitsdict = self._parse_slices(args)
-            except Exception as e:
-                raise ValueError(strm('error trying to get slices given by',args)
-                        +explain_error(e))
+            slicedict,axesdict,errordict,unitsdict = self._parse_slices(args)
             if type(args) is not slice and type(args[1]) is list and type(args[0]) is str and len(args) == 2:
                 return concat([self[args[0],x] for x in args[1]],args[0])
             indexlist = tuple(self.fld(slicedict))
@@ -5663,7 +5700,8 @@ class nddata (object):
             if len(self.axis_coords)>0:
                 #print "DEBUG --> trying to make dictionaries from axis coords of len",len(self.axis_coords),"and axis_coords_error of len",len(self.axis_coords_error),"when dimlabels has len",len(self.dimlabels)
                 axesdict = self.mkd(self.axis_coords)
-                errordict = self.mkd(self.axis_coords_error)
+                if len(self.axis_coords_error)>0:
+                    errordict = self.mkd(self.axis_coords_error)
             for x,y in zip(args[0::2],args[1::2]):
                 slicedict[x] = y
             #}}}
