@@ -89,6 +89,7 @@ rcParams['legend.fontsize'] = 12
 rcParams['axes.grid'] = False
 rcParams['font.size'] = 18
 rcParams['image.cmap'] = 'jet'
+rcParams['figure.figsize']=(16,12)
 logger = logging.getLogger('pyspecdata.core')
 #{{{ constants
 k_B = 1.380648813e-23
@@ -4941,10 +4942,7 @@ class nddata (object):
         if self.axis_coords is None or len(self.axis_coords) == 0:
             self.axis_coords = [None]*len(self.dimlabels)
             self.axis_coords_error = [None]*len(self.dimlabels)
-        try:
-            self.axis_coords[self.axn(axis)] = value
-        except:
-            raise ValueError("I can't set this -- axis coords is",self.axis_coords)
+        self.axis_coords[self.axn(axis)] = value
         return self
     def shear(self, along_axis, propto_axis, shear_amnt,
             zero_fill=True, start_in_conj=False, method='linear'):
