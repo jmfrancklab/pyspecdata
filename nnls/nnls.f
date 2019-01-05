@@ -52,12 +52,17 @@ C     ------------------------------------------------------------------
       SUBROUTINE NNLS (A,MDA,M,N,B,X,RNORM,W,ZZ,INDEX,MODE,MAXITER) 
 C     ------------------------------------------------------------------
       integer I, II, IP, ITER, ITMAX, IZ, IZ1, IZ2, IZMAX, J, JJ, JZ, L
+cf2py intent(out) MODE
+cf2py intent(in) M
+cf2py intent(in) N
       integer M, MDA, MODE,N, NPP1, NSETP, RTNKEY
       integer MAXITER
-c     integer INDEX(N)  
-c     double precision A(MDA,N), B(M), W(N), X(N), ZZ(M)   
       integer INDEX(*)  
+cf2py intent(copy) A
+cf2py intent(copy) B
+cf2py intent(out) X
       double precision A(MDA,*), B(*), W(*), X(*), ZZ(*)   
+cf2py intent(out) RNORM
       double precision ALPHA, ASAVE, CC, DIFF, DUMMY, FACTOR, RNORM
       double precision SM, SS, T, TEMP, TWO, UNORM, UP, WMAX
       double precision ZERO, ZTEST
