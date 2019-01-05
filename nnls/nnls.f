@@ -1,4 +1,4 @@
-C     SUBROUTINE NNLS  (A,MDA,M,N,B,X,RNORM,W,ZZ,INDEX,MODE,MAXITER)
+C     SUBROUTINE NNLS  (A,M,N,B,X,RNORM,W,ZZ,INDEX,MODE,MAXITER)
 C   
 C  Algorithm NNLS: NONNEGATIVE LEAST SQUARES
 C   
@@ -15,7 +15,7 @@ C                      A * X = B  SUBJECT TO X .GE. 0
 C     ------------------------------------------------------------------
 c                     Subroutine Arguments
 c
-C     A(),MDA,M,N     MDA IS THE FIRST DIMENSIONING PARAMETER FOR THE   
+C     A(),M,N     M IS THE FIRST DIMENSIONING PARAMETER FOR THE   
 C                     ARRAY, A().   ON ENTRY A() CONTAINS THE M BY N    
 C                     MATRIX, A.           ON EXIT A() CONTAINS 
 C                     THE PRODUCT MATRIX, Q*A , WHERE Q IS AN   
@@ -49,19 +49,20 @@ C     MAXITER THE MAXIMUM ALLOWED NUMBER OF ITERATIONS.
 C             IF NEGATIVE, THE LIMIT IS TAKEN AS THE DEFAULT, 3*N.              
 C   
 C     ------------------------------------------------------------------
-      SUBROUTINE NNLS (A,MDA,M,N,B,X,RNORM,W,ZZ,INDEX,MODE,MAXITER) 
+      SUBROUTINE NNLS (A,M,N,B,X,RNORM,W,ZZ,INDEX,MODE,MAXITER) 
 C     ------------------------------------------------------------------
       integer I, II, IP, ITER, ITMAX, IZ, IZ1, IZ2, IZMAX, J, JJ, JZ, L
 cf2py intent(out) MODE
 cf2py intent(in) M
 cf2py intent(in) N
-      integer M, MDA, MODE,N, NPP1, NSETP, RTNKEY
+      integer, intent(in) :: M, N
+      integer MODE, NPP1, NSETP, RTNKEY
       integer MAXITER
       integer INDEX(*)  
 cf2py intent(copy) A
 cf2py intent(copy) B
 cf2py intent(out) X
-      double precision A(MDA,*), B(*), W(*), X(*), ZZ(*)   
+      double precision A(M,N), B(*), W(*), X(N), ZZ(*)   
 cf2py intent(out) RNORM
       double precision ALPHA, ASAVE, CC, DIFF, DUMMY, FACTOR, RNORM
       double precision SM, SS, T, TEMP, TWO, UNORM, UP, WMAX
@@ -178,7 +179,7 @@ C
       IF (IZ1 .le. IZ2) then
          DO 160 JZ=IZ1,IZ2 
             JJ=INDEX(JZ)  
-            CALL H12 (2,NSETP,NPP1,M,A(1,J),1,UP,A(1,JJ),1,MDA,1)
+            CALL H12 (2,NSETP,NPP1,M,A(1,J),1,UP,A(1,JJ),1,M,1)
   160    continue
       endif
 C   
@@ -389,7 +390,8 @@ C            NO OPERATIONS WILL BE DONE ON C().
 C     ------------------------------------------------------------------
       SUBROUTINE H12 (MODE,LPIVOT,L1,M,U,IUE,UP,C,ICE,ICV,NCV)  
 C     ------------------------------------------------------------------
-      integer I, I2, I3, I4, ICE, ICV, INCR, IUE, J
+      integer, intent(in) :: ICV
+      integer I, I2, I3, I4, ICE, INCR, IUE, J
       integer L1, LPIVOT, M, MODE, NCV
       double precision B, C(*), CL, CLINV, ONE, SM
 c     double precision U(IUE,M)
