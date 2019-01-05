@@ -1,0 +1,23 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module _nnls ! in 
+    interface  ! in :_nnls
+        subroutine nnls(a,m,n,b,x,rnorm,w,zz,index_bn,mode,maxiter) ! in :_nnls:nnls.f
+            double precision dimension(m,n),intent(copy) :: a
+            integer, optional,intent(in),check(shape(a,0)==m),depend(a) :: m=shape(a,0)
+            integer, optional,intent(in),check(shape(a,1)==n),depend(a) :: n=shape(a,1)
+            double precision dimension(*),intent(copy) :: b
+            double precision dimension(n),intent(out),depend(n) :: x
+            double precision intent(out) :: rnorm
+            double precision dimension(*) :: w
+            double precision dimension(*) :: zz
+            integer dimension(*) :: index_bn
+            integer intent(out) :: mode
+            integer :: maxiter
+        end subroutine nnls
+    end interface 
+end python module _nnls
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

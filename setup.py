@@ -18,6 +18,11 @@ except:
 ext_modules = []
 execfile('pyspecdata/version.py')
 
+ext_modules.append(Extension(name = 'pyspecdata._nnls',
+        sources = ['nnls/nnls.pyf','nnls/nnls.f'],
+        define_macros = [('ADD_UNDERSCORE',None)],
+        ))
+
 setup(
     name='pySpecData',
     author='J. M. Franck',
