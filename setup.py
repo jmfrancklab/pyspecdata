@@ -6,7 +6,7 @@ import subprocess
 import sys
 import os
 
-general_error = "I couldn't import {:s} -- go install it first!!\n(I'm doing this because dependency-based install of PyQt, and some others does not usually go well -- use your distro software (conda install ..., aptitude, etc) instead)\nIn fact, you probably want to install:\n\tpyqt, unxutils, matplotlib, mingw, and libpython"
+general_error = "I couldn't import {:s} -- go install it first!!\n(I'm doing this because dependency-based install of PyQt, and some others does not usually go well -- use your distro software (conda install ..., aptitude, etc) instead)\nIn fact, you probably want to install:\n\tpyqt, unxutils, matplotlib, mingw, and libpython\nAlso, it's recommended to start by running ``python setup.py config --fcompiler=gfortran develop``"
 try:
     import paramset_pyspecdata
 except:
@@ -19,7 +19,7 @@ ext_modules = []
 execfile('pyspecdata/version.py')
 
 ext_modules.append(Extension(name = 'pyspecdata._nnls',
-        sources = ['nnls/nnls.pyf','nnls/nnls.f'],
+        sources = ['nnls/nnls.pyf','nnls/nnls.f','nnls/nnls_regularized.f90'],
         define_macros = [('ADD_UNDERSCORE',None)],
         ))
 
