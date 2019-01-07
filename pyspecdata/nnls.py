@@ -4,13 +4,15 @@ from __future__ import division, print_function, absolute_import
 from . import _nnls
 from numpy import asarray_chkfinite, zeros, double
 
-__all__ = ['nnls']
+__all__ = ['nnls_regularized']
 
 
-def nnls(A, b, maxiter=None):
+def nnls_regularized(A, b, l=0, maxiter=None):
     """
-    Solve ``argmin_x || Ax - b ||_2`` for ``x>=0``. This is a wrapper
-    for a FORTRAN non-negative least squares solver.
+    Solve math:`argmin_x || Ax - b ||_2^2 + \lambda^2 ||x||_2^2` for ``x>=0``.
+    This is a wrapper for a FORTRAN non-negative least squares solver,
+    with regularization (added by stacking $A$ on top an identity matrix
+    times $\lambda$ and $b$ on top of a matching array of zero.
 
     Parameters
     ----------
@@ -18,6 +20,10 @@ def nnls(A, b, maxiter=None):
         Matrix ``A`` as shown above.
     b : ndarray
         Right-hand side vector.
+    l : double (default 0)
+        :math:`lambda` -- if this is set to 0, the algorithm reverts to
+        standard nnls (rather than stacking on top of two zero matrices
+        for no reason)
     maxiter: int, optional
         Maximum number of iterations, optional.
         Default is ``3 * A.shape[1]``.
@@ -34,6 +40,9 @@ def nnls(A, b, maxiter=None):
     The FORTRAN code was published in the book below. The algorithm
     is an active set method. It solves the KKT (Karush-Kuhn-Tucker)
     conditions for the non-negative least squares problem.
+
+    This was adapted from the source distributed with scipy --
+    see scipy for relevant licensing.
 
     References
     ----------
@@ -55,11 +64,21 @@ def nnls(A, b, maxiter=None):
 
     maxiter = -1 if maxiter is None else int(maxiter)
 
+    #if 200 == 400:
+    #    print "test"
+    #    #w = zeros((n,), dtype=double)
+    #    #zz = zeros((m,), dtype=double)
+    #    #index = zeros((n,), dtype=int)
+    #    #x, rnorm, mode = _nnls.nnls(A, b, w, zz, index, maxiter)
+    #else:
     w = zeros((n,), dtype=double)
-    zz = zeros((m,), dtype=double)
+    zz = zeros((m+n,), dtype=double)
     index = zeros((n,), dtype=int)
-
-    x, rnorm, mode = _nnls.nnls_regularized(A, b, w, zz, index, maxiter)
+    A_prime = zeros((m+n,n), dtype=double)
+    b_prime = zeros((m+n,), dtype=double)
+    print("about to call fortran")
+    x, rnorm, mode = _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
+    print("done calling fortran")
     if mode != 1:
         raise RuntimeError("too many iterations")
 

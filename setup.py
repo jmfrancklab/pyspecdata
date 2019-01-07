@@ -13,6 +13,7 @@ except:
     raise RuntimeError("install the paramset_pyspecdata package first!\nIf using setup.py, run 'python setup_paramset.py install'")
 try:
     import matplotlib
+    import PyQt5
 except:
     raise RuntimeError(general_error.format('matplotlib'))
 ext_modules = []
@@ -21,6 +22,7 @@ execfile('pyspecdata/version.py')
 ext_modules.append(Extension(name = 'pyspecdata._nnls',
         sources = ['nnls/nnls.pyf','nnls/nnls.f','nnls/nnls_regularized.f90'],
         define_macros = [('ADD_UNDERSCORE',None)],
+        extra_compile_args = ['-g'],# debug flags
         ))
 
 setup(
