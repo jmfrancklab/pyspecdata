@@ -20,7 +20,7 @@ python module _nnls ! in
             double precision dimension(m,n),intent(in) :: a
             integer, optional,intent(in),check(shape(a,0)==m),depend(a) :: m=shape(a,0)
             integer, optional,intent(in),check(shape(a,1)==n),depend(a) :: n=shape(a,1)
-            double precision dimension(m),intent(in),depend(m) :: b
+            double precision dimension(*),intent(in) :: b
             double precision dimension(n),intent(out),depend(n) :: x
             double precision intent(out) :: rnorm
             double precision dimension(*) :: w

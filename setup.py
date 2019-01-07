@@ -42,7 +42,6 @@ setup(
         "scipy",
         "h5py",
         "matplotlib",
-        "tables",
         "pillow",
         ],
     ext_modules = ext_modules,
