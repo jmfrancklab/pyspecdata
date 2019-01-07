@@ -2,7 +2,7 @@
 from __future__ import division, print_function, absolute_import
 
 from . import _nnls
-from numpy import asarray_chkfinite, zeros, double
+from numpy import asarray_chkfinite, zeros, double, isscalar
 
 __all__ = ['nnls_regularized']
 
@@ -64,18 +64,21 @@ def nnls_regularized(A, b, l=0, maxiter=None):
 
     maxiter = -1 if maxiter is None else int(maxiter)
 
-    if l == 0.0:
-        w = zeros((n,), dtype=double)
-        zz = zeros((m,), dtype=double)
-        index = zeros((n,), dtype=int)
-        x, rnorm, mode = _nnls.nnls(A, b, w, zz, index, maxiter)
+    if isscalar(l):
+        if l == 0.0:
+            w = zeros((n,), dtype=double)
+            zz = zeros((m,), dtype=double)
+            index = zeros((n,), dtype=int)
+            x, rnorm, mode = _nnls.nnls(A, b, w, zz, index, maxiter)
+        else:
+            w = zeros((n,), dtype=double)
+            zz = zeros((m+n,), dtype=double)
+            index = zeros((n,), dtype=int)
+            A_prime = zeros((m+n,n), dtype=double)
+            b_prime = zeros((m+n,), dtype=double)
+            x, rnorm, mode = _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
     else:
-        w = zeros((n,), dtype=double)
-        zz = zeros((m+n,), dtype=double)
-        index = zeros((n,), dtype=int)
-        A_prime = zeros((m+n,n), dtype=double)
-        b_prime = zeros((m+n,), dtype=double)
-        x, rnorm, mode = _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
+        raise ValueError("l (lambda, regularization parameter) is  not a scalar -- this will soon support a looped calculation of of lambda, but is not yet done:\n(AAB code goes here)")
     if mode != 1:
         raise RuntimeError("too many iterations")
     return x, rnorm

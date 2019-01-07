@@ -90,6 +90,23 @@ for j,this_l in enumerate(l):
 ylabel('$x$ norm')
 xlabel('residual')
 
+# ## Vectorized version of lambda curve
+
+m = A.shape[1]
+l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
+x_norm = empty_like(l)
+r_norm = empty_like(l)
+x,r_norm = nnls_regularized(A,test_signal.squeeze(),l=l)
+for j,this_l in enumerate(l):
+    x_norm[j] = linalg.norm(x)
+fl.next('L-curve')
+plot(log10(r_norm),log10(x_norm),'.')
+for j,this_l in enumerate(l):
+    annotate('%5g'%this_l, (log10(r_norm[j]),log10(x_norm[j])),
+             ha='left',va='bottom',rotation=45)
+ylabel('$x$ norm')
+xlabel('residual')
+
 
 # 
 
