@@ -36,7 +36,6 @@ setup(
     description='object-oriented N-dimensional data processing with notebook functionality',
     long_description=open('README.rst').read(),
     install_requires=[
-        "paramset_pyspecdata",
         "sympy",
         "numpy",
         "scipy",

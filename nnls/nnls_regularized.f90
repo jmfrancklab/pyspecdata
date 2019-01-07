@@ -10,7 +10,6 @@
           double precision, intent(out):: rnorm
           integer idx(*), j, k
           integer, intent(out):: mode
-          write(*,*) "about to stack"
           a_prime(1:m,1:n) = a
           do j=1,n
               do k=1,n
@@ -23,7 +22,5 @@
           end do
           b_prime(1:m) = b(1:m)
           b_prime(m+1:m+n) = 0d0
-          write(*,*) "done with stacking"
           call nnls(a_prime,m+n,n,b_prime,x,rnorm,w,zz,idx,mode,maxiter)
-          write(*,*) "done calling nnls"
       end subroutine

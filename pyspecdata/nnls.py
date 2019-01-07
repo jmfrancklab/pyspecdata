@@ -76,10 +76,7 @@ def nnls_regularized(A, b, l=0, maxiter=None):
     index = zeros((n,), dtype=int)
     A_prime = zeros((m+n,n), dtype=double)
     b_prime = zeros((m+n,), dtype=double)
-    print("about to call fortran")
     x, rnorm, mode = _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
-    print("done calling fortran")
     if mode != 1:
         raise RuntimeError("too many iterations")
-
     return x, rnorm
