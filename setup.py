@@ -13,7 +13,7 @@ except:
     raise RuntimeError("install the paramset_pyspecdata package first!\nIf using setup.py, run 'python setup_paramset.py install'")
 try:
     import matplotlib
-    import PyQt5
+    #import PyQt5
 except:
     raise RuntimeError(general_error.format('matplotlib'))
 ext_modules = []
