@@ -20,7 +20,7 @@ ext_modules = []
 execfile('pyspecdata/version.py')
 
 ext_modules.append(Extension(name = 'pyspecdata._nnls',
-        sources = ['nnls/nnls.pyf','nnls/nnls.f','nnls/nnls_regularized.f90'],
+        sources = ['nnls/nnls.pyf','nnls/nnls.f','nnls/nnls_regularized.f90','nnls/nnls_regularized_loop.f90'],
         define_macros = [('ADD_UNDERSCORE',None)],
         extra_compile_args = ['-g'],# debug flags
         ))

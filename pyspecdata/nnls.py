@@ -78,7 +78,12 @@ def nnls_regularized(A, b, l=0, maxiter=None):
             b_prime = zeros((m+n,), dtype=double)
             x, rnorm, mode = _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
     else:
-        raise ValueError("l (lambda, regularization parameter) is  not a scalar -- this will soon support a looped calculation of of lambda, but is not yet done:\n(AAB code goes here)")
+            w = zeros((n,), dtype=double)
+            zz = zeros((m+n,), dtype=double)
+            index = zeros((n,), dtype=int)
+            A_prime = zeros((m+n,n), dtype=double)
+            b_prime = zeros((m+n,), dtype=double)
+            x, rnorm, mode = _nnls.nnls_regularized_loop(A, b, w, zz, index, maxiter, l)
     if mode != 1:
         raise RuntimeError("too many iterations")
     return x, rnorm
