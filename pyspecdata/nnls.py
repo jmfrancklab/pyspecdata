@@ -74,16 +74,14 @@ def nnls_regularized(A, b, l=0, maxiter=None):
             w = zeros((n,), dtype=double)
             zz = zeros((m+n,), dtype=double)
             index = zeros((n,), dtype=int)
-            A_prime = zeros((m+n,n), dtype=double)
-            b_prime = zeros((m+n,), dtype=double)
             x, rnorm, mode = _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
     else:
             w = zeros((n,), dtype=double)
             zz = zeros((m+n,), dtype=double)
             index = zeros((n,), dtype=int)
-            A_prime = zeros((m+n,n), dtype=double)
-            b_prime = zeros((m+n,), dtype=double)
             x, rnorm, mode = _nnls.nnls_regularized_loop(A, b, w, zz, index, maxiter, l)
+            # From the documentation, I wouldn't have thought the following is needed, but it does seem to be
+            x = x.ravel('F').reshape(x.shape)
     if mode != 1:
         raise RuntimeError("too many iterations")
     return x, rnorm

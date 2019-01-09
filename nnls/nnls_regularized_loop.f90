@@ -4,7 +4,7 @@
           ! we no longer need to specify a or b as intent copy,
           ! since we are going to manually copy them
           double precision, intent(in):: a(m,n),b(*),lambda(l)
-          double precision, intent(out):: x(l,n)
+          double precision, intent(out):: x(n,l)
           double precision x_temp(n)
           double precision w(*), zz(*)
           double precision a_prime(m+n,n), b_prime(m+n)
@@ -12,8 +12,8 @@
           double precision rnorm_temp
           integer idx(*), i, j, k
           integer, intent(out):: mode
-          a_prime(1:m,1:n) = a
-          do i=0,l
+          do i=1,l
+              a_prime(1:m,1:n) = a
               do j=1,n
                   do k=1,n
                       if (j == k) then
@@ -26,7 +26,7 @@
               b_prime(1:m) = b(1:m)
               b_prime(m+1:m+n) = 0d0
               call nnls(a_prime,m+n,n,b_prime,x_temp,rnorm_temp,w,zz,idx,mode,maxiter)
-              x(i,1:n) = x_temp(1:n)
+              x(1:n,i) = x_temp(1:n)
               rnorm(i) = rnorm_temp
           end do
       end subroutine

@@ -29,6 +29,8 @@ for mu,sigma,A in peaks:
 
 # Vary R as we move along the rows
 
+# 
+
 P = P.T
 R = R.T
 fl.next('distribution function')
@@ -75,6 +77,32 @@ print r_[c_[1:3:3j],zeros((2,1))]
 
 # 
 
+def L_curve(l,r_norm,x_norm, **kwargs):
+    """plot L-curve using
+
+    Parameters
+    ==========
+    l: double
+        lambda values
+    r_norm: double
+        norm of the residual
+    x_norm: double
+        norm of solution vector"""
+    plot(log10(r_norm),log10(x_norm),'o',**kwargs)
+    for j,this_l in enumerate(l):
+        annotate('%5g'%this_l, (log10(r_norm[j]),log10(x_norm[j])),
+                 ha='left',va='bottom',rotation=45)
+    ylabel('$\log_{10}(x$ norm$)$')
+    xlabel('$\log_{10}($ residual $)$')
+
+
+# 
+
+get_ipython().run_cell_magic(u'timeit', u'', u'm = A.shape[1]\nl = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points\nx_norm = empty_like(l)\nr_norm = empty_like(l)\nfor j,this_l in enumerate(l):\n    x,r_norm[j] = nnls_regularized(A,test_signal.squeeze(),l=this_l)\n    x_norm[j] = linalg.norm(x)')
+
+
+# 
+
 m = A.shape[1]
 l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
 x_norm = empty_like(l)
@@ -82,30 +110,49 @@ r_norm = empty_like(l)
 for j,this_l in enumerate(l):
     x,r_norm[j] = nnls_regularized(A,test_signal.squeeze(),l=this_l)
     x_norm[j] = linalg.norm(x)
-fl.next('L-curve')
-plot(log10(r_norm),log10(x_norm),'.')
-for j,this_l in enumerate(l):
-    annotate('%5g'%this_l, (log10(r_norm[j]),log10(x_norm[j])),
-             ha='left',va='bottom',rotation=45)
-ylabel('$x$ norm')
-xlabel('residual')
+
+
+# 
+
+fl.next('L-curve', legend=True)
+L_curve(l, r_norm, x_norm, markersize=10, alpha=0.5, label='manual loop')
+
+
+# 
+
+print x_norm
+print r_norm
+
 
 # ## Vectorized version of lambda curve
 
+# 
+
+get_ipython().run_cell_magic(u'timeit', u'', u'm = A.shape[1]\nl = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points\nx,r_norm = nnls_regularized(A,test_signal.squeeze(),l=l)')
+
+
+# 
+
 m = A.shape[1]
 l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
-x_norm = empty_like(l)
-r_norm = empty_like(l)
 x,r_norm = nnls_regularized(A,test_signal.squeeze(),l=l)
-for j,this_l in enumerate(l):
-    x_norm[j] = linalg.norm(x)
+
+
+# 
+
+print x.shape,r_norm.shape,l.shape,linalg.norm(x,axis=1).shape
+
+
+# 
+
 fl.next('L-curve')
-plot(log10(r_norm),log10(x_norm),'.')
-for j,this_l in enumerate(l):
-    annotate('%5g'%this_l, (log10(r_norm[j]),log10(x_norm[j])),
-             ha='left',va='bottom',rotation=45)
-ylabel('$x$ norm')
-xlabel('residual')
+L_curve(l,r_norm,linalg.norm(x,axis=1), markersize=5, alpha=0.5, label='compiled loop')
+
+
+# 
+
+print shape(x)
+print shape(x.T)
 
 
 # 
@@ -145,6 +192,7 @@ for j,this_l in enumerate(l):
 ylabel('$x$ norm')
 xlabel('residual')
 
+
 # 
 
 #figure(figsize(8,4))
@@ -164,3 +212,9 @@ if in_notebook:
 else:
     print "not in notebook, calling show"
     fl.show()
+
+
+# 
+
+
+
