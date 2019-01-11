@@ -1,5 +1,6 @@
       subroutine nnls_regularized(a,m,n,b,x,rnorm,w,zz,idx, &
               mode,maxiter,lambda) 
+          !f2py threadsafe
           integer, intent(in):: m, n, maxiter
           ! we no longer need to specify a or b as intent copy,
           ! since we are going to manually copy them

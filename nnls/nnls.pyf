@@ -17,6 +17,7 @@ python module _nnls ! in
             integer :: maxiter
         end subroutine nnls
         subroutine nnls_regularized(a,m,n,b,x,rnorm,w,zz,idx,mode,maxiter,lambda) ! in :_nnls:nnls_regularized.f90
+            threadsafe 
             double precision dimension(m,n),intent(in) :: a
             integer, optional,intent(in),check(shape(a,0)==m),depend(a) :: m=shape(a,0)
             integer, optional,intent(in),check(shape(a,1)==n),depend(a) :: n=shape(a,1)
