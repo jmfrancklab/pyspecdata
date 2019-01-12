@@ -3,6 +3,9 @@ from __future__ import division, print_function, absolute_import
 
 from . import _nnls
 from numpy import asarray_chkfinite, zeros, double, isscalar
+from numpy import array as np_array
+import multiprocessing.dummy as mpd
+from multiprocessing import cpu_count
 
 __all__ = ['nnls_regularized']
 
@@ -76,12 +79,19 @@ def nnls_regularized(A, b, l=0, maxiter=None):
             index = zeros((n,), dtype=int)
             x, rnorm, mode = _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
     else:
-            w = zeros((n,), dtype=double)
-            zz = zeros((m+n,), dtype=double)
-            index = zeros((n,), dtype=int)
-            x, rnorm, mode = _nnls.nnls_regularized_loop(A, b, w, zz, index, maxiter, l)
+            nCPU = cpu_count() 
+            #print("I found",nCPU,"CPU's")
+            p = mpd.Pool(nCPU)
+            def nnls_func(l):
+                w = zeros((n,), dtype=double)
+                zz = zeros((m+n,), dtype=double)
+                index = zeros((n,), dtype=int)
+                return _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
+            retval = p.map(nnls_func,l)
+            x,rnorm,mode = map(np_array,zip(*retval))
             # From the documentation, I wouldn't have thought the following is needed, but it does seem to be
-            x = x.ravel('F').reshape(x.shape)
-    if mode != 1:
+            #x = x.ravel('F').reshape(x.shape)
+    if (isscalar(mode) and mode != 1):
+        # need something for the multiple lambda
         raise RuntimeError("too many iterations")
     return x, rnorm
