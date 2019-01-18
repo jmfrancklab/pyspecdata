@@ -2,7 +2,8 @@
 from __future__ import division, print_function, absolute_import
 
 from . import _nnls
-from numpy import asarray_chkfinite, zeros, double, isscalar, asfortranarray, ascontiguousarray
+from .general_functions import redim_F_to_C, redim_C_to_F
+from numpy import asarray_chkfinite, zeros, double, isscalar
 from numpy import array as np_array
 import multiprocessing.dummy as mpd
 from multiprocessing import cpu_count
@@ -62,8 +63,8 @@ def nnls_regularized(A, b, l=0, maxiter=None):
 
     m, n = A.shape
 
-    if m != b.shape[0]:
-        raise ValueError("incompatible dimensions")
+    if m != b.shape[-1]:
+        raise ValueError("incompatible dimensions (the most quickly changing index should be the nnls dimension)")
 
     maxiter = -1 if maxiter is None else int(maxiter)
 
@@ -81,21 +82,27 @@ def nnls_regularized(A, b, l=0, maxiter=None):
             if len(b.shape) == 1:
                 x, rnorm, mode = _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
             if len(b.shape) == 2:
-                x, rnorm, mode = _nnls.nnls_regularized_loop(A, asfortranarray(b), w, zz, index, maxiter, l)
-                x = ascontiguousarray(x)
+                x, rnorm, mode = _nnls.nnls_regularized_loop(A, redim_C_to_F(b), w, zz, index, maxiter, l)
+                x = redim_F_to_C(x)
     else:
             nCPU = cpu_count() 
             #print("I found",nCPU,"CPU's")
             p = mpd.Pool(nCPU)
-            def nnls_func(l):
-                w = zeros((n,), dtype=double)
-                zz = zeros((m+n,), dtype=double)
-                index = zeros((n,), dtype=int)
-                return _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
+            if len(b.shape) == 1:
+                def nnls_func(l):
+                    w = zeros((n,), dtype=double)
+                    zz = zeros((m+n,), dtype=double)
+                    index = zeros((n,), dtype=int)
+                    return _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
+            if len(b.shape) == 2:
+                def nnls_func(l):
+                    w = zeros((n,), dtype=double)
+                    zz = zeros((m+n,), dtype=double)
+                    index = zeros((n,), dtype=int)
+                    x, rnorm, mode = _nnls.nnls_regularized_loop(A, redim_C_to_F(b), w, zz, index, maxiter, l)
+                    return redim_F_to_C(x), rnorm, mode
             retval = p.map(nnls_func,l)
             x,rnorm,mode = map(np_array,zip(*retval))
-            # From the documentation, I wouldn't have thought the following is needed, but it does seem to be
-            #x = x.ravel('F').reshape(x.shape)
     if (isscalar(mode) and mode != 1):
         # need something for the multiple lambda
         raise RuntimeError("too many iterations")
