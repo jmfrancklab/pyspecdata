@@ -82,6 +82,7 @@ def nnls_regularized(A, b, l=0, maxiter=None):
                 x, rnorm, mode = _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
             if len(b.shape) == 2:
                 x, rnorm, mode = _nnls.nnls_regularized_loop(A, asfortranarray(b), w, zz, index, maxiter, l)
+                x = ascontiguousarray(x)
     else:
             nCPU = cpu_count() 
             #print("I found",nCPU,"CPU's")

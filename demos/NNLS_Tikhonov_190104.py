@@ -206,7 +206,7 @@ def multifreq_lcurve(A,l):
     r_norm = empty((l.size,test_signal_2d.shape[1]))
     for j,this_l in enumerate(l):
         x,r_norm[j,:] = nnls_regularized(A,test_signal_2d,l=this_l)
-        x_norm[j] = linalg.norm(x)
+        x_norm[j] = sqrt((x**2).sum(axis=0)).mean()
     r_norm = r_norm.mean(axis=1)
     return x,x_norm,r_norm
 x,x_norm,r_norm = multifreq_lcurve(A,l)

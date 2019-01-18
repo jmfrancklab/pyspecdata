@@ -39,7 +39,7 @@ python module _nnls ! in
             integer, optional,intent(in),check(shape(b,1)==q),depend(b) :: q=shape(b,1)
             double precision dimension(m,q),intent(in),depend(m) :: b
             double precision dimension(n,q),intent(out),depend(n,q) :: x
-            double precision dimension(m),intent(out),depend(m) :: rnorm
+            double precision dimension(q),intent(out),depend(q) :: rnorm
             double precision dimension(*) :: w
             double precision dimension(*) :: zz
             integer dimension(*) :: idx
