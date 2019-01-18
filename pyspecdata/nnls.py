@@ -77,7 +77,11 @@ def nnls_regularized(A, b, l=0, maxiter=None):
             w = zeros((n,), dtype=double)
             zz = zeros((m+n,), dtype=double)
             index = zeros((n,), dtype=int)
-            x, rnorm, mode = _nnls.nnls_regularized_loop(A, b, w, zz, index, maxiter, l)
+            # choose the correct subroutine based on the dimension
+            if len(b.shape) === 1:
+                x, rnorm, mode = _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
+            if len(b.shape) == 2:
+                x, rnorm, mode = _nnls.nnls_regularized_loop(A, b, w, zz, index, maxiter, l)
     else:
             nCPU = cpu_count() 
             #print("I found",nCPU,"CPU's")
