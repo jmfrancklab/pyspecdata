@@ -31,20 +31,21 @@ python module _nnls ! in
             integer intent(in) :: maxiter
             double precision intent(in) :: lambda
         end subroutine nnls_regularized
-        subroutine nnls_regularized_loop(a,m,n,b,x,rnorm,w,zz,idx,mode,maxiter,lambda,l) ! in :_nnls:nnls_regularized_loop.f90
+        subroutine nnls_regularized_loop(a,m,n,q,b,x,rnorm,w,zz,idx,mode,maxiter,lambda) ! in :_nnls:nnls_regularized_loop.f90
+            threadsafe 
             double precision dimension(m,n),intent(in) :: a
             integer, optional,intent(in),check(shape(a,0)==m),depend(a) :: m=shape(a,0)
             integer, optional,intent(in),check(shape(a,1)==n),depend(a) :: n=shape(a,1)
-            double precision dimension(*),intent(in) :: b
-            double precision dimension(l,n),intent(out),depend(l,n) :: x
-            double precision dimension(l),intent(out),depend(l) :: rnorm
+            integer, optional,intent(in),check(shape(b,1)==q),depend(b) :: q=shape(b,1)
+            double precision dimension(m,q),intent(in),depend(m) :: b
+            double precision dimension(n,q),intent(out),depend(n,q) :: x
+            double precision dimension(m),intent(out),depend(m) :: rnorm
             double precision dimension(*) :: w
             double precision dimension(*) :: zz
             integer dimension(*) :: idx
             integer intent(out) :: mode
             integer intent(in) :: maxiter
-            double precision dimension(l),intent(in) :: lambda
-            integer, optional,intent(in),check(len(lambda)>=l),depend(lambda) :: l=len(lambda)
+            double precision intent(in) :: lambda
         end subroutine nnls_regularized_loop
     end interface 
 end python module _nnls

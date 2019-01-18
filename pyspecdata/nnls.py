@@ -57,7 +57,7 @@ def nnls_regularized(A, b, l=0, maxiter=None):
 
     if len(A.shape) != 2:
         raise ValueError("expected matrix")
-    if len(b.shape) != 1:
+    if len(b.shape) > 2:
         raise ValueError("expected vector")
 
     m, n = A.shape
@@ -77,7 +77,7 @@ def nnls_regularized(A, b, l=0, maxiter=None):
             w = zeros((n,), dtype=double)
             zz = zeros((m+n,), dtype=double)
             index = zeros((n,), dtype=int)
-            x, rnorm, mode = _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
+            x, rnorm, mode = _nnls.nnls_regularized_loop(A, b, w, zz, index, maxiter, l)
     else:
             nCPU = cpu_count() 
             #print("I found",nCPU,"CPU's")
