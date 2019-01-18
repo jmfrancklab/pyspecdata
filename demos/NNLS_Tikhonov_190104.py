@@ -22,7 +22,7 @@ fl=figlist_var()
 # got the following from here:
 #https://medium.com/pythonhive/python-decorator-to-measure-the-execution-time-of-methods-fa04cb6bb36d
 l_line = ''
-def timeit(method,n_times=5):
+def timeit(method,n_times=1):
     def timed(*args, **kw):
         timing = zeros(n_times+1)
         timing[0] = time.time()
@@ -187,7 +187,7 @@ print r_norm
 
 
 fl.next('L-curve')
-L_curve(l,r_norm,linalg.norm(x,axis=1), markersize=5, alpha=0.5, label='compiled loop')
+L_curve(l,r_norm,linalg.norm(x,axis=1), markersize=5, alpha=0.5, label='threaded')
 
 
 # 
@@ -196,6 +196,22 @@ L_curve(l,r_norm,linalg.norm(x,axis=1), markersize=5, alpha=0.5, label='compiled
 print shape(x)
 print shape(x.T)
 
+# Test for the accuracy of the "1.5D" code
+
+l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
+test_signal_2d = test_signal.reshape(-1,1) * ones((1,3))
+@timeit
+def multifreq_lcurve(A,l):
+    x_norm = empty_like(l)
+    r_norm = empty((l.size,test_signal_2d.shape[1]))
+    for j,this_l in enumerate(l):
+        x,r_norm[j,:] = nnls_regularized(A,test_signal_2d,l=this_l)
+        x_norm[j] = linalg.norm(x)
+    r_norm = r_norm.mean(axis=1)
+    return x,x_norm,r_norm
+x,x_norm,r_norm = multifreq_lcurve(A,l)
+fl.next('L-curve')
+L_curve(l,r_norm,x_norm, markersize=5, alpha=0.5, label='1.5 D')
 
 # 
 
