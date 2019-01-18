@@ -9,13 +9,10 @@
           double precision x_temp(n)
           double precision w(*), zz(*)
           double precision a_prime(m+n,n), b_prime(m+n)
-          double precision b_prime_2d(m+n,q)
           double precision, intent(out):: rnorm(q)
           double precision rnorm_temp
           integer idx(*), j, k, p
           integer, intent(out):: mode
-          b_prime_2d(1:m,1:q) = b(1:m,1:q)
-          b_prime_2d(m+1:m+n,1:q) = 0d0
           do p=1,q
               a_prime(1:m,1:n) = a
               do j=1,n
@@ -27,7 +24,8 @@
                       endif
                   end do
               end do
-              b_prime(1:m+n) = b_prime_2d(1:m+n,p)
+              b_prime(1:m) = b(:,p)
+              b_prime(m+1:m+n) = 0d0
               call nnls(a_prime,m+n,n,b_prime,x_temp,rnorm_temp,w,zz,idx,mode,maxiter)
               x(1:n,p) = x_temp(1:n)
               rnorm(p) = rnorm_temp
