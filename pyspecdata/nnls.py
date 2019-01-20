@@ -11,6 +11,41 @@ from multiprocessing import cpu_count
 __all__ = ['nnls_regularized']
 
 
+def nnls(self, dimname, newaxis_dict, kernel_func, l):
+    r"""Perform regularized non-negative least-squares "fit" on self.
+
+    .. todo::
+        someone can explain the math here
+    
+    Parameters
+    ==========
+    dimname: str
+        Name of the "old" dimension that is to be replaced by a distribution.
+        *e.g.* if you are regularizing a set of functions
+        :math:`\exp(-\tau*R_1)`, then this is :math:`\tau`
+    newaxis_dict: dict
+        a dictionary whose key is the name of the new dimension
+        (:math:`R_1` in the example above)
+        and whose value is an array with the new axis labels
+    kernel_func: function
+        a function giving the kernel for the regularization.  The first argument is the "old" variable
+        and the second argument is the "new" value
+        (in the example above, this would be something like ``lambda x,y: exp(-x*y)``)
+
+    Returns
+    =======
+    self:
+        The regularized result.
+        For future use, both the kernel (as an nddata, in a property called
+        "nnls_kernel") and the residual (as an nddata, in a property called
+        "nnls_residual") are stored as properties of the nddata.
+    """
+    assert type(dimname) is str, "first argument is dimension name"
+    assert type(newaxis_dict) is dict, "second argument is dictionary with new axis"
+    assert callable(kernel_func), "third argument is kernel function"
+    # construct the 
+    # store the kernel and the residual in the properties
+    return self
 def nnls_regularized(A, b, l=0, maxiter=None):
     """
     Solve math:`argmin_x || Ax - b ||_2^2 + \lambda^2 ||x||_2^2` for ``x>=0``.
