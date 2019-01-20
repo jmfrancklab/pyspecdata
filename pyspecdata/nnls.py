@@ -7,6 +7,7 @@ from numpy import asarray_chkfinite, zeros, double, isscalar
 from numpy import array as np_array
 import multiprocessing.dummy as mpd
 from multiprocessing import cpu_count
+from ..core import *
 
 __all__ = ['nnls_regularized']
 
@@ -56,7 +57,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
     # construct the kernel
     # the kernel transforms from (columns) the "fit" dimension to (rows)
     # the "data" dimension
-    fitdim_name = newaxis_dict.keys().item()
+    fitdim_name = newaxis_dict.keys()[0]
     fit_axis = nddata(newaxis_dict[fitdim_name], fitdim_name)
     data_axis = self.fromaxis(dimname)
     K = fit_axis*data_axis

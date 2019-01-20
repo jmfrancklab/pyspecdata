@@ -70,6 +70,7 @@ from scipy.interpolate import UnivariateSpline
 from .datadir import getDATADIR
 from . import fourier as this_fourier
 from . import axis_manipulation
+from . import nnls
 from . import plot_funcs as this_plotting
 from .general_functions import *
 from .ndshape import ndshape_base
@@ -4313,6 +4314,7 @@ class nddata (object):
     secsy_transform = axis_manipulation.secsy.secsy_transform
     register_axis = axis_manipulation.register_axis.register_axis
     fourier_shear = this_fourier.shear.shear
+    nnls = nnls.nnls
     #}}}
     #}}}
     #{{{ interpolation and binning
