@@ -4392,7 +4392,8 @@ class nddata (object):
         logger.debug(strm('shape of fit dimension is',newaxis_dict[fitdim_name].shape))
         fit_axis = nddata(newaxis_dict[fitdim_name], fitdim_name)
         data_axis = self.fromaxis(dimname)
-        K = data_axis * fit_axis
+        data_axis, fit_axis = data_axis.aligndata(fit_axis)
+        K = kernel_func(data_axis, fit_axis)
         logger.debug(strm('the size of the kernel is',ndshape(K),'or, raw',K.data.shape))
         self.reorder(dimname, first=False) # make the dimension we will be regularizing innermost
         logger.debug(strm('shape of the data is',ndshape(self)))

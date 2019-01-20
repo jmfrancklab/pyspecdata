@@ -74,7 +74,7 @@ test_signal = exp(-R*t).dot(P.T)
 test_signal += random.normal(scale = 0.01,size=(2048,1))
 print test_signal.shape
 print t.squeeze().shape
-fl.next('distribution function')
+fl.next('test data function')
 plot(t.flatten(),test_signal.flatten())
 xlim(-endp/10,endp)
 

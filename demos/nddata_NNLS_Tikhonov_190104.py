@@ -4,12 +4,6 @@
 # 
 
 
-#!/usr/bin/env python
-
-
-# 
-
-
 try:
     get_ipython().magic(u'load_ext pyspecdata.ipy')
     in_notebook = True
@@ -83,15 +77,22 @@ test_signal += random.normal(scale = 0.01,size=(2048,1))
 print test_signal.shape
 print t.squeeze().shape
 fl.next('test data function')
-test_data = nddata(test_signal.flatten(),'t').labels('t',t)
+test_data = nddata(test_signal.flatten(),[-1],['t']).labels('t',t)
 plot(test_data)
 xlim(-endp/10,endp)
 
+# 
+
+print t == test_data.getaxis('t')
+test_data.nnls('t',{'R':R.ravel()},lambda x,y: exp(-y*x))
 
 # 
 
+A = exp(-R*t)
+K = test_data.get_prop('nnls_kernel').C
+print A.shape, K.data.shape
+print A == K.data
 
-test_data.nnls('t',{'R':R.ravel()},lambda x,y: exp(-y*x))
 
 
 # 
