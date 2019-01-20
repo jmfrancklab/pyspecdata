@@ -70,7 +70,7 @@ from scipy.interpolate import UnivariateSpline
 from .datadir import getDATADIR
 from . import fourier as this_fourier
 from . import axis_manipulation
-from . import nnls
+from . import nnls as this_nnls
 from . import plot_funcs as this_plotting
 from .general_functions import *
 from .ndshape import ndshape_base
@@ -2643,6 +2643,7 @@ class nddata (object):
     For an introduction on how to use ND-Data, see the :ref:`Main ND-Data Documentation <nddata-summary-label>`.
     """
     want_to_prospa_decim_correct = False
+    # {{{ initialization
     def __init__(self, *args, **kwargs):
         """initialize nddata -- several options.
         Depending on the information available, one of several formats can be used.
@@ -2686,12 +2687,16 @@ class nddata (object):
             these can be used to set the labels, etc, and are passed to :func:`__my_init__`
 
         """
+        logger.debug('called init')
         if len(args) > 1:
+            logger.debug('more than one argument')
             if len(args) == 2:
                 if len(args[0].shape) == 1 and type(args[1]) is str:
+                    logger.debug('constructing 1D array')
                     self.__my_init__(args[0],[len(args[0])],[args[1]])
                     self.labels(args[1],args[0].copy())# needs to be a copy, or when we write data, we will change the axis
                 elif all([type(j) is str for j in args[1]]):
+                    logger.debug('passed only axis labels')
                     self.__my_init__(args[0],
                             list(args[0].shape),args[1])
                 else:
@@ -2701,6 +2706,7 @@ class nddata (object):
             else:
                 raise ValueError(strm("You passed",len(args),"to nddata.  I don't know what to do with this."))
         else:
+            logger.debug('only one argument')
             self.__my_init__(args[0],[-1],['INDEX'],**kwargs)
         return
     def __my_init__(self, data, sizes, dimlabels, axis_coords=[],
@@ -2743,6 +2749,7 @@ class nddata (object):
         else:
             self.axis_coords_units = axis_coords_units 
         return
+    # }}}
     def _contains_symbolic(self,string):
         return string[:9] == 'symbolic_' and hasattr(self,string)
     #{{{ for printing
@@ -3640,25 +3647,6 @@ class nddata (object):
     #    self.data = real(self.data)
     #    return self
     #}}}
-    def squeeze(self,verbose = False):
-        'squeeze singleton dimensions -- return a list of the labels for the axes that are dropped'
-        mask = array(self.data.shape) > 1
-        if verbose: print zip(mask,self.dimlabels)
-        self.data = self.data.squeeze()
-        retval = []
-        if type(self.axis_coords) is list:
-            for k,v in [(self.dimlabels[j],self.axis_coords[j]) for j in range(len(self.dimlabels)) if not mask[j]]:
-                retval.append(k)
-                if v is not None:
-                    self.set_prop(k,v[0])
-        self.dimlabels = [v for j,v in enumerate(self.dimlabels) if mask[j]]
-        if type(self.axis_coords) is list:
-            self.axis_coords = [v for j,v in enumerate(self.axis_coords) if mask[j]]
-        if type(self.axis_coords_error) is list:
-            self.axis_coords_error = [v for j,v in enumerate(self.axis_coords_error) if mask[j]]
-        if type(self.axis_coords_units) is list:
-            self.axis_coords_units = [v for j,v in enumerate(self.axis_coords_units) if mask[j]]
-        return retval
     #{{{ align data
     def aligndata(self,arg,verbose = False):
         r'''This is a fundamental method used by all of the arithmetic operations.
@@ -4314,9 +4302,90 @@ class nddata (object):
     secsy_transform = axis_manipulation.secsy.secsy_transform
     register_axis = axis_manipulation.register_axis.register_axis
     fourier_shear = this_fourier.shear.shear
-    nnls = nnls.nnls
     #}}}
     #}}}
+    def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
+        r"""Perform regularized non-negative least-squares "fit" on self.
+
+        .. todo::
+            someone can explain the math here
+        
+        Parameters
+        ==========
+        dimname: str
+            Name of the "data" dimension that is to be replaced by a
+            distribution (the "fit" dimension);
+            *e.g.* if you are regularizing a set of functions
+            :math:`\exp(-\tau*R_1)`, then this is :math:`\tau`
+        newaxis_dict: dict
+            a dictionary whose key is the name of the "fit" dimension
+            (:math:`R_1` in the example above)
+            and whose value is an array with the new axis labels
+        kernel_func: function
+            a function giving the kernel for the regularization.
+            The first argument is the "data" variable
+            and the second argument is the "fit" variable
+            (in the example above, this would be something like
+            ``lambda x,y: exp(-x*y)``)
+        l : double (default 0)
+            the regularization parameter
+            :math:`lambda` -- if this is set to 0, the algorithm reverts to
+            standard nnls
+
+        Returns
+        =======
+        self:
+            The regularized result.
+            For future use, both the kernel (as an nddata, in a property called
+            "nnls_kernel") and the residual (as an nddata, in a property called
+            "nnls_residual") are stored as properties of the nddata.
+            The regularized dimension is always last
+            (innermost).
+        """
+        assert type(dimname) is str, "first argument is dimension name"
+        assert type(newaxis_dict) is dict, "second argument is dictionary with new axis"
+        assert len(newaxis_dict) == 1, "currently only set up for 1D"
+        assert callable(kernel_func), "third argument is kernel function"
+        # construct the kernel
+        # the kernel transforms from (columns) the "fit" dimension to (rows)
+        # the "data" dimension
+        fitdim_name = newaxis_dict.keys()[0]
+        logger.debug(strm('shape of fit dimension is',newaxis_dict[fitdim_name].shape))
+        fit_axis = nddata(newaxis_dict[fitdim_name], fitdim_name)
+        data_axis = self.fromaxis(dimname)
+        K = data_axis * fit_axis
+        logger.debug(strm('the size of the kernel is',ndshape(K),'or, raw',K.data.shape))
+        self.reorder(dimname, first=False) # make the dimension we will be regularizing innermost
+        logger.debug(strm('shape of the data is',ndshape(self)))
+        data_fornnls = self.data
+        if len(data_fornnls.shape) > 2:
+            data_fornnls = data_fornnls.reshape((prod(
+                data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
+        logger.debug(strm('shape of arguments to nnls',K.data.shape,data_fornnls.shape))
+        retval, residual = this_nnls.nnls_regularized(K.data, data_fornnls, l=l)
+        newshape = []
+        if not isscalar(l):
+            newshape.append(len(l))
+            self.dimlabels = ['lambda'] + self.dimlabels
+            self.setaxis('lambda',l)
+        newshape += list(self.data.shape)[:-1] # exclude data dimension
+        newshape.append(len(newaxis_dict[fitdim_name]))
+        retval = retval.reshape(newshape)
+        self.data = retval
+        # change the dimension names and data
+        self.rename(dimname, fitdim_name)
+        self.setaxis(fitdim_name, newaxis_dict[fitdim_name])
+        self.data = retval
+        if not isscalar(residual):
+            # make the residual nddata as well
+            residual_nddata = ndshape(self).pop(fitdim_name).alloc()
+            residual_nddata.data[:] = residual[:]
+        else:
+            residual_nddata = residual
+        # store the kernel and the residual in the properties
+        self.set_prop('nnls_kernel',K)
+        self.set_prop('nnls_residual',residual_nddata)
+        return self
     #{{{ interpolation and binning
     def run_avg(self,thisaxisname,decimation = 20,centered = False):
         'a simple running average'
@@ -5391,6 +5460,25 @@ class nddata (object):
         else:
             raise ValueError("Along the axis '"+axis_name+"', the field '"+which_field+"' does not represent an axis that is repeated one or more times!  The counts for how many times each element along the field is used is "+repr(index_count))
             return
+    def squeeze(self,verbose = False):
+        'squeeze singleton dimensions -- return a list of the labels for the axes that are dropped'
+        mask = array(self.data.shape) > 1
+        if verbose: print zip(mask,self.dimlabels)
+        self.data = self.data.squeeze()
+        retval = []
+        if type(self.axis_coords) is list:
+            for k,v in [(self.dimlabels[j],self.axis_coords[j]) for j in range(len(self.dimlabels)) if not mask[j]]:
+                retval.append(k)
+                if v is not None:
+                    self.set_prop(k,v[0])
+        self.dimlabels = [v for j,v in enumerate(self.dimlabels) if mask[j]]
+        if type(self.axis_coords) is list:
+            self.axis_coords = [v for j,v in enumerate(self.axis_coords) if mask[j]]
+        if type(self.axis_coords_error) is list:
+            self.axis_coords_error = [v for j,v in enumerate(self.axis_coords_error) if mask[j]]
+        if type(self.axis_coords_units) is list:
+            self.axis_coords_units = [v for j,v in enumerate(self.axis_coords_units) if mask[j]]
+        return retval
     #}}}
     #{{{ messing with data -- get, set, and copy
     def __getslice__(self,*args):

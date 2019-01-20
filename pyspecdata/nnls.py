@@ -2,91 +2,15 @@
 from __future__ import division, print_function, absolute_import
 
 from . import _nnls
-from .general_functions import redim_F_to_C, redim_C_to_F
+from .general_functions import redim_F_to_C, redim_C_to_F, strm
 from numpy import asarray_chkfinite, zeros, double, isscalar
 from numpy import array as np_array
 import multiprocessing.dummy as mpd
 from multiprocessing import cpu_count
-from ..core import *
 
 __all__ = ['nnls_regularized']
 
 
-def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
-    r"""Perform regularized non-negative least-squares "fit" on self.
-
-    .. todo::
-        someone can explain the math here
-    
-    Parameters
-    ==========
-    dimname: str
-        Name of the "data" dimension that is to be replaced by a
-        distribution (the "fit" dimension);
-        *e.g.* if you are regularizing a set of functions
-        :math:`\exp(-\tau*R_1)`, then this is :math:`\tau`
-    newaxis_dict: dict
-        a dictionary whose key is the name of the "fit" dimension
-        (:math:`R_1` in the example above)
-        and whose value is an array with the new axis labels
-    kernel_func: function
-        a function giving the kernel for the regularization.
-        The first argument is the "data" variable
-        and the second argument is the "fit" variable
-        (in the example above, this would be something like
-        ``lambda x,y: exp(-x*y)``)
-    l : double (default 0)
-        the regularization parameter
-        :math:`lambda` -- if this is set to 0, the algorithm reverts to
-        standard nnls
-
-    Returns
-    =======
-    self:
-        The regularized result.
-        For future use, both the kernel (as an nddata, in a property called
-        "nnls_kernel") and the residual (as an nddata, in a property called
-        "nnls_residual") are stored as properties of the nddata.
-        The regularized dimension is always last
-        (innermost).
-    """
-    assert type(dimname) is str, "first argument is dimension name"
-    assert type(newaxis_dict) is dict, "second argument is dictionary with new axis"
-    assert len(newaxis_dict) == 1, "currently only set up for 1D"
-    assert callable(kernel_func), "third argument is kernel function"
-    # construct the kernel
-    # the kernel transforms from (columns) the "fit" dimension to (rows)
-    # the "data" dimension
-    fitdim_name = newaxis_dict.keys()[0]
-    fit_axis = nddata(newaxis_dict[fitdim_name], fitdim_name)
-    data_axis = self.fromaxis(dimname)
-    K = fit_axis*data_axis
-    self.reorder(dimname, first=False) # make the dimension we will be regularizing innermost
-    data_fornnls = self.data
-    if len(data_fornnls) > 2:
-        data_fornnls = data_fornnls.reshape(prod(
-            data_fornnls.shape[:-1]),data_fornnls.shape[-1])
-    retval, residual = nnls_regularized(K, data_fornnls, l=l)
-    newshape = []
-    if not isscalar(l):
-        newshape.append(len(l))
-        self.dimlabels = ['lambda'] + self.dimlabels
-        self.setaxis('lambda',l)
-    newshape += list(self.data.shape)
-    newshape.append(len(newaxis_dict[fitdim_name]))
-    retval = retval.reshape(newshape)
-    self.data = retval
-    # change the dimension names and data
-    self.rename(dimname, fitdim_name)
-    self.setaxis(fitdim_name, newaxis_dict[fitdim_name])
-    self.data = retval
-    # make the residual nddata as well
-    residual_nddata = ndshape(self).pop(dimname).alloc()
-    residual_nddata.data[:] = residual[:]
-    # store the kernel and the residual in the properties
-    self.set_prop('nnls_kernel',K)
-    self.set_prop('nnls_residual',residual_nddata)
-    return self
 def nnls_regularized(A, b, l=0, maxiter=None):
     """
     Solve math:`argmin_x || Ax - b ||_2^2 + \lambda^2 ||x||_2^2` for ``x>=0``.
@@ -140,7 +64,7 @@ def nnls_regularized(A, b, l=0, maxiter=None):
     m, n = A.shape
 
     if m != b.shape[-1]:
-        raise ValueError("incompatible dimensions (the most quickly changing index should be the nnls dimension)")
+        raise ValueError(strm("incompatible dimensions (rows of A",m," do not match size of data",b.shape,")"))
 
     maxiter = -1 if maxiter is None else int(maxiter)
 
