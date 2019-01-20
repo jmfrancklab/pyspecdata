@@ -22,7 +22,7 @@ fl=figlist_var()
 # got the following from here:
 #https://medium.com/pythonhive/python-decorator-to-measure-the-execution-time-of-methods-fa04cb6bb36d
 l_line = ''
-def timeit(method,n_times=1):
+def timeit(method,n_times=5):
     def timed(*args, **kw):
         timing = zeros(n_times+1)
         timing[0] = time.time()
@@ -96,6 +96,8 @@ x,rnorm = nnls_regularized(A,test_signal.squeeze(),l=0.)
 fl.next('fit an exponential',legend=True)
 fl.plot(t[:],test_signal.flatten(),label='test signal')
 fl.plot(t[:],A.dot(x),label='fit')
+fl.next('what does the fit look like?')
+fl.plot(R.flatten(),x.flatten())
 
 
 # 
@@ -187,7 +189,7 @@ print r_norm
 
 
 fl.next('L-curve')
-L_curve(l,r_norm,linalg.norm(x,axis=1), markersize=5, alpha=0.5, label='threaded')
+L_curve(l,r_norm,linalg.norm(x,axis=1), markersize=5, alpha=0.5, label='compiled loop')
 
 
 # 
@@ -196,48 +198,9 @@ L_curve(l,r_norm,linalg.norm(x,axis=1), markersize=5, alpha=0.5, label='threaded
 print shape(x)
 print shape(x.T)
 
-# Test for the accuracy of the "1.5D" code
-
-l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
-test_signal_2d = test_signal.reshape(1,-1) * ones((3,1))
-@timeit
-def multifreq_nonvec_lcurve(A,l):
-    x_norm = empty_like(l)
-    r_norm = empty((l.size,test_signal_2d.shape[0]))
-    for j,this_l in enumerate(l):
-        x,r_norm[j,:] = nnls_regularized(A,test_signal_2d,l=this_l)
-        x_norm[j] = sqrt((x**2).sum(axis=1)).mean()
-    r_norm = r_norm.mean(axis=1)
-    return x,x_norm,r_norm
-x,x_norm,r_norm = multifreq_nonvec_lcurve(A,l)
-fl.next('L-curve')
-L_curve(l,r_norm,x_norm, markersize=5, alpha=0.5, label='1.5 D')
 
 # 
 
-P_estimated,final_rnorm = nnls_regularized(A,test_signal.squeeze(),l=0.1)
-fl.next(r'show result where $\lambda$ set to knee')
-fl.plot(R.flatten(),P.flatten())
-fl.plot(R.flatten(),P_estimated,alpha=0.5,linewidth=2)
-
-# and with parallelization 
-
-l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
-test_signal_2d = test_signal.reshape(1,-1) * ones((3,1))
-@timeit
-def multifreq_lcurve(A,l):
-    return nnls_regularized(A,test_signal_2d,l=l)
-x,r_norm = multifreq_lcurve(A,l)
-
-print x.shape # should be lambda x offset x fit
-print r_norm.shape # should be lambda x offset
-
-# 
-
-fl.next('L-curve')
-L_curve(l,r_norm.mean(axis=1),sqrt((x**2).sum(axis=2)).mean(axis=1), markersize=5, alpha=0.5, label='1.5 D, threaded')
-
-# 
 
 P_estimated,final_rnorm = nnls_regularized(A,test_signal.squeeze(),l=0.1)
 fl.next(r'show result where $\lambda$ set to knee')

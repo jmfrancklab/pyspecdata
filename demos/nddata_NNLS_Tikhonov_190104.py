@@ -91,7 +91,18 @@ xlim(-endp/10,endp)
 # 
 
 
-test_data.nnls('t',{'R':R.ravel()},lambda x,y: exp(-y*x), l=0.)
+test_data.nnls('t',{'R':R.ravel()},lambda x,y: exp(-y*x))
+
+
+# 
+
+
+print ndshape(test_data)
+K = test_data.get_prop('nnls_kernel').C
+print ndshape(K)
+K.dot(test_data)
+print ndshape(K)
+K
 
 
 # 
