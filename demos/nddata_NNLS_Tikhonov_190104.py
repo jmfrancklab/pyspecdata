@@ -4,6 +4,12 @@
 # 
 
 
+#!/usr/bin/env python
+
+
+# 
+
+
 try:
     get_ipython().magic(u'load_ext pyspecdata.ipy')
     in_notebook = True
@@ -19,6 +25,9 @@ init_logging(level='debug')
 
 # got the following from here:
 # https://medium.com/pythonhive/python-decorator-to-measure-the-execution-time-of-methods-fa04cb6bb36d
+
+# 
+
 
 l_line = ''
 def timeit(method,n_times=1):
@@ -78,7 +87,11 @@ test_data = nddata(test_signal.flatten(),[-1],['t']).labels('t',t)
 plot(test_data)
 xlim(-endp/10,endp)
 
+
 # Do the basic NNLS fit
+
+# 
+
 
 test_fit = test_data.C.nnls('t',{'R':R.ravel()},lambda x,y: exp(-y*x))
 fl.next('fit an exponential distribution',legend=True)
@@ -89,7 +102,11 @@ fl.plot(test_fit.C.dot(K), alpha=0.5, label='fit')
 fl.next('what does the fit distribution look like?')
 fl.plot(test_fit)
 
+
 # Now add regularization
+
+# 
+
 
 def L_curve(l,r_norm,x_norm, **kwargs):
     """plot L-curve using
@@ -109,20 +126,22 @@ def L_curve(l,r_norm,x_norm, **kwargs):
     ylabel('$\log_{10}(x$ norm$)$')
     xlabel('$\log_{10}($ residual $)$')
 
+
 # 
+
 
 l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
 @timeit
-def nonvec_lcurve(A,l):
+def nonvec_lcurve(l):
     x_norm = empty_like(l)
     r_norm = empty_like(l)
     for j,this_l in enumerate(l):
-        x = test_signal.C.nnls('t',
-                {'R':R.ravel()},lambda x,y: exp(-y*x))
+        x = test_data.C.nnls('t',
+                {'R':R.ravel()},lambda x,y: exp(-y*x), l=this_l)
         r_norm[j] = x.get_prop('nnls_residual')
         x_norm[j] = linalg.norm(x.data)
     return x,x_norm,r_norm
-x,x_norm,r_norm = nonvec_lcurve(A,l)
+x,x_norm,r_norm = nonvec_lcurve(l)
 #x_norm = map(linalg.norm,x) # to be fair, this calculation is done outside the timing, below
 
 
@@ -131,3 +150,30 @@ x,x_norm,r_norm = nonvec_lcurve(A,l)
 
 fl.next('L-curve', legend=True)
 L_curve(l, r_norm, x_norm, markersize=10, alpha=0.5, label='manual loop')
+
+
+# ## Vectorized version of lambda curve
+
+# 
+
+
+l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
+@timeit
+def vec_lcurve(l):
+    return test_data.C.nnls('t',
+            {'R':R.ravel()},lambda x,y: exp(-y*x), l=l)
+x = vec_lcurve(l)
+
+
+# 
+
+
+fl.next('L-curve')
+L_curve(l, x.get_prop('nnls_residual').data.real, x.C.run(linalg.norm,'R').data, markersize=5, alpha=0.5, label='compiled loop')
+
+
+# 
+
+
+
+

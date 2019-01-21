@@ -4406,15 +4406,32 @@ class nddata (object):
         newshape = []
         if not isscalar(l):
             newshape.append(len(l))
-            self.dimlabels = ['lambda'] + self.dimlabels
-            self.setaxis('lambda',l)
         newshape += list(self.data.shape)[:-1] # exclude data dimension
         newshape.append(len(newaxis_dict[fitdim_name]))
+        # {{{ store the dictionaries for later use
+        axis_coords_dict = self.mkd(self.axis_coords)
+        axis_units_dict = self.mkd(self.axis_coords_units)
+        axis_coords_error_dict = self.mkd(self.axis_coords_error)
+        # }}}
         retval = retval.reshape(newshape)
         self.data = retval
+        # {{{ clear all the axis info
+        self.axis_coords = None
+        self.axis_coords_units = None
+        self.axis_coords_error_dict = None
+        # }}}
         # change the dimension names and data
         self.rename(dimname, fitdim_name)
-        self.setaxis(fitdim_name, newaxis_dict[fitdim_name])
+        # {{{ manipulate the dictionaries, and call fld below
+        axis_coords_dict[fitdim_name] = newaxis_dict[fitdim_name]
+        axis_units_dict[fitdim_name] = None
+        axis_coords_error_dict[fitdim_name] = None
+        if not isscalar(l):
+            self.dimlabels = ['lambda'] + self.dimlabels
+            axis_coords_dict['lambda'] = l
+            axis_units_dict['lambda'] = None
+            axis_coords_error_dict['lambda'] = None
+        # }}}
         self.data = retval
         if not isscalar(residual):
             # make the residual nddata as well
@@ -4425,6 +4442,10 @@ class nddata (object):
         # store the kernel and the residual in the properties
         self.set_prop('nnls_kernel',K)
         self.set_prop('nnls_residual',residual_nddata)
+        for j in self.dimlabels:
+            self.axis_coords = self.fld(axis_coords_dict)
+            self.axis_coords_units = self.fld(axis_units_dict)
+            self.axis_coords_error = self.fld(axis_coords_error_dict)
         return self
     #{{{ interpolation and binning
     def run_avg(self,thisaxisname,decimation = 20,centered = False):
