@@ -50,7 +50,7 @@ def timeit(method,n_times=1):
 # 
 
 
-R = c_[1.:100:500j] # distribution of T2 relaxation rates
+R = r_[1.:100:500j] # distribution of T2 relaxation rates
 peaks = [(80,4,1),(20,0.5,0.5),(30,0.5,0.25)]
 calcd = False
 for mu,sigma,A in peaks:
@@ -59,32 +59,30 @@ for mu,sigma,A in peaks:
         calcd = True
     else:
         P += A*exp(-(R-mu)**2/(2*sigma**2))
+P = nddata(P,'R')
+print "your labels are",P.dimlabels
+P.setaxis('R',R.ravel())
 
 
 # Vary R as we move along the rows
 
-# 
-
-
-P = P.T
-R = R.T
 fl.next('distribution function')
-plot(R.flatten(),P.flatten())
+fl.plot(P)
 
 
 # 
 
 
 endp = 0.2
-t = c_[1e-3:endp:2048j] # column vectors give functions of time
-test_signal = exp(-R*t).dot(P.T)
+t = nddata(r_[1e-3:endp:2048j],'t') # column vectors give functions of time
+R = P.fromaxis('R')
+test_data = exp(-R*t).dot(P)
+logger.debug(strm('when constructing test_data, shape of the data is',ndshape(test_data),"len of axis_coords_error",len(test_data.axis_coords_error)))
 
-test_signal += random.normal(scale = 0.01,size=(2048,1))
-print test_signal.shape
-print t.squeeze().shape
+#test_data += random.normal(scale = 0.01,size=(2048,1))
+test_data.add_noise(0.01)
 fl.next('test data function')
-test_data = nddata(test_signal.flatten(),[-1],['t']).labels('t',t)
-plot(test_data)
+fl.plot(test_data)
 xlim(-endp/10,endp)
 
 
@@ -93,7 +91,8 @@ xlim(-endp/10,endp)
 # 
 
 
-test_fit = test_data.C.nnls('t',{'R':R.ravel()},lambda x,y: exp(-y*x))
+logger.debug(strm('before nnls, shape of the data is',ndshape(test_data),"len of axis_coords_error",len(test_data.axis_coords_error)))
+test_fit = test_data.C.nnls('t',R,lambda x,y: exp(-y*x))
 fl.next('fit an exponential distribution',legend=True)
 fl.plot(test_data, alpha=0.5, label='test signal')
 K = test_fit.get_prop('nnls_kernel').C
@@ -137,7 +136,7 @@ def nonvec_lcurve(l):
     r_norm = empty_like(l)
     for j,this_l in enumerate(l):
         x = test_data.C.nnls('t',
-                {'R':R.ravel()},lambda x,y: exp(-y*x), l=this_l)
+                R,lambda x,y: exp(-y*x), l=this_l)
         r_norm[j] = x.get_prop('nnls_residual')
         x_norm[j] = linalg.norm(x.data)
     return x,x_norm,r_norm
@@ -161,7 +160,7 @@ l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacin
 @timeit
 def vec_lcurve(l):
     return test_data.C.nnls('t',
-            {'R':R.ravel()},lambda x,y: exp(-y*x), l=l)
+            R,lambda x,y: exp(-y*x), l=l)
 x = vec_lcurve(l)
 
 
@@ -169,6 +168,7 @@ x = vec_lcurve(l)
 
 
 fl.next('L-curve')
+logger.debug(strm("check dtype of residual:",x.get_prop('nnls_residual').data.dtype))
 L_curve(l, x.get_prop('nnls_residual').data.real, x.C.run(linalg.norm,'R').data, markersize=5, alpha=0.5, label='compiled loop')
 
 
@@ -176,4 +176,9 @@ L_curve(l, x.get_prop('nnls_residual').data.real, x.C.run(linalg.norm,'R').data,
 
 
 
+if in_notebook:
+    print "in notebook, not calling show"
+else:
+    print "not in notebook, calling show"
+    fl.show()
 

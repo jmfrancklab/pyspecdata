@@ -2722,7 +2722,7 @@ class nddata (object):
             else:
                 raise TypeError(strm('data is not an array, it\'s',type(data),'!'))
         if not (type(dimlabels) is list):
-            raise TypeError('labels are not a list')
+            raise TypeError(strm('you provided a multi-dimensional ndarray but a set of dimension labels of type',type(dimlabels),"if you want a 1D nddata, give a 1D array, or if you want a ND nddata, give a list of dimensions"))
         try:
             self.data = reshape(data,sizes)
         except:
@@ -3452,16 +3452,16 @@ class nddata (object):
         A,B = self.aligndata(arg)
         matching_dims = list(set(self.dimlabels) & set(arg.dimlabels))
         assert len(matching_dims) > 0, "no matching dimensions!"
+        # {{{ store the dictionaries for later use
+        axis_coords_dict = A.mkd(A.axis_coords)
+        axis_units_dict = A.mkd(A.axis_coords_units)
+        axis_coords_error_dict = A.mkd(A.axis_coords_error)
+        # }}}
         # manipulate "self" directly
         self.dimlabels = [j for j in A.dimlabels if j not in matching_dims]
         match_idx = [A.axn(j) for j in matching_dims]
         if (self.get_error() is not None) or (arg.get_error() is not None):
             raise ValueError("we plan to include error propagation here, but not yet provided")
-        for j in self.dimlabels:
-            thisaxis = A.getaxis(j)
-            if thisaxis is None:
-                thisaxis = B.getaxis(j)
-            self.setaxis(j,thisaxis)
         self.data = tensordot(A.data,B.data,axes=(match_idx,match_idx))
         logger.debug(strm("shape of A is",ndshape(A)))
         logger.debug(strm("shape of B is",ndshape(B)))
@@ -3469,6 +3469,17 @@ class nddata (object):
         newsize = [(A.data.shape[j] if A.data.shape[j] != 1 else B.data.shape[j])
                 for j in range(len(A.data.shape)) if A.dimlabels[j] not in matching_dims]
         self.data = self.data.reshape(newsize)
+        # {{{ remove info from matching coordinates from the dictionaries
+        for d in (axis_coords_dict,axis_coords_error_dict,axis_units_dict): 
+            for j in matching_dims:
+                if j in d.keys():
+                    d.pop(j)
+        # }}}
+        # {{{ use the dictionaries to reconstruct the metadata
+        self.axis_coords = self.fld(axis_coords_dict)
+        self.axis_coords_units = self.fld(axis_units_dict)
+        self.axis_coords_error = self.fld(axis_coords_error_dict)
+        # }}}
         return self
     def __add__(self,arg):
         if isscalar(arg):
@@ -4356,10 +4367,14 @@ class nddata (object):
             distribution (the "fit" dimension);
             *e.g.* if you are regularizing a set of functions
             :math:`\exp(-\tau*R_1)`, then this is :math:`\tau`
-        newaxis_dict: dict
+        newaxis_dict: dict or nddata
             a dictionary whose key is the name of the "fit" dimension
             (:math:`R_1` in the example above)
-            and whose value is an array with the new axis labels
+            and whose value is an array with the new axis labels.
+            OR
+            this can be a 1D nddata
+            -- if it has an axis, the axis will be used to create the
+            fit axis; if it has no axis, the data will be used
         kernel_func: function
             a function giving the kernel for the regularization.
             The first argument is the "data" variable
@@ -4382,15 +4397,27 @@ class nddata (object):
             (innermost).
         """
         assert type(dimname) is str, "first argument is dimension name"
-        assert type(newaxis_dict) is dict, "second argument is dictionary with new axis"
-        assert len(newaxis_dict) == 1, "currently only set up for 1D"
+        if type(newaxis_dict) is dict:
+            assert len(newaxis_dict) == 1, "currently only set up for 1D"
+        elif isinstance(newaxis_dict,nddata):
+            assert len(newaxis_dict.dimlabels) == 1, "currently only set up for 1D"
+        else:
+            raise ValueError("second argument is dictionary or nddata with new axis")
         assert callable(kernel_func), "third argument is kernel function"
         # construct the kernel
         # the kernel transforms from (columns) the "fit" dimension to (rows)
         # the "data" dimension
-        fitdim_name = newaxis_dict.keys()[0]
-        logger.debug(strm('shape of fit dimension is',newaxis_dict[fitdim_name].shape))
-        fit_axis = nddata(newaxis_dict[fitdim_name], fitdim_name)
+        if isinstance(newaxis_dict,nddata):
+            assert len(newaxis_dict.dimlabels) == 1, "must be 1 dimensional!!"
+            fitdim_name = newaxis_dict.dimlabels[0]
+            fit_axis = newaxis_dict.getaxis(fitdim_name)
+            if fit_axis is None:
+                fit_axis = newaxis_dict.data
+        else:
+            fitdim_name = newaxis_dict.keys()[0]
+            logger.debug(strm('shape of fit dimension is',newaxis_dict[fitdim_name].shape))
+            fit_axis = newaxis_dict[fitdim_name]
+        fit_axis = nddata(fit_axis, fitdim_name)
         data_axis = self.fromaxis(dimname)
         data_axis, fit_axis = data_axis.aligndata(fit_axis)
         K = kernel_func(data_axis, fit_axis)
@@ -4401,13 +4428,15 @@ class nddata (object):
         if len(data_fornnls.shape) > 2:
             data_fornnls = data_fornnls.reshape((prod(
                 data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
-        logger.debug(strm('shape of arguments to nnls',K.data.shape,data_fornnls.shape))
+        logger.debug(strm('shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
         retval, residual = this_nnls.nnls_regularized(K.data, data_fornnls, l=l)
+        logger.debug(strm("coming back from fortran, residual type is",type(residual))+ strm(residual.dtype if type(residual) is ndarray else ''))
         newshape = []
         if not isscalar(l):
             newshape.append(len(l))
         newshape += list(self.data.shape)[:-1] # exclude data dimension
-        newshape.append(len(newaxis_dict[fitdim_name]))
+        newshape.append(len(fit_axis.data))
+        logger.debug(strm('before mkd, shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
         # {{{ store the dictionaries for later use
         axis_coords_dict = self.mkd(self.axis_coords)
         axis_units_dict = self.mkd(self.axis_coords_units)
@@ -4435,17 +4464,18 @@ class nddata (object):
         self.data = retval
         if not isscalar(residual):
             # make the residual nddata as well
-            residual_nddata = ndshape(self).pop(fitdim_name).alloc()
+            residual_nddata = ndshape(self).pop(fitdim_name).alloc(dtype=residual.dtype)
             residual_nddata.data[:] = residual[:]
         else:
             residual_nddata = residual
         # store the kernel and the residual in the properties
         self.set_prop('nnls_kernel',K)
         self.set_prop('nnls_residual',residual_nddata)
-        for j in self.dimlabels:
-            self.axis_coords = self.fld(axis_coords_dict)
-            self.axis_coords_units = self.fld(axis_units_dict)
-            self.axis_coords_error = self.fld(axis_coords_error_dict)
+        # {{{ use the info from the dictionaries
+        self.axis_coords = self.fld(axis_coords_dict)
+        self.axis_coords_units = self.fld(axis_units_dict)
+        self.axis_coords_error = self.fld(axis_coords_error_dict)
+        # }}}
         return self
     #{{{ interpolation and binning
     def run_avg(self,thisaxisname,decimation = 20,centered = False):
