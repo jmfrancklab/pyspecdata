@@ -3469,12 +3469,6 @@ class nddata (object):
         newsize = [(A.data.shape[j] if A.data.shape[j] != 1 else B.data.shape[j])
                 for j in range(len(A.data.shape)) if A.dimlabels[j] not in matching_dims]
         self.data = self.data.reshape(newsize)
-        # {{{ remove info from matching coordinates from the dictionaries
-        for d in (axis_coords_dict,axis_coords_error_dict,axis_units_dict): 
-            for j in matching_dims:
-                if j in d.keys():
-                    d.pop(j)
-        # }}}
         # {{{ use the dictionaries to reconstruct the metadata
         self.axis_coords = self.fld(axis_coords_dict)
         self.axis_coords_units = self.fld(axis_units_dict)
@@ -4435,7 +4429,7 @@ class nddata (object):
         if not isscalar(l):
             newshape.append(len(l))
         newshape += list(self.data.shape)[:-1] # exclude data dimension
-        newshape.append(len(fit_axis.data))
+        newshape.append(ndshape(fit_axis)[fitdim_name])
         logger.debug(strm('before mkd, shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
         # {{{ store the dictionaries for later use
         axis_coords_dict = self.mkd(self.axis_coords)
@@ -4452,7 +4446,7 @@ class nddata (object):
         # change the dimension names and data
         self.rename(dimname, fitdim_name)
         # {{{ manipulate the dictionaries, and call fld below
-        axis_coords_dict[fitdim_name] = newaxis_dict[fitdim_name]
+        axis_coords_dict[fitdim_name] = fit_axis.getaxis(fitdim_name)
         axis_units_dict[fitdim_name] = None
         axis_coords_error_dict[fitdim_name] = None
         if not isscalar(l):
