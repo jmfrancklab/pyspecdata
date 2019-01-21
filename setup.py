@@ -6,17 +6,24 @@ import subprocess
 import sys
 import os
 
-general_error = "I couldn't import {:s} -- go install it first!!\n(I'm doing this because dependency-based install of PyQt, and some others does not usually go well -- use your distro software (conda install ..., aptitude, etc) instead)\nIn fact, you probably want to install:\n\tpyqt, unxutils, matplotlib, mingw, and libpython"
+general_error = "I couldn't import {:s} -- go install it first!!\n(I'm doing this because dependency-based install of PyQt, and some others does not usually go well -- use your distro software (conda install ..., aptitude, etc) instead)\nIn fact, you probably want to install:\n\tpyqt, unxutils, matplotlib, mingw, and libpython\nAlso, it's recommended to start by running ``python setup.py config --fcompiler=gfortran develop``"
 try:
     import paramset_pyspecdata
 except:
     raise RuntimeError("install the paramset_pyspecdata package first!\nIf using setup.py, run 'python setup_paramset.py install'")
 try:
     import matplotlib
+    #import PyQt5
 except:
     raise RuntimeError(general_error.format('matplotlib'))
 ext_modules = []
 execfile('pyspecdata/version.py')
+
+ext_modules.append(Extension(name = 'pyspecdata._nnls',
+        sources = ['nnls/nnls.pyf','nnls/nnls.f','nnls/nnls_regularized.f90','nnls/nnls_regularized_loop.f90'],
+        define_macros = [('ADD_UNDERSCORE',None)],
+        extra_compile_args = ['-g'],# debug flags
+        ))
 
 setup(
     name='pySpecData',
@@ -29,13 +36,12 @@ setup(
     description='object-oriented N-dimensional data processing with notebook functionality',
     long_description=open('README.rst').read(),
     install_requires=[
-        "paramset_pyspecdata",
         "sympy",
         "numpy",
         "scipy",
         "h5py",
         "matplotlib",
-        "tables",
+        "pillow",
         ],
     ext_modules = ext_modules,
     entry_points=dict(console_scripts=
@@ -48,6 +54,7 @@ setup(
 )
 tryagain = False
 
+print "You can now run pyspecdata_dataconfig to generate a template configuration file (which will show up in your home directory)."
 ## Later, I should probably use the setuptools equivalent of install_data to do both this and the lapack stuff
 #print "\n\nNow that everything else is set up, I'm going to check your notebook and data directories, possibly asking you to set them."
 #print "\n--> The notebook directory is the root directory where you store tex files for your notebook."

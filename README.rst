@@ -171,31 +171,16 @@ For example, on Windows with `Anaconda 2.7`_.
 -- just run
 ``conda install numpy scipy sympy pyqt pytables matplotlib h5py``.
 
+On CentOS7, we've tested
+``yum install python-matplotlib python-matplotlib-qt4 python-devel sympy h5py python-tables scipy``
+(after running ``yum install epel-release`` to install the EPEL distribution)
+
 (If you don't install these packages with your system `pip` will try to install them, and there is a good chance it will fail -- it's known not to work great with several of these; `setuptools` should error out and tell you to install the packages.)
 
 *mayavi*: Mayavi can be used (and gives very nice graphics), but frequently lags behind common Python distros.
 Therefore, this package was written so that it doesn't depend on mayavi.
 Rather, you can just import ``mayavi.mlab`` and pass it to any figure list that you initialize:
 ``figlist_var(mlab = mayavi.mlab)``
-
-For compiled extensions
------------------------
-
-All compiled extensions are currently stripped out, but will be slowly
-    added back in.
-
-If you are installing from github (or generally using setuptools -- *i.e.* ``python setup.py install``
-or ``python setup.py develop``).
-
-If you are on windows, you will need some additional packages to enable compilation:
-
-* libpython
-
-* unxutils
-
-* mingw
-
-The last two are specific to Windows, and provide things like the ``gcc`` and ``gfortran`` compiler, as well as ``make``.
 
 Installation for developers
 ---------------------------
@@ -206,6 +191,22 @@ and do
 ``python setup_paramset.py develop``
 followed by
 ``python setup.py develop``)
+
+For compiled extensions
+```````````````````````
+
+All compiled extensions are currently stripped out, but will be slowly
+    added back in.
+
+If you are on windows, you will need some additional packages to enable compilation:
+
+* libpython
+
+* unxutils
+
+* mingw
+
+The last two are specific to Windows, and provide things like the ``gcc`` and ``gfortran`` compiler, as well as ``make``.
 
 Quick-Start
 ===========
@@ -229,10 +230,15 @@ To get started with this code:
    * On Linux, just use your package manager (``aptitude``, ``yum``, *etc.*) to install these libraries.
 
 3. Install `pyspecdata`: ``pip install pyspecdata``
+   or follow the "Installation for developers" section above.
 
-4. Set up directories -- create a file in your home directory
+4. Set up directories.
+   You can run the command `pyspecdata_dataconfig` to assist with this.
+
+   It creates a file in your home directory
    called ``_pyspecdata`` (Windows  -- note the underscore)
    or ``.pyspecdata`` (Mac or Linux).
+
    Here is an example -- you can copy and paste it as a starting point:
 
    ::

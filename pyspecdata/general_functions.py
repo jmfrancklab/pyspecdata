@@ -3,19 +3,37 @@ pyspecdata.core.  I can't just put these inside pyspecdata.core, because that
 would lead to cyclic imports, and e.g. submodules of pyspecdata can't find
 them."""
 
-from pylab import *
-import logging
 import os
-from paramset_pyspecdata import myparams
-import re
-from inspect import ismethod
 import sys
-
 def inside_sphinx():
     if len(sys.argv) > 0:
         return os.path.basename(sys.argv[0]) == "sphinx-build"
     else:
         return False
+if not inside_sphinx():
+    from pylab import *
+else:
+    # {{{ sphinx dummy objects
+    #      there is a better way of doing sphinx dummy objects, but this seems to work
+    def exp(*args,**kwargs):
+        return None
+    def rc(*args,**kwargs):
+        return None
+    def plot(*args,**kwargs):
+        return None
+    rcParams = {}
+    class rclass (object):
+        def __init__(self):
+            print "initializing"
+            return
+        def __getitem__(self,*args,**kwargs):
+            return
+    r_ = rclass()
+    # }}}
+import logging
+from paramset_pyspecdata import myparams
+import re
+
 def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
     '''This function allows dynamically processed (*i.e.* function definitions with `**kwargs`) kwargs (keyword arguments) to be dealt with in a fashion more like standard kwargs.
     The defaults set in `listoftuples` are used to process `kwargs`, which are then returned as a set of values (that are set to defaults as needed).
@@ -173,68 +191,11 @@ def render_matrix(arg, format_code='%.4g'):
     math_str += '\n'
     math_str += r'\end{bmatrix}'
     return math_str
-#{{{ convert back and forth between lists, etc, and ndarray
-def make_ndarray(array_to_conv,name_forprint = 'unknown',verbose = False): 
-    if type(array_to_conv) in [int,int32,double,float,complex,complex128,float,bool,bool_]: # if it's a scalar
-        pass
-    elif type(array_to_conv) is str:
-        pass
-    elif type(array_to_conv) in [list,ndarray] and len(array_to_conv) > 0:
-        array_to_conv = rec.fromarrays([array_to_conv],names = 'LISTELEMENTS') #list(rec.fromarrays([b])['f0']) to convert back
-    elif type(array_to_conv) in [list,ndarray] and len(array_to_conv) is 0:
-        array_to_conv = None
-    elif array_to_conv is  None:
-        pass
-    else:
-        raise TypeError(strm('type of value (',type(array_to_conv),') for attribute name',
-            name_forprint,'passed to make_ndarray is not currently supported'))
-    return array_to_conv
-def unmake_ndarray(array_to_conv,name_forprint = 'unknown',verbose = False): 
-    r'Convert this item to an ndarray'
-    if (type(array_to_conv) is recarray) or (type(array_to_conv) is ndarray and array_to_conv.dtype.names is not None and len(array_to_conv.dtype.names)>0):
-        #{{{ if it's a record/structured array, it should be either a list or dictionary
-        if 'LISTELEMENTS' in array_to_conv.dtype.names:
-            if array_to_conv.dtype.names == tuple(['LISTELEMENTS']):
-                retval = list(array_to_conv['LISTELEMENTS'])
-            else:
-                raise ValueError(strm('Attribute',name_forprint,
-                    'is a recordarray with a LISTELEMENTS field, but it',
-                    'also has other dimensions:',array_to_conv.dtype.names,
-                    'not',tuple(['LISTELEMENTS'])))
-        elif len(array_to_conv)==1:
-            thisval = dict(zip(a.dtype.names,a.tolist()[0]))
-        else: raise ValueError('You passed a structured array, but it has more',
-                "than one dimension, which is not yet supported\nLater, this",
-                'should be supported by returning a dictionary of arrays')
-        #}}}
-    elif type(array_to_conv) is ndarray and len(array_to_conv)==1:
-        #{{{ if it's a length 1 ndarray, then return the element
-        retval = array_to_conv.tolist()
-        if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is a numpy array of length one"
-        #}}}
-    elif type(array_to_conv) in [string_,int32,float64,bool_]:
-        #{{{ map numpy strings onto normal strings
-        retval = array_to_conv.tolist()
-        if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is a numpy scalar"
-        #}}}
-    elif type(array_to_conv) is list:
-        #{{{ deal with lists
-        if verbose: print "(from unmake ndarray verbose):", name_forprint,"is a list"
-        typeofall = map(type,array_to_conv)
-        if all(map(lambda x: x is string_,typeofall)):
-            if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",typeofall,"are all numpy strings"
-            retval = map(str,array_to_conv)
-        else:
-            if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",typeofall,"are not all numpy string"
-            retval = array_to_conv
-        #}}}
-    else:
-        if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is not a numpy string or record array"
-        retval = array_to_conv
-    return retval
-#}}}
-def normal_attrs(obj):
-    '''Return a list of "normal" attributes (as opposed to methods or attributes with a double underscore in the name)'''
-    myattrs = filter(lambda x: not ismethod(obj.__getattribute__(x)),dir(obj))
-    myattrs = filter(lambda x: not x[0:2] == '__',myattrs)
-    return myattrs
+def redim_F_to_C(a):
+    r"""the following creates a C array, reversing the *apparent* order of dimensions, while preserving the order in memory"""
+    assert isfortran(a),"input is not fortran order!"
+    return a.ravel(order='F').reshape(a.shape[::-1], order='C')# 'C' not required, but for clarity
+def redim_C_to_F(a):
+    "see redim_F_to_C"
+    assert (not isfortran(a)),"input is not c order!"
+    return a.ravel(order='C').reshape(a.shape[::-1], order='F')

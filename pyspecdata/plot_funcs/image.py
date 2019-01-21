@@ -2,6 +2,8 @@ from ..general_functions import *
 from ..ndshape import ndshape_base as ndshape
 def image(A,x=[],y=[],**kwargs):
     r"Please don't call image directly anymore -- use the image method of figurelist"
+    x_inverted = False
+    A.squeeze()# drop any singleton dimensions, which cause problems
     #{{{ pull out kwargs for imagehsv
     imagehsvkwargs = {}
     for k,v in kwargs.items():
@@ -26,6 +28,8 @@ def image(A,x=[],y=[],**kwargs):
     if hasattr(A,'dimlabels'):
         setlabels = True
         templabels = list(A.dimlabels)
+        if A.get_prop('x_inverted'):
+            x_inverted = True
         x_label = templabels[-1]
         if A.getaxis(x_label) is None:
             x = r_[0,ndshape(A)[x_label]]
@@ -47,8 +51,10 @@ def image(A,x=[],y=[],**kwargs):
                 if A.getaxis(x) is not None:
                     return '[$ '+A.unitify_axis(x)+r' $_{{{:.3g}\rightarrow{:.3g}}}]'.format(
                         *(A.getaxis(x)[r_[0,-1]]))
+                #elif A.get_units(x) is not None:
+                #    return '[$ '+A.unitify_axis(x)+ '$]'
                 else:
-                    return ' UNLABELED '
+                    return '[$ '+A.unitify_axis(x)+ '$]'
             templabels = map(axis_labeler, templabels)
             y_label = '\\otimes'.join(templabels)
             y_label = ' _{('+r'\times'.join(these_dimsizes)+')}' + y_label
@@ -118,6 +124,9 @@ def image(A,x=[],y=[],**kwargs):
         xlabel(x_label)
         #print y_label
         ylabel(y_label)
+    if x_inverted:
+        these_xlims = ax.get_xlim()
+        ax.set_xlim((max(these_xlims),min(these_xlims)))
     return retval
 
 def imagehsv(A,logscale = False,black = False):
@@ -176,9 +185,12 @@ def imagehsv(A,logscale = False,black = False):
     colors += m
     colors *= (n-1)
     if black:
-        colors[mask * r_[True,True,True]] = black
+        # if the background is black, make the separators white
+        # here, we have to remember that we're already scaled up to a scale of 0--255
+        colors[mask * r_[True,True,True]] = 255.0
     else:
-        colors[mask * r_[True,True,True]] = 1.0
+        # if the background is white, make the separators black
+        colors[mask * r_[True,True,True]] = 0.0
     colors = colors.reshape(origshape)
     return uint8(colors.round())
 

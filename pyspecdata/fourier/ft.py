@@ -7,11 +7,10 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
 
     It adjusts normalization and units so that the result conforms to
             :math:`\tilde{s}(f)=\int_{x_min}^{x_max} s(t) e^{-i 2 \pi f t} dt`
-    Note that while the analytical integral this corresponds to is normalized, performing
-    :func:`ft` followed by :func:`ift` on a discrete sequence is NOT completely invertible
-    (due to integration of the implied comb function??),
-    and would require division by a factor of $\Delta f$ (the spectral width) in order
-    to retrieve the original function
+
+    Note that, as noted in the :func:`ift` documentation,
+    the inverse transform doesn't correspond to the equivalent
+    expression for the IFT.
 
     **pre-FT**, we use the axis to cyclically permute :math:`t=0` to the first index
 

@@ -19,3 +19,4 @@ lapack-3.4.0/SRC/lapack.mri
 lapack-3.4.0/SRC/red_objs.a
 lapack-3.4.0/SRC/rem_objs.a
 lapack-3.4.0/SRC/xobjs.a
+nnls/_nnlsmodule.c

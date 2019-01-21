@@ -123,7 +123,7 @@ def get_notebook_dir(*args):
         base_notebook_dir = os.path.expanduser(base_notebook_dir)
         if not os.path.exists(base_notebook_dir):
             raise ValueError("It seems that your notebook directory (the main directory containing your latex files) isn't either (1) called \"notebook\" and immediately underneath your home directory or (2) registered in the [General] block of your "+_my_config.config_location+"file.\nThis probably means that you want to add a line like\nnotebook_directory = [path to your main notebook directory here]\nTo the [General] block of "+_my_config.config_location)
-        retval = (base_notebook_dir,) + args
+    retval = (base_notebook_dir,) + args
     if len(retval[-1]) != 0:
         retval = retval + ('',)
     return os.path.join(*retval)

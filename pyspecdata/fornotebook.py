@@ -13,8 +13,6 @@ from os.path import exists as path_exists
 from os import name as os_name
 from scipy.optimize import leastsq
 from scipy.signal import fftconvolve
-from scipy.misc import imresize
-from tables import openFile
 from datetime import datetime
 from time import mktime
 from PIL import Image

@@ -1,5 +1,6 @@
 from ..core import *
 from ..datadir import dirformat
+from .open_subpath import open_subpath
 import os.path
 import re
 import string
@@ -53,27 +54,30 @@ def match_line(line,number_re,string_re,array_re):
             else:
                 retval = (3,line)
     return retval
-def dirformat(filename):
-    "adds a path separator at the end of the file as needed"
-    if os.path.isdir(filename):
-        thislist = list(os.path.split(filename))
-        thislist = filter(lambda x: len(x)>0,thislist)
-        thislist = thislist + ['']
-    else:
-        raise ValueError(strm(filename,"doesn't appear to be a directory!!"))
-    return os.path.sep.join(thislist)
-def series(filename, dimname=''):
-    "For opening Bruker ser files"
+def series(file_reference, *subpath, **kwargs):
+    """For opening Bruker ser files.  Note that the expno is included as part of the subpath.
+    
+    Parameters
+    ----------
+    filename:
+        see :func:`open_subpath`
+    subpath:
+        the path within the directory or zip file that's one level up
+        from the ser file storing the raw data
+        (this is typically a numbered directory).
+    """
+    dimname = process_kwargs([('dimname',''),
+        ],kwargs)
     #{{{ Bruker 2D
-    filename = dirformat(filename)
-    v = load_acqu(filename)
-    v2 = load_acqu(filename,whichdim='2')
+    v = load_acqu(file_reference, *subpath)
+    v2 = load_acqu(file_reference, *subpath, whichdim='2')
     td2 = int(v['TD'])
     rg = det_rg(float(v['RG']))
     td1 = int(v2['TD'])
     td2_zf = int(ceil(td2/256.)*256) # round up to 256 points, which is how it's stored
-    fp = open(filename+'ser','rb')
+    fp = open_subpath(file_reference,*(subpath+('ser',)), mode='rb')
     data = fp.read()
+    fp.close()
     if int(v['BYTORDA']) == 1:
         data = fromstring(data, dtype=dtype('>i4'), count=(len(data)/4))
     else:
@@ -83,7 +87,6 @@ def series(filename, dimname=''):
     data /= rg
     mydimsizes = [td1,td2_zf/2]
     mydimnames = [dimname]+['t2']
-    #print 'DEBUG: data going to nddata =',data
     try:
         data = bruker_data(data,mydimsizes,mydimnames)
     except:
@@ -95,14 +98,10 @@ def series(filename, dimname=''):
         else:
             new_guess = len(data)/(td2_zf/2)
             print lsafen("WARNING!, chopping the length of the data to fit the specified td1 of ",td1,"points!\n(specified ",zip(mydimnames,mydimsizes),' td2_zf=%d)'%td2_zf)
-            #td2_zf_new = 2**ceil(log(td2)/log(2))
-            #mydimsizes[1] = td2_zf_new
-            #size_it_might_be = array(mydimsizes).prod()
-            #print "maybe this works:",size_it_might_be == len(data)
+            logger.debug(strm("maybe this works:",size_it_might_be == len(data)))
             data = data[0:size_it_should_be]
             data = bruker_data(data,mydimsizes,mydimnames)
-            #raise CustomError("found td1=",td1,"for",filename,"which I don't think is right, because the product of the dimensions",zip(mydimnames,mydimsizes),'=',size_it_should_be,'does not equal the length of the data',len(data),'I think that it should be',len(data)/(td2_zf/2))
-    #print 'DEBUG: data straight from nddata =',data
+    logger.debug(strm('data straight from nddata =',data))
     data = data['t2',0:td2/2] # now, chop out their zero filling
     t2axis = 1./v['SW_h']*r_[1:td2/2+1]
     t1axis = r_[0:td1]
@@ -113,38 +112,46 @@ def series(filename, dimname=''):
     data.set_units('t2','s')
     data.set_units('digital')
     data.set_prop('title',
-            load_title(filename))
+            load_title(file_reference, *subpath))
     v.update(v2)
+    with open_subpath(file_reference, *(subpath+('pulseprogram',)),mode='r') as fp:
+        ppg = fp.read()
+        data.set_prop('pulprog',ppg)
     data.set_prop('acq',
             v)
-    data.set_prop('filename',
-            filename)
-    proc_filename = os.path.join(filename,
-            'pdata','1','procs')
-    if os.path.exists(proc_filename):
-        data.set_prop('proc',
-                load_jcamp(proc_filename))
-    if os.path.exists(dirformat(filename)+'vdlist'):
-        data.set_prop('vd',
-                load_vdlist(dirformat(filename)))
+    if isinstance(file_reference,basestring):
+        data.set_prop('file_reference',
+                file_reference)
     else:
-        logger.info(strm("vdlist doesn't exist",dirformat(filename)+'vdlist'))
-    #print 'DEBUG 2: data from bruker file =',data
+        # if it's a zip file
+        data.set_prop('file_reference',
+                file_reference[1])
+    if open_subpath(file_reference, *(subpath +
+        ('pdata','1','procs')), test_only=True):
+        data.set_prop('proc',
+                load_jcamp(file_reference, *(subpath +
+                    ('pdata','1','procs'))))
+    if open_subpath(file_reference, *(subpath+('vdlist',)), test_only=True):
+        data.set_prop('vd',
+                load_vdlist(file_reference, *subpath))
+    else:
+        logger.info(strm("vdlist doesn't exist",file_reference,'vdlist'))
+    logger.debug(strm('data from bruker file =',data))
     #}}}
     return data
-def load_1D(filename, dimname=''):
+def load_1D(file_reference, *subpath, **kwargs):
     """Load 1D bruker data into a file.  Load acquisition parameters into
     property 'acq' and processing parameters *from procno 1 only* into
     'proc'
     
     Note that is uses the 'procs' file, which appears to contain the correct data
     """
-    filename = dirformat(filename)
-    v = load_acqu(filename)
+    dimname = process_kwargs([('dimname','')], kwargs)
+    v = load_acqu(file_reference, *subpath)
     td2 = int(v['TD'])
     td1 = 1
     td2_zf = int(ceil(td2/256.)*256) # round up to 256 points, which is how it's stored
-    fp = open(filename+'fid','rb')
+    fp = open_subpath(file_reference, *(subpath+('fid',)),mode='rb')
     data = fp.read()
     if int(v['BYTORDA']) == 1:
         data = fromstring(data, dtype=dtype('>i4'), count=(len(data)/4))
@@ -164,35 +171,55 @@ def load_1D(filename, dimname=''):
     data.circshift('t2',shiftpoints)
     # finally, I will probably need to add in the first order phase shift for the decimation --> just translate this
     data.set_prop('title',
-            load_title(filename))
+            load_title(file_reference,*subpath))
     data.set_prop('acq',
             v)
-    data.set_prop('filename',
-            filename)
-    proc_filename = os.path.join(filename,
-            'pdata','1','procs')
-    if os.path.exists(proc_filename):
+    if type(file_reference) is tuple:
+        data.set_prop('filename',
+                file_reference[1])
+    else:
+        data.set_prop('filename',
+                file_reference)
+    if open_subpath(file_reference,
+            *(subpath+('pdata','1','procs')),
+            test_only=True):
         data.set_prop('proc',
-                load_jcamp(proc_filename))
+                load_jcamp(file_reference,
+                    *(subpath+('pdata','1','procs'))))
     return data
-def load_vdlist(filename):
-    fp = open(filename+'vdlist')
+def load_vdlist(file_reference, *subpath):
+    subpath += ('vdlist',)
+    fp = open_subpath(file_reference,*subpath)
     lines = fp.readlines()
     lines = map(string.rstrip,lines)
     lines = map((lambda x: x.replace('m','e-3')),lines)
     lines = map((lambda x: x.replace('s','')),lines)
     lines = map((lambda x: x.replace('u','e-6')),lines)
     lines = map(double,lines)
+    fp.close()
     return array(lines)
-def load_acqu(filename,whichdim='',return_s = True):
-    "based on filename, determine the jcamp file that stores the acquisition info, and load it"
-    filename = dirformat(filename)
+def load_acqu(file_reference,*subpath,**kwargs):
+    """based on file_reference, determine the jcamp file that stores the acquisition info, and load it
+
+    Parameters
+    ----------
+    file_reference:
+        the file reference -- see open_subpath
+    subpath:
+        the subpath -- see open_subpath
+    whichdim: optional string
+        Default null string -- for multi-dimensional data, there is a separate acqu file for each dimension
+    return_s: bool
+        Default True -- whether to return the parameters of the saved data, or those manipulated since then.
+    """
+    whichdim, return_s = process_kwargs([('whichdim',''),
+        ('return_s',True)],kwargs)
     if return_s:
-        filename += 'acqu'+whichdim+'s' # this is what I am initially doing, and what works with the matched filtering, etc, as is, but it's actually wrong
+        subpath += ('acqu'+whichdim+'s',) # this is what I am initially doing, and what works with the matched filtering, etc, as is, but it's actually wrong
     else:
-        filename += 'acqu'+whichdim # this is actually right, but doesn't work with the matched filtering, etc.
-    return load_jcamp(filename)
-def load_jcamp(filename):
+        subpath += ('acqu'+whichdim,) # this is actually right, but doesn't work with the matched filtering, etc.
+    return load_jcamp(file_reference,*subpath)
+def load_jcamp(file_reference,*subpath):
     "return a dictionary with information for a jcamp file"
     def convert_to_num(val):
         if val == '<>':
@@ -201,61 +228,65 @@ def load_jcamp(filename):
             return val[1:-1]
         else:
             return double(val)
-    with open(filename) as fp:
-        lines = fp.readlines()
-        vars = {}
-        number_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *([0-9\-\.]+)')
-        string_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *<(.*)')
-        array_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *\(([0-9]+)\.\.([0-9]+)\)(.*)')
-        lines = map(string.rstrip,lines)
-        j=0
-        retval =  match_line(lines[j],number_re,string_re,array_re)
-        j = j+1
-        retval2 =  match_line(lines[j],number_re,string_re,array_re) #always grab the second line
-        while j < len(lines):
-            isdata = False
-            if retval[0]==1 or retval[0]==2:
-                name = retval[1]
-                thislen = retval[2]
-                data = retval[3]
-                while (retval2[0] == 3) and (j<len(lines)): # eat up the following lines
-                    data += ' '+retval2[1]
-                    j = j+1
-                    retval2 =  match_line(lines[j],number_re,string_re,array_re)
-                isdata = True
-            elif retval[0]==0:
-                name = retval[1]
-                data = retval[2]
-                isdata = True
-            #else:
-            #   print 'not a data line:',retval[1]
-            if(isdata):
-                if retval[0]==2: #if it's an array
-                    data = data.split(' ')
-                    if len(data)>0:
-                        while '' in data:
-                            data.remove('')
-                        data = map(convert_to_num,data)
-                        if len(data)-1!= thislen[1]:
-                            print 'error:',len(data)-1,'!=',thislen[1]
-                vars.update({name:data})
-            # at this point, the string or array data is loaded into data and we have something in retval2 which is definitely a new line
-            retval = retval2
-            j = j+1
-            if j<len(lines):
-                try:
-                    retval2 =  match_line(lines[j],number_re,string_re,array_re)
-                except:
-                    raise RuntimeError(strm('matching line "',lines[j],'"',"in file",filename))
-        return vars
-def load_title(file):
-    file = dirformat(file)
-    fp = open(file+'pdata/1/title')
+    fp = open_subpath(file_reference,*subpath)
     lines = fp.readlines()
-    emptystring = '\r\n'
-    while emptystring in lines:
-        lines.pop(lines.index(emptystring))
-    emptystring = '\n'
-    while emptystring in lines:
-        lines.pop(lines.index(emptystring))
-    return ''.join(lines)
+    vars = {}
+    number_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *([0-9\-\.]+)')
+    string_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *<(.*)')
+    array_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *\(([0-9]+)\.\.([0-9]+)\)(.*)')
+    lines = map(string.rstrip,lines)
+    j=0
+    retval =  match_line(lines[j],number_re,string_re,array_re)
+    j = j+1
+    retval2 =  match_line(lines[j],number_re,string_re,array_re) #always grab the second line
+    while j < len(lines):
+        isdata = False
+        if retval[0]==1 or retval[0]==2:
+            name = retval[1]
+            thislen = retval[2]
+            data = retval[3]
+            while (retval2[0] == 3) and (j<len(lines)): # eat up the following lines
+                data += ' '+retval2[1]
+                j = j+1
+                retval2 =  match_line(lines[j],number_re,string_re,array_re)
+            isdata = True
+        elif retval[0]==0:
+            name = retval[1]
+            data = retval[2]
+            isdata = True
+        #else:
+        #   print 'not a data line:',retval[1]
+        if(isdata):
+            if retval[0]==2: #if it's an array
+                data = data.split(' ')
+                if len(data)>0:
+                    while '' in data:
+                        data.remove('')
+                    data = map(convert_to_num,data)
+                    if len(data)-1!= thislen[1]:
+                        print 'error:',len(data)-1,'!=',thislen[1]
+            vars.update({name:data})
+        # at this point, the string or array data is loaded into data and we have something in retval2 which is definitely a new line
+        retval = retval2
+        j = j+1
+        if j<len(lines):
+            try:
+                retval2 =  match_line(lines[j],number_re,string_re,array_re)
+            except:
+                raise RuntimeError(strm('matching line "',lines[j],'"',"in file",file_reference))
+    fp.close()
+    return vars
+def load_title(file_reference,*subpath):
+    if not open_subpath(file_reference,*(subpath + ('pdata','1','title')), test_only=True):
+        return None
+    else:
+        fp = open_subpath(file_reference,*(subpath + ('pdata','1','title')))
+        lines = fp.readlines()
+        emptystring = '\r\n'
+        while emptystring in lines:
+            lines.pop(lines.index(emptystring))
+        emptystring = '\n'
+        while emptystring in lines:
+            lines.pop(lines.index(emptystring))
+        fp.close()
+        return ''.join(lines)
