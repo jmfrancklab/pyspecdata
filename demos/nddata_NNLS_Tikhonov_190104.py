@@ -18,11 +18,8 @@ init_logging(level='debug')
 
 
 # got the following from here:
+# https://medium.com/pythonhive/python-decorator-to-measure-the-execution-time-of-methods-fa04cb6bb36d
 
-# 
-
-
-#https://medium.com/pythonhive/python-decorator-to-measure-the-execution-time-of-methods-fa04cb6bb36d
 l_line = ''
 def timeit(method,n_times=1):
     def timed(*args, **kw):
@@ -81,33 +78,56 @@ test_data = nddata(test_signal.flatten(),[-1],['t']).labels('t',t)
 plot(test_data)
 xlim(-endp/10,endp)
 
+# Do the basic NNLS fit
+
+test_fit = test_data.C.nnls('t',{'R':R.ravel()},lambda x,y: exp(-y*x))
+fl.next('fit an exponential distribution',legend=True)
+fl.plot(test_data, alpha=0.5, label='test signal')
+K = test_fit.get_prop('nnls_kernel').C
+#note that order doesn't matter for the following dot (done by dimension name)
+fl.plot(test_fit.C.dot(K), alpha=0.5, label='fit')
+fl.next('what does the fit distribution look like?')
+fl.plot(test_fit)
+
+# Now add regularization
+
+def L_curve(l,r_norm,x_norm, **kwargs):
+    """plot L-curve using
+
+    Parameters
+    ==========
+    l: double
+        lambda values
+    r_norm: double
+        norm of the residual
+    x_norm: double
+        norm of solution vector"""
+    plot(log10(r_norm),log10(x_norm),'o',**kwargs)
+    for j,this_l in enumerate(l):
+        annotate('%5g'%this_l, (log10(r_norm[j]),log10(x_norm[j])),
+                 ha='left',va='bottom',rotation=45)
+    ylabel('$\log_{10}(x$ norm$)$')
+    xlabel('$\log_{10}($ residual $)$')
+
 # 
 
-print t == test_data.getaxis('t')
-test_data.nnls('t',{'R':R.ravel()},lambda x,y: exp(-y*x))
-
-# 
-
-A = exp(-R*t)
-K = test_data.get_prop('nnls_kernel').C
-print A.shape, K.data.shape
-print A == K.data
-
-
-
-# 
-
-
-print ndshape(test_data)
-K = test_data.get_prop('nnls_kernel').C
-print ndshape(K)
-K.dot(test_data)
-print ndshape(K)
-K
+l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
+@timeit
+def nonvec_lcurve(A,l):
+    x_norm = empty_like(l)
+    r_norm = empty_like(l)
+    for j,this_l in enumerate(l):
+        x = test_signal.C.nnls('t',
+                {'R':R.ravel()},lambda x,y: exp(-y*x))
+        r_norm[j] = x.get_prop('nnls_residual')
+        x_norm[j] = linalg.norm(x.data)
+    return x,x_norm,r_norm
+x,x_norm,r_norm = nonvec_lcurve(A,l)
+#x_norm = map(linalg.norm,x) # to be fair, this calculation is done outside the timing, below
 
 
 # 
 
 
-
-
+fl.next('L-curve', legend=True)
+L_curve(l, r_norm, x_norm, markersize=10, alpha=0.5, label='manual loop')

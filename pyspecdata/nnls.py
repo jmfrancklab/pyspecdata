@@ -93,14 +93,14 @@ def nnls_regularized(A, b, l=0, maxiter=None):
                     w = zeros((n,), dtype=double)
                     zz = zeros((m+n,), dtype=double)
                     index = zeros((n,), dtype=int)
-                    x, rnorm, mode = _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
+                    return _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
             if len(b.shape) == 2:
                 def nnls_func(l):
                     w = zeros((n,), dtype=double)
                     zz = zeros((m+n,), dtype=double)
                     index = zeros((n,), dtype=int)
                     x, rnorm, mode = _nnls.nnls_regularized_loop(A, redim_C_to_F(b), w, zz, index, maxiter, l)
-                    x = redim_F_to_C(x)
+                    return redim_F_to_C(x), rnorm, mode
             retval = p.map(nnls_func,l)
             x,rnorm,mode = map(np_array,zip(*retval))
     if (isscalar(mode) and mode != 1):

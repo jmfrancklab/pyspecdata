@@ -3432,7 +3432,7 @@ class nddata (object):
     #}}}
     #{{{ arithmetic
     def dot(self,arg):
-        """tensor dot of self with arg -- dot all matching dimension labels
+        """Tensor dot of self with arg -- dot all matching dimension labels.  This can be used to do matrix multiplication, but note that the order of doesn't matter, since the dimensions that are contracted are determined by matching the dimension names, not the order of the dimension.
 
         >>> a = nddata(r_[0:9],[3,3],['a','b'])
         >>> b = nddata(r_[0:3],'b')
