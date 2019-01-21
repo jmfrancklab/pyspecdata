@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# 
-
-
 try:
     get_ipython().magic(u'load_ext pyspecdata.ipy')
     in_notebook = True
@@ -16,13 +13,11 @@ import time
 fl=figlist_var()
 
 
-# 
-
-
 # got the following from here:
-#https://medium.com/pythonhive/python-decorator-to-measure-the-execution-time-of-methods-fa04cb6bb36d
+# https://medium.com/pythonhive/python-decorator-to-measure-the-execution-time-of-methods-fa04cb6bb36d
+
 l_line = ''
-def timeit(method,n_times=1):
+def timeit(method,n_times=5):
     def timed(*args, **kw):
         timing = zeros(n_times+1)
         timing[0] = time.time()
@@ -74,7 +69,7 @@ test_signal = exp(-R*t).dot(P.T)
 test_signal += random.normal(scale = 0.01,size=(2048,1))
 print test_signal.shape
 print t.squeeze().shape
-fl.next('distribution function')
+fl.next('test data function')
 plot(t.flatten(),test_signal.flatten())
 xlim(-endp/10,endp)
 
@@ -96,6 +91,8 @@ x,rnorm = nnls_regularized(A,test_signal.squeeze(),l=0.)
 fl.next('fit an exponential',legend=True)
 fl.plot(t[:],test_signal.flatten(),label='test signal')
 fl.plot(t[:],A.dot(x),label='fit')
+fl.next('what does the fit look like?')
+fl.plot(R.flatten(),x.flatten())
 
 
 # 
@@ -187,7 +184,7 @@ print r_norm
 
 
 fl.next('L-curve')
-L_curve(l,r_norm,linalg.norm(x,axis=1), markersize=5, alpha=0.5, label='threaded')
+L_curve(l,r_norm,linalg.norm(x,axis=1), markersize=5, alpha=0.5, label='compiled loop')
 
 
 # 
@@ -213,7 +210,7 @@ x,x_norm,r_norm = multifreq_nonvec_lcurve(A,l)
 fl.next('L-curve')
 L_curve(l,r_norm,x_norm, markersize=5, alpha=0.5, label='1.5 D')
 
-# 
+# and show the final result
 
 P_estimated,final_rnorm = nnls_regularized(A,test_signal.squeeze(),l=0.1)
 fl.next(r'show result where $\lambda$ set to knee')

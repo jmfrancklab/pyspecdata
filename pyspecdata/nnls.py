@@ -2,7 +2,7 @@
 from __future__ import division, print_function, absolute_import
 
 from . import _nnls
-from .general_functions import redim_F_to_C, redim_C_to_F
+from .general_functions import redim_F_to_C, redim_C_to_F, strm
 from numpy import asarray_chkfinite, zeros, double, isscalar
 from numpy import array as np_array
 import multiprocessing.dummy as mpd
@@ -64,7 +64,7 @@ def nnls_regularized(A, b, l=0, maxiter=None):
     m, n = A.shape
 
     if m != b.shape[-1]:
-        raise ValueError("incompatible dimensions (the most quickly changing index should be the nnls dimension)")
+        raise ValueError(strm("incompatible dimensions (rows of A",m," do not match size of data",b.shape,")"))
 
     maxiter = -1 if maxiter is None else int(maxiter)
 
