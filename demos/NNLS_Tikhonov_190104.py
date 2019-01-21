@@ -210,7 +210,7 @@ x,x_norm,r_norm = multifreq_nonvec_lcurve(A,l)
 fl.next('L-curve')
 L_curve(l,r_norm,x_norm, markersize=5, alpha=0.5, label='1.5 D')
 
-# 
+# and show the final result
 
 P_estimated,final_rnorm = nnls_regularized(A,test_signal.squeeze(),l=0.1)
 fl.next(r'show result where $\lambda$ set to knee')

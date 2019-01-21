@@ -153,8 +153,6 @@ L_curve(l, r_norm, x_norm, markersize=10, alpha=0.5, label='manual loop')
 
 # ## Vectorized version of lambda curve
 
-# 
-
 
 l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
 @timeit
@@ -169,11 +167,34 @@ x = vec_lcurve(l)
 
 fl.next('L-curve')
 logger.debug(strm("check dtype of residual:",x.get_prop('nnls_residual').data.dtype))
-L_curve(l, x.get_prop('nnls_residual').data.real, x.C.run(linalg.norm,'R').data, markersize=5, alpha=0.5, label='compiled loop')
+L_curve(l, x.get_prop('nnls_residual').data, x.C.run(linalg.norm,'R').data, markersize=5, alpha=0.5, label='compiled loop')
 
+
+# Test for the accuracy of the "1.5D" code
+# unlike for the numpy version, I skip straight to the
+# vectorized/parallel version.
+
+
+l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
+test_data_2d = test_data * nddata(r_[1,1,1],r'\Omega')
+@timeit
+def multifreq_lcurve(l):
+    return test_data_2d.C.nnls('t',
+            R,lambda x,y: exp(-y*x), l=l)
+x = vec_lcurve(l)
 
 # 
 
+fl.next('L-curve')
+L_curve(l, x.get_prop('nnls_residual').data, x.C.run(linalg.norm,'R').data, markersize=5, alpha=0.5, label='compiled loop')
+# and show the final result
+# here, I omit the SVD (allows negative) result
+
+
+fl.next(r'show result where $\lambda$ set to knee')
+test_data.nnls('t', R,lambda x,y: exp(-y*x), l=0.1)
+fl.plot(test_data)
+fl.plot(P)
 
 
 if in_notebook:
