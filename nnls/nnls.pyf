@@ -1,0 +1,54 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module _nnls ! in 
+    interface  ! in :_nnls
+        subroutine nnls(a,m,n,b,x,rnorm,w,zz,index_bn,mode,maxiter) ! in :_nnls:nnls.f
+            double precision dimension(m,n),intent(copy) :: a
+            integer, optional,intent(in),check(shape(a,0)==m),depend(a) :: m=shape(a,0)
+            integer, optional,intent(in),check(shape(a,1)==n),depend(a) :: n=shape(a,1)
+            double precision dimension(*),intent(copy) :: b
+            double precision dimension(n),intent(out),depend(n) :: x
+            double precision intent(out) :: rnorm
+            double precision dimension(*) :: w
+            double precision dimension(*) :: zz
+            integer dimension(*) :: index_bn
+            integer intent(out) :: mode
+            integer :: maxiter
+        end subroutine nnls
+        subroutine nnls_regularized(a,m,n,b,x,rnorm,w,zz,idx,mode,maxiter,lambda) ! in :_nnls:nnls_regularized.f90
+            threadsafe 
+            double precision dimension(m,n),intent(in) :: a
+            integer, optional,intent(in),check(shape(a,0)==m),depend(a) :: m=shape(a,0)
+            integer, optional,intent(in),check(shape(a,1)==n),depend(a) :: n=shape(a,1)
+            double precision dimension(*),intent(in) :: b
+            double precision dimension(n),intent(out),depend(n) :: x
+            double precision intent(out) :: rnorm
+            double precision dimension(*) :: w
+            double precision dimension(*) :: zz
+            integer dimension(*) :: idx
+            integer intent(out) :: mode
+            integer intent(in) :: maxiter
+            double precision intent(in) :: lambda
+        end subroutine nnls_regularized
+        subroutine nnls_regularized_loop(a,m,n,q,b,x,rnorm,w,zz,idx,mode,maxiter,lambda) ! in :_nnls:nnls_regularized_loop.f90
+            threadsafe 
+            double precision dimension(m,n),intent(in) :: a
+            integer, optional,intent(in),check(shape(a,0)==m),depend(a) :: m=shape(a,0)
+            integer, optional,intent(in),check(shape(a,1)==n),depend(a) :: n=shape(a,1)
+            integer, optional,intent(in),check(shape(b,1)==q),depend(b) :: q=shape(b,1)
+            double precision dimension(m,q),intent(in),depend(m) :: b
+            double precision dimension(n,q),intent(out),depend(n,q) :: x
+            double precision dimension(q),intent(out),depend(q) :: rnorm
+            double precision dimension(*) :: w
+            double precision dimension(*) :: zz
+            integer dimension(*) :: idx
+            integer intent(out) :: mode
+            integer intent(in) :: maxiter
+            double precision intent(in) :: lambda
+        end subroutine nnls_regularized_loop
+    end interface 
+end python module _nnls
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.random\_mask
-================================
+pyspecdata.nddata.random\_mask
+==============================
 
 .. currentmodule:: pyspecdata
 

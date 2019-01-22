@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.inhomog\_coords
-===================================
+pyspecdata.nddata.inhomog\_coords
+=================================
 
 .. currentmodule:: pyspecdata
 

@@ -24,25 +24,17 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="pySpecData 0.9.5.1.6 documentation" href="../index.html"/> 
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -105,7 +97,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">pySpecData</a>
@@ -113,9 +105,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -165,29 +158,61 @@
 <dd><dl class="attribute">
 <dt id="pyspecdata.core.figlist.basename">
 <code class="descname">basename</code><a class="headerlink" href="#pyspecdata.core.figlist.basename" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – A basename that can be changed to generate different sets of figures with different basenames.
+<dd><p>A basename that can be changed to generate different sets of figures with different basenames.
 For example, this is useful if you are looping over different sets of data,
 and generating the same set of figures for each set of data (which would correspond to a basename).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pyspecdata.core.figlist.figurelist">
 <code class="descname">figurelist</code><a class="headerlink" href="#pyspecdata.core.figlist.figurelist" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>list</em> – A list of the figure names</p>
+<dd><p>A list of the figure names</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pyspecdata.core.figlist.figdict">
 <code class="descname">figdict</code><a class="headerlink" href="#pyspecdata.core.figlist.figdict" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – A dictionary containing the figurelist and the figure numbers or objects that they correspond to.
+<dd><p>A dictionary containing the figurelist and the figure numbers or objects that they correspond to.
 Keys of this dictionary must be elements of <cite>figurelist</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pyspecdata.core.figlist.propdict">
 <code class="descname">propdict</code><a class="headerlink" href="#pyspecdata.core.figlist.propdict" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>dict</em> – Maintains various properties for each element in figurelist.
+<dd><p>Maintains various properties for each element in figurelist.
 Keys of this dictionary must be elements of <cite>figurelist</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -195,7 +220,7 @@ Keys of this dictionary must be elements of <cite>figurelist</cite>.</p>
 <code class="descname">__init__</code><span class="sig-paren">(</span><em>*arg</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.figlist.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize a figure list, which can be used to generate a series of
 figures from the command line or prompt.  Then the same code (if
-<cite>figlist_var</cite> is used) can be included inside a <code class="docutils literal"><span class="pre">python</span></code> environment
+<cite>figlist_var</cite> is used) can be included inside a <code class="docutils literal notranslate"><span class="pre">python</span></code> environment
 in a latex document.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -205,7 +230,7 @@ in a latex document.</p>
 <li><strong>black</strong> (<em>double</em>) – A fractional number giving how “black” “black” is. Typically 1.0 is
 actually too dark and makes things hard to see.</li>
 <li><strong>mlab</strong> (<em>object</em>) – If you want to use mayavi, this should be the mlab (module?)</li>
-<li><strong>file_name</strong> (<a class="reference internal" href="../units.html#pyspecdata.units.units.str" title="pyspecdata.units.units.str"><em>str</em></a>) – This is the argument passed to <code class="xref py py-func docutils literal"><span class="pre">self.show()</span></code>, and used to
+<li><strong>file_name</strong> (<em>str</em>) – This is the argument passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">self.show()</span></code>, and used to
 construct the file names.</li>
 </ul>
 </td>
@@ -221,46 +246,49 @@ construct the file names.</li>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.__init__.html#pyspecdata.core.figlist.__init__" title="pyspecdata.core.figlist.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(*arg,&nbsp;**kwargs)</td>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.__init__.html#pyspecdata.core.figlist.__init__" title="pyspecdata.core.figlist.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*arg,&nbsp;**kwargs)</td>
 <td>Initialize a figure list, which can be used to generate a series of figures from the command line or prompt.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.adjust_spines.html#pyspecdata.core.figlist.adjust_spines" title="pyspecdata.core.figlist.adjust_spines"><code class="xref py py-obj docutils literal"><span class="pre">adjust_spines</span></code></a>(spines)</td>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.adjust_spines.html#pyspecdata.core.figlist.adjust_spines" title="pyspecdata.core.figlist.adjust_spines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adjust_spines</span></code></a>(spines)</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.check_units.html#pyspecdata.core.figlist.check_units" title="pyspecdata.core.figlist.check_units"><code class="xref py py-obj docutils literal"><span class="pre">check_units</span></code></a>(testdata,&nbsp;x_index,&nbsp;y_index[,&nbsp;…])</td>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.check_units.html#pyspecdata.core.figlist.check_units" title="pyspecdata.core.figlist.check_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_units</span></code></a>(testdata,&nbsp;x_index,&nbsp;y_index[,&nbsp;…])</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.generate_ticks.html#pyspecdata.core.figlist.generate_ticks" title="pyspecdata.core.figlist.generate_ticks"><code class="xref py py-obj docutils literal"><span class="pre">generate_ticks</span></code></a>(plotdata,&nbsp;axes,&nbsp;rescale[,&nbsp;…])</td>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.generate_ticks.html#pyspecdata.core.figlist.generate_ticks" title="pyspecdata.core.figlist.generate_ticks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_ticks</span></code></a>(plotdata,&nbsp;axes,&nbsp;rescale[,&nbsp;…])</td>
 <td>generate 3d ticks and grid for mayavi</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.get_fig_number.html#pyspecdata.core.figlist.get_fig_number" title="pyspecdata.core.figlist.get_fig_number"><code class="xref py py-obj docutils literal"><span class="pre">get_fig_number</span></code></a>(name)</td>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.get_fig_number.html#pyspecdata.core.figlist.get_fig_number" title="pyspecdata.core.figlist.get_fig_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_fig_number</span></code></a>(name)</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.grid.html#pyspecdata.core.figlist.grid" title="pyspecdata.core.figlist.grid"><code class="xref py py-obj docutils literal"><span class="pre">grid</span></code></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.figlist.get_num_figures" title="pyspecdata.core.figlist.get_num_figures"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_num_figures</span></code></a>()</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.header.html#pyspecdata.core.figlist.header" title="pyspecdata.core.figlist.header"><code class="xref py py-obj docutils literal"><span class="pre">header</span></code></a>(number_above,&nbsp;input_string)</td>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.grid.html#pyspecdata.core.figlist.grid" title="pyspecdata.core.figlist.grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grid</span></code></a>()</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.image.html#pyspecdata.core.figlist.image" title="pyspecdata.core.figlist.image"><code class="xref py py-obj docutils literal"><span class="pre">image</span></code></a>(A,&nbsp;**kwargs)</td>
-<td>Called as <cite>fl.image()</cite> where <cite>fl</cite> is the <cite>figlist_var</cite></td>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.header.html#pyspecdata.core.figlist.header" title="pyspecdata.core.figlist.header"><code class="xref py py-obj docutils literal notranslate"><span class="pre">header</span></code></a>(number_above,&nbsp;input_string)</td>
+<td></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">label_point</span></code>(data,&nbsp;axis,&nbsp;value,&nbsp;thislabel[,&nbsp;…])</td>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.image.html#pyspecdata.core.figlist.image" title="pyspecdata.core.figlist.image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image</span></code></a>(A,&nbsp;**kwargs)</td>
+<td>Called as <cite>fl.image()</cite> where <cite>fl</cite> is the <cite>figlist_var</cite> object</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.figlist.label_point" title="pyspecdata.core.figlist.label_point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">label_point</span></code></a>(data,&nbsp;axis,&nbsp;value,&nbsp;thislabel[,&nbsp;…])</td>
 <td>only works for 1D data: assume you’ve passed a single-point nddata, and label it</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">marked_text</span></code>(marker[,&nbsp;input_text,&nbsp;sep])</td>
+<tr class="row-odd"><td><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.figlist.marked_text" title="pyspecdata.core.figlist.marked_text"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marked_text</span></code></a>(marker[,&nbsp;input_text,&nbsp;sep])</td>
 <td>Creates a named <cite>marker</cite> where we can place text.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.mesh.html#pyspecdata.core.figlist.mesh" title="pyspecdata.core.figlist.mesh"><code class="xref py py-obj docutils literal"><span class="pre">mesh</span></code></a>(plotdata[,&nbsp;Z_normalization,&nbsp;…])</td>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.mesh.html#pyspecdata.core.figlist.mesh" title="pyspecdata.core.figlist.mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mesh</span></code></a>(plotdata[,&nbsp;Z_normalization,&nbsp;…])</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.next.html#pyspecdata.core.figlist.next" title="pyspecdata.core.figlist.next"><code class="xref py py-obj docutils literal"><span class="pre">next</span></code></a>(input_name[,&nbsp;legend,&nbsp;boundaries,&nbsp;twinx])</td>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.next.html#pyspecdata.core.figlist.next" title="pyspecdata.core.figlist.next"><code class="xref py py-obj docutils literal notranslate"><span class="pre">next</span></code></a>(input_name[,&nbsp;legend,&nbsp;boundaries,&nbsp;twinx])</td>
 <td>Switch to the figure given by input_name, which is used not only as a string-based name for the figure, but also as a default title and as a base name for resulting figure files.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.phaseplot_finalize.html#pyspecdata.core.figlist.phaseplot_finalize" title="pyspecdata.core.figlist.phaseplot_finalize"><code class="xref py py-obj docutils literal"><span class="pre">phaseplot_finalize</span></code></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.phaseplot_finalize.html#pyspecdata.core.figlist.phaseplot_finalize" title="pyspecdata.core.figlist.phaseplot_finalize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">phaseplot_finalize</span></code></a>()</td>
 <td>Performs plot decorations that are typically desired for a manual phasing plot.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.plot.html#pyspecdata.core.figlist.plot" title="pyspecdata.core.figlist.plot"><code class="xref py py-obj docutils literal"><span class="pre">plot</span></code></a>(*args,&nbsp;**kwargs)</td>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.plot.html#pyspecdata.core.figlist.plot" title="pyspecdata.core.figlist.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>(*args,&nbsp;**kwargs)</td>
 <td><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -272,28 +300,28 @@ construct the file names.</li>
 </table>
 </td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.pop_marker.html#pyspecdata.core.figlist.pop_marker" title="pyspecdata.core.figlist.pop_marker"><code class="xref py py-obj docutils literal"><span class="pre">pop_marker</span></code></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.pop_marker.html#pyspecdata.core.figlist.pop_marker" title="pyspecdata.core.figlist.pop_marker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop_marker</span></code></a>()</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.push_marker.html#pyspecdata.core.figlist.push_marker" title="pyspecdata.core.figlist.push_marker"><code class="xref py py-obj docutils literal"><span class="pre">push_marker</span></code></a>()</td>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.push_marker.html#pyspecdata.core.figlist.push_marker" title="pyspecdata.core.figlist.push_marker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">push_marker</span></code></a>()</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.setprops.html#pyspecdata.core.figlist.setprops" title="pyspecdata.core.figlist.setprops"><code class="xref py py-obj docutils literal"><span class="pre">setprops</span></code></a>(**kwargs)</td>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.setprops.html#pyspecdata.core.figlist.setprops" title="pyspecdata.core.figlist.setprops"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setprops</span></code></a>(**kwargs)</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.show.html#pyspecdata.core.figlist.show" title="pyspecdata.core.figlist.show"><code class="xref py py-obj docutils literal"><span class="pre">show</span></code></a>(*args,&nbsp;**kwargs)</td>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.show.html#pyspecdata.core.figlist.show" title="pyspecdata.core.figlist.show"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show</span></code></a>(*args,&nbsp;**kwargs)</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.show_prep.html#pyspecdata.core.figlist.show_prep" title="pyspecdata.core.figlist.show_prep"><code class="xref py py-obj docutils literal"><span class="pre">show_prep</span></code></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.show_prep.html#pyspecdata.core.figlist.show_prep" title="pyspecdata.core.figlist.show_prep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_prep</span></code></a>()</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.text.html#pyspecdata.core.figlist.text" title="pyspecdata.core.figlist.text"><code class="xref py py-obj docutils literal"><span class="pre">text</span></code></a>(mytext)</td>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.text.html#pyspecdata.core.figlist.text" title="pyspecdata.core.figlist.text"><code class="xref py py-obj docutils literal notranslate"><span class="pre">text</span></code></a>(mytext)</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.twinx.html#pyspecdata.core.figlist.twinx" title="pyspecdata.core.figlist.twinx"><code class="xref py py-obj docutils literal"><span class="pre">twinx</span></code></a>([autopad,&nbsp;orig,&nbsp;color])</td>
+<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.twinx.html#pyspecdata.core.figlist.twinx" title="pyspecdata.core.figlist.twinx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">twinx</span></code></a>([autopad,&nbsp;orig,&nbsp;color])</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="pyspecdata.core.figlist.use_autolegend.html#pyspecdata.core.figlist.use_autolegend" title="pyspecdata.core.figlist.use_autolegend"><code class="xref py py-obj docutils literal"><span class="pre">use_autolegend</span></code></a>([value])</td>
+<tr class="row-odd"><td><a class="reference internal" href="pyspecdata.core.figlist.use_autolegend.html#pyspecdata.core.figlist.use_autolegend" title="pyspecdata.core.figlist.use_autolegend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">use_autolegend</span></code></a>([value])</td>
 <td>No argument sets to true if it’s not already set</td>
 </tr>
 </tbody>
@@ -304,9 +332,7 @@ construct the file names.</li>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -315,11 +341,11 @@ construct the file names.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, John M. Franck.
+        &copy; Copyright 2016, John M. Franck
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -334,36 +360,24 @@ construct the file names.</li>
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.9.5.1.6',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

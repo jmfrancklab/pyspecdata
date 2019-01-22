@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.secsy\_transform\_manual
-============================================
+pyspecdata.nddata.secsy\_transform\_manual
+==========================================
 
 .. currentmodule:: pyspecdata
 

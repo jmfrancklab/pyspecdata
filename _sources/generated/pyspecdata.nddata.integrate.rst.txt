@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.integrate
-=============================
+pyspecdata.nddata.integrate
+===========================
 
 .. currentmodule:: pyspecdata
 

@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.retaxis
-===========================
+pyspecdata.nddata.retaxis
+=========================
 
 .. currentmodule:: pyspecdata
 

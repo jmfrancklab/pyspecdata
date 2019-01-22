@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.get\_covariance
-===================================
+pyspecdata.nddata.get\_covariance
+=================================
 
 .. currentmodule:: pyspecdata
 

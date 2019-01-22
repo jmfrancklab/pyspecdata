@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.matrices\_3d
-================================
+pyspecdata.nddata.matrices\_3d
+==============================
 
 .. currentmodule:: pyspecdata
 

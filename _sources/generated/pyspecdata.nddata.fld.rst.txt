@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.fld
-=======================
+pyspecdata.nddata.fld
+=====================
 
 .. currentmodule:: pyspecdata
 

@@ -21,6 +21,40 @@ These attributes
 or Fourier transforms,
 and are used to automatically format plots.
 
+.. todo::
+    also implement with blocks for working in the Fourier domain
+
+Very importantly, most pyspecdata functions are designed to operate on the data *in place*, meaning that
+rather than doing something like:
+
+>>> data = data.mean() # numpy
+
+you simply do:
+
+>>> data.mean('axisname')
+
+and ``data`` is modified from here out.
+We do this because we are typically processing multidimensional datasets that consist of many points,
+and we subject them to a series of steps to process them.
+We don't want to use up memory with lots of copies of the data.
+Also, this allows us to string together several operation, e.g.:
+
+>>> data.ft('axis1').sum('axis2')['axis1':(0,3)].mean('axis3')
+
+So, while this general setup is different than the standard numpy setup,
+*etc.*, it should lead to you writing more efficient code, with less variables
+to keep track of, and generally also leads to far more compact code,
+and you should probably not try to bypass it by creating copies of your data.
+
+In rare circumstances, you *need* to create a copy of your data
+(I think there is only one case where this is true:
+when you
+need to process the same data in parallel in two different ways to generate two results,
+and then perform math that uses both results).
+For these cases, you can use an easy shortcut for the copy method: `C` (as in `data.C`).
+
+**say something about slicing and copies here**
+
 Note that, if all else fails,
 you can always use numpy directly:
 *The `data` attribute of an nddata object is just a standard numpy array.*
@@ -95,19 +129,17 @@ Item selection and slicing
 --------------------------
 
 Pyspecdata offers several different synataxes 
-for item selection and slicing
-that can be used to select subsets of the data,
-and which are outlined below.
+for item selection and slicing.
+These fall into two main categories:
+*numbered indexing and slicing* (which will be familiar to most users of python)
+and *axis-based indexing*a.
 These can be combined in a single square bracket, separated by commas.
 
-Numpy Index Slicing
+Axis-Based Indexing
 ~~~~~~~~~~~~~~~~~~~
 
-Slice by Index
-~~~~~~~~~~~~~~
-
-Axis Value
-~~~~~~~~~~
+Axis-based Indexing
+``````````````````
 
 To pull a single point along a particular dimension,
 you can just use the value of the axis.
@@ -118,7 +150,7 @@ The point nearest to the axis will be returned.
 Will return the point (or slice of data) where the t2 axis is closest to 1.1 s.
 
 Axis Ranges
-~~~~~~~~~~~
+``````````````````
 
 You can specify an inclusive range of numbers along an axis.
 For example, to select from 0 to 100 μs along `t2`, you use:
@@ -128,7 +160,7 @@ For example, to select from 0 to 100 μs along `t2`, you use:
 Either value in parentheses can be `None`, in which case, all values to the end of the axis will be selected.
 
 Logical
-~~~~~~~
+``````````````````
 
 You can use functions that return logical values to select
 
@@ -141,15 +173,54 @@ If they are, the dataset will be trimmed to remove them.
 
 When the deselected data are scattered throughout, a mask is used instead.
 
-Fourier domain
-~~~~~~~~~~~~~~
+Axis-Based Indexing and Slicing in the Fourier Domain
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Data can be manipulated not only in the direct domain,
+but also in the Fourier conjugate domain.
+This is achieved in one of two ways → by changing the name
+of the axis,
+and by explicitly specifying the domain.
+
+
+Changing the name of the axis
+`````````````````````````````
 
 .. warning::
     this feature is planned, not yet implemented.
 
+The property ``FT_regexp`` is a dictionary that controls
+By default, it is initially set to ``{'\<t':'\<f','\<T':'\<F'}``,
+meaning that t and f at the beginning of word will be converted into each other.
+This means that the following command:
+
 >>> d['f2':(-1e6,1e6)]
 
-switches to the frequency dimension (shift by default -- shift should be a property)
+would switch something with a dimension named `t2` to the frequency dimension
+(shift by default -- shift should be a property).
+
+
+Explicitly Changing the Domain
+```````````````````````````````
+
+Alternatively, a slice of the form
+``dimname:'t/f':(range)``
+or
+``dimname:'u/v':(range)``
+can be used.
+Here, 't' and 'f' always correspond to the "original" and "conjugate" domains, respectively.
+Since, sometimes this might lead to confusion, 'u' and 'v' serve the same respective functions.
+
+Therefore this command performs the same function as the last line of code:
+
+>>> d['t2':'f':(-1e6,1e6)]
+
+Frequency Slices Outside Original Range
+```````````````````````````````````````
+
+Numbered Indexing and Slicing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 Basic Examples
 --------------

@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.run\_avg
-============================
+pyspecdata.nddata.run\_avg
+==========================
 
 .. currentmodule:: pyspecdata
 

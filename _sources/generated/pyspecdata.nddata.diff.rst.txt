@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.diff
-========================
+pyspecdata.nddata.diff
+======================
 
 .. currentmodule:: pyspecdata
 

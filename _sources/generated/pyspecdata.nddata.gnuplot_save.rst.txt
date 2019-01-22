@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.gnuplot\_save
-=================================
+pyspecdata.nddata.gnuplot\_save
+===============================
 
 .. currentmodule:: pyspecdata
 

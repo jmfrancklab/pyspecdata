@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.ft\_state\_to\_str
-======================================
+pyspecdata.nddata.ft\_state\_to\_str
+====================================
 
 .. currentmodule:: pyspecdata
 

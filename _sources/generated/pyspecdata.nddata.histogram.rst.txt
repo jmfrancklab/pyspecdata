@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.histogram
-=============================
+pyspecdata.nddata.histogram
+===========================
 
 .. currentmodule:: pyspecdata
 

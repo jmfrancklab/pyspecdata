@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.copyaxes
-============================
+pyspecdata.nddata.copyaxes
+==========================
 
 .. currentmodule:: pyspecdata
 

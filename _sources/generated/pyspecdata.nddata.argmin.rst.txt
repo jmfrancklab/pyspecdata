@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.argmin
-==========================
+pyspecdata.nddata.argmin
+========================
 
 .. currentmodule:: pyspecdata
 

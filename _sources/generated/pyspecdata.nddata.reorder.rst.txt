@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.reorder
-===========================
+pyspecdata.nddata.reorder
+=========================
 
 .. currentmodule:: pyspecdata
 

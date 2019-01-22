@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.smoosh
-==========================
+pyspecdata.nddata.smoosh
+========================
 
 .. currentmodule:: pyspecdata
 

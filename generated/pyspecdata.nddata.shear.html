@@ -24,25 +24,19 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="pySpecData 0.9.5.1.6 documentation" href="../index.html"/> 
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyspecdata.nddata.smoosh" href="pyspecdata.nddata.smoosh.html" />
+    <link rel="prev" title="pyspecdata.nddata.setaxis" href="pyspecdata.nddata.setaxis.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -88,9 +82,24 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../notebook.html#setting-up-the-notebook">Setting up the notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebook.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebook.html#running-the-notebook">Running the notebook</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../notebook.html#how-it-works">How it works</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../notebook.html#the-latex-end">The LaTeX end</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../notebook.html#the-python-end">The python end</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../pyspecdata.html">N-dimensional Data (nddata)</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../pyspecdata.html#full-list-of-nddata-methods">Full list of <cite>nddata</cite> methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../latexscripts.html">Documentation of Notebook Helper Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
@@ -105,7 +114,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">pySpecData</a>
@@ -113,9 +122,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -137,6 +147,10 @@
   <ul class="wy-breadcrumbs">
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../notebook.html">LaTeX Notebook Functionality</a> &raquo;</li>
+        
+          <li><a href="../pyspecdata.html">N-dimensional Data (nddata)</a> &raquo;</li>
         
       <li>pyspecdata.nddata.shear</li>
     
@@ -162,10 +176,10 @@
 <dl class="method">
 <dt id="pyspecdata.nddata.shear">
 <code class="descclassname">nddata.</code><code class="descname">shear</code><span class="sig-paren">(</span><em>along_axis</em>, <em>propto_axis</em>, <em>shear_amnt</em>, <em>zero_fill=True</em>, <em>start_in_conj=False</em>, <em>method='linear'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.shear" title="Permalink to this definition">¶</a></dt>
-<dd><p>Shear the data <span class="math">\(s\)</span>:</p>
-<p><span class="math">\(s(x',y,z) = s(x+ay,y,z)\)</span></p>
-<p>where <span class="math">\(x\)</span> is the <cite>altered_axis</cite> and <span class="math">\(y\)</span> is the
-<cite>propto_axis</cite>.  (Actually typically 2D, but <span class="math">\(z\)</span> included
+<dd><p>Shear the data <span class="math notranslate nohighlight">\(s\)</span>:</p>
+<p><span class="math notranslate nohighlight">\(s(x',y,z) = s(x+ay,y,z)\)</span></p>
+<p>where <span class="math notranslate nohighlight">\(x\)</span> is the <cite>altered_axis</cite> and <span class="math notranslate nohighlight">\(y\)</span> is the
+<cite>propto_axis</cite>.  (Actually typically 2D, but <span class="math notranslate nohighlight">\(z\)</span> included
 just to illustrate other dimensions that aren’t involved)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -191,10 +205,10 @@ this whether or not <cite>zero_fill</cite> is set
 <dd>Use simple linear interpolation.</dd>
 </dl>
 </li>
-<li><strong>altered_axis</strong> (<a class="reference internal" href="../units.html#pyspecdata.units.units.str" title="pyspecdata.units.units.str"><em>str</em></a>) – The coordinate for which data is altered, <em>i.e.</em>
+<li><strong>altered_axis</strong> (<em>str</em>) – The coordinate for which data is altered, <em>i.e.</em>
 ..math: <cite>x</cite> such that ..math: <cite>f(x+ay,y)</cite>.</li>
 <li><strong>by_amount</strong> (<em>double</em>) – The amount of the shear (..math: <cite>a</cite> in the previous)</li>
-<li><strong>propto_axis</strong> (<a class="reference internal" href="../units.html#pyspecdata.units.units.str" title="pyspecdata.units.units.str"><em>str</em></a>) – The shift along the <cite>altered_axis</cite> dimension is
+<li><strong>propto_axis</strong> (<em>str</em>) – The shift along the <cite>altered_axis</cite> dimension is
 proportional to the shift along <cite>propto_axis</cite>.
 The position of data relative to the <cite>propto_axis</cite> is not
 changed.
@@ -206,7 +220,7 @@ flipped.</li>
 <p>For efficiency, one can replace a double (I)FT call followed by a
 shear call with a single shear call where <cite>start_in_conj</cite> is set.</p>
 <p><cite>self</cite> before the call is given in the conjugate domain  (<em>i.e.</em>,
-<span class="math">\(f\)</span> <em>vs.</em> <span class="math">\(t\)</span>) along both dimensions from the one that’s
+<span class="math notranslate nohighlight">\(f\)</span> <em>vs.</em> <span class="math notranslate nohighlight">\(t\)</span>) along both dimensions from the one that’s
 desired.  This means: (1) <cite>self</cite> after the function call transformed
 into the conjugate domain from that before the call and (2)
 <cite>by_amount</cite>, <cite>altered_axis</cite>, and <cite>propto_axis</cite> all refer to the shear
@@ -224,22 +238,29 @@ function call.</p>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pyspecdata.nddata.smoosh.html" class="btn btn-neutral float-right" title="pyspecdata.nddata.smoosh" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pyspecdata.nddata.setaxis.html" class="btn btn-neutral" title="pyspecdata.nddata.setaxis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, John M. Franck.
+        &copy; Copyright 2016, John M. Franck
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -254,36 +275,24 @@ function call.</p>
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.9.5.1.6',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

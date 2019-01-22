@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.sum\_nopop
-==============================
+pyspecdata.nddata.sum\_nopop
+============================
 
 .. currentmodule:: pyspecdata
 

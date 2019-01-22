@@ -1,5 +1,5 @@
-pyspecdata\.core\.figlist\.phaseplot\_finalize
-==============================================
+pyspecdata.core.figlist.phaseplot\_finalize
+===========================================
 
 .. currentmodule:: pyspecdata.core
 

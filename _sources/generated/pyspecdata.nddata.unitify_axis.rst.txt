@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.unitify\_axis
-=================================
+pyspecdata.nddata.unitify\_axis
+===============================
 
 .. currentmodule:: pyspecdata
 

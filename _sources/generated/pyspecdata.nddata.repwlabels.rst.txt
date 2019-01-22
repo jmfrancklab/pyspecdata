@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.repwlabels
-==============================
+pyspecdata.nddata.repwlabels
+============================
 
 .. currentmodule:: pyspecdata
 

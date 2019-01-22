@@ -1,0 +1,287 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyspecdata.nddata.nnls &mdash; pySpecData 0.9.5.1.6 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyspecdata.nddata.normalize" href="pyspecdata.nddata.normalize.html" />
+    <link rel="prev" title="pyspecdata.nddata.name" href="pyspecdata.nddata.name.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pySpecData
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5.1.6
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../notebook.html#setting-up-the-notebook">Setting up the notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebook.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebook.html#running-the-notebook">Running the notebook</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../notebook.html#how-it-works">How it works</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../notebook.html#the-latex-end">The LaTeX end</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../notebook.html#the-python-end">The python end</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../pyspecdata.html">N-dimensional Data (nddata)</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../pyspecdata.html#full-list-of-nddata-methods">Full list of <cite>nddata</cite> methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../latexscripts.html">Documentation of Notebook Helper Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pySpecData</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../notebook.html">LaTeX Notebook Functionality</a> &raquo;</li>
+        
+          <li><a href="../pyspecdata.html">N-dimensional Data (nddata)</a> &raquo;</li>
+        
+      <li>pyspecdata.nddata.nnls</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/generated/pyspecdata.nddata.nnls.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pyspecdata-nddata-nnls">
+<h1>pyspecdata.nddata.nnls<a class="headerlink" href="#pyspecdata-nddata-nnls" title="Permalink to this headline">¶</a></h1>
+<dl class="method">
+<dt id="pyspecdata.nddata.nnls">
+<code class="descclassname">nddata.</code><code class="descname">nnls</code><span class="sig-paren">(</span><em>dimname</em>, <em>newaxis_dict</em>, <em>kernel_func</em>, <em>l=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.nnls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform regularized non-negative least-squares “fit” on self.</p>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">someone can explain the math here</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dimname</strong> (<em>str</em>) – Name of the “data” dimension that is to be replaced by a
+distribution (the “fit” dimension);
+<em>e.g.</em> if you are regularizing a set of functions
+<span class="math notranslate nohighlight">\(\exp(-\tau*R_1)\)</span>, then this is <span class="math notranslate nohighlight">\(\tau\)</span></li>
+<li><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><em>nddata</em></a>) – a dictionary whose key is the name of the “fit” dimension
+(<span class="math notranslate nohighlight">\(R_1\)</span> in the example above)
+and whose value is an array with the new axis labels.
+OR
+this can be a 1D nddata
+– if it has an axis, the axis will be used to create the
+fit axis; if it has no axis, the data will be used</li>
+<li><strong>kernel_func</strong> (<em>function</em>) – a function giving the kernel for the regularization.
+The first argument is the “data” variable
+and the second argument is the “fit” variable
+(in the example above, this would be something like
+<code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">x,y:</span> <span class="pre">exp(-x*y)</span></code>)</li>
+<li><strong>l</strong> (<em>double</em><em> (</em><em>default 0</em><em>)</em>) – the regularization parameter
+<span class="math notranslate nohighlight">\(lambda\)</span> – if this is set to 0, the algorithm reverts to
+standard nnls</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The regularized result.
+For future use, both the kernel (as an nddata, in a property called
+“nnls_kernel”) and the residual (as an nddata, in a property called
+“nnls_residual”) are stored as properties of the nddata.
+The regularized dimension is always last
+(innermost).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">self</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pyspecdata.nddata.normalize.html" class="btn btn-neutral float-right" title="pyspecdata.nddata.normalize" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pyspecdata.nddata.name.html" class="btn btn-neutral" title="pyspecdata.nddata.name" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, John M. Franck
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

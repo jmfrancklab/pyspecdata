@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.circshift
-=============================
+pyspecdata.nddata.circshift
+===========================
 
 .. currentmodule:: pyspecdata
 

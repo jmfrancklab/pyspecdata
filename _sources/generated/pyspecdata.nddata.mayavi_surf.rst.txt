@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.mayavi\_surf
-================================
+pyspecdata.nddata.mayavi\_surf
+==============================
 
 .. currentmodule:: pyspecdata
 

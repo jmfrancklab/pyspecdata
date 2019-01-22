@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.contiguous
-==============================
+pyspecdata.nddata.contiguous
+============================
 
 .. currentmodule:: pyspecdata
 

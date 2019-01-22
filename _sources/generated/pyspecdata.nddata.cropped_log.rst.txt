@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.cropped\_log
-================================
+pyspecdata.nddata.cropped\_log
+==============================
 
 .. currentmodule:: pyspecdata
 

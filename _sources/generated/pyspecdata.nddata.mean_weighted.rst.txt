@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.mean\_weighted
-==================================
+pyspecdata.nddata.mean\_weighted
+================================
 
 .. currentmodule:: pyspecdata
 

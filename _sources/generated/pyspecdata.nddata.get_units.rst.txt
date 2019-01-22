@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.get\_units
-==============================
+pyspecdata.nddata.get\_units
+============================
 
 .. currentmodule:: pyspecdata
 

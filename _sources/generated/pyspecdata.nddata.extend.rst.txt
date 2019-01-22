@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.extend
-==========================
+pyspecdata.nddata.extend
+========================
 
 .. currentmodule:: pyspecdata
 

@@ -24,28 +24,19 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="pySpecData 0.9.5.1.6 documentation" href="index.html"/>
-        <link rel="up" title="LaTeX Notebook Functionality" href="notebook.html"/>
-        <link rel="next" title="The Figure List" href="figlist.html"/>
-        <link rel="prev" title="ND-Data" href="nddata.html"/> 
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The Figure List" href="figlist.html" />
+    <link rel="prev" title="ND-Data" href="nddata.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -123,7 +114,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">pySpecData</a>
@@ -131,9 +122,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -179,7 +171,7 @@
             
   <div class="section" id="module-pyspecdata.latexscripts">
 <span id="documentation-of-notebook-helper-functions"></span><h1>Documentation of Notebook Helper Functions<a class="headerlink" href="#module-pyspecdata.latexscripts" title="Permalink to this headline">¶</a></h1>
-<p>Provides the <code class="docutils literal"><span class="pre">pdflatex_notebook_wrapper</span></code> shell/dos command, which you run
+<p>Provides the <code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span></code> shell/dos command, which you run
 instead of your normal Latex command to build a lab notebook.
 The results of python environments are <strong>cached</strong> and <strong>only re-run if the code changes</strong>,
 even if the python environments are moved around.
@@ -227,10 +219,10 @@ if a command line argument of “flush” is passed, it flushes that script numb
 <code class="descclassname">pyspecdata.latexscripts.</code><code class="descname">wraplatex</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.wraplatex" title="Permalink to this definition">¶</a></dt>
 <dd><p>runs the python scripts after running latex also creates a copy of latex without the final portion under the underscore
 This prevents the viewer from hanging while it’s waiting for a refresh.
-This can be used in combination with wrapviewer() and latexmk by using a <code class="docutils literal"><span class="pre">~/.latexmkrc</span></code> file that looks like this:</p>
-<p>If you pass the <code class="docutils literal"><span class="pre">--xelatex</span></code> argument, xelatex is used instead of pdflatex
+This can be used in combination with wrapviewer() and latexmk by using a <code class="docutils literal notranslate"><span class="pre">~/.latexmkrc</span></code> file that looks like this:</p>
+<p>If you pass the <code class="docutils literal notranslate"><span class="pre">--xelatex</span></code> argument, xelatex is used instead of pdflatex
 (note that if you’re using latexmk, you need to add this in the latexmkrc file).</p>
-<div class="highlight-perl"><div class="highlight"><pre><span></span><span class="nv">$pdflatex</span><span class="o">=</span><span class="sx">q/pdflatex_notebook_wrapper %O -synctex=1 %S/</span><span class="p">;</span><span class="c1"># calls this function</span>
+<div class="highlight-perl notranslate"><div class="highlight"><pre><span></span><span class="nv">$pdflatex</span><span class="o">=</span><span class="sx">q/pdflatex_notebook_wrapper %O -synctex=1 %S/</span><span class="p">;</span><span class="c1"># calls this function</span>
 <span class="nv">$pdf_previewer</span><span class="o">=</span><span class="sx">q/pdflatex_notebook_view_wrapper/</span><span class="p">;</span><span class="c1"># calls the wrapviewer function</span>
 </pre></div>
 </div>
@@ -239,16 +231,14 @@ This can be used in combination with wrapviewer() and latexmk by using a <code c
 <dl class="function">
 <dt id="pyspecdata.latexscripts.wrapviewer">
 <code class="descclassname">pyspecdata.latexscripts.</code><code class="descname">wrapviewer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.wrapviewer" title="Permalink to this definition">¶</a></dt>
-<dd><p>see <a class="reference internal" href="#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal"><span class="pre">wraplatex</span></code></a></p>
+<dd><p>see <a class="reference internal" href="#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p>
 </dd></dl>
 
 </div>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -266,11 +256,11 @@ This can be used in combination with wrapviewer() and latexmk by using a <code c
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, John M. Franck.
+        &copy; Copyright 2016, John M. Franck
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -285,36 +275,24 @@ This can be used in combination with wrapviewer() and latexmk by using a <code c
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.9.5.1.6',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

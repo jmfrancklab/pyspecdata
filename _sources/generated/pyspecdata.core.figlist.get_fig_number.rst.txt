@@ -1,5 +1,5 @@
-pyspecdata\.core\.figlist\.get\_fig\_number
-===========================================
+pyspecdata.core.figlist.get\_fig\_number
+========================================
 
 .. currentmodule:: pyspecdata.core
 

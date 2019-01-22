@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.chunk\_auto
-===============================
+pyspecdata.nddata.chunk\_auto
+=============================
 
 .. currentmodule:: pyspecdata
 

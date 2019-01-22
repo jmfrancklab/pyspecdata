@@ -1,5 +1,5 @@
-pyspecdata\.core\.figlist
-=========================
+pyspecdata.core.figlist
+=======================
 
 .. currentmodule:: pyspecdata.core
 
@@ -18,6 +18,7 @@ pyspecdata\.core\.figlist
       ~figlist.check_units
       ~figlist.generate_ticks
       ~figlist.get_fig_number
+      ~figlist.get_num_figures
       ~figlist.grid
       ~figlist.header
       ~figlist.image

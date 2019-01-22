@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.set\_ft\_prop
-=================================
+pyspecdata.nddata.set\_ft\_prop
+===============================
 
 .. currentmodule:: pyspecdata
 

@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.normalize
-=============================
+pyspecdata.nddata.normalize
+===========================
 
 .. currentmodule:: pyspecdata
 

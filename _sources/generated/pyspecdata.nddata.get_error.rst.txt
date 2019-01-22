@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.get\_error
-==============================
+pyspecdata.nddata.get\_error
+============================
 
 .. currentmodule:: pyspecdata
 

@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.human\_units
-================================
+pyspecdata.nddata.human\_units
+==============================
 
 .. currentmodule:: pyspecdata
 

@@ -1,5 +1,5 @@
-pyspecdata\.core\.figlist\.push\_marker
-=======================================
+pyspecdata.core.figlist.push\_marker
+====================================
 
 .. currentmodule:: pyspecdata.core
 

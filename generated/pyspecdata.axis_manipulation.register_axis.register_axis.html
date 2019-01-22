@@ -24,28 +24,19 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="pySpecData 0.9.5.1.6 documentation" href="../index.html"/>
-        <link rel="up" title="Axis Manipulation Functions" href="../axis_manipulation.html"/>
-        <link rel="next" title="pyspecdata.axis_manipulation.secsy.secsy_transform_manual" href="pyspecdata.axis_manipulation.secsy.secsy_transform_manual.html"/>
-        <link rel="prev" title="pyspecdata.axis_manipulation.shear.linear_shear" href="pyspecdata.axis_manipulation.shear.linear_shear.html"/> 
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyspecdata.axis_manipulation.secsy.secsy_transform_manual" href="pyspecdata.axis_manipulation.secsy.secsy_transform_manual.html" />
+    <link rel="prev" title="pyspecdata.axis_manipulation.shear.linear_shear" href="pyspecdata.axis_manipulation.shear.linear_shear.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -139,7 +130,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">pySpecData</a>
@@ -147,9 +138,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -205,9 +197,9 @@
 <dd><p>Interpolate the data so that the given axes are in register with a set of specified values. Does not change the spacing of the axis labels.</p>
 <p>It finds the axis label position that is closest to the values given in <cite>arg</cite>, then interpolates (Fourier/sinc method) the data onto a new, slightly shifted, axis that passes exactly through the value given.
 To do this, it uses
-<code class="xref py py-func docutils literal"><span class="pre">.ft_clear_startpoints()</span></code>
+<a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.ft_clear_startpoints" title="pyspecdata.core.nddata.ft_clear_startpoints"><code class="xref py py-func docutils literal notranslate"><span class="pre">.ft_clear_startpoints()</span></code></a>
 and uses
-<code class="xref py py-func docutils literal"><span class="pre">.set_ft_prop()</span></code>
+<a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.set_ft_prop" title="pyspecdata.core.nddata.set_ft_prop"><code class="xref py py-func docutils literal notranslate"><span class="pre">.set_ft_prop()</span></code></a>
 to override the “not aliased” flag.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -223,9 +215,7 @@ to override the “not aliased” flag.</p>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -243,11 +233,11 @@ to override the “not aliased” flag.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, John M. Franck.
+        &copy; Copyright 2016, John M. Franck
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -262,36 +252,24 @@ to override the “not aliased” flag.</p>
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.9.5.1.6',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

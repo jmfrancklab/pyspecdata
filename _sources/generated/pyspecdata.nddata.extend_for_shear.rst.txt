@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.extend\_for\_shear
-======================================
+pyspecdata.nddata.extend\_for\_shear
+====================================
 
 .. currentmodule:: pyspecdata
 

@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.units\_texsafe
-==================================
+pyspecdata.nddata.units\_texsafe
+================================
 
 .. currentmodule:: pyspecdata
 
