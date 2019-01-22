@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.setaxis
-===========================
+pyspecdata.nddata.setaxis
+=========================
 
 .. currentmodule:: pyspecdata
 

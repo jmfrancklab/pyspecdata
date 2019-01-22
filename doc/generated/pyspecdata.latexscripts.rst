@@ -1,5 +1,5 @@
-pyspecdata\.latexscripts
-========================
+pyspecdata.latexscripts
+=======================
 
 .. automodule:: pyspecdata.latexscripts
 
@@ -14,6 +14,7 @@ pyspecdata\.latexscripts
       check_image_path
       det_new_pdf_name
       flush_script
+      genconfig
       get_scripts_dir
       grab_script_string
       main

@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.contour
-===========================
+pyspecdata.nddata.contour
+=========================
 
 .. currentmodule:: pyspecdata
 

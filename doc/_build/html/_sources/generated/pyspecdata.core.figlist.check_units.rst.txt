@@ -1,5 +1,5 @@
-pyspecdata\.core\.figlist\.check\_units
-=======================================
+pyspecdata.core.figlist.check\_units
+====================================
 
 .. currentmodule:: pyspecdata.core
 

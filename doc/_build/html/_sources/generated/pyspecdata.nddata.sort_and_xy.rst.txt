@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.sort\_and\_xy
-=================================
+pyspecdata.nddata.sort\_and\_xy
+===============================
 
 .. currentmodule:: pyspecdata
 

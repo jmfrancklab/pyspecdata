@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.\_\_init\_\_
-================================
+pyspecdata.nddata.\_\_init\_\_
+==============================
 
 .. currentmodule:: pyspecdata
 

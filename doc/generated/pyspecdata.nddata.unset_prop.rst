@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.unset\_prop
-===============================
+pyspecdata.nddata.unset\_prop
+=============================
 
 .. currentmodule:: pyspecdata
 

@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.aligndata
-=============================
+pyspecdata.nddata.aligndata
+===========================
 
 .. currentmodule:: pyspecdata
 

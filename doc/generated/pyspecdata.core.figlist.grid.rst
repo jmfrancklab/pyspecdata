@@ -1,5 +1,5 @@
-pyspecdata\.core\.figlist\.grid
-===============================
+pyspecdata.core.figlist.grid
+============================
 
 .. currentmodule:: pyspecdata.core
 

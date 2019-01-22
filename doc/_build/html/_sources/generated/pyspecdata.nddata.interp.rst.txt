@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.interp
-==========================
+pyspecdata.nddata.interp
+========================
 
 .. currentmodule:: pyspecdata
 

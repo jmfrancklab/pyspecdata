@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.fourier\_shear
-==================================
+pyspecdata.nddata.fourier\_shear
+================================
 
 .. currentmodule:: pyspecdata
 

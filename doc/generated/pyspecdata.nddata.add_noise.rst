@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.add\_noise
-==============================
+pyspecdata.nddata.add\_noise
+============================
 
 .. currentmodule:: pyspecdata
 

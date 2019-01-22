@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.oldtimey
-============================
+pyspecdata.nddata.oldtimey
+==========================
 
 .. currentmodule:: pyspecdata
 

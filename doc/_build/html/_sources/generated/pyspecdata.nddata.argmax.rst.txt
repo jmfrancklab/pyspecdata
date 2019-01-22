@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.argmax
-==========================
+pyspecdata.nddata.argmax
+========================
 
 .. currentmodule:: pyspecdata
 

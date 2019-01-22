@@ -1,5 +1,5 @@
-pyspecdata\.core\.figlist\.mesh
-===============================
+pyspecdata.core.figlist.mesh
+============================
 
 .. currentmodule:: pyspecdata.core
 

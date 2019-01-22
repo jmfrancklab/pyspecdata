@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.linear\_shear
-=================================
+pyspecdata.nddata.linear\_shear
+===============================
 
 .. currentmodule:: pyspecdata
 

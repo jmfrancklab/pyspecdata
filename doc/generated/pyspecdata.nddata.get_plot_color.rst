@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.get\_plot\_color
-====================================
+pyspecdata.nddata.get\_plot\_color
+==================================
 
 .. currentmodule:: pyspecdata
 

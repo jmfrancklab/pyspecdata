@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.plot\_labels
-================================
+pyspecdata.nddata.plot\_labels
+==============================
 
 .. currentmodule:: pyspecdata
 

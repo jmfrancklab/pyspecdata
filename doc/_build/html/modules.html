@@ -24,27 +24,19 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="pySpecData 0.9.5.1.6 documentation" href="index.html"/>
-        <link rel="next" title="LaTeX Notebook Functionality" href="notebook.html"/>
-        <link rel="prev" title="Welcome to pySpecData’s documentation!" href="index.html"/> 
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="LaTeX Notebook Functionality" href="notebook.html" />
+    <link rel="prev" title="Welcome to pySpecData’s documentation!" href="index.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -99,7 +91,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-pyspecdata.load_files">load_files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pyspecdata.fornotebook">fornotebook</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pyspecdata.latexscripts">latexscripts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pyspecdata.ipy">ipy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ipy">ipy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pyspecdata.ndshape">ndshape</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pyspecdata.units">units</a></li>
 </ul>
@@ -119,7 +111,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">pySpecData</a>
@@ -127,9 +119,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -181,11 +174,11 @@
 <span id="core"></span><h2>core<a class="headerlink" href="#module-pyspecdata.core" title="Permalink to this headline">¶</a></h2>
 <p>Provides the core components of pyspecdata.
 Currently, this is a very large file that we will slowly break down into separate modules or packages.</p>
-<p>The classes <a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal"><span class="pre">nddata</span></code></a>, <code class="xref py py-class docutils literal"><span class="pre">nddata_hdf</span></code>, <code class="xref py py-class docutils literal"><span class="pre">ndshape</span></code>, the
-function <code class="xref py py-func docutils literal"><span class="pre">plot()</span></code>, and the class <code class="xref py py-class docutils literal"><span class="pre">fitdata</span></code>
+<p>The classes <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata_hdf</span></code>, <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.ndshape" title="pyspecdata.core.ndshape"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code></a>, the
+function <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.plot" title="pyspecdata.core.plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot()</span></code></a>, and the class <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.fitdata" title="pyspecdata.core.fitdata"><code class="xref py py-class docutils literal notranslate"><span class="pre">fitdata</span></code></a>
 are the core components of the N-Dimensional processing routines.
 Start by familiarizing yourself with those.</p>
-<p>The <a class="reference internal" href="generated/pyspecdata.core.figlist.html#pyspecdata.core.figlist" title="pyspecdata.core.figlist"><code class="xref py py-class docutils literal"><span class="pre">figlist</span></code></a> is the base class for “Figure lists.”
+<p>The <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.figlist" title="pyspecdata.core.figlist"><code class="xref py py-class docutils literal notranslate"><span class="pre">figlist</span></code></a> is the base class for “Figure lists.”
 Figure lists allows you to organize plots and text and to refer to plots
 by name, rather than number.
 They are designed so that same code can be used seamlessly from within
@@ -193,15 +186,15 @@ ipython, jupyter, a python script, or a python environment within latex
 (JMF can also distribute latex code for this – nice python based
 installer is planned).
 The user does not initialize the figlist class directly,
-but rather initializes <code class="docutils literal"><span class="pre">figlist_var</span></code>.
+but rather initializes <code class="docutils literal notranslate"><span class="pre">figlist_var</span></code>.
 At the end of this file,
 there is a snippet of code that sets
-<code class="docutils literal"><span class="pre">figlist_var</span></code> to choice that’s appropriate for the working environment
+<code class="docutils literal notranslate"><span class="pre">figlist_var</span></code> to choice that’s appropriate for the working environment
 (<em>i.e.</em>, python, latex environment, <a href="#id1"><span class="problematic" id="id2">*</span></a>etc.)</p>
 <p>There are many helper and utility functions that need to be sorted an documented by JMF,
 and can be ignored.
 These are somewhat wide-ranging in nature.
-For example, <code class="xref py py-func docutils literal"><span class="pre">box_muller()</span></code> is a helper function (based on numerical recipes) used by <code class="xref py py-func docutils literal"><span class="pre">nddata.add_noise()</span></code>,
+For example, <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.box_muller" title="pyspecdata.core.box_muller"><code class="xref py py-func docutils literal notranslate"><span class="pre">box_muller()</span></code></a> is a helper function (based on numerical recipes) used by <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.nddata.add_noise" title="pyspecdata.core.nddata.add_noise"><code class="xref py py-func docutils literal notranslate"><span class="pre">nddata.add_noise()</span></code></a>,
 while h5 functions are helper functions for using pytables in a fashion that
 will hopefull be intuitive to those familiar with SQL, etc.</p>
 </div>
@@ -219,7 +212,7 @@ will hopefull be intuitive to those familiar with SQL, etc.</p>
 <li><p class="first">Ability to run the same code from the command line or from within a python environment inside latex.
 *   this is achieved by choosing figlist (default gui) and figlistl (inherits</p>
 <blockquote>
-<div><p>from figlist – renders to latex – the <code class="xref py py-func docutils literal"><span class="pre">figlist.show()</span></code> method is
+<div><p>from figlist – renders to latex – the <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.figlist.figlist.show" title="pyspecdata.figlist.figlist.show"><code class="xref py py-func docutils literal notranslate"><span class="pre">figlist.show()</span></code></a> method is
 changed)</p>
 </div></blockquote>
 <ul class="simple">
@@ -232,10 +225,10 @@ changed)</p>
 </ul>
 <div class="admonition-todo admonition" id="index-0">
 <p class="first admonition-title">Todo</p>
-<p>Currently the “items” that the list tracks correspond to either plot formatting directives (see <code class="xref py py-func docutils literal"><span class="pre">figlist.setprops()</span></code>), text, or figures.</p>
+<p>Currently the “items” that the list tracks correspond to either plot formatting directives (see <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.figlist.figlist.setprops" title="pyspecdata.figlist.figlist.setprops"><code class="xref py py-func docutils literal notranslate"><span class="pre">figlist.setprops()</span></code></a>), text, or figures.</p>
 <p>We should scrap most elements of the current implementation of figlist and rebuild it</p>
 <ul class="last">
-<li><p class="first">currently the figlist is set up to use a context block.  We will not only keep this, but also make it so the individual axes.  Syntax (following a <code class="docutils literal"><span class="pre">fl</span> <span class="pre">=</span> <span class="pre">figlist_var()</span></code> should look like this: <code class="docutils literal"><span class="pre">with</span> <span class="pre">fl['my</span> <span class="pre">plot</span> <span class="pre">name']</span> <span class="pre">as</span> <span class="pre">p:</span></code> and contents of the block would then be <code class="docutils literal"><span class="pre">p.plot(...)</span></code>, <em>etc.</em></p>
+<li><p class="first">currently the figlist is set up to use a context block.  We will not only keep this, but also make it so the individual axes.  Syntax (following a <code class="docutils literal notranslate"><span class="pre">fl</span> <span class="pre">=</span> <span class="pre">figlist_var()</span></code> should look like this: <code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">fl['my</span> <span class="pre">plot</span> <span class="pre">name']</span> <span class="pre">as</span> <span class="pre">p:</span></code> and contents of the block would then be <code class="docutils literal notranslate"><span class="pre">p.plot(...)</span></code>, <em>etc.</em></p>
 </li>
 <li><p class="first">define an “organization” function of the figlist block.  This allows us
 to use standard matplotlib commands to set up and organize the axes, using
@@ -318,12 +311,12 @@ them.</p>
 <span id="datadir"></span><h2>datadir<a class="headerlink" href="#module-pyspecdata.datadir" title="Permalink to this headline">¶</a></h2>
 <p>Allows the user to run the same code on different machines,
 even though the location of the raw spectral data might change.</p>
-<p>This is controlled by the <code class="docutils literal"><span class="pre">~/.pyspecdata</span></code> or <code class="docutils literal"><span class="pre">~/_pyspecdata</span></code> config file.</p>
+<p>This is controlled by the <code class="docutils literal notranslate"><span class="pre">~/.pyspecdata</span></code> or <code class="docutils literal notranslate"><span class="pre">~/_pyspecdata</span></code> config file.</p>
 </div>
 <div class="section" id="module-pyspecdata.load_files">
 <span id="load-files"></span><h2>load_files<a class="headerlink" href="#module-pyspecdata.load_files" title="Permalink to this headline">¶</a></h2>
 <p>This subpackage holds all the routines for reading raw data in proprietary formats.
-It’s intended to be accessed entirely through the function <a class="reference internal" href="temp_stubs.html#pyspecdata.load_files.find_file" title="pyspecdata.load_files.find_file"><code class="xref py py-func docutils literal"><span class="pre">find_file()</span></code></a>,
+It’s intended to be accessed entirely through the function <a class="reference internal" href="#pyspecdata.load_files.find_file" title="pyspecdata.load_files.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_file()</span></code></a>,
 which uses <a href="#id3"><span class="problematic" id="id4">:module:`datadir`</span></a> to search for the filename, then automatically identifies
 the file type and calls the appropriate module to load the data into an nddata.</p>
 <p>Currently, Bruker file formats (both ESR and NMR) are supported, as well as
@@ -335,30 +328,29 @@ the file type and calls the appropriate module to load the data into an nddata.<
 <dd><p>Find the file  given by the regular expression <cite>searchstring</cite> inside the directory identified by <cite>exp_type</cite>, load the nddata object, and postprocess with the function <cite>postproc</cite>.</p>
 <p>It looks at the top level of the directory first, and if that fails, starts to look recursively.
 Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.</p>
-<p>It calls <a class="reference internal" href="temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
+<p>It calls <a class="reference internal" href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>searchstring</strong> (<a class="reference internal" href="units.html#pyspecdata.units.units.str" title="pyspecdata.units.units.str"><em>str</em></a>) – Most commonly, this is just a fragment of the file name,
-with any literal <code class="docutils literal"><span class="pre">*</span></code>, <code class="docutils literal"><span class="pre">.</span></code>, or <code class="docutils literal"><span class="pre">?</span></code> characters preceded by
+<li><strong>searchstring</strong> (<em>str</em>) – Most commonly, this is just a fragment of the file name,
+with any literal <code class="docutils literal notranslate"><span class="pre">*</span></code>, <code class="docutils literal notranslate"><span class="pre">.</span></code>, or <code class="docutils literal notranslate"><span class="pre">?</span></code> characters preceded by
 a backslash.
 More generally, it is a regular expression,
-where <code class="docutils literal"><span class="pre">.*searchstring.*</span></code> matches a filename inside the
+where <code class="docutils literal notranslate"><span class="pre">.*searchstring.*</span></code> matches a filename inside the
 directory appropriate for <cite>exp_type</cite>.</li>
-<li><strong>expno</strong> (<em>int</em>) – For Bruker files, <em>etc.</em>, where the files are stored in numbered
+<li><strong>expno</strong> (<em>int</em>) – For Bruker NMR and Prospa files, where the files are stored in numbered
 subdirectories,
 give the number of the subdirectory that you want.
-If this is not given, it assumes that the name you give is the name
-of a file, rather than a directory.
+Currently, this parameter is needed to load Bruker and Kea files.
 If it finds multiple files that match the regular expression,
 it will try to load this experiment number from all the directories.</li>
-<li><strong>exp_type</strong> (<a class="reference internal" href="units.html#pyspecdata.units.units.str" title="pyspecdata.units.units.str"><em>str</em></a>) – Since the function assumes that you have different types of
+<li><strong>exp_type</strong> (<em>str</em>) – Since the function assumes that you have different types of
 experiments sorted into different directories, this argument
-specifies the type of experiment see <a class="reference internal" href="generated/pyspecdata.datadir.getDATADIR.html#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal"><span class="pre">getDATADIR()</span></code></a> for
+specifies the type of experiment see <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a> for
 more info.</li>
-<li><strong>postproc</strong> (<em>function</em><em>, </em><a class="reference internal" href="units.html#pyspecdata.units.units.str" title="pyspecdata.units.units.str"><em>str</em></a><em>, or </em><em>None</em>) – <p>This function is fed the nddata data and the remaining keyword
+<li><strong>postproc</strong> (<em>function</em><em>, </em><em>str</em><em>, or </em><em>None</em>) – <p>This function is fed the nddata data and the remaining keyword
 arguments (<cite>kwargs</cite>) as arguments.
 It’s assumed that each module for each different file type
 provides a dictionary called <cite>postproc_lookup</cite>.
@@ -369,29 +361,29 @@ If <cite>postproc</cite> is None,
 it checks to see if the any of the loading functions that were
 called set the <cite>postproc_type</cite> property
 – <em>i.e.</em> it checks the value of
-<code class="docutils literal"><span class="pre">data.get_prop('postproc_type')</span></code> –
+<code class="docutils literal notranslate"><span class="pre">data.get_prop('postproc_type')</span></code> –
 if this is set, it uses this as a key
 to pull the corresponding value from <cite>postproc_lookup</cite>.</p>
 <p>For instance, when the acert module loads an ACERT HDF5 file,
 it sets <cite>postproc_type</cite> to the value of
-<code class="docutils literal"><span class="pre">(h5</span> <span class="pre">root).experiment.description['class']</span></code>.
+<code class="docutils literal notranslate"><span class="pre">(h5</span> <span class="pre">root).experiment.description['class']</span></code>.
 This, in turn, is used to choose the type of post-processing.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">dimname:</th><td class="field-body">passed to <a class="reference internal" href="temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal"><span class="pre">load_indiv_file()</span></code></a></td>
+<tr class="field-odd field"><th class="field-name">dimname:</th><td class="field-body">passed to <a class="reference internal" href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
 </tr>
-<tr class="field-even field"><th class="field-name">return_acq:</th><td class="field-body">passed to <a class="reference internal" href="temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal"><span class="pre">load_indiv_file()</span></code></a></td>
+<tr class="field-even field"><th class="field-name">return_acq:</th><td class="field-body">passed to <a class="reference internal" href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
 </tr>
-<tr class="field-odd field"><th class="field-name">add_sizes:</th><td class="field-body">passed to <a class="reference internal" href="temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal"><span class="pre">load_indiv_file()</span></code></a></td>
+<tr class="field-odd field"><th class="field-name">add_sizes:</th><td class="field-body">passed to <a class="reference internal" href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
 </tr>
-<tr class="field-even field"><th class="field-name">add_dims:</th><td class="field-body">passed to <a class="reference internal" href="temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal"><span class="pre">load_indiv_file()</span></code></a></td>
+<tr class="field-even field"><th class="field-name">add_dims:</th><td class="field-body">passed to <a class="reference internal" href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
 </tr>
-<tr class="field-odd field"><th class="field-name">use_sweep:</th><td class="field-body">passed to <a class="reference internal" href="temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal"><span class="pre">load_indiv_file()</span></code></a></td>
+<tr class="field-odd field"><th class="field-name">use_sweep:</th><td class="field-body">passed to <a class="reference internal" href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">indirect_dimlabels:</th></tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body">passed to <a class="reference internal" href="temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal"><span class="pre">load_indiv_file()</span></code></a></td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">passed to <a class="reference internal" href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
 </tr>
 </tbody>
 </table>
@@ -406,38 +398,26 @@ This, in turn, is used to choose the type of post-processing.</p>
 </div>
 <div class="section" id="module-pyspecdata.fornotebook">
 <span id="fornotebook"></span><h2>fornotebook<a class="headerlink" href="#module-pyspecdata.fornotebook" title="Permalink to this headline">¶</a></h2>
-<p>This provides <code class="xref py py-class docutils literal"><span class="pre">figlistl</span></code>, the Latex figure list.
+<p>This provides <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.fornotebook.figlistl" title="pyspecdata.fornotebook.figlistl"><code class="xref py py-class docutils literal notranslate"><span class="pre">figlistl</span></code></a>, the Latex figure list.
 Any other functions here are helper functions for the class.
-<code class="xref py py-class docutils literal"><span class="pre">figlist</span></code> is generally <strong>not chosen manually</strong>,
-but <code class="docutils literal"><span class="pre">figlist_var</span></code> will be assigned to <code class="xref py py-class docutils literal"><span class="pre">figlistl</span></code> when
+<a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.fornotebook.figlist" title="pyspecdata.fornotebook.figlist"><code class="xref py py-class docutils literal notranslate"><span class="pre">figlist</span></code></a> is generally <strong>not chosen manually</strong>,
+but <code class="docutils literal notranslate"><span class="pre">figlist_var</span></code> will be assigned to <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.fornotebook.figlistl" title="pyspecdata.fornotebook.figlistl"><code class="xref py py-class docutils literal notranslate"><span class="pre">figlistl</span></code></a> when
 python code is embedded in a python environment inside latex.</p>
 </div>
 <div class="section" id="module-pyspecdata.latexscripts">
 <span id="latexscripts"></span><h2>latexscripts<a class="headerlink" href="#module-pyspecdata.latexscripts" title="Permalink to this headline">¶</a></h2>
-<p>Provides the <code class="docutils literal"><span class="pre">pdflatex_notebook_wrapper</span></code> shell/dos command, which you run
+<p>Provides the <code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span></code> shell/dos command, which you run
 instead of your normal Latex command to build a lab notebook.
 The results of python environments are <strong>cached</strong> and <strong>only re-run if the code changes</strong>,
 even if the python environments are moved around.
 This makes the compilation of a Latex lab notebook extremely efficient.</p>
 </div>
-<div class="section" id="module-pyspecdata.ipy">
-<span id="ipy"></span><h2>ipy<a class="headerlink" href="#module-pyspecdata.ipy" title="Permalink to this headline">¶</a></h2>
-<p>Provides the jupyter extension:</p>
-<blockquote>
-<div>%load_ext pyspecdata.ipy</div></blockquote>
-<p>That allows for fancy representation nddata instances – <em>i.e.</em> you can type the name of
-an instance and hit shift-Enter, and a plot will appear rather than some text
-representation.</p>
-<p>Also overrides plain text representation
-of numpy arrays with latex representation that we build ourselves
-or pull from sympy.</p>
-<p>Also known as “generalized jupyter awesomeness” in only ~150 lines of code!</p>
-<p>See [O’Reilly Book](<a class="reference external" href="https://www.safaribooksonline.com/blog/2014/02/11/altering-display-existing-classes-ipython/">https://www.safaribooksonline.com/blog/2014/02/11/altering-display-existing-classes-ipython/</a>)
-for minimal guidance if you’re interested.</p>
+<div class="section" id="ipy">
+<h2>ipy<a class="headerlink" href="#ipy" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-pyspecdata.ndshape">
 <span id="ndshape"></span><h2>ndshape<a class="headerlink" href="#module-pyspecdata.ndshape" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="xref py py-class docutils literal"><span class="pre">ndshape</span></code> class allows you to allocate arrays and determine the shape of existing arrays.</p>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code> class allows you to allocate arrays and determine the shape of existing arrays.</p>
 </div>
 <div class="section" id="module-pyspecdata.units">
 <span id="units"></span><h2>units<a class="headerlink" href="#module-pyspecdata.units" title="Permalink to this headline">¶</a></h2>
@@ -447,9 +427,7 @@ for minimal guidance if you’re interested.</p>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -467,11 +445,11 @@ for minimal guidance if you’re interested.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, John M. Franck.
+        &copy; Copyright 2016, John M. Franck
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -486,36 +464,24 @@ for minimal guidance if you’re interested.</p>
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.9.5.1.6',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

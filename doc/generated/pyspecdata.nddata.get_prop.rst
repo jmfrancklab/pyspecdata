@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.get\_prop
-=============================
+pyspecdata.nddata.get\_prop
+===========================
 
 .. currentmodule:: pyspecdata
 

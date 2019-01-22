@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.register\_axis
-==================================
+pyspecdata.nddata.register\_axis
+================================
 
 .. currentmodule:: pyspecdata
 

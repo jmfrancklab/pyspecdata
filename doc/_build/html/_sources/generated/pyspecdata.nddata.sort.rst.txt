@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.sort
-========================
+pyspecdata.nddata.sort
+======================
 
 .. currentmodule:: pyspecdata
 

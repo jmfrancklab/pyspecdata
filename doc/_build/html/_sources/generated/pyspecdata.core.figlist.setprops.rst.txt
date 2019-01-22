@@ -1,5 +1,5 @@
-pyspecdata\.core\.figlist\.setprops
-===================================
+pyspecdata.core.figlist.setprops
+================================
 
 .. currentmodule:: pyspecdata.core
 

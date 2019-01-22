@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.ftshift
-===========================
+pyspecdata.nddata.ftshift
+=========================
 
 .. currentmodule:: pyspecdata
 

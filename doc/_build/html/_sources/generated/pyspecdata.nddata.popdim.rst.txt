@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.popdim
-==========================
+pyspecdata.nddata.popdim
+========================
 
 .. currentmodule:: pyspecdata
 

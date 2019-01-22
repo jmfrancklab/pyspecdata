@@ -24,26 +24,18 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="pySpecData 0.9.5.1.6 documentation" href="index.html"/>
-        <link rel="prev" title="The Figure List" href="figlist.html"/> 
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="The Figure List" href="figlist.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -106,7 +98,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">pySpecData</a>
@@ -114,9 +106,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -165,15 +158,15 @@
 <dt id="pyspecdata.units.units">
 <em class="property">class </em><code class="descclassname">pyspecdata.units.</code><code class="descname">units</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.units.units" title="Permalink to this definition">¶</a></dt>
 <dd><p>Each instance of this object stores a numerical representation of a single set of units, and there are routines to set units by
-(<em>i.e.</em> <code class="xref py py-func docutils literal"><span class="pre">parsing</span></code>) strings to units
+(<em>i.e.</em> <code class="xref py py-func docutils literal notranslate"><span class="pre">parsing</span></code>) strings to units
 and routines to convert units to an
-<code class="xref py py-func docutils literal"><span class="pre">str</span></code> representation.</p>
+<code class="xref py py-func docutils literal notranslate"><span class="pre">str</span></code> representation.</p>
 <p>At its core, the units are represented by three numpy structured arrays per instance:
 one for the coefficients in terms of base units,
 one for the order of magnitude used to determine any prefixes added to the base units,
 and one for any scaling factors needed to convert to base units.</p>
 <p>An array of these structured arrays can be converted into a row
-vector with <code class="docutils literal"><span class="pre">.view((float16,len(base_dtype.names)))</span></code>.
+vector with <code class="docutils literal notranslate"><span class="pre">.view((float16,len(base_dtype.names)))</span></code>.
 “Base Units” here are the same as SI base units <strong>except</strong> that it uses g instead of kg (so we can do  the prefixes correctly), and we have added rad.</p>
 <dl class="method">
 <dt id="pyspecdata.units.units.load_derived">
@@ -193,12 +186,12 @@ the base dtype vector.</p>
 <p>Addition, subtraction, and parentheses are not allowed, and we define a
 non-standard order of operations, as follows:</p>
 <ol class="arabic simple">
-<li><code class="docutils literal"><span class="pre">\\mu</span></code> (including a trailing space) and <code class="docutils literal"><span class="pre">u</span></code> are converted to the utf-8 equivalent (μ)</li>
-<li><code class="docutils literal"><span class="pre">...^-0.125</span></code> any number is assumed to be part of the exponent, and only numbers are allowed.</li>
-<li><code class="docutils literal"><span class="pre">*</span></code> multiplication</li>
+<li><code class="docutils literal notranslate"><span class="pre">\\mu</span></code> (including a trailing space) and <code class="docutils literal notranslate"><span class="pre">u</span></code> are converted to the utf-8 equivalent (μ)</li>
+<li><code class="docutils literal notranslate"><span class="pre">...^-0.125</span></code> any number is assumed to be part of the exponent, and only numbers are allowed.</li>
+<li><code class="docutils literal notranslate"><span class="pre">*</span></code> multiplication</li>
 <li>a space also represents multiplication</li>
-<li><code class="docutils literal"><span class="pre">.../...</span></code> comes <strong>after</strong> all other operations, as is typical for single-line text</li>
-<li><code class="docutils literal"><span class="pre">sqrt(...)</span></code> comes “last” in the sense that we take care of everything both inside and outside the sqrt first, before applying the sqrt.</li>
+<li><code class="docutils literal notranslate"><span class="pre">.../...</span></code> comes <strong>after</strong> all other operations, as is typical for single-line text</li>
+<li><code class="docutils literal notranslate"><span class="pre">sqrt(...)</span></code> comes “last” in the sense that we take care of everything both inside and outside the sqrt first, before applying the sqrt.</li>
 </ol>
 <p>At this point, I use split to break up according to the order of operations, assign powers to each, and determine the prefix.
 However, I’m currently only using base units, and I will eventually want to use derived units as well.</p>
@@ -228,9 +221,7 @@ the pinv.)</p>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -246,11 +237,11 @@ the pinv.)</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, John M. Franck.
+        &copy; Copyright 2016, John M. Franck
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -265,36 +256,24 @@ the pinv.)</p>
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.9.5.1.6',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

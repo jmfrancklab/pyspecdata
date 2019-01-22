@@ -1,5 +1,5 @@
-pyspecdata\.core\.figlist\.twinx
-================================
+pyspecdata.core.figlist.twinx
+=============================
 
 .. currentmodule:: pyspecdata.core
 

@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.rename
-==========================
+pyspecdata.nddata.rename
+========================
 
 .. currentmodule:: pyspecdata
 

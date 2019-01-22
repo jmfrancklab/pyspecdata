@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.ft\_clear\_startpoints
-==========================================
+pyspecdata.nddata.ft\_clear\_startpoints
+========================================
 
 .. currentmodule:: pyspecdata
 

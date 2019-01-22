@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.hdf5\_write
-===============================
+pyspecdata.nddata.hdf5\_write
+=============================
 
 .. currentmodule:: pyspecdata
 

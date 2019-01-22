@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.runcopy
-===========================
+pyspecdata.nddata.runcopy
+=========================
 
 .. currentmodule:: pyspecdata
 

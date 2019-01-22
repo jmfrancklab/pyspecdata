@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.matchdims
-=============================
+pyspecdata.nddata.matchdims
+===========================
 
 .. currentmodule:: pyspecdata
 

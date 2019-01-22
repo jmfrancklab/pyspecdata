@@ -15,7 +15,7 @@ Full list of `nddata` methods
 =============================
 
 .. currentmodule:: pyspecdata
-.. comment generated the following with 
+.. comment generated the following (up to autoclass statement) with 
     .. autosummary:: 
         :toctree: generated
         core.nddata
@@ -29,13 +29,13 @@ Full list of `nddata` methods
    .. rubric:: Methods
 
    .. autosummary::
+      :toctree: generated
    
       ~nddata.__init__
       ~nddata.add_noise
       ~nddata.aligndata
       ~nddata.argmax
       ~nddata.argmin
-      ~nddata.angle
       ~nddata.axis
       ~nddata.axlen
       ~nddata.axn
@@ -49,9 +49,11 @@ Full list of `nddata` methods
       ~nddata.contour
       ~nddata.convolve
       ~nddata.copy
+      ~nddata.copy_props
       ~nddata.copyaxes
       ~nddata.cropped_log
       ~nddata.diff
+      ~nddata.dot
       ~nddata.extend
       ~nddata.extend_for_shear
       ~nddata.fld
@@ -59,6 +61,7 @@ Full list of `nddata` methods
       ~nddata.fromaxis
       ~nddata.ft
       ~nddata.ft_clear_startpoints
+      ~nddata.ft_state_to_str
       ~nddata.ftshift
       ~nddata.get_covariance
       ~nddata.get_error
@@ -70,9 +73,11 @@ Full list of `nddata` methods
       ~nddata.getaxisshape
       ~nddata.gnuplot_save
       ~nddata.hdf5_write
+      ~nddata.hdf_save_dict_to_group
       ~nddata.histogram
       ~nddata.human_units
       ~nddata.ift
+      ~nddata.indices
       ~nddata.inhomog_coords
       ~nddata.integrate
       ~nddata.interp
@@ -90,13 +95,13 @@ Full list of `nddata` methods
       ~nddata.mkd
       ~nddata.multimin
       ~nddata.name
+      ~nddata.nnls
       ~nddata.normalize
       ~nddata.oldtimey
       ~nddata.plot_labels
       ~nddata.polyfit
       ~nddata.popdim
       ~nddata.random_mask
-      ~nddata.real
       ~nddata.register_axis
       ~nddata.rename
       ~nddata.reorder
@@ -107,6 +112,8 @@ Full list of `nddata` methods
       ~nddata.run_avg
       ~nddata.run_nopop
       ~nddata.runcopy
+      ~nddata.secsy_transform
+      ~nddata.secsy_transform_manual
       ~nddata.set_error
       ~nddata.set_ft_prop
       ~nddata.set_plot_color
@@ -120,6 +127,7 @@ Full list of `nddata` methods
       ~nddata.squeeze
       ~nddata.sum
       ~nddata.sum_nopop
+      ~nddata.to_ppm
       ~nddata.unitify_axis
       ~nddata.units_texsafe
       ~nddata.unset_prop
@@ -133,6 +141,10 @@ Full list of `nddata` methods
 
    .. autosummary::
    
+      ~nddata.C
+      ~nddata.angle
+      ~nddata.imag
+      ~nddata.real
       ~nddata.want_to_prospa_decim_correct
 
 .. autoclass:: nddata

@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.chunkoff
-============================
+pyspecdata.nddata.chunkoff
+==========================
 
 .. currentmodule:: pyspecdata
 

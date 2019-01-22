@@ -1,5 +1,5 @@
-pyspecdata\.axis\_manipulation\.inhomog\_coords\.inhomog\_coords
-================================================================
+pyspecdata.axis\_manipulation.inhomog\_coords.inhomog\_coords
+=============================================================
 
 .. currentmodule:: pyspecdata.axis_manipulation.inhomog_coords
 

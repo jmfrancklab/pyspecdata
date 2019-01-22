@@ -1,5 +1,5 @@
-pyspecdata\.datadir
-===================
+pyspecdata.datadir
+==================
 
 .. automodule:: pyspecdata.datadir
 
@@ -8,13 +8,11 @@ pyspecdata\.datadir
    .. rubric:: Functions
 
    .. autosummary::
-      :toctree:
    
       dirformat
       getDATADIR
       get_notebook_dir
       grab_data_directory
-      rlinput
    
    
 

@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.to\_ppm
-===========================
+pyspecdata.nddata.to\_ppm
+=========================
 
 .. currentmodule:: pyspecdata
 

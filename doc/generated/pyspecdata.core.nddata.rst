@@ -1,5 +1,5 @@
-pyspecdata\.core\.nddata
-========================
+pyspecdata.core.nddata
+======================
 
 .. currentmodule:: pyspecdata.core
 
@@ -31,9 +31,11 @@ pyspecdata\.core\.nddata
       ~nddata.contour
       ~nddata.convolve
       ~nddata.copy
+      ~nddata.copy_props
       ~nddata.copyaxes
       ~nddata.cropped_log
       ~nddata.diff
+      ~nddata.dot
       ~nddata.extend
       ~nddata.extend_for_shear
       ~nddata.fld
@@ -53,6 +55,7 @@ pyspecdata\.core\.nddata
       ~nddata.getaxisshape
       ~nddata.gnuplot_save
       ~nddata.hdf5_write
+      ~nddata.hdf_save_dict_to_group
       ~nddata.histogram
       ~nddata.human_units
       ~nddata.ift
@@ -74,6 +77,7 @@ pyspecdata\.core\.nddata
       ~nddata.mkd
       ~nddata.multimin
       ~nddata.name
+      ~nddata.nnls
       ~nddata.normalize
       ~nddata.oldtimey
       ~nddata.plot_labels
@@ -114,5 +118,15 @@ pyspecdata\.core\.nddata
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~nddata.C
+      ~nddata.angle
+      ~nddata.imag
+      ~nddata.real
+      ~nddata.want_to_prospa_decim_correct
    
    

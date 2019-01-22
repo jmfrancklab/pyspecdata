@@ -1,5 +1,5 @@
-pyspecdata\.core\.figlist\.adjust\_spines
-=========================================
+pyspecdata.core.figlist.adjust\_spines
+======================================
 
 .. currentmodule:: pyspecdata.core
 

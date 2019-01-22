@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.waterfall
-=============================
+pyspecdata.nddata.waterfall
+===========================
 
 .. currentmodule:: pyspecdata
 

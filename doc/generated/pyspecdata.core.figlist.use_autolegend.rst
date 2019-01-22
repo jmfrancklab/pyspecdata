@@ -1,5 +1,5 @@
-pyspecdata\.core\.figlist\.use\_autolegend
-==========================================
+pyspecdata.core.figlist.use\_autolegend
+=======================================
 
 .. currentmodule:: pyspecdata.core
 

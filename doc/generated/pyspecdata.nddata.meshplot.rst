@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.meshplot
-============================
+pyspecdata.nddata.meshplot
+==========================
 
 .. currentmodule:: pyspecdata
 

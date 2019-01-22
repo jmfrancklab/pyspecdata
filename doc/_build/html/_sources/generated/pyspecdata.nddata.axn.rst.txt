@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.axn
-=======================
+pyspecdata.nddata.axn
+=====================
 
 .. currentmodule:: pyspecdata
 

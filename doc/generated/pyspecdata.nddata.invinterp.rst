@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.invinterp
-=============================
+pyspecdata.nddata.invinterp
+===========================
 
 .. currentmodule:: pyspecdata
 

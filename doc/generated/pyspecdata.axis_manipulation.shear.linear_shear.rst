@@ -1,5 +1,5 @@
-pyspecdata\.axis\_manipulation\.shear\.linear\_shear
-====================================================
+pyspecdata.axis\_manipulation.shear.linear\_shear
+=================================================
 
 .. currentmodule:: pyspecdata.axis_manipulation.shear
 

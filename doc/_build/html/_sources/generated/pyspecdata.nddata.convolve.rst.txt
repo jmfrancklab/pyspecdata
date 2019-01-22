@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.convolve
-============================
+pyspecdata.nddata.convolve
+==========================
 
 .. currentmodule:: pyspecdata
 

@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.check\_axis\_coords\_errors
-===============================================
+pyspecdata.nddata.check\_axis\_coords\_errors
+=============================================
 
 .. currentmodule:: pyspecdata
 

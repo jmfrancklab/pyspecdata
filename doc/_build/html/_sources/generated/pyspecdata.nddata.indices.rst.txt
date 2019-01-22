@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.indices
-===========================
+pyspecdata.nddata.indices
+=========================
 
 .. currentmodule:: pyspecdata
 

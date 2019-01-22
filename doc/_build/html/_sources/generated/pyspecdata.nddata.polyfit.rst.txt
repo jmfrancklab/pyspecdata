@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.polyfit
-===========================
+pyspecdata.nddata.polyfit
+=========================
 
 .. currentmodule:: pyspecdata
 

@@ -1,5 +1,5 @@
-pyspecdata\.core\.figlist\.show
-===============================
+pyspecdata.core.figlist.show
+============================
 
 .. currentmodule:: pyspecdata.core
 

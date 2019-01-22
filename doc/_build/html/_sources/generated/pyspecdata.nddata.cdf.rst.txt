@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.cdf
-=======================
+pyspecdata.nddata.cdf
+=====================
 
 .. currentmodule:: pyspecdata
 

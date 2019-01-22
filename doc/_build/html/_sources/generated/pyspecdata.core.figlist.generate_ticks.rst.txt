@@ -1,5 +1,5 @@
-pyspecdata\.core\.figlist\.generate\_ticks
-==========================================
+pyspecdata.core.figlist.generate\_ticks
+=======================================
 
 .. currentmodule:: pyspecdata.core
 

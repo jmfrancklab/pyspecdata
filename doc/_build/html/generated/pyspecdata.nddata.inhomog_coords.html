@@ -24,25 +24,19 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="pySpecData 0.9.5.1.6 documentation" href="../index.html"/> 
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyspecdata.nddata.integrate" href="pyspecdata.nddata.integrate.html" />
+    <link rel="prev" title="pyspecdata.nddata.indices" href="pyspecdata.nddata.indices.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -88,9 +82,24 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../notebook.html#setting-up-the-notebook">Setting up the notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebook.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebook.html#running-the-notebook">Running the notebook</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../notebook.html#how-it-works">How it works</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../notebook.html#the-latex-end">The LaTeX end</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../notebook.html#the-python-end">The python end</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../pyspecdata.html">N-dimensional Data (nddata)</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../pyspecdata.html#full-list-of-nddata-methods">Full list of <cite>nddata</cite> methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../latexscripts.html">Documentation of Notebook Helper Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
@@ -105,7 +114,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">pySpecData</a>
@@ -113,9 +122,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -137,6 +147,10 @@
   <ul class="wy-breadcrumbs">
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../notebook.html">LaTeX Notebook Functionality</a> &raquo;</li>
+        
+          <li><a href="../pyspecdata.html">N-dimensional Data (nddata)</a> &raquo;</li>
         
       <li>pyspecdata.nddata.inhomog_coords</li>
     
@@ -162,17 +176,17 @@
 <dl class="method">
 <dt id="pyspecdata.nddata.inhomog_coords">
 <code class="descclassname">nddata.</code><code class="descname">inhomog_coords</code><span class="sig-paren">(</span><em>direct_dim</em>, <em>indirect_dim</em>, <em>tolerance=1e-05</em>, <em>method='linear'</em>, <em>plot_name=None</em>, <em>fl=None</em>, <em>debug_kwargs={}</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.inhomog_coords" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply the “inhomogeneity transform,” which rotates the data by <span class="math">\(45^{\circ}\)</span>, and then mirrors the portion with <span class="math">\(t_2&lt;0\)</span> in order to transform from a <span class="math">\((t_1,t_2)\)</span> coordinate system to a <span class="math">\((t_{inh},t_{homog})\)</span> coordinate system.</p>
+<dd><p>Apply the “inhomogeneity transform,” which rotates the data by <span class="math notranslate nohighlight">\(45^{\circ}\)</span>, and then mirrors the portion with <span class="math notranslate nohighlight">\(t_2&lt;0\)</span> in order to transform from a <span class="math notranslate nohighlight">\((t_1,t_2)\)</span> coordinate system to a <span class="math notranslate nohighlight">\((t_{inh},t_{homog})\)</span> coordinate system.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>direct_dim</strong> (<a class="reference internal" href="../units.html#pyspecdata.units.units.str" title="pyspecdata.units.units.str"><em>str</em></a>) – Label of the direct dimension (typically <span class="math">\(t_2\)</span>)</li>
-<li><strong>indirect_dim</strong> (<a class="reference internal" href="../units.html#pyspecdata.units.units.str" title="pyspecdata.units.units.str"><em>str</em></a>) – Label of the indirect dimension (typically <span class="math">\(t_1\)</span>)</li>
+<li><strong>direct_dim</strong> (<em>str</em>) – Label of the direct dimension (typically <span class="math notranslate nohighlight">\(t_2\)</span>)</li>
+<li><strong>indirect_dim</strong> (<em>str</em>) – Label of the indirect dimension (typically <span class="math notranslate nohighlight">\(t_1\)</span>)</li>
 <li><strong>method</strong> (<em>'linear'</em><em>, </em><em>'fourier'</em>) – The interpolation method used to rotate the data and to mirror the data.
 <strong>Note</strong> currently, both use a fourier-based mirroring method.</li>
-<li><strong>plot_name</strong> (<a class="reference internal" href="../units.html#pyspecdata.units.units.str" title="pyspecdata.units.units.str"><em>str</em></a>) – the base name for the plots that are generated</li>
+<li><strong>plot_name</strong> (<em>str</em>) – the base name for the plots that are generated</li>
 <li><strong>fl</strong> (<em>figlist_var</em>) – </li>
 <li><strong>debug_kwargs</strong> (<em>dict</em>) – <p>with keys:</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -196,22 +210,29 @@
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pyspecdata.nddata.integrate.html" class="btn btn-neutral float-right" title="pyspecdata.nddata.integrate" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pyspecdata.nddata.indices.html" class="btn btn-neutral" title="pyspecdata.nddata.indices" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, John M. Franck.
+        &copy; Copyright 2016, John M. Franck
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -226,36 +247,24 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.9.5.1.6',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

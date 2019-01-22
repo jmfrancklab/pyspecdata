@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.replicate\_units
-====================================
+pyspecdata.nddata.replicate\_units
+==================================
 
 .. currentmodule:: pyspecdata
 

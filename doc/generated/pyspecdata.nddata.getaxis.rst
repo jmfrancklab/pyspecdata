@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.getaxis
-===========================
+pyspecdata.nddata.getaxis
+=========================
 
 .. currentmodule:: pyspecdata
 

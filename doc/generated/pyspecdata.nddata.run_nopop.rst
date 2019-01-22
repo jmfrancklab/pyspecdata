@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.run\_nopop
-==============================
+pyspecdata.nddata.run\_nopop
+============================
 
 .. currentmodule:: pyspecdata
 

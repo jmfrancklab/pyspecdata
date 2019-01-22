@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.multimin
-============================
+pyspecdata.nddata.multimin
+==========================
 
 .. currentmodule:: pyspecdata
 

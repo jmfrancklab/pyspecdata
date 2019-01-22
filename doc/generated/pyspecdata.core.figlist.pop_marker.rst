@@ -1,5 +1,5 @@
-pyspecdata\.core\.figlist\.pop\_marker
-======================================
+pyspecdata.core.figlist.pop\_marker
+===================================
 
 .. currentmodule:: pyspecdata.core
 

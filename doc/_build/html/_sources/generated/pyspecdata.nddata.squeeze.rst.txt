@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.squeeze
-===========================
+pyspecdata.nddata.squeeze
+=========================
 
 .. currentmodule:: pyspecdata
 

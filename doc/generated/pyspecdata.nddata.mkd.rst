@@ -1,5 +1,5 @@
-pyspecdata\.nddata\.mkd
-=======================
+pyspecdata.nddata.mkd
+=====================
 
 .. currentmodule:: pyspecdata
 
