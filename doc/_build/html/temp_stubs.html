@@ -159,7 +159,7 @@
 <dd><p>Find the file  given by the regular expression <cite>searchstring</cite> inside the directory identified by <cite>exp_type</cite>, load the nddata object, and postprocess with the function <cite>postproc</cite>.</p>
 <p>It looks at the top level of the directory first, and if that fails, starts to look recursively.
 Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.</p>
-<p>It calls <a class="reference internal" href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
+<p>It calls <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -203,18 +203,18 @@ This, in turn, is used to choose the type of post-processing.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">dimname:</th><td class="field-body">passed to <a class="reference internal" href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
+<tr class="field-odd field"><th class="field-name">dimname:</th><td class="field-body">passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
 </tr>
-<tr class="field-even field"><th class="field-name">return_acq:</th><td class="field-body">passed to <a class="reference internal" href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
+<tr class="field-even field"><th class="field-name">return_acq:</th><td class="field-body">passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
 </tr>
-<tr class="field-odd field"><th class="field-name">add_sizes:</th><td class="field-body">passed to <a class="reference internal" href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
+<tr class="field-odd field"><th class="field-name">add_sizes:</th><td class="field-body">passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
 </tr>
-<tr class="field-even field"><th class="field-name">add_dims:</th><td class="field-body">passed to <a class="reference internal" href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
+<tr class="field-even field"><th class="field-name">add_dims:</th><td class="field-body">passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
 </tr>
-<tr class="field-odd field"><th class="field-name">use_sweep:</th><td class="field-body">passed to <a class="reference internal" href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
+<tr class="field-odd field"><th class="field-name">use_sweep:</th><td class="field-body">passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">indirect_dimlabels:</th></tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body">passed to <a class="reference internal" href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
 </tr>
 </tbody>
 </table>
@@ -258,7 +258,7 @@ or else, <cite>None</cite>, indicating that this is part of a pair of
 files that should be skipped</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a> or None</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a> or None</p>
 </td>
 </tr>
 </tbody>

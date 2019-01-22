@@ -1,0 +1,30 @@
+pyspecdata.file\_saving package
+===============================
+
+Submodules
+----------
+
+pyspecdata.file\_saving.hdf5\_write module
+------------------------------------------
+
+.. automodule:: pyspecdata.file_saving.hdf5_write
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyspecdata.file\_saving.hdf\_save\_dict\_to\_group module
+---------------------------------------------------------
+
+.. automodule:: pyspecdata.file_saving.hdf_save_dict_to_group
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: pyspecdata.file_saving
+    :members:
+    :undoc-members:
+    :show-inheritance:

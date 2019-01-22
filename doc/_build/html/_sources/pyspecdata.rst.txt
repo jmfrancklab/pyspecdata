@@ -147,6 +147,3 @@ Full list of `nddata` methods
       ~nddata.real
       ~nddata.want_to_prospa_decim_correct
 
-.. autoclass:: nddata
-    :members:
-.. (comment) the :members: properties is needed so it pulls all the members of the class
