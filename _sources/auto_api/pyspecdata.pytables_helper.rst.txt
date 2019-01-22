@@ -1,0 +1,22 @@
+pyspecdata.pytables\_helper package
+===================================
+
+Submodules
+----------
+
+pyspecdata.pytables\_helper.functions module
+--------------------------------------------
+
+.. automodule:: pyspecdata.pytables_helper.functions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: pyspecdata.pytables_helper
+    :members:
+    :undoc-members:
+    :show-inheritance:
