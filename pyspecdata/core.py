@@ -4413,6 +4413,7 @@ class nddata (object):
             fit_axis = newaxis_dict[fitdim_name]
         fit_axis = nddata(fit_axis, fitdim_name)
         data_axis = self.fromaxis(dimname)
+        data_axis.squeeze()
         data_axis, fit_axis = data_axis.aligndata(fit_axis)
         K = kernel_func(data_axis, fit_axis)
         logger.debug(strm('the size of the kernel is',ndshape(K),'or, raw',K.data.shape))

@@ -186,5 +186,5 @@ def redim_F_to_C(a):
     return a.ravel(order='F').reshape(a.shape[::-1], order='C')# 'C' not required, but for clarity
 def redim_C_to_F(a):
     "see redim_F_to_C"
-    assert (not isfortran(a)),"input is not c order!"
+    #assert (not isfortran(a)),"input is not c order!"
     return a.ravel(order='C').reshape(a.shape[::-1], order='F')

@@ -1,3 +1,4 @@
+
 # coding: utf-8
 
 # 
@@ -58,6 +59,9 @@ P.setaxis('R',R.ravel())
 
 
 # Vary R as we move along the rows
+
+# 
+
 
 fl.next('distribution function')
 fl.plot(P)
@@ -146,6 +150,8 @@ L_curve(l, r_norm, x_norm, markersize=10, alpha=0.5, label='manual loop')
 
 # ## Vectorized version of lambda curve
 
+# 
+
 
 l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
 @timeit
@@ -163,25 +169,10 @@ logger.debug(strm("check dtype of residual:",x.get_prop('nnls_residual').data.dt
 L_curve(l, x.get_prop('nnls_residual').data, x.C.run(linalg.norm,'R').data, markersize=5, alpha=0.5, label='compiled loop')
 
 
-# Test for the accuracy of the "1.5D" code
-# unlike for the numpy version, I skip straight to the
-# vectorized/parallel version.
-
-
-l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
-test_data_2d = test_data * nddata(r_[1,1,1],r'\Omega')
-@timeit
-def multifreq_lcurve(l):
-    return test_data_2d.C.nnls('t',
-            R,lambda x,y: exp(-y*x), l=l)
-x = vec_lcurve(l)
-
-# 
-
-fl.next('L-curve')
-L_curve(l, x.get_prop('nnls_residual').data, x.C.run(linalg.norm,'R').data, markersize=5, alpha=0.5, label='compiled loop')
 # and show the final result
 # here, I omit the SVD (allows negative) result
+
+# 
 
 
 fl.next(r'show result where $\lambda$ set to knee')
@@ -195,4 +186,97 @@ if in_notebook:
 else:
     print "not in notebook, calling show"
     fl.show()
+
+
+# Test for the accuracy of the "1.5D" code
+# unlike for the numpy version, I skip straight to the
+# vectorized/parallel version.
+
+# 
+
+
+def distribution_2D(x_center,y_center,x_spread,y_spread,x_amp,y_amp):
+    this_distribution = x_amp*y_amp*exp(-(x_scale-x_center)**2/2/x_spread**2
+                           -(y_scale-y_center)**2/2/y_spread**2)
+    return this_distribution
+
+
+# 
+
+
+endp = 0.2
+R = r_[1.:100:100j] # distribution of T2 relaxation rates
+x_scale = nddata(R.copy(),'R')
+t = nddata(r_[1e-3:endp:2048j],'t') # column vectors give functions of time
+y_scale = t.C
+peaks_2D = [(20,1,0.8,0.025,5e-3,1),
+           (30,1,0.8,0.075,1e-2,1),
+           (80,5,1,0.175,1e-2,1)]
+calcd = False
+for x_mu,x_sigma,x_A,y_mu,y_sigma,y_A in peaks_2D:
+    if not calcd:
+        data_dist = distribution_2D(x_center=x_mu,
+                                   y_center=y_mu,
+                                   x_spread=x_sigma,
+                                   y_spread=y_sigma,
+                                   x_amp=x_A,
+                                   y_amp=y_A)
+        calcd = True
+    else:
+        data_dist += distribution_2D(x_center=x_mu,
+                                           y_center=y_mu,
+                                           x_spread=x_sigma,
+                                           y_spread=y_sigma,
+                                           x_amp=x_A,
+                                           y_amp=y_A)
+
+
+# 
+
+
+figure();title('Test 1.5D true distribution')
+image(data_dist)
+n_indirect = 128
+t_indirect = nddata(linspace(endp/n_indirect,endp,n_indirect),'t_indirect')
+kernel = exp(-t_indirect*x_scale)
+test_data_2d = kernel.C.dot(data_dist)
+figure();title('Test 1.5D dataset')
+test_data_2d.add_noise(0.1)
+
+
+# 
+
+
+l = sqrt(logspace(-8,4,30))
+@timeit
+def multifreq_lcurve(l):
+    return test_data_2d.C.nnls('t_indirect',
+            x_scale,lambda x,y: exp(-y*x), l=l)
+x = multifreq_lcurve(l)
+
+
+# 
+
+
+fl.next('L-curve')
+L_curve(l, x.get_prop('nnls_residual').C.sum('t').data,
+        x.C.run(linalg.norm,'R').sum('t').data, markersize=5, alpha=0.5,
+        label='compiled loop')
+
+
+# 
+
+
+heel_lambda = 0.204
+
+
+# Final result for 1.5D test data
+
+# 
+
+
+fl.next(r'show result where $\lambda$ set to knee')
+result = test_data_2d.C.nnls('t_indirect',x_scale,
+                    lambda x,y: exp(-y*x), l=heel_lambda)
+fl.image(result)
 
