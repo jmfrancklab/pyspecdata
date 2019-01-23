@@ -4390,6 +4390,7 @@ class nddata (object):
             The regularized dimension is always last
             (innermost).
         """
+        logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?',isfortran(self.data)))
         assert type(dimname) is str, "first argument is dimension name"
         if type(newaxis_dict) is dict:
             assert len(newaxis_dict) == 1, "currently only set up for 1D"
@@ -4414,10 +4415,11 @@ class nddata (object):
         fit_axis = nddata(fit_axis, fitdim_name)
         data_axis = self.fromaxis(dimname)
         data_axis, fit_axis = data_axis.aligndata(fit_axis)
-        K = kernel_func(data_axis, fit_axis)
+        K = kernel_func(data_axis, fit_axis).squeeze()
+        logger.debug(strm('K dimlabels',K.dimlabels,'and raw shape',K.data.shape))
         logger.debug(strm('the size of the kernel is',ndshape(K),'or, raw',K.data.shape))
         self.reorder(dimname, first=False) # make the dimension we will be regularizing innermost
-        logger.debug(strm('shape of the data is',ndshape(self)))
+        logger.debug(strm('shape of the data is',ndshape(self),'is it fortran ordered?',isfortran(self.data)))
         data_fornnls = self.data
         if len(data_fornnls.shape) > 2:
             data_fornnls = data_fornnls.reshape((prod(
@@ -5545,10 +5547,22 @@ class nddata (object):
         else:
             raise ValueError("Along the axis '"+axis_name+"', the field '"+which_field+"' does not represent an axis that is repeated one or more times!  The counts for how many times each element along the field is used is "+repr(index_count))
             return
-    def squeeze(self,verbose = False):
-        'squeeze singleton dimensions -- return a list of the labels for the axes that are dropped'
+    def squeeze(self,return_dropped=False):
+        r'''squeeze singleton dimensions
+        
+        Parameters
+        ==========
+        return_dropped: bool (default False)
+           return a list of the dimensions that were dropped as a second argument 
+        Returns
+        =======
+        self
+
+        return_dropped: list
+            (optional, only if return_dropped is True)
+        '''
         mask = array(self.data.shape) > 1
-        if verbose: print zip(mask,self.dimlabels)
+        logger.debug(strm(zip(mask,self.dimlabels)))
         self.data = self.data.squeeze()
         retval = []
         if type(self.axis_coords) is list:
@@ -5563,7 +5577,10 @@ class nddata (object):
             self.axis_coords_error = [v for j,v in enumerate(self.axis_coords_error) if mask[j]]
         if type(self.axis_coords_units) is list:
             self.axis_coords_units = [v for j,v in enumerate(self.axis_coords_units) if mask[j]]
-        return retval
+        if return_dropped:
+            return self, retval
+        else:
+            return self
     #}}}
     #{{{ messing with data -- get, set, and copy
     def __getslice__(self,*args):

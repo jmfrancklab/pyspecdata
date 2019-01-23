@@ -174,12 +174,13 @@ test_data_2d = test_data * nddata(r_[1,1,1],r'\Omega')
 def multifreq_lcurve(l):
     return test_data_2d.C.nnls('t',
             R,lambda x,y: exp(-y*x), l=l)
-x = vec_lcurve(l)
+x = multifreq_lcurve(l)
 
 # 
 
 fl.next('L-curve')
-L_curve(l, x.get_prop('nnls_residual').data, x.C.run(linalg.norm,'R').data, markersize=5, alpha=0.5, label='compiled loop')
+L_curve(l, x.get_prop('nnls_residual')[r'\Omega',0].data, x.C.run(linalg.norm,'R')[r'\Omega',0].data, markersize=5, alpha=0.5, label='compiled loop')
+
 # and show the final result
 # here, I omit the SVD (allows negative) result
 
