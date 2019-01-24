@@ -5678,15 +5678,6 @@ class nddata (object):
         self.data = self.data.reshape(newshape)
         self.dimlabels = newnames
         return self
-    def chunkoff(self,axisin,newaxes,newshapes):
-        r'''Break chunks off of the dimension given by `axisin`.
-
-        Specifically, subdivide it into several dimensions given by
-        the names `newaxes` with `newshapes`.  If the shape of the
-        data allows, retain `axisin` as the "outer" dimension.'''
-        axesout = [axisin]+newaxes
-        shapesout = [ndshape(self)[axisin]/prod(newshapes)]+newshapes
-        return self.chunk(axisin,axesout,shapesout)
     def chunk_auto(self,axis_name,which_field,verbose = False,dimname = None):
         r'''assuming that axis "axis_name" is currently labeled with a structured array, choose one field ("which_field") of that structured array to generate a new dimension
         Note that for now, by definition, no error is allowed on the axes.
