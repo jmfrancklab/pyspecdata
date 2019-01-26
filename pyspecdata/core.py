@@ -4487,12 +4487,80 @@ class nddata (object):
             if len(data_fornnls.shape) > 2:
                 logger.debug(strm('Reshpaing data..'))
                 data_fornnls = data_fornnls.reshape((prod(data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
-            retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=l)
+            
+            if l == 'BRD':
+                def chi(x_vec,val):
+                    return 0.5*dot(x_vec.T,dot(dd_chi(G(x_vec),val**2),x_vec)) - dot(x_vec.T,data_fornnls[:,newaxis])
+                def d_chi(x_vec,val):
+                    return dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
+                def dd_chi(G,val):
+                    return G + (val**2)*eye(shape(G)[0])
+                def G(x_vec):
+                    return dot(K,dot(square_heaviside(x_vec),K.T))
+                def H(product):
+                    if product <= 0:
+                        return 0
+                    if product > 0:
+                        return 1
+                def square_heaviside(x_vec):
+                    diag_heavi = []
+                    for q in xrange(shape(K.T)[0]):
+                        pull_val = dot(K.T[q,:],x_vec)
+                        temp = pull_val[0]
+                        temp = H(temp)
+                        diag_heavi.append(temp)
+                    diag_heavi = array(diag_heavi)
+                    square_heavi = diag_heavi*eye(shape(diag_heavi)[0])
+                    return square_heavi
+                def optimize_alpha(input_vec,val):
+                    alpha_converged = False
+                    factor = sqrt(s1*s2)
+                    T = linalg.inv(dd_chi(G(input_vec),val**2))
+                    dot_product = dot(input_vec.T,dot(T,input_vec))
+                    ans = dot_product*factor
+                    ans = ans/linalg.norm(input_vec)/dot_product
+                    tol = 1e-3
+                    if abs(ans-val**2) <= tol:
+                        logger.debug(strm('ALPHA HAS CONVERGED.'))
+                        alpha_converged = True
+                        return ans,alpha_converged
+                    return ans,alpha_converged
+                def newton_min(input_vec,val):
+                    fder = dd_chi(G(input_vec),val)
+                    fval = d_chi(input_vec,val)
+                    return (input_vec + dot(linalg.inv(fder),fval))
+                def mod_BRD(guess,maxiter=20):
+                    smoothing_param = guess
+                    alpha_converged = False
+                    for iter in xrange(maxiter):
+                        logger.debug(strm('ITERATION NO.',iter))
+                        logger.debug(strm('CURRENT LAMBDA',smoothing_param))
+                        retval,residual = this_nnls.nnls_regularized(K,data_fornnls,l=smoothing_param)
+                        f_vec = retval[:,newaxis]
+                        alpha = smoothing_param**2
+                        c_vec = dot(K,f_vec) - data_fornnls[:,newaxis]
+                        c_vec /= -1*alpha
+                        c_update = newton_min(c_vec,smoothing_param)
+                        alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
+                        lambda_update = sqrt(alpha_update[0,0])
+                        if alpha_converged:
+                            logger.debug(strm('*** OPTIMIZED LAMBDA',lambda_update,'***'))
+                            break
+                        if not alpha_converged:
+                            logger.debug(strm('UPDATED LAMBDA',lambda_update))
+                            smoothing_param = lambda_update
+                        if iter == maxiter-1:
+                            logger.debug(strm('DID NOT CONVERGE.'))
+                    return lambda_update
+                retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=mod_BRD(guess=1.0))
+            else:
+                retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=l)
             logger.debug(strm('coming back from fortran, residual type is',type(residual))+ strm(residual.dtype if type(residual) is ndarray else ''))
             newshape = []
             if not isscalar(l):
                 newshape.append(len(l))
-            #newshape += list(self.data.shape)[:-1]
+            logger.debug(strm('test***',list(self.data.shape)[:-1]))
+            #newshape += list(self.data.shape)[:-1] # this would return parametric axis
             newshape.append(ndshape(fit_axis1)[fitdim_name1])
             newshape.append(ndshape(fit_axis2)[fitdim_name2])
             logger.debug(strm('before mkd, shape of the data is',ndshape(self),'len of axis_coords_error',len(self.axis_coords_error)))
