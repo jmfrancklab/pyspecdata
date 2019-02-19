@@ -11,7 +11,7 @@ def inside_sphinx():
     else:
         return False
 if not inside_sphinx():
-    from pylab import *
+    from numpy import *
 else:
     # {{{ sphinx dummy objects
     #      there is a better way of doing sphinx dummy objects, but this seems to work
