@@ -4351,9 +4351,25 @@ class nddata (object):
     def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
         r"""Perform regularized non-negative least-squares "fit" on self.
 
-        .. todo::
-            someone can explain the math here
+        Capable of solving for solution in 1 or 2 dimensions.
+
+        We seek to minimize
+        :math:`Q = \| Ax - b \|_2 + \|\lambda x\|_2`
+        in order to obtain solution vector :math:`x` subject to non-negativity constraint
+        given input matrix :math:`A`, the kernel, and input vector :math:`b`, the data.
+
+        The first term assesses agreement between the fit :math:`Ax` and the data :math:`b`,
+        and the second term accounts for noise with the regularization parameter :math:`\lambda`
+        according to Tikhonov regularization.
+
+        To perform regularized minimization in 2 dimensions, set `l` to :str:`BRD` and provide a
+        tuple of parameters :str:`dimname`, :nddata:`newaxis_dict`, and :function:`kernel_func`.
+        Algorithm described in Venkataramanan et al. 2002 is performed which determines optimal :math:`\lambda`
+        for the data (DOI:10.1109/78.995059).
         
+        See: https://en.wikipedia.org/wiki/Non-negative_least_squares,
+        https://en.wikipedia.org/wiki/Tikhonov_regularization
+         
         Parameters
         ==========
         dimname: str
@@ -4375,10 +4391,12 @@ class nddata (object):
             and the second argument is the "fit" variable
             (in the example above, this would be something like
             ``lambda x,y: exp(-x*y)``)
-        l : double (default 0)
+        l : double (default 0) or str
             the regularization parameter
             :math:`lambda` -- if this is set to 0, the algorithm reverts to
-            standard nnls
+            standard nnls.
+            If this is set to :str:`BRD`, then algorithm expects tuple of each parameter
+            described above in order to perform a 2-dimensional fit.
 
         Returns
         =======
