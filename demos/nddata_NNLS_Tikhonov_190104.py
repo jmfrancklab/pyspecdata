@@ -31,12 +31,12 @@ def timeit(method,n_times=5):
             name = kw.get('log_name', method.__name__.upper())
             kw['log_time'][name] = int(time_diff * 1000)
         else:
-            print '%r  %2.2f ms (average of %d runs)' %                   (method.__name__, time_diff * 1000, n_times) + l_line
+            print '%r  %2.2f ms (average of %d runs)' %(method.__name__, time_diff * 1000, n_times) + l_line
         return result
     return timed
 
 
-#
+# 
 
 
 R = r_[1.:100:500j] # distribution of T2 relaxation rates
@@ -59,7 +59,7 @@ fl.next('distribution function')
 fl.plot(P)
 
 
-#
+# 
 
 
 endp = 0.2
@@ -128,7 +128,7 @@ x,x_norm,r_norm = nonvec_lcurve(l)
 #x_norm = map(linalg.norm,x) # to be fair, this calculation is done outside the timing, below
 
 
-#
+# 
 
 
 fl.next('L-curve', legend=True)
@@ -146,12 +146,13 @@ def vec_lcurve(l):
 x = vec_lcurve(l)
 
 
-#
+# 
 
 
 fl.next('L-curve')
 logger.debug(strm("check dtype of residual:",x.get_prop('nnls_residual').data.dtype))
-L_curve(l, x.get_prop('nnls_residual').data, x.C.run(linalg.norm,'R').data, markersize=5, alpha=0.5, label='compiled loop')
+L_curve(l, x.get_prop('nnls_residual').data, x.C.run(linalg.norm,'R').data,
+        markersize=5, alpha=0.5, label='compiled loop')
 
 
 # Test for the accuracy of the "1.5D" code
@@ -170,7 +171,9 @@ x = multifreq_lcurve(l)
 # 
 
 fl.next('L-curve')
-L_curve(l, x.get_prop('nnls_residual')[r'\Omega',0].data, x.C.run(linalg.norm,'R')[r'\Omega',0].data, markersize=5, alpha=0.5, label='compiled loop')
+L_curve(l, x.get_prop('nnls_residual')[r'\Omega',0].data,
+        x.C.run(linalg.norm,'R')[r'\Omega',0].data, markersize=5, alpha=0.5,
+        label='compiled loop')
 
 # and show the final result
 # here, I omit the SVD (allows negative) result
