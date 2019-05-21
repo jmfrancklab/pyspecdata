@@ -1,7 +1,5 @@
-
 # coding: utf-8
 
-# In[1]:
 
 
 try:
@@ -19,9 +17,6 @@ init_logging(level='debug')
 
 # got the following from here:
 # https://medium.com/pythonhive/python-decorator-to-measure-the-execution-time-of-methods-fa04cb6bb36d
-
-# In[2]:
-
 
 l_line = ''
 def timeit(method,n_times=5):
@@ -41,6 +36,7 @@ def timeit(method,n_times=5):
     return timed
 
 
+#
 
 
 R = r_[1.:100:500j] # distribution of T2 relaxation rates
@@ -59,13 +55,11 @@ P.setaxis('R',R.ravel())
 
 # Vary R as we move along the rows
 
-# In[3]:
-
-
 fl.next('distribution function')
 fl.plot(P)
 
 
+#
 
 
 endp = 0.2
@@ -83,12 +77,6 @@ xlim(-endp/10,endp)
 
 # Do the basic NNLS fit
 
-# In[4]:
-
-
-print ndshape(test_data)
-
-
 
 
 logger.debug(strm('before nnls, shape of the data is',ndshape(test_data),"len of axis_coords_error",len(test_data.axis_coords_error)))
@@ -104,7 +92,6 @@ fl.plot(test_fit)
 
 # Now add regularization
 
-# In[5]:
 
 
 def L_curve(l,r_norm,x_norm, **kwargs):
@@ -126,8 +113,6 @@ def L_curve(l,r_norm,x_norm, **kwargs):
     xlabel('$\log_{10}($ residual $)$')
 
 
-
-
 l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
 @timeit
 def nonvec_lcurve(l):
@@ -143,6 +128,7 @@ x,x_norm,r_norm = nonvec_lcurve(l)
 #x_norm = map(linalg.norm,x) # to be fair, this calculation is done outside the timing, below
 
 
+#
 
 
 fl.next('L-curve', legend=True)
@@ -150,8 +136,6 @@ L_curve(l, r_norm, x_norm, markersize=10, alpha=0.5, label='manual loop')
 
 
 # ## Vectorized version of lambda curve
-
-# In[6]:
 
 
 l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
@@ -162,6 +146,7 @@ def vec_lcurve(l):
 x = vec_lcurve(l)
 
 
+#
 
 
 fl.next('L-curve')
@@ -169,10 +154,26 @@ logger.debug(strm("check dtype of residual:",x.get_prop('nnls_residual').data.dt
 L_curve(l, x.get_prop('nnls_residual').data, x.C.run(linalg.norm,'R').data, markersize=5, alpha=0.5, label='compiled loop')
 
 
+# Test for the accuracy of the "1.5D" code
+# unlike for the numpy version, I skip straight to the
+# vectorized/parallel version.
+
+
+l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
+test_data_2d = test_data * nddata(r_[1,1,1],r'\Omega')
+@timeit
+def multifreq_lcurve(l):
+    return test_data_2d.C.nnls('t',
+            R,lambda x,y: exp(-y*x), l=l)
+x = multifreq_lcurve(l)
+
+# 
+
+fl.next('L-curve')
+L_curve(l, x.get_prop('nnls_residual')[r'\Omega',0].data, x.C.run(linalg.norm,'R')[r'\Omega',0].data, markersize=5, alpha=0.5, label='compiled loop')
+
 # and show the final result
 # here, I omit the SVD (allows negative) result
-
-# In[7]:
 
 
 fl.next(r'show result where $\lambda$ set to knee')
@@ -190,16 +191,10 @@ else:
 
 # ## Testing 1.5D code
 
-# In[8]:
-
-
 def distribution_2D(x_center,y_center,x_spread,y_spread,x_amp,y_amp):
     this_distribution = x_amp*y_amp*exp(-(x_scale-x_center)**2/2/x_spread**2
                            -(y_scale-y_center)**2/2/y_spread**2)
     return this_distribution
-
-
-
 
 endp = 0.2
 R = r_[1.:100:100j] # distribution of T2 relaxation rates
@@ -239,9 +234,6 @@ test_data_2d = kernel.C.dot(data_dist)
 figure();title('Test 1.5D dataset')
 test_data_2d.add_noise(0.1)
 
-
-
-
 l = sqrt(logspace(-8,4,10))
 #@timeit
 def multifreq_lcurve(l):
@@ -249,30 +241,17 @@ def multifreq_lcurve(l):
             x_scale,lambda x,y: exp(-y*x), l=l)
 x = multifreq_lcurve(l)
 
-
-
-
 print ndshape(test_data_2d)
 print ndshape(x)
-
-
-
 
 fl.next('L-curve')
 L_curve(l, x.get_prop('nnls_residual').C.sum('t').data,
         x.C.run(linalg.norm,'R').sum('t').data, markersize=5, alpha=0.5,
         label='compiled loop')
 
-
-
-
 heel_lambda = 0.215
 
-
 # Final result for 1.5D test data
-
-# In[9]:
-
 
 fl.next(r'show result where $\lambda$ set to knee')
 result = test_data_2d.C.nnls('t_indirect',x_scale,
@@ -281,9 +260,6 @@ fl.image(result)
 
 
 # ## Testing 2D BRD extension
-
-# In[10]:
-
 
 def Gaussian_2D(x_axis,y_axis,mu_x,mu_y,sigma_x,sigma_y):
     this_Gaussian = exp(-(x_axis-mu_x)**2/2/sigma_x**2
@@ -298,9 +274,6 @@ def Gaussian_2D_corr(theta,x_axis,y_axis,mu_x,mu_y,sigma_x,sigma_y):
                        -(sum_xy-sum_mu)**2/2/sigma_y**2)
     return this_Gaussian
 
-
-
-
 Nx = 50
 Ny = 50
 x_min = 3e-3; x_max = 3; y_min = 3e-3; y_max = 2;
@@ -313,16 +286,11 @@ dist += Gaussian_2D_corr(-195*pi/180,x_axis_log,y_axis_log,-0.1,0.01,0.35,0.15)
 dist += Gaussian_2D_corr(-115*pi/180,x_axis_log,y_axis_log,-1.8,-1.5,0.09,0.15)
 fl.image(dist)
 
-
-
-
 N_tau1 = 30
 N_tau2 = 1000
 tau1_min = 5e-4; tau1_max = 4; tau2_min = 5e-4; tau2_max = 1.2
 tau1_axis = nddata(logspace(log10(tau1_min),log10(tau1_max),N_tau1),'tau1')
 tau2_axis = nddata(linspace(tau2_min,tau2_max,N_tau2),'tau2')
-
-
 
 s = dist*exp(-tau2_axis/(10**y_axis_log))*(1.-2*exp(-tau1_axis/(10**x_axis_log)))
 s.sum('log(T1)').sum('log(T2)')
@@ -340,9 +308,6 @@ solution = s.C.nnls(('tau1','tau2'),
              (lambda x1,x2: 1.-2*exp(-x1/x2),
              lambda y1,y2: exp(-y1/y2)),
              l='BRD')
-
-
-
 
 fl.next('Solution')
 fl.image(solution)

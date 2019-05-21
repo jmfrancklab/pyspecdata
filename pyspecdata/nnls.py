@@ -3,10 +3,12 @@ from __future__ import division, print_function, absolute_import
 
 from . import _nnls
 from .general_functions import redim_F_to_C, redim_C_to_F, strm
-from numpy import asarray_chkfinite, zeros, double, isscalar
+from numpy import asarray_chkfinite, zeros, double, isscalar, isfortran
 from numpy import array as np_array
 import multiprocessing.dummy as mpd
 from multiprocessing import cpu_count
+import logging
+logger = logging.getLogger('pyspecdata.nnls')
 
 __all__ = ['nnls_regularized']
 
@@ -53,6 +55,7 @@ def nnls_regularized(A, b, l=0, maxiter=None):
     Lawson C., Hanson R.J., (1987) Solving Least Squares Problems, SIAM
 
     """
+    logger.debug(strm("isfortran result",isfortran(A),isfortran(b)))
 
     A, b = map(asarray_chkfinite, (A, b))
 

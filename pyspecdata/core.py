@@ -4367,8 +4367,8 @@ class nddata (object):
         Algorithm described in Venkataramanan et al. 2002 is performed which determines optimal :math:`\lambda`
         for the data (DOI:10.1109/78.995059).
         
-        See: https://en.wikipedia.org/wiki/Non-negative_least_squares,
-        https://en.wikipedia.org/wiki/Tikhonov_regularization
+        See: `Wikipedia page on NNLS <https://en.wikipedia.org/wiki/Non-negative_least_squares>`_,
+        `Wikipedia page on Tikhonov regularization <https://en.wikipedia.org/wiki/Tikhonov_regularization>`_
          
         Parameters
         ==========
