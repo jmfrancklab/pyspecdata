@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # coding: utf-8
 
 
@@ -62,8 +63,8 @@ fl.plot(P)
 # 
 
 
-endp = 0.2
-t = nddata(r_[1e-3:endp:2048j],'t') # column vectors give functions of time
+time_endpoint = 0.2
+t = nddata(r_[1e-3:time_endpoint:2048j],'t') # column vectors give functions of time
 R = P.fromaxis('R')
 test_data = exp(-R*t).dot(P)
 logger.debug(strm('when constructing test_data, shape of the data is',ndshape(test_data),"len of axis_coords_error",len(test_data.axis_coords_error)))
@@ -72,7 +73,7 @@ logger.debug(strm('when constructing test_data, shape of the data is',ndshape(te
 test_data.add_noise(0.01)
 fl.next('test data function')
 fl.plot(test_data)
-xlim(-endp/10,endp)
+xlim(-time_endpoint/10,time_endpoint)
 
 
 # Do the basic NNLS fit
@@ -94,7 +95,8 @@ fl.plot(test_fit)
 
 
 
-def L_curve(l,r_norm,x_norm, **kwargs):
+def L_curve(l,r_norm,x_norm, show_l=None,
+        **kwargs):
     """plot L-curve using
 
     Parameters
@@ -105,7 +107,18 @@ def L_curve(l,r_norm,x_norm, **kwargs):
         norm of the residual
     x_norm: double
         norm of solution vector"""
+    r_to_x = interp1d(log10(r_norm),log10(x_norm),
+            kind='cubic')
+    r_fine = linspace(*tuple(log10(r_norm[r_[0,-1]]).tolist()+[500]))
+    plot(r_fine,r_to_x(r_fine), alpha=0.3)
     plot(log10(r_norm),log10(x_norm),'o',**kwargs)
+    if show_l is not None:
+        l_to_r = interp1d(l,log10(r_norm),
+                kind='cubic')
+        this_r = l_to_r(show_l)
+        this_x = r_to_x(this_r)
+        plot(this_r,this_x,'ro')
+        annotate('chosen $\lambda=%3g$'%show_l, (this_r,this_x))
     for j,this_l in enumerate(l):
         annotate('%5g'%this_l, (log10(r_norm[j]),log10(x_norm[j])),
                  ha='left',va='bottom',rotation=45)
@@ -155,7 +168,10 @@ L_curve(l, x.get_prop('nnls_residual').data, x.C.run(linalg.norm,'R').data,
         markersize=5, alpha=0.5, label='compiled loop')
 
 
-# Test for the accuracy of the "1.5D" code
+# ## 1.5D example -- very simplistic dataset
+# 
+# (where the data is duplicated along the $\Omega$ dimension)
+# 
 # unlike for the numpy version, I skip straight to the
 # vectorized/parallel version.
 
@@ -192,50 +208,40 @@ else:
     fl.show()
 
 
-# ## Testing 1.5D code
+# ## 1.5D code -- a more complicated/realistic example
+# 
+# First, generate a test distribution
 
-def distribution_2D(x_center,y_center,x_spread,y_spread,x_amp,y_amp):
-    this_distribution = x_amp*y_amp*exp(-(x_scale-x_center)**2/2/x_spread**2
-                           -(y_scale-y_center)**2/2/y_spread**2)
-    return this_distribution
 
-endp = 0.2
-R = r_[1.:100:100j] # distribution of T2 relaxation rates
-x_scale = nddata(R.copy(),'R')
-t = nddata(r_[1e-3:endp:2048j],'t') # column vectors give functions of time
-y_scale = t.C
+time_endpoint = 0.2
+R = nddata(r_[1.:100:100j],'R') # distribution of T2 relaxation rates
+t2 = nddata(r_[1e-3:time_endpoint:2048j],'t2') # column vectors give functions of time
 peaks_2D = [(20,1,0.8,0.025,5e-3,1),
            (30,1,0.8,0.075,1e-2,1),
            (80,5,1,0.175,1e-2,1)]
-calcd = False
-for x_mu,x_sigma,x_A,y_mu,y_sigma,y_A in peaks_2D:
-    if not calcd:
-        data_dist = distribution_2D(x_center=x_mu,
-                                   y_center=y_mu,
-                                   x_spread=x_sigma,
-                                   y_spread=y_sigma,
-                                   x_amp=x_A,
-                                   y_amp=y_A)
-        calcd = True
-    else:
-        data_dist += distribution_2D(x_center=x_mu,
-                                           y_center=y_mu,
-                                           x_spread=x_sigma,
-                                           y_spread=y_sigma,
-                                           x_amp=x_A,
-                                           y_amp=y_A)
+data_dist = 0
+for x_mu,x_sigma,x_amp,y_mu,y_sigma,y_amp in peaks_2D:
+        data_dist += x_amp*y_amp*exp(-(R-x_mu)**2/2/x_sigma**2
+                           -(t2-y_mu)**2/2/y_sigma**2)
+fl.next('Test 1.5D true distribution')
+fl.image(data_dist)
 
 
+# Convert to the time domain, where the $R$ dimension is replaced by a
+# $t_{indirect}$ dimension, and add noise
 
 
-figure();title('Test 1.5D true distribution')
-image(data_dist)
 n_indirect = 128
-t_indirect = nddata(linspace(endp/n_indirect,endp,n_indirect),'t_indirect')
-kernel = exp(-t_indirect*x_scale)
+t_indirect = nddata((r_[0:n_indirect]+1)/double(n_indirect),
+        't_indirect')
+kernel = exp(-t_indirect*R)
 test_data_2d = kernel.C.dot(data_dist)
-figure();title('Test 1.5D dataset')
+fl.next('Test 1.5D dataset')
 test_data_2d.add_noise(0.1)
+fl.image(test_data_2d)
+
+
+# Generate the L-curve
 
 l = sqrt(logspace(-8,4,10))
 #@timeit
@@ -248,11 +254,12 @@ print ndshape(test_data_2d)
 print ndshape(x)
 
 fl.next('L-curve')
+heel_lambda = 0.215
 L_curve(l, x.get_prop('nnls_residual').C.sum('t').data,
         x.C.run(linalg.norm,'R').sum('t').data, markersize=5, alpha=0.5,
-        label='compiled loop')
+        label='compiled loop',
+        show_l=heel_lambda)
 
-heel_lambda = 0.215
 
 # Final result for 1.5D test data
 
@@ -314,4 +321,3 @@ solution = s.C.nnls(('tau1','tau2'),
 
 fl.next('Solution')
 fl.image(solution)
-
