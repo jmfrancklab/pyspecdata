@@ -1,5 +1,6 @@
 from ..general_functions import *
 from ..ndshape import ndshape_base as ndshape
+from pylab import gca,sca,imshow,xlabel,ylabel,title,colorbar
 def image(A,x=[],y=[],**kwargs):
     r"Please don't call image directly anymore -- use the image method of figurelist"
     x_inverted = False
