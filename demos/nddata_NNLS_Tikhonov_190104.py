@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # coding: utf-8
 
 
@@ -94,8 +93,7 @@ fl.plot(test_fit)
 # Now add regularization
 
 
-
-def L_curve(l,r_norm,x_norm, show_l=None,
+def L_curve(l,r_norm,x_norm, show_l=None, s=1e-3,
         **kwargs):
     """plot L-curve using
 
@@ -107,23 +105,27 @@ def L_curve(l,r_norm,x_norm, show_l=None,
         norm of the residual
     x_norm: double
         norm of solution vector"""
-    r_to_x = interp1d(log10(r_norm),log10(x_norm),
-            kind='cubic')
-    r_fine = linspace(*tuple(log10(r_norm[r_[0,-1]]).tolist()+[500]))
-    plot(r_fine,r_to_x(r_fine), alpha=0.3)
+    print l.shape, r_norm.shape, x_norm.shape
+    r_to_x = UnivariateSpline(log10(r_norm),log10(x_norm), s=s)
+    r_fine = linspace(*tuple(log10(r_norm[r_[0,-1]]).tolist()+[1000]))
     plot(log10(r_norm),log10(x_norm),'o',**kwargs)
+    a = gca().get_ylim()
+    plot(r_fine,r_to_x(r_fine), alpha=0.3)
+    gca().set_ylim(a)
     if show_l is not None:
-        l_to_r = interp1d(l,log10(r_norm),
-                kind='cubic')
+        l_to_r = UnivariateSpline(l,log10(r_norm),s=1e-3)
         this_r = l_to_r(show_l)
         this_x = r_to_x(this_r)
-        plot(this_r,this_x,'ro')
+        OLDplot(this_r,this_x,'ro')
         annotate('chosen $\lambda=%3g$'%show_l, (this_r,this_x))
     for j,this_l in enumerate(l):
         annotate('%5g'%this_l, (log10(r_norm[j]),log10(x_norm[j])),
                  ha='left',va='bottom',rotation=45)
     ylabel('$\log_{10}(x$ norm$)$')
     xlabel('$\log_{10}($ residual $)$')
+
+
+# 
 
 
 l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
@@ -144,11 +146,13 @@ x,x_norm,r_norm = nonvec_lcurve(l)
 # 
 
 
-fl.next('L-curve', legend=True)
+fl.next('L-curve', legend=True);clf()
 L_curve(l, r_norm, x_norm, markersize=10, alpha=0.5, label='manual loop')
 
 
 # ## Vectorized version of lambda curve
+
+# 
 
 
 l = sqrt(logspace(-8,4,10)) # I do this because it gives me a fairly even spacing of points
@@ -187,8 +191,10 @@ x = multifreq_lcurve(l)
 # 
 
 fl.next('L-curve')
+chosen_l = 0.025
 L_curve(l, x.get_prop('nnls_residual')[r'\Omega',0].data,
         x.C.run(linalg.norm,'R')[r'\Omega',0].data, markersize=5, alpha=0.5,
+        show_l=chosen_l,
         label='compiled loop')
 
 # and show the final result
@@ -201,16 +207,12 @@ fl.plot(test_data)
 fl.plot(P)
 
 
-if in_notebook:
-    print "in notebook, not calling show"
-else:
-    print "not in notebook, calling show"
-    fl.show()
-
-
 # ## 1.5D code -- a more complicated/realistic example
 # 
-# First, generate a test distribution
+# First, generate a test distribution, where we assume we have two dimensions:
+# 
+# *  A $t_2$ dimension, which is actually typically a frequency dimension
+# *  A $t_{indirect}$ dimension -- representing, *e.g.*, the delay of an inversion recovery experiment. 
 
 
 time_endpoint = 0.2
@@ -247,24 +249,32 @@ l = sqrt(logspace(-8,4,10))
 #@timeit
 def multifreq_lcurve(l):
     return test_data_2d.C.nnls('t_indirect',
-            x_scale,lambda x,y: exp(-y*x), l=l)
+            R,lambda x,y: exp(-y*x), l=l)
 x = multifreq_lcurve(l)
+
+
+# 
+
 
 print ndshape(test_data_2d)
 print ndshape(x)
 
+
+# 
+
+
 fl.next('L-curve')
 heel_lambda = 0.215
-L_curve(l, x.get_prop('nnls_residual').C.sum('t').data,
-        x.C.run(linalg.norm,'R').sum('t').data, markersize=5, alpha=0.5,
+L_curve(l, x.get_prop('nnls_residual').C.sum('t2').data,
+        x.C.run(linalg.norm,'R').sum('t2').data, markersize=5, alpha=0.5,
         label='compiled loop',
-        show_l=heel_lambda)
+        show_l=heel_lambda, s=1e-2)
 
 
 # Final result for 1.5D test data
 
 fl.next(r'show result where $\lambda$ set to knee')
-result = test_data_2d.C.nnls('t_indirect',x_scale,
+result = test_data_2d.C.nnls('t_indirect',R,
                     lambda x,y: exp(-y*x), l=heel_lambda)
 fl.image(result)
 
@@ -321,3 +331,14 @@ solution = s.C.nnls(('tau1','tau2'),
 
 fl.next('Solution')
 fl.image(solution)
+
+
+# 
+
+
+if in_notebook:
+    print "in notebook, not calling show"
+else:
+    print "not in notebook, calling show"
+    fl.show()        
+
