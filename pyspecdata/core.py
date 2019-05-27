@@ -3485,6 +3485,7 @@ class nddata (object):
             return A
         #{{{ shape and add
         A,B = self.aligndata(arg)
+        logger.debug(strm('after alignment, right data looks like:',ndshape(B)))
         retval = A.copy()
         retval.data = A.data + B.data
         #}}}
@@ -3694,14 +3695,31 @@ class nddata (object):
     #{{{ align data
     def aligndata(self,arg,verbose = False):
         r'''This is a fundamental method used by all of the arithmetic operations.
-        It uses the dimension labels of `self` (the current instance) and `arg` (an nddata passed to this method) to generate two corresponding output nddatas that I refer to here, respectively, as `A` and `B`.  `A` and `B` have dimensions that are "aligned" -- that is, they are identical except for singleton dimensions (note that numpy automatically tiles singleton dimensions).  Regardless of how the dimensions of `self.data` and `arg.data` (the underlying numpy data) were ordered, `A.data` and `B.data` are now ordered identically, where dimensions with the same label (`.dimlabel`) correspond to the same numpy index.  This allows you do do math.
+        It uses the dimension labels of `self` (the current instance) and `arg`
+        (an nddata passed to this method) to generate two corresponding output
+        nddatas that I refer to here, respectively, as `A` and `B`.  `A` and
+        `B` have dimensions that are "aligned" -- that is, they are identical
+        except for singleton dimensions (note that numpy automatically tiles
+        singleton dimensions).  Regardless of how the dimensions of `self.data`
+        and `arg.data` (the underlying numpy data) were ordered, `A.data` and
+        `B.data` are now ordered identically, where dimensions with the same
+        label (`.dimlabel`) correspond to the same numpy index.  This allows
+        you do do math.
 
-        Note that, currently, both `A` and `B` are given a full set of axis labels, even for singleton dimensions.  This is because we're assuming you're going to do math with them, and that the singleton dimensions will be expanded.
+        Note that, currently, both `A` and `B` are given a full set of axis
+        labels, even for singleton dimensions.  This is because we're assuming
+        you're going to do math with them, and that the singleton dimensions
+        will be expanded.
 
         Parameters
         ==========
-        arg : nddata
-            the nddata that you want to align to `self`
+        arg : nddata or ndarray
+            The nddata that you want to align to `self`.
+            If arg is an ndarray, it will try to match dimensions to self based
+            on the length of the dimension.
+            **Note:** currently there is an issue where this will only really
+            work for 1D data, since it first makes an nddata instance based on
+            arg, which apparently collapses multi-D data to 1D data.
 
         Returns
         =======
@@ -3715,6 +3733,12 @@ class nddata (object):
         if verbose: print "starting aligndata"
         if isscalar(arg) or type(arg) == ndarray:
             arg = nddata(arg)
+            index_dims = [j for j in r_[0:len(arg.dimlabels)]
+                     if arg.dimlabels[j]=='INDEX']
+            for j in index_dims:# find dimension of matching length
+                match_dims = nonzero(arg.data.shape[j]==array(self.data.shape))[0]
+                if len(match_dims) > 0:
+                    arg.dimlabels[j] = self.dimlabels[match_dims[0]]
         if ndshape(self).zero_dimensional and ndshape(arg).zero_dimensional:
             if verbose: print "(1) yes, I found something zero dimensional"
             return self.copy(),arg.copy()
@@ -5784,12 +5808,14 @@ class nddata (object):
         print 'getslice! ',args
     def __setitem__(self,*args):
         righterrors = None
-        #print "DEBUG: types of args",map(type,args)
+        logger.debug(strm("types of args",map(type,args)))
         A = args[0]
         if type(A) is nddata:
+            logger.debug("initially, rightdata appears to be nddata")
             _,B = self.aligndata(A)
             A = B.data # now the next part will handle this
         if type(A) is ndarray:# if selector is an ndarray
+            logger.debug("initially, rightdata appears to be ndarray")
             if A.dtype is not dtype('bool'):
                 raise ValueError("I don't know what to do with an ndarray subscript that has dtype "+repr(A.dtype))
             if A.shape != self.data.shape:
@@ -5801,7 +5827,7 @@ class nddata (object):
             self.data[A] = args[1]
             return
         if isinstance(args[1],nddata):
-            #print "DEBUG: I found rightdata to be nddata"
+            logger.debug("rightdata appears to be nddata after initial treatment")
             #{{{ reorder so the shapes match
             unshared_indices = list(set(args[1].dimlabels) ^ set(self.dimlabels))
             shared_indices = list(self.dimlabels)
@@ -5819,6 +5845,7 @@ class nddata (object):
             righterrors = args[1].get_error()
             #print "DEBUG: and I convert it to",type(rightdata)
         else: # assume it's an ndarray
+            logger.debug("rightdata appears to be ndarray after initial treatment")
             rightdata = args[1]
             #{{{ if I just passed a function, assume that I'm applying some type of data-based mask
             if type(args[0]) is type(emptyfunction):
@@ -5831,6 +5858,7 @@ class nddata (object):
         slicedict,axesdict,errordict,unitsdict = self._parse_slices(args[0]) # pull left index list from parse slices
         leftindex = self.fld(slicedict)
         rightdata = rightdata.squeeze()
+        logger.debug(strm("after squeeze, rightdata has shape",rightdata.shape))
         if len(rightdata.shape) > 0:
             left_shape = shape(self.data[tuple(leftindex)])
             try:
@@ -6165,8 +6193,8 @@ class nddata (object):
                         if axesdict[x] is not None:
                             try:
                                 axesdict[x] = axesdict[x][y]
-                            except:
-                                raise ValueError("axesdict is"+repr(axesdict)+"and I want to set "+repr(x)+" subscript to its "+repr(y)+" value")
+                            except Exception as e:
+                                raise ValueError("axesdict is "+repr(axesdict)+"and I want to set "+repr(x)+" subscript to its "+repr(y)+" value"+explain_error(e))
                 if errordict != None and errordict != array(None):
                     for x,y in slicedict.iteritems():
                         if errordict[x] != None:
