@@ -6084,6 +6084,7 @@ class nddata (object):
             and
             \'axisname\':(value1,value2)
             pairs, where the values give either a single value or an inclusive range on the axis, respectively"""
+        logger.debug(strm("about to start parsing slices for data with axis_coords of length",len(self.axis_coords),"and dimlabels",self.dimlabels,"for ndshape of",ndshape(self)))
         #print "DEBUG getitem called with",args
         errordict = None # in case it's not set
         if self.axis_coords_units is not None:
@@ -6113,10 +6114,12 @@ class nddata (object):
             #{{{ create a slicedict and errordict to store the slices
             slicedict = dict(zip(list(self.dimlabels),[slice(None,None,None)]*len(self.dimlabels))) #initialize to all none
             if len(self.axis_coords)>0:
-                #print "DEBUG --> trying to make dictionaries from axis coords of len",len(self.axis_coords),"and axis_coords_error of len",len(self.axis_coords_error),"when dimlabels has len",len(self.dimlabels)
+                logger.debug(strm("trying to make dictionaries from axis coords of len",len(self.axis_coords),"and axis_coords_error of len",len(self.axis_coords_error),"when dimlabels has len",len(self.dimlabels)))
                 axesdict = self.mkd(self.axis_coords)
                 if len(self.axis_coords_error)>0:
                     errordict = self.mkd(self.axis_coords_error)
+            else:
+                logger.debug(strm("length of axis_coords not greater than 0"))
             for x,y in zip(args[0::2],args[1::2]):
                 slicedict[x] = y
             #}}}
