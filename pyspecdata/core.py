@@ -3485,6 +3485,7 @@ class nddata (object):
             return A
         #{{{ shape and add
         A,B = self.aligndata(arg)
+        logger.debug(strm('after alignment, right data looks like:',ndshape(B)))
         retval = A.copy()
         retval.data = A.data + B.data
         #}}}
@@ -3694,14 +3695,31 @@ class nddata (object):
     #{{{ align data
     def aligndata(self,arg,verbose = False):
         r'''This is a fundamental method used by all of the arithmetic operations.
-        It uses the dimension labels of `self` (the current instance) and `arg` (an nddata passed to this method) to generate two corresponding output nddatas that I refer to here, respectively, as `A` and `B`.  `A` and `B` have dimensions that are "aligned" -- that is, they are identical except for singleton dimensions (note that numpy automatically tiles singleton dimensions).  Regardless of how the dimensions of `self.data` and `arg.data` (the underlying numpy data) were ordered, `A.data` and `B.data` are now ordered identically, where dimensions with the same label (`.dimlabel`) correspond to the same numpy index.  This allows you do do math.
+        It uses the dimension labels of `self` (the current instance) and `arg`
+        (an nddata passed to this method) to generate two corresponding output
+        nddatas that I refer to here, respectively, as `A` and `B`.  `A` and
+        `B` have dimensions that are "aligned" -- that is, they are identical
+        except for singleton dimensions (note that numpy automatically tiles
+        singleton dimensions).  Regardless of how the dimensions of `self.data`
+        and `arg.data` (the underlying numpy data) were ordered, `A.data` and
+        `B.data` are now ordered identically, where dimensions with the same
+        label (`.dimlabel`) correspond to the same numpy index.  This allows
+        you do do math.
 
-        Note that, currently, both `A` and `B` are given a full set of axis labels, even for singleton dimensions.  This is because we're assuming you're going to do math with them, and that the singleton dimensions will be expanded.
+        Note that, currently, both `A` and `B` are given a full set of axis
+        labels, even for singleton dimensions.  This is because we're assuming
+        you're going to do math with them, and that the singleton dimensions
+        will be expanded.
 
         Parameters
         ==========
-        arg : nddata
-            the nddata that you want to align to `self`
+        arg : nddata or ndarray
+            The nddata that you want to align to `self`.
+            If arg is an ndarray, it will try to match dimensions to self based
+            on the length of the dimension.
+            **Note:** currently there is an issue where this will only really
+            work for 1D data, since it first makes an nddata instance based on
+            arg, which apparently collapses multi-D data to 1D data.
 
         Returns
         =======
@@ -3715,6 +3733,12 @@ class nddata (object):
         if verbose: print "starting aligndata"
         if isscalar(arg) or type(arg) == ndarray:
             arg = nddata(arg)
+            index_dims = [j for j in r_[0:len(arg.dimlabels)]
+                     if arg.dimlabels[j]=='INDEX']
+            for j in index_dims:# find dimension of matching length
+                match_dims = nonzero(arg.data.shape[j]==array(self.data.shape))[0]
+                if len(match_dims) > 0:
+                    arg.dimlabels[j] = self.dimlabels[match_dims[0]]
         if ndshape(self).zero_dimensional and ndshape(arg).zero_dimensional:
             if verbose: print "(1) yes, I found something zero dimensional"
             return self.copy(),arg.copy()
@@ -4351,9 +4375,25 @@ class nddata (object):
     def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
         r"""Perform regularized non-negative least-squares "fit" on self.
 
-        .. todo::
-            someone can explain the math here
+        Capable of solving for solution in 1 or 2 dimensions.
+
+        We seek to minimize
+        :math:`Q = \| Ax - b \|_2 + \|\lambda x\|_2`
+        in order to obtain solution vector :math:`x` subject to non-negativity constraint
+        given input matrix :math:`A`, the kernel, and input vector :math:`b`, the data.
+
+        The first term assesses agreement between the fit :math:`Ax` and the data :math:`b`,
+        and the second term accounts for noise with the regularization parameter :math:`\lambda`
+        according to Tikhonov regularization.
+
+        To perform regularized minimization in 2 dimensions, set `l` to :str:`BRD` and provide a
+        tuple of parameters :str:`dimname`, :nddata:`newaxis_dict`, and :function:`kernel_func`.
+        Algorithm described in Venkataramanan et al. 2002 is performed which determines optimal :math:`\lambda`
+        for the data (DOI:10.1109/78.995059).
         
+        See: `Wikipedia page on NNLS <https://en.wikipedia.org/wiki/Non-negative_least_squares>`_,
+        `Wikipedia page on Tikhonov regularization <https://en.wikipedia.org/wiki/Tikhonov_regularization>`_
+         
         Parameters
         ==========
         dimname: str
@@ -4375,10 +4415,12 @@ class nddata (object):
             and the second argument is the "fit" variable
             (in the example above, this would be something like
             ``lambda x,y: exp(-x*y)``)
-        l : double (default 0)
+        l : double (default 0) or str
             the regularization parameter
             :math:`lambda` -- if this is set to 0, the algorithm reverts to
-            standard nnls
+            standard nnls.
+            If this is set to :str:`BRD`, then algorithm expects tuple of each parameter
+            described above in order to perform a 2-dimensional fit.
 
         Returns
         =======
@@ -4391,18 +4433,42 @@ class nddata (object):
             (innermost).
         """
         logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?',isfortran(self.data)))
-        assert type(dimname) is str, "first argument is dimension name"
-        if type(newaxis_dict) is dict:
+        tuple_syntax = False
+        if type(dimname) is tuple:
+            tuple_syntax = True
+            assert len(dimname) == 2, "tuple of two dimension names only"
+            assert type(dimname[0]) and type(dimname[1]) is str, "first argument is tuple of two dimension names"
+        else:
+            assert type(dimname) is str, "first argument is dimension name or tuple of two dimension names"
+        if type(newaxis_dict) is tuple:
+            assert len(newaxis_dict) == 2, "tuple of two nddatas only"
+            if isinstance(newaxis_dict[0],nddata) and isinstance(newaxis_dict[1],nddata):
+                assert len(newaxis_dict[0].dimlabels) and len(newaxis_dict[1].dimlabels) == 1, "currently only set up for 1D"
+        elif type(newaxis_dict) is dict:
             assert len(newaxis_dict) == 1, "currently only set up for 1D"
         elif isinstance(newaxis_dict,nddata):
             assert len(newaxis_dict.dimlabels) == 1, "currently only set up for 1D"
         else:
-            raise ValueError("second argument is dictionary or nddata with new axis")
-        assert callable(kernel_func), "third argument is kernel function"
+            raise ValueError("second argument is dictionary or nddata with new axis, or tuple of nddatas with new axes")
+        if type(kernel_func) is tuple:
+            assert callable(kernel_func[0]) and callable(kernel_func[1]), "third argument is tuple of kernel functions"
+        else:
+            assert callable(kernel_func), "third argument is kernel function"
         # construct the kernel
         # the kernel transforms from (columns) the "fit" dimension to (rows)
         # the "data" dimension
-        if isinstance(newaxis_dict,nddata):
+        if tuple_syntax:
+            if isinstance(newaxis_dict[0],nddata):
+                assert len(newaxis_dict[0].dimlabels) and len(newaxis_dict[1].dimlabels) == 1, "must be 1 dimensional!!"
+                fitdim_name1 = newaxis_dict[0].dimlabels[0]
+                fitdim_name2 = newaxis_dict[1].dimlabels[0]
+                fit_axis1 = newaxis_dict[0].getaxis(fitdim_name1)
+                fit_axis2 = newaxis_dict[1].getaxis(fitdim_name2)
+                if fit_axis1 is None:
+                    fit_axis1 = newaxis_dict[0].data
+                if fit_axis2 is None:
+                    fit_axis2 = newaxis_dict[1].data
+        elif isinstance(newaxis_dict,nddata):
             assert len(newaxis_dict.dimlabels) == 1, "must be 1 dimensional!!"
             fitdim_name = newaxis_dict.dimlabels[0]
             fit_axis = newaxis_dict.getaxis(fitdim_name)
@@ -4412,67 +4478,238 @@ class nddata (object):
             fitdim_name = newaxis_dict.keys()[0]
             logger.debug(strm('shape of fit dimension is',newaxis_dict[fitdim_name].shape))
             fit_axis = newaxis_dict[fitdim_name]
-        fit_axis = nddata(fit_axis, fitdim_name)
-        data_axis = self.fromaxis(dimname)
-        data_axis, fit_axis = data_axis.aligndata(fit_axis)
-        K = kernel_func(data_axis, fit_axis).squeeze()
-        logger.debug(strm('K dimlabels',K.dimlabels,'and raw shape',K.data.shape))
-        logger.debug(strm('the size of the kernel is',ndshape(K),'or, raw',K.data.shape))
-        self.reorder(dimname, first=False) # make the dimension we will be regularizing innermost
-        logger.debug(strm('shape of the data is',ndshape(self),'is it fortran ordered?',isfortran(self.data)))
-        data_fornnls = self.data
-        if len(data_fornnls.shape) > 2:
-            data_fornnls = data_fornnls.reshape((prod(
-                data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
-        logger.debug(strm('shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
-        retval, residual = this_nnls.nnls_regularized(K.data, data_fornnls, l=l)
-        logger.debug(strm("coming back from fortran, residual type is",type(residual))+ strm(residual.dtype if type(residual) is ndarray else ''))
-        newshape = []
-        if not isscalar(l):
-            newshape.append(len(l))
-        newshape += list(self.data.shape)[:-1] # exclude data dimension
-        newshape.append(ndshape(fit_axis)[fitdim_name])
-        logger.debug(strm('before mkd, shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
-        # {{{ store the dictionaries for later use
-        axis_coords_dict = self.mkd(self.axis_coords)
-        axis_units_dict = self.mkd(self.axis_coords_units)
-        axis_coords_error_dict = self.mkd(self.axis_coords_error)
-        # }}}
-        retval = retval.reshape(newshape)
-        self.data = retval
-        # {{{ clear all the axis info
-        self.axis_coords = None
-        self.axis_coords_units = None
-        self.axis_coords_error_dict = None
-        # }}}
-        # change the dimension names and data
-        self.rename(dimname, fitdim_name)
-        # {{{ manipulate the dictionaries, and call fld below
-        axis_coords_dict[fitdim_name] = fit_axis.getaxis(fitdim_name)
-        axis_units_dict[fitdim_name] = None
-        axis_coords_error_dict[fitdim_name] = None
-        if not isscalar(l):
-            self.dimlabels = ['lambda'] + self.dimlabels
-            axis_coords_dict['lambda'] = l
-            axis_units_dict['lambda'] = None
-            axis_coords_error_dict['lambda'] = None
-        # }}}
-        self.data = retval
-        if not isscalar(residual):
-            # make the residual nddata as well
-            residual_nddata = ndshape(self).pop(fitdim_name).alloc(dtype=residual.dtype)
-            residual_nddata.data[:] = residual[:]
+        if tuple_syntax:
+            fit_axis1 = nddata(fit_axis1,fitdim_name1)
+            fit_axis2 = nddata(fit_axis2,fitdim_name2)
+            data_axis1 = self.fromaxis(dimname[0])
+            data_axis2 = self.fromaxis(dimname[1])
+            data_axis1.squeeze()
+            data_axis2.squeeze()
+            data_axis1,fit_axis1 = data_axis1.aligndata(fit_axis1)
+            data_axis2,fit_axis2 = data_axis2.aligndata(fit_axis2)
+            K1 = kernel_func[0](data_axis1,fit_axis1).squeeze()
+            logger.debug(strm('K1 dimlabels',K1.dimlabels,'and raw shape',K1.data.shape))
+            K2 = kernel_func[1](data_axis2,fit_axis2).squeeze()
+            logger.debug(strm('K2 dimlabels',K2.dimlabels,'and raw shape',K2.data.shape))
+            # SVD and truncation of kernels
+            U1,S1,V1 = np.linalg.svd(K1.data,full_matrices=False)
+            U2,S2,V2 = np.linalg.svd(K2.data,full_matrices=False)
+            logger.debug(strm('Uncompressed SVD K1:',map(lambda x: x.shape, (U1,S1,V1))))
+            logger.debug(strm('Uncompressed SVD K2:',map(lambda x: x.shape, (U2,S2,V2))))
+            default_cut = 1e-2
+            s1 = where(S1 > default_cut)[0][-1]
+            s2 = where(S2 > default_cut)[0][-1]
+            U1 = U1[:,0:s1]
+            S1 = S1[0:s1]
+            V1 = V1[0:s1,:]
+            U2 = U2[:,0:s2]
+            S2 = S2[0:s2]
+            V2 = V2[0:s2,:]
+            S1 = S1*eye(s1)
+            S2 = S2*eye(s2)
+            logger.debug(strm('Compressed SVD of K1:',map(lambda x: x.shape, (U1,S1,V1))))
+            logger.debug(strm('Compressed SVD K2:',map(lambda x: x.shape, (U2,S2,V2))))
+            # would generate projected data here
+            # compress data here
+            K1 = S1.dot(V1)
+            K2 = S2.dot(V2)
+            K = K1[:,newaxis,:,newaxis]*K2[newaxis,:,newaxis,:]
+            K = K.reshape(K1.shape[0]*K2.shape[0],K1.shape[1]*K2.shape[1])
+            logger.debug(strm('Compressed K0, K1, and K2:',map(lambda x: x.shape, (K,K1,K2))))
+
+            data_compressed = U1.T.dot(self.data.dot(U2))
+            logger.debug(strm('Compressed data:',data_compressed.shape))
+            # data_for_nnls = nddata(data_compressed,[dimname[0],dimname[1]])
+            # data_for_nnls.smoosh([dimname[0],dimname[1]],dimname=dimname[0])
+            data_fornnls = empty(s1*s2)
+            for s1_index in xrange(s1):
+                for s2_index in xrange(s2):
+                    temp = data_compressed[s1_index][s2_index]
+                    data_fornnls[s1_index*s2+s2_index] = temp
+            logger.debug(strm('Lexicographically ordered data:',data_fornnls.shape))
+            if len(data_fornnls.shape) > 2:
+                logger.debug(strm('Reshpaing data..'))
+                data_fornnls = data_fornnls.reshape((prod(data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
+            
+            if l == 'BRD':
+                def chi(x_vec,val):
+                    return 0.5*dot(x_vec.T,dot(dd_chi(G(x_vec),val**2),x_vec)) - dot(x_vec.T,data_fornnls[:,newaxis])
+                def d_chi(x_vec,val):
+                    return dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
+                def dd_chi(G,val):
+                    return G + (val**2)*eye(shape(G)[0])
+                def G(x_vec):
+                    return dot(K,dot(square_heaviside(x_vec),K.T))
+                def H(product):
+                    if product <= 0:
+                        return 0
+                    if product > 0:
+                        return 1
+                def square_heaviside(x_vec):
+                    diag_heavi = []
+                    for q in xrange(shape(K.T)[0]):
+                        pull_val = dot(K.T[q,:],x_vec)
+                        temp = pull_val[0]
+                        temp = H(temp)
+                        diag_heavi.append(temp)
+                    diag_heavi = array(diag_heavi)
+                    square_heavi = diag_heavi*eye(shape(diag_heavi)[0])
+                    return square_heavi
+                def optimize_alpha(input_vec,val):
+                    alpha_converged = False
+                    factor = sqrt(s1*s2)
+                    T = linalg.inv(dd_chi(G(input_vec),val**2))
+                    dot_product = dot(input_vec.T,dot(T,input_vec))
+                    ans = dot_product*factor
+                    ans = ans/linalg.norm(input_vec)/dot_product
+                    tol = 1e-3
+                    if abs(ans-val**2) <= tol:
+                        logger.debug(strm('ALPHA HAS CONVERGED.'))
+                        alpha_converged = True
+                        return ans,alpha_converged
+                    return ans,alpha_converged
+                def newton_min(input_vec,val):
+                    fder = dd_chi(G(input_vec),val)
+                    fval = d_chi(input_vec,val)
+                    return (input_vec + dot(linalg.inv(fder),fval))
+                def mod_BRD(guess,maxiter=20):
+                    smoothing_param = guess
+                    alpha_converged = False
+                    for iter in xrange(maxiter):
+                        logger.debug(strm('ITERATION NO.',iter))
+                        logger.debug(strm('CURRENT LAMBDA',smoothing_param))
+                        retval,residual = this_nnls.nnls_regularized(K,data_fornnls,l=smoothing_param)
+                        f_vec = retval[:,newaxis]
+                        alpha = smoothing_param**2
+                        c_vec = dot(K,f_vec) - data_fornnls[:,newaxis]
+                        c_vec /= -1*alpha
+                        c_update = newton_min(c_vec,smoothing_param)
+                        alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
+                        lambda_update = sqrt(alpha_update[0,0])
+                        if alpha_converged:
+                            logger.debug(strm('*** OPTIMIZED LAMBDA',lambda_update,'***'))
+                            break
+                        if not alpha_converged:
+                            logger.debug(strm('UPDATED LAMBDA',lambda_update))
+                            smoothing_param = lambda_update
+                        if iter == maxiter-1:
+                            logger.debug(strm('DID NOT CONVERGE.'))
+                    return lambda_update
+                retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=mod_BRD(guess=1.0))
+            else:
+                retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=l)
+            logger.debug(strm('coming back from fortran, residual type is',type(residual))+ strm(residual.dtype if type(residual) is ndarray else ''))
+            newshape = []
+            if not isscalar(l):
+                newshape.append(len(l))
+            logger.debug(strm('test***',list(self.data.shape)[:-1]))
+            #newshape += list(self.data.shape)[:-1] # this would return parametric axis
+            newshape.append(ndshape(fit_axis1)[fitdim_name1])
+            newshape.append(ndshape(fit_axis2)[fitdim_name2])
+            logger.debug(strm('before mkd, shape of the data is',ndshape(self),'len of axis_coords_error',len(self.axis_coords_error)))
+            # {{{ store the dictionaries for later use
+            axis_coords_dict = self.mkd(self.axis_coords)
+            axis_units_dict = self.mkd(self.axis_coords_units)
+            axis_coords_error_dict = self.mkd(self.axis_coords_error)
+            # }}}
+            retval = retval.reshape(newshape)
+            self.data = retval
+            # {{{ clear axis info
+            self.axis_coords = None
+            self.axis_coords_units = None
+            self.axis_coords_error_dict = None
+            # }}}
+            # change the dimnesion names and data
+            self.rename(dimname[0], fitdim_name1)
+            self.rename(dimname[1], fitdim_name2)
+            axis_coords_dict[fitdim_name1] = fit_axis1.getaxis(fitdim_name1)
+            axis_units_dict[fitdim_name1] = None
+            axis_coords_error_dict[fitdim_name1] = None
+            axis_coords_dict[fitdim_name2] = fit_axis2.getaxis(fitdim_name2)
+            axis_units_dict[fitdim_name2] = None
+            axis_coords_error_dict[fitdim_name2] = None
+            if not isscalar(l):
+                self.dimlabels = ['lambda'] + self.dimlabels
+                axis_coords_dict['lambda'] = l
+                axis_units_dict['lambda'] = None
+                axis_coords_error_dict['lambda'] = None
+            self.data = retval
+            if not isscalar(residual):
+                # make the residual nddata as well
+                residual_nddata = ndshape(self).pop(fitdim_name2).pop(fitdim_name1).alloc(dtype=residual.dtype)
+                residual_nddata.data[:] = residual[:]
+            else:
+                residual_nddata = residual
+            # store the kernel and the residual as properties
+            self.set_prop('nnls_kernel',K)
+            self.set_prop('nnls_residual',residual_nddata)
+            # {{{ use the info from the dictionaries
+            self.axis_coords = self.fld(axis_coords_dict)
+            self.axis_coords_units = self.fld(axis_units_dict)
+            self.axis_coords_error = self.fld(axis_coords_error_dict)
+            return self
         else:
-            residual_nddata = residual
-        # store the kernel and the residual in the properties
-        self.set_prop('nnls_kernel',K)
-        self.set_prop('nnls_residual',residual_nddata)
-        # {{{ use the info from the dictionaries
-        self.axis_coords = self.fld(axis_coords_dict)
-        self.axis_coords_units = self.fld(axis_units_dict)
-        self.axis_coords_error = self.fld(axis_coords_error_dict)
-        # }}}
-        return self
+            fit_axis = nddata(fit_axis, fitdim_name)
+            data_axis = self.fromaxis(dimname)
+            data_axis.squeeze()
+            data_axis, fit_axis = data_axis.aligndata(fit_axis)
+            K = kernel_func(data_axis, fit_axis).squeeze()
+            logger.debug(strm('K dimlabels',K.dimlabels,'and raw shape',K.data.shape))
+            self.reorder(dimname, first=False) # make the dimension we will be regularizing innermost
+            logger.debug(strm('shape of the data is',ndshape(self),'is it fortran ordered?',isfortran(self.data)))
+            data_fornnls = self.data
+            if len(data_fornnls.shape) > 2:
+                data_fornnls = data_fornnls.reshape((prod(
+                    data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
+            logger.debug(strm('shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
+            retval, residual = this_nnls.nnls_regularized(K.data, data_fornnls, l=l)
+            logger.debug(strm("coming back from fortran, residual type is",type(residual))+ strm(residual.dtype if type(residual) is ndarray else ''))
+            newshape = []
+            if not isscalar(l):
+                newshape.append(len(l))
+            newshape += list(self.data.shape)[:-1] # exclude data dimension
+            newshape.append(ndshape(fit_axis)[fitdim_name])
+            logger.debug(strm('before mkd, shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
+            # {{{ store the dictionaries for later use
+            axis_coords_dict = self.mkd(self.axis_coords)
+            axis_units_dict = self.mkd(self.axis_coords_units)
+            axis_coords_error_dict = self.mkd(self.axis_coords_error)
+            # }}}
+            retval = retval.reshape(newshape)
+            self.data = retval
+            # {{{ clear all the axis info
+            self.axis_coords = None
+            self.axis_coords_units = None
+            self.axis_coords_error_dict = None
+            # }}}
+            # change the dimension names and data
+            self.rename(dimname, fitdim_name)
+            # {{{ manipulate the dictionaries, and call fld below
+            axis_coords_dict[fitdim_name] = fit_axis.getaxis(fitdim_name)
+            axis_units_dict[fitdim_name] = None
+            axis_coords_error_dict[fitdim_name] = None
+            if not isscalar(l):
+                self.dimlabels = ['lambda'] + self.dimlabels
+                axis_coords_dict['lambda'] = l
+                axis_units_dict['lambda'] = None
+                axis_coords_error_dict['lambda'] = None
+            # }}}
+            self.data = retval
+            if not isscalar(residual):
+                # make the residual nddata as well
+                residual_nddata = ndshape(self).pop(fitdim_name).alloc(dtype=residual.dtype)
+                residual_nddata.data[:] = residual[:]
+            else:
+                residual_nddata = residual
+            # store the kernel and the residual in the properties
+            self.set_prop('nnls_kernel',K)
+            self.set_prop('nnls_residual',residual_nddata)
+            # {{{ use the info from the dictionaries
+            self.axis_coords = self.fld(axis_coords_dict)
+            self.axis_coords_units = self.fld(axis_units_dict)
+            self.axis_coords_error = self.fld(axis_coords_error_dict)
+            # }}}
+            return self
     #{{{ interpolation and binning
     def run_avg(self,thisaxisname,decimation = 20,centered = False):
         'a simple running average'
@@ -5587,12 +5824,14 @@ class nddata (object):
         print 'getslice! ',args
     def __setitem__(self,*args):
         righterrors = None
-        #print "DEBUG: types of args",map(type,args)
+        logger.debug(strm("types of args",map(type,args)))
         A = args[0]
         if type(A) is nddata:
+            logger.debug("initially, rightdata appears to be nddata")
             _,B = self.aligndata(A)
             A = B.data # now the next part will handle this
         if type(A) is ndarray:# if selector is an ndarray
+            logger.debug("initially, rightdata appears to be ndarray")
             if A.dtype is not dtype('bool'):
                 raise ValueError("I don't know what to do with an ndarray subscript that has dtype "+repr(A.dtype))
             if A.shape != self.data.shape:
@@ -5604,7 +5843,7 @@ class nddata (object):
             self.data[A] = args[1]
             return
         if isinstance(args[1],nddata):
-            #print "DEBUG: I found rightdata to be nddata"
+            logger.debug("rightdata appears to be nddata after initial treatment")
             #{{{ reorder so the shapes match
             unshared_indices = list(set(args[1].dimlabels) ^ set(self.dimlabels))
             shared_indices = list(self.dimlabels)
@@ -5622,6 +5861,7 @@ class nddata (object):
             righterrors = args[1].get_error()
             #print "DEBUG: and I convert it to",type(rightdata)
         else: # assume it's an ndarray
+            logger.debug("rightdata appears to be ndarray after initial treatment")
             rightdata = args[1]
             #{{{ if I just passed a function, assume that I'm applying some type of data-based mask
             if type(args[0]) is type(emptyfunction):
@@ -5634,6 +5874,7 @@ class nddata (object):
         slicedict,axesdict,errordict,unitsdict = self._parse_slices(args[0]) # pull left index list from parse slices
         leftindex = self.fld(slicedict)
         rightdata = rightdata.squeeze()
+        logger.debug(strm("after squeeze, rightdata has shape",rightdata.shape))
         if len(rightdata.shape) > 0:
             left_shape = shape(self.data[tuple(leftindex)])
             try:
@@ -5859,6 +6100,7 @@ class nddata (object):
             and
             \'axisname\':(value1,value2)
             pairs, where the values give either a single value or an inclusive range on the axis, respectively"""
+        logger.debug(strm("about to start parsing slices for data with axis_coords of length",len(self.axis_coords),"and dimlabels",self.dimlabels,"for ndshape of",ndshape(self)))
         #print "DEBUG getitem called with",args
         errordict = None # in case it's not set
         if self.axis_coords_units is not None:
@@ -5888,10 +6130,12 @@ class nddata (object):
             #{{{ create a slicedict and errordict to store the slices
             slicedict = dict(zip(list(self.dimlabels),[slice(None,None,None)]*len(self.dimlabels))) #initialize to all none
             if len(self.axis_coords)>0:
-                #print "DEBUG --> trying to make dictionaries from axis coords of len",len(self.axis_coords),"and axis_coords_error of len",len(self.axis_coords_error),"when dimlabels has len",len(self.dimlabels)
+                logger.debug(strm("trying to make dictionaries from axis coords of len",len(self.axis_coords),"and axis_coords_error of len",len(self.axis_coords_error),"when dimlabels has len",len(self.dimlabels)))
                 axesdict = self.mkd(self.axis_coords)
                 if len(self.axis_coords_error)>0:
                     errordict = self.mkd(self.axis_coords_error)
+            else:
+                logger.debug(strm("length of axis_coords not greater than 0"))
             for x,y in zip(args[0::2],args[1::2]):
                 slicedict[x] = y
             #}}}
@@ -5968,8 +6212,8 @@ class nddata (object):
                         if axesdict[x] is not None:
                             try:
                                 axesdict[x] = axesdict[x][y]
-                            except:
-                                raise ValueError("axesdict is"+repr(axesdict)+"and I want to set "+repr(x)+" subscript to its "+repr(y)+" value")
+                            except Exception as e:
+                                raise ValueError("axesdict is "+repr(axesdict)+"and I want to set "+repr(x)+" subscript to its "+repr(y)+" value"+explain_error(e))
                 if errordict != None and errordict != array(None):
                     for x,y in slicedict.iteritems():
                         if errordict[x] != None:

@@ -136,6 +136,12 @@ def series(file_reference, *subpath, **kwargs):
                 load_vdlist(file_reference, *subpath))
     else:
         logger.info(strm("vdlist doesn't exist",file_reference,'vdlist'))
+    if open_subpath(file_reference, *(subpath+('difflist',)), test_only=True):
+        data.set_prop('diff',
+                load_vdlist(file_reference, *subpath,
+                    **dict(name='difflist')))
+    else:
+        logger.debug(strm("difflist doesn't exist",file_reference,'difflist'))
     logger.debug(strm('data from bruker file =',data))
     #}}}
     return data
@@ -187,8 +193,10 @@ def load_1D(file_reference, *subpath, **kwargs):
                 load_jcamp(file_reference,
                     *(subpath+('pdata','1','procs'))))
     return data
-def load_vdlist(file_reference, *subpath):
-    subpath += ('vdlist',)
+def load_vdlist(file_reference, *subpath, **kwargs):
+    name = process_kwargs([('name','vdlist')], kwargs)
+    subpath += (name,)
+    print "subpath is",subpath
     fp = open_subpath(file_reference,*subpath)
     lines = fp.readlines()
     lines = map(string.rstrip,lines)

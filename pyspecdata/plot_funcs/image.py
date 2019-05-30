@@ -108,7 +108,7 @@ def image(A,x=[],y=[],**kwargs):
         except:
             raise IndexError(strm("problem with tempsize",tempsize,
                 "of type",type(tempsize),"dtype",tempsize.dtype))
-    A = A[:A.shape[0]-linecounter,:] # really I should an extra counter besides linecounter now that I am using "spacing", but leave alone for now, to be sure I don't cute off data
+    A = A[:A.shape[0]-linecounter,:] # really I should an extra counter besides linecounter now that I am using "spacing", but leave alone for now, to be sure I don't cut off data
     if origin == 'flip':
         # {{{ if origin is "flip", we need to manually flip the data
         A = A[::-1,:]
