@@ -102,25 +102,120 @@ def _ft_shift(self,thisaxis,p2,shift_axis = None,verbose = False):
         newaxis[targetslice]  = x[sourceslice]
         self.setaxis(axisname,newaxis)
     return self
-def ft_clear_startpoints(self,axis,t=None,f=None, verbose=False):
-    ("clears memory of where the origins in the time and frequency domain are"
-            " this is useful, e.g. when you want to ift and center about time=0"
-            " by setting shift=True you can also manually set the points:"
-            "\n\tkeyword arguments `t` and `f` can be set by (1) manually"
-            " setting the start point (2) using the string 'current' to leave the"
-            " current setting alone or (3) None, which clears the startpoint")
+def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
+    r"""Clears memory of where the origins in the time and frequency domain are.
+    This is useful, *e.g.* when you want to ift and center about time=0.
+    By setting shift=True you can also manually set the points.
+
+    Parameters
+    ==========
+    t: float, 'current', 'reset', or None
+        keyword arguments `t` and `f` can be set by (1) manually setting
+        the start point (2) using the string 'current' to leave the
+        current setting a lone (3) 'reset', which clears the startpoint
+        and (4) None, which will be changed to 'current' when the other is set to a number or 'rest' if both are set to None.
+    t: float, 'current', 'reset', or None
+        see `t`
+    nearest: bool
+        Shifting the startpoint can only be done
+        by an integral number of datapoints
+        (*i.e.* an integral number of dwell
+        times, dt, in the time domain or
+        integral number of df in the frequency
+        domain).
+        While it is possible to shift by a
+        non-integral number of datapoints,
+        this is done by applying a
+        phase-dependent shift in the inverse
+        domain.
+        Applying such a axis-dependent shift
+        can have vary unexpected effects if the
+        data in the inverse domain is aliased,
+        and is therefore heavily discouraged.
+        (For example, consider what happens if
+        we attempt to apply a
+        frequency-dependent phase shift to data
+        where a peak at 110 Hz is aliased and
+        appears at the 10 Hz position.)
+
+        Setting `nearest` to **True**
+        will choose a startpoint at the closest
+        integral datapoint to what you have
+        specified.
+
+        Setting `nearest` to **False**
+        will explicitly override the safeties --
+        essentially telling the code that you
+        know the data is not aliased in the
+        inverse domain and/or are willing to
+        deal with the consequences.
+    """
+    if f is None and t is None:
+        t='reset'
+        f='reset'
+    if f is None:
+        assert t is not 'current'
+        f='current'
+    elif t is None:
+        assert f is not 'current'
+        t='current'
     if f is 'current':
         pass
     else:
+        if f is 'reset':
+            f=None
+        df = _get_ft_df(self,axis)
+        orig_f = self.get_ft_prop(axis,['start','freq'])
+        if orig_f is None and self.get_ft_prop(axis):
+            orig_f = self.getaxis(axis)[0]
+        if f is not None:
+            if not isclose(0.0, abs(orig_f-f) % df,
+                    rtol=1e-5):
+                if nearest is None:
+                    raise ValueError(strm("You need to explicitly set `nearest`, since you are trying to shift the start point from",orig_f,"to",f,"which is a non-integral number ",abs(orig_f-f)/df," of df=",df,"intervals.  If you don't know why you're getting this error, see the documentation for ft_clear_startpoints!!"))
+                elif nearest:
+                    f = round((f-orig_f)/df)*df + orig_f
         self.set_ft_prop(axis,['start_freq'],f)
         self.set_ft_prop(axis,['freq','not','aliased'],None)
+        if nearest is False:
+            self.set_ft_prop(axis,['time','not','aliased'],True)
     if t is 'current':
         pass
     else:
+        if t is 'reset':
+            t=None
+        dt = _get_ft_dt(self,axis)
+        orig_t = self.get_ft_prop(axis,['start','time'])
+        if orig_t is None and not self.get_ft_prop(axis):
+            orig_t = self.getaxis(axis)[0]
+        if t is not None:
+            if not isclose(0.0, abs(orig_t-t) % dt,
+                    atol=1e-3):
+                if nearest is None:
+                    print "discrepancy",abs(orig_t-t) % dt
+                    raise ValueError(strm("You need to explicitly set `nearest`, since you are trying to shift the start point from",orig_t,"to",t,"which is a non-integral number (",(orig_t-t)/dt,") of dt=",dt,"intervals.  If you don't know why you're getting this error, see the documentation for ft_clear_startpoints!!"))
+                elif nearest:
+                    t = round((t-orig_t)/dt)*dt + orig_t
         self.set_ft_prop(axis,['start_time'],t)
         self.set_ft_prop(axis,['time','not','aliased'],None)
+        if nearest is False:
+            self.set_ft_prop(axis,['freq','not','aliased'],True)
     return self
-def _find_index(u,origin = 0.0,tolerance = 1e-5,verbose = False):
+def _get_ft_df(self,axis):
+    if self.get_ft_prop(axis):
+        # axis is in frequency domain
+        return diff(self.getaxis(axis)[r_[0,1]]).item()
+    else:
+        # axis in time domain
+        return 1.0/diff(self.getaxis(axis)[r_[0,-1]]).item()
+def _get_ft_dt(self,axis):
+    if self.get_ft_prop(axis):
+        # axis is in frequency domain
+        return 1.0/diff(self.getaxis(axis)[r_[0,-1]]).item()
+    else:
+        # axis in time domain
+        return diff(self.getaxis(axis)[r_[0,1]]).item()
+def _find_index(u,origin = 0.0,tolerance = 1e-4,verbose = False):
     ("identify the index of `u` (represents either time or frequency) where"
             " `origin` lives -- if it finds a value exactly equal"
             " to `origin`, returns `(p2,None)` -- otherwise, `None` is replaced by"

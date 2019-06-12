@@ -102,6 +102,24 @@ N_A = 6.02214179e23
 gammabar_H = 4.258e7
 gammabar_e = 2.807e10 # this is for a nitroxide
 #}}}
+def apply_oom(average_oom,numbers,prev_label=''):
+    """scale numbers by the order of magnitude average_oom and change the
+    label prev_label by adding the appropriate SI prefix"""
+    average_oom = int(average_oom/3.0)*3
+    oom_names =   ['T' , 'G' , 'M' , 'k' , '' , 'm' , '\\mu ' , 'n' , 'p']
+    oom_values = r_[12 , 9   , 6   , 3   , 0  , -3  , -6     , -9  , -12]
+    eq = oom_values == average_oom
+    if not any(eq):
+        if all(average_oom < oom_values):
+            oom_index = len(oom_values)-1
+        elif all(average_oom > oom_values):
+            oom_index = 0
+        else:
+            raise ValueError(strm("you passed",average_oom,"which I can't find a prefix for"))
+    else:
+        oom_index = nonzero(eq)[0][0]
+    numbers[:] /= 10.**oom_values[oom_index]
+    return oom_names[oom_index]+prev_label
 def mybasicfunction(first_figure = None):
     r'''this gives the format for doing the image thing
 note also
@@ -3168,25 +3186,21 @@ class nddata (object):
         return self
     def human_units(self, verbose=False):
         prev_label = self.get_units()
-        oom_names =   ['T' , 'G' , 'M' , 'k' , '' , 'm' , '\\mu ' , 'n' , 'p']
-        oom_values = r_[12 , 9   , 6   , 3   , 0  , -3  , -6     , -9  , -12]
         if prev_label is not None and len(prev_label)>0:
             #{{{ find the average order of magnitude, rounded down to the nearest power of 3
             average_oom = log10(abs(self.data))/3.
             average_oom = average_oom[isfinite(average_oom)].mean()
             #}}}
-            if verbose: print "(human units): for data the average oom is",average_oom*3
+            logger.debug(strm("(human units): for data the average oom is",average_oom*3))
             if round(average_oom) == 0.0:
                 average_oom = 0
             else:
                 average_oom = 3*floor(average_oom)
-            if verbose: print "(human units): for data I round this to",average_oom
-            oom_index = argmin(abs(average_oom-oom_values))
-            if verbose: print "(human units): for data, selected an oom value of",oom_values[oom_index]
-            self.data[:] /= 10.**oom_values[oom_index]
-            self.set_units(oom_names[oom_index]+prev_label)
+            logger.debug(strm("(human units): for data I round this to",average_oom))
+            this_str = apply_oom(average_oom,self.data,prev_label=prev_label) 
+            self.set_units(this_str)
         else:
-            if verbose: print 'data does not have a unit label'
+            logger.debug(strm('data does not have a unit label'))
         for thisaxis in self.dimlabels:
             prev_label = self.get_units(thisaxis)
             if prev_label is not None and len(prev_label)>0:
@@ -3205,19 +3219,16 @@ class nddata (object):
                         print "(human units) for axis: oom:",average_oom
                     average_oom = average_oom[isfinite(average_oom)].mean()
                     #}}}
-                    if verbose: print "(human units): for axis",thisaxis,"the average oom is",average_oom*3
+                    logger.debug(strm("(human units): for axis",thisaxis,"the average oom is",average_oom*3))
                     average_oom = 3*floor(average_oom)
-                    if verbose: print "(human units): for axis",thisaxis,"I round this to",average_oom
-                    oom_index = argmin(abs(average_oom-oom_values))
-                    if verbose: print "(human units): for axis",thisaxis,"selected an oom value of",oom_values[oom_index]
+                    logger.debug(strm("(human units): for axis",thisaxis,"I round this to",average_oom))
                     x = self.getaxis(thisaxis)
-                    x[:] /= 10.**oom_values[oom_index]
-                    self.setaxis(thisaxis,x)
-                    self.set_units(thisaxis,oom_names[oom_index]+prev_label)
+                    result_label = apply_oom(average_oom,x,prev_label=prev_label)
+                    self.set_units(thisaxis,result_label)
                 else:
-                    if verbose: print thisaxis,'does not have an axis label'
+                    logger.debug(strm(thisaxis,'does not have an axis label'))
             else:
-                if verbose: print thisaxis,'does not have a unit label'
+                logger.debug(strm(thisaxis,'does not have a unit label'))
         return self
     #}}}
     #{{{ get units
@@ -3739,6 +3750,8 @@ class nddata (object):
                 match_dims = nonzero(arg.data.shape[j]==array(self.data.shape))[0]
                 if len(match_dims) > 0:
                     arg.dimlabels[j] = self.dimlabels[match_dims[0]]
+                if len(match_dims) != len(index_dims):
+                    raise ValueError("you seem to by multiplying by something with an 'INDEX' data and something that doesn't have that -- is this really what you want?  (this is commonly produced by multiplying a mismatched ndarray by an nddata)")
         if ndshape(self).zero_dimensional and ndshape(arg).zero_dimensional:
             if verbose: print "(1) yes, I found something zero dimensional"
             return self.copy(),arg.copy()
@@ -4307,7 +4320,8 @@ class nddata (object):
         return self
     #}}}
     #{{{ ft-related functions
-    def unitify_axis(self,axis_name,is_axis = True):
+    def unitify_axis(self,axis_name,
+            is_axis=True):
         'this just generates an axis label with appropriate units'
         if type(axis_name) is int:
             axis_name = self.dimlabels[axis_name]
@@ -5984,6 +5998,18 @@ class nddata (object):
             # }}}
             retval.other_info = deepcopy(self.other_info)
             return retval
+    def like(self,value):
+        r'''provide "zeros_like" and "ones_like" functionality
+
+        Parameters
+        ==========
+        value: float
+            1 is "ones_like" 0 is "zeros_like", etc.
+        '''
+        retval = self.copy(data=False)
+        retval.data = empty_like(self.data)
+        retval.data[:] = value
+        return retval
     def __getitem__(self,args):
         if type(args) is type(emptyfunction):
             #{{{ just a lambda function operates on the data

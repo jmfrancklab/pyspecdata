@@ -136,10 +136,10 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
         #          in order to adjust for a final u-axis that doesn't pass
         #          exactly through zero
         if p2_post_discrepancy is not None:
-            asrt_msg = r"""You are trying to shift the time axis by (%d+%g) du (%g).
+            asrt_msg = r"""You are trying to shift the frequency axis by (%d+%g) du (%g).
 
-            In order to shift by a time that is not
-            integral w.r.t. the dwell time, you need to be sure
+            In order to shift by a frequency that is not
+            integral w.r.t. the frequency resolution step, you need to be sure
             that the time-domain spectrum is not aliased.
             This is typically achieved by starting from a time domain spectrum and
             generating the frequency domain by an FT.

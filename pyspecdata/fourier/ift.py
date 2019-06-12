@@ -142,12 +142,10 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
         if p2_post_discrepancy is not None:
             asrt_msg = r"""You are trying to shift the time axis by (%d+%g) du (%g).
 
-            In order to shift by a frequency that is not
-            integral w.r.t. the frequency resolution step, you need to be sure
+            In order to shift by a time that is not
+            integral w.r.t. the dwell time, you need to be sure
             that the frequency-domain spectrum is not aliased.
-            This is typically achieved by starting from a time domain spectrum and
-            generating the frequency domain by an FT.
-            If you **know** by other means that the frequency-domain spectrum
+            If you **know** that the frequency-domain spectrum
             is not aliased, you can also set the `freq_not_aliased` FT property
             to `True`."""%(p2_post, p2_post_discrepancy, du)
             assert self.get_ft_prop(axes[j],['freq','not','aliased']),(asrt_msg)
