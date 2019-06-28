@@ -161,15 +161,17 @@ Install the following packages using a good package-management system (conda or 
 
 * pyqt
 
-* pytables
+* pytables (in future work, we hope to eliminate dependence on this package)
 
 * matplotlib
 
 * h5py
 
+* The python libraries, and a Fortran compiler.  Under anaconda, these are supplied by `libpython` and `mingw`, respectively.
+
 For example, on Windows with `Anaconda 2.7`_.
 -- just run
-``conda install numpy scipy sympy pyqt pytables matplotlib h5py``.
+``conda install numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw``.
 
 On CentOS7, we've tested
 ``yum install python-matplotlib python-matplotlib-qt4 python-devel sympy h5py python-tables scipy``
@@ -191,6 +193,11 @@ and do
 ``python setup_paramset.py develop``
 followed by
 ``python setup.py develop``)
+
+*Important note for conda on Windows 10:*
+For reasons that we don't understand, the Fortran compiler can give odd errors, depending on which terminal you are using to install.
+This appears to be Windows' fault, rather than conda's (?).
+We highly recommend trying both the Anaconda prompt, as well as the standard dos prompt (press start: type `cmd`) if you experience errors related to compilation.
 
 For compiled extensions
 ```````````````````````
