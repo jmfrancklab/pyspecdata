@@ -1,7 +1,8 @@
 If you already know that you want to install -- you can skip to the quick-start_.
 
 We are currently working to add fast compiled Fortran functions for things like
-NMR 2D ILT (Tikhonov regularization), so please read the install instructions
+2D ILT (Tikhonov regularization with basis set compression) for NMR (Nuclear Magnetic Resonance),
+so please read the install instructions
 carefully!
 
 ===========
