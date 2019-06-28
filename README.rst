@@ -1,5 +1,9 @@
 If you already know that you want to install -- you can skip to the quick-start_.
 
+We are currently working to add fast compiled Fortran functions for things like
+NMR 2D ILT (Tikhonov regularization), so please read the install instructions
+carefully!
+
 ===========
 pySpecData
 ===========
@@ -226,7 +230,7 @@ To get started with this code:
 
 2. Install libraries that pyspecdata depends on. (If you're interested in why you need to do this first, see installation notes below.)
 
-   * On Windows or MacOS: in the Anaconda Prompt, run ``conda install numpy scipy sympy pyqt pytables matplotlib h5py``.
+   * On Windows or MacOS: in the Anaconda Prompt, run ``conda install numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw``.
 
    * For Mac, you can also use homebrew.
      Note that, in the current version python is renamed to `python2`,
@@ -236,8 +240,15 @@ To get started with this code:
 
    * On Linux, just use your package manager (``aptitude``, ``yum``, *etc.*) to install these libraries.
 
-3. Install `pyspecdata`: ``pip install pyspecdata``
+3. Install `paramset_pyspecdata`: ``pip install paramset_pyspecdata``,
+   then `pyspecdata`: ``pip install pyspecdata``
    or follow the "Installation for developers" section above.
+
+   * If you have difficulties with the install, check that you have a gfortran
+     compiler installed (in conda windows, this comes from mingw) and that, if
+     you are using windows, you are trying to install from a standard dos
+     prompt (we like to use git bash, but anaconda and related compilers can
+     misbehave from git bash sometimes).
 
 4. Set up directories.
    You can run the command `pyspecdata_dataconfig` to assist with this.
