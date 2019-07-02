@@ -324,3 +324,17 @@ To get started with this code:
 
        * The GUI tool that will allow you to set up ``_pyspecdata`` by pointing
          and clicking has not yet been set up.
+
+Notes on compilation of NNLS
+============================
+
+We recently added a compiled extension that performs non-negative least-squares for regularization (DOSY/Relaxometry/etc.)
+
+Under linux or mac, you should have a gcc and gfortran compiler installed, and should make sure you have libpython for this to work.
+
+Under anaconda on windows, we have run into some trouble sometimes where it gives you an error 127.
+We recommend using the normal dos command prompt (cmd) to install pyspecdata, and make sure that your path is set such that
+``where gcc`` yields a gcc.exe (NOT .bat) file and ``where python`` yields the anaconda python executable.
+(Recent versions of mingw appear to put .bat files in a preferential location
+in the path, and these .bat files seem to mess everything up, including
+compatibility with the git bash prompt.)
