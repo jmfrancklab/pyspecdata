@@ -284,6 +284,8 @@ To get started with this code:
        * On MacOS and Linux, it's the directory indicated by ``~``.  On Linux,
          this typically expands to ``/home/yourusername``.
 
+       * On any OS, you can always find your home directory in Python using ``import os;print os.path.expanduser('~')``
+
    * What are these directories? → You can either create them or point to existing directories.
 
        * ``data_directory`` must be set.  It is a directory, anywhere on the
@@ -293,7 +295,9 @@ To get started with this code:
          (*e.g.* you might have subdirectories named ``400MHz_NMR``,
          ``500MHz_NMR``, ``95GHz_ESR``, and ``Xband_ESR``).
 
-           * Data is assumed to be **unpacked** (*i.e.* as it is on the spectrometer -- not in .zip or .tgz files)
+           * The library now supports having datasets packed into `.zip` or `.tgz` files.
+             For example, Bruker NMR files typically comprise a directory with several subdirectories for the numbered experiments.
+             We routinely pack these up as zip files on the spectrometer, and directly read the data from the zip files.
 
            * If you're setting up a lab, you might want to separately sync each different
              experiment type folders using `seafile <https://www.seafile.com/en/home/>`_.
