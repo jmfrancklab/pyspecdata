@@ -4318,6 +4318,9 @@ class nddata (object):
         #}}}
         self.data = self.data.reshape(temp)
         return self
+    def item(self):
+        r"like numpy item -- returns a number when zero-dimensional"
+        return self.data.item()
     #}}}
     #{{{ ft-related functions
     def unitify_axis(self,axis_name,
@@ -5919,7 +5922,19 @@ class nddata (object):
             return retval
     @property
     def C(self):
-        "shortcut for copy"
+        """shortcut for copy
+        
+        ..todo::
+            We should offer "N", which generates something like a copy,
+            but which is sets the equivalent of "nopop".
+            For example, currently, you need to do something like
+            ``d.C.argmax('t2')``,
+            which is very inefficient, since it copies the whole array.
+            So, instead, we should do
+            ``d.N.argmax('t2')``, which tells argmax and all other
+            functions not to overwrite "self" but to return a new object.
+            This would cause things like "run_nopop" to become obsolete.
+        """
         return self.copy()
     @C.setter
     def C(self):
