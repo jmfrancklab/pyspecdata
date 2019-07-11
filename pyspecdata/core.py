@@ -4448,6 +4448,8 @@ class nddata (object):
             "nnls_residual") are stored as properties of the nddata.
             The regularized dimension is always last
             (innermost).
+            If :str:`BRD` is specified, then the number of singular values used to compressed each kernel is returned in properties of the nddata called, respectively, "s1" and "s2".
+            Additionally, the compressed data is returned in a property of the nddata called "compressed_data", which can be used to generate the residual between the experimental data and the fit data (i.e., :math:`\widetilde{m} - (\widetilde{K_{1}}\otimes\widetilde{K_{2}})x` where  :math:`\widetilde{m}` is the compressed data, :math:`\widetilde{K_{1}}\otimes\widetilde{K_{2}} = \widetilde{K_{0}}` is the compressed kernel, and :math:`x` is the experimental data, lexicographically ordered. Note that the product :math:`\widetilde{K_{0}}x` is a (s1 x s2) matrix.)
         """
         logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?',isfortran(self.data)))
         tuple_syntax = False
@@ -4659,6 +4661,9 @@ class nddata (object):
                 residual_nddata = residual
             # store the kernel and the residual as properties
             self.set_prop('nnls_kernel',K)
+            self.set_prop('compressed_data',data_compressed)
+            self.set_prop('s1',s1)
+            self.set_prop('s2',s2)
             self.set_prop('nnls_residual',residual_nddata)
             # {{{ use the info from the dictionaries
             self.axis_coords = self.fld(axis_coords_dict)
