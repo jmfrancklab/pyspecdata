@@ -4448,8 +4448,7 @@ class nddata (object):
             "nnls_residual") are stored as properties of the nddata.
             The regularized dimension is always last
             (innermost).
-            If :str:`BRD` is specified, then the number of singular values used to compressed each kernel is returned in properties of the nddata called, respectively, "s1" and "s2".
-            Additionally, the compressed data is returned in a property of the nddata called "compressed_data", which can be used to generate the residual between the experimental data and the fit data (i.e., :math:`\widetilde{m} - (\widetilde{K_{1}}\otimes\widetilde{K_{2}})x` where  :math:`\widetilde{m}` is the compressed data, :math:`\widetilde{K_{1}}\otimes\widetilde{K_{2}} = \widetilde{K_{0}}` is the compressed kernel, and :math:`x` is the experimental data, lexicographically ordered. Note that the product :math:`\widetilde{K_{0}}x` is a (s1 x s2) matrix.)
+            If :str:`BRD` is specified, then the individual, uncompressed kernels :math:`K_{1}` and :math:`K_{2}` are returned as properties of the nddata "K1" and "K2" respectively. The number of singular values used to compressed each kernel is returned in properties of the nddata called, respectively, "s1" and "s2". 
         """
         logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?',isfortran(self.data)))
         tuple_syntax = False
@@ -4507,8 +4506,10 @@ class nddata (object):
             data_axis1,fit_axis1 = data_axis1.aligndata(fit_axis1)
             data_axis2,fit_axis2 = data_axis2.aligndata(fit_axis2)
             K1 = kernel_func[0](data_axis1,fit_axis1).squeeze()
+            K1_ret = K1
             logger.debug(strm('K1 dimlabels',K1.dimlabels,'and raw shape',K1.data.shape))
             K2 = kernel_func[1](data_axis2,fit_axis2).squeeze()
+            K2_ret = K2
             logger.debug(strm('K2 dimlabels',K2.dimlabels,'and raw shape',K2.data.shape))
             # SVD and truncation of kernels
             U1,S1,V1 = np.linalg.svd(K1.data,full_matrices=False)
@@ -4661,10 +4662,11 @@ class nddata (object):
                 residual_nddata = residual
             # store the kernel and the residual as properties
             self.set_prop('nnls_kernel',K)
-            self.set_prop('compressed_data',data_compressed)
             self.set_prop('s1',s1)
             self.set_prop('s2',s2)
             self.set_prop('nnls_residual',residual_nddata)
+            self.set_prop('K1',K1_ret)
+            self.set_prop('K2',K2_ret)
             # {{{ use the info from the dictionaries
             self.axis_coords = self.fld(axis_coords_dict)
             self.axis_coords_units = self.fld(axis_units_dict)
