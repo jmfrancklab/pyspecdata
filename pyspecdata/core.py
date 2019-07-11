@@ -4362,6 +4362,11 @@ class nddata (object):
                         axis_name = axis_name.replace('t','\\nu ')
                         if axis_name[0] != '$':
                             axis_name = '$' + axis_name + '$'
+                #elif axis_name[:2] == 'ph':
+                #    if len(axis_name) > 2:
+                #        axis_name = r'$\Delta c_{'+axis_name[2:]+'}$'
+                #    else:
+                #        axis_name = r'$\Delta c$'
                 else:
                     axis_name = r'F{'+axis_name+r'}'
         else:
@@ -5654,6 +5659,9 @@ class nddata (object):
                 raise ValueError("I don't know how to deal with this type!")
         else:
             raise ValueError("otherargs must be one or two arguments!")
+        assert not any([j in self.dimlabels for j in axesout if j != axisin]), strm(
+                "You are trying to create dimensions",[j for j in axesout if j!=axisin],
+                "one of which matches one of the existing labels",self.dimlabels)
         if any([j == -1 for j in shapesout]):
             j = shapesout.index(-1)
             if j < len(shapesout)-1:
@@ -5664,7 +5672,14 @@ class nddata (object):
             raise ValueError("The size of the axis (%s) you're trying to split (%s) doesn't match the size of the axes you're trying to split it into (%s = %s)"%(repr(axisin),repr(ndshape(self)[axisin]),repr(axesout),repr(shapesout)))
         thisaxis = self.axn(axisin)
         if self.getaxis(axisin) is not None and len(self.getaxis(axisin)) > 0:
-            raise ValueError("You cannot chunk data with labels! Try 'chunk_by' instead!")
+            axes_tmp = self.getaxis(axisin).reshape(shapesout)
+            new_axes = []
+            for j in range(len(axes_tmp.shape)):
+                this_slicer = [0]*len(axes_tmp.shape)
+                this_slicer[j] = slice(None,None,None)
+                new_axes.append(axes_tmp[this_slicer])
+        else:
+            new_axes = None
         #{{{ if there is a list of axis coordinates, add in slots for the new axes
         if type(self.axis_coords) is list:
             if len(self.axis_coords) == 0:
@@ -5687,6 +5702,9 @@ class nddata (object):
         newnames = list(self.dimlabels[0:thisaxis]) + axesout + list(self.dimlabels[thisaxis+1:])
         self.data = self.data.reshape(newshape)
         self.dimlabels = newnames
+        if new_axes is not None:
+            for j in range(len(axesout)):
+                self.setaxis(axesout[j],new_axes[j])
         return self
     def chunk_auto(self,axis_name,which_field,verbose = False,dimname = None):
         r'''assuming that axis "axis_name" is currently labeled with a structured array, choose one field ("which_field") of that structured array to generate a new dimension
