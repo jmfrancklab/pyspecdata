@@ -113,7 +113,12 @@ def series(file_reference, *subpath, **kwargs):
     data.set_units('digital')
     data.set_prop('title',
             load_title(file_reference, *subpath))
+    SFO1 = v['SFO1']
     v.update(v2)
+    if v['SFO1'] != SFO1:
+        # for, e.g. 2H experiments, a bad SFO1 (1H) is stored in acqu2, which we don't want
+        print "warning: ignoring second dimension SFO1, since it's probably wrong"
+        v['SFO1'] = SFO1
     with open_subpath(file_reference, *(subpath+('pulseprogram',)),mode='r') as fp:
         ppg = fp.read()
         data.set_prop('pulprog',ppg)
