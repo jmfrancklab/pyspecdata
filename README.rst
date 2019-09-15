@@ -176,7 +176,7 @@ Install the following packages using a good package-management system (conda or 
 
 For example, on Windows with `Anaconda 2.7`_.
 -- just run
-``conda install numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw``.
+``conda install -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw``.
 
 On CentOS7, we've tested
 ``yum install python-matplotlib python-matplotlib-qt4 python-devel sympy h5py python-tables scipy``
@@ -195,7 +195,7 @@ Installation for developers
 (Once these are installed,
 to install from github, just ``git clone https://github.com/jmfranck/pyspecdata.git`` then move to the directory where setup.py lives,
 and do
-``python setup_paramset.py develop``
+``python setup_paramset.py install``
 followed by
 ``python setup.py develop``)
 
