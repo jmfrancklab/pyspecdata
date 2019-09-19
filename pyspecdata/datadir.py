@@ -4,7 +4,7 @@ even though the location of the raw spectral data might change.
 This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file.
 '''
 import os
-import ConfigParser
+import configparser
 import platform
 from .general_functions import process_kwargs, strm
 import logging
@@ -28,10 +28,10 @@ class MyConfig(object):
     def set_setting(self,this_section,this_key,this_value):
         "set `this_key` to `this_value` inside section `this_section`, creating it if necessary"
         if self._config_parser is None:
-            self._config_parser = ConfigParser.SafeConfigParser()
+            self._config_parser = configparser.SafeConfigParser()
             read_cfg = self._config_parser.read(self.config_location)
             if not read_cfg:
-                print "\nWarning!! There was no file at",self.config_location,"so I'm creating one"
+                print("\nWarning!! There was no file at",self.config_location,"so I'm creating one")
         if not self._config_parser.has_section(this_section):
             self._config_parser.add_section(this_section)
         self._config_parser.set(this_section,this_key,this_value)
@@ -78,20 +78,20 @@ class MyConfig(object):
         -------
         The value corresponding to `this_key`.
         """
-        if this_key in self.config_vars.keys():
+        if this_key in list(self.config_vars.keys()):
             return self.config_vars[this_key]
-        if environ is not None and environ in os.environ.keys():
+        if environ is not None and environ in list(os.environ.keys()):
                 retval = os.environ[environ]
         else:
             if self._config_parser is None:
-                self._config_parser = ConfigParser.SafeConfigParser()
+                self._config_parser = configparser.SafeConfigParser()
                 read_cfg = self._config_parser.read(self.config_location)
                 if not read_cfg:
-                    print "\nWarning!! There was no file at",self.config_location,"so I'm creating one"
+                    print("\nWarning!! There was no file at",self.config_location,"so I'm creating one")
             if self._config_parser.has_section(section):
                 try:
                     retval = self._config_parser.get(section,this_key)
-                except ConfigParser.NoOptionError:
+                except configparser.NoOptionError:
                     retval = None
             else:
                 self._config_parser.add_section(section)
@@ -199,8 +199,8 @@ def getDATADIR(*args,**kwargs):
                 if len(matches) == 1:
                     return matches[0]
                 else:
-                    min_length_match = min(map(len,matches))
-                    matches = filter(lambda x: len(x) == min_length_match,matches)
+                    min_length_match = min(list(map(len,matches)))
+                    matches = [x for x in matches if len(x) == min_length_match]
                     if len(matches) != 1:
                         raise ValueError("I found multiple equivalent matches when searching for exp_type: "+repr(matches))
                     return matches[0]
@@ -226,7 +226,7 @@ def getDATADIR(*args,**kwargs):
             exp_directory = walk_and_grab_best_match(base_data_dir)
             if exp_directory is None:
                 logger.info(strm("I found no directory matches for exp_type "+exp_type+", so now I want to look inside all the known exptypes"))
-                for t,d in dict(_my_config._config_parser.items('ExpTypes')).iteritems():
+                for t,d in dict(_my_config._config_parser.items('ExpTypes')).items():
                     exp_directory = walk_and_grab_best_match(d)
                     if exp_directory is not None:
                         break

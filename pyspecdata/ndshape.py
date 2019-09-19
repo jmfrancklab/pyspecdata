@@ -49,7 +49,7 @@ class ndshape_base ():
                     self.zero_dimensional = True
                     return
             elif isinstance(args[0], list):
-                self.dimlabels, self.shape = map(list,zip(*args[0]))
+                self.dimlabels, self.shape = list(map(list,list(zip(*args[0]))))
             else:
                 raise ValueError('If you pass a single argument, it must be an nddata')
         return
@@ -121,7 +121,7 @@ class ndshape_base ():
         return zip(self.shape,self.dimlabels).__repr__()
     def __getitem__(self,args):
         try:
-            mydict = dict(zip(self.dimlabels,self.shape))
+            mydict = dict(list(zip(self.dimlabels,self.shape)))
         except Exception as e:
             raise ValueError(strm("either dimlabels=",self.dimlabels,"or shape",
                 self.shape,"not in the correct format") + explain_error(e))

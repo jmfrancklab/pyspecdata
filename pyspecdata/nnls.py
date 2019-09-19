@@ -1,5 +1,5 @@
 # again, this is copied liberally from scipy nnls -- see scipy licensing
-from __future__ import division, print_function, absolute_import
+
 
 from . import _nnls
 from .general_functions import redim_F_to_C, redim_C_to_F, strm
@@ -57,7 +57,7 @@ def nnls_regularized(A, b, l=0, maxiter=None):
     """
     logger.debug(strm("isfortran result",isfortran(A),isfortran(b)))
 
-    A, b = map(asarray_chkfinite, (A, b))
+    A, b = list(map(asarray_chkfinite, (A, b)))
 
     if len(A.shape) != 2:
         raise ValueError("expected matrix")
@@ -105,7 +105,7 @@ def nnls_regularized(A, b, l=0, maxiter=None):
                     x, rnorm, mode = _nnls.nnls_regularized_loop(A, redim_C_to_F(b), w, zz, index, maxiter, l)
                     return redim_F_to_C(x), rnorm, mode
             retval = p.map(nnls_func,l)
-            x,rnorm,mode = map(np_array,zip(*retval))
+            x,rnorm,mode = list(map(np_array,list(zip(*retval))))
     if (isscalar(mode) and mode != 1):
         # need something for the multiple lambda
         raise RuntimeError("too many iterations")

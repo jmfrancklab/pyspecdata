@@ -7,7 +7,7 @@ def image(A,x=[],y=[],**kwargs):
     A.squeeze()# drop any singleton dimensions, which cause problems
     #{{{ pull out kwargs for imagehsv
     imagehsvkwargs = {}
-    for k,v in kwargs.items():
+    for k,v in list(kwargs.items()):
         if k in ['black','logscale']:
             imagehsvkwargs[k] = kwargs.pop(k)
     #}}}
@@ -47,7 +47,7 @@ def image(A,x=[],y=[],**kwargs):
                 y = r_[0:A.data.shape[A.axn(y_label)]]
             y_label = A.unitify_axis(y_label)
         else:
-            these_dimsizes = map(lambda x: str(ndshape(A)[x]),templabels)
+            these_dimsizes = [str(ndshape(A)[x]) for x in templabels]
             def axis_labeler(x): # below, I turn off math mode for the axis names
                 if A.getaxis(x) is not None:
                     return '[$ '+A.unitify_axis(x)+r' $_{{{:.3g}\rightarrow{:.3g}}}]'.format(
@@ -56,7 +56,7 @@ def image(A,x=[],y=[],**kwargs):
                 #    return '[$ '+A.unitify_axis(x)+ '$]'
                 else:
                     return '[$ '+A.unitify_axis(x)+ '$]'
-            templabels = map(axis_labeler, templabels)
+            templabels = list(map(axis_labeler, templabels))
             y_label = '\\otimes'.join(templabels)
             y_label = ' _{('+r'\times'.join(these_dimsizes)+')}' + y_label
             y_label = '$'+y_label+'$'# whole expression is in math mode
@@ -294,7 +294,7 @@ def fl_image(self,A,**kwargs):
         firstarg = self.check_units(A,-1,0) # check units, and if need be convert to human units, where x is the last dimension and y is the first
     else:
         firstarg = A
-    if self.black and 'black' not in kwargs.keys():
+    if self.black and 'black' not in list(kwargs.keys()):
         kwargs.update({'black':self.black})
     retval = image(firstarg,**kwargs)#just a placeholder for now, will later keep units + such
     if ax.get_title() is None or len(ax.get_title()) == 0:

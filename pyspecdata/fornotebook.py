@@ -21,7 +21,7 @@ import re
 golden_ratio = (1.0 + sqrt(5))/2.0
 
 def dprint(*stuff):
-    print '\n\nDEBUG',' '.join(map(repr(stuff))),'\n\n'
+    print('\n\nDEBUG',' '.join(map(repr(stuff))),'\n\n')
 def thisjobname():
     if path_exists('pythonjobname.txt'):
         fp = open('pythonjobname.txt')
@@ -56,10 +56,10 @@ class figlistl (figlist):
         self.basename = None # must be turned off, so it can cycle through lists, etc, on its own
         #{{{ process kwargs
         verbose = False
-        if 'verbose' in kwargs.keys():
+        if 'verbose' in list(kwargs.keys()):
             verbose = kwargs.pop('verbose')
         #}}}
-        if line_spacing: print '\n\n'
+        if line_spacing: print('\n\n')
         self.show_prep()
         if not len(kwargs):
             kwargs = {}
@@ -70,13 +70,13 @@ class figlistl (figlist):
         if hasattr(self,'lplot_kwargs'):
             kwargs.update(self.lplot_kwargs)
         for figname in self.figurelist:
-            if verbose: print "showing figure"+lsafen(figname)
+            if verbose: print("showing figure"+lsafen(figname))
             if isinstance(figname, dict):
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
-                    if line_spacing: print '\n\n'
-                    print kwargs.pop('print_string')
-                    if line_spacing: print '\n\n'
+                    if line_spacing: print('\n\n')
+                    print(kwargs.pop('print_string'))
+                    if line_spacing: print('\n\n')
             else:
                 j = self.get_fig_number(figname)
                 if mlab:
@@ -92,12 +92,12 @@ class figlistl (figlist):
                 if len(string)>0:
                     sep = '_'
                 if self.env == 'test':
-                    print 'not running lplot'
+                    print('not running lplot')
                 else:
                     if mlab:
                         lplot(figname.replace('.','_')+sep+string,fig = thefigure,**kwargs)
                     else:
-                        if figname in self.twinx_list.keys():
+                        if figname in list(self.twinx_list.keys()):
                             kwargs.update(autopad = False)# because the autopad is done manually, since it freaks out with twinx
                         lplot(figname.replace('.','_')+sep+string,**kwargs)
         while len(self.figurelist) > 0:
@@ -116,14 +116,14 @@ class figlistl (figlist):
 figlist = figlistl
 def lplotfigures(figurelist,string,**kwargs):
     'obsolete, use the class!'
-    print '\n\n'
+    print('\n\n')
     if not len(kwargs):
         kwargs = {}
     for j,figname in enumerate(figurelist):
         if isinstance(figname, dict):
             kwargs.update(figname)
             if 'print_string' in kwargs:
-                print '\n\n'+kwargs.pop('print_string')+'\n\n'
+                print('\n\n'+kwargs.pop('print_string')+'\n\n')
         else:
             figure(j+1)
             try:
@@ -134,11 +134,11 @@ def lplotfigures(figurelist,string,**kwargs):
         figurelist.pop(-1)
     return
 def figlisterr(figurelist,*args,**kwargs):
-    if 'basename' in kwargs.keys():
+    if 'basename' in list(kwargs.keys()):
         basename = kwargs['basename']
     else:
         basename = thisjobname()
-    print lsafen("Trying to plot the figurelist",figurelist)
+    print(lsafen("Trying to plot the figurelist",figurelist))
     lplotfigures(figurelist,basename+'errplot.pdf')
     return args
 def see_if_math(recnames):
@@ -153,7 +153,7 @@ def see_if_math(recnames):
         out = []
         for j in range(0,len(myin)):
             out.extend(myin[j].split(')'))
-        return not any(map(lambda x: len(x)>1 and not (x[0] == '{' or x[0] == '\\'),out))
+        return not any([len(x)>1 and not (x[0] == '{' or x[0] == '\\') for x in out])
     return [r'\ensuremath{'+v.replace('\\\\','\\')+'}' if ismath(v) else v.replace('_',' ') for v in recnames]
 def lrecordarray_broken(recordlist,rows=30,numwide= 5):
     width = 1.0/numwide
@@ -177,7 +177,7 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
     retval = ''
     if len(data_has_error_names)<len(error_names):
         retval += r'{\color{red}Warning! unassigned error names!'+'\n'
-        retval += lsafe(set(error_names)-set(map(lambda x: x+'_ERROR',data_has_error_names)))+'\n'
+        retval += lsafe(set(error_names)-set([x+'_ERROR' for x in data_has_error_names]))+'\n'
         retval += '}\n\n'
     recordlist_errors = recordlist[error_names]
     recordlist = recordlist[data_names]
@@ -259,7 +259,7 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
             else:
                 return "an array:"+lsafe(str(x))
         else:
-            if isinstance(x,basestring):
+            if isinstance(x,str):
                 return lsafe(this_format_function(x,error))
             else:
                 return '$'+this_format_function(x,error)+'$'
@@ -366,7 +366,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
     else:
         bytextwidth = False
     if print_string is not None:
-        print print_string
+        print(print_string)
     fname = fname.replace(' ','_')
     fname = fname.replace('-','m')
     fname = fname.replace('+','p')
@@ -416,11 +416,11 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
             resize_factor = 4
             data = uint8((data*255).round())
             img = Image.fromarray(data)
-            if verbose: print "old size",img.size
+            if verbose: print("old size",img.size)
             newimgsize = tuple(uint((r_[img.size[0],img.size[1]]/resize_factor).round()))
-            if verbose: print "target new size",newimgsize
+            if verbose: print("target new size",newimgsize)
             img = img.resize(newimgsize,Image.ANTIALIAS)
-            if verbose: print "new size, after resize",img.size
+            if verbose: print("new size, after resize",img.size)
             del data
             img.save(fname)
             del img
@@ -437,7 +437,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
     # replaced outer_legend with appropriate modification to the "legend" option of figlist.show_prep(), same with legend option
         if not boundaries:
             ax = gca()
-            for j in ax.spines.keys():
+            for j in list(ax.spines.keys()):
                 ax.spines[j].set_visible(False)
             setp(ax.get_xticklabels(),visible = False)
             setp(ax.get_yticklabels(),visible = False)
@@ -465,10 +465,10 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
                     dpi=dpi,
                     facecolor=(1,1,1,0))
     if figure:
-        print r"""
+        print(r"""
         \begin{figure}[h]
         \end{figure}
-        """
+        """)
     if bytextwidth:
         if showbox:
             mpwidth = r'%0.2f\linewidth'%width
@@ -479,16 +479,16 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
         mpwidth = r'%0.2fin'%width
         figwidth = mpwidth
     if showbox:
-        print r'''\mbox{\begin{minipage}{%s}'''%mpwidth
+        print(r'''\mbox{\begin{minipage}{%s}'''%mpwidth)
         if alsosave != None:
-            print r'also saved \fn{%s}'%alsosave+'\n\n'
-    print r'\includegraphics[width=%s]{%s}'%(figwidth,fname.replace(r'auto_figures',r'\autofiguredir'))
+            print(r'also saved \fn{%s}'%alsosave+'\n\n')
+    print(r'\includegraphics[width=%s]{%s}'%(figwidth,fname.replace(r'auto_figures',r'\autofiguredir')))
     if showbox:
-        print '\n\n'+r'\hrulefill'+'\n\n'
-        print r'''{\color{red}{\tiny %s}:}\begin{tiny}\fn{%s}\end{tiny}'''%('file:',fname)
-        print '\n\n'+r'\hrulefill'+'\n\n'
-        print r'''\end{minipage}
-}''',
+        print('\n\n'+r'\hrulefill'+'\n\n')
+        print(r'''{\color{red}{\tiny %s}:}\begin{tiny}\fn{%s}\end{tiny}'''%('file:',fname))
+        print('\n\n'+r'\hrulefill'+'\n\n')
+        print(r'''\end{minipage}
+}''', end=' ')
     clf()
     return
 def ordplot(x,y,labels,formatstring):
@@ -522,12 +522,12 @@ def obs_repr(*arg):
     thisstr += r'}'
     return thisstr
 def obs(*arg):
-    print obs_repr(*arg)
+    print(obs_repr(*arg))
     return
 obsndef = True
 def obsn(*arg):
     obs(*arg)
-    print '\n\n'
+    print('\n\n')
     return
 def txt_to_dict(file='data.txt'):
     fp = open(file,'r')
@@ -541,7 +541,7 @@ def txt_to_dict(file='data.txt'):
 def dict_to_txt(mydict,file='data.txt'):
     set_printoptions(precision = 16)
     fp = open(file,'w')
-    for k,v in mydict.iteritems():
+    for k,v in mydict.items():
         fp.write('%s::%s\n'%(k,repr(v).replace('\n','\\n')))
     fp.close()
 def save_data(inputdata={},file = 'data.txt'):
@@ -582,7 +582,7 @@ def save_variable(variable,content,disp=True,file = 'data.txt'):
     return data
 #{{{ specific convenience functions
 def calcdistance(freq,optdistance):
-    print r'$%0.1f\;GHz$ @ '%(freq/1e9),dp((optdistance+119e-3)*1e3,1),r'$mm$'
+    print(r'$%0.1f\;GHz$ @ '%(freq/1e9),dp((optdistance+119e-3)*1e3,1),r'$mm$')
 def calcfield(elfreq,elratio = 28.113,nmrelratio = 1.5167):
     obs('$%0.6f'%elfreq,r'\;\text{GHz}$ ${\tiny ',dp(elratio,5),r'\;\text{GHz/T}=}',dp(1e4/elratio,5),r'\;\text{G/GHz}$, $',dp(nmrelratio,6),r'\permil\;\Rightarrow$ $',dp(elfreq/elratio*1e4,3),r'\;\text{G}$, $',dp(elfreq*nmrelratio,5),r'\;\text{MHz}$')
 def qcalc(freq1,freq2):
@@ -618,7 +618,7 @@ def cpmgseries(filename,plotlabel,tau=None,alpha=None,alphaselect=None):
             plot([alphaselect],rms,'rx')
         axis('tight')
         lplot(plotlabel+'_reg.pdf')
-        print '\n\n'
+        print('\n\n')
     plot(data)
     if (alphaselect!=None):
         plot(data.getaxis('echo'),fit.flatten(),'r',alpha=0.5,linewidth=2)
@@ -642,13 +642,13 @@ def cpmgs(exp,number,tau=None,alpha=None,alphaselect=None,first=False):
     alphaselect = local_data['alphaselect']
     #}}}
     filename = getDATADIR()+'franck_hanlabMagritek/'+exp+'/%d/'%number
-    print r'\fn{%s %d}'%(exp,number)+'\n\n'
+    print(r'\fn{%s %d}'%(exp,number)+'\n\n')
     cpmgseries(filename,exp+thisjobname(),tau,alpha,alphaselect)
 #{{{ esr_saturation
 def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,hn23adjustment = 1.,show_avg = False):
     if figname == None:
         figname = thisjobname()
-    print '\n\n\\fn{',file,'}\n\n'
+    print('\n\n\\fn{',file,'}\n\n')
     data = load_indiv_file(file,dimname='power')
     #plot(data,'.-')
     x = data.getaxis('$B_0$').flatten()
@@ -701,7 +701,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
     try:
         allpeaks_top_x = nddata(allpeaks_top_x,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
     except:
-        print r'\begin{verbatim} If you have an error here, probably change smoothing (%0.2f) or threshold (%0.2f)\end{verbatim}'%(smoothing,threshold),'\n\n'
+        print(r'\begin{verbatim} If you have an error here, probably change smoothing (%0.2f) or threshold (%0.2f)\end{verbatim}'%(smoothing,threshold),'\n\n')
         clf()
         for j in range(0,nslices):
             thisslice = data['power',j].data
@@ -712,12 +712,12 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
             for peakset in peakmask:
                 plot(x[peakset],smoothed[peakset])
         lplot('error_plot'+figname+'.png',width=6)
-        print r'lengths: ',map(len,allpeaks_top_x),''
+        print(r'lengths: ',list(map(len,allpeaks_top_x)),'')
         return
     try:
         allpeaks_bottom_x = nddata(allpeaks_bottom_x,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
     except:
-        print r'\begin{verbatim} If you have an error here, probably change smoothing (%0.2f) or threshold (%0.2f)\end{verbatim}'%(smoothing,threshold),'\n\n'
+        print(r'\begin{verbatim} If you have an error here, probably change smoothing (%0.2f) or threshold (%0.2f)\end{verbatim}'%(smoothing,threshold),'\n\n')
         clf()
         for j in range(0,nslices):
             thisslice = data['power',j].data
@@ -728,7 +728,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
             for peakset in peakmask:
                 plot(x[peakset],smoothed[peakset])
         lplot('error_plot'+figname+'.png',width=6)
-        print r'\begin{verbatim}lengths: ',map(len,allpeaks_top_x),'\end{verbatim}'
+        print(r'\begin{verbatim}lengths: ',list(map(len,allpeaks_top_x)),'\end{verbatim}')
         return
     allpeaks_top = nddata(allpeaks_top,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
     allpeaks_bottom = nddata(allpeaks_bottom,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
@@ -739,7 +739,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
         lplot('esr_dataset'+figname+'.png',width=6,grid=False)
     else:
         lplot('esr_dataset'+figname+'.png',width=6)
-    print '\n\n'
+    print('\n\n')
     #{{{ peak to peak
     peaktopeak = allpeaks_bottom_x - allpeaks_top_x
     peaktopeak_squared = peaktopeak.copy()
@@ -757,7 +757,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
     lplot('esr_dataset'+figname+'_pp2.pdf')
     #}}}
     #}}}
-    print '\n\n'
+    print('\n\n')
     #{{{ height
     height = (allpeaks_top - allpeaks_bottom)/2
     height_n23 = height.copy()
@@ -792,7 +792,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
 #}}}
 #{{{ dnp
 def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'reference_data',expnos = [3]):
-    print '\n\n'
+    print('\n\n')
     # noise tests
     close(1)
     figure(1,figsize=(16,8))
@@ -838,9 +838,9 @@ def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'ref
        ax = gca()
        ax.get_xaxis().set_visible(False)
        ax.get_yaxis().set_visible(False)
-       map((lambda x: x.set_visible(False)),ax.spines.values())
+       list(map((lambda x: x.set_visible(False)),list(ax.spines.values())))
        lplot('noise'+plotlabel+'_%d.pdf'%ind,grid=False,width=5,gensvg=True)
-       print '\n\n'
+       print('\n\n')
        figure(2)
        legendstr = []
        for k in range(0,len(signalexpno)):
@@ -856,5 +856,5 @@ def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'ref
            autolegend(legendstr)
            lplot('signal'+plotlabel+'_%d.pdf'%ind,grid=False)
        if (ind % 2) ==  0:
-          print '\n\n'
+          print('\n\n')
 #}}}

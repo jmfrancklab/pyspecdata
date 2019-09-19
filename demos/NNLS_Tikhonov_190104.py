@@ -2,7 +2,7 @@
 # coding: utf-8
 
 try:
-    get_ipython().magic(u'load_ext pyspecdata.ipy')
+    get_ipython().magic('load_ext pyspecdata.ipy')
     in_notebook = True
 except:
     from pyspecdata import *
@@ -29,7 +29,7 @@ def timeit(method,n_times=5):
             name = kw.get('log_name', method.__name__.upper())
             kw['log_time'][name] = int(time_diff * 1000)
         else:
-            print '%r  %2.2f ms (average of %d runs)' %                   (method.__name__, time_diff * 1000, n_times) + l_line
+            print('%r  %2.2f ms (average of %d runs)' %                   (method.__name__, time_diff * 1000, n_times) + l_line)
         return result
     return timed
 
@@ -67,8 +67,8 @@ t = c_[1e-3:endp:2048j] # column vectors give functions of time
 test_signal = exp(-R*t).dot(P.T)
 
 test_signal += random.normal(scale = 0.01,size=(2048,1))
-print test_signal.shape
-print t.squeeze().shape
+print(test_signal.shape)
+print(t.squeeze().shape)
 fl.next('test data function')
 plot(t.flatten(),test_signal.flatten())
 xlim(-endp/10,endp)
@@ -85,8 +85,8 @@ A = exp(-R*t)
 # 
 
 
-print test_signal.shape
-print A.shape
+print(test_signal.shape)
+print(A.shape)
 x,rnorm = nnls_regularized(A,test_signal.squeeze(),l=0.)
 fl.next('fit an exponential',legend=True)
 fl.plot(t[:],test_signal.flatten(),label='test signal')
@@ -98,7 +98,7 @@ fl.plot(R.flatten(),x.flatten())
 # 
 
 
-print r_[c_[1:3:3j],zeros((2,1))]
+print(r_[c_[1:3:3j],zeros((2,1))])
 
 
 # Now add regularization
@@ -151,8 +151,8 @@ L_curve(l, r_norm, x_norm, markersize=10, alpha=0.5, label='manual loop')
 # 
 
 
-print x_norm
-print r_norm
+print(x_norm)
+print(r_norm)
 
 
 # ## Vectorized version of lambda curve
@@ -170,14 +170,14 @@ x,r_norm = vec_lcurve(A,l)
 # 
 
 
-print x.shape,r_norm.shape,l.shape,linalg.norm(x,axis=1).shape
+print(x.shape,r_norm.shape,l.shape,linalg.norm(x,axis=1).shape)
 
 
 # 
 
 
-print linalg.norm(x,axis=1)
-print r_norm
+print(linalg.norm(x,axis=1))
+print(r_norm)
 
 
 # 
@@ -190,8 +190,8 @@ L_curve(l,r_norm,linalg.norm(x,axis=1), markersize=5, alpha=0.5, label='compiled
 # 
 
 
-print shape(x)
-print shape(x.T)
+print(shape(x))
+print(shape(x.T))
 
 # Test for the accuracy of the "1.5D" code
 
@@ -226,8 +226,8 @@ def multifreq_lcurve(A,l):
     return nnls_regularized(A,test_signal_2d,l=l)
 x,r_norm = multifreq_lcurve(A,l)
 
-print x.shape # should be lambda x offset x fit
-print r_norm.shape # should be lambda x offset
+print(x.shape) # should be lambda x offset x fit
+print(r_norm.shape) # should be lambda x offset
 
 # 
 
@@ -289,8 +289,8 @@ ylabel('Est. population of species with decay rate $P(R)$')
 savefig('yerdon_170420.png',dpi=300,bbox_inches='tight')
 
 if in_notebook:
-    print "in notebook, not calling show"
+    print("in notebook, not calling show")
 else:
-    print "not in notebook, calling show"
+    print("not in notebook, calling show")
     fl.show()
 

@@ -17,7 +17,7 @@ try:
 except:
     raise RuntimeError(general_error.format('matplotlib'))
 ext_modules = []
-execfile('pyspecdata/version.py')
+exec(compile(open('pyspecdata/version.py', "rb").read(), 'pyspecdata/version.py', 'exec'))
 
 ext_modules.append(Extension(name = 'pyspecdata._nnls',
         sources = ['nnls/nnls.pyf','nnls/nnls.f','nnls/nnls_regularized.f90','nnls/nnls_regularized_loop.f90'],
@@ -54,7 +54,7 @@ setup(
 )
 tryagain = False
 
-print "You can now run pyspecdata_dataconfig to generate a template configuration file (which will show up in your home directory)."
+print("You can now run pyspecdata_dataconfig to generate a template configuration file (which will show up in your home directory).")
 ## Later, I should probably use the setuptools equivalent of install_data to do both this and the lapack stuff
 #print "\n\nNow that everything else is set up, I'm going to check your notebook and data directories, possibly asking you to set them."
 #print "\n--> The notebook directory is the root directory where you store tex files for your notebook."

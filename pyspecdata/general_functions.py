@@ -24,7 +24,7 @@ else:
     rcParams = {}
     class rclass (object):
         def __init__(self):
-            print "initializing"
+            print("initializing")
             return
         def __getitem__(self,*args,**kwargs):
             return
@@ -65,10 +65,10 @@ def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
         It's expected that the output is assigned to variables with the **exact same** names as the string in the first half of the tuples, in the **exact same** order.
         These parameters will then be set to the appropriate values.
     '''
-    kwargnames,kwargdefaultvals = zip(*listoftuples)
+    kwargnames,kwargdefaultvals = list(zip(*listoftuples))
     output = []
     for j,val in enumerate(kwargnames):
-        if val in kwargs.keys():
+        if val in list(kwargs.keys()):
             output.append(kwargs.pop(val))
         else:
             output.append(kwargdefaultvals[j])
@@ -79,7 +79,7 @@ def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
     elif len(output) == 1:
         return output[0]
 def autostringconvert(arg):
-    if isinstance(arg,basestring):
+    if isinstance(arg,str):
         return str(arg)
     else:
         return arg

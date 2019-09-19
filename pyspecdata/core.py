@@ -148,8 +148,8 @@ def mydiff(data,axis = -1):
     return newdata
 #}}}
 def normal_attrs(obj):
-    myattrs = filter(lambda x: not ismethod(obj.__getattribute__(x)),dir(obj))
-    myattrs = filter(lambda x: not x[0:2] == '__',myattrs)
+    myattrs = [x for x in dir(obj) if not ismethod(obj.__getattribute__(x))]
+    myattrs = [x for x in myattrs if not x[0:2] == '__']
     return myattrs
 def showtype(x):
     if isinstance(x, ndarray):
@@ -172,35 +172,35 @@ def make_bar_graph_indices(mystructarray,list_of_text_fields,
         index_values = []
         label_values = []
         start_indices = r_[start_indices,len(mystructarray)] # I add this so I can do the next step
-        if verbose: print 'recursion depth is',recursion_depth,'and I am analyzing',list_of_text_fields[0],': ',
-        if verbose: print 'I found these unique values:',unique_values,'at these start indices:',start_indices[:-1]
+        if verbose: print('recursion depth is',recursion_depth,'and I am analyzing',list_of_text_fields[0],': ', end=' ')
+        if verbose: print('I found these unique values:',unique_values,'at these start indices:',start_indices[:-1])
         for k in range(0,len(start_indices)-1):
-            if verbose: print 'recursion depth is',recursion_depth,'and I am analyzing',list_of_text_fields[0],': ',
-            if verbose: print 'trying to extract unique value',unique_values[k],'using the range',start_indices[k],start_indices[k+1]
-            if verbose: print 'which has this data'
+            if verbose: print('recursion depth is',recursion_depth,'and I am analyzing',list_of_text_fields[0],': ', end=' ')
+            if verbose: print('trying to extract unique value',unique_values[k],'using the range',start_indices[k],start_indices[k+1])
+            if verbose: print('which has this data')
             indiv_struct_array = mystructarray[start_indices[k]:start_indices[k+1]]
-            if verbose: print lsafen(indiv_struct_array)
+            if verbose: print(lsafen(indiv_struct_array))
             these_index_values,these_labels = make_bar_graph_indices(indiv_struct_array,list_of_text_fields[1:],recursion_depth = recursion_depth+1,verbose = verbose)
             index_values.append(these_index_values)
             label_values.append([str(unique_values[k])+','+j for j in these_labels])
         #{{{ scale the result of each call down to the equal size (regardless of number of elements), shift by the position in this array, and return
-        if verbose: print 'recursion depth is',recursion_depth,'and I just COMPLETED THE LOOP, which gives a list of index values like this',index_values
-        max_indices = max(array(map(len,index_values),dtype='double'))# the maximum width of the array inside
-        index_values = map(lambda x: x+(max_indices-len(x))/2.0,index_values)# if the bar is less than max indices, shift it over, so it's still in the center
-        if verbose: print 'recursion depth is',recursion_depth,'and I centered each set like this',index_values
-        index_values = map(lambda x: x/max_indices*(1-spacing)+(1-spacing)/2,index_values)# scale down, so the width from left edge of bar to right edge of largest bar runs 0--> 1
-        if verbose: print 'recursion depth is',recursion_depth,'and I scaled down so each runs zero to one*(1-spacing) (centered) like this',index_values
+        if verbose: print('recursion depth is',recursion_depth,'and I just COMPLETED THE LOOP, which gives a list of index values like this',index_values)
+        max_indices = max(array(list(map(len,index_values)),dtype='double'))# the maximum width of the array inside
+        index_values = [x+(max_indices-len(x))/2.0 for x in index_values]# if the bar is less than max indices, shift it over, so it's still in the center
+        if verbose: print('recursion depth is',recursion_depth,'and I centered each set like this',index_values)
+        index_values = [x/max_indices*(1-spacing)+(1-spacing)/2 for x in index_values]# scale down, so the width from left edge of bar to right edge of largest bar runs 0--> 1
+        if verbose: print('recursion depth is',recursion_depth,'and I scaled down so each runs zero to one*(1-spacing) (centered) like this',index_values)
         # this adds an index value, and also collapses down to a single dimension list
         retval_indices = [x+num for num,val in enumerate(index_values) for x in val]
         # now collapse labels down to a single dimension
         retval_labels = [k for j in label_values for k in j]
-        if verbose: print 'recursion depth is',recursion_depth,'and I am passing up indices',retval_indices,'and labels',retval_labels
+        if verbose: print('recursion depth is',recursion_depth,'and I am passing up indices',retval_indices,'and labels',retval_labels)
         return retval_indices,retval_labels
         #}}}
     else:
-        if verbose: print 'recursion depth is',recursion_depth,
+        if verbose: print('recursion depth is',recursion_depth, end=' ')
         N = len(mystructarray)
-        if verbose: print 'hit innermost (no text labels left) and passing up a list of indices that looks like this:',r_[0:N]
+        if verbose: print('hit innermost (no text labels left) and passing up a list of indices that looks like this:',r_[0:N])
         return r_[0:N],['']*N
     #}}}
 def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,verbose = False,ax = None,tickfontsize = 8):
@@ -211,14 +211,14 @@ def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,verbose = Fa
             ax.tick_params(axis = 'both',which = 'major',labelsize = tickfontsize)
             ax.tick_params(axis = 'both',which = 'minor',labelsize = tickfontsize)
         except:
-            print 'Warning, in this version I can\'t set the tick params method for the axis'
+            print('Warning, in this version I can\'t set the tick params method for the axis')
     #{{{ find the text fields, put them first, and sort by them
     mystructarray = mystructarray.copy()
     list_of_text_fields = [str(j[0]) for j in mystructarray.dtype.descr if j[1][0:2] == '|S']
     mystructarray = sorted(mystructarray[list_of_text_fields + [x[0]
         for x in mystructarray.dtype.descr
         if x[0] not in list_of_text_fields]])
-    if verbose: print 'test --> now, it has this form:',lsafen(mystructarray)
+    if verbose: print('test --> now, it has this form:',lsafen(mystructarray))
     #}}}
     error_fields = [str(j) for j in mystructarray.dtype.names if j[-6:] == '_ERROR']
     if len(error_fields) > 0:
@@ -227,15 +227,15 @@ def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,verbose = Fa
     mystructarray = mystructarray[[str(j) for j in mystructarray.dtype.names if j not in error_fields]]
     if othersort is not None:
         list_of_text_fields.append(othersort)
-    if verbose: print 'list of text fields is',lsafen(list_of_text_fields)
+    if verbose: print('list of text fields is',lsafen(list_of_text_fields))
     indices,labels = make_bar_graph_indices(mystructarray,list_of_text_fields,verbose = verbose,spacing = spacing)
-    temp = zip(indices,labels)
-    if verbose: print '(indices,labels) (len %d):'%len(temp),lsafen(temp)
-    if verbose: print 'I get these labels (len %d):'%len(labels),labels,'for the data (len %d)'%len(mystructarray),lsafen(mystructarray)
+    temp = list(zip(indices,labels))
+    if verbose: print('(indices,labels) (len %d):'%len(temp),lsafen(temp))
+    if verbose: print('I get these labels (len %d):'%len(labels),labels,'for the data (len %d)'%len(mystructarray),lsafen(mystructarray))
     indices = array(indices)
     indiv_width = min(diff(indices))*(1-spacing)
     remaining_fields = [x for x in mystructarray.dtype.names if x not in list_of_text_fields] # so they are in the right order, since set does not preserve order
-    if verbose: print 'The list of remaining (i.e. non-text) fields is',lsafen(remaining_fields)
+    if verbose: print('The list of remaining (i.e. non-text) fields is',lsafen(remaining_fields))
     colors = ['b','g','r','c','m','k']
     rects = []
     for j,thisfield in enumerate(remaining_fields):
@@ -318,7 +318,7 @@ def lambda_rec(myarray,myname,myfunction,*varargs):
         myargs = (myargs,)
     if not isinstance(myargs, tuple):
         myargs = tuple(myargs)
-    argdata = map((lambda x: myarray[x]),myargs)
+    argdata = list(map((lambda x: myarray[x]),myargs))
     try:
         newrow = myfunction(*tuple(argdata))
     except TypeError:
@@ -356,14 +356,17 @@ def lambda_rec(myarray,myname,myfunction,*varargs):
         starting_names = starting_names[:insert_before]
     #}}}
     return rec.fromarrays([myarray[x] for x in starting_names if x != eliminate]+[newrow]+[myarray[x] for x in ending_names if x != eliminate],dtype = new_dtype)
-def join_rec((A,a_ind),(B,b_ind)):
+def join_rec(xxx_todo_changeme, xxx_todo_changeme1):
+    (A,a_ind) = xxx_todo_changeme
+    (B,b_ind) = xxx_todo_changeme1
     raise RuntimeError('You should now use decorate_rec!!')
-def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
+def decorate_rec(xxx_todo_changeme2, xxx_todo_changeme3,drop_rows = False,verbose = False):
     r'''Decorate the rows in A with information in B --> if names overlap,
     keep the ones in A
     b_ind and a_ind can be either a single key, or a list of keys;
     if more than one element in B matches that in A, include both options!!'''
-    #A = A.copy() # because I play with it later
+    (A,a_ind) = xxx_todo_changeme2
+    (B,b_ind) = xxx_todo_changeme3
     dropped_rows = None
     # first find the list of indices that give us the data we want
     #{{{ process the arguments
@@ -386,14 +389,14 @@ def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
     A_reduced = A[a_ind] # same for A
     A_reduced = reorder_rec(A_reduced,a_ind)# again, because it doesn't do this just based on the indexing
     # now, I need to generate a mapping from the b_ind to a_ind
-    field_mapping = dict(zip(b_ind,a_ind))
+    field_mapping = dict(list(zip(b_ind,a_ind)))
     # now I change the names so they match and I can compare them
     B_reduced.dtype.names = tuple([field_mapping[x] for x in B_reduced.dtype.names])
     #{{{ now find the list of indices for B that match each value of A
     old_B_reduced_names,old_B_reduced_types = tuple(zip(*tuple(B_reduced.dtype.descr)))
-    B_reduced.dtype = dtype(zip(A_reduced.dtype.names,old_B_reduced_types))
+    B_reduced.dtype = dtype(list(zip(A_reduced.dtype.names,old_B_reduced_types)))
     if A_reduced.dtype != B_reduced.dtype:
-        B_reduced.dtype = dtype(zip(old_B_reduced_names,old_B_reduced_types))
+        B_reduced.dtype = dtype(list(zip(old_B_reduced_names,old_B_reduced_types)))
         raise TypeError(strm('The datatype of A_reduced=', A_reduced.dtype,
             'and B_reduced=', B_reduced.dtype,
             'are not the same,  which is going to create problems!'))
@@ -404,16 +407,16 @@ def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
             'with B_reduced=', B_reduced,
             'one or more of the following is an empty tuple,  which is wrong!:',
             [nonzero(B_reduced == j) for j in A_reduced])+explain_error(e))
-    if verbose: print "(decorate\\_rec):: original list of matching",list_of_matching
+    if verbose: print("(decorate\\_rec):: original list of matching",list_of_matching)
     length_of_matching = array([len(j) for j in list_of_matching])
-    if verbose: print "(decorate\\_rec):: length of matching is",length_of_matching
+    if verbose: print("(decorate\\_rec):: length of matching is",length_of_matching)
     if any(length_of_matching == 0):
         if drop_rows:
             if drop_rows == 'return':
                 dropped_rows = A[length_of_matching == 0].copy()
             else:
                 dropped_rows = A_reduced[length_of_matching == 0]
-                print r'{\color{red}Warning! decorate\_rec dropped fields in the first argument',lsafen(repr(zip(A_reduced.dtype.names * len(dropped_rows),dropped_rows.tolist()))),r'}'
+                print(r'{\color{red}Warning! decorate\_rec dropped fields in the first argument',lsafen(repr(list(zip(A_reduced.dtype.names * len(dropped_rows),dropped_rows.tolist())))),r'}')
             #{{{ now, remove all trace of the dropped fields
             A = A[length_of_matching != 0]
             list_of_matching = [j for j in list_of_matching if len(j)>0]
@@ -430,7 +433,7 @@ def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
     # this gives just the indices in B that match the values of A
     list_of_matching = [j for i in list_of_matching for j in i]
     #}}}
-    if verbose: print "(decorate\\_rec):: list of matching is",list_of_matching
+    if verbose: print("(decorate\\_rec):: list of matching is",list_of_matching)
     # now grab the data for these rows
     add_data = B[list_of_matching]
     #{{{ finally, smoosh the two sets of data together
@@ -444,16 +447,16 @@ def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
     #}}}
     #{{{ add the new fields
     new_dtypes = [j for j in B.dtype.descr if j[0] not in A.dtype.names]
-    if verbose: print "(decorate\\_rec):: new dtypes:",repr(new_dtypes)
+    if verbose: print("(decorate\\_rec):: new dtypes:",repr(new_dtypes))
     try:
         retval = newcol_rec(retval,new_dtypes)
     except Exception as e:
         raise ValueError(strm("Problem trying to add new columns with the dtypes",
             new_dtypes)+explain_error(e))
     #}}}
-    if verbose: print "(decorate\\_rec):: add data:",repr(add_data)
+    if verbose: print("(decorate\\_rec):: add data:",repr(add_data))
     for name in dtype(new_dtypes).names:
-        if verbose: print "(decorate\\_rec):: trying to add data for",name,':',add_data[name][:]
+        if verbose: print("(decorate\\_rec):: trying to add data for",name,':',add_data[name][:])
         retval[name][:] = add_data[name][:]
     #}}}
     if drop_rows == 'return':
@@ -496,11 +499,11 @@ def applyto_rec(myfunc,myarray,mylist,verbose = False):
             mask &= myarray[mylist[k]] == thisitem[mylist[k]]
             newrow[mylist[k]] = thisitem[mylist[k]]
         #}}}
-        if verbose: print lsafen('(applyto rec): for row %d, I select these:'%j)
+        if verbose: print(lsafen('(applyto rec): for row %d, I select these:'%j))
         myarray_subset = myarray[mask]
-        if verbose: print lsafen('(applyto rec): ',repr(myarray_subset))
+        if verbose: print(lsafen('(applyto rec): ',repr(myarray_subset)))
         other_fields = set(mylist)^set(thisitem.dtype.names)
-        if verbose: print lsafen('(applyto rec): other fields are:',other_fields)
+        if verbose: print(lsafen('(applyto rec): other fields are:',other_fields))
         for thisfield in list(other_fields):
             try:
                 newrow[thisfield] = myfunc(myarray_subset[thisfield])
@@ -509,14 +512,14 @@ def applyto_rec(myfunc,myarray,mylist,verbose = False):
                     "when one of the fields that you have NOT passed in the",
                     "second argument is a string.  The fields and types",
                     "are:",repr(myarray_subset.dtype.descr)) + explain_error(e))
-        if verbose: print lsafen("(applyto rec): for row %d, I get this as a result:"%j,newrow)
+        if verbose: print(lsafen("(applyto rec): for row %d, I get this as a result:"%j,newrow))
         combined.append(newrow) # add this row to the list
         myarray = myarray[~mask] # mask out everything I have used from the original matrix
-        if verbose: print lsafen("(applyto rec): the array is now",repr(myarray))
+        if verbose: print(lsafen("(applyto rec): the array is now",repr(myarray)))
         j += 1
     #}}}
     combined = concatenate(combined)
-    if verbose: print lsafen("(applyto rec): final result",repr(combined),"has length",len(combined))
+    if verbose: print(lsafen("(applyto rec): final result",repr(combined),"has length",len(combined)))
     return combined
 def meanstd_rec(myarray,mylist,verbose = False,standard_error = False):
     r'this is something like applyto_rec, except that it applies the mean and creates new rows for the "error," where it puts the standard deviation'
@@ -524,10 +527,10 @@ def meanstd_rec(myarray,mylist,verbose = False,standard_error = False):
         mylist = [mylist]
     combined = []
     other_fields = set(mylist)^set(myarray.dtype.names)
-    if verbose: print '(meanstd_rec): other fields are',lsafen(other_fields)
+    if verbose: print('(meanstd_rec): other fields are',lsafen(other_fields))
     newrow_dtype = [[j,('%s_ERROR'%j[0],)+j[1:]] if j[0] in other_fields else [j] for j in myarray.dtype.descr]
     newrow_dtype = [k for j in newrow_dtype for k in j]
-    if verbose: print lsafen('(meanstd rec): other fields are:',other_fields)
+    if verbose: print(lsafen('(meanstd rec): other fields are:',other_fields))
     #{{{ make the list "combined", which I later concatenate
     j = 0
     while len(myarray) > 0:
@@ -543,9 +546,9 @@ def meanstd_rec(myarray,mylist,verbose = False,standard_error = False):
             mask &= myarray[mylist[k]] == thisitem[mylist[k]]
             newrow[mylist[k]] = thisitem[mylist[k]]
         #}}}
-        if verbose: print lsafen('(meanstd rec): for row %d, I select these:'%j)
+        if verbose: print(lsafen('(meanstd rec): for row %d, I select these:'%j))
         myarray_subset = myarray[mask]
-        if verbose: print lsafen('(meanstd rec): ',repr(myarray_subset))
+        if verbose: print(lsafen('(meanstd rec): ',repr(myarray_subset)))
         for thisfield in list(other_fields):
             try:
                 newrow[thisfield] = mean(myarray_subset[thisfield])
@@ -559,14 +562,14 @@ def meanstd_rec(myarray,mylist,verbose = False,standard_error = False):
                         "second argument is a string.  The fields and types",
                         "are:",repr(myarray_subset.dtype.descr))
             #print 'for field',lsafe(thisfield),'I find',lsafen(newrow[thisfield])
-        if verbose: print lsafen("(meanstd rec): for row %d, I get this as a result:"%j,newrow)
+        if verbose: print(lsafen("(meanstd rec): for row %d, I get this as a result:"%j,newrow))
         combined.append(newrow) # add this row to the list
         myarray = myarray[~mask] # mask out everything I have used from the original matrix
-        if verbose: print lsafen("(meanstd rec): the array is now",repr(myarray))
+        if verbose: print(lsafen("(meanstd rec): the array is now",repr(myarray)))
         j += 1
     #}}}
     combined = concatenate(combined)
-    if verbose: print lsafen("(meanstd rec): final result",repr(combined),"has length",len(combined))
+    if verbose: print(lsafen("(meanstd rec): final result",repr(combined),"has length",len(combined)))
     return combined
 def make_rec(*args,**kwargs):
     r'input,names or a single argument, which is a dictionary\nstrlen = 100 gives length of the strings (which need to be specified in record arrays)\nyou can also specify (especially useful with the dictionary format) the list order = [str1,str2,...] which orders the output records with the field containing str1 first, then the field containing str2, then any remaining fields'
@@ -574,8 +577,8 @@ def make_rec(*args,**kwargs):
         ('order',None),
         ('zeros_like',False)],kwargs)
     if len(args) == 1 and (isinstance(args[0], dict)):
-        names = args[0].keys()
-        input = args[0].values()
+        names = list(args[0].keys())
+        input = list(args[0].values())
     elif len(args) == 2:
         input = args[0]
         names = args[1]
@@ -594,8 +597,8 @@ def make_rec(*args,**kwargs):
     #}}}
     if not (isinstance(input, list) and isinstance(names, list)):
         raise TypeError('you must enter a list for both')
-    types = map(type,input)
-    shapes = map(shape,input)
+    types = list(map(type,input))
+    shapes = list(map(shape,input))
     if all([j == shapes[0] for j in shapes]):
         if shapes[0] == ():# if it's one dimensional
             equal_shapes = False
@@ -614,7 +617,7 @@ def make_rec(*args,**kwargs):
         if isinstance(k, ndarray):
             types[j] = k.dtype
     try:
-        mydtype = dtype(zip(names,types,shapes))
+        mydtype = dtype(list(zip(names,types,shapes)))
     except Exception as e:
         raise ValueError(strm('problem trying to make names',names,' types',
             types,'shapes',shapes)+explain_error(e))
@@ -635,9 +638,9 @@ def make_rec(*args,**kwargs):
         try:
             return array([tuple(input)],dtype = mydtype)
         except:
-            raise ValueError(strm('problem trying to assign data of type',map(type,input),
+            raise ValueError(strm('problem trying to assign data of type',list(map(type,input)),
                 '\nvalues',input,'\nonto',mydtype,'\ndtype made from tuple:',
-                zip(names,types,shapes)))
+                list(zip(names,types,shapes))))
 #{{{ convert back and forth between lists, etc, and ndarray
 def make_ndarray(array_to_conv,name_forprint = 'unknown',verbose = False): 
     if type(array_to_conv) in [int,int32,double,float,complex,complex128,float,bool,bool_]: # if it's a scalar
@@ -667,7 +670,7 @@ def unmake_ndarray(array_to_conv,name_forprint = 'unknown',verbose = False):
                     'also has other dimensions:',array_to_conv.dtype.names,
                     'not',tuple(['LISTELEMENTS'])))
         elif len(array_to_conv)==1:
-            thisval = dict(zip(a.dtype.names,a.tolist()[0]))
+            thisval = dict(list(zip(a.dtype.names,a.tolist()[0])))
         else: raise ValueError('You passed a structured array, but it has more',
                 "than one dimension, which is not yet supported\nLater, this",
                 'should be supported by returning a dictionary of arrays')
@@ -675,26 +678,26 @@ def unmake_ndarray(array_to_conv,name_forprint = 'unknown',verbose = False):
     elif isinstance(array_to_conv, ndarray) and len(array_to_conv)==1:
         #{{{ if it's a length 1 ndarray, then return the element
         retval = array_to_conv.tolist()
-        if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is a numpy array of length one"
+        if verbose: print("(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is a numpy array of length one")
         #}}}
     elif type(array_to_conv) in [string_,int32,float64,bool_]:
         #{{{ map numpy strings onto normal strings
         retval = array_to_conv.tolist()
-        if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is a numpy scalar"
+        if verbose: print("(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is a numpy scalar")
         #}}}
     elif isinstance(array_to_conv, list):
         #{{{ deal with lists
-        if verbose: print "(from unmake ndarray verbose):", name_forprint,"is a list"
-        typeofall = map(type,array_to_conv)
-        if all(map(lambda x: x is string_,typeofall)):
-            if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",typeofall,"are all numpy strings"
-            retval = map(str,array_to_conv)
+        if verbose: print("(from unmake ndarray verbose):", name_forprint,"is a list")
+        typeofall = list(map(type,array_to_conv))
+        if all([x is string_ for x in typeofall]):
+            if verbose: print("(from unmake ndarray verbose):", name_forprint,"=",typeofall,"are all numpy strings")
+            retval = list(map(str,array_to_conv))
         else:
-            if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",typeofall,"are not all numpy string"
+            if verbose: print("(from unmake ndarray verbose):", name_forprint,"=",typeofall,"are not all numpy string")
             retval = array_to_conv
         #}}}
     else:
-        if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is not a numpy string or record array"
+        if verbose: print("(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is not a numpy string or record array")
         retval = array_to_conv
     return retval
 #}}}
@@ -726,9 +729,9 @@ def lsafe(*string,**kwargs):
         string = string[0]
     #{{{ kwargs
     spaces = False
-    if 'spaces' in kwargs.keys():
+    if 'spaces' in list(kwargs.keys()):
         spaces = kwargs.pop('spaces')
-    if 'wrap' in kwargs.keys():
+    if 'wrap' in list(kwargs.keys()):
         wrap = kwargs.pop('wrap')
     else:
         wrap = None
@@ -786,7 +789,7 @@ def copy_maybe_none(input):
         return None
     else:
         if isinstance(input, list):
-            return map(copy,input)
+            return list(map(copy,input))
         else:
             return input.copy()
 def maprep(*mylist):
@@ -826,7 +829,7 @@ def h5searchstring(*args,**kwargs):
     elif len(args) == 1 and isinstance(args[0], dict):
         dict_arg = args[0]
         condlist = []
-        for k,v in dict_arg.iteritems():
+        for k,v in dict_arg.items():
             condlist.append(h5searchstring(k,v,format = format,precision = precision))
         return ' & '.join(condlist)
     else:
@@ -847,18 +850,18 @@ def h5loaddict(thisnode,verbose = False):
     retval = dict([(x,thisnode._v_attrs.__getattribute__(x))
         for x in thisnode._v_attrs._f_list('user')])
     #}}}
-    for k,v in retval.iteritems():#{{{ search for record arrays that represent normal lists
+    for k,v in retval.items():#{{{ search for record arrays that represent normal lists
         retval[k]  = unmake_ndarray(v,name_forprint = k,verbose = verbose)
     if isinstance(thisnode, tables.table.Table):#{{{ load any table data
-        if verbose: print "It's a table\n\n"
-        if 'data' in retval.keys():
+        if verbose: print("It's a table\n\n")
+        if 'data' in list(retval.keys()):
             raise AttributeError('There\'s an attribute called data --> this should not happen!')
         retval.update({'data':thisnode.read()})
     elif isinstance(thisnode, tables.group.Group):
         #{{{ load any sub-nodes as dictionaries
         mychildren = thisnode._v_children
-        for thischild in mychildren.keys():
-            if thischild in retval.keys():
+        for thischild in list(mychildren.keys()):
+            if thischild in list(retval.keys()):
                 raise AttributeError('There\'s an attribute called ',thischild,' and also a sub-node called the',thischild,'--> this should not happen!')
             retval.update({thischild:h5loaddict(mychildren[thischild])})
         #}}}
@@ -881,7 +884,7 @@ def h5child(thisnode,childname,clear = False,create = None,verbose = False):
     try:
         childnode = h5file.get_node(thisnode,childname)
         if verbose:
-            print lsafe('found',childname)
+            print(lsafe('found',childname))
         if clear:
             childnode._f_remove(recursive = True)
             childnode = None
@@ -893,7 +896,7 @@ def h5child(thisnode,childname,clear = False,create = None,verbose = False):
         else:
             childnode = h5file.create_group(thisnode,childname)
             if verbose:
-                print lsafe('created',childname)
+                print(lsafe('created',childname))
     return childnode
 def h5remrows(bottomnode,tablename,searchstring):
     if isinstance(searchstring, dict):
@@ -914,10 +917,10 @@ def h5remrows(bottomnode,tablename,searchstring):
                 try:
                     thistable.remove_rows(row.nrow - counter,row.nrow - counter + 1) # counter accounts for rows I have already removed.
                 except:
-                    print "you passed searchstring",searchstring
-                    print "trying to remove row",row
-                    print "trying to remove row with number",row.nrow
-                    print help(thistable.remove_rows)
+                    print("you passed searchstring",searchstring)
+                    print("trying to remove row",row)
+                    print("trying to remove row with number",row.nrow)
+                    print(help(thistable.remove_rows))
                     raise RuntimeError("length of thistable is "+repr(len(thistable))+" calling remove_rows with "+repr(row.nrow-counter))
                 counter += 1
         return counter,data
@@ -932,11 +935,11 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
         mytable = h5table(bottomnode,tablename,None)
         tableexists = True
     except RuntimeError: # if table doesn't exist, create it
-        newindex = 1L
+        newindex = 1
         tableexists = False
     if tableexists:
         #{{{ auto-increment "index"
-        newindex = mytable.read()['index'].max() + 1L
+        newindex = mytable.read()['index'].max() + 1
         #}}}
         # here is where I would search for the existing data
         if match_row is not None:
@@ -954,7 +957,7 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
                     [e,'\nYou passed',match_row,'\nThe columns available are',mytable.colnames])))
             if len(matches) > 0:
                 if only_last:
-                    if verbose: print r'\o{',lsafen(len(matches),"rows match your search criterion, returning the last row"),'}'
+                    if verbose: print(r'\o{',lsafen(len(matches),"rows match your search criterion, returning the last row"),'}')
                     return mytable,matches['index'][-1]
                 else:
                     return mytable,matches['index'][:]
@@ -962,7 +965,7 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
                 if verbose:
                     obs("I found no matches")
     if len(args) == 1 and (isinstance(args[0], dict)):
-        listofnames,listofdata = map(list,zip(*tuple(args[0].items())))
+        listofnames,listofdata = list(map(list,list(zip(*tuple(args[0].items())))))
     elif len(args) == 2 and isinstance(args[0], list) and isinstance(args[1], list):
         listofdata = args[0]
         listofnames = args[1]
@@ -978,13 +981,13 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
         try:
             mytable.append(myrowdata)
         except ValueError as e:
-            print lsafen("I'm about to flag an error, but it looks like there was an issue appending",myrowdata)
+            print(lsafen("I'm about to flag an error, but it looks like there was an issue appending",myrowdata))
             tabledforerr = mytable.read()
             raise AttributeError(strm('Compare names and values table data vs. the row you are trying to add\n',
-                '\n'.join(map(repr,zip(mytable.read().dtype.fields.keys(),
-                mytable.read().dtype.fields.values(),
-                myrowdata.dtype.fields.keys(),
-                myrowdata.dtype.fields.values())))),explain_error(e))
+                '\n'.join(map(repr,list(zip(list(mytable.read().dtype.fields.keys()),
+                list(mytable.read().dtype.fields.values()),
+                list(myrowdata.dtype.fields.keys()),
+                list(myrowdata.dtype.fields.values())))))),explain_error(e))
         mytable.flush()
     else:
         recorddata = myrowdata
@@ -1002,13 +1005,13 @@ def h5table(bottomnode,tablename,tabledata):
     'create the table, or if tabledata is None, just check if it exists'
     #{{{ save but don't overwrite the table
     h5file = bottomnode._v_file
-    if tablename not in bottomnode._v_children.keys():
+    if tablename not in list(bottomnode._v_children.keys()):
         if tabledata is not None:
             if isinstance(tabledata, dict):
                 tabledata = make_rec(tabledata)
             datatable = h5file.create_table(bottomnode,tablename,tabledata) # actually write the data to the table
         else:
-            raise RuntimeError(' '.join(map(str,['You passed no data, so I can\'t create table',tablename,'but it doesn\'t exist in',bottomnode,'which has children',bottomnode._v_children.keys()])))
+            raise RuntimeError(' '.join(map(str,['You passed no data, so I can\'t create table',tablename,'but it doesn\'t exist in',bottomnode,'which has children',list(bottomnode._v_children.keys())])))
     else:
         if tabledata is not None:
             raise ValueError(strm('You\'re passing data to create the table,',tablename,' but the table already exists!'))
@@ -1021,14 +1024,14 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
     logger.debug(strm("DEBUG: called h5nodebypath on",h5path))
     h5path = h5path.split('/')
     #{{{ open the file / check if it exists
-    if verbose: print lsafen('h5path=',h5path)
+    if verbose: print(lsafen('h5path=',h5path))
     logger.info(strm('the h5path is',h5path))
     try:
         if h5path[0] in listdir(directory):
-            if verbose: print 'DEBUG: file exists\n\n'
+            if verbose: print('DEBUG: file exists\n\n')
         else:
             if check_only: raise AttributeError("You're checking for a node in a file (%s) that does not exist"%h5path[0])
-            if verbose: print 'DEBUG: file does not exist\n\n'
+            if verbose: print('DEBUG: file does not exist\n\n')
         mode = 'a'
         #if check_only: mode = 'r'
         logger.info(strm('so I look for the file',h5path[0],'in directory',directory))
@@ -1055,10 +1058,10 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
                         verbose = verbose,
                         create = create,
                         clear = clear)
-                if verbose: print lsafen("searching for node path: descended to node",currentnode)
+                if verbose: print(lsafen("searching for node path: descended to node",currentnode))
                 logger.info(strm("searching for node path: descended to node",currentnode))
             except BaseException as e:
-                if verbose: print lsafen("searching for node path: got caught searching for node",h5path[pathlevel])
+                if verbose: print(lsafen("searching for node path: got caught searching for node",h5path[pathlevel]))
                 logger.info(strm("searching for node path: got caught searching for node",h5path[pathlevel]))
                 h5file.close()
                 #print lsafen("DEBUG: Yes, I closed the file")
@@ -1072,7 +1075,7 @@ def h5attachattributes(node,listofattributes,myvalues):
         raise IndexError('Problem!, node passed to h5attachattributes: ',node,'is None!')
     h5file = node._v_file
     if isinstance(myvalues,nddata):
-        attributevalues = map(lambda x: myvalues.__getattribute__(x),listofattributes)
+        attributevalues = [myvalues.__getattribute__(x) for x in listofattributes]
     elif isinstance(myvalues, list):
         attributevalues = myvalues
     else:
@@ -1088,23 +1091,23 @@ def h5attachattributes(node,listofattributes,myvalues):
                     thisattr,
                     create = True)
             h5attachattributes(dictnode,
-                    thisval.keys(),
-                    thisval.values())
+                    list(thisval.keys()),
+                    list(thisval.values()))
             thisval = None
             listout.remove(thisattr)
         else:
             # {{{ pytables hates <U24 which is created from unicode
             if type(thisval) in [list,tuple]:
-                if any(map(lambda x: isinstance(x,unicode),thisval)):
+                if any([isinstance(x,str) for x in thisval]):
                     logger.info(strm("going to convert",thisval,"to strings"))
-                    thisval = [str(x) if isinstance(x,unicode) else x for x in thisval]
+                    thisval = [str(x) if isinstance(x,str) else x for x in thisval]
                     logger.info(strm("now it looks like this:",thisval))
             thisval = make_ndarray(thisval,name_forprint = thisattr)
             # }}}
         if thisval is not None:
             try:
                 node._v_attrs.__setattr__(thisattr,thisval)
-            except Exception,e:
+            except Exception as e:
                 raise RuntimeError("PyTables freaks out when trying to attach attribute "+repr(thisattr)+" with value "+repr(thisval)+"\nOriginal error was:\n"+str(e))
             listout.remove(thisattr)
     listofattributes[:] = listout # pointer
@@ -1125,13 +1128,13 @@ def h5inlist(columnname,mylist):
         raise TypeError("the second argument to h5inlist must be a list!!!")
     if any([type(x) in [double,float64] for x in mylist]):
         if all([type(x) in [double,float64,int,int32,int64] for x in mylist]):
-            return '('+'|'.join(map(lambda x: "(%s == %g)"%(columnname,x),mylist))+')'
-    elif all([type(x) in [int,long,int32,int64] for x in mylist]):
-        return '('+'|'.join(map(lambda x: "(%s == %g)"%(columnname,x),mylist))+')'
+            return '('+'|'.join(["(%s == %g)"%(columnname,x) for x in mylist])+')'
+    elif all([type(x) in [int,int,int32,int64] for x in mylist]):
+        return '('+'|'.join(["(%s == %g)"%(columnname,x) for x in mylist])+')'
     elif all([isinstance(x, str) for x in mylist]):
-        return '('+'|'.join(map(lambda x: "(%s == '%s')"%(columnname,x),mylist))+')'
+        return '('+'|'.join(["(%s == '%s')"%(columnname,x) for x in mylist])+')'
     else:
-        raise TypeError("I can't figure out what to do with this list --> I know what to do with a list of numbers or a list of strings, but not a list of type"+repr(map(type,mylist)))
+        raise TypeError("I can't figure out what to do with this list --> I know what to do with a list of numbers or a list of strings, but not a list of type"+repr(list(map(type,mylist))))
 def h5join(firsttuple,secondtuple,
     additional_search = '',
     select_fields = None,
@@ -1144,10 +1147,10 @@ def h5join(firsttuple,secondtuple,
         raise ValueError('The length of the first and second arguments must be two!')
     tablenode = firsttuple[0]
     tableindices = firsttuple[1]
-    if verbose: print 'h5join tableindices looks like this:',tableindices
+    if verbose: print('h5join tableindices looks like this:',tableindices)
     if not isinstance(tableindices, list):
         tableindices = [tableindices]
-    if verbose: print 'h5join tableindices looks like this:',tableindices
+    if verbose: print('h5join tableindices looks like this:',tableindices)
     mystructarray = secondtuple[0].copy()
     mystructarrayindices = secondtuple[1]
     if not isinstance(mystructarrayindices, list):
@@ -1163,7 +1166,7 @@ def h5join(firsttuple,secondtuple,
     for thistableindex,thisstructarrayindex in zip(tableindices,mystructarrayindices):
         if thisstructarrayindex not in mystructarray.dtype.names:
             raise ValueError(repr(thisstructarrayindex)+" is not in "+repr(mystructarray.dtype.names))
-        if isinstance(mystructarray[thisstructarrayindex][0],basestring):
+        if isinstance(mystructarray[thisstructarrayindex][0],str):
             search_string.append(["(%s == '%s')"%(thistableindex,x) for x in mystructarray[thisstructarrayindex]])
         elif type(mystructarray[thisstructarrayindex][0]) in [int,double,float,float64,float32,int32,int64]:
             search_string.append(["(%s == %s)"%(thistableindex,str(x)) for x in mystructarray[thisstructarrayindex]])
@@ -1177,7 +1180,7 @@ def h5join(firsttuple,secondtuple,
     if len(additional_search) > 0:
         additional_search = " & (%s)"%additional_search
         search_string = search_string + additional_search
-    if verbose: print '\n\nh5join generated the search string:',lsafen(search_string)
+    if verbose: print('\n\nh5join generated the search string:',lsafen(search_string))
     retval = tablenode.read_where(search_string)
     #{{{ then join the data together
     # here I'm debugging the join function, again, and again, and agin
@@ -1192,7 +1195,7 @@ def h5join(firsttuple,secondtuple,
             raise ValueError("It doesn't make sense to specify pop_fields and select_fields at the same time!!")
         select_fields = list(set(retval.dtype.names) ^ set(pop_fields))
     if select_fields is not None:
-        if verbose: print '\n\nh5join original indices',lsafen(retval.dtype.names)
+        if verbose: print('\n\nh5join original indices',lsafen(retval.dtype.names))
         try:
             retval = retval[select_fields]
         except ValueError as e:
@@ -1213,7 +1216,7 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
     def adjust_spines(ax,spines):
         xlabel = ax.get_xlabel()
         ylabel = ax.get_ylabel()
-        for loc, spine in ax.spines.items():
+        for loc, spine in list(ax.spines.items()):
             if loc in spines:
                 spine.set_position(('outward',5)) # outward by 5 points
                 spine.set_smart_bounds(True)
@@ -1301,7 +1304,7 @@ def othergridandtick(ax,rotation=(0,0),precision=(2,2),labelstring=('',''),gridc
     def adjust_spines(ax,spines):
         xlabel = ax.get_xlabel()
         ylabel = ax.get_ylabel()
-        for loc, spine in ax.spines.items():
+        for loc, spine in list(ax.spines.items()):
             if loc in spines:
                 spine.set_position(('outward',5)) # outward by 5 points
                 spine.set_smart_bounds(True)
@@ -1364,16 +1367,16 @@ def whereblocks(a):
 def autolegend(*args,**kwargs):
     #lg = legend(legendstr,'best'),loc = 2, borderaxespad = 0.)
     match_colors = False
-    if 'match_colors' in kwargs.keys():
+    if 'match_colors' in list(kwargs.keys()):
         match_colors = kwargs.pop('match_colors')
     alpha = 0.45
-    if 'alpha' in kwargs.keys():
+    if 'alpha' in list(kwargs.keys()):
         alpha = kwargs.pop('alpha')
-    if 'ax' in kwargs.keys():
+    if 'ax' in list(kwargs.keys()):
         ax_list = [kwargs.pop('ax')]
     else:
         ax_list = [gca()]
-    if 'ax2' in kwargs.keys():
+    if 'ax2' in list(kwargs.keys()):
         ax_list.append(kwargs.pop('ax2'))
     for ax in ax_list:
         if len(args)==0:
@@ -1430,7 +1433,7 @@ def autopad_figure(pad = 0.2,centered = False,figname = 'unknown'):
                     else:
                         try:
                             bbox = label.get_window_extent()
-                        except Exception,e:
+                        except Exception as e:
                             warnings.warn("I wasn't able to run autopad on figure"+figname+"\nGetting window extent throws error"+str(e))
                     # the figure transform goes from relative coords->pixels and we
                     # want the inverse of that
@@ -1454,7 +1457,7 @@ def autopad_figure(pad = 0.2,centered = False,figname = 'unknown'):
                 if compto[axisn] < l:
                     spkwargs.update({axisn:l})
         if len(spkwargs) > 0:
-            if centered and 'left' in spkwargs.keys() and 'right' in spkwargs.keys():
+            if centered and 'left' in list(spkwargs.keys()) and 'right' in list(spkwargs.keys()):
                 big = max(r_[spkwargs['left'],1-spkwargs['right']])
                 spkwargs.update({'left':big,'right':1-big})
             try:
@@ -1542,12 +1545,12 @@ def plot_color_counter(*args,**kwargs):
         if LooseVersion(matplotlib.__version__) >= LooseVersion("1.5"):
             # {{{ find the element before the one we want
             retval = args[0]
-            penultimate = ax._get_lines.prop_cycler.next()
-            j = ax._get_lines.prop_cycler.next()
+            penultimate = next(ax._get_lines.prop_cycler)
+            j = next(ax._get_lines.prop_cycler)
             not_in_list_counter = 1000.
             while j != args[0]:
                 penultimate = j
-                j = ax._get_lines.prop_cycler.next()
+                j = next(ax._get_lines.prop_cycler)
                 not_in_list_counter -= 1
                 if not_in_list_counter == 0:
                     raise ValueError("the value isn't in the cycler!")
@@ -1555,7 +1558,7 @@ def plot_color_counter(*args,**kwargs):
             # {{{ now, set to the element before
             not_in_list_counter = 1000.
             while j != penultimate:
-                j = ax._get_lines.prop_cycler.next()
+                j = next(ax._get_lines.prop_cycler)
                 not_in_list_counter -= 1
                 if not_in_list_counter == 0:
                     raise ValueError("the value isn't in the cycler!")
@@ -1569,12 +1572,12 @@ def plot_color_counter(*args,**kwargs):
     else:
         if LooseVersion(matplotlib.__version__) >= LooseVersion("1.5"):
             # {{{ I want to return the current element of the cycle
-            one_too_far = ax._get_lines.prop_cycler.next()
-            j = ax._get_lines.prop_cycler.next()
+            one_too_far = next(ax._get_lines.prop_cycler)
+            j = next(ax._get_lines.prop_cycler)
             not_in_list_counter = 1000.
             while j != one_too_far:
                 penultimate = j
-                j = ax._get_lines.prop_cycler.next()
+                j = next(ax._get_lines.prop_cycler)
                 not_in_list_counter -= 1
                 if not_in_list_counter == 0:
                     raise ValueError("the value isn't in the cycler!")
@@ -1587,7 +1590,7 @@ def plot_color_counter(*args,**kwargs):
                 retval = ax._get_lines.color_cycle
     return retval
 def contour_plot(xvals,yvals,zvals,color = 'k',alpha = 1.0,npts = 300,**kwargs):
-    if 'inline_spacing' in kwargs.keys():
+    if 'inline_spacing' in list(kwargs.keys()):
         inline_spacing = kwargs.pop('inline_spacing')
     else:
         inline_spacing = 20
@@ -1622,12 +1625,12 @@ def plot_updown(data,axis,color1,color2,symbol = '',**kwargs):
         symbol = 'o'
     change = r_[1,diff(data.getaxis(axis))]
     changemask = change > 0
-    if 'force_color' in kwargs.keys() and kwargs['force_color'] == True:
+    if 'force_color' in list(kwargs.keys()) and kwargs['force_color'] == True:
         if hasattr(data,'other_info'):
             if 'plot_color' in data.get_prop():
                 data.other_info.pop('plot_color')
     plot(data[axis,changemask],color1+symbol,**kwargs)
-    if len(kwargs) > 0 and 'label' in kwargs.keys(): kwargs.pop('label') # if I'm doing a legend, I want it on the first
+    if len(kwargs) > 0 and 'label' in list(kwargs.keys()): kwargs.pop('label') # if I'm doing a legend, I want it on the first
     plot(data[axis,~changemask],color2+symbol,**kwargs)
     return
 def nextfigure(figurelist,name):
@@ -1636,20 +1639,20 @@ def nextfigure(figurelist,name):
         figurelist.next(name)
         return figurelist
     else:
-        print 'Boo! not a new style name!'
+        print('Boo! not a new style name!')
     verbose = False # a good way to debug
-    if verbose: print lsafe('DEBUG figurelist, called with',name)
+    if verbose: print(lsafe('DEBUG figurelist, called with',name))
     if name in figurelist:
         fig = figure(figurelist.index(name)+1)
-        if verbose: print lsafen('in',figurelist,'at figure',figurelist.index(name)+1,'switched figures')
+        if verbose: print(lsafen('in',figurelist,'at figure',figurelist.index(name)+1,'switched figures'))
     else:
         fig = figure(len(figurelist)+1)
         fig.add_subplot(111)
-        if verbose: print lsafen('added, figure',len(figurelist)+1,'because not in figurelist',figurelist)
+        if verbose: print(lsafen('added, figure',len(figurelist)+1,'because not in figurelist',figurelist))
         figurelist.append(name)
     return figurelist
 def figlistret(first_figure,figure_list,*args,**kwargs):
-    if 'basename' in kwargs.keys():
+    if 'basename' in list(kwargs.keys()):
         basename = kwargs['basename']
     else:
         basename = thisjobname()
@@ -1675,14 +1678,14 @@ def figlistini_old(first_figure):
     if isinstance(first_figure,figlist_var):
         return first_figure
     else:
-        print "Boo, not a new style name! (initialize)"
+        print("Boo, not a new style name! (initialize)")
     verbose = False
-    if verbose: print lsafe('DEBUG: initialize figlist')
+    if verbose: print(lsafe('DEBUG: initialize figlist'))
     if first_figure == None:
-        if verbose: print lsafen('empty')
+        if verbose: print(lsafen('empty'))
         return []
     else:
-        if verbose: print lsafen(first_figure.figurelist)
+        if verbose: print(lsafen(first_figure.figurelist))
         return first_figure
 class figlist(object):
     r"""
@@ -1732,7 +1735,7 @@ class figlist(object):
         if self.mlab == 'BLANK': del self.mlab
         if self.file_name == 'BLANK': del self.file_name
         if self.line_spacing == 'BLANK': del self.line_spacing
-        if self.verbose: print lsafe('DEBUG: initialize figlist')
+        if self.verbose: print(lsafe('DEBUG: initialize figlist'))
         if len(arg) == 0:
             self.figurelist = []
         else:
@@ -1746,10 +1749,10 @@ class figlist(object):
         return
     def twinx(self,autopad = False,orig = False,color = None):
         #self.figurelist.insert(self.get_fig_number(self.current)-1,{'autopad':False}) #doesn't work because it changes the figure number; I can get the number with fig = gcf(); fig.number, but I can't set it; it would be best to switch to using a list that contains all the figure numbers to match all their names -- or alternatively, note that matplotlib allows you to give them names, though I don't know how that works
-        if self.current in self.twinx_list.keys():
+        if self.current in list(self.twinx_list.keys()):
             ax1,ax2 = self.twinx_list[self.current]
             if color is not None:
-                if 'twinx_color' not in self.propdict[self.current].keys():
+                if 'twinx_color' not in list(self.propdict[self.current].keys()):
                         ax2.tick_params(axis = 'y',colors = color)
                         ax2.yaxis.label.set_color(color)
                         ax2.spines['right'].set_color(color)
@@ -1777,7 +1780,7 @@ class figlist(object):
     def use_autolegend(self,value = None):
         'No argument sets to true if it\'s not already set'
         if value is None:
-            if not self.current in self.autolegend_list.keys():
+            if not self.current in list(self.autolegend_list.keys()):
                 self.autolegend_list.update({self.current:True})
             else: #leave it alone
                 return
@@ -1797,10 +1800,10 @@ class figlist(object):
         self.next(self.pushlist.pop())
         return
     def get_num_figures(self):
-        cleanlist = filter(lambda x: isinstance(x, str),self.figurelist)
+        cleanlist = [x for x in self.figurelist if isinstance(x, str)]
         return len(cleanlist)
     def get_fig_number(self,name):
-        cleanlist = filter(lambda x: isinstance(x, str),self.figurelist)
+        cleanlist = [x for x in self.figurelist if isinstance(x, str)]
         try:
             return cleanlist.index(name)+1
         except ValueError:
@@ -1859,22 +1862,22 @@ class figlist(object):
             self.current = name
             logging.debug(strm('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures'))
             if boundaries is not None:
-                if 'boundaries' not in self.propdict[self.current].keys() or self.propdict[self.current]['boundaries'] != boundaries:
+                if 'boundaries' not in list(self.propdict[self.current].keys()) or self.propdict[self.current]['boundaries'] != boundaries:
                     raise ValueError("You're giving conflicting values for boundaries")
             if legend:
-                if 'legend' not in self.propdict[self.current].keys() or self.propdict[self.current]['legend'] != legend:
+                if 'legend' not in list(self.propdict[self.current].keys()) or self.propdict[self.current]['legend'] != legend:
                     raise ValueError("You're giving conflicting values for legend")
         else:# figure doesn't exist yet
             num_figs_before_add = self.get_num_figures()
             self.current = name
-            if self.current not in self.propdict.keys():
+            if self.current not in list(self.propdict.keys()):
                 self.propdict[self.current] = {}
             if boundaries == False:
                 self.propdict[self.current]['boundaries'] = False
                 self.setprops(boundaries = False)
             if legend:
                 self.propdict[self.current]['legend'] = True
-                if 'figsize' not in kwargs.keys():
+                if 'figsize' not in list(kwargs.keys()):
                     kwargs.update({'figsize':(12,6)})
                 if hasattr(self,'mlab'):
                     fig = self.mlab.figure(num_figs_before_add+1,bgcolor = (1,1,1),**kwargs)
@@ -1925,16 +1928,16 @@ class figlist(object):
             This overrides that behavior.
             Defaults to False.
         """
-        if 'label' in kwargs.keys():
+        if 'label' in list(kwargs.keys()):
             self.use_autolegend()
         human_units = True
-        if 'human_units' in kwargs.keys():
+        if 'human_units' in list(kwargs.keys()):
             human_units = kwargs.pop('human_units')
         if human_units:
             firstarg = self.check_units(args[0],0,1) # check units, and if need be convert to human units, where x is the first dimension and y is the last
         else:
             firstarg = args[0]
-        if 'label' not in kwargs.keys() and isinstance(args[0],nddata):
+        if 'label' not in list(kwargs.keys()) and isinstance(args[0],nddata):
             thisname = args[0].name()
             if thisname is not None:
                 kwargs['label'] = thisname
@@ -1960,16 +1963,16 @@ class figlist(object):
         return
     def check_units(self, testdata, x_index, y_index,
             verbose=False):
-        if verbose: print "-"*30
-        if verbose: print "called check_units for figure",self.current
+        if verbose: print("-"*30)
+        if verbose: print("called check_units for figure",self.current)
         if isinstance(testdata,nddata):
-            if verbose: print "(check_units) it's nddata"
+            if verbose: print("(check_units) it's nddata")
             testdata = testdata.copy().human_units()
             if len(testdata.dimlabels) > 1:
-                if verbose: print "(check_units) more than one dimension"
+                if verbose: print("(check_units) more than one dimension")
                 if not hasattr(self,'current'):
                     raise ValueError("give your plot a name (using .next()) first! (this is used for naming the PDF's etc)")
-                if self.current in self.units.keys():
+                if self.current in list(self.units.keys()):
                         theseunits = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
                         if theseunits != self.units[self.current] and theseunits[0] != self.units[self.current]:
                                 raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(theseunits,self.units[self.current]))
@@ -1977,10 +1980,10 @@ class figlist(object):
                     if isinstance(testdata,nddata):
                         self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
             else:
-                if verbose: print "(check_units) only one dimension"
+                if verbose: print("(check_units) only one dimension")
                 if not hasattr(self,'current'):
                     self.next('default')
-                if self.current in self.units.keys():
+                if self.current in list(self.units.keys()):
                     theseunits = (testdata.get_units(testdata.dimlabels[x_index]))
                     testunits = self.units[self.current]
                     if theseunits != testunits:
@@ -1990,12 +1993,12 @@ class figlist(object):
                             raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(theseunits,self.units[self.current]))
                 else:
                     self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]))
-        if verbose: print "-"*30
+        if verbose: print("-"*30)
         return testdata
     def adjust_spines(self,spines):
         ax = gca()
         #{{{ taken from matplotlib examples
-        for loc, spine in ax.spines.items():
+        for loc, spine in list(ax.spines.items()):
             if loc in spines:
                 spine.set_position(('outward',10)) # outward by 10 points
                 spine.set_smart_bounds(True)
@@ -2028,7 +2031,7 @@ class figlist(object):
         has been used, goes back and places text there."""
         if not hasattr(self,'textdict'):
             self.textdict = {}
-        if marker in self.textdict.keys():
+        if marker in list(self.textdict.keys()):
             idx = self.textdict[marker]
             self.figurelist[idx]['print_string'] = (
                     self.figurelist[idx]['print_string']
@@ -2042,7 +2045,7 @@ class figlist(object):
     def setprops(self,**kwargs):
         self.figurelist.append(kwargs)
     def show_prep(self):
-        for k,v in self.autolegend_list.items():
+        for k,v in list(self.autolegend_list.items()):
             kwargs = {}
             if v:
                 if isinstance(v, str):
@@ -2069,7 +2072,7 @@ class figlist(object):
                         raise Exception(strm('error while trying to run autolegend function for',k,'\n\tfiglist is',self.figurelist,explain_error(e)))
     def show(self,*args,**kwargs):
         self.basename = None # must be turned off, so it can cycle through lists, etc, on its own
-        if 'line_spacing' in kwargs.keys(): kwargs.pop('line_spacing')# for latex only
+        if 'line_spacing' in list(kwargs.keys()): kwargs.pop('line_spacing')# for latex only
         if len(kwargs) > 0:
             raise ValueError("didn't understand kwargs "+repr(kwargs))
         logger.debug(strm("before show_prep, figlist is",self.figurelist))
@@ -2082,15 +2085,15 @@ class figlist(object):
             if isinstance(figname, dict):
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
-                    print '\n\n'
-                    print kwargs.pop('print_string')
-                    print '\n\n'
+                    print('\n\n')
+                    print(kwargs.pop('print_string'))
+                    print('\n\n')
         #}}}
         if len(args) == 1:
             if (args[0][:-4] == '.pdf') or (args[0][:-4] == '.png') or (args[0][:-4] == '.jpg'):
-                print "you passed me a filename, but I'm just burning it"
+                print("you passed me a filename, but I'm just burning it")
         if hasattr(self,'mlab'):
-            print "running mlab show!"
+            print("running mlab show!")
             self.mlab.show()
         else:
             #print "not running mlab show!"
@@ -2188,18 +2191,18 @@ class figlist(object):
             iterator = possible_iterators[argmin(abs(axis_span/desired_ticks -
                 possible_iterators))]
             #}}}
-            if verbose: print 'iterator is',iterator
+            if verbose: print('iterator is',iterator)
             return iterator,r_[ceil(thisaxis.min()/iterator):
                 floor(thisaxis.max()/iterator)+1]*iterator
         #{{{ now, I need to get the list of multiples that falls inside the axis span
         xiterator,xlist = gen_list(x_axis)
         yiterator,ylist = gen_list(y_axis)
-        if verbose: print 'range of x ',x_axis.min(),x_axis.max()
-        if verbose: print 'xlist',xlist
-        if verbose: print plotdata.unitify_axis(0)
-        if verbose: print 'range of y ',y_axis.min(),y_axis.max()
-        if verbose: print 'ylist',ylist
-        if verbose: print plotdata.unitify_axis(1)
+        if verbose: print('range of x ',x_axis.min(),x_axis.max())
+        if verbose: print('xlist',xlist)
+        if verbose: print(plotdata.unitify_axis(0))
+        if verbose: print('range of y ',y_axis.min(),y_axis.max())
+        if verbose: print('ylist',ylist)
+        if verbose: print(plotdata.unitify_axis(1))
         #}}}
         if xiterator < 1:
             x_ticklabels = ['{:0.1f}'.format(j) for j in xlist]
@@ -2312,10 +2315,10 @@ def text_on_plot(x,y,thistext,coord = 'axes',**kwargs):
     if coord == 'axes':
         newkwargs = {'transform':ax.transAxes,'size':'x-large',"horizontalalignment":'center'}
     elif coord == 'data':
-        print "Yes, I am using data transform"
+        print("Yes, I am using data transform")
         newkwargs = {'transform':ax.transData,'size':'small',"horizontalalignment":'right'}
     color = None
-    if 'match_data' in kwargs.keys():
+    if 'match_data' in list(kwargs.keys()):
         if isinstance(kwargs['match_data'], list):
             color = kwargs['match_data'][-1].get_color() # get the color of the last line
         elif kwargs['match_data'].get_plot_color() is not None:
@@ -2374,7 +2377,7 @@ def plot(*args,**kwargs):
         # }}}
         if human_units: myy = myy.human_units()
         if myy.get_plot_color() is not None\
-            and 'color' not in kwargs.keys():# allow override
+            and 'color' not in list(kwargs.keys()):# allow override
             kwargs.update({'color':myy.get_plot_color()})
         if myy.name() is not None:
             myylabel = myy.name()
@@ -2436,13 +2439,13 @@ def plot(*args,**kwargs):
             b = diff(log10(myx))
         except Exception as e:
             raise Exception(strm('likely a problem with the type of the x label, which is',myx,explain_error(e)))
-        if (size(b)>3) and all(abs((b-b[0])/b[0])<1e-4) and not ('nosemilog' in kwargs.keys()):
-            if 'plottype' not in kwargs.keys():
+        if (size(b)>3) and all(abs((b-b[0])/b[0])<1e-4) and not ('nosemilog' in list(kwargs.keys())):
+            if 'plottype' not in list(kwargs.keys()):
                 myplotfunc = ax.semilogx
-    if ('nosemilog' in kwargs.keys()):
+    if ('nosemilog' in list(kwargs.keys())):
         #print 'this should pop nosemilog'
         kwargs.pop('nosemilog')
-    if 'plottype' in kwargs.keys():
+    if 'plottype' in list(kwargs.keys()):
         if kwargs['plottype'] == 'semilogy':
             myplotfunc = ax.semilogy
         elif kwargs['plottype'] == 'semilogx':
@@ -2504,10 +2507,10 @@ def plot(*args,**kwargs):
                 raise RuntimeError(strm("Error trying to plot using function",
                     myplotfunc, '\nwith',len(plotargs), "arguments",
                     '\nwhich were\n',plotargs, "\nand had len\n",
-                    map(len, plotargs), "and", len(newkwargs),
+                    list(map(len, plotargs)), "and", len(newkwargs),
                     "\noptions", newkwargs, "of len",
                     ', '.join([str(type(j)) + " " + str(j) if isscalar(j)
-                        else str(len(j)) for j in newkwargs.values()]),
+                        else str(len(j)) for j in list(newkwargs.values())]),
                     explain_error(e)))
             if x_inverted:
                 these_xlims = ax.get_xlim()
@@ -2523,7 +2526,7 @@ def plot(*args,**kwargs):
         except Exception as e:
             raise RuntimeError(strm('error trying to plot',type(myplotfunc),'with value',myplotfunc,
                     '\nlength of the ndarray arguments:',['shape:'+str(shape(j)) if isinstance(j, ndarray) else j for j in plotargs],
-                    '\nsizes of ndarray kwargs',dict([(j,shape(kwargs[j])) if isinstance(kwargs[j], ndarray) else (j,kwargs[j]) for j in kwargs.keys()]),
+                    '\nsizes of ndarray kwargs',dict([(j,shape(kwargs[j])) if isinstance(kwargs[j], ndarray) else (j,kwargs[j]) for j in list(kwargs.keys())]),
                     '\narguments = ',plotargs,
                     '\nkwargs =',kwargs)+explain_error(e))
         if x_inverted:
@@ -2542,7 +2545,7 @@ def plot(*args,**kwargs):
             '\nsizes of arguments:', [shape(j) for j in plotargs],
             '\nsizes of ndarray kwargs:',
             dict([(j, shape(kwargs[j])) for j in
-                kwargs.keys() if isinstance(kwargs[j], ndarray)])))
+                list(kwargs.keys()) if isinstance(kwargs[j], ndarray)])))
     #grid(True)
     #}}}
     return retval
@@ -2577,12 +2580,12 @@ def concat(datalist,dimname,chop = False,verbose = False):
     newdimsize = 0
     #print 'DEBUG: type(datalist)',type(datalist)
     try:
-        shapes = map(ndshape,datalist)
+        shapes = list(map(ndshape,datalist))
     except Exception as e:
         if not isinstance(datalist, list):
             raise TypeError(strm('You didn\'t pass a list, you passed a',type(datalist)))
         raise RuntimeError(strm('Problem with what you passed to concat, list of types,',
-            map(type,datalist))+explain_error(e))
+            list(map(type,datalist)))+explain_error(e))
     other_info_out = datalist[0].other_info
     for j in range(0,len(datalist)):
         #{{{ make list for the shape to check, which contains the dimensions we are NOT concatting along
@@ -2600,7 +2603,7 @@ def concat(datalist,dimname,chop = False,verbose = False):
             if any(~(array(shapetocheck) == array(shapetocheckagainst))):
                 if chop:
                     if verbose:
-                        print lsafen(repr(shapetocheck)),lsafen(repr(shapetocheckagainst))
+                        print(lsafen(repr(shapetocheck)),lsafen(repr(shapetocheckagainst)))
                         raise ValueError(strm('For item ',j,'in concat, ',
                             shapetocheck,'!=',shapetocheckagainst,
                             'where all the shapes of the things',
@@ -2650,7 +2653,7 @@ def concat(datalist,dimname,chop = False,verbose = False):
             newdatalist.labels(dimlabels,axis_coords)
         except Exception as e:
             raise ValueError(strm("trying to attach axes of lengths",
-                map(len,axis_coords),"to",dimlabels)+explain_error(e))
+                list(map(len,axis_coords)),"to",dimlabels)+explain_error(e))
     #}}}
     newdatalist.other_info = other_info_out
     return newdatalist
@@ -2744,7 +2747,7 @@ class nddata (object):
             self.data = reshape(data,sizes)
         except:
             try:
-                error_string = strm("While initializing nddata, you are trying trying to reshape a",data.shape,"array (",data.size,"data elements) with list of sizes",zip(dimlabels,sizes),"(implying that there are ",prod(sizes),"data elements)")
+                error_string = strm("While initializing nddata, you are trying trying to reshape a",data.shape,"array (",data.size,"data elements) with list of sizes",list(zip(dimlabels,sizes)),"(implying that there are ",prod(sizes),"data elements)")
             except TypeError:
                 error_string = strm("While initializing nddata, you are trying trying to reshape a",data.shape,"array (",data.size,"data elements) with list of sizes",sizes)
             raise ValueError(error_string)
@@ -2787,7 +2790,7 @@ class nddata (object):
             retval += '\n\taxes='
             def rep_this_dict(starting_indent,thisdict,errordict):
                 dictrep = []
-                for k,v in thisdict.iteritems():
+                for k,v in thisdict.items():
                     dictrep.append('`'+k+'\':'+show_array(v,starting_indent)+starting_indent+'\t\t+/-'+repr(errordict[k]))
                 return '{'+(','+starting_indent+'\t').join(dictrep)+'}' # separate with an extra comma, the existing indent, and a tab
             retval += rep_this_dict('\n\t',self.mkd(self.axis_coords),self.mkd(self.axis_coords_error))
@@ -2801,14 +2804,14 @@ class nddata (object):
         x = self.getaxis(self.dimlabels[0])[:5]
         y = self.getaxis(self.dimlabels[1])[:5]
         z = self.data[:5,:5]
-        print "size of x",size(x),"size of y",size(y),"size of z",size(z)
-        print "x",x,"y",y,"z",z
+        print("size of x",size(x),"size of y",size(y),"size of z",size(z))
+        print("x",x,"y",y,"z",z)
         data = empty((z.shape[0]+1,z.shape[1]+1))
         data[1:,1:] = z[:]
         data[0,0] = z.shape[1]
         data[0,1:] = y.flatten()
         data[1:,0] = x.flatten()
-        print "data",data
+        print("data",data)
         fp = open('auto_figures/'+filename+'.dat','w')
         fp.write(float32(data).tostring())
         fp.write('\n')
@@ -2835,16 +2838,16 @@ class nddata (object):
         this_size = array(self.data.shape)
         sortedself = self.copy()
         if any(this_size > max_dimsize):
-            print lsafen("Warning! The data is big (%s), so I'm automatically downsampling"%(ndshape(self)))
+            print(lsafen("Warning! The data is big (%s), so I'm automatically downsampling"%(ndshape(self))))
             for j in where(this_size > max_dimsize):
                 downsampling = ceil(double(this_size[j]) / max_dimsize)
-                print 'downsampling',self.dimlabels[j],'by',downsampling
+                print('downsampling',self.dimlabels[j],'by',downsampling)
                 sortedself = sortedself[self.dimlabels[j],0::downsampling]
-            print lsafen("I reduced to a max of max_dimsize = %d so the data is now %s"%(max_dimsize,ndshape(sortedself)))
+            print(lsafen("I reduced to a max of max_dimsize = %d so the data is now %s"%(max_dimsize,ndshape(sortedself))))
 
         x_axis,y_axis = sortedself.sort_and_xy()
         if invert:
-            print "trying to invert meshplot-like data"
+            print("trying to invert meshplot-like data")
         X = x_axis*ones(shape(y_axis))
         Y = ones(shape(x_axis))*y_axis
         Z = real(sortedself.data)
@@ -2888,9 +2891,9 @@ class nddata (object):
         x_dim = self.dimlabels[0]
         y_dim = self.dimlabels[1]
         if stride is not None:
-            if x_dim in stride.keys():
+            if x_dim in list(stride.keys()):
                 rstride = stride[x_dim]
-            if y_dim in stride.keys():
+            if y_dim in list(stride.keys()):
                 cstride = stride[y_dim]
         if light is not None:
             ls = LightSource(azdeg = light[1],altdeg = light[0])
@@ -2947,7 +2950,7 @@ class nddata (object):
         x_axis,y_axis = self.dimlabels
         x = self.getaxis(x_axis)[:,None]
         y = self.getaxis(y_axis)[None,:]
-        if 'levels' not in kwargs.keys():
+        if 'levels' not in list(kwargs.keys()):
             levels = r_[self.data.min():self.data.max():30j]
         cs = contour(x*ones_like(y),ones_like(x)*y,self.data,**kwargs)
         if labels:
@@ -2984,7 +2987,7 @@ class nddata (object):
         for j in range(0,len(ys)):
             zs = self[y_dim,j].data.flatten()
             zs = r_[0,zs,0]
-            verts.append(zip(xs,zs)) # one of the faces
+            verts.append(list(zip(xs,zs))) # one of the faces
         poly = PolyCollection(verts, facecolors = [color]*len(verts), edgecolors = edgecolor) # the individual facecolors would go here
         poly.set_alpha(alpha)
         fig = gcf()
@@ -3002,7 +3005,7 @@ class nddata (object):
         if ax == None:
             fig = gcf()
             ax = axes3d.Axes3D(fig)
-            print "I'm trying to rotate to",rotation
+            print("I'm trying to rotate to",rotation)
             #ax.view_init(20,-120)
             #ax.view_init(elev = 20 + rotation[1],azim = -120 + rotation[0])
             ax.view_init(azim = rotation[0],elev = rotation[1])
@@ -3012,10 +3015,10 @@ class nddata (object):
         self.sort(self.dimlabels[0])
         self.sort(self.dimlabels[1])
         if invert:
-            print "trying to invert oldtimey"
+            print("trying to invert oldtimey")
         if linewidth == None:
             linewidth = sclinewidth/sortedself.data.shape[1]
-            print "setting linewidth to %0.1f"%linewidth
+            print("setting linewidth to %0.1f"%linewidth)
         if ax is None: 
             ax = sortedself._init_3d_axis(ax,rotation = rotation)
         else:
@@ -3133,36 +3136,36 @@ class nddata (object):
         #{{{ process kwargs
         give_None = True
         if len(kwargs) > 0:
-            if 'give_None' in kwargs.keys():
+            if 'give_None' in list(kwargs.keys()):
                 give_None = kwargs.pop('give_None')
         if len(kwargs) > 0:
             raise ValueError(strm("you passed mkd kwargs I didn't understand:",kwargs))
         #}}}
         if len(arg) == 1:
             if emptytest(arg[0]):
-                return dict(zip(self.dimlabels,
-                    [None]*len(self.dimlabels)))
+                return dict(list(zip(self.dimlabels,
+                    [None]*len(self.dimlabels))))
             if len(arg[0]) != len(self.dimlabels):
-                print r"{\color{red}WARNING! mkd error (John will fix this later):}"
-                print "When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is "+repr(self.dimlabels)+" and you passed "+repr(arg)+'\n\n'
+                print(r"{\color{red}WARNING! mkd error (John will fix this later):}")
+                print("When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is "+repr(self.dimlabels)+" and you passed "+repr(arg)+'\n\n')
                 raise ValueError("When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is "+repr(self.dimlabels)+" and you passed "+repr(arg))
             for i,v in enumerate(arg[0]):
                 if isinstance(v, ndarray):
                     if v.shape == ():
                         arg[0][i] = None
             if give_None:
-                return dict(zip(self.dimlabels,arg[0]))
+                return dict(list(zip(self.dimlabels,arg[0])))
             else:
                 #{{{ don't return values for the things that are None
                 mykeys = [self.dimlabels[j] for j in range(0,len(self.dimlabels)) if arg[0][j] is not None]
                 myvals = [arg[0][j] for j in range(0,len(self.dimlabels)) if arg[0][j] is not None]
-                return dict(zip(mykeys,myvals))
+                return dict(list(zip(mykeys,myvals)))
                 #}}}
         elif len(arg) == 0:
             if not give_None:
                 raise ValueError("You can't tell me not to give none and then not pass me anything!!")
-            return dict(zip(self.dimlabels,
-                [None]*len(self.dimlabels)))
+            return dict(list(zip(self.dimlabels,
+                [None]*len(self.dimlabels))))
         else:
             raise ValueError(strm('.mkd() doesn\'t know what to do with %d arguments',len(arg)))
     def fld(self,dict_in,noscalar = False):
@@ -3213,9 +3216,9 @@ class nddata (object):
 
                     average_oom = log10(abs(data_to_test))/3.
                     if verbose:
-                        print "(human_units) for axis: dtype",data_to_test.dtype
-                        print "(human_units) for axis: dtype",data_to_test
-                        print "(human units) for axis: oom:",average_oom
+                        print("(human_units) for axis: dtype",data_to_test.dtype)
+                        print("(human_units) for axis: dtype",data_to_test)
+                        print("(human units) for axis: oom:",average_oom)
                     average_oom = average_oom[isfinite(average_oom)].mean()
                     #}}}
                     logger.debug(strm("(human units): for axis",thisaxis,"the average oom is",average_oom*3))
@@ -3281,7 +3284,7 @@ class nddata (object):
         elif (len(args) is 1) and args[0] is None:
             self.data_error = None
         else:
-            raise TypeError(' '.join(map(repr,['Not a valid argument to set_error:',map(type,args)])))
+            raise TypeError(' '.join(map(repr,['Not a valid argument to set_error:',list(map(type,args))])))
         return self
     #}}}
     #{{{ random mask -- throw out points
@@ -3323,7 +3326,7 @@ class nddata (object):
                     else:
                         return real(self.axis_coords_error[self.axn(thearg)])
         else:
-            raise ValueError(strm('Not a valid argument to get_error: *args=',args,'map(type,args)=',map(type,args)))
+            raise ValueError(strm('Not a valid argument to get_error: *args=',args,'map(type,args)=',list(map(type,args))))
         #}}}
     #}}}
     #{{{ match dims --
@@ -3399,8 +3402,8 @@ class nddata (object):
         The value of the property (can by any type) or `None` if the property doesn't exist.
         '''
         if propname is None:
-            return self.other_info.keys()
-        if propname not in self.other_info.keys():
+            return list(self.other_info.keys())
+        if propname not in list(self.other_info.keys()):
             return None
         return self.other_info[propname]
     def name(self,*arg):
@@ -3740,7 +3743,7 @@ class nddata (object):
         '''
         #{{{ if zero dimensional, fake a singleton dimension and recurse
         #{{{ unless both are zero dimensional, in which case, just leave alone
-        if verbose: print "starting aligndata"
+        if verbose: print("starting aligndata")
         if isscalar(arg) or isinstance(arg, ndarray):
             arg = nddata(arg)
             index_dims = [j for j in r_[0:len(arg.dimlabels)]
@@ -3752,19 +3755,19 @@ class nddata (object):
                 if len(match_dims) != len(index_dims):
                     raise ValueError("you seem to by multiplying by something with an 'INDEX' data and something that doesn't have that -- is this really what you want?  (this is commonly produced by multiplying a mismatched ndarray by an nddata)")
         if ndshape(self).zero_dimensional and ndshape(arg).zero_dimensional:
-            if verbose: print "(1) yes, I found something zero dimensional"
+            if verbose: print("(1) yes, I found something zero dimensional")
             return self.copy(),arg.copy()
         #}}}
         elif ndshape(self).zero_dimensional:
-            if verbose: print "(2) yes, I found something zero dimensional"
-            if verbose: print "yes, I found something zero dimensional"
+            if verbose: print("(2) yes, I found something zero dimensional")
+            if verbose: print("yes, I found something zero dimensional")
             A = self.copy()
             A.dimlabels = [arg.dimlabels[0]]
             A.data = A.data.reshape(1)
             return A.aligndata(arg)
         elif ndshape(arg).zero_dimensional:
-            if verbose: print "(3) yes, I found something zero dimensional"
-            if verbose: print "yes, I found something zero dimensional"
+            if verbose: print("(3) yes, I found something zero dimensional")
+            if verbose: print("yes, I found something zero dimensional")
             arg = arg.copy()
             arg.dimlabels = [self.dimlabels[0]]
             arg.data = arg.data.reshape(1)
@@ -3791,8 +3794,8 @@ class nddata (object):
                 arg.dimlabels] #  only the labels valid for arg, ordered
         #                         as they are in newdims
         argshape = list(ones(len(newdims), dtype=int64))# should be a better solution
-        if verbose: print "DEBUG 2: shape of self",ndshape(self),"self data shape",self.data.shape,"shape of arg",ndshape(arg),"arg data shape",arg.data.shape
-        if verbose: print "DEBUG 3: shape of selfout",ndshape(selfout),"selfout data shape",selfout.data.shape,"shape of argout",ndshape(argout),"argout data shape",argout.data.shape
+        if verbose: print("DEBUG 2: shape of self",ndshape(self),"self data shape",self.data.shape,"shape of arg",ndshape(arg),"arg data shape",arg.data.shape)
+        if verbose: print("DEBUG 3: shape of selfout",ndshape(selfout),"selfout data shape",selfout.data.shape,"shape of argout",ndshape(argout),"argout data shape",argout.data.shape)
         #{{{ wherever the dimension already exists in arg, pull the shape from arg
         for j,k in enumerate(newdims):
             if k in argout.dimlabels:
@@ -3806,7 +3809,7 @@ class nddata (object):
         # }}}
         # }}}
         # {{{ transpose arg to match newshape
-        argorder = map(argout.dimlabels.index,new_arg_labels) # for
+        argorder = list(map(argout.dimlabels.index,new_arg_labels)) # for
         #          each new dimension, determine the position of the
         #          original dimension
         selfout.data = selfout.data.reshape(int64(selfshape)) # and reshape
@@ -3816,7 +3819,7 @@ class nddata (object):
             argshape = int64(argshape)
             argout.data = argout.data.transpose(argorder
                     ).reshape(argshape) # and reshape the data
-        except ValueError,Argument:
+        except ValueError as Argument:
             raise ValueError('the shape of the data is ' +
                     repr(argout.data.shape) + ' the transpose ' +
                     repr(argorder) + ' and the new shape ' +
@@ -3828,7 +3831,7 @@ class nddata (object):
         if selfout.get_error() != None:
             try:
                 temp = selfout.get_error().copy().reshape(selfshape)
-            except ValueError,Argument:
+            except ValueError as Argument:
                 raise ValueError("The instance (selfout) has a shape of "
                         + repr(selfout.data.shape) +
                         " but its error has a shape of" +
@@ -3839,7 +3842,7 @@ class nddata (object):
         if argout.get_error() != None:
             try:
                 temp = argout.get_error().copy().transpose(argorder).reshape(argshape)
-            except ValueError,Argument:
+            except ValueError as Argument:
                 raise ValueError("The argument (argout) has a shape of "
                         + repr(argout.data.shape)
                         + " but its error has a shape of" +
@@ -3861,7 +3864,7 @@ class nddata (object):
                     temp_dict = input_data.mkd(input_data.axis_coords_error)
                 else:
                     temp_dict = input_data.mkd(input_data.axis_coords)
-                temp_dict = {k:v for k,v in temp_dict.iteritems()
+                temp_dict = {k:v for k,v in temp_dict.items()
                         if v is not None and len(v) > 0}
                 return temp_dict
             # }}}
@@ -3943,10 +3946,10 @@ class nddata (object):
             try:
                 thisindex = self.dimlabels.index(axes[j])
             except:
-                print '|-ERROR FINDING DIMENSION-----'
-                print '| dimlabels is: ',self.dimlabels
-                print "| doesn't contain: ",axes[j]
-                print '|-----------------------------'
+                print('|-ERROR FINDING DIMENSION-----')
+                print('| dimlabels is: ',self.dimlabels)
+                print("| doesn't contain: ",axes[j])
+                print('|-----------------------------')
                 raise
             self.data = sum(self.data,
                     axis=thisindex)
@@ -3959,8 +3962,8 @@ class nddata (object):
             try:
                 thisindex = self.dimlabels.index(axes[j])
             except:
-                print 'error, dimlabels is: ',self.dimlabels
-                print "doesn't contain: ",axes[j]
+                print('error, dimlabels is: ',self.dimlabels)
+                print("doesn't contain: ",axes[j])
                 raise
             temp = list(self.data.shape)
             temp[thisindex] = 1
@@ -4055,7 +4058,7 @@ class nddata (object):
         #{{{ process arguments
         axes = self._possibly_one_axis(*args)
         raw_index = False
-        if 'raw_index' in kwargs.keys():
+        if 'raw_index' in list(kwargs.keys()):
             raw_index = kwargs.pop('raw_index')
         if len(kwargs) > 0:
             raise ValueError("I didn't understand the kwargs:",repr(kwargs))
@@ -4066,8 +4069,8 @@ class nddata (object):
             try:
                 thisindex = self.axn(axes[j])
             except:
-                print 'error, dimlabels is: ',self.dimlabels
-                print "doesn't contain: ",axes[j]
+                print('error, dimlabels is: ',self.dimlabels)
+                print("doesn't contain: ",axes[j])
                 raise
             if raw_index:
                 self.data = argmax(self.data,
@@ -4092,8 +4095,8 @@ class nddata (object):
             try:
                 thisindex = self.axn(axes[j])
             except:
-                print 'error, dimlabels is: ',self.dimlabels
-                print "doesn't contain: ",axes[j]
+                print('error, dimlabels is: ',self.dimlabels)
+                print("doesn't contain: ",axes[j])
                 raise
             if raw_index:
                 self.data = argmin(self.data,
@@ -4121,7 +4124,7 @@ class nddata (object):
                 vals[:-1]+(vals[1]-vals[0])*0.5)
         retval.run_nopop(cumsum,'values')
         if normalized:
-            print 'final value',retval['values',-1]
+            print('final value',retval['values',-1])
             retval /= retval['values',-1]
         return retval
     def mean_all_but(self,listofdims):
@@ -4244,11 +4247,11 @@ class nddata (object):
         if subplot_axes is None:# then do all
             self.data -= self.data.flatten().max() - magnitude # span only 4 orders of magnitude
         else:
-            print "smooshing along subplot_axes",subplot_axes
+            print("smooshing along subplot_axes",subplot_axes)
             newdata = self.copy().smoosh(subplot_axes,dimname = 'subplot')
-            print ndshape(newdata)
+            print(ndshape(newdata))
             newdata.run(max,'subplot')
-            print newdata
+            print(newdata)
             newdata = self - newdata
             self.data = newdata.data + magnitude
         self.data[self.data < 0] = 0
@@ -4327,7 +4330,7 @@ class nddata (object):
         'this just generates an axis label with appropriate units'
         if isinstance(axis_name, int):
             axis_name = self.dimlabels[axis_name]
-        if self.get_prop('FT') is not None and axis_name in self.get_prop('FT').keys() and self.get_prop('FT')[axis_name]:
+        if self.get_prop('FT') is not None and axis_name in list(self.get_prop('FT').keys()) and self.get_prop('FT')[axis_name]:
             isft = True
         else:
             isft = False
@@ -4497,7 +4500,7 @@ class nddata (object):
             if fit_axis is None:
                 fit_axis = newaxis_dict.data
         else:
-            fitdim_name = newaxis_dict.keys()[0]
+            fitdim_name = list(newaxis_dict.keys())[0]
             logger.debug(strm('shape of fit dimension is',newaxis_dict[fitdim_name].shape))
             fit_axis = newaxis_dict[fitdim_name]
         if tuple_syntax:
@@ -4518,8 +4521,8 @@ class nddata (object):
             # SVD and truncation of kernels
             U1,S1,V1 = np.linalg.svd(K1.data,full_matrices=False)
             U2,S2,V2 = np.linalg.svd(K2.data,full_matrices=False)
-            logger.debug(strm('Uncompressed SVD K1:',map(lambda x: x.shape, (U1,S1,V1))))
-            logger.debug(strm('Uncompressed SVD K2:',map(lambda x: x.shape, (U2,S2,V2))))
+            logger.debug(strm('Uncompressed SVD K1:',[x.shape for x in (U1,S1,V1)]))
+            logger.debug(strm('Uncompressed SVD K2:',[x.shape for x in (U2,S2,V2)]))
             default_cut = 1e-2
             s1 = where(S1 > default_cut)[0][-1]
             s2 = where(S2 > default_cut)[0][-1]
@@ -4531,23 +4534,23 @@ class nddata (object):
             V2 = V2[0:s2,:]
             S1 = S1*eye(s1)
             S2 = S2*eye(s2)
-            logger.debug(strm('Compressed SVD of K1:',map(lambda x: x.shape, (U1,S1,V1))))
-            logger.debug(strm('Compressed SVD K2:',map(lambda x: x.shape, (U2,S2,V2))))
+            logger.debug(strm('Compressed SVD of K1:',[x.shape for x in (U1,S1,V1)]))
+            logger.debug(strm('Compressed SVD K2:',[x.shape for x in (U2,S2,V2)]))
             # would generate projected data here
             # compress data here
             K1 = S1.dot(V1)
             K2 = S2.dot(V2)
             K = K1[:,newaxis,:,newaxis]*K2[newaxis,:,newaxis,:]
             K = K.reshape(K1.shape[0]*K2.shape[0],K1.shape[1]*K2.shape[1])
-            logger.debug(strm('Compressed K0, K1, and K2:',map(lambda x: x.shape, (K,K1,K2))))
+            logger.debug(strm('Compressed K0, K1, and K2:',[x.shape for x in (K,K1,K2)]))
 
             data_compressed = U1.T.dot(self.data.dot(U2))
             logger.debug(strm('Compressed data:',data_compressed.shape))
             # data_for_nnls = nddata(data_compressed,[dimname[0],dimname[1]])
             # data_for_nnls.smoosh([dimname[0],dimname[1]],dimname=dimname[0])
             data_fornnls = empty(s1*s2)
-            for s1_index in xrange(s1):
-                for s2_index in xrange(s2):
+            for s1_index in range(s1):
+                for s2_index in range(s2):
                     temp = data_compressed[s1_index][s2_index]
                     data_fornnls[s1_index*s2+s2_index] = temp
             logger.debug(strm('Lexicographically ordered data:',data_fornnls.shape))
@@ -4571,7 +4574,7 @@ class nddata (object):
                         return 1
                 def square_heaviside(x_vec):
                     diag_heavi = []
-                    for q in xrange(shape(K.T)[0]):
+                    for q in range(shape(K.T)[0]):
                         pull_val = dot(K.T[q,:],x_vec)
                         temp = pull_val[0]
                         temp = H(temp)
@@ -4599,7 +4602,7 @@ class nddata (object):
                 def mod_BRD(guess,maxiter=20):
                     smoothing_param = guess
                     alpha_converged = False
-                    for iter in xrange(maxiter):
+                    for iter in range(maxiter):
                         logger.debug(strm('ITERATION NO.',iter))
                         logger.debug(strm('CURRENT LAMBDA',smoothing_param))
                         retval,residual = this_nnls.nnls_regularized(K,data_fornnls,l=smoothing_param)
@@ -4758,7 +4761,7 @@ class nddata (object):
         return self
     def histogram(*args,**kwargs):
         per_hit = 1e-3
-        if 'per_hit' in kwargs.keys():
+        if 'per_hit' in list(kwargs.keys()):
             per_hit = kwargs.pop('per_hit')
         if len(kwargs) > 0:
             raise ValueError("I don't understand the arguments:"+repr(kwargs))
@@ -4813,7 +4816,7 @@ class nddata (object):
             rerrvar = real(thiserror)**2
             if thiserror[0].dtype == 'complex128':
                 ierrvar = imag(thiserror)**2
-        if 'kind' in kwargs.keys():
+        if 'kind' in list(kwargs.keys()):
             thiskind = kwargs.pop('kind')
         else:
             thiskind = 'cubic'
@@ -4822,7 +4825,7 @@ class nddata (object):
                 if len(rdata) < 3:
                     thiskind = 'linear'
         thisaxis = self.axn(axis)
-        if verbose: print 'Using %s interpolation'%thiskind
+        if verbose: print('Using %s interpolation'%thiskind)
         def local_interp_func(local_arg_data,kind = thiskind):
             interpfunc =  interp1d(oldaxis,local_arg_data,kind = kind,axis = thisaxis)
             try:
@@ -4851,7 +4854,7 @@ class nddata (object):
     def invinterp(self,axis,values,**kwargs):
         'interpolate axis values given data values'
         copy = False
-        if 'copy' in kwargs.keys():
+        if 'copy' in list(kwargs.keys()):
             copy = kwargs.pop('copy')
         if isscalar(values):
             values = r_[values]
@@ -4868,7 +4871,7 @@ class nddata (object):
         rdata = rdata[args]
         idata = idata[args]
         #{{{ determine type of interpolation
-        if 'kind' in kwargs.keys():
+        if 'kind' in list(kwargs.keys()):
             thiskind = kwargs.pop('kind')
         else:
             thiskind = 'cubic'
@@ -4949,7 +4952,7 @@ class nddata (object):
         > exit()
         > #}}}
         """
-        if verbose: print "(contiguous) shape of self inside contiguous",ndshape(self)
+        if verbose: print("(contiguous) shape of self inside contiguous",ndshape(self))
         if axis is None:
             if len(self.dimlabels) == 1:
                 axis = self.dimlabels[0]
@@ -4958,7 +4961,7 @@ class nddata (object):
                 raise TypeError("If there is more than one dimension, `axis` must be set to something other than ``None``")
         else:
             mask = lambdafunc(self.copy(),axis).data
-        if verbose: print "(contiguous) shape of mask",mask.shape
+        if verbose: print("(contiguous) shape of mask",mask.shape)
         if axis is None:
             idx, = np.diff(mask).nonzero() # this gives a list of indices for the boundaries between true/false
         else:
@@ -4969,10 +4972,10 @@ class nddata (object):
         if mask[-1]: # If the end of mask is True, then I need to add a boundary there as well
             idx = np.r_[idx, mask.size-1] # Edit
         idx.shape = (-1,2) # idx is 2x2 array of start,stop
-        if verbose: print '(contiguous) DEBUG idx is',idx
-        if verbose: print "(contiguous) diffs for blocks",diff(idx,axis=1),
+        if verbose: print('(contiguous) DEBUG idx is',idx)
+        if verbose: print("(contiguous) diffs for blocks",diff(idx,axis=1), end=' ')
         block_order = diff(idx, axis=1).flatten().argsort()[::-1]
-        if verbose: print "(contiguous) in descending order, the blocks are therefore",idx[block_order,:]
+        if verbose: print("(contiguous) in descending order, the blocks are therefore",idx[block_order,:])
         #if verbose: print "yielding",idx[diff(idx,axis=1).argmax(),:],self.getaxis(axis)[idx[diff(idx,axis=1).argmax(),:]]
         return self.getaxis(axis)[idx[block_order,:]]
     def to_ppm(self):
@@ -5055,21 +5058,21 @@ class nddata (object):
             else:
                 axes = oldorder + axes
         try:
-            neworder = map(self.dimlabels.index,axes)
+            neworder = list(map(self.dimlabels.index,axes))
         except ValueError as e:
             raise ValueError(strm('one of',axes,'not in',self.dimlabels))
-        self.dimlabels = map(self.dimlabels.__getitem__,neworder)
+        self.dimlabels = list(map(self.dimlabels.__getitem__,neworder))
         if len(self.axis_coords)>0:
             try:
-                self.axis_coords = map(self.axis_coords.__getitem__,neworder)
+                self.axis_coords = list(map(self.axis_coords.__getitem__,neworder))
             except Exception as e:
-                raise IndexError(strm('problem mapping',map(len,self.axis_coords),'onto',neworder)
+                raise IndexError(strm('problem mapping',list(map(len,self.axis_coords)),'onto',neworder)
                         + explain_error(e))
             if len(self.axis_coords_units)>0:
                 try:
-                    self.axis_coords_units = map(self.axis_coords_units.__getitem__,neworder)
+                    self.axis_coords_units = list(map(self.axis_coords_units.__getitem__,neworder))
                 except:
-                    raise IndexError(strm('problem mapping',map(len,self.axis_coords_units),
+                    raise IndexError(strm('problem mapping',list(map(len,self.axis_coords_units)),
                         'onto',neworder)+explain_error(e))
         try:
             self.data = self.data.transpose(neworder)
@@ -5093,8 +5096,8 @@ class nddata (object):
         if len(args) == 2:
             listofstrings,listofaxes = args
         elif len(args) == 1 and isinstance(args[0], dict):
-            listofstrings = args[0].keys()
-            listofaxes = args[0].values()
+            listofstrings = list(args[0].keys())
+            listofaxes = list(args[0].values())
         else:
             raise ValueError(strm("I can't figure out how to deal with the arguments",args))
         for j in range(0,len(listofaxes)):
@@ -5107,8 +5110,8 @@ class nddata (object):
         if not isinstance(listofstrings, list):
             raise TypeError("the arguments passed to the .labels() method must be a list of the axis names followed by the list of the axis arrays")
         elif all(map(( lambda x: isinstance(x, str_) ),listofstrings)):
-            listofstrings = map(str,listofstrings)
-        elif not all(map(( lambda x: isinstance(x,basestring) ),listofstrings)):
+            listofstrings = list(map(str,listofstrings))
+        elif not all(map(( lambda x: isinstance(x,str) ),listofstrings)):
             raise TypeError("the arguments passed to the .labels() method must be a list of the axis names followed by the list of the axis arrays")
         for j in range(0,len(listofstrings)):
             if listofaxes[j] is None:
@@ -5235,17 +5238,17 @@ class nddata (object):
                 lambdified_func = sympy.lambdify(list(symbols_in_func), func,
                         modules=mat2array)
             except Exception as e:
-                raise ValueError(strm('Error parsing axis variables',map(sympy.var,axisnames),
+                raise ValueError(strm('Error parsing axis variables',list(map(sympy.var,axisnames)),
                     'that you passed and function',func,'that you passed') +
                     explain_error(e))
             func = lambdified_func
-            axisnames = map(str,symbols_in_func)
+            axisnames = list(map(str,symbols_in_func))
         elif not hasattr(func,'func_code'):
             raise ValueError("I can't interpret the second argument as a function!")
         # I can't do the following for sympy, because the argument count is always zero
-        if not issympy(args[0]) and func.func_code.co_argcount != len(axisnames):
+        if not issympy(args[0]) and func.__code__.co_argcount != len(axisnames):
             raise ValueError(strm("The axisnames you passed",axisnames,
-                "and the argument count",func.func_code.co_argcount,"don't match"))
+                "and the argument count",func.__code__.co_argcount,"don't match"))
         list_of_axes = [self._axis_inshape(x) for x in axisnames]
         retval = func(*list_of_axes)
         if issympy(retval):
@@ -5334,13 +5337,13 @@ class nddata (object):
             newdata = fill_with * ones(newdata,dtype = self.data.dtype)
         newdata_slice = [slice(None,None,None)] * len(newdata.shape)
         newdata_slice[self.axn(axis)] = slice(-start_index,len(u)-start_index,None)
-        if verbose: print "-------------------------"
-        if verbose: print "shape of newdata",newdata.shape
-        if verbose: print "shape of self.data",self.data.shape
-        if verbose: print "len of u",len(u)
-        if verbose: print "start index",start_index
-        if verbose: print "shape of slice",newdata[newdata_slice].shape
-        if verbose: print "-------------------------"
+        if verbose: print("-------------------------")
+        if verbose: print("shape of newdata",newdata.shape)
+        if verbose: print("shape of self.data",self.data.shape)
+        if verbose: print("len of u",len(u))
+        if verbose: print("start index",start_index)
+        if verbose: print("shape of slice",newdata[newdata_slice].shape)
+        if verbose: print("-------------------------")
         newdata[newdata_slice] = self.data
         self.data = newdata
         #}}}
@@ -5653,7 +5656,7 @@ class nddata (object):
                     shapesout = round(shapesout)
                 shapesout = [shapesout] * len(axesout)
             elif isinstance(otherargs[0], dict):
-                axesout,shapesout = otherargs[0].keys(),otherargs[0].values()
+                axesout,shapesout = list(otherargs[0].keys()),list(otherargs[0].values())
             else:
                 raise ValueError("I don't know how to deal with this type!")
         else:
@@ -5697,7 +5700,7 @@ class nddata (object):
                 self.axis_coords_units.insert(thisaxis,None)
         #}}}
         newshape = list(self.data.shape[0:thisaxis]) + shapesout + list(self.data.shape[thisaxis+1:])
-        newshape = map(int,newshape)
+        newshape = list(map(int,newshape))
         newnames = list(self.dimlabels[0:thisaxis]) + axesout + list(self.dimlabels[thisaxis+1:])
         self.data = self.data.reshape(newshape)
         self.dimlabels = newnames
@@ -5717,15 +5720,15 @@ class nddata (object):
         axis_number = self.axn(axis_name)
         new_axis,indices = unique(self.getaxis(axis_name)[which_field],
                 return_inverse = True) # we are essentially creating a hash table for the axis.  According to numpy documentation, the hash indices that this returns should also be sorted sorted.
-        if verbose: print "(chunk auto) indices look like this:",indices
+        if verbose: print("(chunk auto) indices look like this:",indices)
         #{{{ check that there are equal numbers of all the unique new_axis
         index_count = array([count_nonzero(indices == j) for j in range(indices.max()+1)])
         if all(index_count == index_count[0]):
-            if verbose: print "(chunk auto) Yes, there are equal numbers of all unique new_axis! (Each element of the hash table has been indexed the same number of times.)"
+            if verbose: print("(chunk auto) Yes, there are equal numbers of all unique new_axis! (Each element of the hash table has been indexed the same number of times.)")
             #}}}
             #{{{ store the old shape and generate the new shape
             current_shape = list(self.data.shape)
-            if verbose: print "(chunk auto) old shape -- ",current_shape
+            if verbose: print("(chunk auto) old shape -- ",current_shape)
             new_shape = insert(current_shape,axis_number + 1,len(new_axis))
             new_shape[axis_number] /= len(new_axis) # the indices of the hash table become the new dimension
             #}}}
@@ -5763,11 +5766,11 @@ class nddata (object):
                 self.data[copy_to_slice]           = old_data[copy_from_slice]
                 if has_data_error:
                     data_error_location[copy_to_slice] = old_error[copy_from_slice]
-                if verbose: print "(chunk auto) ",j,'matches at',x_strip_current_field[copy_from_slice[axis_number]]
+                if verbose: print("(chunk auto) ",j,'matches at',x_strip_current_field[copy_from_slice[axis_number]])
                 self.axis_coords[axis_number][:,j] = x_strip_current_field[copy_from_slice[axis_number]]
             #}}}
-            if verbose: print "(chunk auto) new axis -- ",self.axis_coords[axis_number]
-            if verbose: print "(chunk auto) new shape -- ",self.data.shape
+            if verbose: print("(chunk auto) new axis -- ",self.axis_coords[axis_number])
+            if verbose: print("(chunk auto) new shape -- ",self.data.shape)
             #{{{ housekeeping for the various axes + data properties -- should perhaps be possible to do this first, then use .getaxis()
             self.dimlabels.insert(axis_number + 1,which_field)
             self.axis_coords.insert(axis_number + 1,new_axis)
@@ -5775,7 +5778,7 @@ class nddata (object):
             self.axis_coords_error.insert(axis_number + 1,None)
             self.axis_coords_units.insert(axis_number + 1,None)
             #}}}
-            if verbose: print '(chunk auto) the dimensions of ',self.dimlabels[axis_number],'are (?? x ',self.dimlabels[axis_number+1],')=',self.axis_coords[axis_number].shape
+            if verbose: print('(chunk auto) the dimensions of ',self.dimlabels[axis_number],'are (?? x ',self.dimlabels[axis_number+1],')=',self.axis_coords[axis_number].shape)
             #}}}
             #}}}
             #{{{ deal appropriately with the "remainder axis" (axis_number)
@@ -5787,11 +5790,11 @@ class nddata (object):
             # created (which is the second dimension), then get rid of the
             # duplicate labels
             test_axis = self.axis_coords[axis_number].T
-            if verbose: print "(chunk auto) test axis -- ",test_axis
+            if verbose: print("(chunk auto) test axis -- ",test_axis)
             test_axis = ascontiguousarray(test_axis).flatten().view([('',test_axis.dtype)]*test_axis.shape[1])
             if all(test_axis == test_axis[0]):
                 self.axis_coords[axis_number] = self.axis_coords[axis_number][:,0].reshape(1,-1)
-                if verbose: print "(chunk auto) collapsed to", self.axis_coords[axis_number]
+                if verbose: print("(chunk auto) collapsed to", self.axis_coords[axis_number])
             #}}}
             if self.axis_coords[axis_number].shape[0] == 1:# then this is a "valid" axis -- because, for each position of the new axis, there is only one value of the remainder axis
                 self.axis_coords[axis_number] = self.axis_coords[axis_number].reshape(-1)
@@ -5831,7 +5834,7 @@ class nddata (object):
             (optional, only if return_dropped is True)
         '''
         mask = array(self.data.shape) > 1
-        logger.debug(strm(zip(mask,self.dimlabels)))
+        logger.debug(strm(list(zip(mask,self.dimlabels))))
         self.data = self.data.squeeze()
         retval = []
         if isinstance(self.axis_coords, list):
@@ -5853,10 +5856,10 @@ class nddata (object):
     #}}}
     #{{{ messing with data -- get, set, and copy
     def __getslice__(self,*args):
-        print 'getslice! ',args
+        print('getslice! ',args)
     def __setitem__(self,*args):
         righterrors = None
-        logger.debug(strm("types of args",map(type,args)))
+        logger.debug(strm("types of args",list(map(type,args))))
         A = args[0]
         if isinstance(A, nddata):
             logger.debug("initially, rightdata appears to be nddata")
@@ -5934,7 +5937,7 @@ class nddata (object):
                 'log':log,
                 'log10':log10,
                 }
-        if arg in fundict.keys():
+        if arg in list(fundict.keys()):
             argf = fundict[arg]
             def retfun():
                 retval = self.copy()
@@ -6184,7 +6187,7 @@ class nddata (object):
             raise ValueError(strm('You tried to pass just a nddata[',type(args),']'))
         if isinstance(args[0], str):
             #{{{ create a slicedict and errordict to store the slices
-            slicedict = dict(zip(list(self.dimlabels),[slice(None,None,None)]*len(self.dimlabels))) #initialize to all none
+            slicedict = dict(list(zip(list(self.dimlabels),[slice(None,None,None)]*len(self.dimlabels)))) #initialize to all none
             if len(self.axis_coords)>0:
                 logger.debug(strm("trying to make dictionaries from axis coords of len",len(self.axis_coords),"and axis_coords_error of len",len(self.axis_coords_error),"when dimlabels has len",len(self.dimlabels)))
                 axesdict = self.mkd(self.axis_coords)
@@ -6199,7 +6202,7 @@ class nddata (object):
             #print "DEBUG slicedict is",slicedict
             testf = lambda x: x+1
             if len(self.axis_coords)>0:
-                for x,y in slicedict.iteritems():
+                for x,y in slicedict.items():
                     #print "DEBUG, type of slice",x,"is",type(y)
                     if isscalar(y):
                         if axesdict[x] is not None:
@@ -6271,7 +6274,7 @@ class nddata (object):
                             except Exception as e:
                                 raise ValueError("axesdict is "+repr(axesdict)+"and I want to set "+repr(x)+" subscript to its "+repr(y)+" value"+explain_error(e))
                 if errordict != None and errordict != array(None):
-                    for x,y in slicedict.iteritems():
+                    for x,y in slicedict.items():
                         if errordict[x] != None:
                             if isscalar(y):
                                 errordict.pop(x)
@@ -6286,7 +6289,7 @@ class nddata (object):
                                             errordict,'-->',x,'=',errordict[x],'with',y,
                                             'error started as',self.axis_coords_error))
             if unitsdict != None and unitsdict != array(None):
-                for x,y in slicedict.iteritems():
+                for x,y in slicedict.items():
                     if unitsdict[x] != None:
                         if isscalar(y):
                             unitsdict.pop(x)
@@ -6340,14 +6343,14 @@ class nddata (object):
             #{{{ print out the attributes of the data
             myattrs = normal_attrs(self)
             #{{{ separate them into data and axes
-            mydataattrs = filter((lambda x: x[0:4] == 'data'),myattrs)
-            myotherattrs = filter((lambda x: x[0:4] != 'data'),myattrs)
-            myotherattrs = filter(lambda x: x not in ['C','sin','cos','exp','log10'],myotherattrs)
-            myaxisattrs = filter((lambda x: x[0:4] == 'axis'),myotherattrs)
-            myotherattrs = filter((lambda x: x[0:4] != 'axis'),myotherattrs)
-            if verbose: print lsafe('data attributes:',zip(mydataattrs,map(lambda x: type(self.__getattribute__(x)),mydataattrs))),'\n\n'
-            if verbose: print lsafe('axis attributes:',zip(myaxisattrs,map(lambda x: type(self.__getattribute__(x)),myaxisattrs))),'\n\n'
-            if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
+            mydataattrs = list(filter((lambda x: x[0:4] == 'data'),myattrs))
+            myotherattrs = list(filter((lambda x: x[0:4] != 'data'),myattrs))
+            myotherattrs = [x for x in myotherattrs if x not in ['C','sin','cos','exp','log10']]
+            myaxisattrs = list(filter((lambda x: x[0:4] == 'axis'),myotherattrs))
+            myotherattrs = list(filter((lambda x: x[0:4] != 'axis'),myotherattrs))
+            if verbose: print(lsafe('data attributes:',list(zip(mydataattrs,[type(self.__getattribute__(x)) for x in mydataattrs]))),'\n\n')
+            if verbose: print(lsafe('axis attributes:',list(zip(myaxisattrs,[type(self.__getattribute__(x)) for x in myaxisattrs]))),'\n\n')
+            if verbose: print(lsafe('other attributes:',list(zip(myotherattrs,[type(self.__getattribute__(x)) for x in myotherattrs]))),'\n\n')
             #}}}
             #}}}
             #{{{ write the data table
@@ -6361,7 +6364,7 @@ class nddata (object):
                 datatable = h5table(bottomnode,'data',thistable)
                 #print 'DEBUG 2: bottomnode is',bottomnode
                 #print 'DEBUG 2: datatable is',datatable
-                if verbose: print "Writing remaining axis attributes\n\n"
+                if verbose: print("Writing remaining axis attributes\n\n")
                 if len(mydataattrs) > 0:
                     h5attachattributes(datatable,mydataattrs,self)
             else:
@@ -6379,9 +6382,9 @@ class nddata (object):
                     for j,axisname in enumerate(self.dimlabels): # make a table for each different dimension
                         myaxisattrsforthisdim = dict([(x,self.__getattribute__(x)[j])
                             for x in list(myaxisattrs) if len(self.__getattribute__(x)) > 0]) # collect the attributes for this dimension and their values
-                        if verbose: print lsafe('for axis',axisname,'myaxisattrsforthisdim=',myaxisattrsforthisdim)
-                        if 'axis_coords' in myaxisattrsforthisdim.keys() and myaxisattrsforthisdim['axis_coords'] is not None:
-                            if 'axis_coords_error' in myaxisattrsforthisdim.keys() and myaxisattrsforthisdim['axis_coords_error'] is not None and len(myaxisattrsforthisdim['axis_coords_error']) > 0: # this is needed to avoid all errors, though I guess I could use try/except
+                        if verbose: print(lsafe('for axis',axisname,'myaxisattrsforthisdim=',myaxisattrsforthisdim))
+                        if 'axis_coords' in list(myaxisattrsforthisdim.keys()) and myaxisattrsforthisdim['axis_coords'] is not None:
+                            if 'axis_coords_error' in list(myaxisattrsforthisdim.keys()) and myaxisattrsforthisdim['axis_coords_error'] is not None and len(myaxisattrsforthisdim['axis_coords_error']) > 0: # this is needed to avoid all errors, though I guess I could use try/except
                                 thistable = rec.fromarrays([myaxisattrsforthisdim['axis_coords'],myaxisattrsforthisdim['axis_coords_error']],names='data,error')
                                 myaxisattrsforthisdim.pop('axis_coords_error')
                             else:
@@ -6389,13 +6392,13 @@ class nddata (object):
                             myaxisattrsforthisdim.pop('axis_coords')
                         datatable = h5table(axesnode,axisname,thistable)
                         #print 'DEBUG 3: axesnode is',axesnode
-                        if verbose: print "Writing remaining axis attributes for",axisname,"\n\n"
+                        if verbose: print("Writing remaining axis attributes for",axisname,"\n\n")
                         if len(myaxisattrsforthisdim) > 0:
-                            h5attachattributes(datatable,myaxisattrsforthisdim.keys(),myaxisattrsforthisdim.values())
+                            h5attachattributes(datatable,list(myaxisattrsforthisdim.keys()),list(myaxisattrsforthisdim.values()))
             #}}}
             #{{{ Check the remaining attributes.
-            if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
-            if verbose: print "Writing remaining other attributes\n\n"
+            if verbose: print(lsafe('other attributes:',list(zip(myotherattrs,[type(self.__getattribute__(x)) for x in myotherattrs]))),'\n\n')
+            if verbose: print("Writing remaining other attributes\n\n")
             if len(myotherattrs) > 0:
                 #print 'DEBUG 4: bottomnode is',bottomnode
                 test = repr(bottomnode) # somehow, this prevents it from claiming that the bottomnode is None --> some type of bug?
@@ -6405,22 +6408,22 @@ class nddata (object):
                 warnlist = [j for j in myotherattrs if (not self._contains_symbolic(j)) and isinstance(self.__getattribute__(j), dict)]
                 #{{{ to avoid pickling, test that none of the attributes I'm trying to write are dictionaries or lists
                 if len(warnlist) > 0:
-                    print "WARNING!!, attributes",warnlist,"are dictionaries!"
+                    print("WARNING!!, attributes",warnlist,"are dictionaries!")
                 warnlist = [j for j in myotherattrs if (not self._contains_symbolic(j)) and isinstance(self.__getattribute__(j), list)]
                 if len(warnlist) > 0:
-                    print "WARNING!!, attributes",warnlist,"are lists!"
+                    print("WARNING!!, attributes",warnlist,"are lists!")
                 #}}}
-                if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
+                if verbose: print(lsafe('other attributes:',list(zip(myotherattrs,[type(self.__getattribute__(x)) for x in myotherattrs]))),'\n\n')
             #}}}
         finally:
             h5file.close()
     #}}}
 class testclass:
     def __getitem__(self,*args,**kwargs):
-        print "you called __getitem__ with args",args,"and kwargs",kwargs
+        print("you called __getitem__ with args",args,"and kwargs",kwargs)
         return
     def __getattribute__(self,*args,**kwargs):
-        print "you called __getattribute__ with args",args,"and kwargs",kwargs
+        print("you called __getattribute__ with args",args,"and kwargs",kwargs)
         return
 class nddata_hdf5 (nddata):
     def __repr__(self):
@@ -6453,7 +6456,7 @@ class nddata_hdf5 (nddata):
         try:
             kwargs.update({'data_error':datarecordarray['error']})
         except:
-            if verbose: print "No error found\n\n"
+            if verbose: print("No error found\n\n")
         datadict.pop('data')
         #}}}
         #{{{ be sure to load the dimlabels
@@ -6464,11 +6467,11 @@ class nddata_hdf5 (nddata):
         #}}}
         #{{{ load the axes and pop them from datadict
         datadict.pop('dimlabels')
-        if 'axes' in datadict.keys():
+        if 'axes' in list(datadict.keys()):
             myaxiscoords = [None]*len(mydimlabels)
             myaxiscoordserror = [None]*len(mydimlabels)
-            logger.info(strm("about to read out the various axes:",datadict['axes'].keys()))
-            for axisname in datadict['axes'].keys():
+            logger.info(strm("about to read out the various axes:",list(datadict['axes'].keys())))
+            for axisname in list(datadict['axes'].keys()):
                 try:
                     axisnumber = mydimlabels.index(axisname)
                 except AttributeError as e:
@@ -6479,7 +6482,7 @@ class nddata_hdf5 (nddata):
                 if 'error' in recordarrayofaxis.dtype.names:
                     myaxiscoordserror[axisnumber] = recordarrayofaxis['error']
                 datadict['axes'][axisname].pop('data')
-                for k in datadict['axes'][axisname].keys():
+                for k in list(datadict['axes'][axisname].keys()):
                     logger.debug(strm("Warning, attribute",k,"of axis table",axisname,"remains, but the code to load this is not yet supported"))
                 datadict['axes'].pop(axisname)
             kwargs.update({"axis_coords":myaxiscoords})
@@ -6515,7 +6518,7 @@ class nddata_hdf5 (nddata):
                     "and I try to reshape it into", tuple([len(self.getaxis(x))
                         for x in mydimlabels]), "corresponding to the dimensions",mydimlabels,"--> this fails!"))
         #}}}
-        for remainingattribute in datadict.keys():
+        for remainingattribute in list(datadict.keys()):
             self.__setattr__(remainingattribute,datadict[remainingattribute])
         self.h5file.close()
         del self.h5file
@@ -6549,10 +6552,10 @@ class ndshape (ndshape_base):
             else:
                 emptyar = format*ones(tuple(self.shape),dtype=dtype)
         except TypeError as e:
-            raise TypeError(strm('Wrong type for self.shape',map(type,self.shape),'this probably means that you swapped the size and name arguments -- ',self.shape,'should be numbers, not names'))
+            raise TypeError(strm('Wrong type for self.shape',list(map(type,self.shape)),'this probably means that you swapped the size and name arguments -- ',self.shape,'should be numbers, not names'))
         retval = nddata(emptyar,self.shape,self.dimlabels)
         if labels:
-            retval.labels(self.dimlabels,map(lambda x: double(r_[0:x]),self.shape))
+            retval.labels(self.dimlabels,[double(r_[0:x]) for x in self.shape])
         return retval
 
 #{{{subplot_dim
@@ -6577,15 +6580,15 @@ class subplot_dim():
             try:
                 ax = subplot(*tuple(mydims))
             except:
-                print 'failed trying subplots: ', mydims
+                print('failed trying subplots: ', mydims)
                 raise
             xlabel(x)
             ylabel(y)
             title(t)
             grid(g)
         else:
-            print "problem, need to pass either 1 or 3 arguments to set"
-            print 'type of args: ',type(args)
+            print("problem, need to pass either 1 or 3 arguments to set")
+            print('type of args: ',type(args))
         return ax
 #}}}
 def fa(input,dtype='complex128'):# make a fortran array
@@ -6660,7 +6663,7 @@ class fitdata(nddata):
     def __init__(self,*args,**kwargs):
         #{{{ manual kwargs
         fit_axis = None
-        if 'fit_axis' in kwargs.keys():
+        if 'fit_axis' in list(kwargs.keys()):
             fit_axis = kwargs.pop('fit_axis')
         #}}}
         if isinstance(args[0],nddata):
@@ -6696,12 +6699,12 @@ class fitdata(nddata):
         return
     def parameter_derivatives(self,xvals,set = None,set_to = None,verbose = False):
         r'return a matrix containing derivatives of the parameters, can set dict set, or keys set, vals set_to'
-        if verbose: print 'parameter derivatives is called!'
+        if verbose: print('parameter derivatives is called!')
         if iscomplex(self.data.flatten()[0]):
-            print lsafen('Warning, taking only real part of fitting data!')
+            print(lsafen('Warning, taking only real part of fitting data!'))
         if isinstance(set, dict):
-            set_to = set.values()
-            set = set.keys()
+            set_to = list(set.values())
+            set = list(set.keys())
         solution_list = dict([(self.symbolic_dict[k],set_to[j])
             if k in set
             else (self.symbolic_dict[k],self.output(k))
@@ -6777,7 +6780,7 @@ class fitdata(nddata):
             #G = matrix(diag(1./sigma))
             #G = S**(-1/2) # analog of the above
             #covarmatrix = ((J.T * W * J)**-1) * J.T * W
-            print 'a'
+            print('a')
             minimizer = inv(J.T * Omegainv * J) * J.T * Omegainv
             covarmatrix = minimizer * S * minimizer.T
             #covarmatrix = array(covarmatrix * S * covarmatrix.T)
@@ -6807,10 +6810,10 @@ class fitdata(nddata):
     def gen_symbolic(self,function_name):
         r'''generates the symbolic representations the function'''
         self.function_name = function_name
-        self.symbolic_vars = map(sympy.var,self.symbol_list)
+        self.symbolic_vars = list(map(sympy.var,self.symbol_list))
         self.symbolic_x = sympy.var(self.fit_axis)
         #print lsafen('test symbol_list=',self.symbol_list)
-        self.symbolic_dict = dict(zip(self.symbol_list,self.symbolic_vars))
+        self.symbolic_dict = dict(list(zip(self.symbol_list,self.symbolic_vars)))
         #print lsafen('test symbolic_vars=',self.symbolic_vars)
         #print lsafen('test symbolic_x=',self.symbolic_x)
         if hasattr(self,'fitfunc_raw_symb'):
@@ -6847,7 +6850,7 @@ class fitdata(nddata):
         if len(this_set) != len(set_to):
             raise ValueError(strm('length of this_set=', this_set,
                 'and set_to', set_to, 'are not the same!'))
-        set_indices = map(self.symbol_list.index,this_set) # calculate indices once for efficiency
+        set_indices = list(map(self.symbol_list.index,this_set)) # calculate indices once for efficiency
         active_mask = ones(len(self.symbol_list),dtype = bool)
         active_mask[set_indices] = False # generate the mask of indices that are actively fit
         return set_indices,set_to,active_mask
@@ -6882,7 +6885,7 @@ class fitdata(nddata):
                     + explain_error(e))
         return retval
     def pinv(self,*args,**kwargs):
-        if 'verbose' in kwargs.keys():
+        if 'verbose' in list(kwargs.keys()):
             verbose = kwargs.pop('verbose')
         else:
             verbose = False
@@ -6899,11 +6902,11 @@ class fitdata(nddata):
         L = c_[x.reshape((-1,1)),ones((len(x),1))]
         retval = dot(pinv(L,rcond = 1e-17),y)
         if verbose:
-            print r'\label{fig:pinv_figure_text}y=',y,'yerr=',yerr,'%s='%x_axis,x,'L=',L
-            print '\n\n'
-            print 'recalc y = ',dot(L,retval)
-            print 'recalc E = ',1.0-1.0/dot(L,retval)
-            print 'actual E = ',self.data
+            print(r'\label{fig:pinv_figure_text}y=',y,'yerr=',yerr,'%s='%x_axis,x,'L=',L)
+            print('\n\n')
+            print('recalc y = ',dot(L,retval))
+            print('recalc E = ',1.0-1.0/dot(L,retval))
+            print('actual E = ',self.data)
         return retval
     def linear(self,*args,**kwargs):
         r'''return the linear-form function, either smoothly along the fit function, or on the raw data, depending on whether or not the taxis argument is given
@@ -6976,7 +6979,7 @@ class fitdata(nddata):
                 recdata.append(make_rec(thisdata,recnames))
             return r_[tuple(recdata)]
         if len(names) > 0:
-            indices = map(self._pn_active,names) # slice out only these rows and columns
+            indices = list(map(self._pn_active,names)) # slice out only these rows and columns
             return self.covariance[r_[indices],:][:,r_[indices]].copy()
         else:
             try:
@@ -6994,7 +6997,7 @@ class fitdata(nddata):
         for j in range(0,len(self.symbol_list)):
             #symbol = self.symbol_list[j]
             symbol = sympy.latex(self.symbolic_vars[j]).replace('$','')
-            if verbose: print 'DEBUG: replacing symbol \\verb|',symbol,'|'
+            if verbose: print('DEBUG: replacing symbol \\verb|',symbol,'|')
             location = printfstring.find(symbol)
             while location != -1:
                 if printfstring[location-1] == '-':
@@ -7003,14 +7006,14 @@ class fitdata(nddata):
                 else:
                     newstring = printfstring[:location]+'%01.03g'+printfstring[location+len(symbol):] # replace the symbol in the written function with the appropriate number
                     thissign = 1.0
-                if verbose: print r"\begin{verbatim} trying to replace",printfstring[location:location+len(symbol)],r'\end{verbatim}'
+                if verbose: print(r"\begin{verbatim} trying to replace",printfstring[location:location+len(symbol)],r'\end{verbatim}')
                 printfstring = newstring
                 printfargs += [thissign*p[j]] # add that number to the printf list
                 locations += [location]
                 allsymb += [symbol]
                 location = printfstring.find(symbol)
         printfargs = [printfargs[x] for x in argsort(locations)]
-        if verbose: print r"\begin{verbatim}trying to generate",self.function_string,'\n',printfstring,'\n',[allsymb[x] for x in argsort(locations)],'\n',printfargs,r'\end{verbatim}'
+        if verbose: print(r"\begin{verbatim}trying to generate",self.function_string,'\n',printfstring,'\n',[allsymb[x] for x in argsort(locations)],'\n',printfargs,r'\end{verbatim}')
         return printfstring%tuple(printfargs)
     def settoguess(self):
         'a debugging function, to easily plot the initial guess'
@@ -7031,8 +7034,8 @@ class fitdata(nddata):
         r'''after we have fit, evaluate the fit function along the axis taxis
         set and set_to allow you to forcibly set a specific symbol to a specific value --> however, this does not affect the class, but only the return value'''
         if isinstance(set, dict):
-            set_to = set.values()
-            set = set.keys()
+            set_to = list(set.values())
+            set = list(set.keys())
         taxis = self._taxis(taxis)
         if hasattr(self,'fit_coeff') and self.fit_coeff is not None:
             p = self.fit_coeff.copy()
@@ -7069,18 +7072,18 @@ class fitdata(nddata):
         return self
     def fit(self,set = None, set_to = None, force_analytical = False, silent = False):
         r'''actually run the fit'''
-        if not silent: print "\n"
-        if not silent: print r'\resizebox*{!}{3in}{\begin{minipage}{\linewidth}'
+        if not silent: print("\n")
+        if not silent: print(r'\resizebox*{!}{3in}{\begin{minipage}{\linewidth}')
         if isinstance(set, dict):
-            set_to = set.values()
-            set = set.keys()
+            set_to = list(set.values())
+            set = list(set.keys())
         x = self.getaxis(self.fit_axis)
         if iscomplex(self.data.flatten()[0]):
-            if not silent: print lsafen('Warning, taking only real part of fitting data!')
+            if not silent: print(lsafen('Warning, taking only real part of fitting data!'))
         y = real(self.data)
         sigma = self.get_error()
         if sigma is None:
-            if not silent: print '{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n'
+            if not silent: print('{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n')
             warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
             sigma = ones(shape(y))
         p_ini = real(array(self.guess())) # need the numpy format to allow boolean mask
@@ -7092,8 +7095,8 @@ class fitdata(nddata):
                     'full_output':True}# 'maxfev':1000*(len(p_ini)+1)}
         if hasattr(self,'has_grad') and self.has_grad == True:
             leastsq_kwargs.update({'Dfun':self.parameter_gradient})
-        if 'Dfun' in leastsq_kwargs.keys():
-            if not silent: print "yes, Dfun passed with arg",leastsq_kwargs['Dfun']
+        if 'Dfun' in list(leastsq_kwargs.keys()):
+            if not silent: print("yes, Dfun passed with arg",leastsq_kwargs['Dfun'])
         try:
             p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
         #{{{ just give various explicit errors
@@ -7127,10 +7130,10 @@ class fitdata(nddata):
                 p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
                 if success != 1:
                     if mesg.find('two consecutive iterates'):
-                        if not silent: print r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n'
-                        if not silent: print r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n'
-                        infodict_keys = infodict.keys()
-                        infodict_vals = infodict.values()
+                        if not silent: print(r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n')
+                        if not silent: print(r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n')
+                        infodict_keys = list(infodict.keys())
+                        infodict_vals = list(infodict.values())
                         if 'nfev' in infodict_keys:
                             infodict_keys[infodict_keys.index('nfev')] = 'nfev, number of function calls'
                         if 'fvec' in infodict_keys:
@@ -7142,7 +7145,7 @@ class fitdata(nddata):
                         if 'qtf' in infodict_keys:
                             infodict_keys[infodict_keys.index('qtf')] = 'qtf, the vector (transpose(q)*fvec)'
                         for k,v in zip(infodict_keys,infodict_vals):
-                            if not silent: print r'{\color{red}{\bf %s:}%s}'%(k,v),'\n\n'
+                            if not silent: print(r'{\color{red}{\bf %s:}%s}'%(k,v),'\n\n')
                         #self.fit_coeff = None
                         #self.settoguess()
                         #return
@@ -7152,10 +7155,10 @@ class fitdata(nddata):
             else:
                 raise RuntimeError(strm('leastsq finished with an error message:',mesg))
         else:
-            if not silent: print r'{\color{blue}'
-            if not silent: print lsafen("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg))
-            if not silent: print r'}'
-            if not silent: print "\n"
+            if not silent: print(r'{\color{blue}')
+            if not silent: print(lsafen("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg)))
+            if not silent: print(r'}')
+            if not silent: print("\n")
         self.fit_coeff = p_out # note that this is stored in HIDDEN form
         dof = len(x) - len(p_out)
         if hasattr(self,'symbolic_x') and force_analytical:
@@ -7164,7 +7167,7 @@ class fitdata(nddata):
             if force_analytical: raise RuntimeError(strm("I can't take the analytical",
                 "covariance!  This is problematic."))
             if cov == None:
-                if not silent: print r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success),'}\n'
+                if not silent: print(r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success),'}\n')
             self.covariance = cov
         if self.covariance is not None:
             try:
@@ -7174,10 +7177,10 @@ class fitdata(nddata):
                     "type(infodict[fvec])",type(infodict["fvec"]),
                     "type(dof)",type(dof)))
         #print lsafen("DEBUG: at end of fit covariance is shape",shape(self.covariance),"fit coeff shape",shape(self.fit_coeff))
-        if not silent: print r'\end{minipage}}'
+        if not silent: print(r'\end{minipage}}')
         return
     def bootstrap(self,points,swap_out = exp(-1.0),seedval = 10347,minbounds = {},maxbounds = {}):
-        print r'\begin{verbatim}'
+        print(r'\begin{verbatim}')
         seed(seedval)
         fitparameters = list(self.symbol_list)
         recordlist = array([tuple([0]*len(fitparameters))]*points,
@@ -7209,11 +7212,11 @@ class fitdata(nddata):
                     thiscopy.fit()
                     success = True
                     if len(minbounds) > 0:
-                        for k,v in minbounds.iteritems():
+                        for k,v in minbounds.items():
                             if thiscopy.output(k) < v:
                                 success = False
                     if len(maxbounds) > 0:
-                        for k,v in maxbounds.iteritems():
+                        for k,v in maxbounds.items():
                             if thiscopy.output(k) > v:
                                 success = False
                 except:
@@ -7223,13 +7226,13 @@ class fitdata(nddata):
                 if success is True:
                     for name in thiscopy.symbol_list: # loop over all fit coeff
                         recordlist[runno][name] = thiscopy.output(name)
-        print r'\end{verbatim}'
+        print(r'\end{verbatim}')
         return recordlist # collect into a single recordlist array
     def guess(self,verbose = False,super_verbose = False):
         r'''provide the guess for our parameters; by default, based on pseudoinverse'''
         self.has_grad = False
         if iscomplex(self.data.flatten()[0]):
-            print lsafen('Warning, taking only real part of fitting data!')
+            print(lsafen('Warning, taking only real part of fitting data!'))
         y = real(self.data)
         # I ended up doing the following, because as it turns out
         # T1 is a bad fit function, because it has a singularity!
@@ -7245,7 +7248,7 @@ class fitdata(nddata):
         y = y.reshape(tuple(new_y_shape))
         #}}}
         #{{{ evaluate f, fprime and residuals
-        guess_dict = dict(zip(self.symbol_list,list(thisguess)))
+        guess_dict = dict(list(zip(self.symbol_list,list(thisguess))))
         fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
         f_at_guess = real(self.eval(None,set = guess_dict).data)
         try:
@@ -7257,13 +7260,13 @@ class fitdata(nddata):
         #}}}
         lastresidual = thisresidual
         for j in range(0,numguesssteps):
-            if super_verbose: print '\n\n.core.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\end{verbatim}'
-            if super_verbose: print '\n\n.core.guess) shape of parameter derivatives',shape(fprime),'shape of output',shape(y),'\n\n'
+            if super_verbose: print('\n\n.core.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\end{verbatim}')
+            if super_verbose: print('\n\n.core.guess) shape of parameter derivatives',shape(fprime),'shape of output',shape(y),'\n\n')
             regularization_bad = True
             alpha_max = 100.
             alpha_mult = 2.
             alpha = 0.1 # maybe I can rather estimate this based on the change in the residual, similar to in L-M?
-            if verbose: print '\n\n.core.guess) value of residual before regularization %d:'%j,thisresidual
+            if verbose: print('\n\n.core.guess) value of residual before regularization %d:'%j,thisresidual)
             while regularization_bad:
                 newguess = real(array(thisguess) + dot(pinvr(fprime.T,alpha),(y-f_at_guess)).flatten())
                 mask = newguess < self.guess_lb
@@ -7271,11 +7274,11 @@ class fitdata(nddata):
                 mask = newguess > self.guess_ub
                 newguess[mask] = self.guess_ub[mask]
                 if any(isnan(newguess)):
-                    if verbose: print '\n\n.core.guess) Regularization blows up $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha
+                    if verbose: print('\n\n.core.guess) Regularization blows up $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha)
                     alpha *= alpha_mult
                 else:
                     #{{{ evaluate f, fprime and residuals
-                    guess_dict = dict(zip(self.symbol_list,list(newguess)))
+                    guess_dict = dict(list(zip(self.symbol_list,list(newguess))))
                     # only evaluate fprime once we know this is good, below
                     f_at_guess = real(self.eval(None,set = guess_dict).data)
                     try:
@@ -7287,24 +7290,24 @@ class fitdata(nddata):
                     #}}}
                     if (thisresidual-lastresidual)/lastresidual > 0.10:
                         alpha *= alpha_mult
-                        if verbose: print '\n\n.core.guess) Regularized Pinv gave a step uphill $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha
+                        if verbose: print('\n\n.core.guess) Regularized Pinv gave a step uphill $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha)
                     else: # accept the step
                         regularization_bad = False
                         thisguess = newguess
                         lastresidual = thisresidual
                         fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
                 if alpha > alpha_max:
-                    print "\n\n.core.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max
+                    print("\n\n.core.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max)
                     if which_starting_guess >= len(self.starting_guesses)-1:
-                        print "\n\n.core.guess) {\\color{red} Warning!!!} ran out of guesses!!!%d\n\n"%alpha_max
+                        print("\n\n.core.guess) {\\color{red} Warning!!!} ran out of guesses!!!%d\n\n"%alpha_max)
                         return thisguess
                     else:
                         which_starting_guess += 1
                         thisguess = self.starting_guesses[which_starting_guess]
-                        print "\n\n.core.guess) try a new starting guess:",lsafen(thisguess)
+                        print("\n\n.core.guess) try a new starting guess:",lsafen(thisguess))
                         j = 0 # restart the loop
                         #{{{ evaluate f, fprime and residuals for the new starting guess
-                        guess_dict = dict(zip(self.symbol_list,list(thisguess)))
+                        guess_dict = dict(list(zip(self.symbol_list,list(thisguess))))
                         fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
                         f_at_guess = real(self.eval(None,set = guess_dict).data)
                         try:
@@ -7315,8 +7318,8 @@ class fitdata(nddata):
                         thisresidual = sqrt((y-f_at_guess)**2).sum()
                         #}}}
                         regularization_bad = False # jump out of this loop
-            if verbose: print '\n\n.core.guess) new value of guess after regularization:',lsafen(newguess)
-            if verbose: print '\n\n.core.guess) value of residual after regularization:',thisresidual
+            if verbose: print('\n\n.core.guess) new value of guess after regularization:',lsafen(newguess))
+            if verbose: print('\n\n.core.guess) value of residual after regularization:',thisresidual)
         return thisguess
 #}}}
 def sqrt(arg):
@@ -7332,9 +7335,9 @@ if myparams['figlist_type'] == 'figlistl':
     figlist_var = figlistl
 elif myparams['figlist_type'] == 'figlist':
     def obsn(*x): #because this is used in fornotebook, and I want it defined
-        print ''.join(x),'\n'
+        print(''.join(x),'\n')
     def obs(*x): #because this is used in fornotebook, and I want it defined
-        print ''.join(map(repr,x))
+        print(''.join(map(repr,x)))
     def lrecordarray(*x,**kwargs):
         return repr(x) # if I'm not using tex, it's easier to not use the formatting
     figlist_var = figlist
@@ -7347,9 +7350,9 @@ elif myparams['figlist_type'] == 'figlist':
             string = string[0]
         #{{{ kwargs
         spaces = False
-        if 'spaces' in kwargs.keys():
+        if 'spaces' in list(kwargs.keys()):
             spaces = kwargs.pop('spaces')
-        if 'wrap' in kwargs.keys():
+        if 'wrap' in list(kwargs.keys()):
             wrap = kwargs.pop('wrap')
         else:
             wrap = None

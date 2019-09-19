@@ -22,7 +22,7 @@ from .general_functions import inside_sphinx
 if inside_sphinx():
     pass # called from sphinx
 else:
-    get_ipython().magic(u'pylab inline')
+    get_ipython().magic('pylab inline')
 # }}}
 import numpy
 import sympy
@@ -38,7 +38,7 @@ from .core import gca
 import re
 from IPython.display import Math
 def load_ipython_extension(ip):
-    ip.display_formatter.formatters.keys()
+    list(ip.display_formatter.formatters.keys())
 
     tex_formatters = ip.display_formatter.formatters['text/latex']
     plain_formatters = ip.display_formatter.formatters['text/plain']
@@ -85,7 +85,7 @@ def load_ipython_extension(ip):
             math_str += r'\end{bmatrix}'
         except:
             math_str = "\\text{(unavailable pretty print)}"
-            print repr(arg)
+            print(repr(arg))
         return math_str
     def _print_plain_override_for_ndarray(arg,p,cycle):
         """caller for pretty, for use in IPython 0.11"""
@@ -96,8 +96,8 @@ def load_ipython_extension(ip):
             else:
                 mkd = "array"
             if any(numpy.array(arg.shape) > 20):
-                print "Matrix is too large ("+'x'.join([str(j) for j in arg.shape])+") -- using text numpy print"
-                print arg
+                print("Matrix is too large ("+'x'.join([str(j) for j in arg.shape])+") -- using text numpy print")
+                print(arg)
             elif len(arg.shape) == 2:
                 math_str = render_matrix(arg)
                 d.display(d.Markdown("**numpy 2D "+mkd+"** represented as a matrix:"))
@@ -151,4 +151,4 @@ def load_ipython_extension(ip):
     ip.ex("fancy_legend = lambda: legend(**dict(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.))")
     ip.ex("from pyspecdata import *")
 def unload_ipython_extension(ip):
-    print "I will not not go gentle into that good night!!!"
+    print("I will not not go gentle into that good night!!!")

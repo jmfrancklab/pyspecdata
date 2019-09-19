@@ -29,7 +29,7 @@ def load_pulse(filename,
         I should think of a more general way of doing this,
         where I pass an ndshape-based slice, instead.
     """
-    print "load_pulse sees indirect_dimlabels",indirect_dimlabels
+    print("load_pulse sees indirect_dimlabels",indirect_dimlabels)
     with h5py.File(filename,'r') as h5:
         #{{{ set up the complex number the hard way, for good form
         data = empty_like(h5['experiment']['data.r'],dtype = complex128)
@@ -49,9 +49,9 @@ def load_pulse(filename,
         data = nddata(data,list(data.shape),dimlabels)
         #}}}
         #{{{ put all further information into the nddata in a way such that it can be retrieved with "get_prop"
-        data.set_prop(dict([(k,v) for k,v in h5['experiment'].attrs.iteritems() if k[0] != '_' and k[0] != 'dimlabels']))
-        data.set_prop(dict([('execution_'+k,v) for k,v in h5['experiment']['execution'].attrs.iteritems() if k[0] != '_']))
-        data.set_prop(dict([('description_'+k,v) for k,v in h5['experiment']['description'].attrs.iteritems() if k[0] != '_']))
+        data.set_prop(dict([(k,v) for k,v in h5['experiment'].attrs.items() if k[0] != '_' and k[0] != 'dimlabels']))
+        data.set_prop(dict([('execution_'+k,v) for k,v in h5['experiment']['execution'].attrs.items() if k[0] != '_']))
+        data.set_prop(dict([('description_'+k,v) for k,v in h5['experiment']['description'].attrs.items() if k[0] != '_']))
         #}}}
         #{{{ finish the t2 axis
         t2_steps = data.get_prop('t2_steps')
@@ -69,16 +69,16 @@ def load_pulse(filename,
             data = data['t2':prefilter]
         #}}}
         #{{{ now, pull the dimlabels that we want
-        if 'dimlabels' in h5['experiment'].attrs.keys():
+        if 'dimlabels' in list(h5['experiment'].attrs.keys()):
             dimlabels = h5['experiment'].attrs['dimlabels'].tolist()
         else:
-            print "You didn't set dimlabels in your pulse program -- the data is ambiguous and I'm taking my best guess!!!"
+            print("You didn't set dimlabels in your pulse program -- the data is ambiguous and I'm taking my best guess!!!")
         if indirect_dimlabels is not None:# in case it's not stored correctly in the file and I need to hard-code it
             idx = dimlabels.index('indirect')
             dimlabels = dimlabels[:idx] + indirect_dimlabels + dimlabels[idx+1:]
         #}}}
         #{{{ assign all the dimensions
-        indirect_names_in_h5 = [k for k,v in h5['experiment'].iteritems() if k not in ['data.i','data.r','bin_switch_times','fields','sweep_currents'] and isinstance(v, h5py.Dataset)]
+        indirect_names_in_h5 = [k for k,v in h5['experiment'].items() if k not in ['data.i','data.r','bin_switch_times','fields','sweep_currents'] and isinstance(v, h5py.Dataset)]
         logger.info(strm("dimlabels are",dimlabels))
         expected_dimlabels = set(dimlabels) - {'phcyc','t2','bin'} # we expect to find these axes stored in the HDF5
         logger.info(strm("expected dimlabels",expected_dimlabels))
@@ -108,7 +108,7 @@ def load_pulse(filename,
         if not unlabeled_indirect:
             if 'indirect' in data.dimlabels:# note that if there was only a single indirect dimension, it's already been used up
                 filtered_dims = [j for j in dimlabels if j not in  ['bin','phcyc','t2']]
-                chunk_dict = dict([(j,len(h5['experiment'][j])) if j in h5['experiment'].keys()
+                chunk_dict = dict([(j,len(h5['experiment'][j])) if j in list(h5['experiment'].keys())
                     else (j,len(h5['experiment'].attrs[j]))
                     for j in filtered_dims])
                 common_dimensions |= set(chunk_dict.keys())
@@ -116,14 +116,14 @@ def load_pulse(filename,
                 logger.info(strm(ndshape(data)))
                 logger.info(strm(chunk_dict))
                 # {{{ if an experiment with a single dimension was abandoned early, we know what to do about that
-                if (len(chunk_dict) == 1 and chunk_dict.values()[0] >
+                if (len(chunk_dict) == 1 and list(chunk_dict.values())[0] >
                         data.data.shape[data.axn('indirect')]):
-                    chunk_dict[chunk_dict.keys()[0]] = data.data.shape[data.axn('indirect')]
+                    chunk_dict[list(chunk_dict.keys())[0]] = data.data.shape[data.axn('indirect')]
                     warnings.warn("Warning: the length of the 'indirect' axis seems to exceed the length of the data!")
                 # }}}
                 data.chunk('indirect',chunk_dict)
             for this_axis in common_dimensions:
-                if this_axis in h5['experiment'].keys():
+                if this_axis in list(h5['experiment'].keys()):
                     axis_data = array(h5['experiment'][this_axis])
                 else:
                     axis_data = array(h5['experiment'].attrs[this_axis])
@@ -139,10 +139,10 @@ def load_pulse(filename,
             #{{{ assign the labels for the bin dimension as a structured array
             forstruct = []
             forstruct_names = []
-            for thisaxis in [x for x in 'bin_switch_times','fields','sweep_currents' if x in h5['experiment'].keys() and isinstance(h5['experiment'][x], h5py.Dataset)]:
+            for thisaxis in [x for x in ('bin_switch_times','fields','sweep_currents') if x in list(h5['experiment'].keys()) and isinstance(h5['experiment'][x], h5py.Dataset)]:
                 forstruct.append((h5['experiment'][thisaxis])[0])
                 forstruct_names.append(thisaxis)
-            print "structure is",forstruct,"names",forstruct_names,"zeros like",h5['experiment']['bin_switch_times'].shape
+            print("structure is",forstruct,"names",forstruct_names,"zeros like",h5['experiment']['bin_switch_times'].shape)
             x = make_rec(forstruct,forstruct_names,zeros_like = h5['experiment']['bin_switch_times'].shape)
             warnings.warn("detected a 'bin' dimension, and associating it with dtype "+repr(x.dtype))
             for thisaxis in forstruct_names:
@@ -199,9 +199,9 @@ def load_cw(filename,use_sweep = False):
             else:
                 data = nddata(data,data.shape,['repeats','field']).labels('field',array(h5['experiment']['fields']))
         #{{{ put all further information into the nddata in a way such that it can be retrieved with "get_prop"
-        data.set_prop(dict([(k,v) for k,v in h5['experiment'].attrs.iteritems() if k[0] != '_' and k[0] != 'dimlabels']))
-        data.set_prop(dict([('execution_'+k,v) for k,v in h5['experiment']['execution'].attrs.iteritems() if k[0] != '_']))
-        data.set_prop(dict([('description_'+k,v) for k,v in h5['experiment']['description'].attrs.iteritems() if k[0] != '_']))
+        data.set_prop(dict([(k,v) for k,v in h5['experiment'].attrs.items() if k[0] != '_' and k[0] != 'dimlabels']))
+        data.set_prop(dict([('execution_'+k,v) for k,v in h5['experiment']['execution'].attrs.items() if k[0] != '_']))
+        data.set_prop(dict([('description_'+k,v) for k,v in h5['experiment']['description'].attrs.items() if k[0] != '_']))
         #}}}
     if data.get_prop('postproc_type') is None:
         data.set_prop('postproc_type','CW')
@@ -261,17 +261,17 @@ def postproc_b1_fid_file(data,fl = None,**kwargs):
     else:
         figname_append = ''
     data.rename('indirect','plen')
-    if 'L_min' in kwargs.keys() and kwargs['L_min'] is not None:
+    if 'L_min' in list(kwargs.keys()) and kwargs['L_min'] is not None:
         L_min = kwargs['L_min']
     else:
         L_min = data.get_prop('L_min')
     in_field_sweep = data.get_prop('in_field_sweep_current') 
     obsn("In field sweep current is %0.6f A"%in_field_sweep)
-    if 'L_inc' in kwargs.keys() and kwargs['L_inc'] is not None:
+    if 'L_inc' in list(kwargs.keys()) and kwargs['L_inc'] is not None:
         L_inc = kwargs['L_inc']
     else:
         L_inc = data.get_prop('L_inc')
-    if 'L_steps' in kwargs.keys() and kwargs['L_steps'] is not None:
+    if 'L_steps' in list(kwargs.keys()) and kwargs['L_steps'] is not None:
         L_steps = kwargs['L_steps']
     else:
         L_steps = data.get_prop('L_steps')

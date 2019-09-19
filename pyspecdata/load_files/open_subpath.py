@@ -17,7 +17,7 @@ def open_subpath(file_reference,*subpath,**kwargs):
     """
     mode,test_only = process_kwargs([('mode','r'),
         ('test_only',False)],kwargs)
-    if isinstance(file_reference,basestring):
+    if isinstance(file_reference,str):
         if test_only:
             full_path = os.path.join(file_reference, *subpath)
             if os.path.exists(full_path):

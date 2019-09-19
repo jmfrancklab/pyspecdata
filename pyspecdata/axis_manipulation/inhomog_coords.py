@@ -25,7 +25,7 @@ def inhomog_coords(self, direct_dim, indirect_dim, tolerance = 1e-5,
         '''
     correct_overlap = process_kwargs([('correct_overlap',True)],debug_kwargs)
     du = check_ascending_axis(self.getaxis(direct_dim),tolerance,"In order to perform the required rotations")
-    print "first point along t2",self.getaxis(direct_dim)[0]
+    print("first point along t2",self.getaxis(direct_dim)[0])
     assert abs(self.getaxis(direct_dim)[0]/du) < tolerance, "the "+direct_dim+"axis needs to start exactly at 0 -- you could try doing a sinc interpolation like this:\n\t" + "self.ft(direct_dim).ft_clear_startpoints(direct_dim,t=0,f='current').ift(direct_dim)"
     #{{{ and rotate!
     if fl is not None: fl.next(plot_name+', rotated')
@@ -57,5 +57,5 @@ def inhomog_coords(self, direct_dim, indirect_dim, tolerance = 1e-5,
     newdata += left_data[direct_dim,lambda x: x>=0]
     self.data = newdata.data
     self.setaxis(direct_dim,newdata.getaxis(direct_dim))
-    print "At END: first point along t2",self.getaxis(direct_dim)[0]
+    print("At END: first point along t2",self.getaxis(direct_dim)[0])
     return self

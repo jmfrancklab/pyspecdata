@@ -111,10 +111,10 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
                 raise ValueError("you are not allowed to shift an array for"
                         " which the index for $f=0$ has already been"
                         " determined!")
-            if verbose: print "check for p2_post_discrepancy"
-            if verbose: print "desired startpoint",desired_startpoint
+            if verbose: print("check for p2_post_discrepancy")
+            if verbose: print("desired startpoint",desired_startpoint)
             p2_post,p2_post_discrepancy,alias_shift_post = _find_index(v,origin = desired_startpoint,verbose = verbose)
-            if verbose: print "p2_post,p2_post_discrepancy,alias_shift_post,v at p2_post, and v at p2_post-1:", p2_post, p2_post_discrepancy, alias_shift_post, v[p2_post], v[p2_post - 1]
+            if verbose: print("p2_post,p2_post_discrepancy,alias_shift_post,v at p2_post, and v at p2_post-1:", p2_post, p2_post_discrepancy, alias_shift_post, v[p2_post], v[p2_post - 1])
             if p2_post != 0 or p2_post_discrepancy is not None:
                 do_post_shift = True
             else:
@@ -154,7 +154,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
                     lambda q: exp(-1j*2*pi*q*p2_post_discrepancy))
             try:
                 self.data *= phaseshift.data
-            except TypeError,e:
+            except TypeError as e:
                 if self.data.dtype != 'complex128':
                     raise TypeError("You tried to ft nddata that was of type "+str(self.data.dtype))
                 else:
@@ -197,7 +197,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
         #    must apply a phase shift to reflect the fact that I need to add
         #    back that time
         if p2_post_discrepancy is not None:
-            if verbose: print "adjusting axis by",p2_post_discrepancy,"where du is",u[1]-u[0]
+            if verbose: print("adjusting axis by",p2_post_discrepancy,"where du is",u[1]-u[0])
             self.axis_coords[thisaxis][:] += p2_post_discrepancy # reflect the
             #   p2_post_discrepancy that we have already incorporated via a
             #   phase-shift above
@@ -219,9 +219,9 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
         if automix:
             sw = 1.0/du
             carrier = abs(self).mean_all_but(axes[j]).argmax(axes[j]).data
-            if verbose: print "I find carrier at",carrier
+            if verbose: print("I find carrier at",carrier)
             add_to_axis = (automix - carrier) / sw
-            if verbose: print "which is",add_to_axis,"times the sw of",sw,"off from the automix value of",automix
+            if verbose: print("which is",add_to_axis,"times the sw of",sw,"off from the automix value of",automix)
             x = self.getaxis(axes[j])
             x += round(add_to_axis)*sw
     return self
