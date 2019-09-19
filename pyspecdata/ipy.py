@@ -90,7 +90,7 @@ def load_ipython_extension(ip):
     def _print_plain_override_for_ndarray(arg,p,cycle):
         """caller for pretty, for use in IPython 0.11"""
         import IPython.display as d
-        if type(arg) is numpy.ndarray:
+        if isinstance(arg, numpy.ndarray):
             if hasattr(arg.dtype,'fields') and arg.dtype.fields is not None:
                 mkd = 'structured array with fields: '+', '.join([j[0] for j in arg.dtype.descr])
             else:

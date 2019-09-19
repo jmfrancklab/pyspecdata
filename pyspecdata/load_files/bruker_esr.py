@@ -99,7 +99,7 @@ def xepr(filename, dimname='', verbose=False):
                 logger.info('Found YTYP=IGD, assuming this is a power series')
                 assert 'YNAM' in v.keys(), ("No parameter YNAM -- how do you expect me to know the name of the second dimension??")
                 y_dim_name = v.pop('YNAM')
-                if type(y_dim_name) is list:
+                if isinstance(y_dim_name, list):
                     y_dim_name = ' '.join(y_dim_name) # it gets split into a list, which for XEpr files shouldn't be happening, but fix later
                     if y_dim_name[0] == "'": y_dim_name = y_dim_name.replace("'","")
                 assert 'YUNI' in v.keys(), ("No parameter YUNI -- how do you expect me to know the units of the second dimension??")

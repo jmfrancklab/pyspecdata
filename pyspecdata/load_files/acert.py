@@ -78,7 +78,7 @@ def load_pulse(filename,
             dimlabels = dimlabels[:idx] + indirect_dimlabels + dimlabels[idx+1:]
         #}}}
         #{{{ assign all the dimensions
-        indirect_names_in_h5 = [k for k,v in h5['experiment'].iteritems() if k not in ['data.i','data.r','bin_switch_times','fields','sweep_currents'] and type(v) == h5py.Dataset]
+        indirect_names_in_h5 = [k for k,v in h5['experiment'].iteritems() if k not in ['data.i','data.r','bin_switch_times','fields','sweep_currents'] and isinstance(v, h5py.Dataset)]
         logger.info(strm("dimlabels are",dimlabels))
         expected_dimlabels = set(dimlabels) - {'phcyc','t2','bin'} # we expect to find these axes stored in the HDF5
         logger.info(strm("expected dimlabels",expected_dimlabels))
@@ -139,7 +139,7 @@ def load_pulse(filename,
             #{{{ assign the labels for the bin dimension as a structured array
             forstruct = []
             forstruct_names = []
-            for thisaxis in [x for x in 'bin_switch_times','fields','sweep_currents' if x in h5['experiment'].keys() and type(h5['experiment'][x]) is h5py.Dataset]:
+            for thisaxis in [x for x in 'bin_switch_times','fields','sweep_currents' if x in h5['experiment'].keys() and isinstance(h5['experiment'][x], h5py.Dataset)]:
                 forstruct.append((h5['experiment'][thisaxis])[0])
                 forstruct_names.append(thisaxis)
             print "structure is",forstruct,"names",forstruct_names,"zeros like",h5['experiment']['bin_switch_times'].shape
@@ -253,7 +253,7 @@ def postproc_eldor_old(data,**kwargs):
 def postproc_b1_fid_file(data,fl = None,**kwargs):
     if fl is None:
         fl = figlist_var()
-    if type(fl) is list and len(fl) == 2:
+    if isinstance(fl, list) and len(fl) == 2:
         figname_append = fl[1]
         fl = fl[0]
         if figname_append[-1] != '_':

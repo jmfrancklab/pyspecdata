@@ -105,7 +105,7 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = []):
     du : double
         the spacing between the elements of u
     """
-    if type(additional_message) is str:
+    if isinstance(additional_message, str):
         additional_message = [additional_message]
     du = (u[-1]-u[0])/(len(u)-1.) # the dwell gives the bandwidth, whether or not it has been zero padded -- I calculate this way for better accuracy
     thismsg = ', '.join(additional_message + ["the axis must be ascending (and equally spaced)"])

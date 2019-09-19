@@ -61,9 +61,9 @@ def image(A,x=[],y=[],**kwargs):
             y_label = ' _{('+r'\times'.join(these_dimsizes)+')}' + y_label
             y_label = '$'+y_label+'$'# whole expression is in math mode
         A = A.data
-    if type(x) is list:
+    if isinstance(x, list):
         x = array(x)
-    if type(y) is list:
+    if isinstance(y, list):
         y = array(y)
     if len(x)==0:
         x = [1,A.shape[1]]

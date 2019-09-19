@@ -27,7 +27,7 @@ def get_ft_prop(self,axis,propname = None):
             " frequency or time domain")
     if propname is None:
         propname = []
-    elif type(propname) is str:
+    elif isinstance(propname, str):
         propname = [propname]
     key_name = '_'.join(['FT'] + propname)
     this_dict = self.get_prop(key_name)
@@ -46,13 +46,13 @@ def set_ft_prop(self,axis,propname = None,value = True):
             " `propname` argument (this allows us to set the"
             " `FT` property more easily)")
     #{{{ if I pass no propname, but a value
-    if type(propname) is bool and value is True:
+    if isinstance(propname, bool) and value is True:
         value = propname
         propname = None
     #}}}
     if propname is None:
         propname = []
-    elif type(propname) is str:
+    elif isinstance(propname, str):
         propname = [propname]
     key_name = '_'.join(['FT'] + propname)
     this_dict = self.get_prop(key_name)

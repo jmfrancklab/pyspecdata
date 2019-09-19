@@ -71,7 +71,7 @@ class figlistl (figlist):
             kwargs.update(self.lplot_kwargs)
         for figname in self.figurelist:
             if verbose: print "showing figure"+lsafen(figname)
-            if type(figname) is dict:
+            if isinstance(figname, dict):
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
                     if line_spacing: print '\n\n'
@@ -120,7 +120,7 @@ def lplotfigures(figurelist,string,**kwargs):
     if not len(kwargs):
         kwargs = {}
     for j,figname in enumerate(figurelist):
-        if type(figname) is dict:
+        if isinstance(figname, dict):
             kwargs.update(figname)
             if 'print_string' in kwargs:
                 print '\n\n'+kwargs.pop('print_string')+'\n\n'
@@ -187,7 +187,7 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
         return retval
     # previously documented
     def this_format_function(x,error_val = None,scientific_notation = scientific_notation):
-        if type(x) is str_:
+        if isinstance(x, str_):
             if error_val is None:
                 return str(x)
             else:
@@ -234,10 +234,10 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
                 return (format+'\\pm '+format)%(x,error_val)
     def maybe_matrix(x,error = None):
         if error is not None:
-            if type(x) is ndarray:
+            if isinstance(x, ndarray):
                 if x.shape != error.shape:
                     raise ValueError("shape of the error does not match the shape of the value/matrix")
-        if type(x) is ndarray:
+        if isinstance(x, ndarray):
             if len(x.shape) == 2:
                 if error is None:
                     #retval = r'\begin{tabular}{'+'c'*x.shape[1]+'}'

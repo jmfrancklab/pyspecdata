@@ -176,7 +176,7 @@ class figlist(object):
         self.next(self.pushlist.pop())
         return
     def get_fig_number(self,name):
-        cleanlist = filter(lambda x: type(x) is str,self.figurelist)
+        cleanlist = filter(lambda x: isinstance(x, str),self.figurelist)
         try:
             return cleanlist.index(name)+1
         except ValueError:
@@ -360,7 +360,7 @@ class figlist(object):
                     theseunits = (testdata.get_units(testdata.dimlabels[x_index]))
                     testunits = self.units[self.current]
                     if theseunits != testunits:
-                        if type(testunits) is tuple and testunits[1] is None:
+                        if isinstance(testunits, tuple) and testunits[1] is None:
                             pass
                         else:
                             raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(theseunits,self.units[self.current]))
@@ -421,7 +421,7 @@ class figlist(object):
         for k,v in self.autolegend_list.items():
             kwargs = {}
             if v:
-                if type(v) is str:
+                if isinstance(v, str):
                     if v[0:7] == 'colored':
                         kwargs.update(dict(match_colors = True))
                         v = v[7:]
@@ -455,7 +455,7 @@ class figlist(object):
         kwargs = {}
         for figname in self.figurelist:
             logger.debug(strm("showing figure"+lsafen(figname)))
-            if type(figname) is dict:
+            if isinstance(figname, dict):
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
                     print '\n\n'

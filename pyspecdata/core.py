@@ -152,7 +152,7 @@ def normal_attrs(obj):
     myattrs = filter(lambda x: not x[0:2] == '__',myattrs)
     return myattrs
 def showtype(x):
-    if type(x) is ndarray:
+    if isinstance(x, ndarray):
         return ndarray,x.dtype
     else:
         return type(x)
@@ -215,10 +215,9 @@ def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,verbose = Fa
     #{{{ find the text fields, put them first, and sort by them
     mystructarray = mystructarray.copy()
     list_of_text_fields = [str(j[0]) for j in mystructarray.dtype.descr if j[1][0:2] == '|S']
-    mystructarray = mystructarray[list_of_text_fields + [x[0]
+    mystructarray = sorted(mystructarray[list_of_text_fields + [x[0]
         for x in mystructarray.dtype.descr
-        if x[0] not in list_of_text_fields]]
-    mystructarray.sort()
+        if x[0] not in list_of_text_fields]])
     if verbose: print 'test --> now, it has this form:',lsafen(mystructarray)
     #}}}
     error_fields = [str(j) for j in mystructarray.dtype.names if j[-6:] == '_ERROR']
@@ -274,7 +273,7 @@ def lookup_rec(A,B,indexpair):
     if type(indexpair) not in [tuple,list]:
         indexpair = (indexpair,indexpair)
     Bini = copy(B)
-    B = recf.drop_fields(B,( set(B.dtype.names) & set(A.dtype.names) ) - set([indexpair[1]])) # indexpair for B gets dropped later anyways
+    B = recf.drop_fields(B,( set(B.dtype.names) & set(A.dtype.names) ) - {indexpair[1]}) # indexpair for B gets dropped later anyways
     joined = []
     for j in A:
         matchedrows =  B[B[indexpair[1]] == j[indexpair[0]]]
@@ -315,16 +314,16 @@ def lambda_rec(myarray,myname,myfunction,*varargs):
                 " with the names of the arguments, or nothing (to use the field"
                 " itself as an argument)")
     myargs = autostringconvert(myargs)
-    if type(myargs) is str:
+    if isinstance(myargs, str):
         myargs = (myargs,)
-    if type(myargs) is not tuple:
+    if not isinstance(myargs, tuple):
         myargs = tuple(myargs)
     argdata = map((lambda x: myarray[x]),myargs)
     try:
         newrow = myfunction(*tuple(argdata))
     except TypeError:
         newrow = array([myfunction(*tuple([x[rownumber] for x in argdata])) for rownumber in range(0,len(argdata[0]))])
-    if type(newrow) is list and type(newrow[0]) is str:
+    if isinstance(newrow, list) and isinstance(newrow[0], str):
         newrow = array(newrow,dtype = '|S100')
     try:
         new_field_type = list(newrow.dtype.descr[0])
@@ -368,10 +367,10 @@ def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
     dropped_rows = None
     # first find the list of indices that give us the data we want
     #{{{ process the arguments
-    if (type(b_ind) is str) and (type(a_ind) is str):
+    if (isinstance(b_ind, str)) and (isinstance(a_ind, str)):
         b_ind = [b_ind]
         a_ind = [a_ind]
-    if ((type(b_ind) is list) and (type(a_ind) is list)) and (len(b_ind) == len(a_ind)):
+    if ((isinstance(b_ind, list)) and (isinstance(a_ind, list))) and (len(b_ind) == len(a_ind)):
         pass
     else:
         raise ValueError('If you call a list for b_ind and/or a_ind, they must match in length!!!')
@@ -464,12 +463,12 @@ def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
 def newcol_rec(A,new_dtypes):
     r'''add new, empty (i.e. random numbers) fields to A, as given by new_dtypes
     --> note that there are deeply nested numpy functions to do this, but the options are confusing, and I think the way these work is efficient'''
-    if type(new_dtypes) is dtype:
+    if isinstance(new_dtypes, dtype):
         new_dtypes = new_dtypes.descr
-    elif type(new_dtypes) is tuple:
+    elif isinstance(new_dtypes, tuple):
         new_dtypes = [new_dtypes]
-    elif type(new_dtypes) is list:
-        if type(new_dtypes[0]) is not tuple:
+    elif isinstance(new_dtypes, list):
+        if not isinstance(new_dtypes[0], tuple):
             new_dtypes = [tuple(new_dtypes)]
     retval = empty(A.shape,dtype = A.dtype.descr + new_dtypes)
     for name in A.dtype.names:
@@ -477,7 +476,7 @@ def newcol_rec(A,new_dtypes):
     return retval
 def applyto_rec(myfunc,myarray,mylist,verbose = False):
     r'apply myfunc to myarray with the intention of collapsing it to a smaller number of values'
-    if type(mylist) is not list and type(mylist) is str:
+    if not isinstance(mylist, list) and isinstance(mylist, str):
         mylist = [mylist]
     combined = []
     j = 0
@@ -521,7 +520,7 @@ def applyto_rec(myfunc,myarray,mylist,verbose = False):
     return combined
 def meanstd_rec(myarray,mylist,verbose = False,standard_error = False):
     r'this is something like applyto_rec, except that it applies the mean and creates new rows for the "error," where it puts the standard deviation'
-    if type(mylist) is not list and type(mylist) is str:
+    if not isinstance(mylist, list) and isinstance(mylist, str):
         mylist = [mylist]
     combined = []
     other_fields = set(mylist)^set(myarray.dtype.names)
@@ -574,7 +573,7 @@ def make_rec(*args,**kwargs):
     strlen,order,zeros_like = process_kwargs([('strlen',100),
         ('order',None),
         ('zeros_like',False)],kwargs)
-    if len(args) == 1 and (type(args[0]) is dict):
+    if len(args) == 1 and (isinstance(args[0], dict)):
         names = args[0].keys()
         input = args[0].values()
     elif len(args) == 2:
@@ -593,7 +592,7 @@ def make_rec(*args,**kwargs):
         names = [names[j] for j in newindices]
         input = [input[j] for j in newindices]
     #}}}
-    if not (type(input) is list and type(names) is list):
+    if not (isinstance(input, list) and isinstance(names, list)):
         raise TypeError('you must enter a list for both')
     types = map(type,input)
     shapes = map(shape,input)
@@ -608,11 +607,11 @@ def make_rec(*args,**kwargs):
     else:
         equal_shapes = False
     for j,k in enumerate(input):
-        if type(k) is list and equal_shapes:
+        if isinstance(k, list) and equal_shapes:
             k = k[0]
-        if type(k) is str:
+        if isinstance(k, str):
             types[j] = '|S%d'%strlen
-        if type(k) is ndarray:
+        if isinstance(k, ndarray):
             types[j] = k.dtype
     try:
         mydtype = dtype(zip(names,types,shapes))
@@ -643,7 +642,7 @@ def make_rec(*args,**kwargs):
 def make_ndarray(array_to_conv,name_forprint = 'unknown',verbose = False): 
     if type(array_to_conv) in [int,int32,double,float,complex,complex128,float,bool,bool_]: # if it's a scalar
         pass
-    elif type(array_to_conv) is str:
+    elif isinstance(array_to_conv, str):
         pass
     elif type(array_to_conv) in [list,ndarray] and len(array_to_conv) > 0:
         array_to_conv = rec.fromarrays([array_to_conv],names = 'LISTELEMENTS') #list(rec.fromarrays([b])['f0']) to convert back
@@ -657,7 +656,7 @@ def make_ndarray(array_to_conv,name_forprint = 'unknown',verbose = False):
     return array_to_conv
 def unmake_ndarray(array_to_conv,name_forprint = 'unknown',verbose = False): 
     r'Convert this item to an ndarray'
-    if (type(array_to_conv) is recarray) or (type(array_to_conv) is ndarray and array_to_conv.dtype.names is not None and len(array_to_conv.dtype.names)>0):
+    if (isinstance(array_to_conv, recarray)) or (isinstance(array_to_conv, ndarray) and array_to_conv.dtype.names is not None and len(array_to_conv.dtype.names)>0):
         #{{{ if it's a record/structured array, it should be either a list or dictionary
         if 'LISTELEMENTS' in array_to_conv.dtype.names:
             if array_to_conv.dtype.names == tuple(['LISTELEMENTS']):
@@ -673,7 +672,7 @@ def unmake_ndarray(array_to_conv,name_forprint = 'unknown',verbose = False):
                 "than one dimension, which is not yet supported\nLater, this",
                 'should be supported by returning a dictionary of arrays')
         #}}}
-    elif type(array_to_conv) is ndarray and len(array_to_conv)==1:
+    elif isinstance(array_to_conv, ndarray) and len(array_to_conv)==1:
         #{{{ if it's a length 1 ndarray, then return the element
         retval = array_to_conv.tolist()
         if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is a numpy array of length one"
@@ -683,7 +682,7 @@ def unmake_ndarray(array_to_conv,name_forprint = 'unknown',verbose = False):
         retval = array_to_conv.tolist()
         if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is a numpy scalar"
         #}}}
-    elif type(array_to_conv) is list:
+    elif isinstance(array_to_conv, list):
         #{{{ deal with lists
         if verbose: print "(from unmake ndarray verbose):", name_forprint,"is a list"
         typeofall = map(type,array_to_conv)
@@ -734,7 +733,7 @@ def lsafe(*string,**kwargs):
     else:
         wrap = None
     #}}}
-    if type(string) is not str:
+    if not isinstance(string, str):
         string = str(string)
     if wrap is True:
         wrap = 60
@@ -786,14 +785,14 @@ def copy_maybe_none(input):
     if input == None:
         return None
     else:
-        if type(input) is list:
+        if isinstance(input, list):
             return map(copy,input)
         else:
             return input.copy()
 def maprep(*mylist):
     mylist = list(mylist)
     for j in range(0,len(mylist)):
-        if type(mylist[j]) is not str:
+        if not isinstance(mylist[j], str):
             mylist[j] = mylist[j].__repr__()
     return ' '.join(mylist)
 #}}}
@@ -824,7 +823,7 @@ def h5searchstring(*args,**kwargs):
         kwargs)
     if len(args) == 2:
         fieldname,value = args
-    elif len(args) == 1 and type(args[0]) is dict:
+    elif len(args) == 1 and isinstance(args[0], dict):
         dict_arg = args[0]
         condlist = []
         for k,v in dict_arg.iteritems():
@@ -832,7 +831,7 @@ def h5searchstring(*args,**kwargs):
         return ' & '.join(condlist)
     else:
         raise ValueError("pass either field,value pair or a dictionary!")
-    if type(value) is str:
+    if isinstance(value, str):
         raise ValueError("string matching in pytables is broken -- search by hand and then use the index")
     precision *= value
     searchstring_high = '(%s < %s + (%s))'%tuple([fieldname]+[format]*2)
@@ -850,12 +849,12 @@ def h5loaddict(thisnode,verbose = False):
     #}}}
     for k,v in retval.iteritems():#{{{ search for record arrays that represent normal lists
         retval[k]  = unmake_ndarray(v,name_forprint = k,verbose = verbose)
-    if type(thisnode) is tables.table.Table:#{{{ load any table data
+    if isinstance(thisnode, tables.table.Table):#{{{ load any table data
         if verbose: print "It's a table\n\n"
         if 'data' in retval.keys():
             raise AttributeError('There\'s an attribute called data --> this should not happen!')
         retval.update({'data':thisnode.read()})
-    elif type(thisnode) is tables.group.Group:
+    elif isinstance(thisnode, tables.group.Group):
         #{{{ load any sub-nodes as dictionaries
         mychildren = thisnode._v_children
         for thischild in mychildren.keys():
@@ -897,7 +896,7 @@ def h5child(thisnode,childname,clear = False,create = None,verbose = False):
                 print lsafe('created',childname)
     return childnode
 def h5remrows(bottomnode,tablename,searchstring):
-    if type(searchstring) is dict:
+    if isinstance(searchstring, dict):
         searchstring = h5searchstring(searchstring)
     try:
         thistable = bottomnode.__getattr__(tablename)
@@ -941,7 +940,7 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
         #}}}
         # here is where I would search for the existing data
         if match_row is not None:
-            if type(match_row) is dict:
+            if isinstance(match_row, dict):
                 match_row = h5searchstring(match_row)
             if verbose: obs("trying to match row according to",lsafen(match_row))
             mytable.flush()
@@ -962,9 +961,9 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
             else:
                 if verbose:
                     obs("I found no matches")
-    if len(args) == 1 and (type(args[0]) is dict):
+    if len(args) == 1 and (isinstance(args[0], dict)):
         listofnames,listofdata = map(list,zip(*tuple(args[0].items())))
-    elif len(args) == 2 and type(args[0]) is list and type(args[1]) is list:
+    elif len(args) == 2 and isinstance(args[0], list) and isinstance(args[1], list):
         listofdata = args[0]
         listofnames = args[1]
     else:
@@ -1005,7 +1004,7 @@ def h5table(bottomnode,tablename,tabledata):
     h5file = bottomnode._v_file
     if tablename not in bottomnode._v_children.keys():
         if tabledata is not None:
-            if type(tabledata) is dict:
+            if isinstance(tabledata, dict):
                 tabledata = make_rec(tabledata)
             datatable = h5file.create_table(bottomnode,tablename,tabledata) # actually write the data to the table
         else:
@@ -1074,7 +1073,7 @@ def h5attachattributes(node,listofattributes,myvalues):
     h5file = node._v_file
     if isinstance(myvalues,nddata):
         attributevalues = map(lambda x: myvalues.__getattribute__(x),listofattributes)
-    elif type(myvalues) is list:
+    elif isinstance(myvalues, list):
         attributevalues = myvalues
     else:
         raise TypeError("I don't understand the type of myvalues, which much be a list or a nddata object, from which the attribute values are retrieved")
@@ -1111,7 +1110,7 @@ def h5attachattributes(node,listofattributes,myvalues):
     listofattributes[:] = listout # pointer
 def h5inlist(columnname,mylist):
     'returns rows where the column named columnname is in the value of mylist'
-    if type(mylist) is slice:
+    if isinstance(mylist, slice):
         if mylist.start is not None and mylist.stop is not None:
             return "(%s >= %g) & (%s < %g)"%(columnname,mylist.start,columnname,mylist.stop)
         elif mylist.stop is not None:
@@ -1120,16 +1119,16 @@ def h5inlist(columnname,mylist):
             return "(%s > %g)"%(columnname,mylist.start)
         else:
             raise ValueError()
-    if type(mylist) is ndarray:
+    if isinstance(mylist, ndarray):
         mylist = mylist.tolist()
-    if type(mylist) is not list:
+    if not isinstance(mylist, list):
         raise TypeError("the second argument to h5inlist must be a list!!!")
     if any([type(x) in [double,float64] for x in mylist]):
         if all([type(x) in [double,float64,int,int32,int64] for x in mylist]):
             return '('+'|'.join(map(lambda x: "(%s == %g)"%(columnname,x),mylist))+')'
     elif all([type(x) in [int,long,int32,int64] for x in mylist]):
         return '('+'|'.join(map(lambda x: "(%s == %g)"%(columnname,x),mylist))+')'
-    elif all([type(x) is str for x in mylist]):
+    elif all([isinstance(x, str) for x in mylist]):
         return '('+'|'.join(map(lambda x: "(%s == '%s')"%(columnname,x),mylist))+')'
     else:
         raise TypeError("I can't figure out what to do with this list --> I know what to do with a list of numbers or a list of strings, but not a list of type"+repr(map(type,mylist)))
@@ -1139,19 +1138,19 @@ def h5join(firsttuple,secondtuple,
     pop_fields = None,
     verbose = False):
     #{{{ process the first argument as the hdf5 table and indices, and process the second one as the structured array to join onto
-    if not ((type(firsttuple) is tuple) and (type(secondtuple) is tuple)):
+    if not ((isinstance(firsttuple, tuple)) and (isinstance(secondtuple, tuple))):
         raise ValueError('both the first and second arguments must be tuples!')
     if not ((len(firsttuple) == 2) and (len(secondtuple) == 2)):
         raise ValueError('The length of the first and second arguments must be two!')
     tablenode = firsttuple[0]
     tableindices = firsttuple[1]
     if verbose: print 'h5join tableindices looks like this:',tableindices
-    if type(tableindices) is not list:
+    if not isinstance(tableindices, list):
         tableindices = [tableindices]
     if verbose: print 'h5join tableindices looks like this:',tableindices
     mystructarray = secondtuple[0].copy()
     mystructarrayindices = secondtuple[1]
-    if type(mystructarrayindices) is not list:
+    if not isinstance(mystructarrayindices, list):
         mystructarrayindices = [mystructarrayindices]
     #}}}
     #{{{ generate a search string to match potentially more than one key
@@ -1421,7 +1420,7 @@ def autopad_figure(pad = 0.2,centered = False,figname = 'unknown'):
             labellist = [x[1] for x in labelsets if x[0] is axisn]
             for labels in labellist:
                 for label in labels:
-                    if type(label) is Line2D:
+                    if isinstance(label, Line2D):
                         pass # just rely on the pad
                         #if any(map(lambda x: x == label.get_transform(),[ax.transData,ax.transAxes,fig.transFigure,None])):
                         #    print 'found it'
@@ -1483,7 +1482,7 @@ def expand_x(*args):
     width = abs(diff(xlims))
     thismean = mean(xlims)
     if len(args) > 0:
-        if len(args) == 1 and type(args) is tuple:
+        if len(args) == 1 and isinstance(args, tuple):
             args = args[0]
         for j in range(2):
             if args[j] is None:
@@ -1507,7 +1506,7 @@ def expand_y(*args):
     width = abs(diff(ylims))
     thismean = mean(ylims)
     if len(args) > 0:
-        if len(args) == 1 and type(args) is tuple:
+        if len(args) == 1 and isinstance(args, tuple):
             args = args[0]
         for j in range(2):
             if args[j] is None:
@@ -1798,10 +1797,10 @@ class figlist(object):
         self.next(self.pushlist.pop())
         return
     def get_num_figures(self):
-        cleanlist = filter(lambda x: type(x) is str,self.figurelist)
+        cleanlist = filter(lambda x: isinstance(x, str),self.figurelist)
         return len(cleanlist)
     def get_fig_number(self,name):
-        cleanlist = filter(lambda x: type(x) is str,self.figurelist)
+        cleanlist = filter(lambda x: isinstance(x, str),self.figurelist)
         try:
             return cleanlist.index(name)+1
         except ValueError:
@@ -1985,7 +1984,7 @@ class figlist(object):
                     theseunits = (testdata.get_units(testdata.dimlabels[x_index]))
                     testunits = self.units[self.current]
                     if theseunits != testunits:
-                        if type(testunits) is tuple and testunits[1] is None:
+                        if isinstance(testunits, tuple) and testunits[1] is None:
                             pass
                         else:
                             raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(theseunits,self.units[self.current]))
@@ -2046,7 +2045,7 @@ class figlist(object):
         for k,v in self.autolegend_list.items():
             kwargs = {}
             if v:
-                if type(v) is str:
+                if isinstance(v, str):
                     if v[0:7] == 'colored':
                         kwargs.update(dict(match_colors = True))
                         v = v[7:]
@@ -2080,7 +2079,7 @@ class figlist(object):
         kwargs = {}
         for figname in self.figurelist:
             logger.debug(strm("showing figure"+lsafen(figname)))
-            if type(figname) is dict:
+            if isinstance(figname, dict):
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
                     print '\n\n'
@@ -2317,7 +2316,7 @@ def text_on_plot(x,y,thistext,coord = 'axes',**kwargs):
         newkwargs = {'transform':ax.transData,'size':'small',"horizontalalignment":'right'}
     color = None
     if 'match_data' in kwargs.keys():
-        if type(kwargs['match_data']) is list:
+        if isinstance(kwargs['match_data'], list):
             color = kwargs['match_data'][-1].get_color() # get the color of the last line
         elif kwargs['match_data'].get_plot_color() is not None:
             color = kwargs['match_data'].get_plot_color() # don't know when this works, but apparently, it does!
@@ -2351,7 +2350,7 @@ def plot(*args,**kwargs):
     #{{{assign all the possible combinations
     if len(args)==1:
         myy = args[0]
-    elif (len(args)==2) and (type(args[1]) is str):
+    elif (len(args)==2) and (isinstance(args[1], str)):
         myy = args[0]
         myformat = args[1]
     else:
@@ -2391,9 +2390,9 @@ def plot(*args,**kwargs):
                 if len(myy.data.shape) == 0:
                     raise ValueError("I can't plot zero-dimensional data (typically arises when you have a dataset with one point)")
                 myx = r_[0:myy.data.shape[0]]
-        if not noerr and type(myy.data_error) is ndarray and len(myy.data_error)>0: #then this should be an errorbar plot
+        if not noerr and isinstance(myy.data_error, ndarray) and len(myy.data_error)>0: #then this should be an errorbar plot
             def thiserrbarplot(*tebargs,**tebkwargs):
-                if type(tebargs[-1]) is str:
+                if isinstance(tebargs[-1], str):
                     tebkwargs.update({'fmt':tebargs[-1]})
                     return ax.errorbar(*tebargs[:-1],**tebkwargs)
                 else:
@@ -2416,7 +2415,7 @@ def plot(*args,**kwargs):
         # at this point, if there is no axis label, it will break and go to pass
         if yaxislabels is not None:
             if len(yaxislabels) > 0:
-                if type(yaxislabels[0]) is string_:
+                if isinstance(yaxislabels[0], string_):
                     has_labels = True
                 elif label_format_string is not None:
                     yaxislabels = [label_format_string%j for j in yaxislabels]
@@ -2523,8 +2522,8 @@ def plot(*args,**kwargs):
             retval = myplotfunc(*plotargs,**kwargs)
         except Exception as e:
             raise RuntimeError(strm('error trying to plot',type(myplotfunc),'with value',myplotfunc,
-                    '\nlength of the ndarray arguments:',['shape:'+str(shape(j)) if type(j) is ndarray else j for j in plotargs],
-                    '\nsizes of ndarray kwargs',dict([(j,shape(kwargs[j])) if type(kwargs[j]) is ndarray else (j,kwargs[j]) for j in kwargs.keys()]),
+                    '\nlength of the ndarray arguments:',['shape:'+str(shape(j)) if isinstance(j, ndarray) else j for j in plotargs],
+                    '\nsizes of ndarray kwargs',dict([(j,shape(kwargs[j])) if isinstance(kwargs[j], ndarray) else (j,kwargs[j]) for j in kwargs.keys()]),
                     '\narguments = ',plotargs,
                     '\nkwargs =',kwargs)+explain_error(e))
         if x_inverted:
@@ -2543,7 +2542,7 @@ def plot(*args,**kwargs):
             '\nsizes of arguments:', [shape(j) for j in plotargs],
             '\nsizes of ndarray kwargs:',
             dict([(j, shape(kwargs[j])) for j in
-                kwargs.keys() if type(kwargs[j]) is ndarray])))
+                kwargs.keys() if isinstance(kwargs[j], ndarray)])))
     #grid(True)
     #}}}
     return retval
@@ -2580,7 +2579,7 @@ def concat(datalist,dimname,chop = False,verbose = False):
     try:
         shapes = map(ndshape,datalist)
     except Exception as e:
-        if type(datalist) is not list:
+        if not isinstance(datalist, list):
             raise TypeError(strm('You didn\'t pass a list, you passed a',type(datalist)))
         raise RuntimeError(strm('Problem with what you passed to concat, list of types,',
             map(type,datalist))+explain_error(e))
@@ -2709,11 +2708,11 @@ class nddata (object):
         if len(args) > 1:
             logger.debug('more than one argument')
             if len(args) == 2:
-                if len(args[0].shape) == 1 and type(args[1]) is str:
+                if len(args[0].shape) == 1 and isinstance(args[1], str):
                     logger.debug('constructing 1D array')
                     self.__my_init__(args[0],[len(args[0])],[args[1]])
                     self.labels(args[1],args[0].copy())# needs to be a copy, or when we write data, we will change the axis
-                elif all([type(j) is str for j in args[1]]):
+                elif all([isinstance(j, str) for j in args[1]]):
                     logger.debug('passed only axis labels')
                     self.__my_init__(args[0],
                             list(args[0].shape),args[1])
@@ -2733,13 +2732,13 @@ class nddata (object):
         if ft_start_time is not None:
             raise ValueError('ft_start_time is obsolete -- you will want to pass a float value to the shift keyword argument of either .ft() or .ift()')
         self.genftpairs = False
-        if not (type(data) is ndarray):
+        if not (isinstance(data, ndarray)):
             #if (type(data) is float64) or (type(data) is complex128) or (type(data) is list):
-            if isscalar(data) or (type(data) is list) or (type(data) is tuple):
+            if isscalar(data) or (isinstance(data, list)) or (isinstance(data, tuple)):
                 data = array(data)
             else:
                 raise TypeError(strm('data is not an array, it\'s',type(data),'!'))
-        if not (type(dimlabels) is list):
+        if not (isinstance(dimlabels, list)):
             raise TypeError(strm('you provided a multi-dimensional ndarray but a set of dimension labels of type',type(dimlabels),"if you want a 1D nddata, give a 1D array, or if you want a ND nddata, give a list of dimensions"))
         try:
             self.data = reshape(data,sizes)
@@ -3148,7 +3147,7 @@ class nddata (object):
                 print "When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is "+repr(self.dimlabels)+" and you passed "+repr(arg)+'\n\n'
                 raise ValueError("When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is "+repr(self.dimlabels)+" and you passed "+repr(arg))
             for i,v in enumerate(arg[0]):
-                if type(v) == ndarray:
+                if isinstance(v, ndarray):
                     if v.shape == ():
                         arg[0][i] = None
             if give_None:
@@ -3273,11 +3272,11 @@ class nddata (object):
                 args = (zeros_like(self.data),)
             else:
                 args = (ones_like(self.data) * args[0],)
-        if (len(args) is 1) and (type(args[0]) is ndarray):
+        if (len(args) is 1) and (isinstance(args[0], ndarray)):
             self.data_error = reshape(args[0],shape(self.data))
-        elif (len(args) is 1) and (type(args[0]) is list):
+        elif (len(args) is 1) and (isinstance(args[0], list)):
             self.data_error = reshape(array(args[0]),shape(self.data))
-        elif (len(args) is 2) and (type(args[0]) is str) and (type(args[1]) is ndarray):
+        elif (len(args) is 2) and (isinstance(args[0], str)) and (isinstance(args[1], ndarray)):
             self.axis_coords_error[self.axn(args[0])] = args[1]
         elif (len(args) is 1) and args[0] is None:
             self.data_error = None
@@ -3303,9 +3302,9 @@ class nddata (object):
                 return real(self.data_error)
         elif (len(args) is 1):
             thearg = args[0]
-            if type(thearg) is str_:
+            if isinstance(thearg, str_):
                 thearg = str(thearg) # like in the other spot, this became necessary with some upgrade, though I'm not sure that I should maybe just change the error functions to treat the numpy string in the same way
-            if (type(thearg) is str):
+            if (isinstance(thearg, str)):
                 if len(self.axis_coords_error) == 0: self.axis_coords_error = [None] * len(self.dimlabels) # is we have an empty axis_coords_error, need to fill with None's
                 try:
                     errorforthisaxis = self.axis_coords_error[self.axn(thearg)]
@@ -3316,7 +3315,7 @@ class nddata (object):
                     return None
                 else:
                     x = self.axis_coords_error[self.axn(thearg)]
-                    if type(x) is ndarray:
+                    if isinstance(x, ndarray):
                         if x.shape == ():
                             return None
                         else:
@@ -3367,7 +3366,7 @@ class nddata (object):
         if len(args) == 2:
             propname,val = args
             self.other_info.update({propname:val})
-        elif len(args) == 1 and type(args[0]) is dict:
+        elif len(args) == 1 and isinstance(args[0], dict):
             self.other_info.update(args[0])
         else:
             raise ValueError("I don't know what you're passing to set prop!!!")
@@ -3489,7 +3488,7 @@ class nddata (object):
     def __add__(self,arg):
         if isscalar(arg):
             A = self.copy()
-            if type(arg) is complex and self.data.dtype not in [complex128,complex64]:
+            if isinstance(arg, complex) and self.data.dtype not in [complex128,complex64]:
                 A.data = complex128(A.data)
             A.data += arg
             # error does not change
@@ -3515,7 +3514,7 @@ class nddata (object):
     def __sub__(self,arg):
         return self.__add__(-1*arg)
     def __lt__(self,arg):
-        if type(arg) is ndarray:
+        if isinstance(arg, ndarray):
             retval = self.copy()
             retval.data = retval.data < arg
             return retval
@@ -3530,7 +3529,7 @@ class nddata (object):
         else:
             raise ValueError("I don't know what to do with an argument of type"+repr(type(arg)))
     def __gt__(self,arg):
-        if type(arg) is ndarray:
+        if isinstance(arg, ndarray):
             retval = self.copy()
             retval.data = retval.data > arg
             return retval
@@ -3545,7 +3544,7 @@ class nddata (object):
         else:
             raise ValueError("I don't know what to do with an argument of type"+repr(type(arg)))
     def __le__(self,arg):
-        if type(arg) is ndarray:
+        if isinstance(arg, ndarray):
             retval = self.copy()
             retval.data = retval.data <= arg
             return retval
@@ -3560,7 +3559,7 @@ class nddata (object):
         else:
             raise ValueError("I don't know what to do with an argument of type"+repr(type(arg)))
     def __ge__(self,arg):
-        if type(arg) is ndarray:
+        if isinstance(arg, ndarray):
             retval = self.copy()
             retval.data = retval.data >= arg
             return retval
@@ -3579,7 +3578,7 @@ class nddata (object):
         if isscalar(arg):
             #print "multiplying",self.data.dtype,"with scalar of type",type(arg)
             A = self.copy()
-            if type(arg) is complex and self.data.dtype not in [complex128,complex64]:
+            if isinstance(arg, complex) and self.data.dtype not in [complex128,complex64]:
                 A.data = complex128(A.data)
             A.data *= arg
             if A.get_error() != None:
@@ -3617,7 +3616,7 @@ class nddata (object):
         result = self.copy()
         result.set_error(None)
         logger.info("error propagation for right power not currently supported (do you need this, really?)")
-        assert isscalar(arg) or type(arg) is ndarray, "currently right power only supported for ndarray and scalars -- do you really need something else??"
+        assert isscalar(arg) or isinstance(arg, ndarray), "currently right power only supported for ndarray and scalars -- do you really need something else??"
         result.data = arg**self.data
         return result
     def __pow__(self,arg):
@@ -3742,7 +3741,7 @@ class nddata (object):
         #{{{ if zero dimensional, fake a singleton dimension and recurse
         #{{{ unless both are zero dimensional, in which case, just leave alone
         if verbose: print "starting aligndata"
-        if isscalar(arg) or type(arg) == ndarray:
+        if isscalar(arg) or isinstance(arg, ndarray):
             arg = nddata(arg)
             index_dims = [j for j in r_[0:len(arg.dimlabels)]
                      if arg.dimlabels[j]=='INDEX']
@@ -3867,18 +3866,18 @@ class nddata (object):
                 return temp_dict
             # }}}
             #{{{ add the axes and errors for B
-            if type(arg.axis_coords) is list:
+            if isinstance(arg.axis_coords, list):
                 if len(arg.axis_coords) > 0:
                     axesdict.update(non_empty_axes(arg))
-            if type(arg.axis_coords_error) is list:
+            if isinstance(arg.axis_coords_error, list):
                 if len(arg.axis_coords_error) > 0 and not all([x is None for x in arg.axis_coords_error]):
                     errordict.update(arg.mkd(arg.axis_coords_error))
             #}}}
             #{{{ add the axes and errors for A
-            if type(self.axis_coords) is list:
+            if isinstance(self.axis_coords, list):
                 if len(self.axis_coords) > 0:
                     axesdict.update(non_empty_axes(self))
-            if type(self.axis_coords_error) is list:
+            if isinstance(self.axis_coords_error, list):
                 if len(self.axis_coords_error) > 0 and not all([x is None for x in self.axis_coords_error]):
                     errordict.update(self.mkd(self.axis_coords_error))
             #}}}
@@ -3938,7 +3937,7 @@ class nddata (object):
             self.data /= dt
         return self
     def sum(self,axes):
-        if (type(axes) is str):
+        if (isinstance(axes, str)):
             axes = [axes]
         for j in range(0,len(axes)):
             try:
@@ -3954,7 +3953,7 @@ class nddata (object):
             self._pop_axis_info(thisindex)
         return self
     def sum_nopop(self,axes):
-        if (type(axes) is str):
+        if (isinstance(axes, str)):
             axes = [axes]
         for j in range(0,len(axes)):
             try:
@@ -4060,7 +4059,7 @@ class nddata (object):
             raw_index = kwargs.pop('raw_index')
         if len(kwargs) > 0:
             raise ValueError("I didn't understand the kwargs:",repr(kwargs))
-        if (type(axes) is str):
+        if (isinstance(axes, str)):
             axes = [axes]
         #}}}
         for j in range(0,len(axes)):
@@ -4087,7 +4086,7 @@ class nddata (object):
             Return the raw (ndarray) numerical index, rather than the corresponding axis value.
             Note that the result returned is still, however, an nddata (rather than numpy ndarray) object.
         """
-        if (type(axes) is str):
+        if (isinstance(axes, str)):
             axes = [axes]
         for j in range(0,len(axes)):
             try:
@@ -4173,7 +4172,7 @@ class nddata (object):
         axes = self._possibly_one_axis(*args)
         return_error = process_kwargs([('return_error',True)],kwargs)
         logger.debug(strm("return error is",return_error))
-        if (type(axes) is str):
+        if (isinstance(axes, str)):
             axes = [axes]
         #}}}
         for j in range(0,len(axes)):
@@ -4276,7 +4275,7 @@ class nddata (object):
             try:
                 thisindex = self.dimlabels.index(axis)
             except Exception as e:
-                if type(axis) is not str:
+                if not isinstance(axis, str):
                     raise ValueError('The format of run is run(func,"axisname"), but you didn\'t give a string as the second argument -- maybe you fed the arguments backwards?')
                 elif axis not in self.dimlabels:
                     raise ValueError("axis "+axis+
@@ -4326,7 +4325,7 @@ class nddata (object):
     def unitify_axis(self,axis_name,
             is_axis=True):
         'this just generates an axis label with appropriate units'
-        if type(axis_name) is int:
+        if isinstance(axis_name, int):
             axis_name = self.dimlabels[axis_name]
         if self.get_prop('FT') is not None and axis_name in self.get_prop('FT').keys() and self.get_prop('FT')[axis_name]:
             isft = True
@@ -4457,23 +4456,23 @@ class nddata (object):
         """
         logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?',isfortran(self.data)))
         tuple_syntax = False
-        if type(dimname) is tuple:
+        if isinstance(dimname, tuple):
             tuple_syntax = True
             assert len(dimname) == 2, "tuple of two dimension names only"
-            assert type(dimname[0]) and type(dimname[1]) is str, "first argument is tuple of two dimension names"
+            assert type(dimname[0]) and isinstance(dimname[1], str), "first argument is tuple of two dimension names"
         else:
-            assert type(dimname) is str, "first argument is dimension name or tuple of two dimension names"
-        if type(newaxis_dict) is tuple:
+            assert isinstance(dimname, str), "first argument is dimension name or tuple of two dimension names"
+        if isinstance(newaxis_dict, tuple):
             assert len(newaxis_dict) == 2, "tuple of two nddatas only"
             if isinstance(newaxis_dict[0],nddata) and isinstance(newaxis_dict[1],nddata):
                 assert len(newaxis_dict[0].dimlabels) and len(newaxis_dict[1].dimlabels) == 1, "currently only set up for 1D"
-        elif type(newaxis_dict) is dict:
+        elif isinstance(newaxis_dict, dict):
             assert len(newaxis_dict) == 1, "currently only set up for 1D"
         elif isinstance(newaxis_dict,nddata):
             assert len(newaxis_dict.dimlabels) == 1, "currently only set up for 1D"
         else:
             raise ValueError("second argument is dictionary or nddata with new axis, or tuple of nddatas with new axes")
-        if type(kernel_func) is tuple:
+        if isinstance(kernel_func, tuple):
             assert callable(kernel_func[0]) and callable(kernel_func[1]), "third argument is tuple of kernel functions"
         else:
             assert callable(kernel_func), "third argument is kernel function"
@@ -4623,7 +4622,7 @@ class nddata (object):
                 retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=mod_BRD(guess=1.0))
             else:
                 retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=l)
-            logger.debug(strm('coming back from fortran, residual type is',type(residual))+ strm(residual.dtype if type(residual) is ndarray else ''))
+            logger.debug(strm('coming back from fortran, residual type is',type(residual))+ strm(residual.dtype if isinstance(residual, ndarray) else ''))
             newshape = []
             if not isscalar(l):
                 newshape.append(len(l))
@@ -4692,7 +4691,7 @@ class nddata (object):
                     data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
             logger.debug(strm('shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
             retval, residual = this_nnls.nnls_regularized(K.data, data_fornnls, l=l)
-            logger.debug(strm("coming back from fortran, residual type is",type(residual))+ strm(residual.dtype if type(residual) is ndarray else ''))
+            logger.debug(strm("coming back from fortran, residual type is",type(residual))+ strm(residual.dtype if isinstance(residual, ndarray) else ''))
             newshape = []
             if not isscalar(l):
                 newshape.append(len(l))
@@ -4764,10 +4763,10 @@ class nddata (object):
         if len(kwargs) > 0:
             raise ValueError("I don't understand the arguments:"+repr(kwargs))
         if len(args) == 1:
-            if type(args[0]) is ndarray:
+            if isinstance(args[0], ndarray):
                 if args[0].shape[2] != len(self.dimlabels):
                     raise ValueError("You must pass an N x M array, where M is the number of dimensions in this array!")
-            elif type(args[0]) is dict:
+            elif isinstance(args[0], dict):
                 raise ValueError("should eventually support dictionaries (via fld), but doesn't yet")
             else:
                 raise ValueError("I don't know what funny business you're up to passing me a"+repr(type(args[0])))
@@ -4784,7 +4783,7 @@ class nddata (object):
         '''
         oldaxis = self.getaxis(axis)
         if not return_func:
-            if (type(axisvalues) is int) or (type(axisvalues) is int32):
+            if (isinstance(axisvalues, int)) or (isinstance(axisvalues, int32)):
                 axisvalues = linspace(oldaxis[0],oldaxis[-1],axisvalues)
             elif isscalar(axisvalues):
                 axisvalues = r_[axisvalues]
@@ -4798,7 +4797,7 @@ class nddata (object):
                 axisvalues[axisvalues<oldaxis.min()] = oldaxis.min()
                 axisvalues[axisvalues>oldaxis.max()] = oldaxis.max()
             elif not (past_bounds == 'fail'):
-                if type(past_bounds) is tuple:
+                if isinstance(past_bounds, tuple):
                     if len(past_bounds) == 2:
                         axisvalues[axisvalues<oldaxis.min()] = past_bounds[0]
                         axisvalues[axisvalues>oldaxis.max()] = past_bounds[1]
@@ -5017,7 +5016,7 @@ class nddata (object):
             *e.g.* ``lambda x: max(abs(x))/10.``
             
         '''
-        if type(intensity) is type(emptyfunction):
+        if isinstance(intensity, type(emptyfunction)):
             intensity = intensity(lambda x: self.data)
         return_complex = iscomplexobj(self.data)
         self.data += box_muller(self.data.size, return_complex=return_complex).reshape(self.data.shape) * intensity
@@ -5045,7 +5044,7 @@ class nddata (object):
             axes = axes[0]
         else:
             axes = axes
-        if type(axes) is str:
+        if isinstance(axes, str):
             axes = [axes]
         if len(axes) < len(self.dimlabels):
             oldorder = list(self.dimlabels)
@@ -5093,21 +5092,21 @@ class nddata (object):
         you can pass either a dictionary or a axis name (string)/axis label (numpy array) pair'''
         if len(args) == 2:
             listofstrings,listofaxes = args
-        elif len(args) == 1 and type(args[0]) is dict:
+        elif len(args) == 1 and isinstance(args[0], dict):
             listofstrings = args[0].keys()
             listofaxes = args[0].values()
         else:
             raise ValueError(strm("I can't figure out how to deal with the arguments",args))
         for j in range(0,len(listofaxes)):
-            if type(listofaxes[j]) is list:
+            if isinstance(listofaxes[j], list):
                 listofaxes[j] = array(listofaxes[j])
         listofstrings = autostringconvert(listofstrings)
-        if type(listofstrings) is str:
+        if isinstance(listofstrings, str):
             listofstrings = [listofstrings]
             listofaxes = [listofaxes]
-        if type(listofstrings) is not list:
+        if not isinstance(listofstrings, list):
             raise TypeError("the arguments passed to the .labels() method must be a list of the axis names followed by the list of the axis arrays")
-        elif all(map(( lambda x: type(x) is str_ ),listofstrings)):
+        elif all(map(( lambda x: isinstance(x, str_) ),listofstrings)):
             listofstrings = map(str,listofstrings)
         elif not all(map(( lambda x: isinstance(x,basestring) ),listofstrings)):
             raise TypeError("the arguments passed to the .labels() method must be a list of the axis names followed by the list of the axis arrays")
@@ -5197,7 +5196,7 @@ class nddata (object):
         overwrite,as_array = process_kwargs([('overwrite',False),
             ('as_array',False)],kwargs)
         if len(args) == 1:
-            if type(args[0]) is str:
+            if isinstance(args[0], str):
                 axisname = args[0]
                 retval = self.retaxis(axisname)
                 #{{{ copied from old retaxis function, then added the overwrite capability
@@ -5225,7 +5224,7 @@ class nddata (object):
         elif len(args) == 2:
             axisnames = args[0]
             func = args[1]
-            if type(axisnames) is not list:
+            if not isinstance(axisnames, list):
                 axisnames = [axisnames]
         else:
             raise ValueError('Wrong number of arguments!! -- you passed '+repr(len(args))+' arguments!')
@@ -5355,13 +5354,13 @@ class nddata (object):
         " then put the result into the axis labels")
         if axis == 'INDEX':
             raise ValueError("Axes that are called INDEX are special, and you are not allowed to label them!")
-        if type(value) is type(emptyfunction):
+        if isinstance(value, type(emptyfunction)):
             x = self.getaxis(axis)
             x[:] = value(x.copy())
             return self
         if type(value) in [float,int,double,float64]:
            value = linspace(0.,value,self.axlen(axis))
-        if type(value)is list:
+        if isinstance(value, list):
             value = array(value)
         if self.axis_coords is None or len(self.axis_coords) == 0:
             self.axis_coords = [None]*len(self.dimlabels)
@@ -5519,7 +5518,7 @@ class nddata (object):
             final_position = -1
             dimname = ' $\\times$ '.join(dimstocollapse)
         else:
-            if type(dimname) is int:
+            if isinstance(dimname, int):
                 dimname = dimstocollapse[dimname]
                 final_position = self.axn(dimname)
             elif dimname in self.dimlabels:
@@ -5641,7 +5640,7 @@ class nddata (object):
         if len(otherargs) == 2:
             axesout,shapesout = otherargs
         elif len(otherargs) == 1:
-            if type(otherargs[0]) is list:
+            if isinstance(otherargs[0], list):
                 axesout = otherargs[0]
                 shapesout = ndshape(self)[axisin]**(1./len(axesout))
                 if abs(shapesout-round(shapesout)) > 1e-15: # there is some kind of roundoff error here
@@ -5653,7 +5652,7 @@ class nddata (object):
                 else:
                     shapesout = round(shapesout)
                 shapesout = [shapesout] * len(axesout)
-            elif type(otherargs[0]) is dict:
+            elif isinstance(otherargs[0], dict):
                 axesout,shapesout = otherargs[0].keys(),otherargs[0].values()
             else:
                 raise ValueError("I don't know how to deal with this type!")
@@ -5681,17 +5680,17 @@ class nddata (object):
         else:
             new_axes = None
         #{{{ if there is a list of axis coordinates, add in slots for the new axes
-        if type(self.axis_coords) is list:
+        if isinstance(self.axis_coords, list):
             if len(self.axis_coords) == 0:
                 self.axis_coords = [None] * len(self.dimlabels)
             for j in range(len(axesout)-1):
                 self.axis_coords.insert(thisaxis,None)
-        if type(self.axis_coords_error) is list:
+        if isinstance(self.axis_coords_error, list):
             if len(self.axis_coords_error) == 0:
                 self.axis_coords_error = [None] * len(self.dimlabels)
             for j in range(len(axesout)-1):
                 self.axis_coords_error.insert(thisaxis,None)
-        if type(self.axis_coords_units) is list:
+        if isinstance(self.axis_coords_units, list):
             if len(self.axis_coords_units) == 0:
                 self.axis_coords_units = [None] * len(self.dimlabels)
             for j in range(len(axesout)-1):
@@ -5835,17 +5834,17 @@ class nddata (object):
         logger.debug(strm(zip(mask,self.dimlabels)))
         self.data = self.data.squeeze()
         retval = []
-        if type(self.axis_coords) is list:
+        if isinstance(self.axis_coords, list):
             for k,v in [(self.dimlabels[j],self.axis_coords[j]) for j in range(len(self.dimlabels)) if not mask[j]]:
                 retval.append(k)
                 if v is not None:
                     self.set_prop(k,v[0])
         self.dimlabels = [v for j,v in enumerate(self.dimlabels) if mask[j]]
-        if type(self.axis_coords) is list:
+        if isinstance(self.axis_coords, list):
             self.axis_coords = [v for j,v in enumerate(self.axis_coords) if mask[j]]
-        if type(self.axis_coords_error) is list:
+        if isinstance(self.axis_coords_error, list):
             self.axis_coords_error = [v for j,v in enumerate(self.axis_coords_error) if mask[j]]
-        if type(self.axis_coords_units) is list:
+        if isinstance(self.axis_coords_units, list):
             self.axis_coords_units = [v for j,v in enumerate(self.axis_coords_units) if mask[j]]
         if return_dropped:
             return self, retval
@@ -5859,11 +5858,11 @@ class nddata (object):
         righterrors = None
         logger.debug(strm("types of args",map(type,args)))
         A = args[0]
-        if type(A) is nddata:
+        if isinstance(A, nddata):
             logger.debug("initially, rightdata appears to be nddata")
             _,B = self.aligndata(A)
             A = B.data # now the next part will handle this
-        if type(A) is ndarray:# if selector is an ndarray
+        if isinstance(A, ndarray):# if selector is an ndarray
             logger.debug("initially, rightdata appears to be ndarray")
             if A.dtype is not dtype('bool'):
                 raise ValueError("I don't know what to do with an ndarray subscript that has dtype "+repr(A.dtype))
@@ -5897,12 +5896,12 @@ class nddata (object):
             logger.debug("rightdata appears to be ndarray after initial treatment")
             rightdata = args[1]
             #{{{ if I just passed a function, assume that I'm applying some type of data-based mask
-            if type(args[0]) is type(emptyfunction):
+            if isinstance(args[0], type(emptyfunction)):
                 thisfunc = args[0]
                 self.data[thisfunc(self.data)] = rightdata
                 return
                 #}}}
-            if (type(rightdata) is not ndarray): # in case its a scalar
+            if (not isinstance(rightdata, ndarray)): # in case its a scalar
                 rightdata = array([rightdata])
         slicedict,axesdict,errordict,unitsdict = self._parse_slices(args[0]) # pull left index list from parse slices
         leftindex = self.fld(slicedict)
@@ -6042,7 +6041,7 @@ class nddata (object):
         retval.data[:] = value
         return retval
     def __getitem__(self,args):
-        if type(args) is type(emptyfunction):
+        if isinstance(args, type(emptyfunction)):
             #{{{ just a lambda function operates on the data
             thisfunc = args
             newdata = self.copy()
@@ -6055,7 +6054,7 @@ class nddata (object):
                 raise ValueError("I don't know how to do this for multidimensional data yet!")
             return newdata
             #}}}
-        elif type(args) is nddata:
+        elif isinstance(args, nddata):
             #{{{ try the nddata mask
             A = args
             if isinstance(A,nddata) and A.data.dtype is dtype("bool"):
@@ -6082,14 +6081,14 @@ class nddata (object):
                 return self
             else:
                 errmsg = "you passed a single argument of type "+repr(type(A))
-                if type(A) is nddata:
+                if isinstance(A, nddata):
                     errmsg += " with dtype "+repr(A.data.dtype)
                 errmsg += " -- I don't know what to do with this"
                 raise ValueError(errmsg)
             #}}}
         else:
             slicedict,axesdict,errordict,unitsdict = self._parse_slices(args)
-            if type(args) is not slice and type(args[1]) is list and type(args[0]) is str and len(args) == 2:
+            if not isinstance(args, slice) and isinstance(args[1], list) and isinstance(args[0], str) and len(args) == 2:
                 return concat([self[args[0],x] for x in args[1]],args[0])
             indexlist = tuple(self.fld(slicedict))
             newlabels = [x for x in self.dimlabels if not isscalar(slicedict[x])] # generate the new list of labels, in order, for all dimensions that are not indexed by a scalar
@@ -6163,7 +6162,7 @@ class nddata (object):
         if self.axis_coords_units is not None:
             unitsdict = self.mkd(self.axis_coords_units)
         axesdict = None # in case it's not set
-        if type(args) is slice:
+        if isinstance(args, slice):
             args = [args]
         else:
             args = list(args)
@@ -6171,7 +6170,7 @@ class nddata (object):
         j=0
         trueslice = [] # this lets me distinguish from 'axisname',slice
         while j < len(args):
-            if type(args[j]) is slice:
+            if isinstance(args[j], slice):
                 this_dim_name = args[j].start
                 args.insert(j,this_dim_name)
                 trueslice.append(this_dim_name)
@@ -6179,11 +6178,11 @@ class nddata (object):
             j+=2 # even only
         #}}}
         for j in range(0,len(args),2):
-            if type(args[j]) is str_:
+            if isinstance(args[j], str_):
                 args[j] = str(args[j]) # on upgrading + using on windows, this became necessary, for some reason I don't understand
         if type(args) in [float,int32,int,double]:
             raise ValueError(strm('You tried to pass just a nddata[',type(args),']'))
-        if type(args[0]) is str:
+        if isinstance(args[0], str):
             #{{{ create a slicedict and errordict to store the slices
             slicedict = dict(zip(list(self.dimlabels),[slice(None,None,None)]*len(self.dimlabels))) #initialize to all none
             if len(self.axis_coords)>0:
@@ -6205,18 +6204,18 @@ class nddata (object):
                     if isscalar(y):
                         if axesdict[x] is not None:
                             axesdict.pop(x) # pop the axes for all scalar dimensions
-                    elif type(y) is type(testf):
+                    elif isinstance(y, type(testf)):
                         mask = y(axesdict[x])
                         slicedict[x] = mask
                         if axesdict[x] is not None:
                             axesdict[x] = axesdict[x][mask]
                     else:
-                        if type(y) is slice and x in trueslice:
+                        if isinstance(y, slice) and x in trueslice:
                             #print "DEBUG, I found",y,"to be of type slice"
                             if y.step is not None:
                                 raise ValueError("setting the slice step is not currently supported")
                             else:
-                                if type(y.stop) is tuple: #then I passed a single index
+                                if isinstance(y.stop, tuple): #then I passed a single index
                                     temp = diff(axesdict[x]) 
                                     if not all(temp*sign(temp[0])>0):
                                         raise ValueError(strm("you can only use the range format on data where the axis is in consecutively increasing or decreasing order, and the differences that I see are",temp*sign(temp[0])))
@@ -6276,7 +6275,7 @@ class nddata (object):
                         if errordict[x] != None:
                             if isscalar(y):
                                 errordict.pop(x)
-                            elif type(y) is type(emptyfunction):
+                            elif isinstance(y, type(emptyfunction)):
                                 mask = y(axesdict[x])
                                 errordict[x] = errordict[x][mask]
                             else:
@@ -6328,7 +6327,7 @@ class nddata (object):
             raise ValueError(strm("You're trying to save an nddata object which",
                     "does not yet have a name, and you can't do this! Run",
                     "yourobject.name('setname')"))
-        if type(thisname) is str:
+        if isinstance(thisname, str):
             h5path += thisname
         else:
             raise ValueError(strm("problem trying to store HDF5 file; you need to",
@@ -6403,11 +6402,11 @@ class nddata (object):
                 h5attachattributes(bottomnode,
                     [j for j in myotherattrs if not self._contains_symbolic(j)],
                     self)
-                warnlist = [j for j in myotherattrs if (not self._contains_symbolic(j)) and type(self.__getattribute__(j)) is dict]
+                warnlist = [j for j in myotherattrs if (not self._contains_symbolic(j)) and isinstance(self.__getattribute__(j), dict)]
                 #{{{ to avoid pickling, test that none of the attributes I'm trying to write are dictionaries or lists
                 if len(warnlist) > 0:
                     print "WARNING!!, attributes",warnlist,"are dictionaries!"
-                warnlist = [j for j in myotherattrs if (not self._contains_symbolic(j)) and type(self.__getattribute__(j)) is list]
+                warnlist = [j for j in myotherattrs if (not self._contains_symbolic(j)) and isinstance(self.__getattribute__(j), list)]
                 if len(warnlist) > 0:
                     print "WARNING!!, attributes",warnlist,"are lists!"
                 #}}}
@@ -6506,7 +6505,7 @@ class nddata_hdf5 (nddata):
                     temp = self.getaxis(thisdimlabel)
                 except:
                     temp = -1 # no axis is given
-                if type(temp) is ndarray:
+                if isinstance(temp, ndarray):
                     temp = len(temp)
                 det_shape.append(temp)
             try:
@@ -6561,14 +6560,14 @@ class subplot_dim():
     def __init__(self,firstdim,seconddim):
         self.num = r_[firstdim,seconddim,0]
     def set(self,args,x='',g=True,y='',t='',a=''):
-        if type(args) is int:
+        if isinstance(args, int):
             number = args
             ax = subplot(*tuple(self.num+r_[0,0,number]))
             xlabel(x)
             ylabel(y)
             title(t)
             grid(g)
-        elif (type(args) is tuple) and (len(args) is 3):
+        elif (isinstance(args, tuple)) and (len(args) is 3):
             # the second value passed is 
             whichsmall = args[2]
             break_into = args[1]
@@ -6700,7 +6699,7 @@ class fitdata(nddata):
         if verbose: print 'parameter derivatives is called!'
         if iscomplex(self.data.flatten()[0]):
             print lsafen('Warning, taking only real part of fitting data!')
-        if type(set) is dict:
+        if isinstance(set, dict):
             set_to = set.values()
             set = set.keys()
         solution_list = dict([(self.symbolic_dict[k],set_to[j])
@@ -6841,9 +6840,9 @@ class fitdata(nddata):
         indices --> gives the indices that are forced
         values --> the values they are forced to
         mask --> p[mask] are actually active in the fit'''
-        if type(this_set) is not list:
+        if not isinstance(this_set, list):
             this_set = [this_set]
-        if type(set_to) is not list:
+        if not isinstance(set_to, list):
             set_to = [set_to]
         if len(this_set) != len(set_to):
             raise ValueError(strm('length of this_set=', this_set,
@@ -7021,7 +7020,7 @@ class fitdata(nddata):
         r'You can enter None, to get the fit along the same range as the data, an integer to give the number of points, or a range of data, which will return with 300 points'
         if taxis is None:
             taxis = self.getaxis(self.fit_axis).copy()
-        elif type(taxis) is int:
+        elif isinstance(taxis, int):
             taxis = linspace(self.getaxis(self.fit_axis).min(),
                     self.getaxis(self.fit_axis).max(),
                     taxis)
@@ -7031,7 +7030,7 @@ class fitdata(nddata):
     def eval(self,taxis,set = None,set_to = None):
         r'''after we have fit, evaluate the fit function along the axis taxis
         set and set_to allow you to forcibly set a specific symbol to a specific value --> however, this does not affect the class, but only the return value'''
-        if type(set) is dict:
+        if isinstance(set, dict):
             set_to = set.values()
             set = set.keys()
         taxis = self._taxis(taxis)
@@ -7072,7 +7071,7 @@ class fitdata(nddata):
         r'''actually run the fit'''
         if not silent: print "\n"
         if not silent: print r'\resizebox*{!}{3in}{\begin{minipage}{\linewidth}'
-        if type(set) is dict:
+        if isinstance(set, dict):
             set_to = set.values()
             set = set.keys()
         x = self.getaxis(self.fit_axis)
@@ -7099,7 +7098,7 @@ class fitdata(nddata):
             p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
         #{{{ just give various explicit errors
         except TypeError as err:
-            if type(x) != ndarray and type(y) != ndarray:
+            if not isinstance(x, ndarray) and not isinstance(y, ndarray):
                 raise TypeError(strm('leastsq failed because the two arrays',
                     "aren\'t of the right",
                     'type','type(x):',type(x),'type(y):',type(y)))
@@ -7355,7 +7354,7 @@ elif myparams['figlist_type'] == 'figlist':
         else:
             wrap = None
         #}}}
-        if type(string) is not str:
+        if not isinstance(string, str):
             string = repr(string)
         if wrap is True:
             wrap = 60

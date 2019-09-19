@@ -48,7 +48,7 @@ class ndshape_base ():
                 if len(self.shape) == 0 and len(self.dimlabels) == 0:
                     self.zero_dimensional = True
                     return
-            elif type(args[0]) is list:
+            elif isinstance(args[0], list):
                 self.dimlabels, self.shape = map(list,zip(*args[0]))
             else:
                 raise ValueError('If you pass a single argument, it must be an nddata')
@@ -86,7 +86,7 @@ class ndshape_base ():
         'take list of shape,dimlabels'
         shape = arg[0]
         dimlabels = arg[1]
-        if type(shape) is str:
+        if isinstance(shape, str):
             shape,dimlabels = dimlabels,shape
         if isscalar(self.shape):
             self.shape = [self.shape]
@@ -104,7 +104,7 @@ class ndshape_base ():
         this is the correct function, until I can fix my back-references for add, which does it backwards'''
         shape = arg[0]
         dimlabels = arg[1]
-        if type(shape) is str:
+        if isinstance(shape, str):
             shape,dimlabels = dimlabels,shape
         if isscalar(self.shape):
             self.shape = [self.shape]

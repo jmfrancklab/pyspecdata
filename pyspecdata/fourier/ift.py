@@ -43,7 +43,7 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
     if verbose: print "check 1",self.data.dtype
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
-    if (type(axes) is str):
+    if (isinstance(axes, str)):
         axes = [axes]
     #{{{ check and set the FT property
     for j in axes:
@@ -61,7 +61,7 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
         ('shift',False),
         ('pad',False)],
         kwargs)
-    if not (type(shift) is list):
+    if not (isinstance(shift, list)):
         shift = [shift]*len(axes)
     #}}}
     for j in range(0,len(axes)):

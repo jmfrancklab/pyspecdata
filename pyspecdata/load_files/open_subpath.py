@@ -27,8 +27,8 @@ def open_subpath(file_reference,*subpath,**kwargs):
         else:
             fp = open(os.path.join(file_reference,*subpath),mode)
     else:
-        if type(file_reference) == tuple:
-            if len(file_reference) == 3 and type(file_reference[0]) is ZipFile:
+        if isinstance(file_reference, tuple):
+            if len(file_reference) == 3 and isinstance(file_reference[0], ZipFile):
                 zf = file_reference[0]
                 zip_basename = file_reference[1]
                 name_inside_zip = file_reference[2]

@@ -35,7 +35,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
     """
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
-    if (type(axes) is str):
+    if (isinstance(axes, str)):
         axes = [axes]
     #{{{ check and set the FT property
     for j in axes:
@@ -55,7 +55,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
         ('automix',False),
         ],
         kwargs)
-    if not (type(shift) is list):
+    if not (isinstance(shift, list)):
         shift = [shift]*len(axes)
     #}}}
     for j in range(0,len(axes)):

@@ -185,7 +185,7 @@ def load_1D(file_reference, *subpath, **kwargs):
             load_title(file_reference,*subpath))
     data.set_prop('acq',
             v)
-    if type(file_reference) is tuple:
+    if isinstance(file_reference, tuple):
         data.set_prop('filename',
                 file_reference[1])
     else:

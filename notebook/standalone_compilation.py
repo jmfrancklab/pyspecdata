@@ -28,8 +28,7 @@ print '\n\n'
 #}}}
 #{{{ now, do some manual analysis
 print 'data is:\n\n'
-data = reorder_rec(data,['chemical','run_number'])
-data.sort()
+data = sorted(reorder_rec(data,['chemical','run_number']))
 lrecordarray(data,resizebox = 0.8)
 print '\n\n'
 print 'First, I average over the ones with undecided \\tonen\n\n'
