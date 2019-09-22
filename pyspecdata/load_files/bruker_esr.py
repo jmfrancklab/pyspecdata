@@ -1,7 +1,7 @@
 from ..core import *
 from ..general_functions import strm
 from numpy import fromstring
-import re, string
+import re
 from io import StringIO
 logger = logging.getLogger('pyspecdata.load_files.bruker_esr')
 b0_texstr = r'$B_0$'
@@ -237,7 +237,7 @@ def winepr_load_acqu(filename):
         lines = fp.readlines()
     vars = {}
     line_re = re.compile(r'([_A-Za-z0-9]+) +(.*)')
-    lines = list(map(string.rstrip,lines))
+    lines = list(map(lambda x: x.rstrip(),lines))
     #lines = [j.rstrip('\n') for j in lines] # because it's just \n, even on windows
     v = {'DRS':4096,'RES':1024,'HSW':50}
     for line in lines:

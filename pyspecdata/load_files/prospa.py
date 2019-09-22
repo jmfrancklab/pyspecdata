@@ -57,11 +57,11 @@ def load_datafile(file,dims=1):
     else:
         print('ERROR: wrong number of dims')
     data = fp.read()
-    data = array(struct.unpack('%df'%(len(data)/4),data))
+    data = array(struct.unpack('%df'%(len(data)//4),data))
     data = data[7:]
     # the following is junk!!!
     #elif precision=='b':
-    #   data = array(struct.unpack('%db'%(len(data)/1),data))
+    #   data = array(struct.unpack('%db'%(len(data)//1),data))
     #   data = data[7*4:]
     #else:
     #   print 'error, precision wrong'

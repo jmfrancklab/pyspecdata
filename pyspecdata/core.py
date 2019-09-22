@@ -2484,7 +2484,6 @@ def plot(*args,**kwargs):
     #{{{ hsv plots when we have multiple lines
     if len(shape(myy.squeeze()))>1 and sum(array(shape(myy))>1):
         #{{{ hsv plots
-        hold(True)
         retval = []
         for j in range(0,myy.shape[1]):
             #{{{ this is the way to assign plot arguments
@@ -2515,7 +2514,6 @@ def plot(*args,**kwargs):
             if x_inverted:
                 these_xlims = ax.get_xlim()
                 ax.set_xlim((max(these_xlims),min(these_xlims)))
-        #hold(False)
         #}}}
         #}}}
     else:
@@ -4748,7 +4746,7 @@ class nddata (object):
         decimation = int(decimation)
         if temp != 0:
             if centered:
-                self = self[thisaxisname,temp/2:-int(temp/2. + 0.5)]
+                self = self[thisaxisname,temp//2:-int(temp/2. + 0.5)]
             else:
                 self = self[thisaxisname,0:-temp]
         thisaxis = nddata(self.getaxis(thisaxisname),[-1],[thisaxisname])
@@ -6436,6 +6434,7 @@ class nddata_hdf5 (nddata):
             self.h5file.close()
             del self.h5file
             del self.datanode
+        super().__del__()
         return
     def __init__(self,pathstring,directory='.'):
         self.pathstring = pathstring

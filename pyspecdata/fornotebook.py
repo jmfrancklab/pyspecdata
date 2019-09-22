@@ -397,7 +397,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
         temp = fig.scene.anti_aliasing_frames
         fig.scene.disable_render = True
         fig.scene.anti_aliasing_frames = 0 # mayavi antialiasing is terrible, so just acquire at a high dpi setting
-        mlab.savefig(fname, magnification=dpi/72,
+        mlab.savefig(fname, magnification=int(dpi/72+0.5),
                 bbox_inches='tight')
         #{{{ convert to transparent, find red pixels, and change them to transparent
         data = imread(fname)
@@ -838,7 +838,8 @@ def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'ref
        ax = gca()
        ax.get_xaxis().set_visible(False)
        ax.get_yaxis().set_visible(False)
-       list(map((lambda x: x.set_visible(False)),list(ax.spines.values())))
+       for x in list(ax.spines.values()):
+           x.set_visible(False)
        lplot('noise'+plotlabel+'_%d.pdf'%ind,grid=False,width=5,gensvg=True)
        print('\n\n')
        figure(2)
