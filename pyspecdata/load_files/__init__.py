@@ -453,6 +453,29 @@ postproc_lookup = {
         'B1_se':acert.postproc_B1_se,
         'CW':acert.postproc_cw,
         }
+def bruker_dir(search_string, exp_type):
+    "A generator that returns a 3-tuple of dirname, expno, and dataset for a directory"
+    dirnames = search_filename(search_string, exp_type=exp_type)
+    for j in dirnames:
+        if os.path.isdir(j):
+            for k in os.listdir(j):
+                if os.path.isdir(k):
+                    yield j,k,find_file(search_string,
+                                    expno=int(k),
+                                    exp_type=exp_type)
+        else:
+            with ZipFile(j) as z:
+                names_of_subdir = set()
+                for k in z.namelist():
+                    path_list = k.split('/')
+                    if len(path_list) > 3:
+                        names_of_subdir |= {path_list[1]}
+                names_of_subdir = list(names_of_subdir)
+                names_of_subdir.sort()
+                for k in names_of_subdir:
+                    yield j,k,find_file(search_string,
+                                    expno=int(k),
+                                    exp_type=exp_type)
 def load_t1_axis(file):
     raise RuntimeError("don't use load_t1_axis anymore, the t1 axis should be available as an nddata property called wait_time")
 def bruker_load_t1_axis(file):
@@ -478,5 +501,6 @@ __all__ = ['find_file',
         'bruker_load_t1_axis',
         'prospa_t1_info',
         'bruker_load_title',
+        'bruker_dir',
         'cw',
         ]

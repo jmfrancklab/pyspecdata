@@ -242,6 +242,8 @@ def load_jcamp(file_reference,*subpath):
             return double(val)
     fp = open_subpath(file_reference,*subpath)
     lines = fp.readlines()
+    if isinstance(lines[0],bytes):
+        lines = map(lambda x: x.decode('utf-8'), lines)
     vars = {}
     number_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *([0-9\-\.]+)')
     string_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *<(.*)')
@@ -294,6 +296,8 @@ def load_title(file_reference,*subpath):
     else:
         fp = open_subpath(file_reference,*(subpath + ('pdata','1','title')))
         lines = fp.readlines()
+        if isinstance(lines[0],bytes):
+            lines = map(lambda x: x.decode('utf-8'), lines)
         emptystring = '\r\n'
         while emptystring in lines:
             lines.pop(lines.index(emptystring))
