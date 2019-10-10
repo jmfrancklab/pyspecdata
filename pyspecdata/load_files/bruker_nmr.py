@@ -185,6 +185,9 @@ def load_1D(file_reference, *subpath, **kwargs):
             load_title(file_reference,*subpath))
     data.set_prop('acq',
             v)
+    with open_subpath(file_reference, *(subpath+('pulseprogram',)),mode='r',encoding='utf-8') as fp:
+        ppg = fp.read()
+        data.set_prop('pulprog',ppg)
     if type(file_reference) is tuple:
         data.set_prop('filename',
                 file_reference[1])
