@@ -4074,6 +4074,8 @@ class nddata (object):
                 self.data = argmax(self.data,
                         axis=thisindex)
             else:
+                if self.axis_coords[thisindex] is None:
+                    raise ValueError("It doesn't make sense to call argmax if you have removed the axis coordinates! (getaxis yields None for %s"%thisindex)
                 self.data = self.axis_coords[thisindex][argmax(self.data,
                     axis=thisindex)]
             self._pop_axis_info(thisindex)
