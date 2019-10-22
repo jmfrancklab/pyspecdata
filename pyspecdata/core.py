@@ -4271,6 +4271,17 @@ class nddata (object):
             newdata.data = func(newdata.data)
         return newdata
     def run(self,*args):
+        """run a standard numpy function on the nddata:
+
+        ``d.run(func,'axisname')`` will run function `func` (*e.g.* a
+        lambda function) along axis named 'axisname'
+
+        ``d.run(func)`` will run function `func` on the data
+
+        **in general**: if the result of func reduces a dimension size to
+        1, the 'axisname' dimension will be "popped" (it will not exist in
+        the result) -- if this is not what you want, use ``run_nopop``
+        """
         func = args[0]
         func = self._wrapaxisfuncs(func)
         if len(args)>1:
@@ -4289,8 +4300,12 @@ class nddata (object):
             self.data = func(self.data,axis=thisindex)
             self._pop_axis_info(thisindex)
         else:
-            self.data = func(self.data)
-        return self
+            retval = func(self.data)
+            if self.data.size == retval.size:
+                self.data = retval
+                return self
+            else:
+                return retval
     def run_nopop(self,func,axis):
         func = self._wrapaxisfuncs(func)
         try:
@@ -5631,15 +5646,15 @@ class nddata (object):
             axesout -- gives the names of the output axes
             shapesout -- optional -- if not given, it assumes equal length -- if given, one of the values can be -1, which is assumed length
 
+        When there are axes, it assumes that the axes of the new dimensions
+        are nested -- *e.g.*, it will chunk a dimension with axis: 
+        [1,2,3,4,5,6,7,8,9,10]
+        into dimensions with axes:
+        [0,1,2,3,4], [1,6]
+
         ..todo::
-            when we transition to axes that are stored using a
-            slice/linspace-like format, 
-            allow for chunking to assume that the axes of the new dimensions
-            are nested -- *e.g.*, chunk a dimension with axis: 
-            [1,2,3,4,5,6,7,8,9,10]
-            into dimensions with axes:
-            [0,1,2,3,4], [1,6]
-            '''
+            Deal with this efficiently when we move to new-style axes
+        '''
         if len(otherargs) == 2:
             axesout,shapesout = otherargs
         elif len(otherargs) == 1:
@@ -5703,10 +5718,12 @@ class nddata (object):
         newshape = map(int,newshape)
         newnames = list(self.dimlabels[0:thisaxis]) + axesout + list(self.dimlabels[thisaxis+1:])
         self.data = self.data.reshape(newshape)
+        orig_axis_units = self.get_units(axisin)
         self.dimlabels = newnames
         if new_axes is not None:
             for j in range(len(axesout)):
                 self.setaxis(axesout[j],new_axes[j])
+                self.set_units(axesout[j],orig_axis_units)
         return self
     def chunk_auto(self,axis_name,which_field,verbose = False,dimname = None):
         r'''assuming that axis "axis_name" is currently labeled with a structured array, choose one field ("which_field") of that structured array to generate a new dimension
