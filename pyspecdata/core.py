@@ -1988,7 +1988,7 @@ class figlist(object):
                         if type(testunits) is tuple and testunits[1] is None:
                             pass
                         else:
-                            raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(theseunits,self.units[self.current]))
+                            raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(self.units[self.current],theseunits))
                 else:
                     self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]))
         if verbose: print "-"*30
@@ -4080,8 +4080,10 @@ class nddata (object):
                     axis=thisindex)]
             self._pop_axis_info(thisindex)
         return self
-    def argmin(self,axes,raw_index = False):
-        r"""find the min along a particular axis, and get rid of that axis, replacing it with the index number of the max value
+    def argmin(self,*axes,**kwargs):
+        r"""If `argmin('axisname')` find the min along a particular axis, and get rid of that
+        axis, replacing it with the index number of the max value.
+        If `argmin()`: return a dictionary giving the coordinates of the overall minimum point.
         
         Parameters
         ==========
@@ -4089,6 +4091,14 @@ class nddata (object):
             Return the raw (ndarray) numerical index, rather than the corresponding axis value.
             Note that the result returned is still, however, an nddata (rather than numpy ndarray) object.
         """
+        raw_index = process_kwargs([("raw_index",False)],kwargs)
+        if len(axes) == 0:
+            raw_indices = dict(zip(self.dimlabels,
+                unravel_index(self.data.ravel().argmin(),self.data.shape)))
+            if raw_index:
+                return raw_indices
+            else:
+                return dict([(k,self.getaxis(k)[v]) for k,v in raw_indices.iteritems()])
         if (type(axes) is str):
             axes = [axes]
         for j in range(0,len(axes)):
