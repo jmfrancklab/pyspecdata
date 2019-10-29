@@ -53,6 +53,7 @@ from matplotlib.lines import Line2D
 from scipy.interpolate import griddata as scipy_griddata
 import tables
 import warnings
+import re
 from inspect import ismethod
 from numpy.core import rec
 from matplotlib.pyplot import cm
@@ -3392,8 +3393,14 @@ class nddata (object):
         ----------
         propname: str
             Name of the property that you're want returned.
-            If this is left out or set to "None", the names of the available
+            If this is left out or set to "None" (not given), the names of the available
             properties are returned.
+            If no exact match is found, and propname contains a . or * or [, it's
+            assumed to be a regular expression.
+            If several such matches are found, the error message is informative.
+
+            .. todo::
+                have it recursively search dictionaries (e.g. bruker acq)
 
         Returns
         -------
@@ -3402,7 +3409,17 @@ class nddata (object):
         if propname is None:
             return self.other_info.keys()
         if propname not in self.other_info.keys():
-            return None
+            if '.' in propname or '*' in propname or '[' in propname:
+                propname_re = re.compile(propname)
+                matches = [j for j in self.other_info.keys() if propname_re.match(j)]
+                if len(matches) == 0:
+                    return None
+                assert len(matches) == 1, "I found %d matches for regexp %s in properties: %s"%(len(matches),
+                        propname,
+                        ' '.join(matches))
+                return self.other_info[matches[0]]
+            else:
+                return None
         return self.other_info[propname]
     def name(self,*arg):
         r"""args:
