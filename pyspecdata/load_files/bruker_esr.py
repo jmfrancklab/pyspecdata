@@ -32,11 +32,7 @@ def xepr(filename, dimname='', verbose=False):
         filename_par = filename_par[:-4] + filename_par[-4:].lower()
     # }}}
     # }}}
-    # {{{ load the data
-    with open(filename_spc,'rb') as fp:
-        data = fromstring(fp.read(),'>f8')
-    # }}}
-    # load the parameters
+    # {{{ load the parameters
     v = xepr_load_acqu(filename_par)
     # {{{ flatten the dictionary (remove the uppermost/block
     #     level)
@@ -44,6 +40,19 @@ def xepr(filename, dimname='', verbose=False):
     for k_a,v_a in v.iteritems():
         new_v.update(v_a)
     v = new_v
+    # }}}
+    ikkf = v['IKKF']
+    # }}}
+    # {{{ load the data
+    with open(filename_spc,'rb') as fp:
+        if all([j == 'REAL' for j in ikkf]):
+            data = fromstring(fp.read(),'>f8')
+        elif all([j == 'CPLX' for j in ikkf]):
+            data = fromstring(fp.read(),'>c16')
+        else:
+            raise ValueError('the data type (IKKF) is givn as '
+                    +' '.join(ikkf)
+                    +" and I don't support mixed types!")
     # }}}
     # {{{ use the parameters to determine the axes
     #     pop parameters that are just part of the axes
@@ -62,6 +71,10 @@ def xepr(filename, dimname='', verbose=False):
             if thiskey in v.keys() and v[thiskey]:
                 harmonics[k,j] = True
     n_harmonics = sum(harmonics)
+    logger.debug('there are %d harmonics'%n_harmonics)
+    logger.debug('there are %d harmonics, first is of type %s'%(n_harmonics,ikkf[0]))
+    # }}}
+    # {{{ check that calculated axes match dimensions
     y_points_calcd = len(data)/x_points/n_harmonics
     dimname_list = [b0_texstr]
     dimsize_list = [x_points]
