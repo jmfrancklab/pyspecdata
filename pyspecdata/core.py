@@ -4895,9 +4895,9 @@ class nddata (object):
         return self
     def invinterp(self,axis,values,**kwargs):
         'interpolate axis values given data values'
-        copy = False
-        if 'copy' in kwargs.keys():
-            copy = kwargs.pop('copy')
+        copy = process_kwargs([('copy',False),
+            ], kwargs, pass_through=True)
+        
         if isscalar(values):
             values = r_[values]
         origdata = self.data.copy()
@@ -4922,13 +4922,13 @@ class nddata (object):
                 if len(rdata) < 3:
                     thiskind = 'linear'
         #}}}
-        interpfunc =  interp1d(origdata,rdata,kind = thiskind)
+        interpfunc =  interp1d(origdata,rdata, kind=thiskind, **kwargs)
         try:
             rdata = interpfunc(values)
         except Exception as e:
             raise ValueError(strm('You passed',values,'and the data spans from',
                     origdata.min(),'to',origdata.max())+explain_error(e))
-        interpfunc =  interp1d(origdata,idata,kind = thiskind)
+        interpfunc =  interp1d(origdata,idata, kind=thiskind, **kwargs)
         idata = interpfunc(values)
         cdata = rdata + 1j * idata
         if copy:
