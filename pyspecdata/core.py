@@ -5410,6 +5410,9 @@ class nddata (object):
         if self.axis_coords is None or len(self.axis_coords) == 0:
             self.axis_coords = [None]*len(self.dimlabels)
             self.axis_coords_error = [None]*len(self.dimlabels)
+        a = len(value)
+        b = self.data.shape[self.axn(axis)]
+        assert  a == b, "Along the axis %s, the length of the axis you passed (%d) doesn't match the size of the data (%d)."%(axis,a,b)
         self.axis_coords[self.axn(axis)] = value
         return self
     def shear(self, along_axis, propto_axis, shear_amnt,
