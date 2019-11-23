@@ -1927,7 +1927,7 @@ class figlist(object):
             This overrides that behavior.
             Defaults to False.
         """
-        if 'label' in kwargs.keys():
+        if 'label' in kwargs.keys() or 'label_format_string' in kwargs.keys():
             self.use_autolegend()
         human_units = True
         if 'human_units' in kwargs.keys():
@@ -2330,16 +2330,24 @@ def text_on_plot(x,y,thistext,coord = 'axes',**kwargs):
     newkwargs.update(kwargs)
     return text(x,y,thistext,**newkwargs)
 def plot(*args,**kwargs):
+    """The base plotting function that wraps around matplotlib to do a couple convenient things.
+
+    Parameters
+    ----------
+    label_format_string: str
+        If supplied, it formats the values of the other dimension to turn them into a label string.
+    human_units: bool
+    """
     global myplotfunc
     has_labels = False
     #{{{ deal with axes and some other kwargs
-    ax,human_units,label_format_string,normalize,noerr = process_kwargs([('ax',gca()),
+    ax,human_units,label_format_string,normalize,noerr,longest_is_x = process_kwargs([('ax',gca()),
         ('human_units',False),
         ('label_format_string',None),
         ('normalize',False),
         ('noerr',False),
+        ('longest_is_x',True),
         ],kwargs,pass_through = True)
-    label_format_string = None
     #}}}
     myplotfunc = ax.plot # default
     #{{{ all possible properties
@@ -2374,6 +2382,14 @@ def plot(*args,**kwargs):
             for singleton_dim in [lb for j,lb in enumerate(myy.dimlabels) if myy.data.shape[j] == 1]:
                 myy = myy[singleton_dim,0]
         # }}}
+        if longest_is_x:
+            longest_dim = argmax(myy.data.shape)
+            all_but_longest = set(range(len(myy.data.shape)))^set((longest_dim,))
+            last_not_longest = max(all_but_longest)
+            all_but_longest = list(all_but_longest) # seems to be sorted by default
+        else:
+            longest_dim = 0 # treat first as x, like before
+            last_not_longest = -1
         if human_units: myy = myy.human_units()
         if myy.get_plot_color() is not None\
             and 'color' not in kwargs.keys():# allow override
@@ -2384,14 +2400,14 @@ def plot(*args,**kwargs):
             myylabel = 'data'
         myylabel = myy.unitify_axis(myylabel,is_axis = False)
         if (len(myy.dimlabels)>0):
-            myxlabel = myy.unitify_axis(0)
+            myxlabel = myy.unitify_axis(longest_dim)
         if (myx == None):
             try:
-                myx = myy.getaxis(myy.dimlabels[0])
+                myx = myy.getaxis(myy.dimlabels[longest_dim])
             except:
                 if len(myy.data.shape) == 0:
                     raise ValueError("I can't plot zero-dimensional data (typically arises when you have a dataset with one point)")
-                myx = r_[0:myy.data.shape[0]]
+                myx = r_[0:myy.data.shape[longest_dim]]
         if not noerr and type(myy.data_error) is ndarray and len(myy.data_error)>0: #then this should be an errorbar plot
             def thiserrbarplot(*tebargs,**tebkwargs):
                 if type(tebargs[-1]) is str:
@@ -2405,13 +2421,13 @@ def plot(*args,**kwargs):
             myyerror = squeeze(myyerror)
             #}}}
             kwargs.update({'yerr':myyerror})
-            valueforxerr = myy.get_error(myy.dimlabels[0])
+            valueforxerr = myy.get_error(myy.dimlabels[longest_dim])
             if valueforxerr != None: # if we have x errorbars too
                 #print "DEBUG decided to assign to xerr:",valueforxerr
                 kwargs.update({'xerr':valueforxerr})
         #{{{ deal with axis labels along y
         try:
-            yaxislabels = myy.getaxis(myy.dimlabels[-1])
+            yaxislabels = myy.getaxis(myy.dimlabels[last_not_longest])
         except:
             pass
         # at this point, if there is no axis label, it will break and go to pass
@@ -2427,7 +2443,7 @@ def plot(*args,**kwargs):
         if myy.get_prop('x_inverted'):
             x_inverted=True
         #myy_name = myy.name()
-        myy = squeeze(myy.data)
+        myy = squeeze(myy.data.transpose([longest_dim]+all_but_longest))
         #if len(myy.data) == 1 and 'label' not in kwargs.keys() and myy_name is not None:
         #    kwargs.update('label',myy_name)
         # }}}
@@ -2483,7 +2499,6 @@ def plot(*args,**kwargs):
     #{{{ hsv plots when we have multiple lines
     if len(shape(myy.squeeze()))>1 and sum(array(shape(myy))>1):
         #{{{ hsv plots
-        hold(True)
         retval = []
         for j in range(0,myy.shape[1]):
             #{{{ this is the way to assign plot arguments
@@ -2495,13 +2510,13 @@ def plot(*args,**kwargs):
             #}}}
             #{{{ here, I update to use the labels
             if has_labels:
+                print "yes, has labels"
                 newkwargs.update({'label':yaxislabels[j]})
             #}}}
             if any(isinf(myy)):
                 myy[isinf(myy)] = NaN # added this to prevent an overflow error
             try:
                 retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
-                #print "\n\n\\begin{verbatim}DEBUG plot:",plotargs,'\nkwargs:\n',newkwargs,'\\end{verbatim}'
             except Exception as e:
                 raise RuntimeError(strm("Error trying to plot using function",
                     myplotfunc, '\nwith',len(plotargs), "arguments",
@@ -4370,7 +4385,7 @@ class nddata (object):
     def unitify_axis(self,axis_name,
             is_axis=True):
         'this just generates an axis label with appropriate units'
-        if type(axis_name) is int:
+        if type(axis_name) in [int,int64]:
             axis_name = self.dimlabels[axis_name]
         if self.get_prop('FT') is not None and axis_name in self.get_prop('FT').keys() and self.get_prop('FT')[axis_name]:
             isft = True
@@ -5574,14 +5589,22 @@ class nddata (object):
         # {{{ store the dictionaries for later use
         axis_coords_dict = self.mkd(self.axis_coords)
         axis_coords_error_dict = self.mkd(self.axis_coords_error)
+        axis_coords_units_dict = self.mkd(self.axis_coords_units)
         # }}}
+        old_units = []
         for this_name in dimstocollapse:
             this_idx = retained_dims.index(this_name)
             retained_dims.pop(this_idx)
             axis_coords_error_dict.pop(this_name)
+            old_units.append(axis_coords_units_dict.pop(this_name))
             axis_coords_dict.pop(this_name)
             if this_idx < final_position:
                 final_position -= 1
+        new_units = list(set(old_units))
+        if len(new_units) > 1:
+            new_units = ' '.join(map(str,new_units))
+        else:
+            new_units = new_units[0]
         # this might be sub-optimal, but put the dims to collapse at the end, and move them back later if we want
         new_order = retained_dims + dimstocollapse
         self.reorder(new_order)
@@ -5656,12 +5679,15 @@ class nddata (object):
         #}}}
         #}}}
         #{{{ make new dimlabels, and where relevant, project the new dictionary onto these dimlabels
+        axis_coords_units_dict[dimname] = new_units
         self.dimlabels = retained_dims + [dimname]
         logger.debug(strm("end up with dimlabels",self.dimlabels,"and shape",self.data.shape))
         self.axis_coords = self.fld(axis_coords_dict)
         self.axis_coords_error = self.fld(axis_coords_error_dict)
+        self.axis_coords_units = self.fld(axis_coords_units_dict)
         logger.debug(strm("new axis coords (%d)"%len(self.axis_coords),self.axis_coords))
         logger.debug(strm("new axis coords errors (%d)"%len(self.axis_coords_error),self.axis_coords_error))
+        logger.debug(strm("new axis coords unitss (%d)"%len(self.axis_coords_units),self.axis_coords_units))
         #}}}
         #{{{ then deal with the units
         #}}}
@@ -6075,6 +6101,29 @@ class nddata (object):
             # }}}
             retval.other_info = deepcopy(self.other_info)
             return retval
+    def set_to(self,otherinst):
+        r'''Set data inside the current instance to that of the other instance.
+
+        Goes through the list of attributes specified in copy,
+        and assigns them to the element of the current instance.
+
+        This is to be used:
+
+        *   for constructing classes that inherit nddata with additional methods.
+        *   for overwriting the current data with the result of a slicing operation
+        '''
+        self.data = otherinst.data
+        self.dimlabels = otherinst.dimlabels
+        self.data_error = otherinst.data_error
+        if hasattr(otherinst,'data_units'):
+            self.data_units = otherinst.data_units
+        if hasattr(otherinst,'data_covariance'):
+            self.data_covariance = otherinst.data_covariance
+        self.axis_coords = otherinst.axis_coords
+        self.axis_coords_error = otherinst.axis_coords_error
+        self.axis_coords_units = otherinst.axis_coords_units
+        self.other_info = otherinst.other_info
+        return self
     def like(self,value):
         r'''provide "zeros_like" and "ones_like" functionality
 
