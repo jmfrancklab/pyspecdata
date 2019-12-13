@@ -295,7 +295,7 @@ def xepr_load_acqu(filename):
     comment_re = re.compile(r'^ *\*')
     variable_re = re.compile(r'^ *([^\s]*)\s+(.*?) *$')
     comma_re = re.compile(r'\s*,\s*')
-    with open(filename,'r') as fp:
+    with open(filename,'r',encoding='utf-8') as fp:
         blocks = {}
         # {{{ read lines and assign to the appropriate block
         for line in fp:
