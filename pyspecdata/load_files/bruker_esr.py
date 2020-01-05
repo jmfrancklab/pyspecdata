@@ -88,6 +88,7 @@ def xepr(filename, dimname='', verbose=False):
         dims_accounted_for |= {'harmonic'}
         # }}}
     y_dim_name = None
+    logger.debug(strm('Parameter names:',v.keys()))
     if y_points_calcd>1:
         if 'YPTS' in list(v.keys()):
             assert v['YPTS']==y_points_calcd, ("y points left over after"

@@ -785,7 +785,7 @@ class CustomError(Exception):
         raise NotImplementedError("You should get rid of CustomError and use explain_error instead")
         return
 def copy_maybe_none(input):
-    if input == None:
+    if input is None:
         return None
     else:
         if isinstance(input, list):
@@ -803,9 +803,9 @@ def maprep(*mylist):
 #{{{ helper function for HDF5 search
 def gensearch(labelname,format = '%0.3f',value = None,precision = None):
     'obsolete -- use h5gensearch'
-    if value == None:
+    if value is None:
         raise ValueError('You must pass a value to gensearch')
-    if precision == None:
+    if precision is None:
         precision = value*0.01 # the precision is 1% of the value, if we don't give an argument
     searchstring_high = '(%s < %s + (%s))'%tuple([labelname]+[format]*2)
     #print "\n\nDEBUG check format:\\begin{verbatim}",searchstring_high,r'\end{verbatim}'
@@ -1263,7 +1263,7 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
             widthexp = floor(log(width)/log(10.))-1
             scalefactor = 10**widthexp
             width /= scalefactor
-            if fixed_y_locator == None:
+            if fixed_y_locator is None:
                 if logarithmic:
                     majorLocator = LogLocator(10)
                 else:
@@ -1272,7 +1272,7 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
                 majorLocator   = MultipleLocator(fixed_y_locator[4::5])
             #majorFormatter = FormatStrFormatter('%0.'+'%d'%precision[1]+'f'+labelstring[1])# labelstring can be used, for instance, for pi
             #ax.yaxis.set_major_formatter(majorFormatter)
-            if fixed_y_locator == None:
+            if fixed_y_locator is None:
                 if logarithmic:
                     minorLocator = LogLocator(10,subs=r_[0:11])
                 else:
@@ -1681,7 +1681,7 @@ def figlistini_old(first_figure):
         print("Boo, not a new style name! (initialize)")
     verbose = False
     if verbose: print(lsafe('DEBUG: initialize figlist'))
-    if first_figure == None:
+    if first_figure is None:
         if verbose: print(lsafen('empty'))
         return []
     else:
@@ -2386,7 +2386,7 @@ def plot(*args,**kwargs):
         myylabel = myy.unitify_axis(myylabel,is_axis = False)
         if (len(myy.dimlabels)>0):
             myxlabel = myy.unitify_axis(0)
-        if (myx == None):
+        if myx is None:
             try:
                 myx = myy.getaxis(myy.dimlabels[0])
             except:
@@ -2758,11 +2758,11 @@ class nddata (object):
         self.data_error = data_error
         self.data_units = data_units
         self.other_info = dict(other_info)
-        if axis_coords_error == None:
+        if axis_coords_error is None:
             self.axis_coords_error = [None]*len(axis_coords)
         else:
             self.axis_coords_error = axis_coords_error
-        if axis_coords_units == None:
+        if axis_coords_units is None:
             self.axis_coords_units = [None]*len(axis_coords)
         else:
             self.axis_coords_units = axis_coords_units 
@@ -3000,7 +3000,7 @@ class nddata (object):
         #ax.view_init(elev = rotation[0],azim = rotation[1])
         if rotation is None:
             rotation = [0,0]
-        if ax == None:
+        if ax is None:
             fig = gcf()
             ax = axes3d.Axes3D(fig)
             print("I'm trying to rotate to",rotation)
@@ -3014,7 +3014,7 @@ class nddata (object):
         self.sort(self.dimlabels[1])
         if invert:
             print("trying to invert oldtimey")
-        if linewidth == None:
+        if linewidth is None:
             linewidth = sclinewidth/sortedself.data.shape[1]
             print("setting linewidth to %0.1f"%linewidth)
         if ax is None: 
@@ -3175,7 +3175,7 @@ class nddata (object):
     def set_units(self,*args):
         if len(args) == 2:
             unitval = args[1] # later, have some type of processing bojive
-            if self.axis_coords_units == None or len(self.axis_coords_units) == 0:
+            if self.axis_coords_units is None or len(self.axis_coords_units) == 0:
                 self.axis_coords_units = [None] * len(self.dimlabels)
             self.axis_coords_units[self.axn(args[0])] = unitval
         elif len(args) == 1:
@@ -3248,7 +3248,7 @@ class nddata (object):
         return self
     def get_units(self,*args):
         if len(args) == 1:
-            if self.axis_coords_units == None:
+            if self.axis_coords_units is None:
                 return None
             if len(self.axis_coords_units) == 0:
                 return None
@@ -3508,7 +3508,7 @@ class nddata (object):
         if Berr != None:
             Rerr += (Berr)**2
         Rerr = sqrt(real(Rerr)) # convert back to stdev
-        if Aerr == None and Berr == None:
+        if Aerr is None and Berr is None:
             Rerr = None
         retval.set_error(Rerr)
         return retval
@@ -3608,7 +3608,7 @@ class nddata (object):
         if Berr != None:
             Rerr += (Berr * A.data)**2
         Rerr = sqrt(real(Rerr)) # convert back to stdev
-        if Aerr == None and Berr == None:
+        if Aerr is None and Berr is None:
             Rerr = None
         #}}}
         retval.set_error(Rerr)
@@ -3678,7 +3678,7 @@ class nddata (object):
             raise AttributeError(strm("Rerr gave an attribute error when you passed",Rerr) + explain_error(e))
         #print "DEBUG: step 3",Rerr
         #print "Rerr dtype",Rerr.dtype
-        if Aerr == None and Berr == None:
+        if Aerr is None and Berr is None:
             Rerr = None
         #}}}
         retval.set_error(Rerr)
@@ -4794,7 +4794,7 @@ class nddata (object):
                 raise ValueError("I can't interpolate imaginary values")
             else:
                 axisvalues = real(axisvalues)
-            if past_bounds == None:
+            if past_bounds is None:
                 axisvalues[axisvalues<oldaxis.min()] = oldaxis.min()
                 axisvalues[axisvalues>oldaxis.max()] = oldaxis.max()
             elif not (past_bounds == 'fail'):
@@ -7165,7 +7165,7 @@ class fitdata(nddata):
         else:
             if force_analytical: raise RuntimeError(strm("I can't take the analytical",
                 "covariance!  This is problematic."))
-            if cov == None:
+            if cov is None:
                 if not silent: print(r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success),'}\n')
             self.covariance = cov
         if self.covariance is not None:
