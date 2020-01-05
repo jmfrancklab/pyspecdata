@@ -255,8 +255,8 @@ def _check_signature(filename):
         (currently "HDF5", "DOS Format"  or "TXT")
         OR `None` if the type is unknown.
     """
-    file_signatures = {'\x89\x48\x44\x46\x0d\x0a\x1a\x0a':'HDF5',
-            'DOS  Format':'DOS Format'}
+    file_signatures = {b'\x89\x48\x44\x46\x0d\x0a\x1a\x0a':'HDF5',
+            b'DOS  Format':'DOS Format'}
     max_sig_length = max(list(map(len,list(file_signatures.keys()))))
     with open(filename,'rb') as fp:
         inistring = fp.read(max_sig_length)

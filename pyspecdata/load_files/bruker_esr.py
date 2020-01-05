@@ -75,7 +75,7 @@ def xepr(filename, dimname='', verbose=False):
     logger.debug('there are %d harmonics, first is of type %s'%(n_harmonics,ikkf[0]))
     # }}}
     # {{{ check that calculated axes match dimensions
-    y_points_calcd = len(data)/x_points/n_harmonics
+    y_points_calcd = len(data)//x_points//n_harmonics
     dimname_list = [b0_texstr]
     dimsize_list = [x_points]
     dims_accounted_for = {b0_texstr}
@@ -302,7 +302,7 @@ def xepr_load_acqu(filename):
         converts the record array to a list.'''
         if len(x):
             try:
-                return genfromtxt(StringIO(x),dtype=None).tolist()
+                return genfromtxt(StringIO(x),dtype=None,encoding='utf-8').tolist()
             except:
                 raise ValueError("genfromtxt chokes on "+repr(x))
         else:
@@ -312,7 +312,7 @@ def xepr_load_acqu(filename):
     comment_re = re.compile(r'^ *\*')
     variable_re = re.compile(r'^ *([^\s]*)\s+(.*?) *$')
     comma_re = re.compile(r'\s*,\s*')
-    with open(filename,'r') as fp:
+    with open(filename,'r',encoding='utf-8') as fp:
         blocks = {}
         # {{{ read lines and assign to the appropriate block
         for line in fp:
