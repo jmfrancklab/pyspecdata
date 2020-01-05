@@ -113,11 +113,13 @@ def series(file_reference, *subpath, **kwargs):
     data.set_prop('title',
             load_title(file_reference, *subpath))
     SFO1 = v['SFO1']
+    BF1 = v['BF1']
     v.update(v2)
     if v['SFO1'] != SFO1:
         # for, e.g. 2H experiments, a bad SFO1 (1H) is stored in acqu2, which we don't want
         print("warning: ignoring second dimension SFO1, since it's probably wrong")
         v['SFO1'] = SFO1
+        v['BF1'] = BF1
     with open_subpath(file_reference, *(subpath+('pulseprogram',)),mode='r') as fp:
         ppg = fp.read()
         data.set_prop('pulprog',ppg)
@@ -184,7 +186,10 @@ def load_1D(file_reference, *subpath, **kwargs):
             load_title(file_reference,*subpath))
     data.set_prop('acq',
             v)
-    if isinstance(file_reference, tuple):
+    with open_subpath(file_reference, *(subpath+('pulseprogram',)),mode='r',encoding='utf-8') as fp:
+        ppg = fp.read()
+        data.set_prop('pulprog',ppg)
+    if type(file_reference) is tuple:
         data.set_prop('filename',
                 file_reference[1])
     else:

@@ -32,11 +32,7 @@ def xepr(filename, dimname='', verbose=False):
         filename_par = filename_par[:-4] + filename_par[-4:].lower()
     # }}}
     # }}}
-    # {{{ load the data
-    with open(filename_spc,'rb') as fp:
-        data = fromstring(fp.read(),'>f8')
-    # }}}
-    # load the parameters
+    # {{{ load the parameters
     v = xepr_load_acqu(filename_par)
     # {{{ flatten the dictionary (remove the uppermost/block
     #     level)
@@ -44,6 +40,19 @@ def xepr(filename, dimname='', verbose=False):
     for k_a,v_a in v.items():
         new_v.update(v_a)
     v = new_v
+    # }}}
+    ikkf = v['IKKF']
+    # }}}
+    # {{{ load the data
+    with open(filename_spc,'rb') as fp:
+        if all([j == 'REAL' for j in ikkf]):
+            data = fromstring(fp.read(),'>f8')
+        elif all([j == 'CPLX' for j in ikkf]):
+            data = fromstring(fp.read(),'>c16')
+        else:
+            raise ValueError('the data type (IKKF) is givn as '
+                    +' '.join(ikkf)
+                    +" and I don't support mixed types!")
     # }}}
     # {{{ use the parameters to determine the axes
     #     pop parameters that are just part of the axes
@@ -55,13 +64,17 @@ def xepr(filename, dimname='', verbose=False):
     #         difference, but I'm not sure if this is correct
     #         (I think so)
     x_axis += v.pop('XMIN') # actually using pop is better than calling these, so that we don't have redundant information
-    harmonics = array([[False] * 5]*2) # outer dimension for the 90 degree phase
+    harmonics = array([[False] * 2]*5) # inner dimension for the 90 degree phase
     for j,jval in enumerate(['1st','2nd','3rd','4th','5th']):
         for k,kval in enumerate(['','90']):
             thiskey = 'Enable'+jval+'Harm'+kval
-            if thiskey in list(v.keys()) and v[thiskey]:
-                harmonics[k,j] = True
+            if thiskey in v.keys() and v[thiskey]:
+                harmonics[j,k] = True
     n_harmonics = sum(harmonics)
+    logger.debug('there are %d harmonics'%n_harmonics)
+    logger.debug('there are %d harmonics, first is of type %s'%(n_harmonics,ikkf[0]))
+    # }}}
+    # {{{ check that calculated axes match dimensions
     y_points_calcd = len(data)/x_points/n_harmonics
     dimname_list = [b0_texstr]
     dimsize_list = [x_points]
@@ -79,12 +92,16 @@ def xepr(filename, dimname='', verbose=False):
         dimname_list = dimname_list + ['harmonic']
         dimsize_list = dimsize_list + [n_harmonics]
         # {{{ generate a grid of labels and mask out the ones we want
-        harmonic_axes = array([[(1,0),(2,0),(3,0),(4,0),(5,0)],
-            [(1,90),(2,90),(3,90),(4,90),(5,90)]],
+        #harmonic_axes = array([[(1,0),(2,0),(3,0),(4,0),(5,0)],
+        #    [(1,90),(2,90),(3,90),(4,90),(5,90)]],
+        #    dtype=[('harmonic','int'),('phase','int')])
+        harmonic_axes = array([(1,0),(2,0),(3,0),(4,0),
+            (5,0),(1,90),(2,90),(3,90),(4,90),(5,90)],
             dtype=[('harmonic','int'),('phase','int')])
+        harmonic_axes = harmonic_axes.reshape(2,5).T
         harmonic_axes = harmonic_axes[harmonics]
         dims_to_label.update({'harmonic':harmonic_axes})
-        if verbose: print("I found multiple harmonics, and am loading them into the 'harmonics' axis.  This is experimental.  You most likely will want to select the 0th element of the harmonic axis.")
+        logger.info("I found multiple harmonics, and am loading them into the 'harmonics' axis.  This is experimental.  You most likely will want to select the 0th element of the harmonic axis.")
         dims_accounted_for |= {'harmonic'}
         # }}}
     y_dim_name = None
