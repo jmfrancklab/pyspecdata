@@ -2512,7 +2512,6 @@ def plot(*args,**kwargs):
             #}}}
             #{{{ here, I update to use the labels
             if has_labels:
-                print "yes, has labels"
                 newkwargs.update({'label':yaxislabels[j]})
             #}}}
             if any(isinf(myy)):
