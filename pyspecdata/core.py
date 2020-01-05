@@ -5795,7 +5795,7 @@ class nddata (object):
                         if j != which_field]]
             #}}}
             #{{{ reshape the axis coordinate so that it becomes a 2D array with the new dimension chunked off
-            self.axis_coords[axis_number] = empty((len(x_strip_current_field)/len(new_axis),len(new_axis)),
+            self.axis_coords[axis_number] = empty((len(x_strip_current_field)//len(new_axis),len(new_axis)),
                     dtype = x_strip_current_field.dtype)
             if not (self.get_error(axis_name) is None):
                 raise ValueError("Until I do the structured array upgrade chunk_auto will not be able to deal with an axis that has errors.")

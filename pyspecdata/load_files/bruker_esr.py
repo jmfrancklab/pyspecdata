@@ -75,7 +75,7 @@ def xepr(filename, dimname='', verbose=False):
     logger.debug('there are %d harmonics, first is of type %s'%(n_harmonics,ikkf[0]))
     # }}}
     # {{{ check that calculated axes match dimensions
-    y_points_calcd = len(data)/x_points/n_harmonics
+    y_points_calcd = len(data)//x_points//n_harmonics
     dimname_list = [b0_texstr]
     dimsize_list = [x_points]
     dims_accounted_for = {b0_texstr}
@@ -105,7 +105,6 @@ def xepr(filename, dimname='', verbose=False):
         dims_accounted_for |= {'harmonic'}
         # }}}
     y_dim_name = None
-    logger.debug(strm('Parameter names:',v.keys()))
     if y_points_calcd>1:
         if 'YPTS' in list(v.keys()):
             assert v['YPTS']==y_points_calcd, ("y points left over after"
@@ -303,7 +302,7 @@ def xepr_load_acqu(filename):
         converts the record array to a list.'''
         if len(x):
             try:
-                return genfromtxt(StringIO(x),dtype=None).tolist()
+                return genfromtxt(StringIO(x),dtype=None,encoding='utf-8').tolist()
             except:
                 raise ValueError("genfromtxt chokes on "+repr(x))
         else:
