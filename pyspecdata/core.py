@@ -53,6 +53,7 @@ from matplotlib.lines import Line2D
 from scipy.interpolate import griddata as scipy_griddata
 import tables
 import warnings
+import re
 from inspect import ismethod
 from numpy.core import rec
 from matplotlib.pyplot import cm
@@ -1990,7 +1991,7 @@ class figlist(object):
                         if isinstance(testunits, tuple) and testunits[1] is None:
                             pass
                         else:
-                            raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(theseunits,self.units[self.current]))
+                            raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(self.units[self.current],theseunits))
                 else:
                     self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]))
         if verbose: print("-"*30)
@@ -3392,17 +3393,33 @@ class nddata (object):
         ----------
         propname: str
             Name of the property that you're want returned.
-            If this is left out or set to "None", the names of the available
+            If this is left out or set to "None" (not given), the names of the available
             properties are returned.
+            If no exact match is found, and propname contains a . or * or [, it's
+            assumed to be a regular expression.
+            If several such matches are found, the error message is informative.
+
+            .. todo::
+                have it recursively search dictionaries (e.g. bruker acq)
 
         Returns
         -------
         The value of the property (can by any type) or `None` if the property doesn't exist.
         '''
         if propname is None:
-            return list(self.other_info.keys())
-        if propname not in list(self.other_info.keys()):
-            return None
+            return self.other_info.keys()
+        if propname not in self.other_info.keys():
+            if '.' in propname or '*' in propname or '[' in propname:
+                propname_re = re.compile(propname)
+                matches = [j for j in self.other_info.keys() if propname_re.match(j)]
+                if len(matches) == 0:
+                    return None
+                assert len(matches) == 1, "I found %d matches for regexp %s in properties: %s"%(len(matches),
+                        propname,
+                        ' '.join(matches))
+                return self.other_info[matches[0]]
+            else:
+                return None
         return self.other_info[propname]
     def name(self,*arg):
         r"""args:
@@ -4074,12 +4091,16 @@ class nddata (object):
                 self.data = argmax(self.data,
                         axis=thisindex)
             else:
+                if self.axis_coords[thisindex] is None:
+                    raise ValueError("It doesn't make sense to call argmax if you have removed the axis coordinates! (getaxis yields None for %s"%thisindex)
                 self.data = self.axis_coords[thisindex][argmax(self.data,
                     axis=thisindex)]
             self._pop_axis_info(thisindex)
         return self
-    def argmin(self,axes,raw_index = False):
-        r"""find the min along a particular axis, and get rid of that axis, replacing it with the index number of the max value
+    def argmin(self,*axes,**kwargs):
+        r"""If `argmin('axisname')` find the min along a particular axis, and get rid of that
+        axis, replacing it with the index number of the max value.
+        If `argmin()`: return a dictionary giving the coordinates of the overall minimum point.
         
         Parameters
         ==========
@@ -4087,7 +4108,15 @@ class nddata (object):
             Return the raw (ndarray) numerical index, rather than the corresponding axis value.
             Note that the result returned is still, however, an nddata (rather than numpy ndarray) object.
         """
-        if (isinstance(axes, str)):
+        raw_index = process_kwargs([("raw_index",False)],kwargs)
+        if len(axes) == 0:
+            raw_indices = dict(zip(self.dimlabels,
+                unravel_index(self.data.ravel().argmin(),self.data.shape)))
+            if raw_index:
+                return raw_indices
+            else:
+                return dict([(k,self.getaxis(k)[v]) for k,v in raw_indices.iteritems()])
+        if (type(axes) is str):
             axes = [axes]
         for j in range(0,len(axes)):
             try:
@@ -4269,6 +4298,17 @@ class nddata (object):
             newdata.data = func(newdata.data)
         return newdata
     def run(self,*args):
+        """run a standard numpy function on the nddata:
+
+        ``d.run(func,'axisname')`` will run function `func` (*e.g.* a
+        lambda function) along axis named 'axisname'
+
+        ``d.run(func)`` will run function `func` on the data
+
+        **in general**: if the result of func reduces a dimension size to
+        1, the 'axisname' dimension will be "popped" (it will not exist in
+        the result) -- if this is not what you want, use ``run_nopop``
+        """
         func = args[0]
         func = self._wrapaxisfuncs(func)
         if len(args)>1:
@@ -4287,8 +4327,12 @@ class nddata (object):
             self.data = func(self.data,axis=thisindex)
             self._pop_axis_info(thisindex)
         else:
-            self.data = func(self.data)
-        return self
+            retval = func(self.data)
+            if self.data.size == retval.size:
+                self.data = retval
+                return self
+            else:
+                return retval
     def run_nopop(self,func,axis):
         func = self._wrapaxisfuncs(func)
         try:
@@ -4851,9 +4895,9 @@ class nddata (object):
         return self
     def invinterp(self,axis,values,**kwargs):
         'interpolate axis values given data values'
-        copy = False
-        if 'copy' in list(kwargs.keys()):
-            copy = kwargs.pop('copy')
+        copy = process_kwargs([('copy',False),
+            ], kwargs, pass_through=True)
+        
         if isscalar(values):
             values = r_[values]
         origdata = self.data.copy()
@@ -4878,13 +4922,13 @@ class nddata (object):
                 if len(rdata) < 3:
                     thiskind = 'linear'
         #}}}
-        interpfunc =  interp1d(origdata,rdata,kind = thiskind)
+        interpfunc =  interp1d(origdata,rdata, kind=thiskind, **kwargs)
         try:
             rdata = interpfunc(values)
         except Exception as e:
             raise ValueError(strm('You passed',values,'and the data spans from',
                     origdata.min(),'to',origdata.max())+explain_error(e))
-        interpfunc =  interp1d(origdata,idata,kind = thiskind)
+        interpfunc =  interp1d(origdata,idata, kind=thiskind, **kwargs)
         idata = interpfunc(values)
         cdata = rdata + 1j * idata
         if copy:
@@ -5366,6 +5410,9 @@ class nddata (object):
         if self.axis_coords is None or len(self.axis_coords) == 0:
             self.axis_coords = [None]*len(self.dimlabels)
             self.axis_coords_error = [None]*len(self.dimlabels)
+        a = len(value)
+        b = self.data.shape[self.axn(axis)]
+        assert  a == b, "Along the axis %s, the length of the axis you passed (%d) doesn't match the size of the data (%d)."%(axis,a,b)
         self.axis_coords[self.axn(axis)] = value
         return self
     def shear(self, along_axis, propto_axis, shear_amnt,
@@ -5629,15 +5676,15 @@ class nddata (object):
             axesout -- gives the names of the output axes
             shapesout -- optional -- if not given, it assumes equal length -- if given, one of the values can be -1, which is assumed length
 
+        When there are axes, it assumes that the axes of the new dimensions
+        are nested -- *e.g.*, it will chunk a dimension with axis: 
+        [1,2,3,4,5,6,7,8,9,10]
+        into dimensions with axes:
+        [0,1,2,3,4], [1,6]
+
         ..todo::
-            when we transition to axes that are stored using a
-            slice/linspace-like format, 
-            allow for chunking to assume that the axes of the new dimensions
-            are nested -- *e.g.*, chunk a dimension with axis: 
-            [1,2,3,4,5,6,7,8,9,10]
-            into dimensions with axes:
-            [0,1,2,3,4], [1,6]
-            '''
+            Deal with this efficiently when we move to new-style axes
+        '''
         if len(otherargs) == 2:
             axesout,shapesout = otherargs
         elif len(otherargs) == 1:
@@ -5701,10 +5748,12 @@ class nddata (object):
         newshape = list(map(int,newshape))
         newnames = list(self.dimlabels[0:thisaxis]) + axesout + list(self.dimlabels[thisaxis+1:])
         self.data = self.data.reshape(newshape)
+        orig_axis_units = self.get_units(axisin)
         self.dimlabels = newnames
         if new_axes is not None:
             for j in range(len(axesout)):
                 self.setaxis(axesout[j],new_axes[j])
+                self.set_units(axesout[j],orig_axis_units)
         return self
     def chunk_auto(self,axis_name,which_field,verbose = False,dimname = None):
         r'''assuming that axis "axis_name" is currently labeled with a structured array, choose one field ("which_field") of that structured array to generate a new dimension
