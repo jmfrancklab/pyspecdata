@@ -118,7 +118,7 @@ class ndshape_base ():
         self.dimlabels = self.dimlabels + dimlabels
         return self
     def __repr__(self): #how it responds to print
-        return zip(self.shape,self.dimlabels).__repr__()
+        return list(zip(self.shape,self.dimlabels)).__repr__()
     def __getitem__(self,args):
         try:
             mydict = dict(zip(self.dimlabels,self.shape))
