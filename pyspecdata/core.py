@@ -2382,14 +2382,18 @@ def plot(*args,**kwargs):
             for singleton_dim in [lb for j,lb in enumerate(myy.dimlabels) if myy.data.shape[j] == 1]:
                 myy = myy[singleton_dim,0]
         # }}}
-        if longest_is_x:
+        if len(myy.data.shape)>1 and longest_is_x:
             longest_dim = argmax(myy.data.shape)
             all_but_longest = set(range(len(myy.data.shape)))^set((longest_dim,))
-            last_not_longest = max(all_but_longest)
+            if len(all_but_longest) > 0:
+                last_not_longest = max(all_but_longest)
+            else:
+                last_not_longest = -1
             all_but_longest = list(all_but_longest) # seems to be sorted by default
         else:
             longest_dim = 0 # treat first as x, like before
             last_not_longest = -1
+            all_but_longest = []
         if human_units: myy = myy.human_units()
         if myy.get_plot_color() is not None\
             and 'color' not in kwargs.keys():# allow override
