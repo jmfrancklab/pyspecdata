@@ -1,4 +1,6 @@
-If you already know that you want to install -- you can skip to the quick-start_.
+**We are now in transition from Python 2 to Python 3**:
+If you already know that you want to install,
+and you are using Anaconda, you should see [conda_upgrade.md](conda_upgrade.md).
 
 We are currently working to add fast compiled Fortran functions for things like
 2D ILT (Tikhonov regularization with basis set compression) for NMR (Nuclear Magnetic Resonance),
