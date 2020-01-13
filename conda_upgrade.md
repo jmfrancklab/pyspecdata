@@ -1,4 +1,4 @@
-These instructions are for installing Anaconda with PySpecData,
+These instructions are for installing Anaconda with pySpecData,
 both a Python 2 and Python 3 versions.
 
 Please note that if you downloaded the “Python 2.X” version of anaconda,
@@ -8,13 +8,16 @@ maintained, and lead to a host of headaches.
 So, *yes*, the solution is to *completely uninstall* Anaconda, and then reinstall.
 
 Note that you are *strongly encouraged* to use the Python 3.X version of
-PySpecData, and to report any errors that you find.
+pySpecData, and to report any errors that you find.
 You can convert your old scripts to Python 3 using ``2to3 -w name_of_your_python_script.py``
 
 The basic strategy here is to install the most recent version of
 anaconda (3.7) so that we are using an up-to-date “conda” package
 manager, but then install a virtual environment where we can run old
 Python 2 code if we so choose.
+
+These instructions should work either on a Windows computer or a Mac (using
+Anaconda -- you can also do homebrew on a Mac, which is not covered here).
 
 **If at any point during these instructions, you don't get the expected result, stop and seek help!**
 
@@ -56,22 +59,22 @@ opening the
 users→ click “full control” checkbox on bottom →
 apply (this takes a few minutes to run)
 
-## install pyspecdata inside py3 environment
+## install pySpecData inside py3 environment
 
-make sure the git distro is set to a python 3 branch (as of this
+make sure that in your git repo, you have checked out a python 3 branch (as of this
 writing, master is python 2, and there is a py3 branch, but that will
 change)
 
 install various python running environments
 `conda install -y -c anaconda jupyter ipython spyder`
 
-install pyspecdata prerequisites from the documentation:
+install pySpecData prerequisites from the documentation:
 `conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw`
 
-install pyspecdata in the python 3 (base) environment
+install pySpecData in the python 3 (base) environment
 `python setup_paramset.py install`
 
-if this gives syntax errors, remove the pyspecdata/build directory
+if this gives syntax errors, remove the pySpecData/build directory
 
 and `python setup.py develop`
 
@@ -101,7 +104,7 @@ On a Windows computer with git installed:
 *   edit `~/.bashrc` to make sure `/c/ProgramData/Anaconda3` is in the path
     and that `/c/ProgramData/Anaconda3/MinGW/bin` is in the path
     *and* that you do not have an alias called `conda` defined.
-*   Add the following lines to the end of ` /.bash_profile`:
+*   Add the following lines to the end of `~/.bash_profile`:
 
     ~~~sh
     eval “$('/C/ProgramData/Anaconda3/Scripts/conda.exe' 'shell.bash' 'hook')”
@@ -109,33 +112,42 @@ On a Windows computer with git installed:
     export PS1=“$ps1tmp ”
     ~~~
 
-verify that you can `conda activate py2` inside git bash and see a 2.7
+verify that you can `conda activate py2` inside bash and see a 2.7
 number displayed under ipython
 
-verify that you can `conda activate base` inside git bash and that it
+verify that you can `conda activate base` inside bash and that it
 switches the version displayed under ipython
 
 at this stage, you can switch to running commands inside bash if you
 like
 
-## install pyspecdata into py2 environment
+## install pySpecData into py2 environment
 
 ``conda activate py2``
 
-(in the py2 environment) install pyspecdata prerequisites from the documentation into the py2
+(in the py2 environment) install pySpecData prerequisites from the documentation into the py2
 environment:
 `conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw`
 
-make sure the pyspecdata git distro is set to a python 2 branch (as of
+in the pySpecData git distro, check out a python 2 branch (as of
 this writing, master is python 2, but that will change)
 
 check that “which gcc” (bash) or “where gcc” (dos) points to a command
 inside the anaconda `envs\py2` folder (if you experience a 127 error
 during linking, it's due to this issue)
 
-install pyspecdata in the python 2 environment
+install pySpecData in the python 2 environment
 ``python setup_paramset.py install``
 
 and ``python setup.py develop`` (if you have installed before on this
 computer, could be good to add “`build_ext –force`” to the end of this
 command line, after deleting the “build” subdirectory, just to be sure)
+
+## Using pySpecData
+
+Note that whenever you run pySpecData, the git branch that's checked out must match the version of python that you are currently running
+(if you have activated the base environment, you must have a python 3
+pySpecData checked out; if you have activated the py2 branch, you must have a
+python 2 branch checked out).
+This is because we are using the “develop” setup, where python is actually reading the modules out of our git repo (which is good, because then you just pull the most recent version of pySpecData to update the code).
+
