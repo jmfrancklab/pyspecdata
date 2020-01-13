@@ -11,8 +11,6 @@ Note that you are *strongly encouraged* to use the Python 3.X version of
 PySpecData, and to report any errors that you find.
 You can convert your old scripts to Python 3 using ``2to3 -w name_of_your_python_script.py``
 
-### set up anaconda
-
 The basic strategy here is to install the most recent version of
 anaconda (3.7) so that we are using an up-to-date “conda” package
 manager, but then install a virtual environment where we can run old
@@ -20,7 +18,7 @@ Python 2 code if we so choose.
 
 **If at any point during these instructions, you don't get the expected result, stop and seek help!**
 
-#### initial
+## initial
 
 remove current anaconda
 
@@ -29,7 +27,7 @@ reboot to complete uninstall
 go [here](https://www.anaconda.com/distribution/) to download the Python
 3.7 version of Anaconda, and install
 
-#### checking for applocker
+## checking for applocker
 
 This section only applies to Windows computers.
 
@@ -48,7 +46,7 @@ create a new rule based on path -- manually enter
 execute all following commands inside anaconda prompt unless noted
 otherwise
 
-#### changing permissions to allow package installation
+## changing permissions to allow package installation
 
 make the Anaconda3 folder writeable by all users.
 On Windows, you achieve this by
@@ -58,7 +56,7 @@ opening the
 users→ click “full control” checkbox on bottom →
 apply (this takes a few minutes to run)
 
-#### install pyspecdata inside py3 environment
+## install pyspecdata inside py3 environment
 
 make sure the git distro is set to a python 3 branch (as of this
 writing, master is python 2, and there is a py3 branch, but that will
@@ -77,7 +75,7 @@ if this gives syntax errors, remove the pyspecdata/build directory
 
 and `python setup.py develop`
 
-#### create a python 2 environment, and install basic tools 
+## create a python 2 environment, and install basic tools 
 
 `conda create –name py2 python=2.7` (do *not* do this from within git
 bash! Do it from the anaconda prompt), then `conda activate py2` and install various python running
@@ -93,7 +91,7 @@ to switch to the python 2
 environment,
 type ``ipython`` to make sure a python 2 version number is listed when ipython opens (and type ``exit`` to quit ipython)
 
-#### set up bash so it can switch environments
+## set up bash so it can switch environments
 
 `conda activate base` to switch back to the base distribution
 `conda update -y python-libarchive-c` then `conda init bash` -- it might
@@ -120,7 +118,7 @@ switches the version displayed under ipython
 at this stage, you can switch to running commands inside bash if you
 like
 
-#### install pyspecdata into py2 environment
+## install pyspecdata into py2 environment
 
 ``conda activate py2``
 
