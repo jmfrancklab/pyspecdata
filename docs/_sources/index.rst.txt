@@ -15,6 +15,7 @@ Contents:
     modules.rst
     notebook.rst
     nddata.rst
+    fitdata.rst
     figlist.rst
     units.rst
 
