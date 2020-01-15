@@ -110,7 +110,7 @@ History/Roadmap
 
         is required for jupyter.
   
-    - **0.9.5.1.6**
+    - 0.9.5.1.6
 
         - Removed several legacy modules, and added docstrings for the remaining modules.
 
@@ -125,9 +125,13 @@ History/Roadmap
         - Improved support for 2D Bruker XEPR
 
         - Made it possible to call standard trig functions with `nddata` as an argument.
-
     - 0.9.5.1.7
-      ``to_ppm`` should only be a method of inherited class
+        - ILT (Tikhonov regularization) with SVD Kernel compression
+          (1 and 2 dimensions)
+        - ``smoosh`` and ``chunk`` deal with axes properly
+    - 0.9.5.1.8
+      - ``to_ppm`` should only be a method of inherited class
+      - 1.5 and 2.5 D ILT
 
 0.9.5.2
     Comma-separated indexing to work correctly with all indexing types.

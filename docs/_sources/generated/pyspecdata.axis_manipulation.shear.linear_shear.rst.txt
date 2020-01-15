@@ -1,0 +1,6 @@
+pyspecdata.axis\_manipulation.shear.linear\_shear
+=================================================
+
+.. currentmodule:: pyspecdata.axis_manipulation.shear
+
+.. autofunction:: linear_shear
