@@ -88,8 +88,24 @@ fitfunc_raw(self,p,x) and fitfunc_raw_symb(self,p,x)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. todo::
-    Rather than demanding that these both be equal, I should employ a
-    conversion. Is this already done?
+    This should be changed.
+    We should not have to overload these methods.
+
+    Rather, we should
+    use a property, which we set to a sympy expression,
+    and let the setter generate whatever we need:
+
+    We should generate the symbol list by using this:
+    `this <https://stackoverflow.com/questions/30018977/how-can-i-get-a-list-of-the-symbols-in-a-sympy-expression>`__
+    and we should determine the axis being fit by comparing the variables to dimlabels.
+
+    If we actually need `fitfunc_raw_symb` in the form used before,
+    we can generate `fitfunc_raw_symb` in a straightforward way.
+
+    We can generate `fitfunc_raw` from `lambdify`.
+
+    We can generate the gradient as part of teh setter.
+
 
 These defines the functional form of the fit they are defined in terms
 of the parameter vector, :math:`p` (this is a list of fit parameters
