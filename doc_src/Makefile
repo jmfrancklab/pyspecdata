@@ -95,3 +95,6 @@ doctest:
 
 github: html
 	@cp -a _build/html/. ../docs
+	@echo "Please notice the status of the docs directory:"
+	@git status ../docs/*
+	@echo "if anything is untracked, you probably want to check it in"

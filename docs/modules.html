@@ -178,11 +178,11 @@
 <span id="core"></span><h2>core<a class="headerlink" href="#module-pyspecdata.core" title="Permalink to this headline">¶</a></h2>
 <p>Provides the core components of pyspecdata.
 Currently, this is a very large file that we will slowly break down into separate modules or packages.</p>
-<p>The classes <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata_hdf</span></code>, <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.ndshape" title="pyspecdata.core.ndshape"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code></a>, the
+<p>The classes <a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata_hdf</span></code>, <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.ndshape" title="pyspecdata.core.ndshape"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code></a>, the
 function <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.plot" title="pyspecdata.core.plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot()</span></code></a>, and the class <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.fitdata" title="pyspecdata.core.fitdata"><code class="xref py py-class docutils literal notranslate"><span class="pre">fitdata</span></code></a>
 are the core components of the N-Dimensional processing routines.
 Start by familiarizing yourself with those.</p>
-<p>The <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.figlist" title="pyspecdata.core.figlist"><code class="xref py py-class docutils literal notranslate"><span class="pre">figlist</span></code></a> is the base class for “Figure lists.”
+<p>The <a class="reference internal" href="generated/pyspecdata.core.figlist.html#pyspecdata.core.figlist" title="pyspecdata.core.figlist"><code class="xref py py-class docutils literal notranslate"><span class="pre">figlist</span></code></a> is the base class for “Figure lists.”
 Figure lists allows you to organize plots and text and to refer to plots
 by name, rather than number.
 They are designed so that same code can be used seamlessly from within
@@ -320,7 +320,7 @@ even though the location of the raw spectral data might change.</p>
 <div class="section" id="module-pyspecdata.load_files">
 <span id="load-files"></span><h2>load_files<a class="headerlink" href="#module-pyspecdata.load_files" title="Permalink to this headline">¶</a></h2>
 <p>This subpackage holds all the routines for reading raw data in proprietary formats.
-It’s intended to be accessed entirely through the function <a class="reference internal" href="#pyspecdata.load_files.find_file" title="pyspecdata.load_files.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_file()</span></code></a>,
+It’s intended to be accessed entirely through the function <a class="reference internal" href="temp_stubs.html#pyspecdata.load_files.find_file" title="pyspecdata.load_files.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_file()</span></code></a>,
 which uses <a href="#id3"><span class="problematic" id="id4">:module:`datadir`</span></a> to search for the filename, then automatically identifies
 the file type and calls the appropriate module to load the data into an nddata.</p>
 <p>Currently, Bruker file formats (both ESR and NMR) are supported, as well as
