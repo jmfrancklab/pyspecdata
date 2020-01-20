@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 
 <!DOCTYPE html>
@@ -267,3 +268,274 @@ to override the “not aliased” flag.</p>
 
 </body>
 </html>
+||||||| merged common ancestors
+=======
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyspecdata.axis_manipulation.register_axis.register_axis &mdash; pySpecData 0.9.5.1.7 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyspecdata.axis_manipulation.secsy.secsy_transform_manual" href="pyspecdata.axis_manipulation.secsy.secsy_transform_manual.html" />
+    <link rel="prev" title="pyspecdata.axis_manipulation.shear.linear_shear" href="pyspecdata.axis_manipulation.shear.linear_shear.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pySpecData
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5.1.7
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../notebook.html#setting-up-the-notebook">Setting up the notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebook.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebook.html#running-the-notebook">Running the notebook</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../notebook.html#how-it-works">How it works</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../notebook.html#the-latex-end">The LaTeX end</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../notebook.html#the-python-end">The python end</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../pyspecdata.html">N-dimensional Data (nddata)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pyspecdata.html#full-list-of-nddata-methods">Full list of <cite>nddata</cite> methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../latexscripts.html">Documentation of Notebook Helper Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../nddata.html">ND-Data</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../nddata.html#dimension-labels">Dimension labels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nddata.html#item-selection-and-slicing">Item selection and slicing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nddata.html#basic-examples">Basic Examples</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../nddata.html#methods-by-sub-topic">Methods by Sub-Topic</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../axis_manipulation.html">Axis Manipulation Functions</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords.html">pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyspecdata.axis_manipulation.shear.linear_shear.html">pyspecdata.axis_manipulation.shear.linear_shear</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">pyspecdata.axis_manipulation.register_axis.register_axis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyspecdata.axis_manipulation.secsy.secsy_transform_manual.html">pyspecdata.axis_manipulation.secsy.secsy_transform_manual</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../fourier.html">Fourier Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pySpecData</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../notebook.html">LaTeX Notebook Functionality</a> &raquo;</li>
+        
+          <li><a href="../pyspecdata.html">N-dimensional Data (nddata)</a> &raquo;</li>
+        
+          <li><a href="../axis_manipulation.html">Axis Manipulation Functions</a> &raquo;</li>
+        
+      <li>pyspecdata.axis_manipulation.register_axis.register_axis</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/generated/pyspecdata.axis_manipulation.register_axis.register_axis.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pyspecdata-axis-manipulation-register-axis-register-axis">
+<h1>pyspecdata.axis_manipulation.register_axis.register_axis<a class="headerlink" href="#pyspecdata-axis-manipulation-register-axis-register-axis" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="pyspecdata.axis_manipulation.register_axis.register_axis">
+<code class="descclassname">pyspecdata.axis_manipulation.register_axis.</code><code class="descname">register_axis</code><span class="sig-paren">(</span><em>self</em>, <em>arg</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.register_axis.register_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate the data so that the given axes are in register with a set of specified values. Does not change the spacing of the axis labels.</p>
+<p>It finds the axis label position that is closest to the values given in <cite>arg</cite>, then interpolates (Fourier/sinc method) the data onto a new, slightly shifted, axis that passes exactly through the value given.
+To do this, it uses
+<a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.ft_clear_startpoints" title="pyspecdata.core.nddata.ft_clear_startpoints"><code class="xref py py-func docutils literal notranslate"><span class="pre">.ft_clear_startpoints()</span></code></a>
+and uses
+<a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.set_ft_prop" title="pyspecdata.core.nddata.set_ft_prop"><code class="xref py py-func docutils literal notranslate"><span class="pre">.set_ft_prop()</span></code></a>
+to override the “not aliased” flag.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>arg</strong> (<em>dict</em><em> (</em><em>key</em><em>,</em><em>value = str</em><em>,</em><em>double</em><em>)</em>) – A list of the dimensions that you want to place in register, and the values you want them registered to.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pyspecdata.axis_manipulation.secsy.secsy_transform_manual.html" class="btn btn-neutral float-right" title="pyspecdata.axis_manipulation.secsy.secsy_transform_manual" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pyspecdata.axis_manipulation.shear.linear_shear.html" class="btn btn-neutral float-left" title="pyspecdata.axis_manipulation.shear.linear_shear" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, John M. Franck
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
+>>>>>>> update documentation, and add version tag

@@ -82,7 +82,7 @@ class MyConfig(object):
         -------
         The value corresponding to `this_key`.
         """
-        if this_key in list(self.config_vars.keys()):
+        if this_key in self.config_vars.keys():
             logger.debug("I pulled",this_key,"from the config_vars")
             return self.config_vars[this_key]
         logger.debug("about to look for environment variable",environ)

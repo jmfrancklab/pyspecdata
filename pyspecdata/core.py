@@ -176,10 +176,10 @@ def make_bar_graph_indices(mystructarray,list_of_text_fields,
         index_values = []
         label_values = []
         start_indices = r_[start_indices,len(mystructarray)] # I add this so I can do the next step
-        logger.info(strm('recursion depth is',recursion_depth,'and I am analyzing',list_of_text_fields[0],': ', end=' '))
+        logger.info(strm('recursion depth is',recursion_depth,'and I am analyzing',list_of_text_fields[0],': '))
         logger.info(strm('I found these unique values:',unique_values,'at these start indices:',start_indices[:-1]))
         for k in range(0,len(start_indices)-1):
-            logger.info(strm('recursion depth is',recursion_depth,'and I am analyzing',list_of_text_fields[0],': ', end=' '))
+            logger.info(strm('recursion depth is',recursion_depth,'and I am analyzing',list_of_text_fields[0],': '))
             logger.info(strm('trying to extract unique value',unique_values[k],'using the range',start_indices[k],start_indices[k+1]))
             logger.info(strm('which has this data'))
             indiv_struct_array = mystructarray[start_indices[k]:start_indices[k+1]]
@@ -202,7 +202,7 @@ def make_bar_graph_indices(mystructarray,list_of_text_fields,
         return retval_indices,retval_labels
         #}}}
     else:
-        logger.info(strm('recursion depth is',recursion_depth, end=' '))
+        logger.info(strm('recursion depth is',recursion_depth))
         N = len(mystructarray)
         logger.info(strm('hit innermost (no text labels left) and passing up a list of indices that looks like this:',r_[0:N]))
         return r_[0:N],['']*N

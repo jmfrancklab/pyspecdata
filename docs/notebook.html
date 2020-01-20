@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 
 <!DOCTYPE html>
@@ -375,3 +376,382 @@ in the cache.</p>
 
 </body>
 </html>
+||||||| merged common ancestors
+=======
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>LaTeX Notebook Functionality &mdash; pySpecData 0.9.5.1.7 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="N-dimensional Data (nddata)" href="pyspecdata.html" />
+    <link rel="prev" title="List of Modules and Sub-Packages" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pySpecData
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5.1.7
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">LaTeX Notebook Functionality</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-the-notebook">Setting up the notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-the-notebook">Running the notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-latex-end">The LaTeX end</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-python-end">The python end</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyspecdata.html">N-dimensional Data (nddata)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyspecdata.html#full-list-of-nddata-methods">Full list of <cite>nddata</cite> methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="latexscripts.html">Documentation of Notebook Helper Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pySpecData</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>LaTeX Notebook Functionality</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/notebook.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="latex-notebook-functionality">
+<h1>LaTeX Notebook Functionality<a class="headerlink" href="#latex-notebook-functionality" title="Permalink to this headline">¶</a></h1>
+<p>This package contains tools for running a LaTeX notebook with
+embedded python code.  One can then, for instance, keep an
+electronic lab notebook where the plots and data are generated
+and processed in place, immediately from the <em>raw data</em>.  (The author of the project has kept an
+electronic notebook for several years in this way with great
+success.)</p>
+<ul class="simple">
+<li>With minimal effort, it is possible to design a notebook that
+works in a similar fashion with HTML, Markdown, <em>etc.</em>  (The main
+author just has no interest in doing this, since the PDF output
+looks very nice.)</li>
+<li>It’s highly recommended to keep a notebook as a series of
+different files that have no preamble or ending (<em>i.e.</em> only
+the part that goes inside the <code class="docutils literal notranslate"><span class="pre">document</span></code> environment), which
+can then be collected into a gigantic master document with the
+<code class="docutils literal notranslate"><span class="pre">\input{...}</span></code> command, or compiled individually (<em>e.g.</em> while
+you are actually in the lab working on a particular section).</li>
+<li>It’s also highly recommended to store notes organized by
+project, which can then be cross-referenced in a separate
+chronological document (or <em>vice versa</em>) with the
+<code class="docutils literal notranslate"><span class="pre">\\ref{...}</span></code> command.</li>
+</ul>
+<div class="section" id="setting-up-the-notebook">
+<h2>Setting up the notebook<a class="headerlink" href="#setting-up-the-notebook" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">latex packages</p>
+<p>You need to put the texmf tree in a location where it can be found by your latex installation.</p>
+<ul class="simple">
+<li>Under Windows, add the texmf tree to “miktex settings” under the “roots” tab.</li>
+<li>(To do) We should use <a class="reference external" href="http://ctan.math.washington.edu/tex-archive/info/dtxtut/dtxtut.pdf">this guide</a> or
+or <a class="reference external" href="https://ctan.org/pkg/makedtx">this package</a> to package the code and include it here.</li>
+</ul>
+<p>Once you’ve done this, the shell command <code class="docutils literal notranslate"><span class="pre">kpsewhich</span> <span class="pre">mypython.sty</span></code>
+should return a result
+(if you have miktex installed on windows, this should work from either the git
+bash prompt or the dos or powershell prompt).</p>
+</li>
+<li><p class="first">The pyspecdata package.</p>
+<p>Proves the commands <cite>pdflatex_notebook_wrapper</cite> and
+<cite>update_notebook_pythonscripts</cite>, described below under “Running the
+notebook.”</p>
+<p>Also provies the command <cite>pdflatex_notebook_view_wrapper</cite>, which is used to
+determine the output PDF and call an appropriate viewer.</p>
+</li>
+<li><p class="first">A standard latex compilation system:</p>
+<p>You can use latexmk (shipped with miktex) with <a class="reference external" href="https://www.sumatrapdfreader.org/free-pdf-reader.html">Sumatrapdf</a>
+(Sumatrapdf allows you to edit the PDF while it’s open in Sumatrapdf, while Adobe Acrobat <em>does not</em>).
+Here is a <code class="docutils literal notranslate"><span class="pre">~/.latexmkrc</span></code> file that works on windows:</p>
+<div class="highlight-perl notranslate"><div class="highlight"><pre><span></span><span class="nv">$pdflatex</span><span class="o">=</span><span class="sx">q/pdflatex_notebook_wrapper %O -synctex=1 --xelatex %S/</span><span class="p">;</span>
+<span class="nv">$pdf_previewer</span><span class="o">=</span><span class="sx">q/pdflatex_notebook_view_wrapper/</span><span class="p">;</span><span class="c1">#calls the wrapviewer function</span>
+</pre></div>
+</div>
+<p><strong>It should also be possible to use TeXworks</strong> by adding pdflatex_notebook_wrapper to
+preferences → typesetting → processing tools.</p>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">Alec, can you check this out and update documentation??</p>
+</div>
+</li>
+<li><p class="first">The <cite>‘paramset_pyspecdata’</cite> module.
+Just run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup_paramset.py</span> <span class="pre">install</span></code> from repository root directory (the same directory where you run
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></code>
+or
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">develop</span></code>)</p>
+<p>(This external module is simply used
+to store the context in which the code is called – <em>i.e.</em>, from within
+python <em>vs.</em> from the command line.)</p>
+</li>
+<li><p class="first">It’s assumed that your latex files are stored in a “notebook directory.”
+In some cases, during the first run, an explanatory error will appear – just follow the instructions.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="running-the-notebook">
+<h2>Running the notebook<a class="headerlink" href="#running-the-notebook" title="Permalink to this headline">¶</a></h2>
+<p>If you create figures with the <cite>figlist_var</cite> class,
+you should simply be able to write a latex file with embedded
+<code class="docutils literal notranslate"><span class="pre">python</span></code> environments (<code class="docutils literal notranslate"><span class="pre">\\begin{python}</span></code> … <code class="docutils literal notranslate"><span class="pre">\\end{python}</span></code>)
+replace the <code class="docutils literal notranslate"><span class="pre">pdflatex</span></code> command with
+<code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span></code> when compiling your latex notebook,
+to drop the code and plots in place.
+For clarity, the code output is a slightly different color (a
+dark brown) than the standard text.</p>
+<p>A synctex “jump to source” on the resulting portion of the PDF
+will send you to the tex output, which is stored in
+<code class="docutils literal notranslate"><span class="pre">scripts/*.tex</span></code>, where <code class="docutils literal notranslate"><span class="pre">*</span></code> is a sequential number
+corresponding to the script, and the python source used to
+generate it is stored in <code class="docutils literal notranslate"><span class="pre">scripts/*.py</span></code>.</p>
+<p>Each snippet of unique code is run <strong>only once</strong>, <strong>ever</strong> making the
+notebook fast and efficient.
+For now, an important drawback to this is that if you change modules or
+libraries called by the script, the resulting PDF output will not
+change.
+To get around this, a command is provided that forces scripts to
+be re-run.  You use it like this: <code class="docutils literal notranslate"><span class="pre">update_notebook_pythonscripts</span>
+<span class="pre">flush</span> <span class="pre">10</span> <span class="pre">21</span></code>  – which will flush script numbers 10 to 21.
+Manually deleting the <code class="docutils literal notranslate"><span class="pre">.py</span></code> files inside the scripts directory
+will <strong>not</strong> have the same effect.</p>
+<div class="admonition-todo admonition" id="index-1">
+<p class="first admonition-title">Todo</p>
+<p>To limit downtime for the PDF, pdflatex_notebook_wrapper currently copies
+the final pdf to a truncated filename (assuming that the filename consists
+of words separated by underscores, it drops the last word).</p>
+<p>It would be much better to copy the source PDF into a subdirectory, build it there, and then copy the pdf back into the main directory.
+This would entail changing the paths of the various files</p>
+<p><code class="docutils literal notranslate"><span class="pre">\RequirePackage[log]{snapshot}</span></code> might be helpful to log files here.</p>
+<p class="last">probably we will just want to add commands to renewcommand for input as well as the graphicx root.</p>
+</div>
+</div>
+<div class="section" id="how-it-works">
+<h2>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Note that the code works a bit differently than in previous
+versions – while it previously required LaTeX to be run with shell-escape enabled,
+<code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span></code> doesn’t require this.</li>
+<li><code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span></code> just calls <code class="docutils literal notranslate"><span class="pre">pdflatex</span></code> followed
+by <code class="docutils literal notranslate"><span class="pre">update_notebook_pythonscripts</span></code></li>
+</ul>
+<div class="section" id="the-latex-end">
+<h3>The LaTeX end<a class="headerlink" href="#the-latex-end" title="Permalink to this headline">¶</a></h3>
+<p>The file <cite>mypython.sty</cite> looks for the <cite>python</cite> environment, it pulls the relevant
+code, outputs it to <code class="docutils literal notranslate"><span class="pre">scripts/*.py</span></code> and then writes a command to
+the <code class="docutils literal notranslate"><span class="pre">.aux</span></code> file that tells LaTeX where to find the
+<code class="docutils literal notranslate"><span class="pre">scripts/*.tex</span></code> output.
+The <code class="docutils literal notranslate"><span class="pre">scripts/*.tex</span></code> output is only updated once
+<code class="docutils literal notranslate"><span class="pre">update_notebook_pythonscripts</span></code> (without arguments) is run.</p>
+</div>
+<div class="section" id="the-python-end">
+<h3>The python end<a class="headerlink" href="#the-python-end" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">update_notebook_pythonscripts</span></code> runs through the various
+<code class="docutils literal notranslate"><span class="pre">scripts/*.py</span></code> files, checks and checks whether or not they
+have been previously cached (under the same or a different script
+number).  If the python code is in the cache, it just pulls the
+cached output.  If not, it runs the file, and stores the result
+in the cache.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pyspecdata.html">N-dimensional Data (nddata)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyspecdata.html#by-topic">By Topic</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pyspecdata.html#full-list-of-nddata-methods">Full list of <cite>nddata</cite> methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="latexscripts.html">Documentation of Notebook Helper Functions</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pyspecdata.html" class="btn btn-neutral float-right" title="N-dimensional Data (nddata)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="modules.html" class="btn btn-neutral float-left" title="List of Modules and Sub-Packages" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, John M. Franck
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
+>>>>>>> update documentation, and add version tag
