@@ -37,7 +37,7 @@ if _figure_mode_setting == 'latex':
     environ['ETS_TOOLKIT'] = 'qt4'
     import matplotlib; matplotlib.use('Agg')
 # }}} -- continued below
-from .general_functions import inside_sphinx
+from .general_functions import inside_sphinx,log_fname
 if not inside_sphinx():
     from pylab import *
 else:
@@ -176,35 +176,35 @@ def make_bar_graph_indices(mystructarray,list_of_text_fields,
         index_values = []
         label_values = []
         start_indices = r_[start_indices,len(mystructarray)] # I add this so I can do the next step
-        if verbose: print 'recursion depth is',recursion_depth,'and I am analyzing',list_of_text_fields[0],': ',
-        if verbose: print 'I found these unique values:',unique_values,'at these start indices:',start_indices[:-1]
+        logger.info(strm('recursion depth is',recursion_depth,'and I am analyzing',list_of_text_fields[0],': '))
+        logger.info(strm('I found these unique values:',unique_values,'at these start indices:',start_indices[:-1]))
         for k in range(0,len(start_indices)-1):
-            if verbose: print 'recursion depth is',recursion_depth,'and I am analyzing',list_of_text_fields[0],': ',
-            if verbose: print 'trying to extract unique value',unique_values[k],'using the range',start_indices[k],start_indices[k+1]
-            if verbose: print 'which has this data'
+            logger.info(strm('recursion depth is',recursion_depth,'and I am analyzing',list_of_text_fields[0],': '))
+            logger.info(strm('trying to extract unique value',unique_values[k],'using the range',start_indices[k],start_indices[k+1]))
+            logger.info(strm('which has this data'))
             indiv_struct_array = mystructarray[start_indices[k]:start_indices[k+1]]
-            if verbose: print lsafen(indiv_struct_array)
+            logger.info(strm(lsafen(indiv_struct_array)))
             these_index_values,these_labels = make_bar_graph_indices(indiv_struct_array,list_of_text_fields[1:],recursion_depth = recursion_depth+1,verbose = verbose)
             index_values.append(these_index_values)
             label_values.append([str(unique_values[k])+','+j for j in these_labels])
         #{{{ scale the result of each call down to the equal size (regardless of number of elements), shift by the position in this array, and return
-        if verbose: print 'recursion depth is',recursion_depth,'and I just COMPLETED THE LOOP, which gives a list of index values like this',index_values
+        logger.info(strm('recursion depth is',recursion_depth,'and I just COMPLETED THE LOOP, which gives a list of index values like this',index_values))
         max_indices = max(array(map(len,index_values),dtype='double'))# the maximum width of the array inside
         index_values = map(lambda x: x+(max_indices-len(x))/2.0,index_values)# if the bar is less than max indices, shift it over, so it's still in the center
-        if verbose: print 'recursion depth is',recursion_depth,'and I centered each set like this',index_values
+        logger.info(strm('recursion depth is',recursion_depth,'and I centered each set like this',index_values))
         index_values = map(lambda x: x/max_indices*(1-spacing)+(1-spacing)/2,index_values)# scale down, so the width from left edge of bar to right edge of largest bar runs 0--> 1
-        if verbose: print 'recursion depth is',recursion_depth,'and I scaled down so each runs zero to one*(1-spacing) (centered) like this',index_values
+        logger.info(strm('recursion depth is',recursion_depth,'and I scaled down so each runs zero to one*(1-spacing) (centered) like this',index_values))
         # this adds an index value, and also collapses down to a single dimension list
         retval_indices = [x+num for num,val in enumerate(index_values) for x in val]
         # now collapse labels down to a single dimension
         retval_labels = [k for j in label_values for k in j]
-        if verbose: print 'recursion depth is',recursion_depth,'and I am passing up indices',retval_indices,'and labels',retval_labels
+        logger.info(strm('recursion depth is',recursion_depth,'and I am passing up indices',retval_indices,'and labels',retval_labels))
         return retval_indices,retval_labels
         #}}}
     else:
-        if verbose: print 'recursion depth is',recursion_depth,
+        logger.info(strm('recursion depth is',recursion_depth,))
         N = len(mystructarray)
-        if verbose: print 'hit innermost (no text labels left) and passing up a list of indices that looks like this:',r_[0:N]
+        logger.info(strm('hit innermost (no text labels left) and passing up a list of indices that looks like this:',r_[0:N]))
         return r_[0:N],['']*N
     #}}}
 def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,verbose = False,ax = None,tickfontsize = 8):
@@ -223,7 +223,7 @@ def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,verbose = Fa
         for x in mystructarray.dtype.descr
         if x[0] not in list_of_text_fields]]
     mystructarray.sort()
-    if verbose: print 'test --> now, it has this form:',lsafen(mystructarray)
+    logger.info(strm('test --> now, it has this form:',lsafen(mystructarray)))
     #}}}
     error_fields = [str(j) for j in mystructarray.dtype.names if j[-6:] == '_ERROR']
     if len(error_fields) > 0:
@@ -232,15 +232,15 @@ def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,verbose = Fa
     mystructarray = mystructarray[[str(j) for j in mystructarray.dtype.names if j not in error_fields]]
     if othersort is not None:
         list_of_text_fields.append(othersort)
-    if verbose: print 'list of text fields is',lsafen(list_of_text_fields)
+    logger.info(strm('list of text fields is',lsafen(list_of_text_fields)))
     indices,labels = make_bar_graph_indices(mystructarray,list_of_text_fields,verbose = verbose,spacing = spacing)
     temp = zip(indices,labels)
-    if verbose: print '(indices,labels) (len %d):'%len(temp),lsafen(temp)
-    if verbose: print 'I get these labels (len %d):'%len(labels),labels,'for the data (len %d)'%len(mystructarray),lsafen(mystructarray)
+    logger.info(strm('(indices,labels) (len %d):'%len(temp),lsafen(temp)))
+    logger.info(strm('I get these labels (len %d):'%len(labels),labels,'for the data (len %d)'%len(mystructarray),lsafen(mystructarray)))
     indices = array(indices)
     indiv_width = min(diff(indices))*(1-spacing)
     remaining_fields = [x for x in mystructarray.dtype.names if x not in list_of_text_fields] # so they are in the right order, since set does not preserve order
-    if verbose: print 'The list of remaining (i.e. non-text) fields is',lsafen(remaining_fields)
+    logger.info(strm('The list of remaining (i.e. non-text) fields is',lsafen(remaining_fields)))
     colors = ['b','g','r','c','m','k']
     rects = []
     for j,thisfield in enumerate(remaining_fields):
@@ -409,9 +409,9 @@ def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
             'with B_reduced=', B_reduced,
             'one or more of the following is an empty tuple,  which is wrong!:',
             [nonzero(B_reduced == j) for j in A_reduced])+explain_error(e))
-    if verbose: print "(decorate\\_rec):: original list of matching",list_of_matching
+    logger.info(strm("(decorate\\_rec):: original list of matching",list_of_matching))
     length_of_matching = array([len(j) for j in list_of_matching])
-    if verbose: print "(decorate\\_rec):: length of matching is",length_of_matching
+    logger.info(strm("(decorate\\_rec):: length of matching is",length_of_matching))
     if any(length_of_matching == 0):
         if drop_rows:
             if drop_rows == 'return':
@@ -435,7 +435,7 @@ def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
     # this gives just the indices in B that match the values of A
     list_of_matching = [j for i in list_of_matching for j in i]
     #}}}
-    if verbose: print "(decorate\\_rec):: list of matching is",list_of_matching
+    logger.info(strm("(decorate\\_rec):: list of matching is",list_of_matching))
     # now grab the data for these rows
     add_data = B[list_of_matching]
     #{{{ finally, smoosh the two sets of data together
@@ -449,16 +449,16 @@ def decorate_rec((A,a_ind),(B,b_ind),drop_rows = False,verbose = False):
     #}}}
     #{{{ add the new fields
     new_dtypes = [j for j in B.dtype.descr if j[0] not in A.dtype.names]
-    if verbose: print "(decorate\\_rec):: new dtypes:",repr(new_dtypes)
+    logger.info(strm("(decorate\\_rec):: new dtypes:",repr(new_dtypes)))
     try:
         retval = newcol_rec(retval,new_dtypes)
     except Exception as e:
         raise ValueError(strm("Problem trying to add new columns with the dtypes",
             new_dtypes)+explain_error(e))
     #}}}
-    if verbose: print "(decorate\\_rec):: add data:",repr(add_data)
+    logger.info(strm("(decorate\\_rec):: add data:",repr(add_data)))
     for name in dtype(new_dtypes).names:
-        if verbose: print "(decorate\\_rec):: trying to add data for",name,':',add_data[name][:]
+        logger.info(strm("(decorate\\_rec):: trying to add data for",name,':',add_data[name][:]))
         retval[name][:] = add_data[name][:]
     #}}}
     if drop_rows == 'return':
@@ -501,11 +501,11 @@ def applyto_rec(myfunc,myarray,mylist,verbose = False):
             mask &= myarray[mylist[k]] == thisitem[mylist[k]]
             newrow[mylist[k]] = thisitem[mylist[k]]
         #}}}
-        if verbose: print lsafen('(applyto rec): for row %d, I select these:'%j)
+        logger.info(strm(lsafen('(applyto rec): for row %d, I select these:'%j)))
         myarray_subset = myarray[mask]
-        if verbose: print lsafen('(applyto rec): ',repr(myarray_subset))
+        logger.info(strm(lsafen('(applyto rec): ',repr(myarray_subset))))
         other_fields = set(mylist)^set(thisitem.dtype.names)
-        if verbose: print lsafen('(applyto rec): other fields are:',other_fields)
+        logger.info(strm(lsafen('(applyto rec): other fields are:',other_fields)))
         for thisfield in list(other_fields):
             try:
                 newrow[thisfield] = myfunc(myarray_subset[thisfield])
@@ -514,14 +514,14 @@ def applyto_rec(myfunc,myarray,mylist,verbose = False):
                     "when one of the fields that you have NOT passed in the",
                     "second argument is a string.  The fields and types",
                     "are:",repr(myarray_subset.dtype.descr)) + explain_error(e))
-        if verbose: print lsafen("(applyto rec): for row %d, I get this as a result:"%j,newrow)
+        logger.info(strm(lsafen("(applyto rec): for row %d, I get this as a result:"%j,newrow)))
         combined.append(newrow) # add this row to the list
         myarray = myarray[~mask] # mask out everything I have used from the original matrix
-        if verbose: print lsafen("(applyto rec): the array is now",repr(myarray))
+        logger.info(strm(lsafen("(applyto rec): the array is now",repr(myarray))))
         j += 1
     #}}}
     combined = concatenate(combined)
-    if verbose: print lsafen("(applyto rec): final result",repr(combined),"has length",len(combined))
+    logger.info(strm(lsafen("(applyto rec): final result",repr(combined),"has length",len(combined))))
     return combined
 def meanstd_rec(myarray,mylist,verbose = False,standard_error = False):
     r'this is something like applyto_rec, except that it applies the mean and creates new rows for the "error," where it puts the standard deviation'
@@ -529,10 +529,10 @@ def meanstd_rec(myarray,mylist,verbose = False,standard_error = False):
         mylist = [mylist]
     combined = []
     other_fields = set(mylist)^set(myarray.dtype.names)
-    if verbose: print '(meanstd_rec): other fields are',lsafen(other_fields)
+    logger.info(strm('(meanstd_rec): other fields are',lsafen(other_fields)))
     newrow_dtype = [[j,('%s_ERROR'%j[0],)+j[1:]] if j[0] in other_fields else [j] for j in myarray.dtype.descr]
     newrow_dtype = [k for j in newrow_dtype for k in j]
-    if verbose: print lsafen('(meanstd rec): other fields are:',other_fields)
+    logger.info(strm(lsafen('(meanstd rec): other fields are:',other_fields)))
     #{{{ make the list "combined", which I later concatenate
     j = 0
     while len(myarray) > 0:
@@ -548,9 +548,9 @@ def meanstd_rec(myarray,mylist,verbose = False,standard_error = False):
             mask &= myarray[mylist[k]] == thisitem[mylist[k]]
             newrow[mylist[k]] = thisitem[mylist[k]]
         #}}}
-        if verbose: print lsafen('(meanstd rec): for row %d, I select these:'%j)
+        logger.info(strm(lsafen('(meanstd rec): for row %d, I select these:'%j)))
         myarray_subset = myarray[mask]
-        if verbose: print lsafen('(meanstd rec): ',repr(myarray_subset))
+        logger.info(strm(lsafen('(meanstd rec): ',repr(myarray_subset))))
         for thisfield in list(other_fields):
             try:
                 newrow[thisfield] = mean(myarray_subset[thisfield])
@@ -564,14 +564,14 @@ def meanstd_rec(myarray,mylist,verbose = False,standard_error = False):
                         "second argument is a string.  The fields and types",
                         "are:",repr(myarray_subset.dtype.descr))
             #print 'for field',lsafe(thisfield),'I find',lsafen(newrow[thisfield])
-        if verbose: print lsafen("(meanstd rec): for row %d, I get this as a result:"%j,newrow)
+        logger.info(strm(lsafen("(meanstd rec): for row %d, I get this as a result:"%j,newrow)))
         combined.append(newrow) # add this row to the list
         myarray = myarray[~mask] # mask out everything I have used from the original matrix
-        if verbose: print lsafen("(meanstd rec): the array is now",repr(myarray))
+        logger.info(strm(lsafen("(meanstd rec): the array is now",repr(myarray))))
         j += 1
     #}}}
     combined = concatenate(combined)
-    if verbose: print lsafen("(meanstd rec): final result",repr(combined),"has length",len(combined))
+    logger.info(strm(lsafen("(meanstd rec): final result",repr(combined),"has length",len(combined))))
     return combined
 def make_rec(*args,**kwargs):
     r'input,names or a single argument, which is a dictionary\nstrlen = 100 gives length of the strings (which need to be specified in record arrays)\nyou can also specify (especially useful with the dictionary format) the list order = [str1,str2,...] which orders the output records with the field containing str1 first, then the field containing str2, then any remaining fields'
@@ -680,26 +680,26 @@ def unmake_ndarray(array_to_conv,name_forprint = 'unknown',verbose = False):
     elif type(array_to_conv) is ndarray and len(array_to_conv)==1:
         #{{{ if it's a length 1 ndarray, then return the element
         retval = array_to_conv.tolist()
-        if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is a numpy array of length one"
+        logger.info(strm("(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is a numpy array of length one"))
         #}}}
     elif type(array_to_conv) in [string_,int32,float64,bool_]:
         #{{{ map numpy strings onto normal strings
         retval = array_to_conv.tolist()
-        if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is a numpy scalar"
+        logger.info(strm("(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is a numpy scalar"))
         #}}}
     elif type(array_to_conv) is list:
         #{{{ deal with lists
-        if verbose: print "(from unmake ndarray verbose):", name_forprint,"is a list"
+        logger.info(strm("(from unmake ndarray verbose):", name_forprint,"is a list"))
         typeofall = map(type,array_to_conv)
         if all(map(lambda x: x is string_,typeofall)):
-            if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",typeofall,"are all numpy strings"
+            logger.info(strm("(from unmake ndarray verbose):", name_forprint,"=",typeofall,"are all numpy strings"))
             retval = map(str,array_to_conv)
         else:
-            if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",typeofall,"are not all numpy string"
+            logger.info(strm("(from unmake ndarray verbose):", name_forprint,"=",typeofall,"are not all numpy string"))
             retval = array_to_conv
         #}}}
     else:
-        if verbose: print "(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is not a numpy string or record array"
+        logger.info(strm("(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is not a numpy string or record array"))
         retval = array_to_conv
     return retval
 #}}}
@@ -855,7 +855,7 @@ def h5loaddict(thisnode,verbose = False):
     for k,v in retval.iteritems():#{{{ search for record arrays that represent normal lists
         retval[k]  = unmake_ndarray(v,name_forprint = k,verbose = verbose)
     if type(thisnode) is tables.table.Table:#{{{ load any table data
-        if verbose: print "It's a table\n\n"
+        logger.info(strm("It's a table\n\n"))
         if 'data' in retval.keys():
             raise AttributeError('There\'s an attribute called data --> this should not happen!')
         retval.update({'data':thisnode.read()})
@@ -959,7 +959,7 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
                     [e,'\nYou passed',match_row,'\nThe columns available are',mytable.colnames])))
             if len(matches) > 0:
                 if only_last:
-                    if verbose: print r'\o{',lsafen(len(matches),"rows match your search criterion, returning the last row"),'}'
+                    logger.info(strm(r'\o{',lsafen(len(matches),"rows match your search criterion, returning the last row"),'}'))
                     return mytable,matches['index'][-1]
                 else:
                     return mytable,matches['index'][:]
@@ -1026,14 +1026,25 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
     logger.debug(strm("DEBUG: called h5nodebypath on",h5path))
     h5path = h5path.split('/')
     #{{{ open the file / check if it exists
-    if verbose: print lsafen('h5path=',h5path)
+    logger.info(strm(lsafen('h5path=',h5path)))
     logger.info(strm('the h5path is',h5path))
+    if h5path[0] in listdir(directory):
+        logger.info(strm('DEBUG: file exists\n\n'))
+        log_fname('data_files',h5path[0],directory)
+    else:
+        if check_only:
+            log_fname('missing_data_files',h5path[0],directory)
+            raise AttributeError("You're checking for a node in a file (%s) that does not exist"%h5path[0])
+        logger.info(strm('DEBUG: file does not exist\n\n'))
+    mode = 'a'
+    #if check_only: mode = 'r'
+    logger.info(strm('so I look for the file',h5path[0],'in directory',directory))
     try:
         if h5path[0] in listdir(directory):
-            if verbose: print 'DEBUG: file exists\n\n'
+            logger.info(strm('DEBUG: file exists\n\n'))
         else:
             if check_only: raise AttributeError("You're checking for a node in a file (%s) that does not exist"%h5path[0])
-            if verbose: print 'DEBUG: file does not exist\n\n'
+            logger.info(strm('DEBUG: file does not exist\n\n'))
         mode = 'a'
         #if check_only: mode = 'r'
         logger.info(strm('so I look for the file',h5path[0],'in directory',directory))
@@ -1060,10 +1071,10 @@ def h5nodebypath(h5path,verbose = False,force = False,only_lowest = False,check_
                         verbose = verbose,
                         create = create,
                         clear = clear)
-                if verbose: print lsafen("searching for node path: descended to node",currentnode)
+                logger.info(strm(lsafen("searching for node path: descended to node",currentnode)))
                 logger.info(strm("searching for node path: descended to node",currentnode))
             except BaseException as e:
-                if verbose: print lsafen("searching for node path: got caught searching for node",h5path[pathlevel])
+                logger.info(strm(lsafen("searching for node path: got caught searching for node",h5path[pathlevel])))
                 logger.info(strm("searching for node path: got caught searching for node",h5path[pathlevel]))
                 h5file.close()
                 #print lsafen("DEBUG: Yes, I closed the file")
@@ -1149,10 +1160,10 @@ def h5join(firsttuple,secondtuple,
         raise ValueError('The length of the first and second arguments must be two!')
     tablenode = firsttuple[0]
     tableindices = firsttuple[1]
-    if verbose: print 'h5join tableindices looks like this:',tableindices
+    logger.info(strm('h5join tableindices looks like this:',tableindices))
     if type(tableindices) is not list:
         tableindices = [tableindices]
-    if verbose: print 'h5join tableindices looks like this:',tableindices
+    logger.info(strm('h5join tableindices looks like this:',tableindices))
     mystructarray = secondtuple[0].copy()
     mystructarrayindices = secondtuple[1]
     if type(mystructarrayindices) is not list:
@@ -1182,7 +1193,7 @@ def h5join(firsttuple,secondtuple,
     if len(additional_search) > 0:
         additional_search = " & (%s)"%additional_search
         search_string = search_string + additional_search
-    if verbose: print '\n\nh5join generated the search string:',lsafen(search_string)
+    logger.info(strm('\n\nh5join generated the search string:',lsafen(search_string)))
     retval = tablenode.read_where(search_string)
     #{{{ then join the data together
     # here I'm debugging the join function, again, and again, and agin
@@ -1197,7 +1208,7 @@ def h5join(firsttuple,secondtuple,
             raise ValueError("It doesn't make sense to specify pop_fields and select_fields at the same time!!")
         select_fields = list(set(retval.dtype.names) ^ set(pop_fields))
     if select_fields is not None:
-        if verbose: print '\n\nh5join original indices',lsafen(retval.dtype.names)
+        logger.info(strm('\n\nh5join original indices',lsafen(retval.dtype.names)))
         try:
             retval = retval[select_fields]
         except ValueError as e:
@@ -1643,14 +1654,14 @@ def nextfigure(figurelist,name):
     else:
         print 'Boo! not a new style name!'
     verbose = False # a good way to debug
-    if verbose: print lsafe('DEBUG figurelist, called with',name)
+    logger.info(strm(lsafe('DEBUG figurelist, called with',name)))
     if name in figurelist:
         fig = figure(figurelist.index(name)+1)
-        if verbose: print lsafen('in',figurelist,'at figure',figurelist.index(name)+1,'switched figures')
+        logger.info(strm(lsafen('in',figurelist,'at figure',figurelist.index(name)+1,'switched figures')))
     else:
         fig = figure(len(figurelist)+1)
         fig.add_subplot(111)
-        if verbose: print lsafen('added, figure',len(figurelist)+1,'because not in figurelist',figurelist)
+        logger.info(strm(lsafen('added, figure',len(figurelist)+1,'because not in figurelist',figurelist)))
         figurelist.append(name)
     return figurelist
 def figlistret(first_figure,figure_list,*args,**kwargs):
@@ -1682,12 +1693,12 @@ def figlistini_old(first_figure):
     else:
         print "Boo, not a new style name! (initialize)"
     verbose = False
-    if verbose: print lsafe('DEBUG: initialize figlist')
+    logger.info(strm(lsafe('DEBUG: initialize figlist')))
     if first_figure == None:
-        if verbose: print lsafen('empty')
+        logger.info(strm(lsafen('empty')))
         return []
     else:
-        if verbose: print lsafen(first_figure.figurelist)
+        logger.info(strm(lsafen(first_figure.figurelist)))
         return first_figure
 class figlist(object):
     r"""
@@ -1965,13 +1976,13 @@ class figlist(object):
         return
     def check_units(self, testdata, x_index, y_index,
             verbose=False):
-        if verbose: print "-"*30
-        if verbose: print "called check_units for figure",self.current
+        logger.info(strm("-"*30))
+        logger.info(strm("called check_units for figure",self.current))
         if isinstance(testdata,nddata):
-            if verbose: print "(check_units) it's nddata"
+            logger.info(strm("(check_units) it's nddata"))
             testdata = testdata.copy().human_units()
             if len(testdata.dimlabels) > 1:
-                if verbose: print "(check_units) more than one dimension"
+                logger.info(strm("(check_units) more than one dimension"))
                 if not hasattr(self,'current'):
                     raise ValueError("give your plot a name (using .next()) first! (this is used for naming the PDF's etc)")
                 if self.current in self.units.keys():
@@ -1982,7 +1993,7 @@ class figlist(object):
                     if isinstance(testdata,nddata):
                         self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
             else:
-                if verbose: print "(check_units) only one dimension"
+                logger.info(strm("(check_units) only one dimension"))
                 if not hasattr(self,'current'):
                     self.next('default')
                 if self.current in self.units.keys():
@@ -1995,7 +2006,7 @@ class figlist(object):
                             raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(self.units[self.current],theseunits))
                 else:
                     self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]))
-        if verbose: print "-"*30
+        logger.info(strm("-"*30))
         return testdata
     def adjust_spines(self,spines):
         ax = gca()
@@ -2193,18 +2204,18 @@ class figlist(object):
             iterator = possible_iterators[argmin(abs(axis_span/desired_ticks -
                 possible_iterators))]
             #}}}
-            if verbose: print 'iterator is',iterator
+            logger.info(strm('iterator is',iterator))
             return iterator,r_[ceil(thisaxis.min()/iterator):
                 floor(thisaxis.max()/iterator)+1]*iterator
         #{{{ now, I need to get the list of multiples that falls inside the axis span
         xiterator,xlist = gen_list(x_axis)
         yiterator,ylist = gen_list(y_axis)
-        if verbose: print 'range of x ',x_axis.min(),x_axis.max()
-        if verbose: print 'xlist',xlist
-        if verbose: print plotdata.unitify_axis(0)
-        if verbose: print 'range of y ',y_axis.min(),y_axis.max()
-        if verbose: print 'ylist',ylist
-        if verbose: print plotdata.unitify_axis(1)
+        logger.info(strm('range of x ',x_axis.min(),x_axis.max()))
+        logger.info(strm('xlist',xlist))
+        logger.info(strm(plotdata.unitify_axis(0)))
+        logger.info(strm('range of y ',y_axis.min(),y_axis.max()))
+        logger.info(strm('ylist',ylist))
+        logger.info(strm(plotdata.unitify_axis(1)))
         #}}}
         if xiterator < 1:
             x_ticklabels = ['{:0.1f}'.format(j) for j in xlist]
@@ -3779,7 +3790,7 @@ class nddata (object):
         '''
         #{{{ if zero dimensional, fake a singleton dimension and recurse
         #{{{ unless both are zero dimensional, in which case, just leave alone
-        if verbose: print "starting aligndata"
+        logger.info(strm("starting aligndata"))
         if isscalar(arg) or type(arg) == ndarray:
             arg = nddata(arg)
             index_dims = [j for j in r_[0:len(arg.dimlabels)]
@@ -3791,19 +3802,19 @@ class nddata (object):
                 if len(match_dims) != len(index_dims):
                     raise ValueError("you seem to by multiplying by something with an 'INDEX' data and something that doesn't have that -- is this really what you want?  (this is commonly produced by multiplying a mismatched ndarray by an nddata)")
         if ndshape(self).zero_dimensional and ndshape(arg).zero_dimensional:
-            if verbose: print "(1) yes, I found something zero dimensional"
+            logger.info(strm("(1) yes, I found something zero dimensional"))
             return self.copy(),arg.copy()
         #}}}
         elif ndshape(self).zero_dimensional:
-            if verbose: print "(2) yes, I found something zero dimensional"
-            if verbose: print "yes, I found something zero dimensional"
+            logger.info(strm("(2) yes, I found something zero dimensional"))
+            logger.info(strm("yes, I found something zero dimensional"))
             A = self.copy()
             A.dimlabels = [arg.dimlabels[0]]
             A.data = A.data.reshape(1)
             return A.aligndata(arg)
         elif ndshape(arg).zero_dimensional:
-            if verbose: print "(3) yes, I found something zero dimensional"
-            if verbose: print "yes, I found something zero dimensional"
+            logger.info(strm("(3) yes, I found something zero dimensional"))
+            logger.info(strm("yes, I found something zero dimensional"))
             arg = arg.copy()
             arg.dimlabels = [self.dimlabels[0]]
             arg.data = arg.data.reshape(1)
@@ -3830,8 +3841,8 @@ class nddata (object):
                 arg.dimlabels] #  only the labels valid for arg, ordered
         #                         as they are in newdims
         argshape = list(ones(len(newdims), dtype=int64))# should be a better solution
-        if verbose: print "DEBUG 2: shape of self",ndshape(self),"self data shape",self.data.shape,"shape of arg",ndshape(arg),"arg data shape",arg.data.shape
-        if verbose: print "DEBUG 3: shape of selfout",ndshape(selfout),"selfout data shape",selfout.data.shape,"shape of argout",ndshape(argout),"argout data shape",argout.data.shape
+        logger.info(strm("DEBUG 2: shape of self",ndshape(self),"self data shape",self.data.shape,"shape of arg",ndshape(arg),"arg data shape",arg.data.shape))
+        logger.info(strm("DEBUG 3: shape of selfout",ndshape(selfout),"selfout data shape",selfout.data.shape,"shape of argout",ndshape(argout),"argout data shape",argout.data.shape))
         #{{{ wherever the dimension already exists in arg, pull the shape from arg
         for j,k in enumerate(newdims):
             if k in argout.dimlabels:
@@ -4888,7 +4899,7 @@ class nddata (object):
                 if len(rdata) < 3:
                     thiskind = 'linear'
         thisaxis = self.axn(axis)
-        if verbose: print 'Using %s interpolation'%thiskind
+        logger.info(strm('Using %s interpolation'%thiskind))
         def local_interp_func(local_arg_data,kind = thiskind):
             interpfunc =  interp1d(oldaxis,local_arg_data,kind = kind,axis = thisaxis)
             try:
@@ -5015,7 +5026,7 @@ class nddata (object):
         > exit()
         > #}}}
         """
-        if verbose: print "(contiguous) shape of self inside contiguous",ndshape(self)
+        logger.info(strm("(contiguous) shape of self inside contiguous",ndshape(self)))
         if axis is None:
             if len(self.dimlabels) == 1:
                 axis = self.dimlabels[0]
@@ -5024,7 +5035,7 @@ class nddata (object):
                 raise TypeError("If there is more than one dimension, `axis` must be set to something other than ``None``")
         else:
             mask = lambdafunc(self.copy(),axis).data
-        if verbose: print "(contiguous) shape of mask",mask.shape
+        logger.info(strm("(contiguous) shape of mask",mask.shape))
         if axis is None:
             idx, = np.diff(mask).nonzero() # this gives a list of indices for the boundaries between true/false
         else:
@@ -5035,10 +5046,10 @@ class nddata (object):
         if mask[-1]: # If the end of mask is True, then I need to add a boundary there as well
             idx = np.r_[idx, mask.size-1] # Edit
         idx.shape = (-1,2) # idx is 2x2 array of start,stop
-        if verbose: print '(contiguous) DEBUG idx is',idx
-        if verbose: print "(contiguous) diffs for blocks",diff(idx,axis=1),
+        logger.info(strm('(contiguous) DEBUG idx is',idx))
+        logger.info(strm("(contiguous) diffs for blocks",diff(idx,axis=1),))
         block_order = diff(idx, axis=1).flatten().argsort()[::-1]
-        if verbose: print "(contiguous) in descending order, the blocks are therefore",idx[block_order,:]
+        logger.info(strm("(contiguous) in descending order, the blocks are therefore",idx[block_order,:]))
         #if verbose: print "yielding",idx[diff(idx,axis=1).argmax(),:],self.getaxis(axis)[idx[diff(idx,axis=1).argmax(),:]]
         return self.getaxis(axis)[idx[block_order,:]]
     def to_ppm(self):
@@ -5400,13 +5411,13 @@ class nddata (object):
             newdata = fill_with * ones(newdata,dtype = self.data.dtype)
         newdata_slice = [slice(None,None,None)] * len(newdata.shape)
         newdata_slice[self.axn(axis)] = slice(-start_index,len(u)-start_index,None)
-        if verbose: print "-------------------------"
-        if verbose: print "shape of newdata",newdata.shape
-        if verbose: print "shape of self.data",self.data.shape
-        if verbose: print "len of u",len(u)
-        if verbose: print "start index",start_index
-        if verbose: print "shape of slice",newdata[newdata_slice].shape
-        if verbose: print "-------------------------"
+        logger.info(strm("-------------------------"))
+        logger.info(strm("shape of newdata",newdata.shape))
+        logger.info(strm("shape of self.data",self.data.shape))
+        logger.info(strm("len of u",len(u)))
+        logger.info(strm("start index",start_index))
+        logger.info(strm("shape of slice",newdata[newdata_slice].shape))
+        logger.info(strm("-------------------------"))
         newdata[newdata_slice] = self.data
         self.data = newdata
         #}}}
@@ -5831,15 +5842,15 @@ class nddata (object):
         axis_number = self.axn(axis_name)
         new_axis,indices = unique(self.getaxis(axis_name)[which_field],
                 return_inverse = True) # we are essentially creating a hash table for the axis.  According to numpy documentation, the hash indices that this returns should also be sorted sorted.
-        if verbose: print "(chunk auto) indices look like this:",indices
+        logger.info(strm("(chunk auto) indices look like this:",indices))
         #{{{ check that there are equal numbers of all the unique new_axis
         index_count = array([count_nonzero(indices == j) for j in range(indices.max()+1)])
         if all(index_count == index_count[0]):
-            if verbose: print "(chunk auto) Yes, there are equal numbers of all unique new_axis! (Each element of the hash table has been indexed the same number of times.)"
+            logger.info(strm("(chunk auto) Yes, there are equal numbers of all unique new_axis! (Each element of the hash table has been indexed the same number of times.)"))
             #}}}
             #{{{ store the old shape and generate the new shape
             current_shape = list(self.data.shape)
-            if verbose: print "(chunk auto) old shape -- ",current_shape
+            logger.info(strm("(chunk auto) old shape -- ",current_shape))
             new_shape = insert(current_shape,axis_number + 1,len(new_axis))
             new_shape[axis_number] /= len(new_axis) # the indices of the hash table become the new dimension
             #}}}
@@ -5877,11 +5888,11 @@ class nddata (object):
                 self.data[copy_to_slice]           = old_data[copy_from_slice]
                 if has_data_error:
                     data_error_location[copy_to_slice] = old_error[copy_from_slice]
-                if verbose: print "(chunk auto) ",j,'matches at',x_strip_current_field[copy_from_slice[axis_number]]
+                logger.info(strm("(chunk auto) ",j,'matches at',x_strip_current_field[copy_from_slice[axis_number]]))
                 self.axis_coords[axis_number][:,j] = x_strip_current_field[copy_from_slice[axis_number]]
             #}}}
-            if verbose: print "(chunk auto) new axis -- ",self.axis_coords[axis_number]
-            if verbose: print "(chunk auto) new shape -- ",self.data.shape
+            logger.info(strm("(chunk auto) new axis -- ",self.axis_coords[axis_number]))
+            logger.info(strm("(chunk auto) new shape -- ",self.data.shape))
             #{{{ housekeeping for the various axes + data properties -- should perhaps be possible to do this first, then use .getaxis()
             self.dimlabels.insert(axis_number + 1,which_field)
             self.axis_coords.insert(axis_number + 1,new_axis)
@@ -5889,7 +5900,7 @@ class nddata (object):
             self.axis_coords_error.insert(axis_number + 1,None)
             self.axis_coords_units.insert(axis_number + 1,None)
             #}}}
-            if verbose: print '(chunk auto) the dimensions of ',self.dimlabels[axis_number],'are (?? x ',self.dimlabels[axis_number+1],')=',self.axis_coords[axis_number].shape
+            logger.info(strm('(chunk auto) the dimensions of ',self.dimlabels[axis_number],'are (?? x ',self.dimlabels[axis_number+1],')=',self.axis_coords[axis_number].shape))
             #}}}
             #}}}
             #{{{ deal appropriately with the "remainder axis" (axis_number)
@@ -5901,11 +5912,11 @@ class nddata (object):
             # created (which is the second dimension), then get rid of the
             # duplicate labels
             test_axis = self.axis_coords[axis_number].T
-            if verbose: print "(chunk auto) test axis -- ",test_axis
+            logger.info(strm("(chunk auto) test axis -- ",test_axis))
             test_axis = ascontiguousarray(test_axis).flatten().view([('',test_axis.dtype)]*test_axis.shape[1])
             if all(test_axis == test_axis[0]):
                 self.axis_coords[axis_number] = self.axis_coords[axis_number][:,0].reshape(1,-1)
-                if verbose: print "(chunk auto) collapsed to", self.axis_coords[axis_number]
+                logger.info(strm("(chunk auto) collapsed to", self.axis_coords[axis_number]))
             #}}}
             if self.axis_coords[axis_number].shape[0] == 1:# then this is a "valid" axis -- because, for each position of the new axis, there is only one value of the remainder axis
                 self.axis_coords[axis_number] = self.axis_coords[axis_number].reshape(-1)
@@ -6482,9 +6493,9 @@ class nddata (object):
             myotherattrs = filter(lambda x: x not in ['C','sin','cos','exp','log10'],myotherattrs)
             myaxisattrs = filter((lambda x: x[0:4] == 'axis'),myotherattrs)
             myotherattrs = filter((lambda x: x[0:4] != 'axis'),myotherattrs)
-            if verbose: print lsafe('data attributes:',zip(mydataattrs,map(lambda x: type(self.__getattribute__(x)),mydataattrs))),'\n\n'
-            if verbose: print lsafe('axis attributes:',zip(myaxisattrs,map(lambda x: type(self.__getattribute__(x)),myaxisattrs))),'\n\n'
-            if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
+            logger.info(strm(lsafe('data attributes:',zip(mydataattrs,map(lambda x: type(self.__getattribute__(x)),mydataattrs))),'\n\n'))
+            logger.info(strm(lsafe('axis attributes:',zip(myaxisattrs,map(lambda x: type(self.__getattribute__(x)),myaxisattrs))),'\n\n'))
+            logger.info(strm(lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'))
             #}}}
             #}}}
             #{{{ write the data table
@@ -6498,7 +6509,7 @@ class nddata (object):
                 datatable = h5table(bottomnode,'data',thistable)
                 #print 'DEBUG 2: bottomnode is',bottomnode
                 #print 'DEBUG 2: datatable is',datatable
-                if verbose: print "Writing remaining axis attributes\n\n"
+                logger.info(strm("Writing remaining axis attributes\n\n"))
                 if len(mydataattrs) > 0:
                     h5attachattributes(datatable,mydataattrs,self)
             else:
@@ -6516,7 +6527,7 @@ class nddata (object):
                     for j,axisname in enumerate(self.dimlabels): # make a table for each different dimension
                         myaxisattrsforthisdim = dict([(x,self.__getattribute__(x)[j])
                             for x in list(myaxisattrs) if len(self.__getattribute__(x)) > 0]) # collect the attributes for this dimension and their values
-                        if verbose: print lsafe('for axis',axisname,'myaxisattrsforthisdim=',myaxisattrsforthisdim)
+                        logger.info(strm(lsafe('for axis',axisname,'myaxisattrsforthisdim=',myaxisattrsforthisdim)))
                         if 'axis_coords' in myaxisattrsforthisdim.keys() and myaxisattrsforthisdim['axis_coords'] is not None:
                             if 'axis_coords_error' in myaxisattrsforthisdim.keys() and myaxisattrsforthisdim['axis_coords_error'] is not None and len(myaxisattrsforthisdim['axis_coords_error']) > 0: # this is needed to avoid all errors, though I guess I could use try/except
                                 thistable = rec.fromarrays([myaxisattrsforthisdim['axis_coords'],myaxisattrsforthisdim['axis_coords_error']],names='data,error')
@@ -6526,13 +6537,13 @@ class nddata (object):
                             myaxisattrsforthisdim.pop('axis_coords')
                         datatable = h5table(axesnode,axisname,thistable)
                         #print 'DEBUG 3: axesnode is',axesnode
-                        if verbose: print "Writing remaining axis attributes for",axisname,"\n\n"
+                        logger.info(strm("Writing remaining axis attributes for",axisname,"\n\n"))
                         if len(myaxisattrsforthisdim) > 0:
                             h5attachattributes(datatable,myaxisattrsforthisdim.keys(),myaxisattrsforthisdim.values())
             #}}}
             #{{{ Check the remaining attributes.
-            if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
-            if verbose: print "Writing remaining other attributes\n\n"
+            logger.info(strm(lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'))
+            logger.info(strm("Writing remaining other attributes\n\n"))
             if len(myotherattrs) > 0:
                 #print 'DEBUG 4: bottomnode is',bottomnode
                 test = repr(bottomnode) # somehow, this prevents it from claiming that the bottomnode is None --> some type of bug?
@@ -6547,7 +6558,7 @@ class nddata (object):
                 if len(warnlist) > 0:
                     print "WARNING!!, attributes",warnlist,"are lists!"
                 #}}}
-                if verbose: print lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'
+                logger.info(strm(lsafe('other attributes:',zip(myotherattrs,map(lambda x: type(self.__getattribute__(x)),myotherattrs))),'\n\n'))
             #}}}
         finally:
             h5file.close()
@@ -6595,7 +6606,7 @@ class nddata_hdf5 (nddata):
         try:
             kwargs.update({'data_error':datarecordarray['error']})
         except:
-            if verbose: print "No error found\n\n"
+            logger.info(strm("No error found\n\n"))
         datadict.pop('data')
         #}}}
         #{{{ be sure to load the dimlabels
@@ -6841,7 +6852,7 @@ class fitdata(nddata):
         return
     def parameter_derivatives(self,xvals,set = None,set_to = None,verbose = False):
         r'return a matrix containing derivatives of the parameters, can set dict set, or keys set, vals set_to'
-        if verbose: print 'parameter derivatives is called!'
+        logger.info(strm('parameter derivatives is called!'))
         if iscomplex(self.data.flatten()[0]):
             print lsafen('Warning, taking only real part of fitting data!')
         if type(set) is dict:
@@ -7139,7 +7150,7 @@ class fitdata(nddata):
         for j in range(0,len(self.symbol_list)):
             #symbol = self.symbol_list[j]
             symbol = sympy.latex(self.symbolic_vars[j]).replace('$','')
-            if verbose: print 'DEBUG: replacing symbol \\verb|',symbol,'|'
+            logger.info(strm('DEBUG: replacing symbol \\verb|',symbol,'|'))
             location = printfstring.find(symbol)
             while location != -1:
                 if printfstring[location-1] == '-':
@@ -7148,14 +7159,14 @@ class fitdata(nddata):
                 else:
                     newstring = printfstring[:location]+'%01.03g'+printfstring[location+len(symbol):] # replace the symbol in the written function with the appropriate number
                     thissign = 1.0
-                if verbose: print r"\begin{verbatim} trying to replace",printfstring[location:location+len(symbol)],r'\end{verbatim}'
+                logger.info(strm(r"\begin{verbatim} trying to replace",printfstring[location:location+len(symbol)],r'\end{verbatim}'))
                 printfstring = newstring
                 printfargs += [thissign*p[j]] # add that number to the printf list
                 locations += [location]
                 allsymb += [symbol]
                 location = printfstring.find(symbol)
         printfargs = [printfargs[x] for x in argsort(locations)]
-        if verbose: print r"\begin{verbatim}trying to generate",self.function_string,'\n',printfstring,'\n',[allsymb[x] for x in argsort(locations)],'\n',printfargs,r'\end{verbatim}'
+        logger.info(strm(r"\begin{verbatim}trying to generate",self.function_string,'\n',printfstring,'\n',[allsymb[x] for x in argsort(locations)],'\n',printfargs,r'\end{verbatim}'))
         return printfstring%tuple(printfargs)
     def settoguess(self):
         'a debugging function, to easily plot the initial guess'
@@ -7408,7 +7419,7 @@ class fitdata(nddata):
             alpha_max = 100.
             alpha_mult = 2.
             alpha = 0.1 # maybe I can rather estimate this based on the change in the residual, similar to in L-M?
-            if verbose: print '\n\n.core.guess) value of residual before regularization %d:'%j,thisresidual
+            logger.info(strm('\n\n.core.guess) value of residual before regularization %d:'%j,thisresidual))
             while regularization_bad:
                 newguess = real(array(thisguess) + dot(pinvr(fprime.T,alpha),(y-f_at_guess)).flatten())
                 mask = newguess < self.guess_lb
@@ -7416,7 +7427,7 @@ class fitdata(nddata):
                 mask = newguess > self.guess_ub
                 newguess[mask] = self.guess_ub[mask]
                 if any(isnan(newguess)):
-                    if verbose: print '\n\n.core.guess) Regularization blows up $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha
+                    logger.info(strm('\n\n.core.guess) Regularization blows up $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha))
                     alpha *= alpha_mult
                 else:
                     #{{{ evaluate f, fprime and residuals
@@ -7432,7 +7443,7 @@ class fitdata(nddata):
                     #}}}
                     if (thisresidual-lastresidual)/lastresidual > 0.10:
                         alpha *= alpha_mult
-                        if verbose: print '\n\n.core.guess) Regularized Pinv gave a step uphill $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha
+                        logger.info(strm('\n\n.core.guess) Regularized Pinv gave a step uphill $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha))
                     else: # accept the step
                         regularization_bad = False
                         thisguess = newguess
@@ -7460,8 +7471,8 @@ class fitdata(nddata):
                         thisresidual = sqrt((y-f_at_guess)**2).sum()
                         #}}}
                         regularization_bad = False # jump out of this loop
-            if verbose: print '\n\n.core.guess) new value of guess after regularization:',lsafen(newguess)
-            if verbose: print '\n\n.core.guess) value of residual after regularization:',thisresidual
+            logger.info(strm('\n\n.core.guess) new value of guess after regularization:',lsafen(newguess)))
+            logger.info(strm('\n\n.core.guess) value of residual after regularization:',thisresidual))
         return thisguess
 #}}}
 def sqrt(arg):

@@ -183,3 +183,15 @@ def redim_F_to_C(a):
 def redim_C_to_F(a):
     "see redim_F_to_C"
     return a.ravel(order='C').reshape(a.shape[::-1], order='F')
+def log_fname(logname,fname,dirname):
+    with open(logname+'.log','r+', encoding='utf-8') as fp:
+        already_listed = False
+        # importantly, r+ seeks to start of file
+        for j in fp:
+            f, d = j.split()
+            if f == fname and d == dirname:
+                already_listed = True
+                break
+        if not already_listed:
+            fp.seek(0,os.SEEK_END)# make sure at end of file
+            fp.write('%-70s%-50s\n'%(fname,dirname))
