@@ -54,8 +54,8 @@ if haswatchdog:
                 return self.dependencies
 def det_new_pdf_name(thisargv):
     'based on an original tex or pdf name, determine the original basename (i.e., no extension), as well as one with the final word after the underscore removed'
-    tex_basename = list(filter(lambda x: x[0] != '-',
-            thisargv))[-1]
+    tex_basename = filter(lambda x: x[0] != '-',
+            thisargv)[-1]
     tex_basename = os.path.basename(tex_basename)
     if tex_basename[-4:] == '.tex':
         tex_basename = tex_basename[:-4]
@@ -74,7 +74,7 @@ def genconfig():
         hide_start = '_' # the default hidden/config starter for vim, mingw applications, etc
     else:
         hide_start = '.'
-    with open(os.path.join(os.path.expanduser('~'),hide_start+'pyspecdata'),'w',encoding='utf-8') as fp:
+    with open(os.path.join(os.path.expanduser('~'),hide_start+'pyspecdata'),'w') as fp:
         fp.write('[General]\n')
         fp.write('# replace the following with your default data location (this is just a suggestion)\n')
         possible_data = [x for x in next(os.walk(os.path.expanduser('~')))[1] if 'data' in x.lower() and 'app' not in x.lower()]
@@ -109,7 +109,7 @@ def wraplatex():
         use_xelatex = False
     print "about to update the python script outputs...."
     orig_tex_basename,new_pdf_basename = det_new_pdf_name(proc_args)
-    with open(orig_tex_basename+'.tex','r',encoding='utf-8') as fp:
+    with open(orig_tex_basename+'.tex','r') as fp:
         thisline = fp.readline()
         while thisline.startswith('%!'):# in case we want to allow multiple directives
             if 'xelatex' in thisline:
@@ -133,8 +133,8 @@ def wraplatex():
     return
 def wrapviewer():
     'see :func:`wraplatex <pyspecdata.latexscripts.wraplatex>`'
-    pdf_basename = list(filter(lambda x: x[0] != '-',
-            sys.argv))[-1]
+    pdf_basename = filter(lambda x: x[0] != '-',
+            sys.argv)[-1]
     orig_tex_basename,new_pdf_basename = det_new_pdf_name(sys.argv)
     if os.name == 'posix':
         # {{{ this plays the role of the function that I used to call "new_evince" with argument "b"
@@ -173,7 +173,7 @@ def cached_filename(hashstring,returndir = False):
     we use the first two characters as directory names (so there are just 16 of them'''
     return get_scripts_dir() + 'cache' + os.path.sep + hashstring[0] + os.path.sep + hashstring[1] + os.path.sep + hashstring[2:] + '.tex'
 def grab_script_string(scriptnum_as_str):
-    fp_script = open(script_filename(scriptnum_as_str),encoding='utf-8')
+    fp_script = open(script_filename(scriptnum_as_str))
     #print "opening",script_filename(scriptnum_as_str)
     script_string = ''
     reading = False
@@ -197,7 +197,7 @@ def get_scripts_dir():
 def sha_string(script):
     'convert the sha hash to a string'
     s = hashlib.sha256()
-    s.update(script.encode('utf-8'))
+    s.update(script)
     hasharray = numpy.fromstring(s.digest(),'>u8')
     del s
     return ''.join(map(lambda x: '%016x'%x,list(hasharray)))
@@ -206,7 +206,7 @@ def cache_output_if_needed(scriptnum_as_str,hashstring,showcode = False,show_err
     output_fname = cached_filename(hashstring)
     script_fname = script_filename(scriptnum_as_str)
     # {{{ interpret the "NOerr" directive
-    with open(script_fname,'r',encoding='utf-8') as fp:
+    with open(script_fname,'r') as fp:
         firstline = fp.readline()
         if firstline.startswith('### NOerr'): show_error = False
     # }}}
@@ -216,7 +216,7 @@ def cache_output_if_needed(scriptnum_as_str,hashstring,showcode = False,show_err
         print "no cached file"
         if not os.path.exists(os.path.dirname(output_fname)):
             os.makedirs(os.path.dirname(output_fname))
-        fp_out = open(output_fname,'w',encoding='utf-8')
+        fp_out = open(output_fname,'w')
         #fp_out.write(r'{\color{red}script: %d}'%script_number+'\n')
         if showcode:
             fp_out.write(r'\begin{lstlisting}'+'\n')
