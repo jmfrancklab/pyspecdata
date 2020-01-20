@@ -20,7 +20,7 @@ from . import acert
 from .open_subpath import open_subpath
 from ..datadir import getDATADIR
 from ..datadir import _my_config
-from ..general_functions import process_kwargs,strm
+from ..general_functions import process_kwargs,strm,log_fname
 from ..core import *
 from builtins import any # numpy has an "any" function, which is very annoying
 from itertools import tee
@@ -110,6 +110,9 @@ def find_file(searchstring,
     It looks at the top level of the directory first, and if that fails, starts to look recursively.
     Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
 
+    Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
+    (so that you can make sure they are properly synced to the cloud, etc.).
+
     It calls :func:`~pyspecdata.load_files.load_indiv_file`, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.
 
     Parameters
@@ -183,6 +186,9 @@ def find_file(searchstring,
             indirect_dimlabels=indirect_dimlabels,
             expno=expno)
         # }}}
+        for_logging = os.path.normpath(filename).split(os.path.sep)
+        log_fname('data_files',for_logging[-1],os.path.join(for_logging[:-1]))
+        del for_logging
     if data is None:
         raise ValueError(strm(
             "I found no data matching the regexp", searchstring))
