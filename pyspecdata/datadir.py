@@ -41,7 +41,7 @@ class MyConfig(object):
     def __exit__(self, exception_type, exception_value, traceback):
         if self._config_parser is not None:
             # {{{ reset to standard figures
-            self._config_parser.set_setting('mode','figures','standard')
+            self.set_setting('mode','figures','standard')
             # }}}
             with open(self.config_location,'w') as fp:
                 self._config_parser.write(fp)
@@ -83,15 +83,18 @@ class MyConfig(object):
         The value corresponding to `this_key`.
         """
         if this_key in list(self.config_vars.keys()):
+            logger.debug("I pulled",this_key,"from the config_vars")
             return self.config_vars[this_key]
-        if environ is not None and environ in list(os.environ.keys()):
-                retval = os.environ[environ]
+        logger.debug("about to look for environment variable",environ)
+        if environ is not None and environ in os.environ.keys():
+            retval = os.environ[environ]
+            logger.debug("I pulled",environ,"from the environment variables -- it is",retval)
         else:
             if self._config_parser is None:
                 self._config_parser = configparser.SafeConfigParser()
                 read_cfg = self._config_parser.read(self.config_location)
                 if not read_cfg:
-                    print("\nWarning!! There was no file at",self.config_location,"so I'm creating one")
+                    logger.debug("\nWarning!! There was no file at",self.config_location,"so I'm creating one")
             if self._config_parser.has_section(section):
                 try:
                     retval = self._config_parser.get(section,this_key)
@@ -114,6 +117,7 @@ class MyConfig(object):
                 self._config_parser.set(section,this_key,retval)
             if environ is not None:
                 os.environ[environ] = retval
+            logger.debug("I pulled",this_key,"from the configuration file -- it is",retval)
         self.config_vars[this_key] = retval
         return retval
 _my_config = MyConfig()

@@ -27,9 +27,16 @@ For example, :func:`box_muller` is a helper function (based on numerical recipes
 while h5 functions are helper functions for using pytables in a fashion that
 will hopefull be intuitive to those familiar with SQL, etc.
 '''
+from .datadir import _my_config
 from sys import exc_info
 from os import listdir,environ
 from os.path import sep as path_sep
+# {{{ determine the figure style, and load the appropriate modules
+_figure_mode_setting = _my_config.get_setting('figures', section='mode', environ='pyspecdata_figures')
+if _figure_mode_setting == 'latex':
+    environ['ETS_TOOLKIT'] = 'qt4'
+    import matplotlib; matplotlib.use('Agg')
+# }}} -- continued below
 from .general_functions import inside_sphinx
 if not inside_sphinx():
     from pylab import *
@@ -76,7 +83,6 @@ from .ndshape import ndshape_base
 rc('image',aspect='auto',interpolation='nearest')
 #rcParams['text.usetex'] = True
 rc('font', family='Arial')# I need this to render unicode
-rcParams['text.latex.unicode'] = True
 rcParams['xtick.direction'] = 'out'
 rcParams['xtick.major.size'] = 12
 rcParams['xtick.minor.size'] = 6
@@ -4131,7 +4137,7 @@ class nddata (object):
             if raw_index:
                 return raw_indices
             else:
-                return dict([(k,self.getaxis(k)[v]) for k,v in raw_indices.iteritems()])
+                return dict([(k,self.getaxis(k)[v]) for k,v in raw_indices.items()])
         if (type(axes) is str):
             axes = [axes]
         for j in range(0,len(axes)):
@@ -5301,8 +5307,8 @@ class nddata (object):
                     explain_error(e))
             func = lambdified_func
             axisnames = list(map(str,symbols_in_func))
-        elif not hasattr(func,'func_code'):
-            raise ValueError("I can't interpret the second argument as a function!")
+        elif not hasattr(func,'__call__'):
+            raise ValueError("I can't interpret the second argument as a function! It is type "+str(type(func)))
         # I can't do the following for sympy, because the argument count is always zero
         if not issympy(args[0]) and func.__code__.co_argcount != len(axisnames):
             raise ValueError(strm("The axisnames you passed",axisnames,
@@ -5409,10 +5415,39 @@ class nddata (object):
         new_u = u[0] + du * r_[start_index:stop_index]
         self.setaxis(axis,new_u)
         return self
-    def setaxis(self,axis,value):
-        ("set the value of the axis if you pass a function as the `value`, it"
-        " will use the existing axis labels as the argument of the function, and"
-        " then put the result into the axis labels")
+    def setaxis(self,*args):
+        """set or alter the value of the coordinate axis
+        
+        Can be used in one of several ways:
+
+        * ``self.setaxis('axisname', values)``: just sets the values
+        * ``self.fromaxis('axisname',inputfunc)``: take the existing function, apply inputfunc, and replace
+        * ``self.fromaxis(inputsymbolic)``: Evaluate `inputsymbolic` and load the result into the axes, appropriately
+        """
+        if len(args) == 2:
+            axis, value = args
+        elif len(args) == 1 and issympy(args[0]):
+            func = args[0]
+            symbols_in_func = func.atoms(sympy.Symbol)
+            logger.debug(strm('identified this as a sympy expression (',func,') with symbols',symbols_in_func))
+            symbols_not_in_dimlabels = set(map(str,symbols_in_func))-set(self.dimlabels)
+            if len(symbols_not_in_dimlabels)>0:
+                raise ValueError("You passed a symbolic function, but the symbols"+str(symbols_not_in_dimlabels)+" are not axes")
+            logging.debug(strm("about to run sympy lambdify, symbols_in_func is",symbols_in_func))
+            mat2array = [{'ImmutableMatrix': array}, 'numpy']# returns arrays rather than the stupid matrix class
+            try:
+                lambdified_func = sympy.lambdify(list(symbols_in_func), func,
+                        modules=mat2array)
+            except Exception as e:
+                raise ValueError(strm('Error parsing axis variables',list(map(sympy.var,axisnames)),
+                    'that you passed and function',func,'that you passed') +
+                    explain_error(e))
+            value = lambdified_func
+            axis = list(map(str,symbols_in_func))
+            assert len(axis)==1, "currently only supported for 1 axis at a time -- if you want to do for more than one axis, please create a pull request with an example"
+            axis = axis[0]
+        else:
+            raise ValueError("not a valid argument to setaxis -- look at the documentation!")
         if axis == 'INDEX':
             raise ValueError("Axes that are called INDEX are special, and you are not allowed to label them!")
         if isinstance(value, type(emptyfunction)):
@@ -5426,10 +5461,13 @@ class nddata (object):
         if self.axis_coords is None or len(self.axis_coords) == 0:
             self.axis_coords = [None]*len(self.dimlabels)
             self.axis_coords_error = [None]*len(self.dimlabels)
-        a = len(value)
-        b = self.data.shape[self.axn(axis)]
-        assert  a == b, "Along the axis %s, the length of the axis you passed (%d) doesn't match the size of the data (%d)."%(axis,a,b)
-        self.axis_coords[self.axn(axis)] = value
+        if value is None:
+            self.axis_coords[self.axn(axis)] = value
+        else:
+            a = len(value)
+            b = self.data.shape[self.axn(axis)]
+            assert  a == b, "Along the axis %s, the length of the axis you passed (%d) doesn't match the size of the data (%d)."%(axis,a,b)
+            self.axis_coords[self.axn(axis)] = value
         return self
     def shear(self, along_axis, propto_axis, shear_amnt,
             zero_fill=True, start_in_conj=False, method='linear'):
@@ -6528,6 +6566,7 @@ class nddata_hdf5 (nddata):
             return repr(self.datanode)
         else:
             return nddata.__repr__(self)
+        atexit.register(self._cleanup)
     def __del__(self):
         self._cleanup()
         return
@@ -6545,7 +6584,7 @@ class nddata_hdf5 (nddata):
         #except BaseException  as e:
         #    raise IndexError("I can't find the node "+pathstring+explain_error(e))
         self._init_datanode(self.datanode)
-        atexit.register(self._cleanup,self)
+        atexit.register(self._cleanup)
     def _init_datanode(self,datanode,verbose = False,**kwargs):
         datadict = h5loaddict(datanode)
         #{{{ load the data, and pop it from datadict
@@ -6561,7 +6600,7 @@ class nddata_hdf5 (nddata):
         datadict.pop('data')
         #}}}
         #{{{ be sure to load the dimlabels
-        mydimlabels = datadict['dimlabels']
+        mydimlabels = [j.decode('utf-8') for j in datadict['dimlabels']]
         if len(mydimlabels) == 1:
             if len(mydimlabels[0]) == 1:
                 mydimlabels = list([mydimlabels[0][0]]) # for some reason, think I need to do this for length 1
@@ -6577,6 +6616,9 @@ class nddata_hdf5 (nddata):
                     axisnumber = mydimlabels.index(axisname)
                 except AttributeError as e:
                     raise AttributeError(strm('mydimlabels is not in the right format!\nit looks like this:\n',
+                        mydimlabels,type(mydimlabels))+explain_error(e))
+                except ValueError as e:
+                    raise ValueError(strm('mydimlabels is not in the right format!\nit looks like this:\n',
                         mydimlabels,type(mydimlabels))+explain_error(e))
                 recordarrayofaxis = datadict['axes'][axisname]['data']
                 myaxiscoords[axisnumber] = recordarrayofaxis['data']
@@ -7432,11 +7474,7 @@ def sqrt(arg):
         return np_sqrt(arg)
 
 # {{{ determine the figure style, and load the appropriate modules
-_figure_mode_setting = _my_config.config_parser.get_setting('figures', section='mode', environ='pyspecdata_figures')
 if _figure_mode_setting == 'latex':
-    print("_figure_mode_setting matplotlib agg")
-    environ['ETS_TOOLKIT'] = 'qt4'
-    import matplotlib; matplotlib.use('Agg')
     from .fornotebook import *
     figlist_var = figlistl
 elif _figure_mode_setting == 'standard':
@@ -7446,7 +7484,6 @@ elif _figure_mode_setting == 'standard':
         print(''.join(map(repr,x)))
     def lrecordarray(*x,**kwargs):
         return repr(x) # if I'm not using tex, it's easier to not use the formatting
-    figlist_var = figlist
     def lsafe(*string,**kwargs):
         "replacement for normal lsafe -- no escaping"
         if len(string) > 1:
