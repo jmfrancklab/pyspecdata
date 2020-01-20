@@ -8,6 +8,7 @@ import ConfigParser
 import platform
 from .general_functions import process_kwargs, strm
 import logging
+import atexit
 logger = logging.getLogger('pyspecdata.datadir')
 class MyConfig(object):
     r'''Provides an easy interface to the pyspecdata configuration file.
@@ -24,6 +25,7 @@ class MyConfig(object):
         self.config_location = os.path.join(os.path.expanduser('~'),self.hide_start+'pyspecdata')
         self.config_vars = {}
         "The dictionary that stores the current settings -- keep these in a dictionary, which should be faster than reading from environ, or from a file."
+        atexit.register(self.__exit__,None,None,None)
         return
     def set_setting(self,this_section,this_key,this_value):
         "set `this_key` to `this_value` inside section `this_section`, creating it if necessary"
@@ -40,8 +42,12 @@ class MyConfig(object):
         self.__del__()
     def __del__(self):
         if self._config_parser is not None:
+            # {{{ reset to standard figures
+            self._config_parser.set_setting('mode','figures','standard')
+            # }}}
             with open(self.config_location,'w') as fp:
                 self._config_parser.write(fp)
+        self.__del__()
     def get_setting(self,this_key,environ = None,default = None,section = 'General'):
         """Get a settings from the "General" group.
         If the file does not exist, or the option is not set, then set the option, creating the file as needed.
