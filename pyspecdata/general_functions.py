@@ -31,7 +31,6 @@ else:
     r_ = rclass()
     # }}}
 import logging
-from paramset_pyspecdata import myparams
 import re
 
 def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
@@ -123,8 +122,6 @@ def init_logging(level=logging.INFO, filename='pyspecdata.log'):
         level=logging.INFO
     elif level.lower() == 'debug':
         level=logging.DEBUG
-    if myparams['figlist_type'] == 'figlistl':
-        return
     FORMAT = "--> %(filename)s(%(lineno)s):%(name)s %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"
     log_filename = os.path.join(os.path.expanduser('~'),filename)
     if os.path.exists(log_filename):

@@ -7,7 +7,6 @@ python code is embedded in a python environment inside latex.
 import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from .core import *
-from string import rstrip
 from scipy.io import savemat,loadmat
 from os.path import exists as path_exists
 from os import name as os_name
@@ -24,9 +23,8 @@ def dprint(*stuff):
     print('\n\nDEBUG',' '.join(map(repr(stuff))),'\n\n')
 def thisjobname():
     if path_exists('pythonjobname.txt'):
-        fp = open('pythonjobname.txt')
-        retval = rstrip(fp.read())
-        fp.close()
+        with open('pythonjobname.txt') as fp:
+            retval = fp.read().rstrip()
     else:
         retval = 'JobnameUndefined'
     return retval

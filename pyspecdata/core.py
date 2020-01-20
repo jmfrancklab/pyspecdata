@@ -27,13 +27,9 @@ For example, :func:`box_muller` is a helper function (based on numerical recipes
 while h5 functions are helper functions for using pytables in a fashion that
 will hopefull be intuitive to those familiar with SQL, etc.
 '''
-from paramset_pyspecdata import myparams
 from sys import exc_info
 from os import listdir,environ
 from os.path import sep as path_sep
-if myparams['figlist_type'] == 'figlistl':
-    environ['ETS_TOOLKIT'] = 'qt4'
-    import matplotlib; matplotlib.use('Agg')
 from .general_functions import inside_sphinx
 if not inside_sphinx():
     from pylab import *
@@ -41,6 +37,7 @@ else:
     pi = 3.14
 from types import FunctionType as function
 import textwrap
+import atexit
 import matplotlib
 import matplotlib.transforms as mtransforms
 from distutils.version import LooseVersion
@@ -6532,11 +6529,13 @@ class nddata_hdf5 (nddata):
         else:
             return nddata.__repr__(self)
     def __del__(self):
+        self._cleanup()
+        return
+    def _cleanup(self):
         if hasattr(self,'_node_children'):
             self.h5file.close()
             del self.h5file
             del self.datanode
-        super().__del__()
         return
     def __init__(self,pathstring,directory='.'):
         self.pathstring = pathstring
@@ -6546,6 +6545,7 @@ class nddata_hdf5 (nddata):
         #except BaseException  as e:
         #    raise IndexError("I can't find the node "+pathstring+explain_error(e))
         self._init_datanode(self.datanode)
+        atexit.register(self._cleanup,self)
     def _init_datanode(self,datanode,verbose = False,**kwargs):
         datadict = h5loaddict(datanode)
         #{{{ load the data, and pop it from datadict
@@ -7431,10 +7431,15 @@ def sqrt(arg):
     else:
         return np_sqrt(arg)
 
-if myparams['figlist_type'] == 'figlistl':
+# {{{ determine the figure style, and load the appropriate modules
+_figure_mode_setting = _my_config.config_parser.get_setting('figures', section='mode', environ='pyspecdata_figures')
+if _figure_mode_setting == 'latex':
+    print("_figure_mode_setting matplotlib agg")
+    environ['ETS_TOOLKIT'] = 'qt4'
+    import matplotlib; matplotlib.use('Agg')
     from .fornotebook import *
     figlist_var = figlistl
-elif myparams['figlist_type'] == 'figlist':
+elif _figure_mode_setting == 'standard':
     def obsn(*x): #because this is used in fornotebook, and I want it defined
         print(''.join(x),'\n')
     def obs(*x): #because this is used in fornotebook, and I want it defined
@@ -7465,3 +7470,7 @@ elif myparams['figlist_type'] == 'figlist':
         if wrap is not None:
             string = '\n'.join(textwrap.wrap(string,wrap))
         return string
+    figlist_var = figlist
+else:
+    raise ValueError("I don't understand the figures mode "+_figure_mode_setting)
+# }}}
