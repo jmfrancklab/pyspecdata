@@ -1,0 +1,414 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyspecdata.plot_funcs package &mdash; pySpecData 0.9.5.1.7 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pySpecData
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5.1.7
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pySpecData</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>pyspecdata.plot_funcs package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/auto_api/pyspecdata.plot_funcs.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pyspecdata-plot-funcs-package">
+<h1>pyspecdata.plot_funcs package<a class="headerlink" href="#pyspecdata-plot-funcs-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pyspecdata.plot_funcs.image">
+<span id="pyspecdata-plot-funcs-image-module"></span><h2>pyspecdata.plot_funcs.image module<a class="headerlink" href="#module-pyspecdata.plot_funcs.image" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pyspecdata.plot_funcs.image.fl_image">
+<code class="descclassname">pyspecdata.plot_funcs.image.</code><code class="descname">fl_image</code><span class="sig-paren">(</span><em>self</em>, <em>A</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.image.fl_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called as <cite>fl.image()</cite> where <cite>fl</cite> is the <cite>figlist_var</cite>
+object</p>
+<p>Note that this code just wraps the figlist properties, and
+the heavy lifting is done by the <cite>image(</cite> function.
+Together, the effect is as follows:</p>
+<ul>
+<li><p class="first"><cite>check_units</cite> converts to human-readable units, and
+makes sure they match the units already used in the plot.</p>
+</li>
+<li><p class="first">if <cite>A</cite> has more than two dimensions, the final dimension in
+<cite>A.dimlabels</cite> is used as the column dimension, and a
+direct-product of all non-column dimensions (a Kronecker
+product, such that the innermost index comes the latest in
+the list <cite>A.dimlabels</cite>) is used as the row dimension. A
+white/black line is drawn after the innermost index used to
+create the direct product is finished iterating.</p>
+</li>
+<li><p class="first">If <cite>A</cite> consists of complex data, then an HSV plot
+(misnomer, actually an HV plot) is used:
+- convert to polar form: <span class="math notranslate nohighlight">\(z=\rho \exp(i \phi)\)</span>
+- <span class="math notranslate nohighlight">\(\phi\)</span> determines the color (Hue)</p>
+<blockquote>
+<div><ul class="simple">
+<li>Color wheel is cyclical, like <span class="math notranslate nohighlight">\(\exp(i \phi)\)</span></li>
+<li>red is taken as <span class="math notranslate nohighlight">\(\phi=0\)</span>, purely real and positive</li>
+<li>green-blue is <span class="math notranslate nohighlight">\(pi\)</span> radians out of phase with red and
+therefore negative real</li>
+</ul>
+</div></blockquote>
+<ul>
+<li><p class="first"><span class="math notranslate nohighlight">\(\rho\)</span> determines the intensity (value)
+- Depending on whether or not <cite>black</cite> is set (either as a</p>
+<blockquote>
+<div><p>keyword argument, or <cite>fl.black</cite>, the background will be
+black with high <span class="math notranslate nohighlight">\(\rho\)</span> values “lit up” (intended for
+screen plotting) or the background will be white with
+the high <span class="math notranslate nohighlight">\(\rho\)</span> values “colored in” (intended for
+printing)</p>
+</div></blockquote>
+</li>
+</ul>
+</li>
+<li><p class="first">If the data type (<cite>dtype</cite>) of the data in <cite>A</cite> is real
+(typically achieved by calling <cite>abs(A)</cite> or
+<cite>A.runcopy(real)</cite>), then <cite>A</cite> is plotted with a colormap and
+corresponding colorbar.</p>
+</li>
+<li><p class="first">If no title has been given, it’s set to the name of the
+current plot in the figurelist</p>
+</li>
+</ul>
+<dl class="attribute">
+<dt id="pyspecdata.plot_funcs.image.A">
+<code class="descclassname">pyspecdata.plot_funcs.image.</code><code class="descname">A</code><a class="headerlink" href="#pyspecdata.plot_funcs.image.A" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a> or numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyspecdata.plot_funcs.image.x">
+<code class="descclassname">pyspecdata.plot_funcs.image.</code><code class="descname">x</code><a class="headerlink" href="#pyspecdata.plot_funcs.image.x" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <cite>A</cite> is a numpy array, then this gives the values along
+the x axis (columns).
+Defaults to the size of the array.
+Not used if <cite>A</cite> is <cite>nddata</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Optional[double] or Optional[scalar]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyspecdata.plot_funcs.image.y">
+<code class="descclassname">pyspecdata.plot_funcs.image.</code><code class="descname">y</code><a class="headerlink" href="#pyspecdata.plot_funcs.image.y" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <cite>A</cite> is a numpy array, then this gives the values along
+the y axis (columns).
+Defaults to the size of the array.
+Not used if <cite>A</cite> is <cite>nddata</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Optional[double] or Optional[scalar]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyspecdata.plot_funcs.image.x_first">
+<code class="descclassname">pyspecdata.plot_funcs.image.</code><code class="descname">x_first</code><a class="headerlink" href="#pyspecdata.plot_funcs.image.x_first" title="Permalink to this definition">¶</a></dt>
+<dd><p>Since it’s designed to represent matrices, an image plot
+by defaults is “transposed” relative to all other plots.
+If you want the first dimension on the x-axis (<em>e.g.</em>, if
+you are plotting a contour plot on top of an image), then set
+<cite>x_first</cite> to <cite>True</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyspecdata.plot_funcs.image.spacing">
+<code class="descclassname">pyspecdata.plot_funcs.image.</code><code class="descname">spacing</code><a class="headerlink" href="#pyspecdata.plot_funcs.image.spacing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines the size of the white/black line drawn
+Defaults to 1</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">integer</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyspecdata.plot_funcs.image.ax">
+<code class="descclassname">pyspecdata.plot_funcs.image.</code><code class="descname">ax</code><a class="headerlink" href="#pyspecdata.plot_funcs.image.ax" title="Permalink to this definition">¶</a></dt>
+<dd><p>the Axis object where the plot should go.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">matplotlib Axes</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">all remaning</code></dt>
+<dd><p>are passed through to matplotlib <cite>imshow</cite></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyspecdata.plot_funcs.image.origin">
+<code class="descclassname">pyspecdata.plot_funcs.image.</code><code class="descname">origin</code><a class="headerlink" href="#pyspecdata.plot_funcs.image.origin" title="Permalink to this definition">¶</a></dt>
+<dd><p>upper and lower are passed to matplotlib.
+Flip is for 2D nmr, and flips the data manually.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">{‘upper’, ‘lower’, ‘flip’}</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">.. code-block:: python</code></dt>
+<dd><p>from pyspecdata import *
+fl = figlist_var()</p>
+<p>t = r_[-1:1:300j]
+x = nddata(t,[-1],[‘x’]).labels(‘x’,t)
+y = nddata(t,[-1],[‘y’]).labels(‘y’,t)</p>
+<p>z = x**2 + 2*y**2
+print “dimlabels of z:”,z.dimlabels</p>
+<p>fl.next(‘image with contours’)
+fl.image(z,x_first = True) #  x_first is needed to align
+#                             with the contour plot
+z.contour(colors = ‘w’,alpha = 0.75)</p>
+<p>fl.next(‘simple plot’) #  just to show that x is the same
+#                         here as well
+fl.plot(z[‘y’:(0,0.01)])</p>
+<p>fl.show(‘compare_image_contour_150911.pdf’)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspecdata.plot_funcs.image.image">
+<code class="descclassname">pyspecdata.plot_funcs.image.</code><code class="descname">image</code><span class="sig-paren">(</span><em>A</em>, <em>x=[]</em>, <em>y=[]</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.image.image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Please don’t call image directly anymore – use the image method of figurelist</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyspecdata.plot_funcs.image.imagehsv">
+<code class="descclassname">pyspecdata.plot_funcs.image.</code><code class="descname">imagehsv</code><span class="sig-paren">(</span><em>A</em>, <em>logscale=False</em>, <em>black=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.image.imagehsv" title="Permalink to this definition">¶</a></dt>
+<dd><p>This provides the HSV mapping used to plot complex number</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyspecdata.plot_funcs">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyspecdata.plot_funcs" title="Permalink to this headline">¶</a></h2>
+<p>This subpackage contains plotting functions that take advantage of <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code>.  Eventually, all plotting functions should be moved to separate modules in this subpackage.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, John M. Franck
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
