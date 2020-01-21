@@ -227,7 +227,7 @@ def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,ax = None,ti
     error_fields = [str(j) for j in mystructarray.dtype.names if j[-6:] == '_ERROR']
     if len(error_fields) > 0:
         mystructarray_errors = mystructarray[error_fields]
-        if verbose: "found error fields:",mystructarray_errors
+        logger.debug("found error fields:",mystructarray_errors)
     mystructarray = mystructarray[[str(j) for j in mystructarray.dtype.names if j not in error_fields]]
     if othersort is not None:
         list_of_text_fields.append(othersort)
@@ -679,26 +679,26 @@ def unmake_ndarray(array_to_conv,name_forprint = 'unknown'):
     elif type(array_to_conv) is ndarray and len(array_to_conv)==1:
         #{{{ if it's a length 1 ndarray, then return the element
         retval = array_to_conv.tolist()
-        logger.debug(strm("(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is a numpy array of length one"))
+        logger.debug(strm(name_forprint,"=",type(array_to_conv),"is a numpy array of length one"))
         #}}}
     elif type(array_to_conv) in [string_,int32,float64,bool_]:
         #{{{ map numpy strings onto normal strings
         retval = array_to_conv.tolist()
-        logger.debug(strm("(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is a numpy scalar"))
+        logger.debug(strm("name_forprint","=",type(array_to_conv),"is a numpy scalar"))
         #}}}
     elif type(array_to_conv) is list:
         #{{{ deal with lists
-        logger.debug(strm("(from unmake ndarray verbose):", name_forprint,"is a list"))
+        logger.debug(strm(name_forprint,"is a list"))
         typeofall = map(type,array_to_conv)
         if all(map(lambda x: x is string_,typeofall)):
-            logger.debug(strm("(from unmake ndarray verbose):", name_forprint,"=",typeofall,"are all numpy strings"))
+            logger.debug(strm( name_forprint,"=",typeofall,"are all numpy strings"))
             retval = map(str,array_to_conv)
         else:
-            logger.debug(strm("(from unmake ndarray verbose):", name_forprint,"=",typeofall,"are not all numpy string"))
+            logger.debug(strm(name_forprint,"=",typeofall,"are not all numpy string"))
             retval = array_to_conv
         #}}}
     else:
-        logger.debug(strm("(from unmake ndarray verbose):", name_forprint,"=",type(array_to_conv),"is not a numpy string or record array"))
+        logger.debug(strm(name_forprint,"=",type(array_to_conv),"is not a numpy string or record array"))
         retval = array_to_conv
     return retval
 #}}}
@@ -884,8 +884,7 @@ def h5child(thisnode,childname,clear = False,create = None):
     h5file = thisnode._v_file
     try:
         childnode = h5file.get_node(thisnode,childname)
-        if verbose:
-            print lsafe('found',childname)
+        logger.debug('found',childname)
         if clear:
             childnode._f_remove(recursive = True)
             childnode = None
@@ -896,8 +895,7 @@ def h5child(thisnode,childname,clear = False,create = None):
             childnode = None
         else:
             childnode = h5file.create_group(thisnode,childname)
-            if verbose:
-                print lsafe('created',childname)
+            logger.debug('created',childname)
     return childnode
 def h5remrows(bottomnode,tablename,searchstring):
     if type(searchstring) is dict:
@@ -931,7 +929,7 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
     '''add a row to a table, creating it if necessary, but don\'t add if the data matches the search condition indicated by `match_row`
     `match_row` can be either text or a dictionary -- in the latter case it's passed to h5searchstring
     '''
-    match_row,verbose,only_last = process_kwargs([('match_row',None),('verbose',False),('only_last',True)],kwargs)
+    match_row,only_last = process_kwargs([('match_row',None),('only_last',True)],kwargs)
     try: # see if the table exists
         mytable = h5table(bottomnode,tablename,None)
         tableexists = True
@@ -946,7 +944,7 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
         if match_row is not None:
             if type(match_row) is dict:
                 match_row = h5searchstring(match_row)
-            if verbose: obs("trying to match row according to",lsafen(match_row))
+            logger.debug("trying to match row according to",lsafen(match_row))
             mytable.flush()
             try:
                 matches = mytable.read_where(match_row)
@@ -963,8 +961,7 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
                 else:
                     return mytable,matches['index'][:]
             else:
-                if verbose:
-                    obs("I found no matches")
+                logger.debug("I found no matches")
     if len(args) == 1 and (type(args[0]) is dict):
         listofnames,listofdata = map(list,zip(*tuple(args[0].items())))
     elif len(args) == 2 and type(args[0]) is list and type(args[1]) is list:
@@ -1729,8 +1726,7 @@ class figlist(object):
             This is the argument passed to :func:`self.show`, and used to
             construct the file names.
         """
-        self.verbose, self.black, self.env, self.mlab, self.file_name, self.line_spacing = process_kwargs([
-            ('verbose',False),
+        self.black, self.env, self.mlab, self.file_name, self.line_spacing = process_kwargs([
             ('black',0.9),
             ('env',''),
             ('mlab','BLANK'),
@@ -1743,7 +1739,7 @@ class figlist(object):
         if self.mlab == 'BLANK': del self.mlab
         if self.file_name == 'BLANK': del self.file_name
         if self.line_spacing == 'BLANK': del self.line_spacing
-        if self.verbose: print lsafe('DEBUG: initialize figlist')
+        logger.debug('DEBUG: initialize figlist')
         if len(arg) == 0:
             self.figurelist = []
         else:
@@ -2627,13 +2623,12 @@ def concat(datalist,dimname,chop = False):
         else:
             if any(~(array(shapetocheck) == array(shapetocheckagainst))):
                 if chop:
-                    if verbose:
-                        print lsafen(repr(shapetocheck)),lsafen(repr(shapetocheckagainst))
-                        raise ValueError(strm('For item ',j,'in concat, ',
-                            shapetocheck,'!=',shapetocheckagainst,
-                            'where all the shapes of the things',
-                            'you\'re trying to concat are:',
-                            shapes))
+                    logger.debug(repr(shapetocheck),lsafen(repr(shapetocheckagainst)))
+                    raise ValueError(strm('For item ',j,'in concat, ',
+                        shapetocheck,'!=',shapetocheckagainst,
+                        'where all the shapes of the things',
+                        'you\'re trying to concat are:',
+                        shapes))
                 else:
                     raise ValueError(strm('For item ',j,'in concat, ',
                         shapetocheck,'!=',shapetocheckagainst,
@@ -3240,10 +3235,9 @@ class nddata (object):
                     #{{{ find the average order of magnitude, rounded down to the nearest power of 3
 
                     average_oom = log10(abs(data_to_test))/3.
-                    if verbose:
-                        print "(human_units) for axis: dtype",data_to_test.dtype
-                        print "(human_units) for axis: dtype",data_to_test
-                        print "(human units) for axis: oom:",average_oom
+                    logger.debug("for axis: dtype",data_to_test.dtype)
+                    logger.debug("for axis: dtype",data_to_test)
+                    logger.debug("for axis: oom:",average_oom)
                     average_oom = average_oom[isfinite(average_oom)].mean()
                     #}}}
                     logger.debug(strm("(human units): for axis",thisaxis,"the average oom is",average_oom*3))
@@ -5044,7 +5038,6 @@ class nddata (object):
         logger.debug(strm("(contiguous) diffs for blocks",diff(idx,axis=1),))
         block_order = diff(idx, axis=1).flatten().argsort()[::-1]
         logger.debug(strm("(contiguous) in descending order, the blocks are therefore",idx[block_order,:]))
-        #if verbose: print "yielding",idx[diff(idx,axis=1).argmax(),:],self.getaxis(axis)[idx[diff(idx,axis=1).argmax(),:]]
         return self.getaxis(axis)[idx[block_order,:]]
     def to_ppm(self):
         """Function that converts from Hz to ppm using Bruker parameters
@@ -7042,12 +7035,11 @@ class fitdata(nddata):
         x = x[mask]
         L = c_[x.reshape((-1,1)),ones((len(x),1))]
         retval = dot(pinv(L,rcond = 1e-17),y)
-        if verbose:
-            print r'\label{fig:pinv_figure_text}y=',y,'yerr=',yerr,'%s='%x_axis,x,'L=',L
-            print '\n\n'
-            print 'recalc y = ',dot(L,retval)
-            print 'recalc E = ',1.0-1.0/dot(L,retval)
-            print 'actual E = ',self.data
+        logger.debug(r'\label{fig:pinv_figure_text}y=',y,'yerr=',yerr,'%s='%x_axis,x,'L=',L)
+        logger.debug('\n\n')
+        logger.debug('recalc y = ',dot(L,retval))
+        logger.debug('recalc E = ',1.0-1.0/dot(L,retval))
+        logger.debug('actual E = ',self.data)
         return retval
     def linear(self,*args,**kwargs):
         r'''return the linear-form function, either smoothly along the fit function, or on the raw data, depending on whether or not the taxis argument is given
@@ -7369,7 +7361,7 @@ class fitdata(nddata):
                         recordlist[runno][name] = thiscopy.output(name)
         print r'\end{verbatim}'
         return recordlist # collect into a single recordlist array
-    def guess(self,super_verbose = False):
+    def guess(self):
         r'''provide the guess for our parameters; by default, based on pseudoinverse'''
         self.has_grad = False
         if iscomplex(self.data.flatten()[0]):
@@ -7401,8 +7393,8 @@ class fitdata(nddata):
         #}}}
         lastresidual = thisresidual
         for j in range(0,numguesssteps):
-            if super_verbose: print '\n\n.core.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\end{verbatim}'
-            if super_verbose: print '\n\n.core.guess) shape of parameter derivatives',shape(fprime),'shape of output',shape(y),'\n\n'
+            logger.debug('\n\n.core.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\end{verbatim}')
+            logger.debug('\n\n.core.guess) shape of parameter derivatives',shape(fprime),'shape of output',shape(y),'\n\n')
             regularization_bad = True
             alpha_max = 100.
             alpha_mult = 2.
