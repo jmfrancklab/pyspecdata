@@ -3937,9 +3937,7 @@ class nddata (object):
         return selfout,argout
     #}}}
     #{{{ integrate, differentiate, and sum
-    def integrate(self,thisaxis,backwards = False):
-        return self.integrate(self,thisaxis,backwards = backwards,cumulative = True)
-    def integrate(self,thisaxis,backwards = False,cumulative = False):
+    def integrate(self, thisaxis, backwards=False, cumulative=False):
         r'''this performs an integration -- which is similar to a sum, except that it takes the axis into account, i.e., it performs:
             $\int f(x) dx$
             rather than
