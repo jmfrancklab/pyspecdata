@@ -184,7 +184,7 @@ def redim_C_to_F(a):
     "see redim_F_to_C"
     return a.ravel(order='C').reshape(a.shape[::-1], order='F')
 def log_fname(logname,fname,dirname):
-    with open(logname+'.log','r+') as fp:
+    with open(logname+'.log','r+',encoding='utf-8') as fp:
         already_listed = False
         # importantly, r+ seeks to start of file
         for j in fp:
