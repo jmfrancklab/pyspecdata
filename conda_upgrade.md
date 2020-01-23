@@ -58,6 +58,11 @@ opening the
 `Anaconda3`→ security tab→ edit→
 users→ click “full control” checkbox on bottom →
 apply (this takes a few minutes to run)
+On Mac, locate where Anaconda was installed (default was /opt directory) and edit permissions via Finder window.
+You can accomplish this via the following commands.
+cd /opt
+open . (open new Finder window at this location)
+right-click on the anaconda3 directory, select 'Get Info' from the list. In the pop-up window, find Sharing & Permissions section, and in the Name list, find everyone -- change Privilege from 'Read only' to 'Read & Write'.
 
 ## install pySpecData inside py3 environment
 
@@ -71,6 +76,8 @@ install various python running environments
 install pySpecData prerequisites from the documentation:
 `conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw`
 
+Note: for installation on Mac, do not include libpython and mingw
+
 install pySpecData in the python 3 (base) environment
 `python setup_paramset.py install`
 
@@ -80,7 +87,7 @@ and `python setup.py develop`
 
 ## create a python 2 environment, and install basic tools 
 
-`conda create –name py2 python=2.7` (do *not* do this from within git
+`conda create –-name py2 python=2.7` (Windows users: do *not* do this from within git
 bash! Do it from the anaconda prompt), then `conda activate py2` and install various python running
 environments `conda install -y -c anaconda jupyter ipython spyder`
 
@@ -128,6 +135,8 @@ like
 (in the py2 environment) install pySpecData prerequisites from the documentation into the py2
 environment:
 `conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw`
+
+Mac users: In a manner similar to before, from terminal cd /opt/anaconda3/env, open . to open a Finder window at this location, and locate the py2 folder. Right-click on this, and allow 'Read & Write' privileges to everyone if it is not allowed already.
 
 in the pySpecData git distro, check out a python 2 branch (as of
 this writing, master is python 2, but that will change)
