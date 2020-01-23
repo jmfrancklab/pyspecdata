@@ -59,9 +59,12 @@ Make the Anaconda3 folder writeable by all users:
     users→ click “full control” checkbox on bottom →
     apply (this takes a few minutes to run)
 *   On Mac, locate where Anaconda was installed (default was /opt directory) and edit permissions via Finder window.
-    You can accomplish this via the following commands.  cd /opt open . (open
-    new Finder window at this location) right-click on the anaconda3 directory,
-    select 'Get Info' from the list. In the pop-up window, find Sharing &
+    You can accomplish this via the following commands.
+    ``cd /opt``
+    ``open .`` (open new Finder window at this location)
+    right-click on the anaconda3 directory,
+    select 'Get Info' from the list.
+    In the pop-up window, find the Sharing &
     Permissions section, and in the Name list, find everyone -- change
     Privilege from 'Read only' to 'Read & Write'.
 
@@ -81,7 +84,7 @@ Install various python running environments
 
 Install pySpecData prerequisites from the documentation:
 for Windows: `conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw`
-For installation on Mac, do not include mingw
+For installation on Mac: Do not include mingw
 (libpython may or may not be necessary, depending on details.)
 
 On windows, make sure that `where gcc` returns a file **with an .exe extension**; if it does not, you need to add the directory with gcc.exe (usually Anaconda\MinGW) to your windows path.
