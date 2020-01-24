@@ -38,16 +38,14 @@ class MyConfig(object):
             self._config_parser.add_section(this_section)
         self._config_parser.set(this_section,this_key,this_value)
         return
-    def __exit__(self,a,b,c):
-        self.__del__()
-    def __del__(self):
+    def __exit__(self, exception_type, exception_value, traceback):
         if self._config_parser is not None:
             # {{{ reset to standard figures
             self.set_setting('mode','figures','standard')
             # }}}
             with open(self.config_location,'w') as fp:
                 self._config_parser.write(fp)
-        self.__del__()
+        return
     def get_setting(self,this_key,environ = None,default = None,section = 'General'):
         """Get a settings from the "General" group.
         If the file does not exist, or the option is not set, then set the option, creating the file as needed.
