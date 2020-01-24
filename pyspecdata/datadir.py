@@ -38,7 +38,7 @@ class MyConfig(object):
             self._config_parser.add_section(this_section)
         self._config_parser.set(this_section,this_key,this_value)
         return
-    def __exit__(self):
+    def __exit__(self,a,b,c):
         self.__del__()
     def __del__(self):
         if self._config_parser is not None:
