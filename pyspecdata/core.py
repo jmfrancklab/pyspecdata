@@ -33,6 +33,10 @@ from os import listdir,environ
 from os.path import sep as path_sep
 # {{{ determine the figure style, and load the appropriate modules
 _figure_mode_setting = _my_config.get_setting('figures', section='mode', environ='pyspecdata_figures')
+if _figure_mode_setting is None:
+    print("Warning!  Figure mode is not set, so I'm going to set it to standard by default!!!")
+    _figure_mode_setting = 'standard'
+    _my_config.set_setting('mode','figures','standard')
 if _figure_mode_setting == 'latex':
     environ['ETS_TOOLKIT'] = 'qt4'
     import matplotlib; matplotlib.use('Agg')
