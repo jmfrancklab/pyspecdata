@@ -67,7 +67,10 @@ Make the Anaconda3 folder writeable by all users:
 
 ## install pySpecData inside py3 environment
 
-If using windows, do the following **in the anaconda prompt**.  The anaconda prompt should read (base) indicating tha tyou are in the base (Python 3) environment:
+If using windows, do all the following **in the anaconda prompt**.
+The anaconda
+prompt should read (base) indicating that you are in the base (Python 3)
+environment:
 
 Make sure that in your git repo, you have checked out a python 3 branch (as of this
 writing, master is python 2, and there is a py3 branch, but that will
@@ -88,7 +91,20 @@ On windows, make sure that `where gcc` returns a file **with an .exe extension**
 install pySpecData in the python 3 (base) environment
 `python setup.py develop`
 
-(if this gives syntax errors, remove the pySpecData/build directory)
+If, on Windows, you have an issue where it complains about a “NoneType” `ld_version`,
+like [here](https://stackoverflow.com/questions/48764602/cygwincompiler-typeerror-not-supported-between-instances-of-nonetype-and),
+then you need to find the location of gcc.exe and add it to your path.
+You can do this easily and temporarily by running
+either with something similar to
+``set PATH=%PATH%;C:\ProgramData\Anaconda3\MinGW\bin``
+in DOS/Power Shell, or with
+``export PATH=$PATH;C:\ProgramData\Anaconda3\MinGW\bin``
+If you are having trouble, it's useful to separately run `python setup.py
+build` (which calls the compilers) and `python setup.py develop` (which will
+then complete the process).
+
+Alos, if you have previously built an old version of pySpecData and building
+gives syntax errors, you may need to remove the pySpecData/build directory
 
 ## create a python 2 environment, and install basic tools 
 
@@ -151,7 +167,7 @@ not allowed already.
 in the pySpecData git distro, check out a python 2 branch (as of
 this writing, master is python 2, but that will change)
 
-check that “which gcc” (bash) or “where gcc” (dos) points to a command
+Check that “which gcc” (bash) or “where gcc” (dos) points to a command
 inside the anaconda `envs\py2` folder (if you experience a 127 error
 during linking, it's due to this issue)
 
