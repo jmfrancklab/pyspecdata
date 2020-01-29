@@ -108,6 +108,8 @@ to switch to the python 2
 environment,
 type ``ipython`` to make sure a python 2 version number is listed when ipython opens (and type ``exit`` to quit ipython)
 
+small note from Alec: when I followed in exactly this order, I got [this error](https://github.com/conda/conda/issues/5448) when trying to open ipython, and needed to close the terminal window and open it again, then switch to py2 environment, in order for ipython to load.
+
 ## set up bash so it can switch environments
 
 `conda activate base` to switch back to the base distribution
