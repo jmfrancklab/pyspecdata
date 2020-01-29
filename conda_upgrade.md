@@ -106,8 +106,8 @@ If you are having trouble, it's useful to separately run `python setup.py
 build` (which calls the compilers) and `python setup.py develop` (which will
 then complete the process).
 
-Alos, if you have previously built an old version of pySpecData and building
-gives syntax errors, you may need to remove the pySpecData/build directory
+Also, if you have previously built an old version of pySpecData and building
+gives syntax errors, you may need to remove the ``pySpecData/build`` directory
 
 ## create a python 2 environment, and install basic tools 
 
