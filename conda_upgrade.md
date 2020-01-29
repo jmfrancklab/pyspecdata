@@ -67,16 +67,16 @@ Make the Anaconda3 folder writeable by all users:
 
 ## install pySpecData inside py3 environment
 
-If using windows, do the following **in the anaconda prompt**:
+If using windows, do the following **in the anaconda prompt**.  The anaconda prompt should read (base) indicating tha tyou are in the base (Python 3) environment:
 
-make sure that in your git repo, you have checked out a python 3 branch (as of this
+Make sure that in your git repo, you have checked out a python 3 branch (as of this
 writing, master is python 2, and there is a py3 branch, but that will
 change)
 
-install various python running environments
+Install various python running environments
 `conda install -y -c anaconda jupyter ipython spyder`
 
-install pySpecData prerequisites from the documentation:
+Install pySpecData prerequisites from the documentation:
 for Windows: `conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw`
 For installation on Mac, do not include mingw
 (libpython may or may not be necessary, depending on details.)
