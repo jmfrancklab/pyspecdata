@@ -81,6 +81,10 @@ for Windows: `conda install -y -c anaconda numpy scipy sympy pyqt pytables matpl
 For installation on Mac, do not include mingw
 (libpython may or may not be necessary, depending on details.)
 
+On windows, make sure that `where gcc` returns a file **with an .exe extension**; if it does not, you need to add the directory with gcc.exe (usually Anaconda\MinGW) to your windows path.
+(Or to your bash path, if you've set up for bash below, and are trying this within bash).
+*This is a problem with how anaconda sets up mingw.*
+
 install pySpecData in the python 3 (base) environment
 `python setup.py develop`
 
