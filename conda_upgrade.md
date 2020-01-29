@@ -80,11 +80,9 @@ For installation on Mac, do not include mingw
 (libpython may or may not be necessary, depending on details.)
 
 install pySpecData in the python 3 (base) environment
-`python setup_paramset.py install`
+`python setup.py develop`
 
-if this gives syntax errors, remove the pySpecData/build directory
-
-and `python setup.py develop`
+(if this gives syntax errors, remove the pySpecData/build directory)
 
 ## create a python 2 environment, and install basic tools 
 
@@ -150,9 +148,7 @@ inside the anaconda `envs\py2` folder (if you experience a 127 error
 during linking, it's due to this issue)
 
 install pySpecData in the python 2 environment
-``python setup_paramset.py install``
-
-and ``python setup.py develop`` (if you have installed before on this
+``python setup.py develop`` (if you have installed before on this
 computer, could be good to add “`build_ext –force`” to the end of this
 command line, after deleting the “build” subdirectory, just to be sure)
 
