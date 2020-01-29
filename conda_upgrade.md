@@ -67,6 +67,8 @@ Make the Anaconda3 folder writeable by all users:
 
 ## install pySpecData inside py3 environment
 
+If using windows, do the following **in the anaconda prompt**:
+
 make sure that in your git repo, you have checked out a python 3 branch (as of this
 writing, master is python 2, and there is a py3 branch, but that will
 change)
@@ -85,6 +87,8 @@ install pySpecData in the python 3 (base) environment
 (if this gives syntax errors, remove the pySpecData/build directory)
 
 ## create a python 2 environment, and install basic tools 
+
+If using windows, do the following **in the anaconda prompt**:
 
 `conda create –-name py2 python=2.7` (Windows users: do *not* do this from within git
 bash! Do it from the anaconda prompt), then `conda activate py2` and install various python running
