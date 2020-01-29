@@ -5465,7 +5465,7 @@ class nddata (object):
             self.axis_coords = [None]*len(self.dimlabels)
             self.axis_coords_error = [None]*len(self.dimlabels)
         if value is None:
-            self.axis_coords[self.axn(axis)] = value
+            self.axis_coords[self.axn(axis)] = None
         else:
             a = len(value)
             b = self.data.shape[self.axn(axis)]
