@@ -101,12 +101,13 @@ environments `conda install -y -c anaconda jupyter ipython spyder`
 ``conda activate base``
 to switch to the base (python 3)
 environment,
-type ``ipython`` to make sure a python 3 version number is listed when ipython opens (and type ``exit`` to quit ipython)
+type ``ipython -pylab`` OR ``python -c "import matplotlib.pyplot;print 'test'"`` to make sure a python 3 version number is listed when ipython opens (and type ``exit`` to quit ipython)
 
 ``conda activate py2``
 to switch to the python 2
 environment,
-type ``ipython`` to make sure a python 2 version number is listed when ipython opens (and type ``exit`` to quit ipython)
+
+type ``ipython -pylab`` OR ``python -c "import matplotlib.pyplot;print 'test'"`` to make sure a python 2 version number is listed when ipython opens (and type ``exit`` to quit ipython)
 
 small note from Alec: when I followed in exactly this order, I got [this error](https://github.com/conda/conda/issues/5448) when trying to open ipython, and needed to close the terminal window and open it again, then switch to py2 environment, in order for ipython to load.
 
@@ -134,10 +135,9 @@ number displayed under ipython
 verify that you can `conda activate base` inside bash and that it
 switches the version displayed under ipython
 
-at this stage, you can switch to running commands inside bash if you
-like
-
 ## install pySpecData into py2 environment
+
+Windows users: perform all of the following steps in an anaconda prompt (not bash).
 
 ``conda activate py2``
 
