@@ -76,8 +76,7 @@ prompt should read (base) indicating that you are in the base (Python 3)
 environment:
 
 Make sure that in your git repo, you have checked out a python 3 branch (as of this
-writing, master is python 2, and there is a py3 branch, but that will
-change)
+writing, master is python 3, and there is a py2 branch for python 2.7, which is planned for obsolescence)
 
 Install various python running environments
 `conda install -y -c anaconda jupyter ipython spyder`
@@ -195,7 +194,7 @@ Right-click on this, and allow 'Read & Write' privileges to everyone if it is
 not allowed already.
 
 in the pySpecData git distro, check out a python 2 branch (as of
-this writing, master is python 2, but that will change)
+this writing, that will be py2)
 
 Check that “which gcc” (bash) or “where gcc” (dos) points to a command
 inside the anaconda `envs\py2` folder (if you experience a 127 error
