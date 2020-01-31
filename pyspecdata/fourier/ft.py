@@ -6,7 +6,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
     r"""This performs a Fourier transform along the axes identified by the string or list of strings `axes`.
 
     It adjusts normalization and units so that the result conforms to
-            :math:`\tilde{s}(f)=\int_{x_min}^{x_max} s(t) e^{-i 2 \pi f t} dt`
+            :math:`\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt`
 
     Note that, as noted in the :func:`ift` documentation,
     the inverse transform doesn't correspond to the equivalent
@@ -39,6 +39,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
         axes = [axes]
     #{{{ check and set the FT property
     for j in axes:
+        if j not in self.dimlabels: raise ValueError("the axis "+j+" doesn't exist")
         if self.get_ft_prop(j):
             errmsg = "This data has been FT'd along "+str(j)
             raise ValueError(errmsg + "-- you can't FT"
