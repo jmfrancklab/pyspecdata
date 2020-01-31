@@ -146,7 +146,10 @@ You may get
 and needed to close the terminal window and open it again, then switch to py2
 environment, in order for ipython to load.
 
-small note from Alec: when I followed in exactly this order, I got [this error](https://github.com/conda/conda/issues/5448) when trying to open ipython, and needed to close the terminal window and open it again, then switch to py2 environment, in order for ipython to load.
+You may get
+[this error](https://github.com/conda/conda/issues/5448) when trying to open ipython,
+and needed to close the terminal window and open it again, then switch to py2
+environment, in order for ipython to load.
 
 ## set up bash so it can switch environments
 
