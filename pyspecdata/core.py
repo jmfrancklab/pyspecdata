@@ -3212,21 +3212,23 @@ class nddata (object):
         return self
     def human_units(self):
         prev_label = self.get_units()
-        if prev_label is not None and len(prev_label)>0:
-            #{{{ find the average order of magnitude, rounded down to the nearest power of 3
-            average_oom = log10(abs(self.data))/3.
-            average_oom = average_oom[isfinite(average_oom)].mean()
-            #}}}
-            logger.debug(strm("(human units): for data the average oom is",average_oom*3))
-            if round(average_oom) == 0.0:
-                average_oom = 0
-            else:
-                average_oom = 3*floor(average_oom)
-            logger.debug(strm("(human units): for data I round this to",average_oom))
-            this_str = apply_oom(average_oom,self.data,prev_label=prev_label) 
-            self.set_units(this_str)
-        else:
-            logger.debug(strm('data does not have a unit label'))
+        # -- rescaling for y axis seems screwed up, so
+        # just skip it
+        #if prev_label is not None and len(prev_label)>0:
+        #    #{{{ find the average order of magnitude, rounded down to the nearest power of 3
+        #    average_oom = log10(abs(self.data))/3.
+        #    average_oom = average_oom[isfinite(average_oom)].mean()
+        #    #}}}
+        #    logger.debug(strm("(human units): for data the average oom is",average_oom*3))
+        #    if round(average_oom) == 0.0:
+        #        average_oom = 0
+        #    else:
+        #        average_oom = 3*floor(average_oom)
+        #    logger.debug(strm("(human units): for data I round this to",average_oom))
+        #    this_str = apply_oom(average_oom,self.data,prev_label=prev_label) 
+        #    self.set_units(this_str)
+        #else:
+        #    logger.debug(strm('data does not have a unit label'))
         for thisaxis in self.dimlabels:
             prev_label = self.get_units(thisaxis)
             if prev_label is not None and len(prev_label)>0:
