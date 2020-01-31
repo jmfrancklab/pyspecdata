@@ -24,7 +24,7 @@ else:
     rcParams = {}
     class rclass (object):
         def __init__(self):
-            print "initializing"
+            print("initializing")
             return
         def __getitem__(self,*args,**kwargs):
             return
@@ -64,10 +64,10 @@ def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
         It's expected that the output is assigned to variables with the **exact same** names as the string in the first half of the tuples, in the **exact same** order.
         These parameters will then be set to the appropriate values.
     '''
-    kwargnames,kwargdefaultvals = zip(*listoftuples)
+    kwargnames,kwargdefaultvals = list(zip(*listoftuples))
     output = []
     for j,val in enumerate(kwargnames):
-        if val in kwargs.keys():
+        if val in list(kwargs.keys()):
             output.append(kwargs.pop(val))
         else:
             output.append(kwargdefaultvals[j])
@@ -78,7 +78,7 @@ def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
     elif len(output) == 1:
         return output[0]
 def autostringconvert(arg):
-    if isinstance(arg,basestring):
+    if isinstance(arg,str):
         return str(arg)
     else:
         return arg
@@ -104,7 +104,7 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = []):
     du : double
         the spacing between the elements of u
     """
-    if type(additional_message) is str:
+    if isinstance(additional_message, str):
         additional_message = [additional_message]
     du = (u[-1]-u[0])/(len(u)-1.) # the dwell gives the bandwidth, whether or not it has been zero padded -- I calculate this way for better accuracy
     thismsg = ', '.join(additional_message + ["the axis must be ascending (and equally spaced)"])
@@ -184,9 +184,9 @@ def redim_C_to_F(a):
     "see redim_F_to_C"
     return a.ravel(order='C').reshape(a.shape[::-1], order='F')
 def log_fname(logname,fname,dirname):
-    with open(logname+'.log','r+') as fp:
+    with open(logname+'.log','a+',encoding='utf-8') as fp:
         already_listed = False
-        # importantly, r+ seeks to start of file
+        fp.seek(0,0)
         for j in fp:
             f, d = j.split()
             if f == fname and d == dirname:

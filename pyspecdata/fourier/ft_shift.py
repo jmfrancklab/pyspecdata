@@ -27,13 +27,13 @@ def get_ft_prop(self,axis,propname = None):
             " frequency or time domain")
     if propname is None:
         propname = []
-    elif type(propname) is str:
+    elif isinstance(propname, str):
         propname = [propname]
     key_name = '_'.join(['FT'] + propname)
     this_dict = self.get_prop(key_name)
     if this_dict is None:
         return None
-    elif axis in this_dict.keys():
+    elif axis in list(this_dict.keys()):
         return this_dict[axis]
     else:
         return None
@@ -46,18 +46,18 @@ def set_ft_prop(self,axis,propname = None,value = True):
             " `propname` argument (this allows us to set the"
             " `FT` property more easily)")
     #{{{ if I pass no propname, but a value
-    if type(propname) is bool and value is True:
+    if isinstance(propname, bool) and value is True:
         value = propname
         propname = None
     #}}}
     if propname is None:
         propname = []
-    elif type(propname) is str:
+    elif isinstance(propname, str):
         propname = [propname]
     key_name = '_'.join(['FT'] + propname)
     this_dict = self.get_prop(key_name)
     if value is None:# unset
-        if this_dict is not None and axis in this_dict.keys():
+        if this_dict is not None and axis in list(this_dict.keys()):
             this_dict.pop(axis)
             if len(this_dict) == 0:
                 self.unset_prop(key_name)
@@ -192,7 +192,7 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
             if not isclose(0.0, abs(orig_t-t) % dt,
                     atol=1e-3):
                 if nearest is None:
-                    print "discrepancy",abs(orig_t-t) % dt
+                    print("discrepancy",abs(orig_t-t) % dt)
                     raise ValueError(strm("You need to explicitly set `nearest`, since you are trying to shift the start point from",orig_t,"to",t,"which is a non-integral number (",(orig_t-t)/dt,") of dt=",dt,"intervals.  If you don't know why you're getting this error, see the documentation for ft_clear_startpoints!!"))
                 elif nearest:
                     t = round((t-orig_t)/dt)*dt + orig_t
@@ -231,11 +231,11 @@ def _find_index(u,origin = 0.0,tolerance = 1e-4,verbose = False):
     if not u[0] < origin < u[-1]:
         alias_number = (origin - u[0]) // SW # subtracting this many SW's from origin
         #                                     will land me back inside the range of u
-        if verbose: print "(_find_index) range of axis:",u[0],u[-1]
-        if verbose: print "(_find_index) alias number is",alias_number
-        if verbose: print "(_find_index) set origin from",origin,
+        if verbose: print("(_find_index) range of axis:",u[0],u[-1])
+        if verbose: print("(_find_index) alias number is",alias_number)
+        if verbose: print("(_find_index) set origin from",origin, end=' ')
         origin -= alias_number * SW
-        if verbose: print "to",origin
+        if verbose: print("to",origin)
     p2 = argmin(abs(u-origin))
     assert count_nonzero(u[p2] == u) == 1, ("there seem to be"
             " "+repr(count_nonzero(u[p2] == u))+" values equal"
@@ -244,6 +244,6 @@ def _find_index(u,origin = 0.0,tolerance = 1e-4,verbose = False):
         p2_discrepancy = origin - u[p2]
     else:
         p2_discrepancy = None
-    if verbose: print "(_find_index) for origin",origin,"I am returning p2",p2,"out of",N,"and discrepancy",p2_discrepancy
+    if verbose: print("(_find_index) for origin",origin,"I am returning p2",p2,"out of",N,"and discrepancy",p2_discrepancy)
     alias_number += 1 # because the way that _ft_shift works essentially entails one aliasing
     return p2,p2_discrepancy,alias_number*SW

@@ -16,7 +16,7 @@ def register_axis(self,arg):
     arg : dict (key,value = str,double)
         A list of the dimensions that you want to place in register, and the values you want them registered to.
     '''
-    for k,v in arg.iteritems():
+    for k,v in arg.items():
         x = self.getaxis(k)
         idx = argmin(abs(x - v))
         offset = (v # where I want to be

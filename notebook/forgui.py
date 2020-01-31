@@ -30,10 +30,10 @@ def ordplot(x,y,labels,formatstring):
 			newlabels += [labels[order[j]]]
 		addlabels(formatstring,x[order],y[order],newlabels)
 def obs(*arg):
-	print r'\o{'
+	print(r'\o{')
 	for j in arg:
-		print j,
-	print r'}'
+		print(j, end=' ')
+	print(r'}')
 def save_data(inputdata=[]):
 	# concatenate data to data already in data.mat file
 	if path_exists('data.mat'):
@@ -70,7 +70,7 @@ def save_variable(variable,content,disp=True):
 	return data
 #{{{ Emax fitting
 def eplots(filename,setting,dbm,expno,integral,invalid=[],plot_slope=False,normalize = False,order=True,forceone=False,inverse=True):
-	print '\n\n'
+	print('\n\n')
 	if plot_slope:
 		Emax,E,relative_slope = emax_plot(setting,dbm,expno,integral,invalid=invalid,return_slope=True,normalize=normalize,forceone=forceone)
 	else:
@@ -80,7 +80,7 @@ def eplots(filename,setting,dbm,expno,integral,invalid=[],plot_slope=False,norma
 	title(filename)
 	lplot(filename+r'_t.pdf')
 	if plot_slope:
-		print '\n\n'
+		print('\n\n')
 		order = argsort(E)[::-1]
 		plot(E[order],relative_slope[order])
 		lplot(filename+r'_slope.pdf')
@@ -124,7 +124,7 @@ def emax_fit(power,integral,fit_axis_size = 100,emax=[],return_slope=False,norma
 		B = p_out[1]
 		C = p_out[2]
 		relative_slope = (B*(1.+C*x)-C*B*x)/((1.+C*x)**2)/B
-		print 'A is ',A,'\n\n'
+		print('A is ',A,'\n\n')
 		return (x,emax_fit_fitfunc(p_out,x),Emax,relative_slope,normalization)
 	else:
 		return (x,emax_fit_fitfunc(p_out,x),Emax,normalization)
@@ -203,10 +203,10 @@ def emax_T(setting,dbm,expno,integral,invalid=[],order=False,showemax = None,inv
 		y = 1.-integral[wa]
 	if order:
 		#ordplot(1./power[wa],1./(1.-integral[wa]),map((lambda x: labelstring[x]),wa),'%s')
-		ordplot(x,y,map((lambda x: labelstring[x]),wa),'%s')
+		ordplot(x,y,list(map((lambda x: labelstring[x]),wa)),'%s')
 	else:
 		plot(x,y,'x-')
-		addlabels('%s',x,y,map((lambda z: labelstring[z]),wa))
+		addlabels('%s',x,y,list(map((lambda z: labelstring[z]),wa)))
 	invalid_mask = zeros(len(expno),dtype='bool')
 	for j in range(0,len(invalid)):
 		invalid_mask |= (expno == invalid[j])
@@ -242,7 +242,7 @@ def emax_T(setting,dbm,expno,integral,invalid=[],order=False,showemax = None,inv
 #}}}
 #{{{ specific convenience functions
 def calcdistance(freq,optdistance):
-	print r'$%0.1f\;GHz$ @ '%(freq/1e9),dp((optdistance+119e-3)*1e3,1),r'$mm$'
+	print(r'$%0.1f\;GHz$ @ '%(freq/1e9),dp((optdistance+119e-3)*1e3,1),r'$mm$')
 def calcfield(elfreq,elratio = 28.113,nmrelratio = 1.5167):
 	obs(elfreq,'$GHz$,',dp(elratio,5),'$GHz/T\;',dp(nmrelratio,4),'\;ppt\;\Rightarrow$',dp(elfreq/elratio*1e4,2),'$G$',dp(elfreq*nmrelratio,5),'$MHz$')
 def qcalc(freq1,freq2):
@@ -277,7 +277,7 @@ def cpmgseries(filename,plotlabel,tau=None,alpha=None,alphaselect=None):
 			plot([alphaselect],rms,'rx')
 		axis('tight')
 		lplot(plotlabel+'_reg.pdf')
-		print '\n\n'
+		print('\n\n')
 	plot(data)
 	if (alphaselect!=None):
 		plot(data.getaxis('echo'),fit.flatten(),'r',alpha=0.5,linewidth=2)
@@ -301,11 +301,11 @@ def cpmgs(exp,number,tau=None,alpha=None,alphaselect=None,first=False):
 	alphaselect = local_data['alphaselect']
 	#}}}
 	filename = '/mnt/esr/Magritek/john/'+exp+'/%d/'%number
-	print r'\fn{%s %d}'%(exp,number)+'\n\n'
+	print(r'\fn{%s %d}'%(exp,number)+'\n\n')
 	cpmgseries(filename,exp+thisjobname(),tau,alpha,alphaselect)
 #{{{ esr_saturation
 def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8):
-	print '\n\n\\fn{',file,'}\n\n'
+	print('\n\n\\fn{',file,'}\n\n')
 	data = load_indiv_file(file,dimname='power')
 	#plot(data,'.-')
 	x = data.getaxis('$B_0$').flatten()
@@ -358,7 +358,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8):
 	try:
 		allpeaks_top_x = nddata(allpeaks_top_x,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
 	except:
-		print r'\begin{verbatim} If you have an error here, probably change smoothing (%0.2f) or threshold (%0.2f)\end{verbatim}'%(smoothing,threshold),'\n\n'
+		print(r'\begin{verbatim} If you have an error here, probably change smoothing (%0.2f) or threshold (%0.2f)\end{verbatim}'%(smoothing,threshold),'\n\n')
 		clf()
 		for j in range(0,nslices):
 			thisslice = data['power',j].data
@@ -369,12 +369,12 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8):
 			for peakset in peakmask:
 				plot(x[peakset],smoothed[peakset])
 		lplot('error_plot'+thisjobname()+'.png',width=6)
-		print r'\begin{verbatim}lengths: ',map(len,allpeaks_top_x),'\end{verbatim}'
+		print(r'\begin{verbatim}lengths: ',list(map(len,allpeaks_top_x)),'\end{verbatim}')
 		return
 	try:
 		allpeaks_bottom_x = nddata(allpeaks_bottom_x,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
 	except:
-		print r'\begin{verbatim} If you have an error here, probably change smoothing (%0.2f) or threshold (%0.2f)\end{verbatim}'%(smoothing,threshold),'\n\n'
+		print(r'\begin{verbatim} If you have an error here, probably change smoothing (%0.2f) or threshold (%0.2f)\end{verbatim}'%(smoothing,threshold),'\n\n')
 		clf()
 		for j in range(0,nslices):
 			thisslice = data['power',j].data
@@ -385,7 +385,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8):
 			for peakset in peakmask:
 				plot(x[peakset],smoothed[peakset])
 		lplot('error_plot'+thisjobname()+'.png',width=6)
-		print r'\begin{verbatim}lengths: ',map(len,allpeaks_top_x),'\end{verbatim}'
+		print(r'\begin{verbatim}lengths: ',list(map(len,allpeaks_top_x)),'\end{verbatim}')
 		return
 	allpeaks_top = nddata(allpeaks_top,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
 	allpeaks_bottom = nddata(allpeaks_bottom,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
@@ -396,7 +396,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8):
 		lplot('esr_dataset'+thisjobname()+'.png',width=6,grid=False)
 	else:
 		lplot('esr_dataset'+thisjobname()+'.png',width=6)
-	print '\n\n'
+	print('\n\n')
 	#{{{ peak to peak
 	peaktopeak = allpeaks_bottom_x - allpeaks_top_x
 	peaktopeak_squared = peaktopeak.copy()
@@ -414,7 +414,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8):
 	lplot('esr_dataset'+thisjobname()+'_pp2.pdf')
 	#}}}
 	#}}}
-	print '\n\n'
+	print('\n\n')
 	#{{{ height
 	height = allpeaks_top# - allpeaks_bottom
 	height_n23 = height.copy()

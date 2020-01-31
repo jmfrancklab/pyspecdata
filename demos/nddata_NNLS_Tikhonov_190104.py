@@ -3,7 +3,7 @@
 
 
 try:
-    get_ipython().magic(u'load_ext pyspecdata.ipy')
+    get_ipython().magic('load_ext pyspecdata.ipy')
     in_notebook = True
 except:
     from pyspecdata import *
@@ -31,7 +31,7 @@ def timeit(method,n_times=5):
             name = kw.get('log_name', method.__name__.upper())
             kw['log_time'][name] = int(time_diff * 1000)
         else:
-            print '%r  %2.2f ms (average of %d runs)' %(method.__name__, time_diff * 1000, n_times) + l_line
+            print('%r  %2.2f ms (average of %d runs)' %(method.__name__, time_diff * 1000, n_times) + l_line)
         return result
     return timed
 
@@ -49,7 +49,7 @@ for mu,sigma,A in peaks:
     else:
         P += A*exp(-(R-mu)**2/(2*sigma**2))
 P = nddata(P,'R')
-print "your labels are",P.dimlabels
+print("your labels are",P.dimlabels)
 P.setaxis('R',R.ravel())
 
 
@@ -105,7 +105,7 @@ def L_curve(l,r_norm,x_norm, show_l=None, s=1e-3,
         norm of the residual
     x_norm: double
         norm of solution vector"""
-    print l.shape, r_norm.shape, x_norm.shape
+    print(l.shape, r_norm.shape, x_norm.shape)
     r_to_x = UnivariateSpline(log10(r_norm),log10(x_norm), s=s)
     r_fine = linspace(*tuple(log10(r_norm[r_[0,-1]]).tolist()+[1000]))
     plot(log10(r_norm),log10(x_norm),'o',**kwargs)
@@ -256,8 +256,8 @@ x = multifreq_lcurve(l)
 # 
 
 
-print ndshape(test_data_2d)
-print ndshape(x)
+print(ndshape(test_data_2d))
+print(ndshape(x))
 
 
 # 
@@ -337,8 +337,8 @@ fl.image(solution)
 
 
 if in_notebook:
-    print "in notebook, not calling show"
+    print("in notebook, not calling show")
 else:
-    print "not in notebook, calling show"
+    print("not in notebook, calling show")
     fl.show()        
 

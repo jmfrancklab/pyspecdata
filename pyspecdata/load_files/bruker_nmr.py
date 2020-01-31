@@ -3,7 +3,6 @@ from ..datadir import dirformat
 from .open_subpath import open_subpath
 import os.path
 import re
-import string
 import struct
 
 bruker_data = nddata # should work by inheritance but doesn't
@@ -14,12 +13,12 @@ def det_phcorr(v):
         decimarray=array([2,3,4,6,8,12,16,24,32,48,64,96,128,192,256,384,512,768,1024]) # the -1 is because this is an index, and copied from matlab code!!!
         dspfvs = v['DSPFVS']
         decim = v['DECIM']
-        if 'GRPDLY' not in v.keys():
+        if 'GRPDLY' not in list(v.keys()):
             grpdly = -1
         grpdly = v['GRPDLY'] # later versions of topspin
         if grpdly == -1:
             try:
-                retval = gdparray[dspfvs,where(decimarray==decim)[0]]/2/decim
+                retval = gdparray[dspfvs,where(decimarray==decim)[0]]//2/decim
             except:
                 if len(where(decimarray==decim)[0]) == 0:
                     raise CustomError("Not able to find decim",decim,"in decimarray")
@@ -79,13 +78,13 @@ def series(file_reference, *subpath, **kwargs):
     data = fp.read()
     fp.close()
     if int(v['BYTORDA']) == 1:
-        data = fromstring(data, dtype=dtype('>i4'), count=(len(data)/4))
+        data = fromstring(data, dtype=dtype('>i4'), count=(len(data)//4))
     else:
-        data = fromstring(data, dtype=dtype('<i4'), count=(len(data)/4))
+        data = fromstring(data, dtype=dtype('<i4'), count=(len(data)//4))
     data = complex128(data)
     data = data[0::2]+1j*data[1::2]
     data /= rg
-    mydimsizes = [td1,td2_zf/2]
+    mydimsizes = [td1,td2_zf//2]
     mydimnames = [dimname]+['t2']
     try:
         data = bruker_data(data,mydimsizes,mydimnames)
@@ -96,14 +95,14 @@ def series(file_reference, *subpath, **kwargs):
             zero_filled_data[0:len(data)] = data
             data = bruker_data(zero_filled_data,mydimsizes,mydimnames)
         else:
-            new_guess = len(data)/(td2_zf/2)
-            print lsafen("WARNING!, chopping the length of the data to fit the specified td1 of ",td1,"points!\n(specified ",zip(mydimnames,mydimsizes),' td2_zf=%d)'%td2_zf)
+            new_guess = len(data)/(td2_zf//2)
+            print(lsafen("WARNING!, chopping the length of the data to fit the specified td1 of ",td1,"points!\n(specified ",list(zip(mydimnames,mydimsizes)),' td2_zf=%d)'%td2_zf))
             logger.debug(strm("maybe this works:",size_it_might_be == len(data)))
             data = data[0:size_it_should_be]
             data = bruker_data(data,mydimsizes,mydimnames)
     logger.debug(strm('data straight from nddata =',data))
-    data = data['t2',0:td2/2] # now, chop out their zero filling
-    t2axis = 1./v['SW_h']*r_[1:td2/2+1]
+    data = data['t2',0:td2//2] # now, chop out their zero filling
+    t2axis = 1./v['SW_h']*r_[1:td2//2+1]
     t1axis = r_[0:td1]
     mylabels = [t1axis]+[t2axis]
     data.labels(mydimnames,mylabels)
@@ -118,7 +117,7 @@ def series(file_reference, *subpath, **kwargs):
     v.update(v2)
     if v['SFO1'] != SFO1:
         # for, e.g. 2H experiments, a bad SFO1 (1H) is stored in acqu2, which we don't want
-        print "warning: ignoring second dimension SFO1, since it's probably wrong"
+        print("warning: ignoring second dimension SFO1, since it's probably wrong")
         v['SFO1'] = SFO1
         v['BF1'] = BF1
     with open_subpath(file_reference, *(subpath+('pulseprogram',)),mode='r') as fp:
@@ -126,7 +125,7 @@ def series(file_reference, *subpath, **kwargs):
         data.set_prop('pulprog',ppg)
     data.set_prop('acq',
             v)
-    if isinstance(file_reference,basestring):
+    if isinstance(file_reference,str):
         data.set_prop('file_reference',
                 file_reference)
     else:
@@ -167,16 +166,16 @@ def load_1D(file_reference, *subpath, **kwargs):
     fp = open_subpath(file_reference, *(subpath+('fid',)),mode='rb')
     data = fp.read()
     if int(v['BYTORDA']) == 1:
-        data = fromstring(data, dtype=dtype('>i4'), count=(len(data)/4))
+        data = fromstring(data, dtype=dtype('>i4'), count=(len(data)//4))
     else:
-        data = fromstring(data, dtype=dtype('<i4'), count=(len(data)/4))
+        data = fromstring(data, dtype=dtype('<i4'), count=(len(data)//4))
     data = complex128(data)
     data = data[0::2]+1j*data[1::2]
     rg = det_rg(v['RG'])
     data /= rg
-    data = bruker_data(data,[td1,td2_zf/2],[dimname,'t2'])
-    data = data['t2',0:td2/2] # now, chop out their zero filling
-    t2axis = 1./v['SW_h']*r_[1:td2/2+1]
+    data = bruker_data(data,[td1,td2_zf//2],[dimname,'t2'])
+    data = data['t2',0:td2//2] # now, chop out their zero filling
+    t2axis = 1./v['SW_h']*r_[1:td2//2+1]
     t1axis = r_[1]
     data.labels([dimname,'t2'],[t1axis,t2axis])
     shiftpoints = int(det_phcorr(v)) # use the canned routine to calculate the second order phase shift
@@ -206,14 +205,14 @@ def load_1D(file_reference, *subpath, **kwargs):
 def load_vdlist(file_reference, *subpath, **kwargs):
     name = process_kwargs([('name','vdlist')], kwargs)
     subpath += (name,)
-    print "subpath is",subpath
+    print("subpath is",subpath)
     fp = open_subpath(file_reference,*subpath)
     lines = fp.readlines()
-    lines = map(string.rstrip,lines)
-    lines = map((lambda x: x.replace('m','e-3')),lines)
-    lines = map((lambda x: x.replace('s','')),lines)
-    lines = map((lambda x: x.replace('u','e-6')),lines)
-    lines = map(double,lines)
+    lines = list(map(lambda x: x.rstrip(),lines))
+    lines = list(map((lambda x: x.replace('m','e-3')),lines))
+    lines = list(map((lambda x: x.replace('s','')),lines))
+    lines = list(map((lambda x: x.replace('u','e-6')),lines))
+    lines = list(map(double,lines))
     fp.close()
     return array(lines)
 def load_acqu(file_reference,*subpath,**kwargs):
@@ -248,11 +247,13 @@ def load_jcamp(file_reference,*subpath):
             return double(val)
     fp = open_subpath(file_reference,*subpath)
     lines = fp.readlines()
+    if isinstance(lines[0],bytes):
+        lines = map(lambda x: x.decode('utf-8'), lines)
     vars = {}
     number_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *([0-9\-\.]+)')
     string_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *<(.*)')
     array_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *\(([0-9]+)\.\.([0-9]+)\)(.*)')
-    lines = map(string.rstrip,lines)
+    lines = list(map(lambda x: x.rstrip(),lines))
     j=0
     retval =  match_line(lines[j],number_re,string_re,array_re)
     j = j+1
@@ -280,9 +281,9 @@ def load_jcamp(file_reference,*subpath):
                 if len(data)>0:
                     while '' in data:
                         data.remove('')
-                    data = map(convert_to_num,data)
+                    data = list(map(convert_to_num,data))
                     if len(data)-1!= thislen[1]:
-                        print 'error:',len(data)-1,'!=',thislen[1]
+                        print('error:',len(data)-1,'!=',thislen[1])
             vars.update({name:data})
         # at this point, the string or array data is loaded into data and we have something in retval2 which is definitely a new line
         retval = retval2
@@ -300,6 +301,8 @@ def load_title(file_reference,*subpath):
     else:
         fp = open_subpath(file_reference,*(subpath + ('pdata','1','title')))
         lines = fp.readlines()
+        if isinstance(lines[0],bytes):
+            lines = map(lambda x: x.decode('utf-8'), lines)
         emptystring = '\r\n'
         while emptystring in lines:
             lines.pop(lines.index(emptystring))

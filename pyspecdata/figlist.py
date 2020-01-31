@@ -111,7 +111,7 @@ class figlist(object):
         if self.mlab == 'BLANK': del self.mlab
         if self.file_name == 'BLANK': del self.file_name
         if self.line_spacing == 'BLANK': del self.line_spacing
-        if self.verbose: print lsafe('DEBUG: initialize figlist')
+        if self.verbose: print(lsafe('DEBUG: initialize figlist'))
         if len(arg) == 0:
             self.figurelist = []
         else:
@@ -125,10 +125,10 @@ class figlist(object):
         return
     def twinx(self,autopad = False,orig = False,color = None):
         #self.figurelist.insert(self.get_fig_number(self.current)-1,{'autopad':False}) #doesn't work because it changes the figure number; I can get the number with fig = gcf(); fig.number, but I can't set it; it would be best to switch to using a list that contains all the figure numbers to match all their names -- or alternatively, note that matplotlib allows you to give them names, though I don't know how that works
-        if self.current in self.twinx_list.keys():
+        if self.current in list(self.twinx_list.keys()):
             ax1,ax2 = self.twinx_list[self.current]
             if color is not None:
-                if 'twinx_color' not in self.propdict[self.current].keys():
+                if 'twinx_color' not in list(self.propdict[self.current].keys()):
                         ax2.tick_params(axis = 'y',colors = color)
                         ax2.yaxis.label.set_color(color)
                         ax2.spines['right'].set_color(color)
@@ -156,7 +156,7 @@ class figlist(object):
     def use_autolegend(self,value = None):
         'No argument sets to true if it\'s not already set'
         if value is None:
-            if not self.current in self.autolegend_list.keys():
+            if not self.current in list(self.autolegend_list.keys()):
                 self.autolegend_list.update({self.current:True})
             else: #leave it alone
                 return
@@ -176,7 +176,7 @@ class figlist(object):
         self.next(self.pushlist.pop())
         return
     def get_fig_number(self,name):
-        cleanlist = filter(lambda x: type(x) is str,self.figurelist)
+        cleanlist = [x for x in self.figurelist if isinstance(x, str)]
         try:
             return cleanlist.index(name)+1
         except ValueError:
@@ -229,12 +229,12 @@ class figlist(object):
             else:
                 fig = figure(self.get_fig_number(name))
             self.current = name
-            if self.verbose: print lsafen('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures')
+            if self.verbose: print(lsafen('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures'))
             if boundaries is not None:
-                if 'boundaries' not in self.propdict[self.current].keys() or self.propdict[self.current]['boundaries'] != boundaries:
+                if 'boundaries' not in list(self.propdict[self.current].keys()) or self.propdict[self.current]['boundaries'] != boundaries:
                     raise ValueError("You're giving conflicting values for boundaries")
             if legend:
-                if 'legend' not in self.propdict[self.current].keys() or self.propdict[self.current]['legend'] != legend:
+                if 'legend' not in list(self.propdict[self.current].keys()) or self.propdict[self.current]['legend'] != legend:
                     raise ValueError("You're giving conflicting values for legend")
         else:# figure doesn't exist yet
             if hasattr(self,'current'):
@@ -242,14 +242,14 @@ class figlist(object):
             else:
                 last_figure_number = 0
             self.current = name
-            if self.current not in self.propdict.keys():
+            if self.current not in list(self.propdict.keys()):
                 self.propdict[self.current] = {}
             if boundaries == False:
                 self.propdict[self.current]['boundaries'] = False
                 self.setprops(boundaries = False)
             if legend:
                 self.propdict[self.current]['legend'] = True
-                if 'figsize' not in kwargs.keys():
+                if 'figsize' not in list(kwargs.keys()):
                     kwargs.update({'figsize':(12,6)})
                 if hasattr(self,'mlab'):
                     fig = self.mlab.figure(last_figure_number+1,bgcolor = (1,1,1),**kwargs)
@@ -301,16 +301,16 @@ class figlist(object):
             This overrides that behavior.
             Defaults to False.
         """
-        if 'label' in kwargs.keys():
+        if 'label' in list(kwargs.keys()):
             self.use_autolegend()
         human_units = True
-        if 'human_units' in kwargs.keys():
+        if 'human_units' in list(kwargs.keys()):
             human_units = kwargs.pop('human_units')
         if human_units:
             firstarg = self.check_units(args[0],0,1) # check units, and if need be convert to human units, where x is the first dimension and y is the last
         else:
             firstarg = args[0]
-        if 'label' not in kwargs.keys() and isinstance(args[0],nddata):
+        if 'label' not in list(kwargs.keys()) and isinstance(args[0],nddata):
             thisname = args[0].name()
             if thisname is not None:
                 kwargs['label'] = thisname
@@ -336,16 +336,16 @@ class figlist(object):
         return
     def check_units(self, testdata, x_index, y_index,
             verbose=False):
-        if verbose: print "-"*30
-        if verbose: print "called check_units for figure",self.current
+        if verbose: print("-"*30)
+        if verbose: print("called check_units for figure",self.current)
         if isinstance(testdata,nddata):
-            if verbose: print "(check_units) it's nddata"
+            if verbose: print("(check_units) it's nddata")
             testdata = testdata.copy().human_units()
             if len(testdata.dimlabels) > 1:
-                if verbose: print "(check_units) more than one dimension"
+                if verbose: print("(check_units) more than one dimension")
                 if not hasattr(self,'current'):
                     raise ValueError("give your plot a name (using .next()) first! (this is used for naming the PDF's etc)")
-                if self.current in self.units.keys():
+                if self.current in list(self.units.keys()):
                         theseunits = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
                         if theseunits != self.units[self.current] and theseunits[0] != self.units[self.current]:
                                 raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(theseunits,self.units[self.current]))
@@ -353,25 +353,25 @@ class figlist(object):
                     if isinstance(testdata,nddata):
                         self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
             else:
-                if verbose: print "(check_units) only one dimension"
+                if verbose: print("(check_units) only one dimension")
                 if not hasattr(self,'current'):
                     self.next('default')
-                if self.current in self.units.keys():
+                if self.current in list(self.units.keys()):
                     theseunits = (testdata.get_units(testdata.dimlabels[x_index]))
                     testunits = self.units[self.current]
                     if theseunits != testunits:
-                        if type(testunits) is tuple and testunits[1] is None:
+                        if isinstance(testunits, tuple) and testunits[1] is None:
                             pass
                         else:
                             raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(theseunits,self.units[self.current]))
                 else:
                     self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]))
-        if verbose: print "-"*30
+        if verbose: print("-"*30)
         return testdata
     def adjust_spines(self,spines):
         ax = gca()
         #{{{ taken from matplotlib examples
-        for loc, spine in ax.spines.items():
+        for loc, spine in list(ax.spines.items()):
             if loc in spines:
                 spine.set_position(('outward',10)) # outward by 10 points
                 spine.set_smart_bounds(True)
@@ -404,7 +404,7 @@ class figlist(object):
         has been used, goes back and places text there."""
         if not hasattr(self,'textdict'):
             self.textdict = {}
-        if marker in self.textdict.keys():
+        if marker in list(self.textdict.keys()):
             idx = self.textdict[marker]
             self.figurelist[idx]['print_string'] = (
                     self.figurelist[idx]['print_string']
@@ -418,10 +418,10 @@ class figlist(object):
     def setprops(self,**kwargs):
         self.figurelist.append(kwargs)
     def show_prep(self):
-        for k,v in self.autolegend_list.items():
+        for k,v in list(self.autolegend_list.items()):
             kwargs = {}
             if v:
-                if type(v) is str:
+                if isinstance(v, str):
                     if v[0:7] == 'colored':
                         kwargs.update(dict(match_colors = True))
                         v = v[7:]
@@ -445,7 +445,7 @@ class figlist(object):
                         raise Exception(strm('error while trying to run autolegend function for',k,'\n\tfiglist is',self.figurelist,explain_error(e)))
     def show(self,*args,**kwargs):
         self.basename = None # must be turned off, so it can cycle through lists, etc, on its own
-        if 'line_spacing' in kwargs.keys(): kwargs.pop('line_spacing')# for latex only
+        if 'line_spacing' in list(kwargs.keys()): kwargs.pop('line_spacing')# for latex only
         if len(kwargs) > 0:
             raise ValueError("didn't understand kwargs "+repr(kwargs))
         logger.debug(strm("before show_prep, figlist is",self.figurelist))
@@ -455,18 +455,18 @@ class figlist(object):
         kwargs = {}
         for figname in self.figurelist:
             logger.debug(strm("showing figure"+lsafen(figname)))
-            if type(figname) is dict:
+            if isinstance(figname, dict):
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
-                    print '\n\n'
-                    print kwargs.pop('print_string')
-                    print '\n\n'
+                    print('\n\n')
+                    print(kwargs.pop('print_string'))
+                    print('\n\n')
         #}}}
         if len(args) == 1:
             if (args[0][:-4] == '.pdf') or (args[0][:-4] == '.png') or (args[0][:-4] == '.jpg'):
-                print "you passed me a filename, but I'm just burning it"
+                print("you passed me a filename, but I'm just burning it")
         if hasattr(self,'mlab'):
-            print "running mlab show!"
+            print("running mlab show!")
             self.mlab.show()
         else:
             #print "not running mlab show!"
@@ -564,18 +564,18 @@ class figlist(object):
             iterator = possible_iterators[argmin(abs(axis_span/desired_ticks -
                 possible_iterators))]
             #}}}
-            if verbose: print 'iterator is',iterator
+            if verbose: print('iterator is',iterator)
             return iterator,r_[ceil(thisaxis.min()/iterator):
                 floor(thisaxis.max()/iterator)+1]*iterator
         #{{{ now, I need to get the list of multiples that falls inside the axis span
         xiterator,xlist = gen_list(x_axis)
         yiterator,ylist = gen_list(y_axis)
-        if verbose: print 'range of x ',x_axis.min(),x_axis.max()
-        if verbose: print 'xlist',xlist
-        if verbose: print plotdata.unitify_axis(0)
-        if verbose: print 'range of y ',y_axis.min(),y_axis.max()
-        if verbose: print 'ylist',ylist
-        if verbose: print plotdata.unitify_axis(1)
+        if verbose: print('range of x ',x_axis.min(),x_axis.max())
+        if verbose: print('xlist',xlist)
+        if verbose: print(plotdata.unitify_axis(0))
+        if verbose: print('range of y ',y_axis.min(),y_axis.max())
+        if verbose: print('ylist',ylist)
+        if verbose: print(plotdata.unitify_axis(1))
         #}}}
         if xiterator < 1:
             x_ticklabels = ['{:0.1f}'.format(j) for j in xlist]

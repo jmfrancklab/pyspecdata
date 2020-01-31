@@ -26,7 +26,7 @@ if phcycsteps_separate:
 else:
     extra_kwargs = {}
 #{{{ generate the powers for the T1 series
-print '\n\nNext, check the $T_1$ powers:\n\n'
+print('\n\nNext, check the $T_1$ powers:\n\n')
 fl = figlistl()
 power_threshold = -35
 t1_dbm,fl.figurelist = auto_steps(getDATADIR()+path+name+'/t1_powers.mat',
@@ -44,7 +44,7 @@ for j in bad_t1_autovals:
     t1mask = logical_and(t1mask,t1_autovals != j)
 fl = check_autosteps(power_threshold,t1_dbm,figure_list = fl,mask = t1mask)
 fl.show('T1powers_'+name+'.pdf')
-print r't1\_dbm is:',lsafen(t1_dbm),'\n\n'
+print(r't1\_dbm is:',lsafen(t1_dbm),'\n\n')
 #}}}
 dnp_for_rho(getDATADIR()+path,name,integration_width = 160,
         peak_within = 500, show_t1_raw = True,
@@ -58,5 +58,5 @@ dnp_for_rho(getDATADIR()+path,name,integration_width = 160,
         run_number = run_number,
         threshold = -50.,
         **extra_kwargs)
-print r'\subparagraph{Noise test}'
+print(r'\subparagraph{Noise test}')
 standard_noise_comparison(name,path = path)

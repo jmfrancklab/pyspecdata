@@ -22,7 +22,7 @@ from ..datadir import getDATADIR
 from ..datadir import _my_config
 from ..general_functions import process_kwargs,strm,log_fname
 from ..core import *
-from __builtin__ import any # numpy has an "any" function, which is very annoying
+from builtins import any # numpy has an "any" function, which is very annoying
 from itertools import tee
 import warnings, os, h5py, re
 from zipfile import ZipFile, is_zipfile
@@ -84,7 +84,7 @@ def search_filename(searchstring,exp_type,
         raise IOError(("I can't find a file matching the regular expression {0:s} in {1:s}"+exptype_msg).format(searchstring,directory))
     else:
         if len(files) > 1:
-            basenames,exts = map(set,zip(*[j.rsplit('.',1) for j in files if len(j.rsplit('.',1))>1]))
+            basenames,exts = list(map(set,list(zip(*[j.rsplit('.',1) for j in files if len(j.rsplit('.',1))>1]))))
             if len(basenames) == 1 and len(exts) == len(files):
                 pass
             else:
@@ -171,7 +171,7 @@ def find_file(searchstring,
     logger.info(strm("find_file sees indirect_dimlabels",
         indirect_dimlabels))
     # {{{ legacy warning
-    if 'subdirectory' in kwargs.keys():
+    if 'subdirectory' in list(kwargs.keys()):
         raise ValueError("The `subdirectory` keyword argument is not longer valid -- use `exp_type` instead!")
     # }}}
     files = search_filename(searchstring, exp_type, print_result=print_result)
@@ -207,7 +207,7 @@ def find_file(searchstring,
             assert len(kwargs) == 0, "there must be no keyword arguments left, because you're not postprocessing"
             return data
         else:
-            if postproc_type in postproc_lookup.keys():
+            if postproc_type in list(postproc_lookup.keys()):
                 data = postproc_lookup[postproc_type](data,**kwargs)
             else:
                 raise ValueError('postprocessing not defined for file with postproc_type %s --> it should be defined in the postproc_type dictionary in load_files.__init__.py'+postproc_type)
@@ -261,16 +261,16 @@ def _check_signature(filename):
         (currently "HDF5", "DOS Format"  or "TXT")
         OR `None` if the type is unknown.
     """
-    file_signatures = {'\x89\x48\x44\x46\x0d\x0a\x1a\x0a':'HDF5',
-            'DOS  Format':'DOS Format'}
-    max_sig_length = max(map(len,file_signatures.keys()))
+    file_signatures = {b'\x89\x48\x44\x46\x0d\x0a\x1a\x0a':'HDF5',
+            b'DOS  Format':'DOS Format'}
+    max_sig_length = max(list(map(len,list(file_signatures.keys()))))
     with open(filename,'rb') as fp:
         inistring = fp.read(max_sig_length)
         if any(thiskey in inistring for thiskey in
-                file_signatures.keys()):# this will fail without overriding the numpy any( above
-            retval = file_signatures[(thiskey for thiskey in
-                file_signatures.keys() if thiskey in
-                inistring).next()]
+                list(file_signatures.keys())):# this will fail without overriding the numpy any( above
+            retval = file_signatures[next((thiskey for thiskey in
+                list(file_signatures.keys()) if thiskey in
+                inistring))]
             logger.info(strm("Found magic signature, returning",
                 retval))
             return retval
@@ -459,6 +459,29 @@ postproc_lookup = {
         'B1_se':acert.postproc_B1_se,
         'CW':acert.postproc_cw,
         }
+def bruker_dir(search_string, exp_type):
+    "A generator that returns a 3-tuple of dirname, expno, and dataset for a directory"
+    dirnames = search_filename(search_string, exp_type=exp_type)
+    for j in dirnames:
+        if os.path.isdir(j):
+            for k in os.listdir(j):
+                if os.path.isdir(k):
+                    yield j,k,find_file(search_string,
+                                    expno=int(k),
+                                    exp_type=exp_type)
+        else:
+            with ZipFile(j) as z:
+                names_of_subdir = set()
+                for k in z.namelist():
+                    path_list = k.split('/')
+                    if len(path_list) > 3:
+                        names_of_subdir |= {path_list[1]}
+                names_of_subdir = list(names_of_subdir)
+                names_of_subdir.sort()
+                for k in names_of_subdir:
+                    yield j,k,find_file(search_string,
+                                    expno=int(k),
+                                    exp_type=exp_type)
 def load_t1_axis(file):
     raise RuntimeError("don't use load_t1_axis anymore, the t1 axis should be available as an nddata property called wait_time")
 def bruker_load_t1_axis(file):
@@ -484,5 +507,6 @@ __all__ = ['find_file',
         'bruker_load_t1_axis',
         'prospa_t1_info',
         'bruker_load_title',
+        'bruker_dir',
         'cw',
         ]

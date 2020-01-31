@@ -11,7 +11,7 @@ def decim_correct(data):
     top = int(data_abs.data)
     data.circshift('t2',top)
     #}}}
-    print 'Applied prospa decimation correction'
+    print('Applied prospa decimation correction')
     return data
 def load_acqu(file):
     file = dirformat(file)
@@ -23,10 +23,10 @@ def load_acqu(file):
         lines[j] = string.rstrip(lines[j])
         m = line_re.match(lines[j])
         if m:
-            exec 'temp = %s'%m.groups()[1]
+            exec('temp = %s'%m.groups()[1])
             vars.update({m.groups()[0]:temp})
         else:
-            print "error, acqu.par line not parsed: ",lines[j]
+            print("error, acqu.par line not parsed: ",lines[j])
     fp.close()
     return vars
 def t1_info(file):
@@ -39,7 +39,7 @@ def t1_info(file):
     file_re = re.compile(r'([0-9]+)msDelay$')
     datafiles = []
     wait_time = []
-    print 'DEBUG: prospa is searching for times in the file list',files
+    print('DEBUG: prospa is searching for times in the file list',files)
     for j in range(0,len(files)):
         m = file_re.match(files[j])
         if m:
@@ -55,13 +55,13 @@ def load_datafile(file,dims=1):
     elif dims == 2:
         fp = open(file+'data.2d','rb')
     else:
-        print 'ERROR: wrong number of dims'
+        print('ERROR: wrong number of dims')
     data = fp.read()
-    data = array(struct.unpack('%df'%(len(data)/4),data))
+    data = array(struct.unpack('%df'%(len(data)//4),data))
     data = data[7:]
     # the following is junk!!!
     #elif precision=='b':
-    #   data = array(struct.unpack('%db'%(len(data)/1),data))
+    #   data = array(struct.unpack('%db'%(len(data)//1),data))
     #   data = data[7*4:]
     #else:
     #   print 'error, precision wrong'

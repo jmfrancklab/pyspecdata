@@ -14,4 +14,4 @@ from .nnls import *
 #        'OLDplot',
 #        'nddata_hdf5']
 #__all__.extend(numpy.__all__)
-__all__ = filter(lambda x: x[0] != '_',dir())
+__all__ = [x for x in dir() if x[0] != '_']

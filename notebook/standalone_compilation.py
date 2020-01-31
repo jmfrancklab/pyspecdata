@@ -14,9 +14,9 @@ data,data_nice = retrieve_DNP_set(['ubq_T66C','ubq_F4C','ubq_G35C','ubq_T66C_N14
 #{{{ first, just plot the nice data
 data_nice = lambda_rec(data_nice,'run',lambda x: '%0.1f'%x,'run_number') # make a text field
 data_nice = drop_fields(data_nice,['run_number'])
-print 'after formatting nicely, and taking the average of available $T_{1,0}$ measurements:\n\n'
+print('after formatting nicely, and taking the average of available $T_{1,0}$ measurements:\n\n')
 lrecordarray(data_nice,resizebox = 0.5)
-print '\n\n'
+print('\n\n')
 fl.next('bargraph')
 clf()
 textlabel_bargraph(data_nice,spacing = 0.1,tickfontsize = 5)
@@ -24,23 +24,22 @@ axis('tight')
 expand_x()
 ylim((-0.1,1.0))
 autolegend() # redo this, where I apply the labels
-print '\n\n'
+print('\n\n')
 #}}}
 #{{{ now, do some manual analysis
-print 'data is:\n\n'
-data = reorder_rec(data,['chemical','run_number'])
-data.sort()
+print('data is:\n\n')
+data = sorted(reorder_rec(data,['chemical','run_number']))
 lrecordarray(data,resizebox = 0.8)
-print '\n\n'
-print 'First, I average over the ones with undecided \\tonen\n\n'
-print 'and add the coupling factor\n\n'
+print('\n\n')
+print('First, I average over the ones with undecided \\tonen\n\n')
+print('and add the coupling factor\n\n')
 data = applyto_rec(mean,data,['run_number','chemical','fit_type'])
 data = lambda_rec(data,
     r'\xi',
     (lambda x,y: x/y),
     ['ksmax','krho'])
 lrecordarray(data,resizebox = 0.8)
-print '\n\nNow plot the \\ksigma vs. NOE/ROE\n\n'
+print('\n\nNow plot the \\ksigma vs. NOE/ROE\n\n')
 noe_axis = r'$\sigma_{NOE}/\sigma_{ROE}$'
 mask = data['run_number'] == 130410.2
 mask = logical_and(mask,data['chemical'] == 'ubq_T66C_N14')
@@ -58,7 +57,7 @@ for thisdata in [
     expand_y()
     ksmax_data.plot_labels([j[4:].replace('_N14',' ($^{14}$N)') for j in thisdata[3]])
 #{{{ Manual analysis of data
-print '\n\nNow take the mean and drop a bunch of fields\n\n'
+print('\n\nNow take the mean and drop a bunch of fields\n\n')
 data = drop_fields(data,['run_number','fit_type'])
 data_mean_new = meanstd_rec(data,['chemical'])
 sfo1 = 14.85

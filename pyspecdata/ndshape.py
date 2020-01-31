@@ -48,8 +48,8 @@ class ndshape_base ():
                 if len(self.shape) == 0 and len(self.dimlabels) == 0:
                     self.zero_dimensional = True
                     return
-            elif type(args[0]) is list:
-                self.dimlabels, self.shape = map(list,zip(*args[0]))
+            elif isinstance(args[0], list):
+                self.dimlabels, self.shape = list(map(list,list(zip(*args[0]))))
             else:
                 raise ValueError('If you pass a single argument, it must be an nddata')
         return
@@ -86,7 +86,7 @@ class ndshape_base ():
         'take list of shape,dimlabels'
         shape = arg[0]
         dimlabels = arg[1]
-        if type(shape) is str:
+        if isinstance(shape, str):
             shape,dimlabels = dimlabels,shape
         if isscalar(self.shape):
             self.shape = [self.shape]
@@ -104,7 +104,7 @@ class ndshape_base ():
         this is the correct function, until I can fix my back-references for add, which does it backwards'''
         shape = arg[0]
         dimlabels = arg[1]
-        if type(shape) is str:
+        if isinstance(shape, str):
             shape,dimlabels = dimlabels,shape
         if isscalar(self.shape):
             self.shape = [self.shape]
@@ -118,10 +118,10 @@ class ndshape_base ():
         self.dimlabels = self.dimlabels + dimlabels
         return self
     def __repr__(self): #how it responds to print
-        return zip(self.shape,self.dimlabels).__repr__()
+        return list(zip(self.shape,self.dimlabels)).__repr__()
     def __getitem__(self,args):
         try:
-            mydict = dict(zip(self.dimlabels,self.shape))
+            mydict = dict(list(zip(self.dimlabels,self.shape)))
         except Exception as e:
             raise ValueError(strm("either dimlabels=",self.dimlabels,"or shape",
                 self.shape,"not in the correct format") + explain_error(e))

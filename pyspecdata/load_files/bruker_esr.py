@@ -1,8 +1,8 @@
 from ..core import *
 from ..general_functions import strm
 from numpy import fromstring
-import re, string
-from StringIO import StringIO
+import re
+from io import StringIO
 logger = logging.getLogger('pyspecdata.load_files.bruker_esr')
 b0_texstr = r'$B_0$'
 def xepr(filename, dimname='', verbose=False):
@@ -37,7 +37,7 @@ def xepr(filename, dimname='', verbose=False):
     # {{{ flatten the dictionary (remove the uppermost/block
     #     level)
     new_v = {}
-    for k_a,v_a in v.iteritems():
+    for k_a,v_a in v.items():
         new_v.update(v_a)
     v = new_v
     # }}}
@@ -75,7 +75,7 @@ def xepr(filename, dimname='', verbose=False):
     logger.debug('there are %d harmonics, first is of type %s'%(n_harmonics,ikkf[0]))
     # }}}
     # {{{ check that calculated axes match dimensions
-    y_points_calcd = len(data)/x_points/n_harmonics
+    y_points_calcd = len(data)//x_points//n_harmonics
     dimname_list = [b0_texstr]
     dimsize_list = [x_points]
     dims_accounted_for = {b0_texstr}
@@ -84,7 +84,7 @@ def xepr(filename, dimname='', verbose=False):
         retval = v.pop(un_key)
         if retval[0] == "'": retval = retval.replace("'","")
         return retval
-    if 'XUNI' in v.keys():
+    if 'XUNI' in list(v.keys()):
         dim_units = {b0_texstr:interpret_units('XUNI')}
     else:
         dim_units = {}
@@ -106,20 +106,20 @@ def xepr(filename, dimname='', verbose=False):
         # }}}
     y_dim_name = None
     if y_points_calcd>1:
-        if 'YPTS' in v.keys():
+        if 'YPTS' in list(v.keys()):
             assert v['YPTS']==y_points_calcd, ("y points left over after"
                     " reshaping according to harmonics (y_points_calcd="
                     + str(y_points_calcd)
                     + ") doesn't match the number of data points")
-            assert 'YTYP' in v.keys(), ("No parameter YTYP -- how do you expect me to know the type of 2D dataset??")
+            assert 'YTYP' in list(v.keys()), ("No parameter YTYP -- how do you expect me to know the type of 2D dataset??")
             if v['YTYP'] == 'IGD':
                 logger.info('Found YTYP=IGD, assuming this is a power series')
-                assert 'YNAM' in v.keys(), ("No parameter YNAM -- how do you expect me to know the name of the second dimension??")
+                assert 'YNAM' in list(v.keys()), ("No parameter YNAM -- how do you expect me to know the name of the second dimension??")
                 y_dim_name = v.pop('YNAM')
-                if type(y_dim_name) is list:
+                if isinstance(y_dim_name, list):
                     y_dim_name = ' '.join(y_dim_name) # it gets split into a list, which for XEpr files shouldn't be happening, but fix later
                     if y_dim_name[0] == "'": y_dim_name = y_dim_name.replace("'","")
-                assert 'YUNI' in v.keys(), ("No parameter YUNI -- how do you expect me to know the units of the second dimension??")
+                assert 'YUNI' in list(v.keys()), ("No parameter YUNI -- how do you expect me to know the units of the second dimension??")
                 dim_units.update({y_dim_name:interpret_units('YUNI')})
                 filename_ygf = filename_par[:-4] + '.YGF'
                 if not os.path.exists(filename_ygf):
@@ -154,7 +154,7 @@ def xepr(filename, dimname='', verbose=False):
             "(Code below is just copied from winepr"
             " -- need to update)")
     data.labels(dims_to_label)
-    for k,val in dim_units.iteritems():
+    for k,val in dim_units.items():
         data.set_units(k,val)
     # }}}
     # {{{ use the parameters to rescale the data
@@ -254,7 +254,7 @@ def winepr_load_acqu(filename):
         lines = fp.readlines()
     vars = {}
     line_re = re.compile(r'([_A-Za-z0-9]+) +(.*)')
-    lines = map(string.rstrip,lines)
+    lines = list(map(lambda x: x.rstrip(),lines))
     #lines = [j.rstrip('\n') for j in lines] # because it's just \n, even on windows
     v = {'DRS':4096,'RES':1024,'HSW':50}
     for line in lines:
@@ -272,16 +272,16 @@ def winepr_load_acqu(filename):
                 except:
                     pass
             v[name]=value
-    jss = long(v['JSS'])
+    jss = int(v['JSS'])
     parameters = [ 'DUAL', '2D', 'FT', 'MAN0', 'MAN1', 'PROT', 'VEPR', 'POW', 'ABS', 'FTX', 'FTY', 'POW2', 'ABS2']
-    parameters = map((lambda x: 's_'+x),parameters)
-    masks = [ 0x00000001L, 0x00000002L, 0x00000004L, 0x00000008L, 0x00000010L,
-            0x00000020L, 0x00000040L, 0x00000080L, 0x00000100L, 0x00000200L,
-            0x00000400L, 0x00000800L, 0x00001000L]
-    values = map((lambda x: x&jss),masks)
-    values = map(bool,values)
-    values = map(bool,values)
-    v.update(dict(zip(parameters,values)))
+    parameters = list(map((lambda x: 's_'+x),parameters))
+    masks = [ 0x00000001, 0x00000002, 0x00000004, 0x00000008, 0x00000010,
+            0x00000020, 0x00000040, 0x00000080, 0x00000100, 0x00000200,
+            0x00000400, 0x00000800, 0x00001000]
+    values = list(map((lambda x: x&jss),masks))
+    values = list(map(bool,values))
+    values = list(map(bool,values))
+    v.update(dict(list(zip(parameters,values))))
     return v
 def xepr_load_acqu(filename):
     '''Load the Xepr acquisition parameter file, which should be a .dsc extension.
@@ -302,7 +302,7 @@ def xepr_load_acqu(filename):
         converts the record array to a list.'''
         if len(x):
             try:
-                return genfromtxt(StringIO(x),dtype=None).tolist()
+                return genfromtxt(StringIO(x),dtype=None,encoding='utf-8').tolist()
             except:
                 raise ValueError("genfromtxt chokes on "+repr(x))
         else:
@@ -312,7 +312,7 @@ def xepr_load_acqu(filename):
     comment_re = re.compile(r'^ *\*')
     variable_re = re.compile(r'^ *([^\s]*)\s+(.*?) *$')
     comma_re = re.compile(r'\s*,\s*')
-    with open(filename,'r') as fp:
+    with open(filename,'r',encoding='utf-8') as fp:
         blocks = {}
         # {{{ read lines and assign to the appropriate block
         for line in fp:
@@ -335,9 +335,9 @@ def xepr_load_acqu(filename):
                             if ',' in m.groups()[1]:
                                 # {{{ break into lists
                                 block_list.append((m.groups()[0],
-                                        map(auto_string_convert,
+                                        list(map(auto_string_convert,
                                             comma_re.split(
-                                                m.groups()[1]))))
+                                                m.groups()[1])))))
                                 # }}}
                             else:
                                 block_list.append((m.groups()[0],

@@ -3,19 +3,19 @@ from pylab import *
 from .ft_shift import _find_index,thinkaboutit_message
 
 def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
-    r"""This performs a Fourier transform along the axes identified by the string or list of strings `axes`.
+    r"""This performs an inverse Fourier transform along the axes identified by the string or list of strings `axes`.
 
     It adjusts normalization and units so that the result conforms to
-            :math:`s(t)=t_{dw} \int_{x_min}^{x_max} \tilde{s}(t) e^{i 2 \pi f t} df`
+            :math:`s(t)=t_{dw} \int_{x_{min}}^{x_{max}} \tilde{s}(t) e^{i 2 \pi f t} df`
     Where :math:`t_{dw}=\frac{1}{\Delta f}`, is the dwell time (with :math:`\Delta f` the spectral width).
 
     *Why do we do this?* Note that while the analytical integral this corresponds to is normalized, performing
     :func:`ft` followed by :func:`ift` on a discrete sequence is NOT completely invertible
     (due to integration of the implied comb function??),
-    and would require division by a factor of $\Delta f$ (the spectral width) in order
+    and would require division by a factor of :math:`\Delta f` (the spectral width) in order
     to retrieve the original function
 
-    **pre-IFT**, we use the axis to cyclically permute $f=0$ to the first index
+    **pre-IFT**, we use the axis to cyclically permute :math:`f=0` to the first index
 
     **post-IFT**, we assume that the data has previously been FT'd
     If this is the case, passing ``shift=True`` will cause an error
@@ -40,10 +40,10 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
             In the code, this is controlled by `p2_post` (the integral
             :math:`\Delta t` and `p2_post_discrepancy` -- the non-integral.
     """
-    if verbose: print "check 1",self.data.dtype
+    if verbose: print("check 1",self.data.dtype)
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
-    if (type(axes) is str):
+    if (isinstance(axes, str)):
         axes = [axes]
     #{{{ check and set the FT property
     for j in axes:
@@ -61,7 +61,7 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
         ('shift',False),
         ('pad',False)],
         kwargs)
-    if not (type(shift) is list):
+    if not (isinstance(shift, list)):
         shift = [shift]*len(axes)
     #}}}
     for j in range(0,len(axes)):
@@ -117,10 +117,10 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
                 raise ValueError("you are not allowed to shift an array for"
                         " which the index for $t=0$ has already been"
                         " determined!")
-            if verbose: print "check for p2_post_discrepancy"
-            if verbose: print "desired startpoint",desired_startpoint
+            if verbose: print("check for p2_post_discrepancy")
+            if verbose: print("desired startpoint",desired_startpoint)
             p2_post,p2_post_discrepancy,alias_shift_post = _find_index(v,origin = desired_startpoint,verbose = verbose)
-            if verbose: print "p2_post,p2_post_discrepancy,alias_shift_post,v at p2_post, and v at p2_post-1:", p2_post, p2_post_discrepancy, alias_shift_post, v[p2_post], v[p2_post - 1]
+            if verbose: print("p2_post,p2_post_discrepancy,alias_shift_post,v at p2_post, and v at p2_post-1:", p2_post, p2_post_discrepancy, alias_shift_post, v[p2_post], v[p2_post - 1])
             if p2_post != 0 or p2_post_discrepancy is not None:
                 do_post_shift = True
             else:
@@ -156,7 +156,7 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
                     lambda q: exp(1j*2*pi*q*p2_post_discrepancy))
             try:
                 self.data *= phaseshift.data
-            except TypeError,e:
+            except TypeError as e:
                 if self.data.dtype != 'complex128':
                     raise TypeError("You tried to ift nddata that was of type "+str(self.data.dtype))
                 else:
@@ -193,7 +193,7 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
         #    must apply a phase shift to reflect the fact that I need to add
         #    back that frequency
         if p2_post_discrepancy is not None:
-            if verbose: print "adjusting axis by",p2_post_discrepancy,"where du is",u[1]-u[0]
+            if verbose: print("adjusting axis by",p2_post_discrepancy,"where du is",u[1]-u[0])
             self.axis_coords[thisaxis][:] += p2_post_discrepancy # reflect the
             #   p2_post_discrepancy that we have already incorporated via a
             #   phase-shift above

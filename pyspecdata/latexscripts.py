@@ -25,7 +25,7 @@ if haswatchdog:
             #print "called 'on_modified'"
             if event is None:# if I called it manually
                 runornot = True
-                print "Scons signaled manually"
+                print("Scons signaled manually")
             else:
                 #print "in event:",dir(event)
                 #print event.event_type
@@ -33,10 +33,10 @@ if haswatchdog:
                 #print event.key
                 #print event.src_path
                 if event.src_path in ['.' + os.path.sep + j for j in self.dependencies]:
-                    print "Scons signaled on",event.src_path,", which is a dependency"
+                    print("Scons signaled on",event.src_path,", which is a dependency")
                     runornot = True
                 else:
-                    print "Modified",event.src_path,"which is not a dependency"
+                    print("Modified",event.src_path,"which is not a dependency")
                     runornot = False
             if runornot:
                 outstring = check_output(['scons','--tree=all'] + sys.argv[1:],shell = True)
@@ -54,8 +54,8 @@ if haswatchdog:
                 return self.dependencies
 def det_new_pdf_name(thisargv):
     'based on an original tex or pdf name, determine the original basename (i.e., no extension), as well as one with the final word after the underscore removed'
-    tex_basename = filter(lambda x: x[0] != '-',
-            thisargv)[-1]
+    tex_basename = list(filter(lambda x: x[0] != '-',
+            thisargv))[-1]
     tex_basename = os.path.basename(tex_basename)
     if tex_basename[-4:] == '.tex':
         tex_basename = tex_basename[:-4]
@@ -74,7 +74,7 @@ def genconfig():
         hide_start = '_' # the default hidden/config starter for vim, mingw applications, etc
     else:
         hide_start = '.'
-    with open(os.path.join(os.path.expanduser('~'),hide_start+'pyspecdata'),'w') as fp:
+    with open(os.path.join(os.path.expanduser('~'),hide_start+'pyspecdata'),'w',encoding='utf-8') as fp:
         fp.write('[General]\n')
         fp.write('# replace the following with your default data location (this is just a suggestion)\n')
         possible_data = [x for x in next(os.walk(os.path.expanduser('~')))[1] if 'data' in x.lower() and 'app' not in x.lower()]
@@ -86,7 +86,7 @@ def genconfig():
         fp.write('\n')
         fp.write('[ExpTypes]\n')
         fp.write('# in this section, you can place specific subdirectories (for faster access, or if they live elsewhere\n') 
-        print "now edit "+hide_start+"pyspecdata in your home directory"
+        print("now edit "+hide_start+"pyspecdata in your home directory")
 
 def wraplatex():
     '''runs the python scripts after running latex also creates a copy of latex without the final portion under the underscore
@@ -107,9 +107,9 @@ def wraplatex():
         use_xelatex = True
     else:
         use_xelatex = False
-    print "about to update the python script outputs...."
+    print("about to update the python script outputs....")
     orig_tex_basename,new_pdf_basename = det_new_pdf_name(proc_args)
-    with open(orig_tex_basename+'.tex','r') as fp:
+    with open(orig_tex_basename+'.tex','r',encoding='utf-8') as fp:
         thisline = fp.readline()
         while thisline.startswith('%!'):# in case we want to allow multiple directives
             if 'xelatex' in thisline:
@@ -121,20 +121,20 @@ def wraplatex():
         shellcmd = ' '.join(['xelatex']+proc_args[1:])
     else:
         shellcmd = ' '.join(['pdflatex']+proc_args[1:])
-    print "executing:",shellcmd
+    print("executing:",shellcmd)
     os.system(shellcmd)
-    print "executing:",'update_notebook_pythonscripts'
+    print("executing:",'update_notebook_pythonscripts')
     os.system('update_notebook_pythonscripts')
     if orig_tex_basename != new_pdf_basename:
-        print "preparing to:",'cp '+orig_tex_basename+'.pdf '+new_pdf_basename+'.pdf'
+        print("preparing to:",'cp '+orig_tex_basename+'.pdf '+new_pdf_basename+'.pdf')
         os.system('cp '+orig_tex_basename+'.pdf '+new_pdf_basename+'.pdf')
         os.system('cp '+orig_tex_basename+'.synctex.gz '
                 +new_pdf_basename+'.synctex.gz')
     return
 def wrapviewer():
     'see :func:`wraplatex <pyspecdata.latexscripts.wraplatex>`'
-    pdf_basename = filter(lambda x: x[0] != '-',
-            sys.argv)[-1]
+    pdf_basename = list(filter(lambda x: x[0] != '-',
+            sys.argv))[-1]
     orig_tex_basename,new_pdf_basename = det_new_pdf_name(sys.argv)
     if os.name == 'posix':
         # {{{ this plays the role of the function that I used to call "new_evince" with argument "b"
@@ -145,19 +145,19 @@ def wrapviewer():
             # no longer used, but make this functional, in case I want it later
             #3/29/14 -- replaced '+sys.argv[2]+' w/ default
             cmdstring = 'evince_vim_dbus.py EVINCE '+full_pdf_name+' 1 '+full_tex_name 
-            print cmdstring
+            print(cmdstring)
             os.system(cmdstring)
         elif which_command is 'i':#inverse
             cmdstring = 'evince_vim_dbus.py GVIM default '+full_pdf_name+' '+full_tex_name
-            print cmdstring
+            print(cmdstring)
             os.system(cmdstring)
         elif which_command is 'b':#both
             cmdstring = '~/silentfork.sh evince_vim_dbus.py EVINCE '+full_pdf_name+' 1 '+full_tex_name 
-            print cmdstring
+            print(cmdstring)
             os.system(cmdstring)
             time.sleep(0.75)
             cmdstring = '~/silentfork.sh evince_vim_dbus.py GVIM default '+full_pdf_name+' '+full_tex_name
-            print cmdstring
+            print(cmdstring)
             os.system(cmdstring)
         # }}}
 
@@ -173,7 +173,7 @@ def cached_filename(hashstring,returndir = False):
     we use the first two characters as directory names (so there are just 16 of them'''
     return get_scripts_dir() + 'cache' + os.path.sep + hashstring[0] + os.path.sep + hashstring[1] + os.path.sep + hashstring[2:] + '.tex'
 def grab_script_string(scriptnum_as_str):
-    fp_script = open(script_filename(scriptnum_as_str))
+    fp_script = open(script_filename(scriptnum_as_str),encoding='utf-8')
     #print "opening",script_filename(scriptnum_as_str)
     script_string = ''
     reading = False
@@ -197,33 +197,33 @@ def get_scripts_dir():
 def sha_string(script):
     'convert the sha hash to a string'
     s = hashlib.sha256()
-    s.update(script)
+    s.update(script.encode('utf-8'))
     hasharray = numpy.fromstring(s.digest(),'>u8')
     del s
-    return ''.join(map(lambda x: '%016x'%x,list(hasharray)))
+    return ''.join(['%016x'%x for x in list(hasharray)])
 def cache_output_if_needed(scriptnum_as_str,hashstring,showcode = False,show_error = True):
     r'if needed, run the python script numbered by scriptnum_as_str that hashes to hashstring, and output the result to the cache ONLY'
     output_fname = cached_filename(hashstring)
     script_fname = script_filename(scriptnum_as_str)
     # {{{ interpret the "NOerr" directive
-    with open(script_fname,'r') as fp:
+    with open(script_fname,'r',encoding='utf-8') as fp:
         firstline = fp.readline()
         if firstline.startswith('### NOerr'): show_error = False
     # }}}
     if os.path.exists(output_fname):
-        print output_fname,"already exists, so I will just use it"
+        print(output_fname,"already exists, so I will just use it")
     else:
-        print "no cached file"
+        print("no cached file")
         if not os.path.exists(os.path.dirname(output_fname)):
             os.makedirs(os.path.dirname(output_fname))
-        fp_out = open(output_fname,'w')
+        fp_out = open(output_fname,'w',encoding='utf-8')
         #fp_out.write(r'{\color{red}script: %d}'%script_number+'\n')
         if showcode:
             fp_out.write(r'\begin{lstlisting}'+'\n')
             fp_out.write(''.join(script))
             fp_out.write(r'\end{lstlisting}'+'\n')
         temp = os.environ
-        print "about to run python"
+        print("about to run python")
         python_name = 'python'
         if os.name == 'posix':
             temp.update({'PYTHON_DATA_DIR':getDATADIR()})
@@ -243,8 +243,8 @@ def cache_output_if_needed(scriptnum_as_str,hashstring,showcode = False,show_err
                     stdin = PIPE,
                     stderr = PIPE,
                     env = temp)
-        stdoutdata,stderrdata = proc.communicate()
-        print "ran python"
+        stdoutdata,stderrdata = [j.decode('utf-8') for j in proc.communicate()]
+        print("ran python")
         if os.name != 'posix':
             stdoutdata = stdoutdata.replace('\r','')
             if stderrdata is not None:
@@ -271,16 +271,16 @@ def cache_output_if_needed(scriptnum_as_str,hashstring,showcode = False,show_err
         return
 def flush_script(number):
     tex_name = os.path.normpath(os.path.join(os.getcwd(),'scripts',number+'.tex'))
-    print "removing:",tex_name
+    print("removing:",tex_name)
     if os.path.exists(tex_name):
         os.remove(tex_name)
     file_name = cached_filename(sha_string(grab_script_string(number)))
-    print "removing:",file_name
+    print("removing:",file_name)
     if os.path.exists(file_name):
         os.remove(file_name)
-        print "does it still exist?",os.path.exists(file_name)
+        print("does it still exist?",os.path.exists(file_name))
     else:
-        print "there is no cache for script",number
+        print("there is no cache for script",number)
     return
 if haswatchdog:
     def repeat_scons():
@@ -323,7 +323,7 @@ def main():
         scriptnum_as_str = line.strip()
         outname    = scriptnum_as_str + '.tex'
         hashstring = sha_string(grab_script_string(scriptnum_as_str))
-        print "reading script",script_filename(scriptnum_as_str),"which has hash",hashstring
+        print("reading script",script_filename(scriptnum_as_str),"which has hash",hashstring)
         cache_output_if_needed(scriptnum_as_str,hashstring)
         # always pull the  output from the cache
         sh_copy2(cached_filename(hashstring),get_scripts_dir()+outname)
