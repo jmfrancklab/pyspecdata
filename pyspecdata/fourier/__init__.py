@@ -8,4 +8,7 @@ __all__ = [ "_ft_conj",
             "ift",
             ]
 
-from . import * # needed so that pyspecdata.fourier contains all the previous names
+if not inside_sphinx():
+    from . import * # needed so that pyspecdata.fourier contains all the previous names
+else:
+    pi = 3.14
