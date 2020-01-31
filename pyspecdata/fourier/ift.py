@@ -3,19 +3,19 @@ from pylab import *
 from .ft_shift import _find_index,thinkaboutit_message
 
 def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
-    r"""This performs a Fourier transform along the axes identified by the string or list of strings `axes`.
+    r"""This performs an inverse Fourier transform along the axes identified by the string or list of strings `axes`.
 
     It adjusts normalization and units so that the result conforms to
-            :math:`s(t)=t_{dw} \int_{x_min}^{x_max} \tilde{s}(t) e^{i 2 \pi f t} df`
+            :math:`s(t)=t_{dw} \int_{x_{min}}^{x_{max}} \tilde{s}(t) e^{i 2 \pi f t} df`
     Where :math:`t_{dw}=\frac{1}{\Delta f}`, is the dwell time (with :math:`\Delta f` the spectral width).
 
     *Why do we do this?* Note that while the analytical integral this corresponds to is normalized, performing
     :func:`ft` followed by :func:`ift` on a discrete sequence is NOT completely invertible
     (due to integration of the implied comb function??),
-    and would require division by a factor of $\Delta f$ (the spectral width) in order
+    and would require division by a factor of :math:`\Delta f` (the spectral width) in order
     to retrieve the original function
 
-    **pre-IFT**, we use the axis to cyclically permute $f=0$ to the first index
+    **pre-IFT**, we use the axis to cyclically permute :math:`f=0` to the first index
 
     **post-IFT**, we assume that the data has previously been FT'd
     If this is the case, passing ``shift=True`` will cause an error
