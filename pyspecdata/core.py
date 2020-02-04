@@ -2395,7 +2395,11 @@ def plot(*args,**kwargs):
         else:
             longest_dim = 0 # treat first as x, like before
             last_not_longest = -1
-            all_but_longest = []
+            if len(myy.data.shape)>1:
+                all_but_longest = set(range(len(myy.data.shape)))^set((longest_dim,))
+                all_but_longest = list(all_but_longest)
+            else:
+                all_but_longest = []
         if human_units: myy = myy.human_units()
         if myy.get_plot_color() is not None\
             and 'color' not in list(kwargs.keys()):# allow override
@@ -4205,19 +4209,21 @@ class nddata (object):
         #}}}
         return self
     def mean(self,*args,**kwargs):
-        r'''Take the mean and set the error to the standard deviation
+        r'''Take the mean and (optionally) set the error to the standard deviation
 
         Parameters
         ----------
-        return_error: bool
-            whether or note to return the standard deviation as an error
+        std: bool
+            whether or not to return the standard deviation as an error
         '''
         logger.debug("entered the mean function")
         #{{{ process arguments
         if len(args) > 1:
             raise ValueError('you can\'t pass more than one argument!!')
         axes = self._possibly_one_axis(*args)
-        return_error = process_kwargs([('return_error',True)],kwargs)
+        if 'return_error' in kwargs:
+            raise ValueError('return_error kwarg no longer used -- use std kwarg if you want to set the error to the std')
+        return_error = process_kwargs([('std',False)],kwargs)
         logger.debug(strm("return error is",return_error))
         if (isinstance(axes, str)):
             axes = [axes]
