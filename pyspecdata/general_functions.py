@@ -188,7 +188,10 @@ def log_fname(logname,fname,dirname):
         already_listed = False
         fp.seek(0,0)
         for j in fp:
-            f, d = j.split()
+            try:
+                f, d = j.split()
+            except:
+                raise RuntimeError(strm("there seems to be something wrong with your",logname,"file (in the current directory).  It should consist of one line per file, with each file containing a file and directory name.  Instead, I find a line with the following elements",j.split()))
             if f == fname and d == dirname:
                 already_listed = True
                 break
