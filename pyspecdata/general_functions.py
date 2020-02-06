@@ -188,13 +188,16 @@ def log_fname(logname,fname,dirname):
         already_listed = False
         fp.seek(0,0)
         for j in fp:
+            j = j.replace(r'\ ','LITERALSPACE')
             try:
                 f, d = j.split()
             except:
                 raise RuntimeError(strm("there seems to be something wrong with your",logname+'.log',"file (in the current directory).  It should consist of one line per file, with each file containing a file and directory name.  Instead, I find a line with the following elements",j.split(),'\n',"You might try deleting the",logname+'.log',"file"))
+            f = f.replace('LITERALSPACE',' ')
+            d = d.replace('LITERALSPACE',' ')
             if f == fname and d == dirname:
                 already_listed = True
                 break
         if not already_listed:
             fp.seek(0,os.SEEK_END)# make sure at end of file
-            fp.write('%-70s%-50s\n'%(fname,dirname))
+            fp.write('%-70s%-50s\n'%(fname.replace(' ','\\ '),dirname.replace(' ','\\ ')))
