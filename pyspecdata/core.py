@@ -6061,8 +6061,20 @@ class nddata (object):
     @property
     def C(self):
         """shortcut for copy
+
+        btw, what we are doing is analogous to a ruby function with
+        functioname!() modify result, and we can use the "out" keyword in
+        numpy.
         
         ..todo::
+            (new idea)
+            This should just set a flag that says "Do not allow this data to be substituted in place,"
+            so that if something goes to edit the data in place,
+            it instead first makes a copy.
+
+            also here, see `Definition of shallow and deep copy <https://docs.python.org/2/library/copy.html>`_
+
+            (older idea)
             We should offer "N", which generates something like a copy,
             but which is sets the equivalent of "nopop".
             For example, currently, you need to do something like
