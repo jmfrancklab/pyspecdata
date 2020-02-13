@@ -6437,8 +6437,8 @@ class nddata (object):
             return slicedict,axesdict,errordict,unitsdict
             #}}}
         else:
-            raise ValueError(strm('label your freaking dimensions! (type of args[0] is ',
-                type(args[0]),'and it should be str!)'))
+            raise ValueError(strm('label your freaking dimensions! (type of args[0] (',args[0],'is ',
+                type(args[0]),'and it should be str!).  Overall, the dimlabels for the nddata are',self.dimlabels))
     #}}}
     #{{{ hdf5 write
     def hdf5_write(self, h5path, directory='.'):
@@ -6605,7 +6605,7 @@ class nddata_hdf5 (nddata):
         datadict.pop('data')
         #}}}
         #{{{ be sure to load the dimlabels
-        mydimlabels = [j.decode('utf-8') for j in datadict['dimlabels']]
+        mydimlabels = [str(j.decode('utf-8')) for j in datadict['dimlabels']]
         if len(mydimlabels) == 1:
             if len(mydimlabels[0]) == 1:
                 mydimlabels = list([mydimlabels[0][0]]) # for some reason, think I need to do this for length 1
