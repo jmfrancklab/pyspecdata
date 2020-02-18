@@ -187,7 +187,7 @@ def find_file(searchstring,
             expno=expno)
         # }}}
         for_logging = os.path.normpath(filename).split(os.path.sep)
-        log_fname('data_files',for_logging[-1],os.path.join(for_logging[:-1]))
+        log_fname('data_files',for_logging[-1],os.path.join(*for_logging[:-1]))
         del for_logging
     if data is None:
         raise ValueError(strm(
