@@ -85,10 +85,10 @@ class MyConfig(object):
         if this_key in self.config_vars.keys():
             logger.debug("I pulled",this_key,"from the config_vars")
             return self.config_vars[this_key]
-        logger.debug("about to look for environment variable",environ)
         if environ is not None and environ in os.environ.keys():
+            logger.debug(strm("about to look for environment variable",environ))
             retval = os.environ[environ]
-            logger.debug("I pulled",environ,"from the environment variables -- it is",retval)
+            logger.debug(strm("I pulled",environ,"from the environment variables -- it is",retval))
         else:
             if self._config_parser is None:
                 self._config_parser = configparser.SafeConfigParser()

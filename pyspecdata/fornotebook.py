@@ -72,9 +72,13 @@ class figlistl (figlist):
             if isinstance(figname, dict):
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
-                    if line_spacing: print('\n\n')
-                    print(kwargs.pop('print_string'))
-                    if line_spacing: print('\n\n')
+                    if line_spacing: sys.stdout.buffer.write(b'\n\n')
+                    outstr = kwargs.pop('print_string')
+                    # {{{ to "print" with correct encoding
+                    sys.stdout.buffer.write(outstr.encode('utf-8'))
+                    # }}}
+                    if line_spacing: sys.stdout.buffer.write(b'\n\n')
+                    sys.stdout.buffer.flush()
             else:
                 j = self.get_fig_number(figname)
                 if mlab:

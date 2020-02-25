@@ -1862,7 +1862,7 @@ class figlist(object):
                 fig = self.figdict[name]
                 figure(self.figdict[name].number)
             self.current = name
-            logging.debug(strm('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures'))
+            #logging.debug(strm('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures'))
             if boundaries is not None:
                 if 'boundaries' not in list(self.propdict[self.current].keys()) or self.propdict[self.current]['boundaries'] != boundaries:
                     raise ValueError("You're giving conflicting values for boundaries")
