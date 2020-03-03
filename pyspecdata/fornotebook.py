@@ -480,18 +480,21 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
     else:
         mpwidth = r'%0.2fin'%width
         figwidth = mpwidth
+    def bufwr(inpstr):
+        sys.stdout.buffer.write(inpstr.encode('utf-8'))
     if showbox:
-        print(r'''\mbox{\begin{minipage}{%s}'''%mpwidth)
+        bufwr(r'''\mbox{\begin{minipage}{%s}'''%mpwidth)
         if alsosave != None:
-            print(r'also saved \fn{%s}'%alsosave+'\n\n')
-    print(r'\includegraphics[width=%s]{%s}'%(figwidth,fname.replace(r'auto_figures',r'\autofiguredir')))
+            bufwr(r'also saved \fn{%s}'%alsosave+'\n\n')
+    bufwr(r'\includegraphics[width=%s]{%s}'%(figwidth,fname.replace(r'auto_figures',r'\autofiguredir')))
     if showbox:
-        print('\n\n'+r'\hrulefill'+'\n\n')
-        print(r'''{\color{red}{\tiny %s}:}\begin{tiny}\fn{%s}\end{tiny}'''%('file:',fname))
-        print('\n\n'+r'\hrulefill'+'\n\n')
-        print(r'''\end{minipage}
+        bufwr('\n\n'+r'\hrulefill'+'\n\n')
+        bufwr(r'''{\color{red}{\tiny %s}:}\begin{tiny}\fn{%s}\end{tiny}'''%('file:',fname))
+        bufwr('\n\n'+r'\hrulefill'+'\n\n')
+        bufwr(r'''\end{minipage}
 }''', end=' ')
     clf()
+    sys.stdout.buffer.flush()
     return
 def ordplot(x,y,labels,formatstring):
         order = argsort(x)
