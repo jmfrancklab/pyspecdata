@@ -13,6 +13,20 @@ ND-Data
 
 The nddata class is built on top of numpy_.
 Numpy allows you to create multi-dimensional arrays of data.
+For example, take the following 2D array, representing the x and y dimensions of a plot:
+>>> C = np.r_[[0,1,2,3,4,5],[0,0.1,0.2,0.3,0.4,0.5]]
+[[0  1   2   3   4   5]
+ [0  0.1 0.2 0.3 0.4 0.5]]
+To transform this into a numpy array, we form nddata out of the y-axis and add an axis
+label comprised of the x-axis:
+>>> Cdata = nddata(C[0],'x').labels('x',C[1])
+[0, 1, 2, 3, 4, 5]
+          +/-None
+   dimlabels=['x']
+   axes={'x':[0, 0.1, 0.2, 0.3,
+0.4, 0.5]
+                    +/-None
+
 The nddata class labels the dimensions (with a short text identifier)
 and allows you to associate
 axes, units, and errors with the data.
