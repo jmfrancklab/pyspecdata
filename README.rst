@@ -1,8 +1,11 @@
-**We are now in transition from Python 2 to Python 3**:
+[![DOI](https://zenodo.org/badge/24356894.svg)](https://zenodo.org/badge/latestdoi/24356894)
+
+To learn more about pyspecdata, you can head over to the ![documentation](http://jmfrancklab.github.io/pyspecdata)
+
 If you already know that you want to install,
 and you are using Anaconda, you should see `conda_upgrade.md <conda_upgrade.md>`_.
 
-We are currently working to add fast compiled Fortran functions for things like
+We have added fast compiled Fortran functions for things like
 2D ILT (Tikhonov regularization with basis set compression) for NMR (Nuclear Magnetic Resonance),
 so please read the install instructions
 carefully!
