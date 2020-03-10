@@ -13,19 +13,38 @@ ND-Data
 
 The nddata class is built on top of numpy_.
 Numpy allows you to create multi-dimensional arrays of data.
-For example, take the following 2D array, representing the x and y dimensions of a plot:
->>> C = np.r_[[0,1,2,3,4,5],[0,0.1,0.2,0.3,0.4,0.5]]
-[[0  1   2   3   4   5]
- [0  0.1 0.2 0.3 0.4 0.5]]
-To transform this into a numpy array, we form nddata out of the y-axis and add an axis
-label comprised of the x-axis:
->>> Cdata = nddata(C[0],'x').labels('x',C[1])
-[0, 1, 2, 3, 4, 5]
-          +/-None
-   dimlabels=['x']
-   axes={'x':[0, 0.1, 0.2, 0.3,
-0.4, 0.5]
-                    +/-None
+
+Building an nddata from numpy arrays
+------------------------------------
+
+First, you should ask yourself whether there is already provides a means for
+loading your data from a source file or an instrument automatically.
+If not, it's still relatively simple to construct your own `nddata`.
+
+For example, let's consider a case where we have *x* and *y* data
+
+>>> from numpy import *
+>>> x = r_[0, 1, 2, 3, 4]
+>>> y = r_[0, 0.1, 0.2, 0.3, 0.4]
+
+To transform this into an ndata, we assign *y* as the data, and label it with *x* as the axis label.
+
+>>> d = nddata(y,'x').labels('x',x)
+
+Now, for example, we're ready to plot with axis labels or to Fourier transform.
+However, the true strength of pySpecData lies in how it treats
+multi-dimensional data.
+
+.. note::
+    Please note that the xarray packages does have some of the benefits listed here,
+    if you have seent it,
+    but it doesn't have as strong an emphasis on benefits that can be derived from
+    object-oriented programming.
+    For example, error propagation and Fourier transformation are not handled in the same way,
+    and the slicing notation is less compact.
+
+Multidimensional data
+---------------------
 
 The nddata class labels the dimensions (with a short text identifier)
 and allows you to associate
@@ -67,7 +86,8 @@ need to process the same data in parallel in two different ways to generate two 
 and then perform math that uses both results).
 For these cases, you can use an easy shortcut for the copy method: `C` (as in `data.C`).
 
-**say something about slicing and copies here**
+.. todo::
+    say something about slicing and copies here
 
 Note that, if all else fails,
 you can always use numpy directly:
@@ -86,6 +106,8 @@ Finally, we outline several classes of methods by sub-topic.
 
 Dimension labels
 ----------------
+
+.. _nddata-dimension-label:
 
 All dimension labels can have a display name (used for printing and plotting)
 and one or more short names (used for writing code).

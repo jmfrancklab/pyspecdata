@@ -34,6 +34,14 @@ That looks like this:
 >>> d['t2':(-10e3,10e-3)]
 >>> d.ift('t2')
 
+Note that most pySpecData methods operate *in-place* on the data;
+it modifies the data inside the nddata, rather than making a new copy.
+This is because we assume that we are progressively optimizing/filtering
+our spectral data with each new line of code.
+This allows us to quickly work through many operations (like the ft here)
+without keeping many copies of a large dataset and with less typing for each operation.
+(If you every truly want to create a copy a dataset, just attach a `.C`)
+
 .. todo::
     describe updates allowing aliasing (nu2 vs. t2, etc.)
 
@@ -52,14 +60,21 @@ We primarily work in magnetic resonance,
 so have written wrappers for a few different types of NMR
 (nuclear magnetic resonance) and ESR (electron spin resonance)
 file formats.
-You can use the :func:`find_file` function to automatically detect these
-files and load them as an nddata.
+You can use the :func:`pyspecdata.find_file` function to automatically load them as nddata.
 
 Additionally, we have written several classes that allow you to read
 nddata objects directly from *e.g.* an oscilloscope.
+These are available as separate repositories on github (please contact us for further info).
+
+Finally, you can easily build nddata from standard arrays, as discussed in the section :ref:`nddata-summary-label`.
 
 Contents:
 ---------
+
+There are many other features of pySpecData that govern the interaction
+of ndata objects with plots and, *e.g.* that allow you to generate a nice
+PDF laboratory notebook showing every step of your data processing.
+These and further details are covered in the various sections of the documentation:
 
 .. toctree::
     :maxdepth: 2
