@@ -6,7 +6,60 @@
 Welcome to pySpecData's documentation!
 ======================================
 
+pySpecData allows you to deal with multi-dimensional spectroscopy data in an object-oriented fashion.
+
+In practice, this means that it makes the code for processing spectral data shorter and more quickly legible.
+It *automatically* handles the following issues, without any additional code:
+
+*   relabeling axes after a Fourier transformation
+*   propagation of errors
+*   adding units to plots
+
+To do this, you work with a pySpecData `nddata` object
+(which includes information about dimension names, axis values, errors, and the units)
+rather than
+working directly with traditional numpy `ndarray` objects.
+(pySpecData is built on top of numpy.)
+
+If you have ever worked with arrays in Matlab or Python before, you are
+familiar with the additional code needed to convert between index numbers
+and axis values.
+Using the funny notation of pySpecData, you can do this automatically.
+
+For example, say you have loaded an `nddata` object called `d` wanted to take time-domain data, Fourier transform,
+select out the central 20 kHz in the frequency domain, and then inverse Fourier transform, while preserving the correct axes throughout.
+That looks like this:
+
+>>> d.ft('t2', shift=True)
+>>> d['t2':(-10e3,10e-3)]
+>>> d.ift('t2')
+
+.. todo::
+    describe updates allowing aliasing (nu2 vs. t2, etc.)
+
+Note that
+
+>>> plot(d)
+
+automatically plots the data on the correct axes and includes the units
+and the name of dimension (*t2* in this example) and its units along the
+*x* axis.
+
+How do I generate an nddata object?
+-----------------------------------
+
+We primarily work in magnetic resonance,
+so have written wrappers for a few different types of NMR
+(nuclear magnetic resonance) and ESR (electron spin resonance)
+file formats.
+You can use the :func:`find_file` function to automatically detect these
+files and load them as an nddata.
+
+Additionally, we have written several classes that allow you to read
+nddata objects directly from *e.g.* an oscilloscope.
+
 Contents:
+---------
 
 .. toctree::
     :maxdepth: 2
