@@ -26,6 +26,7 @@ autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_too
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../..'))
+sys.path.append(os.path.abspath('..'))
 
 # -- General configuration ------------------------------------------------
 
@@ -42,8 +43,8 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',# should allow numpydoc
     'sphinx.ext.autosummary',# should allow numpydoc
-    'matplotlib.sphinxext.only_directives',
-    'matplotlib.sphinxext.plot_directive',
+    #'matplotlib.sphinxext.only_directives',
+    #'matplotlib.sphinxext.plot_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'IPython.sphinxext.ipython_directive',
 ]

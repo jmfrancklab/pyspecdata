@@ -157,7 +157,67 @@
             
   <div class="section" id="welcome-to-pyspecdata-s-documentation">
 <h1>Welcome to pySpecData’s documentation!<a class="headerlink" href="#welcome-to-pyspecdata-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Contents:</p>
+<p>pySpecData allows you to deal with multi-dimensional spectroscopy data in an object-oriented fashion.</p>
+<p>In practice, this means that it makes the code for processing spectral data shorter and more quickly legible.
+It <em>automatically</em> handles the following issues, without any additional code:</p>
+<ul class="simple">
+<li><p>relabeling axes after a Fourier transformation</p></li>
+<li><p>propagation of errors</p></li>
+<li><p>adding units to plots</p></li>
+</ul>
+<p>To do this, you work with a pySpecData <cite>nddata</cite> object
+(which includes information about dimension names, axis values, errors, and the units)
+rather than
+working directly with traditional numpy <cite>ndarray</cite> objects.
+(pySpecData is built on top of numpy.)</p>
+<p>If you have ever worked with arrays in Matlab or Python before, you are
+familiar with the additional code needed to convert between index numbers
+and axis values.
+Using the funny notation of pySpecData, you can do this automatically.</p>
+<p>For example, say you have loaded an <cite>nddata</cite> object called <cite>d</cite> wanted to take time-domain data, Fourier transform,
+select out the central 20 kHz in the frequency domain, and then inverse Fourier transform, while preserving the correct axes throughout.
+That looks like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">ft</span><span class="p">(</span><span class="s1">&#39;t2&#39;</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">:(</span><span class="o">-</span><span class="mf">10e3</span><span class="p">,</span><span class="mf">10e-3</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">ift</span><span class="p">(</span><span class="s1">&#39;t2&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that most pySpecData methods operate <em>in-place</em> on the data;
+it modifies the data inside the nddata, rather than making a new copy.
+This is because we assume that we are progressively optimizing/filtering
+our spectral data with each new line of code.
+This allows us to quickly work through many operations (like the ft here)
+without keeping many copies of a large dataset and with less typing for each operation.
+(If you every truly want to create a copy a dataset, just attach a <cite>.C</cite>)</p>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>describe updates allowing aliasing (nu2 vs. t2, etc.)</p>
+</div>
+<p>Note that</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plot</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>automatically plots the data on the correct axes and includes the units
+and the name of dimension (<em>t2</em> in this example) and its units along the
+<em>x</em> axis.</p>
+<div class="section" id="how-do-i-generate-an-nddata-object">
+<h2>How do I generate an nddata object?<a class="headerlink" href="#how-do-i-generate-an-nddata-object" title="Permalink to this headline">¶</a></h2>
+<p>We primarily work in magnetic resonance,
+so have written wrappers for a few different types of NMR
+(nuclear magnetic resonance) and ESR (electron spin resonance)
+file formats.
+You can use the <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.find_file" title="pyspecdata.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">pyspecdata.find_file()</span></code></a> function to automatically load them as nddata.</p>
+<p>Additionally, we have written several classes that allow you to read
+nddata objects directly from <em>e.g.</em> an oscilloscope.
+These are available as separate repositories on github (please contact us for further info).</p>
+<p>Finally, you can easily build nddata from standard arrays, as discussed in the section <a class="reference internal" href="nddata.html"><span class="doc">about nddata objects</span></a>.</p>
+</div>
+<div class="section" id="contents">
+<h2>Contents:<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<p>There are many other features of pySpecData that govern the interaction
+of ndata objects with plots and, <em>e.g.</em> that allow you to generate a nice
+PDF laboratory notebook showing every step of your data processing.
+These and further details are covered in the various sections of the documentation:</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a><ul>
@@ -168,9 +228,9 @@
 <li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.load_files">load_files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.fornotebook">fornotebook</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.latexscripts">latexscripts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#ipy">ipy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.ipy">ipy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.ndshape">ndshape</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.units">units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#units">units</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a><ul>
@@ -181,6 +241,8 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nddata.html#building-an-nddata-from-numpy-arrays">Building an nddata from numpy arrays</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nddata.html#multidimensional-data">Multidimensional data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nddata.html#dimension-labels">Dimension labels</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nddata.html#item-selection-and-slicing">Item selection and slicing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nddata.html#basic-examples">Basic Examples</a></li>
@@ -197,12 +259,13 @@
 </ul>
 </div>
 </div>
+</div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 </div>
 

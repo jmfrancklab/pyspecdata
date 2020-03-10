@@ -890,7 +890,7 @@ def h5child(thisnode,childname,clear = False,create = None):
     h5file = thisnode._v_file
     try:
         childnode = h5file.get_node(thisnode,childname)
-        logger.debug('found',childname)
+        logger.debug(strm('found',childname))
         if clear:
             childnode._f_remove(recursive = True)
             childnode = None
@@ -4442,23 +4442,23 @@ class nddata (object):
             axis_name = axis_name + ' / ' + yunits
         return axis_name
     #{{{ the following are all in the desired format -- the repetition at the end is because each function is in its own file (module) of the same name
-    _ft_conj = this_fourier._ft_conj._ft_conj
-    ft = this_fourier.ft.ft
-    set_ft_prop = this_fourier.ft_shift.set_ft_prop
-    get_ft_prop = this_fourier.ft_shift.get_ft_prop
-    ft_state_to_str = this_fourier.ft_shift.ft_state_to_str
-    ft_clear_startpoints = this_fourier.ft_shift.ft_clear_startpoints
-    ift = this_fourier.ift.ift
-    _ft_shift = this_fourier.ft_shift._ft_shift
-    ftshift = this_fourier.ftshift.ftshift
-    convolve = this_fourier.convolve.convolve
-    extend_for_shear = this_fourier.shear.extend_for_shear
-    linear_shear = axis_manipulation.shear.linear_shear
-    inhomog_coords = axis_manipulation.inhomog_coords.inhomog_coords
-    secsy_transform_manual = axis_manipulation.secsy.secsy_transform_manual
-    secsy_transform = axis_manipulation.secsy.secsy_transform
-    register_axis = axis_manipulation.register_axis.register_axis
-    fourier_shear = this_fourier.shear.shear
+    _ft_conj = this_fourier._ft_conj
+    ft = this_fourier.ft
+    set_ft_prop = this_fourier.set_ft_prop
+    get_ft_prop = this_fourier.get_ft_prop
+    ft_state_to_str = this_fourier.ft_state_to_str
+    ft_clear_startpoints = this_fourier.ft_clear_startpoints
+    ift = this_fourier.ift
+    _ft_shift = this_fourier._ft_shift
+    ftshift = this_fourier.ftshift
+    convolve = this_fourier.convolve
+    extend_for_shear = this_fourier.extend_for_shear
+    linear_shear = axis_manipulation.linear_shear
+    inhomog_coords = axis_manipulation.inhomog_coords
+    secsy_transform_manual = axis_manipulation.secsy_transform_manual
+    secsy_transform = axis_manipulation.secsy_transform
+    register_axis = axis_manipulation.register_axis
+    fourier_shear = this_fourier.shear
     #}}}
     #}}}
     def nnls(self, dimname, newaxis_dict, kernel_func, l=0):

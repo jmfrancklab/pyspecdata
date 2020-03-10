@@ -103,23 +103,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1 current"><a class="reference internal" href="../nddata.html">ND-Data</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../nddata.html#dimension-labels">Dimension labels</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../nddata.html#item-selection-and-slicing">Item selection and slicing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../nddata.html#basic-examples">Basic Examples</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../nddata.html#methods-by-sub-topic">Methods by Sub-Topic</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="../axis_manipulation.html">Axis Manipulation Functions</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyspecdata.axis_manipulation.shear.linear_shear.html">pyspecdata.axis_manipulation.shear.linear_shear</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyspecdata.axis_manipulation.register_axis.register_axis.html">pyspecdata.axis_manipulation.register_axis.register_axis</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyspecdata.axis_manipulation.secsy.secsy_transform_manual.html">pyspecdata.axis_manipulation.secsy.secsy_transform_manual</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../fourier.html">Fourier Functions</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
@@ -197,35 +181,27 @@
 <h1>pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords<a class="headerlink" href="#pyspecdata-axis-manipulation-inhomog-coords-inhomog-coords" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords">
-<code class="descclassname">pyspecdata.axis_manipulation.inhomog_coords.</code><code class="descname">inhomog_coords</code><span class="sig-paren">(</span><em>self</em>, <em>direct_dim</em>, <em>indirect_dim</em>, <em>tolerance=1e-05</em>, <em>method='linear'</em>, <em>plot_name=None</em>, <em>fl=None</em>, <em>debug_kwargs={}</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.axis_manipulation.inhomog_coords.</code><code class="sig-name descname">inhomog_coords</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">direct_dim</em>, <em class="sig-param">indirect_dim</em>, <em class="sig-param">tolerance=1e-05</em>, <em class="sig-param">method='linear'</em>, <em class="sig-param">plot_name=None</em>, <em class="sig-param">fl=None</em>, <em class="sig-param">debug_kwargs={}</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply the “inhomogeneity transform,” which rotates the data by <span class="math notranslate nohighlight">\(45^{\circ}\)</span>, and then mirrors the portion with <span class="math notranslate nohighlight">\(t_2&lt;0\)</span> in order to transform from a <span class="math notranslate nohighlight">\((t_1,t_2)\)</span> coordinate system to a <span class="math notranslate nohighlight">\((t_{inh},t_{homog})\)</span> coordinate system.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>direct_dim</strong> (<em>str</em>) – Label of the direct dimension (typically <span class="math notranslate nohighlight">\(t_2\)</span>)</li>
-<li><strong>indirect_dim</strong> (<em>str</em>) – Label of the indirect dimension (typically <span class="math notranslate nohighlight">\(t_1\)</span>)</li>
-<li><strong>method</strong> (<em>'linear'</em><em>, </em><em>'fourier'</em>) – The interpolation method used to rotate the data and to mirror the data.
-<strong>Note</strong> currently, both use a fourier-based mirroring method.</li>
-<li><strong>plot_name</strong> (<em>str</em>) – the base name for the plots that are generated</li>
-<li><strong>fl</strong> (<em>figlist_var</em>) – </li>
-<li><strong>debug_kwargs</strong> (<em>dict</em>) – <p>with keys:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2"><cite>correct_overlap</cite>:</th></tr>
-<tr class="field-odd field"><td>&#160;</td><td class="field-body">if False, doesn’t correct for the overlap error that occurs during mirroring</td>
-</tr>
-</tbody>
-</table>
-</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>direct_dim</strong> (<em>str</em>) – Label of the direct dimension (typically <span class="math notranslate nohighlight">\(t_2\)</span>)</p></li>
+<li><p><strong>indirect_dim</strong> (<em>str</em>) – Label of the indirect dimension (typically <span class="math notranslate nohighlight">\(t_1\)</span>)</p></li>
+<li><p><strong>method</strong> (<em>'linear'</em><em>, </em><em>'fourier'</em>) – The interpolation method used to rotate the data and to mirror the data.
+<strong>Note</strong> currently, both use a fourier-based mirroring method.</p></li>
+<li><p><strong>plot_name</strong> (<em>str</em>) – the base name for the plots that are generated</p></li>
+<li><p><strong>fl</strong> (<em>figlist_var</em>) – </p></li>
+<li><p><strong>debug_kwargs</strong> (<em>dict</em>) – <p>with keys:</p>
+<dl class="field-list simple">
+<dt class="field-odd"><cite>correct_overlap</cite></dt>
+<dd class="field-odd"><p>if False, doesn’t correct for the overlap error that occurs during mirroring</p>
+</dd>
+</dl>
+</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

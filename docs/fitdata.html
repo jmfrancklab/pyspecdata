@@ -205,9 +205,9 @@
 necessary for fitting. Currently, the fitdata class only supports
 fitting along one dimension, so before constructing a new class, one
 must first choose what dimension they will be fitting along.</p>
-<div class="admonition-todo admonition" id="index-0">
-<p class="first admonition-title">Todo</p>
-<p class="last">Of
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>Of
 course, for multidimensional data, the fit will be repeated along the
 dimensions that are not the fit dimension. see how easy it would be to
 allow more than one dimension</p>
@@ -228,9 +228,9 @@ section) next.</p>
 <p>For easiest (thought not necessarily most efficient) usage, one should
 take advantage of the symbolic math package (sympy), which can
 automatically calculate the gradients based on the functional form.</p>
-<div class="admonition-todo admonition" id="index-1">
-<p class="first admonition-title">Todo</p>
-<p class="last">actually use the gradients</p>
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<p>actually use the gradients</p>
 </div>
 <p>The calculation of these gradients makes some tedious programming – such
 as generating an initial guess to be unnecessary. Therefore, one need
@@ -260,18 +260,18 @@ word subscript, parameters named with multiple symbols or subscripts do
 not appear to work correctly. In addition, none of the later parameter
 names can contain one of the earlier parameter names as a substring.
 Therefore, if unexpected errors occur, we recommend switching to simple
-(i.e.&nbsp;single letter) parameter names.</p>
+(i.e. single letter) parameter names.</p>
 <p>If one is <em>not</em> using symbolic math (not recommended), one define the
 attribute <code class="docutils literal notranslate"><span class="pre">self.function_string</span></code> and <code class="docutils literal notranslate"><span class="pre">self.function_name</span></code> by hand
 (these are strings that give the functional format and name of the y
 values, respectively).</p>
-<p>If you want to see an example that allows “multiplicity” – i.e.&nbsp;a
+<p>If you want to see an example that allows “multiplicity” – i.e. a
 biexponential, rather than an exponential – see the <code class="docutils literal notranslate"><span class="pre">t2curve</span></code> class in</p>
 </div>
 <div class="section" id="fitfunc-raw-self-p-x-and-fitfunc-raw-symb-self-p-x">
 <h4>fitfunc_raw(self,p,x) and fitfunc_raw_symb(self,p,x)<a class="headerlink" href="#fitfunc-raw-self-p-x-and-fitfunc-raw-symb-self-p-x" title="Permalink to this headline">¶</a></h4>
-<div class="admonition-todo admonition" id="index-2">
-<p class="first admonition-title">Todo</p>
+<div class="admonition-todo admonition" id="id3">
+<p class="admonition-title">Todo</p>
 <p>This should be changed.
 We should not have to overload these methods.</p>
 <p>Rather, we should
@@ -283,7 +283,7 @@ and we should determine the axis being fit by comparing the variables to dimlabe
 <p>If we actually need <cite>fitfunc_raw_symb</cite> in the form used before,
 we can generate <cite>fitfunc_raw_symb</cite> in a straightforward way.</p>
 <p>We can generate <cite>fitfunc_raw</cite> from <cite>lambdify</cite>.</p>
-<p class="last">We can generate the gradient as part of teh setter.</p>
+<p>We can generate the gradient as part of teh setter.</p>
 </div>
 <p>These defines the functional form of the fit they are defined in terms
 of the parameter vector, <span class="math notranslate nohighlight">\(p\)</span> (this is a list of fit parameters
@@ -347,11 +347,11 @@ end of the recovery curve as follows:</p>
 </div>
 <p>However, we note that the symbolic algebra version does work quite
 consistently. It employs several steps with the “regularized
-pseudoinverse” routine (i.e.&nbsp;Tikhonov regularized solution via SVD, see
+pseudoinverse” routine (i.e. Tikhonov regularized solution via SVD, see
 <a class="reference external" href="#sec:pinvr">[sec:pinvr]</a>).</p>
-<div class="admonition-todo admonition" id="index-3">
-<p class="first admonition-title">Todo</p>
-<p class="last">While this seems to work very well,
+<div class="admonition-todo admonition" id="id4">
+<p class="admonition-title">Todo</p>
+<p>While this seems to work very well,
 it is unclear why, since Levenberg-Marquardt, the algorithm at the core
 of scipy’s nonlinear fitting procedure, consists of a series of steps,
 many of which are mathematically identical to a regularized
@@ -365,7 +365,7 @@ derivative.</p>
 <p>In the event that we want to use a “linearized format” of the fit
 function, we can use “linfunc” to return this format. This routine
 (which is not designed to be used directly), takes the inputs <span class="math notranslate nohighlight">\(x\)</span>,
-which are the values (i.e.&nbsp;labels) of the fit axis and <span class="math notranslate nohighlight">\(y\)</span>, which
+which are the values (i.e. labels) of the fit axis and <span class="math notranslate nohighlight">\(y\)</span>, which
 are the data values at the points given by <span class="math notranslate nohighlight">\(x\)</span>.</p>
 <p>For instance, in the case of a <span class="math notranslate nohighlight">\(T_1\)</span> recovery curve, we may want
 to check the fit by plotting the value <span class="math notranslate nohighlight">\(\ln(M(t)-M(\infty))\)</span> as a
@@ -418,9 +418,9 @@ methods are available. In addition, the following methods are available.</p>
 <div class="section" id="instance-fit">
 <h4>instance.fit(…)<a class="headerlink" href="#instance-fit" title="Permalink to this headline">¶</a></h4>
 <div class="section" id="instance-fit-1">
-<span id="id1"></span><h5>instance.fit()<a class="headerlink" href="#instance-fit-1" title="Permalink to this headline">¶</a></h5>
+<span id="id5"></span><h5>instance.fit()<a class="headerlink" href="#instance-fit-1" title="Permalink to this headline">¶</a></h5>
 <p>For various reasons, it is best to separate the actual fitting step from
-initialization routine (i.e.&nbsp;function called when we create a new
+initialization routine (i.e. function called when we create a new
 instance). This actually fits the data to the curve format specified by
 the particular class (i.e. <code class="docutils literal notranslate"><span class="pre">t1curve,</span> <span class="pre">ksp</span></code>, etc.).</p>
 </div>
@@ -439,9 +439,9 @@ names of fit parameters for this class.</p>
 <div class="section" id="instance-guess">
 <h4>instance.guess()<a class="headerlink" href="#instance-guess" title="Permalink to this headline">¶</a></h4>
 <p>This evaluates the initial guess along the fit axis.</p>
-<div class="admonition-todo admonition" id="index-4">
-<p class="first admonition-title">Todo</p>
-<p class="last">how is the fit axis determined, and is it possible to fit if the
+<div class="admonition-todo admonition" id="id6">
+<p class="admonition-title">Todo</p>
+<p>how is the fit axis determined, and is it possible to fit if the
 data has more than one dimension?</p>
 </div>
 </div>
@@ -466,7 +466,7 @@ these are not supplied in order, but rather order of importance.</p>
 <p>Return the value of the parameter named <span class="math notranslate nohighlight">\(parametername\)</span>.</p>
 </div>
 <div class="section" id="instance-output-1">
-<span id="id2"></span><h5>instance.output()<a class="headerlink" href="#instance-output-1" title="Permalink to this headline">¶</a></h5>
+<span id="id7"></span><h5>instance.output()<a class="headerlink" href="#instance-output-1" title="Permalink to this headline">¶</a></h5>
 <p>Output a numpy record array with all the symbols and their values. The
 same result is obtained by calling <code class="docutils literal notranslate"><span class="pre">instance.output(’parametername’)</span></code>
 and <code class="docutils literal notranslate"><span class="pre">myoutputs</span> <span class="pre">=</span> <span class="pre">instance.output();</span> <span class="pre">myoutputs[’parametername’]</span></code>.</p>
@@ -505,11 +505,11 @@ parameters are set on a one-time basis, just for the evaluation.</p>
 <h4>instance.covar(…)<a class="headerlink" href="#instance-covar" title="Permalink to this headline">¶</a></h4>
 <div class="section" id="instance-covar-p1">
 <h5>instance.covar(‘p1’)<a class="headerlink" href="#instance-covar-p1" title="Permalink to this headline">¶</a></h5>
-<p>Returns the covariance for the fit parameter <span class="math notranslate nohighlight">\(p1\)</span> (i.e.&nbsp;the
+<p>Returns the covariance for the fit parameter <span class="math notranslate nohighlight">\(p1\)</span> (i.e. the
 expected <span class="math notranslate nohighlight">\(\sigma^2\)</span> for this parameter)</p>
-<div class="admonition-todo admonition" id="index-5">
-<p class="first admonition-title">Todo</p>
-<p class="last">see the theory
+<div class="admonition-todo admonition" id="id8">
+<p class="admonition-title">Todo</p>
+<p>see the theory
 section about fitting errors.</p>
 </div>
 </div>
@@ -524,19 +524,19 @@ section about fitting errors.</p>
 <span class="math notranslate nohighlight">\(p1\)</span>…<span class="math notranslate nohighlight">\(pN\)</span>.</p>
 </div>
 <div class="section" id="instance-covar-1">
-<span id="id3"></span><h5>instance.covar()<a class="headerlink" href="#instance-covar-1" title="Permalink to this headline">¶</a></h5>
+<span id="id9"></span><h5>instance.covar()<a class="headerlink" href="#instance-covar-1" title="Permalink to this headline">¶</a></h5>
 <p>Returns an ndarray record array with a labeled covariance matrix. This
 function is ideal for printing with <code class="docutils literal notranslate"><span class="pre">lrecordarray</span></code>; note that this
 includes a field of data called “labels,”</p>
-<div class="admonition-todo admonition" id="index-6">
-<p class="first admonition-title">Todo</p>
-<p class="last">are the labels actually implemented?</p>
+<div class="admonition-todo admonition" id="id10">
+<p class="admonition-title">Todo</p>
+<p>are the labels actually implemented?</p>
 </div>
 <p>which label the various rows.</p>
 </div>
 </div>
 <div class="section" id="instance-latex-1">
-<span id="id4"></span><h4>instance.latex()<a class="headerlink" href="#instance-latex-1" title="Permalink to this headline">¶</a></h4>
+<span id="id11"></span><h4>instance.latex()<a class="headerlink" href="#instance-latex-1" title="Permalink to this headline">¶</a></h4>
 <p>Shows the function string, with the results of the fit substituted in
 for the appropriate parameters.</p>
 </div>
@@ -552,20 +552,20 @@ for the appropriate parameters.</p>
 <p>The following are functions used internally by routines in the fitdata
 class:</p>
 <ul class="simple">
-<li>instance._pn(…)</li>
-<li>instance._taxis(…)</li>
-<li>instance.add_inactive_p(…)</li>
-<li>instance.analytical_covariance(…)</li>
-<li>instance.errfunc(…)</li>
-<li>instance.fitfunc(p,x) all references to the fit function should be
-made with this method</li>
-<li>instance.gen_symbolic(…) used above</li>
-<li>instance.gen_indices(…)</li>
-<li>instance.parameter_derivatives(…)</li>
-<li>instance.parameter_gradient(…)</li>
-<li>instance.remove_inactive_p(…)</li>
-<li>instance.makereal() efficiently finds the real part of the data to be
-fit</li>
+<li><p>instance._pn(…)</p></li>
+<li><p>instance._taxis(…)</p></li>
+<li><p>instance.add_inactive_p(…)</p></li>
+<li><p>instance.analytical_covariance(…)</p></li>
+<li><p>instance.errfunc(…)</p></li>
+<li><p>instance.fitfunc(p,x) all references to the fit function should be
+made with this method</p></li>
+<li><p>instance.gen_symbolic(…) used above</p></li>
+<li><p>instance.gen_indices(…)</p></li>
+<li><p>instance.parameter_derivatives(…)</p></li>
+<li><p>instance.parameter_gradient(…)</p></li>
+<li><p>instance.remove_inactive_p(…)</p></li>
+<li><p>instance.makereal() efficiently finds the real part of the data to be
+fit</p></li>
 </ul>
 </div>
 <div class="section" id="example">

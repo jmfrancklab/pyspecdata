@@ -158,38 +158,36 @@
 <h1>pyspecdata.core.figlist.image<a class="headerlink" href="#pyspecdata-core-figlist-image" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="pyspecdata.core.figlist.image">
-<code class="descclassname">figlist.</code><code class="descname">image</code><span class="sig-paren">(</span><em>A</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.figlist.image" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">figlist.</code><code class="sig-name descname">image</code><span class="sig-paren">(</span><em class="sig-param">A</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.figlist.image" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called as <cite>fl.image()</cite> where <cite>fl</cite> is the <cite>figlist_var</cite>
 object</p>
 <p>Note that this code just wraps the figlist properties, and
 the heavy lifting is done by the <cite>image(</cite> function.
 Together, the effect is as follows:</p>
 <ul>
-<li><p class="first"><cite>check_units</cite> converts to human-readable units, and
-makes sure they match the units already used in the plot.</p>
-</li>
-<li><p class="first">if <cite>A</cite> has more than two dimensions, the final dimension in
+<li><p><cite>check_units</cite> converts to human-readable units, and
+makes sure they match the units already used in the plot.</p></li>
+<li><p>if <cite>A</cite> has more than two dimensions, the final dimension in
 <cite>A.dimlabels</cite> is used as the column dimension, and a
 direct-product of all non-column dimensions (a Kronecker
 product, such that the innermost index comes the latest in
 the list <cite>A.dimlabels</cite>) is used as the row dimension. A
 white/black line is drawn after the innermost index used to
-create the direct product is finished iterating.</p>
-</li>
-<li><p class="first">If <cite>A</cite> consists of complex data, then an HSV plot
+create the direct product is finished iterating.</p></li>
+<li><p>If <cite>A</cite> consists of complex data, then an HSV plot
 (misnomer, actually an HV plot) is used:
 - convert to polar form: <span class="math notranslate nohighlight">\(z=\rho \exp(i \phi)\)</span>
 - <span class="math notranslate nohighlight">\(\phi\)</span> determines the color (Hue)</p>
 <blockquote>
 <div><ul class="simple">
-<li>Color wheel is cyclical, like <span class="math notranslate nohighlight">\(\exp(i \phi)\)</span></li>
-<li>red is taken as <span class="math notranslate nohighlight">\(\phi=0\)</span>, purely real and positive</li>
-<li>green-blue is <span class="math notranslate nohighlight">\(pi\)</span> radians out of phase with red and
-therefore negative real</li>
+<li><p>Color wheel is cyclical, like <span class="math notranslate nohighlight">\(\exp(i \phi)\)</span></p></li>
+<li><p>red is taken as <span class="math notranslate nohighlight">\(\phi=0\)</span>, purely real and positive</p></li>
+<li><p>green-blue is <span class="math notranslate nohighlight">\(pi\)</span> radians out of phase with red and
+therefore negative real</p></li>
 </ul>
 </div></blockquote>
 <ul>
-<li><p class="first"><span class="math notranslate nohighlight">\(\rho\)</span> determines the intensity (value)
+<li><p><span class="math notranslate nohighlight">\(\rho\)</span> determines the intensity (value)
 - Depending on whether or not <cite>black</cite> is set (either as a</p>
 <blockquote>
 <div><p>keyword argument, or <cite>fl.black</cite>, the background will be
@@ -201,133 +199,110 @@ printing)</p>
 </li>
 </ul>
 </li>
-<li><p class="first">If the data type (<cite>dtype</cite>) of the data in <cite>A</cite> is real
+<li><p>If the data type (<cite>dtype</cite>) of the data in <cite>A</cite> is real
 (typically achieved by calling <cite>abs(A)</cite> or
 <cite>A.runcopy(real)</cite>), then <cite>A</cite> is plotted with a colormap and
-corresponding colorbar.</p>
-</li>
-<li><p class="first">If no title has been given, it’s set to the name of the
-current plot in the figurelist</p>
-</li>
+corresponding colorbar.</p></li>
+<li><p>If no title has been given, it’s set to the name of the
+current plot in the figurelist</p></li>
 </ul>
 <dl class="attribute">
 <dt id="pyspecdata.core.figlist.A">
-<code class="descname">A</code><a class="headerlink" href="#pyspecdata.core.figlist.A" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a> or numpy array</td>
-</tr>
-</tbody>
-</table>
+<code class="sig-name descname">A</code><a class="headerlink" href="#pyspecdata.core.figlist.A" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pyspecdata.core.x">
-<code class="descclassname">pyspecdata.core.</code><code class="descname">x</code><a class="headerlink" href="#pyspecdata.core.x" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">x</code><a class="headerlink" href="#pyspecdata.core.x" title="Permalink to this definition">¶</a></dt>
 <dd><p>If <cite>A</cite> is a numpy array, then this gives the values along
 the x axis (columns).
 Defaults to the size of the array.
 Not used if <cite>A</cite> is <cite>nddata</cite>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Optional[double] or Optional[scalar]</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Optional[double] or Optional[scalar]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pyspecdata.core.y">
-<code class="descclassname">pyspecdata.core.</code><code class="descname">y</code><a class="headerlink" href="#pyspecdata.core.y" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">y</code><a class="headerlink" href="#pyspecdata.core.y" title="Permalink to this definition">¶</a></dt>
 <dd><p>If <cite>A</cite> is a numpy array, then this gives the values along
 the y axis (columns).
 Defaults to the size of the array.
 Not used if <cite>A</cite> is <cite>nddata</cite>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Optional[double] or Optional[scalar]</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Optional[double] or Optional[scalar]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pyspecdata.core.x_first">
-<code class="descclassname">pyspecdata.core.</code><code class="descname">x_first</code><a class="headerlink" href="#pyspecdata.core.x_first" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">x_first</code><a class="headerlink" href="#pyspecdata.core.x_first" title="Permalink to this definition">¶</a></dt>
 <dd><p>Since it’s designed to represent matrices, an image plot
 by defaults is “transposed” relative to all other plots.
 If you want the first dimension on the x-axis (<em>e.g.</em>, if
 you are plotting a contour plot on top of an image), then set
 <cite>x_first</cite> to <cite>True</cite>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">boolean</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pyspecdata.core.spacing">
-<code class="descclassname">pyspecdata.core.</code><code class="descname">spacing</code><a class="headerlink" href="#pyspecdata.core.spacing" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">spacing</code><a class="headerlink" href="#pyspecdata.core.spacing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determines the size of the white/black line drawn
 Defaults to 1</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">integer</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>integer</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pyspecdata.core.ax">
-<code class="descclassname">pyspecdata.core.</code><code class="descname">ax</code><a class="headerlink" href="#pyspecdata.core.ax" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">ax</code><a class="headerlink" href="#pyspecdata.core.ax" title="Permalink to this definition">¶</a></dt>
 <dd><p>the Axis object where the plot should go.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">matplotlib Axes</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>matplotlib Axes</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt>
-<code class="descname">all remaning</code></dt>
+<code class="sig-name descname">all remaning</code></dt>
 <dd><p>are passed through to matplotlib <cite>imshow</cite></p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="pyspecdata.core.origin">
-<code class="descclassname">pyspecdata.core.</code><code class="descname">origin</code><a class="headerlink" href="#pyspecdata.core.origin" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">origin</code><a class="headerlink" href="#pyspecdata.core.origin" title="Permalink to this definition">¶</a></dt>
 <dd><p>upper and lower are passed to matplotlib.
 Flip is for 2D nmr, and flips the data manually.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">{‘upper’, ‘lower’, ‘flip’}</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>{‘upper’, ‘lower’, ‘flip’}</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="attribute">
 <dt>
-<code class="descname">.. code-block:: python</code></dt>
+<code class="sig-name descname">.. code-block:: python</code></dt>
 <dd><p>from pyspecdata import *
 fl = figlist_var()</p>
 <p>t = r_[-1:1:300j]

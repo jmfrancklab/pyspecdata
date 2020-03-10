@@ -66,7 +66,7 @@ Additionally, we have written several classes that allow you to read
 nddata objects directly from *e.g.* an oscilloscope.
 These are available as separate repositories on github (please contact us for further info).
 
-Finally, you can easily build nddata from standard arrays, as discussed in the section :ref:`nddata-summary-label`.
+Finally, you can easily build nddata from standard arrays, as discussed in the section :doc:`about nddata objects <nddata>`.
 
 Contents:
 ---------

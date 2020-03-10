@@ -158,39 +158,33 @@
 <h1>pyspecdata.core.figlist.next<a class="headerlink" href="#pyspecdata-core-figlist-next" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="pyspecdata.core.figlist.next">
-<code class="descclassname">figlist.</code><code class="descname">next</code><span class="sig-paren">(</span><em>input_name</em>, <em>legend=False</em>, <em>boundaries=None</em>, <em>twinx=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.figlist.next" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">figlist.</code><code class="sig-name descname">next</code><span class="sig-paren">(</span><em class="sig-param">input_name</em>, <em class="sig-param">legend=False</em>, <em class="sig-param">boundaries=None</em>, <em class="sig-param">twinx=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.figlist.next" title="Permalink to this definition">¶</a></dt>
 <dd><p>Switch to the figure given by input_name, which is used not only as
 a string-based name for the figure, but also as a default title and as
 a base name for resulting figure files.</p>
 <p><strong>In the future, we actually want this to track the appropriate axis object!</strong></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>legend</strong> (<em>bool</em>) – If this is set, a legend is created <em>outside</em> the figure.</li>
-<li><strong>twinx</strong> (<em>{0</em><em>,</em><em>1}</em>) – <table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">1:</th><td class="field-body">plots on an overlayed axis (the matplotlib twinx) whose y axis
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>legend</strong> (<em>bool</em>) – If this is set, a legend is created <em>outside</em> the figure.</p></li>
+<li><p><strong>twinx</strong> (<em>{0</em><em>,</em><em>1}</em>) – <dl class="field-list simple">
+<dt class="field-odd">1</dt>
+<dd class="field-odd"><p>plots on an overlayed axis (the matplotlib twinx) whose y axis
 is labeled on the right when you set this for the first time, you
 can also set a <cite>color</cite> kwarg that controls the coloring of the
-right axis.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">0:</th><td class="field-body">used to switch back to the left (default) axis</td>
-</tr>
-</tbody>
-</table>
-</li>
-<li><strong>boundaries</strong> – <strong>need to add description</strong></li>
-<li><strong>kwargs</strong> (<em>dict</em>) – Any other keyword arguments are passed to the matplotlib (mayavi)
-figure() function that’s used to switch (create) figures.</li>
+right axis.</p>
+</dd>
+<dt class="field-even">0</dt>
+<dd class="field-even"><p>used to switch back to the left (default) axis</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>boundaries</strong> – <strong>need to add description</strong></p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – Any other keyword arguments are passed to the matplotlib (mayavi)
+figure() function that’s used to switch (create) figures.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

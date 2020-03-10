@@ -103,23 +103,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1 current"><a class="reference internal" href="../nddata.html">ND-Data</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../nddata.html#dimension-labels">Dimension labels</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../nddata.html#item-selection-and-slicing">Item selection and slicing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../nddata.html#basic-examples">Basic Examples</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../nddata.html#methods-by-sub-topic">Methods by Sub-Topic</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="../axis_manipulation.html">Axis Manipulation Functions</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords.html">pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyspecdata.axis_manipulation.shear.linear_shear.html">pyspecdata.axis_manipulation.shear.linear_shear</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">pyspecdata.axis_manipulation.register_axis.register_axis</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyspecdata.axis_manipulation.secsy.secsy_transform_manual.html">pyspecdata.axis_manipulation.secsy.secsy_transform_manual</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../fourier.html">Fourier Functions</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
@@ -197,7 +181,7 @@
 <h1>pyspecdata.axis_manipulation.register_axis.register_axis<a class="headerlink" href="#pyspecdata-axis-manipulation-register-axis-register-axis" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyspecdata.axis_manipulation.register_axis.register_axis">
-<code class="descclassname">pyspecdata.axis_manipulation.register_axis.</code><code class="descname">register_axis</code><span class="sig-paren">(</span><em>self</em>, <em>arg</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.register_axis.register_axis" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.axis_manipulation.register_axis.</code><code class="sig-name descname">register_axis</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">arg</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.register_axis.register_axis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interpolate the data so that the given axes are in register with a set of specified values. Does not change the spacing of the axis labels.</p>
 <p>It finds the axis label position that is closest to the values given in <cite>arg</cite>, then interpolates (Fourier/sinc method) the data onto a new, slightly shifted, axis that passes exactly through the value given.
 To do this, it uses
@@ -205,14 +189,11 @@ To do this, it uses
 and uses
 <a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.set_ft_prop" title="pyspecdata.core.nddata.set_ft_prop"><code class="xref py py-func docutils literal notranslate"><span class="pre">.set_ft_prop()</span></code></a>
 to override the “not aliased” flag.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>arg</strong> (<em>dict</em><em> (</em><em>key</em><em>,</em><em>value = str</em><em>,</em><em>double</em><em>)</em>) – A list of the dimensions that you want to place in register, and the values you want them registered to.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>arg</strong> (<em>dict</em><em> (</em><em>key</em><em>,</em><em>value = str</em><em>,</em><em>double</em><em>)</em>) – A list of the dimensions that you want to place in register, and the values you want them registered to.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

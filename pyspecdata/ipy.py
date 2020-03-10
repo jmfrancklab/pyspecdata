@@ -30,10 +30,11 @@ from sympy.interactive import printing
 printing.init_printing(use_latex=True,
                        wrap_line=False,
                        num_columns=10000)
-from .core import image as pyspec_image
-from .core import plot as pyspec_plot
-from .core import nddata as pyspec_nddata
-from .core import gca
+if not inside_sphinx():
+    from .core import image as pyspec_image
+    from .core import plot as pyspec_plot
+    from .core import nddata as pyspec_nddata
+    from .core import gca
 
 import re
 from IPython.display import Math

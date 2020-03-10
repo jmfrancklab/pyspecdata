@@ -159,35 +159,33 @@
 <h1>load_file<a class="headerlink" href="#load-file" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyspecdata.load_files.find_file">
-<code class="descclassname">pyspecdata.load_files.</code><code class="descname">find_file</code><span class="sig-paren">(</span><em>searchstring</em>, <em>exp_type=None</em>, <em>postproc=None</em>, <em>print_result=True</em>, <em>verbose=False</em>, <em>prefilter=None</em>, <em>expno=None</em>, <em>dimname=''</em>, <em>return_acq=False</em>, <em>add_sizes=[]</em>, <em>add_dims=[]</em>, <em>use_sweep=None</em>, <em>indirect_dimlabels=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.find_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">find_file</code><span class="sig-paren">(</span><em class="sig-param">searchstring</em>, <em class="sig-param">exp_type=None</em>, <em class="sig-param">postproc=None</em>, <em class="sig-param">print_result=True</em>, <em class="sig-param">verbose=False</em>, <em class="sig-param">prefilter=None</em>, <em class="sig-param">expno=None</em>, <em class="sig-param">dimname=''</em>, <em class="sig-param">return_acq=False</em>, <em class="sig-param">add_sizes=[]</em>, <em class="sig-param">add_dims=[]</em>, <em class="sig-param">use_sweep=None</em>, <em class="sig-param">indirect_dimlabels=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.find_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the file  given by the regular expression <cite>searchstring</cite> inside the directory identified by <cite>exp_type</cite>, load the nddata object, and postprocess with the function <cite>postproc</cite>.</p>
 <p>It looks at the top level of the directory first, and if that fails, starts to look recursively.
 Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.</p>
 <p>Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
 (so that you can make sure they are properly synced to the cloud, etc.).</p>
 <p>It calls <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>searchstring</strong> (<em>str</em>) – Most commonly, this is just a fragment of the file name,
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>searchstring</strong> (<em>str</em>) – Most commonly, this is just a fragment of the file name,
 with any literal <code class="docutils literal notranslate"><span class="pre">*</span></code>, <code class="docutils literal notranslate"><span class="pre">.</span></code>, or <code class="docutils literal notranslate"><span class="pre">?</span></code> characters preceded by
 a backslash.
 More generally, it is a regular expression,
 where <code class="docutils literal notranslate"><span class="pre">.*searchstring.*</span></code> matches a filename inside the
-directory appropriate for <cite>exp_type</cite>.</li>
-<li><strong>expno</strong> (<em>int</em>) – For Bruker NMR and Prospa files, where the files are stored in numbered
+directory appropriate for <cite>exp_type</cite>.</p></li>
+<li><p><strong>expno</strong> (<em>int</em>) – For Bruker NMR and Prospa files, where the files are stored in numbered
 subdirectories,
 give the number of the subdirectory that you want.
 Currently, this parameter is needed to load Bruker and Kea files.
 If it finds multiple files that match the regular expression,
-it will try to load this experiment number from all the directories.</li>
-<li><strong>exp_type</strong> (<em>str</em>) – Since the function assumes that you have different types of
+it will try to load this experiment number from all the directories.</p></li>
+<li><p><strong>exp_type</strong> (<em>str</em>) – Since the function assumes that you have different types of
 experiments sorted into different directories, this argument
 specifies the type of experiment see <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a> for
-more info.</li>
-<li><strong>postproc</strong> (<a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.function" title="pyspecdata.function"><em>function</em></a><em>, </em><em>str</em><em>, or </em><em>None</em>) – <p>This function is fed the nddata data and the remaining keyword
+more info.</p></li>
+<li><p><strong>postproc</strong> (<a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.function" title="pyspecdata.function"><em>function</em></a><em>, </em><em>str</em><em>, or </em><em>None</em>) – <p>This function is fed the nddata data and the remaining keyword
 arguments (<cite>kwargs</cite>) as arguments.
 It’s assumed that each module for each different file type
 provides a dictionary called <cite>postproc_lookup</cite>.
@@ -205,87 +203,82 @@ to pull the corresponding value from <cite>postproc_lookup</cite>.</p>
 it sets <cite>postproc_type</cite> to the value of
 <code class="docutils literal notranslate"><span class="pre">(h5</span> <span class="pre">root).experiment.description['class']</span></code>.
 This, in turn, is used to choose the type of post-processing.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">dimname:</th><td class="field-body">passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
-</tr>
-<tr class="field-even field"><th class="field-name">return_acq:</th><td class="field-body">passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
-</tr>
-<tr class="field-odd field"><th class="field-name">add_sizes:</th><td class="field-body">passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
-</tr>
-<tr class="field-even field"><th class="field-name">add_dims:</th><td class="field-body">passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
-</tr>
-<tr class="field-odd field"><th class="field-name">use_sweep:</th><td class="field-body">passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">indirect_dimlabels:</th></tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body">passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></td>
-</tr>
-</tbody>
-</table>
-</li>
+<dl class="field-list simple">
+<dt class="field-odd">dimname</dt>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+</dd>
+<dt class="field-even">return_acq</dt>
+<dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+</dd>
+<dt class="field-odd">add_sizes</dt>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+</dd>
+<dt class="field-even">add_dims</dt>
+<dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+</dd>
+<dt class="field-odd">use_sweep</dt>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+</dd>
+<dt class="field-even">indirect_dimlabels</dt>
+<dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+</dd>
+</dl>
+</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyspecdata.load_files.load_indiv_file">
-<code class="descclassname">pyspecdata.load_files.</code><code class="descname">load_indiv_file</code><span class="sig-paren">(</span><em>filename</em>, <em>dimname=''</em>, <em>return_acq=False</em>, <em>add_sizes=[]</em>, <em>add_dims=[]</em>, <em>use_sweep=None</em>, <em>indirect_dimlabels=None</em>, <em>expno=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.load_indiv_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">load_indiv_file</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">dimname=''</em>, <em class="sig-param">return_acq=False</em>, <em class="sig-param">add_sizes=[]</em>, <em class="sig-param">add_dims=[]</em>, <em class="sig-param">use_sweep=None</em>, <em class="sig-param">indirect_dimlabels=None</em>, <em class="sig-param">expno=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.load_indiv_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open the file given by <cite>filename</cite>, use file signature magic and/or
 filename extension(s) to identify the file type, and call the appropriate
 function to open it.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>dimname</strong> (<em>str</em>) – When there is a single indirect dimension composed of several scans,
-call the indirect dimension <cite>dimname</cite>.</li>
-<li><strong>return_acq</strong> (<em>DEPRECATED</em>) – </li>
-<li><strong>add_sizes</strong> (<em>list</em>) – the sizes associated with the dimensions in add_dims</li>
-<li><strong>add_dims</strong> (<em>list</em>) – Can only be used with <cite>dimname</cite>.
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimname</strong> (<em>str</em>) – When there is a single indirect dimension composed of several scans,
+call the indirect dimension <cite>dimname</cite>.</p></li>
+<li><p><strong>return_acq</strong> (<em>DEPRECATED</em>) – </p></li>
+<li><p><strong>add_sizes</strong> (<em>list</em>) – the sizes associated with the dimensions in add_dims</p></li>
+<li><p><strong>add_dims</strong> (<em>list</em>) – Can only be used with <cite>dimname</cite>.
 Break the dimension <cite>dimname</cite> into several dimensions,
 with the names given by the list <cite>add_dims</cite> and sizes given by <cite>add_sizes</cite>.
 If the product of the sizes is not the same as the original dimension
 given by <cite>dimname</cite>,
 retain it as the “outermost” (leftmost) dimension.
 <code class="xref py py-func docutils literal notranslate"><span class="pre">pyspecdata.core.chunkoff()</span></code> is used to do this, like so:
-<code class="docutils literal notranslate"><span class="pre">data.chunkoff(dimname,add_dims,add_sizes)</span></code></li>
-<li><strong>indirect_dimlabels</strong> (<em>str</em><em> or </em><em>None</em>) – passed through to <cite>acert.load_pulse</cite> (names an indirect dimension when dimlabels isn’t provided)</li>
+<code class="docutils literal notranslate"><span class="pre">data.chunkoff(dimname,add_dims,add_sizes)</span></code></p></li>
+<li><p><strong>indirect_dimlabels</strong> (<em>str</em><em> or </em><em>None</em>) – passed through to <cite>acert.load_pulse</cite> (names an indirect dimension when dimlabels isn’t provided)</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the nddata containing the data,
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the nddata containing the data,
 or else, <cite>None</cite>, indicating that this is part of a pair of
 files that should be skipped</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a> or None</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or None</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
 <div class="section" id="safe-modules">
 <h1>safe modules<a class="headerlink" href="#safe-modules" title="Permalink to this headline">¶</a></h1>
 <p>Here, include modules that are safe – that is, modules that don’t import a lot of junk, and for which we can just call autosummary.</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="modules.html#module-pyspecdata.datadir" title="pyspecdata.datadir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datadir</span></code></a></td>
-<td>Allows the user to run the same code on different machines, even though the location of the raw spectral data might change.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="modules.html#module-pyspecdata.datadir" title="pyspecdata.datadir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datadir</span></code></a></p></td>
+<td><p>Allows the user to run the same code on different machines, even though the location of the raw spectral data might change.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="modules.html#module-pyspecdata.latexscripts" title="pyspecdata.latexscripts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">latexscripts</span></code></a></td>
-<td>Provides the <code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span></code> shell/dos command, which you run instead of your normal Latex command to build a lab notebook.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="modules.html#module-pyspecdata.latexscripts" title="pyspecdata.latexscripts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">latexscripts</span></code></a></p></td>
+<td><p>Provides the <code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span></code> shell/dos command, which you run instead of your normal Latex command to build a lab notebook.</p></td>
 </tr>
 </tbody>
 </table>

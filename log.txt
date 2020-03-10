@@ -1,0 +1,37 @@
+running install
+running bdist_egg
+running egg_info
+running build_src
+build_src
+writing paramset_pyspecdata.egg-info\PKG-INFO
+writing dependency_links to paramset_pyspecdata.egg-info\dependency_links.txt
+writing top-level names to paramset_pyspecdata.egg-info\top_level.txt
+reading manifest file 'paramset_pyspecdata.egg-info\SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+warning: no files found matching '*.f90'
+warning: no files found matching '*.txt' under directory 'docs'
+warning: no files found matching '*.pdf' under directory 'docs'
+writing manifest file 'paramset_pyspecdata.egg-info\SOURCES.txt'
+installing library code to build\bdist.win-amd64\egg
+running install_lib
+running build_py
+creating build\bdist.win-amd64\egg
+creating build\bdist.win-amd64\egg\paramset_pyspecdata
+copying build\lib\paramset_pyspecdata\__init__.py -> build\bdist.win-amd64\egg\paramset_pyspecdata
+byte-compiling build\bdist.win-amd64\egg\paramset_pyspecdata\__init__.py to __init__.cpython-37.pyc
+creating build\bdist.win-amd64\egg\EGG-INFO
+copying paramset_pyspecdata.egg-info\PKG-INFO -> build\bdist.win-amd64\egg\EGG-INFO
+copying paramset_pyspecdata.egg-info\SOURCES.txt -> build\bdist.win-amd64\egg\EGG-INFO
+copying paramset_pyspecdata.egg-info\dependency_links.txt -> build\bdist.win-amd64\egg\EGG-INFO
+copying paramset_pyspecdata.egg-info\top_level.txt -> build\bdist.win-amd64\egg\EGG-INFO
+zip_safe flag not set; analyzing archive contents...
+creating 'dist\paramset_pyspecdata-0.1.0-py3.7.egg' and adding 'build\bdist.win-amd64\egg' to it
+removing 'build\bdist.win-amd64\egg' (and everything under it)
+Processing paramset_pyspecdata-0.1.0-py3.7.egg
+Removing c:\programdata\anaconda3\lib\site-packages\paramset_pyspecdata-0.1.0-py3.7.egg
+Copying paramset_pyspecdata-0.1.0-py3.7.egg to c:\programdata\anaconda3\lib\site-packages
+paramset-pyspecdata 0.1.0 is already the active version in easy-install.pth
+
+Installed c:\programdata\anaconda3\lib\site-packages\paramset_pyspecdata-0.1.0-py3.7.egg
+Processing dependencies for paramset-pyspecdata==0.1.0
+Finished processing dependencies for paramset-pyspecdata==0.1.0
