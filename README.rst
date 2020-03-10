@@ -1,6 +1,7 @@
-[![DOI](https://zenodo.org/badge/24356894.svg)](https://zenodo.org/badge/latestdoi/24356894)
-
-To learn more about pyspecdata, you can head over to the [documentation](http://jmfrancklab.github.io/pyspecdata)
+.. image:: https://zenodo.org/badge/24356894.svg
+   :target: https://zenodo.org/badge/latestdoi/24356894
+   
+To learn more about pyspecdata, you can head over to the `documentation <http://jmfrancklab.github.io/pyspecdata>`_.
 
 If you already know that you want to install,
 and you are using Anaconda, you should see `conda_upgrade.md <conda_upgrade.md>`_.
