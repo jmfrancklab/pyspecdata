@@ -3238,9 +3238,9 @@ class nddata (object):
                     #{{{ find the average order of magnitude, rounded down to the nearest power of 3
 
                     average_oom = log10(abs(data_to_test))/3.
-                    logger.debug("for axis: dtype",data_to_test.dtype)
-                    logger.debug("for axis: dtype",data_to_test)
-                    logger.debug("for axis: oom:",average_oom)
+                    logger.debug(strm("for axis: dtype",data_to_test.dtype))
+                    logger.debug(strm("for axis: dtype",data_to_test))
+                    logger.debug(strm("for axis: oom:",average_oom))
                     average_oom = average_oom[isfinite(average_oom)].mean()
                     #}}}
                     logger.debug(strm("(human units): for axis",thisaxis,"the average oom is",average_oom*3))

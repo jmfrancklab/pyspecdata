@@ -117,7 +117,7 @@ class MyConfig(object):
                 self._config_parser.set(section,this_key,retval)
             if environ is not None:
                 os.environ[environ] = retval
-            logger.debug("I pulled",this_key,"from the configuration file -- it is",retval)
+            logger.debug(strm("I pulled",this_key,"from the configuration file -- it is",retval))
         self.config_vars[this_key] = retval
         return retval
 _my_config = MyConfig()
