@@ -89,25 +89,19 @@
 <li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ND-Data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#building-an-nddata-from-numpy-arrays">Building an nddata from numpy arrays</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#multidimensional-data">Multidimensional data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-an-nddata-from-numpy-arrays">Building an nddata from numpy arrays</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dimension-labels">Dimension labels</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#item-selection-and-slicing">Item selection and slicing</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#axis-based-indexing">Axis-Based Indexing</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id5">Axis-based Indexing</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#axis-ranges">Axis Ranges</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#logical">Logical</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#axis-based-indexing-and-slicing-in-the-fourier-domain">Axis-Based Indexing and Slicing in the Fourier Domain</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#changing-the-name-of-the-axis">Changing the name of the axis</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#explicitly-changing-the-domain">Explicitly Changing the Domain</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#frequency-slices-outside-original-range">Frequency Slices Outside Original Range</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="#axis-based-indexing">Axis-based Indexing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#axis-ranges">Axis Ranges</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#numbered-indexing-and-slicing">Numbered Indexing and Slicing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logical">Logical</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#axis-based-indexing-and-slicing-in-the-fourier-domain">Axis-Based Indexing and Slicing in the Fourier Domain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#error-propagation">Error propagation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#methods-for-manipulating-data">Methods for Manipulating Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#basic-examples">Basic Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#methods-by-sub-topic">Methods by Sub-Topic</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="axis_manipulation.html">Axis Manipulation Functions</a></li>
@@ -192,34 +186,6 @@
 <span class="target" id="nddata-summary-label"></span><p>(This is an introduction.  For detailed info, see <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span> <span class="pre">documentation</span></code></a>.)</p>
 <p>The nddata class is built on top of <a class="reference external" href="http://numpy.org">numpy</a>.
 Numpy allows you to create multi-dimensional arrays of data.</p>
-<div class="section" id="building-an-nddata-from-numpy-arrays">
-<h2>Building an nddata from numpy arrays<a class="headerlink" href="#building-an-nddata-from-numpy-arrays" title="Permalink to this headline">¶</a></h2>
-<p>First, you should ask yourself whether there is already provides a means for
-loading your data from a source file or an instrument automatically.
-If not, it’s still relatively simple to construct your own <cite>nddata</cite>.</p>
-<p>For example, let’s consider a case where we have <em>x</em> and <em>y</em> data</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="o">*</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">]</span>
-</pre></div>
-</div>
-<p>To transform this into an ndata, we assign <em>y</em> as the data, and label it with <em>x</em> as the axis label.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="s1">&#39;x&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Now, for example, we’re ready to plot with axis labels or to Fourier transform.
-However, the true strength of pySpecData lies in how it treats
-multi-dimensional data.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Please note that the xarray packages does have some of the benefits listed here,
-if you have seent it,
-but it doesn’t have as strong an emphasis on benefits that can be derived from
-object-oriented programming.
-For example, error propagation and Fourier transformation are not handled in the same way,
-and the slicing notation is less compact.</p>
-</div>
-</div>
 <div class="section" id="multidimensional-data">
 <h2>Multidimensional data<a class="headerlink" href="#multidimensional-data" title="Permalink to this headline">¶</a></h2>
 <p>The nddata class labels the dimensions (with a short text identifier)
@@ -277,6 +243,36 @@ directly access the <cite>data</cite> attribute.</p>
 dimension labels to make code more legible and make many common tasks easier.
 Then, we note how slicing operations are different (and easier) for nddata than for standard numpy arrays.
 Finally, we outline several classes of methods by sub-topic.</p>
+</div>
+<div class="section" id="building-an-nddata-from-numpy-arrays">
+<h2>Building an nddata from numpy arrays<a class="headerlink" href="#building-an-nddata-from-numpy-arrays" title="Permalink to this headline">¶</a></h2>
+<p>You can build nddata objects manually, and we do this a bit in our examples
+(in order to provide a simple example).
+However, in practice, you should first ask yourself whether there is already a means for
+loading your data from a source file or an instrument automatically.
+If not, it’s still relatively simple to construct your own <cite>nddata</cite>.</p>
+<p>For example, let’s consider a case where we have <em>x</em> and <em>y</em> data</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>To transform this into an ndata, we assign <em>y</em> as the data, and label it with <em>x</em> as the axis label.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="s1">&#39;x&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, for example, we’re ready to plot with axis labels or to Fourier transform.
+However, the true strength of pySpecData lies in how it treats
+multi-dimensional data.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Please note that the xarray package is another package that deals with multidimensional data, and it does have some of the benefits listed here,
+but follows a distinctly different philosophy.
+Here, we place a strong an emphasis on benefits that can be derived from
+object-oriented programming.
+For example, error propagation and Fourier transformation are not handled in the same way,
+and the slicing notation is less compact.</p>
+</div>
 </div>
 <div class="section" id="dimension-labels">
 <h2>Dimension labels<a class="headerlink" href="#dimension-labels" title="Permalink to this headline">¶</a></h2>
@@ -339,9 +335,7 @@ These fall into two main categories:
 and <a href="#id3"><span class="problematic" id="id4">*</span></a>axis-based indexing*a.
 These can be combined in a single square bracket, separated by commas.</p>
 <div class="section" id="axis-based-indexing">
-<h3>Axis-Based Indexing<a class="headerlink" href="#axis-based-indexing" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id5">
-<h4>Axis-based Indexing<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
+<h3>Axis-based Indexing<a class="headerlink" href="#axis-based-indexing" title="Permalink to this headline">¶</a></h3>
 <p>To pull a single point along a particular dimension,
 you can just use the value of the axis.
 The point nearest to the axis will be returned.</p>
@@ -351,7 +345,7 @@ The point nearest to the axis will be returned.</p>
 <p>Will return the point (or slice of data) where the t2 axis is closest to 1.1 s.</p>
 </div>
 <div class="section" id="axis-ranges">
-<h4>Axis Ranges<a class="headerlink" href="#axis-ranges" title="Permalink to this headline">¶</a></h4>
+<h3>Axis Ranges<a class="headerlink" href="#axis-ranges" title="Permalink to this headline">¶</a></h3>
 <p>You can specify an inclusive range of numbers along an axis.
 For example, to select from 0 to 100 μs along <cite>t2</cite>, you use:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">:(</span><span class="mi">0</span><span class="p">,</span><span class="mf">100e-6</span><span class="p">)]</span>
@@ -359,29 +353,42 @@ For example, to select from 0 to 100 μs along <cite>t2</cite>, you use:</p>
 </div>
 <p>Either value in parentheses can be <cite>None</cite>, in which case, all values to the end of the axis will be selected.</p>
 </div>
+<div class="section" id="numbered-indexing-and-slicing">
+<h3>Numbered Indexing and Slicing<a class="headerlink" href="#numbered-indexing-and-slicing" title="Permalink to this headline">¶</a></h3>
+<p>You can still use standard index-based references
+or slices:
+you do this by placing a comma after your dimension name, rather than a colon:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span> <span class="c1"># select index 5 (6th element)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">,</span><span class="mi">5</span><span class="p">::</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="c1"># select from index 5 up to 2 elements before the end</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="logical">
-<h4>Logical<a class="headerlink" href="#logical" title="Permalink to this headline">¶</a></h4>
+<h3>Logical<a class="headerlink" href="#logical" title="Permalink to this headline">¶</a></h3>
 <p>You can use functions that return logical values to select</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">5</span><span class="p">]</span>
 </pre></div>
 </div>
+<p>returns all <em>data values</em> that are less 5 away from 2 (values from -3 to 8).</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">5</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>When this is done, nddata will check to see if slices along any dimension are uniformly missing.
 If they are, the dataset will be trimmed to remove them.</p>
 <p>When the deselected data are scattered throughout, a mask is used instead.</p>
+<div class="admonition-todo admonition" id="id5">
+<p class="admonition-title">Todo</p>
+<p>include examples/tests here</p>
+</div>
 </div>
 </div>
 <div class="section" id="axis-based-indexing-and-slicing-in-the-fourier-domain">
-<h3>Axis-Based Indexing and Slicing in the Fourier Domain<a class="headerlink" href="#axis-based-indexing-and-slicing-in-the-fourier-domain" title="Permalink to this headline">¶</a></h3>
+<h2>Axis-Based Indexing and Slicing in the Fourier Domain<a class="headerlink" href="#axis-based-indexing-and-slicing-in-the-fourier-domain" title="Permalink to this headline">¶</a></h2>
 <p>Data can be manipulated not only in the direct domain,
 but also in the Fourier conjugate domain.
 This is achieved in one of two ways → by changing the name
 of the axis,
 and by explicitly specifying the domain.</p>
-<div class="section" id="changing-the-name-of-the-axis">
-<h4>Changing the name of the axis<a class="headerlink" href="#changing-the-name-of-the-axis" title="Permalink to this headline">¶</a></h4>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>this feature is planned, not yet implemented.</p>
@@ -395,9 +402,6 @@ This means that the following command:</p>
 </div>
 <p>would switch something with a dimension named <cite>t2</cite> to the frequency dimension
 (shift by default – shift should be a property).</p>
-</div>
-<div class="section" id="explicitly-changing-the-domain">
-<h4>Explicitly Changing the Domain<a class="headerlink" href="#explicitly-changing-the-domain" title="Permalink to this headline">¶</a></h4>
 <p>Alternatively, a slice of the form
 <code class="docutils literal notranslate"><span class="pre">dimname:'t/f':(range)</span></code>
 or
@@ -409,25 +413,20 @@ Since, sometimes this might lead to confusion, ‘u’ and ‘v’ serve the sam
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">:</span><span class="s1">&#39;f&#39;</span><span class="p">:(</span><span class="o">-</span><span class="mf">1e6</span><span class="p">,</span><span class="mf">1e6</span><span class="p">)]</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="frequency-slices-outside-original-range">
-<h4>Frequency Slices Outside Original Range<a class="headerlink" href="#frequency-slices-outside-original-range" title="Permalink to this headline">¶</a></h4>
-</div>
-</div>
-<div class="section" id="numbered-indexing-and-slicing">
-<h3>Numbered Indexing and Slicing<a class="headerlink" href="#numbered-indexing-and-slicing" title="Permalink to this headline">¶</a></h3>
+<div class="admonition-todo admonition" id="id6">
+<p class="admonition-title">Todo</p>
+<p>show how this works with aliases</p>
 </div>
 </div>
-<div class="section" id="basic-examples">
-<h2>Basic Examples<a class="headerlink" href="#basic-examples" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>Apply a filter (fromaxis).</p></li>
-<li><p>Slicing.</p></li>
-<li><p>Aliasing of FT.</p></li>
-</ul>
+<div class="section" id="error-propagation">
+<h2>Error propagation<a class="headerlink" href="#error-propagation" title="Permalink to this headline">¶</a></h2>
+<div class="admonition-todo admonition" id="id7">
+<p class="admonition-title">Todo</p>
+<p>this works very well, but show an example here.</p>
 </div>
-<div class="section" id="methods-by-sub-topic">
-<h2>Methods by Sub-Topic<a class="headerlink" href="#methods-by-sub-topic" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="methods-for-manipulating-data">
+<h2>Methods for Manipulating Data<a class="headerlink" href="#methods-for-manipulating-data" title="Permalink to this headline">¶</a></h2>
 <p>It’s important to note that, in contrast to standard numpy,
 nddata routines are designed to be called as methods,
 rather than independent functions.
@@ -439,6 +438,30 @@ Alternatively, the property <code class="docutils literal notranslate"><span cla
 <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">d.C.ft('t2')</span></code> leaves <code class="docutils literal notranslate"><span class="pre">d</span></code> alone, and returns the FT as a new object
 called <code class="docutils literal notranslate"><span class="pre">a</span></code>.</p>
 <p>This encourages a style where methods are chained together, <em>e.g.</em> <code class="docutils literal notranslate"><span class="pre">d.ft('t2').mean('t1')</span></code>.</p>
+<p>In order to encourage this style, we provide the method <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata.run" title="pyspecdata.nddata.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyspecdata.nddata.run()</span></code></a>, which allows you to run a standard numpy function on the data:
+<code class="docutils literal notranslate"><span class="pre">d.run(abs)</span></code> will take the absolute value of the data in-place, while
+<code class="docutils literal notranslate"><span class="pre">d.run(std,'t2')</span></code> will run a standard deviation along the ‘t2’ axis
+(this removes the ‘t2’ dimension once you’re done, since it would have a length of only 1 – <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata.run_nopop" title="pyspecdata.nddata.run_nopop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyspecdata.nddata.run_nopop()</span></code></a> would not remove the dimension).</p>
+<p><em>For a full list of methods</em>, see the API documentation: <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.nddata</span></code></a>.</p>
+</div>
+<div class="section" id="basic-examples">
+<h2>Basic Examples<a class="headerlink" href="#basic-examples" title="Permalink to this headline">¶</a></h2>
+<div class="admonition-todo admonition" id="id8">
+<p class="admonition-title">Todo</p>
+<p>Give good examples/plots here</p>
+</div>
+<ul class="simple">
+<li><p>Apply a filter (fromaxis).</p></li>
+<li><p>Slicing.</p></li>
+<li><p>Aliasing of FT.</p></li>
+</ul>
+</div>
+<div class="section" id="methods-by-sub-topic">
+<h2>Methods by Sub-Topic<a class="headerlink" href="#methods-by-sub-topic" title="Permalink to this headline">¶</a></h2>
+<div class="admonition-todo admonition" id="id9">
+<p class="admonition-title">Todo</p>
+<p>we are in the process of organizing most methods into categories.</p>
+</div>
 <p>A selection of the methods noted below are broken down by sub-topic.</p>
 <div class="toctree-wrapper compound">
 <ul>

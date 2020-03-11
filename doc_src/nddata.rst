@@ -14,35 +14,6 @@ ND-Data
 The nddata class is built on top of numpy_.
 Numpy allows you to create multi-dimensional arrays of data.
 
-Building an nddata from numpy arrays
-------------------------------------
-
-First, you should ask yourself whether there is already provides a means for
-loading your data from a source file or an instrument automatically.
-If not, it's still relatively simple to construct your own `nddata`.
-
-For example, let's consider a case where we have *x* and *y* data
-
->>> from numpy import *
->>> x = r_[0, 1, 2, 3, 4]
->>> y = r_[0, 0.1, 0.2, 0.3, 0.4]
-
-To transform this into an ndata, we assign *y* as the data, and label it with *x* as the axis label.
-
->>> d = nddata(y,'x').labels('x',x)
-
-Now, for example, we're ready to plot with axis labels or to Fourier transform.
-However, the true strength of pySpecData lies in how it treats
-multi-dimensional data.
-
-.. note::
-    Please note that the xarray packages does have some of the benefits listed here,
-    if you have seent it,
-    but it doesn't have as strong an emphasis on benefits that can be derived from
-    object-oriented programming.
-    For example, error propagation and Fourier transformation are not handled in the same way,
-    and the slicing notation is less compact.
-
 Multidimensional data
 ---------------------
 
@@ -103,6 +74,38 @@ Below, we outline how you can use
 dimension labels to make code more legible and make many common tasks easier.
 Then, we note how slicing operations are different (and easier) for nddata than for standard numpy arrays.
 Finally, we outline several classes of methods by sub-topic.
+
+Building an nddata from numpy arrays
+------------------------------------
+
+You can build nddata objects manually, and we do this a bit in our examples
+(in order to provide a simple example).
+However, in practice, you should first ask yourself whether there is already a means for
+loading your data from a source file or an instrument automatically.
+If not, it's still relatively simple to construct your own `nddata`.
+
+For example, let's consider a case where we have *x* and *y* data
+
+>>> from numpy import *
+>>> x = r_[0, 1, 2, 3, 4]
+>>> y = r_[0, 0.1, 0.2, 0.3, 0.4]
+
+To transform this into an ndata, we assign *y* as the data, and label it with *x* as the axis label.
+
+>>> d = nddata(y,'x').labels('x',x)
+
+Now, for example, we're ready to plot with axis labels or to Fourier transform.
+However, the true strength of pySpecData lies in how it treats
+multi-dimensional data.
+
+.. note::
+    Please note that the xarray package is another package that deals with multidimensional data, and it does have some of the benefits listed here,
+    but follows a distinctly different philosophy.
+    Here, we place a strong an emphasis on benefits that can be derived from
+    object-oriented programming.
+    For example, error propagation and Fourier transformation are not handled in the same way,
+    and the slicing notation is less compact.
+
 
 Dimension labels
 ----------------
@@ -171,9 +174,6 @@ These fall into two main categories:
 and *axis-based indexing*a.
 These can be combined in a single square bracket, separated by commas.
 
-Axis-Based Indexing
-~~~~~~~~~~~~~~~~~~~
-
 Axis-based Indexing
 ``````````````````
 
@@ -195,12 +195,25 @@ For example, to select from 0 to 100 μs along `t2`, you use:
 
 Either value in parentheses can be `None`, in which case, all values to the end of the axis will be selected.
 
+Numbered Indexing and Slicing
+`````````````````````````````
+
+You can still use standard index-based references
+or slices:
+you do this by placing a comma after your dimension name, rather than a colon:
+
+>>> d['t2',5] # select index 5 (6th element)
+>>> d['t2',5::-2] # select from index 5 up to 2 elements before the end
+
+
 Logical
 ``````````````````
 
 You can use functions that return logical values to select
 
 >>> d[lambda x: abs(x-2)<5]
+
+returns all *data values* that are less 5 away from 2 (values from -3 to 8).
 
 >>> d['t2',lambda x: abs(x-2)<5]
 
@@ -209,8 +222,11 @@ If they are, the dataset will be trimmed to remove them.
 
 When the deselected data are scattered throughout, a mask is used instead.
 
+.. todo::
+    include examples/tests here
+
 Axis-Based Indexing and Slicing in the Fourier Domain
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------------------
 
 Data can be manipulated not only in the direct domain,
 but also in the Fourier conjugate domain.
@@ -220,7 +236,7 @@ and by explicitly specifying the domain.
 
 
 Changing the name of the axis
-`````````````````````````````
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. warning::
     this feature is planned, not yet implemented.
@@ -237,7 +253,7 @@ would switch something with a dimension named `t2` to the frequency dimension
 
 
 Explicitly Changing the Domain
-```````````````````````````````
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Alternatively, a slice of the form
 ``dimname:'t/f':(range)``
@@ -252,22 +268,19 @@ Therefore this command performs the same function as the last line of code:
 >>> d['t2':'f':(-1e6,1e6)]
 
 Frequency Slices Outside Original Range
-```````````````````````````````````````
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Numbered Indexing and Slicing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. todo::
+    show how this works with aliases
 
+Error propagation
+-----------------
 
-Basic Examples
---------------
+.. todo::
+    this works very well, but show an example here.
 
-* Apply a filter (fromaxis).
-* Slicing.
-* Aliasing of FT.
-  
-
-Methods by Sub-Topic
---------------------
+Methods for Manipulating Data
+-----------------------------
 
 It's important to note that, in contrast to standard numpy,
 nddata routines are designed to be called as methods,
@@ -281,6 +294,30 @@ Alternatively, the property ``C`` offers easy access to a copy:
 called ``a``.
 
 This encourages a style where methods are chained together, *e.g.* ``d.ft('t2').mean('t1')``.
+
+In order to encourage this style, we provide the method :meth:`pyspecdata.nddata.run`, which allows you to run a standard numpy function on the data:
+``d.run(abs)`` will take the absolute value of the data in-place, while
+``d.run(std,'t2')`` will run a standard deviation along the 't2' axis
+(this removes the 't2' dimension once you're done, since it would have a length of only 1 -- :meth:`pyspecdata.nddata.run_nopop` would not remove the dimension).
+
+*For a full list of methods*, see the API documentation: :class:`pyspecdata.nddata`.
+
+Basic Examples
+--------------
+
+.. todo::
+    Give good examples/plots here
+
+* Apply a filter (fromaxis).
+* Slicing.
+* Aliasing of FT.
+  
+
+Methods by Sub-Topic
+--------------------
+
+.. todo::
+    we are in the process of organizing most methods into categories.
 
 A selection of the methods noted below are broken down by sub-topic.
 
