@@ -49,7 +49,8 @@ Note that
 
 >>> plot(d)
 
-automatically plots the data on the correct axes and includes the units
+Quickly generates a publication-quality plot;
+it automatically plots the data on the correct axes and includes the units
 and the name of dimension (*t2* in this example) and its units along the
 *x* axis.
 
