@@ -137,11 +137,21 @@ History/Roadmap
       - ``to_ppm`` should only be a method of inherited class
       - 1.5 and 2.5 D ILT
 
-0.9.5.2
-    Comma-separated indexing to work correctly with all indexing types.
-    (0.9.5 requires sequential brackets rather than comma-separated indexing for some combined range selections.)
+**0.9.5.3**
+    upgrade to Python 3 and begin to flesh out documentation
+1.0
+    We are working on four major upgrades relative to the 0.9 sequence:
 
-0.9.5.4
+    - Axes as objects rather than a set of separate attributes of nddata.
+    - Remove dependence on pytables in favor of h5py.
+    - Replace figure lists with “plotting contexts,” which will still
+      enable PDF vs. GUI plotting, but will better integrated with Qt and
+      more object-oriented in nature
+    - Comma-separated indexing to work correctly with all indexing types.
+      (0.9.5 requires sequential brackets rather than comma-separated
+      indexing for some combined range selections.)
+
+1.0.2
     GUI for setting configuration directories.
 
     Means for dealing with non-linearly spaced data in image plots
@@ -149,10 +159,10 @@ History/Roadmap
     but pretends that image plots are linear -- we will implement linear spline
     interpolation algorithm)
 
-0.9.5.5
+1.0.3
     Bruker DSP phase correction for raw data from newer versions of Topspin that is in sync with the code from nmrglue.
 
-0.9.5.8
+1.0.4
     Package a make-less copy of lapack to allow a cross-platform build of density matrix propagation routines.
 
 1.1.0
