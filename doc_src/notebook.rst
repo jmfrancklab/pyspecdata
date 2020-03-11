@@ -8,6 +8,12 @@ and processed in place, immediately from the *raw data*.  (The author of the pro
 electronic notebook for several years in this way with great
 success.)
 
+Please note that this is a very different "notebook" than the one
+supplied by jupyter notebooks (which pyspecdata also supports).
+In this section, we aim to provide a laboratory notebook with
+publication-ready figures and a complete path from raw data to those
+figures.
+
 * With minimal effort, it is possible to design a notebook that
   works in a similar fashion with HTML, Markdown, *etc.*  (The main
   author just has no interest in doing this, since the PDF output
