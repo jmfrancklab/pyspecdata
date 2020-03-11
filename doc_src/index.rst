@@ -69,6 +69,12 @@ These are available as separate repositories on github (please contact us for fu
 
 Finally, you can easily build nddata from standard arrays, as discussed in the section :doc:`about nddata objects <nddata>`.
 
+What can I do with nddata objects?
+------------------------------------------
+
+To understand how to manipulate nddata objects, head over to the section
+:doc:`about nddata objects <nddata>`.
+
 Contents:
 ---------
 
