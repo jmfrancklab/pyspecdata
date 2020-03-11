@@ -3230,11 +3230,14 @@ class nddata (object):
             prev_label = self.get_units(thisaxis)
             if prev_label is not None and len(prev_label)>0:
                 data_to_test = self.getaxis(thisaxis)
+                logger.debug(strm("the axis",thisaxis,"looks like this:",data_to_test))
                 if data_to_test is not None:
                     try:
                         data_to_test = data_to_test[isfinite(data_to_test)]
                     except:
                         raise ValueError(strm('data_to_test is',data_to_test,'isfinite is',isfinite(data_to_test)))
+                    if len(data_to_test) == 0:
+                        raise ValueError(strm("Your",thisaxis,"axis doesn't seem to have any sensible values!"))
                     #{{{ find the average order of magnitude, rounded down to the nearest power of 3
 
                     average_oom = log10(abs(data_to_test))/3.
@@ -3243,9 +3246,9 @@ class nddata (object):
                     logger.debug(strm("for axis: oom:",average_oom))
                     average_oom = average_oom[isfinite(average_oom)].mean()
                     #}}}
-                    logger.debug(strm("(human units): for axis",thisaxis,"the average oom is",average_oom*3))
+                    logger.debug(strm("for axis",thisaxis,"the average oom is",average_oom*3))
                     average_oom = 3*floor(average_oom)
-                    logger.debug(strm("(human units): for axis",thisaxis,"I round this to",average_oom))
+                    logger.debug(strm("for axis",thisaxis,"I round this to",average_oom))
                     x = self.getaxis(thisaxis)
                     result_label = apply_oom(average_oom,x,prev_label=prev_label)
                     self.set_units(thisaxis,result_label)
