@@ -6,7 +6,12 @@ To learn more about pyspecdata, you can head over to the `documentation <http://
 If you already know that you want to install,
 and you are using Anaconda, you should see `conda_upgrade.md <conda_upgrade.md>`_.
 
-We have added fast compiled Fortran functions for things like
+Please note this package is heavily utilized by three other packages that our lab manages on github:
+*   `ODNP processing scripts <https://github.com/jmfrancklab/proc_scripts/>`_
+*   `Classes for communicating with instruments <https://github.com/jmfrancklab/inst_notebooks/>`_
+*   `SpinCore Extension <https://github.com/jmfrancklab/spincore_apps/>`_
+
+We have somewhat recently added fast compiled Fortran functions for things like
 2D ILT (Tikhonov regularization with basis set compression) for NMR (Nuclear Magnetic Resonance),
 so please read the install instructions
 carefully!

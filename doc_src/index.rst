@@ -8,6 +8,12 @@ Welcome to pySpecData's documentation!
 
 pySpecData allows you to deal with multi-dimensional spectroscopy data in an object-oriented fashion.
 
+Please note this package is heavily utilized by three other packages that our lab manages on github:
+
+*   `ODNP processing scripts <https://github.com/jmfrancklab/proc_scripts/>`_.
+*   `Classes for communicating with instruments <https://github.com/jmfrancklab/inst_notebooks/>`_.
+*   `Convenient SpinCore NMR Extension <https://github.com/jmfrancklab/spincore_apps/>`_.
+
 In practice, this means that it makes the code for processing spectral data shorter and more quickly legible.
 It *automatically* handles the following issues, without any additional code:
 
