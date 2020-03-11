@@ -137,7 +137,7 @@ History/Roadmap
       - ``to_ppm`` should only be a method of inherited class
       - 1.5 and 2.5 D ILT
 
-**0.9.5.3**
+0.9.5.3 **Current Version**
     upgrade to Python 3 and begin to flesh out documentation
 1.0
     We are working on four major upgrades relative to the 0.9 sequence:
