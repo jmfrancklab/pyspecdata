@@ -94,6 +94,11 @@ To transform this into an ndata, we assign *y* as the data, and label it with *x
 
 >>> d = nddata(y,'x').labels('x',x)
 
+The first function ``nddata(y,'x')`` creates an instance of nddata; to do this,
+we need to give our dimensions names -- here we name the single dimension
+`'x'`.
+We then attach an axis label with `.labels('x',x)`
+
 Now, for example, we're ready to plot with axis labels or to Fourier transform.
 However, the true strength of pySpecData lies in how it treats
 multi-dimensional data.
