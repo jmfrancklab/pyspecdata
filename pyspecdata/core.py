@@ -2439,7 +2439,7 @@ def plot(*args,**kwargs):
         try:
             yaxislabels = myy.getaxis(myy.dimlabels[last_not_longest])
         except:
-            pass
+            raise ValueError(strm("trying to determine the axis labels for the plot, I can't seem to find the",last_not_longest,"element of dimlabels:",myy.dimlabels))
         # at this point, if there is no axis label, it will break and go to pass
         if yaxislabels is not None:
             if len(yaxislabels) > 0:
@@ -4349,6 +4349,7 @@ class nddata (object):
                     raise e
             self.data = func(self.data,axis=thisindex)
             self._pop_axis_info(thisindex)
+            return self
         else:
             retval = func(self.data)
             if self.data.size == retval.size:
