@@ -4352,6 +4352,7 @@ class nddata (object):
                     raise e
             self.data = func(self.data,axis=thisindex)
             self._pop_axis_info(thisindex)
+            return self
         else:
             retval = func(self.data)
             if self.data.size == retval.size:
@@ -5210,8 +5211,15 @@ class nddata (object):
         self.axis_coords[whichaxis] = self.axis_coords[whichaxis][order]
         return self
     def copyaxes(self,other):
+        raise ValueError('use copy_axes')
+    def copy_axes(self,other):
         # in the case that the dimensions match, and we want to copy the labels
-        self.axis_coords = other.axis_coords
+        for thisdim in self.dimlabels:
+            if thisdim in other.dimlabels:
+                thisax = other.getaxis(thisdim)
+                if thisax is not None:
+                    thisax = thisax.copy()
+                self.setaxis(thisdim,thisax)
         return self
     def axis(self,axisname):
         'returns a 1-D axis for further manipulation'
@@ -6263,8 +6271,18 @@ class nddata (object):
             else:
                 axis_coords_units = None
             try:
-                retval =  nddata(self.data[indexlist],
-                        self.data[indexlist].shape,
+                sliced_data = self.data[indexlist]
+            except Exception as e:
+                raise ValueError(strm("the slice values that you've passed",
+                    "don't seem to match the size of the data",
+                    "the shape of the data is",self.data.shape,
+                    "and the index list (the slice indeces passed to the",
+                    "underlying numpy data) I generate from this command is",
+                    indexlist,
+                    "likely, one of the slice indeces is out of bounds for the size of the data"))
+            try:
+                retval =  nddata(sliced_data,
+                        sliced_data.shape,
                         newlabels,
                         axis_coords = [axesdict[x] for x in newlabels],
                         axis_coords_error = axis_coords_error,
