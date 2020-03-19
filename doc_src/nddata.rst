@@ -43,7 +43,7 @@ and we subject them to a series of steps to process them.
 We don't want to use up memory with lots of copies of the data.
 Also, this allows us to string together several operation, e.g.:
 
->>> data.ft('axis1').sum('axis2')['axis1':(0,3)].mean('axis3')
+>>> data.ft('axis1').sum('axis2').mean('axis3')
 
 So, while this general setup is different than the standard numpy setup,
 *etc.*, it should lead to you writing more efficient code, with less variables
