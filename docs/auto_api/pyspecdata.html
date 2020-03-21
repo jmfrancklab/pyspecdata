@@ -1323,21 +1323,19 @@ These are ordered according to descending range width.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<p>&gt; #{{{ debugging block
-&gt; sum_for_contiguous = abs(forplot).mean(‘t1’)
-&gt; fl.next(“test contiguous”)
-&gt; forplot = sum_for_contiguous.copy().set_error(None)
-&gt; fl.plot(forplot,alpha = 0.25,linewidth = 3)
-&gt; print “this is what the max looks like”,0.5*sum_for_contiguous.set_error(None).runcopy(max,’t2’)
-&gt; print sum_for_contiguous &gt; 0.5*sum_for_contiguous.runcopy(max,’t2’)
-&gt; retval = sum_for_contiguous.contiguous(quarter_of_max,’t2’)
-&gt; print “contiguous range / 1e6:”,retval/1e6
-&gt; for j in range(retval.shape[0]):
-&gt;     a,b = retval[j,:]
-&gt;     fl.plot(forplot[‘t2’:(a,b)])
-&gt; fl.show()
-&gt; exit()
-&gt; #}}}</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sum_for_contiguous</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">forplot</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="s1">&#39;t1&#39;</span><span class="p">)</span>
+<span class="n">fl</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="s2">&quot;test contiguous&quot;</span><span class="p">)</span>
+<span class="n">forplot</span> <span class="o">=</span> <span class="n">sum_for_contiguous</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">set_error</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+<span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">forplot</span><span class="p">,</span><span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span><span class="n">linewidth</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;this is what the max looks like&quot;</span><span class="p">,</span><span class="mf">0.5</span><span class="o">*</span><span class="n">sum_for_contiguous</span><span class="o">.</span><span class="n">set_error</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span><span class="o">.</span><span class="n">runcopy</span><span class="p">(</span><span class="nb">max</span><span class="p">,</span><span class="s1">&#39;t2&#39;</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="n">sum_for_contiguous</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">sum_for_contiguous</span><span class="o">.</span><span class="n">runcopy</span><span class="p">(</span><span class="nb">max</span><span class="p">,</span><span class="s1">&#39;t2&#39;</span><span class="p">))</span>
+<span class="n">retval</span> <span class="o">=</span> <span class="n">sum_for_contiguous</span><span class="o">.</span><span class="n">contiguous</span><span class="p">(</span><span class="n">quarter_of_max</span><span class="p">,</span><span class="s1">&#39;t2&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;contiguous range / 1e6:&quot;</span><span class="p">,</span><span class="n">retval</span><span class="o">/</span><span class="mf">1e6</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">retval</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="o">=</span> <span class="n">retval</span><span class="p">[</span><span class="n">j</span><span class="p">,:]</span>
+    <span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">forplot</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">:(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)])</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -1400,6 +1398,11 @@ nddata metadata.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="method">
+<dt id="pyspecdata.core.nddata.copy_axes">
+<code class="sig-name descname">copy_axes</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.copy_axes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="pyspecdata.core.nddata.copy_props">
@@ -6939,21 +6942,19 @@ These are ordered according to descending range width.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<p>&gt; #{{{ debugging block
-&gt; sum_for_contiguous = abs(forplot).mean(‘t1’)
-&gt; fl.next(“test contiguous”)
-&gt; forplot = sum_for_contiguous.copy().set_error(None)
-&gt; fl.plot(forplot,alpha = 0.25,linewidth = 3)
-&gt; print “this is what the max looks like”,0.5*sum_for_contiguous.set_error(None).runcopy(max,’t2’)
-&gt; print sum_for_contiguous &gt; 0.5*sum_for_contiguous.runcopy(max,’t2’)
-&gt; retval = sum_for_contiguous.contiguous(quarter_of_max,’t2’)
-&gt; print “contiguous range / 1e6:”,retval/1e6
-&gt; for j in range(retval.shape[0]):
-&gt;     a,b = retval[j,:]
-&gt;     fl.plot(forplot[‘t2’:(a,b)])
-&gt; fl.show()
-&gt; exit()
-&gt; #}}}</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sum_for_contiguous</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">forplot</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="s1">&#39;t1&#39;</span><span class="p">)</span>
+<span class="n">fl</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="s2">&quot;test contiguous&quot;</span><span class="p">)</span>
+<span class="n">forplot</span> <span class="o">=</span> <span class="n">sum_for_contiguous</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">set_error</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+<span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">forplot</span><span class="p">,</span><span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span><span class="n">linewidth</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;this is what the max looks like&quot;</span><span class="p">,</span><span class="mf">0.5</span><span class="o">*</span><span class="n">sum_for_contiguous</span><span class="o">.</span><span class="n">set_error</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span><span class="o">.</span><span class="n">runcopy</span><span class="p">(</span><span class="nb">max</span><span class="p">,</span><span class="s1">&#39;t2&#39;</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="n">sum_for_contiguous</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">sum_for_contiguous</span><span class="o">.</span><span class="n">runcopy</span><span class="p">(</span><span class="nb">max</span><span class="p">,</span><span class="s1">&#39;t2&#39;</span><span class="p">))</span>
+<span class="n">retval</span> <span class="o">=</span> <span class="n">sum_for_contiguous</span><span class="o">.</span><span class="n">contiguous</span><span class="p">(</span><span class="n">quarter_of_max</span><span class="p">,</span><span class="s1">&#39;t2&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;contiguous range / 1e6:&quot;</span><span class="p">,</span><span class="n">retval</span><span class="o">/</span><span class="mf">1e6</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">retval</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="o">=</span> <span class="n">retval</span><span class="p">[</span><span class="n">j</span><span class="p">,:]</span>
+    <span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">forplot</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">:(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)])</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -7016,6 +7017,11 @@ nddata metadata.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="method">
+<dt id="pyspecdata.nddata.copy_axes">
+<code class="sig-name descname">copy_axes</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.copy_axes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="pyspecdata.nddata.copy_props">
