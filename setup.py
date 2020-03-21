@@ -30,7 +30,7 @@ setup(
     author_email='jmfranck@notgiven.com',
     url='http://github.com/jmfranck/pyspecdata',
     description='object-oriented N-dimensional data processing with notebook functionality',
-    long_description=open('README.rst').read(),
+    long_description=open('README.rst',encoding='utf-8').read(),
     install_requires=[
         "sympy",
         "numpy",

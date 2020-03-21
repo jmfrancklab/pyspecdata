@@ -6,10 +6,10 @@ Subpackages
 
 .. toctree::
 
-    pyspecdata.axis_manipulation
-    pyspecdata.fourier
-    pyspecdata.load_files
-    pyspecdata.plot_funcs
+   pyspecdata.axis_manipulation
+   pyspecdata.fourier
+   pyspecdata.load_files
+   pyspecdata.plot_funcs
 
 Submodules
 ----------
@@ -18,95 +18,95 @@ pyspecdata.core module
 ----------------------
 
 .. automodule:: pyspecdata.core
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 pyspecdata.datadir module
 -------------------------
 
 .. automodule:: pyspecdata.datadir
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 pyspecdata.figlist module
 -------------------------
 
 .. automodule:: pyspecdata.figlist
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 pyspecdata.fornotebook module
 -----------------------------
 
 .. automodule:: pyspecdata.fornotebook
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 pyspecdata.general\_functions module
 ------------------------------------
 
 .. automodule:: pyspecdata.general_functions
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 pyspecdata.ipy module
 ---------------------
 
 .. automodule:: pyspecdata.ipy
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 pyspecdata.latexscripts module
 ------------------------------
 
 .. automodule:: pyspecdata.latexscripts
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 pyspecdata.ndshape module
 -------------------------
 
 .. automodule:: pyspecdata.ndshape
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 pyspecdata.nnls module
 ----------------------
 
 .. automodule:: pyspecdata.nnls
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 pyspecdata.units module
 -----------------------
 
 .. automodule:: pyspecdata.units
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 pyspecdata.version module
 -------------------------
 
 .. automodule:: pyspecdata.version
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 
 Module contents
 ---------------
 
 .. automodule:: pyspecdata
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:

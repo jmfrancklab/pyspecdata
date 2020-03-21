@@ -82,6 +82,8 @@ Install pySpecData prerequisites from the documentation:
 for Windows: `conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw`
 For installation on Mac, do not include mingw
 (libpython may or may not be necessary, depending on details.)
+If you are installing as a developer, where you will want to rebuild the documentation, also run:
+`conda install -y -c conda-forge make sphinx sphinx_rtd_theme`
 
 On windows, make sure that `where gcc` returns a file **with an .exe extension**; if it does not, you need to add the directory with gcc.exe (usually Anaconda\MinGW) to your windows path.
 (Or to your bash path, if you've set up for bash below, and are trying this within bash).

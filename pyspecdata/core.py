@@ -5005,21 +5005,20 @@ class nddata (object):
         Examples
         --------
 
-        > #{{{ debugging block
-        > sum_for_contiguous = abs(forplot).mean('t1')
-        > fl.next("test contiguous")
-        > forplot = sum_for_contiguous.copy().set_error(None)
-        > fl.plot(forplot,alpha = 0.25,linewidth = 3)
-        > print "this is what the max looks like",0.5*sum_for_contiguous.set_error(None).runcopy(max,'t2')
-        > print sum_for_contiguous > 0.5*sum_for_contiguous.runcopy(max,'t2')
-        > retval = sum_for_contiguous.contiguous(quarter_of_max,'t2')
-        > print "contiguous range / 1e6:",retval/1e6
-        > for j in range(retval.shape[0]):
-        >     a,b = retval[j,:]
-        >     fl.plot(forplot['t2':(a,b)])
-        > fl.show()
-        > exit()
-        > #}}}
+        .. code:: python
+
+            sum_for_contiguous = abs(forplot).mean('t1')
+            fl.next("test contiguous")
+            forplot = sum_for_contiguous.copy().set_error(None)
+            fl.plot(forplot,alpha = 0.25,linewidth = 3)
+            print("this is what the max looks like",0.5*sum_for_contiguous.set_error(None).runcopy(max,'t2'))
+            print(sum_for_contiguous > 0.5*sum_for_contiguous.runcopy(max,'t2'))
+            retval = sum_for_contiguous.contiguous(quarter_of_max,'t2')
+            print("contiguous range / 1e6:",retval/1e6)
+            for j in range(retval.shape[0]):
+                a,b = retval[j,:]
+                fl.plot(forplot['t2':(a,b)])
+
         """
         logger.debug(strm("(contiguous) shape of self inside contiguous",ndshape(self)))
         if axis is None:

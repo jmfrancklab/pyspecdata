@@ -5313,16 +5313,14 @@ is False.</p></li>
 <p class="rubric">Examples</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">numpy.lib</span> <span class="k">import</span> <span class="n">recfunctions</span> <span class="k">as</span> <span class="n">rfn</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">))],</span>
-<span class="gp">... </span>  <span class="n">dtype</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;ba&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;bb&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)])])</span>
+<span class="gp">... </span>  <span class="n">dtype</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;ba&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;bb&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)])])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rfn</span><span class="o">.</span><span class="n">drop_fields</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
-<span class="go">array([((2.0, 3),), ((5.0, 6),)],</span>
-<span class="go">      dtype=[(&#39;b&#39;, [(&#39;ba&#39;, &#39;&lt;f8&#39;), (&#39;bb&#39;, &#39;&lt;i4&#39;)])])</span>
+<span class="go">array([((2., 3),), ((5., 6),)],</span>
+<span class="go">      dtype=[(&#39;b&#39;, [(&#39;ba&#39;, &#39;&lt;f8&#39;), (&#39;bb&#39;, &#39;&lt;i8&#39;)])])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rfn</span><span class="o">.</span><span class="n">drop_fields</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s1">&#39;ba&#39;</span><span class="p">)</span>
-<span class="go">array([(1, (3,)), (4, (6,))],</span>
-<span class="go">      dtype=[(&#39;a&#39;, &#39;&lt;i4&#39;), (&#39;b&#39;, [(&#39;bb&#39;, &#39;&lt;i4&#39;)])])</span>
+<span class="go">array([(1, (3,)), (4, (6,))], dtype=[(&#39;a&#39;, &#39;&lt;i8&#39;), (&#39;b&#39;, [(&#39;bb&#39;, &#39;&lt;i8&#39;)])])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rfn</span><span class="o">.</span><span class="n">drop_fields</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ba&#39;</span><span class="p">,</span> <span class="s1">&#39;bb&#39;</span><span class="p">])</span>
-<span class="go">array([(1,), (4,)],</span>
-<span class="go">      dtype=[(&#39;a&#39;, &#39;&lt;i4&#39;)])</span>
+<span class="go">array([(1,), (4,)], dtype=[(&#39;a&#39;, &#39;&lt;i8&#39;)])</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -5882,7 +5880,7 @@ and not return a figure list in the output</p>
 Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.</p>
 <p>Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
 (so that you can make sure they are properly synced to the cloud, etc.).</p>
-<p>It calls <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
+<p>It calls <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -5922,22 +5920,22 @@ it sets <cite>postproc_type</cite> to the value of
 This, in turn, is used to choose the type of post-processing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">dimname</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">return_acq</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">add_sizes</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">add_dims</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">use_sweep</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">indirect_dimlabels</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 </dl>
 </p></li>
@@ -6354,7 +6352,7 @@ If False, references to <cite>x</cite> and <cite>y</cite> are used. The default 
 <li><p><strong>bounds_error</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, a ValueError is raised any time interpolation is attempted on
 a value outside of the range of x (where extrapolation is
 necessary). If False, out of bounds values are assigned <cite>fill_value</cite>.
-By default, an error is raised unless <cite>fill_value=”extrapolate”</cite>.</p></li>
+By default, an error is raised unless <code class="docutils literal notranslate"><span class="pre">fill_value=&quot;extrapolate&quot;</span></code>.</p></li>
 <li><p><strong>fill_value</strong> (<em>array-like</em><em> or </em><em>(</em><em>array-like</em><em>, </em><em>array_like</em><em>) or </em><em>&quot;extrapolate&quot;</em><em>, </em><em>optional</em>) – <ul>
 <li><p>if a ndarray (or float), this value will be used to fill in for
 requested points outside of the data range. If not provided, then
@@ -6383,6 +6381,11 @@ If True, <cite>x</cite> has to be an array of monotonically increasing values.</
 </ul>
 </dd>
 </dl>
+<dl class="attribute">
+<dt id="pyspecdata.interp1d.fill_value">
+<code class="sig-name descname">fill_value</code><a class="headerlink" href="#pyspecdata.interp1d.fill_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="pyspecdata.interp1d.__call__">
 <code class="sig-name descname">__call__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.interp1d.__call__" title="Permalink to this definition">¶</a></dt>
@@ -6418,9 +6421,10 @@ If True, <cite>x</cite> has to be an array of monotonically increasing values.</
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="pyspecdata.interp1d.fill_value">
-<em class="property">property </em><code class="sig-name descname">fill_value</code><a class="headerlink" href="#pyspecdata.interp1d.fill_value" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt>
+<em class="property">property </em><code class="sig-name descname">fill_value</code></dt>
+<dd><p>The fill value.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -6498,13 +6502,12 @@ relative errors are of the order of the machine precision.</p></li>
 <dd class="field-even"><p><ul>
 <li><p><strong>x</strong> (<em>ndarray</em>) – The solution (or the result of the last iteration for an unsuccessful
 call).</p></li>
-<li><p><strong>cov_x</strong> (<em>ndarray</em>) – Uses the fjac and ipvt optional outputs to construct an
-estimate of the jacobian around the solution. None if a
-singular matrix encountered (indicates very flat curvature in
-some direction).  This matrix must be multiplied by the
-residual variance to get the covariance of the
-parameter estimates – see curve_fit.</p></li>
-<li><p><strong>infodict</strong> (<em>dict</em>) – a dictionary of optional outputs with the key s:</p>
+<li><p><strong>cov_x</strong> (<em>ndarray</em>) – The inverse of the Hessian. <cite>fjac</cite> and <cite>ipvt</cite> are used to construct an
+estimate of the Hessian. A value of None indicates a singular matrix,
+which means the curvature in parameters <cite>x</cite> is numerically flat. To
+obtain the covariance matrix of the parameters <cite>x</cite>, <cite>cov_x</cite> must be
+multiplied by the variance of the residuals – see curve_fit.</p></li>
+<li><p><strong>infodict</strong> (<em>dict</em>) – a dictionary of optional outputs with the keys:</p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">nfev</span></code></dt><dd><p>The number of function calls</p>
 </dd>
@@ -8287,8 +8290,8 @@ These parameters will then be set to the appropriate values.</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">30.</span><span class="p">])),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="p">[</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">60.</span><span class="p">]))],</span>
 <span class="gp">... </span>  <span class="n">dtype</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;ba&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;bb&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="mi">2</span><span class="p">))])])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rfn</span><span class="o">.</span><span class="n">rename_fields</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;bb&#39;</span><span class="p">:</span><span class="s1">&#39;BB&#39;</span><span class="p">})</span>
-<span class="go">array([(1, (2.0, [3.0, 30.0])), (4, (5.0, [6.0, 60.0]))],</span>
-<span class="go">      dtype=[(&#39;A&#39;, &#39;&lt;i4&#39;), (&#39;b&#39;, [(&#39;ba&#39;, &#39;&lt;f8&#39;), (&#39;BB&#39;, &#39;&lt;f8&#39;, 2)])])</span>
+<span class="go">array([(1, (2., [ 3., 30.])), (4, (5., [ 6., 60.]))],</span>
+<span class="go">      dtype=[(&#39;A&#39;, &#39;&lt;i8&#39;), (&#39;b&#39;, [(&#39;ba&#39;, &#39;&lt;f8&#39;), (&#39;BB&#39;, &#39;&lt;f8&#39;, (2,))])])</span>
 </pre></div>
 </div>
 </dd></dl>
