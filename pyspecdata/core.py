@@ -1790,16 +1790,21 @@ class figlist(object):
             self.autolegend_list.update({self.current:value})
             return
     def push_marker(self):
-        if not hasattr(self,'pushlist'):
-            self.pushlist = []
-        if not hasattr(self,'pushbasenamelist'):
-            self.pushbasenamelist = []
-        self.pushlist.append(self.current)
-        self.pushbasenamelist.append(self.basename)
+        """save the current plot to a "stack" so we can return to it with "pop_marker" """
+        if hasattr(self,'current'): # if not, this is the first plot
+            if not hasattr(self,'pushlist'):
+                self.pushlist = []
+            if not hasattr(self,'pushbasenamelist'):
+                self.pushbasenamelist = []
+            self.pushlist.append(self.current)
+            self.pushbasenamelist.append(self.basename)
         return
     def pop_marker(self):
-        self.basename = self.pushbasenamelist.pop()
-        self.next(self.pushlist.pop())
+        """use the plot on the top of the "stack" (see push_marker) as the current plot"""
+        if hasattr(self,'pushlist') and len(self.pushlist) > 0: # otherwise, we called push with no current plot
+            if hasattr(self,'pushbasenamelist'):
+                self.basename = self.pushbasenamelist.pop()
+            self.next(self.pushlist.pop())
         return
     def get_num_figures(self):
         cleanlist = [x for x in self.figurelist if isinstance(x, str)]
