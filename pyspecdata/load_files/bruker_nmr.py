@@ -107,7 +107,7 @@ def series(file_reference, *subpath, **kwargs):
     mylabels = [t1axis]+[t2axis]
     data.labels(mydimnames,mylabels)
     shiftpoints = int(det_phcorr(v)) # use the canned routine to calculate the first order phase shift
-    data.circshift('t2',shiftpoints)
+    data.setaxis('t2',lambda x: x-shiftpoints/v['SW_h'])
     data.set_units('t2','s')
     data.set_units('digital')
     data.set_prop('title',
@@ -180,7 +180,8 @@ def load_1D(file_reference, *subpath, **kwargs):
     data.labels([dimname,'t2'],[t1axis,t2axis])
     shiftpoints = int(det_phcorr(v)) # use the canned routine to calculate the second order phase shift
     #print 'shiftpoints = ',shiftpoints
-    data.circshift('t2',shiftpoints)
+    data.setaxis('t2',lambda x: x-shiftpoints/v['SW_h'])
+    print('yes, I called with %d shiftpoints'%shiftpoints)
     # finally, I will probably need to add in the first order phase shift for the decimation --> just translate this
     data.set_prop('title',
             load_title(file_reference,*subpath))
