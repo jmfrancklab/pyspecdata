@@ -85,7 +85,7 @@ For installation on Mac, do not include mingw
 If you are installing as a developer, where you will want to rebuild the documentation, also run:
 `conda install -y -c conda-forge make sphinx sphinx_rtd_theme`
 
-On windows, make sure that `where gcc` returns a file **with an .exe extension**; if it does not, you need to add the directory with gcc.exe (usually Anaconda\MinGW) to your windows path.
+On windows, make sure that `where gcc` (`which gcc` for bash) returns a file **with an .exe extension**; if it does not, you need to add the directory with gcc.exe (usually Anaconda\MinGW) to your windows path.
 (Or to your bash path, if you've set up for bash below, and are trying this within bash).
 *This is a problem with how anaconda sets up mingw.*
 
