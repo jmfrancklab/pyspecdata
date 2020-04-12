@@ -1816,7 +1816,9 @@ class figlist(object):
         except ValueError:
             raise ValueError(strm("You are looking for",name,
                 "which isn't in the list of figures",cleanlist))
-    def next(self,input_name, legend=False, boundaries=None, twinx=None, **kwargs):
+    def next(self,input_name, legend=False,
+            boundaries=None, twinx=None, fig=None,
+            **kwargs):
         r"""Switch to the figure given by input_name, which is used not only as
         a string-based name for the figure, but also as a default title and as
         a base name for resulting figure files.
@@ -1896,12 +1898,13 @@ class figlist(object):
                 self.use_autolegend('outside')
             else:
                 self.propdict[self.current]['legend'] = False
-                if hasattr(self,'mlab'):
-                    fig = self.mlab.figure(num_figs_before_add+1,bgcolor = (1,1,1),**kwargs)
-                    fig.scene.render_window.aa_frames = 20
-                    fig.scene.anti_aliasing_frames = 20
-                else:
-                    fig = figure(num_figs_before_add+1,**kwargs)
+                if fig is None:
+                    if hasattr(self,'mlab'):
+                        fig = self.mlab.figure(num_figs_before_add+1,bgcolor = (1,1,1),**kwargs)
+                        fig.scene.render_window.aa_frames = 20
+                        fig.scene.anti_aliasing_frames = 20
+                    else:
+                        fig = figure(num_figs_before_add+1,**kwargs)
                 if twinx is not None:
                     fig.add_subplot(111)
             logger.debug(strm('added figure',len(self.figurelist)+1,'because not in figurelist',self.figurelist))

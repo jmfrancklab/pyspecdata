@@ -45,7 +45,7 @@ setup(
         'update_notebook_pythonscripts=pyspecdata.latexscripts:main',
         'pdflatex_notebook_wrapper=pyspecdata.latexscripts:wraplatex',
         'pdflatex_notebook_view_wrapper=pyspecdata.latexscripts:wrapviewer',
-        'pyspecdata_dataconfig=pyspecdata.genconfig:genconfig']
+        'pyspecdata_dataconfig=pyspecdata.latexscripts:genconfig']
         ),
 )
 tryagain = False

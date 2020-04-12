@@ -5,6 +5,7 @@ them."""
 
 import os
 import sys
+from matplotlib.pylab import gci
 def inside_sphinx():
     if len(sys.argv) > 0:
         return os.path.basename(sys.argv[0]) == "sphinx-build"
@@ -33,6 +34,17 @@ else:
 import logging
 import re
 
+def balance_clims():
+    """works with matplotlib to generate a plot
+    appropriate for positive and negative
+    from here:
+        https://stackoverflow.com/questions/13060450/how-to-get-current-plots-clim-in-matplotlib
+    """
+    thisi = gci()
+    these_clims = thisi.get_clim()
+    a = max(abs(array(these_clims)))
+    thisi.set_clim((-a,a))
+    return
 def process_kwargs(listoftuples, kwargs, pass_through=False, as_attr=False):
     '''This function allows dynamically processed (*i.e.* function definitions with `**kwargs`) kwargs (keyword arguments) to be dealt with in a fashion more like standard kwargs.
     The defaults set in `listoftuples` are used to process `kwargs`, which are then returned as a set of values (that are set to defaults as needed).
