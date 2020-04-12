@@ -4,7 +4,7 @@ The results of python environments are **cached** and **only re-run if the code 
 even if the python environments are moved around.
 This makes the compilation of a Latex lab notebook extremely efficient.
 '''
-from .datadir import getDATADIR
+from .datadir import getDATADIR, _my_config
 #from .datadir import get_notebook_dir
 from distutils.spawn import find_executable
 import os.path
@@ -70,11 +70,13 @@ def det_new_pdf_name(thisargv):
     return orig_tex_basename,new_pdf_basename
 def genconfig():
     '''creates a template configuration directory'''
+    _my_config._config_parser = None # this supresses the output
     if platform.platform().startswith('Windows'):
         hide_start = '_' # the default hidden/config starter for vim, mingw applications, etc
     else:
         hide_start = '.'
-    with open(os.path.join(os.path.expanduser('~'),hide_start+'pyspecdata'),'w',encoding='utf-8') as fp:
+    filename = os.path.join(os.path.expanduser('~'),hide_start+'pyspecdata')
+    with open(filename,'w',encoding='utf-8') as fp:
         fp.write('[General]\n')
         fp.write('# replace the following with your default data location (this is just a suggestion)\n')
         possible_data = [x for x in next(os.walk(os.path.expanduser('~')))[1] if 'data' in x.lower() and 'app' not in x.lower()]
@@ -86,7 +88,7 @@ def genconfig():
         fp.write('\n')
         fp.write('[ExpTypes]\n')
         fp.write('# in this section, you can place specific subdirectories (for faster access, or if they live elsewhere\n') 
-        print("now edit "+hide_start+"pyspecdata in your home directory")
+    print("now edit "+filename)
 
 def wraplatex():
     '''runs the python scripts after running latex also creates a copy of latex without the final portion under the underscore
