@@ -3411,7 +3411,7 @@ class nddata (object):
         r"""Copy all properties (see :func:`get_prop`) from another nddata
         object -- note that these include properties pertaining the the FT
         status of various dimensions."""
-        self.other_info.update(other.other_info.copy())
+        self.other_info.update(deepcopy(other.other_info))
         return self
     def get_prop(self,propname=None):
         r'''return arbitrary ND-data properties (typically acquisition parameters *etc.*) by name (`propname`)
