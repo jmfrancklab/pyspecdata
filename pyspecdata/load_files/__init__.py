@@ -115,6 +115,8 @@ def find_file(searchstring,
 
     It calls :func:`~pyspecdata.load_files.load_indiv_file`, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.
 
+    If it can't find any files matching the criterion, it logs the missing file and throws an exception.
+
     Parameters
     ----------
     searchstring : str
@@ -175,6 +177,13 @@ def find_file(searchstring,
         raise ValueError("The `subdirectory` keyword argument is not longer valid -- use `exp_type` instead!")
     # }}}
     files = search_filename(searchstring, exp_type, print_result=print_result)
+    if len(files) = 0:
+        # naive replacement to match rclone-like rules
+        err = log_fname('missing_data_files',
+                searchstring.replace('.*','*').replace('(','{').replace(')','}').replace('|',','),
+                exp_type,
+                err=True)
+        raise ValueError("Can't find file specified by search string %s"%searchstring+'\n'+err)
     data = None
     while data is None and len(files) > 0:
         filename = files.pop(-1)
