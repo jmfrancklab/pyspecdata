@@ -3,7 +3,7 @@ All rights reserved.
 
 (An initial version software was developed in S. Han's lab, with some recent
 upgrades/additions at ACERT/JH Freed's lab, significant development has
-continued in JM Franck's independent lab.)
+continued in JM Franck's independent lab, with significant contributions from A Beaton.)
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
