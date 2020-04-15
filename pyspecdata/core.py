@@ -2790,7 +2790,7 @@ class nddata (object):
         #        raise IndexError('The length of your axis labels (axis_coords) (shape %s) and your axis data (shape %s) does not match!!!'%(repr([len(thiscoord) for thiscoord in axis_coords]),repr(data.shape)))
         self.data_error = data_error
         self.data_units = data_units
-        self.other_info = dict(other_info)
+        self.other_info = deepcopy(other_info)
         if axis_coords_error is None:
             self.axis_coords_error = [None]*len(axis_coords)
         else:
