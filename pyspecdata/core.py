@@ -41,7 +41,7 @@ if _figure_mode_setting == 'latex':
     environ['ETS_TOOLKIT'] = 'qt4'
     import matplotlib; matplotlib.use('Agg')
 # }}} -- continued below
-from .general_functions import inside_sphinx,log_fname
+from .general_functions import inside_sphinx
 if not inside_sphinx():
     from pylab import *
 else:
@@ -76,7 +76,7 @@ import numpy.lib.recfunctions as recf
 from inspect import getargspec
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
-from .datadir import getDATADIR
+from .datadir import getDATADIR,log_fname
 from . import fourier as this_fourier
 from . import axis_manipulation
 from . import nnls as this_nnls
@@ -1035,8 +1035,10 @@ def h5nodebypath(h5path,force = False,only_lowest = False,check_only = False,dir
         log_fname('data_files',h5path[0],directory)
     else:
         if check_only:
-            log_fname('missing_data_files',h5path[0],directory)
-            raise AttributeError("You're checking for a node in a file (%s) that does not exist"%h5path[0])
+            errmsg = log_fname('missing_data_files',h5path[0],directory,err=True)
+            raise AttributeError("You're checking for a node in a file (%s) that does not exist"%(h5path[0])
+                    +'\n'
+                    +errmsg)
         logger.debug(strm('DEBUG: file does not exist\n\n'))
     mode = 'a'
     #if check_only: mode = 'r'
@@ -5438,11 +5440,18 @@ class nddata (object):
         Can be used in one of several ways:
 
         * ``self.setaxis('axisname', values)``: just sets the values
+        * ``self.setaxis('axisname', '#')``: just
+            number the axis in numerically increasing order
+            (e.g. if you have smooshed it from a couple
+            other dimensions.)
         * ``self.fromaxis('axisname',inputfunc)``: take the existing function, apply inputfunc, and replace
         * ``self.fromaxis(inputsymbolic)``: Evaluate `inputsymbolic` and load the result into the axes, appropriately
         """
         if len(args) == 2:
             axis, value = args
+            if value=='#':
+                self.setaxis(axis,r_[0:ndshape(self)[axis]])
+                return self
         elif len(args) == 1 and issympy(args[0]):
             func = args[0]
             symbols_in_func = func.atoms(sympy.Symbol)

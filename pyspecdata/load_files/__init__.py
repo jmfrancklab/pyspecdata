@@ -19,8 +19,8 @@ from . import bruker_esr
 from . import acert
 from .open_subpath import open_subpath
 from ..datadir import getDATADIR
-from ..datadir import _my_config
-from ..general_functions import process_kwargs,strm,log_fname
+from ..datadir import _my_config,log_fname
+from ..general_functions import process_kwargs,strm
 from ..core import *
 from builtins import any # numpy has an "any" function, which is very annoying
 from itertools import tee

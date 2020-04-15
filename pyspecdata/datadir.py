@@ -9,6 +9,8 @@ import platform
 from .general_functions import process_kwargs, strm
 import logging
 import atexit
+from subprocess import Popen,PIPE,check_output
+from subprocess import call as subprocess_call
 logger = logging.getLogger('pyspecdata.datadir')
 class MyConfig(object):
     r'''Provides an easy interface to the pyspecdata configuration file.
@@ -247,3 +249,78 @@ def getDATADIR(*args,**kwargs):
     if len(retval[-1]) != 0:
         retval = retval + ('',)
     return os.path.join(*retval)
+def rclone_search(fname,dirname):
+    retval = "I can't find %s in %s, so I'm going to search for t in your rclone remotes"%(fname,dirname)
+    rclone_remotes = []
+    try:
+        with Popen('rclone', stdout=PIPE, stderr=PIPE) as p:
+            pass
+    except OSError as e:
+        raise RuntimeError("I can't find the rclone program in your"
+                "path -- please install from http://rclone.org")
+    with Popen(['rclone','listremotes'],
+            stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
+        for j in proc.stdout:
+            rclone_remotes.append(j.rstrip())
+    for thisremote in rclone_remotes:
+        retval += '\n'+strm("checking remote",thisremote)
+        # do NOT quote the filename -- quotes are typically stripped off by the
+        # shell -- they would be literal here
+        cmd = ['rclone','--include',fname, 'ls',thisremote]
+        with Popen(cmd, stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
+            for j in proc.stdout:
+                foundpath = j.split()
+                foundpath = [' '.join(foundpath[1:])] # leave out size, just filename
+                lastlen = 0
+                while len(foundpath) > lastlen:
+                    lastlen = len(foundpath)
+                    foundpath = [j for k in foundpath
+                            for j in os.path.split(k)
+                            if len(j) > 0]
+                retval += '\nYou should be able to retrieve this file with:\n'+strm(
+                        "rclone copy -v --include '%s' %s%s %s"%(fname,
+                    thisremote,
+                    '/'.join(foundpath[:-1]),
+                    os.path.normpath(os.path.join(dirname)).replace('\\','\\\\')))
+    return retval
+def log_fname(logname,fname,dirname,err=False):
+    r"""logs the file name either used or missing.
+
+    Also, by setting the `err` flag to True, you can generate an error message
+    that will guide you on how to selectively copy down this data from a remote source
+    (google drive, etc.), *e.g.*:
+
+    ``Traceback (most recent call last):
+      File "proc_square_refl.py", line 21, in <module>
+        directory=getDATADIR(exp_type='test_equip'))
+      File "c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py", line 6630, in __init__
+        check_only=True, directory=directory)
+      File "c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py", line 1041, in h5nodebypath
+        +errmsg)
+    AttributeError: You're checking for a node in a file (200110_pulse_2.h5) that does not exist
+    I can't find 200110_pulse_2.h5 in C:\Users\johnf\exp_data\test_equip\, so I'm going to search for t in your rclone remotes
+    checking remote g_syr:
+    You should be able to retrieve this file with:
+    rclone copy -v --include '200110_pulse_2.h5' g_syr:exp_data/test_equip C:\\Users\\johnf\\exp_data\\test_equip``
+    """
+    if err:
+        rclone_suggest = rclone_search(fname,dirname)# eventually lump into the error message
+    with open(logname+'.log','a+',encoding='utf-8') as fp:
+        already_listed = False
+        fp.seek(0,0)
+        for j in fp:
+            j = j.replace(r'\ ','LITERALSPACE')
+            try:
+                f, d = j.split()
+            except:
+                raise RuntimeError(strm("there seems to be something wrong with your",logname+'.log',"file (in the current directory).  It should consist of one line per file, with each file containing a file and directory name.  Instead, I find a line with the following elements",j.split(),'\n',"You might try deleting the",logname+'.log',"file"))
+            f = f.replace('LITERALSPACE',' ')
+            d = d.replace('LITERALSPACE',' ')
+            if f == fname and d == dirname:
+                already_listed = True
+                break
+        if not already_listed:
+            fp.seek(0,os.SEEK_END)# make sure at end of file
+            fp.write('%-70s%-50s\n'%(fname.replace(' ','\\ '),dirname.replace(' ','\\ ')))
+    if err:
+        return rclone_suggest
