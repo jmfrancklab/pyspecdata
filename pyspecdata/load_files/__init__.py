@@ -177,7 +177,7 @@ def find_file(searchstring,
         raise ValueError("The `subdirectory` keyword argument is not longer valid -- use `exp_type` instead!")
     # }}}
     files = search_filename(searchstring, exp_type, print_result=print_result)
-    if len(files) = 0:
+    if len(files) == 0:
         # naive replacement to match rclone-like rules
         err = log_fname('missing_data_files',
                 searchstring.replace('.*','*').replace('(','{').replace(')','}').replace('|',','),
