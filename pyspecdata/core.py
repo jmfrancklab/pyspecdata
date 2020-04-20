@@ -6859,7 +6859,11 @@ class fitdata(nddata):
         if isinstance(args[0],nddata):
             #print(nddata)
             #print "DEBUG trying to transfer",args[0].axis_coords_error
-            myattrs = [for j in normal_attrs(args[0]) if j not in ['C','sin','cos','exp','log10']]
+            print([j for j in normal_attrs(args[0]) if j not in ['C','angle','sin','cos','exp','log10']])
+            myattrs = [j for j in normal_attrs(args[0]) if j not in ['C','sin','cos','exp','log10']]
+            print("*** DEBUG ***")
+            print(myattrs)
+            print("*** DEBUG ***")
             for j in range(0,len(myattrs)):
                 self.__setattr__(myattrs[j])
                 # commenting this out (line below)
