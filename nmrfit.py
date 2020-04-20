@@ -1,7 +1,9 @@
 from pyspecdata.core import *
+import numpy
 import sympy
 
 #{{{ different types of fit classes
+#{{{ rate curve
 class rate_curve(fitdata):
     'for multiplicity, see t2curve'
     def __init__(self,*args,**kwargs):
@@ -15,14 +17,16 @@ class rate_curve(fitdata):
     def fitfunc_raw_symb(self,p,x):
         return p[0]*sympy.exp(-p[1]*x) + p[2]**2
     def fitfunc_raw(self,p,x):
-        return p[0]*exp(-p[1]*x) + p[2]**2
+        return p[0]*numpy.exp(-p[1]*x) + p[2]**2
+    #}}}
 class t1curve(fitdata):
     def fitfunc_raw(self,p,x):
         '''just the actual fit function to return the array y as a function of p and x'''
-        return p[0]+(p[1]-p[0])*exp(-x/p[2])
+        return p[0]+(p[1]-p[0])*(numpy.exp(-x/p[2]))
     def fitfunc_raw_symb(self,p,x):
         '''if I'm using a named function, I have to define separately in terms of sympy rather than numpy functions'''
-        return p[0]+(p[1]-p[0])*sympy.exp(-x/p[2])
+        return p[0]+(p[1]-p[0])*(sympy.exp(-x/p[2]))
+    #{{{ linfunc
     def linfunc(self,x,y,xerr = None,yerr = None):
         '''just the actual fit function to return the pair of arrays x',y' that should be linear
         it accepts as inputs x and y, and it uses the output from the fit, where necessary
@@ -51,6 +55,8 @@ class t1curve(fitdata):
             retval.set_error(reterr)
         #}}}
         return retval
+    #}}}
+    #{{{ linerror
     def linerror(self,x,y):
         '''propagate the error for linfunc
         '''
@@ -63,6 +69,7 @@ class t1curve(fitdata):
         retval.labels([self.fit_axis],
                 [x_axis_of_linear_plot.copy()])
         return retval
+    #}}}
     def __init__(self,*args,**kwargs):
         '''here, we give the particular latex representation and list of symbols for this particular child class'''
         fitdata.__init__(self,*args,**kwargs)

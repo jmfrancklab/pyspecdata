@@ -6891,7 +6891,10 @@ class fitdata(nddata):
         return
     def parameter_derivatives(self,xvals,set = None,set_to = None):
         r'return a matrix containing derivatives of the parameters, can set dict set, or keys set, vals set_to'
-        logger.debug(strm('parameter derivatives is called!'))
+        #logger.debug(strm('parameter derivatives is called!'))
+        print("*** DEBUG ***")
+        print('parameter derivatives is called!')
+        print("*** DEBUG ***")
         if iscomplex(self.data.flatten()[0]):
             print((lsafen('Warning, taking only real part of fitting data!')))
         if isinstance(set, dict):
@@ -6909,14 +6912,39 @@ class fitdata(nddata):
         for j in range(0,len(parameters)):
             thisvar = self.symbolic_dict[parameters[j]]
             mydiff_sym[j] = sympy.diff(self.symbolic_func,thisvar)
+
             #print r'$\frac{\partial %s}{\partial %s}=%s$'%(self.function_name,repr(thisvar),sympy.latex(mydiff).replace('$','')),'\n\n'
             try:
+                print("*** DEBUG 0 ***")
+                print(type(mydiff_sym[0]))
+                print(solution_list)
+                print("*** DEBUG 0 ***")
                 mydiff = mydiff_sym[j].subs(solution_list)
+                print("*** DEBUG 1 ***")
+                print(mydiff)
+                print("*** DEBUG 1 ***")
             except Exception as e:
                 raise ValueError(strm('error trying to substitute', mydiff_sym[j],
                     'with', solution_list) + explain_error(e))
             try:
-                fprime[j,:] = array([complex(mydiff.subs(x,xvals[k])) for k in range(0,len(xvals))])
+                print("*** DEBUG 2 ***")
+                print(type(mydiff))
+                # if I do not specify the module as sympy in the line below,
+                # get weird AttributeError
+                q = sympy.lambdify(fit_axis,mydiff,modules=['sympy'])
+                print("I lambdified")
+                example_storage = []
+                for k in range(0,len(xvals)):
+                    print(xvals[k])
+                    print(q(2))
+                    #example_storage.append(q(xvals[k]))
+                print("*** DEBUG 2 ***")
+
+                fprime[j,:] = array([mydiff.subs(x,complex(xvals[k])) for k in range(0,len(xvals))])
+
+                
+
+
             except ValueError as e:
                 raise ValueError(strm('Trying to set index',j,
                     'shape(fprime)',shape(fprime),
@@ -7273,8 +7301,8 @@ class fitdata(nddata):
             if not silent: print('{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n')
             warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
             sigma = ones(shape(y))
-        p_ini = [1.0,1.0,1.0] # hard-coded for debug
-        #p_ini = real(array(self.guess())) # need the numpy format to allow boolean mask
+        #p_ini = [1.0,1.0,1.0] # hard-coded for debug
+        p_ini = real(array(self.guess())) # need the numpy format to allow boolean mask
         if set != None:
             self.set_indices,self.set_to,self.active_mask = self.gen_indices(set,set_to)
             p_ini = self.remove_inactive_p(p_ini)
@@ -7428,7 +7456,14 @@ class fitdata(nddata):
         # on the other hand, setting a value of one seems to be
         # bad for very short T1 samples
         which_starting_guess = 0
-        thisguess = self.starting_guesses[which_starting_guess]
+        thisguess = []
+        print("*** DEBUG ***")
+        print(shape(list(self.starting_guesses)[0]))
+        print("*** DEBUG ***")
+        list_starting_guesses = list(self.starting_guesses)
+        for this_val in list_starting_guesses:
+            thisguess.apppend(list_starting_guesses[which_starting_guess][this_val])
+        #thisguess[:] = list_starting_guesses[which_starting_guess][:]
         numguesssteps = 20
         #{{{ for some reason (not sure) adding a dimension to y
         new_y_shape = list(y.shape)
