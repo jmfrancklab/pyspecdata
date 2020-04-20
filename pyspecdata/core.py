@@ -6908,7 +6908,7 @@ class fitdata(nddata):
         parameters = self._active_symbols()
         mydiff_sym = [[]] * len(self.symbolic_vars)
         x = self.symbolic_x
-        fprime = zeros([len(parameters),number_of_i])
+        fprime = zeros([len(parameters),number_of_i],dtype=sympy.Symbol)
         for j in range(0,len(parameters)):
             thisvar = self.symbolic_dict[parameters[j]]
             mydiff_sym[j] = sympy.diff(self.symbolic_func,thisvar)
@@ -6929,22 +6929,25 @@ class fitdata(nddata):
             try:
                 print("*** DEBUG 2 ***")
                 print(type(mydiff))
-                # if I do not specify the module as sympy in the line below,
-                # get weird AttributeError
+                # need to make some specification in modules as in line below
+                # or else get weird AttributeError
                 mydiff_lam = sympy.lambdify(fit_axis,mydiff,modules=[{'exp':(sympy.exp)},'numpy'])
-                #example_storage = []
-                #for k in range(0,len(xvals)):
-                #    example_storage.append(mydiff_lam(xvals[k]))
-                #print(example_storage)
-                #print(shape(example_storage))
-                #for k in range(0,len(xvals)):
-                #    fprime[j,k] = array(example_storage[k])
-                #    fprime[j,k] = list(float(mydiff_lam(xvals[k])))
-                #print("*** FINISHED ***")
-                #print(example_storage)
+                example_storage = []
+                for k in range(0,len(xvals)):
+                    print(mydiff_lam(xvals[k]))
+                    fprime[j,k] = mydiff_lam(xvals[k])
+                    #example_storage.append(mydiff_lam(xvals[k]))
+                print("*** DEBUG 2 ***")
+                print(example_storage)
+                print(shape(example_storage))
+                for k in range(0,len(xvals)):
+                    fprime[j,k] = array(example_storage[k])
+                    fprime[j,k] = list(float(mydiff_lam(xvals[k])))
+                print("*** FINISHED ***")
+                print(example_storage)
+
                 fprime[j,:] = array([mydiff.subs(x,complex(xvals[k])) for k in range(0,len(xvals))])
 
-                print("*** DEBUG 2 ***")
                 
 
 
