@@ -6857,10 +6857,22 @@ class fitdata(nddata):
             fit_axis = kwargs.pop('fit_axis')
         #}}}
         if isinstance(args[0],nddata):
+            #print(nddata)
             #print "DEBUG trying to transfer",args[0].axis_coords_error
+            print("DEBUG trying to transfer",args[0].axis_coords_error)
             myattrs = normal_attrs(args[0])
+            print("**** **** ****")
+            print("DEBUG DEBUG")
+            print("**** **** ****")
+            print(myattrs[0])
+            print("**** **** ****")
+            print("DEBUG DEBUG")
+            print("**** **** ****")
+            print(args[0].__getattribute__(myattrs[0]).data)
             for j in range(0,len(myattrs)):
-                self.__setattr__(myattrs[j],args[0].__getattribute__(myattrs[j]))
+                self.__setattr__(myattrs[j])
+                # commenting this out (line below)
+                #self.__setattr__(myattrs[j],args[0].__getattribute__(myattrs[j]))
             #nddata.__init__(self,
             #        args[0].data,
             #        args[0].data.shape,
@@ -6891,7 +6903,7 @@ class fitdata(nddata):
         r'return a matrix containing derivatives of the parameters, can set dict set, or keys set, vals set_to'
         logger.debug(strm('parameter derivatives is called!'))
         if iscomplex(self.data.flatten()[0]):
-            print(lsafen('Warning, taking only real part of fitting data!'))
+            print((lsafen('Warning, taking only real part of fitting data!')))
         if isinstance(set, dict):
             set_to = list(set.values())
             set = list(set.keys())
@@ -7264,7 +7276,7 @@ class fitdata(nddata):
             set = list(set.keys())
         x = self.getaxis(self.fit_axis)
         if iscomplex(self.data.flatten()[0]):
-            if not silent: print(lsafen('Warning, taking only real part of fitting data!'))
+            if not silent: print((lsafen('Warning, taking only real part of fitting data!')))
         y = real(self.data)
         sigma = self.get_error()
         if sigma is None:
@@ -7281,7 +7293,7 @@ class fitdata(nddata):
         if hasattr(self,'has_grad') and self.has_grad == True:
             leastsq_kwargs.update({'Dfun':self.parameter_gradient})
         if 'Dfun' in list(leastsq_kwargs.keys()):
-            if not silent: print("yes, Dfun passed with arg",leastsq_kwargs['Dfun'])
+            if not silent: print(("yes, Dfun passed with arg",leastsq_kwargs['Dfun']))
         try:
             p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
         #{{{ just give various explicit errors
@@ -7315,8 +7327,8 @@ class fitdata(nddata):
                 p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
                 if success != 1:
                     if mesg.find('two consecutive iterates'):
-                        if not silent: print(r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n')
-                        if not silent: print(r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n')
+                        if not silent: print((r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n'))
+                        if not silent: print((r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n'))
                         infodict_keys = list(infodict.keys())
                         infodict_vals = list(infodict.values())
                         if 'nfev' in infodict_keys:
@@ -7330,7 +7342,7 @@ class fitdata(nddata):
                         if 'qtf' in infodict_keys:
                             infodict_keys[infodict_keys.index('qtf')] = 'qtf, the vector (transpose(q)*fvec)'
                         for k,v in zip(infodict_keys,infodict_vals):
-                            if not silent: print(r'{\color{red}{\bf %s:}%s}'%(k,v),'\n\n')
+                            if not silent: print((r'{\color{red}{\bf %s:}%s}'%(k,v),'\n\n'))
                         #self.fit_coeff = None
                         #self.settoguess()
                         #return
@@ -7341,7 +7353,7 @@ class fitdata(nddata):
                 raise RuntimeError(strm('leastsq finished with an error message:',mesg))
         else:
             if not silent: print(r'{\color{blue}')
-            if not silent: print(lsafen("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg)))
+            if not silent: print((lsafen("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg))))
             if not silent: print(r'}')
             if not silent: print("\n")
         self.fit_coeff = p_out # note that this is stored in HIDDEN form
@@ -7352,7 +7364,7 @@ class fitdata(nddata):
             if force_analytical: raise RuntimeError(strm("I can't take the analytical",
                 "covariance!  This is problematic."))
             if cov is None:
-                if not silent: print(r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success),'}\n')
+                if not silent: print((r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success),'}\n'))
             self.covariance = cov
         if self.covariance is not None:
             try:
@@ -7397,11 +7409,11 @@ class fitdata(nddata):
                     thiscopy.fit()
                     success = True
                     if len(minbounds) > 0:
-                        for k,v in minbounds.items():
+                        for k,v in list(minbounds.items()):
                             if thiscopy.output(k) < v:
                                 success = False
                     if len(maxbounds) > 0:
-                        for k,v in maxbounds.items():
+                        for k,v in list(maxbounds.items()):
                             if thiscopy.output(k) > v:
                                 success = False
                 except:
@@ -7417,7 +7429,7 @@ class fitdata(nddata):
         r'''provide the guess for our parameters; by default, based on pseudoinverse'''
         self.has_grad = False
         if iscomplex(self.data.flatten()[0]):
-            print(lsafen('Warning, taking only real part of fitting data!'))
+            print((lsafen('Warning, taking only real part of fitting data!')))
         y = real(self.data)
         # I ended up doing the following, because as it turns out
         # T1 is a bad fit function, because it has a singularity!
@@ -7482,14 +7494,14 @@ class fitdata(nddata):
                         lastresidual = thisresidual
                         fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
                 if alpha > alpha_max:
-                    print("\n\n.core.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max)
+                    print(("\n\n.core.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max))
                     if which_starting_guess >= len(self.starting_guesses)-1:
-                        print("\n\n.core.guess) {\\color{red} Warning!!!} ran out of guesses!!!%d\n\n"%alpha_max)
+                        print(("\n\n.core.guess) {\\color{red} Warning!!!} ran out of guesses!!!%d\n\n"%alpha_max))
                         return thisguess
                     else:
                         which_starting_guess += 1
                         thisguess = self.starting_guesses[which_starting_guess]
-                        print("\n\n.core.guess) try a new starting guess:",lsafen(thisguess))
+                        print(("\n\n.core.guess) try a new starting guess:",lsafen(thisguess)))
                         j = 0 # restart the loop
                         #{{{ evaluate f, fprime and residuals for the new starting guess
                         guess_dict = dict(list(zip(self.symbol_list,list(thisguess))))
