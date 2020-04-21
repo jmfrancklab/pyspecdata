@@ -99,6 +99,7 @@ rcParams['axes.grid'] = False
 rcParams['font.size'] = 18
 rcParams['image.cmap'] = 'jet'
 rcParams['figure.figsize']=(16,12)
+mat2array = [{'ImmutableMatrix': array}, 'numpy']# for sympy returns arrays rather than the stupid matrix class
 logger = logging.getLogger('pyspecdata.core')
 #{{{ constants
 k_B = 1.380648813e-23
@@ -5317,7 +5318,6 @@ class nddata (object):
             raise ValueError('Wrong number of arguments!! -- you passed '+repr(len(args))+' arguments!')
         if issympy(func):
             logging.debug(strm("about to run sympy lambdify, symbols_in_func is",symbols_in_func))
-            mat2array = [{'ImmutableMatrix': array}, 'numpy']# returns arrays rather than the stupid matrix class
             try:
                 lambdified_func = sympy.lambdify(list(symbols_in_func), func,
                         modules=mat2array)
@@ -5460,7 +5460,6 @@ class nddata (object):
             if len(symbols_not_in_dimlabels)>0:
                 raise ValueError("You passed a symbolic function, but the symbols"+str(symbols_not_in_dimlabels)+" are not axes")
             logging.debug(strm("about to run sympy lambdify, symbols_in_func is",symbols_in_func))
-            mat2array = [{'ImmutableMatrix': array}, 'numpy']# returns arrays rather than the stupid matrix class
             try:
                 lambdified_func = sympy.lambdify(list(symbols_in_func), func,
                         modules=mat2array)
@@ -6889,19 +6888,20 @@ class fitdata(nddata):
         self.active_indices = None
         #}}}
         return
-    def parameter_derivatives(self,xvals,set = None,set_to = None):
-        r'return a matrix containing derivatives of the parameters, can set dict set, or keys set, vals set_to'
-        #logger.debug(strm('parameter derivatives is called!'))
+    def parameter_derivatives(self,xvals,set_what = None,set_to = None):
+        r'''return a matrix containing derivatives of the parameters, can set_what
+        dict set_what, or keys set_what, vals set_to'''
+        logger.debug(strm('parameter derivatives is called!'))
         print("*** DEBUG ***")
         print('parameter derivatives is called!')
         print("*** DEBUG ***")
         if iscomplex(self.data.flatten()[0]):
-            print((lsafen('Warning, taking only real part of fitting data!')))
-        if isinstance(set, dict):
-            set_to = list(set.values())
-            set = list(set.keys())
+            print(lsafen('Warning, taking only real part of fitting data!'))
+        if isinstance(set_what, dict):
+            set_to = list(set_what.values())
+            set_what = list(set_what.keys())
         solution_list = dict([(self.symbolic_dict[k],set_to[j])
-            if k in set
+            if k in set_what
             else (self.symbolic_dict[k],self.output(k))
             for j,k in enumerate(self.symbol_list)]) # load into the solution list
         number_of_i = len(xvals)
@@ -6909,11 +6909,10 @@ class fitdata(nddata):
         mydiff_sym = [[]] * len(self.symbolic_vars)
         x = self.symbolic_x
         # specify dtype to enable storage of sympy data
-        fprime = zeros([len(parameters),number_of_i],dtype=sympy.Symbol)
+        fprime = zeros([len(parameters),number_of_i])
         for j in range(0,len(parameters)):
             thisvar = self.symbolic_dict[parameters[j]]
             mydiff_sym[j] = sympy.diff(self.symbolic_func,thisvar)
-
             #print r'$\frac{\partial %s}{\partial %s}=%s$'%(self.function_name,repr(thisvar),sympy.latex(mydiff).replace('$','')),'\n\n'
             try:
                 print("*** DEBUG 0 ***")
@@ -6926,32 +6925,26 @@ class fitdata(nddata):
                 print("*** DEBUG 1 ***")
             except Exception as e:
                 raise ValueError(strm('error trying to substitute', mydiff_sym[j],
-                    'with', solution_list) + explain_error(e))
+                    'with', solution_list))
             try:
-                print("*** DEBUG 2 ***")
-                print(type(mydiff))
-                # need to make some specification in modules as in line below
-                # or else get weird AttributeError
-                mydiff_lam = sympy.lambdify(fit_axis,mydiff,modules=[{'exp':(sympy.exp)},'numpy'])
-                for k in range(0,len(xvals)):
-                    fprime[j,k] = mydiff_lam(xvals[k])
-                print("*** DEBUG 2 ***")
-            except ValueError as e:
-                raise ValueError(strm('Trying to set index',j,
-                    'shape(fprime)',shape(fprime),
-                    'shape(xvals)',shape(xvals),'the thing I\'m trying to',
-                    'compute looks like this',
-                    [mydiff.subs(x,xvals[k]) for k in range(0,len(xvals))]))
-            except Exception as e:
-                raise ValueError(strm('Trying to set index',j,
-                    'shape(fprime)',shape(fprime),
-                    'shape(xvals)',shape(xvals))+explain_error(e))
+                mydiff_lam = sympy.lambdify(fit_axis,mydiff,
+                        modules=mat2array)
+            except:
+                raise ValueError(strm("I have trouble trying to run lambdify"
+                    "to generate a function of",fit_axis,"type",type(fit_axis),
+                    "from the expression",mydiff,"type",type(mydiff)))
+            try:
+                fprime[j,:] = mydiff_lam(xvals)
+            except AttributeError:
+                raise AttributeError(strm("You have generated a lambda function of",
+                    mydiff,"where allegedly the only remaining variable is",
+                    fit_axis,"... is it possible that is not the case?"))
         return fprime
     def parameter_gradient(self,p,x,y,sigma):
         r'this gives the specific format wanted by leastsq'
         # for now, I'm going to assume that it's not using sigma, though this could be wrong
         # and I could need to scale everything by sigma in the same way as errfunc
-        return self.parameter_derivatives(x,set = self.symbol_list,set_to = p).T
+        return self.parameter_derivatives(x,set_what = self.symbol_list,set_to = p).T
     def analytical_covariance(self):
         covarmatrix = zeros([len(self._active_symbols())]*2)
         #{{{ try this ppt suggestion --> his V is my fprime, but 
@@ -7028,9 +7021,10 @@ class fitdata(nddata):
         #print lsafen('test symbolic_vars=',self.symbolic_vars)
         #print lsafen('test symbolic_x=',self.symbolic_x)
         if hasattr(self,'fitfunc_raw_symb'):
+            # before we were sometimes generating symbolic_func from fitfunc
+            # raw -- can't do this w/out special treatment, b/c we need to
+            # replace exp w/ sympy exp, etc
             self.symbolic_func = self.fitfunc_raw_symb(self.symbolic_vars,self.symbolic_x)
-        else:
-            self.symbolic_func = self.fitfunc_raw(self.symbolic_vars,self.symbolic_x)
         self.function_string = sympy.latex(self.symbolic_func).replace('$','')
         self.function_string = r'$' + self.function_name + '=' + self.function_string + r'$'
         return self
@@ -7236,24 +7230,26 @@ class fitdata(nddata):
         elif not isscalar(taxis) and len(taxis) == 2:
             taxis = linspace(taxis[0],taxis[1],300)
         return taxis
-    def eval(self,taxis,set = None,set_to = None):
+    def eval(self,taxis,set_what = None,set_to = None):
         r'''after we have fit, evaluate the fit function along the axis taxis
-        set and set_to allow you to forcibly set a specific symbol to a specific value --> however, this does not affect the class, but only the return value'''
-        if isinstance(set, dict):
-            set_to = list(set.values())
-            set = list(set.keys())
+        set_what and set_to allow you to forcibly set_what a specific symbol to a
+        specific value --> however, this does not affect the class, but only
+        the return value'''
+        if isinstance(set_what, dict):
+            set_to = list(set_what.values())
+            set_what = list(set_what.keys())
         taxis = self._taxis(taxis)
         if hasattr(self,'fit_coeff') and self.fit_coeff is not None:
             p = self.fit_coeff.copy()
         else:
             p = array([NaN]*len(self.symbol_list))
         #{{{ LOCALLY apply any forced values
-        if set != None:
+        if set_what != None:
             if self.set_indices != None:
-                raise ValueError("you're trying to set indices in an eval"
+                raise ValueError("you're trying to set_what indices in an eval"
                         " function for a function that was fit constrained; this"
                         " is not currently supported")
-            set_indices,set_to,active_mask = self.gen_indices(set,set_to)
+            set_indices,set_to,active_mask = self.gen_indices(set_what,set_to)
             p[set_indices] = set_to
         #}}}
         #{{{ make a new, blank array with the fit axis expanded to fit taxis
@@ -7276,13 +7272,13 @@ class fitdata(nddata):
             self.fit_axis = new
         nddata.rename(self,previous,new)
         return self
-    def fit(self,set = None, set_to = None, force_analytical = False, silent = False):
+    def fit(self,set_what = None, set_to = None, force_analytical = False, silent = False):
         r'''actually run the fit'''
         if not silent: print("\n")
         if not silent: print(r'\resizebox*{!}{3in}{\begin{minipage}{\linewidth}')
-        if isinstance(set, dict):
-            set_to = list(set.values())
-            set = list(set.keys())
+        if isinstance(set_what, dict):
+            set_to = list(set_what.values())
+            set_what = list(set_what.keys())
         x = self.getaxis(self.fit_axis)
         if iscomplex(self.data.flatten()[0]):
             if not silent: print((lsafen('Warning, taking only real part of fitting data!')))
@@ -7294,8 +7290,8 @@ class fitdata(nddata):
             sigma = ones(shape(y))
         #p_ini = [1.0,1.0,1.0] # hard-coded for debug
         p_ini = real(array(self.guess())) # need the numpy format to allow boolean mask
-        if set != None:
-            self.set_indices,self.set_to,self.active_mask = self.gen_indices(set,set_to)
+        if set_what != None:
+            self.set_indices,self.set_to,self.active_mask = self.gen_indices(set_what,set_to)
             p_ini = self.remove_inactive_p(p_ini)
         leastsq_args = (self.errfunc, p_ini)
         leastsq_kwargs = {'args':(x,y,sigma),
@@ -7463,8 +7459,8 @@ class fitdata(nddata):
         #}}}
         #{{{ evaluate f, fprime and residuals
         guess_dict = dict(list(zip(self.symbol_list,list(thisguess))))
-        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
-        f_at_guess = real(self.eval(None,set = guess_dict).data)
+        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set_what = guess_dict)
+        f_at_guess = real(self.eval(None,set_what = guess_dict).data)
         try:
             f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
         except:
@@ -7494,7 +7490,7 @@ class fitdata(nddata):
                     #{{{ evaluate f, fprime and residuals
                     guess_dict = dict(list(zip(self.symbol_list,list(newguess))))
                     # only evaluate fprime once we know this is good, below
-                    f_at_guess = real(self.eval(None,set = guess_dict).data)
+                    f_at_guess = real(self.eval(None,set_what = guess_dict).data)
                     try:
                         f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
                     except:
@@ -7509,7 +7505,7 @@ class fitdata(nddata):
                         regularization_bad = False
                         thisguess = newguess
                         lastresidual = thisresidual
-                        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+                        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set_what = guess_dict)
                 if alpha > alpha_max:
                     print(("\n\n.core.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max))
                     if which_starting_guess >= len(self.starting_guesses)-1:
@@ -7522,8 +7518,8 @@ class fitdata(nddata):
                         j = 0 # restart the loop
                         #{{{ evaluate f, fprime and residuals for the new starting guess
                         guess_dict = dict(list(zip(self.symbol_list,list(thisguess))))
-                        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
-                        f_at_guess = real(self.eval(None,set = guess_dict).data)
+                        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set_what = guess_dict)
+                        f_at_guess = real(self.eval(None,set_what = guess_dict).data)
                         try:
                             f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
                         except:
