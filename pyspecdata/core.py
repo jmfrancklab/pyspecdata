@@ -2597,14 +2597,28 @@ def box_muller(length, return_complex=True):
 #}}}
 
 #{{{nddata
-#{{{ format out to a certain decimal place
-def dp(number,decimalplaces,scientific=False):
+def dp(number,decimalplaces=2,scientific=False,max_front=3):
+    """format out to a certain decimal places, potentially in scientific notation
+
+    Parameters
+    ----------
+    decimalplaces: int (optional, default 3)
+        number of decimal places
+    scientific: boolean (optional, default False)
+        use scientific notation
+    max_front: int (optional, default 3)
+        at most this many places in front of the decimal before switching
+        automatically to scientific notation.
+    """
     if scientific:
-        tenlog = floor(log(number)/log(10.))
+        logger.debug(strm("trying to convert",number,"to scientific notation"))
+        tenlog = int(floor(log10(abs(number))))
         number /= 10**tenlog
         fstring = '%0.'+'%d'%decimalplaces+r'f\times 10^{%d}'%tenlog
     else:
         fstring = '%0.'+'%d'%decimalplaces+'f'
+        if len(fstring%number) > 1+decimalplaces+max_front:
+            return dp(number, decimalplaces=decimalplaces, scientific=True)
     return fstring%number
 #}}}
 #{{{ concatenate datalist along dimname
@@ -7029,6 +7043,10 @@ class fitdata(nddata):
             name of the symbol.
             If no name is passed, then output returns a dictionary of the
             resulting values.
+        Returns
+        -------
+        retval: dict or float
+            Either a dictionary of all the values, or the value itself.
         '''
         if not hasattr(self,'fit_coeff') or self.fit_coeff is None:
             return None
@@ -7101,31 +7119,36 @@ class fitdata(nddata):
         r'''show the latex string for the function, with all the symbols substituted by their values'''
         # this should actually be generic to fitdata
         p = self.fit_coeff
-        printfstring = self.function_string
+        retval = self.function_string
         printfargs = []
         allsymb = []
         locations = []
+        # {{{ I replace the symbols manually
+        #     Note that I came back and tried to use sympy to do this,
+        #     but then realize that sympy will automatically simplify,
+        #     e.g. numbers in the denominator, so it ends up changing the
+        #     way the function looks.  Though this is a pain, it's
+        #     better.
         for j in range(0,len(self.symbol_list)):
-            #symbol = self.symbol_list[j]
             symbol = sympy.latex(self.symbolic_vars[j]).replace('$','')
-            logger.debug(strm('DEBUG: replacing symbol \\verb|',symbol,'|'))
-            location = printfstring.find(symbol)
+            logger.debug(strm('DEBUG: replacing symbol "',symbol,'"'))
+            location = retval.find(symbol)
             while location != -1:
-                if printfstring[location-1] == '-':
-                    newstring = printfstring[:location-1]+'+%01.03g'+printfstring[location+len(symbol):] # replace the symbol in the written function with the appropriate number
-                    thissign = -1.0
+                if retval[location-1] == '-':
+                    newstring = retval[:location-1]+dp(-1*p[j])+retval[location+len(symbol):] # replace the symbol in the written function with the appropriate number
                 else:
-                    newstring = printfstring[:location]+'%01.03g'+printfstring[location+len(symbol):] # replace the symbol in the written function with the appropriate number
-                    thissign = 1.0
-                logger.debug(strm(r"\begin{verbatim} trying to replace",printfstring[location:location+len(symbol)],r'\end{verbatim}'))
-                printfstring = newstring
-                printfargs += [thissign*p[j]] # add that number to the printf list
+                    newstring = retval[:location]+dp(p[j])+retval[location+len(symbol):] # replace the symbol in the written function with the appropriate number
+                logger.debug(strm(r"trying to replace",
+                    retval[location:location+len(symbol)]))
+                retval = newstring
                 locations += [location]
                 allsymb += [symbol]
-                location = printfstring.find(symbol)
-        printfargs = [printfargs[x] for x in argsort(locations)]
-        logger.debug(strm(r"\begin{verbatim}trying to generate",self.function_string,'\n',printfstring,'\n',[allsymb[x] for x in argsort(locations)],'\n',printfargs,r'\end{verbatim}'))
-        return printfstring%tuple(printfargs)
+                location = retval.find(symbol)
+        # }}}
+        logger.debug(strm(r"trying to generate",self.function_string,
+            '\n',retval,'\n',[allsymb[x] for x in argsort(locations)],
+            '\n',printfargs))
+        return retval
     def settoguess(self):
         'a debugging function, to easily plot the initial guess'
         self.fit_coeff = real(self.guess())
