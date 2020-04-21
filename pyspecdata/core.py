@@ -7021,7 +7021,15 @@ class fitdata(nddata):
         else:
             return self.linfunc(self.getaxis(self.fit_axis),self.data,yerr = self.get_error(),xerr = self.get_error(self.fit_axis)) # otherwise, return the raw data
     def output(self,*name):
-        r'''give the fit value of a particular symbol'''
+        r'''give the fit value of a particular symbol, or a dictionary of all values.
+
+        Parameters
+        ----------
+        name: str (optional)
+            name of the symbol.
+            If no name is passed, then output returns a dictionary of the
+            resulting values.
+        '''
         if not hasattr(self,'fit_coeff') or self.fit_coeff is None:
             return None
         p = self.fit_coeff.copy()
@@ -7042,7 +7050,7 @@ class fitdata(nddata):
                     name,"in",self.symbol_list))
         elif len(name) == 0:
             # return a record array
-            return array(tuple(p),{"names":list(self.symbol_list),"formats":['double']*len(p)}).reshape(1)
+            return {self.symbol_list[j]:p[j] for j in range(len(p))}
         else:
             raise ValueError(strm("You can't pass",len(name),"arguments to .output()"))
     def _pn(self,name):
