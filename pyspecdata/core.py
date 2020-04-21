@@ -7288,8 +7288,8 @@ class fitdata(nddata):
             if not silent: print('{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n')
             warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
             sigma = ones(shape(y))
-        #p_ini = [1.0,1.0,1.0] # hard-coded for debug
-        p_ini = real(array(self.guess())) # need the numpy format to allow boolean mask
+        p_ini = [1.0,1.0,1.0] # hard-coded for debug
+        #p_ini = real(array(self.guess())) # need the numpy format to allow boolean mask
         if set_what != None:
             self.set_indices,self.set_to,self.active_mask = self.gen_indices(set_what,set_to)
             p_ini = self.remove_inactive_p(p_ini)
