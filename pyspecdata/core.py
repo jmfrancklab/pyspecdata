@@ -6888,6 +6888,32 @@ class fitdata(nddata):
         self.active_indices = None
         #}}}
         return
+    @property
+    def functional_form(self):
+        return self.symbolic_func
+    @functional_form.setter
+    def functoinal_form(self,sym_expr):
+        #{{{ adapted from fromaxis, trying to adapt the variable
+        symbols_in_expr = sym_expr.atoms(sympy.Symbol)
+        logger.debug(strm('identified this as a sympy expression (',sym_expr,') with symbols',symbols_in_expr))
+        symbols_in_expr = set(map(str,symbols_in_expr))
+        # the next are the parameters
+        self.fit_axis = set(self.dimlabels) & symbols_in_expr
+        assert len(self.fit_axis)==1, "currently only 1D fitting is supported, though this should be easy to change -- I see potential fit axes %s"%str(self.fit_axis)
+        # the next line gives the parameters
+        self.symbolic_vars = symbols_in_expr-self.fit_axis
+        #}}}
+        self.fit_axis = list(self.fit_axis)[0]
+        # redefine as real to avoid weird piecewise derivatives
+        self.fit_axis_sym = sympy.var(self.fit_axis,real=True) 
+        self.symbolic_vars = [sympy.var(j,real=True) for j in self.symbolic_vars]
+        args = [self.fit_axis] + self.symbolic_vars
+        self.fitfunc_multiarg = sympy.lambdify(tuple(args), sym_expr, modules=mat2array)
+        self.fitfunc_raw = lambda p,x: self.fitfunc_multiarg(*tuple([p[j] for j in len(self.symbolic_vars)] + [self.fitaxis]
+            ))
+        # leave the gradient for later
+
+
     def gen_symbolic(self,function_name):
         r'''generates the symbolic representations the function'''
         self.function_name = function_name
