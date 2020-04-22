@@ -6077,7 +6077,7 @@ class nddata (object):
         if lefterror is not None:
             lefterror[tuple(leftindex)] = righterrors.squeeze()
     # {{{ standard trig functions
-    def __getattr__(self,arg):
+    def __getattribute__(self,arg):
         fundict = {'exp':exp,
                 'sin':sin,
                 'cos':cos,
@@ -6096,8 +6096,7 @@ class nddata (object):
                 return retval
             return retfun
         else:
-            retval = getattr(super(nddata,self),arg)
-            return retval
+            return super().__getattribute__(arg)
     @property
     def C(self):
         """shortcut for copy
@@ -6627,24 +6626,12 @@ class nddata_hdf5 (nddata):
         else:
             return nddata.__repr__(self)
         atexit.register(self._cleanup)
-    def __del__(self):
-        self._cleanup()
-        return
     def _cleanup(self):
         if hasattr(self,'_node_children'):
             self.h5file.close()
             del self.h5file
             del self.datanode
         return
-    def __init__(self,pathstring,directory='.'):
-        self.pathstring = pathstring
-        #try:
-        self.h5file,self.datanode = h5nodebypath(pathstring,
-                check_only=True, directory=directory)
-        #except BaseException  as e:
-        #    raise IndexError("I can't find the node "+pathstring+explain_error(e))
-        self._init_datanode(self.datanode)
-        atexit.register(self._cleanup)
     def _init_datanode(self,datanode,**kwargs):
         datadict = h5loaddict(datanode)
         #{{{ load the data, and pop it from datadict
@@ -6727,6 +6714,16 @@ class nddata_hdf5 (nddata):
         del self.h5file
         del self.datanode
         return
+    def __init__(self,pathstring,directory='.'):
+        self.pathstring = pathstring
+        #try:
+        self.h5file,self.datanode = h5nodebypath(pathstring,
+                check_only=True, directory=directory)
+        #except BaseException  as e:
+        #    raise IndexError("I can't find the node "+pathstring+explain_error(e))
+        print("about to call _init_datanode")
+        self._init_datanode(self.datanode)
+        atexit.register(self._cleanup)
 #}}}
 
 class ndshape (ndshape_base):
@@ -6900,51 +6897,52 @@ class fitdata(nddata):
         #}}}
         return
     @property
+    def function_string(self):
+        retval = sympy.latex(self.symbolic_expr).replace('$','')
+        return r'$f(%s)='%(sympy.latex(self.fit_axis)) + retval + r'$'
+    @function_string.setter
+    def function_string(self):
+        raise ValueError("You cannot set the string directly -- change the functional_form property instead!")
+    @property
     def functional_form(self):
         print("Getting symbolic function")
-        return self.symbolic_func
+        return self.symbolic_expr
     @functional_form.setter
-    def functoinal_form(self,sym_expr):
-        print("Setting symbolic function")
+    def functional_form(self,sym_expr):
+        assert issympy(sym_expr), "for now, the functional form must be a sympy expression!"
+        self.symbolic_expr = sym_expr
         #{{{ adapted from fromaxis, trying to adapt the variable
-        symbols_in_expr = sym_expr.atoms(sympy.Symbol)
-        #logger.debug(strm('identified this as a sympy expression (',sym_expr,') with symbols',symbols_in_expr))
-        print('identified this as a sympy expression (',sym_expr,') with symbols',symbols_in_expr)
+        symbols_in_expr = self.symbolic_expr.atoms(sympy.Symbol)
+        #logger.debug(strm('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr))
+        print('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr)
         symbols_in_expr = set(map(str,symbols_in_expr))
         # the next are the parameters
         self.fit_axis = set(self.dimlabels) & symbols_in_expr
-        assert len(self.fit_axis)==1, "currently only 1D fitting is supported, though this should be easy to change -- I see potential fit axes %s"%str(self.fit_axis)
+        if len(self.fit_axis) == 0:
+            raise ValueError("I can't find any variables that might correspond to a dimension you want to fit along."
+                    "The variables are", symbols_in_expr,
+                    "and the dimensions are", self.dimlabels)
+        elif len(self.fit_axis) > 1:
+            raise ValueError("currently only 1D fitting is supported, though this should be easy"
+                    "to change -- I see potential fit axes %s"%str(self.fit_axis))
         # the next line gives the parameters
         self.symbolic_vars = symbols_in_expr-self.fit_axis
         #}}}
         self.fit_axis = list(self.fit_axis)[0]
         # redefine as real to avoid weird piecewise derivatives
         self.fit_axis_sym = sympy.var(self.fit_axis,real=True) 
+        self.symbolic_vars = list(self.symbolic_vars)
+        self.symbolic_vars.sort() # so I get consistent behavior
         self.symbolic_vars = [sympy.var(j,real=True) for j in self.symbolic_vars]
-        args = [self.fit_axis] + self.symbolic_vars
-        self.fitfunc_multiarg = sympy.lambdify(tuple(args), sym_expr, modules=mat2array)
-        self.fitfunc_raw = lambda p,x: self.fitfunc_multiarg(*tuple([p[j] for j in len(self.symbolic_vars)] + [self.fitaxis]
-            ))
+        args = self.symbolic_vars + [self.fit_axis]
+        self.fitfunc_multiarg = sympy.lambdify(tuple(args), self.symbolic_expr, modules=mat2array)
+        def raw_fn(p,x):
+            print("called fitfunc_raw with",p,"and",x)
+            assert len(p)==len(self.symbolic_vars), "length of parameter passed to fitfunc_raw doesn't match number of symbolic parameters"
+            return self.fitfunc_multiarg(
+                    *tuple([p[j] for j in range(len(self.symbolic_vars))] + [x]))
+        self.fitfunc_raw = raw_fn
         # leave the gradient for later
-
-
-    def gen_symbolic(self,function_name):
-        r'''generates the symbolic representations the function'''
-        self.function_name = function_name
-        self.symbolic_vars = list(map(sympy.var,self.symbol_list))
-        self.symbolic_x = sympy.var(self.fit_axis)
-        #print lsafen('test symbol_list=',self.symbol_list)
-        self.symbolic_dict = dict(list(zip(self.symbol_list,self.symbolic_vars)))
-        #print lsafen('test symbolic_vars=',self.symbolic_vars)
-        #print lsafen('test symbolic_x=',self.symbolic_x)
-        if hasattr(self,'fitfunc_raw_symb'):
-            # before we were sometimes generating symbolic_func from fitfunc
-            # raw -- can't do this w/out special treatment, b/c we need to
-            # replace exp w/ sympy exp, etc
-            self.symbolic_func = self.fitfunc_raw_symb(self.symbolic_vars,self.symbolic_x)
-        self.function_string = sympy.latex(self.symbolic_func).replace('$','')
-        self.function_string = r'$' + self.function_name + '=' + self.function_string + r'$'
-        return self
     def copy(self): # for some reason, if I don't override this with the same thing, it doesn't override
         namelist = []
         vallist = []
@@ -7233,32 +7231,33 @@ class fitdata(nddata):
             leastsq_kwargs.update({'Dfun':self.parameter_gradient})
         if 'Dfun' in list(leastsq_kwargs.keys()):
             if not silent: print("yes, Dfun passed with arg",leastsq_kwargs['Dfun'])
-        try:
-            p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
-        #{{{ just give various explicit errors
-        except TypeError as err:
-            if not isinstance(x, ndarray) and not isinstance(y, ndarray):
-                raise TypeError(strm('leastsq failed because the two arrays',
-                    "aren\'t of the right",
-                    'type','type(x):',type(x),'type(y):',type(y)))
-            else:
-                if any(shape(x) != shape(y)):
-                    raise RuntimeError(strm('leastsq failed because the two arrays do'
-                            "not match in size size",
-                            'shape(x):',shape(x),
-                            'shape(y):',shape(y)))
-            raise TypeError(strm('leastsq failed because of a type error!',
-                'type(x):',showtype(x),'type(y):',showtype(y),
-                'type(sigma)',showtype(sigma),'shape(x):',shape(x),
-                'shape(y):',shape(y),'shape(sigma)',shape(sigma),
-                'p_ini',type(p_ini),p_ini))
-        except ValueError as err:
-            raise ValueError(strm('leastsq failed with "',err,
-                '", maybe there is something wrong with the input:',
-                self))
-        except Exception as e:
-            raise ValueError('leastsq failed; I don\'t know why'+explain_error(e))
-        #}}}
+        p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
+        #try:
+        #   p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
+        ##{{{ just give various explicit errors
+        #except TypeError as err:
+        #    if not isinstance(x, ndarray) and not isinstance(y, ndarray):
+        #        raise TypeError(strm('leastsq failed because the two arrays',
+        #            "aren\'t of the right",
+        #            'type','type(x):',type(x),'type(y):',type(y)))
+        #    else:
+        #        if any(shape(x) != shape(y)):
+        #            raise RuntimeError(strm('leastsq failed because the two arrays do'
+        #                    "not match in size size",
+        #                    'shape(x):',shape(x),
+        #                    'shape(y):',shape(y)))
+        #    raise TypeError(strm('leastsq failed because of a type error!',
+        #        'type(x):',showtype(x),'type(y):',showtype(y),
+        #        'type(sigma)',showtype(sigma),'shape(x):',shape(x),
+        #        'shape(y):',shape(y),'shape(sigma)',shape(sigma),
+        #        'p_ini',type(p_ini),p_ini))
+        #except ValueError as err:
+        #    raise ValueError(strm('leastsq failed with "',err,
+        #        '", maybe there is something wrong with the input:',
+        #        self))
+        #except Exception as e:
+        #    raise ValueError('leastsq failed; I don\'t know why'+explain_error(e))
+        ##}}}
         if success not in [1,2,3,4]:
             #{{{ up maximum number of evals
             if mesg.find('maxfev'):
