@@ -6904,12 +6904,15 @@ class fitdata(nddata):
         return
     @property
     def functional_form(self):
+        print("Getting symbolic function")
         return self.symbolic_func
     @functional_form.setter
     def functoinal_form(self,sym_expr):
+        print("Setting symbolic function")
         #{{{ adapted from fromaxis, trying to adapt the variable
         symbols_in_expr = sym_expr.atoms(sympy.Symbol)
-        logger.debug(strm('identified this as a sympy expression (',sym_expr,') with symbols',symbols_in_expr))
+        #logger.debug(strm('identified this as a sympy expression (',sym_expr,') with symbols',symbols_in_expr))
+        print('identified this as a sympy expression (',sym_expr,') with symbols',symbols_in_expr)
         symbols_in_expr = set(map(str,symbols_in_expr))
         # the next are the parameters
         self.fit_axis = set(self.dimlabels) & symbols_in_expr
