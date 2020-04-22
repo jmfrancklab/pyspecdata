@@ -6870,9 +6870,6 @@ class fitdata(nddata):
             fit_axis = kwargs.pop('fit_axis')
         #}}}
         if isinstance(args[0],nddata):
-            #print(nddata)
-            #print "DEBUG trying to transfer",args[0].axis_coords_error
-            #print([j for j in normal_attrs(args[0]) if j not in ['C','angle','sin','cos','exp','log10']])
             myattrs = [j for j in normal_attrs(args[0]) if j not in ['C','angle','imag','real','sin','cos','exp','log10']]
             for j in range(0,len(myattrs)):
                 self.__setattr__(myattrs[j],args[0].__getattribute__(myattrs[j]))
@@ -7070,7 +7067,6 @@ class fitdata(nddata):
                 raise ValueError(strm("While running output: couldn't find",
                     name,"in",self.symbol_list))
         elif len(name) == 0:
-            # return a record array
             return {self.symbol_list[j]:p[j] for j in range(len(p))}
         else:
             raise ValueError(strm("You can't pass",len(name),"arguments to .output()"))
@@ -7236,7 +7232,7 @@ class fitdata(nddata):
         if hasattr(self,'has_grad') and self.has_grad == True:
             leastsq_kwargs.update({'Dfun':self.parameter_gradient})
         if 'Dfun' in list(leastsq_kwargs.keys()):
-            if not silent: print(("yes, Dfun passed with arg",leastsq_kwargs['Dfun']))
+            if not silent: print("yes, Dfun passed with arg",leastsq_kwargs['Dfun'])
         try:
             p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
         #{{{ just give various explicit errors
@@ -7270,8 +7266,8 @@ class fitdata(nddata):
                 p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
                 if success != 1:
                     if mesg.find('two consecutive iterates'):
-                        if not silent: print((r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n'))
-                        if not silent: print((r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n'))
+                        if not silent: print(r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n')
+                        if not silent: print(r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n')
                         infodict_keys = list(infodict.keys())
                         infodict_vals = list(infodict.values())
                         if 'nfev' in infodict_keys:
@@ -7285,7 +7281,7 @@ class fitdata(nddata):
                         if 'qtf' in infodict_keys:
                             infodict_keys[infodict_keys.index('qtf')] = 'qtf, the vector (transpose(q)*fvec)'
                         for k,v in zip(infodict_keys,infodict_vals):
-                            if not silent: print((r'{\color{red}{\bf %s:}%s}'%(k,v),'\n\n'))
+                            if not silent: print(r'{\color{red}{\bf %s:}%s}'%(k,v),'\n\n')
                         #self.fit_coeff = None
                         #self.settoguess()
                         #return
@@ -7296,7 +7292,7 @@ class fitdata(nddata):
                 raise RuntimeError(strm('leastsq finished with an error message:',mesg))
         else:
             if not silent: print(r'{\color{blue}')
-            if not silent: print((lsafen("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg))))
+            if not silent: print(lsafen("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg)))
             if not silent: print(r'}')
             if not silent: print("\n")
         self.fit_coeff = p_out # note that this is stored in HIDDEN form
@@ -7307,7 +7303,7 @@ class fitdata(nddata):
             if force_analytical: raise RuntimeError(strm("I can't take the analytical",
                 "covariance!  This is problematic."))
             if cov is None:
-                if not silent: print((r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success),'}\n'))
+                if not silent: print(r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success),'}\n')
             self.covariance = cov
         if self.covariance is not None:
             try:
@@ -7352,11 +7348,11 @@ class fitdata(nddata):
                     thiscopy.fit()
                     success = True
                     if len(minbounds) > 0:
-                        for k,v in list(minbounds.items()):
+                        for k,v in minbounds.items():
                             if thiscopy.output(k) < v:
                                 success = False
                     if len(maxbounds) > 0:
-                        for k,v in list(maxbounds.items()):
+                        for k,v in maxbounds.items():
                             if thiscopy.output(k) > v:
                                 success = False
                 except:
