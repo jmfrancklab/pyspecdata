@@ -6999,7 +6999,6 @@ class fitdata(nddata):
     def dfitfunc(self,p,x,y):
         p = self.add_inactive_p(p)
         return self.dfitfunc_raw(p,x,y)
-
     def errfunc(self,p,x,y,sigma):
         '''just the error function'''
         fit = self.fitfunc(p,x)
