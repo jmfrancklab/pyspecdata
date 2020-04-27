@@ -101,7 +101,6 @@ rcParams['image.cmap'] = 'jet'
 rcParams['figure.figsize']=(16,12)
 mat2array = [{'ImmutableMatrix': array}, 'numpy']# for sympy returns arrays rather than the stupid matrix class
 logger = logging.getLogger('pyspecdata.core')
-from sympy import Matrix,ImmutableMatrix,Array
 #{{{ constants
 k_B = 1.380648813e-23
 mu_0 = 4e-7*pi
@@ -6912,9 +6911,6 @@ class fitdata(nddata):
     def functional_form(self,sym_expr):
         assert issympy(sym_expr), "for now, the functional form must be a sympy expression!"
         self.symbolic_expr = sym_expr
-        print("*** *** ***")
-        print(self.symbolic_expr)
-        print("*** *** ***")
         #self.dsymbolic_expr = sympy.diff(sympy_expr,)
         #{{{ adapted from fromaxis, trying to adapt the variable
         symbols_in_expr = self.symbolic_expr.atoms(sympy.Symbol)
@@ -6939,30 +6935,29 @@ class fitdata(nddata):
         self.symbolic_vars = list(self.symbolic_vars)
         self.symbolic_vars.sort() # so I get consistent behavior
         self.symbolic_vars = [sympy.var(j,real=True) for j in self.symbolic_vars]
-        # differentiate wrt fitting parameters (T1)
-        #self.dsymbolic_expr = sympy.diff(sym_expr,self.symbolic_vars[-1])
+        # differentiate wrt all parameters except fit axis
         print("*** *** ***")
-        print(self.fit_axis)
+        print(sym_expr)
         print(self.symbolic_vars)
         print("*** *** ***")
-        self.dsymbolic_expr = ImmutableMatrix([sym_expr]).jacobian(Matrix(self.symbolic_vars))
+        all_derivs = []
+        for thisvar in self.symbolic_vars:
+            print("*** *** ***")
+            print(thisvar)
+            sympy.lambdify(self.symbolic_vars+[self.fit_axis],sympy.diff(sym_expr,thisvar),modules=mat2array)
+            print("*** *** ***")
+        #self.dsymbolic_expr = sympy.diff(sym_expr,self.symbolic_vars)
         args = self.symbolic_vars + [self.fit_axis]
         self.fitfunc_multiarg = sympy.lambdify(tuple(args), self.symbolic_expr, modules=mat2array)
         #self.dfitfunc_multiarg = sympy.lambdify(tuple(args), self.dsymbolic_expr, modules=mat2array)
-        self.dfitfunc_multiarg = sympy.lambdify(self.symbolic_vars+[self.fit_axis],self.dsymbolic_expr,modules='numpy')
-        
+        #self.dfitfunc_multiarg = sympy.lambdify(self.symbolic_vars+[self.fit_axis],sympy.diff(sym_expr,self.symbolic_vars),modules=mat2array)
         def raw_fn(p,x):
             assert len(p)==len(self.symbolic_vars), "length of parameter passed to fitfunc_raw doesn't match number of symbolic parameters"
             return self.fitfunc_multiarg(
                     *tuple([p[j] for j in range(len(self.symbolic_vars))] + [x]))
-        #def d_raw_fn(p,x,y):
-        #    return [self.dfitfunc_multiarg(
-        #            *tuple([p[j] for j in range(len(self.symbolic_vars))] + [x])),ones(len(x))]
         def d_raw_fn(p,x,y):
-            x_ones = ones_like(self.fit_axis)
-            retval = self.dfitfunc_multiarg(*tuple(self.symbolic_vars+[self.fit_axis]))
-            retval = r_[[retval[0,j]*x_ones for j in range(retval.shape[1])]]
-            return retval
+            return [self.dfitfunc_multiarg(
+                    *tuple([p[j] for j in range(len(self.symbolic_vars))] + [x])),ones(len(x))]
         self.fitfunc_raw = raw_fn
         self.dfitfunc_raw = d_raw_fn
         # leave the gradient for later
@@ -7013,7 +7008,15 @@ class fitdata(nddata):
         p = self.add_inactive_p(p)
         return self.fitfunc_raw(p,x)
     def dfitfunc(self,p,x,y):
+        print("*** *** ***")
+        print(" P BEFORE ")
+        print(p)
+        print("*** *** ***")
         p = self.add_inactive_p(p)
+        print("*** *** ***")
+        print(" P AFTER ")
+        print(p)
+        print("*** *** ***")
         return self.dfitfunc_raw(p,x,y)
     def errfunc(self,p,x,y,sigma):
         '''just the error function'''
