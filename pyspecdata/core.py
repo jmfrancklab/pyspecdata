@@ -6934,6 +6934,7 @@ class fitdata(nddata):
         self.symbolic_vars = list(self.symbolic_vars)
         self.symbolic_vars.sort() # so I get consistent behavior
         self.symbolic_vars = [sympy.var(j,real=True) for j in self.symbolic_vars]
+        self.symbol_list = [str(j) for j in self.symbolic_vars]
         args = self.symbolic_vars + [self.fit_axis]
         self.fitfunc_multiarg = sympy.lambdify(tuple(args), self.symbolic_expr, modules=mat2array)
         def raw_fn(p,x):
