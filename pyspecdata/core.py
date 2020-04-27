@@ -7012,15 +7012,16 @@ class fitdata(nddata):
         r"this wraps fitfunc_raw (which gives the actual form of the fit function) to take care of forced variables"
         p = self.add_inactive_p(p)
         return self.fitfunc_raw(p,x)
-    def errfunc(self,p,x,y,sigma):
+    def residual(self,p,x,y,sigma):
         '''just the error function'''
         fit = self.fitfunc(p,x)
         #normalization = sum(1.0/sigma)
         #print 'DEBUG: y=',y,'\nfit=',fit,'\nsigma=',sigma,'\n\n'
         sigma[sigma == 0.0] = 1
         try:
-            retval = (y-fit)/sigma #* normalization
-            #print 'DEBUG: retval=',retval,'\n\n'
+            # as noted here: https://stackoverflow.com/questions/6949370/scipy-leastsq-dfun-usage
+            # this needs to be fit - y, not vice versa
+            retval = (fit-y)/sigma #* normalization
         except ValueError as e:
             raise ValueError(strm('your error (',shape(sigma),
                     ') probably doesn\'t match y (',
@@ -7247,7 +7248,7 @@ class fitdata(nddata):
         if set_what is not None:
             self.set_indices,self.set_to,self.active_mask = self.gen_indices(set_what,set_to)
             p_ini = self.remove_inactive_p(p_ini)
-        leastsq_args = (self.errfunc, p_ini)
+        leastsq_args = (self.residual, p_ini)
         leastsq_kwargs = {'args':(x,y,sigma),
                     'full_output':True}# 'maxfev':1000*(len(p_ini)+1)}
         if hasattr(self,'has_grad') and self.has_grad == True:
