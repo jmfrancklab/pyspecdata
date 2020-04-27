@@ -6937,7 +6937,6 @@ class fitdata(nddata):
         args = self.symbolic_vars + [self.fit_axis]
         self.fitfunc_multiarg = sympy.lambdify(tuple(args), self.symbolic_expr, modules=mat2array)
         def raw_fn(p,x):
-            print("called fitfunc_raw with",p,"and",x)
             assert len(p)==len(self.symbolic_vars), "length of parameter passed to fitfunc_raw doesn't match number of symbolic parameters"
             return self.fitfunc_multiarg(
                     *tuple([p[j] for j in range(len(self.symbolic_vars))] + [x]))
