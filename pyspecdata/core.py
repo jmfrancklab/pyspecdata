@@ -159,6 +159,8 @@ def mydiff(data,axis = -1):
 def normal_attrs(obj):
     myattrs = [x for x in dir(obj) if not ismethod(obj.__getattribute__(x))]
     myattrs = [x for x in myattrs if not x[0:2] == '__']
+    # next line filters out properties
+    myattrs = [x for x in myattrs if x not in ['C','angle','imag','real']]
     return myattrs
 def showtype(x):
     if isinstance(x, ndarray):
@@ -6867,7 +6869,7 @@ class fitdata(nddata):
             fit_axis = kwargs.pop('fit_axis')
         #}}}
         if isinstance(args[0],nddata):
-            myattrs = [j for j in normal_attrs(args[0]) if j not in ['C','angle','imag','real','sin','cos','exp','log10']]
+            myattrs = normal_attrs(args[0])
             for j in range(0,len(myattrs)):
                 self.__setattr__(myattrs[j],args[0].__getattribute__(myattrs[j]))
             #nddata.__init__(self,
