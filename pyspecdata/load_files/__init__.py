@@ -37,7 +37,8 @@ def _dirformat(file):
         return file
 #}}}
 def search_filename(searchstring,exp_type,
-        print_result=True):
+        print_result=True,
+        unique=False):
     r"""Use regular expression `searchstring` to find a file inside the directory indicated by `exp_type`
 
     Parameters
@@ -54,6 +55,8 @@ def search_filename(searchstring,exp_type,
         experiments sorted into different directories, this argument
         specifies the type of experiment see :func:`~pyspecdata.datadir.getDATADIR` for
         more info.
+    unique : boolean (default False)
+        If true, then throw an error unless only one file is found.
     """
     #{{{ actually find the files
     directory = getDATADIR(exp_type=exp_type)
@@ -92,8 +95,14 @@ def search_filename(searchstring,exp_type,
         elif print_result:
             logger.info("found only one file, and loading it:"+repr(files))
     #}}}
-    return [directory+j for j in files]
-
+    retval = [directory+j for j in files]
+    if unique:
+        if len(retval) == 0:
+            raise ValueError("found no files in",directory,"matching",searchstring)
+        elif len(retval) > 1:
+            raise ValueError("found more than on file in",directory,"matching",searchstring)
+        else:
+            return retval[0]
 def find_file(searchstring,
             exp_type = None,
             postproc = None,
