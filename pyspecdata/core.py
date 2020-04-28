@@ -6942,7 +6942,10 @@ class fitdata(nddata):
         print("*** *** ***")
         all_derivs = []
         for thisvar in self.symbolic_vars:
-            all_derivs.append(sympy.lambdify(self.symbolic_vars+[self.fit_axis],sympy.diff(sym_expr,thisvar),modules=mat2array))
+            print("*** *** *** *** ***")
+            print(type(self.fit_axis_sym))
+            print("*** *** *** *** ***")
+            all_derivs.append(sympy.lambdify(self.symbolic_vars+[self.fit_axis_sym],sympy.diff(sym_expr,thisvar),modules=mat2array))
         print("*** *** ***")
         print("Found all derivatives.")
         print("*** *** ***")
@@ -6951,9 +6954,9 @@ class fitdata(nddata):
             for j in range(len(self.symbolic_vars)):
                 retval[j,:] = all_derivs[j](*tuple(p_arg+[x_arg]))
                 return retval
-        retval = jac_matrix(self.symbolic_vars,self.fit_axis)
+        retval = jac_matrix(self.symbolic_vars,self.fit_axis_sym)
         #self.dsymbolic_expr = sympy.diff(sym_expr,self.symbolic_vars)
-        args = self.symbolic_vars + [self.fit_axis]
+        args = self.symbolic_vars + [self.fit_axis_sym]
         self.fitfunc_multiarg = sympy.lambdify(tuple(args), self.symbolic_expr, modules=mat2array)
         #self.dfitfunc_multiarg = sympy.lambdify(tuple(args), self.dsymbolic_expr, modules=mat2array)
         #self.dfitfunc_multiarg = sympy.lambdify(self.symbolic_vars+[self.fit_axis],sympy.diff(sym_expr,self.symbolic_vars),modules=mat2array)
