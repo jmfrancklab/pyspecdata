@@ -2054,7 +2054,7 @@ def plot(*args,**kwargs):
         myy = squeeze(myy.data)
     #}}}
     #{{{ semilog where appropriate
-    if (myx != None) and (len(myx)>1): # by doing this and making myplotfunc global, we preserve the plot style if we want to tack on one point
+    if (myx is not None) and (len(myx)>1) and all(myx>0): # by doing this and making myplotfunc global, we preserve the plot style if we want to tack on one point
         try:
             b = diff(log10(myx))
         except:
@@ -2127,8 +2127,7 @@ def plot(*args,**kwargs):
         #}}}
     else:
         plotargs = [myx,real(myy),myformat]
-        while None in plotargs:
-            plotargs.remove(None)
+        plotargs = [j for j in plotargs if j is not None]
         try:
             #print 'DEBUG plotting with args',plotargs,'and kwargs',kwargs,'\n\n'
             retval = myplotfunc(*plotargs,**kwargs)
