@@ -6939,27 +6939,22 @@ class fitdata(nddata):
         print("*** *** ***")
         print(sym_expr)
         print(self.symbolic_vars)
+        print(self.fit_axis_sym)
         print("*** *** ***")
         all_derivs = []
         for thisvar in self.symbolic_vars:
-            print("*** *** *** *** ***")
-            print(type(self.fit_axis_sym))
-            print("*** *** *** *** ***")
             all_derivs.append(sympy.lambdify(self.symbolic_vars+[self.fit_axis_sym],sympy.diff(sym_expr,thisvar),modules=mat2array))
         print("*** *** ***")
-        print("Found all derivatives.")
         print("*** *** ***")
         def jac_matrix(p_arg,x_arg):
             retval = empty((len(self.symbolic_vars),len(self.fit_axis)))
             for j in range(len(self.symbolic_vars)):
                 retval[j,:] = all_derivs[j](*tuple(p_arg+[x_arg]))
                 return retval
-        retval = jac_matrix(self.symbolic_vars,self.fit_axis_sym)
+        retval = jac_matrix([1,1,1],self.fit_axis_sym)
         #self.dsymbolic_expr = sympy.diff(sym_expr,self.symbolic_vars)
         args = self.symbolic_vars + [self.fit_axis_sym]
         self.fitfunc_multiarg = sympy.lambdify(tuple(args), self.symbolic_expr, modules=mat2array)
-        #self.dfitfunc_multiarg = sympy.lambdify(tuple(args), self.dsymbolic_expr, modules=mat2array)
-        #self.dfitfunc_multiarg = sympy.lambdify(self.symbolic_vars+[self.fit_axis],sympy.diff(sym_expr,self.symbolic_vars),modules=mat2array)
         def raw_fn(p,x):
             assert len(p)==len(self.symbolic_vars), "length of parameter passed to fitfunc_raw doesn't match number of symbolic parameters"
             return self.fitfunc_multiarg(
@@ -7017,15 +7012,7 @@ class fitdata(nddata):
         p = self.add_inactive_p(p)
         return self.fitfunc_raw(p,x)
     def dfitfunc(self,p,x,y):
-        print("*** *** ***")
-        print(" P BEFORE ")
-        print(p)
-        print("*** *** ***")
         p = self.add_inactive_p(p)
-        print("*** *** ***")
-        print(" P AFTER ")
-        print(p)
-        print("*** *** ***")
         return self.dfitfunc_raw(p,x,y)
     def errfunc(self,p,x,y,sigma):
         '''just the error function'''
