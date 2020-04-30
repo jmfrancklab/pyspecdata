@@ -104,12 +104,12 @@ def search_filename(searchstring,exp_type,
         else:
             return retval[0]
 def find_file(searchstring,
-            exp_type = None,
-            postproc = None,
-            print_result = True,
-            verbose = False,
-            prefilter = None,
-            expno = None,
+            exp_type=None,
+            postproc=None,
+            print_result=True,
+            verbose=False,
+            prefilter=None,
+            expno=None,
             dimname='', return_acq=False,
             add_sizes=[], add_dims=[], use_sweep=None,
             indirect_dimlabels=None,
@@ -151,7 +151,9 @@ def find_file(searchstring,
         This function is fed the nddata data and the remaining keyword
         arguments (`kwargs`) as arguments.
         It's assumed that each module for each different file type
-        provides a dictionary called `postproc_lookup`.
+        provides a dictionary called `postproc_lookup` (some are already
+        available in pySpecData, but also, see the `postproc_lookup` argument,
+        below).
         If `postproc` is a string,
         it looks up the string inside the `postproc_lookup`
         dictionary that's appropriate for the file type.
@@ -178,6 +180,8 @@ def find_file(searchstring,
         :add_dims: passed to :func:`~pyspecdata.load_files.load_indiv_file`
         :use_sweep: passed to :func:`~pyspecdata.load_files.load_indiv_file`
         :indirect_dimlabels: passed to :func:`~pyspecdata.load_files.load_indiv_file`
+    postproc_lookup : dictionary with str:function pairs
+        types of postprocessing to add to the `postproc_lookup` dictionary
         '''
     logger.info(strm("find_file sees indirect_dimlabels",
         indirect_dimlabels))
@@ -409,16 +413,21 @@ def load_indiv_file(filename, dimname='', return_acq=False,
                 # we can have the normal ACERT Pulse experiment or the ACERT CW format
                 with h5py.File(filename,'r') as h5:
                     try:
+                        # check to see if it's an acert file
                         description_class = h5['experiment']['description'].attrs['class']
+                        is_acert = True
                     except:
-                        raise IOError("I am assuming this is an ACERT datafile,"
-                                " but can't identify the type, because"
-                                " I can't find"
-                                " experiment.description['class']")
-                if description_class == 'CW':
-                    data = acert.load_cw(filename, use_sweep=use_sweep)
+                        is_acert = False
+                if is_acert:
+                    if description_class == 'CW':
+                        data = acert.load_cw(filename, use_sweep=use_sweep)
+                    else:
+                        data = acert.load_pulse(filename, indirect_dimlabels=indirect_dimlabels)
                 else:
-                    data = acert.load_pulse(filename, indirect_dimlabels=indirect_dimlabels)
+                    # assume this is a normal pySpecData HDF5 file
+                    dirname, filename = os.path.split(filename)
+                    data = nddata_hdf5(filename+'/'+expno,
+                            directory=dirname)
             elif type_by_signature == 'DOS Format':
                 if type_by_extension == 'PAR':
                     # par identifies the old-format WinEPR parameter file, and spc the binary spectrum
