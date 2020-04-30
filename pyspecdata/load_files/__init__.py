@@ -103,6 +103,7 @@ def search_filename(searchstring,exp_type,
             raise ValueError("found more than on file in",directory,"matching",searchstring)
         else:
             return retval[0]
+    return retval
 def find_file(searchstring,
             exp_type=None,
             postproc=None,
@@ -193,6 +194,7 @@ def find_file(searchstring,
     if 'subdirectory' in list(kwargs.keys()):
         raise ValueError("The `subdirectory` keyword argument is not longer valid -- use `exp_type` instead!")
     # }}}
+    logger.debug(strm("preparing to call search_filename with arguments",(searchstring, exp_type, print_result)))
     files = search_filename(searchstring, exp_type, print_result=print_result)
     if len(files) == 0:
         # naive replacement to match rclone-like rules
