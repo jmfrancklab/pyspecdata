@@ -154,9 +154,11 @@ def find_file(searchstring,
         provides a dictionary called `postproc_lookup` (some are already
         available in pySpecData, but also, see the `postproc_lookup` argument,
         below).
+
         If `postproc` is a string,
         it looks up the string inside the `postproc_lookup`
         dictionary that's appropriate for the file type.
+
         If `postproc` is None,
         it checks to see if the any of the loading functions that were
         called set the `postproc_type` property
@@ -164,6 +166,8 @@ def find_file(searchstring,
         ``data.get_prop('postproc_type')`` --
         if this is set, it uses this as a key
         to pull the corresponding value from `postproc_lookup`.
+        For example, if this is a bruker file, it sets postproc to the
+        name of the pulse sequence.
 
         For instance, when the acert module loads an ACERT HDF5 file,
         it sets `postproc_type` to the value of
@@ -220,19 +224,15 @@ def find_file(searchstring,
         return postproc(data,**kwargs)
     else:
         if postproc is None:
-            postproc_type = data.get_prop('postproc_type')
-            logger.debug(strm("found postproc_type",postproc_type))
-        else:
-            logger.debug("found no postproc_type")
-        if postproc_type is None:
-            logger.debug("got a postproc_type value of None")
-            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're not postprocessing"
-            return data
+            if 'postproc_type' in data.get_prop():
+                postproc_type = data.get_prop('postproc_type')
+                logger.debug(strm("found postproc_type",postproc_type))
         else:
             if postproc_type in list(postproc_lookup.keys()):
                 data = postproc_lookup[postproc_type](data,**kwargs)
+                logger.debug('this file was postprocessed successfully')
             else:
-                raise ValueError('postprocessing not defined for file with postproc_type %s --> it should be defined in the postproc_type dictionary in load_files.__init__.py'+postproc_type)
+                logger.debug('postprocessing not defined for file with postproc_type %s --> it should be defined in the postproc_type dictionary in load_files.__init__.py'+postproc_type)
             assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing"
             return data
 def format_listofexps(args):
@@ -372,11 +372,13 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             #{{{ Bruker 2D
             logger.debug('Identified a bruker series file')
             data = bruker_nmr.series(file_reference, expno_as_str, dimname=dimname)
+            s.set_prop('postproc_type',s.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
             #}}}
         elif open_subpath(file_reference, expno_as_str, 'acqus', test_only=True):
             logger.debug('Identified a bruker 1d file')
             #{{{ Bruker 1D
             data = bruker_nmr.load_1D(file_reference, expno_as_str, dimname=dimname)
+            s.set_prop('postproc_type',s.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
             #}}}
         else:
             logger.debug('Identified a potential prospa file')
