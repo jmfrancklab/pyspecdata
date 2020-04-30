@@ -114,6 +114,7 @@ def find_file(searchstring,
             dimname='', return_acq=False,
             add_sizes=[], add_dims=[], use_sweep=None,
             indirect_dimlabels=None,
+            lookup={},
             **kwargs):
     r'''Find the file  given by the regular expression `searchstring` inside the directory identified by `exp_type`, load the nddata object, and postprocess with the function `postproc`.
 
@@ -153,7 +154,7 @@ def find_file(searchstring,
         arguments (`kwargs`) as arguments.
         It's assumed that each module for each different file type
         provides a dictionary called `postproc_lookup` (some are already
-        available in pySpecData, but also, see the `postproc_lookup` argument,
+        available in pySpecData, but also, see the `lookup` argument,
         below).
 
         If `postproc` is a string,
@@ -185,9 +186,10 @@ def find_file(searchstring,
         :add_dims: passed to :func:`~pyspecdata.load_files.load_indiv_file`
         :use_sweep: passed to :func:`~pyspecdata.load_files.load_indiv_file`
         :indirect_dimlabels: passed to :func:`~pyspecdata.load_files.load_indiv_file`
-    postproc_lookup : dictionary with str:function pairs
+    lookup : dictionary with str:function pairs
         types of postprocessing to add to the `postproc_lookup` dictionary
         '''
+    postproc_lookup.update(lookup)
     logger.info(strm("find_file sees indirect_dimlabels",
         indirect_dimlabels))
     # {{{ legacy warning
@@ -226,16 +228,21 @@ def find_file(searchstring,
         return postproc(data,**kwargs)
     else:
         if postproc is None:
-            if 'postproc_type' in data.get_prop():
-                postproc_type = data.get_prop('postproc_type')
-                logger.debug(strm("found postproc_type",postproc_type))
+            postproc_type = data.get_prop('postproc_type')
+            logger.debug(strm("found postproc_type",postproc_type))
+        else:
+            postproc_type = postproc
+        if postproc_type is None:
+            logger.debug("got a postproc_type value of None")
+            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing (you have %s)"%str(kwargs)
+            return data
         else:
             if postproc_type in list(postproc_lookup.keys()):
                 data = postproc_lookup[postproc_type](data,**kwargs)
                 logger.debug('this file was postprocessed successfully')
             else:
                 logger.debug('postprocessing not defined for file with postproc_type %s --> it should be defined in the postproc_type dictionary in load_files.__init__.py'+postproc_type)
-            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing"
+            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing (you have %s)"%str(kwargs)
             return data
 def format_listofexps(args):
     """**Phased out**: leaving documentation so we can interpret and update old code
