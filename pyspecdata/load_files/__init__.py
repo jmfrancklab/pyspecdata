@@ -381,7 +381,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             #{{{ Bruker 2D
             logger.debug('Identified a bruker series file')
             data = bruker_nmr.series(file_reference, expno_as_str, dimname=dimname)
-            s.set_prop('postproc_type',s.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
+            data.set_prop('postproc_type',data.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
             #}}}
         elif open_subpath(file_reference, expno_as_str, 'acqus', test_only=True):
             logger.debug('Identified a bruker 1d file')
