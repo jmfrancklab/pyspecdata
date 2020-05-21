@@ -496,3 +496,27 @@ test of
    plot(d.eval(100),label = d.name()+' fit')
    autolegend()
    fl.show('asymptotetest120201.pdf') # dump out all our figures.
+
+.. comment generated the following with 
+    .. autosummary:: 
+        :toctree: generated
+        core.nddata
+
+.. currentmodule:: pyspecdata.core
+
+.. todo::
+    :no-inherited-members: doesn't work -- not sure how to modify class.rst
+    I put a template from stackexchange inside _templates
+    -- see https://stackoverflow.com/questions/28147432/how-to-customize-sphinx-ext-autosummary-rst-template
+    on how to use it
+
+    then, I need to link to or include generated/pyspecdata.core.fitdata.rst
+
+.. autosummary::
+    :toctree: generated
+    ~fitdata
+
+.. comment
+    .. autoclass:: pyspecdata.fitdata
+        :members:
+        :toctree:

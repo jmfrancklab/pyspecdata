@@ -6861,6 +6861,15 @@ def myfilter(x,center = 250e3,sigma = 100e3):
 
 #{{{ fitdata
 class fitdata(nddata):
+    """
+    If you haven't dont his before,
+    create a jupyter notebook (not checked in, just for your own playing around) with:
+    ```
+    import sympy as s
+    s.init_printing()
+    ```
+    you can then use `s.symbols(` to create symbols/variables that allow you to build the mathematical expression for your fitting function
+    """
     def __init__(self,*args,**kwargs):
         #{{{ manual kwargs
         fit_axis = None
