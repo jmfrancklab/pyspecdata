@@ -159,6 +159,8 @@ def mydiff(data,axis = -1):
 def normal_attrs(obj):
     myattrs = [x for x in dir(obj) if not ismethod(obj.__getattribute__(x))]
     myattrs = [x for x in myattrs if not x[0:2] == '__']
+    # next line filters out properties
+    myattrs = [x for x in myattrs if x not in ['C','angle','imag','real']]
     return myattrs
 def showtype(x):
     if isinstance(x, ndarray):
@@ -6867,7 +6869,7 @@ class fitdata(nddata):
             fit_axis = kwargs.pop('fit_axis')
         #}}}
         if isinstance(args[0],nddata):
-            myattrs = [j for j in normal_attrs(args[0]) if j not in ['C','angle','imag','real','sin','cos','exp','log10']]
+            myattrs = normal_attrs(args[0])
             for j in range(0,len(myattrs)):
                 self.__setattr__(myattrs[j],args[0].__getattribute__(myattrs[j]))
             #nddata.__init__(self,
@@ -6911,7 +6913,6 @@ class fitdata(nddata):
     def functional_form(self,sym_expr):
         assert issympy(sym_expr), "for now, the functional form must be a sympy expression!"
         self.symbolic_expr = sym_expr
-        #self.dsymbolic_expr = sympy.diff(sympy_expr,)
         #{{{ adapted from fromaxis, trying to adapt the variable
         symbols_in_expr = self.symbolic_expr.atoms(sympy.Symbol)
         #logger.debug(strm('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr))
@@ -6935,35 +6936,14 @@ class fitdata(nddata):
         self.symbolic_vars = list(self.symbolic_vars)
         self.symbolic_vars.sort() # so I get consistent behavior
         self.symbolic_vars = [sympy.var(j,real=True) for j in self.symbolic_vars]
-        # differentiate wrt all parameters except fit axis
-        print("*** *** ***")
-        print(sym_expr)
-        print(self.symbolic_vars)
-        print(self.fit_axis_sym)
-        print("*** *** ***")
-        all_derivs = []
-        for thisvar in self.symbolic_vars:
-            all_derivs.append(sympy.lambdify(self.symbolic_vars+[self.fit_axis_sym],sympy.diff(sym_expr,thisvar),modules=mat2array))
-        print("*** *** ***")
-        print("*** *** ***")
-        def jac_matrix(p_arg,x_arg):
-            retval = empty((len(self.symbolic_vars),len(self.fit_axis)))
-            for j in range(len(self.symbolic_vars)):
-                retval[j,:] = all_derivs[j](*tuple(p_arg+[x_arg]))
-                return retval
-        retval = jac_matrix([1,1,1],self.fit_axis_sym)
-        #self.dsymbolic_expr = sympy.diff(sym_expr,self.symbolic_vars)
-        args = self.symbolic_vars + [self.fit_axis_sym]
+        self.symbol_list = [str(j) for j in self.symbolic_vars]
+        args = self.symbolic_vars + [self.fit_axis]
         self.fitfunc_multiarg = sympy.lambdify(tuple(args), self.symbolic_expr, modules=mat2array)
         def raw_fn(p,x):
             assert len(p)==len(self.symbolic_vars), "length of parameter passed to fitfunc_raw doesn't match number of symbolic parameters"
             return self.fitfunc_multiarg(
                     *tuple([p[j] for j in range(len(self.symbolic_vars))] + [x]))
-        def d_raw_fn(p,x,y):
-            return [self.dfitfunc_multiarg(
-                    *tuple([p[j] for j in range(len(self.symbolic_vars))] + [x])),ones(len(x))]
         self.fitfunc_raw = raw_fn
-        self.dfitfunc_raw = d_raw_fn
         # leave the gradient for later
     def copy(self): # for some reason, if I don't override this with the same thing, it doesn't override
         namelist = []
@@ -7011,9 +6991,6 @@ class fitdata(nddata):
         r"this wraps fitfunc_raw (which gives the actual form of the fit function) to take care of forced variables"
         p = self.add_inactive_p(p)
         return self.fitfunc_raw(p,x)
-    def dfitfunc(self,p,x,y):
-        p = self.add_inactive_p(p)
-        return self.dfitfunc_raw(p,x,y)
     def errfunc(self,p,x,y,sigma):
         '''just the error function'''
         fit = self.fitfunc(p,x)
@@ -7251,15 +7228,11 @@ class fitdata(nddata):
             p_ini = self.remove_inactive_p(p_ini)
         leastsq_args = (self.errfunc, p_ini)
         leastsq_kwargs = {'args':(x,y,sigma),
-                    'full_output':True,
-                    # testing out Dfun here
-                    'Dfun':self.dfitfunc,
-                    'col_deriv':1}# 'maxfev':1000*(len(p_ini)+1)}
-        # Commenting out all of the below to test out sympy differentiation for Dfun
-        #if hasattr(self,'has_grad') and self.has_grad == True:
-        #    leastsq_kwargs.update({'Dfun':self.parameter_gradient})
-        #if 'Dfun' in list(leastsq_kwargs.keys()):
-        #    if not silent: print("yes, Dfun passed with arg",leastsq_kwargs['Dfun'])
+                    'full_output':True}# 'maxfev':1000*(len(p_ini)+1)}
+        if hasattr(self,'has_grad') and self.has_grad == True:
+            leastsq_kwargs.update({'Dfun':self.parameter_gradient})
+        if 'Dfun' in list(leastsq_kwargs.keys()):
+            if not silent: print("yes, Dfun passed with arg",leastsq_kwargs['Dfun'])
         p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
         #try:
         #   p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
