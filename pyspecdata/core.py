@@ -6862,6 +6862,8 @@ def myfilter(x,center = 250e3,sigma = 100e3):
 
 #{{{ fitdata
 class fitdata(nddata):
+r''' Inherits from an nddata and enables curve fitting through use of a sympy expression.
+'''
     def __init__(self,*args,**kwargs):
         #{{{ manual kwargs
         fit_axis = None
@@ -6911,6 +6913,8 @@ class fitdata(nddata):
         return self.symbolic_expr
     @functional_form.setter
     def functional_form(self,sym_expr):
+    r''' The functional form, given as a sympy expression, to which you would like to fit the data.
+    '''
         assert issympy(sym_expr), "for now, the functional form must be a sympy expression!"
         self.symbolic_expr = sym_expr
         #{{{ adapted from fromaxis, trying to adapt the variable
