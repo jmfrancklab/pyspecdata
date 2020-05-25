@@ -37,7 +37,8 @@ def _dirformat(file):
         return file
 #}}}
 def search_filename(searchstring,exp_type,
-        print_result=True):
+        print_result=True,
+        unique=False):
     r"""Use regular expression `searchstring` to find a file inside the directory indicated by `exp_type`
 
     Parameters
@@ -54,6 +55,8 @@ def search_filename(searchstring,exp_type,
         experiments sorted into different directories, this argument
         specifies the type of experiment see :func:`~pyspecdata.datadir.getDATADIR` for
         more info.
+    unique : boolean (default False)
+        If true, then throw an error unless only one file is found.
     """
     #{{{ actually find the files
     directory = getDATADIR(exp_type=exp_type)
@@ -81,7 +84,11 @@ def search_filename(searchstring,exp_type,
         exptype_msg = ""
         if exp_type is None:
             exptype_msg = "\nYou probably need to set exp_type so I know where inside {1:s} to find the file."
-        raise IOError(("I can't find a file matching the regular expression {0:s} in {1:s}"+exptype_msg).format(searchstring,directory))
+        err = log_fname('missing_data_files',
+                searchstring.replace('.*','*').replace('(','{').replace(')','}').replace('|',','),
+                exp_type,
+                err=True)
+        raise ValueError("Can't find file specified by search string %s"%searchstring+'\n'+err)
     else:
         if len(files) > 1:
             basenames,exts = list(map(set,list(zip(*[j.rsplit('.',1) for j in files if len(j.rsplit('.',1))>1]))))
@@ -92,18 +99,26 @@ def search_filename(searchstring,exp_type,
         elif print_result:
             logger.info("found only one file, and loading it:"+repr(files))
     #}}}
-    return [directory+j for j in files]
-
+    retval = [directory+j for j in files]
+    if unique:
+        if len(retval) == 0:
+            raise ValueError("found no files in",directory,"matching",searchstring)
+        elif len(retval) > 1:
+            raise ValueError("found more than on file in",directory,"matching",searchstring)
+        else:
+            return retval[0]
+    return retval
 def find_file(searchstring,
-            exp_type = None,
-            postproc = None,
-            print_result = True,
-            verbose = False,
-            prefilter = None,
-            expno = None,
+            exp_type=None,
+            postproc=None,
+            print_result=True,
+            verbose=False,
+            prefilter=None,
+            expno=None,
             dimname='', return_acq=False,
             add_sizes=[], add_dims=[], use_sweep=None,
             indirect_dimlabels=None,
+            lookup={},
             **kwargs):
     r'''Find the file  given by the regular expression `searchstring` inside the directory identified by `exp_type`, load the nddata object, and postprocess with the function `postproc`.
 
@@ -142,10 +157,14 @@ def find_file(searchstring,
         This function is fed the nddata data and the remaining keyword
         arguments (`kwargs`) as arguments.
         It's assumed that each module for each different file type
-        provides a dictionary called `postproc_lookup`.
+        provides a dictionary called `postproc_lookup` (some are already
+        available in pySpecData, but also, see the `lookup` argument,
+        below).
+
         If `postproc` is a string,
         it looks up the string inside the `postproc_lookup`
         dictionary that's appropriate for the file type.
+
         If `postproc` is None,
         it checks to see if the any of the loading functions that were
         called set the `postproc_type` property
@@ -153,6 +172,8 @@ def find_file(searchstring,
         ``data.get_prop('postproc_type')`` --
         if this is set, it uses this as a key
         to pull the corresponding value from `postproc_lookup`.
+        For example, if this is a bruker file, it sets postproc to the
+        name of the pulse sequence.
 
         For instance, when the acert module loads an ACERT HDF5 file,
         it sets `postproc_type` to the value of
@@ -169,13 +190,17 @@ def find_file(searchstring,
         :add_dims: passed to :func:`~pyspecdata.load_files.load_indiv_file`
         :use_sweep: passed to :func:`~pyspecdata.load_files.load_indiv_file`
         :indirect_dimlabels: passed to :func:`~pyspecdata.load_files.load_indiv_file`
+    lookup : dictionary with str:function pairs
+        types of postprocessing to add to the `postproc_lookup` dictionary
         '''
+    postproc_lookup.update(lookup)
     logger.info(strm("find_file sees indirect_dimlabels",
         indirect_dimlabels))
     # {{{ legacy warning
     if 'subdirectory' in list(kwargs.keys()):
         raise ValueError("The `subdirectory` keyword argument is not longer valid -- use `exp_type` instead!")
     # }}}
+    logger.debug(strm("preparing to call search_filename with arguments",(searchstring, exp_type, print_result)))
     files = search_filename(searchstring, exp_type, print_result=print_result)
     if len(files) == 0:
         # naive replacement to match rclone-like rules
@@ -210,17 +235,18 @@ def find_file(searchstring,
             postproc_type = data.get_prop('postproc_type')
             logger.debug(strm("found postproc_type",postproc_type))
         else:
-            logger.debug("found no postproc_type")
+            postproc_type = postproc
         if postproc_type is None:
             logger.debug("got a postproc_type value of None")
-            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're not postprocessing"
+            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing (you have %s)"%str(kwargs)
             return data
         else:
             if postproc_type in list(postproc_lookup.keys()):
                 data = postproc_lookup[postproc_type](data,**kwargs)
+                logger.debug('this file was postprocessed successfully')
             else:
-                raise ValueError('postprocessing not defined for file with postproc_type %s --> it should be defined in the postproc_type dictionary in load_files.__init__.py'+postproc_type)
-            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing"
+                logger.debug('postprocessing not defined for file with postproc_type %s --> it should be defined in the postproc_type dictionary in load_files.__init__.py'+postproc_type)
+            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing (you have %s)"%str(kwargs)
             return data
 def format_listofexps(args):
     """**Phased out**: leaving documentation so we can interpret and update old code
@@ -359,11 +385,13 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             #{{{ Bruker 2D
             logger.debug('Identified a bruker series file')
             data = bruker_nmr.series(file_reference, expno_as_str, dimname=dimname)
+            data.set_prop('postproc_type',data.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
             #}}}
         elif open_subpath(file_reference, expno_as_str, 'acqus', test_only=True):
             logger.debug('Identified a bruker 1d file')
             #{{{ Bruker 1D
             data = bruker_nmr.load_1D(file_reference, expno_as_str, dimname=dimname)
+            s.set_prop('postproc_type',s.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
             #}}}
         else:
             logger.debug('Identified a potential prospa file')
@@ -400,16 +428,21 @@ def load_indiv_file(filename, dimname='', return_acq=False,
                 # we can have the normal ACERT Pulse experiment or the ACERT CW format
                 with h5py.File(filename,'r') as h5:
                     try:
+                        # check to see if it's an acert file
                         description_class = h5['experiment']['description'].attrs['class']
+                        is_acert = True
                     except:
-                        raise IOError("I am assuming this is an ACERT datafile,"
-                                " but can't identify the type, because"
-                                " I can't find"
-                                " experiment.description['class']")
-                if description_class == 'CW':
-                    data = acert.load_cw(filename, use_sweep=use_sweep)
+                        is_acert = False
+                if is_acert:
+                    if description_class == 'CW':
+                        data = acert.load_cw(filename, use_sweep=use_sweep)
+                    else:
+                        data = acert.load_pulse(filename, indirect_dimlabels=indirect_dimlabels)
                 else:
-                    data = acert.load_pulse(filename, indirect_dimlabels=indirect_dimlabels)
+                    # assume this is a normal pySpecData HDF5 file
+                    dirname, filename = os.path.split(filename)
+                    data = nddata_hdf5(filename+'/'+expno,
+                            directory=dirname)
             elif type_by_signature == 'DOS Format':
                 if type_by_extension == 'PAR':
                     # par identifies the old-format WinEPR parameter file, and spc the binary spectrum

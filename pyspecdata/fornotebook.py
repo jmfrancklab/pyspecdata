@@ -480,8 +480,9 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
     else:
         mpwidth = r'%0.2fin'%width
         figwidth = mpwidth
-    def bufwr(inpstr):
-        sys.stdout.buffer.write(inpstr.encode('utf-8'))
+    def bufwr(inpstr, end='\n'):
+        endstr = end.encode('utf-8')
+        sys.stdout.buffer.write(inpstr.encode('utf-8')+endstr)
     if showbox:
         bufwr(r'''\mbox{\begin{minipage}{%s}'''%mpwidth)
         if alsosave != None:
@@ -491,8 +492,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
         bufwr('\n\n'+r'\hrulefill'+'\n\n')
         bufwr(r'''{\color{red}{\tiny %s}:}\begin{tiny}\fn{%s}\end{tiny}'''%('file:',fname))
         bufwr('\n\n'+r'\hrulefill'+'\n\n')
-        bufwr(r'''\end{minipage}
-}''', end=' ')
+        bufwr(r'''\end{minipage} }''', end=' ')
     clf()
     sys.stdout.buffer.flush()
     return

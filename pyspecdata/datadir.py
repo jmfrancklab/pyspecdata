@@ -85,7 +85,7 @@ class MyConfig(object):
         The value corresponding to `this_key`.
         """
         if this_key in self.config_vars.keys():
-            logger.debug("I pulled",this_key,"from the config_vars")
+            logger.debug(strm("I pulled",this_key,"from the config_vars"))
             return self.config_vars[this_key]
         if environ is not None and environ in os.environ.keys():
             logger.debug(strm("about to look for environment variable",environ))
