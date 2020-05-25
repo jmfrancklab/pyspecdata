@@ -6862,8 +6862,7 @@ def myfilter(x,center = 250e3,sigma = 100e3):
 
 #{{{ fitdata
 class fitdata(nddata):
-r''' Inherits from an nddata and enables curve fitting through use of a sympy expression.
-''' 
+r''' Inherits from an nddata and enables curve fitting through use of a sympy expression.'''
     def __init__(self,*args,**kwargs):
         #{{{ manual kwargs
         fit_axis = None
