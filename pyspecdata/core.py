@@ -6634,6 +6634,16 @@ class nddata_hdf5 (nddata):
             del self.h5file
             del self.datanode
         return
+    def __init__(self,pathstring,directory='.'):
+        self.pathstring = pathstring
+        #try:
+        self.h5file,self.datanode = h5nodebypath(pathstring,
+                check_only=True, directory=directory)
+        #except BaseException  as e:
+        #    raise IndexError("I can't find the node "+pathstring+explain_error(e))
+        print("about to call _init_datanode")
+        self._init_datanode(self.datanode)
+        atexit.register(self._cleanup)
     def _init_datanode(self,datanode,**kwargs):
         datadict = h5loaddict(datanode)
         #{{{ load the data, and pop it from datadict
@@ -6716,16 +6726,6 @@ class nddata_hdf5 (nddata):
         del self.h5file
         del self.datanode
         return
-    def __init__(self,pathstring,directory='.'):
-        self.pathstring = pathstring
-        #try:
-        self.h5file,self.datanode = h5nodebypath(pathstring,
-                check_only=True, directory=directory)
-        #except BaseException  as e:
-        #    raise IndexError("I can't find the node "+pathstring+explain_error(e))
-        print("about to call _init_datanode")
-        self._init_datanode(self.datanode)
-        atexit.register(self._cleanup)
 #}}}
 
 class ndshape (ndshape_base):
@@ -6862,7 +6862,8 @@ def myfilter(x,center = 250e3,sigma = 100e3):
 
 #{{{ fitdata
 class fitdata(nddata):
-r''' Inherits from an nddata and enables curve fitting through use of a sympy expression.'''
+    r''' Inherits from an nddata and enables curve fitting through use of a sympy expression. The user creates a fitdata class object from an existing nddata class object, and on this fitdata object can define the func:`functional_form` of the curve it would like to fit to the data of the original nddata. This functional form must be provided as a sympy expression, with one of its variables matching the name of the dimension that the user would like to fit to. The user provides fit coefficients using func:`fit_coeff` and obtains output using func:`fit` and func:`eval`.'''
+
     def __init__(self,*args,**kwargs):
         #{{{ manual kwargs
         fit_axis = None
@@ -6901,6 +6902,7 @@ r''' Inherits from an nddata and enables curve fitting through use of a sympy ex
         return
     @property
     def function_string(self):
+        r'''A property of the fitdata class which stores a string output of the functional form of the desired fit expression provided in func:`functional_form` in LaTeX format'''
         retval = sympy.latex(self.symbolic_expr).replace('$','')
         return r'$f(%s)='%(sympy.latex(self.fit_axis)) + retval + r'$'
     @function_string.setter
@@ -6908,12 +6910,12 @@ r''' Inherits from an nddata and enables curve fitting through use of a sympy ex
         raise ValueError("You cannot set the string directly -- change the functional_form property instead!")
     @property
     def functional_form(self):
+        r'''A property of the fitdata class which is set by the user, takes as input a sympy expression of the desired fit expression'''
         print("Getting symbolic function")
         return self.symbolic_expr
     @functional_form.setter
     def functional_form(self,sym_expr):
-    r''' The functional form, given as a sympy expression, to which you would like to fit the data.
-    '''
+        r''' The functional form, given as a sympy expression, to which you would like to fit the data.'''
         assert issympy(sym_expr), "for now, the functional form must be a sympy expression!"
         self.symbolic_expr = sym_expr
         #{{{ adapted from fromaxis, trying to adapt the variable
@@ -6932,6 +6934,8 @@ r''' Inherits from an nddata and enables curve fitting through use of a sympy ex
                     "to change -- I see potential fit axes %s"%str(self.fit_axis))
         # the next line gives the parameters
         self.symbolic_vars = symbols_in_expr-self.fit_axis
+        # this gets used later in p_ini
+        self.number_of_parameters = len(self.symbolic_vars)
         #}}}
         self.fit_axis = list(self.fit_axis)[0]
         # redefine as real to avoid weird piecewise derivatives
@@ -6948,6 +6952,73 @@ r''' Inherits from an nddata and enables curve fitting through use of a sympy ex
                     *tuple([p[j] for j in range(len(self.symbolic_vars))] + [x]))
         self.fitfunc_raw = raw_fn
         # leave the gradient for later
+    def analytical_covariance(self):
+        r'''Not up to date'''
+        covarmatrix = zeros([len(self._active_symbols())]*2)
+        #{{{ try this ppt suggestion --> his V is my fprime, but 
+        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis))
+        dirproductform = False
+        if dirproductform:
+            sigma = self.get_error()
+            f1 = fprime.shape[0]
+            f2 = fprime.shape[1]
+            fprime1 = fprime.reshape(f1,1,f2) # j index
+            fprime2 = fprime.reshape(1,f1,f2) # k index
+            fprime_prod = fprime1 * fprime2
+            fprime_prod = fprime_prod.reshape(-1,f2).T # direct product form
+            try:
+                covarmat = dot(pinv(fprime_prod),(sigma**2).reshape(-1,1))
+            except ValueError as e:
+                raise ValueError(strm('shape of fprime_prod', shape(fprime_prod),
+                    'shape of inverse', shape(pinv(fprime_prod)),
+                    'shape of sigma', shape(sigma))+explain_error(e))
+            covarmatrix = covarmat.reshape(f1,f1)
+            for l in range(0,f1): 
+                for m in range(0,f1): 
+                    if l != m:
+                        covarmatrix[l,m] /= 2
+        else:
+            sigma = self.get_error()
+            #covarmatrix = dot(pinv(f),
+            #        dot(diag(sigma**2),pinv(f.T)))
+            J = matrix(fprime.T)
+            #W = matrix(diag(1./sigma**2))
+            #S = matrix(diag(sigma**2))
+            #if hasattr(self,'data_covariance'):
+            #    print "covariance data is present"
+            S = matrix(self.get_covariance())
+            Omegainv = S**-1
+            #S = matrix(diag(sigma**2))
+            #G = matrix(diag(1./sigma))
+            #G = S**(-1/2) # analog of the above
+            #covarmatrix = ((J.T * W * J)**-1) * J.T * W
+            print('a')
+            minimizer = inv(J.T * Omegainv * J) * J.T * Omegainv
+            covarmatrix = minimizer * S * minimizer.T
+            #covarmatrix = array(covarmatrix * S * covarmatrix.T)
+            #covarmatrix = array((J.T * G.T * G * J)**-1 * J.T * G.T * G * S * G.T * G * J * (J.T * G.T * G * J)**-1)
+            #try:
+            #    betapremult = (J.T * Omegainv * J)**-1 * J.T * Omegainv
+            #except:
+            #    print 'from sigma','\n\n',diag(sigma**2),'\n\n','from covarmatrix','\n\n',S,'\n\n'
+            #    raise RuntimeError('problem generating estimator (word?)')
+            #covarmatrix = array( betapremult * S * betapremult.T)
+        #print "shape of fprime",shape(fprime),"shape of fprime_prod",shape(fprime_prod),'sigma = ',sigma,'covarmat=',covarmatrix,'\n'
+        #}}}
+        # note for this code, that it depends on above code I later moved to  parameter_derivatives
+        #for j in range(0,shape(covarmatrix)[0]):
+        #    for k in range(0,shape(covarmatrix)[0]):
+        #        #mydiff_second = sympy.diff(mydiff_sym[j],self.symbolic_vars[k]).subs(solution_list)
+        #        #fdprime = array([mydiff_second.subs(x,xvals[l])/sigma[l] for l in range(0,len(xvals))]) # only divide by sigma once, since there is only one f
+        #        #try:
+        #        temp = 1.0/(fprime[j,:] * fprime[k,:])
+        #        mask = isinf(temp)
+        #        covarmatrix[j,k] = mean(sigma[~mask]**2 * temp[~mask])# + 2. * mean(fminusE * fdprime)
+        #        #except:
+        #        #    raise RuntimeError(strm('Problem multiplying covarmatrix', 'shape(fprime[j,:])',shape(fprime[j,:]), 'shape(fminusE)',shape(fminusE), 'shape(fdprime)',shape(fdprime)))
+        #        #if j != k:
+        #        #    covarmatrix[j,k] *= 2
+        return covarmatrix
     def copy(self): # for some reason, if I don't override this with the same thing, it doesn't override
         namelist = []
         vallist = []
@@ -7210,22 +7281,21 @@ r''' Inherits from an nddata and enables curve fitting through use of a sympy ex
         return self
     def fit(self,set_what = None, set_to = None, force_analytical = False, silent = False):
         r'''actually run the fit'''
-        if not silent: print("\n")
-        if not silent: print(r'\resizebox*{!}{3in}{\begin{minipage}{\linewidth}')
+        if not silent: logger.info(strm("\n"))
+        if not silent: logger.info(strm((r'\resizebox*{!}{3in}{\begin{minipage}{\linewidth}')))
         if isinstance(set_what, dict):
             set_to = list(set_what.values())
             set_what = list(set_what.keys())
         x = self.getaxis(self.fit_axis)
         if iscomplex(self.data.flatten()[0]):
-            if not silent: print((lsafen('Warning, taking only real part of fitting data!')))
+            if not silent: logger.info(strm('Warning, taking only real part of fitting data!'))
         y = real(self.data)
         sigma = self.get_error()
         if sigma is None:
             if not silent: print('{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n')
             warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
             sigma = ones(shape(y))
-        p_ini = [1.0,1.0,1.0] # hard-coded for debug
-        #p_ini = real(array(self.guess())) # need the numpy format to allow boolean mask
+        p_ini = [1.0]*self.number_of_parameters
         if set_what != None:
             self.set_indices,self.set_to,self.active_mask = self.gen_indices(set_what,set_to)
             p_ini = self.remove_inactive_p(p_ini)
@@ -7237,32 +7307,32 @@ r''' Inherits from an nddata and enables curve fitting through use of a sympy ex
         if 'Dfun' in list(leastsq_kwargs.keys()):
             if not silent: print("yes, Dfun passed with arg",leastsq_kwargs['Dfun'])
         p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
-        #try:
-        #   p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
-        ##{{{ just give various explicit errors
-        #except TypeError as err:
-        #    if not isinstance(x, ndarray) and not isinstance(y, ndarray):
-        #        raise TypeError(strm('leastsq failed because the two arrays',
-        #            "aren\'t of the right",
-        #            'type','type(x):',type(x),'type(y):',type(y)))
-        #    else:
-        #        if any(shape(x) != shape(y)):
-        #            raise RuntimeError(strm('leastsq failed because the two arrays do'
-        #                    "not match in size size",
-        #                    'shape(x):',shape(x),
-        #                    'shape(y):',shape(y)))
-        #    raise TypeError(strm('leastsq failed because of a type error!',
-        #        'type(x):',showtype(x),'type(y):',showtype(y),
-        #        'type(sigma)',showtype(sigma),'shape(x):',shape(x),
-        #        'shape(y):',shape(y),'shape(sigma)',shape(sigma),
-        #        'p_ini',type(p_ini),p_ini))
-        #except ValueError as err:
-        #    raise ValueError(strm('leastsq failed with "',err,
-        #        '", maybe there is something wrong with the input:',
-        #        self))
-        #except Exception as e:
-        #    raise ValueError('leastsq failed; I don\'t know why'+explain_error(e))
-        ##}}}
+        try:
+           p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
+        #{{{ just give various explicit errors
+        except TypeError as err:
+            if not isinstance(x, ndarray) and not isinstance(y, ndarray):
+                raise TypeError(strm('leastsq failed because the two arrays',
+                    "aren\'t of the right",
+                    'type','type(x):',type(x),'type(y):',type(y)))
+            else:
+                if any(shape(x) != shape(y)):
+                    raise RuntimeError(strm('leastsq failed because the two arrays do'
+                            "not match in size size",
+                            'shape(x):',shape(x),
+                            'shape(y):',shape(y)))
+            raise TypeError(strm('leastsq failed because of a type error!',
+                'type(x):',showtype(x),'type(y):',showtype(y),
+                'type(sigma)',showtype(sigma),'shape(x):',shape(x),
+                'shape(y):',shape(y),'shape(sigma)',shape(sigma),
+                'p_ini',type(p_ini),p_ini))
+        except ValueError as err:
+            raise ValueError(strm('leastsq failed with "',err,
+                '", maybe there is something wrong with the input:',
+                self))
+        except Exception as e:
+            raise ValueError('leastsq failed; I don\'t know why')
+        #}}}
         if success not in [1,2,3,4]:
             #{{{ up maximum number of evals
             if mesg.find('maxfev'):
@@ -7368,6 +7438,100 @@ r''' Inherits from an nddata and enables curve fitting through use of a sympy ex
                         recordlist[runno][name] = thiscopy.output(name)
         print(r'\end{verbatim}')
         return recordlist # collect into a single recordlist array
+    def guess(self,use_pseudoinverse=False):
+        r'''old code that I am preserving here -- provide the guess for our parameters; by default, based on pseudoinverse'''
+        if use_pseudoinverse:
+            self.has_grad = False
+            if iscomplex(self.data.flatten()[0]):
+                print(lsafen('Warning, taking only real part of fitting data!'))
+            y = real(self.data)
+            # I ended up doing the following, because as it turns out
+            # T1 is a bad fit function, because it has a singularity!
+            # this is probably why it freaks out if I set this to zero
+            # on the other hand, setting a value of one seems to be
+            # bad for very short T1 samples
+            which_starting_guess = 0
+            thisguess = self.starting_guesses[which_starting_guess]
+            numguesssteps = 20
+            #{{{ for some reason (not sure) adding a dimension to y
+            new_y_shape = list(y.shape)
+            new_y_shape.append(1)
+            y = y.reshape(tuple(new_y_shape))
+            #}}}
+            #{{{ evaluate f, fprime and residuals
+            guess_dict = dict(list(zip(self.symbol_list,list(thisguess))))
+            fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+            f_at_guess = real(self.eval(None,set = guess_dict).data)
+            try:
+                f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
+            except:
+                raise ValueError(strm('trying to reshape f_at_ini_guess from',f_at_guess.shape,
+                    'to',new_y_shape))
+            thisresidual = sqrt((y-f_at_guess)**2).sum()
+            #}}}
+            lastresidual = thisresidual
+            for j in range(0,numguesssteps):
+                logger.debug('\n\n.core.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\end{verbatim}')
+                logger.debug('\n\n.core.guess) shape of parameter derivatives',shape(fprime),'shape of output',shape(y),'\n\n')
+                regularization_bad = True
+                alpha_max = 100.
+                alpha_mult = 2.
+                alpha = 0.1 # maybe I can rather estimate this based on the change in the residual, similar to in L-M?
+                logger.debug(strm('\n\n.core.guess) value of residual before regularization %d:'%j,thisresidual))
+                while regularization_bad:
+                    newguess = real(array(thisguess) + dot(pinvr(fprime.T,alpha),(y-f_at_guess)).flatten())
+                    mask = newguess < self.guess_lb
+                    newguess[mask] = self.guess_lb[mask]
+                    mask = newguess > self.guess_ub
+                    newguess[mask] = self.guess_ub[mask]
+                    if any(isnan(newguess)):
+                        logger.debug(strm('\n\n.core.guess) Regularization blows up $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha))
+                        alpha *= alpha_mult
+                    else:
+                        #{{{ evaluate f, fprime and residuals
+                        guess_dict = dict(list(zip(self.symbol_list,list(newguess))))
+                        # only evaluate fprime once we know this is good, below
+                        f_at_guess = real(self.eval(None,set = guess_dict).data)
+                        try:
+                            f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
+                        except:
+                            raise IndexError(strm('trying to reshape f_at_ini_guess from',
+                                f_at_guess.shape,'to',new_y_shape))
+                        thisresidual = sqrt((y-f_at_guess)**2).sum()
+                        #}}}
+                        if (thisresidual-lastresidual)/lastresidual > 0.10:
+                            alpha *= alpha_mult
+                            logger.debug(strm('\n\n.core.guess) Regularized Pinv gave a step uphill $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha))
+                        else: # accept the step
+                            regularization_bad = False
+                            thisguess = newguess
+                            lastresidual = thisresidual
+                            fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+                    if alpha > alpha_max:
+                        print("\n\n.core.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max)
+                        if which_starting_guess >= len(self.starting_guesses)-1:
+                            print("\n\n.core.guess) {\\color{red} Warning!!!} ran out of guesses!!!%d\n\n"%alpha_max)
+                            return thisguess
+                        else:
+                            which_starting_guess += 1
+                            thisguess = self.starting_guesses[which_starting_guess]
+                            print("\n\n.core.guess) try a new starting guess:",lsafen(thisguess))
+                            j = 0 # restart the loop
+                            #{{{ evaluate f, fprime and residuals for the new starting guess
+                            guess_dict = dict(list(zip(self.symbol_list,list(thisguess))))
+                            fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+                            f_at_guess = real(self.eval(None,set = guess_dict).data)
+                            try:
+                                f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
+                            except:
+                                raise RuntimeError(strm('trying to reshape f_at_ini_guess from',
+                                    f_at_guess.shape,'to',new_y_shape))
+                            thisresidual = sqrt((y-f_at_guess)**2).sum()
+                            #}}}
+                            regularization_bad = False # jump out of this loop
+                logger.debug(strm('\n\n.core.guess) new value of guess after regularization:',lsafen(newguess)))
+                logger.debug(strm('\n\n.core.guess) value of residual after regularization:',thisresidual))
+            return thisguess
 #}}}
 def sqrt(arg):
     if isinstance(arg,nddata):
