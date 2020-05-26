@@ -12,7 +12,7 @@ unicode_superscript = {
         '-':'\u00bb',
         '-':'\u00b7'}
 for j in range(4,10):
-    unicode_superscript.update({str(j):('\\u207'+str(j)).decode('unicode_escape')})
+    unicode_superscript.update({str(j):('\\u207'+str(j))})
 
 class units (object):
     r"""Each instance of this object stores a numerical representation of a single set of units, and there are routines to set units by

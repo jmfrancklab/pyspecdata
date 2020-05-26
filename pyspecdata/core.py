@@ -2445,7 +2445,7 @@ def plot(*args,**kwargs):
             #}}}
             kwargs.update({'yerr':myyerror})
             valueforxerr = myy.get_error(myy.dimlabels[longest_dim])
-            if valueforxerr != None: # if we have x errorbars too
+            if valueforxerr is not None: # if we have x errorbars too
                 #print "DEBUG decided to assign to xerr:",valueforxerr
                 kwargs.update({'xerr':valueforxerr})
         #{{{ deal with axis labels along y
@@ -2497,7 +2497,7 @@ def plot(*args,**kwargs):
         kwargs.pop('plottype')
     #}}}
     #{{{ take care of manual colors
-    if myformat != None:
+    if myformat is not None:
         colorpos = myformat.find('#')
         if  colorpos > -1:
             kwargs.update({'color':myformat[colorpos:colorpos+7]})
@@ -3321,7 +3321,10 @@ class nddata (object):
         
         `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
 
-        `error_for_data` can be a scalar, in which case, **all** the data errors are set to `error_for_data`'''
+        `error_for_data` can be a scalar, in which case, **all** the data errors are set to `error_for_data`
+        .. todo::
+                several options below -- enumerate them in the documentation
+        '''
         if (len(args) is 1) and isscalar(args[0]):
             if args[0] == 0:
                 args = (zeros_like(self.data),)
@@ -3333,6 +3336,8 @@ class nddata (object):
             self.data_error = reshape(array(args[0]),shape(self.data))
         elif (len(args) is 2) and (isinstance(args[0], str)) and (isinstance(args[1], ndarray)):
             self.axis_coords_error[self.axn(args[0])] = args[1]
+        elif (len(args) is 2) and (isinstance(args[0], str)) and (isscalar(args[1])):
+            self.axis_coords_error[self.axn(args[0])] = args[1]*ones_like(self.getaxis(args[0]))
         elif (len(args) is 1) and args[0] is None:
             self.data_error = None
         else:
@@ -3573,9 +3578,9 @@ class nddata (object):
         Aerr = A.get_error()
         Berr = B.get_error()
         Rerr = 0.0
-        if Aerr != None:
+        if Aerr is not None:
             Rerr += (Aerr)**2
-        if Berr != None:
+        if Berr is not None:
             Rerr += (Berr)**2
         Rerr = sqrt(real(Rerr)) # convert back to stdev
         if Aerr is None and Berr is None:
@@ -3652,7 +3657,7 @@ class nddata (object):
             if isinstance(arg, complex) and self.data.dtype not in [complex128,complex64]:
                 A.data = complex128(A.data)
             A.data *= arg
-            if A.get_error() != None:
+            if A.get_error() is not None:
                 error = A.get_error()
                 error *= abs(arg)
             return A
@@ -3673,9 +3678,9 @@ class nddata (object):
         Aerr = A.get_error()
         Berr = B.get_error()
         Rerr = 0.0 # we can have error on one or both, so we're going to need to add up the variances
-        if Aerr != None:
+        if Aerr is not None:
             Rerr += (Aerr * B.data)**2
-        if Berr != None:
+        if Berr is not None:
             Rerr += (Berr * A.data)**2
         Rerr = sqrt(real(Rerr)) # convert back to stdev
         if Aerr is None and Berr is None:
@@ -3695,13 +3700,13 @@ class nddata (object):
             x = self.get_error()
             result = self.copy()
             result.data = 1.0/result.data
-            if x != None:
+            if x is not None:
                 result.set_error(abs(x.copy()/(self.data**2)))
             return result
         elif arg == 2:
             return self * self
         else:
-            if self.get_error() != None:
+            if self.get_error() is not None:
                 raise ValueError(strm("nothing but -1 and 2 supported yet! (you tried to raise to a power of "+repr(arg)+")"))
             else:
                 result = self.copy()
@@ -3713,7 +3718,7 @@ class nddata (object):
         if isscalar(arg):
             A = self.copy()
             A.data /= arg
-            if A.get_error() != None:
+            if A.get_error() is not None:
                 error = A.get_error()
                 error /= abs(arg)
             return A
@@ -3725,12 +3730,12 @@ class nddata (object):
         Berr = B.get_error()
         Rerr = 0.0 # we can have error on one or both, so we're going to need to add up the variances
         dt128 = dtype('complex128')
-        if Aerr != None:
+        if Aerr is not None:
             if (A.data.dtype is dt128) or (B.data.dtype is dt128):# this should avoid the error that Ryan gets
                 Rerr += (complex128(Aerr)/complex128(B.data))**2
             else:
                 Rerr += (Aerr/B.data)**2
-        if Berr != None:
+        if Berr is not None:
             if (A.data.dtype is dt128) or (Berr.dtype is dt128) or (B.data.dtype is dt128):# this should avoid the error that Ryan gets
                 Rerr += (complex128(A.data)*complex128(Berr)/(complex128(B.data)**2))**2
             else:
@@ -3896,7 +3901,7 @@ class nddata (object):
         argout.dimlabels = newdims
         # }}}
         # {{{ transpose the data errors appropriately
-        if selfout.get_error() != None:
+        if selfout.get_error() is not None:
             try:
                 temp = selfout.get_error().copy().reshape(selfshape)
             except ValueError as Argument:
@@ -3907,7 +3912,7 @@ class nddata (object):
                         "!!!\n\n(original argument:\n" +
                         repr(Argument) + "\n)")
             selfout.set_error(temp)
-        if argout.get_error() != None:
+        if argout.get_error() is not None:
             try:
                 temp = argout.get_error().copy().transpose(argorder).reshape(argshape)
             except ValueError as Argument:
@@ -4081,15 +4086,15 @@ class nddata (object):
         y = formult.data
         #{{{ now solve Lx = y, where x is appropriate for our polynomial
         startingpower = 0
-        if force_y_intercept != None:
+        if force_y_intercept is not None:
             startingpower = 1
         L =  concatenate([x**j for j in range(startingpower,order+1)],axis=1) # note the totally AWESOME way in which this is done!
         #print 'fitting to matrix',L
-        if force_y_intercept != None:
+        if force_y_intercept is not None:
             y -= force_y_intercept
         c = dot(pinv(L),y)
         fity = dot(L,c)
-        if force_y_intercept != None:
+        if force_y_intercept is not None:
             #print "\n\nDEBUG: forcing from",fity[0],"to"
             fity += force_y_intercept
             #print "DEBUG: ",fity[0]
@@ -4184,6 +4189,10 @@ class nddata (object):
                     axis=thisindex)]
             self._pop_axis_info(thisindex)
         return self
+    def max(self):
+        return self.data.max()
+    def min(self):
+        return self.data.min()
     def cdf(self,normalized = True,max_bins = 500):
         """calculate the Cumulative Distribution Function for the data along `axis_name`
 
@@ -6283,7 +6292,7 @@ class nddata (object):
             indexlist = tuple(self.fld(slicedict))
             newlabels = [x for x in self.dimlabels if not isscalar(slicedict[x])] # generate the new list of labels, in order, for all dimensions that are not indexed by a scalar
         #{{{ properly index the data error
-        if self.data_error != None:
+        if self.data_error is not None:
             try:
                 newerror = self.data_error[indexlist]
             except:
@@ -6292,7 +6301,7 @@ class nddata (object):
             newerror = None
         #}}}
         if len(self.axis_coords)>0:
-            if errordict != None:
+            if errordict is not None:
                 axis_coords_error = [errordict[x] for x in newlabels]
             else:
                 axis_coords_error = None
@@ -6470,9 +6479,9 @@ class nddata (object):
                                 axesdict[x] = axesdict[x][y]
                             except Exception as e:
                                 raise ValueError("axesdict is "+repr(axesdict)+"and I want to set "+repr(x)+" subscript to its "+repr(y)+" value"+explain_error(e))
-                if errordict != None and errordict != array(None):
+                if errordict is not None and errordict != array(None):
                     for x,y in slicedict.items():
-                        if errordict[x] != None:
+                        if errordict[x] is not None:
                             if isscalar(y):
                                 errordict.pop(x)
                             elif isinstance(y, type(emptyfunction)):
@@ -6485,9 +6494,9 @@ class nddata (object):
                                     raise IndexError(strm('Trying to index',
                                             errordict,'-->',x,'=',errordict[x],'with',y,
                                             'error started as',self.axis_coords_error))
-            if unitsdict != None and unitsdict != array(None):
+            if unitsdict is not None and unitsdict != array(None):
                 for x,y in slicedict.items():
-                    if unitsdict[x] != None:
+                    if unitsdict[x] is not None:
                         if isscalar(y):
                             unitsdict.pop(x)
             return slicedict,axesdict,errordict,unitsdict
@@ -6863,7 +6872,14 @@ def myfilter(x,center = 250e3,sigma = 100e3):
 #{{{ fitdata
 class fitdata(nddata):
     r''' Inherits from an nddata and enables curve fitting through use of a sympy expression. The user creates a fitdata class object from an existing nddata class object, and on this fitdata object can define the func:`functional_form` of the curve it would like to fit to the data of the original nddata. This functional form must be provided as a sympy expression, with one of its variables matching the name of the dimension that the user would like to fit to. The user provides fit coefficients using func:`fit_coeff` and obtains output using func:`fit` and func:`eval`.'''
-
+    If you haven't dont his before,
+    create a jupyter notebook (not checked in, just for your own playing around) with:
+    ```
+    import sympy as s
+    s.init_printing()
+    ```
+    you can then use `s.symbols(` to create symbols/variables that allow you to build the mathematical expression for your fitting function
+    """
     def __init__(self,*args,**kwargs):
         #{{{ manual kwargs
         fit_axis = None
@@ -7053,7 +7069,7 @@ class fitdata(nddata):
     def remove_inactive_p(self,p):
         return p[self.active_mask]
     def add_inactive_p(self,p):
-        if self.set_indices != None:
+        if self.set_indices is not None:
             #{{{ uncollapse the function
             temp = p.copy()
             p = zeros(len(self.symbol_list))
@@ -7065,15 +7081,16 @@ class fitdata(nddata):
         r"this wraps fitfunc_raw (which gives the actual form of the fit function) to take care of forced variables"
         p = self.add_inactive_p(p)
         return self.fitfunc_raw(p,x)
-    def errfunc(self,p,x,y,sigma):
+    def residual(self,p,x,y,sigma):
         '''just the error function'''
         fit = self.fitfunc(p,x)
         #normalization = sum(1.0/sigma)
         #print 'DEBUG: y=',y,'\nfit=',fit,'\nsigma=',sigma,'\n\n'
         sigma[sigma == 0.0] = 1
         try:
-            retval = (y-fit)/sigma #* normalization
-            #print 'DEBUG: retval=',retval,'\n\n'
+            # as noted here: https://stackoverflow.com/questions/6949370/scipy-leastsq-dfun-usage
+            # this needs to be fit - y, not vice versa
+            retval = (fit-y)/sigma #* normalization
         except ValueError as e:
             raise ValueError(strm('your error (',shape(sigma),
                     ') probably doesn\'t match y (',
@@ -7125,7 +7142,7 @@ class fitdata(nddata):
         if not hasattr(self,'fit_coeff') or self.fit_coeff is None:
             return None
         p = self.fit_coeff.copy()
-        if self.set_indices != None:
+        if self.set_indices is not None:
             #{{{ uncollapse the function
             temp = p.copy()
             p = zeros(len(self.symbol_list))
@@ -7148,7 +7165,7 @@ class fitdata(nddata):
         return self.symbol_list.index(name)
     def _active_symbols(self):
         if not hasattr(self,'active_symbols'):
-            if self.set_indices != None:
+            if self.set_indices is not None:
                 self.active_symbols = [x for x in self.symbol_list if self.active_mask[self._pn(x)]]
             else:
                 self.active_symbols = list(self.symbol_list)
@@ -7251,9 +7268,9 @@ class fitdata(nddata):
         else:
             p = array([NaN]*len(self.symbol_list))
         #{{{ LOCALLY apply any forced values
-        if set_what != None:
-            if self.set_indices != None:
-                raise ValueError("you're trying to set_what indices in an eval"
+        if set is not None:
+            if self.set_indices is not None:
+                raise ValueError("you're trying to set indices in an eval"
                         " function for a function that was fit constrained; this"
                         " is not currently supported")
             set_indices,set_to,active_mask = self.gen_indices(set_what,set_to)
@@ -7295,11 +7312,12 @@ class fitdata(nddata):
             if not silent: print('{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n')
             warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
             sigma = ones(shape(y))
-        p_ini = [1.0]*self.number_of_parameters
         if set_what != None:
+            p_ini = [1.0]*self.number_of_parameters
+        if set_what is not None:
             self.set_indices,self.set_to,self.active_mask = self.gen_indices(set_what,set_to)
             p_ini = self.remove_inactive_p(p_ini)
-        leastsq_args = (self.errfunc, p_ini)
+        leastsq_args = (self.residual, p_ini)
         leastsq_kwargs = {'args':(x,y,sigma),
                     'full_output':True}# 'maxfev':1000*(len(p_ini)+1)}
         if hasattr(self,'has_grad') and self.has_grad == True:

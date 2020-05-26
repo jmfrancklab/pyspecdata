@@ -169,10 +169,17 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
         if orig_f is None and self.get_ft_prop(axis):
             orig_f = self.getaxis(axis)[0]
         if f is not None:
-            if not isclose(0.0, abs(orig_f-f) % df,
-                    rtol=1e-5):
+            n_df = (orig_f-f)/df # number of df's shifted by
+            if abs((n_df - round(n_df))/n_df) > 1e-3:
                 if nearest is None:
-                    raise ValueError(strm("You need to explicitly set `nearest`, since you are trying to shift the start point from",orig_f,"to",f,"which is a non-integral number ",abs(orig_f-f)/df," of df=",df,"intervals.  If you don't know why you're getting this error, see the documentation for ft_clear_startpoints!!"))
+                    raise ValueError(strm("You need to explicitly"
+                        " set `nearest`, since you are trying to shift"
+                        " the start point from",orig_f,"to",f,
+                        "which is a non-integral number ",abs(orig_f-f)/df,
+                        " of df=",df,"intervals (n_df ", n_df,
+                        ".  If you don't know why"
+                        " you're getting this error, see the documentation"
+                        " for ft_clear_startpoints!!"))
                 elif nearest:
                     f = round((f-orig_f)/df)*df + orig_f
         self.set_ft_prop(axis,['start_freq'],f)
@@ -189,11 +196,18 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
         if orig_t is None and not self.get_ft_prop(axis):
             orig_t = self.getaxis(axis)[0]
         if t is not None:
-            if not isclose(0.0, abs(orig_t-t) % dt,
-                    atol=1e-3):
+            n_dt = (orig_t-t)/dt # number of dt's shifted by
+            if abs((n_dt - round(n_dt))/n_dt) > 1e-3:
                 if nearest is None:
                     print("discrepancy",abs(orig_t-t) % dt)
-                    raise ValueError(strm("You need to explicitly set `nearest`, since you are trying to shift the start point from",orig_t,"to",t,"which is a non-integral number (",(orig_t-t)/dt,") of dt=",dt,"intervals.  If you don't know why you're getting this error, see the documentation for ft_clear_startpoints!!"))
+                    raise ValueError(strm("You need to explicitly"
+                        " set `nearest`, since you are trying to shift"
+                        " the start point from",orig_t,"to",t,
+                        "which is a non-integral number ",abs(orig_t-t)/dt,
+                        " of dt=",dt,"intervals (n_dt ", n_dt,
+                        ".  If you don't know why"
+                        " you're getting this error, see the documentation"
+                        " for ft_clear_startpoints!!"))
                 elif nearest:
                     t = round((t-orig_t)/dt)*dt + orig_t
         self.set_ft_prop(axis,['start_time'],t)
@@ -207,11 +221,13 @@ def _get_ft_df(self,axis):
         return diff(self.getaxis(axis)[r_[0,1]]).item()
     else:
         # axis in time domain
-        return 1.0/diff(self.getaxis(axis)[r_[0,-1]]).item()
+        N = len(self.getaxis(axis))
+        return (N)/(N+1)/diff(self.getaxis(axis)[r_[0,-1]]).item()
 def _get_ft_dt(self,axis):
     if self.get_ft_prop(axis):
         # axis is in frequency domain
-        return 1.0/diff(self.getaxis(axis)[r_[0,-1]]).item()
+        N = len(self.getaxis(axis))
+        return (N)/(N+1)/diff(self.getaxis(axis)[r_[0,-1]]).item()
     else:
         # axis in time domain
         return diff(self.getaxis(axis)[r_[0,1]]).item()

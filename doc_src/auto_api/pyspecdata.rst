@@ -5,6 +5,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
    pyspecdata.axis_manipulation
    pyspecdata.fourier
