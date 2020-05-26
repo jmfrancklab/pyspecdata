@@ -6900,6 +6900,50 @@ class fitdata(nddata):
         self.active_indices = None
         #}}}
         return
+    def parameter_derivatives(self,xvals,set = None,set_to = None):
+        r'return a matrix containing derivatives of the parameters, can set dict set, or keys set, vals set_to'
+        logger.debug(strm('parameter derivatives is called!'))
+        if iscomplex(self.data.flatten()[0]):
+            print(lsafen('Warning, taking only real part of fitting data!'))
+        if isinstance(set, dict):
+            set_to = list(set.values())
+            set = list(set.keys())
+        solution_list = dict([(self.symbolic_dict[k],set_to[j])
+            if k in set
+            else (self.symbolic_dict[k],self.output(k))
+            for j,k in enumerate(self.symbol_list)]) # load into the solution list
+        number_of_i = len(xvals)
+        parameters = self._active_symbols()
+        mydiff_sym = [[]] * len(self.symbolic_vars)
+        x = self.symbolic_x
+        fprime = zeros([len(parameters),number_of_i])
+        for j in range(0,len(parameters)):
+            thisvar = self.symbolic_dict[parameters[j]]
+            mydiff_sym[j] = sympy.diff(self.symbolic_func,thisvar)
+            #print r'$\frac{\partial %s}{\partial %s}=%s$'%(self.function_name,repr(thisvar),sympy.latex(mydiff).replace('$','')),'\n\n'
+            try:
+                mydiff = mydiff_sym[j].subs(solution_list)
+            except Exception as e:
+                raise ValueError(strm('error trying to substitute', mydiff_sym[j],
+                    'with', solution_list) + explain_error(e))
+            try:
+                fprime[j,:] = array([complex(mydiff.subs(x,xvals[k])) for k in range(0,len(xvals))])
+            except ValueError as e:
+                raise ValueError(strm('Trying to set index',j,
+                    'shape(fprime)',shape(fprime),
+                    'shape(xvals)',shape(xvals),'the thing I\'m trying to',
+                    'compute looks like this',
+                    [mydiff.subs(x,xvals[k]) for k in range(0,len(xvals))]))
+            except Exception as e:
+                raise ValueError(strm('Trying to set index',j,
+                    'shape(fprime)',shape(fprime),
+                    'shape(xvals)',shape(xvals))+explain_error(e))
+        return fprime
+    def parameter_gradient(self,p,x,y,sigma):
+        r'this gives the specific format wanted by leastsq'
+        # for now, I'm going to assume that it's not using sigma, though this could be wrong
+        # and I could need to scale everything by sigma in the same way as errfunc
+        return self.parameter_derivatives(x,set = self.symbol_list,set_to = p).T
     @property
     def function_string(self):
         r'''A property of the fitdata class which stores a string output of the functional form of the desired fit expression provided in func:`functional_form` in LaTeX format'''
