@@ -6939,11 +6939,6 @@ class fitdata(nddata):
                     'shape(fprime)',shape(fprime),
                     'shape(xvals)',shape(xvals))+explain_error(e))
         return fprime
-    def parameter_gradient(self,p,x,y,sigma):
-        r'this gives the specific format wanted by leastsq'
-        # for now, I'm going to assume that it's not using sigma, though this could be wrong
-        # and I could need to scale everything by sigma in the same way as errfunc
-        return self.parameter_derivatives(x,set = self.symbol_list,set_to = p).T
     @property
     def function_string(self):
         r'''A property of the fitdata class which stores a string output of the functional form of the desired fit expression provided in func:`functional_form` in LaTeX format'''
@@ -7346,10 +7341,6 @@ class fitdata(nddata):
         leastsq_args = (self.errfunc, p_ini)
         leastsq_kwargs = {'args':(x,y,sigma),
                     'full_output':True}# 'maxfev':1000*(len(p_ini)+1)}
-        if hasattr(self,'has_grad') and self.has_grad == True:
-            leastsq_kwargs.update({'Dfun':self.parameter_gradient})
-        if 'Dfun' in list(leastsq_kwargs.keys()):
-            if not silent: print("yes, Dfun passed with arg",leastsq_kwargs['Dfun'])
         p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
         try:
            p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
