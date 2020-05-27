@@ -132,6 +132,7 @@ def init_logging(level=logging.INFO, filename='pyspecdata.log'):
     "Initialize logging on pyspecdata.log -- do NOT log if run from within a notebook (it's fair to assume that you will run first before embedding)"
     if level.lower() == 'info':
         level=logging.INFO
+    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
     elif level.lower() == 'debug':
         level=logging.DEBUG
     FORMAT = "--> %(filename)s(%(lineno)s):%(name)s %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"
