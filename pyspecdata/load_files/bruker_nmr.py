@@ -11,18 +11,19 @@ def det_phcorr(v):
     if v['DIGMOD']==1:
         gdparray=array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[179,201,533,709,1097,1449,2225,2929,4481,5889,8993,11809,18017,23649,36065,47329,72161,94689,144353,189409,288737],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[184,219,384,602,852,1668,2292,3368,4616,6768,9264,13568,18560,27392,36992,55040,73856,110336,147584,220928,295040]])
         decimarray=array([2,3,4,6,8,12,16,24,32,48,64,96,128,192,256,384,512,768,1024]) # the -1 is because this is an index, and copied from matlab code!!!
-        dspfvs = v['DSPFVS']
+        dspfvs = int(v['DSPFVS'])
         decim = v['DECIM']
         if 'GRPDLY' not in list(v.keys()):
             grpdly = -1
         grpdly = v['GRPDLY'] # later versions of topspin
         if grpdly == -1:
+            idx = nonzero(decimarray==decim)[0].item()
             try:
-                retval = gdparray[dspfvs,where(decimarray==decim)[0]]//2/decim
+                retval = gdparray[dspfvs,idx]//2/decim
             except:
                 if len(where(decimarray==decim)[0]) == 0:
-                    raise CustomError("Not able to find decim",decim,"in decimarray")
-                raise CustomError('Problem returning',dspfvs,where(decimarray==decim)[0],'elements of gdparray from gdparray of size',shape(gdparray),'because decimarray is of size',shape(decimarray))
+                    raise ValueError(strm("Not able to find decim",decim,"in decimarray"))
+                raise ValueError(strm('Problem returning',dspfvs,idx,'elements of gdparray from gdparray of size',shape(gdparray),'because decimarray is of size',shape(decimarray)))
                 retval = 0
             return retval
         else:
