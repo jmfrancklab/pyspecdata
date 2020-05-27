@@ -342,198 +342,28 @@ def _check_signature(filename):
             except UnicodeDecodeError:
                 # if it failed, it's because the string is not ASCII
                 return None
-def load_indiv_info(filename, dimname='', return_acq=False,
-        add_sizes=[], add_dims=[], use_sweep=None,
-        indirect_dimlabels=None, expno=None):
-    """Open the file given by `filename`, use file signature magic and/or
-    filename extension(s) to identify the file type, and call the appropriate
-    function to open it.
-    
-    Parameters
-    ----------
-    dimname : str
-        When there is a single indirect dimension composed of several scans,
-        call the indirect dimension `dimname`.
-    return_acq : DEPRECATED
-    add_sizes : list
-        the sizes associated with the dimensions in add_dims
-    add_dims : list
-        Can only be used with `dimname`.
-        Break the dimension `dimname` into several dimensions,
-        with the names given by the list `add_dims` and sizes given by `add_sizes`.
-        If the product of the sizes is not the same as the original dimension
-        given by `dimname`,
-        retain it as the "outermost" (leftmost) dimension. 
-        :func:`pyspecdata.core.chunkoff` is used to do this, like so:
-        ``data.chunkoff(dimname,add_dims,add_sizes)``
-    indirect_dimlabels : str or None
-        passed through to `acert.load_pulse` (names an indirect dimension when dimlabels isn't provided)
-
-    Returns
-    -------
-    nddata or None
-        the nddata containing the data,
-        or else, `None`, indicating that this is part of a pair of
-        files that should be skipped
-    """
-    logger.debug(strm("load_indiv_file sees indirect_dimlabels",
-        indirect_dimlabels))
-    #to search for kwargs when separating: \<dimname\>\|\<return_acq\>\|\<add_sizes\>\|\<add_dims\>
-    if not os.path.exists(filename):
-        if os.path.exists(filename+'.par'):
-            # {{{ legacy support for WinEPR without extension
-            logger.debug("legacy support for WinEPR without extension")
-            data = bruker_esr.winepr(filename, dimname=dimname)
-            warnings.warn("Don't call load_indiv_file anymore with the"
-                    " incomplete filename to try to load the ESR spectrum."
-                    " Rather, supply the full name of the .par file.")
-            # }}}
-        else:
-            raise IOError("%s does not exist"%filename)
-    # {{{ first, we search for the file magic to determine the filetype
-    filetype = None
-    if os.path.isdir(filename) or is_zipfile(filename):# Bruker, prospa, etc, datasets are stored as directories
-        if expno is None:
-            raise ValueError("currently, you must specify the experiment number when trying to load a directory-style file")
-        else:
-            expno_as_str = '%d'%expno
-        if is_zipfile(filename):
-            zf = ZipFile(filename)
-            list_of_files = [j.split('/') for j in zf.namelist()]
-            basename = os.path.normpath(filename).split(os.path.sep)[-1].split('.')[0]
-            assert all([j[0] == basename for j in list_of_files]), strm("I expected that the zip file contains a directory called ",basename,"which contains your NMR data -- this appears not to be the case.  (Note that with future extensions, other formats will be possible.)")
-            file_reference = (zf,
-                    filename,
-                    basename)
-        else:
-            file_reference = filename
-        if open_subpath(file_reference, expno_as_str, 'ser', test_only=True):
-            #{{{ Bruker 2D
-            logger.debug('Identified a bruker series file')
-            data = bruker_nmr.series(file_reference, expno_as_str, dimname=dimname)
-            data.set_prop('postproc_type',data.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
-            #}}}
-        elif open_subpath(file_reference, expno_as_str, 'acqus', test_only=True):
-            logger.debug('Identified a bruker 1d file')
-            #{{{ Bruker 1D
-            data = bruker_nmr.load_1D(file_reference, expno_as_str, dimname=dimname)
-            data.set_prop('postproc_type',data.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
-            #}}}
-        else:
-            logger.debug('Identified a potential prospa file')
-            # the rest are for prospa
-            # even though I've made steps towards supporting zipped prospa (by
-            # using open_subpath), that's not yet done -- diff against this commit
-            # to see what the previous code looked like
-            file_reference += '/' + expno_as_str
-            files_in_dir = os.listdir(file_reference)
-            if open_subpath(file_reference, 'data.2d', test_only=True):
-                #{{{ Prospa generic 2D
-                data = prospa.load_2D(file_reference, dimname=dimname)
-                #}}}
-                #{{{ specific Prospa formats
-            elif any(map((lambda x:'Delay' in x),files_in_dir)):
-                data = prospa.load_2D(file_reference, dimname=dimname)
-                twod = 't1' # this was set by det_type, not sure what's done with it now
-            elif open_subpath(file_reference, 'acqu.par', test_only=True):
-                data = prospa.load_1D(file_reference)
-            elif os.path.exists(os.path.join(file_reference,'..','acqu.par')):
-                data = prospa.load_2D(file_reference, dimname=dimname)
-                twod = 't1_sub' # this was set by det_type, not sure what's done with it now
-                #}}}
-            else:
-                raise RuntimeError('WARNING! unidentified file type '+file_reference)
-    else:
-        logger.debug(strm("the path",filename,"is a file"))
-        type_by_signature = _check_signature(filename)
-        type_by_extension = _check_extension(filename)
-        logger.debug(strm("signature and extension checks are done"))
-        if type_by_signature:
-            logger.debug(strm("determining type by signature"))
-            if type_by_signature == 'HDF5':
-                # we can have the normal ACERT Pulse experiment or the ACERT CW format
-                with h5py.File(filename,'r') as h5:
-                    try:
-                        # check to see if it's an acert file
-                        description_class = h5['experiment']['description'].attrs['class']
-                        is_acert = True
-                    except:
-                        is_acert = False
-                if is_acert:
-                    if description_class == 'CW':
-                        data = acert.load_cw(filename, use_sweep=use_sweep)
-                    else:
-                        data = acert.load_pulse(filename, indirect_dimlabels=indirect_dimlabels)
-                else:
-                    # assume this is a normal pySpecData HDF5 file
-                    dirname, filename = os.path.split(filename)
-                    data = nddata_hdf5(filename+'/'+expno,
-                            directory=dirname)
-            elif type_by_signature == 'DOS Format':
-                if type_by_extension == 'PAR':
-                    # par identifies the old-format WinEPR parameter file, and spc the binary spectrum
-                    logger.debug("old-format WinEPR parameter file")
-                    data = bruker_esr.winepr(filename, dimname=dimname)
-                else:
-                    raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
-            elif type_by_signature == 'TXT':
-                if type_by_extension == 'DSC':
-                    # DSC identifies the new-format XEpr parameter file, and DTA the binary spectrum
-                    data = bruker_esr.xepr(filename, dimname=dimname)
-                else:
-                    raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
-            else:
-                raise RuntimeError("Type %s not yet supported!"%type_by_signature)
-        else:
-            logger.debug(strm("determining type by extension"))
-            if type_by_extension == 'SPC':
-                logger.info(strm("skipping SPC file",filename))
-                return None # ignore SPC, and leave the reading to the PAR file
-            elif type_by_extension == 'DTA':
-                logger.info(strm("skipping DTA file",filename))
-                return None # ignore DTA and load the reading to the DSC file
-            elif type_by_extension == 'YGF':
-                logger.info(strm("skipping YGA file",filename))
-                return None # ignore YGA and load the reading to the DSC file
-            else:
-                raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
-    # }}}
-    #{{{ return, and if necessary, reorganize
-    if len(add_sizes)>0:
-        data.labels([dimname],[[]]) # remove the axis, so we can reshape
-        #print 'DEBUG: data before chunk = ',data
-        data.chunkoff(dimname,add_dims,add_sizes)
-        #print 'DEBUG: data after chunk = ',data
-        data.labels(add_dims,
-                [r_[0:x] for x in add_sizes])
-    if return_acq:
-        raise ValueError('return_acq is deprecated!! All properties are now set directly to the nddata using the set_prop function')
-    logger.debug("done with load_indiv_file")
-    if '' in data.dimlabels:
-        if ndshape(data)[''] < 2:
-            data = data['',0]
-        else:
-            if 'indirect' in data.dimlabels:
-                raise ValueError("Was going to rename unnamed dimension 'indirect', but there's already one called that!")
-            else:
-                data.rename('','indirect')
-    return data
-    #}}}
 def load_indiv_info(filename,
         expno=None):
     """Open the file given by `filename`, use file signature magic and/or
     filename extension(s) to identify the file type, and call the appropriate
-    function to general an information dictionary.
+    function to generate an information dictionary.
+
+    What happens here is largely translated from the
+    appropriate functions that are called in
+    load_indiv_info.
 
     Returns
     -------
     dict or None
     """
+    info_dict = {}
     if not os.path.exists(filename):
         if os.path.exists(filename+'.par'):
             # {{{ legacy support for WinEPR without extension
             logger.debug("legacy support for WinEPR without extension")
-            data = bruker_esr.winepr(filename, dimname=dimname)
+            raise ValueError("WinEPR info dict not yet"
+                    "supported -- look at commit where feature"
+                    "branch diverges from master")
             warnings.warn("Don't call load_indiv_file anymore with the"
                     " incomplete filename to try to load the ESR spectrum."
                     " Rather, supply the full name of the .par file.")
@@ -546,7 +376,11 @@ def load_indiv_info(filename,
         if expno is None:
             raise ValueError("currently, you must specify the experiment number when trying to load a directory-style file")
         else:
-            expno_as_str = '%d'%expno
+            if type(expno) is str:
+                expno_as_str = expno
+                assert '%d'%int(expno) == expno_as_str, "expno needs to be an integer here!"
+            else:
+                expno_as_str = '%d'%expno
         if is_zipfile(filename):
             zf = ZipFile(filename)
             list_of_files = [j.split('/') for j in zf.namelist()]
@@ -558,16 +392,38 @@ def load_indiv_info(filename,
         else:
             file_reference = filename
         if open_subpath(file_reference, expno_as_str, 'ser', test_only=True):
+            subpath = (expno_as_str,)
             #{{{ Bruker 2D
             logger.debug('Identified a bruker series file')
-            data = bruker_nmr.series(file_reference, expno_as_str, dimname=dimname)
-            data.set_prop('postproc_type',data.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
+            # {{{ translated from bruker_nmr.series
+            v = bruker_nmr.load_acqu(file_reference, *subpath)
+            v2 = bruker_nmr.load_acqu(file_reference, *subpath, whichdim='2')
+            SFO1 = v['SFO1']
+            BF1 = v['BF1']
+            v.update(v2)
+            if v['SFO1'] != SFO1:
+                # for, e.g. 2H experiments, a bad SFO1 (1H) is stored in acqu2, which we don't want
+                print("warning: ignoring second dimension SFO1, since it's probably wrong")
+                v['SFO1'] = SFO1
+                v['BF1'] = BF1
+            with open_subpath(file_reference, *(subpath+('pulseprogram',)),mode='r') as fp:
+                ppg = fp.read()
+                info_dict['pulprog'] = ppg
+            info_dict['acq'] = v
+            info_dict['postproc_type'] = info_dict['acq']['PULPROG'] # so it chooses postproc_type based on the pulse sequence
+            info_dict['title'] = bruker_nmr.load_title(file_reference, *subpath)
+            # }}}
             #}}}
         elif open_subpath(file_reference, expno_as_str, 'acqus', test_only=True):
             logger.debug('Identified a bruker 1d file')
             #{{{ Bruker 1D
-            data = bruker_nmr.load_1D(file_reference, expno_as_str, dimname=dimname)
-            data.set_prop('postproc_type',data.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
+            subpath = (expno_as_str,)
+            # {{{ from bruker_nmr.load_1D
+            v = bruker_nmr.load_acqu(file_reference, *subpath)
+            info_dict['title'] = bruker_nmr.load_title(file_reference,*subpath)
+            info_dict['acq'] = v
+            # }}}
+            info_dict['postproc_type'] = info_dict['acq']['PULPROG'] # so it chooses postproc_type based on the pulse sequence
             #}}}
         else:
             logger.debug('Identified a potential prospa file')
@@ -579,16 +435,24 @@ def load_indiv_info(filename,
             files_in_dir = os.listdir(file_reference)
             if open_subpath(file_reference, 'data.2d', test_only=True):
                 #{{{ Prospa generic 2D
-                data = prospa.load_2D(file_reference, dimname=dimname)
+                raise ValueError("Prospa 2D info dict not yet"
+                        "supported -- look at commit where feature"
+                        "branch diverges from master")
                 #}}}
                 #{{{ specific Prospa formats
             elif any(map((lambda x:'Delay' in x),files_in_dir)):
-                data = prospa.load_2D(file_reference, dimname=dimname)
+                raise ValueError("Prospa 2D info dict not yet"
+                        "supported -- look at commit where feature"
+                        "branch diverges from master")
                 twod = 't1' # this was set by det_type, not sure what's done with it now
             elif open_subpath(file_reference, 'acqu.par', test_only=True):
-                data = prospa.load_1D(file_reference)
+                raise ValueError("Prospa 1D info dict not yet"
+                        "supported -- look at commit where feature"
+                        "branch diverges from master")
             elif os.path.exists(os.path.join(file_reference,'..','acqu.par')):
-                data = prospa.load_2D(file_reference, dimname=dimname)
+                raise ValueError("Prospa 2D info dict not yet"
+                        "supported -- look at commit where feature"
+                        "branch diverges from master")
                 twod = 't1_sub' # this was set by det_type, not sure what's done with it now
                 #}}}
             else:
@@ -610,26 +474,30 @@ def load_indiv_info(filename,
                     except:
                         is_acert = False
                 if is_acert:
-                    if description_class == 'CW':
-                        data = acert.load_cw(filename, use_sweep=use_sweep)
-                    else:
-                        data = acert.load_pulse(filename, indirect_dimlabels=indirect_dimlabels)
+                    raise ValueError("ACERT HDF5 info dict not yet"
+                            "supported -- look at commit where feature"
+                            "branch diverges from master")
                 else:
                     # assume this is a normal pySpecData HDF5 file
                     dirname, filename = os.path.split(filename)
-                    data = nddata_hdf5(filename+'/'+expno,
-                            directory=dirname)
+                    raise ValueError("pySpecData HDF5 info dict not yet"
+                            "supported -- look at commit where feature"
+                            "branch diverges from master")
             elif type_by_signature == 'DOS Format':
                 if type_by_extension == 'PAR':
                     # par identifies the old-format WinEPR parameter file, and spc the binary spectrum
                     logger.debug("old-format WinEPR parameter file")
-                    data = bruker_esr.winepr(filename, dimname=dimname)
+                    raise ValueError("old-format WinEPR info dict not yet"
+                            "supported -- look at commit where feature"
+                            "branch diverges from master")
                 else:
                     raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
             elif type_by_signature == 'TXT':
                 if type_by_extension == 'DSC':
                     # DSC identifies the new-format XEpr parameter file, and DTA the binary spectrum
-                    data = bruker_esr.xepr(filename, dimname=dimname)
+                    raise ValueError("new-format XEPR info dict not yet"
+                            "supported -- look at commit where feature"
+                            "branch diverges from master")
                 else:
                     raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
             else:
@@ -648,26 +516,7 @@ def load_indiv_info(filename,
             else:
                 raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
     # }}}
-    #{{{ return, and if necessary, reorganize
-    if len(add_sizes)>0:
-        data.labels([dimname],[[]]) # remove the axis, so we can reshape
-        #print 'DEBUG: data before chunk = ',data
-        data.chunkoff(dimname,add_dims,add_sizes)
-        #print 'DEBUG: data after chunk = ',data
-        data.labels(add_dims,
-                [r_[0:x] for x in add_sizes])
-    if return_acq:
-        raise ValueError('return_acq is deprecated!! All properties are now set directly to the nddata using the set_prop function')
-    logger.debug("done with load_indiv_file")
-    if '' in data.dimlabels:
-        if ndshape(data)[''] < 2:
-            data = data['',0]
-        else:
-            if 'indirect' in data.dimlabels:
-                raise ValueError("Was going to rename unnamed dimension 'indirect', but there's already one called that!")
-            else:
-                data.rename('','indirect')
-    return data
+    return info_dict
     #}}}
 def load_indiv_file(filename, dimname='', return_acq=False,
         add_sizes=[], add_dims=[], use_sweep=None,
@@ -891,8 +740,10 @@ def det_type(file,**kwargs):
     raise RuntimeError("det_type is deprecated, and should be handled by the file magic inside load_indiv_file.  THE ONE EXCEPTION to this is the fact that det_type would return a second argument that allowed you to classify different types of prospa files.  This is not handled currently")
 
 __all__ = ['find_file',
+        'find_info',
         'search_filename',
         'load_indiv_file',
+        'load_indiv_info',
         'format_listofexps',
         'bruker_nmr',
         'bruker_esr',
