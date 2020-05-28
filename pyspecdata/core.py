@@ -6871,8 +6871,8 @@ def myfilter(x,center = 250e3,sigma = 100e3):
 
 #{{{ fitdata
 class fitdata(nddata):
-    r''' Inherits from an nddata and enables curve fitting through use of a sympy expression. The user creates a fitdata class object from an existing nddata class object, and on this fitdata object can define the func:`functional_form` of the curve it would like to fit to the data of the original nddata. This functional form must be provided as a sympy expression, with one of its variables matching the name of the dimension that the user would like to fit to. The user provides fit coefficients using func:`fit_coeff` and obtains output using func:`fit` and func:`eval`.
-    If you haven't dont his before,
+    r"""" Inherits from an nddata and enables curve fitting through use of a sympy expression. The user creates a fitdata class object from an existing nddata class object, and on this fitdata object can define the func:`functional_form` of the curve it would like to fit to the data of the original nddata. This functional form must be provided as a sympy expression, with one of its variables matching the name of the dimension that the user would like to fit to. The user provides fit coefficients using func:`fit_coeff` and obtains output using func:`fit` and func:`eval`.
+    If you haven't done this before,
     create a jupyter notebook (not checked in, just for your own playing around) with:
     ```
     import sympy as s
@@ -6957,7 +6957,7 @@ class fitdata(nddata):
         return fprime
     @property
     def function_string(self):
-        r'''A property of the fitdata class which stores a string output of the functional form of the desired fit expression provided in func:`functional_form` in LaTeX format'''
+        r"""A property of the fitdata class which stores a string output of the functional form of the desired fit expression provided in func:`functional_form` in LaTeX format that is read-only"""
         retval = sympy.latex(self.symbolic_expr).replace('$','')
         return r'$f(%s)='%(sympy.latex(self.fit_axis)) + retval + r'$'
     @function_string.setter
