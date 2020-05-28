@@ -128,38 +128,27 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = []):
     assert du > 0, thismsg
     return du
 
-def init_logging(levelString, filename='pyspecdata.log'):
-    "Initialize logging on pyspecdata.log -- do NOT log if run from within a notebook (it's fair to assume that you will run first before embedding)"
-    root = logging.getLogger()
+def init_logging(level=logging.INFO, filename='pyspecdata.log'):
+    r"""Initialize logging on pyspecdata.log -- do NOT log if run from within a
+    notebook (it's fair to assume that you will run first before embedding)"""
+    if type(level) is str:
+        if level.lower() == 'info':
+            level=logging.INFO
+        elif level.lower() == 'debug':
+            level=logging.DEBUG
+        else:
+            raise ValueError("if you give me level as a string, give me 'info' or 'debug'")
+    logger = logging.getLogger()
     fileHandler = logging.StreamHandler(filename)
     sysOutHandler = logging.StreamHandler(sys.stdout)        
-    level = logging.INFO
-    
-    if levelString == 'info':
-        level = logging.INFO
-        ###########################
-        fileHandler.setLevel(logging.INFO)
-        sysOutHandler.setLevel(logging.INFO)
-        root.setLevel(logging.INFO)
-        ###########################
-        logging.basicConfig(stream=sys.stdout,level=logging.DEBUG)
-    
-    elif levelString == 'debug':
-        ####################################
-        fileHandler.setLevel(logging.DEBUG)
-        sysOutHandler.setLevel(logging.DEBUG)
-        root.setLevel(logging.DEBUG)
-        ####################################
-        level=logging.DEBUG
-
+    sysOutHandler.setLevel(level)
+    logger.setLevel(level)
     FORMAT = "--> %(filename)s(%(lineno)s):%(name)s %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"
     formatter = logging.Formatter(FORMAT)
     fileHandler.setFormatter(formatter)
     sysOutHandler.setFormatter(formatter)
-
-    root.addHandler(fileHandler)
-    root.addHandler(sysOutHandler)
-
+    logger.addHandler(fileHandler)
+    logger.addHandler(sysOutHandler)
     log_filename = os.path.join(os.path.expanduser('~'),filename)
     if os.path.exists(log_filename):
         # manually remove, and then use append -- otherwise, it won't write to
@@ -170,8 +159,7 @@ def init_logging(levelString, filename='pyspecdata.log'):
             filemode='a',
             level=level,
             )
-    
-    #return root
+    #return logger
 
 def strm(*args):
     return ' '.join(map(str,args))
