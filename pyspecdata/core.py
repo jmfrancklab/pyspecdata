@@ -6871,7 +6871,7 @@ def myfilter(x,center = 250e3,sigma = 100e3):
 
 #{{{ fitdata
 class fitdata(nddata):
-    r''' Inherits from an nddata and enables curve fitting through use of a sympy expression. The user creates a fitdata class object from an existing nddata class object, and on this fitdata object can define the func:`functional_form` of the curve it would like to fit to the data of the original nddata. This functional form must be provided as a sympy expression, with one of its variables matching the name of the dimension that the user would like to fit to. The user provides fit coefficients using func:`fit_coeff` and obtains output using func:`fit` and func:`eval`.'''
+    r''' Inherits from an nddata and enables curve fitting through use of a sympy expression. The user creates a fitdata class object from an existing nddata class object, and on this fitdata object can define the func:`functional_form` of the curve it would like to fit to the data of the original nddata. This functional form must be provided as a sympy expression, with one of its variables matching the name of the dimension that the user would like to fit to. The user provides fit coefficients using func:`fit_coeff` and obtains output using func:`fit` and func:`eval`.
     If you haven't dont his before,
     create a jupyter notebook (not checked in, just for your own playing around) with:
     ```
