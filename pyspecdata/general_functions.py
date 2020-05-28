@@ -138,21 +138,23 @@ def init_logging(level=logging.INFO, filename='pyspecdata.log'):
             level=logging.DEBUG
         else:
             raise ValueError("if you give me level as a string, give me 'info' or 'debug'")
+    FORMAT = "--> %(filename)s(%(lineno)s):%(name)s %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"
+    formatter = logging.Formatter(FORMAT)
     log_filename = os.path.join(os.path.expanduser('~'),filename)
     if os.path.exists(log_filename):
         # manually remove, and then use append -- otherwise, it won't write to
         # file immediately
         os.remove(log_filename)
     logger = logging.getLogger()
-    #fileHandler = logging.FileHandler(filename)
-    stdout_handler = logging.StreamHandler(sys.stdout)        
-    stdout_handler.setLevel(level)
-    #logger.setLevel(level)
-    formatter = logging.Formatter("--> %(filename)s(%(lineno)s):%(name)s %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s")
-    #fileHandler.setFormatter(logging.Formatter(FORMAT))
+    logger.setLevel(level) # even if I set the handler level, it won't
+    #                        print w/out this
+    file_handler = logging.FileHandler(log_filename, mode='a')
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    # can set levels independently with: stdout_handler.setLevel(level)
     stdout_handler.setFormatter(formatter)
-    #logger.addHandler(fileHandler)
+    file_handler.setFormatter(formatter)
     logger.addHandler(stdout_handler)
+    logger.addHandler(file_handler)
     return logger
 
 def strm(*args):
