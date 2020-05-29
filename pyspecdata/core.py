@@ -3322,6 +3322,7 @@ class nddata (object):
         `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
 
         `error_for_data` can be a scalar, in which case, **all** the data errors are set to `error_for_data`
+
         .. todo::
                 several options below -- enumerate them in the documentation
         '''
@@ -6871,15 +6872,27 @@ def myfilter(x,center = 250e3,sigma = 100e3):
 
 #{{{ fitdata
 class fitdata(nddata):
-    r"""" Inherits from an nddata and enables curve fitting through use of a sympy expression. The user creates a fitdata class object from an existing nddata class object, and on this fitdata object can define the func:`functional_form` of the curve it would like to fit to the data of the original nddata. This functional form must be provided as a sympy expression, with one of its variables matching the name of the dimension that the user would like to fit to. The user provides fit coefficients using func:`fit_coeff` and obtains output using func:`fit` and func:`eval`.
+    r'''Inherits from an nddata and enables curve fitting through use of a sympy expression.
+
+    The user creates a fitdata class object from an existing nddata
+    class object, and on this fitdata object can define the
+    func:`functional_form` of the curve it would like to fit to the
+    data of the original nddata.
+    This functional form must be provided as a sympy expression, with
+    one of its variables matching the name of the dimension that the
+    user would like to fit to.
+    The user provides fit coefficients using func:`fit_coeff` and
+    obtains output using func:`fit` and func:`eval`.
     If you haven't done this before,
     create a jupyter notebook (not checked in, just for your own playing around) with:
     ```
     import sympy as s
     s.init_printing()
     ```
-    you can then use `s.symbols(` to create symbols/variables that allow you to build the mathematical expression for your fitting function
-    """
+    you can then use `s.symbols(` to create symbols/variables that
+    allow you to build the mathematical expression for your fitting
+    function
+    '''
     def __init__(self,*args,**kwargs):
         #{{{ manual kwargs
         fit_axis = None
@@ -6957,7 +6970,9 @@ class fitdata(nddata):
         return fprime
     @property
     def function_string(self):
-        r"""A property of the fitdata class which stores a string output of the functional form of the desired fit expression provided in func:`functional_form` in LaTeX format that is read-only"""
+        r'''A property of the fitdata class which stores a string
+        output of the functional form of the desired fit expression
+        provided in func:`functional_form` in LaTeX format'''
         retval = sympy.latex(self.symbolic_expr).replace('$','')
         return r'$f(%s)='%(sympy.latex(self.fit_axis)) + retval + r'$'
     @function_string.setter
@@ -6965,12 +6980,15 @@ class fitdata(nddata):
         raise ValueError("You cannot set the string directly -- change the functional_form property instead!")
     @property
     def functional_form(self):
-        r'''A property of the fitdata class which is set by the user, takes as input a sympy expression of the desired fit expression'''
+        r'''A property of the fitdata class which is set by the user,
+        takes as input a sympy expression of the desired fit
+        expression'''
         print("Getting symbolic function")
         return self.symbolic_expr
     @functional_form.setter
     def functional_form(self,sym_expr):
-        r''' The functional form, given as a sympy expression, to which you would like to fit the data.'''
+        r''' The functional form, given as a sympy expression, to
+        which you would like to fit the data.'''
         assert issympy(sym_expr), "for now, the functional form must be a sympy expression!"
         self.symbolic_expr = sym_expr
         #{{{ adapted from fromaxis, trying to adapt the variable
@@ -7351,8 +7369,8 @@ class fitdata(nddata):
             if not silent: print('{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n')
             warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
             sigma = ones(shape(y))
-        if set_what != None:
-            p_ini = [1.0]*self.number_of_parameters
+        if set_what is not None:
+            p_ini = self.guess()
         if set_what is not None:
             self.set_indices,self.set_to,self.active_mask = self.gen_indices(set_what,set_to)
             p_ini = self.remove_inactive_p(p_ini)
@@ -7585,6 +7603,8 @@ class fitdata(nddata):
                 logger.debug(strm('\n\n.core.guess) new value of guess after regularization:',lsafen(newguess)))
                 logger.debug(strm('\n\n.core.guess) value of residual after regularization:',thisresidual))
             return thisguess
+        else:
+            return [1.0]*self.number_of_parameters
 #}}}
 def sqrt(arg):
     if isinstance(arg,nddata):
