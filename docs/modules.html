@@ -21,11 +21,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -96,7 +96,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-pyspecdata.latexscripts">latexscripts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pyspecdata.ipy">ipy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pyspecdata.ndshape">ndshape</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#units">units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pyspecdata.units">units</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a></li>
@@ -178,11 +178,11 @@
 <span id="core"></span><h2>core<a class="headerlink" href="#module-pyspecdata.core" title="Permalink to this headline">¶</a></h2>
 <p>Provides the core components of pyspecdata.
 Currently, this is a very large file that we will slowly break down into separate modules or packages.</p>
-<p>The classes <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata_hdf</span></code>, <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.ndshape" title="pyspecdata.core.ndshape"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code></a>, the
-function <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.plot" title="pyspecdata.core.plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot()</span></code></a>, and the class <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.fitdata" title="pyspecdata.core.fitdata"><code class="xref py py-class docutils literal notranslate"><span class="pre">fitdata</span></code></a>
+<p>The classes <a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata_hdf</span></code>, <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.ndshape" title="pyspecdata.core.ndshape"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code></a>, the
+function <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.plot" title="pyspecdata.core.plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot()</span></code></a>, and the class <a class="reference internal" href="generated/pyspecdata.core.fitdata.html#pyspecdata.core.fitdata" title="pyspecdata.core.fitdata"><code class="xref py py-class docutils literal notranslate"><span class="pre">fitdata</span></code></a>
 are the core components of the N-Dimensional processing routines.
 Start by familiarizing yourself with those.</p>
-<p>The <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.figlist" title="pyspecdata.core.figlist"><code class="xref py py-class docutils literal notranslate"><span class="pre">figlist</span></code></a> is the base class for “Figure lists.”
+<p>The <a class="reference internal" href="generated/pyspecdata.core.figlist.html#pyspecdata.core.figlist" title="pyspecdata.core.figlist"><code class="xref py py-class docutils literal notranslate"><span class="pre">figlist</span></code></a> is the base class for “Figure lists.”
 Figure lists allows you to organize plots and text and to refer to plots
 by name, rather than number.
 They are designed so that same code can be used seamlessly from within
@@ -303,21 +303,22 @@ even though the location of the raw spectral data might change.</p>
 <div class="section" id="module-pyspecdata.load_files">
 <span id="load-files"></span><h2>load_files<a class="headerlink" href="#module-pyspecdata.load_files" title="Permalink to this headline">¶</a></h2>
 <p>This subpackage holds all the routines for reading raw data in proprietary formats.
-It’s intended to be accessed entirely through the function <a class="reference internal" href="#pyspecdata.load_files.find_file" title="pyspecdata.load_files.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_file()</span></code></a>,
+It’s intended to be accessed entirely through the function <a class="reference internal" href="temp_stubs.html#pyspecdata.load_files.find_file" title="pyspecdata.load_files.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_file()</span></code></a>,
 which uses <a href="#id4"><span class="problematic" id="id5">:module:`datadir`</span></a> to search for the filename, then automatically identifies
 the file type and calls the appropriate module to load the data into an nddata.</p>
 <p>Currently, Bruker file formats (both ESR and NMR) are supported, as well as
 (at least some earlier iteration) of Magritek file formats.</p>
 <p>Users/developers are very strongly encouraged to add support for new file types.</p>
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.find_file">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">find_file</code><span class="sig-paren">(</span><em class="sig-param">searchstring</em>, <em class="sig-param">exp_type=None</em>, <em class="sig-param">postproc=None</em>, <em class="sig-param">print_result=True</em>, <em class="sig-param">verbose=False</em>, <em class="sig-param">prefilter=None</em>, <em class="sig-param">expno=None</em>, <em class="sig-param">dimname=''</em>, <em class="sig-param">return_acq=False</em>, <em class="sig-param">add_sizes=[]</em>, <em class="sig-param">add_dims=[]</em>, <em class="sig-param">use_sweep=None</em>, <em class="sig-param">indirect_dimlabels=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.find_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">find_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">searchstring</span></em>, <em class="sig-param"><span class="n">exp_type</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">postproc</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">print_result</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">prefilter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expno</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dimname</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">return_acq</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">add_sizes</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">add_dims</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">use_sweep</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">indirect_dimlabels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lookup</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.find_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the file  given by the regular expression <cite>searchstring</cite> inside the directory identified by <cite>exp_type</cite>, load the nddata object, and postprocess with the function <cite>postproc</cite>.</p>
 <p>It looks at the top level of the directory first, and if that fails, starts to look recursively.
 Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.</p>
 <p>Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
 (so that you can make sure they are properly synced to the cloud, etc.).</p>
 <p>It calls <a class="reference internal" href="temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
+<p>If it can’t find any files matching the criterion, it logs the missing file and throws an exception.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -340,17 +341,21 @@ more info.</p></li>
 <li><p><strong>postproc</strong> (<a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.function" title="pyspecdata.function"><em>function</em></a><em>, </em><em>str</em><em>, or </em><em>None</em>) – <p>This function is fed the nddata data and the remaining keyword
 arguments (<cite>kwargs</cite>) as arguments.
 It’s assumed that each module for each different file type
-provides a dictionary called <cite>postproc_lookup</cite>.
-If <cite>postproc</cite> is a string,
+provides a dictionary called <cite>postproc_lookup</cite> (some are already
+available in pySpecData, but also, see the <cite>lookup</cite> argument,
+below).</p>
+<p>If <cite>postproc</cite> is a string,
 it looks up the string inside the <cite>postproc_lookup</cite>
-dictionary that’s appropriate for the file type.
-If <cite>postproc</cite> is None,
+dictionary that’s appropriate for the file type.</p>
+<p>If <cite>postproc</cite> is None,
 it checks to see if the any of the loading functions that were
 called set the <cite>postproc_type</cite> property
 – <em>i.e.</em> it checks the value of
 <code class="docutils literal notranslate"><span class="pre">data.get_prop('postproc_type')</span></code> –
 if this is set, it uses this as a key
-to pull the corresponding value from <cite>postproc_lookup</cite>.</p>
+to pull the corresponding value from <cite>postproc_lookup</cite>.
+For example, if this is a bruker file, it sets postproc to the
+name of the pulse sequence.</p>
 <p>For instance, when the acert module loads an ACERT HDF5 file,
 it sets <cite>postproc_type</cite> to the value of
 <code class="docutils literal notranslate"><span class="pre">(h5</span> <span class="pre">root).experiment.description['class']</span></code>.
@@ -376,6 +381,7 @@ This, in turn, is used to choose the type of post-processing.</p>
 </dd>
 </dl>
 </p></li>
+<li><p><strong>lookup</strong> (<em>dictionary with str:function pairs</em>) – types of postprocessing to add to the <cite>postproc_lookup</cite> dictionary</p></li>
 </ul>
 </dd>
 </dl>
@@ -418,8 +424,9 @@ for minimal guidance if you’re interested.</p>
 <span id="ndshape"></span><h2>ndshape<a class="headerlink" href="#module-pyspecdata.ndshape" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code> class allows you to allocate arrays and determine the shape of existing arrays.</p>
 </div>
-<div class="section" id="units">
-<h2>units<a class="headerlink" href="#units" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pyspecdata.units">
+<span id="units"></span><h2>units<a class="headerlink" href="#module-pyspecdata.units" title="Permalink to this headline">¶</a></h2>
+<p>Not yet implemented – a preliminary idea for how to handle actual unit conversion.  (Currently, we only do s to Hz during FT and order of magnitude prefixes when plotting.)</p>
 </div>
 </div>
 

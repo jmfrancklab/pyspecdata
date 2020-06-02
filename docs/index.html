@@ -21,11 +21,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -183,7 +183,7 @@ Using the funny notation of pySpecData, you can do this automatically.</p>
 <p>For example, say you have loaded an <cite>nddata</cite> object called <cite>d</cite> wanted to take time-domain data, Fourier transform,
 select out the central 20 kHz in the frequency domain, and then inverse Fourier transform, while preserving the correct axes throughout.
 That looks like this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">ft</span><span class="p">(</span><span class="s1">&#39;t2&#39;</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">ft</span><span class="p">(</span><span class="s1">&#39;t2&#39;</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">:(</span><span class="o">-</span><span class="mf">10e3</span><span class="p">,</span><span class="mf">10e-3</span><span class="p">)]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">ift</span><span class="p">(</span><span class="s1">&#39;t2&#39;</span><span class="p">)</span>
 </pre></div>
@@ -200,7 +200,7 @@ without keeping many copies of a large dataset and with less typing for each ope
 <p>describe updates allowing aliasing (nu2 vs. t2, etc.)</p>
 </div>
 <p>Note that</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plot</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plot</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Quickly generates a publication-quality plot;
@@ -242,7 +242,7 @@ These and further details are covered in the various sections of the documentati
 <li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.latexscripts">latexscripts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.ipy">ipy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.ndshape">ndshape</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#units">units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.units">units</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a><ul>
@@ -266,7 +266,6 @@ These and further details are covered in the various sections of the documentati
 </li>
 <li class="toctree-l1"><a class="reference internal" href="fitdata.html">the fitdata class</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="fitdata.html#creating-new-types-of-fitdata-modules">creating new types of fitdata modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="fitdata.html#fitdata-methods-to-override">fitdata Methods to Override</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>

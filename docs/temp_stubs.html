@@ -21,11 +21,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -157,15 +157,16 @@
   <p>This page holds stubs for functions that will be included in the api documentation</p>
 <div class="section" id="load-file">
 <h1>load_file<a class="headerlink" href="#load-file" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.find_file">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">find_file</code><span class="sig-paren">(</span><em class="sig-param">searchstring</em>, <em class="sig-param">exp_type=None</em>, <em class="sig-param">postproc=None</em>, <em class="sig-param">print_result=True</em>, <em class="sig-param">verbose=False</em>, <em class="sig-param">prefilter=None</em>, <em class="sig-param">expno=None</em>, <em class="sig-param">dimname=''</em>, <em class="sig-param">return_acq=False</em>, <em class="sig-param">add_sizes=[]</em>, <em class="sig-param">add_dims=[]</em>, <em class="sig-param">use_sweep=None</em>, <em class="sig-param">indirect_dimlabels=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.find_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">find_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">searchstring</span></em>, <em class="sig-param"><span class="n">exp_type</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">postproc</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">print_result</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">prefilter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expno</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dimname</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">return_acq</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">add_sizes</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">add_dims</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">use_sweep</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">indirect_dimlabels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lookup</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.find_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the file  given by the regular expression <cite>searchstring</cite> inside the directory identified by <cite>exp_type</cite>, load the nddata object, and postprocess with the function <cite>postproc</cite>.</p>
 <p>It looks at the top level of the directory first, and if that fails, starts to look recursively.
 Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.</p>
 <p>Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
 (so that you can make sure they are properly synced to the cloud, etc.).</p>
 <p>It calls <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
+<p>If it can’t find any files matching the criterion, it logs the missing file and throws an exception.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -188,17 +189,21 @@ more info.</p></li>
 <li><p><strong>postproc</strong> (<a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.function" title="pyspecdata.function"><em>function</em></a><em>, </em><em>str</em><em>, or </em><em>None</em>) – <p>This function is fed the nddata data and the remaining keyword
 arguments (<cite>kwargs</cite>) as arguments.
 It’s assumed that each module for each different file type
-provides a dictionary called <cite>postproc_lookup</cite>.
-If <cite>postproc</cite> is a string,
+provides a dictionary called <cite>postproc_lookup</cite> (some are already
+available in pySpecData, but also, see the <cite>lookup</cite> argument,
+below).</p>
+<p>If <cite>postproc</cite> is a string,
 it looks up the string inside the <cite>postproc_lookup</cite>
-dictionary that’s appropriate for the file type.
-If <cite>postproc</cite> is None,
+dictionary that’s appropriate for the file type.</p>
+<p>If <cite>postproc</cite> is None,
 it checks to see if the any of the loading functions that were
 called set the <cite>postproc_type</cite> property
 – <em>i.e.</em> it checks the value of
 <code class="docutils literal notranslate"><span class="pre">data.get_prop('postproc_type')</span></code> –
 if this is set, it uses this as a key
-to pull the corresponding value from <cite>postproc_lookup</cite>.</p>
+to pull the corresponding value from <cite>postproc_lookup</cite>.
+For example, if this is a bruker file, it sets postproc to the
+name of the pulse sequence.</p>
 <p>For instance, when the acert module loads an ACERT HDF5 file,
 it sets <cite>postproc_type</cite> to the value of
 <code class="docutils literal notranslate"><span class="pre">(h5</span> <span class="pre">root).experiment.description['class']</span></code>.
@@ -224,14 +229,15 @@ This, in turn, is used to choose the type of post-processing.</p>
 </dd>
 </dl>
 </p></li>
+<li><p><strong>lookup</strong> (<em>dictionary with str:function pairs</em>) – types of postprocessing to add to the <cite>postproc_lookup</cite> dictionary</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.load_indiv_file">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">load_indiv_file</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">dimname=''</em>, <em class="sig-param">return_acq=False</em>, <em class="sig-param">add_sizes=[]</em>, <em class="sig-param">add_dims=[]</em>, <em class="sig-param">use_sweep=None</em>, <em class="sig-param">indirect_dimlabels=None</em>, <em class="sig-param">expno=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.load_indiv_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">load_indiv_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">dimname</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">return_acq</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">add_sizes</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">add_dims</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">use_sweep</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">indirect_dimlabels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expno</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.load_indiv_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open the file given by <cite>filename</cite>, use file signature magic and/or
 filename extension(s) to identify the file type, and call the appropriate
 function to open it.</p>

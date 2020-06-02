@@ -21,11 +21,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -156,10 +156,10 @@
             
   <div class="section" id="pyspecdata-core-figlist">
 <h1>pyspecdata.core.figlist<a class="headerlink" href="#pyspecdata-core-figlist" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
+<dl class="py class">
 <dt id="pyspecdata.core.figlist">
-<em class="property">class </em><code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">figlist</code><span class="sig-paren">(</span><em class="sig-param">*arg</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.figlist" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="attribute">
+<em class="property">class </em><code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">figlist</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">arg</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.figlist" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
 <dt id="pyspecdata.core.figlist.basename">
 <code class="sig-name descname">basename</code><a class="headerlink" href="#pyspecdata.core.figlist.basename" title="Permalink to this definition">¶</a></dt>
 <dd><p>A basename that can be changed to generate different sets of figures with different basenames.
@@ -172,7 +172,7 @@ and generating the same set of figures for each set of data (which would corresp
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.core.figlist.figurelist">
 <code class="sig-name descname">figurelist</code><a class="headerlink" href="#pyspecdata.core.figlist.figurelist" title="Permalink to this definition">¶</a></dt>
 <dd><p>A list of the figure names</p>
@@ -183,7 +183,7 @@ and generating the same set of figures for each set of data (which would corresp
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.core.figlist.figdict">
 <code class="sig-name descname">figdict</code><a class="headerlink" href="#pyspecdata.core.figlist.figdict" title="Permalink to this definition">¶</a></dt>
 <dd><p>A dictionary containing the figurelist and the figure numbers or objects that they correspond to.
@@ -195,7 +195,7 @@ Keys of this dictionary must be elements of <cite>figurelist</cite>.</p>
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.core.figlist.propdict">
 <code class="sig-name descname">propdict</code><a class="headerlink" href="#pyspecdata.core.figlist.propdict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maintains various properties for each element in figurelist.
@@ -207,9 +207,9 @@ Keys of this dictionary must be elements of <cite>figurelist</cite>.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyspecdata.core.figlist.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">*arg</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.figlist.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">arg</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.figlist.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize a figure list, which can be used to generate a series of
 figures from the command line or prompt.  Then the same code (if
 <cite>figlist_var</cite> is used) can be included inside a <code class="docutils literal notranslate"><span class="pre">python</span></code> environment
@@ -258,7 +258,7 @@ construct the file names.</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="pyspecdata.core.figlist.header.html#pyspecdata.core.figlist.header" title="pyspecdata.core.figlist.header"><code class="xref py py-obj docutils literal notranslate"><span class="pre">header</span></code></a>(number_above, input_string)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyspecdata.core.figlist.image.html#pyspecdata.core.figlist.image" title="pyspecdata.core.figlist.image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image</span></code></a>(A, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.figlist.image" title="pyspecdata.core.figlist.image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image</span></code></a>(A, **kwargs)</p></td>
 <td><p>Called as <cite>fl.image()</cite> where <cite>fl</cite> is the <cite>figlist_var</cite> object</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.figlist.label_point" title="pyspecdata.core.figlist.label_point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">label_point</span></code></a>(data, axis, value, thislabel[, …])</p></td>
@@ -270,7 +270,7 @@ construct the file names.</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="pyspecdata.core.figlist.mesh.html#pyspecdata.core.figlist.mesh" title="pyspecdata.core.figlist.mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mesh</span></code></a>(plotdata[, Z_normalization, …])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyspecdata.core.figlist.next.html#pyspecdata.core.figlist.next" title="pyspecdata.core.figlist.next"><code class="xref py py-obj docutils literal notranslate"><span class="pre">next</span></code></a>(input_name[, legend, boundaries, twinx])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyspecdata.core.figlist.next.html#pyspecdata.core.figlist.next" title="pyspecdata.core.figlist.next"><code class="xref py py-obj docutils literal notranslate"><span class="pre">next</span></code></a>(input_name[, legend, boundaries, …])</p></td>
 <td><p>Switch to the figure given by input_name, which is used not only as a string-based name for the figure, but also as a default title and as a base name for resulting figure files.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pyspecdata.core.figlist.phaseplot_finalize.html#pyspecdata.core.figlist.phaseplot_finalize" title="pyspecdata.core.figlist.phaseplot_finalize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">phaseplot_finalize</span></code></a>()</p></td>
@@ -285,10 +285,10 @@ construct the file names.</p></li>
 </p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pyspecdata.core.figlist.pop_marker.html#pyspecdata.core.figlist.pop_marker" title="pyspecdata.core.figlist.pop_marker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop_marker</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>use the plot on the top of the “stack” (see push_marker) as the current plot</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyspecdata.core.figlist.push_marker.html#pyspecdata.core.figlist.push_marker" title="pyspecdata.core.figlist.push_marker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">push_marker</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>save the current plot to a “stack” so we can return to it with “pop_marker”</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pyspecdata.core.figlist.setprops.html#pyspecdata.core.figlist.setprops" title="pyspecdata.core.figlist.setprops"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setprops</span></code></a>(**kwargs)</p></td>
 <td><p></p></td>

@@ -21,11 +21,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -179,9 +179,9 @@
             
   <div class="section" id="pyspecdata-axis-manipulation-inhomog-coords-inhomog-coords">
 <h1>pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords<a class="headerlink" href="#pyspecdata-axis-manipulation-inhomog-coords-inhomog-coords" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords">
-<code class="sig-prename descclassname">pyspecdata.axis_manipulation.inhomog_coords.</code><code class="sig-name descname">inhomog_coords</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">direct_dim</em>, <em class="sig-param">indirect_dim</em>, <em class="sig-param">tolerance=1e-05</em>, <em class="sig-param">method='linear'</em>, <em class="sig-param">plot_name=None</em>, <em class="sig-param">fl=None</em>, <em class="sig-param">debug_kwargs={}</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.axis_manipulation.inhomog_coords.</code><code class="sig-name descname">inhomog_coords</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">direct_dim</span></em>, <em class="sig-param"><span class="n">indirect_dim</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'linear'</span></em>, <em class="sig-param"><span class="n">plot_name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fl</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">debug_kwargs</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply the “inhomogeneity transform,” which rotates the data by <span class="math notranslate nohighlight">\(45^{\circ}\)</span>, and then mirrors the portion with <span class="math notranslate nohighlight">\(t_2&lt;0\)</span> in order to transform from a <span class="math notranslate nohighlight">\((t_1,t_2)\)</span> coordinate system to a <span class="math notranslate nohighlight">\((t_{inh},t_{homog})\)</span> coordinate system.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

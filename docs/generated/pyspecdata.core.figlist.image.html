@@ -21,11 +21,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -156,9 +156,9 @@
             
   <div class="section" id="pyspecdata-core-figlist-image">
 <h1>pyspecdata.core.figlist.image<a class="headerlink" href="#pyspecdata-core-figlist-image" title="Permalink to this headline">¶</a></h1>
-<dl class="method">
+<dl class="py method">
 <dt id="pyspecdata.core.figlist.image">
-<code class="sig-prename descclassname">figlist.</code><code class="sig-name descname">image</code><span class="sig-paren">(</span><em class="sig-param">A</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.figlist.image" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">figlist.</code><code class="sig-name descname">image</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">A</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.figlist.image" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called as <cite>fl.image()</cite> where <cite>fl</cite> is the <cite>figlist_var</cite>
 object</p>
 <p>Note that this code just wraps the figlist properties, and
@@ -206,7 +206,7 @@ corresponding colorbar.</p></li>
 <li><p>If no title has been given, it’s set to the name of the
 current plot in the figurelist</p></li>
 </ul>
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.core.figlist.A">
 <code class="sig-name descname">A</code><a class="headerlink" href="#pyspecdata.core.figlist.A" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -216,7 +216,7 @@ current plot in the figurelist</p></li>
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.core.x">
 <code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">x</code><a class="headerlink" href="#pyspecdata.core.x" title="Permalink to this definition">¶</a></dt>
 <dd><p>If <cite>A</cite> is a numpy array, then this gives the values along
@@ -230,7 +230,7 @@ Not used if <cite>A</cite> is <cite>nddata</cite>.</p>
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.core.y">
 <code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">y</code><a class="headerlink" href="#pyspecdata.core.y" title="Permalink to this definition">¶</a></dt>
 <dd><p>If <cite>A</cite> is a numpy array, then this gives the values along
@@ -244,7 +244,7 @@ Not used if <cite>A</cite> is <cite>nddata</cite>.</p>
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.core.x_first">
 <code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">x_first</code><a class="headerlink" href="#pyspecdata.core.x_first" title="Permalink to this definition">¶</a></dt>
 <dd><p>Since it’s designed to represent matrices, an image plot
@@ -259,7 +259,7 @@ you are plotting a contour plot on top of an image), then set
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.core.spacing">
 <code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">spacing</code><a class="headerlink" href="#pyspecdata.core.spacing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determines the size of the white/black line drawn
@@ -271,7 +271,7 @@ Defaults to 1</p>
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.core.ax">
 <code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">ax</code><a class="headerlink" href="#pyspecdata.core.ax" title="Permalink to this definition">¶</a></dt>
 <dd><p>the Axis object where the plot should go.</p>
@@ -282,13 +282,13 @@ Defaults to 1</p>
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt>
 <code class="sig-name descname">all remaning</code></dt>
 <dd><p>are passed through to matplotlib <cite>imshow</cite></p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.core.origin">
 <code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">origin</code><a class="headerlink" href="#pyspecdata.core.origin" title="Permalink to this definition">¶</a></dt>
 <dd><p>upper and lower are passed to matplotlib.
@@ -300,7 +300,7 @@ Flip is for 2D nmr, and flips the data manually.</p>
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt>
 <code class="sig-name descname">.. code-block:: python</code></dt>
 <dd><p>from pyspecdata import *

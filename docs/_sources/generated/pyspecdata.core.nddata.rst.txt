@@ -30,6 +30,7 @@ pyspecdata.core.nddata
       ~nddata.contour
       ~nddata.convolve
       ~nddata.copy
+      ~nddata.copy_axes
       ~nddata.copy_props
       ~nddata.copyaxes
       ~nddata.cropped_log
@@ -68,12 +69,14 @@ pyspecdata.core.nddata
       ~nddata.linear_shear
       ~nddata.matchdims
       ~nddata.matrices_3d
+      ~nddata.max
       ~nddata.mayavi_surf
       ~nddata.mean
       ~nddata.mean_all_but
       ~nddata.mean_nopop
       ~nddata.mean_weighted
       ~nddata.meshplot
+      ~nddata.min
       ~nddata.mkd
       ~nddata.multimin
       ~nddata.name
