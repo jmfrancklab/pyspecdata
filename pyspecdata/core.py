@@ -7119,6 +7119,9 @@ class fitdata(nddata):
         if len(this_set) != len(set_to):
             raise ValueError(strm('length of this_set=', this_set,
                 'and set_to', set_to, 'are not the same!'))
+        print("*** *** *** *** ***")
+        print(this_set)
+        print("*** *** *** *** ***")
         set_indices = list(map(self.symbol_list.index,this_set)) # calculate indices once for efficiency
         active_mask = ones(len(self.symbol_list),dtype = bool)
         active_mask[set_indices] = False # generate the mask of indices that are actively fit
@@ -7325,7 +7328,8 @@ class fitdata(nddata):
         else:
             p = array([NaN]*len(self.symbol_list))
         #{{{ LOCALLY apply any forced values
-        if set is not None:
+        # changed line below from set to set_what, and now it works
+        if set_what is not None:
             if self.set_indices is not None:
                 raise ValueError("you're trying to set indices in an eval"
                         " function for a function that was fit constrained; this"
