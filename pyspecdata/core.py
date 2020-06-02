@@ -99,6 +99,7 @@ rcParams['axes.grid'] = False
 rcParams['font.size'] = 18
 rcParams['image.cmap'] = 'jet'
 rcParams['figure.figsize']=(16,12)
+mat2array = [{'ImmutableMatrix': array}, 'numpy']# for sympy returns arrays rather than the stupid matrix class
 logger = logging.getLogger('pyspecdata.core')
 #{{{ constants
 k_B = 1.380648813e-23
@@ -2598,14 +2599,28 @@ def box_muller(length, return_complex=True):
 #}}}
 
 #{{{nddata
-#{{{ format out to a certain decimal place
-def dp(number,decimalplaces,scientific=False):
+def dp(number,decimalplaces=2,scientific=False,max_front=3):
+    """format out to a certain decimal places, potentially in scientific notation
+
+    Parameters
+    ----------
+    decimalplaces: int (optional, default 3)
+        number of decimal places
+    scientific: boolean (optional, default False)
+        use scientific notation
+    max_front: int (optional, default 3)
+        at most this many places in front of the decimal before switching
+        automatically to scientific notation.
+    """
     if scientific:
-        tenlog = floor(log(number)/log(10.))
+        logger.debug(strm("trying to convert",number,"to scientific notation"))
+        tenlog = int(floor(log10(abs(number))))
         number /= 10**tenlog
         fstring = '%0.'+'%d'%decimalplaces+r'f\times 10^{%d}'%tenlog
     else:
         fstring = '%0.'+'%d'%decimalplaces+'f'
+        if len(fstring%number) > 1+decimalplaces+max_front:
+            return dp(number, decimalplaces=decimalplaces, scientific=True)
     return fstring%number
 #}}}
 #{{{ concatenate datalist along dimname
@@ -3307,6 +3322,7 @@ class nddata (object):
         `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
 
         `error_for_data` can be a scalar, in which case, **all** the data errors are set to `error_for_data`
+
         .. todo::
                 several options below -- enumerate them in the documentation
         '''
@@ -5328,7 +5344,6 @@ class nddata (object):
             raise ValueError('Wrong number of arguments!! -- you passed '+repr(len(args))+' arguments!')
         if issympy(func):
             logging.debug(strm("about to run sympy lambdify, symbols_in_func is",symbols_in_func))
-            mat2array = [{'ImmutableMatrix': array}, 'numpy']# returns arrays rather than the stupid matrix class
             try:
                 lambdified_func = sympy.lambdify(list(symbols_in_func), func,
                         modules=mat2array)
@@ -5471,7 +5486,6 @@ class nddata (object):
             if len(symbols_not_in_dimlabels)>0:
                 raise ValueError("You passed a symbolic function, but the symbols"+str(symbols_not_in_dimlabels)+" are not axes")
             logging.debug(strm("about to run sympy lambdify, symbols_in_func is",symbols_in_func))
-            mat2array = [{'ImmutableMatrix': array}, 'numpy']# returns arrays rather than the stupid matrix class
             try:
                 lambdified_func = sympy.lambdify(list(symbols_in_func), func,
                         modules=mat2array)
@@ -6075,7 +6089,7 @@ class nddata (object):
         if lefterror is not None:
             lefterror[tuple(leftindex)] = righterrors.squeeze()
     # {{{ standard trig functions
-    def __getattr__(self,arg):
+    def __getattribute__(self,arg):
         fundict = {'exp':exp,
                 'sin':sin,
                 'cos':cos,
@@ -6094,8 +6108,7 @@ class nddata (object):
                 return retval
             return retfun
         else:
-            retval = getattr(super(nddata,self),arg)
-            return retval
+            return super().__getattribute__(arg)
     @property
     def C(self):
         """shortcut for copy
@@ -6625,9 +6638,6 @@ class nddata_hdf5 (nddata):
         else:
             return nddata.__repr__(self)
         atexit.register(self._cleanup)
-    def __del__(self):
-        self._cleanup()
-        return
     def _cleanup(self):
         if hasattr(self,'_node_children'):
             self.h5file.close()
@@ -6641,6 +6651,7 @@ class nddata_hdf5 (nddata):
                 check_only=True, directory=directory)
         #except BaseException  as e:
         #    raise IndexError("I can't find the node "+pathstring+explain_error(e))
+        logger.debug("about to call _init_datanode")
         self._init_datanode(self.datanode)
         atexit.register(self._cleanup)
     def _init_datanode(self,datanode,**kwargs):
@@ -6861,15 +6872,28 @@ def myfilter(x,center = 250e3,sigma = 100e3):
 
 #{{{ fitdata
 class fitdata(nddata):
-    """
-    If you haven't dont his before,
+    r'''Inherits from an nddata and enables curve fitting through use of a sympy expression.
+
+    The user creates a fitdata class object from an existing nddata
+    class object, and on this fitdata object can define the
+    :func:`functional_form` of the curve it would like to fit to the
+    data of the original nddata.
+    This functional form must be provided as a sympy expression, with
+    one of its variables matching the name of the dimension that the
+    user would like to fit to.
+    The user provides fit coefficients using :func:`fit_coeff` and
+    obtains output using :func:`fit` and :func:`eval`.
+
+    If you haven't done this before,
     create a jupyter notebook (not checked in, just for your own playing around) with:
     ```
     import sympy as s
     s.init_printing()
     ```
-    you can then use `s.symbols(` to create symbols/variables that allow you to build the mathematical expression for your fitting function
-    """
+    you can then use `s.symbols(` to create symbols/variables that
+    allow you to build the mathematical expression for your fitting
+    function
+    '''
     def __init__(self,*args,**kwargs):
         #{{{ manual kwargs
         fit_axis = None
@@ -6877,7 +6901,6 @@ class fitdata(nddata):
             fit_axis = kwargs.pop('fit_axis')
         #}}}
         if isinstance(args[0],nddata):
-            #print "DEBUG trying to transfer",args[0].axis_coords_error
             myattrs = normal_attrs(args[0])
             for j in range(0,len(myattrs)):
                 self.__setattr__(myattrs[j],args[0].__getattribute__(myattrs[j]))
@@ -6946,12 +6969,65 @@ class fitdata(nddata):
                     'shape(fprime)',shape(fprime),
                     'shape(xvals)',shape(xvals))+explain_error(e))
         return fprime
-    def parameter_gradient(self,p,x,y,sigma):
-        r'this gives the specific format wanted by leastsq'
-        # for now, I'm going to assume that it's not using sigma, though this could be wrong
-        # and I could need to scale everything by sigma in the same way as errfunc
-        return self.parameter_derivatives(x,set = self.symbol_list,set_to = p).T
+    @property
+    def function_string(self):
+        r'''A property of the fitdata class which stores a string
+        output of the functional form of the desired fit expression
+        provided in func:`functional_form` in LaTeX format'''
+        retval = sympy.latex(self.symbolic_expr).replace('$','')
+        return r'$f(%s)='%(sympy.latex(self.fit_axis)) + retval + r'$'
+    @function_string.setter
+    def function_string(self):
+        raise ValueError("You cannot set the string directly -- change the functional_form property instead!")
+    @property
+    def functional_form(self):
+        r'''A property of the fitdata class which is set by the user,
+        takes as input a sympy expression of the desired fit
+        expression'''
+        print("Getting symbolic function")
+        return self.symbolic_expr
+    @functional_form.setter
+    def functional_form(self,sym_expr):
+        r''' The functional form, given as a sympy expression, to
+        which you would like to fit the data.'''
+        assert issympy(sym_expr), "for now, the functional form must be a sympy expression!"
+        self.symbolic_expr = sym_expr
+        #{{{ adapted from fromaxis, trying to adapt the variable
+        symbols_in_expr = self.symbolic_expr.atoms(sympy.Symbol)
+        #logger.debug(strm('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr))
+        print('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr)
+        symbols_in_expr = set(map(str,symbols_in_expr))
+        # the next are the parameters
+        self.fit_axis = set(self.dimlabels) & symbols_in_expr
+        if len(self.fit_axis) == 0:
+            raise ValueError("I can't find any variables that might correspond to a dimension you want to fit along."
+                    "The variables are", symbols_in_expr,
+                    "and the dimensions are", self.dimlabels)
+        elif len(self.fit_axis) > 1:
+            raise ValueError("currently only 1D fitting is supported, though this should be easy"
+                    "to change -- I see potential fit axes %s"%str(self.fit_axis))
+        # the next line gives the parameters
+        self.symbolic_vars = symbols_in_expr-self.fit_axis
+        # this gets used later in p_ini
+        self.number_of_parameters = len(self.symbolic_vars)
+        #}}}
+        self.fit_axis = list(self.fit_axis)[0]
+        # redefine as real to avoid weird piecewise derivatives
+        self.fit_axis_sym = sympy.var(self.fit_axis,real=True) 
+        self.symbolic_vars = list(self.symbolic_vars)
+        self.symbolic_vars.sort() # so I get consistent behavior
+        self.symbolic_vars = [sympy.var(j,real=True) for j in self.symbolic_vars]
+        self.symbol_list = [str(j) for j in self.symbolic_vars]
+        args = self.symbolic_vars + [self.fit_axis]
+        self.fitfunc_multiarg = sympy.lambdify(tuple(args), self.symbolic_expr, modules=mat2array)
+        def raw_fn(p,x):
+            assert len(p)==len(self.symbolic_vars), "length of parameter passed to fitfunc_raw doesn't match number of symbolic parameters"
+            return self.fitfunc_multiarg(
+                    *tuple([p[j] for j in range(len(self.symbolic_vars))] + [x]))
+        self.fitfunc_raw = raw_fn
+        # leave the gradient for later
     def analytical_covariance(self):
+        r'''Not up to date'''
         covarmatrix = zeros([len(self._active_symbols())]*2)
         #{{{ try this ppt suggestion --> his V is my fprime, but 
         fprime = self.parameter_derivatives(self.getaxis(self.fit_axis))
@@ -7017,22 +7093,6 @@ class fitdata(nddata):
         #        #if j != k:
         #        #    covarmatrix[j,k] *= 2
         return covarmatrix
-    def gen_symbolic(self,function_name):
-        r'''generates the symbolic representations the function'''
-        self.function_name = function_name
-        self.symbolic_vars = list(map(sympy.var,self.symbol_list))
-        self.symbolic_x = sympy.var(self.fit_axis)
-        #print lsafen('test symbol_list=',self.symbol_list)
-        self.symbolic_dict = dict(list(zip(self.symbol_list,self.symbolic_vars)))
-        #print lsafen('test symbolic_vars=',self.symbolic_vars)
-        #print lsafen('test symbolic_x=',self.symbolic_x)
-        if hasattr(self,'fitfunc_raw_symb'):
-            self.symbolic_func = self.fitfunc_raw_symb(self.symbolic_vars,self.symbolic_x)
-        else:
-            self.symbolic_func = self.fitfunc_raw(self.symbolic_vars,self.symbolic_x)
-        self.function_string = sympy.latex(self.symbolic_func).replace('$','')
-        self.function_string = r'$' + self.function_name + '=' + self.function_string + r'$'
-        return self
     def copy(self): # for some reason, if I don't override this with the same thing, it doesn't override
         namelist = []
         vallist = []
@@ -7060,6 +7120,9 @@ class fitdata(nddata):
         if len(this_set) != len(set_to):
             raise ValueError(strm('length of this_set=', this_set,
                 'and set_to', set_to, 'are not the same!'))
+        logger.debug("*** *** *** *** ***")
+        logger.debug(str(this_set))
+        logger.debug("*** *** *** *** ***")
         set_indices = list(map(self.symbol_list.index,this_set)) # calculate indices once for efficiency
         active_mask = ones(len(self.symbol_list),dtype = bool)
         active_mask[set_indices] = False # generate the mask of indices that are actively fit
@@ -7079,15 +7142,16 @@ class fitdata(nddata):
         r"this wraps fitfunc_raw (which gives the actual form of the fit function) to take care of forced variables"
         p = self.add_inactive_p(p)
         return self.fitfunc_raw(p,x)
-    def errfunc(self,p,x,y,sigma):
+    def residual(self,p,x,y,sigma):
         '''just the error function'''
         fit = self.fitfunc(p,x)
         #normalization = sum(1.0/sigma)
         #print 'DEBUG: y=',y,'\nfit=',fit,'\nsigma=',sigma,'\n\n'
         sigma[sigma == 0.0] = 1
         try:
-            retval = (y-fit)/sigma #* normalization
-            #print 'DEBUG: retval=',retval,'\n\n'
+            # as noted here: https://stackoverflow.com/questions/6949370/scipy-leastsq-dfun-usage
+            # this needs to be fit - y, not vice versa
+            retval = (fit-y)/sigma #* normalization
         except ValueError as e:
             raise ValueError(strm('your error (',shape(sigma),
                     ') probably doesn\'t match y (',
@@ -7123,7 +7187,20 @@ class fitdata(nddata):
         else:
             return self.linfunc(self.getaxis(self.fit_axis),self.data,yerr = self.get_error(),xerr = self.get_error(self.fit_axis)) # otherwise, return the raw data
     def output(self,*name):
-        r'''give the fit value of a particular symbol'''
+        r'''give the fit value of a particular symbol, or a dictionary of all values.
+
+        Parameters
+        ----------
+        name: str (optional)
+            name of the symbol.
+            If no name is passed, then output returns a dictionary of the
+            resulting values.
+
+        Returns
+        -------
+        retval: dict or float
+            Either a dictionary of all the values, or the value itself.
+        '''
         if not hasattr(self,'fit_coeff') or self.fit_coeff is None:
             return None
         p = self.fit_coeff.copy()
@@ -7143,8 +7220,7 @@ class fitdata(nddata):
                 raise ValueError(strm("While running output: couldn't find",
                     name,"in",self.symbol_list))
         elif len(name) == 0:
-            # return a record array
-            return array(tuple(p),{"names":list(self.symbol_list),"formats":['double']*len(p)}).reshape(1)
+            return {self.symbol_list[j]:p[j] for j in range(len(p))}
         else:
             raise ValueError(strm("You can't pass",len(name),"arguments to .output()"))
     def _pn(self,name):
@@ -7195,31 +7271,36 @@ class fitdata(nddata):
         r'''show the latex string for the function, with all the symbols substituted by their values'''
         # this should actually be generic to fitdata
         p = self.fit_coeff
-        printfstring = self.function_string
+        retval = self.function_string
         printfargs = []
         allsymb = []
         locations = []
+        # {{{ I replace the symbols manually
+        #     Note that I came back and tried to use sympy to do this,
+        #     but then realize that sympy will automatically simplify,
+        #     e.g. numbers in the denominator, so it ends up changing the
+        #     way the function looks.  Though this is a pain, it's
+        #     better.
         for j in range(0,len(self.symbol_list)):
-            #symbol = self.symbol_list[j]
             symbol = sympy.latex(self.symbolic_vars[j]).replace('$','')
-            logger.debug(strm('DEBUG: replacing symbol \\verb|',symbol,'|'))
-            location = printfstring.find(symbol)
+            logger.debug(strm('DEBUG: replacing symbol "',symbol,'"'))
+            location = retval.find(symbol)
             while location != -1:
-                if printfstring[location-1] == '-':
-                    newstring = printfstring[:location-1]+'+%01.03g'+printfstring[location+len(symbol):] # replace the symbol in the written function with the appropriate number
-                    thissign = -1.0
+                if retval[location-1] == '-':
+                    newstring = retval[:location-1]+dp(-1*p[j])+retval[location+len(symbol):] # replace the symbol in the written function with the appropriate number
                 else:
-                    newstring = printfstring[:location]+'%01.03g'+printfstring[location+len(symbol):] # replace the symbol in the written function with the appropriate number
-                    thissign = 1.0
-                logger.debug(strm(r"\begin{verbatim} trying to replace",printfstring[location:location+len(symbol)],r'\end{verbatim}'))
-                printfstring = newstring
-                printfargs += [thissign*p[j]] # add that number to the printf list
+                    newstring = retval[:location]+dp(p[j])+retval[location+len(symbol):] # replace the symbol in the written function with the appropriate number
+                logger.debug(strm(r"trying to replace",
+                    retval[location:location+len(symbol)]))
+                retval = newstring
                 locations += [location]
                 allsymb += [symbol]
-                location = printfstring.find(symbol)
-        printfargs = [printfargs[x] for x in argsort(locations)]
-        logger.debug(strm(r"\begin{verbatim}trying to generate",self.function_string,'\n',printfstring,'\n',[allsymb[x] for x in argsort(locations)],'\n',printfargs,r'\end{verbatim}'))
-        return printfstring%tuple(printfargs)
+                location = retval.find(symbol)
+        # }}}
+        logger.debug(strm(r"trying to generate",self.function_string,
+            '\n',retval,'\n',[allsymb[x] for x in argsort(locations)],
+            '\n',printfargs))
+        return retval
     def settoguess(self):
         'a debugging function, to easily plot the initial guess'
         self.fit_coeff = real(self.guess())
@@ -7235,24 +7316,27 @@ class fitdata(nddata):
         elif not isscalar(taxis) and len(taxis) == 2:
             taxis = linspace(taxis[0],taxis[1],300)
         return taxis
-    def eval(self,taxis,set = None,set_to = None):
+    def eval(self,taxis,set_what = None,set_to = None):
         r'''after we have fit, evaluate the fit function along the axis taxis
-        set and set_to allow you to forcibly set a specific symbol to a specific value --> however, this does not affect the class, but only the return value'''
-        if isinstance(set, dict):
-            set_to = list(set.values())
-            set = list(set.keys())
+        set_what and set_to allow you to forcibly set_what a specific symbol to a
+        specific value --> however, this does not affect the class, but only
+        the return value'''
+        if isinstance(set_what, dict):
+            set_to = list(set_what.values())
+            set_what = list(set_what.keys())
         taxis = self._taxis(taxis)
         if hasattr(self,'fit_coeff') and self.fit_coeff is not None:
             p = self.fit_coeff.copy()
         else:
             p = array([NaN]*len(self.symbol_list))
         #{{{ LOCALLY apply any forced values
-        if set is not None:
+        # changed line below from set to set_what, and now it works
+        if set_what is not None:
             if self.set_indices is not None:
                 raise ValueError("you're trying to set indices in an eval"
                         " function for a function that was fit constrained; this"
                         " is not currently supported")
-            set_indices,set_to,active_mask = self.gen_indices(set,set_to)
+            set_indices,set_to,active_mask = self.gen_indices(set_what,set_to)
             p[set_indices] = set_to
         #}}}
         #{{{ make a new, blank array with the fit axis expanded to fit taxis
@@ -7275,35 +7359,31 @@ class fitdata(nddata):
             self.fit_axis = new
         nddata.rename(self,previous,new)
         return self
-    def fit(self,set = None, set_to = None, force_analytical = False, silent = False):
+    def fit(self,set_what = None, set_to = None, force_analytical = False):
         r'''actually run the fit'''
-        if not silent: print("\n")
-        if not silent: print(r'\resizebox*{!}{3in}{\begin{minipage}{\linewidth}')
-        if isinstance(set, dict):
-            set_to = list(set.values())
-            set = list(set.keys())
+        if isinstance(set_what, dict):
+            set_to = list(set_what.values())
+            set_what = list(set_what.keys())
         x = self.getaxis(self.fit_axis)
         if iscomplex(self.data.flatten()[0]):
-            if not silent: print(lsafen('Warning, taking only real part of fitting data!'))
+            logger.info(strm('Warning, taking only real part of fitting data!'))
         y = real(self.data)
         sigma = self.get_error()
         if sigma is None:
-            if not silent: print('{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n')
+            print('{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n')
             warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
             sigma = ones(shape(y))
-        p_ini = real(array(self.guess())) # need the numpy format to allow boolean mask
-        if set is not None:
-            self.set_indices,self.set_to,self.active_mask = self.gen_indices(set,set_to)
+        if set_what is None:
+            p_ini = self.guess()
+        if set_what is not None:
+            self.set_indices,self.set_to,self.active_mask = self.gen_indices(set_what,set_to)
             p_ini = self.remove_inactive_p(p_ini)
-        leastsq_args = (self.errfunc, p_ini)
+        leastsq_args = (self.residual, p_ini)
         leastsq_kwargs = {'args':(x,y,sigma),
                     'full_output':True}# 'maxfev':1000*(len(p_ini)+1)}
-        if hasattr(self,'has_grad') and self.has_grad == True:
-            leastsq_kwargs.update({'Dfun':self.parameter_gradient})
-        if 'Dfun' in list(leastsq_kwargs.keys()):
-            if not silent: print("yes, Dfun passed with arg",leastsq_kwargs['Dfun'])
+        p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
         try:
-            p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
+           p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
         #{{{ just give various explicit errors
         except TypeError as err:
             if not isinstance(x, ndarray) and not isinstance(y, ndarray):
@@ -7326,7 +7406,7 @@ class fitdata(nddata):
                 '", maybe there is something wrong with the input:',
                 self))
         except Exception as e:
-            raise ValueError('leastsq failed; I don\'t know why'+explain_error(e))
+            raise ValueError('leastsq failed; I don\'t know why')
         #}}}
         if success not in [1,2,3,4]:
             #{{{ up maximum number of evals
@@ -7335,8 +7415,8 @@ class fitdata(nddata):
                 p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
                 if success != 1:
                     if mesg.find('two consecutive iterates'):
-                        if not silent: print(r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n')
-                        if not silent: print(r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n')
+                        print(r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n')
+                        print(r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n')
                         infodict_keys = list(infodict.keys())
                         infodict_vals = list(infodict.values())
                         if 'nfev' in infodict_keys:
@@ -7350,7 +7430,7 @@ class fitdata(nddata):
                         if 'qtf' in infodict_keys:
                             infodict_keys[infodict_keys.index('qtf')] = 'qtf, the vector (transpose(q)*fvec)'
                         for k,v in zip(infodict_keys,infodict_vals):
-                            if not silent: print(r'{\color{red}{\bf %s:}%s}'%(k,v),'\n\n')
+                            print(r'{\color{red}{\bf %s:}%s}'%(k,v),'\n\n')
                         #self.fit_coeff = None
                         #self.settoguess()
                         #return
@@ -7360,10 +7440,7 @@ class fitdata(nddata):
             else:
                 raise RuntimeError(strm('leastsq finished with an error message:',mesg))
         else:
-            if not silent: print(r'{\color{blue}')
-            if not silent: print(lsafen("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg)))
-            if not silent: print(r'}')
-            if not silent: print("\n")
+            logger.info("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg))
         self.fit_coeff = p_out # note that this is stored in HIDDEN form
         dof = len(x) - len(p_out)
         if hasattr(self,'symbolic_x') and force_analytical:
@@ -7372,7 +7449,7 @@ class fitdata(nddata):
             if force_analytical: raise RuntimeError(strm("I can't take the analytical",
                 "covariance!  This is problematic."))
             if cov is None:
-                if not silent: print(r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success),'}\n')
+                print(r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success),'}\n')
             self.covariance = cov
         if self.covariance is not None:
             try:
@@ -7381,8 +7458,7 @@ class fitdata(nddata):
                 raise TypeError(strm("type(self.covariance)",type(self.covariance),
                     "type(infodict[fvec])",type(infodict["fvec"]),
                     "type(dof)",type(dof)))
-        #print lsafen("DEBUG: at end of fit covariance is shape",shape(self.covariance),"fit coeff shape",shape(self.fit_coeff))
-        if not silent: print(r'\end{minipage}}')
+        logger.debug(strm("at end of fit covariance is shape",shape(self.covariance),"fit coeff shape",shape(self.fit_coeff)))
         return
     def bootstrap(self,points,swap_out = exp(-1.0),seedval = 10347,minbounds = {},maxbounds = {}):
         print(r'\begin{verbatim}')
@@ -7433,99 +7509,102 @@ class fitdata(nddata):
                         recordlist[runno][name] = thiscopy.output(name)
         print(r'\end{verbatim}')
         return recordlist # collect into a single recordlist array
-    def guess(self):
-        r'''provide the guess for our parameters; by default, based on pseudoinverse'''
-        self.has_grad = False
-        if iscomplex(self.data.flatten()[0]):
-            print(lsafen('Warning, taking only real part of fitting data!'))
-        y = real(self.data)
-        # I ended up doing the following, because as it turns out
-        # T1 is a bad fit function, because it has a singularity!
-        # this is probably why it freaks out if I set this to zero
-        # on the other hand, setting a value of one seems to be
-        # bad for very short T1 samples
-        which_starting_guess = 0
-        thisguess = self.starting_guesses[which_starting_guess]
-        numguesssteps = 20
-        #{{{ for some reason (not sure) adding a dimension to y
-        new_y_shape = list(y.shape)
-        new_y_shape.append(1)
-        y = y.reshape(tuple(new_y_shape))
-        #}}}
-        #{{{ evaluate f, fprime and residuals
-        guess_dict = dict(list(zip(self.symbol_list,list(thisguess))))
-        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
-        f_at_guess = real(self.eval(None,set = guess_dict).data)
-        try:
-            f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
-        except:
-            raise ValueError(strm('trying to reshape f_at_ini_guess from',f_at_guess.shape,
-                'to',new_y_shape))
-        thisresidual = sqrt((y-f_at_guess)**2).sum()
-        #}}}
-        lastresidual = thisresidual
-        for j in range(0,numguesssteps):
-            logger.debug('\n\n.core.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\end{verbatim}')
-            logger.debug('\n\n.core.guess) shape of parameter derivatives',shape(fprime),'shape of output',shape(y),'\n\n')
-            regularization_bad = True
-            alpha_max = 100.
-            alpha_mult = 2.
-            alpha = 0.1 # maybe I can rather estimate this based on the change in the residual, similar to in L-M?
-            logger.debug(strm('\n\n.core.guess) value of residual before regularization %d:'%j,thisresidual))
-            while regularization_bad:
-                newguess = real(array(thisguess) + dot(pinvr(fprime.T,alpha),(y-f_at_guess)).flatten())
-                mask = newguess < self.guess_lb
-                newguess[mask] = self.guess_lb[mask]
-                mask = newguess > self.guess_ub
-                newguess[mask] = self.guess_ub[mask]
-                if any(isnan(newguess)):
-                    logger.debug(strm('\n\n.core.guess) Regularization blows up $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha))
-                    alpha *= alpha_mult
-                else:
-                    #{{{ evaluate f, fprime and residuals
-                    guess_dict = dict(list(zip(self.symbol_list,list(newguess))))
-                    # only evaluate fprime once we know this is good, below
-                    f_at_guess = real(self.eval(None,set = guess_dict).data)
-                    try:
-                        f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
-                    except:
-                        raise IndexError(strm('trying to reshape f_at_ini_guess from',
-                            f_at_guess.shape,'to',new_y_shape))
-                    thisresidual = sqrt((y-f_at_guess)**2).sum()
-                    #}}}
-                    if (thisresidual-lastresidual)/lastresidual > 0.10:
+    def guess(self,use_pseudoinverse=False):
+        r'''old code that I am preserving here -- provide the guess for our parameters; by default, based on pseudoinverse'''
+        if use_pseudoinverse:
+            self.has_grad = False
+            if iscomplex(self.data.flatten()[0]):
+                print(lsafen('Warning, taking only real part of fitting data!'))
+            y = real(self.data)
+            # I ended up doing the following, because as it turns out
+            # T1 is a bad fit function, because it has a singularity!
+            # this is probably why it freaks out if I set this to zero
+            # on the other hand, setting a value of one seems to be
+            # bad for very short T1 samples
+            which_starting_guess = 0
+            thisguess = self.starting_guesses[which_starting_guess]
+            numguesssteps = 20
+            #{{{ for some reason (not sure) adding a dimension to y
+            new_y_shape = list(y.shape)
+            new_y_shape.append(1)
+            y = y.reshape(tuple(new_y_shape))
+            #}}}
+            #{{{ evaluate f, fprime and residuals
+            guess_dict = dict(list(zip(self.symbol_list,list(thisguess))))
+            fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+            f_at_guess = real(self.eval(None,set = guess_dict).data)
+            try:
+                f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
+            except:
+                raise ValueError(strm('trying to reshape f_at_ini_guess from',f_at_guess.shape,
+                    'to',new_y_shape))
+            thisresidual = sqrt((y-f_at_guess)**2).sum()
+            #}}}
+            lastresidual = thisresidual
+            for j in range(0,numguesssteps):
+                logger.debug('\n\n.core.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\end{verbatim}')
+                logger.debug('\n\n.core.guess) shape of parameter derivatives',shape(fprime),'shape of output',shape(y),'\n\n')
+                regularization_bad = True
+                alpha_max = 100.
+                alpha_mult = 2.
+                alpha = 0.1 # maybe I can rather estimate this based on the change in the residual, similar to in L-M?
+                logger.debug(strm('\n\n.core.guess) value of residual before regularization %d:'%j,thisresidual))
+                while regularization_bad:
+                    newguess = real(array(thisguess) + dot(pinvr(fprime.T,alpha),(y-f_at_guess)).flatten())
+                    mask = newguess < self.guess_lb
+                    newguess[mask] = self.guess_lb[mask]
+                    mask = newguess > self.guess_ub
+                    newguess[mask] = self.guess_ub[mask]
+                    if any(isnan(newguess)):
+                        logger.debug(strm('\n\n.core.guess) Regularization blows up $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha))
                         alpha *= alpha_mult
-                        logger.debug(strm('\n\n.core.guess) Regularized Pinv gave a step uphill $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha))
-                    else: # accept the step
-                        regularization_bad = False
-                        thisguess = newguess
-                        lastresidual = thisresidual
-                        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
-                if alpha > alpha_max:
-                    print("\n\n.core.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max)
-                    if which_starting_guess >= len(self.starting_guesses)-1:
-                        print("\n\n.core.guess) {\\color{red} Warning!!!} ran out of guesses!!!%d\n\n"%alpha_max)
-                        return thisguess
                     else:
-                        which_starting_guess += 1
-                        thisguess = self.starting_guesses[which_starting_guess]
-                        print("\n\n.core.guess) try a new starting guess:",lsafen(thisguess))
-                        j = 0 # restart the loop
-                        #{{{ evaluate f, fprime and residuals for the new starting guess
-                        guess_dict = dict(list(zip(self.symbol_list,list(thisguess))))
-                        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+                        #{{{ evaluate f, fprime and residuals
+                        guess_dict = dict(list(zip(self.symbol_list,list(newguess))))
+                        # only evaluate fprime once we know this is good, below
                         f_at_guess = real(self.eval(None,set = guess_dict).data)
                         try:
                             f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
                         except:
-                            raise RuntimeError(strm('trying to reshape f_at_ini_guess from',
+                            raise IndexError(strm('trying to reshape f_at_ini_guess from',
                                 f_at_guess.shape,'to',new_y_shape))
                         thisresidual = sqrt((y-f_at_guess)**2).sum()
                         #}}}
-                        regularization_bad = False # jump out of this loop
-            logger.debug(strm('\n\n.core.guess) new value of guess after regularization:',lsafen(newguess)))
-            logger.debug(strm('\n\n.core.guess) value of residual after regularization:',thisresidual))
-        return thisguess
+                        if (thisresidual-lastresidual)/lastresidual > 0.10:
+                            alpha *= alpha_mult
+                            logger.debug(strm('\n\n.core.guess) Regularized Pinv gave a step uphill $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha))
+                        else: # accept the step
+                            regularization_bad = False
+                            thisguess = newguess
+                            lastresidual = thisresidual
+                            fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+                    if alpha > alpha_max:
+                        print("\n\n.core.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max)
+                        if which_starting_guess >= len(self.starting_guesses)-1:
+                            print("\n\n.core.guess) {\\color{red} Warning!!!} ran out of guesses!!!%d\n\n"%alpha_max)
+                            return thisguess
+                        else:
+                            which_starting_guess += 1
+                            thisguess = self.starting_guesses[which_starting_guess]
+                            print("\n\n.core.guess) try a new starting guess:",lsafen(thisguess))
+                            j = 0 # restart the loop
+                            #{{{ evaluate f, fprime and residuals for the new starting guess
+                            guess_dict = dict(list(zip(self.symbol_list,list(thisguess))))
+                            fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+                            f_at_guess = real(self.eval(None,set = guess_dict).data)
+                            try:
+                                f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
+                            except:
+                                raise RuntimeError(strm('trying to reshape f_at_ini_guess from',
+                                    f_at_guess.shape,'to',new_y_shape))
+                            thisresidual = sqrt((y-f_at_guess)**2).sum()
+                            #}}}
+                            regularization_bad = False # jump out of this loop
+                logger.debug(strm('\n\n.core.guess) new value of guess after regularization:',lsafen(newguess)))
+                logger.debug(strm('\n\n.core.guess) value of residual after regularization:',thisresidual))
+            return thisguess
+        else:
+            return [1.0]*self.number_of_parameters
 #}}}
 def sqrt(arg):
     if isinstance(arg,nddata):
