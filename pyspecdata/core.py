@@ -6651,7 +6651,7 @@ class nddata_hdf5 (nddata):
                 check_only=True, directory=directory)
         #except BaseException  as e:
         #    raise IndexError("I can't find the node "+pathstring+explain_error(e))
-        print("about to call _init_datanode")
+        logger.debug("about to call _init_datanode")
         self._init_datanode(self.datanode)
         atexit.register(self._cleanup)
     def _init_datanode(self,datanode,**kwargs):
@@ -6876,13 +6876,14 @@ class fitdata(nddata):
 
     The user creates a fitdata class object from an existing nddata
     class object, and on this fitdata object can define the
-    func:`functional_form` of the curve it would like to fit to the
+    :func:`functional_form` of the curve it would like to fit to the
     data of the original nddata.
     This functional form must be provided as a sympy expression, with
     one of its variables matching the name of the dimension that the
     user would like to fit to.
-    The user provides fit coefficients using func:`fit_coeff` and
-    obtains output using func:`fit` and func:`eval`.
+    The user provides fit coefficients using :func:`fit_coeff` and
+    obtains output using :func:`fit` and :func:`eval`.
+
     If you haven't done this before,
     create a jupyter notebook (not checked in, just for your own playing around) with:
     ```
@@ -7119,9 +7120,9 @@ class fitdata(nddata):
         if len(this_set) != len(set_to):
             raise ValueError(strm('length of this_set=', this_set,
                 'and set_to', set_to, 'are not the same!'))
-        print("*** *** *** *** ***")
-        print(this_set)
-        print("*** *** *** *** ***")
+        logger.debug("*** *** *** *** ***")
+        logger.debug(str(this_set))
+        logger.debug("*** *** *** *** ***")
         set_indices = list(map(self.symbol_list.index,this_set)) # calculate indices once for efficiency
         active_mask = ones(len(self.symbol_list),dtype = bool)
         active_mask[set_indices] = False # generate the mask of indices that are actively fit
@@ -7194,6 +7195,7 @@ class fitdata(nddata):
             name of the symbol.
             If no name is passed, then output returns a dictionary of the
             resulting values.
+
         Returns
         -------
         retval: dict or float
@@ -7357,20 +7359,18 @@ class fitdata(nddata):
             self.fit_axis = new
         nddata.rename(self,previous,new)
         return self
-    def fit(self,set_what = None, set_to = None, force_analytical = False, silent = False):
+    def fit(self,set_what = None, set_to = None, force_analytical = False):
         r'''actually run the fit'''
-        if not silent: logger.info(strm("\n"))
-        if not silent: logger.info(strm((r'\resizebox*{!}{3in}{\begin{minipage}{\linewidth}')))
         if isinstance(set_what, dict):
             set_to = list(set_what.values())
             set_what = list(set_what.keys())
         x = self.getaxis(self.fit_axis)
         if iscomplex(self.data.flatten()[0]):
-            if not silent: logger.info(strm('Warning, taking only real part of fitting data!'))
+            logger.info(strm('Warning, taking only real part of fitting data!'))
         y = real(self.data)
         sigma = self.get_error()
         if sigma is None:
-            if not silent: print('{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n')
+            print('{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n')
             warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
             sigma = ones(shape(y))
         if set_what is None:
@@ -7415,8 +7415,8 @@ class fitdata(nddata):
                 p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
                 if success != 1:
                     if mesg.find('two consecutive iterates'):
-                        if not silent: print(r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n')
-                        if not silent: print(r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n')
+                        print(r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n')
+                        print(r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n')
                         infodict_keys = list(infodict.keys())
                         infodict_vals = list(infodict.values())
                         if 'nfev' in infodict_keys:
@@ -7430,7 +7430,7 @@ class fitdata(nddata):
                         if 'qtf' in infodict_keys:
                             infodict_keys[infodict_keys.index('qtf')] = 'qtf, the vector (transpose(q)*fvec)'
                         for k,v in zip(infodict_keys,infodict_vals):
-                            if not silent: print(r'{\color{red}{\bf %s:}%s}'%(k,v),'\n\n')
+                            print(r'{\color{red}{\bf %s:}%s}'%(k,v),'\n\n')
                         #self.fit_coeff = None
                         #self.settoguess()
                         #return
@@ -7440,10 +7440,7 @@ class fitdata(nddata):
             else:
                 raise RuntimeError(strm('leastsq finished with an error message:',mesg))
         else:
-            if not silent: print(r'{\color{blue}')
-            if not silent: print(lsafen("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg)))
-            if not silent: print(r'}')
-            if not silent: print("\n")
+            logger.info("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg))
         self.fit_coeff = p_out # note that this is stored in HIDDEN form
         dof = len(x) - len(p_out)
         if hasattr(self,'symbolic_x') and force_analytical:
@@ -7452,7 +7449,7 @@ class fitdata(nddata):
             if force_analytical: raise RuntimeError(strm("I can't take the analytical",
                 "covariance!  This is problematic."))
             if cov is None:
-                if not silent: print(r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success),'}\n')
+                print(r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success),'}\n')
             self.covariance = cov
         if self.covariance is not None:
             try:
@@ -7461,8 +7458,7 @@ class fitdata(nddata):
                 raise TypeError(strm("type(self.covariance)",type(self.covariance),
                     "type(infodict[fvec])",type(infodict["fvec"]),
                     "type(dof)",type(dof)))
-        #print lsafen("DEBUG: at end of fit covariance is shape",shape(self.covariance),"fit coeff shape",shape(self.fit_coeff))
-        if not silent: print(r'\end{minipage}}')
+        logger.debug(strm("at end of fit covariance is shape",shape(self.covariance),"fit coeff shape",shape(self.fit_coeff)))
         return
     def bootstrap(self,points,swap_out = exp(-1.0),seedval = 10347,minbounds = {},maxbounds = {}):
         print(r'\begin{verbatim}')
