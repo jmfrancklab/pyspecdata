@@ -128,9 +128,7 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = []):
     assert du > 0, thismsg
     return du
 
-def init_logging(level=logging.INFO, filename='pyspecdata.log'):
-    r"""Initialize logging on pyspecdata.log -- do NOT log if run from within a
-    notebook (it's fair to assume that you will run first before embedding)"""
+def level_str_to_int(level):
     if type(level) is str:
         if level.lower() == 'info':
             level=logging.INFO
@@ -138,7 +136,12 @@ def init_logging(level=logging.INFO, filename='pyspecdata.log'):
             level=logging.DEBUG
         else:
             raise ValueError("if you give me level as a string, give me 'info' or 'debug'")
+    return level
+def init_logging(level=logging.INFO, stdout_level=logging.INFO, filename='pyspecdata.log'):
+    r"""Initialize logging on pyspecdata.log -- do NOT log if run from within a
+    notebook (it's fair to assume that you will run first before embedding)"""
     FORMAT = "--> %(filename)s(%(lineno)s):%(name)s %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"
+    level = level_str_to_int(level)
     formatter = logging.Formatter(FORMAT)
     log_filename = os.path.join(os.path.expanduser('~'),filename)
     if os.path.exists(log_filename):
@@ -150,7 +153,8 @@ def init_logging(level=logging.INFO, filename='pyspecdata.log'):
     #                        print w/out this
     file_handler = logging.FileHandler(log_filename, mode='a')
     stdout_handler = logging.StreamHandler(sys.stdout)
-    # can set levels independently with: stdout_handler.setLevel(level)
+    # can set levels independently with:
+    stdout_handler.setLevel(level_str_to_int(stdout_level))
     stdout_handler.setFormatter(formatter)
     file_handler.setFormatter(formatter)
     logger.addHandler(stdout_handler)

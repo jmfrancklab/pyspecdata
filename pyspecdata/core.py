@@ -99,7 +99,7 @@ rcParams['axes.grid'] = False
 rcParams['font.size'] = 18
 rcParams['image.cmap'] = 'jet'
 rcParams['figure.figsize']=(16,12)
-if inside_sphinx:
+if inside_sphinx():
     mat2array = []
 else:
     mat2array = [{'ImmutableMatrix': array}, 'numpy']# for sympy returns arrays rather than the stupid matrix class
