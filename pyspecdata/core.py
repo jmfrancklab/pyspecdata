@@ -866,7 +866,7 @@ def h5loaddict(thisnode):
     for k,v in retval.items():#{{{ search for record arrays that represent normal lists
         retval[k]  = unmake_ndarray(v,name_forprint = k)
     if isinstance(thisnode, tables.table.Table):#{{{ load any table data
-        logger.info(strm("It's a table\n\n"))
+        logger.debug(strm("It's a table\n\n"))
         if 'data' in list(retval.keys()):
             raise AttributeError('There\'s an attribute called data --> this should not happen!')
         retval.update({'data':thisnode.read()})
@@ -1035,7 +1035,7 @@ def h5nodebypath(h5path,force = False,only_lowest = False,check_only = False,dir
     h5path = h5path.split('/')
     #{{{ open the file / check if it exists
     logger.debug(strm(lsafen('h5path=',h5path)))
-    logger.info(strm('the h5path is',h5path))
+    logger.debug(strm('the h5path is',h5path))
     if h5path[0] in listdir(directory):
         logger.debug(strm('DEBUG: file exists\n\n'))
         log_fname('data_files',h5path[0],directory)
@@ -1073,10 +1073,10 @@ def h5nodebypath(h5path,force = False,only_lowest = False,check_only = False,dir
                         create = create,
                         clear = clear)
                 logger.debug(strm(lsafen("searching for node path: descended to node",currentnode)))
-                logger.info(strm("searching for node path: descended to node",currentnode))
+                logger.debug(strm("searching for node path: descended to node",currentnode))
             except BaseException as e:
                 logger.debug(strm(lsafen("searching for node path: got caught searching for node",h5path[pathlevel])))
-                logger.info(strm("searching for node path: got caught searching for node",h5path[pathlevel]))
+                logger.debug(strm("searching for node path: got caught searching for node",h5path[pathlevel]))
                 h5file.close()
                 #print lsafen("DEBUG: Yes, I closed the file")
                 raise IndexError(strm('Problem trying to load node ',h5path,explain_error(e)))
@@ -1113,9 +1113,9 @@ def h5attachattributes(node,listofattributes,myvalues):
             # {{{ pytables hates <U24 which is created from unicode
             if type(thisval) in [list,tuple]:
                 if any([isinstance(x,str) for x in thisval]):
-                    logger.info(strm("going to convert",thisval,"to strings"))
+                    logger.debug(strm("going to convert",thisval,"to strings"))
                     thisval = [str(x) if isinstance(x,str) else x for x in thisval]
-                    logger.info(strm("now it looks like this:",thisval))
+                    logger.debug(strm("now it looks like this:",thisval))
             thisval = make_ndarray(thisval,name_forprint = thisattr)
             # }}}
         if thisval is not None:
@@ -3695,7 +3695,7 @@ class nddata (object):
     def __rpow__(self,arg):
         result = self.copy()
         result.set_error(None)
-        logger.info("error propagation for right power not currently supported (do you need this, really?)")
+        logger.debug("error propagation for right power not currently supported (do you need this, really?)")
         assert isscalar(arg) or isinstance(arg, ndarray), "currently right power only supported for ndarray and scalars -- do you really need something else??"
         result.data = arg**self.data
         return result
@@ -4403,26 +4403,27 @@ class nddata (object):
     def run_nopop(self,func,axis):
         func = self._wrapaxisfuncs(func)
         try:
-            thisaxis = self.dimlabels.index(axis)
+            thisaxis = self.axn(axis)
         except Exception as e:
             raise IndexError(strm("I couldn't find the dimension",axis,
                 "in the list of axes",self.dimlabels))
         temp = list(self.data.shape)
         temp[thisaxis] = 1
-        numnonoptargs = len(getargspec(func)[0])-len(getargspec(func)[3])
-        if numnonoptargs == 1:
-            try:
-                self.data = func(self.data,axis=thisaxis)
-            except TypeError:
-                self.data = func(self.data,axes=thisaxis)
-        elif numnonoptargs == 2:
+        numnonoptargs = len(getargspec(func).args)
+        if numnonoptargs == 2:
             try:
                 self.data = func(self.getaxis(axis),self.data,axis=thisaxis)
             except TypeError:
                 self.data = func(self.getaxis(axis),self.data,axes=thisaxis)
         else:
-            raise ValueError('you passed a function to run_nopop that doesn\'t'
-                    'have either one or two arguments!')
+            if numnonoptargs == 1 or len(getargspec(func).varargs)>0:
+                try:
+                    self.data = func(self.data,axis=thisaxis)
+                except TypeError:
+                    self.data = func(self.data,axes=thisaxis)
+            else:
+                raise ValueError('you passed a function to run_nopop that doesn\'t'
+                        'have either one or two arguments!')
         #{{{ if the function doesn't rip out the dim, make sure we don't change the dims
         if len(self.data.shape)==len(temp):
             temp[thisaxis] = self.data.shape[thisaxis]
@@ -6622,7 +6623,7 @@ class nddata (object):
                 if len(warnlist) > 0:
                     print("WARNING!!, attributes",warnlist,"are lists!")
                 #}}}
-                logger.info(strm(lsafe('other attributes:',list(zip(myotherattrs,[type(self.__getattribute__(x)) for x in myotherattrs]))),'\n\n'))
+                logger.debug(strm(lsafe('other attributes:',list(zip(myotherattrs,[type(self.__getattribute__(x)) for x in myotherattrs]))),'\n\n'))
             #}}}
         finally:
             h5file.close()
@@ -6682,7 +6683,7 @@ class nddata_hdf5 (nddata):
         if 'axes' in list(datadict.keys()):
             myaxiscoords = [None]*len(mydimlabels)
             myaxiscoordserror = [None]*len(mydimlabels)
-            logger.info(strm("about to read out the various axes:",list(datadict['axes'].keys())))
+            logger.debug(strm("about to read out the various axes:",list(datadict['axes'].keys())))
             for axisname in list(datadict['axes'].keys()):
                 try:
                     axisnumber = mydimlabels.index(axisname)
@@ -6709,7 +6710,7 @@ class nddata_hdf5 (nddata):
                     "data!!")
             # the reshaping this refers to is done below
         #}}}
-        logger.info(strm("about to initialize data with shape",mydata.shape,"labels",mydimlabels,"and kwargs",kwargs))
+        logger.debug(strm("about to initialize data with shape",mydata.shape,"labels",mydimlabels,"and kwargs",kwargs))
         nddata.__init__(self,
                 mydata,
                 mydata.shape,
@@ -7369,7 +7370,7 @@ class fitdata(nddata):
             set_what = list(set_what.keys())
         x = self.getaxis(self.fit_axis)
         if iscomplex(self.data.flatten()[0]):
-            logger.info(strm('Warning, taking only real part of fitting data!'))
+            logger.debug(strm('Warning, taking only real part of fitting data!'))
         y = real(self.data)
         sigma = self.get_error()
         if sigma is None:
@@ -7443,7 +7444,7 @@ class fitdata(nddata):
             else:
                 raise RuntimeError(strm('leastsq finished with an error message:',mesg))
         else:
-            logger.info("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg))
+            logger.debug("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg))
         self.fit_coeff = p_out # note that this is stored in HIDDEN form
         dof = len(x) - len(p_out)
         if hasattr(self,'symbolic_x') and force_analytical:

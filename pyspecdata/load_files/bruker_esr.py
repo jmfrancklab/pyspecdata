@@ -101,7 +101,7 @@ def xepr(filename, dimname='', verbose=False):
         harmonic_axes = harmonic_axes.reshape(2,5).T
         harmonic_axes = harmonic_axes[harmonics]
         dims_to_label.update({'harmonic':harmonic_axes})
-        logger.info("I found multiple harmonics, and am loading them into the 'harmonics' axis.  This is experimental.  You most likely will want to select the 0th element of the harmonic axis.")
+        logger.debug("I found multiple harmonics, and am loading them into the 'harmonics' axis.  This is experimental.  You most likely will want to select the 0th element of the harmonic axis.")
         dims_accounted_for |= {'harmonic'}
         # }}}
     y_dim_name = None
@@ -113,7 +113,7 @@ def xepr(filename, dimname='', verbose=False):
                     + ") doesn't match the number of data points")
             assert 'YTYP' in list(v.keys()), ("No parameter YTYP -- how do you expect me to know the type of 2D dataset??")
             if v['YTYP'] == 'IGD':
-                logger.info('Found YTYP=IGD, assuming this is a power series')
+                logger.debug('Found YTYP=IGD, assuming this is a power series')
                 assert 'YNAM' in list(v.keys()), ("No parameter YNAM -- how do you expect me to know the name of the second dimension??")
                 y_dim_name = v.pop('YNAM')
                 if isinstance(y_dim_name, list):
@@ -132,7 +132,7 @@ def xepr(filename, dimname='', verbose=False):
             else:
                 raise ValueError(strm("found YTYP=",v['YTYP']," which is not currently programmed"))
         else:
-            logger.info("y_points_calcd is greater than 1, but YPTS is not set, so assuming WinEPR style")
+            logger.debug("y_points_calcd is greater than 1, but YPTS is not set, so assuming WinEPR style")
             assert y_points_calcd == v['REY'], 'Trying WinEPR style and I thought REY was the indirect dim, guess not'
             if dimname=='':
                 y_dim_name = v['JEY']
@@ -158,7 +158,7 @@ def xepr(filename, dimname='', verbose=False):
         data.set_units(k,val)
     # }}}
     # {{{ use the parameters to rescale the data
-    logger.info("There is a parameter called DModGain as well as"
+    logger.debug("There is a parameter called DModGain as well as"
             " Gain -- not sure what that is")
     rg = v.pop('Gain')
     if isscalar(rg) or rg[1] != 'dB':
