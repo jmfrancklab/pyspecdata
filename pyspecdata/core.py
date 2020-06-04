@@ -130,7 +130,14 @@ def apply_oom(average_oom,numbers,prev_label=''):
             raise ValueError(strm("you passed",average_oom,"which I can't find a prefix for"))
     else:
         oom_index = nonzero(eq)[0][0]
-    np.true_divide(numbers[:], (10.**oom_values[oom_index]), out=None)
+    print('type of numbers',numbers.dtype)
+    orig_dtype = numbers.dtype
+    oom = oom_values[oom_index]
+    print('type of oom', oom.dtype)
+    numbers = numbers.astype(float)
+    print('type of numbers',numbers.dtype)
+    numbers /= (10.**oom)
+    numbers = numbers.astype(orig_dtype) 
     return oom_names[oom_index]+prev_label
 def mybasicfunction(first_figure = None):
     r'''this gives the format for doing the image thing
