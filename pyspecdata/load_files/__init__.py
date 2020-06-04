@@ -194,7 +194,7 @@ def find_file(searchstring,
         types of postprocessing to add to the `postproc_lookup` dictionary
         '''
     postproc_lookup.update(lookup)
-    logger.info(strm("find_file sees indirect_dimlabels",
+    logger.debug(strm("find_file sees indirect_dimlabels",
         indirect_dimlabels))
     # {{{ legacy warning
     if 'subdirectory' in list(kwargs.keys()):

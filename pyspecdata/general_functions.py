@@ -137,11 +137,15 @@ def level_str_to_int(level):
         else:
             raise ValueError("if you give me level as a string, give me 'info' or 'debug'")
     return level
-def init_logging(level=logging.INFO, stdout_level=logging.INFO, filename='pyspecdata.log'):
-    r"""Initialize logging on pyspecdata.log -- do NOT log if run from within a
-    notebook (it's fair to assume that you will run first before embedding)"""
+def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspecdata.log'):
+    r"""A decent logging setup to log to `~/pyspecdata.log` (and `~/pyspecdata.XX.log` if that's taken).
+
+    By default, everything above "debug" is logged to a file, while everything above "info" is printed to stdout.
+    """
     FORMAT = "--> %(filename)s(%(lineno)s):%(name)s %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"
     level = level_str_to_int(level)
+    stdout_level = level_str_to_int(stdout_level)
+    min_level = min([level,stdout_level])
     formatter = logging.Formatter(FORMAT)
     log_filename = os.path.join(os.path.expanduser('~'),filename)
     if os.path.exists(log_filename):
@@ -149,13 +153,14 @@ def init_logging(level=logging.INFO, stdout_level=logging.INFO, filename='pyspec
         # file immediately
         os.remove(log_filename)
     logger = logging.getLogger()
-    logger.setLevel(level) # even if I set the handler level, it won't
+    logger.setLevel(min_level) # even if I set the handler level, it won't
     #                        print w/out this
     file_handler = logging.FileHandler(log_filename, mode='a')
     stdout_handler = logging.StreamHandler(sys.stdout)
     # can set levels independently with:
-    stdout_handler.setLevel(level_str_to_int(stdout_level))
+    stdout_handler.setLevel(stdout_level)
     stdout_handler.setFormatter(formatter)
+    file_handler.setLevel(level)
     file_handler.setFormatter(formatter)
     logger.addHandler(stdout_handler)
     logger.addHandler(file_handler)

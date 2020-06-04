@@ -194,7 +194,7 @@ def getDATADIR(*args,**kwargs):
             if num_sep + level <= num_sep_this:
                 del dirs[:]
     def walk_and_grab_best_match(walking_top_dir):
-        logger.info(strm("Walking inside",walking_top_dir,"to find",exp_type,"will only walk 2 directories deep!"))
+        logger.debug(strm("Walking inside",walking_top_dir,"to find",exp_type,"will only walk 2 directories deep!"))
         equal_matches = []
         containing_matches = []
         for d,s,_ in walklevel(walking_top_dir, level=2):
@@ -235,7 +235,7 @@ def getDATADIR(*args,**kwargs):
         if exp_directory is None:
             exp_directory = walk_and_grab_best_match(base_data_dir)
             if exp_directory is None:
-                logger.info(strm("I found no directory matches for exp_type "+exp_type+", so now I want to look inside all the known exptypes"))
+                logger.debug(strm("I found no directory matches for exp_type "+exp_type+", so now I want to look inside all the known exptypes"))
                 for t,d in dict(_my_config._config_parser.items('ExpTypes')).items():
                     exp_directory = walk_and_grab_best_match(d)
                     if exp_directory is not None:
@@ -277,10 +277,12 @@ def rclone_search(fname,dirname):
                     foundpath = [j for k in foundpath
                             for j in os.path.split(k)
                             if len(j) > 0]
+                    logging.debug(strm("foundpath is",foundpath))
                 retval += '\nYou should be able to retrieve this file with:\n'+strm(
                         "rclone copy -v --include '%s' %s%s %s"%(fname,
                     thisremote,
                     '/'.join(foundpath[:-1]),
+                    # dirname below needs to be replaced with path relative to current directory
                     os.path.normpath(os.path.join(dirname)).replace('\\','\\\\')))
     return retval
 def log_fname(logname,fname,dirname,err=False):
