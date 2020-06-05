@@ -115,8 +115,23 @@ gammabar_H = 4.258e7
 gammabar_e = 2.807e10 # this is for a nitroxide
 #}}}
 def apply_oom(average_oom,numbers,prev_label=''):
-    """scale numbers by the order of magnitude average_oom and change the
-    label prev_label by adding the appropriate SI prefix"""
+    """scale numbers by the order of magnitude average_oom and change the name of the units accordingly
+
+    Parameters
+    ----------
+    average_oom: int or float
+        the average order of magnitude to use
+    numbers: ndarray
+        The numbers to be scaled by average_oom.
+        The array is modified in-place.
+    prev_label: str
+        a string representing the units
+
+    Returns
+    -------
+    new_label: str
+        prev_label is prefixed by the appropriate SI prefix
+    """
     average_oom = int(average_oom/3.0)*3
     oom_names =   ['T' , 'G' , 'M' , 'k' , '' , 'm' , '\\mu ' , 'n' , 'p']
     oom_values = r_[12 , 9   , 6   , 3   , 0  , -3  , -6 , -9  , -12]
@@ -130,11 +145,15 @@ def apply_oom(average_oom,numbers,prev_label=''):
             raise ValueError(strm("you passed",average_oom,"which I can't find a prefix for"))
     else:
         oom_index = nonzero(eq)[0][0]
-    orig_dtype = numbers.dtype
-    oom = oom_values[oom_index]
-    #numbers[:] = numbers.astype(float)
-    numbers[:] /= (10**oom)
-    numbers = numbers.astype(orig_dtype) 
+    if numbers.dtype in ['int32','int64']:
+        # this is not necessary unless we have an integer type
+        logger.warning("you are trying to determine the SI prefix of a"
+                "set of numbers that are described by integers.  This is"
+                "probably not a good idea!!")
+        new_values = numbers / 10.**oom_values[oom_index]
+        numbers[:] = new_values.astype(numbers.dtype)
+    else:
+        numbers[:] /= 10.**oom_values[oom_index]
     return oom_names[oom_index]+prev_label
 def mybasicfunction(first_figure = None):
     r'''this gives the format for doing the image thing
