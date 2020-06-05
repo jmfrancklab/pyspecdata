@@ -119,7 +119,7 @@ def apply_oom(average_oom,numbers,prev_label=''):
     label prev_label by adding the appropriate SI prefix"""
     average_oom = int(average_oom/3.0)*3
     oom_names =   ['T' , 'G' , 'M' , 'k' , '' , 'm' , '\\mu ' , 'n' , 'p']
-    oom_values = r_[12 , 9   , 6   , 3   , 0  , -3  , -6     , -9  , -12]
+    oom_values = r_[12 , 9   , 6   , 3   , 0  , -3  , -6 , -9  , -12]
     eq = oom_values == average_oom
     if not any(eq):
         if all(average_oom < oom_values):
@@ -130,13 +130,10 @@ def apply_oom(average_oom,numbers,prev_label=''):
             raise ValueError(strm("you passed",average_oom,"which I can't find a prefix for"))
     else:
         oom_index = nonzero(eq)[0][0]
-    print('type of numbers',numbers.dtype)
     orig_dtype = numbers.dtype
     oom = oom_values[oom_index]
-    print('type of oom', oom.dtype)
-    numbers = numbers.astype(float)
-    print('type of numbers',numbers.dtype)
-    numbers /= (10.**oom)
+    #numbers[:] = numbers.astype(float)
+    numbers[:] /= (10**oom)
     numbers = numbers.astype(orig_dtype) 
     return oom_names[oom_index]+prev_label
 def mybasicfunction(first_figure = None):
