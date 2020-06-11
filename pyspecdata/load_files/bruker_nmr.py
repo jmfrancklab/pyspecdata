@@ -209,6 +209,8 @@ def load_vdlist(file_reference, *subpath, **kwargs):
     print("subpath is",subpath)
     fp = open_subpath(file_reference,*subpath)
     lines = fp.readlines()
+    if isinstance(lines[0],bytes):
+        lines = map(lambda x: x.decode('utf-8'), lines)
     lines = list(map(lambda x: x.rstrip(),lines))
     lines = list(map((lambda x: x.replace('m','e-3')),lines))
     lines = list(map((lambda x: x.replace('s','')),lines))
