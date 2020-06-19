@@ -15,6 +15,8 @@ except:
 ext_modules = []
 exec(compile(open('pyspecdata/version.py', "rb").read(), 'pyspecdata/version.py', 'exec'))
 
+input("We now build some extensions from Fortran source, and you need to be set up to do that.  If you have issues, don't give up!  Please head over to github, and read the conda_upgrade.md link at the top of the README, and if all else fails, contact the developers!...\nhttps://github.com/jmfrancklab/pyspecdata\n(press enter to acknowledge)\n")
+
 ext_modules.append(Extension(name = 'pyspecdata._nnls',
         sources = ['nnls/nnls.pyf','nnls/nnls.f','nnls/nnls_regularized.f90','nnls/nnls_regularized_loop.f90'],
         define_macros = [('ADD_UNDERSCORE',None)],

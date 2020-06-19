@@ -7,9 +7,10 @@ If you already know that you want to install,
 and you are using Anaconda, you should see `conda_upgrade.md <conda_upgrade.md>`_.
 
 Please note this package is heavily utilized by three other packages that our lab manages on github:
-*   `ODNP processing scripts <https://github.com/jmfrancklab/proc_scripts/>`_
-*   `Classes for communicating with instruments <https://github.com/jmfrancklab/inst_notebooks/>`_
-*   `SpinCore Extension <https://github.com/jmfrancklab/spincore_apps/>`_
+
+-   `ODNP processing scripts <https://github.com/jmfrancklab/proc_scripts/>`_
+-   `Classes for communicating with instruments <https://github.com/jmfrancklab/inst_notebooks/>`_
+-   `SpinCore Extension <https://github.com/jmfrancklab/spincore_apps/>`_
 
 We have somewhat recently added fast compiled Fortran functions for things like
 2D ILT (Tikhonov regularization with basis set compression) for NMR (Nuclear Magnetic Resonance),
@@ -22,6 +23,14 @@ pySpecData
 
 Object-oriented Python package for processing spectral data -- or in general, *n*-dimensional data with labeled axes (i.e. *N*-dimensional gridded data or "nddata").
 It depends on numpy, which provides very fast manipulations of *N*-dimensional gridded arrays ("ndarray").
+This package has some overlap with xarray,
+but it doesn't attempt to mimic pandas notation,
+shooting instead for very compact notation for natural slicing, etc.
+It mainly focuses on making it easier to *quickly write good code
+for processing spectroscopy data*.
+In particular, it takes care of various features related to fourier
+transformation, error propagation, and direct products in multidimensional data with
+little to no interaction from the user.
 
 If you are working in a lab developing new spectroscopic methodologies, then this package is definitely for you.
 If you deal with multi-dimensional data of some other form, then it's likely for you.
@@ -138,12 +147,14 @@ History/Roadmap
         - ILT (Tikhonov regularization) with SVD Kernel compression
           (1 and 2 dimensions)
         - ``smoosh`` and ``chunk`` deal with axes properly
-    - 0.9.5.1.8
-      - ``to_ppm`` should only be a method of inherited class
-      - 1.5 and 2.5 D ILT
 
 0.9.5.3 **Current Version**
     upgrade to Python 3 and begin to flesh out documentation
+
+0.9.5.4
+    - 0.9.5.4.1
+      - ``to_ppm`` should only be a method of inherited class
+      - 1.5 and 2.5 D ILT
 1.0
     We are working on four major upgrades relative to the 0.9 sequence:
 
