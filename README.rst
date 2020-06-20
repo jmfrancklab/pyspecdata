@@ -250,11 +250,9 @@ If you are on windows, you will need some additional packages to enable compilat
 
 * libpython
 
-* unxutils
-
 * mingw
 
-The last two are specific to Windows, and provide things like the ``gcc`` and ``gfortran`` compiler, as well as ``make``.
+The last one is specific to Windows, and provide things like the ``gcc`` and ``gfortran`` compiler.
 
 Quick-Start
 ===========
