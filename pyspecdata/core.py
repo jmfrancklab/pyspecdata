@@ -3184,39 +3184,35 @@ class nddata (object):
     # list -- same information, but it's assumed they are listed in the order given by "dimlabels"
     def mkd(self,*arg,**kwargs):
         'make dictionary format'
-        #{{{ process kwargs
-        give_None = True
-        if len(kwargs) > 0:
-            if 'give_None' in list(kwargs.keys()):
-                give_None = kwargs.pop('give_None')
-        if len(kwargs) > 0:
-            raise ValueError(strm("you passed mkd kwargs I didn't understand:",kwargs))
-        #}}}
+        give_None = process_kwargs([("give_None",True)],kwargs)
         if len(arg) == 1:
-            if emptytest(arg[0]):
-                return dict(list(zip(self.dimlabels,
-                    [None]*len(self.dimlabels))))
-            if len(arg[0]) != len(self.dimlabels):
+            input_list = arg[0]
+            if emptytest(input_list):
+                return dict(zip(self.dimlabels,
+                    [None]*len(self.dimlabels)))
+            if len(input_list) != len(self.dimlabels):
                 print(r"{\color{red}WARNING! mkd error (John will fix this later):}")
                 print("When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is "+repr(self.dimlabels)+" and you passed "+repr(arg)+'\n\n')
                 raise ValueError("When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is "+repr(self.dimlabels)+" and you passed "+repr(arg))
-            for i,v in enumerate(arg[0]):
+            for i,v in enumerate(input_list):
                 if isinstance(v, ndarray):
-                    if v.shape == ():
-                        arg[0][i] = None
+                    if v.shape == () and v.size == 0:
+                        input_list[i] = None
+                    if v.dtype.type in [str_, bytes_]:
+                        input_list[i] = str(v)
             if give_None:
-                return dict(list(zip(self.dimlabels,arg[0])))
+                return dict(zip(self.dimlabels,input_list))
             else:
                 #{{{ don't return values for the things that are None
-                mykeys = [self.dimlabels[j] for j in range(0,len(self.dimlabels)) if arg[0][j] is not None]
-                myvals = [arg[0][j] for j in range(0,len(self.dimlabels)) if arg[0][j] is not None]
-                return dict(list(zip(mykeys,myvals)))
+                mykeys = [self.dimlabels[j] for j in range(0,len(self.dimlabels)) if input_list[j] is not None]
+                myvals = [input_list[j] for j in range(0,len(self.dimlabels)) if input_list[j] is not None]
+                return dict(zip(mykeys,myvals))
                 #}}}
         elif len(arg) == 0:
             if not give_None:
                 raise ValueError("You can't tell me not to give none and then not pass me anything!!")
-            return dict(list(zip(self.dimlabels,
-                [None]*len(self.dimlabels))))
+            return dict(zip(self.dimlabels,
+                [None]*len(self.dimlabels)))
         else:
             raise ValueError(strm('.mkd() doesn\'t know what to do with %d arguments',len(arg)))
     def fld(self,dict_in,noscalar = False):
@@ -5260,6 +5256,10 @@ class nddata (object):
                 if thisax is not None:
                     thisax = thisax.copy()
                 self.setaxis(thisdim,thisax)
+                if other.get_error(thisdim) is not None:
+                    self.set_error(thisdim, copy(other.get_error(thisdim)))
+                if other.get_units(thisdim) is not None:
+                    self.set_units(thisdim, copy(other.get_units(thisdim)))
         return self
     def axis(self,axisname):
         'returns a 1-D axis for further manipulation'
@@ -6023,64 +6023,61 @@ class nddata (object):
     #}}}
     #{{{ messing with data -- get, set, and copy
     def __getslice__(self,*args):
-        print('getslice! ',args)
-    def __setitem__(self,*args):
+        raise ValueError(strm('getslice! ',args))
+    def __setitem__(self,key,val):
         righterrors = None
-        logger.debug(strm("types of args",list(map(type,args))))
-        A = args[0]
-        if isinstance(A, nddata):
+        logger.debug(strm("types of key",list(map(type,key)),'key',key))
+        if isinstance(key, nddata):
             logger.debug("initially, rightdata appears to be nddata")
-            _,B = self.aligndata(A)
-            A = B.data # now the next part will handle this
-        if isinstance(A, ndarray):# if selector is an ndarray
+            _,B = self.aligndata(key)
+            key = B.data # now the next part will handle this
+        if isinstance(key, ndarray):# if selector is an ndarray
             logger.debug("initially, rightdata appears to be ndarray")
-            if A.dtype is not dtype('bool'):
-                raise ValueError("I don't know what to do with an ndarray subscript that has dtype "+repr(A.dtype))
-            if A.shape != self.data.shape:
-                temp = array(A.shape) == 1
-                if all( array(A.shape)[temp] == array(self.data.shape)[temp]):
-                    pass
-                else:
-                    raise ValueError("The shape of your logical mask "+repr(A.shape)+" and the shape of your data "+repr(self.data.shape)+" are not compatible (matching or singleton) -- I really don't think that you want to do this!")
-            self.data[A] = args[1]
+            if key.dtype is not dtype('bool'):
+                raise ValueError("I don't know what to do with an ndarray subscript that has dtype "+repr(key.dtype))
+            if key.shape != self.data.shape:
+                raise ValueError("The shape of your logical mask "
+                        +repr(key.shape)
+                        +" and the shape of your data "
+                        +repr(self.data.shape)
+                        +" are not compatible (matching or singleton) -- I really don't think that you want to do this!")
+            self.data[key] = val
             return
-        if isinstance(args[1],nddata):
+        if isinstance(val,nddata):
             logger.debug("rightdata appears to be nddata after initial treatment")
             #{{{ reorder so the shapes match
-            unshared_indices = list(set(args[1].dimlabels) ^ set(self.dimlabels))
+            unshared_indices = list(set(val.dimlabels) ^ set(self.dimlabels))
             shared_indices = list(self.dimlabels)
             if 'INDEX' in unshared_indices:
                 unshared_indices.remove('INDEX')
-            for j in unshared_indices:
-                try:
-                    shared_indices.remove(j)
-                except:
-                    raise ValueError(strm("Error trying to remove",j,"from list of shared indices",shared_indices))
-            if len(args[1].dimlabels) != len(shared_indices) or (not all([args[1].dimlabels[j] == shared_indices[j] for j in range(0,len(shared_indices))])):
-                args[1].reorder(shared_indices)
+            shared_indices = [j for j in shared_indices
+                    if j not in unshared_indices]
+            if len(val.dimlabels) != len(shared_indices) or (not all([val.dimlabels[j] == shared_indices[j] for j in range(0,len(shared_indices))])):
+                val.reorder(shared_indices)
             #}}}
-            rightdata = args[1].data
-            righterrors = args[1].get_error()
-            #print "DEBUG: and I convert it to",type(rightdata)
+            rightdata = val.data
+            righterrors = val.get_error()
         else: # assume it's an ndarray
             logger.debug("rightdata appears to be ndarray after initial treatment")
-            rightdata = args[1]
+            rightdata = val
             #{{{ if I just passed a function, assume that I'm applying some type of data-based mask
-            if isinstance(args[0], type(emptyfunction)):
-                thisfunc = args[0]
+            if isinstance(key, type(emptyfunction)):
+                thisfunc = key
                 self.data[thisfunc(self.data)] = rightdata
                 return
-                #}}}
-            if (not isinstance(rightdata, ndarray)): # in case its a scalar
+            #}}}
+            if (not isinstance(rightdata, ndarray) and isscalar(rightdata)): # in case its a scalar
                 rightdata = array([rightdata])
-        slicedict,axesdict,errordict,unitsdict = self._parse_slices(args[0]) # pull left index list from parse slices
-        leftindex = self.fld(slicedict)
+        slicedict,axesdict,errordict,unitsdict = self._parse_slices(key) # pull left index list from parse slices
+        logger.debug(strm("result of parse_slices",slicedict,axesdict,errordict,unitsdict))
+        leftindex = tuple(self.fld(slicedict))
         rightdata = rightdata.squeeze()
         logger.debug(strm("after squeeze, rightdata has shape",rightdata.shape))
         if len(rightdata.shape) > 0:
-            left_shape = shape(self.data[tuple(leftindex)])
+            left_view = self.data[leftindex]
+            left_shape = shape(left_view)
             try:
-                self.data[tuple(leftindex)] = rightdata.reshape(left_shape) # assign the data
+                left_view[:] = rightdata.reshape(left_shape) # assign the data
             except:
                 raise IndexError(strm('ERROR ASSIGNING NDDATA:\n',
                     'self.data.shape:',self.data.shape,
@@ -6088,10 +6085,11 @@ class nddata (object):
                     'rightdata.shape:',rightdata.shape,
                     '--> shape of left slice: ',left_shape))
         else:
-            self.data[tuple(leftindex)] = rightdata
+            self.data[:] = rightdata
         lefterror = self.get_error()
         if lefterror is not None:
-            lefterror[tuple(leftindex)] = righterrors.squeeze()
+            lefterror[leftindex] = righterrors.squeeze()
+        return self
     # {{{ standard trig functions
     def __getattribute__(self,arg):
         fundict = {'exp':exp,
@@ -6370,8 +6368,7 @@ class nddata (object):
             and
             \'axisname\':(value1,value2)
             pairs, where the values give either a single value or an inclusive range on the axis, respectively"""
-        logger.debug(strm("about to start parsing slices for data with axis_coords of length",len(self.axis_coords),"and dimlabels",self.dimlabels,"for ndshape of",ndshape(self)))
-        #print "DEBUG getitem called with",args
+        logger.debug(strm("about to start parsing slices",args,"for data with axis_coords of length",len(self.axis_coords),"and dimlabels",self.dimlabels,"for ndshape of",ndshape(self)))
         errordict = None # in case it's not set
         if self.axis_coords_units is not None:
             unitsdict = self.mkd(self.axis_coords_units)
