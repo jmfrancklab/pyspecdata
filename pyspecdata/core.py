@@ -6026,7 +6026,7 @@ class nddata (object):
         raise ValueError(strm('getslice! ',args))
     def __setitem__(self,key,val):
         righterrors = None
-        logger.debug(strm("types of key",list(map(type,key)),'key',key))
+        logger.debug(strm('key',key))
         if isinstance(key, nddata):
             logger.debug("initially, rightdata appears to be nddata")
             _,B = self.aligndata(key)
