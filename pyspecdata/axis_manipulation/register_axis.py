@@ -1,5 +1,6 @@
 from ..general_functions import *
-from pylab import * 
+if not inside_sphinx():
+    from pylab import r_
 
 def register_axis(self,arg,nearest=None):
     r'''Interpolate the data so that the given axes are in register with a set of specified values. Does not change the spacing of the axis labels.

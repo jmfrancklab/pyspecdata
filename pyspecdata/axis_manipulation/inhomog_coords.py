@@ -1,5 +1,6 @@
 from ..general_functions import *
-from pylab import * 
+if not inside_sphinx():
+    from pylab import r_
 
 def inhomog_coords(self, direct_dim, indirect_dim, tolerance = 1e-5,
         method = 'linear', plot_name = None, fl = None,
