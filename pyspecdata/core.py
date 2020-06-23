@@ -2396,9 +2396,10 @@ def plot(*args,**kwargs):
     if isinstance(myy,nddata):
         myy = myy.copy()
         # {{{ automatically reduce any singleton dimensions
-        if any(array(myy.data.shape) == 1):
-            for singleton_dim in [lb for j,lb in enumerate(myy.dimlabels) if myy.data.shape[j] == 1]:
-                myy = myy[singleton_dim,0]
+        if not len(myy.dimlabels) == 1:
+            if any(array(myy.data.shape) == 1):
+                for singleton_dim in [lb for j,lb in enumerate(myy.dimlabels) if myy.data.shape[j] == 1]:
+                    myy = myy[singleton_dim,0]
         # }}}
         if len(myy.data.shape)>1 and longest_is_x:
             longest_dim = argmax(myy.data.shape)
@@ -2469,7 +2470,10 @@ def plot(*args,**kwargs):
         if myy.get_prop('x_inverted'):
             x_inverted=True
         #myy_name = myy.name()
-        myy = squeeze(myy.data.transpose([longest_dim]+all_but_longest))
+        if len(myy.data.shape) == 1:
+            myy = myy.data
+        else:
+            myy = squeeze(myy.data.transpose([longest_dim]+all_but_longest))
         #if len(myy.data) == 1 and 'label' not in kwargs.keys() and myy_name is not None:
         #    kwargs.update('label',myy_name)
         # }}}
@@ -6069,7 +6073,7 @@ class nddata (object):
             if (not isinstance(rightdata, ndarray) and isscalar(rightdata)): # in case its a scalar
                 rightdata = array([rightdata])
         slicedict,axesdict,errordict,unitsdict = self._parse_slices(key) # pull left index list from parse slices
-        logger.debug(strm("result of parse_slices",slicedict,axesdict,errordict,unitsdict))
+        logger.debug(strm("result of parse_slices slicedict",slicedict,"axesdict",axesdict,"errordict",errordict,"unitsdict",unitsdict))
         leftindex = tuple(self.fld(slicedict))
         rightdata = rightdata.squeeze()
         logger.debug(strm("after squeeze, rightdata has shape",rightdata.shape))
@@ -6465,8 +6469,9 @@ class nddata (object):
                                         if axesdict[x][temp_high + 1] <= temp_high_value:
                                             temp_high += 1
                                     #print "DEBUG: evaluate to indices",temp_low,'to',temp_high,'out of',len(axesdict[x])
-                                    if temp_high-temp_low == 0:
-                                        raise ValueError('The indices '+repr(y)+' on axis '+x+' slices to nothing!  The limits of '+x+' are '+repr(axesdict[x].min())+':'+repr(axesdict[x].max()))
+                                    if temp_high == temp_low:
+                                        # never give a zero-width slice
+                                        temp_high += 1
                                     slicedict[x] = slice(temp_low,temp_high,None)
                                     y = slicedict[x]
                                 else: #then I passed a single index
