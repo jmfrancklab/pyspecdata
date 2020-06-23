@@ -6070,18 +6070,16 @@ class nddata (object):
                 self.data[thisfunc(self.data)] = rightdata
                 return
             #}}}
-            if (not isinstance(rightdata, ndarray) and isscalar(rightdata)): # in case its a scalar
+            if (not isinstance(rightdata, ndarray)): # in case its a scalar
                 rightdata = array([rightdata])
         slicedict,axesdict,errordict,unitsdict = self._parse_slices(key) # pull left index list from parse slices
-        logger.debug(strm("result of parse_slices slicedict",slicedict,"axesdict",axesdict,"errordict",errordict,"unitsdict",unitsdict))
         leftindex = tuple(self.fld(slicedict))
         rightdata = rightdata.squeeze()
         logger.debug(strm("after squeeze, rightdata has shape",rightdata.shape))
         if len(rightdata.shape) > 0:
-            left_view = self.data[leftindex]
-            left_shape = shape(left_view)
+            left_shape = shape(self.data[leftindex])
             try:
-                left_view[:] = rightdata.reshape(left_shape) # assign the data
+                self.data[leftindex] = rightdata.reshape(left_shape) # assign the data
             except:
                 raise IndexError(strm('ERROR ASSIGNING NDDATA:\n',
                     'self.data.shape:',self.data.shape,
@@ -6089,7 +6087,7 @@ class nddata (object):
                     'rightdata.shape:',rightdata.shape,
                     '--> shape of left slice: ',left_shape))
         else:
-            self.data[:] = rightdata
+            self.data[leftindex] = rightdata
         lefterror = self.get_error()
         if lefterror is not None:
             lefterror[leftindex] = righterrors.squeeze()
@@ -6372,7 +6370,8 @@ class nddata (object):
             and
             \'axisname\':(value1,value2)
             pairs, where the values give either a single value or an inclusive range on the axis, respectively"""
-        logger.debug(strm("about to start parsing slices",args,"for data with axis_coords of length",len(self.axis_coords),"and dimlabels",self.dimlabels,"for ndshape of",ndshape(self)))
+        logger.debug(strm("about to start parsing slices for data with axis_coords of length",len(self.axis_coords),"and dimlabels",self.dimlabels,"for ndshape of",ndshape(self)))
+        #print "DEBUG getitem called with",args
         errordict = None # in case it's not set
         if self.axis_coords_units is not None:
             unitsdict = self.mkd(self.axis_coords_units)
