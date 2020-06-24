@@ -7000,7 +7000,7 @@ class fitdata(nddata):
         #{{{ adapted from fromaxis, trying to adapt the variable
         symbols_in_expr = self.symbolic_expr.atoms(sympy.Symbol)
         #logger.debug(strm('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr))
-        print('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr)
+        logger.info(strm('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr))
         symbols_in_expr = set(map(str,symbols_in_expr))
         # the next are the parameters
         self.fit_axis = set(self.dimlabels) & symbols_in_expr
@@ -7025,11 +7025,11 @@ class fitdata(nddata):
         self.symbol_list = [str(j) for j in self.symbolic_vars]
         args = self.symbolic_vars + [self.fit_axis]
         self.fitfunc_multiarg = sympy.lambdify(tuple(args), self.symbolic_expr, modules=mat2array)
-        def raw_fn(p,x):
-            assert len(p)==len(self.symbolic_vars), "length of parameter passed to fitfunc_raw doesn't match number of symbolic parameters"
-            return self.fitfunc_multiarg(
-                    *tuple([p[j] for j in range(len(self.symbolic_vars))] + [x]))
-        self.fitfunc_raw = raw_fn
+        def fn(p,x):
+            p = self.add_inactive_p(p)
+            assert len(p)==len(self.symbolic_vars), "length of parameter passed to fitfunc doesn't match number of symbolic parameters"
+            return self.fitfunc_multiarg(*tuple(list(p) + [x]))
+        self.fitfunc = fn
         # leave the gradient for later
     def analytical_covariance(self):
         r'''Not up to date'''
@@ -7144,13 +7144,12 @@ class fitdata(nddata):
             p[self.set_indices] = self.set_to # then just set the forced values to their given values
         return p
     def fitfunc(self,p,x):
-        r"this wraps fitfunc_raw (which gives the actual form of the fit function) to take care of forced variables"
-        p = self.add_inactive_p(p)
-        return self.fitfunc_raw(p,x)
+        r"This is the function that does the actual fitting, and takes a properly ordered list of parameters as well as an ndarray for the x axis."
+        raise ValueError("this should have been overwritten when you set functional_form!")
     def residual(self,p,x,y,sigma):
-        '''just the error function'''
+        '''just the residual (error) function'''
         fit = self.fitfunc(p,x)
-        #normalization = sum(1.0/sigma)
+        normalization = sum(1.0/sigma)
         #print 'DEBUG: y=',y,'\nfit=',fit,'\nsigma=',sigma,'\n\n'
         sigma[sigma == 0.0] = 1
         try:
@@ -7364,14 +7363,15 @@ class fitdata(nddata):
             self.fit_axis = new
         nddata.rename(self,previous,new)
         return self
-    def fit(self,set_what = None, set_to = None, force_analytical = False):
+    def fit(self, set_what=None, set_to=None, force_analytical=False):
         r'''actually run the fit'''
         if isinstance(set_what, dict):
             set_to = list(set_what.values())
             set_what = list(set_what.keys())
         x = self.getaxis(self.fit_axis)
         if iscomplex(self.data.flatten()[0]):
-            logger.debug(strm('Warning, taking only real part of fitting data!'))
+            if not all(imag(self.data.flatten()) == 0):
+                raise ValueError("You passed complex data, but I will only fit real data right now!")
         y = real(self.data)
         sigma = self.get_error()
         if sigma is None:
@@ -7446,7 +7446,7 @@ class fitdata(nddata):
                 raise RuntimeError(strm('leastsq finished with an error message:',mesg))
         else:
             logger.debug("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg))
-        self.fit_coeff = p_out # note that this is stored in HIDDEN form
+        self.fit_coeff = p_outf# note that this is stored in HIDDEN form
         dof = len(x) - len(p_out)
         if hasattr(self,'symbolic_x') and force_analytical:
             self.covariance = self.analytical_covariance()
@@ -7514,19 +7514,15 @@ class fitdata(nddata):
                         recordlist[runno][name] = thiscopy.output(name)
         print(r'\end{verbatim}')
         return recordlist # collect into a single recordlist array
-    
-    
-    def set_guess(self,Mi=None,M0=None,R1=None,R2=None):
-        
-        self.fit_coeff={}
-        if (Mi):
-            self.fit_coeff['Mi']=Mi 
-        if (M0):
-            self.fit_coeff['M0']=M0
-        if (R1):
-            self.fit_coeff['R1']=R1
-        if (R2):
-            self.fit_coeff['R2']=R2
+    def set_guess(self,**kwargs):
+        input_guesses = set(kwargs.keys()) 
+        symbols_not_present = input_guesses-set(self.symbolic_vars)
+        if len(symbols_not_present) > 0:
+            raise ValueError(strm("You specified the symbol(s)",symbols_not_present,"but I can't find this in the symbols for the fitting function, which are",self.symbolic_vars))
+        symbols_not_set = set(self.symbolic_vars) - input_guesses
+        self.guess_dict = kwargs
+        self.guess_dict.update({k:1 for k in symbols_not_set})
+        return
     def guess(self,use_pseudoinverse=False):
         r'''old code that I am preserving here -- provide the guess for our parameters; by default, based on pseudoinverse'''
         if use_pseudoinverse:
@@ -7622,7 +7618,10 @@ class fitdata(nddata):
                 logger.debug(strm('\n\n.core.guess) value of residual after regularization:',thisresidual))
             return thisguess
         else:
-            return [1.0]*self.number_of_parameters
+            if hasattr(self,'guess_dict'):
+                return [self.guess_dict[k] for k in self.symbolic_vars]
+            else:
+                return [1.0]*self.number_of_parameters
 #}}}
 def sqrt(arg):
     if isinstance(arg,nddata):
