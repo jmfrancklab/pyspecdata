@@ -7514,12 +7514,20 @@ class fitdata(nddata):
                         recordlist[runno][name] = thiscopy.output(name)
         print(r'\end{verbatim}')
         return recordlist # collect into a single recordlist array
-    def set_guess(Mi=None,M0=None,R1=None,R2=None):
-        data = list(set_guess_dict.items())
-        set_guess_array = np.array(data)
-        return set_guess_array
-
-    def guess(self,use_pseudoinverse=True):
+    
+    
+    def set_guess(self,Mi=None,M0=None,R1=None,R2=None):
+        
+        self.fit_coeff={}
+        if (Mi):
+            self.fit_coeff['Mi']=Mi 
+        if (M0):
+            self.fit_coeff['M0']=M0
+        if (R1):
+            self.fit_coeff['R1']=R1
+        if (R2):
+            self.fit_coeff['R2']=R2
+    def guess(self,use_pseudoinverse=False):
         r'''old code that I am preserving here -- provide the guess for our parameters; by default, based on pseudoinverse'''
         if use_pseudoinverse:
             self.has_grad = False
