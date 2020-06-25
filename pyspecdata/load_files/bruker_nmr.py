@@ -114,7 +114,11 @@ def series(file_reference, *subpath, **kwargs):
             load_title(file_reference, *subpath))
     SFO1 = v['SFO1']
     BF1 = v['BF1']
+    v['TD2'] = int(v['TD'])
+    del v['TD']
     v.update(v2)
+    v['TD1'] = int(v['TD'])
+    del v['TD']
     if v['SFO1'] != SFO1:
         # for, e.g. 2H experiments, a bad SFO1 (1H) is stored in acqu2, which we don't want
         print("warning: ignoring second dimension SFO1, since it's probably wrong")
@@ -122,7 +126,7 @@ def series(file_reference, *subpath, **kwargs):
         v['BF1'] = BF1
     with open_subpath(file_reference, *(subpath+('pulseprogram',)),mode='r') as fp:
         ppg = fp.read()
-        data.set_prop('pulprog',ppg)
+        data.set_prop('pulprog',ppg.decode('utf-8'))
     data.set_prop('acq',
             v)
     if isinstance(file_reference,str):
@@ -142,6 +146,12 @@ def series(file_reference, *subpath, **kwargs):
                 load_vdlist(file_reference, *subpath))
     else:
         logger.info(strm("vdlist doesn't exist",file_reference,'vdlist'))
+    if open_subpath(file_reference, *(subpath+('gradient_calib',)), test_only=True):
+        logger.debug(strm("I found a gradient_calib file"))
+        fp = open_subpath(file_reference, *(subpath+('gradient_calib',)),mode='r')
+        data.set_prop('gradient_calib',
+                fp.read().decode('ascii'))
+        fp.close()
     if open_subpath(file_reference, *(subpath+('difflist',)), test_only=True):
         data.set_prop('diff',
                 load_vdlist(file_reference, *subpath,
@@ -189,7 +199,7 @@ def load_1D(file_reference, *subpath, **kwargs):
             v)
     with open_subpath(file_reference, *(subpath+('pulseprogram',)),mode='r') as fp:
         ppg = fp.read()
-        data.set_prop('pulprog',ppg)
+        data.set_prop('pulprog',ppg.decode('utf-8'))
     if type(file_reference) is tuple:
         data.set_prop('filename',
                 file_reference[1])

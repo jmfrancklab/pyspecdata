@@ -266,7 +266,8 @@ def rclone_search(fname,dirname):
         retval += '\n'+strm("checking remote",thisremote)
         # do NOT quote the filename -- quotes are typically stripped off by the
         # shell -- they would be literal here
-        cmd = ['rclone','--include',fname, 'ls',thisremote]
+        cmd = ['rclone','--include','*'+fname+'*', 'ls',thisremote]
+        logger.debug("running "+strm(*cmd))
         with Popen(cmd, stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
             for j in proc.stdout:
                 foundpath = j.split()
@@ -279,7 +280,7 @@ def rclone_search(fname,dirname):
                             if len(j) > 0]
                     logging.debug(strm("foundpath is",foundpath))
                 retval += '\nYou should be able to retrieve this file with:\n'+strm(
-                        "rclone copy -v --include '%s' %s%s %s"%(fname,
+                        "rclone copy -v --include '%s' %s%s %s"%(foundpath[-1],
                     thisremote,
                     '/'.join(foundpath[:-1]),
                     # dirname below needs to be replaced with path relative to current directory
