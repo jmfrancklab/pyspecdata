@@ -183,6 +183,10 @@ def getDATADIR(*args,**kwargs):
             Currently, in both attempts, it will only walk 2 levels deep (since NMR directories
             can be rather complex, and otherwise it would take forever).
     '''
+    exp_type = process_kwargs([('exp_type',None)],kwargs)
+    base_data_dir = _my_config.get_setting('data_directory',environ = 'PYTHON_DATA_DIR',default = '~/experimental_data')
+    if exp_type is not None and '/' in exp_type:
+        exp_type = os.path.normpath(exp_type)
     # the following is from https://stackoverflow.com/questions/229186/os-walk-without-digging-into-directories-below
     def walklevel(some_dir, level=1):
         some_dir = some_dir.rstrip(os.path.sep)
@@ -202,8 +206,10 @@ def getDATADIR(*args,**kwargs):
             s[:] = [j for j in s if j[0]
                     not in ['.','_']
                     and '.hfssresults' not in j]# prune the walk
-            equal_matches.extend([os.path.join(d,j) for j in s if j == exp_type])
-            containing_matches.extend([os.path.join(d,j) for j in s if exp_type.lower() in j.lower()])
+            equal_matches.extend([os.path.join(d,j) for j in s if
+                os.path.join(d,j).lower().endswith(exp_type.lower())])
+            containing_matches.extend([os.path.join(d,j) for j in s if
+                exp_type.lower() in os.path.join(d,j).lower()])
         def grab_smallest(matches):
             if len(matches) > 0:
                 if len(matches) == 1:
@@ -227,8 +233,6 @@ def getDATADIR(*args,**kwargs):
         # }}}
         _my_config.set_setting('ExpTypes',exp_type,exp_directory)
         return exp_directory
-    exp_type = process_kwargs([('exp_type',None)],kwargs)
-    base_data_dir = _my_config.get_setting('data_directory',environ = 'PYTHON_DATA_DIR',default = '~/experimental_data')
     if exp_type is not None:
         # {{{ determine the experiment subdirectory
         exp_directory = _my_config.get_setting(exp_type, section='ExpTypes')
