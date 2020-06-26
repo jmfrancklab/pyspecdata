@@ -148,9 +148,16 @@ def grab_data_directory():
             +"\nAll the functionality of this function should now be"
             +"replaced by getDATADIR")
 def getDATADIR(*args,**kwargs):
-    r'''Returns the base directory where you put all your data.  If arguments
-    are passed, it returns the directory underneath the data directory, ending
-    in a trailing (back)slash
+    r'''Used to find a directory containing data in a way that works
+    seamlessly across different computers (and operating systems).
+    Supports the case where data is processed both on a laboratory
+    computer and (*e.g.* after transferring via ssh or a syncing client) on a
+    user's laptop.
+    While it will return a default directory without any arguments, it is
+    typically used with the keyword argument `exp_type`, described below.
+    
+
+    It returns the directory ending in a trailing (back)slash.
     
     It is determined by a call to `MyConfig.get_setting` with the setting name
     `data_directory` and the environment variable set to ``PYTHON_DATA_DIR``.
@@ -158,7 +165,17 @@ def getDATADIR(*args,**kwargs):
     Parameters
     ----------
     exp_type : str
-        A string identifying the experiment type.
+        A string identifying the name of a subdirectory where the data is stored.
+        It can contain slashes.
+        Typically, this gives the path relative to a google drive, rclone,
+        dropbox, etc, repository.
+        To make code portable, `exp_type` should **not** contain a full path or
+        or portions of the path that are specific to the computer/user.
+
+        If the directory has note been used before, all the directories listed
+        in the user's `_pyspecdata` or `.pyspecdata` config file will be
+        searched recursively up to 2 levels deep.
+
         It searches for `exp_type` in this order:
 
         * Look in the ``ExpTypes`` section of the config file.

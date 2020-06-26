@@ -125,6 +125,7 @@ def find_file(searchstring,
 
     It looks at the top level of the directory first, and if that fails, starts to look recursively.
     Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
+    (For a more thorough description, see :func:`~pyspecdata.datadir.getDATADIR`).
 
     Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
     (so that you can make sure they are properly synced to the cloud, etc.).
