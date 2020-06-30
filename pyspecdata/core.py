@@ -4567,7 +4567,7 @@ class nddata (object):
             (innermost).
             If :str:`BRD` is specified, then the individual, uncompressed kernels :math:`K_{1}` and :math:`K_{2}` are returned as properties of the nddata "K1" and "K2" respectively. The number of singular values used to compressed each kernel is returned in properties of the nddata called, respectively, "s1" and "s2". 
         """
-        logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?',isfortran(self.data)))
+        logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?'))
         tuple_syntax = False
         if isinstance(dimname, tuple):
             tuple_syntax = True
@@ -4797,7 +4797,7 @@ class nddata (object):
             K = kernel_func(data_axis, fit_axis).squeeze()
             logger.debug(strm('K dimlabels',K.dimlabels,'and raw shape',K.data.shape))
             self.reorder(dimname, first=False) # make the dimension we will be regularizing innermost
-            logger.debug(strm('shape of the data is',ndshape(self),'is it fortran ordered?',isfortran(self.data)))
+            logger.debug(strm('shape of the data is',ndshape(self),'is it fortran ordered?'))
             data_fornnls = self.data
             if len(data_fornnls.shape) > 2:
                 data_fornnls = data_fornnls.reshape((prod(
@@ -4875,9 +4875,9 @@ class nddata (object):
                         if iter == maxiter-1:
                             logger.debug(strm('DID NOT CONVERGE.'))
                     return lambda_update
-                retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=mod_BRD(guess=1.0))
+                retval, residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=mod_BRD(guess=1.0))
             else:
-                retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=l)
+                retval, residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=l)
             print("*** *** ***")
             #retval, residual = this_nnls.nnls_regularized(K.data, data_fornnls, l=l)
             logger.debug(strm("coming back from fortran, residual type is",type(residual))+ strm(residual.dtype if isinstance(residual, ndarray) else ''))

@@ -55,7 +55,6 @@ def nnls_regularized(A, b, l=0, maxiter=None):
     Lawson C., Hanson R.J., (1987) Solving Least Squares Problems, SIAM
 
     """
-    logger.debug(strm("isfortran result",isfortran(A),isfortran(b)))
 
     A, b = list(map(asarray_chkfinite, (A, b)))
 
