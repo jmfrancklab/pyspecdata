@@ -4699,7 +4699,7 @@ class nddata (object):
                     dot_product = dot(input_vec.T,dot(T,input_vec))
                     ans = dot_product*factor
                     ans = ans/linalg.norm(input_vec)/dot_product
-                    tol = 1e-3
+                    tol = 1e-6
                     if abs(ans-val**2) <= tol:
                         logger.debug(strm('ALPHA HAS CONVERGED.'))
                         alpha_converged = True
@@ -4819,7 +4819,7 @@ class nddata (object):
                 def dd_chi(G,val):
                     return G + (val**2)*eye(shape(G)[0])
                 def G(x_vec):
-                    return dot(K,dot(square_heaviside(x_vec),K.T))
+                    return dot(K.data,dot(square_heaviside(x_vec),K.data.T))
                 def H(product):
                     if product <= 0:
                         return 0
@@ -4827,8 +4827,8 @@ class nddata (object):
                         return 1
                 def square_heaviside(x_vec):
                     diag_heavi = []
-                    for q in range(shape(K.T)[0]):
-                        pull_val = dot(K.T[q,:],x_vec)
+                    for q in range(shape(K.data.T)[0]):
+                        pull_val = dot(K.data.T[q,:],x_vec)
                         temp = pull_val[0]
                         temp = H(temp)
                         diag_heavi.append(temp)
@@ -4837,12 +4837,12 @@ class nddata (object):
                     return square_heavi
                 def optimize_alpha(input_vec,val):
                     alpha_converged = False
-                    factor = sqrt(s1*s2)
+                    factor = sqrt(input_vec.shape[0])
                     T = linalg.inv(dd_chi(G(input_vec),val**2))
                     dot_product = dot(input_vec.T,dot(T,input_vec))
                     ans = dot_product*factor
                     ans = ans/linalg.norm(input_vec)/dot_product
-                    tol = 1e-3
+                    tol = 1e-6
                     if abs(ans-val**2) <= tol:
                         logger.debug(strm('ALPHA HAS CONVERGED.'))
                         alpha_converged = True
@@ -4858,10 +4858,10 @@ class nddata (object):
                     for iter in range(maxiter):
                         logger.debug(strm('ITERATION NO.',iter))
                         logger.debug(strm('CURRENT LAMBDA',smoothing_param))
-                        retval,residual = this_nnls.nnls_regularized(K,data_fornnls,l=smoothing_param)
+                        retval,residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=smoothing_param)
                         f_vec = retval[:,newaxis]
                         alpha = smoothing_param**2
-                        c_vec = dot(K,f_vec) - data_fornnls[:,newaxis]
+                        c_vec = dot(K.data,f_vec) - data_fornnls[:,newaxis]
                         c_vec /= -1*alpha
                         c_update = newton_min(c_vec,smoothing_param)
                         alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
