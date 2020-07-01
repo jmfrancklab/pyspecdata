@@ -3520,9 +3520,79 @@ class nddata (object):
             return None
     #}}}
     #}}}
+    def svd(self, todim, fromdim):
+        """Singular value decomposition.  Original matrix is unmodified.
+
+        .. note::
+            Because we are planning to upgrade with axis objects,
+            FT properties, axis errors, etc, are not transferred here.
+            If you are using it when this note is still around, be sure to
+            `.copy_props(`
+
+            Also, error, units, are not currently propagated, but could be relatively easily!
+
+        If
+
+        >>> U, Sigma, Vh = thisinstance.svd()
+
+        then ``U``, ``Sigma``, and ``Vh`` are nddata such that ``result`` in
+
+        >>> result = U @ Sigma @ Vh
+
+        will be the same as ``thisinstance``.
+        Note that this relies on the fact that nddata matrix multiplication doesn't care about the ordering
+        of the dimensions (see :method:`~pyspecdata.core.dot`).
+        The vector space that contains the singular values is called `'SV'` (see more below).
+
+        Parameters
+        ==========
+        fromdim: str
+            This dimension corresponds to the columns of the matrix that is
+            being analyzed by SVD.
+            (The matrix transforms from the vector space labeled by ``fromdim``
+            and into the vector space labeled by ``todim``).
+        todim: str
+            This dimension corresponds to the rows of the matrix that is
+            being analyzed by SVD.
+
+        Returns
+        =======
+        U: nddata
+            Has dimensions (all other dimensions) × 'todim' × 'SV',
+            where the dimension 'SV' is the vector space of the singular
+            values.
+        Sigma: nddata
+            Has dimensions (all other dimensions) × 'SV'.
+            Only non-zero
+        Vh: nddata
+            Has dimensions (all other dimensions) × 'SV' × 'fromdim',
+        """
+        orig_order = list(self.dimlabels)
+        all_but = [j for j in self.dimlabels if j not in [fromdim,todim]]
+        new_order = all_but + [todim,fromdim]
+        self.reorder(new_order)
+        U, Sigma, Vh = svd(self.data, full_matrices=False)
+        U = nddata(U,all_but + [todim,'SV'])
+        # {{{ label the axes
+        for j in all_but:
+            U.setaxis(j,self.getaxis(j))
+            V.setaxis(j,self.getaxis(j))
+        U.setaxis(todim,self.getaxis(todim))
+        Vh.setaxis(fromdim,self.getaxis(fromdim))
+        # }}}
+        self.reorder(orig_order)
+        return U, Sigma, Vh
     #{{{ arithmetic
     def dot(self,arg):
         """Tensor dot of self with arg -- dot all matching dimension labels.  This can be used to do matrix multiplication, but note that the order of doesn't matter, since the dimensions that are contracted are determined by matching the dimension names, not the order of the dimension.
+
+        Note that
+
+        >>> C = A @ B
+
+        is equivalent to
+
+        >>> C = A.C.dot(B)
 
         >>> a = nddata(r_[0:9],[3,3],['a','b'])
         >>> b = nddata(r_[0:3],'b')
