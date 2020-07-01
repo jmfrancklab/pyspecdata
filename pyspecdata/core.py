@@ -2764,7 +2764,8 @@ class nddata (object):
         """
         logger.debug('called init')
         if len(args) > 1:
-            logger.debug('more than one argument')
+            logger.debug('more than one argument -- args: '+strm(args))
+            if isinstance(args[0],nddata): raise ValueError("you can't initialize an nddata from another nddata!!!")
             if len(args) == 2:
                 if len(args[0].shape) == 1 and isinstance(args[1], str):
                     logger.debug('constructing 1D array')
@@ -6204,6 +6205,8 @@ class nddata (object):
                 retval.data = argf(retval.data)
                 return retval
             return retfun
+        elif arg == 'shape':
+            return ndshape(self)
         else:
             return super().__getattribute__(arg)
     @property

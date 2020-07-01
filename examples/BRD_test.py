@@ -2,33 +2,28 @@
 # but checked against BRD 1981
 from pyspecdata import *
 from scipy.optimize import nnls
-# vd list
-y_axis = linspace(5e-4,10,25)
-# T1 axis
-x_axis = r_[-4:2:100j]
+init_logging('debug')
+vd_list = nddata(linspace(5e-4,10,25),'vd')
+t1_name = r'$\log(T_1)$'
+logT1 = nddata(r_[-4:2:100j],t1_name)
 def Gaussian_1d(axis,mu1,sigma1):
     this_G = exp(-(axis-mu1)**2/2/sigma1**2)
     return this_G
-true_F = Gaussian_1d(10**(x_axis),6,0.3)
+true_F = Gaussian_1d(logT1.C.run(lambda x: 10**(x)),6,0.3)
 
-y_axis_2d = y_axis[:,newaxis]
-x_axis_2d = x_axis[newaxis,:]
 
-print(shape(y_axis_2d))
-print(shape(x_axis_2d))
-
-K = (1.-2*exp(-y_axis_2d/10**(x_axis_2d)))
+K = (1.-2*exp(-vd_list/10**(logT1)))
+K.reorder('vd') # make sure vd along rows
 print(shape(K))
 print(shape(true_F))
 
-M = K @ true_F # the fake data
+M = K.C.dot(true_F) # the fake data
 print(shape(M))
-M = nddata(M,['vd'])
-M.setaxis('vd',y_axis)
+#M.setaxis('vd',y_axis)
 M.add_noise(0.2)
 
 # this is here to test the integrated 1D-BRD (for pyspecdata)
-solution = M.C.nnls('vd',nddata(x_axis,'logT1'), lambda x,y: 1-2*exp(-x/10**(y)), l='BRD')
+solution = M.C.nnls('vd',logT1, lambda x,y: 1-2*exp(-x/10**(y)), l='BRD')
 
 def nnls_reg(K,b,val):
     b_prime = r_[b,zeros(K.shape[1])]
@@ -42,14 +37,13 @@ def A_prime(K,val):
     A_prime = r_[K,val*eye(dimension)]
     return A_prime
 
-plot_Lcurve = False
+plot_Lcurve = True
 #{{{ L-curve
 l = sqrt(logspace(-10,1,25)) # adjusting the left number will adjust the right side of L-curve
 
-x_nd = nddata(x_axis,'logT1')
 def vec_lcurve(l):
     return M.real.C.nnls('vd',
-            x_nd,lambda x,y: (1.-2*exp(-x/10**(y))), l=l)
+            logT1,lambda x,y: (1.-2*exp(-x/10**(y))), l=l)
 
 # solution matrix for l different lambda values
 x = vec_lcurve(l)
@@ -57,7 +51,10 @@ print(ndshape(x))
 # norm of the residual (data - soln)
 r_norm = x.get_prop('nnls_residual').data
 # norm of the solution (taken along the fit axis)
-x_norm = x.C.run(linalg.norm,'logT1').data
+x_norm = x.C.run(linalg.norm,t1_name).data
+
+# From L-curve
+this_L = 0.226
 
 if plot_Lcurve:
     # Next plot the L-curve
@@ -75,21 +72,15 @@ if plot_Lcurve:
             for j,this_l in enumerate(l):
                 annotate('%d'%j, (log10(r_norm[j]),log10(x_norm[j])),
                          ha='left',va='bottom',rotation=45)
-    show();quit()
 #}}}
-
-# From L-curve
-this_L = 0.226
 
 # generate data vector for smoothing
 
-L_opt_vec = nnls_reg(K,M.data.squeeze(),this_L)
+print(K.shape)
+L_opt_vec = nnls_reg(K.data,M.data.squeeze(),this_L)
 
 figure();title('ILT distributions')
-true_F = nddata(true_F,'log(T1)')
-true_F.setaxis('log(T1)',x_axis)
-L_opt_vec = nddata(L_opt_vec,'log(T1)')
-L_opt_vec.setaxis('log(T1)',x_axis)
+L_opt_vec = nddata(L_opt_vec,t1_name).copy_axes(true_F)
 plot(true_F,label='True')
 plot(L_opt_vec,label='L-Curve')
 plot(solution,':',label='pyspecdata-BRD')
