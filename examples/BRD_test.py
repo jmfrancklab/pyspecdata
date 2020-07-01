@@ -20,7 +20,7 @@ print(shape(true_F))
 M = K @ true_F # the fake data
 print(shape(M))
 #M.setaxis('vd',y_axis)
-M.add_noise(0.2)
+M.add_noise(0.2, seed=937162211)
 
 # this is here to test the integrated 1D-BRD (for pyspecdata)
 solution = M.C.nnls('vd',logT1, lambda x,y: 1-2*exp(-x/10**(y)), l='BRD')

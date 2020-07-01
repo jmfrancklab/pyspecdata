@@ -44,6 +44,7 @@ if _figure_mode_setting == 'latex':
 from .general_functions import inside_sphinx
 if not inside_sphinx():
     from pylab import *
+    from pylab import seed as pl_seed
 else:
     pi = 3.14
 from types import FunctionType as function
@@ -2593,8 +2594,10 @@ def plot(*args,**kwargs):
     return retval
 #}}}
 #{{{general functions
-def box_muller(length, return_complex=True):
+def box_muller(length, return_complex=True, seed=None):
     r'''algorithm to generate normally distributed noise'''
+    if seed is not None:
+        pl_seed(seed)
     s1 = rand(length)
     s2 = rand(length)
     n1 = sqrt(-2*log(s1))*cos(2*pi*s2)
@@ -5213,7 +5216,7 @@ class nddata (object):
             #}}}
     def repwlabels(self,axis):
         return None
-    def add_noise(self,intensity):
+    def add_noise(self,intensity,seed=None):
         '''Add Gaussian (box-muller) noise to the data.
 
         Parameters
@@ -5227,7 +5230,7 @@ class nddata (object):
         if isinstance(intensity, type(emptyfunction)):
             intensity = intensity(lambda x: self.data)
         return_complex = iscomplexobj(self.data)
-        self.data += box_muller(self.data.size, return_complex=return_complex).reshape(self.data.shape) * intensity
+        self.data += box_muller(self.data.size, return_complex=return_complex, seed=seed).reshape(self.data.shape) * intensity
         return self
     #{{{ functions to manipulate and return the axes
     def reorder(self,*axes,**kwargs):
