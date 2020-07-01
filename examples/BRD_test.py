@@ -10,8 +10,6 @@ def Gaussian_1d(axis,mu1,sigma1):
     this_G = exp(-(axis-mu1)**2/2/sigma1**2)
     return this_G
 true_F = Gaussian_1d(10**(x_axis),6,0.3)
-figure();title('True distribution')
-plot(true_F)
 
 y_axis_2d = reshape(y_axis,(shape(y_axis)[0],1))
 x_axis_2d = reshape(x_axis,(1,shape(x_axis)[0]))
@@ -32,17 +30,11 @@ M_nd = M.C
 
 # this is here to test the integrated 1D-BRD (for pyspecdata)
 solution = M.C.nnls('vd',nddata(x_axis,'logT1'), lambda x,y: 1-2*exp(-x/10**(y)), l='BRD')
-figure();title('1D BRD - pyspecdata')
-plot(solution)
 
-#figure();title('Data (M vector)')
-#plot(M)
 M = M.data
 
 x,rnorm = nnls(K,M)
 print(shape(x))
-#figure();title('Inversion (not regularized)')
-#plot(x)
 
 def nnls_reg(val):
     x_norm = empty([1])
@@ -214,11 +206,7 @@ def mod_BRD(guess,maxiter=20):
 
 opt_val = mod_BRD(guess=2,maxiter=20)
 opt_vec = nnls_reg(opt_val)
-#figure();title('BRD-regularized distribution')
-#plot(opt_vec)
 L_opt_vec = nnls_reg(this_L)
-#figure();title('L-curve-regularized distribution')
-#plot(L_opt_vec)
 
 figure();title('ILT distributions')
 true_F = nddata(true_F,'log(T1)')
