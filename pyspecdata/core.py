@@ -3654,6 +3654,9 @@ class nddata (object):
             return retval
         else:
             raise ValueError("I don't know what to do with an argument of type"+repr(type(arg)))
+    def __matmul__(self,arg):
+        assert type(arg) is nddata, "currently matrix multiplication only allowed if both are nddata"
+        return self.C.dot(arg)
     def __mul__(self,arg):
         #{{{ do scalar multiplication
         if isscalar(arg):

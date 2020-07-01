@@ -17,7 +17,7 @@ K.reorder('vd') # make sure vd along rows
 print(shape(K))
 print(shape(true_F))
 
-M = K.C.dot(true_F) # the fake data
+M = K @ true_F # the fake data
 print(shape(M))
 #M.setaxis('vd',y_axis)
 M.add_noise(0.2)
