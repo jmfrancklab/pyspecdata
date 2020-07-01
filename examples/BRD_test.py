@@ -11,8 +11,8 @@ def Gaussian_1d(axis,mu1,sigma1):
     return this_G
 true_F = Gaussian_1d(10**(x_axis),6,0.3)
 
-y_axis_2d = reshape(y_axis,(shape(y_axis)[0],1))
-x_axis_2d = reshape(x_axis,(1,shape(x_axis)[0]))
+y_axis_2d = y_axis[:,newaxis]
+x_axis_2d = x_axis[newaxis,:]
 
 print(shape(y_axis_2d))
 print(shape(x_axis_2d))
@@ -21,30 +21,24 @@ K = (1.-2*exp(-y_axis_2d/10**(x_axis_2d)))
 print(shape(K))
 print(shape(true_F))
 
-M = K.dot(true_F)
+M = K @ true_F # the fake data
 print(shape(M))
 M = nddata(M,['vd'])
 M.setaxis('vd',y_axis)
 M.add_noise(0.2)
-M_nd = M.C
 
 # this is here to test the integrated 1D-BRD (for pyspecdata)
 solution = M.C.nnls('vd',nddata(x_axis,'logT1'), lambda x,y: 1-2*exp(-x/10**(y)), l='BRD')
 
-M = M.data
-
-x,rnorm = nnls(K,M)
-print(shape(x))
-
-def nnls_reg(val):
-    x_norm = empty([1])
-    r_norm = empty([1])
-    x,r_norm[0] = nnls(A_prime(val,dimension),b_prime)
+def nnls_reg(K,b,val):
+    b_prime = r_[b,zeros(K.shape[1])]
+    x,_ = nnls(A_prime(K,val),b_prime)
     return x
 
 # generate the A matrix, which should have form of the original kernel
 # and then an additional length corresponding to size of the data dimension, where smothing param val is placed 
-def A_prime(val,dimension):
+def A_prime(K,val):
+    dimension = K.shape[1]
     A_prime = r_[K,val*eye(dimension)]
     return A_prime
 
@@ -52,10 +46,9 @@ plot_Lcurve = False
 #{{{ L-curve
 l = sqrt(logspace(-10,1,25)) # adjusting the left number will adjust the right side of L-curve
 
-M_nd.setaxis('vd',y_axis)
 x_nd = nddata(x_axis,'logT1')
 def vec_lcurve(l):
-    return M_nd.real.C.nnls('vd',
+    return M.real.C.nnls('vd',
             x_nd,lambda x,y: (1.-2*exp(-x/10**(y))), l=l)
 
 # solution matrix for l different lambda values
@@ -89,16 +82,8 @@ if plot_Lcurve:
 this_L = 0.226
 
 # generate data vector for smoothing
-M = M[:,newaxis]
-M_prime = r_[M,zeros((K.shape[1],1))]
-M_prime = M_prime.squeeze()
 
-print(shape(M)[0])
-
-dimension = K.shape[1]
-b_prime = M_prime
-
-L_opt_vec = nnls_reg(this_L)
+L_opt_vec = nnls_reg(K,M.data.squeeze(),this_L)
 
 figure();title('ILT distributions')
 true_F = nddata(true_F,'log(T1)')
