@@ -4877,25 +4877,30 @@ class nddata (object):
                     fval = d_chi(input_vec,val)
                     return (input_vec + dot(linalg.inv(fder),fval))
                 def mod_BRD(guess,maxiter=20):
+                    print("Here 2")
                     smoothing_param = guess
                     alpha_converged = False
                     for iter in range(maxiter):
                         logger.debug(strm('ITERATION NO.',iter))
                         logger.debug(strm('CURRENT LAMBDA',smoothing_param))
                         retval,residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=smoothing_param)
+                        print("Here 3")
                         #f_vec = retval
                         f_vec = retval[:,newaxis]
+                        data_fornnls_reshaped = data_fornnls[:,:,newaxis]
+                        print(shape(data_fornnls_reshaped))
+                        K_final = K.data[newaxis,:,:]
                         print("*** *** ***")
                         print("*** *** ***")
-                        print(shape(K.data))
+                        print(shape(K_final))
                         print(shape(f_vec))
-                        print(shape(dot(K.data,f_vec)))
-                        print(shape(data_fornnls[:,newaxis]))
+                        print(shape(data_fornnls[:,:,newaxis]))
                         print("*** *** ***")
                         print("*** *** ***")
-                        quit()
                         alpha = smoothing_param**2
-                        c_vec = dot(K.data,f_vec) - data_fornnls[:,newaxis]
+                        c_vec = (K_final @ f_vec) - data_fornnls[:,:,newaxis]
+                        print("Here 4")
+                        quit()
                         c_vec /= -1*alpha
                         c_update = newton_min(c_vec,smoothing_param)
                         alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
@@ -4909,7 +4914,9 @@ class nddata (object):
                         if iter == maxiter-1:
                             logger.debug(strm('DID NOT CONVERGE.'))
                     return lambda_update
+                print("Here")
                 retval, residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=mod_BRD(guess=1.0))
+                print("Here")
             else:
                 retval, residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=l)
             print("*** *** ***")
