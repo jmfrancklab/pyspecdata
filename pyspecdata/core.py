@@ -4827,15 +4827,8 @@ class nddata (object):
                 data_fornnls = data_fornnls.reshape((prod(
                     data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
             logger.debug(strm('shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
-            print("*** *** ***")
             if l == 'BRD':
-                print("*** *** ***")
-                print("*** *** ***")
-                print("*** *** ***")
-                print("FOUND BRD")
-                print("*** *** ***")
-                print("*** *** ***")
-                print("*** *** ***")
+                logger.debug("FOUND BRD")
                 def chi(x_vec,val):
                     return 0.5*dot(x_vec.T,dot(dd_chi(G(x_vec),val**2),x_vec)) - dot(x_vec.T,data_fornnls[:,newaxis])
                 def d_chi(x_vec,val):
@@ -4902,7 +4895,6 @@ class nddata (object):
                 retval, residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=mod_BRD(guess=1.0))
             else:
                 retval, residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=l)
-            print("*** *** ***")
             #retval, residual = this_nnls.nnls_regularized(K.data, data_fornnls, l=l)
             logger.debug(strm("coming back from fortran, residual type is",type(residual))+ strm(residual.dtype if isinstance(residual, ndarray) else ''))
             newshape = []
@@ -6213,6 +6205,11 @@ class nddata (object):
             return retfun
         elif arg == 'shape':
             return ndshape(self)
+        elif arg == 'isfortran':
+            raise ValueError("you tried to call isfortran on an nddata object --"
+            " this probably means you're doing something wrong -- possibly that"
+            " you are passing an nddata object when you should be passing a"
+            " standard numpy ndarray")
         else:
             return super().__getattribute__(arg)
     @property
