@@ -7515,7 +7515,8 @@ class fitdata(nddata):
         print(r'\end{verbatim}')
         return recordlist # collect into a single recordlist array
     def set_guess(self,**kwargs):
-        input_guesses = set(kwargs.keys()) 
+        input_guesses = set(kwargs.keys())
+        print(input_guesses)
         symbols_not_present = input_guesses-set(self.symbolic_vars)
         if len(symbols_not_present) > 0:
             raise ValueError(strm("You specified the symbol(s)",symbols_not_present,"but I can't find this in the symbols for the fitting function, which are",self.symbolic_vars))
