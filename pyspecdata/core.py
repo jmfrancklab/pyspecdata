@@ -4883,7 +4883,17 @@ class nddata (object):
                         logger.debug(strm('ITERATION NO.',iter))
                         logger.debug(strm('CURRENT LAMBDA',smoothing_param))
                         retval,residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=smoothing_param)
+                        #f_vec = retval
                         f_vec = retval[:,newaxis]
+                        print("*** *** ***")
+                        print("*** *** ***")
+                        print(shape(K.data))
+                        print(shape(f_vec))
+                        print(shape(dot(K.data,f_vec)))
+                        print(shape(data_fornnls[:,newaxis]))
+                        print("*** *** ***")
+                        print("*** *** ***")
+                        quit()
                         alpha = smoothing_param**2
                         c_vec = dot(K.data,f_vec) - data_fornnls[:,newaxis]
                         c_vec /= -1*alpha
