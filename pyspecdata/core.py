@@ -4591,6 +4591,16 @@ class nddata (object):
             each kernel is returned in properties of the nddata called,
             respectively, "s1" and "s2". 
         """
+        def demand_real(x, addtxt=''):
+            if not x.dtype == real64:
+                if x.dtype == complex128:
+                    raise ValueError("you are not allows to pass nnls complex data:\nif it makes sense for you, try yourdata.real.nnls( where you now have yourdata.nnls("+'\n'+addtxt)
+                else:
+                    raise ValueError("I expect double-precision floating point (float64), but you passed me data of dtype "+str(x.dtype)+'\n'+addtxt)
+        demand_real(self.data)
+        demand_real(self.getaxis(dimname),"(this message pertains to the %s axis)"%dimname)
+        for k,v in newaxis_dict.items():
+            demand_real(v,"(this message pertains to the new %s axis)"%str(k))
         logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?'))
         tuple_syntax = False
         if isinstance(dimname, tuple):
@@ -4822,7 +4832,8 @@ class nddata (object):
             logger.debug(strm('K dimlabels',K.dimlabels,'and raw shape',K.data.shape))
             self.reorder(dimname, first=False) # make the dimension we will be regularizing innermost
             logger.debug(strm('shape of the data is',ndshape(self),'is it fortran ordered?'))
-            data_fornnls = self.data.real
+            data_fornnls = self.data
+            demand_real(data_fornnls)
             if len(data_fornnls.shape) > 2:
                 data_fornnls = data_fornnls.reshape((prod(
                     data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
