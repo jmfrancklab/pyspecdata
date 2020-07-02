@@ -7370,8 +7370,7 @@ class fitdata(nddata):
             set_what = list(set_what.keys())
         x = self.getaxis(self.fit_axis)
         if iscomplex(self.data.flatten()[0]):
-            if not all(imag(self.data.flatten()) == 0):
-                raise ValueError("You passed complex data, but I will only fit real data right now!")
+            logger.debug(strm('Warning, taking only real part of fitting data!'))
         y = real(self.data)
         sigma = self.get_error()
         if sigma is None:
@@ -7446,7 +7445,7 @@ class fitdata(nddata):
                 raise RuntimeError(strm('leastsq finished with an error message:',mesg))
         else:
             logger.debug("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg))
-        self.fit_coeff = p_outf# note that this is stored in HIDDEN form
+        self.fit_coeff = p_out # note that this is stored in HIDDEN form
         dof = len(x) - len(p_out)
         if hasattr(self,'symbolic_x') and force_analytical:
             self.covariance = self.analytical_covariance()
