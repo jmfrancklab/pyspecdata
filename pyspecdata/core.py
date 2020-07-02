@@ -4553,14 +4553,19 @@ class nddata (object):
             distribution (the "fit" dimension);
             *e.g.* if you are regularizing a set of functions
             :math:`\exp(-\tau*R_1)`, then this is :math:`\tau`
-        newaxis_dict: dict or nddata
-            a dictionary whose key is the name of the "fit" dimension
-            (:math:`R_1` in the example above)
-            and whose value is an array with the new axis labels.
-            OR
+        newaxis_dict: nddata or dict
             this can be a 1D nddata
             -- if it has an axis, the axis will be used to create the
             fit axis; if it has no axis, the data will be used
+
+            OR, if dimname is a tuple of 2 dimensions indicating a 2D ILT, this
+            should also be a tuple of 2 nddata, representing the two axes
+
+            OR (only for 1D or 1.5D ILT),
+            a dictionary whose key is the name of the "fit" dimension
+            (:math:`R_1` in the example above)
+            and whose value is an array with the new axis labels.
+
         kernel_func: function
             a function giving the kernel for the regularization.
             The first argument is the "data" variable
@@ -4591,16 +4596,30 @@ class nddata (object):
             each kernel is returned in properties of the nddata called,
             respectively, "s1" and "s2". 
         """
+        # {{{ type checking
         def demand_real(x, addtxt=''):
-            if not x.dtype == real64:
+            if not x.dtype == float64:
                 if x.dtype == complex128:
                     raise ValueError("you are not allows to pass nnls complex data:\nif it makes sense for you, try yourdata.real.nnls( where you now have yourdata.nnls("+'\n'+addtxt)
                 else:
                     raise ValueError("I expect double-precision floating point (float64), but you passed me data of dtype "+str(x.dtype)+'\n'+addtxt)
         demand_real(self.data)
-        demand_real(self.getaxis(dimname),"(this message pertains to the %s axis)"%dimname)
-        for k,v in newaxis_dict.items():
-            demand_real(v,"(this message pertains to the new %s axis)"%str(k))
+        if type(dimname) is str:
+            testdim = [dimname]
+        else:
+            testdim = dimname
+        for j in testdim:
+            demand_real(self.getaxis(dimname),"(this message pertains to the %s axis)"%dimname)
+        if type(newaxis_dict) is dict:
+            for k,v in newaxis_dict.items():
+                demand_real(v,"(this message pertains to the new %s axis)"%str(k))
+        else:
+            for j in newaxis_dict:
+                if len(j.dimlabels) == 1 and j.getaxis(j.dimlabels[0]) is not None:
+                    demand_real(j.getaxis(j.dimlabels[0]),"(this message pertains to the new %s axis pulled from the second argument's axis)"%str(j.dimlabels[0]))
+                else:
+                    demand_real(j.data,"(this message pertains to the new %s axis pulled from the second argument's data)"%str(j.dimlabels[0]))
+        # }}}
         logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?'))
         tuple_syntax = False
         if isinstance(dimname, tuple):
@@ -4614,9 +4633,9 @@ class nddata (object):
             if isinstance(newaxis_dict[0],nddata) and isinstance(newaxis_dict[1],nddata):
                 assert len(newaxis_dict[0].dimlabels) and len(newaxis_dict[1].dimlabels) == 1, "currently only set up for 1D"
         elif isinstance(newaxis_dict, dict):
-            assert len(newaxis_dict) == 1, "currently only set up for 1D"
+            assert len(newaxis_dict) == 1, "currently dictionary only set up for 1D"
         elif isinstance(newaxis_dict,nddata):
-            assert len(newaxis_dict.dimlabels) == 1, "currently only set up for 1D"
+            assert len(newaxis_dict.dimlabels) == 1, "the axis argument must be 1D"
         else:
             raise ValueError("second argument is dictionary or nddata with new axis, or tuple of nddatas with new axes")
         if isinstance(kernel_func, tuple):
