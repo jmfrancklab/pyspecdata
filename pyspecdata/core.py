@@ -7529,14 +7529,14 @@ class fitdata(nddata):
                         recordlist[runno][name] = thiscopy.output(name)
         print(r'\end{verbatim}')
         return recordlist # collect into a single recordlist array
-    def set_guess(self,**kwargs):
-        input_guesses = set(kwargs.keys())
+    def set_guess(self,dict_of_values):
+        input_guesses = set(dict_of_values.keys())
         print(input_guesses)
         symbols_not_present = input_guesses-set(self.symbolic_vars)
         if len(symbols_not_present) > 0:
             raise ValueError(strm("You specified the symbol(s)",symbols_not_present,"but I can't find this in the symbols for the fitting function, which are",self.symbolic_vars))
         symbols_not_set = set(self.symbolic_vars) - input_guesses
-        self.guess_dict = kwargs
+        self.guess_dict = dict_of_values
         self.guess_dict.update({k:1 for k in symbols_not_set})
         return
     def guess(self,use_pseudoinverse=False):
