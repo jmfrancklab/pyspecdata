@@ -4818,11 +4818,11 @@ class nddata (object):
             data_axis = self.fromaxis(dimname)
             data_axis.squeeze()
             data_axis, fit_axis = data_axis.aligndata(fit_axis)
-            K = kernel_func(data_axis, fit_axis).squeeze()
+            K = kernel_func(data_axis.real, fit_axis).squeeze()
             logger.debug(strm('K dimlabels',K.dimlabels,'and raw shape',K.data.shape))
             self.reorder(dimname, first=False) # make the dimension we will be regularizing innermost
             logger.debug(strm('shape of the data is',ndshape(self),'is it fortran ordered?'))
-            data_fornnls = self.data
+            data_fornnls = self.data.real
             if len(data_fornnls.shape) > 2:
                 data_fornnls = data_fornnls.reshape((prod(
                     data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
