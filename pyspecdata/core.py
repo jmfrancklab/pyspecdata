@@ -7513,7 +7513,7 @@ class fitdata(nddata):
                         recordlist[runno][name] = thiscopy.output(name)
         print(r'\end{verbatim}')
         return recordlist # collect into a single recordlist array
-    def set_guess(self,**kwargs):
+    def set_guess(self, **kwargs):
         input_guesses = set(kwargs.keys())
         print(input_guesses)
         symbols_not_present = input_guesses-set(self.symbolic_vars)
