@@ -148,9 +148,16 @@ def grab_data_directory():
             +"\nAll the functionality of this function should now be"
             +"replaced by getDATADIR")
 def getDATADIR(*args,**kwargs):
-    r'''Returns the base directory where you put all your data.  If arguments
-    are passed, it returns the directory underneath the data directory, ending
-    in a trailing (back)slash
+    r'''Used to find a directory containing data in a way that works
+    seamlessly across different computers (and operating systems).
+    Supports the case where data is processed both on a laboratory
+    computer and (*e.g.* after transferring via ssh or a syncing client) on a
+    user's laptop.
+    While it will return a default directory without any arguments, it is
+    typically used with the keyword argument `exp_type`, described below.
+    
+
+    It returns the directory ending in a trailing (back)slash.
     
     It is determined by a call to `MyConfig.get_setting` with the setting name
     `data_directory` and the environment variable set to ``PYTHON_DATA_DIR``.
@@ -158,7 +165,17 @@ def getDATADIR(*args,**kwargs):
     Parameters
     ----------
     exp_type : str
-        A string identifying the experiment type.
+        A string identifying the name of a subdirectory where the data is stored.
+        It can contain slashes.
+        Typically, this gives the path relative to a google drive, rclone,
+        dropbox, etc, repository.
+        To make code portable, `exp_type` should **not** contain a full path or
+        or portions of the path that are specific to the computer/user.
+
+        If the directory has note been used before, all the directories listed
+        in the user's `_pyspecdata` or `.pyspecdata` config file will be
+        searched recursively up to 2 levels deep.
+
         It searches for `exp_type` in this order:
 
         * Look in the ``ExpTypes`` section of the config file.
@@ -183,6 +200,10 @@ def getDATADIR(*args,**kwargs):
             Currently, in both attempts, it will only walk 2 levels deep (since NMR directories
             can be rather complex, and otherwise it would take forever).
     '''
+    exp_type = process_kwargs([('exp_type',None)],kwargs)
+    base_data_dir = _my_config.get_setting('data_directory',environ = 'PYTHON_DATA_DIR',default = '~/experimental_data')
+    if exp_type is not None and '/' in exp_type:
+        exp_type = os.path.normpath(exp_type)
     # the following is from https://stackoverflow.com/questions/229186/os-walk-without-digging-into-directories-below
     def walklevel(some_dir, level=1):
         some_dir = some_dir.rstrip(os.path.sep)
@@ -202,8 +223,10 @@ def getDATADIR(*args,**kwargs):
             s[:] = [j for j in s if j[0]
                     not in ['.','_']
                     and '.hfssresults' not in j]# prune the walk
-            equal_matches.extend([os.path.join(d,j) for j in s if j == exp_type])
-            containing_matches.extend([os.path.join(d,j) for j in s if exp_type.lower() in j.lower()])
+            equal_matches.extend([os.path.join(d,j) for j in s if
+                os.path.join(d,j).lower().endswith(exp_type.lower())])
+            containing_matches.extend([os.path.join(d,j) for j in s if
+                exp_type.lower() in os.path.join(d,j).lower()])
         def grab_smallest(matches):
             if len(matches) > 0:
                 if len(matches) == 1:
@@ -227,8 +250,6 @@ def getDATADIR(*args,**kwargs):
         # }}}
         _my_config.set_setting('ExpTypes',exp_type,exp_directory)
         return exp_directory
-    exp_type = process_kwargs([('exp_type',None)],kwargs)
-    base_data_dir = _my_config.get_setting('data_directory',environ = 'PYTHON_DATA_DIR',default = '~/experimental_data')
     if exp_type is not None:
         # {{{ determine the experiment subdirectory
         exp_directory = _my_config.get_setting(exp_type, section='ExpTypes')
@@ -266,7 +287,8 @@ def rclone_search(fname,dirname):
         retval += '\n'+strm("checking remote",thisremote)
         # do NOT quote the filename -- quotes are typically stripped off by the
         # shell -- they would be literal here
-        cmd = ['rclone','--include',fname, 'ls',thisremote]
+        cmd = ['rclone','--include','*'+fname+'*', 'ls',thisremote]
+        logger.debug("running "+strm(*cmd))
         with Popen(cmd, stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
             for j in proc.stdout:
                 foundpath = j.split()
@@ -279,7 +301,7 @@ def rclone_search(fname,dirname):
                             if len(j) > 0]
                     logging.debug(strm("foundpath is",foundpath))
                 retval += '\nYou should be able to retrieve this file with:\n'+strm(
-                        "rclone copy -v --include '%s' %s%s %s"%(fname,
+                        "rclone copy -v --include '%s' %s%s %s"%(foundpath[-1],
                     thisremote,
                     '/'.join(foundpath[:-1]),
                     # dirname below needs to be replaced with path relative to current directory

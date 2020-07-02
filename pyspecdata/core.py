@@ -6370,33 +6370,48 @@ class nddata (object):
             and
             \'axisname\':(value1,value2)
             pairs, where the values give either a single value or an inclusive range on the axis, respectively"""
-        logger.debug(strm("about to start parsing slices for data with axis_coords of length",len(self.axis_coords),"and dimlabels",self.dimlabels,"for ndshape of",ndshape(self)))
-        #print "DEBUG getitem called with",args
+        logger.debug(strm("about to start parsing slices",args,"for data with axis_coords of length",len(self.axis_coords),"and dimlabels",self.dimlabels,"for ndshape of",ndshape(self)))
         errordict = None # in case it's not set
         if self.axis_coords_units is not None:
             unitsdict = self.mkd(self.axis_coords_units)
         axesdict = None # in case it's not set
         if isinstance(args, slice):
             args = [args]
-        else:
-            args = list(args)
-        #{{{ to make things easier, convert "slice" arguments to "axis,slice" pairs
-        j=0
-        trueslice = [] # this lets me distinguish from 'axisname',slice
+        # {{{ make a sensible list of tuples that's easier to understand
+        sensible_list = [] # type, dimension, arguments
+        testf = lambda x: x+1
+        j = 0
         while j < len(args):
-            if isinstance(args[j], slice):
-                this_dim_name = args[j].start
-                args.insert(j,this_dim_name)
-                trueslice.append(this_dim_name)
-                j+=1
-            j+=2 # even only
-        #}}}
-        for j in range(0,len(args),2):
-            if isinstance(args[j], str_):
-                args[j] = str(args[j]) # on upgrading + using on windows, this became necessary, for some reason I don't understand
+            if isinstance(args[j],str):# works for str and str_
+                dimname = args[j]
+                if isinstance(dimname, str_):
+                    dimname = str(dimname) # on upgrading + using on windows, this became necessary, for some reason I don't understand
+                elif isinstance(args[j+1],type(testf)):
+                    sensible_list.append((hash('func'),dimname,args[j+1]))
+                else:
+                    sensible_list.append((hash('np'),dimname,args[j+1]))
+                j += 2
+            elif type(args[j]) is slice:
+                dimname = args[j].start
+                if isinstance(dimname, str_):
+                    dimname = str(dimname)
+                target = args[j].stop
+                if isscalar(target):
+                    sensible_list.append((hash('idx'),dimname,target))
+                elif type(target) in [tuple,list]:
+                    assert len(target)==2, strm("for",args[j],"I expected a 'dimname':(range_start,range_stop)")
+                    sensible_list.append((hash('range'),dimname,target[0],target[1]))
+                j += 1
+            else:# works for str and str_
+                raise ValueError("I have read in slice argument",args[:j],"but then I get confused!")
+        def pprint(a):
+            b = {hash(j):j for j in ['idx','range','np']}
+            return (b[a[0]],)+a[1:]
+        logger.debug(strm('Here is the sensible list:',[pprint(j) for j in sensible_list]))
+        # }}}
         if type(args) in [float,int32,int,double]:
             raise ValueError(strm('You tried to pass just a nddata[',type(args),']'))
-        if isinstance(args[0], str):
+        if isinstance(args[0], str) or isinstance(args[0], slice):
             #{{{ create a slicedict and errordict to store the slices
             slicedict = dict(list(zip(list(self.dimlabels),[slice(None,None,None)]*len(self.dimlabels)))) #initialize to all none
             if len(self.axis_coords)>0:
@@ -6405,106 +6420,107 @@ class nddata (object):
                 if len(self.axis_coords_error)>0:
                     errordict = self.mkd(self.axis_coords_error)
             else:
-                logger.debug(strm("length of axis_coords not greater than 0"))
-            for x,y in zip(args[0::2],args[1::2]):
-                slicedict[x] = y
+                axesdict = self.mkd(self.axis_coords)
+                logger.debug(strm("length of axis_coords not greater than 0, generated dictionary",axesdict))
             #}}}
             #{{{ map the slices onto the axis coordinates and errors
-            #print "DEBUG slicedict is",slicedict
-            testf = lambda x: x+1
-            if len(self.axis_coords)>0:
-                for x,y in slicedict.items():
-                    #print "DEBUG, type of slice",x,"is",type(y)
-                    if isscalar(y):
-                        if axesdict[x] is not None:
-                            axesdict.pop(x) # pop the axes for all scalar dimensions
-                    elif isinstance(y, type(testf)):
-                        mask = y(axesdict[x])
-                        slicedict[x] = mask
-                        if axesdict[x] is not None:
-                            axesdict[x] = axesdict[x][mask]
+            for thistuple in sensible_list:
+                thisop = thistuple[0]
+                thisdim = thistuple[1]
+                thisargs = thistuple[2:]
+                #print "DEBUG, type of slice",x,"is",type(y)
+                if thisop == hash('np'):
+                    slicedict[thisdim] = thisargs[0]
+                    if isscalar(thisargs[0]):
+                        axesdict.pop(thisdim) # pop the axes for all scalar dimensions
                     else:
-                        if isinstance(y, slice) and x in trueslice:
-                            #print "DEBUG, I found",y,"to be of type slice"
-                            if y.step is not None:
-                                raise ValueError("setting the slice step is not currently supported")
-                            else:
-                                if isinstance(y.stop, tuple): #then I passed a single index
-                                    temp = diff(axesdict[x]) 
-                                    if not all(temp*sign(temp[0])>0):
-                                        raise ValueError(strm("you can only use the range format on data where the axis is in consecutively increasing or decreasing order, and the differences that I see are",temp*sign(temp[0])))
-                                    del temp
-                                    if len(y.stop) > 2:
-                                        raise ValueError("range with more than two values not currently supported")
-                                    elif len(y.stop) == 1:
-                                        temp_low = y.stop[0]
-                                        temp_high = inf
-                                        temp_high_value = inf
-                                    else:
-                                        temp_low = y.stop[0]
-                                        temp_high = y.stop[1]
-                                        temp_high_value = y.stop[1]
-                                        if temp_low is None:
-                                            temp_low = -inf
-                                        if temp_high is None:
-                                            temp_high = inf
-                                        if temp_low > temp_high:
-                                            temp_low,temp_high = temp_high,temp_low
-                                    #print "DEBUG: slice values",temp_low,'to',temp_high
-                                    if temp_low == inf:
-                                        temp_low = axesdict[x].argmax()
-                                    elif temp_low == -inf:
-                                        temp_low = axesdict[x].argmin()
-                                    else:
-                                        temp_low = abs(axesdict[x] - temp_low).argmin()
-                                    if temp_high == inf:
-                                        temp_high = axesdict[x].argmax()
-                                    elif temp_high == -inf:
-                                        temp_high = axesdict[x].argmin()
-                                    else:
-                                        temp_high = abs(axesdict[x] - temp_high).argmin()
-                                    if temp_high + 1 < len(axesdict[x]):
-                                        #print "DEBUG: I test against value",axesdict[x][temp_high + 1]
-                                        if axesdict[x][temp_high + 1] <= temp_high_value:
-                                            temp_high += 1
-                                    #print "DEBUG: evaluate to indices",temp_low,'to',temp_high,'out of',len(axesdict[x])
-                                    if temp_high == temp_low:
-                                        # never give a zero-width slice
-                                        temp_high += 1
-                                    slicedict[x] = slice(temp_low,temp_high,None)
-                                    y = slicedict[x]
-                                else: #then I passed a single index
-                                    temp = abs(axesdict[x] - y.stop).argmin()
-                                    #slicedict[x] = slice(temp,temp+1,None)
-                                    slicedict[x] = temp
-                                    y = slicedict[x]
-                        if axesdict[x] == []:
-                            axesdict[x] = None
-                        if axesdict[x] is not None:
+                        if axesdict[thisdim] is not None:
+                            axesdict[thisdim] = axesdict[thisdim][slicedict[thisdim]]
+                elif thisop == hash('func'):
+                    mask = thisargs[0](axesdict[thisdim])
+                    slicedict[thisdim] = mask
+                    if axesdict[thisdim] is not None:
+                        axesdict[thisdim] = axesdict[thisdim][mask]
+                elif thisop == hash('range'):
+                    if axesdict[thisdim] is None:
+                        raise ValueError("You passed a range-type slice"
+                        +" selection, but to do that, your axis coordinates need to"
+                        +f" be labeled! (The axis coordinates of {thisdim} aren't"
+                        +" labeled)")
+                    temp = diff(axesdict[thisdim]) 
+                    if not all(temp*sign(temp[0])>0):
+                        raise ValueError(strm("you can only use the range format on data where the axis is in consecutively increasing or decreasing order, and the differences that I see are",temp*sign(temp[0])))
+                    if sign(temp[0]) == -1:
+                        thisaxis = axesdict[thisdim][::-1]
+                    else:
+                        thisaxis = axesdict[thisdim]
+                    if len(thisargs) > 2:
+                        raise ValueError("range with more than two values not currently supported")
+                    elif len(thisargs) == 1:
+                        temp_low = thisargs[0]
+                        temp_high = inf
+                    else:
+                        temp_low = thisargs[0]
+                        temp_high = thisargs[1]
+                        if temp_low is None:
+                            temp_low = -inf
+                        if temp_high is None:
+                            temp_high = inf
+                        if temp_low > temp_high:
+                            temp_low,temp_high = temp_high,temp_low
+                    if temp_low == inf:
+                        raise ValueError(strm("this is not going to work -- I interpret range",thisargs,"I get to",temp_low,",",temp_high))
+                    elif temp_low == -inf:
+                        temp_low = 0
+                    else:
+                        logger.debug(strm("looking for",temp_low))
+                        temp_low = searchsorted(thisaxis,temp_low)
+                        logger.debug(strm("i found",thisaxis[temp_low]))
+                    if temp_high == inf:
+                        temp_high = len(thisaxis)-1
+                    elif temp_high == -inf:
+                        raise ValueError(strm("this is not going to work -- I interpret range",thisargs,"I get to",temp_low,",",temp_high))
+                    else:
+                        logger.debug(strm("looking for",temp_high))
+                        temp_high = searchsorted(thisaxis,temp_high)
+                        logger.debug(strm("i found",thisaxis[temp_high]))
+                    if sign(temp[0]) == -1:
+                        temp_high = len(thisaxis) -1 -temp_high
+                        temp_low = len(thisaxis) -1 -temp_low
+                        temp_high, temp_low = temp_low, temp_high
+                    del temp
+                    slicedict[thisdim] = slice(temp_low,temp_high+1,None) # inclusive
+                    axesdict[thisdim] = axesdict[thisdim][slicedict[thisdim]]
+                elif thisop == hash('idx'):
+                    if axesdict[thisdim] is None:
+                        raise ValueError("You passed a labeled index"
+                        +" selection, but to do that, your axis coordinates need to"
+                        +f" be labeled! (The axis coordinates of {thisdim} aren't"
+                        +" labeled)")
+                    temp = abs(axesdict[thisdim] - thisargs[0]).argmin()
+                    slicedict[thisdim] = temp
+                    axesdict.pop(thisdim)
+            if errordict is not None and errordict != array(None):
+                for x,y in slicedict.items():
+                    if errordict[x] is not None:
+                        if isscalar(y):
+                            errordict.pop(x)
+                        elif isinstance(y, type(emptyfunction)):
+                            mask = y(axesdict[x])
+                            errordict[x] = errordict[x][mask]
+                        else:
                             try:
-                                axesdict[x] = axesdict[x][y]
-                            except Exception as e:
-                                raise ValueError("axesdict is "+repr(axesdict)+"and I want to set "+repr(x)+" subscript to its "+repr(y)+" value"+explain_error(e))
-                if errordict is not None and errordict != array(None):
-                    for x,y in slicedict.items():
-                        if errordict[x] is not None:
-                            if isscalar(y):
-                                errordict.pop(x)
-                            elif isinstance(y, type(emptyfunction)):
-                                mask = y(axesdict[x])
-                                errordict[x] = errordict[x][mask]
-                            else:
-                                try:
-                                    errordict[x] = errordict[x][y] # default
-                                except:
-                                    raise IndexError(strm('Trying to index',
-                                            errordict,'-->',x,'=',errordict[x],'with',y,
-                                            'error started as',self.axis_coords_error))
+                                errordict[x] = errordict[x][y] # default
+                            except:
+                                raise IndexError(strm('Trying to index',
+                                        errordict,'-->',x,'=',errordict[x],'with',y,
+                                        'error started as',self.axis_coords_error))
             if unitsdict is not None and unitsdict != array(None):
                 for x,y in slicedict.items():
                     if unitsdict[x] is not None:
                         if isscalar(y):
                             unitsdict.pop(x)
+            logger.debug(strm('Here is the slice dict:',slicedict,"and the axes dict",axesdict))
             return slicedict,axesdict,errordict,unitsdict
             #}}}
         else:
