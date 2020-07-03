@@ -6475,6 +6475,7 @@ class nddata (object):
                     else:
                         logger.debug(strm("looking for",temp_low))
                         temp_low = searchsorted(thisaxis,temp_low)
+                        temp_low = temp_low-1 if temp_low >= len(thisaxis) else temp_low
                         logger.debug(strm("i found",thisaxis[temp_low]))
                     if temp_high == inf:
                         temp_high = len(thisaxis)-1
@@ -6483,6 +6484,7 @@ class nddata (object):
                     else:
                         logger.debug(strm("looking for",temp_high))
                         temp_high = searchsorted(thisaxis,temp_high)
+                        temp_high = temp_high-1 if temp_high >= len(thisaxis) else temp_high
                         logger.debug(strm("i found",thisaxis[temp_high]))
                     if sign(temp[0]) == -1:
                         temp_high = len(thisaxis) -1 -temp_high
