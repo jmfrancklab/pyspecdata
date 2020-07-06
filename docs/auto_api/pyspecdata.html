@@ -1759,6 +1759,10 @@ If several such matches are found, the error message is informative.</p>
 you want to put it – it does <strong>not</strong> include the directory where
 the file lives.
 The directory can be passed to the <cite>directory</cite> argument.</p>
+<p>You can use either <a class="reference internal" href="#pyspecdata.find_file" title="pyspecdata.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_file()</span></code></a> or
+<a class="reference internal" href="#pyspecdata.nddata_hdf5" title="pyspecdata.nddata_hdf5"><code class="xref py py-func docutils literal notranslate"><span class="pre">nddata_hdf5()</span></code></a> to read the data, as shown below.
+When reading this, please note that HDF5 files store <em>multiple</em> datasets,
+and each is named (here, the name is <cite>test_data</cite>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -3766,7 +3770,7 @@ This can be used in combination with wrapviewer() and latexmk by using a <code c
 <dl class="py function">
 <dt id="pyspecdata.latexscripts.wrapviewer">
 <code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">wrapviewer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.wrapviewer" title="Permalink to this definition">¶</a></dt>
-<dd><p>see <a class="reference internal" href="../latexscripts.html#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p>
+<dd><p>see <a class="reference internal" href="#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p>
 </dd></dl>
 
 </div>
@@ -7669,6 +7673,10 @@ If several such matches are found, the error message is informative.</p>
 you want to put it – it does <strong>not</strong> include the directory where
 the file lives.
 The directory can be passed to the <cite>directory</cite> argument.</p>
+<p>You can use either <a class="reference internal" href="#pyspecdata.find_file" title="pyspecdata.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_file()</span></code></a> or
+<a class="reference internal" href="#pyspecdata.nddata_hdf5" title="pyspecdata.nddata_hdf5"><code class="xref py py-func docutils literal notranslate"><span class="pre">nddata_hdf5()</span></code></a> to read the data, as shown below.
+When reading this, please note that HDF5 files store <em>multiple</em> datasets,
+and each is named (here, the name is <cite>test_data</cite>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

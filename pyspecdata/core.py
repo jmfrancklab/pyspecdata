@@ -6537,6 +6537,29 @@ class nddata (object):
         you want to put it -- it does **not** include the directory where
         the file lives.
         The directory can be passed to the `directory` argument.
+
+        You can use either :func:`~pyspecdata.find_file` or
+        :func:`~pyspecdata.nddata_hdf5` to read the data, as shown below.
+        When reading this, please note that HDF5 files store *multiple* datasets,
+        and each is named (here, the name is `test_data`).
+
+        .. code::
+            from pyspecdata import *
+            init_logging('debug')
+            a = nddata(r_[0:5:10j], 'x')
+            a.name('test_data')
+            try:
+                a.hdf5_write('example.h5',getDATADIR(exp_type='Sam'))
+            except:
+                print("file already exists, not creating again -- delete the file or node if wanted")
+            # read the file by the "raw method"
+            b = nddata_hdf5('example.h5/test_data',
+                    getDATADIR(exp_type='Sam'))
+            print("found data:",b)
+            # or use the find file method
+            c = find_file('example.h5', exp_type='Sam',
+                    expno='test_data')
+            print("found data:",c)
         
         Parameters
         ----------
