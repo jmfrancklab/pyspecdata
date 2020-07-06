@@ -5796,9 +5796,8 @@ class nddata (object):
                 multidim_axis_label = multidim_axis_label.flatten() # then flatten the axis
                 logger.debug(strm("shape of multidim_axis_label is now",multidim_axis_label.shape))
                 logger.debug(strm("multidim_axis_label is:\n",repr(multidim_axis_label)))
-                axis_coords_dict[dimname] = multidim_axis_label
-                axis_coords_error_dict[dimname] = multidim_axis_error
-
+            else:
+                raise ValueError("You requested an axis, but I don't know what dtype to assign to it -- consider calling chunk with noaxis, instead")
             # }}}
         #{{{ update axis dictionary with the new info
         logger.debug(strm("end up with axis_coords_dict (%d)"%len(axis_coords_dict),axis_coords_dict))
