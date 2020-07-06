@@ -6544,6 +6544,7 @@ class nddata (object):
         and each is named (here, the name is `test_data`).
 
         .. code-block:: python
+
             from pyspecdata import *
             init_logging('debug')
             a = nddata(r_[0:5:10j], 'x')
