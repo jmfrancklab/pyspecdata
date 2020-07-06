@@ -5795,7 +5795,7 @@ class nddata (object):
                 logger.debug(strm("shape of multidim_axis_label is now",multidim_axis_label.shape))
                 logger.debug(strm("multidim_axis_label is:\n",repr(multidim_axis_label)))
             else:
-                raise ValueError("You requested an axis, but I don't know what dtype to assign to it -- consider calling chunk with noaxis, instead")
+                raise ValueError("You requested that smoosh generate an axis, but I don't know what dtype to assign to it (what fields to use).  This is likely because you don't have axes assigned to the dimensions you're trying to smoosh.  Consider calling smoosh with noaxis=True, instead")
             axis_coords_dict[dimname] = multidim_axis_label
             axis_coords_error_dict[dimname] = multidim_axis_error
             # }}}
