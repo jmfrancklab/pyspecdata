@@ -1,4 +1,6 @@
-from pylab import * 
+from ..general_functions import inside_sphinx
+if not inside_sphinx():
+    from pylab import r_,fft,ifft,ifftshift,fftshift
 
 def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*(y**2))))):
     r'''Perform a convolution.
@@ -17,7 +19,7 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*
         Default is a normalized Gaussian of width (:math:`\sigma`)
         `filterwidth`
         :math:`\frac{1}{2 \sigma^2}\exp\left( - \frac{x^2}{2 \sigma^2} \right)`
-        For example if you want a complex lorentzian with `filterwidth` controlled by the rate $R$, 
+        For example if you want a complex Lorentzian with `filterwidth` controlled by the rate :math:`R`, 
         *i.e.*
         :math:`\frac{-1}{-i 2 \pi f - R}`
         then ``convfunc = lambda f,R: -1./(-1j*2*pi*f-R)``

@@ -1,5 +1,6 @@
 from ..general_functions import *
-from pylab import * 
+if not inside_sphinx():
+    from pylab import r_,fft,ifft
 from .ft_shift import _find_index,thinkaboutit_message
 
 def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
@@ -8,7 +9,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
     It adjusts normalization and units so that the result conforms to
             :math:`\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt`
 
-    Note that, as noted in the :func:`ift` documentation,
+    Note that, as noted in the :meth:`~pyspecdata.fourier.ift.ift` documentation,
     the inverse transform doesn't correspond to the equivalent
     expression for the IFT.
 
