@@ -5750,6 +5750,9 @@ class nddata (object):
         axes_with_labels = [j for j in dimstocollapse if self.getaxis(j) is not None] # specifically, I am only concerned with the ones I am collapsing that have labels
         if noaxis:
             logger.debug('noaxis was specified')
+            axis_coords_dict[dimname] = None
+            axis_coords_error_dict[dimname] = None
+
         else:
             logger.debug('starting construction of the smooshed axis')
             axes_with_labels_haserror = [self.get_error(j) is not None for j in axes_with_labels]
@@ -5762,6 +5765,7 @@ class nddata (object):
             logger.debug(strm("the axes that have labels have sizes:",axes_with_labels_size))
             # {{{ we construct a multidimensional axis
             multidim_axis_error = None
+
             if len(axes_with_labels_dtype) > 0:
                 # create a new axis of the appropriate shape and size
                 multidim_axis_label = empty(axes_with_labels_size,
@@ -5790,14 +5794,11 @@ class nddata (object):
                 multidim_axis_label = multidim_axis_label.flatten() # then flatten the axis
                 logger.debug(strm("shape of multidim_axis_label is now",multidim_axis_label.shape))
                 logger.debug(strm("multidim_axis_label is:\n",repr(multidim_axis_label)))
+                axis_coords_dict[dimname] = multidim_axis_label
+                axis_coords_error_dict[dimname] = multidim_axis_error
+
             # }}}
         #{{{ update axis dictionary with the new info
-        if noaxis:
-            axis_coords_dict[dimname] = None
-            axis_coords_error_dict[dimname] = None
-        else:
-            axis_coords_dict[dimname] = multidim_axis_label
-            axis_coords_error_dict[dimname] = multidim_axis_error
         logger.debug(strm("end up with axis_coords_dict (%d)"%len(axis_coords_dict),axis_coords_dict))
         logger.debug(strm("end up with axis_coords_error_dict (%d)"%len(axis_coords_error_dict),axis_coords_error_dict))
         #}}}
