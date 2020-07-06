@@ -5754,7 +5754,6 @@ class nddata (object):
             logger.debug('noaxis was specified')
             axis_coords_dict[dimname] = None
             axis_coords_error_dict[dimname] = None
-
         else:
             logger.debug('starting construction of the smooshed axis')
             axes_with_labels_haserror = [self.get_error(j) is not None for j in axes_with_labels]
@@ -5767,7 +5766,6 @@ class nddata (object):
             logger.debug(strm("the axes that have labels have sizes:",axes_with_labels_size))
             # {{{ we construct a multidimensional axis
             multidim_axis_error = None
-
             if len(axes_with_labels_dtype) > 0:
                 # create a new axis of the appropriate shape and size
                 multidim_axis_label = empty(axes_with_labels_size,
@@ -5798,6 +5796,8 @@ class nddata (object):
                 logger.debug(strm("multidim_axis_label is:\n",repr(multidim_axis_label)))
             else:
                 raise ValueError("You requested an axis, but I don't know what dtype to assign to it -- consider calling chunk with noaxis, instead")
+            axis_coords_dict[dimname] = multidim_axis_label
+            axis_coords_error_dict[dimname] = multidim_axis_error
             # }}}
         #{{{ update axis dictionary with the new info
         logger.debug(strm("end up with axis_coords_dict (%d)"%len(axis_coords_dict),axis_coords_dict))
