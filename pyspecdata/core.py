@@ -62,7 +62,7 @@ from scipy.interpolate import griddata as scipy_griddata
 import tables
 import warnings
 import re
-from inspect import ismethod
+from inspect import ismethod,signature,Parameter
 from numpy.core import rec
 from matplotlib.pyplot import cm
 import tables
@@ -73,7 +73,6 @@ from scipy.optimize import leastsq
 from scipy.signal import fftconvolve
 import scipy.sparse as sparse
 import numpy.lib.recfunctions as recf
-from inspect import getargspec
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
 from .datadir import getDATADIR,log_fname
@@ -4409,23 +4408,31 @@ class nddata (object):
                 "in the list of axes",self.dimlabels))
         temp = list(self.data.shape)
         temp[thisaxis] = 1
-        numnonoptargs = len(getargspec(func).args)
-        numvarargs = getargspec(func).varargs
-        if numvarargs is None:
-            numvarargs = 0
-        else:
-            numvarargs = len(numvarargs)
+        func_sig = signature(func)
+        numnonoptargs = len([v.default for v in func_sig.parameters.values() if v.default==Parameter.empty])
+        kwargnames =  [k for k,v in func_sig.parameters.items() if v.default!=Parameter.empty]
         if numnonoptargs == 2:
-            try:
+            if 'axis' in kwargnames:
                 self.data = func(self.getaxis(axis),self.data,axis=thisaxis)
-            except TypeError:
+            if 'axes' in kwargnames:
                 self.data = func(self.getaxis(axis),self.data,axes=thisaxis)
+            else:
+                raise ValueError("Your function doesn't have axis or axes as a keyword argument!")
         else:
-            if numnonoptargs == 1 or numvarargs>0:
-                try:
+            if numnonoptargs == 1:
+                paramnames = [k for k in func_sig.parameters.keys()]
+                if len(paramnames) == 1:
+                    if func_sig.parameters[paramnames[0]].kind == Parameter.VAR_POSITIONAL:
+                        try:
+                            self.data = func(self.data,axis=thisaxis)
+                        except:
+                            self.data = func(self.data,axes=thisaxis)
+                if 'axis' in kwargnames:
                     self.data = func(self.data,axis=thisaxis)
-                except TypeError:
+                if 'axes' in kwargnames:
                     self.data = func(self.data,axes=thisaxis)
+                else:
+                    raise ValueError("Your function doesn't have axis or axes as a keyword argument!")
             else:
                 raise ValueError('you passed a function to run_nopop that doesn\'t'
                         'have either one or two arguments!')
