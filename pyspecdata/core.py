@@ -4410,13 +4410,18 @@ class nddata (object):
         temp = list(self.data.shape)
         temp[thisaxis] = 1
         numnonoptargs = len(getargspec(func).args)
+        numvarargs = getargspec(func).varargs
+        if numvarargs is None:
+            numvarargs = 0
+        else:
+            numvarargs = len(numvarargs)
         if numnonoptargs == 2:
             try:
                 self.data = func(self.getaxis(axis),self.data,axis=thisaxis)
             except TypeError:
                 self.data = func(self.getaxis(axis),self.data,axes=thisaxis)
         else:
-            if numnonoptargs == 1 or len(getargspec(func).args)>0:
+            if numnonoptargs == 1 or len(getargspec(func).varargs)>0:
                 try:
                     self.data = func(self.data,axis=thisaxis)
                 except TypeError:
