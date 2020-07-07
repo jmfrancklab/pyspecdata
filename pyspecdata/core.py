@@ -4416,7 +4416,7 @@ class nddata (object):
             except TypeError:
                 self.data = func(self.getaxis(axis),self.data,axes=thisaxis)
         else:
-            if numnonoptargs == 1 or len(getargspec(func).varargs)>0:
+            if numnonoptargs == 1 or len(getargspec(func).args)>0:
                 try:
                     self.data = func(self.data,axis=thisaxis)
                 except TypeError:
