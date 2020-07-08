@@ -4417,7 +4417,7 @@ class nddata (object):
         temp = list(self.data.shape)
         temp[thisaxis] = 1
         all_args = func.__code__.co_argcount
-        if myfuction.__defaults__ is not None:
+        if func.__defaults__ is not None:
             kwargs = len(func.__defaults__)
         else:
             kwargs = 0
