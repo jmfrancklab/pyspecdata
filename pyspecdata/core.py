@@ -4409,19 +4409,19 @@ class nddata (object):
                 "in the list of axes",self.dimlabels))
         temp = list(self.data.shape)
         temp[thisaxis] = 1
-        numnonoptargs = len(getargspec(func).args)
-        numvarargs = getargspec(func).varargs
-        if numvarargs is None:
-            numvarargs = 0
+        all_args = func.__code__.co_argcount
+        if func.__defaults__ is not None:
+            kwargs = len(func.__defaults__)
         else:
-            numvarargs = len(numvarargs)
-        if numnonoptargs == 2:
+            kwargs = 0
+        numargs = all_args - kwargs
+        if numargs == 2:
             try:
                 self.data = func(self.getaxis(axis),self.data,axis=thisaxis)
             except TypeError:
                 self.data = func(self.getaxis(axis),self.data,axes=thisaxis)
         else:
-            if numnonoptargs == 1 or numvarargs>0:
+            if numargs == 1 or numargs>0:
                 try:
                     self.data = func(self.data,axis=thisaxis)
                 except TypeError:
