@@ -132,7 +132,7 @@ def apply_oom(average_oom,numbers,prev_label=''):
     new_label: str
         prev_label is prefixed by the appropriate SI prefix
     """
-    average_oom = int(average_oom/3.0)*3
+    average_oom = int(average_oom/3)*3
     oom_names =   ['T' , 'G' , 'M' , 'k' , '' , 'm' , '\\mu ' , 'n' , 'p']
     oom_values = r_[12 , 9   , 6   , 3   , 0  , -3  , -6 , -9  , -12]
     eq = oom_values == average_oom
@@ -3293,7 +3293,7 @@ class nddata (object):
                         raise ValueError(strm("Your",thisaxis,"axis doesn't seem to have any sensible values!"))
                     #{{{ find the average order of magnitude, rounded down to the nearest power of 3
 
-                    average_oom = log10(abs(data_to_test))/3.
+                    average_oom = log10(abs(data_to_test))/3
                     logger.debug(strm("for axis: dtype",data_to_test.dtype))
                     logger.debug(strm("for axis: dtype",data_to_test))
                     logger.debug(strm("for axis: oom:",average_oom))
