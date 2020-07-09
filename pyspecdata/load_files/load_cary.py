@@ -4,8 +4,9 @@ taken from `here <https://github.com/Yohko/importtool/blob/master/Igor%20Procedu
 
 """
 from numpy import *
+from ..general_functions import strm
 from ..core import nddata
-import os
+import os, logging
 
 def load_bindata(fp,param):
     x_mode_rep = "nm;Å;cm-1;°".split(';')
@@ -16,18 +17,18 @@ def load_bindata(fp,param):
     y_unit = y_mode_rep[int(param['y_mode'])]
     # I'm not creating the spec_counter variable that is is
     #tmps = str(param['spec_counter'])+"_"+param['spectrum_name']+"_"+x_unit
-    print("about to read",param['points'],"double points, with x units",x_unit,"and y unit",y_unit)
+    logging.debug(strm("about to read",param['points'],"double points, with x units",x_unit,"and y unit",y_unit))
     current_pos = fp.tell()
-    print("inside bindata, position is",fp.tell())
+    logging.debug(strm("inside bindata, position is",fp.tell()))
     #for j in range(500):
     #    fp.seek(current_pos+j,0)
     #    result = fromfile(fp, dtype='<f4', count=1)
     #    if result>1 and result<1000:
-    #        print("try",j,"offset",result)
+    #        logging.debug(strm("try",j,"offset",result))
     retval = fromfile(fp, dtype=[('x','<f4'),('y','<f4')], count=param['points'])
-    #print(retval)
+    #logging.debug(retval)
     retval = nddata(retval['y'],'wavelength' ).setaxis('wavelength',retval['x']
-            ).set_units('wavelength',x_unit).set_units('wavelength',y_unit)
+            ).set_units('wavelength',x_unit).set_units(y_unit)
     return retval
 def load_header(fp, param):
     retval = fromfile(fp, dtype=[
@@ -61,14 +62,14 @@ def load_header(fp, param):
 
 def load_cary(filename):
     filesize = os.stat(filename).st_size
-    print("filesize",filesize)
+    logging.debug(strm("filesize",filesize))
     param = {}
     with open(filename,'rb') as fp:
         # line 92
         thislen = fromfile(fp,dtype='<u1', count=1).item()
-        print("thislen is",thislen)
+        logging.debug(strm("thislen is",thislen))
         magic = fromfile(fp,dtype=f'a{thislen}', count=1).item()
-        print("magic is",magic)
+        logging.debug(strm("magic is",magic))
         _ = fromfile(fp,dtype=f'a{61-thislen}', count=1)
         marker = fp.tell()
         fp.seek(0,2) # seek to end
@@ -77,23 +78,27 @@ def load_cary(filename):
         alldata = []
         while fp.tell() < file_end-4:
             param['blockoffset'] = fp.tell()
-            print("blockoffset",param['blockoffset'])
+            logging.debug(strm("blockoffset",param['blockoffset']))
             # line 100
             thislen = fromfile(fp,dtype='<u4', count=1).item()
             param['Tstore_type'] = fromfile(fp,dtype=f'a{thislen}', count=1).item().decode('ascii')
-            print("Tstore_type \"%s\""%param['Tstore_type'])
+            logging.debug("Tstore_type \"%s\""%param['Tstore_type'])
             # line 102
             param['blocklen'] = fromfile(fp,dtype='<u4', count=1).item()
             if param['Tstore_type'] == "TContinuumStore":
                 # line 106
                 param = load_header(fp, param)
-                print("param:",param)
+                logging.debug(strm("param:",param))
                 data = load_bindata(fp, param)
                 data.name(param['spectrum_name'])
-                print("at this point, we are at",
+                logging.debug(strm("at this point, we are at",
                         fp.tell(),"relative to end of block",
                         param['blockoffset']+param['blocklen'],
-                        "and end of file",file_end)
+                        "and end of file",file_end))
                 fp.seek(param['blockoffset']+param['blocklen'], 0)
             alldata.append(data)
-        return alldata
+    retval = {}
+    for j in alldata:
+        assert j.name() not in retval.keys(), "You have a duplicate spectrum name!!!"
+        retval[j.name()] = j
+    return retval
