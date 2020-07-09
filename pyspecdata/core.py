@@ -3525,14 +3525,30 @@ class nddata (object):
     #}}}
     #}}}
     #{{{ arithmetic
+    def along(self,dimname):
+        """Specifies the dimension for the next matrix
+        multiplication (represents the rows/columns)."""
+        self._matmul_along = dimname
+        return self
     def dot(self,arg):
-        """Tensor dot of self with arg -- dot all matching dimension labels.  This can be used to do matrix multiplication, but note that the order of doesn't matter, since the dimensions that are contracted are determined by matching the dimension names, not the order of the dimension.
+        """This will perform a dot product or a matrix multiplication.
+        If one dimension in ``arg`` matches that in ``self``,
+        it will dot along that dimension
+        (take a matrix multiplication where that dimension represents the columns of ``self`` and the rows of ``arg``)
+
+        Note that if you have your dimensions named "rows" and "columns", this
+        will be very confusing, but if you have your dimensions named in terms
+        of the vector basis they are defined/live in, this makes sense.
+
+        If there are zero or no matching dimensions, then use
+        :func:`~pyspecdata.nddata.along` to specify the dimensions for matrix
+        multiplication / dot product.
 
         >>> a = nddata(r_[0:9],[3,3],['a','b'])
         >>> b = nddata(r_[0:3],'b')
         >>> print a.C.dot(b)
         >>> print a.data.dot(b.data)
-
+)
         >>> a = nddata(r_[0:27],[3,3,3],['a','b','c'])
         >>> b = nddata(r_[0:9],[3,3],['a','b'])
         >>> print a.C.dot(b)
@@ -3542,32 +3558,67 @@ class nddata (object):
         >>> b = nddata(r_[0:9],[3,3],['a','d'])
         >>> print a.C.dot(b)
         >>> print tensordot(a.data,b.data,axes=((0),(0)))
+
+        .. literalinclude:: ../examples/matrix_mult.py
         """
+        if hasattr(self,'_matmul_along'):
+            dot_dim_A = self._matmul_along
+            if hasattr(arg,'_matmul_along'):
+                dot_dim_B = arg._matmul_along
+            else:
+                dot_dim_B = dot_dim_A
+        elif hasattr(arg,'_matmul_along'):
+            dot_dim_B = arg._matmul_along
+            dot_dim_A = dot_dim_B
+        else:
+            matching_dims = set(self.dimlabels) & set(arg.dimlabels)
+            if len(matching_dims) == 1:
+                dot_dim_A = list(matching_dims)[0]
+                dot_dim_B = dot_dim_A
+            else:
+                raise ValueError("I can't determine the dimension for matrix"
+                        " multiplication!  Either have only one matching dimension,"
+                        " or use .along(")
+        # {{{ unset the "along" setting
+        if hasattr(self,'_matmul_along'):
+            del(self._matmul_along)
+        if hasattr(arg,'_matmul_along'):
+            del(arg._matmul_along)
+        # }}}
+        if dot_dim_B != dot_dim_A:
+            arg = arg.C.rename(dot_dim_B,dot_dim_A)
         A,B = self.aligndata(arg)
-        matching_dims = list(set(self.dimlabels) & set(arg.dimlabels))
-        assert len(matching_dims) > 0, "no matching dimensions!"
         # {{{ store the dictionaries for later use
         axis_coords_dict = A.mkd(A.axis_coords)
         axis_units_dict = A.mkd(A.axis_coords_units)
         axis_coords_error_dict = A.mkd(A.axis_coords_error)
         # }}}
         # manipulate "self" directly
-        self.dimlabels = [j for j in A.dimlabels if j not in matching_dims]
-        match_idx = [A.axn(j) for j in matching_dims]
+        self.dimlabels = [j for j in A.dimlabels if j != dot_dim_A]
         if (self.get_error() is not None) or (arg.get_error() is not None):
             raise ValueError("we plan to include error propagation here, but not yet provided")
-        self.data = tensordot(A.data,B.data,axes=(match_idx,match_idx))
+        ax_idx = A.axn(dot_dim_A) # should be the same for both, since they are aligned
         logger.debug(strm("shape of A is",ndshape(A)))
         logger.debug(strm("shape of B is",ndshape(B)))
-        logger.debug(strm("matching_dims are",matching_dims))
-        newsize = [(A.data.shape[j] if A.data.shape[j] != 1 else B.data.shape[j])
-                for j in range(len(A.data.shape)) if A.dimlabels[j] not in matching_dims]
-        self.data = self.data.reshape(newsize)
+        A.data = A.data[...,newaxis]
+        B.data = B.data[...,newaxis]
+        logger.debug(strm("add a new axis",A.data.shape))
+        logger.debug(strm("add a new axis",B.data.shape))
+        A.data = moveaxis(A.data,ax_idx,-1) # columns position
+        B.data = moveaxis(B.data,ax_idx,-2) # row position
+        logger.debug(strm("after movement",A.data.shape))
+        logger.debug(strm("after movement",B.data.shape))
+        self.data = matmul(A.data,B.data)
+        logger.debug(strm("after mult",self.data.shape))
+        self.data = self.data[...,0,0]
+        logger.debug(strm("remove extras",self.data.shape))
         # {{{ use the dictionaries to reconstruct the metadata
         self.axis_coords = self.fld(axis_coords_dict)
         self.axis_coords_units = self.fld(axis_units_dict)
         self.axis_coords_error = self.fld(axis_coords_error_dict)
         # }}}
+        print("self.data.shape",self.data.shape)
+        print("ndshape",ndshape(self))
         return self
     def __add__(self,arg):
         if isscalar(arg):
@@ -4553,14 +4604,19 @@ class nddata (object):
             distribution (the "fit" dimension);
             *e.g.* if you are regularizing a set of functions
             :math:`\exp(-\tau*R_1)`, then this is :math:`\tau`
-        newaxis_dict: dict or nddata
-            a dictionary whose key is the name of the "fit" dimension
-            (:math:`R_1` in the example above)
-            and whose value is an array with the new axis labels.
-            OR
+        newaxis_dict: nddata or dict
             this can be a 1D nddata
             -- if it has an axis, the axis will be used to create the
             fit axis; if it has no axis, the data will be used
+
+            OR, if dimname is a tuple of 2 dimensions indicating a 2D ILT, this
+            should also be a tuple of 2 nddata, representing the two axes
+
+            OR (only for 1D or 1.5D ILT),
+            a dictionary whose key is the name of the "fit" dimension
+            (:math:`R_1` in the example above)
+            and whose value is an array with the new axis labels.
+
         kernel_func: function
             a function giving the kernel for the regularization.
             The first argument is the "data" variable
@@ -4591,6 +4647,30 @@ class nddata (object):
             each kernel is returned in properties of the nddata called,
             respectively, "s1" and "s2". 
         """
+        # {{{ type checking
+        def demand_real(x, addtxt=''):
+            if not x.dtype == float64:
+                if x.dtype == complex128:
+                    raise ValueError("you are not allows to pass nnls complex data:\nif it makes sense for you, try yourdata.real.nnls( where you now have yourdata.nnls("+'\n'+addtxt)
+                else:
+                    raise ValueError("I expect double-precision floating point (float64), but you passed me data of dtype "+str(x.dtype)+'\n'+addtxt)
+        demand_real(self.data)
+        if type(dimname) is str:
+            testdim = [dimname]
+        else:
+            testdim = dimname
+        for j in testdim:
+            demand_real(self.getaxis(dimname),"(this message pertains to the %s axis)"%dimname)
+        if type(newaxis_dict) is dict:
+            for k,v in newaxis_dict.items():
+                demand_real(v,"(this message pertains to the new %s axis)"%str(k))
+        else:
+            for j in newaxis_dict:
+                if len(j.dimlabels) == 1 and j.getaxis(j.dimlabels[0]) is not None:
+                    demand_real(j.getaxis(j.dimlabels[0]),"(this message pertains to the new %s axis pulled from the second argument's axis)"%str(j.dimlabels[0]))
+                else:
+                    demand_real(j.data,"(this message pertains to the new %s axis pulled from the second argument's data)"%str(j.dimlabels[0]))
+        # }}}
         logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?'))
         tuple_syntax = False
         if isinstance(dimname, tuple):
@@ -4604,9 +4684,9 @@ class nddata (object):
             if isinstance(newaxis_dict[0],nddata) and isinstance(newaxis_dict[1],nddata):
                 assert len(newaxis_dict[0].dimlabels) and len(newaxis_dict[1].dimlabels) == 1, "currently only set up for 1D"
         elif isinstance(newaxis_dict, dict):
-            assert len(newaxis_dict) == 1, "currently only set up for 1D"
+            assert len(newaxis_dict) == 1, "currently dictionary only set up for 1D"
         elif isinstance(newaxis_dict,nddata):
-            assert len(newaxis_dict.dimlabels) == 1, "currently only set up for 1D"
+            assert len(newaxis_dict.dimlabels) == 1, "the axis argument must be 1D"
         else:
             raise ValueError("second argument is dictionary or nddata with new axis, or tuple of nddatas with new axes")
         if isinstance(kernel_func, tuple):
@@ -4822,20 +4902,14 @@ class nddata (object):
             logger.debug(strm('K dimlabels',K.dimlabels,'and raw shape',K.data.shape))
             self.reorder(dimname, first=False) # make the dimension we will be regularizing innermost
             logger.debug(strm('shape of the data is',ndshape(self),'is it fortran ordered?'))
-            data_fornnls = self.data.real
+            data_fornnls = self.data
+            demand_real(data_fornnls)
             if len(data_fornnls.shape) > 2:
                 data_fornnls = data_fornnls.reshape((prod(
                     data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
             logger.debug(strm('shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
-            print("*** *** ***")
             if l == 'BRD':
-                print("*** *** ***")
-                print("*** *** ***")
-                print("*** *** ***")
-                print("FOUND BRD")
-                print("*** *** ***")
-                print("*** *** ***")
-                print("*** *** ***")
+                logger.debug("FOUND BRD")
                 def chi(x_vec,val):
                     return 0.5*dot(x_vec.T,dot(dd_chi(G(x_vec),val**2),x_vec)) - dot(x_vec.T,data_fornnls[:,newaxis])
                 def d_chi(x_vec,val):
@@ -4912,7 +4986,6 @@ class nddata (object):
                 print("Here 2")
             else:
                 retval, residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=l)
-            print("*** *** ***")
             #retval, residual = this_nnls.nnls_regularized(K.data, data_fornnls, l=l)
             logger.debug(strm("coming back from fortran, residual type is",type(residual))+ strm(residual.dtype if isinstance(residual, ndarray) else ''))
             newshape = []
@@ -6223,6 +6296,11 @@ class nddata (object):
             return retfun
         elif arg == 'shape':
             return ndshape(self)
+        elif arg == 'isfortran':
+            raise ValueError("you tried to call isfortran on an nddata object --"
+            " this probably means you're doing something wrong -- possibly that"
+            " you are passing an nddata object when you should be passing a"
+            " standard numpy ndarray")
         else:
             return super().__getattribute__(arg)
     @property
