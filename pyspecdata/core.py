@@ -115,7 +115,8 @@ gammabar_H = 4.258e7
 gammabar_e = 2.807e10 # this is for a nitroxide
 #}}}
 def apply_oom(average_oom,numbers,prev_label=''):
-    """scale numbers by the order of magnitude average_oom and change the name of the units accordingly
+    """scale numbers by the order of magnitude average_oom and change the
+    name of the units by adding the appropriate SI prefix
 
     Parameters
     ----------
@@ -132,7 +133,6 @@ def apply_oom(average_oom,numbers,prev_label=''):
     new_label: str
         prev_label is prefixed by the appropriate SI prefix
     """
-    #average_oom = int(average_oom/3)*3
     oom_names =   ['T' , 'G' , 'M' , 'k' , '' , 'm' , '\\mu ' , 'n' , 'p']
     oom_values = r_[12 , 9   , 6   , 3   , 0  , -3  , -6     , -9  , -12]
     eq = oom_values == average_oom
