@@ -4877,9 +4877,17 @@ class nddata (object):
                     fval = d_chi(input_vec,val)
                     return (input_vec + dot(linalg.inv(fder),fval))
                 def mod_BRD(guess,maxiter=20):
+                    print("Here 3")
                     smoothing_param = guess
                     alpha_converged = False
                     for iter in range(maxiter):
+                        print("Here 4")
+                        print("*** *** ***")
+                        print("*** *** ***")
+                        print(shape(K.data))
+                        print(shape(data_fornnls))
+                        print("*** *** ***")
+                        print("*** *** ***")
                         logger.debug(strm('ITERATION NO.',iter))
                         logger.debug(strm('CURRENT LAMBDA',smoothing_param))
                         retval,residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=smoothing_param)
@@ -4899,7 +4907,9 @@ class nddata (object):
                         if iter == maxiter-1:
                             logger.debug(strm('DID NOT CONVERGE.'))
                     return lambda_update
+                print("Here 1")
                 retval, residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=mod_BRD(guess=1.0))
+                print("Here 2")
             else:
                 retval, residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=l)
             print("*** *** ***")
