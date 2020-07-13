@@ -116,8 +116,23 @@ gammabar_e = 2.807e10 # this is for a nitroxide
 #}}}
 def apply_oom(average_oom,numbers,prev_label=''):
     """scale numbers by the order of magnitude average_oom and change the
-    label prev_label by adding the appropriate SI prefix"""
-    average_oom = int(average_oom/3.0)*3
+    name of the units by adding the appropriate SI prefix
+
+    Parameters
+    ----------
+    average_oom: int or float
+        the average order of magnitude to use
+    numbers: ndarray
+        The numbers to be scaled by average_oom.
+        The array is modified in-place.
+    prev_label: str
+        a string representing the units
+
+    Returns
+    -------
+    new_label: str
+        prev_label is prefixed by the appropriate SI prefix
+    """
     oom_names =   ['T' , 'G' , 'M' , 'k' , '' , 'm' , '\\mu ' , 'n' , 'p']
     oom_values = r_[12 , 9   , 6   , 3   , 0  , -3  , -6     , -9  , -12]
     eq = oom_values == average_oom
@@ -130,7 +145,15 @@ def apply_oom(average_oom,numbers,prev_label=''):
             raise ValueError(strm("you passed",average_oom,"which I can't find a prefix for"))
     else:
         oom_index = nonzero(eq)[0][0]
-    numbers[:] /= 10.**oom_values[oom_index]
+    if numbers.dtype in ['int32','int64']:
+        # this is not necessary unless we have an integer type
+        logger.warning("you are trying to determine the SI prefix of a"
+                "set of numbers that are described by integers.  This is"
+                "probably not a good idea!!")
+        new_values = numbers / 10.**oom_values[oom_index]
+        numbers[:] = new_values.astype(numbers.dtype)
+    else:
+        numbers[:] /= 10.**oom_values[oom_index]
     return oom_names[oom_index]+prev_label
 def mybasicfunction(first_figure = None):
     r'''this gives the format for doing the image thing
@@ -5671,6 +5694,8 @@ class nddata (object):
             allow for smooshing to determine a new axes that is standard
             (not a structured array) and that increases linearly.
         '''
+        not_present = set(dimstocollapse) - set(self.dimlabels)
+        if len(not_present) > 0: raise ValueError(strm(not_present,"was not found in the list of dimensions",self.dimlabels))
         #{{{ first, put them all at the end, in order given here
         retained_dims = list(self.dimlabels)
         logger.debug(strm("old order",retained_dims))
@@ -5727,6 +5752,8 @@ class nddata (object):
         axes_with_labels = [j for j in dimstocollapse if self.getaxis(j) is not None] # specifically, I am only concerned with the ones I am collapsing that have labels
         if noaxis:
             logger.debug('noaxis was specified')
+            axis_coords_dict[dimname] = None
+            axis_coords_error_dict[dimname] = None
         else:
             logger.debug('starting construction of the smooshed axis')
             axes_with_labels_haserror = [self.get_error(j) is not None for j in axes_with_labels]
@@ -5767,14 +5794,12 @@ class nddata (object):
                 multidim_axis_label = multidim_axis_label.flatten() # then flatten the axis
                 logger.debug(strm("shape of multidim_axis_label is now",multidim_axis_label.shape))
                 logger.debug(strm("multidim_axis_label is:\n",repr(multidim_axis_label)))
-            # }}}
-        #{{{ update axis dictionary with the new info
-        if noaxis:
-            axis_coords_dict[dimname] = None
-            axis_coords_error_dict[dimname] = None
-        else:
+            else:
+                raise ValueError("You requested that smoosh generate an axis, but I don't know what dtype to assign to it (what fields to use).  This is likely because you don't have axes assigned to the dimensions you're trying to smoosh.  Consider calling smoosh with noaxis=True, instead")
             axis_coords_dict[dimname] = multidim_axis_label
             axis_coords_error_dict[dimname] = multidim_axis_error
+            # }}}
+        #{{{ update axis dictionary with the new info
         logger.debug(strm("end up with axis_coords_dict (%d)"%len(axis_coords_dict),axis_coords_dict))
         logger.debug(strm("end up with axis_coords_error_dict (%d)"%len(axis_coords_error_dict),axis_coords_error_dict))
         #}}}
@@ -6537,6 +6562,30 @@ class nddata (object):
         you want to put it -- it does **not** include the directory where
         the file lives.
         The directory can be passed to the `directory` argument.
+
+        You can use either :func:`~pyspecdata.find_file` or
+        :func:`~pyspecdata.nddata_hdf5` to read the data, as shown below.
+        When reading this, please note that HDF5 files store *multiple* datasets,
+        and each is named (here, the name is `test_data`).
+
+        .. code-block:: python
+
+            from pyspecdata import *
+            init_logging('debug')
+            a = nddata(r_[0:5:10j], 'x')
+            a.name('test_data')
+            try:
+                a.hdf5_write('example.h5',getDATADIR(exp_type='Sam'))
+            except:
+                print("file already exists, not creating again -- delete the file or node if wanted")
+            # read the file by the "raw method"
+            b = nddata_hdf5('example.h5/test_data',
+                    getDATADIR(exp_type='Sam'))
+            print("found data:",b)
+            # or use the find file method
+            c = find_file('example.h5', exp_type='Sam',
+                    expno='test_data')
+            print("found data:",c)
         
         Parameters
         ----------

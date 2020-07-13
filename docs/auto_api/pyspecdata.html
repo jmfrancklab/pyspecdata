@@ -1759,6 +1759,28 @@ If several such matches are found, the error message is informative.</p>
 you want to put it – it does <strong>not</strong> include the directory where
 the file lives.
 The directory can be passed to the <cite>directory</cite> argument.</p>
+<p>You can use either <a class="reference internal" href="#pyspecdata.find_file" title="pyspecdata.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_file()</span></code></a> or
+<a class="reference internal" href="#pyspecdata.nddata_hdf5" title="pyspecdata.nddata_hdf5"><code class="xref py py-func docutils literal notranslate"><span class="pre">nddata_hdf5()</span></code></a> to read the data, as shown below.
+When reading this, please note that HDF5 files store <em>multiple</em> datasets,
+and each is named (here, the name is <cite>test_data</cite>).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">init_logging</span><span class="p">(</span><span class="s1">&#39;debug&#39;</span><span class="p">)</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">:</span><span class="mi">10</span><span class="n">j</span><span class="p">],</span> <span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s1">&#39;test_data&#39;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">hdf5_write</span><span class="p">(</span><span class="s1">&#39;example.h5&#39;</span><span class="p">,</span><span class="n">getDATADIR</span><span class="p">(</span><span class="n">exp_type</span><span class="o">=</span><span class="s1">&#39;Sam&#39;</span><span class="p">))</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;file already exists, not creating again -- delete the file or node if wanted&quot;</span><span class="p">)</span>
+<span class="c1"># read the file by the &quot;raw method&quot;</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">nddata_hdf5</span><span class="p">(</span><span class="s1">&#39;example.h5/test_data&#39;</span><span class="p">,</span>
+        <span class="n">getDATADIR</span><span class="p">(</span><span class="n">exp_type</span><span class="o">=</span><span class="s1">&#39;Sam&#39;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;found data:&quot;</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+<span class="c1"># or use the find file method</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">find_file</span><span class="p">(</span><span class="s1">&#39;example.h5&#39;</span><span class="p">,</span> <span class="n">exp_type</span><span class="o">=</span><span class="s1">&#39;Sam&#39;</span><span class="p">,</span>
+        <span class="n">expno</span><span class="o">=</span><span class="s1">&#39;test_data&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;found data:&quot;</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+</pre></div>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -3766,7 +3788,7 @@ This can be used in combination with wrapviewer() and latexmk by using a <code c
 <dl class="py function">
 <dt id="pyspecdata.latexscripts.wrapviewer">
 <code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">wrapviewer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.wrapviewer" title="Permalink to this definition">¶</a></dt>
-<dd><p>see <a class="reference internal" href="../latexscripts.html#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p>
+<dd><p>see <a class="reference internal" href="#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p>
 </dd></dl>
 
 </div>
@@ -6116,7 +6138,7 @@ Whenever it finds a file in the current directory, it will not return data from 
 (For a more thorough description, see <a class="reference internal" href="#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a>).</p>
 <p>Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
 (so that you can make sure they are properly synced to the cloud, etc.).</p>
-<p>It calls <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
+<p>It calls <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
 <p>If it can’t find any files matching the criterion, it logs the missing file and throws an exception.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -6161,22 +6183,22 @@ it sets <cite>postproc_type</cite> to the value of
 This, in turn, is used to choose the type of post-processing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">dimname</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">return_acq</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">add_sizes</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">add_dims</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">use_sweep</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">indirect_dimlabels</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 </dl>
 </p></li>
@@ -7669,6 +7691,28 @@ If several such matches are found, the error message is informative.</p>
 you want to put it – it does <strong>not</strong> include the directory where
 the file lives.
 The directory can be passed to the <cite>directory</cite> argument.</p>
+<p>You can use either <a class="reference internal" href="#pyspecdata.find_file" title="pyspecdata.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_file()</span></code></a> or
+<a class="reference internal" href="#pyspecdata.nddata_hdf5" title="pyspecdata.nddata_hdf5"><code class="xref py py-func docutils literal notranslate"><span class="pre">nddata_hdf5()</span></code></a> to read the data, as shown below.
+When reading this, please note that HDF5 files store <em>multiple</em> datasets,
+and each is named (here, the name is <cite>test_data</cite>).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">init_logging</span><span class="p">(</span><span class="s1">&#39;debug&#39;</span><span class="p">)</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">:</span><span class="mi">10</span><span class="n">j</span><span class="p">],</span> <span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s1">&#39;test_data&#39;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">hdf5_write</span><span class="p">(</span><span class="s1">&#39;example.h5&#39;</span><span class="p">,</span><span class="n">getDATADIR</span><span class="p">(</span><span class="n">exp_type</span><span class="o">=</span><span class="s1">&#39;Sam&#39;</span><span class="p">))</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;file already exists, not creating again -- delete the file or node if wanted&quot;</span><span class="p">)</span>
+<span class="c1"># read the file by the &quot;raw method&quot;</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">nddata_hdf5</span><span class="p">(</span><span class="s1">&#39;example.h5/test_data&#39;</span><span class="p">,</span>
+        <span class="n">getDATADIR</span><span class="p">(</span><span class="n">exp_type</span><span class="o">=</span><span class="s1">&#39;Sam&#39;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;found data:&quot;</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+<span class="c1"># or use the find file method</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">find_file</span><span class="p">(</span><span class="s1">&#39;example.h5&#39;</span><span class="p">,</span> <span class="n">exp_type</span><span class="o">=</span><span class="s1">&#39;Sam&#39;</span><span class="p">,</span>
+        <span class="n">expno</span><span class="o">=</span><span class="s1">&#39;test_data&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;found data:&quot;</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+</pre></div>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
