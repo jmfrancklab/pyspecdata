@@ -99,6 +99,8 @@ def load_cary(filename):
             alldata.append(data)
     retval = {}
     for j in alldata:
-        assert j.name() not in retval.keys(), "You have a duplicate spectrum name!!!"
+        while j.name() in retval.keys():
+            logging.warn("You have a duplicate spectrum name!!! -- renaming it from %s to %s_rep"%(j.name(),j.name()))
+            j.name(j.name()+'_rep')
         retval[j.name()] = j
     return retval
