@@ -34,3 +34,14 @@ with figlist_var() as fl:
                 label='%s, subtracted'%k)
     ylabel(d.get_units())
     gridandtick(gca())
+    fl.next('checking slicing')
+    # just checking that data can be manipulated in the same way, even though
+    # it comes from a placeholder
+    for k,d in subdata.items():
+        thiscolor = next(color_cycle)
+        d['wavelength':(300,350)] = 0
+        fl.plot(d,
+                alpha=0.5,
+                color=thiscolor,
+                label=k)
+    gridandtick(gca())
