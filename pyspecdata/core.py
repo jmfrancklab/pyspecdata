@@ -4655,17 +4655,19 @@ class nddata (object):
                 else:
                     raise ValueError("I expect double-precision floating point (float64), but you passed me data of dtype "+str(x.dtype)+'\n'+addtxt)
         demand_real(self.data)
+        # make list from provided dimension
         if type(dimname) is str:
             testdim = [dimname]
         else:
             testdim = dimname
+        # make sure each dimension is real-valued
         for j in testdim:
             demand_real(self.getaxis(dimname),"(this message pertains to the %s axis)"%dimname)
         if type(newaxis_dict) is dict:
             for k,v in newaxis_dict.items():
                 demand_real(v,"(this message pertains to the new %s axis)"%str(k))
         else:
-            for j in newaxis_dict:
+            for j in [newaxis_dict]:
                 if len(j.dimlabels) == 1 and j.getaxis(j.dimlabels[0]) is not None:
                     demand_real(j.getaxis(j.dimlabels[0]),"(this message pertains to the new %s axis pulled from the second argument's axis)"%str(j.dimlabels[0]))
                 else:
