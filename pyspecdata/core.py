@@ -4612,11 +4612,6 @@ class nddata (object):
             OR, if dimname is a tuple of 2 dimensions indicating a 2D ILT, this
             should also be a tuple of 2 nddata, representing the two axes
 
-            OR (only for 1D or 1.5D ILT),
-            a dictionary whose key is the name of the "fit" dimension
-            (:math:`R_1` in the example above)
-            and whose value is an array with the new axis labels.
-
         kernel_func: function
             a function giving the kernel for the regularization.
             The first argument is the "data" variable
@@ -4656,76 +4651,44 @@ class nddata (object):
                     raise ValueError("I expect double-precision floating point (float64), but you passed me data of dtype "+str(x.dtype)+'\n'+addtxt)
         demand_real(self.data)
         # make list from provided dimension
-        if type(dimname) is str:
-            testdim = [dimname]
+        if type(dimname) is str and type(newaxis_dict) is nddata:
+            dimname = [decimation]
+            newaxis_dict = [newaxis_dict]
+        elif type(dimname) is list and type(newaxis_dict) is list:
+            assert len(dimname) == len(newaxis_dict)
+            assert len(dimname) in [1,2]
         else:
-            testdim = dimname
+            raise ValueError(strm("I didn't understand what you specified for the new axes (dimension:",
+                dimname,"and new axes",newaxis_dict))
         # make sure each dimension is real-valued
-        for j in testdim:
+        for j in dimname:
             demand_real(self.getaxis(j),"(this message pertains to the %s axis)"%j)
-        if type(newaxis_dict) is dict:
-            for k,v in newaxis_dict.items():
-                demand_real(v,"(this message pertains to the new %s axis)"%str(k))
-        elif type(newaxis_dict) is tuple:
-            for j in newaxis_dict:
-                if len(j.dimlabels) == 1 and j.getaxis(j.dimlabels[0]) is not None:
-                    demand_real(j.getaxis(j.dimlabels[0]),"(this message pertains to the new %s axis pulled from the second argument's axis)"%str(j.dimlabels[0]))
-                else:
-                    demand_real(j.data,"(this message pertains to the new %s axis pulled from the second argument's data)"%str(j.dimlabels[0]))
-        else:
-            for j in [newaxis_dict]:
-                print(j);quit()
-                if len(j.dimlabels) == 1 and j.getaxis(j.dimlabels[0]) is not None:
-                    demand_real(j.getaxis(j.dimlabels[0]),"(this message pertains to the new %s axis pulled from the second argument's axis)"%str(j.dimlabels[0]))
-                else:
-                    demand_real(j.data,"(this message pertains to the new %s axis pulled from the second argument's data)"%str(j.dimlabels[0]))
+        for j in newaxis_dict:
+            assert len(j.dimlabels) == 1, "must be one-dimensional, has dimensions:"+str(j.dimlabels)
+            if j.getaxis(j.dimlabels[0]) is not None:
+                demand_real(j.getaxis(j.dimlabels[0]),"(this message pertains to the new %s axis pulled from the second argument's axis)"%str(j.dimlabels[0]))
+            else:
+                demand_real(j.data,"(this message pertains to the new %s axis pulled from the second argument's data)"%str(j.dimlabels[0]))
         # }}}
         logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?'))
         tuple_syntax = False
-        if isinstance(dimname, tuple):
-            tuple_syntax = True
-            assert len(dimname) == 2, "tuple of two dimension names only"
-            assert type(dimname[0]) and isinstance(dimname[1], str), "first argument is tuple of two dimension names"
-        else:
-            assert isinstance(dimname, str), "first argument is dimension name or tuple of two dimension names"
-        if isinstance(newaxis_dict, tuple):
-            assert len(newaxis_dict) == 2, "tuple of two nddatas only"
-            if isinstance(newaxis_dict[0],nddata) and isinstance(newaxis_dict[1],nddata):
-                assert len(newaxis_dict[0].dimlabels) and len(newaxis_dict[1].dimlabels) == 1, "currently only set up for 1D"
-        elif isinstance(newaxis_dict, dict):
-            assert len(newaxis_dict) == 1, "currently dictionary only set up for 1D"
-        elif isinstance(newaxis_dict,nddata):
-            assert len(newaxis_dict.dimlabels) == 1, "the axis argument must be 1D"
-        else:
-            raise ValueError("second argument is dictionary or nddata with new axis, or tuple of nddatas with new axes")
         if isinstance(kernel_func, tuple):
             assert callable(kernel_func[0]) and callable(kernel_func[1]), "third argument is tuple of kernel functions"
         else:
             assert callable(kernel_func), "third argument is kernel function"
+            kernel_func = [kernel_func]
+        assert len(kernel_func) == len(dimname)
+        # at this point kernel_func and newaxis_dict are both lists with length
+        # equal to dimnames (length 1 for 1D and 2 for 2D)
+        #
+        twod = len(dimnames) > 1
         # construct the kernel
         # the kernel transforms from (columns) the "fit" dimension to (rows)
         # the "data" dimension
-        if tuple_syntax:
-            if isinstance(newaxis_dict[0],nddata):
-                assert len(newaxis_dict[0].dimlabels) and len(newaxis_dict[1].dimlabels) == 1, "must be 1 dimensional!!"
-                fitdim_name1 = newaxis_dict[0].dimlabels[0]
-                fitdim_name2 = newaxis_dict[1].dimlabels[0]
-                fit_axis1 = newaxis_dict[0].getaxis(fitdim_name1)
-                fit_axis2 = newaxis_dict[1].getaxis(fitdim_name2)
-                if fit_axis1 is None:
-                    fit_axis1 = newaxis_dict[0].data
-                if fit_axis2 is None:
-                    fit_axis2 = newaxis_dict[1].data
-        elif isinstance(newaxis_dict,nddata):
-            assert len(newaxis_dict.dimlabels) == 1, "must be 1 dimensional!!"
-            fitdim_name = newaxis_dict.dimlabels[0]
-            fit_axis = newaxis_dict.getaxis(fitdim_name)
-            if fit_axis is None:
-                fit_axis = newaxis_dict.data
-        else:
-            fitdim_name = list(newaxis_dict.keys())[0]
-            logger.debug(strm('shape of fit dimension is',newaxis_dict[fitdim_name].shape))
-            fit_axis = newaxis_dict[fitdim_name]
+        fitdim_names = [j.dimlabels[0] for j in newaxis_dict]
+        fitaxis = [j.getaxis(fitdim_names[j]) for j in range(len(newaxis_dict))
+                if j.getaxis(fitdim_names[j]) is not None
+                else j.data]
         if tuple_syntax:
             fit_axis1 = nddata(fit_axis1,fitdim_name1)
             fit_axis2 = nddata(fit_axis2,fitdim_name2)
