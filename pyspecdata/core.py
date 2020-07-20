@@ -4662,12 +4662,19 @@ class nddata (object):
             testdim = dimname
         # make sure each dimension is real-valued
         for j in testdim:
-            demand_real(self.getaxis(dimname),"(this message pertains to the %s axis)"%dimname)
+            demand_real(self.getaxis(j),"(this message pertains to the %s axis)"%j)
         if type(newaxis_dict) is dict:
             for k,v in newaxis_dict.items():
                 demand_real(v,"(this message pertains to the new %s axis)"%str(k))
+        elif type(newaxis_dict) is tuple:
+            for j in newaxis_dict:
+                if len(j.dimlabels) == 1 and j.getaxis(j.dimlabels[0]) is not None:
+                    demand_real(j.getaxis(j.dimlabels[0]),"(this message pertains to the new %s axis pulled from the second argument's axis)"%str(j.dimlabels[0]))
+                else:
+                    demand_real(j.data,"(this message pertains to the new %s axis pulled from the second argument's data)"%str(j.dimlabels[0]))
         else:
             for j in [newaxis_dict]:
+                print(j);quit()
                 if len(j.dimlabels) == 1 and j.getaxis(j.dimlabels[0]) is not None:
                     demand_real(j.getaxis(j.dimlabels[0]),"(this message pertains to the new %s axis pulled from the second argument's axis)"%str(j.dimlabels[0]))
                 else:
