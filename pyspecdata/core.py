@@ -4709,6 +4709,7 @@ class nddata (object):
         V1 = V1[0:s1,:]
         S1 = S1*eye(s1)
         print('Compressed SVD of K1:',[x.shape for x in (U1,S1,V1)])
+        #{{{ prepping 2D
         if twoD:
             U2 = (svd_return[1])[0]
             S2 = (svd_return[1])[1]
@@ -4735,6 +4736,7 @@ class nddata (object):
             if len(data_fornnls.shape) > 2:
                 print('Reshpaing data..')
                 data_fornnls = data_fornnls.reshape((prod(data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
+                #}}}
         if not twoD:
             K = S1 @ V1
             data_fornnls = U1.T @ self.data
@@ -4744,128 +4746,80 @@ class nddata (object):
                 data_fornnls = data_fornnls.reshape((prod(
                     data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
             print('shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error))
-        print("OK");quit()
-        if tuple_syntax:
-            fit_axis1 = nddata(fit_axis1,fitdim_name1)
-            fit_axis2 = nddata(fit_axis2,fitdim_name2)
-            data_axis1 = self.fromaxis(dimname[0])
-            data_axis2 = self.fromaxis(dimname[1])
-            data_axis1.squeeze()
-            data_axis2.squeeze()
-            data_axis1,fit_axis1 = data_axis1.aligndata(fit_axis1)
-            data_axis2,fit_axis2 = data_axis2.aligndata(fit_axis2)
-            K1 = kernel_func[0](data_axis1,fit_axis1).squeeze()
-            K1_ret = K1
-            logger.debug(strm('K1 dimlabels',K1.dimlabels,'and raw shape',K1.data.shape))
-            K2 = kernel_func[1](data_axis2,fit_axis2).squeeze()
-            K2_ret = K2
-            logger.debug(strm('K2 dimlabels',K2.dimlabels,'and raw shape',K2.data.shape))
-            # SVD and truncation of kernels
-            U1,S1,V1 = np.linalg.svd(K1.data,full_matrices=False)
-            U2,S2,V2 = np.linalg.svd(K2.data,full_matrices=False)
-            logger.debug(strm('Uncompressed SVD K1:',[x.shape for x in (U1,S1,V1)]))
-            logger.debug(strm('Uncompressed SVD K2:',[x.shape for x in (U2,S2,V2)]))
-            default_cut = 1e-2
-            s1 = where(S1 > default_cut)[0][-1]
-            s2 = where(S2 > default_cut)[0][-1]
-            U1 = U1[:,0:s1]
-            S1 = S1[0:s1]
-            V1 = V1[0:s1,:]
-            U2 = U2[:,0:s2]
-            S2 = S2[0:s2]
-            V2 = V2[0:s2,:]
-            S1 = S1*eye(s1)
-            S2 = S2*eye(s2)
-            logger.debug(strm('Compressed SVD of K1:',[x.shape for x in (U1,S1,V1)]))
-            logger.debug(strm('Compressed SVD K2:',[x.shape for x in (U2,S2,V2)]))
-            # would generate projected data here
-            # compress data here
-            K1 = S1.dot(V1)
-            K2 = S2.dot(V2)
-            K = K1[:,newaxis,:,newaxis]*K2[newaxis,:,newaxis,:]
-            K = K.reshape(K1.shape[0]*K2.shape[0],K1.shape[1]*K2.shape[1])
-            logger.debug(strm('Compressed K0, K1, and K2:',[x.shape for x in (K,K1,K2)]))
-
-            data_compressed = U1.T.dot(self.data.dot(U2))
-            logger.debug(strm('Compressed data:',data_compressed.shape))
-            # data_for_nnls = nddata(data_compressed,[dimname[0],dimname[1]])
-            # data_for_nnls.smoosh([dimname[0],dimname[1]],dimname=dimname[0])
-            data_fornnls = empty(s1*s2)
-            for s1_index in range(s1):
-                for s2_index in range(s2):
-                    temp = data_compressed[s1_index][s2_index]
-                    data_fornnls[s1_index*s2+s2_index] = temp
-            logger.debug(strm('Lexicographically ordered data:',data_fornnls.shape))
-            if len(data_fornnls.shape) > 2:
-                logger.debug(strm('Reshpaing data..'))
-                data_fornnls = data_fornnls.reshape((prod(data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
-            
-            if l == 'BRD':
-                def chi(x_vec,val):
-                    return 0.5*dot(x_vec.T,dot(dd_chi(G(x_vec),val**2),x_vec)) - dot(x_vec.T,data_fornnls[:,newaxis])
-                def d_chi(x_vec,val):
-                    return dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
-                def dd_chi(G,val):
-                    return G + (val**2)*eye(shape(G)[0])
-                def G(x_vec):
-                    return dot(K,dot(square_heaviside(x_vec),K.T))
-                def H(product):
-                    if product <= 0:
-                        return 0
-                    if product > 0:
-                        return 1
-                def square_heaviside(x_vec):
-                    diag_heavi = []
-                    for q in range(shape(K.T)[0]):
-                        pull_val = dot(K.T[q,:],x_vec)
-                        temp = pull_val[0]
-                        temp = H(temp)
-                        diag_heavi.append(temp)
-                    diag_heavi = array(diag_heavi)
-                    square_heavi = diag_heavi*eye(shape(diag_heavi)[0])
-                    return square_heavi
-                def optimize_alpha(input_vec,val):
-                    alpha_converged = False
+        #{{{ BRD code
+        if l == 'BRD':
+            def chi(x_vec,val):
+                return 0.5*dot(x_vec.T,dot(dd_chi(G(x_vec),val**2),x_vec)) - dot(x_vec.T,data_fornnls[:,newaxis])
+            def d_chi(x_vec,val):
+                return dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
+            def dd_chi(G,val):
+                return G + (val**2)*eye(shape(G)[0])
+            def G(x_vec):
+                return dot(K,dot(square_heaviside(x_vec),K.T))
+            def H(product):
+                if product <= 0:
+                    return 0
+                if product > 0:
+                    return 1
+            def square_heaviside(x_vec):
+                diag_heavi = []
+                for q in range(shape(K.T)[0]):
+                    pull_val = dot(K.T[q,:],x_vec)
+                    temp = pull_val[0]
+                    temp = H(temp)
+                    diag_heavi.append(temp)
+                diag_heavi = array(diag_heavi)
+                square_heavi = diag_heavi*eye(shape(diag_heavi)[0])
+                return square_heavi
+            def optimize_alpha(input_vec,val):
+                alpha_converged = False
+                if twoD:
                     factor = sqrt(s1*s2)
-                    T = linalg.inv(dd_chi(G(input_vec),val**2))
-                    dot_product = dot(input_vec.T,dot(T,input_vec))
-                    ans = dot_product*factor
-                    ans = ans/linalg.norm(input_vec)/dot_product
-                    tol = 1e-6
-                    if abs(ans-val**2) <= tol:
-                        logger.debug(strm('ALPHA HAS CONVERGED.'))
-                        alpha_converged = True
-                        return ans,alpha_converged
+                if not twoD:
+                    factor = sqrt(input_vec.shape[0])
+                T = linalg.inv(dd_chi(G(input_vec),val**2))
+                dot_product = dot(input_vec.T,dot(T,input_vec))
+                ans = dot_product*factor
+                ans = ans/linalg.norm(input_vec)/dot_product
+                tol = 1e-6
+                if abs(ans-val**2) <= tol:
+                    logger.debug(strm('ALPHA HAS CONVERGED.'))
+                    alpha_converged = True
                     return ans,alpha_converged
-                def newton_min(input_vec,val):
-                    fder = dd_chi(G(input_vec),val)
-                    fval = d_chi(input_vec,val)
-                    return (input_vec + dot(linalg.inv(fder),fval))
-                def mod_BRD(guess,maxiter=20):
-                    smoothing_param = guess
-                    alpha_converged = False
-                    for iter in range(maxiter):
-                        logger.debug(strm('ITERATION NO.',iter))
-                        logger.debug(strm('CURRENT LAMBDA',smoothing_param))
-                        retval,residual = this_nnls.nnls_regularized(K,data_fornnls,l=smoothing_param)
-                        f_vec = retval[:,newaxis]
-                        alpha = smoothing_param**2
-                        c_vec = dot(K,f_vec) - data_fornnls[:,newaxis]
-                        c_vec /= -1*alpha
-                        c_update = newton_min(c_vec,smoothing_param)
-                        alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
-                        lambda_update = sqrt(alpha_update[0,0])
-                        if alpha_converged:
-                            logger.debug(strm('*** OPTIMIZED LAMBDA',lambda_update,'***'))
-                            break
-                        if not alpha_converged:
-                            logger.debug(strm('UPDATED LAMBDA',lambda_update))
-                            smoothing_param = lambda_update
-                        if iter == maxiter-1:
-                            logger.debug(strm('DID NOT CONVERGE.'))
-                    return lambda_update
-                retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=mod_BRD(guess=1.0))
-            else:
+                return ans,alpha_converged
+            def newton_min(input_vec,val):
+                fder = dd_chi(G(input_vec),val)
+                fval = d_chi(input_vec,val)
+                return (input_vec + dot(linalg.inv(fder),fval))
+            def mod_BRD(guess,maxiter=20):
+                smoothing_param = guess
+                alpha_converged = False
+                for iter in range(maxiter):
+                    logger.debug(strm('ITERATION NO.',iter))
+                    logger.debug(strm('CURRENT LAMBDA',smoothing_param))
+                    retval,residual = this_nnls.nnls_regularized(K,data_fornnls,l=smoothing_param)
+                    f_vec = retval[:,newaxis]
+                    alpha = smoothing_param**2
+                    c_vec = dot(K,f_vec) - data_fornnls[:,newaxis]
+                    c_vec /= -1*alpha
+                    c_update = newton_min(c_vec,smoothing_param)
+                    alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
+                    lambda_update = sqrt(alpha_update[0,0])
+                    if alpha_converged:
+                        logger.debug(strm('*** OPTIMIZED LAMBDA',lambda_update,'***'))
+                        break
+                    if not alpha_converged:
+                        logger.debug(strm('UPDATED LAMBDA',lambda_update))
+                        smoothing_param = lambda_update
+                    if iter == maxiter-1:
+                        logger.debug(strm('DID NOT CONVERGE.'))
+                return lambda_update
+            #}}}
+            retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=mod_BRD(guess=1.0))
+        print("OK");quit()
+        if twoD:
+        #else:
+            if twoD:
                 retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=l)
             logger.debug(strm('coming back from fortran, residual type is',type(residual))+ strm(residual.dtype if isinstance(residual, ndarray) else ''))
             newshape = []
