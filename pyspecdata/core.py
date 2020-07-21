@@ -4670,9 +4670,7 @@ class nddata (object):
             else:
                 demand_real(j.data,"(this message pertains to the new %s axis pulled from the second argument's data)"%str(j.dimlabels[0]))
         # }}}
-        print("OK");quit()
         logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?'))
-
         if isinstance(kernel_func, tuple):
             assert callable(kernel_func[0]) and callable(kernel_func[1]), "third argument is tuple of kernel functions"
         else:
@@ -4681,18 +4679,17 @@ class nddata (object):
         assert len(kernel_func) == len(dimname)
         # at this point kernel_func and newaxis_dict are both lists with length
         # equal to dimnames (length 1 for 1D and 2 for 2D)
-        twod = len(dimname) > 1
-        print(twod)
-        print(len(dimname))
-        print(dimname)
-        quit()
+        twoD = len(dimname) > 1
         # construct the kernel
         # the kernel transforms from (columns) the "fit" dimension to (rows)
         # the "data" dimension
-        fitdim_names = [j.dimlabels[0] for j in newaxis_dict]
-        #fitaxis = [j.getaxis(fitdim_names[j]) for j in range(len(newaxis_dict))
-        #        if j.getaxis(fitdim_names[j]) is not None
-        #        else j.data]
+        fit_dimnames = [j.dimlabels[0] for j in newaxis_dict]
+        for j_idx,j in enumerate(newaxis_dict):
+            if j.getaxis(fit_dimnames[j_idx]) is not None:
+                fit_dimaxes = [j.getaxis(fit_dimnames[j_idx])]
+            else:
+                fit_dimaxes = [j.data]
+        print("Ok");quit()
         if tuple_syntax:
             fit_axis1 = nddata(fit_axis1,fitdim_name1)
             fit_axis2 = nddata(fit_axis2,fitdim_name2)
