@@ -4684,12 +4684,21 @@ class nddata (object):
         # the kernel transforms from (columns) the "fit" dimension to (rows)
         # the "data" dimension
         fit_dimnames = [j.dimlabels[0] for j in newaxis_dict]
-        for j_idx,j in enumerate(newaxis_dict):
-            if j.getaxis(fit_dimnames[j_idx]) is not None:
-                fit_dimaxes = [j.getaxis(fit_dimnames[j_idx])]
-            else:
-                fit_dimaxes = [j.data]
-        print("Ok");quit()
+        fit_dimaxes = [j.getaxis(fit_dimnames[j_idx]) for j_idx,j in enumerate(newaxis_dict) if j.getaxis(fit_dimnames[j_idx]) is not None]
+        #    else:
+        #        fit_dimaxes = [j.data]
+        fit_axes = [nddata(fit_dimaxes[j],fit_dimnames[j]) for j in range(len(dimname))]
+        data_axes = [self.fromaxis(dimname[j]) for j in range(len(dimname))]
+        for j in range(len(dimname)):
+            data_axes[j].squeeze()
+        for j in range(len(dimname)):
+            data_axes[j],fit_axes[j] = data_axes[j].aligndata(fit_axes[j])
+        # note I specified K1_ret and K2_ret for returning kernels as properties of the nddata
+        kernels = [kernel_func[j](data_axes[j],fit_axes[j]).squeeze() for j in range(len(dimname))]
+        logger.debug(strm('K%d dimlabels'%j,kernels[j].dimlabels,'and raw shape',kernels[j].data.shape) for j in range(len(dimname)))
+        #for j in range(len(dimname)):
+        #    print('K%d dimlabels'%j,kernels[j].dimlabels,'and raw shape',kernels[j].data.shape)
+        print("OK");quit()
         if tuple_syntax:
             fit_axis1 = nddata(fit_axis1,fitdim_name1)
             fit_axis2 = nddata(fit_axis2,fitdim_name2)
