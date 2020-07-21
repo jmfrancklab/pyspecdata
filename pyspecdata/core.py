@@ -4650,17 +4650,17 @@ class nddata (object):
                 else:
                     raise ValueError("I expect double-precision floating point (float64), but you passed me data of dtype "+str(x.dtype)+'\n'+addtxt)
         demand_real(self.data)
-        # make list from provided dimension
+        # establish variables as lists
         if type(dimname) is str and type(newaxis_dict) is nddata:
-            dimname = [decimation]
+            dimname = [dimname]
             newaxis_dict = [newaxis_dict]
-        elif type(dimname) is list and type(newaxis_dict) is list:
+        elif type(dimname) is tuple and type(newaxis_dict) is tuple :
             assert len(dimname) == len(newaxis_dict)
             assert len(dimname) in [1,2]
         else:
             raise ValueError(strm("I didn't understand what you specified for the new axes (dimension:",
                 dimname,"and new axes",newaxis_dict))
-        # make sure each dimension is real-valued
+        # make sure axes are real
         for j in dimname:
             demand_real(self.getaxis(j),"(this message pertains to the %s axis)"%j)
         for j in newaxis_dict:
@@ -4670,8 +4670,9 @@ class nddata (object):
             else:
                 demand_real(j.data,"(this message pertains to the new %s axis pulled from the second argument's data)"%str(j.dimlabels[0]))
         # }}}
+        print("OK");quit()
         logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?'))
-        tuple_syntax = False
+
         if isinstance(kernel_func, tuple):
             assert callable(kernel_func[0]) and callable(kernel_func[1]), "third argument is tuple of kernel functions"
         else:
@@ -4680,15 +4681,18 @@ class nddata (object):
         assert len(kernel_func) == len(dimname)
         # at this point kernel_func and newaxis_dict are both lists with length
         # equal to dimnames (length 1 for 1D and 2 for 2D)
-        #
-        twod = len(dimnames) > 1
+        twod = len(dimname) > 1
+        print(twod)
+        print(len(dimname))
+        print(dimname)
+        quit()
         # construct the kernel
         # the kernel transforms from (columns) the "fit" dimension to (rows)
         # the "data" dimension
         fitdim_names = [j.dimlabels[0] for j in newaxis_dict]
-        fitaxis = [j.getaxis(fitdim_names[j]) for j in range(len(newaxis_dict))
-                if j.getaxis(fitdim_names[j]) is not None
-                else j.data]
+        #fitaxis = [j.getaxis(fitdim_names[j]) for j in range(len(newaxis_dict))
+        #        if j.getaxis(fitdim_names[j]) is not None
+        #        else j.data]
         if tuple_syntax:
             fit_axis1 = nddata(fit_axis1,fitdim_name1)
             fit_axis2 = nddata(fit_axis2,fitdim_name2)
