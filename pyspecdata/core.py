@@ -4696,8 +4696,15 @@ class nddata (object):
         # note I specified K1_ret and K2_ret for returning kernels as properties of the nddata
         kernels = [kernel_func[j](data_axes[j],fit_axes[j]).squeeze() for j in range(len(dimname))]
         logger.debug(strm('K%d dimlabels'%j,kernels[j].dimlabels,'and raw shape',kernels[j].data.shape) for j in range(len(dimname)))
-        #for j in range(len(dimname)):
-        #    print('K%d dimlabels'%j,kernels[j].dimlabels,'and raw shape',kernels[j].data.shape)
+        svd_return = []
+        for j in range(len(dimname)):
+            svd_return.append(np.linalg.svd(kernels[j].data,full_matrices=False))
+        U = svd_return[j][0] for j in range(len(dimname))
+        S = svd_return[j][1]
+        V = svd_return[j][2]
+        print(shape(U))
+        print(shape(S))
+        print(shape(V))
         print("OK");quit()
         if tuple_syntax:
             fit_axis1 = nddata(fit_axis1,fitdim_name1)
