@@ -4706,25 +4706,6 @@ class nddata (object):
             U2 = (svd_return[1])[0];print(shape(U2))
             S2 = (svd_return[1])[1];print(shape(S2))
             V2 = (svd_return[1])[2];print(shape(V2))
-            U = [U,U2]
-            S = [S,S2]
-            V = [V,V2]
-            print("*** *** ***")
-            print(shape(U[0]))
-            print(shape(S[0]))
-            print(shape(V[0]))
-            print("*** *** ***")
-            print(shape(U[1]))
-            print(shape(S[1]))
-            print(shape(V[1]))
-            print("*** *** ***")
-        quit()
-        S = svd_return[:][1];quit()
-        V = svd_return[:][2];quit()
-        print("OK");quit()
-        print(shape(U))
-        print(shape(S))
-        print(shape(V))
         if tuple_syntax:
             fit_axis1 = nddata(fit_axis1,fitdim_name1)
             fit_axis2 = nddata(fit_axis2,fitdim_name2)
