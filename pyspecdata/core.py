@@ -4708,7 +4708,7 @@ class nddata (object):
         S1 = S1[0:s1]
         V1 = V1[0:s1,:]
         S1 = S1*eye(s1)
-        print('Compressed SVD of K1:',[x.shape for x in (U1,S1,V1)])
+        debug(logger(strm('Compressed SVD of K1:',[x.shape for x in (U1,S1,V1)])))
         #{{{ prepping 2D
         if twoD:
             U2 = (svd_return[1])[0]
@@ -4719,35 +4719,35 @@ class nddata (object):
             S2 = S2[0:s2]
             V2 = V2[0:s2,:]
             S2 = S2*eye(s2)
-            print('Compressed SVD K2:',[x.shape for x in (U2,S2,V2)])
+            debug(logger(strm('Compressed SVD K2:',[x.shape for x in (U2,S2,V2)])))
             K1 = S1.dot(V1)
             K1_ret = K1
             K2 = S2.dot(V2)
             K2_ret = K2
             K = K1[:,newaxis,:,newaxis]*K2[newaxis,:,newaxis,:]
             K = K.reshape(K1.shape[0]*K2.shape[0],K1.shape[1]*K2.shape[1])
-            print('Compressed K0, K1, and K2:',[x.shape for x in (K,K1,K2)])
+            debug(logger(strm('Compressed K0, K1, and K2:',[x.shape for x in (K,K1,K2)])))
             data_compressed = U1.T.dot(self.data.dot(U2))
-            print('Compressed data:',data_compressed.shape)
+            debug(logger(strm('Compressed data:',data_compressed.shape)))
             data_fornnls = empty(s1*s2)
             for s1_index in range(s1):
                 for s2_index in range(s2):
                     temp = data_compressed[s1_index][s2_index]
                     data_fornnls[s1_index*s2+s2_index] = temp
-            print('Lexicographically ordered data:',data_fornnls.shape)
+            debug(logger(strm('Lexicographically ordered data:',data_fornnls.shape)))
             if len(data_fornnls.shape) > 2:
-                print('Reshpaing data..')
+                debug(logger(strm('Reshpaing data..')))
                 data_fornnls = data_fornnls.reshape((prod(data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
                 #}}}
         if not twoD:
             K = S1 @ V1
             data_fornnls = U1.T @ self.data
-            print(shape(K))
-            print(shape(data_fornnls))
+            debug(logger(strm(shape(K))))
+            debug(logger(strm(shape(data_fornnls))))
             if len(data_fornnls.shape) > 2:
                 data_fornnls = data_fornnls.reshape((prod(
                     data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
-            print('shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error))
+            debug(logger(strm('shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error))))
         #{{{ BRD code
         if l == 'BRD':
             def chi(x_vec,val):
@@ -4828,7 +4828,7 @@ class nddata (object):
         newshape.append(ndshape(fit_axes[0])[fit_dimnames[0]])
         if twoD:
             newshape.append(ndshape(fit_axes[1])[fit_dimnames[1]])
-        print('before mkd, shape of the data is',ndshape(self),'len of axis_coords_error',len(self.axis_coords_error))
+        debug(logger(strm('before mkd, shape of the data is',ndshape(self),'len of axis_coords_error',len(self.axis_coords_error))))
         # {{{ store the dictionaries for later use
         axis_coords_dict = self.mkd(self.axis_coords)
         axis_units_dict = self.mkd(self.axis_coords_units)
