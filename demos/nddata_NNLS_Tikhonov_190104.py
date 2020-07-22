@@ -294,8 +294,8 @@ def Gaussian_2D_corr(theta,x_axis,y_axis,mu_x,mu_y,sigma_x,sigma_y):
                        -(sum_xy-sum_mu)**2/2/sigma_y**2)
     return this_Gaussian
 
-Nx = 100
-Ny = 50
+Nx = 10
+Ny = 10
 x_min = 3e-3; x_max = 3; y_min = 3e-3; y_max = 2;
 x_axis_log = nddata(linspace(log10(x_min),log10(x_max),Nx),r'log(T1)')
 y_axis_log = nddata(linspace(log10(y_min),log10(y_max),Ny),r'log(T2)')
@@ -307,7 +307,7 @@ dist += Gaussian_2D_corr(-115*pi/180,x_axis_log,y_axis_log,-1.8,-1.5,0.09,0.15)
 fl.image(dist)
 
 N_tau1 = 30
-N_tau2 = 1000
+N_tau2 = 10
 tau1_min = 5e-4; tau1_max = 4; tau2_min = 5e-4; tau2_max = 1.2
 tau1_axis = nddata(logspace(log10(tau1_min),log10(tau1_max),N_tau1),'tau1')
 tau2_axis = nddata(linspace(tau2_min,tau2_max,N_tau2),'tau2')
