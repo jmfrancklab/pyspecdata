@@ -4721,7 +4721,9 @@ class nddata (object):
             S2 = S2*eye(s2)
             print('Compressed SVD K2:',[x.shape for x in (U2,S2,V2)])
             K1 = S1.dot(V1)
+            K1_ret = K1
             K2 = S2.dot(V2)
+            K2_ret = K2
             K = K1[:,newaxis,:,newaxis]*K2[newaxis,:,newaxis,:]
             K = K.reshape(K1.shape[0]*K2.shape[0],K1.shape[1]*K2.shape[1])
             print('Compressed K0, K1, and K2:',[x.shape for x in (K,K1,K2)])
@@ -4851,175 +4853,26 @@ class nddata (object):
             axis_units_dict['lambda'] = None
             axis_coords_error_dict['lambda'] = None
         self.data = retval
-        print("OK");quit()
         if not isscalar(residual):
             # make the residual nddata as well
-            #residual_nddata = ndshape(self).pop(fitdim_name2).pop(fitdim_name1).alloc(dtype=residual.dtype)
-            residual_nddata = ndshape(self).pop(fitdim_name[j] for j in range(len(dimname))).alloc(dtype=residual.dtype)
-            print("OK");quit()
+            residual_nddata = ndshape(self).pop(fit_dimnames[0]).alloc(dtype=residual.dtype)
+            if twoD:
+                residual_nddata = ndshape(self).pop(fit_dimnames[1]).pop(fit_dimnames[0]).alloc(dtype=residual.dtype)
             residual_nddata.data[:] = residual[:]
         else:
             residual_nddata = residual
+        # store the kernel and the residual as properties
+        self.set_prop('nnls_kernel',K)
+        self.set_prop('s1',s1)
+        self.set_prop('nnls_residual',residual_nddata)
         if twoD:
-            if not isscalar(residual):
-                # make the residual nddata as well
-                residual_nddata = ndshape(self).pop(fitdim_name2).pop(fitdim_name1).alloc(dtype=residual.dtype)
-                residual_nddata.data[:] = residual[:]
-            else:
-                residual_nddata = residual
-            # store the kernel and the residual as properties
-            self.set_prop('nnls_kernel',K)
-            self.set_prop('s1',s1)
             self.set_prop('s2',s2)
-            self.set_prop('nnls_residual',residual_nddata)
             self.set_prop('K1',K1_ret)
             self.set_prop('K2',K2_ret)
-            # {{{ use the info from the dictionaries
-            self.axis_coords = self.fld(axis_coords_dict)
-            self.axis_coords_units = self.fld(axis_units_dict)
-            self.axis_coords_error = self.fld(axis_coords_error_dict)
-            return self
-        else:
-            fit_axis = nddata(fit_axis, fitdim_name)
-            data_axis = self.fromaxis(dimname)
-            data_axis.squeeze()
-            data_axis, fit_axis = data_axis.aligndata(fit_axis)
-            K = kernel_func(data_axis, fit_axis).squeeze()
-            logger.debug(strm('K dimlabels',K.dimlabels,'and raw shape',K.data.shape))
-            self.reorder(dimname, first=False) # make the dimension we will be regularizing innermost
-            logger.debug(strm('shape of the data is',ndshape(self),'is it fortran ordered?'))
-            data_fornnls = self.data
-            demand_real(data_fornnls)
-            if len(data_fornnls.shape) > 2:
-                data_fornnls = data_fornnls.reshape((prod(
-                    data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
-            logger.debug(strm('shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
-            if l == 'BRD':
-                logger.debug("FOUND BRD")
-                def chi(x_vec,val):
-                    return 0.5*dot(x_vec.T,dot(dd_chi(G(x_vec),val**2),x_vec)) - dot(x_vec.T,data_fornnls[:,newaxis])
-                def d_chi(x_vec,val):
-                    return dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
-                def dd_chi(G,val):
-                    return G + (val**2)*eye(shape(G)[0])
-                def G(x_vec):
-                    return dot(K.data,dot(square_heaviside(x_vec),K.data.T))
-                def H(product):
-                    if product <= 0:
-                        return 0
-                    if product > 0:
-                        return 1
-                def square_heaviside(x_vec):
-                    diag_heavi = []
-                    for q in range(shape(K.data.T)[0]):
-                        pull_val = dot(K.data.T[q,:],x_vec)
-                        temp = pull_val[0]
-                        temp = H(temp)
-                        diag_heavi.append(temp)
-                    diag_heavi = array(diag_heavi)
-                    square_heavi = diag_heavi*eye(shape(diag_heavi)[0])
-                    return square_heavi
-                def optimize_alpha(input_vec,val):
-                    alpha_converged = False
-                    factor = sqrt(input_vec.shape[0])
-                    T = linalg.inv(dd_chi(G(input_vec),val**2))
-                    dot_product = dot(input_vec.T,dot(T,input_vec))
-                    ans = dot_product*factor
-                    ans = ans/linalg.norm(input_vec)/dot_product
-                    tol = 1e-6
-                    if abs(ans-val**2) <= tol:
-                        logger.debug(strm('ALPHA HAS CONVERGED.'))
-                        alpha_converged = True
-                        return ans,alpha_converged
-                    return ans,alpha_converged
-                def newton_min(input_vec,val):
-                    fder = dd_chi(G(input_vec),val)
-                    fval = d_chi(input_vec,val)
-                    return (input_vec + dot(linalg.inv(fder),fval))
-                def mod_BRD(guess,maxiter=20):
-                    print("Here 3")
-                    smoothing_param = guess
-                    alpha_converged = False
-                    for iter in range(maxiter):
-                        print("Here 4")
-                        print("*** *** ***")
-                        print("*** *** ***")
-                        print(shape(K.data))
-                        print(shape(data_fornnls))
-                        print("*** *** ***")
-                        print("*** *** ***")
-                        logger.debug(strm('ITERATION NO.',iter))
-                        logger.debug(strm('CURRENT LAMBDA',smoothing_param))
-                        retval,residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=smoothing_param)
-                        f_vec = retval[:,newaxis]
-                        alpha = smoothing_param**2
-                        c_vec = dot(K.data,f_vec) - data_fornnls[:,newaxis]
-                        c_vec /= -1*alpha
-                        c_update = newton_min(c_vec,smoothing_param)
-                        alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
-                        lambda_update = sqrt(alpha_update[0,0])
-                        if alpha_converged:
-                            logger.debug(strm('*** OPTIMIZED LAMBDA',lambda_update,'***'))
-                            break
-                        if not alpha_converged:
-                            logger.debug(strm('UPDATED LAMBDA',lambda_update))
-                            smoothing_param = lambda_update
-                        if iter == maxiter-1:
-                            logger.debug(strm('DID NOT CONVERGE.'))
-                    return lambda_update
-                print("Here 1")
-                retval, residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=mod_BRD(guess=1.0))
-                print("Here 2")
-            else:
-                retval, residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=l)
-            #retval, residual = this_nnls.nnls_regularized(K.data, data_fornnls, l=l)
-            logger.debug(strm("coming back from fortran, residual type is",type(residual))+ strm(residual.dtype if isinstance(residual, ndarray) else ''))
-            newshape = []
-            if not isscalar(l):
-                newshape.append(len(l))
-            newshape += list(self.data.shape)[:-1] # exclude data dimension
-            newshape.append(ndshape(fit_axis)[fitdim_name])
-            logger.debug(strm('before mkd, shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
-            # {{{ store the dictionaries for later use
-            axis_coords_dict = self.mkd(self.axis_coords)
-            axis_units_dict = self.mkd(self.axis_coords_units)
-            axis_coords_error_dict = self.mkd(self.axis_coords_error)
-            # }}}
-            retval = retval.reshape(newshape)
-            self.data = retval
-            # {{{ clear all the axis info
-            self.axis_coords = None
-            self.axis_coords_units = None
-            self.axis_coords_error_dict = None
-            # }}}
-            # change the dimension names and data
-            self.rename(dimname, fitdim_name)
-            # {{{ manipulate the dictionaries, and call fld below
-            axis_coords_dict[fitdim_name] = fit_axis.getaxis(fitdim_name)
-            axis_units_dict[fitdim_name] = None
-            axis_coords_error_dict[fitdim_name] = None
-            if not isscalar(l):
-                self.dimlabels = ['lambda'] + self.dimlabels
-                axis_coords_dict['lambda'] = l
-                axis_units_dict['lambda'] = None
-                axis_coords_error_dict['lambda'] = None
-            # }}}
-            self.data = retval
-            if not isscalar(residual):
-                # make the residual nddata as well
-                residual_nddata = ndshape(self).pop(fitdim_name).alloc(dtype=residual.dtype)
-                residual_nddata.data[:] = residual[:]
-            else:
-                residual_nddata = residual
-            # store the kernel and the residual in the properties
-            self.set_prop('nnls_kernel',K)
-            self.set_prop('nnls_residual',residual_nddata)
-            # {{{ use the info from the dictionaries
-            self.axis_coords = self.fld(axis_coords_dict)
-            self.axis_coords_units = self.fld(axis_units_dict)
-            self.axis_coords_error = self.fld(axis_coords_error_dict)
-            # }}}
-            return self
+        self.axis_coords = self.fld(axis_coords_dict)
+        self.axis_coords_units = self.fld(axis_units_dict)
+        self.axis_coords_error = self.fld(axis_coords_error_dict)
+        return self
     #{{{ interpolation and binning
     def run_avg(self,thisaxisname,decimation = 20,centered = False):
         'a simple running average'
