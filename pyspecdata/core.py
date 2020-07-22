@@ -6474,7 +6474,8 @@ class nddata (object):
                         +" labeled)")
                     temp = diff(axesdict[thisdim]) 
                     if not all(temp*sign(temp[0])>0):
-                        raise ValueError(strm("you can only use the range format on data where the axis is in consecutively increasing or decreasing order, and the differences that I see are",temp*sign(temp[0])))
+                        raise ValueError(strm("you can only use the range format on data where the axis is in consecutively increasing or decreasing order, and the differences that I see are",temp*sign(temp[0])),
+                                "if you like, you can still do this by first calling .sort( on the %s axis"%thisdim)
                     if sign(temp[0]) == -1:
                         thisaxis = axesdict[thisdim][::-1]
                     else:
@@ -6493,6 +6494,7 @@ class nddata (object):
                             temp_high = inf
                         if temp_low > temp_high:
                             temp_low,temp_high = temp_high,temp_low
+                    # at this point, temp_low is indeed the lower value, and temp_high indeed the higher
                     if temp_low == inf:
                         raise ValueError(strm("this is not going to work -- I interpret range",thisargs,"I get to",temp_low,",",temp_high))
                     elif temp_low == -inf:
@@ -6500,23 +6502,31 @@ class nddata (object):
                     else:
                         logger.debug(strm("looking for",temp_low))
                         temp_low = searchsorted(thisaxis,temp_low)
-                        temp_low = temp_low-1 if temp_low >= len(thisaxis) else temp_low
-                        logger.debug(strm("i found",thisaxis[temp_low]))
+                        if temp_low >= len(thisaxis):
+                            raise ValueError("the lower value of your slice on the %s axis is higher than the highest value of the axis coordinates!"%thisdim)
+                        logger.debug(strm("i found",thisaxis[temp_low],"for the low end of the slice",
+                            thisargs))
                     if temp_high == inf:
                         temp_high = len(thisaxis)-1
                     elif temp_high == -inf:
                         raise ValueError(strm("this is not going to work -- I interpret range",thisargs,"I get to",temp_low,",",temp_high))
                     else:
                         logger.debug(strm("looking for",temp_high))
+                        temp_high_float = temp_high
                         temp_high = searchsorted(thisaxis,temp_high)
-                        temp_high = temp_high-1 if temp_high >= len(thisaxis) else temp_high
-                        logger.debug(strm("i found",thisaxis[temp_high]))
+                        logger.debug(strm("i found",thisaxis[temp_high]),"for the high value")
+                    # at this point, the result is inclusive if temp_high is
+                    # not an exact match, but exclusive if it is
+                    if thisaxis[temp_high] == temp_high_float:
+                        temp_high += 1 # make it inclusive
                     if sign(temp[0]) == -1:
                         temp_high = len(thisaxis) -1 -temp_high
                         temp_low = len(thisaxis) -1 -temp_low
                         temp_high, temp_low = temp_low, temp_high
                     del temp
-                    slicedict[thisdim] = slice(temp_low,temp_high+1,None) # inclusive
+                    if temp_low == temp_high:
+                        temp_high += 1
+                    slicedict[thisdim] = slice(temp_low,temp_high,None) # inclusive
                     axesdict[thisdim] = axesdict[thisdim][slicedict[thisdim]]
                 elif thisop == hash('idx'):
                     if axesdict[thisdim] is None:
