@@ -4819,43 +4819,48 @@ class nddata (object):
         else:
             retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=l)
         logger.debug(strm('coming back from fortran, residual type is',type(residual))+ strm(residual.dtype if isinstance(residual, ndarray) else ''))
-        print("OK");quit()
+        newshape = []
+        if not isscalar(l):
+            newshape.append(len(l))
+        logger.debug(strm('test***',list(self.data.shape)[:-1]))
+        newshape.append(ndshape(fit_axes[0])[fit_dimnames[0]])
         if twoD:
-            newshape = []
-            if not isscalar(l):
-                newshape.append(len(l))
-            logger.debug(strm('test***',list(self.data.shape)[:-1]))
-            #newshape += list(self.data.shape)[:-1] # this would return parametric axis
-            newshape.append(ndshape(fit_axis1)[fitdim_name1])
-            newshape.append(ndshape(fit_axis2)[fitdim_name2])
-            logger.debug(strm('before mkd, shape of the data is',ndshape(self),'len of axis_coords_error',len(self.axis_coords_error)))
-            # {{{ store the dictionaries for later use
-            axis_coords_dict = self.mkd(self.axis_coords)
-            axis_units_dict = self.mkd(self.axis_coords_units)
-            axis_coords_error_dict = self.mkd(self.axis_coords_error)
-            # }}}
-            retval = retval.reshape(newshape)
-            self.data = retval
-            # {{{ clear axis info
-            self.axis_coords = None
-            self.axis_coords_units = None
-            self.axis_coords_error_dict = None
-            # }}}
-            # change the dimnesion names and data
-            self.rename(dimname[0], fitdim_name1)
-            self.rename(dimname[1], fitdim_name2)
-            axis_coords_dict[fitdim_name1] = fit_axis1.getaxis(fitdim_name1)
-            axis_units_dict[fitdim_name1] = None
-            axis_coords_error_dict[fitdim_name1] = None
-            axis_coords_dict[fitdim_name2] = fit_axis2.getaxis(fitdim_name2)
-            axis_units_dict[fitdim_name2] = None
-            axis_coords_error_dict[fitdim_name2] = None
-            if not isscalar(l):
-                self.dimlabels = ['lambda'] + self.dimlabels
-                axis_coords_dict['lambda'] = l
-                axis_units_dict['lambda'] = None
-                axis_coords_error_dict['lambda'] = None
-            self.data = retval
+            newshape.append(ndshape(fit_axes[1])[fit_dimnames[1]])
+        print('before mkd, shape of the data is',ndshape(self),'len of axis_coords_error',len(self.axis_coords_error))
+        # {{{ store the dictionaries for later use
+        axis_coords_dict = self.mkd(self.axis_coords)
+        axis_units_dict = self.mkd(self.axis_coords_units)
+        axis_coords_error_dict = self.mkd(self.axis_coords_error)
+        # }}}
+        retval = retval.reshape(newshape)
+        self.data = retval
+        # {{{ clear axis info
+        self.axis_coords = None
+        self.axis_coords_units = None
+        self.axis_coords_error_dict = None
+        # }}}
+        # change the dimnesion names and data
+        for j in range(len(dimname)):
+            self.rename(dimname[j],fit_dimnames[j])
+            axis_coords_dict[fit_dimnames[j]] = fit_axes[j].getaxis(fit_dimnames[j])
+            axis_units_dict[fit_dimnames[j]] = None
+            axis_coords_error_dict[fit_dimnames[j]] = None
+        if not isscalar(l):
+            self.dimlabels = ['lambda'] + self.dimlabels
+            axis_coords_dict['lambda'] = l
+            axis_units_dict['lambda'] = None
+            axis_coords_error_dict['lambda'] = None
+        self.data = retval
+        print("OK");quit()
+        if not isscalar(residual):
+            # make the residual nddata as well
+            #residual_nddata = ndshape(self).pop(fitdim_name2).pop(fitdim_name1).alloc(dtype=residual.dtype)
+            residual_nddata = ndshape(self).pop(fitdim_name[j] for j in range(len(dimname))).alloc(dtype=residual.dtype)
+            print("OK");quit()
+            residual_nddata.data[:] = residual[:]
+        else:
+            residual_nddata = residual
+        if twoD:
             if not isscalar(residual):
                 # make the residual nddata as well
                 residual_nddata = ndshape(self).pop(fitdim_name2).pop(fitdim_name1).alloc(dtype=residual.dtype)
