@@ -4816,12 +4816,11 @@ class nddata (object):
                 return lambda_update
             #}}}
             retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=mod_BRD(guess=1.0))
+        else:
+            retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=l)
+        logger.debug(strm('coming back from fortran, residual type is',type(residual))+ strm(residual.dtype if isinstance(residual, ndarray) else ''))
         print("OK");quit()
         if twoD:
-        #else:
-            if twoD:
-                retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=l)
-            logger.debug(strm('coming back from fortran, residual type is',type(residual))+ strm(residual.dtype if isinstance(residual, ndarray) else ''))
             newshape = []
             if not isscalar(l):
                 newshape.append(len(l))
