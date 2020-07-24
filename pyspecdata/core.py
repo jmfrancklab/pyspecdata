@@ -4432,7 +4432,7 @@ class nddata (object):
                 if 'axes' in kwargnames:
                     self.data = func(self.data,axes=thisaxis)
                 else:
-                    raise ValueError("Your function doesn't have axis or axes as a keyword argument!")
+                    raise ValueError("Your function doesn't have axis or axes as a keyword argument! The number of non-optional arguments are %s. The keyword arguments are %s"%(str(numnonoptargs),str(kwargnames)))
             else:
                 raise ValueError('you passed a function to run_nopop that doesn\'t'
                         'have either one or two arguments!')
