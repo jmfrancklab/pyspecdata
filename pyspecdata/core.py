@@ -4429,7 +4429,7 @@ class nddata (object):
                             self.data = func(self.data,axes=thisaxis)
                 if 'axis' in kwargnames:
                     self.data = func(self.data,axis=thisaxis)
-                if 'axes' in kwargnames:
+                elif 'axes' in kwargnames:
                     self.data = func(self.data,axes=thisaxis)
                 else:
                     raise ValueError("Your function doesn't have axis or axes as a keyword argument! The number of non-optional arguments are %s. The keyword arguments are %s"%(str(numnonoptargs),str(kwargnames)))
