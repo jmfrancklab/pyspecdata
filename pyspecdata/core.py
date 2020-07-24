@@ -6506,18 +6506,17 @@ class nddata (object):
                             raise ValueError("the lower value of your slice on the %s axis is higher than the highest value of the axis coordinates!"%thisdim)
                         logger.debug(strm("i found",thisaxis[temp_low],"for the low end of the slice",
                             thisargs))
+                    temp_high_float = temp_high
                     if temp_high == inf:
                         temp_high = len(thisaxis)-1
                     elif temp_high == -inf:
                         raise ValueError(strm("this is not going to work -- I interpret range",thisargs,"I get to",temp_low,",",temp_high))
                     else:
                         logger.debug(strm("looking for",temp_high))
-                        temp_high_float = temp_high
                         temp_high = searchsorted(thisaxis,temp_high)
-                        logger.debug(strm("i found",thisaxis[temp_high]),"for the high value")
                     # at this point, the result is inclusive if temp_high is
                     # not an exact match, but exclusive if it is
-                    if thisaxis[temp_high] == temp_high_float:
+                    if temp_high<len(thisaxis) and thisaxis[temp_high] == temp_high_float:
                         temp_high += 1 # make it inclusive
                     if sign(temp[0]) == -1:
                         temp_high = len(thisaxis) -1 -temp_high
