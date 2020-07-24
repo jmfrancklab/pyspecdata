@@ -1,7 +1,7 @@
 from ..general_functions import inside_sphinx
 from pylab import *
 if not inside_sphinx():
-    from pylab import r_,fft,ifft,ifftshift,fftshift
+    from pylab import r_,fft,ifft,ifftshift,fftshift,exp,ones_like
 
 def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*(y**2))))):
     r'''Perform a convolution.
