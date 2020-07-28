@@ -3525,14 +3525,30 @@ class nddata (object):
     #}}}
     #}}}
     #{{{ arithmetic
+    def along(self,dimname):
+        """Specifies the dimension for the next matrix
+        multiplication (represents the rows/columns)."""
+        self._matmul_along = dimname
+        return self
     def dot(self,arg):
-        """Tensor dot of self with arg -- dot all matching dimension labels.  This can be used to do matrix multiplication, but note that the order of doesn't matter, since the dimensions that are contracted are determined by matching the dimension names, not the order of the dimension.
+        """This will perform a dot product or a matrix multiplication.
+        If one dimension in ``arg`` matches that in ``self``,
+        it will dot along that dimension
+        (take a matrix multiplication where that dimension represents the columns of ``self`` and the rows of ``arg``)
+
+        Note that if you have your dimensions named "rows" and "columns", this
+        will be very confusing, but if you have your dimensions named in terms
+        of the vector basis they are defined/live in, this makes sense.
+
+        If there are zero or no matching dimensions, then use
+        :func:`~pyspecdata.nddata.along` to specify the dimensions for matrix
+        multiplication / dot product.
 
         >>> a = nddata(r_[0:9],[3,3],['a','b'])
         >>> b = nddata(r_[0:3],'b')
         >>> print a.C.dot(b)
         >>> print a.data.dot(b.data)
-
+)
         >>> a = nddata(r_[0:27],[3,3,3],['a','b','c'])
         >>> b = nddata(r_[0:9],[3,3],['a','b'])
         >>> print a.C.dot(b)
@@ -3542,32 +3558,67 @@ class nddata (object):
         >>> b = nddata(r_[0:9],[3,3],['a','d'])
         >>> print a.C.dot(b)
         >>> print tensordot(a.data,b.data,axes=((0),(0)))
+
+        .. literalinclude:: ../examples/matrix_mult.py
         """
+        if hasattr(self,'_matmul_along'):
+            dot_dim_A = self._matmul_along
+            if hasattr(arg,'_matmul_along'):
+                dot_dim_B = arg._matmul_along
+            else:
+                dot_dim_B = dot_dim_A
+        elif hasattr(arg,'_matmul_along'):
+            dot_dim_B = arg._matmul_along
+            dot_dim_A = dot_dim_B
+        else:
+            matching_dims = set(self.dimlabels) & set(arg.dimlabels)
+            if len(matching_dims) == 1:
+                dot_dim_A = list(matching_dims)[0]
+                dot_dim_B = dot_dim_A
+            else:
+                raise ValueError("I can't determine the dimension for matrix"
+                        " multiplication!  Either have only one matching dimension,"
+                        " or use .along(")
+        # {{{ unset the "along" setting
+        if hasattr(self,'_matmul_along'):
+            del(self._matmul_along)
+        if hasattr(arg,'_matmul_along'):
+            del(arg._matmul_along)
+        # }}}
+        if dot_dim_B != dot_dim_A:
+            arg = arg.C.rename(dot_dim_B,dot_dim_A)
         A,B = self.aligndata(arg)
-        matching_dims = list(set(self.dimlabels) & set(arg.dimlabels))
-        assert len(matching_dims) > 0, "no matching dimensions!"
         # {{{ store the dictionaries for later use
         axis_coords_dict = A.mkd(A.axis_coords)
         axis_units_dict = A.mkd(A.axis_coords_units)
         axis_coords_error_dict = A.mkd(A.axis_coords_error)
         # }}}
         # manipulate "self" directly
-        self.dimlabels = [j for j in A.dimlabels if j not in matching_dims]
-        match_idx = [A.axn(j) for j in matching_dims]
+        self.dimlabels = [j for j in A.dimlabels if j != dot_dim_A]
         if (self.get_error() is not None) or (arg.get_error() is not None):
             raise ValueError("we plan to include error propagation here, but not yet provided")
-        self.data = tensordot(A.data,B.data,axes=(match_idx,match_idx))
+        ax_idx = A.axn(dot_dim_A) # should be the same for both, since they are aligned
         logger.debug(strm("shape of A is",ndshape(A)))
         logger.debug(strm("shape of B is",ndshape(B)))
-        logger.debug(strm("matching_dims are",matching_dims))
-        newsize = [(A.data.shape[j] if A.data.shape[j] != 1 else B.data.shape[j])
-                for j in range(len(A.data.shape)) if A.dimlabels[j] not in matching_dims]
-        self.data = self.data.reshape(newsize)
+        A.data = A.data[...,newaxis]
+        B.data = B.data[...,newaxis]
+        logger.debug(strm("add a new axis",A.data.shape))
+        logger.debug(strm("add a new axis",B.data.shape))
+        A.data = moveaxis(A.data,ax_idx,-1) # columns position
+        B.data = moveaxis(B.data,ax_idx,-2) # row position
+        logger.debug(strm("after movement",A.data.shape))
+        logger.debug(strm("after movement",B.data.shape))
+        self.data = matmul(A.data,B.data)
+        logger.debug(strm("after mult",self.data.shape))
+        self.data = self.data[...,0,0]
+        logger.debug(strm("remove extras",self.data.shape))
         # {{{ use the dictionaries to reconstruct the metadata
         self.axis_coords = self.fld(axis_coords_dict)
         self.axis_coords_units = self.fld(axis_units_dict)
         self.axis_coords_error = self.fld(axis_coords_error_dict)
         # }}}
+        print("self.data.shape",self.data.shape)
+        print("ndshape",ndshape(self))
         return self
     def __add__(self,arg):
         if isscalar(arg):
@@ -4566,11 +4617,6 @@ class nddata (object):
             OR, if dimname is a tuple of 2 dimensions indicating a 2D ILT, this
             should also be a tuple of 2 nddata, representing the two axes
 
-            OR (only for 1D or 1.5D ILT),
-            a dictionary whose key is the name of the "fit" dimension
-            (:math:`R_1` in the example above)
-            and whose value is an array with the new axis labels.
-
         kernel_func: function
             a function giving the kernel for the regularization.
             The first argument is the "data" variable
@@ -4609,113 +4655,85 @@ class nddata (object):
                 else:
                     raise ValueError("I expect double-precision floating point (float64), but you passed me data of dtype "+str(x.dtype)+'\n'+addtxt)
         demand_real(self.data)
-        if type(dimname) is str:
-            testdim = [dimname]
+        # establish variables as lists
+        if type(dimname) is str and type(newaxis_dict) is nddata:
+            dimname = [dimname]
+            newaxis_dict = [newaxis_dict]
+        elif type(dimname) is tuple and type(newaxis_dict) is tuple :
+            assert len(dimname) == len(newaxis_dict)
+            assert len(dimname) in [1,2]
         else:
-            testdim = dimname
-        for j in testdim:
-            demand_real(self.getaxis(dimname),"(this message pertains to the %s axis)"%dimname)
-        if type(newaxis_dict) is dict:
-            for k,v in newaxis_dict.items():
-                demand_real(v,"(this message pertains to the new %s axis)"%str(k))
-        else:
-            for j in newaxis_dict:
-                if len(j.dimlabels) == 1 and j.getaxis(j.dimlabels[0]) is not None:
-                    demand_real(j.getaxis(j.dimlabels[0]),"(this message pertains to the new %s axis pulled from the second argument's axis)"%str(j.dimlabels[0]))
-                else:
-                    demand_real(j.data,"(this message pertains to the new %s axis pulled from the second argument's data)"%str(j.dimlabels[0]))
+            raise ValueError(strm("I didn't understand what you specified for the new axes (dimension:",
+                dimname,"and new axes",newaxis_dict))
+        # make sure axes are real
+        for j in dimname:
+            demand_real(self.getaxis(j),"(this message pertains to the %s axis)"%j)
+        for j in newaxis_dict:
+            assert len(j.dimlabels) == 1, "must be one-dimensional, has dimensions:"+str(j.dimlabels)
+            if j.getaxis(j.dimlabels[0]) is not None:
+                demand_real(j.getaxis(j.dimlabels[0]),"(this message pertains to the new %s axis pulled from the second argument's axis)"%str(j.dimlabels[0]))
+            else:
+                demand_real(j.data,"(this message pertains to the new %s axis pulled from the second argument's data)"%str(j.dimlabels[0]))
         # }}}
         logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?'))
-        tuple_syntax = False
-        if isinstance(dimname, tuple):
-            tuple_syntax = True
-            assert len(dimname) == 2, "tuple of two dimension names only"
-            assert type(dimname[0]) and isinstance(dimname[1], str), "first argument is tuple of two dimension names"
-        else:
-            assert isinstance(dimname, str), "first argument is dimension name or tuple of two dimension names"
-        if isinstance(newaxis_dict, tuple):
-            assert len(newaxis_dict) == 2, "tuple of two nddatas only"
-            if isinstance(newaxis_dict[0],nddata) and isinstance(newaxis_dict[1],nddata):
-                assert len(newaxis_dict[0].dimlabels) and len(newaxis_dict[1].dimlabels) == 1, "currently only set up for 1D"
-        elif isinstance(newaxis_dict, dict):
-            assert len(newaxis_dict) == 1, "currently dictionary only set up for 1D"
-        elif isinstance(newaxis_dict,nddata):
-            assert len(newaxis_dict.dimlabels) == 1, "the axis argument must be 1D"
-        else:
-            raise ValueError("second argument is dictionary or nddata with new axis, or tuple of nddatas with new axes")
         if isinstance(kernel_func, tuple):
             assert callable(kernel_func[0]) and callable(kernel_func[1]), "third argument is tuple of kernel functions"
         else:
             assert callable(kernel_func), "third argument is kernel function"
+            kernel_func = [kernel_func]
+        assert len(kernel_func) == len(dimname)
+        # at this point kernel_func and newaxis_dict are both lists with length
+        # equal to dimnames (length 1 for 1D and 2 for 2D)
+        twoD = len(dimname) > 1
         # construct the kernel
         # the kernel transforms from (columns) the "fit" dimension to (rows)
         # the "data" dimension
-        if tuple_syntax:
-            if isinstance(newaxis_dict[0],nddata):
-                assert len(newaxis_dict[0].dimlabels) and len(newaxis_dict[1].dimlabels) == 1, "must be 1 dimensional!!"
-                fitdim_name1 = newaxis_dict[0].dimlabels[0]
-                fitdim_name2 = newaxis_dict[1].dimlabels[0]
-                fit_axis1 = newaxis_dict[0].getaxis(fitdim_name1)
-                fit_axis2 = newaxis_dict[1].getaxis(fitdim_name2)
-                if fit_axis1 is None:
-                    fit_axis1 = newaxis_dict[0].data
-                if fit_axis2 is None:
-                    fit_axis2 = newaxis_dict[1].data
-        elif isinstance(newaxis_dict,nddata):
-            assert len(newaxis_dict.dimlabels) == 1, "must be 1 dimensional!!"
-            fitdim_name = newaxis_dict.dimlabels[0]
-            fit_axis = newaxis_dict.getaxis(fitdim_name)
-            if fit_axis is None:
-                fit_axis = newaxis_dict.data
-        else:
-            fitdim_name = list(newaxis_dict.keys())[0]
-            logger.debug(strm('shape of fit dimension is',newaxis_dict[fitdim_name].shape))
-            fit_axis = newaxis_dict[fitdim_name]
-        if tuple_syntax:
-            fit_axis1 = nddata(fit_axis1,fitdim_name1)
-            fit_axis2 = nddata(fit_axis2,fitdim_name2)
-            data_axis1 = self.fromaxis(dimname[0])
-            data_axis2 = self.fromaxis(dimname[1])
-            data_axis1.squeeze()
-            data_axis2.squeeze()
-            data_axis1,fit_axis1 = data_axis1.aligndata(fit_axis1)
-            data_axis2,fit_axis2 = data_axis2.aligndata(fit_axis2)
-            K1 = kernel_func[0](data_axis1,fit_axis1).squeeze()
-            K1_ret = K1
-            logger.debug(strm('K1 dimlabels',K1.dimlabels,'and raw shape',K1.data.shape))
-            K2 = kernel_func[1](data_axis2,fit_axis2).squeeze()
-            K2_ret = K2
-            logger.debug(strm('K2 dimlabels',K2.dimlabels,'and raw shape',K2.data.shape))
-            # SVD and truncation of kernels
-            U1,S1,V1 = np.linalg.svd(K1.data,full_matrices=False)
-            U2,S2,V2 = np.linalg.svd(K2.data,full_matrices=False)
-            logger.debug(strm('Uncompressed SVD K1:',[x.shape for x in (U1,S1,V1)]))
-            logger.debug(strm('Uncompressed SVD K2:',[x.shape for x in (U2,S2,V2)]))
-            default_cut = 1e-2
-            s1 = where(S1 > default_cut)[0][-1]
+        fit_dimnames = [j.dimlabels[0] for j in newaxis_dict]
+        fit_dimaxes = [j.getaxis(fit_dimnames[j_idx]) for j_idx,j in enumerate(newaxis_dict) if j.getaxis(fit_dimnames[j_idx]) is not None]
+        #    else:
+        #        fit_dimaxes = [j.data]
+        fit_axes = [nddata(fit_dimaxes[j],fit_dimnames[j]) for j in range(len(dimname))]
+        data_axes = [self.fromaxis(dimname[j]) for j in range(len(dimname))]
+        for j in range(len(dimname)):
+            data_axes[j].squeeze()
+        for j in range(len(dimname)):
+            data_axes[j],fit_axes[j] = data_axes[j].aligndata(fit_axes[j])
+        # note I specified K1_ret and K2_ret for returning kernels as properties of the nddata
+        kernels = [kernel_func[j](data_axes[j],fit_axes[j]).squeeze() for j in range(len(dimname))]
+        logger.debug(strm('K%d dimlabels'%j,kernels[j].dimlabels,'and raw shape',kernels[j].data.shape) for j in range(len(dimname)))
+        svd_return = []
+        for j in range(len(dimname)):
+            svd_return.append(np.linalg.svd(kernels[j].data,full_matrices=False))
+        U1 = (svd_return[0])[0]
+        S1 = (svd_return[0])[1]
+        V1 = (svd_return[0])[2]
+        default_cut = 1e-2
+        s1 = where(S1 > default_cut)[0][-1]
+        U1 = U1[:,0:s1]
+        S1 = S1[0:s1]
+        V1 = V1[0:s1,:]
+        S1 = S1*eye(s1)
+        logger.debug(strm('Compressed SVD of K1:',[x.shape for x in (U1,S1,V1)]))
+        #{{{ prepping 2D
+        if twoD:
+            U2 = (svd_return[1])[0]
+            S2 = (svd_return[1])[1]
+            V2 = (svd_return[1])[2]
             s2 = where(S2 > default_cut)[0][-1]
-            U1 = U1[:,0:s1]
-            S1 = S1[0:s1]
-            V1 = V1[0:s1,:]
             U2 = U2[:,0:s2]
             S2 = S2[0:s2]
             V2 = V2[0:s2,:]
-            S1 = S1*eye(s1)
             S2 = S2*eye(s2)
-            logger.debug(strm('Compressed SVD of K1:',[x.shape for x in (U1,S1,V1)]))
             logger.debug(strm('Compressed SVD K2:',[x.shape for x in (U2,S2,V2)]))
-            # would generate projected data here
-            # compress data here
             K1 = S1.dot(V1)
+            K1_ret = K1
             K2 = S2.dot(V2)
+            K2_ret = K2
             K = K1[:,newaxis,:,newaxis]*K2[newaxis,:,newaxis,:]
             K = K.reshape(K1.shape[0]*K2.shape[0],K1.shape[1]*K2.shape[1])
             logger.debug(strm('Compressed K0, K1, and K2:',[x.shape for x in (K,K1,K2)]))
-
             data_compressed = U1.T.dot(self.data.dot(U2))
             logger.debug(strm('Compressed data:',data_compressed.shape))
-            # data_for_nnls = nddata(data_compressed,[dimname[0],dimname[1]])
-            # data_for_nnls.smoosh([dimname[0],dimname[1]],dimname=dimname[0])
             data_fornnls = empty(s1*s2)
             for s1_index in range(s1):
                 for s2_index in range(s2):
@@ -4725,259 +4743,141 @@ class nddata (object):
             if len(data_fornnls.shape) > 2:
                 logger.debug(strm('Reshpaing data..'))
                 data_fornnls = data_fornnls.reshape((prod(data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
-            
-            if l == 'BRD':
-                def chi(x_vec,val):
-                    return 0.5*dot(x_vec.T,dot(dd_chi(G(x_vec),val**2),x_vec)) - dot(x_vec.T,data_fornnls[:,newaxis])
-                def d_chi(x_vec,val):
-                    return dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
-                def dd_chi(G,val):
-                    return G + (val**2)*eye(shape(G)[0])
-                def G(x_vec):
-                    return dot(K,dot(square_heaviside(x_vec),K.T))
-                def H(product):
-                    if product <= 0:
-                        return 0
-                    if product > 0:
-                        return 1
-                def square_heaviside(x_vec):
-                    diag_heavi = []
-                    for q in range(shape(K.T)[0]):
-                        pull_val = dot(K.T[q,:],x_vec)
-                        temp = pull_val[0]
-                        temp = H(temp)
-                        diag_heavi.append(temp)
-                    diag_heavi = array(diag_heavi)
-                    square_heavi = diag_heavi*eye(shape(diag_heavi)[0])
-                    return square_heavi
-                def optimize_alpha(input_vec,val):
-                    alpha_converged = False
-                    factor = sqrt(s1*s2)
-                    T = linalg.inv(dd_chi(G(input_vec),val**2))
-                    dot_product = dot(input_vec.T,dot(T,input_vec))
-                    ans = dot_product*factor
-                    ans = ans/linalg.norm(input_vec)/dot_product
-                    tol = 1e-6
-                    if abs(ans-val**2) <= tol:
-                        logger.debug(strm('ALPHA HAS CONVERGED.'))
-                        alpha_converged = True
-                        return ans,alpha_converged
-                    return ans,alpha_converged
-                def newton_min(input_vec,val):
-                    fder = dd_chi(G(input_vec),val)
-                    fval = d_chi(input_vec,val)
-                    return (input_vec + dot(linalg.inv(fder),fval))
-                def mod_BRD(guess,maxiter=20):
-                    smoothing_param = guess
-                    alpha_converged = False
-                    for iter in range(maxiter):
-                        logger.debug(strm('ITERATION NO.',iter))
-                        logger.debug(strm('CURRENT LAMBDA',smoothing_param))
-                        retval,residual = this_nnls.nnls_regularized(K,data_fornnls,l=smoothing_param)
-                        f_vec = retval[:,newaxis]
-                        alpha = smoothing_param**2
-                        c_vec = dot(K,f_vec) - data_fornnls[:,newaxis]
-                        c_vec /= -1*alpha
-                        c_update = newton_min(c_vec,smoothing_param)
-                        alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
-                        lambda_update = sqrt(alpha_update[0,0])
-                        if alpha_converged:
-                            logger.debug(strm('*** OPTIMIZED LAMBDA',lambda_update,'***'))
-                            break
-                        if not alpha_converged:
-                            logger.debug(strm('UPDATED LAMBDA',lambda_update))
-                            smoothing_param = lambda_update
-                        if iter == maxiter-1:
-                            logger.debug(strm('DID NOT CONVERGE.'))
-                    return lambda_update
-                retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=mod_BRD(guess=1.0))
-            else:
-                retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=l)
-            logger.debug(strm('coming back from fortran, residual type is',type(residual))+ strm(residual.dtype if isinstance(residual, ndarray) else ''))
-            newshape = []
-            if not isscalar(l):
-                newshape.append(len(l))
-            logger.debug(strm('test***',list(self.data.shape)[:-1]))
-            #newshape += list(self.data.shape)[:-1] # this would return parametric axis
-            newshape.append(ndshape(fit_axis1)[fitdim_name1])
-            newshape.append(ndshape(fit_axis2)[fitdim_name2])
-            logger.debug(strm('before mkd, shape of the data is',ndshape(self),'len of axis_coords_error',len(self.axis_coords_error)))
-            # {{{ store the dictionaries for later use
-            axis_coords_dict = self.mkd(self.axis_coords)
-            axis_units_dict = self.mkd(self.axis_coords_units)
-            axis_coords_error_dict = self.mkd(self.axis_coords_error)
-            # }}}
-            retval = retval.reshape(newshape)
-            self.data = retval
-            # {{{ clear axis info
-            self.axis_coords = None
-            self.axis_coords_units = None
-            self.axis_coords_error_dict = None
-            # }}}
-            # change the dimnesion names and data
-            self.rename(dimname[0], fitdim_name1)
-            self.rename(dimname[1], fitdim_name2)
-            axis_coords_dict[fitdim_name1] = fit_axis1.getaxis(fitdim_name1)
-            axis_units_dict[fitdim_name1] = None
-            axis_coords_error_dict[fitdim_name1] = None
-            axis_coords_dict[fitdim_name2] = fit_axis2.getaxis(fitdim_name2)
-            axis_units_dict[fitdim_name2] = None
-            axis_coords_error_dict[fitdim_name2] = None
-            if not isscalar(l):
-                self.dimlabels = ['lambda'] + self.dimlabels
-                axis_coords_dict['lambda'] = l
-                axis_units_dict['lambda'] = None
-                axis_coords_error_dict['lambda'] = None
-            self.data = retval
-            if not isscalar(residual):
-                # make the residual nddata as well
-                residual_nddata = ndshape(self).pop(fitdim_name2).pop(fitdim_name1).alloc(dtype=residual.dtype)
-                residual_nddata.data[:] = residual[:]
-            else:
-                residual_nddata = residual
-            # store the kernel and the residual as properties
-            self.set_prop('nnls_kernel',K)
-            self.set_prop('s1',s1)
-            self.set_prop('s2',s2)
-            self.set_prop('nnls_residual',residual_nddata)
-            self.set_prop('K1',K1_ret)
-            self.set_prop('K2',K2_ret)
-            # {{{ use the info from the dictionaries
-            self.axis_coords = self.fld(axis_coords_dict)
-            self.axis_coords_units = self.fld(axis_units_dict)
-            self.axis_coords_error = self.fld(axis_coords_error_dict)
-            return self
-        else:
-            fit_axis = nddata(fit_axis, fitdim_name)
-            data_axis = self.fromaxis(dimname)
-            data_axis.squeeze()
-            data_axis, fit_axis = data_axis.aligndata(fit_axis)
-            K = kernel_func(data_axis, fit_axis).squeeze()
-            logger.debug(strm('K dimlabels',K.dimlabels,'and raw shape',K.data.shape))
-            self.reorder(dimname, first=False) # make the dimension we will be regularizing innermost
-            logger.debug(strm('shape of the data is',ndshape(self),'is it fortran ordered?'))
-            data_fornnls = self.data
-            demand_real(data_fornnls)
+                #}}}
+        if not twoD:
+            K = S1 @ V1
+            data_fornnls = U1.T @ self.data
+            logger.debug(strm(shape(K)))
+            logger.debug(strm(shape(data_fornnls)))
             if len(data_fornnls.shape) > 2:
                 data_fornnls = data_fornnls.reshape((prod(
                     data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
             logger.debug(strm('shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
-            if l == 'BRD':
-                logger.debug("FOUND BRD")
-                def chi(x_vec,val):
-                    return 0.5*dot(x_vec.T,dot(dd_chi(G(x_vec),val**2),x_vec)) - dot(x_vec.T,data_fornnls[:,newaxis])
-                def d_chi(x_vec,val):
-                    return dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
-                def dd_chi(G,val):
-                    return G + (val**2)*eye(shape(G)[0])
-                def G(x_vec):
-                    return dot(K.data,dot(square_heaviside(x_vec),K.data.T))
-                def H(product):
-                    if product <= 0:
-                        return 0
-                    if product > 0:
-                        return 1
-                def square_heaviside(x_vec):
-                    diag_heavi = []
-                    for q in range(shape(K.data.T)[0]):
-                        pull_val = dot(K.data.T[q,:],x_vec)
-                        temp = pull_val[0]
-                        temp = H(temp)
-                        diag_heavi.append(temp)
-                    diag_heavi = array(diag_heavi)
-                    square_heavi = diag_heavi*eye(shape(diag_heavi)[0])
-                    return square_heavi
-                def optimize_alpha(input_vec,val):
-                    alpha_converged = False
+        #{{{ BRD code
+        if l == 'BRD':
+            def chi(x_vec,val):
+                return 0.5*dot(x_vec.T,dot(dd_chi(G(x_vec),val**2),x_vec)) - dot(x_vec.T,data_fornnls[:,newaxis])
+            def d_chi(x_vec,val):
+                return dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
+            def dd_chi(G,val):
+                return G + (val**2)*eye(shape(G)[0])
+            def G(x_vec):
+                return dot(K,dot(square_heaviside(x_vec),K.T))
+            def H(product):
+                if product <= 0:
+                    return 0
+                if product > 0:
+                    return 1
+            def square_heaviside(x_vec):
+                diag_heavi = []
+                for q in range(shape(K.T)[0]):
+                    pull_val = dot(K.T[q,:],x_vec)
+                    temp = pull_val[0]
+                    temp = H(temp)
+                    diag_heavi.append(temp)
+                diag_heavi = array(diag_heavi)
+                square_heavi = diag_heavi*eye(shape(diag_heavi)[0])
+                return square_heavi
+            def optimize_alpha(input_vec,val):
+                alpha_converged = False
+                if twoD:
+                    factor = sqrt(s1*s2)
+                if not twoD:
                     factor = sqrt(input_vec.shape[0])
-                    T = linalg.inv(dd_chi(G(input_vec),val**2))
-                    dot_product = dot(input_vec.T,dot(T,input_vec))
-                    ans = dot_product*factor
-                    ans = ans/linalg.norm(input_vec)/dot_product
-                    tol = 1e-6
-                    if abs(ans-val**2) <= tol:
-                        logger.debug(strm('ALPHA HAS CONVERGED.'))
-                        alpha_converged = True
-                        return ans,alpha_converged
+                T = linalg.inv(dd_chi(G(input_vec),val**2))
+                dot_product = dot(input_vec.T,dot(T,input_vec))
+                ans = dot_product*factor
+                ans = ans/linalg.norm(input_vec)/dot_product
+                tol = 1e-6
+                if abs(ans-val**2) <= tol:
+                    logger.debug(strm('ALPHA HAS CONVERGED.'))
+                    alpha_converged = True
                     return ans,alpha_converged
-                def newton_min(input_vec,val):
-                    fder = dd_chi(G(input_vec),val)
-                    fval = d_chi(input_vec,val)
-                    return (input_vec + dot(linalg.inv(fder),fval))
-                def mod_BRD(guess,maxiter=20):
-                    smoothing_param = guess
-                    alpha_converged = False
-                    for iter in range(maxiter):
-                        logger.debug(strm('ITERATION NO.',iter))
-                        logger.debug(strm('CURRENT LAMBDA',smoothing_param))
-                        retval,residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=smoothing_param)
-                        f_vec = retval[:,newaxis]
-                        alpha = smoothing_param**2
-                        c_vec = dot(K.data,f_vec) - data_fornnls[:,newaxis]
-                        c_vec /= -1*alpha
-                        c_update = newton_min(c_vec,smoothing_param)
-                        alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
-                        lambda_update = sqrt(alpha_update[0,0])
-                        if alpha_converged:
-                            logger.debug(strm('*** OPTIMIZED LAMBDA',lambda_update,'***'))
-                            break
-                        if not alpha_converged:
-                            logger.debug(strm('UPDATED LAMBDA',lambda_update))
-                            smoothing_param = lambda_update
-                        if iter == maxiter-1:
-                            logger.debug(strm('DID NOT CONVERGE.'))
-                    return lambda_update
-                retval, residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=mod_BRD(guess=1.0))
-            else:
-                retval, residual = this_nnls.nnls_regularized(K.data,data_fornnls,l=l)
-            #retval, residual = this_nnls.nnls_regularized(K.data, data_fornnls, l=l)
-            logger.debug(strm("coming back from fortran, residual type is",type(residual))+ strm(residual.dtype if isinstance(residual, ndarray) else ''))
-            newshape = []
-            if not isscalar(l):
-                newshape.append(len(l))
-            newshape += list(self.data.shape)[:-1] # exclude data dimension
-            newshape.append(ndshape(fit_axis)[fitdim_name])
-            logger.debug(strm('before mkd, shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
-            # {{{ store the dictionaries for later use
-            axis_coords_dict = self.mkd(self.axis_coords)
-            axis_units_dict = self.mkd(self.axis_coords_units)
-            axis_coords_error_dict = self.mkd(self.axis_coords_error)
-            # }}}
-            retval = retval.reshape(newshape)
-            self.data = retval
-            # {{{ clear all the axis info
-            self.axis_coords = None
-            self.axis_coords_units = None
-            self.axis_coords_error_dict = None
-            # }}}
-            # change the dimension names and data
-            self.rename(dimname, fitdim_name)
-            # {{{ manipulate the dictionaries, and call fld below
-            axis_coords_dict[fitdim_name] = fit_axis.getaxis(fitdim_name)
-            axis_units_dict[fitdim_name] = None
-            axis_coords_error_dict[fitdim_name] = None
-            if not isscalar(l):
-                self.dimlabels = ['lambda'] + self.dimlabels
-                axis_coords_dict['lambda'] = l
-                axis_units_dict['lambda'] = None
-                axis_coords_error_dict['lambda'] = None
-            # }}}
-            self.data = retval
-            if not isscalar(residual):
-                # make the residual nddata as well
-                residual_nddata = ndshape(self).pop(fitdim_name).alloc(dtype=residual.dtype)
-                residual_nddata.data[:] = residual[:]
-            else:
-                residual_nddata = residual
-            # store the kernel and the residual in the properties
-            self.set_prop('nnls_kernel',K)
-            self.set_prop('nnls_residual',residual_nddata)
-            # {{{ use the info from the dictionaries
-            self.axis_coords = self.fld(axis_coords_dict)
-            self.axis_coords_units = self.fld(axis_units_dict)
-            self.axis_coords_error = self.fld(axis_coords_error_dict)
-            # }}}
-            return self
+                return ans,alpha_converged
+            def newton_min(input_vec,val):
+                fder = dd_chi(G(input_vec),val)
+                fval = d_chi(input_vec,val)
+                return (input_vec + dot(linalg.inv(fder),fval))
+            def mod_BRD(guess,maxiter=20):
+                smoothing_param = guess
+                alpha_converged = False
+                for iter in range(maxiter):
+                    logger.debug(strm('ITERATION NO.',iter))
+                    logger.debug(strm('CURRENT LAMBDA',smoothing_param))
+                    retval,residual = this_nnls.nnls_regularized(K,data_fornnls,l=smoothing_param)
+                    f_vec = retval[:,newaxis]
+                    alpha = smoothing_param**2
+                    c_vec = dot(K,f_vec) - data_fornnls[:,newaxis]
+                    c_vec /= -1*alpha
+                    c_update = newton_min(c_vec,smoothing_param)
+                    alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
+                    lambda_update = sqrt(alpha_update[0,0])
+                    if alpha_converged:
+                        logger.debug(strm('*** OPTIMIZED LAMBDA',lambda_update,'***'))
+                        break
+                    if not alpha_converged:
+                        logger.debug(strm('UPDATED LAMBDA',lambda_update))
+                        smoothing_param = lambda_update
+                    if iter == maxiter-1:
+                        logger.debug(strm('DID NOT CONVERGE.'))
+                return lambda_update
+            #}}}
+            retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=mod_BRD(guess=1.0))
+        else:
+            retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=l)
+        logger.debug(strm('coming back from fortran, residual type is',type(residual))+ strm(residual.dtype if isinstance(residual, ndarray) else ''))
+        newshape = []
+        if not isscalar(l):
+            newshape.append(len(l))
+        logger.debug(strm('test***',list(self.data.shape)[:-1]))
+        newshape.append(ndshape(fit_axes[0])[fit_dimnames[0]])
+        if twoD:
+            newshape.append(ndshape(fit_axes[1])[fit_dimnames[1]])
+        logger.debug(strm('before mkd, shape of the data is',ndshape(self),'len of axis_coords_error',len(self.axis_coords_error)))
+        # {{{ store the dictionaries for later use
+        axis_coords_dict = self.mkd(self.axis_coords)
+        axis_units_dict = self.mkd(self.axis_coords_units)
+        axis_coords_error_dict = self.mkd(self.axis_coords_error)
+        # }}}
+        retval = retval.reshape(newshape)
+        self.data = retval
+        # {{{ clear axis info
+        self.axis_coords = None
+        self.axis_coords_units = None
+        self.axis_coords_error_dict = None
+        # }}}
+        # change the dimnesion names and data
+        for j in range(len(dimname)):
+            self.rename(dimname[j],fit_dimnames[j])
+            axis_coords_dict[fit_dimnames[j]] = fit_axes[j].getaxis(fit_dimnames[j])
+            axis_units_dict[fit_dimnames[j]] = None
+            axis_coords_error_dict[fit_dimnames[j]] = None
+        if not isscalar(l):
+            self.dimlabels = ['lambda'] + self.dimlabels
+            axis_coords_dict['lambda'] = l
+            axis_units_dict['lambda'] = None
+            axis_coords_error_dict['lambda'] = None
+        self.data = retval
+        if not isscalar(residual):
+            # make the residual nddata as well
+            residual_nddata = ndshape(self).pop(fit_dimnames[0]).alloc(dtype=residual.dtype)
+            if twoD:
+                residual_nddata = ndshape(self).pop(fit_dimnames[1]).pop(fit_dimnames[0]).alloc(dtype=residual.dtype)
+            residual_nddata.data[:] = residual[:]
+        else:
+            residual_nddata = residual
+        # store the kernel and the residual as properties
+        self.set_prop('nnls_kernel',K)
+        self.set_prop('s1',s1)
+        self.set_prop('nnls_residual',residual_nddata)
+        if twoD:
+            self.set_prop('s2',s2)
+            self.set_prop('K1',K1_ret)
+            self.set_prop('K2',K2_ret)
+        self.axis_coords = self.fld(axis_coords_dict)
+        self.axis_coords_units = self.fld(axis_units_dict)
+        self.axis_coords_error = self.fld(axis_coords_error_dict)
+        return self
     #{{{ interpolation and binning
     def run_avg(self,thisaxisname,decimation = 20,centered = False):
         'a simple running average'
