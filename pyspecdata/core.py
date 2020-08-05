@@ -6517,6 +6517,7 @@ class nddata (object):
                         logger.debug(strm("i found",thisaxis[temp_high]),"for the high value")
                     # at this point, the result is inclusive if temp_high is
                     # not an exact match, but exclusive if it is
+                    temp_high_float = temp_high
                     if thisaxis[temp_high] == temp_high_float:
                         temp_high += 1 # make it inclusive
                     if sign(temp[0]) == -1:
