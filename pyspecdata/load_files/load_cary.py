@@ -81,7 +81,11 @@ def load_cary(filename):
             logging.debug(strm("blockoffset",param['blockoffset']))
             # line 100
             thislen = fromfile(fp,dtype='<u4', count=1).item()
-            param['Tstore_type'] = fromfile(fp,dtype=f'a{thislen}', count=1).item().decode('ascii')
+            temp = fromfile(fp,dtype=f'a{thislen}', count=1).item()
+            try:
+                param['Tstore_type'] = temp.decode('ascii')
+            except:
+                raise IOError(strm("problem decoding or assigning Tstore type",repr(temp)))
             logging.debug("Tstore_type \"%s\""%param['Tstore_type'])
             # line 102
             param['blocklen'] = fromfile(fp,dtype='<u4', count=1).item()
@@ -96,11 +100,22 @@ def load_cary(filename):
                         param['blockoffset']+param['blocklen'],
                         "and end of file",file_end))
                 fp.seek(param['blockoffset']+param['blocklen'], 0)
+            else:
+                logging.info(strm("skipping block of type",param['Tstore_type']))
+                fp.seek(param['blockoffset']+param['blocklen'], 0)
+                #raise ValueError(strm("not yet set up for Tstore_type",param['Tstore_type']))
             alldata.append(data)
     retval = {}
-    for j in alldata:
-        while j.name() in retval.keys():
-            logging.warn("You have a duplicate spectrum name!!! -- renaming it from %s to %s_rep"%(j.name(),j.name()))
-            j.name(j.name()+'_rep')
-        retval[j.name()] = j
+    for n,j in enumerate(alldata):
+        repcounter = 0
+        orig_name = j.name()
+        logging.info("orig name for %d is %s"%(n,orig_name))
+        new_name = orig_name
+        while new_name in retval.keys():
+            repcounter += 1
+            new_name = orig_name + '_rep%03d'%repcounter
+        if repcounter > 0:
+            logging.warn("You have a duplicate spectrum name!!! -- renamed it from %s to %s"%(orig_name,new_name))
+        retval[new_name] = j
+        #retval[new_name].name(new_name) # this messes with the keys -- not sure why?
     return retval

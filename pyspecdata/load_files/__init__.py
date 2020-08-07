@@ -105,7 +105,7 @@ def search_filename(searchstring,exp_type,
         if len(retval) == 0:
             raise ValueError("found no files in",directory,"matching",searchstring)
         elif len(retval) > 1:
-            raise ValueError("found more than on file in",directory,"matching",searchstring)
+            raise ValueError("found more than on file in",directory,"matching",searchstring,"(",retval,")")
         else:
             return retval[0]
     return retval

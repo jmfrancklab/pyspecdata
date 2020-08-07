@@ -34,3 +34,16 @@ with figlist_var() as fl:
                 label='%s, subtracted'%k)
     ylabel(d.get_units())
     gridandtick(gca())
+    print("now I'm going to try a DSW file")
+    data = load_cary(search_filename('Ras_Stability4',
+        exp_type='Ras_stability/At_RT',
+        unique=True))
+    print("the experiments present in this file are:",data.keys())
+    fl.next("kinetics data")
+    for k,thisspectrum in data.items():
+        fl.plot(thisspectrum,
+                alpha=0.5,
+                label=k)
+    ylabel(thisspectrum.get_units())
+    ylim((-0.05,1))
+    gridandtick(gca())
