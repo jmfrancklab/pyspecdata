@@ -23,6 +23,11 @@ print(shape(M))
 M.add_noise(0.2, seed=937162211)
 
 # this is here to test the integrated 1D-BRD (for pyspecdata)
+print("*** *** ***")
+print(ndshape(M))
+print(ndshape(logT1))
+print("*** *** ***")
+quit()
 solution = M.C.nnls('vd',logT1, lambda x,y: 1-2*exp(-x/10**(y)), l='BRD')
 
 def nnls_reg(K,b,val):
