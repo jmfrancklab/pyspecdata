@@ -5286,7 +5286,7 @@ class nddata (object):
                 if other.get_error(thisdim) is not None:
                     self.set_error(thisdim, copy(other.get_error(thisdim)))
                 if other.get_units(thisdim) is not None:
-                    self.set_units(thisdim, copy(other.get_units(thisdim)))
+                    self.set_units(thisdim, other.get_units(thisdim))
         return self
     def axis(self,axisname):
         'returns a 1-D axis for further manipulation'
@@ -5506,7 +5506,7 @@ class nddata (object):
         """
         if len(args) == 2:
             axis, value = args
-            if value=='#':
+            if isscalar(value) and value=='#':
                 self.setaxis(axis,r_[0:ndshape(self)[axis]])
                 return self
         elif len(args) == 1 and issympy(args[0]):
