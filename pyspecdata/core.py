@@ -5694,6 +5694,7 @@ class nddata (object):
             allow for smooshing to determine a new axes that is standard
             (not a structured array) and that increases linearly.
         '''
+        assert (type(dimstocollapse) in [list,tuple]) and len(dimstocollapse)>1, "What?? You must try to collapse more than one dimension!! -- you claim you want to collapse '%s'"%str(dimstocollapse)
         not_present = set(dimstocollapse) - set(self.dimlabels)
         if len(not_present) > 0: raise ValueError(strm(not_present,"was not found in the list of dimensions",self.dimlabels))
         #{{{ first, put them all at the end, in order given here
@@ -5718,6 +5719,7 @@ class nddata (object):
         axis_coords_units_dict = self.mkd(self.axis_coords_units)
         # }}}
         old_units = []
+        logger.debug(strm("dims to collapse",dimstocollapse))
         for this_name in dimstocollapse:
             this_idx = retained_dims.index(this_name)
             retained_dims.pop(this_idx)
@@ -5726,13 +5728,14 @@ class nddata (object):
             axis_coords_dict.pop(this_name)
             if this_idx < final_position:
                 final_position -= 1
+        logger.debug(strm("old units",old_units))
         new_units = list(set(old_units))
-        if len(new_units) > 1:
+        if len(new_units)>1:
             new_units = ' '.join(map(str,new_units))
-        elif len(new_units) ==1:
+        elif len(new_units)==1:
             new_units = new_units[0]
         else:
-            new_units=None
+            new_units = None
         # this might be sub-optimal, but put the dims to collapse at the end, and move them back later if we want
         new_order = retained_dims + dimstocollapse
         self.reorder(new_order)
