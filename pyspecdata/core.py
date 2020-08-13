@@ -5729,8 +5729,10 @@ class nddata (object):
         new_units = list(set(old_units))
         if len(new_units) > 1:
             new_units = ' '.join(map(str,new_units))
-        else:
+        elif len(new_units) ==1:
             new_units = new_units[0]
+        else:
+            new_units=None
         # this might be sub-optimal, but put the dims to collapse at the end, and move them back later if we want
         new_order = retained_dims + dimstocollapse
         self.reorder(new_order)
