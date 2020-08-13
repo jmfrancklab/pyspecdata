@@ -316,11 +316,6 @@ def load_title(file_reference,*subpath):
         lines = fp.readlines()
         if isinstance(lines[0],bytes):
             lines = map(lambda x: x.decode('utf-8'), lines)
-        emptystring = '\r\n'
-        while emptystring in lines:
-            lines.pop(lines.index(emptystring))
-        emptystring = '\n'
-        while emptystring in lines:
-            lines.pop(lines.index(emptystring))
+        lines = [j for j in lines if j not in ['\r\n','\n']]
         fp.close()
         return ''.join(lines)
