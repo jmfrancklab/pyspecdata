@@ -318,8 +318,12 @@ def load_title(file_reference,*subpath):
         fp = open_subpath(file_reference,*(subpath + ('pdata','1','title')))
         lines = fp.readlines()
         logger.debug("I get %d lines"%len(lines))
-        if isinstance(lines[0],bytes):
-            lines = map(lambda x: x.decode('utf-8'), lines)
-        lines = [j for j in lines if j not in ['\r\n','\n']]
+        if len(lines) == 0:
+            lines = []
+            logger.warning("You do not have a title set -- this is highly unusual!!")
+        else:
+            if isinstance(lines[0],bytes):
+                lines = map(lambda x: x.decode('utf-8'), lines)
+            lines = [j for j in lines if j not in ['\r\n','\n']]
         fp.close()
         return ''.join(lines)
