@@ -110,6 +110,7 @@ def series(file_reference, *subpath, **kwargs):
     data.setaxis('t2',lambda x: x-shiftpoints/v['SW_h'])
     data.set_units('t2','s')
     data.set_units('digital')
+    logger.debug("I'm about to try to load the title from: "+strm(file_reference,*subpath))
     data.set_prop('title',
             load_title(file_reference, *subpath))
     SFO1 = v['SFO1']
@@ -309,13 +310,20 @@ def load_jcamp(file_reference,*subpath):
     fp.close()
     return vars
 def load_title(file_reference,*subpath):
+    logger.debug("I'm attempting to load the subpath with the following arguments: "+strm(
+        file_reference,subpath,'pdata','1','title'))
     if not open_subpath(file_reference,*(subpath + ('pdata','1','title')), test_only=True):
         return None
     else:
         fp = open_subpath(file_reference,*(subpath + ('pdata','1','title')))
         lines = fp.readlines()
-        if isinstance(lines[0],bytes):
-            lines = map(lambda x: x.decode('utf-8'), lines)
-        lines = [j for j in lines if j not in ['\r\n','\n']]
+        logger.debug("I get %d lines"%len(lines))
+        if len(lines) == 0:
+            lines = []
+            logger.warning("You do not have a title set -- this is highly unusual!!")
+        else:
+            if isinstance(lines[0],bytes):
+                lines = map(lambda x: x.decode('utf-8'), lines)
+            lines = [j for j in lines if j not in ['\r\n','\n']]
         fp.close()
         return ''.join(lines)
