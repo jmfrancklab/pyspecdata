@@ -127,7 +127,9 @@ def series(file_reference, *subpath, **kwargs):
         v['BF1'] = BF1
     with open_subpath(file_reference, *(subpath+('pulseprogram',)),mode='r') as fp:
         ppg = fp.read()
-        data.set_prop('pulprog',ppg.decode('utf-8'))
+        if type(ppg) is bytes:
+            ppg = ppg
+        data.set_prop('pulprog',ppg)
     data.set_prop('acq',
             v)
     if isinstance(file_reference,str):
@@ -151,7 +153,7 @@ def series(file_reference, *subpath, **kwargs):
         logger.debug(strm("I found a gradient_calib file"))
         fp = open_subpath(file_reference, *(subpath+('gradient_calib',)),mode='r')
         data.set_prop('gradient_calib',
-                fp.read().decode('ascii'))
+                fp.read())
         fp.close()
     if open_subpath(file_reference, *(subpath+('difflist',)), test_only=True):
         data.set_prop('diff',
@@ -200,7 +202,7 @@ def load_1D(file_reference, *subpath, **kwargs):
             v)
     with open_subpath(file_reference, *(subpath+('pulseprogram',)),mode='r') as fp:
         ppg = fp.read()
-        data.set_prop('pulprog',ppg.decode('utf-8'))
+        data.set_prop('pulprog',ppg)
     if type(file_reference) is tuple:
         data.set_prop('filename',
                 file_reference[1])
@@ -221,7 +223,7 @@ def load_vdlist(file_reference, *subpath, **kwargs):
     fp = open_subpath(file_reference,*subpath)
     lines = fp.readlines()
     if isinstance(lines[0],bytes):
-        lines = map(lambda x: x.decode('utf-8'), lines)
+        lines = map(lambda x: x, lines)
     lines = list(map(lambda x: x.rstrip(),lines))
     lines = list(map((lambda x: x.replace('m','e-3')),lines))
     lines = list(map((lambda x: x.replace('s','')),lines))
@@ -262,7 +264,7 @@ def load_jcamp(file_reference,*subpath):
     fp = open_subpath(file_reference,*subpath)
     lines = fp.readlines()
     if isinstance(lines[0],bytes):
-        lines = map(lambda x: x.decode('utf-8'), lines)
+        lines = map(lambda x: x, lines)
     vars = {}
     number_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *([0-9\-\.]+)')
     string_re = re.compile(r'##\$([_A-Za-z0-9]+) *= *<(.*)')
@@ -322,8 +324,6 @@ def load_title(file_reference,*subpath):
             lines = []
             logger.warning("You do not have a title set -- this is highly unusual!!")
         else:
-            if isinstance(lines[0],bytes):
-                lines = map(lambda x: x.decode('utf-8'), lines)
             lines = [j for j in lines if j not in ['\r\n','\n']]
         fp.close()
         return ''.join(lines)
