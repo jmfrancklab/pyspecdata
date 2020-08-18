@@ -245,10 +245,11 @@ def find_file(searchstring,
         else:
             if postproc_type in list(postproc_lookup.keys()):
                 data = postproc_lookup[postproc_type](data,**kwargs)
-                logger.debug('this file was postprocessed successfully with kwargs ' +str(kwargs))
+                if 'fl' in kwargs.keys(): kwargs.pop('fl')
+                logger.debug('this file was postprocessed successfully')
             else:
                 logger.debug('postprocessing not defined for file with postproc_type %s --> it should be defined in the postproc_type dictionary in load_files.__init__.py'+postproc_type)
-            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing (you have %s)"%str(kwargs)
+            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing (you have %s) -- the postproc function should pop the keys from the dictionary after use"%str(kwargs)
             return data
 def format_listofexps(args):
     """**Phased out**: leaving documentation so we can interpret and update old code
