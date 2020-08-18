@@ -245,7 +245,7 @@ def find_file(searchstring,
         else:
             if postproc_type in list(postproc_lookup.keys()):
                 data = postproc_lookup[postproc_type](data,**kwargs)
-                logger.debug('this file was postprocessed successfully')
+                logger.debug('this file was postprocessed successfully with kwargs ' +str(kwargs))
             else:
                 logger.debug('postprocessing not defined for file with postproc_type %s --> it should be defined in the postproc_type dictionary in load_files.__init__.py'+postproc_type)
             assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing (you have %s)"%str(kwargs)
