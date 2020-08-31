@@ -66,7 +66,6 @@ import re
 from inspect import ismethod
 from numpy.core import rec
 from matplotlib.pyplot import cm
-import tables
 from copy import deepcopy 
 import traceback
 import sympy
