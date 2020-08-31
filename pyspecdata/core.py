@@ -59,7 +59,8 @@ from matplotlib.collections import PolyCollection
 from matplotlib.colors import LightSource
 from matplotlib.lines import Line2D
 from scipy.interpolate import griddata as scipy_griddata
-import tables
+if not inside_sphinx():
+    import tables
 import warnings
 import re
 from inspect import ismethod
