@@ -18,7 +18,7 @@ import shlex
 import sphinx_rtd_theme
 import mock
  
-autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_toolkits', 'get_ipython']
+autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_toolkits', 'get_ipython', 'matplotlib']
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
