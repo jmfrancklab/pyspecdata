@@ -1,7 +1,8 @@
 # again, this is copied liberally from scipy nnls -- see scipy licensing
 
 
-from . import _nnls
+if not inside_sphinx():
+    from . import _nnls
 from .general_functions import redim_F_to_C, redim_C_to_F, strm
 from numpy import asarray_chkfinite, zeros, double, isscalar, isfortran
 from numpy import array as np_array
