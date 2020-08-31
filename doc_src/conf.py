@@ -16,7 +16,6 @@ import sys
 import os
 import shlex
 import sphinx_rtd_theme
-from pyspecdata.version import __version__
 import mock
  
 autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_toolkits', 'get_ipython']
@@ -27,6 +26,7 @@ autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_too
 #sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../..'))
 sys.path.append(os.path.abspath('..'))
+from pyspecdata.version import __version__
 
 # -- General configuration ------------------------------------------------
 
