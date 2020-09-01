@@ -28,6 +28,3 @@ python:
            - IPython
       - method: setuptools
         path: .
-        extra_requirements:
-           - docs
-           - IPython
