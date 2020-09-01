@@ -25,5 +25,9 @@ python:
         path: .
         extra_requirements:
            - docs
+           - IPython
       - method: setuptools
         path: .
+        extra_requirements:
+           - docs
+           - IPython
