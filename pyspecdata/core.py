@@ -5458,6 +5458,7 @@ class nddata (object):
         assert du > 0, thismsg# ascending
         start_index = 0
         stop_index = len(u)
+        stop_index = extent 
         if extent < u[0]:
             start_index = int(-(u[0] - extent) // du) # the part after the negative is positive
             if (start_index * du + (u[0] - extent))/du < -tolerance:# the first quantity here is negative
