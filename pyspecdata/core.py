@@ -5459,6 +5459,13 @@ class nddata (object):
         start_index = 0
         stop_index = len(u)
         stop_index = extent 
+        print("*** *** *** *** ***")
+        print(extent)
+        print(u[-1])
+        print(du)
+        print(extent*du-u[-1])
+        print(int((extent - u[-1]) // du))
+        print("*** *** *** *** ***")
         if extent < u[0]:
             start_index = int(-(u[0] - extent) // du) # the part after the negative is positive
             if (start_index * du + (u[0] - extent))/du < -tolerance:# the first quantity here is negative
@@ -5467,7 +5474,10 @@ class nddata (object):
             stop_index_addto = int((extent - u[-1]) // du)
             if ((extent - u[-1]) - du * stop_index_addto)/du > tolerance:# the first quantity here is negative
                 stop_index_addto += 1
+            if stop_index_addto > 100:
+                stop_index_addto = 1
             stop_index += stop_index_addto
+            print(stop_index)
         else:
             raise RuntimeError("extent ({:g}) needs to be further than the bounds on '{:s}', which are {:g} and {:g}".format(extent,axis,u[0],u[-1]))
         #{{{ create a new array, and put self.data into it
