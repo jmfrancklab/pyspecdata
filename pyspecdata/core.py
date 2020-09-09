@@ -5459,13 +5459,13 @@ class nddata (object):
         start_index = 0
         stop_index = len(u)
         stop_index = extent 
-        print("*** *** *** *** ***")
-        print(extent)
-        print(u[-1])
-        print(du)
-        print(extent*du-u[-1])
-        print(int((extent - u[-1]) // du))
-        print("*** *** *** *** ***")
+        logger.debug("*** *** *** *** ***")
+        logger.debug(extent)
+        logger.debug(u[-1])
+        logger.debug(du)
+        logger.debug(extent*du-u[-1])
+        logger.debug(int((extent - u[-1]) // du))
+        logger.debug("*** *** *** *** ***")
         if extent < u[0]:
             start_index = int(-(u[0] - extent) // du) # the part after the negative is positive
             if (start_index * du + (u[0] - extent))/du < -tolerance:# the first quantity here is negative
@@ -5477,7 +5477,7 @@ class nddata (object):
             if stop_index_addto > 100:
                 stop_index_addto = 1
             stop_index += stop_index_addto
-            print(stop_index)
+            logger.debug(stop_index)
         else:
             raise RuntimeError("extent ({:g}) needs to be further than the bounds on '{:s}', which are {:g} and {:g}".format(extent,axis,u[0],u[-1]))
         #{{{ create a new array, and put self.data into it
