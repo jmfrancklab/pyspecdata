@@ -13,6 +13,19 @@ from .ft_shift import ft_clear_startpoints
 from .shear import shear
 from .shear import extend_for_shear
 from .ift import ift
+class nddata_ft(object):
+    _ft_conj = _ft_conj
+    ft = ft
+    set_ft_prop = set_ft_prop
+    get_ft_prop = get_ft_prop
+    ft_state_to_str = ft_state_to_str
+    ft_clear_startpoints = ft_clear_startpoints
+    ift = ift
+    _ft_shift = _ft_shift
+    ftshift = ftshift
+    convolve = convolve
+    extend_for_shear = extend_for_shear
+    shear = shear
 __all__ = ["_ft_conj",
         "convolve",
         "ft",
