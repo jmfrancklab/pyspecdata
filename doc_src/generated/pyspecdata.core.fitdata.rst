@@ -47,7 +47,6 @@ pyspecdata.core.fitdata
       ~fitdata.fit
       ~fitdata.fitfunc
       ~fitdata.fld
-      ~fitdata.fourier_shear
       ~fitdata.fromaxis
       ~fitdata.ft
       ~fitdata.ft_clear_startpoints

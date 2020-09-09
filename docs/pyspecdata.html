@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Axis Manipulation Functions" href="axis_manipulation.html" />
+    <link rel="next" title="Documentation of Notebook Helper Functions" href="latexscripts.html" />
     <link rel="prev" title="LaTeX Notebook Functionality" href="notebook.html" /> 
 </head>
 
@@ -86,7 +86,9 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">List of Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fitdata.html">the fitdata class</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="notebook.html#setting-up-the-notebook">Setting up the notebook</a></li>
 <li class="toctree-l2"><a class="reference internal" href="notebook.html#requirements">Requirements</a></li>
@@ -103,10 +105,9 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fitdata.html">the fitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
 </ul>
 
             
@@ -309,7 +310,7 @@ but aren’t gridded data.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyspecdata.nddata.contour" title="pyspecdata.nddata.contour"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contour</span></code></a>([labels])</p></td>
 <td><p>Contour plot – kwargs are passed to the matplotlib <cite>contour</cite> function.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyspecdata.nddata.convolve" title="pyspecdata.nddata.convolve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convolve</span></code></a>(axisname, filterwidth[, convfunc])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convolve</span></code>(axisname, filterwidth[, convfunc])</p></td>
 <td><p>Perform a convolution.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyspecdata.nddata.copy" title="pyspecdata.nddata.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a>([data])</p></td>
@@ -327,25 +328,25 @@ but aren’t gridded data.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyspecdata.nddata.extend" title="pyspecdata.nddata.extend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extend</span></code></a>(axis, extent[, fill_with, tolerance])</p></td>
 <td><p>If <cite>axis</cite> is uniformly ascending with spacing <span class="math notranslate nohighlight">\(dx\)</span>, then extend by adding a point every <span class="math notranslate nohighlight">\(dx\)</span> until the axis includes the point <cite>extent</cite>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyspecdata.nddata.extend_for_shear" title="pyspecdata.nddata.extend_for_shear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extend_for_shear</span></code></a>(altered_axis, propto_axis, …)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">extend_for_shear</span></code>(altered_axis, propto_axis, …)</p></td>
 <td><p>this is propto_axis helper function for <cite>.fourier.shear</cite></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyspecdata.nddata.fld" title="pyspecdata.nddata.fld"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fld</span></code></a>(dict_in[, noscalar])</p></td>
 <td><p>flatten dictionary – return list</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyspecdata.nddata.fourier_shear" title="pyspecdata.nddata.fourier_shear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fourier_shear</span></code></a>(altered_axis, propto_axis, …)</p></td>
-<td><p>the fourier shear method – see .shear() documentation</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nddata.fourier_shear</span></code></p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyspecdata.nddata.fromaxis" title="pyspecdata.nddata.fromaxis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fromaxis</span></code></a>(*args, **kwargs)</p></td>
 <td><p>Generate an nddata object from one of the axis labels.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ft</span></code></a>(axes[, tolerance, cosine, verbose])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ft</span></code>(axes[, tolerance, cosine, verbose])</p></td>
 <td><p>This performs a Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyspecdata.nddata.ft_clear_startpoints" title="pyspecdata.nddata.ft_clear_startpoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ft_clear_startpoints</span></code></a>(axis[, t, f, nearest])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ft_clear_startpoints</span></code>(axis[, t, f, nearest])</p></td>
 <td><p>Clears memory of where the origins in the time and frequency domain are.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyspecdata.nddata.ftshift" title="pyspecdata.nddata.ftshift"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ftshift</span></code></a>(axis, value)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ftshift</span></code>(axis, value)</p></td>
 <td><p>FT-based shift.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyspecdata.nddata.get_covariance" title="pyspecdata.nddata.get_covariance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_covariance</span></code></a>()</p></td>
@@ -354,7 +355,7 @@ but aren’t gridded data.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyspecdata.nddata.get_error" title="pyspecdata.nddata.get_error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_error</span></code></a>(*args)</p></td>
 <td><p>get a copy of the errors either set_error(‘axisname’,error_for_axis) or set_error(error_for_data)</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyspecdata.nddata.get_ft_prop" title="pyspecdata.nddata.get_ft_prop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ft_prop</span></code></a>(axis[, propname])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ft_prop</span></code>(axis[, propname])</p></td>
 <td><p>Gets the FT property given by <cite>propname</cite>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata.get_plot_color" title="pyspecdata.nddata.get_plot_color"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_plot_color</span></code></a>()</p></td>
@@ -384,7 +385,7 @@ but aren’t gridded data.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata.human_units" title="pyspecdata.nddata.human_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">human_units</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ift</span></code></a>(axes[, n, tolerance, verbose])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ift</span></code>(axes[, n, tolerance, verbose])</p></td>
 <td><p>This performs an inverse Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyspecdata.nddata.inhomog_coords" title="pyspecdata.nddata.inhomog_coords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inhomog_coords</span></code></a>(direct_dim, indirect_dim[, …])</p></td>
@@ -492,7 +493,7 @@ but aren’t gridded data.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#pyspecdata.nddata.set_error" title="pyspecdata.nddata.set_error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error</span></code></a>(*args)</p></td>
 <td><p>set the errors: either</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyspecdata.nddata.set_ft_prop" title="pyspecdata.nddata.set_ft_prop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ft_prop</span></code></a>(axis[, propname, value])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ft_prop</span></code>(axis[, propname, value])</p></td>
 <td><p>Sets the FT property given by <cite>propname</cite>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata.set_plot_color" title="pyspecdata.nddata.set_plot_color"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_plot_color</span></code></a>(thiscolor)</p></td>
@@ -816,28 +817,6 @@ Defaults to True</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyspecdata.nddata.convolve">
-<code class="sig-name descname">convolve</code><span class="sig-paren">(</span><em class="sig-param">axisname</em>, <em class="sig-param">filterwidth</em>, <em class="sig-param">convfunc=&lt;function &lt;lambda&gt;&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.convolve" title="Permalink to this definition">¶</a></dt>
-<dd><p>Perform a convolution.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>axisname</strong> (<em>str</em>) – apply the convolution along <cite>axisname</cite></p></li>
-<li><p><strong>filterwidth</strong> (<em>double</em>) – width of the convolution function.</p></li>
-<li><p><strong>convfunc</strong> (<a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.function" title="pyspecdata.function"><em>function</em></a>) – A function that takes two arguments – the first are the axis coordinates and the second is <cite>filterwidth</cite>.
-Default is a normalized Gaussian of width (<span class="math notranslate nohighlight">\(\sigma\)</span>)
-<cite>filterwidth</cite>
-<span class="math notranslate nohighlight">\(\frac{1}{2 \sigma^2}\exp\left( - \frac{x^2}{2 \sigma^2} \right)\)</span>
-For example if you want a complex Lorentzian with <cite>filterwidth</cite> controlled by the rate <span class="math notranslate nohighlight">\(R\)</span>,
-<em>i.e.</em>
-<span class="math notranslate nohighlight">\(\frac{-1}{-i 2 \pi f - R}\)</span>
-then <code class="docutils literal notranslate"><span class="pre">convfunc</span> <span class="pre">=</span> <span class="pre">lambda</span> <span class="pre">f,R:</span> <span class="pre">-1./(-1j*2*pi*f-R)</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="pyspecdata.nddata.copy">
 <code class="sig-name descname">copy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a full copy of this instance.</p>
@@ -917,21 +896,9 @@ various errors, etc.)</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyspecdata.nddata.extend_for_shear">
-<code class="sig-name descname">extend_for_shear</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">altered_axis</span></em>, <em class="sig-param"><span class="n">propto_axis</span></em>, <em class="sig-param"><span class="n">skew_amount</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.extend_for_shear" title="Permalink to this definition">¶</a></dt>
-<dd><p>this is propto_axis helper function for <cite>.fourier.shear</cite></p>
-</dd></dl>
-
-<dl class="py method">
 <dt id="pyspecdata.nddata.fld">
 <code class="sig-name descname">fld</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dict_in</span></em>, <em class="sig-param"><span class="n">noscalar</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.fld" title="Permalink to this definition">¶</a></dt>
 <dd><p>flatten dictionary – return list</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="pyspecdata.nddata.fourier_shear">
-<code class="sig-name descname">fourier_shear</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">altered_axis</span></em>, <em class="sig-param"><span class="n">propto_axis</span></em>, <em class="sig-param"><span class="n">by_amount</span></em>, <em class="sig-param"><span class="n">zero_fill</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">start_in_conj</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.fourier_shear" title="Permalink to this definition">¶</a></dt>
-<dd><p>the fourier shear method – see .shear() documentation</p>
 </dd></dl>
 
 <dl class="py method">
@@ -968,104 +935,6 @@ inferred from the symbolic expression.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyspecdata.nddata.ft">
-<code class="sig-name descname">ft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">cosine</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.ft" title="Permalink to this definition">¶</a></dt>
-<dd><p>This performs a Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
-<dl class="simple">
-<dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt\)</span></p>
-</dd>
-</dl>
-<p>Note that, as noted in the <a class="reference internal" href="auto_api/pyspecdata.fourier.html#pyspecdata.fourier.ift.ift" title="pyspecdata.fourier.ift.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> documentation,
-the inverse transform doesn’t correspond to the equivalent
-expression for the IFT.</p>
-<p><strong>pre-FT</strong>, we use the axis to cyclically permute <span class="math notranslate nohighlight">\(t=0\)</span> to the first index</p>
-<p><strong>post-FT</strong>, we assume that the data has previously been IFT’d
-If this is the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> will cause an error
-If this is not the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> generates a standard fftshift
-<code class="docutils literal notranslate"><span class="pre">shift=None</span></code> will choose True, if and only if this is not the case</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>pad</strong> (<em>int</em><em> or </em><em>boolean</em>) – <cite>pad</cite> specifies a zero-filling.  If it’s a number, then it gives
-the length of the zero-filled dimension.  If it is just <cite>True</cite>,
-then the size of the dimension is determined by rounding the
-dimension size up to the nearest integral power of 2.</p></li>
-<li><p><strong>automix</strong> (<em>double</em>) – <cite>automix</cite> can be set to the approximate frequency value.  This is
-useful for the specific case where the data has been captured on a
-sampling scope, and it’s severely aliased over.</p></li>
-<li><p><strong>cosine</strong> (<em>boolean</em>) – yields a sum of the fft and ifft, for a cosine transform</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="pyspecdata.nddata.ft_clear_startpoints">
-<code class="sig-name descname">ft_clear_startpoints</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">t</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">f</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nearest</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.ft_clear_startpoints" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clears memory of where the origins in the time and frequency domain are.
-This is useful, <em>e.g.</em> when you want to ift and center about time=0.
-By setting shift=True you can also manually set the points.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>t</strong> (<em>float</em><em>, </em><em>'current'</em><em>, </em><em>'reset'</em><em>, or </em><em>None</em>) – keyword arguments <cite>t</cite> and <cite>f</cite> can be set by (1) manually setting
-the start point (2) using the string ‘current’ to leave the
-current setting a lone (3) ‘reset’, which clears the startpoint
-and (4) None, which will be changed to ‘current’ when the other is set to a number or ‘rest’ if both are set to None.</p></li>
-<li><p><strong>t</strong> – see <cite>t</cite></p></li>
-<li><p><strong>nearest</strong> (<em>bool</em>) – <p>Shifting the startpoint can only be done
-by an integral number of datapoints
-(<em>i.e.</em> an integral number of dwell
-times, dt, in the time domain or
-integral number of df in the frequency
-domain).
-While it is possible to shift by a
-non-integral number of datapoints,
-this is done by applying a
-phase-dependent shift in the inverse
-domain.
-Applying such a axis-dependent shift
-can have vary unexpected effects if the
-data in the inverse domain is aliased,
-and is therefore heavily discouraged.
-(For example, consider what happens if
-we attempt to apply a
-frequency-dependent phase shift to data
-where a peak at 110 Hz is aliased and
-appears at the 10 Hz position.)</p>
-<p>Setting <cite>nearest</cite> to <strong>True</strong>
-will choose a startpoint at the closest
-integral datapoint to what you have
-specified.</p>
-<p>Setting <cite>nearest</cite> to <strong>False</strong>
-will explicitly override the safeties –
-essentially telling the code that you
-know the data is not aliased in the
-inverse domain and/or are willing to
-deal with the consequences.</p>
-</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="pyspecdata.nddata.ft_state_to_str">
-<code class="sig-name descname">ft_state_to_str</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">axes</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.ft_state_to_str" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a string that lists the FT domain for the given axes.</p>
-<p><span class="math notranslate nohighlight">\(u\)</span> refers to the original domain (typically time) and <span class="math notranslate nohighlight">\(v\)</span> refers to the FT’d domain (typically frequency)
-If no axes are passed as arguments, it does this for all axes.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="pyspecdata.nddata.ftshift">
-<code class="sig-name descname">ftshift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.ftshift" title="Permalink to this definition">¶</a></dt>
-<dd><p>FT-based shift.  Currently only works in time domain.</p>
-<p>This was previously made obsolete, but is now a demo of how to use the ft properties.
-It is not the most efficient way to do this.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt id="pyspecdata.nddata.get_covariance">
 <code class="sig-name descname">get_covariance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.get_covariance" title="Permalink to this definition">¶</a></dt>
 <dd><p>this returns the covariance matrix of the data</p>
@@ -1076,12 +945,6 @@ It is not the most efficient way to do this.</p>
 <code class="sig-name descname">get_error</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.get_error" title="Permalink to this definition">¶</a></dt>
 <dd><p>get a copy of the errors
 either set_error(‘axisname’,error_for_axis) or set_error(error_for_data)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="pyspecdata.nddata.get_ft_prop">
-<code class="sig-name descname">get_ft_prop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">propname</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.get_ft_prop" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the FT property given by <cite>propname</cite>.  For both setting and getting, <cite>None</cite> is equivalent to an unset value if no <cite>propname</cite> is given, this just sets the <cite>FT</cite> property, which tells if a dimension is frequency or time domain</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1156,47 +1019,6 @@ the file lives.
 structure.)</p></li>
 <li><p><strong>directory</strong> (<em>str</em>) – the directory where the HDF5 file lives.</p></li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="pyspecdata.nddata.ift">
-<code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.ift" title="Permalink to this definition">¶</a></dt>
-<dd><p>This performs an inverse Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
-<dl class="simple">
-<dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=t_{dw} \int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
-</dd>
-</dl>
-<p>Where <span class="math notranslate nohighlight">\(t_{dw}=\frac{1}{\Delta f}\)</span>, is the dwell time (with <span class="math notranslate nohighlight">\(\Delta f\)</span> the spectral width).</p>
-<p><em>Why do we do this?</em> Note that while the analytical integral this corresponds to is normalized, performing
-<a class="reference internal" href="#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code></a> followed by <a class="reference internal" href="#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> on a discrete sequence is NOT completely invertible
-(due to integration of the implied comb function??),
-and would require division by a factor of <span class="math notranslate nohighlight">\(\Delta f\)</span> (the spectral width) in order
-to retrieve the original function</p>
-<p><strong>pre-IFT</strong>, we use the axis to cyclically permute <span class="math notranslate nohighlight">\(f=0\)</span> to the first index</p>
-<p><strong>post-IFT</strong>, we assume that the data has previously been FT’d
-If this is the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> will cause an error
-If this is not the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> generates a standard ifftshift
-<code class="docutils literal notranslate"><span class="pre">shift=None</span></code> will choose True, if and only if this is not the case</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>pad</strong> (<em>int</em><em> or </em><em>boolean</em>) – <p><cite>pad</cite> specifies a zero-filling.  If it’s a number, then it gives
-the length of the zero-filled dimension.  If it is just <cite>True</cite>,
-then the size of the dimension is determined by rounding the
-dimension size up to the nearest integral power of 2.   It uses the
-<cite>start_time</cite> ft property to determine the start of the axis.  To
-do this, it assumes that it is a stationary signal
-(convolved with infinite comb function).
-The value of <cite>start_time</cite> can differ from by a non-integral multiple of
-<span class="math notranslate nohighlight">\(\Delta t\)</span>, though the routine will check whether or not it is safe to
-do this.</p>
-<dl class="simple">
-<dt>..note ::</dt><dd><p>In the code, this is controlled by <cite>p2_post</cite> (the integral
-<span class="math notranslate nohighlight">\(\Delta t\)</span> and <cite>p2_post_discrepancy</cite> – the non-integral.</p>
-</dd>
-</dl>
-</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1481,9 +1303,9 @@ but the idea should be that multiple fits would be returned.)</p></li>
 <dd><p>Interpolate the data so that the given axes are in register with a set of specified values. Does not change the spacing of the axis labels.</p>
 <p>It finds the axis label position that is closest to the values given in <cite>arg</cite>, then interpolates (Fourier/sinc method) the data onto a new, slightly shifted, axis that passes exactly through the value given.
 To do this, it uses
-<a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.nddata.ft_clear_startpoints" title="pyspecdata.core.nddata.ft_clear_startpoints"><code class="xref py py-func docutils literal notranslate"><span class="pre">.ft_clear_startpoints()</span></code></a>
+<code class="xref py py-func docutils literal notranslate"><span class="pre">.ft_clear_startpoints()</span></code>
 and uses
-<a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.nddata.set_ft_prop" title="pyspecdata.core.nddata.set_ft_prop"><code class="xref py py-func docutils literal notranslate"><span class="pre">.set_ft_prop()</span></code></a>
+<code class="xref py py-func docutils literal notranslate"><span class="pre">.set_ft_prop()</span></code>
 to override the “not aliased” flag.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1582,12 +1404,6 @@ and then throw out the data for which <span class="math notranslate nohighlight"
 <p class="admonition-title">Todo</p>
 <p>several options below – enumerate them in the documentation</p>
 </div>
-</dd></dl>
-
-<dl class="py method">
-<dt id="pyspecdata.nddata.set_ft_prop">
-<code class="sig-name descname">set_ft_prop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">propname</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.set_ft_prop" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the FT property given by <cite>propname</cite>.  For both setting and getting, <cite>None</cite> is equivalent to an unset value if <cite>propname</cite> is a boolean, and <cite>value</cite> is True (the default), it’s assumed that propname is actually None, and that <cite>value</cite> is set to the <cite>propname</cite> argument (this allows us to set the <cite>FT</cite> property more easily)</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1775,7 +1591,7 @@ allow for smooshing to determine a new axes that is standard
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="axis_manipulation.html" class="btn btn-neutral float-right" title="Axis Manipulation Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="latexscripts.html" class="btn btn-neutral float-right" title="Documentation of Notebook Helper Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="notebook.html" class="btn btn-neutral float-left" title="LaTeX Notebook Functionality" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

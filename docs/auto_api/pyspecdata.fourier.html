@@ -84,12 +84,13 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">List of Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
 </ul>
 
             
@@ -316,7 +317,7 @@ It is not the most efficient way to do this.</p>
 </dl>
 <p>Where <span class="math notranslate nohighlight">\(t_{dw}=\frac{1}{\Delta f}\)</span>, is the dwell time (with <span class="math notranslate nohighlight">\(\Delta f\)</span> the spectral width).</p>
 <p><em>Why do we do this?</em> Note that while the analytical integral this corresponds to is normalized, performing
-<a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code></a> followed by <a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> on a discrete sequence is NOT completely invertible
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code> followed by <code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code> on a discrete sequence is NOT completely invertible
 (due to integration of the implied comb function??),
 and would require division by a factor of <span class="math notranslate nohighlight">\(\Delta f\)</span> (the spectral width) in order
 to retrieve the original function</p>
@@ -520,7 +521,7 @@ deal with the consequences.</p>
 </dl>
 <p>Where <span class="math notranslate nohighlight">\(t_{dw}=\frac{1}{\Delta f}\)</span>, is the dwell time (with <span class="math notranslate nohighlight">\(\Delta f\)</span> the spectral width).</p>
 <p><em>Why do we do this?</em> Note that while the analytical integral this corresponds to is normalized, performing
-<a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code></a> followed by <a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> on a discrete sequence is NOT completely invertible
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code> followed by <code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code> on a discrete sequence is NOT completely invertible
 (due to integration of the implied comb function??),
 and would require division by a factor of <span class="math notranslate nohighlight">\(\Delta f\)</span> (the spectral width) in order
 to retrieve the original function</p>

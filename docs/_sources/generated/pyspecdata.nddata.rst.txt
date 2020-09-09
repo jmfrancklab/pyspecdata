@@ -1,7 +1,7 @@
-pyspecdata.core.nddata
-======================
+pyspecdata.nddata
+=================
 
-.. currentmodule:: pyspecdata.core
+.. currentmodule:: pyspecdata
 
 .. autoclass:: nddata
 
