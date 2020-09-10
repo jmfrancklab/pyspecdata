@@ -261,8 +261,10 @@ def load_jcamp(file_reference,*subpath):
             return val[1:-1]
         elif '.' in val:
             return double(val)
+        elif 'e-' in val.lower():
+            return double(val)
         else:
-            return int(float(val))
+            return int(val)
     fp = open_subpath(file_reference,*subpath)
     lines = fp.readlines()
     if isinstance(lines[0],bytes):
