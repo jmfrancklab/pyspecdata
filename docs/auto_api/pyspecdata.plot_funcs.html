@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyspecdata.plot_funcs package &mdash; pySpecData 0.9.5.1.7 documentation</title>
+  <title>pyspecdata.plot_funcs package &mdash; pySpecData 0.9.5.3.1 documentation</title>
   
 
   
@@ -21,11 +21,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.9.5.1.7
+                0.9.5.3.1
               </div>
             
           
@@ -161,9 +161,9 @@
 </div>
 <div class="section" id="module-pyspecdata.plot_funcs.image">
 <span id="pyspecdata-plot-funcs-image-module"></span><h2>pyspecdata.plot_funcs.image module<a class="headerlink" href="#module-pyspecdata.plot_funcs.image" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.plot_funcs.image.fl_image">
-<code class="sig-prename descclassname">pyspecdata.plot_funcs.image.</code><code class="sig-name descname">fl_image</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">A</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.image.fl_image" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.plot_funcs.image.</code><code class="sig-name descname">fl_image</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">A</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.image.fl_image" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called as <cite>fl.image()</cite> where <cite>fl</cite> is the <cite>figlist_var</cite>
 object</p>
 <p>Note that this code just wraps the figlist properties, and
@@ -211,7 +211,7 @@ corresponding colorbar.</p></li>
 <li><p>If no title has been given, it’s set to the name of the
 current plot in the figurelist</p></li>
 </ul>
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.plot_funcs.image.A">
 <code class="sig-prename descclassname">pyspecdata.plot_funcs.image.</code><code class="sig-name descname">A</code><a class="headerlink" href="#pyspecdata.plot_funcs.image.A" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -221,7 +221,7 @@ current plot in the figurelist</p></li>
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.plot_funcs.image.x">
 <code class="sig-prename descclassname">pyspecdata.plot_funcs.image.</code><code class="sig-name descname">x</code><a class="headerlink" href="#pyspecdata.plot_funcs.image.x" title="Permalink to this definition">¶</a></dt>
 <dd><p>If <cite>A</cite> is a numpy array, then this gives the values along
@@ -235,7 +235,7 @@ Not used if <cite>A</cite> is <cite>nddata</cite>.</p>
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.plot_funcs.image.y">
 <code class="sig-prename descclassname">pyspecdata.plot_funcs.image.</code><code class="sig-name descname">y</code><a class="headerlink" href="#pyspecdata.plot_funcs.image.y" title="Permalink to this definition">¶</a></dt>
 <dd><p>If <cite>A</cite> is a numpy array, then this gives the values along
@@ -249,7 +249,7 @@ Not used if <cite>A</cite> is <cite>nddata</cite>.</p>
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.plot_funcs.image.x_first">
 <code class="sig-prename descclassname">pyspecdata.plot_funcs.image.</code><code class="sig-name descname">x_first</code><a class="headerlink" href="#pyspecdata.plot_funcs.image.x_first" title="Permalink to this definition">¶</a></dt>
 <dd><p>Since it’s designed to represent matrices, an image plot
@@ -264,7 +264,7 @@ you are plotting a contour plot on top of an image), then set
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.plot_funcs.image.spacing">
 <code class="sig-prename descclassname">pyspecdata.plot_funcs.image.</code><code class="sig-name descname">spacing</code><a class="headerlink" href="#pyspecdata.plot_funcs.image.spacing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determines the size of the white/black line drawn
@@ -276,7 +276,7 @@ Defaults to 1</p>
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.plot_funcs.image.ax">
 <code class="sig-prename descclassname">pyspecdata.plot_funcs.image.</code><code class="sig-name descname">ax</code><a class="headerlink" href="#pyspecdata.plot_funcs.image.ax" title="Permalink to this definition">¶</a></dt>
 <dd><p>the Axis object where the plot should go.</p>
@@ -287,13 +287,13 @@ Defaults to 1</p>
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt>
 <code class="sig-name descname">all remaning</code></dt>
 <dd><p>are passed through to matplotlib <cite>imshow</cite></p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="pyspecdata.plot_funcs.image.origin">
 <code class="sig-prename descclassname">pyspecdata.plot_funcs.image.</code><code class="sig-name descname">origin</code><a class="headerlink" href="#pyspecdata.plot_funcs.image.origin" title="Permalink to this definition">¶</a></dt>
 <dd><p>upper and lower are passed to matplotlib.
@@ -305,7 +305,7 @@ Flip is for 2D nmr, and flips the data manually.</p>
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt>
 <code class="sig-name descname">.. code-block:: python</code></dt>
 <dd><p>from pyspecdata import *
@@ -327,15 +327,15 @@ fl.plot(z[‘y’:(0,0.01)])</p>
 
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.plot_funcs.image.image">
-<code class="sig-prename descclassname">pyspecdata.plot_funcs.image.</code><code class="sig-name descname">image</code><span class="sig-paren">(</span><em class="sig-param">A</em>, <em class="sig-param">x=[]</em>, <em class="sig-param">y=[]</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.image.image" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.plot_funcs.image.</code><code class="sig-name descname">image</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">A</span></em>, <em class="sig-param"><span class="n">x</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.image.image" title="Permalink to this definition">¶</a></dt>
 <dd><p>Please don’t call image directly anymore – use the image method of figurelist</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.plot_funcs.image.imagehsv">
-<code class="sig-prename descclassname">pyspecdata.plot_funcs.image.</code><code class="sig-name descname">imagehsv</code><span class="sig-paren">(</span><em class="sig-param">A</em>, <em class="sig-param">logscale=False</em>, <em class="sig-param">black=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.image.imagehsv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.plot_funcs.image.</code><code class="sig-name descname">imagehsv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">A</span></em>, <em class="sig-param"><span class="n">logscale</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">black</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.image.imagehsv" title="Permalink to this definition">¶</a></dt>
 <dd><p>This provides the HSV mapping used to plot complex number</p>
 </dd></dl>
 

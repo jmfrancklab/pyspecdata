@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ND-Data &mdash; pySpecData 0.9.5.1.7 documentation</title>
+  <title>ND-Data &mdash; pySpecData 0.9.5.3.1 documentation</title>
   
 
   
@@ -21,11 +21,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.9.5.1.7
+                0.9.5.3.1
               </div>
             
           
@@ -198,7 +198,7 @@
             
   <div class="section" id="nd-data">
 <h1>ND-Data<a class="headerlink" href="#nd-data" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="nddata-summary-label"></span><p>(This is an introduction.  For detailed info, see <a class="reference internal" href="pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span> <span class="pre">documentation</span></code></a>.)</p>
+<span class="target" id="nddata-summary-label"></span><p>(This is an introduction.  For detailed info, see <a class="reference internal" href="pyspecdata.html#id0" title="pyspecdata.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span> <span class="pre">documentation</span></code></a>.)</p>
 <p>The nddata class is built on top of <a class="reference external" href="http://numpy.org">numpy</a>.
 Numpy allows you to create multi-dimensional arrays of data.</p>
 <div class="section" id="multidimensional-data">
@@ -216,11 +216,11 @@ and are used to automatically format plots.</p>
 </div>
 <p>Very importantly, most pyspecdata functions are designed to operate on the data <em>in place</em>, meaning that
 rather than doing something like:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="c1"># numpy</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="c1"># numpy</span>
 </pre></div>
 </div>
 <p>you simply do:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="s1">&#39;axisname&#39;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="s1">&#39;axisname&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>and <code class="docutils literal notranslate"><span class="pre">data</span></code> is modified from here out.
@@ -228,7 +228,7 @@ We do this because we are typically processing multidimensional datasets that co
 and we subject them to a series of steps to process them.
 We don’t want to use up memory with lots of copies of the data.
 Also, this allows us to string together several operation, e.g.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">ft</span><span class="p">(</span><span class="s1">&#39;axis1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s1">&#39;axis2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="s1">&#39;axis3&#39;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">ft</span><span class="p">(</span><span class="s1">&#39;axis1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s1">&#39;axis2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="s1">&#39;axis3&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>So, while this general setup is different than the standard numpy setup,
@@ -267,13 +267,13 @@ However, in practice, you should first ask yourself whether there is already a m
 loading your data from a source file or an instrument automatically.
 If not, it’s still relatively simple to construct your own <cite>nddata</cite>.</p>
 <p>For example, let’s consider a case where we have <em>x</em> and <em>y</em> data</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="o">*</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>To transform this into an ndata, we assign <em>y</em> as the data, and label it with <em>x</em> as the axis label.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="s1">&#39;x&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="s1">&#39;x&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The first function <code class="docutils literal notranslate"><span class="pre">nddata(y,'x')</span></code> creates an instance of nddata; to do this,
@@ -308,7 +308,7 @@ if a dimension is present in one array
 but not the other,
 pyspecdata will simply tile the smaller array along the missing dimension(s).</p>
 <p>To see how this works, compare the results of</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">*</span><span class="n">b</span>
 <span class="go">[0, 1, 4, 9]</span>
@@ -320,7 +320,7 @@ pyspecdata will simply tile the smaller array along the missing dimension(s).</p
 </div>
 <p>which are arrays of data organized along the <em>same</em> dimension,
 and</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">a</span><span class="o">*</span><span class="n">b</span>
 <span class="go">[[0, 0, 0, 0]</span>
@@ -358,7 +358,7 @@ These can be combined in a single square bracket, separated by commas.</p>
 <p>To pull a single point along a particular dimension,
 you can just use the value of the axis.
 The point nearest to the axis will be returned.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">:</span><span class="mf">1.1</span><span class="p">]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">:</span><span class="mf">1.1</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Will return the point (or slice of data) where the t2 axis is closest to 1.1 s.</p>
@@ -367,7 +367,7 @@ The point nearest to the axis will be returned.</p>
 <h3>Axis Ranges<a class="headerlink" href="#axis-ranges" title="Permalink to this headline">¶</a></h3>
 <p>You can specify an inclusive range of numbers along an axis.
 For example, to select from 0 to 100 μs along <cite>t2</cite>, you use:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">:(</span><span class="mi">0</span><span class="p">,</span><span class="mf">100e-6</span><span class="p">)]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">:(</span><span class="mi">0</span><span class="p">,</span><span class="mf">100e-6</span><span class="p">)]</span>
 </pre></div>
 </div>
 <p>Either value in parentheses can be <cite>None</cite>, in which case, all values to the end of the axis will be selected.</p>
@@ -377,7 +377,7 @@ For example, to select from 0 to 100 μs along <cite>t2</cite>, you use:</p>
 <p>You can still use standard index-based references
 or slices:
 you do this by placing a comma after your dimension name, rather than a colon:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span> <span class="c1"># select index 5 (6th element)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span> <span class="c1"># select index 5 (6th element)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">,</span><span class="mi">5</span><span class="p">::</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="c1"># select from index 5 up to 2 elements before the end</span>
 </pre></div>
 </div>
@@ -385,11 +385,11 @@ you do this by placing a comma after your dimension name, rather than a colon:</
 <div class="section" id="logical">
 <h3>Logical<a class="headerlink" href="#logical" title="Permalink to this headline">¶</a></h3>
 <p>You can use functions that return logical values to select</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">5</span><span class="p">]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">5</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>returns all <em>data values</em> that are less 5 away from 2 (values from -3 to 8).</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">5</span><span class="p">]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">5</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>When this is done, nddata will check to see if slices along any dimension are uniformly missing.
@@ -416,7 +416,7 @@ and by explicitly specifying the domain.</p>
 By default, it is initially set to <code class="docutils literal notranslate"><span class="pre">{'\&lt;t':'\&lt;f','\&lt;T':'\&lt;F'}</span></code>,
 meaning that t and f at the beginning of word will be converted into each other.
 This means that the following command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;f2&#39;</span><span class="p">:(</span><span class="o">-</span><span class="mf">1e6</span><span class="p">,</span><span class="mf">1e6</span><span class="p">)]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;f2&#39;</span><span class="p">:(</span><span class="o">-</span><span class="mf">1e6</span><span class="p">,</span><span class="mf">1e6</span><span class="p">)]</span>
 </pre></div>
 </div>
 <p>would switch something with a dimension named <cite>t2</cite> to the frequency dimension
@@ -429,7 +429,7 @@ can be used.
 Here, ‘t’ and ‘f’ always correspond to the “original” and “conjugate” domains, respectively.
 Since, sometimes this might lead to confusion, ‘u’ and ‘v’ serve the same respective functions.</p>
 <p>Therefore this command performs the same function as the last line of code:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">:</span><span class="s1">&#39;f&#39;</span><span class="p">:(</span><span class="o">-</span><span class="mf">1e6</span><span class="p">,</span><span class="mf">1e6</span><span class="p">)]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">:</span><span class="s1">&#39;f&#39;</span><span class="p">:(</span><span class="o">-</span><span class="mf">1e6</span><span class="p">,</span><span class="mf">1e6</span><span class="p">)]</span>
 </pre></div>
 </div>
 <div class="admonition-todo admonition" id="id6">
@@ -461,7 +461,7 @@ called <code class="docutils literal notranslate"><span class="pre">a</span></co
 <code class="docutils literal notranslate"><span class="pre">d.run(abs)</span></code> will take the absolute value of the data in-place, while
 <code class="docutils literal notranslate"><span class="pre">d.run(std,'t2')</span></code> will run a standard deviation along the ‘t2’ axis
 (this removes the ‘t2’ dimension once you’re done, since it would have a length of only 1 – <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata.run_nopop" title="pyspecdata.nddata.run_nopop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyspecdata.nddata.run_nopop()</span></code></a> would not remove the dimension).</p>
-<p><em>For a full list of methods</em>, see the API documentation: <a class="reference internal" href="pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.nddata</span></code></a>.</p>
+<p><em>For a full list of methods</em>, see the API documentation: <a class="reference internal" href="pyspecdata.html#id0" title="pyspecdata.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.nddata</span></code></a>.</p>
 </div>
 <div class="section" id="basic-examples">
 <h2>Basic Examples<a class="headerlink" href="#basic-examples" title="Permalink to this headline">¶</a></h2>

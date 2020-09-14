@@ -13,6 +13,8 @@ pyspecdata.datadir
       getDATADIR
       get_notebook_dir
       grab_data_directory
+      log_fname
+      rclone_search
    
    
 

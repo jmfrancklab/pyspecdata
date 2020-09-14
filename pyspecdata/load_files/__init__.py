@@ -60,6 +60,7 @@ def search_filename(searchstring,exp_type,
     """
     #{{{ actually find the files
     directory = getDATADIR(exp_type=exp_type)
+    logging.debug(strm("looking for",searchstring,"inside",directory,"which was found to correspond to",exp_type))
     def look_inside(inp_directory):
         logger.debug(strm("looking inside directory",inp_directory))
         dirlist = os.listdir(inp_directory)
@@ -86,7 +87,7 @@ def search_filename(searchstring,exp_type,
             exptype_msg = "\nYou probably need to set exp_type so I know where inside {1:s} to find the file."
         err = log_fname('missing_data_files',
                 searchstring.replace('.*','*').replace('(','{').replace(')','}').replace('|',','),
-                exp_type,
+                directory,
                 err=True)
         raise ValueError("Can't find file specified by search string %s"%searchstring+'\n'+err)
     else:
@@ -97,7 +98,7 @@ def search_filename(searchstring,exp_type,
             else:
                 warnings.warn('found multiple files:\n'+'\n\t'.join(files)+'\nand opening last')
         elif print_result:
-            logger.info("found only one file, and loading it:"+repr(files))
+            logger.debug("found only one file, and loading it:"+repr(files))
     #}}}
     retval = [directory+j for j in files]
     if unique:
@@ -124,6 +125,7 @@ def find_file(searchstring,
 
     It looks at the top level of the directory first, and if that fails, starts to look recursively.
     Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
+    (For a more thorough description, see :func:`~pyspecdata.datadir.getDATADIR`).
 
     Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
     (so that you can make sure they are properly synced to the cloud, etc.).
@@ -194,7 +196,7 @@ def find_file(searchstring,
         types of postprocessing to add to the `postproc_lookup` dictionary
         '''
     postproc_lookup.update(lookup)
-    logger.info(strm("find_file sees indirect_dimlabels",
+    logger.debug(strm("find_file sees indirect_dimlabels",
         indirect_dimlabels))
     # {{{ legacy warning
     if 'subdirectory' in list(kwargs.keys()):
@@ -206,7 +208,7 @@ def find_file(searchstring,
         # naive replacement to match rclone-like rules
         err = log_fname('missing_data_files',
                 searchstring.replace('.*','*').replace('(','{').replace(')','}').replace('|',','),
-                exp_type,
+                directory,
                 err=True)
         raise ValueError("Can't find file specified by search string %s"%searchstring+'\n'+err)
     data = None
@@ -243,10 +245,11 @@ def find_file(searchstring,
         else:
             if postproc_type in list(postproc_lookup.keys()):
                 data = postproc_lookup[postproc_type](data,**kwargs)
+                if 'fl' in kwargs.keys(): kwargs.pop('fl')
                 logger.debug('this file was postprocessed successfully')
             else:
                 logger.debug('postprocessing not defined for file with postproc_type %s --> it should be defined in the postproc_type dictionary in load_files.__init__.py'+postproc_type)
-            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing (you have %s)"%str(kwargs)
+            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing (you have %s) -- the postproc function should pop the keys from the dictionary after use"%str(kwargs)
             return data
 def format_listofexps(args):
     """**Phased out**: leaving documentation so we can interpret and update old code
@@ -306,7 +309,7 @@ def _check_signature(filename):
             retval = file_signatures[next((thiskey for thiskey in
                 list(file_signatures.keys()) if thiskey in
                 inistring))]
-            logger.info(strm("Found magic signature, returning",
+            logger.debug(strm("Found magic signature, returning",
                 retval))
             return retval
         else:
@@ -461,13 +464,13 @@ def load_indiv_file(filename, dimname='', return_acq=False,
         else:
             logger.debug(strm("determining type by extension"))
             if type_by_extension == 'SPC':
-                logger.info(strm("skipping SPC file",filename))
+                logger.debug(strm("skipping SPC file",filename))
                 return None # ignore SPC, and leave the reading to the PAR file
             elif type_by_extension == 'DTA':
-                logger.info(strm("skipping DTA file",filename))
+                logger.debug(strm("skipping DTA file",filename))
                 return None # ignore DTA and load the reading to the DSC file
             elif type_by_extension == 'YGF':
-                logger.info(strm("skipping YGA file",filename))
+                logger.debug(strm("skipping YGA file",filename))
                 return None # ignore YGA and load the reading to the DSC file
             else:
                 raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)

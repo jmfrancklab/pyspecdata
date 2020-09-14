@@ -59,13 +59,13 @@ from matplotlib.collections import PolyCollection
 from matplotlib.colors import LightSource
 from matplotlib.lines import Line2D
 from scipy.interpolate import griddata as scipy_griddata
-import tables
+if not inside_sphinx():
+    import tables
 import warnings
 import re
-from inspect import ismethod
+from inspect import ismethod,signature,Parameter
 from numpy.core import rec
 from matplotlib.pyplot import cm
-import tables
 from copy import deepcopy 
 import traceback
 import sympy
@@ -73,7 +73,6 @@ from scipy.optimize import leastsq
 from scipy.signal import fftconvolve
 import scipy.sparse as sparse
 import numpy.lib.recfunctions as recf
-from inspect import getargspec
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
 from .datadir import getDATADIR,log_fname
@@ -99,6 +98,10 @@ rcParams['axes.grid'] = False
 rcParams['font.size'] = 18
 rcParams['image.cmap'] = 'jet'
 rcParams['figure.figsize']=(16,12)
+if inside_sphinx():
+    mat2array = []
+else:
+    mat2array = [{'ImmutableMatrix': array}, 'numpy']# for sympy returns arrays rather than the stupid matrix class
 logger = logging.getLogger('pyspecdata.core')
 #{{{ constants
 k_B = 1.380648813e-23
@@ -112,8 +115,23 @@ gammabar_e = 2.807e10 # this is for a nitroxide
 #}}}
 def apply_oom(average_oom,numbers,prev_label=''):
     """scale numbers by the order of magnitude average_oom and change the
-    label prev_label by adding the appropriate SI prefix"""
-    average_oom = int(average_oom/3.0)*3
+    name of the units by adding the appropriate SI prefix
+
+    Parameters
+    ----------
+    average_oom: int or float
+        the average order of magnitude to use
+    numbers: ndarray
+        The numbers to be scaled by average_oom.
+        The array is modified in-place.
+    prev_label: str
+        a string representing the units
+
+    Returns
+    -------
+    new_label: str
+        prev_label is prefixed by the appropriate SI prefix
+    """
     oom_names =   ['T' , 'G' , 'M' , 'k' , '' , 'm' , '\\mu ' , 'n' , 'p']
     oom_values = r_[12 , 9   , 6   , 3   , 0  , -3  , -6     , -9  , -12]
     eq = oom_values == average_oom
@@ -126,7 +144,15 @@ def apply_oom(average_oom,numbers,prev_label=''):
             raise ValueError(strm("you passed",average_oom,"which I can't find a prefix for"))
     else:
         oom_index = nonzero(eq)[0][0]
-    numbers[:] /= 10.**oom_values[oom_index]
+    if numbers.dtype in ['int32','int64']:
+        # this is not necessary unless we have an integer type
+        logger.warning("you are trying to determine the SI prefix of a"
+                "set of numbers that are described by integers.  This is"
+                "probably not a good idea!!")
+        new_values = numbers / 10.**oom_values[oom_index]
+        numbers[:] = new_values.astype(numbers.dtype)
+    else:
+        numbers[:] /= 10.**oom_values[oom_index]
     return oom_names[oom_index]+prev_label
 def mybasicfunction(first_figure = None):
     r'''this gives the format for doing the image thing
@@ -862,7 +888,7 @@ def h5loaddict(thisnode):
     for k,v in retval.items():#{{{ search for record arrays that represent normal lists
         retval[k]  = unmake_ndarray(v,name_forprint = k)
     if isinstance(thisnode, tables.table.Table):#{{{ load any table data
-        logger.info(strm("It's a table\n\n"))
+        logger.debug(strm("It's a table\n\n"))
         if 'data' in list(retval.keys()):
             raise AttributeError('There\'s an attribute called data --> this should not happen!')
         retval.update({'data':thisnode.read()})
@@ -1031,7 +1057,7 @@ def h5nodebypath(h5path,force = False,only_lowest = False,check_only = False,dir
     h5path = h5path.split('/')
     #{{{ open the file / check if it exists
     logger.debug(strm(lsafen('h5path=',h5path)))
-    logger.info(strm('the h5path is',h5path))
+    logger.debug(strm('the h5path is',h5path))
     if h5path[0] in listdir(directory):
         logger.debug(strm('DEBUG: file exists\n\n'))
         log_fname('data_files',h5path[0],directory)
@@ -1069,10 +1095,10 @@ def h5nodebypath(h5path,force = False,only_lowest = False,check_only = False,dir
                         create = create,
                         clear = clear)
                 logger.debug(strm(lsafen("searching for node path: descended to node",currentnode)))
-                logger.info(strm("searching for node path: descended to node",currentnode))
+                logger.debug(strm("searching for node path: descended to node",currentnode))
             except BaseException as e:
                 logger.debug(strm(lsafen("searching for node path: got caught searching for node",h5path[pathlevel])))
-                logger.info(strm("searching for node path: got caught searching for node",h5path[pathlevel]))
+                logger.debug(strm("searching for node path: got caught searching for node",h5path[pathlevel]))
                 h5file.close()
                 #print lsafen("DEBUG: Yes, I closed the file")
                 raise IndexError(strm('Problem trying to load node ',h5path,explain_error(e)))
@@ -1109,9 +1135,9 @@ def h5attachattributes(node,listofattributes,myvalues):
             # {{{ pytables hates <U24 which is created from unicode
             if type(thisval) in [list,tuple]:
                 if any([isinstance(x,str) for x in thisval]):
-                    logger.info(strm("going to convert",thisval,"to strings"))
+                    logger.debug(strm("going to convert",thisval,"to strings"))
                     thisval = [str(x) if isinstance(x,str) else x for x in thisval]
-                    logger.info(strm("now it looks like this:",thisval))
+                    logger.debug(strm("now it looks like this:",thisval))
             thisval = make_ndarray(thisval,name_forprint = thisattr)
             # }}}
         if thisval is not None:
@@ -1293,8 +1319,9 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
             ax.yaxis.set_minor_locator(minorLocator)
             #}}}
     ax.yaxis.grid(use_grid,which='major',color=gridcolor,alpha=0.15,linestyle='-')
-    ax.yaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.125,linestyle='-')
-    ax.xaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.125,linestyle='-')
+    ax.xaxis.grid(use_grid,which='major',color=gridcolor,alpha=0.15,linestyle='-')
+    ax.yaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.075,linestyle='-')
+    ax.xaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.075,linestyle='-')
     labels = ax.get_xticklabels()
     setp(labels,rotation=rotation[0],fontsize=10)
     if y:
@@ -2392,9 +2419,10 @@ def plot(*args,**kwargs):
     if isinstance(myy,nddata):
         myy = myy.copy()
         # {{{ automatically reduce any singleton dimensions
-        if any(array(myy.data.shape) == 1):
-            for singleton_dim in [lb for j,lb in enumerate(myy.dimlabels) if myy.data.shape[j] == 1]:
-                myy = myy[singleton_dim,0]
+        if not len(myy.dimlabels) == 1:
+            if any(array(myy.data.shape) == 1):
+                for singleton_dim in [lb for j,lb in enumerate(myy.dimlabels) if myy.data.shape[j] == 1]:
+                    myy = myy[singleton_dim,0]
         # }}}
         if len(myy.data.shape)>1 and longest_is_x:
             longest_dim = argmax(myy.data.shape)
@@ -2465,7 +2493,10 @@ def plot(*args,**kwargs):
         if myy.get_prop('x_inverted'):
             x_inverted=True
         #myy_name = myy.name()
-        myy = squeeze(myy.data.transpose([longest_dim]+all_but_longest))
+        if len(myy.data.shape) == 1:
+            myy = myy.data
+        else:
+            myy = squeeze(myy.data.transpose([longest_dim]+all_but_longest))
         #if len(myy.data) == 1 and 'label' not in kwargs.keys() and myy_name is not None:
         #    kwargs.update('label',myy_name)
         # }}}
@@ -2598,14 +2629,28 @@ def box_muller(length, return_complex=True):
 #}}}
 
 #{{{nddata
-#{{{ format out to a certain decimal place
-def dp(number,decimalplaces,scientific=False):
+def dp(number,decimalplaces=2,scientific=False,max_front=3):
+    """format out to a certain decimal places, potentially in scientific notation
+
+    Parameters
+    ----------
+    decimalplaces: int (optional, default 3)
+        number of decimal places
+    scientific: boolean (optional, default False)
+        use scientific notation
+    max_front: int (optional, default 3)
+        at most this many places in front of the decimal before switching
+        automatically to scientific notation.
+    """
     if scientific:
-        tenlog = floor(log(number)/log(10.))
+        logger.debug(strm("trying to convert",number,"to scientific notation"))
+        tenlog = int(floor(log10(abs(number))))
         number /= 10**tenlog
         fstring = '%0.'+'%d'%decimalplaces+r'f\times 10^{%d}'%tenlog
     else:
         fstring = '%0.'+'%d'%decimalplaces+'f'
+        if len(fstring%number) > 1+decimalplaces+max_front:
+            return dp(number, decimalplaces=decimalplaces, scientific=True)
     return fstring%number
 #}}}
 #{{{ concatenate datalist along dimname
@@ -3166,39 +3211,35 @@ class nddata (object):
     # list -- same information, but it's assumed they are listed in the order given by "dimlabels"
     def mkd(self,*arg,**kwargs):
         'make dictionary format'
-        #{{{ process kwargs
-        give_None = True
-        if len(kwargs) > 0:
-            if 'give_None' in list(kwargs.keys()):
-                give_None = kwargs.pop('give_None')
-        if len(kwargs) > 0:
-            raise ValueError(strm("you passed mkd kwargs I didn't understand:",kwargs))
-        #}}}
+        give_None = process_kwargs([("give_None",True)],kwargs)
         if len(arg) == 1:
-            if emptytest(arg[0]):
-                return dict(list(zip(self.dimlabels,
-                    [None]*len(self.dimlabels))))
-            if len(arg[0]) != len(self.dimlabels):
+            input_list = arg[0]
+            if emptytest(input_list):
+                return dict(zip(self.dimlabels,
+                    [None]*len(self.dimlabels)))
+            if len(input_list) != len(self.dimlabels):
                 print(r"{\color{red}WARNING! mkd error (John will fix this later):}")
                 print("When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is "+repr(self.dimlabels)+" and you passed "+repr(arg)+'\n\n')
                 raise ValueError("When making a dictionary with mkd, you must pass a list that has one element for each dimension!  dimlabels is "+repr(self.dimlabels)+" and you passed "+repr(arg))
-            for i,v in enumerate(arg[0]):
+            for i,v in enumerate(input_list):
                 if isinstance(v, ndarray):
-                    if v.shape == ():
-                        arg[0][i] = None
+                    if v.shape == () and v.size == 0:
+                        input_list[i] = None
+                    if v.dtype.type in [str_, bytes_]:
+                        input_list[i] = str(v)
             if give_None:
-                return dict(list(zip(self.dimlabels,arg[0])))
+                return dict(zip(self.dimlabels,input_list))
             else:
                 #{{{ don't return values for the things that are None
-                mykeys = [self.dimlabels[j] for j in range(0,len(self.dimlabels)) if arg[0][j] is not None]
-                myvals = [arg[0][j] for j in range(0,len(self.dimlabels)) if arg[0][j] is not None]
-                return dict(list(zip(mykeys,myvals)))
+                mykeys = [self.dimlabels[j] for j in range(0,len(self.dimlabels)) if input_list[j] is not None]
+                myvals = [input_list[j] for j in range(0,len(self.dimlabels)) if input_list[j] is not None]
+                return dict(zip(mykeys,myvals))
                 #}}}
         elif len(arg) == 0:
             if not give_None:
                 raise ValueError("You can't tell me not to give none and then not pass me anything!!")
-            return dict(list(zip(self.dimlabels,
-                [None]*len(self.dimlabels))))
+            return dict(zip(self.dimlabels,
+                [None]*len(self.dimlabels)))
         else:
             raise ValueError(strm('.mkd() doesn\'t know what to do with %d arguments',len(arg)))
     def fld(self,dict_in,noscalar = False):
@@ -3307,6 +3348,7 @@ class nddata (object):
         `set_error('axisname',error_for_axis)` or `set_error(error_for_data)`
 
         `error_for_data` can be a scalar, in which case, **all** the data errors are set to `error_for_data`
+
         .. todo::
                 several options below -- enumerate them in the documentation
         '''
@@ -3676,7 +3718,7 @@ class nddata (object):
     def __rpow__(self,arg):
         result = self.copy()
         result.set_error(None)
-        logger.info("error propagation for right power not currently supported (do you need this, really?)")
+        logger.debug("error propagation for right power not currently supported (do you need this, really?)")
         assert isscalar(arg) or isinstance(arg, ndarray), "currently right power only supported for ndarray and scalars -- do you really need something else??"
         result.data = arg**self.data
         return result
@@ -4384,26 +4426,40 @@ class nddata (object):
     def run_nopop(self,func,axis):
         func = self._wrapaxisfuncs(func)
         try:
-            thisaxis = self.dimlabels.index(axis)
+            thisaxis = self.axn(axis)
         except Exception as e:
             raise IndexError(strm("I couldn't find the dimension",axis,
                 "in the list of axes",self.dimlabels))
         temp = list(self.data.shape)
         temp[thisaxis] = 1
-        numnonoptargs = len(getargspec(func)[0])-len(getargspec(func)[3])
-        if numnonoptargs == 1:
-            try:
-                self.data = func(self.data,axis=thisaxis)
-            except TypeError:
-                self.data = func(self.data,axes=thisaxis)
-        elif numnonoptargs == 2:
-            try:
+        func_sig = signature(func)
+        numnonoptargs = len([v.default for v in func_sig.parameters.values() if v.default==Parameter.empty])
+        kwargnames =  [k for k,v in func_sig.parameters.items() if v.default!=Parameter.empty]
+        if numnonoptargs == 2:
+            if 'axis' in kwargnames:
                 self.data = func(self.getaxis(axis),self.data,axis=thisaxis)
-            except TypeError:
+            if 'axes' in kwargnames:
                 self.data = func(self.getaxis(axis),self.data,axes=thisaxis)
+            else:
+                raise ValueError("Your function doesn't have axis or axes as a keyword argument!")
         else:
-            raise ValueError('you passed a function to run_nopop that doesn\'t'
-                    'have either one or two arguments!')
+            if numnonoptargs == 1:
+                paramnames = [k for k in func_sig.parameters.keys()]
+                if len(paramnames) == 1:
+                    if func_sig.parameters[paramnames[0]].kind == Parameter.VAR_POSITIONAL:
+                        try:
+                            self.data = func(self.data,axis=thisaxis)
+                        except:
+                            self.data = func(self.data,axes=thisaxis)
+                if 'axis' in kwargnames:
+                    self.data = func(self.data,axis=thisaxis)
+                elif 'axes' in kwargnames:
+                    self.data = func(self.data,axes=thisaxis)
+                else:
+                    raise ValueError("Your function doesn't have axis or axes as a keyword argument! The number of non-optional arguments are %s. The keyword arguments are %s"%(str(numnonoptargs),str(kwargnames)))
+            else:
+                raise ValueError('you passed a function to run_nopop that doesn\'t'
+                        'have either one or two arguments!')
         #{{{ if the function doesn't rip out the dim, make sure we don't change the dims
         if len(self.data.shape)==len(temp):
             temp[thisaxis] = self.data.shape[thisaxis]
@@ -5240,6 +5296,10 @@ class nddata (object):
                 if thisax is not None:
                     thisax = thisax.copy()
                 self.setaxis(thisdim,thisax)
+                if other.get_error(thisdim) is not None:
+                    self.set_error(thisdim, copy(other.get_error(thisdim)))
+                if other.get_units(thisdim) is not None:
+                    self.set_units(thisdim, other.get_units(thisdim))
         return self
     def axis(self,axisname):
         'returns a 1-D axis for further manipulation'
@@ -5328,7 +5388,6 @@ class nddata (object):
             raise ValueError('Wrong number of arguments!! -- you passed '+repr(len(args))+' arguments!')
         if issympy(func):
             logging.debug(strm("about to run sympy lambdify, symbols_in_func is",symbols_in_func))
-            mat2array = [{'ImmutableMatrix': array}, 'numpy']# returns arrays rather than the stupid matrix class
             try:
                 lambdified_func = sympy.lambdify(list(symbols_in_func), func,
                         modules=mat2array)
@@ -5460,7 +5519,7 @@ class nddata (object):
         """
         if len(args) == 2:
             axis, value = args
-            if value=='#':
+            if isscalar(value) and value=='#':
                 self.setaxis(axis,r_[0:ndshape(self)[axis]])
                 return self
         elif len(args) == 1 and issympy(args[0]):
@@ -5471,7 +5530,6 @@ class nddata (object):
             if len(symbols_not_in_dimlabels)>0:
                 raise ValueError("You passed a symbolic function, but the symbols"+str(symbols_not_in_dimlabels)+" are not axes")
             logging.debug(strm("about to run sympy lambdify, symbols_in_func is",symbols_in_func))
-            mat2array = [{'ImmutableMatrix': array}, 'numpy']# returns arrays rather than the stupid matrix class
             try:
                 lambdified_func = sympy.lambdify(list(symbols_in_func), func,
                         modules=mat2array)
@@ -5649,6 +5707,9 @@ class nddata (object):
             allow for smooshing to determine a new axes that is standard
             (not a structured array) and that increases linearly.
         '''
+        assert (type(dimstocollapse) in [list,tuple]) and len(dimstocollapse)>1, "What?? You must try to collapse more than one dimension!! -- you claim you want to collapse '%s'"%str(dimstocollapse)
+        not_present = set(dimstocollapse) - set(self.dimlabels)
+        if len(not_present) > 0: raise ValueError(strm(not_present,"was not found in the list of dimensions",self.dimlabels))
         #{{{ first, put them all at the end, in order given here
         retained_dims = list(self.dimlabels)
         logger.debug(strm("old order",retained_dims))
@@ -5671,6 +5732,7 @@ class nddata (object):
         axis_coords_units_dict = self.mkd(self.axis_coords_units)
         # }}}
         old_units = []
+        logger.debug(strm("dims to collapse",dimstocollapse))
         for this_name in dimstocollapse:
             this_idx = retained_dims.index(this_name)
             retained_dims.pop(this_idx)
@@ -5679,11 +5741,14 @@ class nddata (object):
             axis_coords_dict.pop(this_name)
             if this_idx < final_position:
                 final_position -= 1
+        logger.debug(strm("old units",old_units))
         new_units = list(set(old_units))
         if len(new_units) > 1:
             new_units = ' '.join(map(str,new_units))
-        else:
+        elif new_units == 1:
             new_units = new_units[0]
+        else:
+            new_units = None
         # this might be sub-optimal, but put the dims to collapse at the end, and move them back later if we want
         new_order = retained_dims + dimstocollapse
         self.reorder(new_order)
@@ -5705,6 +5770,8 @@ class nddata (object):
         axes_with_labels = [j for j in dimstocollapse if self.getaxis(j) is not None] # specifically, I am only concerned with the ones I am collapsing that have labels
         if noaxis:
             logger.debug('noaxis was specified')
+            axis_coords_dict[dimname] = None
+            axis_coords_error_dict[dimname] = None
         else:
             logger.debug('starting construction of the smooshed axis')
             axes_with_labels_haserror = [self.get_error(j) is not None for j in axes_with_labels]
@@ -5745,14 +5812,12 @@ class nddata (object):
                 multidim_axis_label = multidim_axis_label.flatten() # then flatten the axis
                 logger.debug(strm("shape of multidim_axis_label is now",multidim_axis_label.shape))
                 logger.debug(strm("multidim_axis_label is:\n",repr(multidim_axis_label)))
-            # }}}
-        #{{{ update axis dictionary with the new info
-        if noaxis:
-            axis_coords_dict[dimname] = None
-            axis_coords_error_dict[dimname] = None
-        else:
+            else:
+                raise ValueError("You requested that smoosh generate an axis, but I don't know what dtype to assign to it (what fields to use).  This is likely because you don't have axes assigned to the dimensions you're trying to smoosh.  Consider calling smoosh with noaxis=True, instead")
             axis_coords_dict[dimname] = multidim_axis_label
             axis_coords_error_dict[dimname] = multidim_axis_error
+            # }}}
+        #{{{ update axis dictionary with the new info
         logger.debug(strm("end up with axis_coords_dict (%d)"%len(axis_coords_dict),axis_coords_dict))
         logger.debug(strm("end up with axis_coords_error_dict (%d)"%len(axis_coords_error_dict),axis_coords_error_dict))
         #}}}
@@ -6005,64 +6070,59 @@ class nddata (object):
     #}}}
     #{{{ messing with data -- get, set, and copy
     def __getslice__(self,*args):
-        print('getslice! ',args)
-    def __setitem__(self,*args):
+        raise ValueError(strm('getslice! ',args))
+    def __setitem__(self,key,val):
         righterrors = None
-        logger.debug(strm("types of args",list(map(type,args))))
-        A = args[0]
-        if isinstance(A, nddata):
+        logger.debug(strm('key',key))
+        if isinstance(key, nddata):
             logger.debug("initially, rightdata appears to be nddata")
-            _,B = self.aligndata(A)
-            A = B.data # now the next part will handle this
-        if isinstance(A, ndarray):# if selector is an ndarray
+            _,B = self.aligndata(key)
+            key = B.data # now the next part will handle this
+        if isinstance(key, ndarray):# if selector is an ndarray
             logger.debug("initially, rightdata appears to be ndarray")
-            if A.dtype is not dtype('bool'):
-                raise ValueError("I don't know what to do with an ndarray subscript that has dtype "+repr(A.dtype))
-            if A.shape != self.data.shape:
-                temp = array(A.shape) == 1
-                if all( array(A.shape)[temp] == array(self.data.shape)[temp]):
-                    pass
-                else:
-                    raise ValueError("The shape of your logical mask "+repr(A.shape)+" and the shape of your data "+repr(self.data.shape)+" are not compatible (matching or singleton) -- I really don't think that you want to do this!")
-            self.data[A] = args[1]
+            if key.dtype is not dtype('bool'):
+                raise ValueError("I don't know what to do with an ndarray subscript that has dtype "+repr(key.dtype))
+            if key.shape != self.data.shape:
+                raise ValueError("The shape of your logical mask "
+                        +repr(key.shape)
+                        +" and the shape of your data "
+                        +repr(self.data.shape)
+                        +" are not compatible (matching or singleton) -- I really don't think that you want to do this!")
+            self.data[key] = val
             return
-        if isinstance(args[1],nddata):
+        if isinstance(val,nddata):
             logger.debug("rightdata appears to be nddata after initial treatment")
             #{{{ reorder so the shapes match
-            unshared_indices = list(set(args[1].dimlabels) ^ set(self.dimlabels))
+            unshared_indices = list(set(val.dimlabels) ^ set(self.dimlabels))
             shared_indices = list(self.dimlabels)
             if 'INDEX' in unshared_indices:
                 unshared_indices.remove('INDEX')
-            for j in unshared_indices:
-                try:
-                    shared_indices.remove(j)
-                except:
-                    raise ValueError(strm("Error trying to remove",j,"from list of shared indices",shared_indices))
-            if len(args[1].dimlabels) != len(shared_indices) or (not all([args[1].dimlabels[j] == shared_indices[j] for j in range(0,len(shared_indices))])):
-                args[1].reorder(shared_indices)
+            shared_indices = [j for j in shared_indices
+                    if j not in unshared_indices]
+            if len(val.dimlabels) != len(shared_indices) or (not all([val.dimlabels[j] == shared_indices[j] for j in range(0,len(shared_indices))])):
+                val.reorder(shared_indices)
             #}}}
-            rightdata = args[1].data
-            righterrors = args[1].get_error()
-            #print "DEBUG: and I convert it to",type(rightdata)
+            rightdata = val.data
+            righterrors = val.get_error()
         else: # assume it's an ndarray
             logger.debug("rightdata appears to be ndarray after initial treatment")
-            rightdata = args[1]
+            rightdata = val
             #{{{ if I just passed a function, assume that I'm applying some type of data-based mask
-            if isinstance(args[0], type(emptyfunction)):
-                thisfunc = args[0]
+            if isinstance(key, type(emptyfunction)):
+                thisfunc = key
                 self.data[thisfunc(self.data)] = rightdata
                 return
-                #}}}
+            #}}}
             if (not isinstance(rightdata, ndarray)): # in case its a scalar
                 rightdata = array([rightdata])
-        slicedict,axesdict,errordict,unitsdict = self._parse_slices(args[0]) # pull left index list from parse slices
-        leftindex = self.fld(slicedict)
+        slicedict,axesdict,errordict,unitsdict = self._parse_slices(key) # pull left index list from parse slices
+        leftindex = tuple(self.fld(slicedict))
         rightdata = rightdata.squeeze()
         logger.debug(strm("after squeeze, rightdata has shape",rightdata.shape))
         if len(rightdata.shape) > 0:
-            left_shape = shape(self.data[tuple(leftindex)])
+            left_shape = shape(self.data[leftindex])
             try:
-                self.data[tuple(leftindex)] = rightdata.reshape(left_shape) # assign the data
+                self.data[leftindex] = rightdata.reshape(left_shape) # assign the data
             except:
                 raise IndexError(strm('ERROR ASSIGNING NDDATA:\n',
                     'self.data.shape:',self.data.shape,
@@ -6070,12 +6130,13 @@ class nddata (object):
                     'rightdata.shape:',rightdata.shape,
                     '--> shape of left slice: ',left_shape))
         else:
-            self.data[tuple(leftindex)] = rightdata
+            self.data[leftindex] = rightdata
         lefterror = self.get_error()
         if lefterror is not None:
-            lefterror[tuple(leftindex)] = righterrors.squeeze()
+            lefterror[leftindex] = righterrors.squeeze()
+        return self
     # {{{ standard trig functions
-    def __getattr__(self,arg):
+    def __getattribute__(self,arg):
         fundict = {'exp':exp,
                 'sin':sin,
                 'cos':cos,
@@ -6094,8 +6155,7 @@ class nddata (object):
                 return retval
             return retfun
         else:
-            retval = getattr(super(nddata,self),arg)
-            return retval
+            return super().__getattribute__(arg)
     @property
     def C(self):
         """shortcut for copy
@@ -6353,33 +6413,48 @@ class nddata (object):
             and
             \'axisname\':(value1,value2)
             pairs, where the values give either a single value or an inclusive range on the axis, respectively"""
-        logger.debug(strm("about to start parsing slices for data with axis_coords of length",len(self.axis_coords),"and dimlabels",self.dimlabels,"for ndshape of",ndshape(self)))
-        #print "DEBUG getitem called with",args
+        logger.debug(strm("about to start parsing slices",args,"for data with axis_coords of length",len(self.axis_coords),"and dimlabels",self.dimlabels,"for ndshape of",ndshape(self)))
         errordict = None # in case it's not set
         if self.axis_coords_units is not None:
             unitsdict = self.mkd(self.axis_coords_units)
         axesdict = None # in case it's not set
         if isinstance(args, slice):
             args = [args]
-        else:
-            args = list(args)
-        #{{{ to make things easier, convert "slice" arguments to "axis,slice" pairs
-        j=0
-        trueslice = [] # this lets me distinguish from 'axisname',slice
+        # {{{ make a sensible list of tuples that's easier to understand
+        sensible_list = [] # type, dimension, arguments
+        testf = lambda x: x+1
+        j = 0
         while j < len(args):
-            if isinstance(args[j], slice):
-                this_dim_name = args[j].start
-                args.insert(j,this_dim_name)
-                trueslice.append(this_dim_name)
-                j+=1
-            j+=2 # even only
-        #}}}
-        for j in range(0,len(args),2):
-            if isinstance(args[j], str_):
-                args[j] = str(args[j]) # on upgrading + using on windows, this became necessary, for some reason I don't understand
+            if isinstance(args[j],str):# works for str and str_
+                dimname = args[j]
+                if isinstance(dimname, str_):
+                    dimname = str(dimname) # on upgrading + using on windows, this became necessary, for some reason I don't understand
+                elif isinstance(args[j+1],type(testf)):
+                    sensible_list.append((hash('func'),dimname,args[j+1]))
+                else:
+                    sensible_list.append((hash('np'),dimname,args[j+1]))
+                j += 2
+            elif type(args[j]) is slice:
+                dimname = args[j].start
+                if isinstance(dimname, str_):
+                    dimname = str(dimname)
+                target = args[j].stop
+                if isscalar(target):
+                    sensible_list.append((hash('idx'),dimname,target))
+                elif type(target) in [tuple,list]:
+                    assert len(target)==2, strm("for",args[j],"I expected a 'dimname':(range_start,range_stop)")
+                    sensible_list.append((hash('range'),dimname,target[0],target[1]))
+                j += 1
+            else:# works for str and str_
+                raise ValueError("I have read in slice argument",args[:j],"but then I get confused!")
+        def pprint(a):
+            b = {hash(j):j for j in ['idx','range','np']}
+            return (b[a[0]],)+a[1:]
+        logger.debug(strm('Here is the sensible list:',[pprint(j) for j in sensible_list]))
+        # }}}
         if type(args) in [float,int32,int,double]:
             raise ValueError(strm('You tried to pass just a nddata[',type(args),']'))
-        if isinstance(args[0], str):
+        if isinstance(args[0], str) or isinstance(args[0], slice):
             #{{{ create a slicedict and errordict to store the slices
             slicedict = dict(list(zip(list(self.dimlabels),[slice(None,None,None)]*len(self.dimlabels)))) #initialize to all none
             if len(self.axis_coords)>0:
@@ -6388,105 +6463,118 @@ class nddata (object):
                 if len(self.axis_coords_error)>0:
                     errordict = self.mkd(self.axis_coords_error)
             else:
-                logger.debug(strm("length of axis_coords not greater than 0"))
-            for x,y in zip(args[0::2],args[1::2]):
-                slicedict[x] = y
+                axesdict = self.mkd(self.axis_coords)
+                logger.debug(strm("length of axis_coords not greater than 0, generated dictionary",axesdict))
             #}}}
             #{{{ map the slices onto the axis coordinates and errors
-            #print "DEBUG slicedict is",slicedict
-            testf = lambda x: x+1
-            if len(self.axis_coords)>0:
-                for x,y in slicedict.items():
-                    #print "DEBUG, type of slice",x,"is",type(y)
-                    if isscalar(y):
-                        if axesdict[x] is not None:
-                            axesdict.pop(x) # pop the axes for all scalar dimensions
-                    elif isinstance(y, type(testf)):
-                        mask = y(axesdict[x])
-                        slicedict[x] = mask
-                        if axesdict[x] is not None:
-                            axesdict[x] = axesdict[x][mask]
+            for thistuple in sensible_list:
+                thisop = thistuple[0]
+                thisdim = thistuple[1]
+                thisargs = thistuple[2:]
+                #print "DEBUG, type of slice",x,"is",type(y)
+                if thisop == hash('np'):
+                    slicedict[thisdim] = thisargs[0]
+                    if isscalar(thisargs[0]):
+                        axesdict.pop(thisdim) # pop the axes for all scalar dimensions
                     else:
-                        if isinstance(y, slice) and x in trueslice:
-                            #print "DEBUG, I found",y,"to be of type slice"
-                            if y.step is not None:
-                                raise ValueError("setting the slice step is not currently supported")
-                            else:
-                                if isinstance(y.stop, tuple): #then I passed a single index
-                                    temp = diff(axesdict[x]) 
-                                    if not all(temp*sign(temp[0])>0):
-                                        raise ValueError(strm("you can only use the range format on data where the axis is in consecutively increasing or decreasing order, and the differences that I see are",temp*sign(temp[0])))
-                                    del temp
-                                    if len(y.stop) > 2:
-                                        raise ValueError("range with more than two values not currently supported")
-                                    elif len(y.stop) == 1:
-                                        temp_low = y.stop[0]
-                                        temp_high = inf
-                                        temp_high_value = inf
-                                    else:
-                                        temp_low = y.stop[0]
-                                        temp_high = y.stop[1]
-                                        temp_high_value = y.stop[1]
-                                        if temp_low is None:
-                                            temp_low = -inf
-                                        if temp_high is None:
-                                            temp_high = inf
-                                        if temp_low > temp_high:
-                                            temp_low,temp_high = temp_high,temp_low
-                                    #print "DEBUG: slice values",temp_low,'to',temp_high
-                                    if temp_low == inf:
-                                        temp_low = axesdict[x].argmax()
-                                    elif temp_low == -inf:
-                                        temp_low = axesdict[x].argmin()
-                                    else:
-                                        temp_low = abs(axesdict[x] - temp_low).argmin()
-                                    if temp_high == inf:
-                                        temp_high = axesdict[x].argmax()
-                                    elif temp_high == -inf:
-                                        temp_high = axesdict[x].argmin()
-                                    else:
-                                        temp_high = abs(axesdict[x] - temp_high).argmin()
-                                    if temp_high + 1 < len(axesdict[x]):
-                                        #print "DEBUG: I test against value",axesdict[x][temp_high + 1]
-                                        if axesdict[x][temp_high + 1] <= temp_high_value:
-                                            temp_high += 1
-                                    #print "DEBUG: evaluate to indices",temp_low,'to',temp_high,'out of',len(axesdict[x])
-                                    if temp_high-temp_low == 0:
-                                        raise ValueError('The indices '+repr(y)+' on axis '+x+' slices to nothing!  The limits of '+x+' are '+repr(axesdict[x].min())+':'+repr(axesdict[x].max()))
-                                    slicedict[x] = slice(temp_low,temp_high,None)
-                                    y = slicedict[x]
-                                else: #then I passed a single index
-                                    temp = abs(axesdict[x] - y.stop).argmin()
-                                    #slicedict[x] = slice(temp,temp+1,None)
-                                    slicedict[x] = temp
-                                    y = slicedict[x]
-                        if axesdict[x] == []:
-                            axesdict[x] = None
-                        if axesdict[x] is not None:
+                        if axesdict[thisdim] is not None:
+                            axesdict[thisdim] = axesdict[thisdim][slicedict[thisdim]]
+                elif thisop == hash('func'):
+                    mask = thisargs[0](axesdict[thisdim])
+                    slicedict[thisdim] = mask
+                    if axesdict[thisdim] is not None:
+                        axesdict[thisdim] = axesdict[thisdim][mask]
+                elif thisop == hash('range'):
+                    if axesdict[thisdim] is None:
+                        raise ValueError("You passed a range-type slice"
+                        +" selection, but to do that, your axis coordinates need to"
+                        +f" be labeled! (The axis coordinates of {thisdim} aren't"
+                        +" labeled)")
+                    temp = diff(axesdict[thisdim]) 
+                    if not all(temp*sign(temp[0])>0):
+                        raise ValueError(strm("you can only use the range format on data where the axis is in consecutively increasing or decreasing order, and the differences that I see are",temp*sign(temp[0])),
+                                "if you like, you can still do this by first calling .sort( on the %s axis"%thisdim)
+                    if sign(temp[0]) == -1:
+                        thisaxis = axesdict[thisdim][::-1]
+                    else:
+                        thisaxis = axesdict[thisdim]
+                    if len(thisargs) > 2:
+                        raise ValueError("range with more than two values not currently supported")
+                    elif len(thisargs) == 1:
+                        temp_low = thisargs[0]
+                        temp_high = inf
+                    else:
+                        temp_low = thisargs[0]
+                        temp_high = thisargs[1]
+                        if temp_low is None:
+                            temp_low = -inf
+                        if temp_high is None:
+                            temp_high = inf
+                        if temp_low > temp_high:
+                            temp_low,temp_high = temp_high,temp_low
+                    # at this point, temp_low is indeed the lower value, and temp_high indeed the higher
+                    if temp_low == inf:
+                        raise ValueError(strm("this is not going to work -- I interpret range",thisargs,"I get to",temp_low,",",temp_high))
+                    elif temp_low == -inf:
+                        temp_low = 0
+                    else:
+                        logger.debug(strm("looking for",temp_low))
+                        temp_low = searchsorted(thisaxis,temp_low)
+                        if temp_low >= len(thisaxis):
+                            raise ValueError("the lower value of your slice on the %s axis is higher than the highest value of the axis coordinates!"%thisdim)
+                        logger.debug(strm("i found",thisaxis[temp_low],"for the low end of the slice",
+                            thisargs))
+                    temp_high_float = temp_high
+                    if temp_high == inf:
+                        temp_high = len(thisaxis)-1
+                    elif temp_high == -inf:
+                        raise ValueError(strm("this is not going to work -- I interpret range",thisargs,"I get to",temp_low,",",temp_high))
+                    else:
+                        logger.debug(strm("looking for",temp_high))
+                        temp_high = searchsorted(thisaxis,temp_high)
+                    # at this point, the result is inclusive if temp_high is
+                    # not an exact match, but exclusive if it is
+                    if temp_high<len(thisaxis) and thisaxis[temp_high] == temp_high_float:
+                        temp_high += 1 # make it inclusive
+                    if sign(temp[0]) == -1:
+                        temp_high = len(thisaxis) -1 -temp_high
+                        temp_low = len(thisaxis) -1 -temp_low
+                        temp_high, temp_low = temp_low, temp_high
+                    del temp
+                    if temp_low == temp_high:
+                        temp_high += 1
+                    slicedict[thisdim] = slice(temp_low,temp_high,None) # inclusive
+                    axesdict[thisdim] = axesdict[thisdim][slicedict[thisdim]]
+                elif thisop == hash('idx'):
+                    if axesdict[thisdim] is None:
+                        raise ValueError("You passed a labeled index"
+                        +" selection, but to do that, your axis coordinates need to"
+                        +f" be labeled! (The axis coordinates of {thisdim} aren't"
+                        +" labeled)")
+                    temp = abs(axesdict[thisdim] - thisargs[0]).argmin()
+                    slicedict[thisdim] = temp
+                    axesdict.pop(thisdim)
+            if errordict is not None and errordict != array(None):
+                for x,y in slicedict.items():
+                    if errordict[x] is not None:
+                        if isscalar(y):
+                            errordict.pop(x)
+                        elif isinstance(y, type(emptyfunction)):
+                            mask = y(axesdict[x])
+                            errordict[x] = errordict[x][mask]
+                        else:
                             try:
-                                axesdict[x] = axesdict[x][y]
-                            except Exception as e:
-                                raise ValueError("axesdict is "+repr(axesdict)+"and I want to set "+repr(x)+" subscript to its "+repr(y)+" value"+explain_error(e))
-                if errordict is not None and errordict != array(None):
-                    for x,y in slicedict.items():
-                        if errordict[x] is not None:
-                            if isscalar(y):
-                                errordict.pop(x)
-                            elif isinstance(y, type(emptyfunction)):
-                                mask = y(axesdict[x])
-                                errordict[x] = errordict[x][mask]
-                            else:
-                                try:
-                                    errordict[x] = errordict[x][y] # default
-                                except:
-                                    raise IndexError(strm('Trying to index',
-                                            errordict,'-->',x,'=',errordict[x],'with',y,
-                                            'error started as',self.axis_coords_error))
+                                errordict[x] = errordict[x][y] # default
+                            except:
+                                raise IndexError(strm('Trying to index',
+                                        errordict,'-->',x,'=',errordict[x],'with',y,
+                                        'error started as',self.axis_coords_error))
             if unitsdict is not None and unitsdict != array(None):
                 for x,y in slicedict.items():
                     if unitsdict[x] is not None:
                         if isscalar(y):
                             unitsdict.pop(x)
+            logger.debug(strm('Here is the slice dict:',slicedict,"and the axes dict",axesdict))
             return slicedict,axesdict,errordict,unitsdict
             #}}}
         else:
@@ -6501,6 +6589,30 @@ class nddata (object):
         you want to put it -- it does **not** include the directory where
         the file lives.
         The directory can be passed to the `directory` argument.
+
+        You can use either :func:`~pyspecdata.find_file` or
+        :func:`~pyspecdata.nddata_hdf5` to read the data, as shown below.
+        When reading this, please note that HDF5 files store *multiple* datasets,
+        and each is named (here, the name is `test_data`).
+
+        .. code-block:: python
+
+            from pyspecdata import *
+            init_logging('debug')
+            a = nddata(r_[0:5:10j], 'x')
+            a.name('test_data')
+            try:
+                a.hdf5_write('example.h5',getDATADIR(exp_type='Sam'))
+            except:
+                print("file already exists, not creating again -- delete the file or node if wanted")
+            # read the file by the "raw method"
+            b = nddata_hdf5('example.h5/test_data',
+                    getDATADIR(exp_type='Sam'))
+            print("found data:",b)
+            # or use the find file method
+            c = find_file('example.h5', exp_type='Sam',
+                    expno='test_data')
+            print("found data:",c)
         
         Parameters
         ----------
@@ -6606,7 +6718,7 @@ class nddata (object):
                 if len(warnlist) > 0:
                     print("WARNING!!, attributes",warnlist,"are lists!")
                 #}}}
-                logger.info(strm(lsafe('other attributes:',list(zip(myotherattrs,[type(self.__getattribute__(x)) for x in myotherattrs]))),'\n\n'))
+                logger.debug(strm(lsafe('other attributes:',list(zip(myotherattrs,[type(self.__getattribute__(x)) for x in myotherattrs]))),'\n\n'))
             #}}}
         finally:
             h5file.close()
@@ -6625,9 +6737,6 @@ class nddata_hdf5 (nddata):
         else:
             return nddata.__repr__(self)
         atexit.register(self._cleanup)
-    def __del__(self):
-        self._cleanup()
-        return
     def _cleanup(self):
         if hasattr(self,'_node_children'):
             self.h5file.close()
@@ -6641,6 +6750,7 @@ class nddata_hdf5 (nddata):
                 check_only=True, directory=directory)
         #except BaseException  as e:
         #    raise IndexError("I can't find the node "+pathstring+explain_error(e))
+        logger.debug("about to call _init_datanode")
         self._init_datanode(self.datanode)
         atexit.register(self._cleanup)
     def _init_datanode(self,datanode,**kwargs):
@@ -6668,7 +6778,7 @@ class nddata_hdf5 (nddata):
         if 'axes' in list(datadict.keys()):
             myaxiscoords = [None]*len(mydimlabels)
             myaxiscoordserror = [None]*len(mydimlabels)
-            logger.info(strm("about to read out the various axes:",list(datadict['axes'].keys())))
+            logger.debug(strm("about to read out the various axes:",list(datadict['axes'].keys())))
             for axisname in list(datadict['axes'].keys()):
                 try:
                     axisnumber = mydimlabels.index(axisname)
@@ -6695,7 +6805,7 @@ class nddata_hdf5 (nddata):
                     "data!!")
             # the reshaping this refers to is done below
         #}}}
-        logger.info(strm("about to initialize data with shape",mydata.shape,"labels",mydimlabels,"and kwargs",kwargs))
+        logger.debug(strm("about to initialize data with shape",mydata.shape,"labels",mydimlabels,"and kwargs",kwargs))
         nddata.__init__(self,
                 mydata,
                 mydata.shape,
@@ -6861,15 +6971,28 @@ def myfilter(x,center = 250e3,sigma = 100e3):
 
 #{{{ fitdata
 class fitdata(nddata):
-    """
-    If you haven't dont his before,
+    r'''Inherits from an nddata and enables curve fitting through use of a sympy expression.
+
+    The user creates a fitdata class object from an existing nddata
+    class object, and on this fitdata object can define the
+    :func:`functional_form` of the curve it would like to fit to the
+    data of the original nddata.
+    This functional form must be provided as a sympy expression, with
+    one of its variables matching the name of the dimension that the
+    user would like to fit to.
+    The user provides fit coefficients using :func:`fit_coeff` and
+    obtains output using :func:`fit` and :func:`eval`.
+
+    If you haven't done this before,
     create a jupyter notebook (not checked in, just for your own playing around) with:
     ```
     import sympy as s
     s.init_printing()
     ```
-    you can then use `s.symbols(` to create symbols/variables that allow you to build the mathematical expression for your fitting function
-    """
+    you can then use `s.symbols(` to create symbols/variables that
+    allow you to build the mathematical expression for your fitting
+    function
+    '''
     def __init__(self,*args,**kwargs):
         #{{{ manual kwargs
         fit_axis = None
@@ -6877,7 +7000,6 @@ class fitdata(nddata):
             fit_axis = kwargs.pop('fit_axis')
         #}}}
         if isinstance(args[0],nddata):
-            #print "DEBUG trying to transfer",args[0].axis_coords_error
             myattrs = normal_attrs(args[0])
             for j in range(0,len(myattrs)):
                 self.__setattr__(myattrs[j],args[0].__getattribute__(myattrs[j]))
@@ -6946,12 +7068,65 @@ class fitdata(nddata):
                     'shape(fprime)',shape(fprime),
                     'shape(xvals)',shape(xvals))+explain_error(e))
         return fprime
-    def parameter_gradient(self,p,x,y,sigma):
-        r'this gives the specific format wanted by leastsq'
-        # for now, I'm going to assume that it's not using sigma, though this could be wrong
-        # and I could need to scale everything by sigma in the same way as errfunc
-        return self.parameter_derivatives(x,set = self.symbol_list,set_to = p).T
+    @property
+    def function_string(self):
+        r'''A property of the fitdata class which stores a string
+        output of the functional form of the desired fit expression
+        provided in func:`functional_form` in LaTeX format'''
+        retval = sympy.latex(self.symbolic_expr).replace('$','')
+        return r'$f(%s)='%(sympy.latex(self.fit_axis)) + retval + r'$'
+    @function_string.setter
+    def function_string(self):
+        raise ValueError("You cannot set the string directly -- change the functional_form property instead!")
+    @property
+    def functional_form(self):
+        r'''A property of the fitdata class which is set by the user,
+        takes as input a sympy expression of the desired fit
+        expression'''
+        print("Getting symbolic function")
+        return self.symbolic_expr
+    @functional_form.setter
+    def functional_form(self,sym_expr):
+        r''' The functional form, given as a sympy expression, to
+        which you would like to fit the data.'''
+        assert issympy(sym_expr), "for now, the functional form must be a sympy expression!"
+        self.symbolic_expr = sym_expr
+        #{{{ adapted from fromaxis, trying to adapt the variable
+        symbols_in_expr = self.symbolic_expr.atoms(sympy.Symbol)
+        #logger.debug(strm('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr))
+        print('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr)
+        symbols_in_expr = set(map(str,symbols_in_expr))
+        # the next are the parameters
+        self.fit_axis = set(self.dimlabels) & symbols_in_expr
+        if len(self.fit_axis) == 0:
+            raise ValueError("I can't find any variables that might correspond to a dimension you want to fit along."
+                    "The variables are", symbols_in_expr,
+                    "and the dimensions are", self.dimlabels)
+        elif len(self.fit_axis) > 1:
+            raise ValueError("currently only 1D fitting is supported, though this should be easy"
+                    "to change -- I see potential fit axes %s"%str(self.fit_axis))
+        # the next line gives the parameters
+        self.symbolic_vars = symbols_in_expr-self.fit_axis
+        # this gets used later in p_ini
+        self.number_of_parameters = len(self.symbolic_vars)
+        #}}}
+        self.fit_axis = list(self.fit_axis)[0]
+        # redefine as real to avoid weird piecewise derivatives
+        self.fit_axis_sym = sympy.var(self.fit_axis,real=True) 
+        self.symbolic_vars = list(self.symbolic_vars)
+        self.symbolic_vars.sort() # so I get consistent behavior
+        self.symbolic_vars = [sympy.var(j,real=True) for j in self.symbolic_vars]
+        self.symbol_list = [str(j) for j in self.symbolic_vars]
+        args = self.symbolic_vars + [self.fit_axis]
+        self.fitfunc_multiarg = sympy.lambdify(tuple(args), self.symbolic_expr, modules=mat2array)
+        def raw_fn(p,x):
+            assert len(p)==len(self.symbolic_vars), "length of parameter passed to fitfunc_raw doesn't match number of symbolic parameters"
+            return self.fitfunc_multiarg(
+                    *tuple([p[j] for j in range(len(self.symbolic_vars))] + [x]))
+        self.fitfunc_raw = raw_fn
+        # leave the gradient for later
     def analytical_covariance(self):
+        r'''Not up to date'''
         covarmatrix = zeros([len(self._active_symbols())]*2)
         #{{{ try this ppt suggestion --> his V is my fprime, but 
         fprime = self.parameter_derivatives(self.getaxis(self.fit_axis))
@@ -7017,22 +7192,6 @@ class fitdata(nddata):
         #        #if j != k:
         #        #    covarmatrix[j,k] *= 2
         return covarmatrix
-    def gen_symbolic(self,function_name):
-        r'''generates the symbolic representations the function'''
-        self.function_name = function_name
-        self.symbolic_vars = list(map(sympy.var,self.symbol_list))
-        self.symbolic_x = sympy.var(self.fit_axis)
-        #print lsafen('test symbol_list=',self.symbol_list)
-        self.symbolic_dict = dict(list(zip(self.symbol_list,self.symbolic_vars)))
-        #print lsafen('test symbolic_vars=',self.symbolic_vars)
-        #print lsafen('test symbolic_x=',self.symbolic_x)
-        if hasattr(self,'fitfunc_raw_symb'):
-            self.symbolic_func = self.fitfunc_raw_symb(self.symbolic_vars,self.symbolic_x)
-        else:
-            self.symbolic_func = self.fitfunc_raw(self.symbolic_vars,self.symbolic_x)
-        self.function_string = sympy.latex(self.symbolic_func).replace('$','')
-        self.function_string = r'$' + self.function_name + '=' + self.function_string + r'$'
-        return self
     def copy(self): # for some reason, if I don't override this with the same thing, it doesn't override
         namelist = []
         vallist = []
@@ -7060,6 +7219,9 @@ class fitdata(nddata):
         if len(this_set) != len(set_to):
             raise ValueError(strm('length of this_set=', this_set,
                 'and set_to', set_to, 'are not the same!'))
+        logger.debug("*** *** *** *** ***")
+        logger.debug(str(this_set))
+        logger.debug("*** *** *** *** ***")
         set_indices = list(map(self.symbol_list.index,this_set)) # calculate indices once for efficiency
         active_mask = ones(len(self.symbol_list),dtype = bool)
         active_mask[set_indices] = False # generate the mask of indices that are actively fit
@@ -7079,15 +7241,16 @@ class fitdata(nddata):
         r"this wraps fitfunc_raw (which gives the actual form of the fit function) to take care of forced variables"
         p = self.add_inactive_p(p)
         return self.fitfunc_raw(p,x)
-    def errfunc(self,p,x,y,sigma):
+    def residual(self,p,x,y,sigma):
         '''just the error function'''
         fit = self.fitfunc(p,x)
         #normalization = sum(1.0/sigma)
         #print 'DEBUG: y=',y,'\nfit=',fit,'\nsigma=',sigma,'\n\n'
         sigma[sigma == 0.0] = 1
         try:
-            retval = (y-fit)/sigma #* normalization
-            #print 'DEBUG: retval=',retval,'\n\n'
+            # as noted here: https://stackoverflow.com/questions/6949370/scipy-leastsq-dfun-usage
+            # this needs to be fit - y, not vice versa
+            retval = (fit-y)/sigma #* normalization
         except ValueError as e:
             raise ValueError(strm('your error (',shape(sigma),
                     ') probably doesn\'t match y (',
@@ -7123,7 +7286,20 @@ class fitdata(nddata):
         else:
             return self.linfunc(self.getaxis(self.fit_axis),self.data,yerr = self.get_error(),xerr = self.get_error(self.fit_axis)) # otherwise, return the raw data
     def output(self,*name):
-        r'''give the fit value of a particular symbol'''
+        r'''give the fit value of a particular symbol, or a dictionary of all values.
+
+        Parameters
+        ----------
+        name: str (optional)
+            name of the symbol.
+            If no name is passed, then output returns a dictionary of the
+            resulting values.
+
+        Returns
+        -------
+        retval: dict or float
+            Either a dictionary of all the values, or the value itself.
+        '''
         if not hasattr(self,'fit_coeff') or self.fit_coeff is None:
             return None
         p = self.fit_coeff.copy()
@@ -7143,8 +7319,7 @@ class fitdata(nddata):
                 raise ValueError(strm("While running output: couldn't find",
                     name,"in",self.symbol_list))
         elif len(name) == 0:
-            # return a record array
-            return array(tuple(p),{"names":list(self.symbol_list),"formats":['double']*len(p)}).reshape(1)
+            return {self.symbol_list[j]:p[j] for j in range(len(p))}
         else:
             raise ValueError(strm("You can't pass",len(name),"arguments to .output()"))
     def _pn(self,name):
@@ -7195,31 +7370,36 @@ class fitdata(nddata):
         r'''show the latex string for the function, with all the symbols substituted by their values'''
         # this should actually be generic to fitdata
         p = self.fit_coeff
-        printfstring = self.function_string
+        retval = self.function_string
         printfargs = []
         allsymb = []
         locations = []
+        # {{{ I replace the symbols manually
+        #     Note that I came back and tried to use sympy to do this,
+        #     but then realize that sympy will automatically simplify,
+        #     e.g. numbers in the denominator, so it ends up changing the
+        #     way the function looks.  Though this is a pain, it's
+        #     better.
         for j in range(0,len(self.symbol_list)):
-            #symbol = self.symbol_list[j]
             symbol = sympy.latex(self.symbolic_vars[j]).replace('$','')
-            logger.debug(strm('DEBUG: replacing symbol \\verb|',symbol,'|'))
-            location = printfstring.find(symbol)
+            logger.debug(strm('DEBUG: replacing symbol "',symbol,'"'))
+            location = retval.find(symbol)
             while location != -1:
-                if printfstring[location-1] == '-':
-                    newstring = printfstring[:location-1]+'+%01.03g'+printfstring[location+len(symbol):] # replace the symbol in the written function with the appropriate number
-                    thissign = -1.0
+                if retval[location-1] == '-':
+                    newstring = retval[:location-1]+dp(-1*p[j])+retval[location+len(symbol):] # replace the symbol in the written function with the appropriate number
                 else:
-                    newstring = printfstring[:location]+'%01.03g'+printfstring[location+len(symbol):] # replace the symbol in the written function with the appropriate number
-                    thissign = 1.0
-                logger.debug(strm(r"\begin{verbatim} trying to replace",printfstring[location:location+len(symbol)],r'\end{verbatim}'))
-                printfstring = newstring
-                printfargs += [thissign*p[j]] # add that number to the printf list
+                    newstring = retval[:location]+dp(p[j])+retval[location+len(symbol):] # replace the symbol in the written function with the appropriate number
+                logger.debug(strm(r"trying to replace",
+                    retval[location:location+len(symbol)]))
+                retval = newstring
                 locations += [location]
                 allsymb += [symbol]
-                location = printfstring.find(symbol)
-        printfargs = [printfargs[x] for x in argsort(locations)]
-        logger.debug(strm(r"\begin{verbatim}trying to generate",self.function_string,'\n',printfstring,'\n',[allsymb[x] for x in argsort(locations)],'\n',printfargs,r'\end{verbatim}'))
-        return printfstring%tuple(printfargs)
+                location = retval.find(symbol)
+        # }}}
+        logger.debug(strm(r"trying to generate",self.function_string,
+            '\n',retval,'\n',[allsymb[x] for x in argsort(locations)],
+            '\n',printfargs))
+        return retval
     def settoguess(self):
         'a debugging function, to easily plot the initial guess'
         self.fit_coeff = real(self.guess())
@@ -7235,24 +7415,27 @@ class fitdata(nddata):
         elif not isscalar(taxis) and len(taxis) == 2:
             taxis = linspace(taxis[0],taxis[1],300)
         return taxis
-    def eval(self,taxis,set = None,set_to = None):
+    def eval(self,taxis,set_what = None,set_to = None):
         r'''after we have fit, evaluate the fit function along the axis taxis
-        set and set_to allow you to forcibly set a specific symbol to a specific value --> however, this does not affect the class, but only the return value'''
-        if isinstance(set, dict):
-            set_to = list(set.values())
-            set = list(set.keys())
+        set_what and set_to allow you to forcibly set_what a specific symbol to a
+        specific value --> however, this does not affect the class, but only
+        the return value'''
+        if isinstance(set_what, dict):
+            set_to = list(set_what.values())
+            set_what = list(set_what.keys())
         taxis = self._taxis(taxis)
         if hasattr(self,'fit_coeff') and self.fit_coeff is not None:
             p = self.fit_coeff.copy()
         else:
             p = array([NaN]*len(self.symbol_list))
         #{{{ LOCALLY apply any forced values
-        if set is not None:
+        # changed line below from set to set_what, and now it works
+        if set_what is not None:
             if self.set_indices is not None:
                 raise ValueError("you're trying to set indices in an eval"
                         " function for a function that was fit constrained; this"
                         " is not currently supported")
-            set_indices,set_to,active_mask = self.gen_indices(set,set_to)
+            set_indices,set_to,active_mask = self.gen_indices(set_what,set_to)
             p[set_indices] = set_to
         #}}}
         #{{{ make a new, blank array with the fit axis expanded to fit taxis
@@ -7275,35 +7458,31 @@ class fitdata(nddata):
             self.fit_axis = new
         nddata.rename(self,previous,new)
         return self
-    def fit(self,set = None, set_to = None, force_analytical = False, silent = False):
+    def fit(self,set_what = None, set_to = None, force_analytical = False):
         r'''actually run the fit'''
-        if not silent: print("\n")
-        if not silent: print(r'\resizebox*{!}{3in}{\begin{minipage}{\linewidth}')
-        if isinstance(set, dict):
-            set_to = list(set.values())
-            set = list(set.keys())
+        if isinstance(set_what, dict):
+            set_to = list(set_what.values())
+            set_what = list(set_what.keys())
         x = self.getaxis(self.fit_axis)
         if iscomplex(self.data.flatten()[0]):
-            if not silent: print(lsafen('Warning, taking only real part of fitting data!'))
+            logger.debug(strm('Warning, taking only real part of fitting data!'))
         y = real(self.data)
         sigma = self.get_error()
         if sigma is None:
-            if not silent: print('{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n')
+            print('{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n')
             warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
             sigma = ones(shape(y))
-        p_ini = real(array(self.guess())) # need the numpy format to allow boolean mask
-        if set is not None:
-            self.set_indices,self.set_to,self.active_mask = self.gen_indices(set,set_to)
+        if set_what is None:
+            p_ini = self.guess()
+        if set_what is not None:
+            self.set_indices,self.set_to,self.active_mask = self.gen_indices(set_what,set_to)
             p_ini = self.remove_inactive_p(p_ini)
-        leastsq_args = (self.errfunc, p_ini)
+        leastsq_args = (self.residual, p_ini)
         leastsq_kwargs = {'args':(x,y,sigma),
                     'full_output':True}# 'maxfev':1000*(len(p_ini)+1)}
-        if hasattr(self,'has_grad') and self.has_grad == True:
-            leastsq_kwargs.update({'Dfun':self.parameter_gradient})
-        if 'Dfun' in list(leastsq_kwargs.keys()):
-            if not silent: print("yes, Dfun passed with arg",leastsq_kwargs['Dfun'])
+        p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
         try:
-            p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
+           p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
         #{{{ just give various explicit errors
         except TypeError as err:
             if not isinstance(x, ndarray) and not isinstance(y, ndarray):
@@ -7326,7 +7505,7 @@ class fitdata(nddata):
                 '", maybe there is something wrong with the input:',
                 self))
         except Exception as e:
-            raise ValueError('leastsq failed; I don\'t know why'+explain_error(e))
+            raise ValueError('leastsq failed; I don\'t know why')
         #}}}
         if success not in [1,2,3,4]:
             #{{{ up maximum number of evals
@@ -7335,8 +7514,8 @@ class fitdata(nddata):
                 p_out,cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
                 if success != 1:
                     if mesg.find('two consecutive iterates'):
-                        if not silent: print(r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n')
-                        if not silent: print(r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n')
+                        print(r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n')
+                        print(r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n')
                         infodict_keys = list(infodict.keys())
                         infodict_vals = list(infodict.values())
                         if 'nfev' in infodict_keys:
@@ -7350,7 +7529,7 @@ class fitdata(nddata):
                         if 'qtf' in infodict_keys:
                             infodict_keys[infodict_keys.index('qtf')] = 'qtf, the vector (transpose(q)*fvec)'
                         for k,v in zip(infodict_keys,infodict_vals):
-                            if not silent: print(r'{\color{red}{\bf %s:}%s}'%(k,v),'\n\n')
+                            print(r'{\color{red}{\bf %s:}%s}'%(k,v),'\n\n')
                         #self.fit_coeff = None
                         #self.settoguess()
                         #return
@@ -7360,10 +7539,7 @@ class fitdata(nddata):
             else:
                 raise RuntimeError(strm('leastsq finished with an error message:',mesg))
         else:
-            if not silent: print(r'{\color{blue}')
-            if not silent: print(lsafen("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg)))
-            if not silent: print(r'}')
-            if not silent: print("\n")
+            logger.debug("Fit finished successfully with a code of %d and a message ``%s''"%(success,mesg))
         self.fit_coeff = p_out # note that this is stored in HIDDEN form
         dof = len(x) - len(p_out)
         if hasattr(self,'symbolic_x') and force_analytical:
@@ -7372,7 +7548,7 @@ class fitdata(nddata):
             if force_analytical: raise RuntimeError(strm("I can't take the analytical",
                 "covariance!  This is problematic."))
             if cov is None:
-                if not silent: print(r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success),'}\n')
+                print(r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,cov,infodict,mesg,success),'}\n')
             self.covariance = cov
         if self.covariance is not None:
             try:
@@ -7381,8 +7557,7 @@ class fitdata(nddata):
                 raise TypeError(strm("type(self.covariance)",type(self.covariance),
                     "type(infodict[fvec])",type(infodict["fvec"]),
                     "type(dof)",type(dof)))
-        #print lsafen("DEBUG: at end of fit covariance is shape",shape(self.covariance),"fit coeff shape",shape(self.fit_coeff))
-        if not silent: print(r'\end{minipage}}')
+        logger.debug(strm("at end of fit covariance is shape",shape(self.covariance),"fit coeff shape",shape(self.fit_coeff)))
         return
     def bootstrap(self,points,swap_out = exp(-1.0),seedval = 10347,minbounds = {},maxbounds = {}):
         print(r'\begin{verbatim}')
@@ -7433,99 +7608,102 @@ class fitdata(nddata):
                         recordlist[runno][name] = thiscopy.output(name)
         print(r'\end{verbatim}')
         return recordlist # collect into a single recordlist array
-    def guess(self):
-        r'''provide the guess for our parameters; by default, based on pseudoinverse'''
-        self.has_grad = False
-        if iscomplex(self.data.flatten()[0]):
-            print(lsafen('Warning, taking only real part of fitting data!'))
-        y = real(self.data)
-        # I ended up doing the following, because as it turns out
-        # T1 is a bad fit function, because it has a singularity!
-        # this is probably why it freaks out if I set this to zero
-        # on the other hand, setting a value of one seems to be
-        # bad for very short T1 samples
-        which_starting_guess = 0
-        thisguess = self.starting_guesses[which_starting_guess]
-        numguesssteps = 20
-        #{{{ for some reason (not sure) adding a dimension to y
-        new_y_shape = list(y.shape)
-        new_y_shape.append(1)
-        y = y.reshape(tuple(new_y_shape))
-        #}}}
-        #{{{ evaluate f, fprime and residuals
-        guess_dict = dict(list(zip(self.symbol_list,list(thisguess))))
-        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
-        f_at_guess = real(self.eval(None,set = guess_dict).data)
-        try:
-            f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
-        except:
-            raise ValueError(strm('trying to reshape f_at_ini_guess from',f_at_guess.shape,
-                'to',new_y_shape))
-        thisresidual = sqrt((y-f_at_guess)**2).sum()
-        #}}}
-        lastresidual = thisresidual
-        for j in range(0,numguesssteps):
-            logger.debug('\n\n.core.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\end{verbatim}')
-            logger.debug('\n\n.core.guess) shape of parameter derivatives',shape(fprime),'shape of output',shape(y),'\n\n')
-            regularization_bad = True
-            alpha_max = 100.
-            alpha_mult = 2.
-            alpha = 0.1 # maybe I can rather estimate this based on the change in the residual, similar to in L-M?
-            logger.debug(strm('\n\n.core.guess) value of residual before regularization %d:'%j,thisresidual))
-            while regularization_bad:
-                newguess = real(array(thisguess) + dot(pinvr(fprime.T,alpha),(y-f_at_guess)).flatten())
-                mask = newguess < self.guess_lb
-                newguess[mask] = self.guess_lb[mask]
-                mask = newguess > self.guess_ub
-                newguess[mask] = self.guess_ub[mask]
-                if any(isnan(newguess)):
-                    logger.debug(strm('\n\n.core.guess) Regularization blows up $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha))
-                    alpha *= alpha_mult
-                else:
-                    #{{{ evaluate f, fprime and residuals
-                    guess_dict = dict(list(zip(self.symbol_list,list(newguess))))
-                    # only evaluate fprime once we know this is good, below
-                    f_at_guess = real(self.eval(None,set = guess_dict).data)
-                    try:
-                        f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
-                    except:
-                        raise IndexError(strm('trying to reshape f_at_ini_guess from',
-                            f_at_guess.shape,'to',new_y_shape))
-                    thisresidual = sqrt((y-f_at_guess)**2).sum()
-                    #}}}
-                    if (thisresidual-lastresidual)/lastresidual > 0.10:
+    def guess(self,use_pseudoinverse=False):
+        r'''old code that I am preserving here -- provide the guess for our parameters; by default, based on pseudoinverse'''
+        if use_pseudoinverse:
+            self.has_grad = False
+            if iscomplex(self.data.flatten()[0]):
+                print(lsafen('Warning, taking only real part of fitting data!'))
+            y = real(self.data)
+            # I ended up doing the following, because as it turns out
+            # T1 is a bad fit function, because it has a singularity!
+            # this is probably why it freaks out if I set this to zero
+            # on the other hand, setting a value of one seems to be
+            # bad for very short T1 samples
+            which_starting_guess = 0
+            thisguess = self.starting_guesses[which_starting_guess]
+            numguesssteps = 20
+            #{{{ for some reason (not sure) adding a dimension to y
+            new_y_shape = list(y.shape)
+            new_y_shape.append(1)
+            y = y.reshape(tuple(new_y_shape))
+            #}}}
+            #{{{ evaluate f, fprime and residuals
+            guess_dict = dict(list(zip(self.symbol_list,list(thisguess))))
+            fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+            f_at_guess = real(self.eval(None,set = guess_dict).data)
+            try:
+                f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
+            except:
+                raise ValueError(strm('trying to reshape f_at_ini_guess from',f_at_guess.shape,
+                    'to',new_y_shape))
+            thisresidual = sqrt((y-f_at_guess)**2).sum()
+            #}}}
+            lastresidual = thisresidual
+            for j in range(0,numguesssteps):
+                logger.debug('\n\n.core.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\end{verbatim}')
+                logger.debug('\n\n.core.guess) shape of parameter derivatives',shape(fprime),'shape of output',shape(y),'\n\n')
+                regularization_bad = True
+                alpha_max = 100.
+                alpha_mult = 2.
+                alpha = 0.1 # maybe I can rather estimate this based on the change in the residual, similar to in L-M?
+                logger.debug(strm('\n\n.core.guess) value of residual before regularization %d:'%j,thisresidual))
+                while regularization_bad:
+                    newguess = real(array(thisguess) + dot(pinvr(fprime.T,alpha),(y-f_at_guess)).flatten())
+                    mask = newguess < self.guess_lb
+                    newguess[mask] = self.guess_lb[mask]
+                    mask = newguess > self.guess_ub
+                    newguess[mask] = self.guess_ub[mask]
+                    if any(isnan(newguess)):
+                        logger.debug(strm('\n\n.core.guess) Regularization blows up $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha))
                         alpha *= alpha_mult
-                        logger.debug(strm('\n\n.core.guess) Regularized Pinv gave a step uphill $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha))
-                    else: # accept the step
-                        regularization_bad = False
-                        thisguess = newguess
-                        lastresidual = thisresidual
-                        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
-                if alpha > alpha_max:
-                    print("\n\n.core.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max)
-                    if which_starting_guess >= len(self.starting_guesses)-1:
-                        print("\n\n.core.guess) {\\color{red} Warning!!!} ran out of guesses!!!%d\n\n"%alpha_max)
-                        return thisguess
                     else:
-                        which_starting_guess += 1
-                        thisguess = self.starting_guesses[which_starting_guess]
-                        print("\n\n.core.guess) try a new starting guess:",lsafen(thisguess))
-                        j = 0 # restart the loop
-                        #{{{ evaluate f, fprime and residuals for the new starting guess
-                        guess_dict = dict(list(zip(self.symbol_list,list(thisguess))))
-                        fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+                        #{{{ evaluate f, fprime and residuals
+                        guess_dict = dict(list(zip(self.symbol_list,list(newguess))))
+                        # only evaluate fprime once we know this is good, below
                         f_at_guess = real(self.eval(None,set = guess_dict).data)
                         try:
                             f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
                         except:
-                            raise RuntimeError(strm('trying to reshape f_at_ini_guess from',
+                            raise IndexError(strm('trying to reshape f_at_ini_guess from',
                                 f_at_guess.shape,'to',new_y_shape))
                         thisresidual = sqrt((y-f_at_guess)**2).sum()
                         #}}}
-                        regularization_bad = False # jump out of this loop
-            logger.debug(strm('\n\n.core.guess) new value of guess after regularization:',lsafen(newguess)))
-            logger.debug(strm('\n\n.core.guess) value of residual after regularization:',thisresidual))
-        return thisguess
+                        if (thisresidual-lastresidual)/lastresidual > 0.10:
+                            alpha *= alpha_mult
+                            logger.debug(strm('\n\n.core.guess) Regularized Pinv gave a step uphill $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha))
+                        else: # accept the step
+                            regularization_bad = False
+                            thisguess = newguess
+                            lastresidual = thisresidual
+                            fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+                    if alpha > alpha_max:
+                        print("\n\n.core.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max)
+                        if which_starting_guess >= len(self.starting_guesses)-1:
+                            print("\n\n.core.guess) {\\color{red} Warning!!!} ran out of guesses!!!%d\n\n"%alpha_max)
+                            return thisguess
+                        else:
+                            which_starting_guess += 1
+                            thisguess = self.starting_guesses[which_starting_guess]
+                            print("\n\n.core.guess) try a new starting guess:",lsafen(thisguess))
+                            j = 0 # restart the loop
+                            #{{{ evaluate f, fprime and residuals for the new starting guess
+                            guess_dict = dict(list(zip(self.symbol_list,list(thisguess))))
+                            fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+                            f_at_guess = real(self.eval(None,set = guess_dict).data)
+                            try:
+                                f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
+                            except:
+                                raise RuntimeError(strm('trying to reshape f_at_ini_guess from',
+                                    f_at_guess.shape,'to',new_y_shape))
+                            thisresidual = sqrt((y-f_at_guess)**2).sum()
+                            #}}}
+                            regularization_bad = False # jump out of this loop
+                logger.debug(strm('\n\n.core.guess) new value of guess after regularization:',lsafen(newguess)))
+                logger.debug(strm('\n\n.core.guess) value of residual after regularization:',thisresidual))
+            return thisguess
+        else:
+            return [1.0]*self.number_of_parameters
 #}}}
 def sqrt(arg):
     if isinstance(arg,nddata):

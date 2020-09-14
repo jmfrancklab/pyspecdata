@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyspecdata.load_files package &mdash; pySpecData 0.9.5.1.7 documentation</title>
+  <title>pyspecdata.load_files package &mdash; pySpecData 0.9.5.3.1 documentation</title>
   
 
   
@@ -21,11 +21,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.9.5.1.7
+                0.9.5.3.1
               </div>
             
           
@@ -171,15 +171,15 @@ Provides post-processing routines for:
 (which are typically
 experiment names set in
 <code class="docutils literal notranslate"><span class="pre">(h5</span> <span class="pre">root).experiment.description['class']</span></code>)</p>
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.acert.automagical_phasecycle">
-<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">automagical_phasecycle</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.automagical_phasecycle" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">automagical_phasecycle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.automagical_phasecycle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use the phase cycle list to determine the phase cycles, and then ift them to return coherence skips</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.acert.load_cw">
-<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">load_cw</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">use_sweep=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.load_cw" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">load_cw</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">use_sweep</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.load_cw" title="Permalink to this definition">¶</a></dt>
 <dd><p>load the cw file given by filename</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -188,9 +188,9 @@ experiment names set in
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.acert.load_pulse">
-<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">load_pulse</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">indirect_dimlabels=None</em>, <em class="sig-param">prefilter=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.load_pulse" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">load_pulse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">indirect_dimlabels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prefilter</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.load_pulse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load ACERT pulse data from the 95 GHz.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -205,58 +205,58 @@ where I pass an ndshape-based slice, instead.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.acert.postproc_B1_se">
-<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_B1_se</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_B1_se" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_B1_se</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_B1_se" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.acert.postproc_b1_fid_file">
-<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_b1_fid_file</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">fl=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_b1_fid_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_b1_fid_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">fl</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_b1_fid_file" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.acert.postproc_blank">
-<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_blank</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_blank" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_blank</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_blank" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.acert.postproc_cw">
-<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_cw</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">phase=True</em>, <em class="sig-param">use_sweep=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_cw" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_cw</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">phase</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">use_sweep</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_cw" title="Permalink to this definition">¶</a></dt>
 <dd><p>this opens the cw data, using search_freed_file and open_cw_file, and then autophases it</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.acert.postproc_echo_T2">
-<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_echo_T2</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_echo_T2" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_echo_T2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_echo_T2" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.acert.postproc_eldor_3d">
-<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_eldor_3d</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_eldor_3d" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_eldor_3d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_eldor_3d" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.acert.postproc_eldor_file">
-<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_eldor_file</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">fl=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_eldor_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_eldor_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">fl</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_eldor_file" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.acert.postproc_eldor_old">
-<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_eldor_old</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_eldor_old" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_eldor_old</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_eldor_old" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.acert.postproc_generic">
-<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_generic</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_generic" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.acert.</code><code class="sig-name descname">postproc_generic</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.acert.postproc_generic" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
 <div class="section" id="module-pyspecdata.load_files.bruker_esr">
 <span id="pyspecdata-load-files-bruker-esr-module"></span><h2>pyspecdata.load_files.bruker_esr module<a class="headerlink" href="#module-pyspecdata.load_files.bruker_esr" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.bruker_esr.winepr">
-<code class="sig-prename descclassname">pyspecdata.load_files.bruker_esr.</code><code class="sig-name descname">winepr</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">dimname=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_esr.winepr" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.bruker_esr.</code><code class="sig-name descname">winepr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">dimname</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_esr.winepr" title="Permalink to this definition">¶</a></dt>
 <dd><p>For opening WinEPR files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -265,15 +265,15 @@ where I pass an ndshape-based slice, instead.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.bruker_esr.winepr_load_acqu">
-<code class="sig-prename descclassname">pyspecdata.load_files.bruker_esr.</code><code class="sig-name descname">winepr_load_acqu</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_esr.winepr_load_acqu" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.bruker_esr.</code><code class="sig-name descname">winepr_load_acqu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_esr.winepr_load_acqu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load the parameters for the winepr filename</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.bruker_esr.xepr">
-<code class="sig-prename descclassname">pyspecdata.load_files.bruker_esr.</code><code class="sig-name descname">xepr</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">dimname=''</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_esr.xepr" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.bruker_esr.</code><code class="sig-name descname">xepr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">dimname</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_esr.xepr" title="Permalink to this definition">¶</a></dt>
 <dd><p>For opening Xepr files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -282,9 +282,9 @@ where I pass an ndshape-based slice, instead.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.bruker_esr.xepr_load_acqu">
-<code class="sig-prename descclassname">pyspecdata.load_files.bruker_esr.</code><code class="sig-name descname">xepr_load_acqu</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_esr.xepr_load_acqu" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.bruker_esr.</code><code class="sig-name descname">xepr_load_acqu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_esr.xepr_load_acqu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load the Xepr acquisition parameter file, which should be a .dsc extension.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -302,29 +302,29 @@ where I pass an ndshape-based slice, instead.</p></li>
 </div>
 <div class="section" id="module-pyspecdata.load_files.bruker_nmr">
 <span id="pyspecdata-load-files-bruker-nmr-module"></span><h2>pyspecdata.load_files.bruker_nmr module<a class="headerlink" href="#module-pyspecdata.load_files.bruker_nmr" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.bruker_nmr.det_phcorr">
-<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">det_phcorr</code><span class="sig-paren">(</span><em class="sig-param">v</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.det_phcorr" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">det_phcorr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">v</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.det_phcorr" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.bruker_nmr.det_rg">
-<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">det_rg</code><span class="sig-paren">(</span><em class="sig-param">a</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.det_rg" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">det_rg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.det_rg" title="Permalink to this definition">¶</a></dt>
 <dd><p>determine the actual voltage correction from the value of rg for a bruker NMR file</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.bruker_nmr.load_1D">
-<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">load_1D</code><span class="sig-paren">(</span><em class="sig-param">file_reference</em>, <em class="sig-param">*subpath</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.load_1D" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">load_1D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_reference</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">subpath</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.load_1D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load 1D bruker data into a file.  Load acquisition parameters into
 property ‘acq’ and processing parameters <em>from procno 1 only</em> into
 ‘proc’</p>
 <p>Note that is uses the ‘procs’ file, which appears to contain the correct data</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.bruker_nmr.load_acqu">
-<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">load_acqu</code><span class="sig-paren">(</span><em class="sig-param">file_reference</em>, <em class="sig-param">*subpath</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.load_acqu" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">load_acqu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_reference</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">subpath</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.load_acqu" title="Permalink to this definition">¶</a></dt>
 <dd><p>based on file_reference, determine the jcamp file that stores the acquisition info, and load it</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -338,30 +338,30 @@ property ‘acq’ and processing parameters <em>from procno 1 only</em> into
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.bruker_nmr.load_jcamp">
-<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">load_jcamp</code><span class="sig-paren">(</span><em class="sig-param">file_reference</em>, <em class="sig-param">*subpath</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.load_jcamp" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">load_jcamp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_reference</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">subpath</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.load_jcamp" title="Permalink to this definition">¶</a></dt>
 <dd><p>return a dictionary with information for a jcamp file</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.bruker_nmr.load_title">
-<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">load_title</code><span class="sig-paren">(</span><em class="sig-param">file_reference</em>, <em class="sig-param">*subpath</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.load_title" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">load_title</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_reference</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">subpath</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.load_title" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.bruker_nmr.load_vdlist">
-<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">load_vdlist</code><span class="sig-paren">(</span><em class="sig-param">file_reference</em>, <em class="sig-param">*subpath</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.load_vdlist" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">load_vdlist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_reference</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">subpath</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.load_vdlist" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.bruker_nmr.match_line">
-<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">match_line</code><span class="sig-paren">(</span><em class="sig-param">line</em>, <em class="sig-param">number_re</em>, <em class="sig-param">string_re</em>, <em class="sig-param">array_re</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.match_line" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">match_line</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">line</span></em>, <em class="sig-param"><span class="n">number_re</span></em>, <em class="sig-param"><span class="n">string_re</span></em>, <em class="sig-param"><span class="n">array_re</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.match_line" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.bruker_nmr.series">
-<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">series</code><span class="sig-paren">(</span><em class="sig-param">file_reference</em>, <em class="sig-param">*subpath</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.series" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.bruker_nmr.</code><code class="sig-name descname">series</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_reference</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">subpath</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_nmr.series" title="Permalink to this definition">¶</a></dt>
 <dd><p>For opening Bruker ser files.  Note that the expno is included as part of the subpath.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -378,9 +378,9 @@ from the ser file storing the raw data
 </div>
 <div class="section" id="module-pyspecdata.load_files.open_subpath">
 <span id="pyspecdata-load-files-open-subpath-module"></span><h2>pyspecdata.load_files.open_subpath module<a class="headerlink" href="#module-pyspecdata.load_files.open_subpath" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.open_subpath.open_subpath">
-<code class="sig-prename descclassname">pyspecdata.load_files.open_subpath.</code><code class="sig-name descname">open_subpath</code><span class="sig-paren">(</span><em class="sig-param">file_reference</em>, <em class="sig-param">*subpath</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.open_subpath.open_subpath" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.open_subpath.</code><code class="sig-name descname">open_subpath</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_reference</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">subpath</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.open_subpath.open_subpath" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -398,57 +398,59 @@ within the zip file.</p></li>
 <div class="section" id="module-pyspecdata.load_files.prospa">
 <span id="pyspecdata-load-files-prospa-module"></span><h2>pyspecdata.load_files.prospa module<a class="headerlink" href="#module-pyspecdata.load_files.prospa" title="Permalink to this headline">¶</a></h2>
 <p>routines specific to loading information from prospa files</p>
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.prospa.decim_correct">
-<code class="sig-prename descclassname">pyspecdata.load_files.prospa.</code><code class="sig-name descname">decim_correct</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.prospa.decim_correct" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.prospa.</code><code class="sig-name descname">decim_correct</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.prospa.decim_correct" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.prospa.load_1D">
-<code class="sig-prename descclassname">pyspecdata.load_files.prospa.</code><code class="sig-name descname">load_1D</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.prospa.load_1D" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.prospa.</code><code class="sig-name descname">load_1D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.prospa.load_1D" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.prospa.load_2D">
-<code class="sig-prename descclassname">pyspecdata.load_files.prospa.</code><code class="sig-name descname">load_2D</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">dimname=''</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.prospa.load_2D" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.prospa.</code><code class="sig-name descname">load_2D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">dimname</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.prospa.load_2D" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.prospa.load_acqu">
-<code class="sig-prename descclassname">pyspecdata.load_files.prospa.</code><code class="sig-name descname">load_acqu</code><span class="sig-paren">(</span><em class="sig-param">file</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.prospa.load_acqu" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.prospa.</code><code class="sig-name descname">load_acqu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.prospa.load_acqu" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.prospa.load_datafile">
-<code class="sig-prename descclassname">pyspecdata.load_files.prospa.</code><code class="sig-name descname">load_datafile</code><span class="sig-paren">(</span><em class="sig-param">file</em>, <em class="sig-param">dims=1</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.prospa.load_datafile" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.prospa.</code><code class="sig-name descname">load_datafile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">dims</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.prospa.load_datafile" title="Permalink to this definition">¶</a></dt>
 <dd><p>load a prospa datafile into a flat array as a 1D file
 use dims=2 if it’s a 2D file</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.prospa.t1_info">
-<code class="sig-prename descclassname">pyspecdata.load_files.prospa.</code><code class="sig-name descname">t1_info</code><span class="sig-paren">(</span><em class="sig-param">file</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.prospa.t1_info" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.prospa.</code><code class="sig-name descname">t1_info</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.prospa.t1_info" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
 <div class="section" id="module-pyspecdata.load_files">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyspecdata.load_files" title="Permalink to this headline">¶</a></h2>
 <p>This subpackage holds all the routines for reading raw data in proprietary formats.
-It’s intended to be accessed entirely through the function <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.find_file" title="pyspecdata.load_files.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_file()</span></code></a>,
+It’s intended to be accessed entirely through the function <a class="reference internal" href="../modules.html#pyspecdata.load_files.find_file" title="pyspecdata.load_files.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_file()</span></code></a>,
 which uses <a href="#id1"><span class="problematic" id="id2">:module:`datadir`</span></a> to search for the filename, then automatically identifies
 the file type and calls the appropriate module to load the data into an nddata.</p>
 <p>Currently, Bruker file formats (both ESR and NMR) are supported, as well as
 (at least some earlier iteration) of Magritek file formats.</p>
 <p>Users/developers are very strongly encouraged to add support for new file types.</p>
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.find_file">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">find_file</code><span class="sig-paren">(</span><em class="sig-param">searchstring</em>, <em class="sig-param">exp_type=None</em>, <em class="sig-param">postproc=None</em>, <em class="sig-param">print_result=True</em>, <em class="sig-param">verbose=False</em>, <em class="sig-param">prefilter=None</em>, <em class="sig-param">expno=None</em>, <em class="sig-param">dimname=''</em>, <em class="sig-param">return_acq=False</em>, <em class="sig-param">add_sizes=[]</em>, <em class="sig-param">add_dims=[]</em>, <em class="sig-param">use_sweep=None</em>, <em class="sig-param">indirect_dimlabels=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.find_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">find_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">searchstring</span></em>, <em class="sig-param"><span class="n">exp_type</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">postproc</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">print_result</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">prefilter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expno</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dimname</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">return_acq</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">add_sizes</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">add_dims</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">use_sweep</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">indirect_dimlabels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lookup</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.find_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the file  given by the regular expression <cite>searchstring</cite> inside the directory identified by <cite>exp_type</cite>, load the nddata object, and postprocess with the function <cite>postproc</cite>.</p>
 <p>It looks at the top level of the directory first, and if that fails, starts to look recursively.
-Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.</p>
+Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
+(For a more thorough description, see <a class="reference internal" href="pyspecdata.html#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a>).</p>
 <p>Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
 (so that you can make sure they are properly synced to the cloud, etc.).</p>
-<p>It calls <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
+<p>It calls <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
+<p>If it can’t find any files matching the criterion, it logs the missing file and throws an exception.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -471,56 +473,63 @@ more info.</p></li>
 <li><p><strong>postproc</strong> (<a class="reference internal" href="pyspecdata.html#pyspecdata.function" title="pyspecdata.function"><em>function</em></a><em>, </em><em>str</em><em>, or </em><em>None</em>) – <p>This function is fed the nddata data and the remaining keyword
 arguments (<cite>kwargs</cite>) as arguments.
 It’s assumed that each module for each different file type
-provides a dictionary called <cite>postproc_lookup</cite>.
-If <cite>postproc</cite> is a string,
+provides a dictionary called <cite>postproc_lookup</cite> (some are already
+available in pySpecData, but also, see the <cite>lookup</cite> argument,
+below).</p>
+<p>If <cite>postproc</cite> is a string,
 it looks up the string inside the <cite>postproc_lookup</cite>
-dictionary that’s appropriate for the file type.
-If <cite>postproc</cite> is None,
+dictionary that’s appropriate for the file type.</p>
+<p>If <cite>postproc</cite> is None,
 it checks to see if the any of the loading functions that were
 called set the <cite>postproc_type</cite> property
 – <em>i.e.</em> it checks the value of
 <code class="docutils literal notranslate"><span class="pre">data.get_prop('postproc_type')</span></code> –
 if this is set, it uses this as a key
-to pull the corresponding value from <cite>postproc_lookup</cite>.</p>
+to pull the corresponding value from <cite>postproc_lookup</cite>.
+For example, if this is a bruker file, it sets postproc to the
+name of the pulse sequence.</p>
 <p>For instance, when the acert module loads an ACERT HDF5 file,
 it sets <cite>postproc_type</cite> to the value of
 <code class="docutils literal notranslate"><span class="pre">(h5</span> <span class="pre">root).experiment.description['class']</span></code>.
 This, in turn, is used to choose the type of post-processing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">dimname</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">return_acq</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">add_sizes</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">add_dims</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">use_sweep</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">indirect_dimlabels</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 </dl>
 </p></li>
+<li><p><strong>lookup</strong> (<em>dictionary with str:function pairs</em>) – types of postprocessing to add to the <cite>postproc_lookup</cite> dictionary</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt>
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">find_file</code><span class="sig-paren">(</span><em class="sig-param">searchstring</em>, <em class="sig-param">exp_type=None</em>, <em class="sig-param">postproc=None</em>, <em class="sig-param">print_result=True</em>, <em class="sig-param">verbose=False</em>, <em class="sig-param">prefilter=None</em>, <em class="sig-param">expno=None</em>, <em class="sig-param">dimname=''</em>, <em class="sig-param">return_acq=False</em>, <em class="sig-param">add_sizes=[]</em>, <em class="sig-param">add_dims=[]</em>, <em class="sig-param">use_sweep=None</em>, <em class="sig-param">indirect_dimlabels=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span></dt>
+<dl class="py function">
+<dt id="id0">
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">find_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">searchstring</span></em>, <em class="sig-param"><span class="n">exp_type</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">postproc</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">print_result</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">prefilter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expno</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dimname</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">return_acq</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">add_sizes</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">add_dims</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">use_sweep</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">indirect_dimlabels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lookup</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the file  given by the regular expression <cite>searchstring</cite> inside the directory identified by <cite>exp_type</cite>, load the nddata object, and postprocess with the function <cite>postproc</cite>.</p>
 <p>It looks at the top level of the directory first, and if that fails, starts to look recursively.
-Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.</p>
+Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
+(For a more thorough description, see <a class="reference internal" href="pyspecdata.html#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a>).</p>
 <p>Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
 (so that you can make sure they are properly synced to the cloud, etc.).</p>
-<p>It calls <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
+<p>It calls <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
+<p>If it can’t find any files matching the criterion, it logs the missing file and throws an exception.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -543,50 +552,55 @@ more info.</p></li>
 <li><p><strong>postproc</strong> (<a class="reference internal" href="pyspecdata.html#pyspecdata.function" title="pyspecdata.function"><em>function</em></a><em>, </em><em>str</em><em>, or </em><em>None</em>) – <p>This function is fed the nddata data and the remaining keyword
 arguments (<cite>kwargs</cite>) as arguments.
 It’s assumed that each module for each different file type
-provides a dictionary called <cite>postproc_lookup</cite>.
-If <cite>postproc</cite> is a string,
+provides a dictionary called <cite>postproc_lookup</cite> (some are already
+available in pySpecData, but also, see the <cite>lookup</cite> argument,
+below).</p>
+<p>If <cite>postproc</cite> is a string,
 it looks up the string inside the <cite>postproc_lookup</cite>
-dictionary that’s appropriate for the file type.
-If <cite>postproc</cite> is None,
+dictionary that’s appropriate for the file type.</p>
+<p>If <cite>postproc</cite> is None,
 it checks to see if the any of the loading functions that were
 called set the <cite>postproc_type</cite> property
 – <em>i.e.</em> it checks the value of
 <code class="docutils literal notranslate"><span class="pre">data.get_prop('postproc_type')</span></code> –
 if this is set, it uses this as a key
-to pull the corresponding value from <cite>postproc_lookup</cite>.</p>
+to pull the corresponding value from <cite>postproc_lookup</cite>.
+For example, if this is a bruker file, it sets postproc to the
+name of the pulse sequence.</p>
 <p>For instance, when the acert module loads an ACERT HDF5 file,
 it sets <cite>postproc_type</cite> to the value of
 <code class="docutils literal notranslate"><span class="pre">(h5</span> <span class="pre">root).experiment.description['class']</span></code>.
 This, in turn, is used to choose the type of post-processing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">dimname</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">return_acq</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">add_sizes</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">add_dims</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">use_sweep</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">indirect_dimlabels</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 </dl>
 </p></li>
+<li><p><strong>lookup</strong> (<em>dictionary with str:function pairs</em>) – types of postprocessing to add to the <cite>postproc_lookup</cite> dictionary</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.search_filename">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">search_filename</code><span class="sig-paren">(</span><em class="sig-param">searchstring</em>, <em class="sig-param">exp_type</em>, <em class="sig-param">print_result=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.search_filename" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">search_filename</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">searchstring</span></em>, <em class="sig-param"><span class="n">exp_type</span></em>, <em class="sig-param"><span class="n">print_result</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">unique</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.search_filename" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use regular expression <cite>searchstring</cite> to find a file inside the directory indicated by <cite>exp_type</cite></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -601,14 +615,15 @@ directory appropriate for <cite>exp_type</cite>.</p></li>
 experiments sorted into different directories, this argument
 specifies the type of experiment see <a class="reference internal" href="pyspecdata.html#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a> for
 more info.</p></li>
+<li><p><strong>unique</strong> (<em>boolean</em><em> (</em><em>default False</em><em>)</em>) – If true, then throw an error unless only one file is found.</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.load_indiv_file">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">load_indiv_file</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">dimname=''</em>, <em class="sig-param">return_acq=False</em>, <em class="sig-param">add_sizes=[]</em>, <em class="sig-param">add_dims=[]</em>, <em class="sig-param">use_sweep=None</em>, <em class="sig-param">indirect_dimlabels=None</em>, <em class="sig-param">expno=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.load_indiv_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">load_indiv_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">dimname</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">return_acq</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">add_sizes</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">add_dims</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">use_sweep</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">indirect_dimlabels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expno</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.load_indiv_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open the file given by <cite>filename</cite>, use file signature magic and/or
 filename extension(s) to identify the file type, and call the appropriate
 function to open it.</p>
@@ -641,9 +656,9 @@ files that should be skipped</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.format_listofexps">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">format_listofexps</code><span class="sig-paren">(</span><em class="sig-param">args</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.format_listofexps" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">format_listofexps</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.format_listofexps" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>Phased out</strong>: leaving documentation so we can interpret and update old code</p>
 <p>This is an auxiliary function that’s used to decode the experiment list.</p>
 <dl class="field-list simple">
@@ -680,35 +695,35 @@ experiment</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.load_t1_axis">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">load_t1_axis</code><span class="sig-paren">(</span><em class="sig-param">file</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.load_t1_axis" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">load_t1_axis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.load_t1_axis" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.bruker_load_t1_axis">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">bruker_load_t1_axis</code><span class="sig-paren">(</span><em class="sig-param">file</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_load_t1_axis" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">bruker_load_t1_axis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_load_t1_axis" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.prospa_t1_info">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">prospa_t1_info</code><span class="sig-paren">(</span><em class="sig-param">file</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.prospa_t1_info" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">prospa_t1_info</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.prospa_t1_info" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.bruker_load_title">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">bruker_load_title</code><span class="sig-paren">(</span><em class="sig-param">file</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_load_title" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">bruker_load_title</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_load_title" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.bruker_dir">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">bruker_dir</code><span class="sig-paren">(</span><em class="sig-param">search_string</em>, <em class="sig-param">exp_type</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_dir" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">bruker_dir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">search_string</span></em>, <em class="sig-param"><span class="n">exp_type</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_dir" title="Permalink to this definition">¶</a></dt>
 <dd><p>A generator that returns a 3-tuple of dirname, expno, and dataset for a directory</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.load_files.cw">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">cw</code><span class="sig-paren">(</span><em class="sig-param">file</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.cw" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">cw</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.cw" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>

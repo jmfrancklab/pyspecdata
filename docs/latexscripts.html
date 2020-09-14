@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Documentation of Notebook Helper Functions &mdash; pySpecData 0.9.5.1.7 documentation</title>
+  <title>Documentation of Notebook Helper Functions &mdash; pySpecData 0.9.5.3.1 documentation</title>
   
 
   
@@ -21,11 +21,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.9.5.1.7
+                0.9.5.3.1
               </div>
             
           
@@ -180,45 +180,45 @@ instead of your normal Latex command to build a lab notebook.
 The results of python environments are <strong>cached</strong> and <strong>only re-run if the code changes</strong>,
 even if the python environments are moved around.
 This makes the compilation of a Latex lab notebook extremely efficient.</p>
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.latexscripts.cache_output_if_needed">
-<code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">cache_output_if_needed</code><span class="sig-paren">(</span><em class="sig-param">scriptnum_as_str</em>, <em class="sig-param">hashstring</em>, <em class="sig-param">showcode=False</em>, <em class="sig-param">show_error=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.cache_output_if_needed" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">cache_output_if_needed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scriptnum_as_str</span></em>, <em class="sig-param"><span class="n">hashstring</span></em>, <em class="sig-param"><span class="n">showcode</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">show_error</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.cache_output_if_needed" title="Permalink to this definition">¶</a></dt>
 <dd><p>if needed, run the python script numbered by scriptnum_as_str that hashes to hashstring, and output the result to the cache ONLY</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.latexscripts.cached_filename">
-<code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">cached_filename</code><span class="sig-paren">(</span><em class="sig-param">hashstring</em>, <em class="sig-param">returndir=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.cached_filename" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">cached_filename</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hashstring</span></em>, <em class="sig-param"><span class="n">returndir</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.cached_filename" title="Permalink to this definition">¶</a></dt>
 <dd><p>this sets the format for where the cached file is stored
 we use the first two characters as directory names (so there are just 16 of them</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.latexscripts.det_new_pdf_name">
-<code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">det_new_pdf_name</code><span class="sig-paren">(</span><em class="sig-param">thisargv</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.det_new_pdf_name" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">det_new_pdf_name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">thisargv</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.det_new_pdf_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>based on an original tex or pdf name, determine the original basename (i.e., no extension), as well as one with the final word after the underscore removed</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.latexscripts.genconfig">
 <code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">genconfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.genconfig" title="Permalink to this definition">¶</a></dt>
 <dd><p>creates a template configuration directory</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.latexscripts.main">
 <code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>This looks for <cite>scripts/scriptsUsed.csv</cite> inside the notebook directory, and checks whether or not it should be run
 if a command line argument of “flush” is passed, it flushes that script number from the cache</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.latexscripts.sha_string">
-<code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">sha_string</code><span class="sig-paren">(</span><em class="sig-param">script</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.sha_string" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">sha_string</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">script</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.sha_string" title="Permalink to this definition">¶</a></dt>
 <dd><p>convert the sha hash to a string</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.latexscripts.wraplatex">
 <code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">wraplatex</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.wraplatex" title="Permalink to this definition">¶</a></dt>
 <dd><p>runs the python scripts after running latex also creates a copy of latex without the final portion under the underscore
@@ -232,7 +232,7 @@ This can be used in combination with wrapviewer() and latexmk by using a <code c
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyspecdata.latexscripts.wrapviewer">
 <code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">wrapviewer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.wrapviewer" title="Permalink to this definition">¶</a></dt>
 <dd><p>see <a class="reference internal" href="#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p>
