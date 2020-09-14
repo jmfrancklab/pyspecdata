@@ -6,21 +6,21 @@ import numpy as np
 tau = nddata(r_[0:2:100j], 'tau')
 fake_data = 102*(1-2*exp(-tau*6.0))
 fake_data.add_noise(5.0)
-print(ndshape(fake_data))
-with figlist_var() as fl:
-    fl.next('fake data')
-    fl.plot(fake_data)
 #}}}
 #{{{ fitting data
 f = fitdata(fake_data)
 M0,Mi,R1,vd = sympy.symbols("M_0 M_inf R_1 tau",real=True)
 f.functional_form = Mi + (M0-Mi)*sympy.exp(-vd*R1)
+logger.info(strm("Functional Form", f.functional_form))
+logger.info(strm("Functional Form", f.functional_form))
 f.set_guess({M0:-500, Mi:500, R1:2})
 f.settoguess()
 save_guess = f.eval(100)
 f.fit()
-fl.next('fit function')
-fl.plot(f,'o',label='data')
-fl.plot(save_guess,label='guess')
-fl.show();quit()
+print("output:",f.output())
+print("latex:",f.latex())
+with figlist_var() as fl: 
+    fl.next('fit with guess')
+    fl.plot(f,'o',label='data')
+    fl.plot(save_guess,label='guess')
 
