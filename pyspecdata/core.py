@@ -5745,7 +5745,7 @@ class nddata (object):
         new_units = list(set(old_units))
         if len(new_units)>1:
             new_units = ' '.join(map(str,new_units))
-        elif len(new_units)==1:
+        elif new_units == 1:
             new_units = new_units[0]
         else:
             new_units = None
