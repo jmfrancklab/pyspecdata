@@ -23,6 +23,6 @@ T1 = 1./f.output('R_1')
 with figlist_var() as fl: 
     fl.next('fit with guess')
     fl.plot(fake_data,'o',label='fake data')
-    fl.plot(f,label='fit')
+    fl.plot(f.eval(100),label='fit')
     fl.plot(guess,label='guess')
 
