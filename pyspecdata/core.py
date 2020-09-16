@@ -7415,10 +7415,11 @@ class fitdata(nddata):
             taxis = linspace(taxis[0],taxis[1],300)
         return taxis
     def eval(self,taxis,set_what = None,set_to = None):
-        r'''after we have fit, evaluate the fit function along the axis taxis
+        r'''after we have fit, eval calculates the fit function along the axis taxis.
         set_what and set_to allow you to forcibly set_what a specific symbol to a
         specific value --> however, this does not affect the class, but only
-        the return value'''
+        the return value. The specific value defines the number of evenly spaced points
+        along the taxis'''
         if isinstance(set_what, dict):
             set_to = list(set_what.values())
             set_what = list(set_what.keys())
