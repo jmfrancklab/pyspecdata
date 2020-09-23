@@ -3,7 +3,7 @@ even though the location of the raw spectral data might change.
 
 This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file.
 '''
-import os
+import os, sys
 import configparser
 import platform
 from .general_functions import process_kwargs, strm
@@ -348,3 +348,11 @@ def log_fname(logname,fname,dirname,err=False):
             fp.write('%-70s%-50s\n'%(fname.replace(' ','\\ '),dirname.replace(' ','\\ ')))
     if err:
         return rclone_suggest
+def register_directory():
+    assert len(sys.argv) == 2,"Only give one argument -- the directory!"
+    exp_directory = sys.argv[1]
+    exp_directory = os.path.normpath(os.path.expanduser(exp_directory))
+    _,exp_type = os.path.split(exp_directory)
+    logger.debug(strm("trying to register directory",exp_directory,"as",exp_type))
+    _my_config.set_setting('ExpTypes',exp_type,exp_directory)
+    return
