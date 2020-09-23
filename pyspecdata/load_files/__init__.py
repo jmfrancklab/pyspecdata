@@ -378,7 +378,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             zf = ZipFile(filename)
             list_of_files = [j.split('/') for j in zf.namelist()]
             basename = os.path.normpath(filename).split(os.path.sep)[-1].split('.')[0]
-            assert all([j[0] == basename for j in list_of_files]), strm("I expected that the zip file contains a directory called ",basename,"which contains your NMR data -- this appears not to be the case.  (Note that with future extensions, other formats will be possible.)")
+            assert all([j[0] == basename for j in list_of_files]), strm("I expected that the zip file %s contains a directory called %s which contains your NMR data -- this appears not to be the case.  (Note that with future extensions, other formats will be possible.)"%(filename,basename))
             file_reference = (zf,
                     filename,
                     basename)
