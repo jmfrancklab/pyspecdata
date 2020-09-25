@@ -109,7 +109,7 @@ def load_cary(filename):
     for n,j in enumerate(alldata):
         repcounter = 0
         orig_name = j.name()
-        logging.info("orig name for %d is %s"%(n,orig_name))
+        logging.debug("orig name for %d is %s"%(n,orig_name))
         new_name = orig_name
         while new_name in retval.keys():
             repcounter += 1

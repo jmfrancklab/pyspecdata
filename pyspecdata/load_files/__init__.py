@@ -143,6 +143,12 @@ def find_file(searchstring,
         More generally, it is a regular expression,
         where ``.*searchstring.*`` matches a filename inside the
         directory appropriate for `exp_type`.
+    exp_type : str
+        Gives the name of a directory, known to be pyspecdata, that contains
+        the file of interest.
+        For a directory to be known to pyspecdata, it must be registered with
+        the (terminal/shell/command prompt) command `pyspecdata_register_dir`
+        **or** in a directory contained inside (underneath) such a directory.
     expno : int
         For Bruker NMR and Prospa files, where the files are stored in numbered
         subdirectories,
@@ -150,11 +156,6 @@ def find_file(searchstring,
         Currently, this parameter is needed to load Bruker and Kea files.
         If it finds multiple files that match the regular expression,
         it will try to load this experiment number from all the directories.
-    exp_type : str
-        Since the function assumes that you have different types of
-        experiments sorted into different directories, this argument
-        specifies the type of experiment see :func:`~pyspecdata.datadir.getDATADIR` for
-        more info.
     postproc : function, str, or None
         This function is fed the nddata data and the remaining keyword
         arguments (`kwargs`) as arguments.
