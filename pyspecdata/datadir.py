@@ -155,6 +155,10 @@ def getDATADIR(*args,**kwargs):
     user's laptop.
     While it will return a default directory without any arguments, it is
     typically used with the keyword argument `exp_type`, described below.
+
+    Note that **the most common way** to use this mechanism is to set up your directories using
+    the pyspecdata_register_dir shell command -- see
+    :func:`~pyspecdata.datadir.register_directory`.
     
 
     It returns the directory ending in a trailing (back)slash.
@@ -349,6 +353,23 @@ def log_fname(logname,fname,dirname,err=False):
     if err:
         return rclone_suggest
 def register_directory():
+    r"""The shell command `pyspecdata_register_dir WHICHDIR` will register the
+    directory WHICHDIR (substitute with the name of a directory on your
+    computer) so that it can be automatically discovered by
+    :func:`~pyspecdata.find_file` or
+    :func:`~pyspecdata.search_filename`
+    after executing this shell command
+    you can use the `exp_type` argument of those commands where you only give
+    the lowest level subdirectory (or the final couple subdirectories) that
+    contains your data.
+
+    Key to the way this mechanism works
+
+    .. note::
+        this feature was installed on 9/24/20: you need to re-run
+        `setup.py` in order to get this command to work for the first time if
+        you installed pyspecdata before that date.
+    """
     assert len(sys.argv) == 2,"Only give one argument -- the directory!"
     exp_directory = sys.argv[1]
     exp_directory = os.path.normpath(os.path.expanduser(exp_directory))

@@ -163,7 +163,7 @@
 <dd><p>Find the file  given by the regular expression <cite>searchstring</cite> inside the directory identified by <cite>exp_type</cite>, load the nddata object, and postprocess with the function <cite>postproc</cite>.</p>
 <p>It looks at the top level of the directory first, and if that fails, starts to look recursively.
 Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
-(For a more thorough description, see <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a>).</p>
+(For information on how to set up the file searching mechanism, see <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.datadir.register_directory" title="pyspecdata.datadir.register_directory"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_directory()</span></code></a>).</p>
 <p>Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
 (so that you can make sure they are properly synced to the cloud, etc.).</p>
 <p>It calls <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
@@ -266,7 +266,7 @@ or else, <cite>None</cite>, indicating that this is part of a pair of
 files that should be skipped</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or None</p>
+<dd class="field-odd"><p><a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or None</p>
 </dd>
 </dl>
 </dd></dl>
