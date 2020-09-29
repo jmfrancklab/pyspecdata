@@ -4,5 +4,8 @@ Here are some examples to help navigate the different functions and tools includ
 
 Here is an example of the use of fitdata and setting a initial guess then plotting simultaneously.
 
-.. plot:: pyplots/fit_fake_data.py
+.. plot:: ../examples/matplotlib_test.py
+    :include-source:
+
+.. plot:: ../examples/fit_fake_data.py
     :include-source:
