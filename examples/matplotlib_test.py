@@ -8,34 +8,9 @@ from matplotlib.patches import Ellipse
 # {{{ this is the contents of pylab.py -- works
 # need to go through and figure out which lines
 # are actually needed and which are not
-from matplotlib.cbook import flatten, silent_list, iterable, dedent
-import matplotlib as mpl
-from matplotlib.dates import (
-    date2num, num2date, datestr2num, strpdate2num, drange, epoch2num,
-    num2epoch, mx2num, DateFormatter, IndexDateFormatter, DateLocator,
-    RRuleLocator, YearLocator, MonthLocator, WeekdayLocator, DayLocator,
-    HourLocator, MinuteLocator, SecondLocator, rrule, MO, TU, WE, TH, FR,
-    SA, SU, YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, SECONDLY,
-    relativedelta)
-# bring all the symbols in so folks can import them from
-# pylab in one fell swoop
-## We are still importing too many things from mlab; more cleanup is needed.
-from matplotlib.mlab import (
-    demean, detrend, detrend_linear, detrend_mean, detrend_none,
-    window_hanning, window_none)
-from matplotlib import cbook, mlab, pyplot as plt
-from matplotlib.pyplot import *
-from numpy import *
-from numpy.fft import *
-from numpy.random import *
-from numpy.linalg import *
-import numpy as np
-import numpy.ma as ma
-# don't let numpy's datetime hide stdlib
-import datetime
-# This is needed, or bytes will be numpy.random.bytes from
-# "from numpy.random import *" above
-bytes = __import__("builtins").bytes
+# -- I have already stripped out some
+from matplotlib.pyplot import figure, subplot, show, xlim, ylim, plot
+from numpy import * # I think it wasn't importing from numpy b/c it seems we're inside sphinx
 # }}}
 
 
