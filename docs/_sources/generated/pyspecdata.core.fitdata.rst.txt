@@ -119,6 +119,7 @@ pyspecdata.core.fitdata
       ~fitdata.secsy_transform_manual
       ~fitdata.set_error
       ~fitdata.set_ft_prop
+      ~fitdata.set_guess
       ~fitdata.set_plot_color
       ~fitdata.set_prop
       ~fitdata.set_to
