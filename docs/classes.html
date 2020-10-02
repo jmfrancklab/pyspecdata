@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>The Figure List &mdash; pySpecData 0.9.5.3.1 documentation</title>
+  <title>List of Classes &mdash; pySpecData 0.9.5.3.1 documentation</title>
   
 
   
@@ -36,8 +36,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Units" href="units.html" />
-    <link rel="prev" title="Documentation of Notebook Helper Functions" href="latexscripts.html" /> 
+    <link rel="next" title="pyspecdata.nddata_ft" href="generated/pyspecdata.nddata_ft.html" />
+    <link rel="prev" title="Fourier Functions" href="fourier.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -87,10 +87,14 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="classes.html">List of Classes</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">List of Classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/pyspecdata.nddata_ft.html">pyspecdata.nddata_ft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/pyspecdata.nddata.html">pyspecdata.nddata</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="fitdata.html">the fitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
 </ul>
@@ -138,13 +142,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>The Figure List</li>
+      <li>List of Classes</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/figlist.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/classes.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -157,64 +161,30 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="the-figure-list">
-<h1>The Figure List<a class="headerlink" href="#the-figure-list" title="Permalink to this headline">¶</a></h1>
-<p>So that we can place figures either in an organized lab
-notebook,
-or in a graphical display (<em>e.g.</em> Qt-based),
-or in simple figures that show up at the command line,
-we need a means of collating figures
-(as well as intervening text)
-into an organized
-list – this is the figure list.</p>
-<p>Previously, this was simply a list of matplotlib or
-mayavi figures
-(typically implemented with <code class="docutils literal notranslate"><span class="pre">fl.next('figure</span> <span class="pre">name')</span></code> calls),
-but that strategy proved to be insufficient for various
-reasons.
-Practically, this leads to complicated code when
-implementing, <em>e.g.</em> twinx or twiny plots,
-and it also obscures the underlying matplotlib, mayavi,
-etc, code from the user.
-Philosophically, as with nddata, we want to take maximal
-advantage of operator overloading and other object
-oriented concepts, including seamless switching between
-output to, <em>e.g.</em> latex, html, bokeh, matplotlib, Qt
-GUIs, <em>etc.</em></p>
-<p>Therefore, we build the new system around a list of
-<em>visualization objects</em>.
-By breaking the plotting process into several methods
-which are defined in <strong>create new document with definitions</strong>,
-we can automate the process,
-while also keeping it maximally flexible.
-In the simplest example,
-a visualization object corresponds to <em>e.g.</em> a single
-matplotlib axis;
-but it can also correspond to multiple axes,
-as when we want to plot multi-dimensional data, or when
-we want to show the projections of 2D data.</p>
-<p>From the end-user’s perspective, plotting is achieved
-by
-(1) optionally modifying an existing plotting object
-class to get different properties than the default:
-the default classes available are
-image,
-plot,
-contour,
-and
-surface
-(2) creating instances of the plotting classes inside
-inside the figure list,
-in order of appearance
-(note that sometimes, it will make sense to first
-initialize blank plots, and drop data into them if the
-order of plotting and data generation are different)
-(3) adding nddata objects (or numpy objects, which are
-converted to nddata objects) to the plotting instances
-(quite literally)
-(4) if interactive plotting is employed, the nddata
-themselves are updated, and then the figurelist update
-method is called.</p>
+  <div class="section" id="list-of-classes">
+<h1>List of Classes<a class="headerlink" href="#list-of-classes" title="Permalink to this headline">¶</a></h1>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/pyspecdata.nddata_ft.html#pyspecdata.nddata_ft" title="pyspecdata.nddata_ft"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nddata_ft</span></code></a></p></td>
+<td><p>Provides Fourier transformation.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nddata</span></code></a>(*args, **kwargs)</p></td>
+<td><p>This is the detailed API reference.</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 
 
@@ -225,10 +195,10 @@ method is called.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="units.html" class="btn btn-neutral float-right" title="Units" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="generated/pyspecdata.nddata_ft.html" class="btn btn-neutral float-right" title="pyspecdata.nddata_ft" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="latexscripts.html" class="btn btn-neutral float-left" title="Documentation of Notebook Helper Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="fourier.html" class="btn btn-neutral float-left" title="Fourier Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -1,0 +1,287 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyspecdata.nddata_ft &mdash; pySpecData 0.9.5.3.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyspecdata.nddata" href="pyspecdata.nddata.html" />
+    <link rel="prev" title="List of Classes" href="../classes.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pySpecData
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5.3.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../classes.html">List of Classes</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pyspecdata.nddata_ft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyspecdata.nddata.html">pyspecdata.nddata</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pySpecData</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../classes.html">List of Classes</a> &raquo;</li>
+        
+      <li>pyspecdata.nddata_ft</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/generated/pyspecdata.nddata_ft.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pyspecdata-nddata-ft">
+<h1>pyspecdata.nddata_ft<a class="headerlink" href="#pyspecdata-nddata-ft" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="pyspecdata.nddata_ft">
+<em class="property">class </em><code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">nddata_ft</code><a class="headerlink" href="#pyspecdata.nddata_ft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides Fourier transformation.</p>
+<p>Deals correctly with units and
+coordinates under zero-filling, choosing to view different aliases
+(including “shifted” vs. “unshifted”), etc.</p>
+<p>All methods here are inherited by (present in) any <a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a> object.</p>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code> adjusts normalization and units so that the result conforms to</p>
+<p><span class="math notranslate nohighlight">\(\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt\)</span></p>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code> adjusts normalization and units so that the result conforms to</p>
+<p><span class="math notranslate nohighlight">\(s(t)=t_{dw} \int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
+<p>Where <span class="math notranslate nohighlight">\(t_{dw}=\frac{1}{\Delta f}\)</span>, is the dwell time (with <span class="math notranslate nohighlight">\(\Delta f\)</span> the spectral width).</p>
+<p><em>Why do we do this?</em> Note that while the analytical integral this corresponds to is normalized, performing
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code> followed by <code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code> on a discrete sequence is NOT completely invertible
+(due to integration of the implied comb function??),
+and would require division by a factor of <span class="math notranslate nohighlight">\(\Delta f\)</span> (the spectral width) in order
+to retrieve the original function</p>
+<dl class="py method">
+<dt id="pyspecdata.nddata_ft.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata_ft.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyspecdata.nddata_ft.__init__" title="pyspecdata.nddata_ft.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a></p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.nddata_ft.convolve" title="pyspecdata.nddata_ft.convolve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convolve</span></code></a>(axisname, filterwidth[, convfunc])</p></td>
+<td><p>Perform a convolution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.nddata_ft.extend_for_shear" title="pyspecdata.nddata_ft.extend_for_shear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extend_for_shear</span></code></a>(altered_axis, propto_axis, …)</p></td>
+<td><p>this is propto_axis helper function for <cite>.fourier.shear</cite></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.nddata_ft.ft" title="pyspecdata.nddata_ft.ft"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ft</span></code></a>(axes[, tolerance, cosine, verbose])</p></td>
+<td><p>This performs a Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.nddata_ft.ft_clear_startpoints" title="pyspecdata.nddata_ft.ft_clear_startpoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ft_clear_startpoints</span></code></a>(axis[, t, f, nearest])</p></td>
+<td><p>Clears memory of where the origins in the time and frequency domain are.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.nddata_ft.ft_state_to_str" title="pyspecdata.nddata_ft.ft_state_to_str"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ft_state_to_str</span></code></a>(*axes)</p></td>
+<td><p>Return a string that lists the FT domain for the given axes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.nddata_ft.ftshift" title="pyspecdata.nddata_ft.ftshift"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ftshift</span></code></a>(axis, value)</p></td>
+<td><p>FT-based shift.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.nddata_ft.get_ft_prop" title="pyspecdata.nddata_ft.get_ft_prop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ft_prop</span></code></a>(axis[, propname])</p></td>
+<td><p>Gets the FT property given by <cite>propname</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.nddata_ft.ift" title="pyspecdata.nddata_ft.ift"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ift</span></code></a>(axes[, n, tolerance, verbose])</p></td>
+<td><p>This performs an inverse Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.nddata_ft.set_ft_prop" title="pyspecdata.nddata_ft.set_ft_prop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ft_prop</span></code></a>(axis[, propname, value])</p></td>
+<td><p>Sets the FT property given by <cite>propname</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.nddata_ft.shear" title="pyspecdata.nddata_ft.shear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shear</span></code></a>(altered_axis, propto_axis, by_amount)</p></td>
+<td><p>the fourier shear method – see .shear() documentation</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pyspecdata.nddata.html" class="btn btn-neutral float-right" title="pyspecdata.nddata" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../classes.html" class="btn btn-neutral float-left" title="List of Classes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, John M. Franck
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
