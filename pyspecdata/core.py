@@ -7419,7 +7419,19 @@ class fitdata(nddata):
         set_what and set_to allow you to forcibly set_what a specific symbol to a
         specific value --> however, this does not affect the class, but only
         the return value. The specific value defines the number of evenly spaced points
-        along the taxis'''
+        along the taxis.
+        
+        Parameters
+        ----------
+        set_what: specific symbol you wish to assign or have included in the evaluation
+        set_to: the specific value (int) you are assigning the symbol you included
+        int: number of evenly spaced points along the taxis along the fit
+
+        Returns
+        -------
+        newdata:nddata of the calculated fit function along the axis taxis with a set 
+        amount of points along the fit and specifically set symbols with values.
+        '''
         if isinstance(set_what, dict):
             set_to = list(set_what.values())
             set_what = list(set_what.keys())
