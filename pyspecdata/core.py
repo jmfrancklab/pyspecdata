@@ -60,13 +60,13 @@ from matplotlib.collections import PolyCollection
 from matplotlib.colors import LightSource
 from matplotlib.lines import Line2D
 from scipy.interpolate import griddata as scipy_griddata
-import tables
+if not inside_sphinx():
+    import tables
 import warnings
 import re
-from inspect import ismethod
+from inspect import ismethod,signature,Parameter
 from numpy.core import rec
 from matplotlib.pyplot import cm
-import tables
 from copy import deepcopy 
 import traceback
 import sympy
@@ -74,7 +74,6 @@ from scipy.optimize import leastsq
 from scipy.signal import fftconvolve
 import scipy.sparse as sparse
 import numpy.lib.recfunctions as recf
-from inspect import getargspec
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
 from .datadir import getDATADIR,log_fname
@@ -117,8 +116,23 @@ gammabar_e = 2.807e10 # this is for a nitroxide
 #}}}
 def apply_oom(average_oom,numbers,prev_label=''):
     """scale numbers by the order of magnitude average_oom and change the
-    label prev_label by adding the appropriate SI prefix"""
-    average_oom = int(average_oom/3.0)*3
+    name of the units by adding the appropriate SI prefix
+
+    Parameters
+    ----------
+    average_oom: int or float
+        the average order of magnitude to use
+    numbers: ndarray
+        The numbers to be scaled by average_oom.
+        The array is modified in-place.
+    prev_label: str
+        a string representing the units
+
+    Returns
+    -------
+    new_label: str
+        prev_label is prefixed by the appropriate SI prefix
+    """
     oom_names =   ['T' , 'G' , 'M' , 'k' , '' , 'm' , '\\mu ' , 'n' , 'p']
     oom_values = r_[12 , 9   , 6   , 3   , 0  , -3  , -6     , -9  , -12]
     eq = oom_values == average_oom
@@ -131,7 +145,15 @@ def apply_oom(average_oom,numbers,prev_label=''):
             raise ValueError(strm("you passed",average_oom,"which I can't find a prefix for"))
     else:
         oom_index = nonzero(eq)[0][0]
-    numbers[:] /= 10.**oom_values[oom_index]
+    if numbers.dtype in ['int32','int64']:
+        # this is not necessary unless we have an integer type
+        logger.warning("you are trying to determine the SI prefix of a"
+                "set of numbers that are described by integers.  This is"
+                "probably not a good idea!!")
+        new_values = numbers / 10.**oom_values[oom_index]
+        numbers[:] = new_values.astype(numbers.dtype)
+    else:
+        numbers[:] /= 10.**oom_values[oom_index]
     return oom_names[oom_index]+prev_label
 def mybasicfunction(first_figure = None):
     r'''this gives the format for doing the image thing
@@ -1298,8 +1320,9 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
             ax.yaxis.set_minor_locator(minorLocator)
             #}}}
     ax.yaxis.grid(use_grid,which='major',color=gridcolor,alpha=0.15,linestyle='-')
-    ax.yaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.125,linestyle='-')
-    ax.xaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.125,linestyle='-')
+    ax.xaxis.grid(use_grid,which='major',color=gridcolor,alpha=0.15,linestyle='-')
+    ax.yaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.075,linestyle='-')
+    ax.xaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.075,linestyle='-')
     labels = ax.get_xticklabels()
     setp(labels,rotation=rotation[0],fontsize=10)
     if y:
@@ -4467,18 +4490,31 @@ class nddata (object):
                 "in the list of axes",self.dimlabels))
         temp = list(self.data.shape)
         temp[thisaxis] = 1
-        numnonoptargs = len(getargspec(func).args)
+        func_sig = signature(func)
+        numnonoptargs = len([v.default for v in func_sig.parameters.values() if v.default==Parameter.empty])
+        kwargnames =  [k for k,v in func_sig.parameters.items() if v.default!=Parameter.empty]
         if numnonoptargs == 2:
-            try:
+            if 'axis' in kwargnames:
                 self.data = func(self.getaxis(axis),self.data,axis=thisaxis)
-            except TypeError:
+            if 'axes' in kwargnames:
                 self.data = func(self.getaxis(axis),self.data,axes=thisaxis)
+            else:
+                raise ValueError("Your function doesn't have axis or axes as a keyword argument!")
         else:
-            if numnonoptargs == 1 or len(getargspec(func).varargs)>0:
-                try:
+            if numnonoptargs == 1:
+                paramnames = [k for k in func_sig.parameters.keys()]
+                if len(paramnames) == 1:
+                    if func_sig.parameters[paramnames[0]].kind == Parameter.VAR_POSITIONAL:
+                        try:
+                            self.data = func(self.data,axis=thisaxis)
+                        except:
+                            self.data = func(self.data,axes=thisaxis)
+                if 'axis' in kwargnames:
                     self.data = func(self.data,axis=thisaxis)
-                except TypeError:
+                elif 'axes' in kwargnames:
                     self.data = func(self.data,axes=thisaxis)
+                else:
+                    raise ValueError("Your function doesn't have axis or axes as a keyword argument! The number of non-optional arguments are %s. The keyword arguments are %s"%(str(numnonoptargs),str(kwargnames)))
             else:
                 raise ValueError('you passed a function to run_nopop that doesn\'t'
                         'have either one or two arguments!')
@@ -5285,7 +5321,7 @@ class nddata (object):
                 if other.get_error(thisdim) is not None:
                     self.set_error(thisdim, copy(other.get_error(thisdim)))
                 if other.get_units(thisdim) is not None:
-                    self.set_units(thisdim, copy(other.get_units(thisdim)))
+                    self.set_units(thisdim, other.get_units(thisdim))
         return self
     def axis(self,axisname):
         'returns a 1-D axis for further manipulation'
@@ -5505,7 +5541,7 @@ class nddata (object):
         """
         if len(args) == 2:
             axis, value = args
-            if value=='#':
+            if isscalar(value) and value=='#':
                 self.setaxis(axis,r_[0:ndshape(self)[axis]])
                 return self
         elif len(args) == 1 and issympy(args[0]):
@@ -5693,6 +5729,9 @@ class nddata (object):
             allow for smooshing to determine a new axes that is standard
             (not a structured array) and that increases linearly.
         '''
+        assert (type(dimstocollapse) in [list,tuple]) and len(dimstocollapse)>1, "What?? You must try to collapse more than one dimension!! -- you claim you want to collapse '%s'"%str(dimstocollapse)
+        not_present = set(dimstocollapse) - set(self.dimlabels)
+        if len(not_present) > 0: raise ValueError(strm(not_present,"was not found in the list of dimensions",self.dimlabels))
         #{{{ first, put them all at the end, in order given here
         retained_dims = list(self.dimlabels)
         logger.debug(strm("old order",retained_dims))
@@ -5715,6 +5754,7 @@ class nddata (object):
         axis_coords_units_dict = self.mkd(self.axis_coords_units)
         # }}}
         old_units = []
+        logger.debug(strm("dims to collapse",dimstocollapse))
         for this_name in dimstocollapse:
             this_idx = retained_dims.index(this_name)
             retained_dims.pop(this_idx)
@@ -5723,11 +5763,14 @@ class nddata (object):
             axis_coords_dict.pop(this_name)
             if this_idx < final_position:
                 final_position -= 1
+        logger.debug(strm("old units",old_units))
         new_units = list(set(old_units))
         if len(new_units) > 1:
             new_units = ' '.join(map(str,new_units))
-        else:
+        elif new_units == 1:
             new_units = new_units[0]
+        else:
+            new_units = None
         # this might be sub-optimal, but put the dims to collapse at the end, and move them back later if we want
         new_order = retained_dims + dimstocollapse
         self.reorder(new_order)
@@ -5749,6 +5792,8 @@ class nddata (object):
         axes_with_labels = [j for j in dimstocollapse if self.getaxis(j) is not None] # specifically, I am only concerned with the ones I am collapsing that have labels
         if noaxis:
             logger.debug('noaxis was specified')
+            axis_coords_dict[dimname] = None
+            axis_coords_error_dict[dimname] = None
         else:
             logger.debug('starting construction of the smooshed axis')
             axes_with_labels_haserror = [self.get_error(j) is not None for j in axes_with_labels]
@@ -5789,14 +5834,12 @@ class nddata (object):
                 multidim_axis_label = multidim_axis_label.flatten() # then flatten the axis
                 logger.debug(strm("shape of multidim_axis_label is now",multidim_axis_label.shape))
                 logger.debug(strm("multidim_axis_label is:\n",repr(multidim_axis_label)))
-            # }}}
-        #{{{ update axis dictionary with the new info
-        if noaxis:
-            axis_coords_dict[dimname] = None
-            axis_coords_error_dict[dimname] = None
-        else:
+            else:
+                raise ValueError("You requested that smoosh generate an axis, but I don't know what dtype to assign to it (what fields to use).  This is likely because you don't have axes assigned to the dimensions you're trying to smoosh.  Consider calling smoosh with noaxis=True, instead")
             axis_coords_dict[dimname] = multidim_axis_label
             axis_coords_error_dict[dimname] = multidim_axis_error
+            # }}}
+        #{{{ update axis dictionary with the new info
         logger.debug(strm("end up with axis_coords_dict (%d)"%len(axis_coords_dict),axis_coords_dict))
         logger.debug(strm("end up with axis_coords_error_dict (%d)"%len(axis_coords_error_dict),axis_coords_error_dict))
         #}}}
@@ -6478,7 +6521,8 @@ class nddata (object):
                         +" labeled)")
                     temp = diff(axesdict[thisdim]) 
                     if not all(temp*sign(temp[0])>0):
-                        raise ValueError(strm("you can only use the range format on data where the axis is in consecutively increasing or decreasing order, and the differences that I see are",temp*sign(temp[0])))
+                        raise ValueError(strm("you can only use the range format on data where the axis is in consecutively increasing or decreasing order, and the differences that I see are",temp*sign(temp[0])),
+                                "if you like, you can still do this by first calling .sort( on the %s axis"%thisdim)
                     if sign(temp[0]) == -1:
                         thisaxis = axesdict[thisdim][::-1]
                     else:
@@ -6497,6 +6541,7 @@ class nddata (object):
                             temp_high = inf
                         if temp_low > temp_high:
                             temp_low,temp_high = temp_high,temp_low
+                    # at this point, temp_low is indeed the lower value, and temp_high indeed the higher
                     if temp_low == inf:
                         raise ValueError(strm("this is not going to work -- I interpret range",thisargs,"I get to",temp_low,",",temp_high))
                     elif temp_low == -inf:
@@ -6504,7 +6549,11 @@ class nddata (object):
                     else:
                         logger.debug(strm("looking for",temp_low))
                         temp_low = searchsorted(thisaxis,temp_low)
-                        logger.debug(strm("i found",thisaxis[temp_low]))
+                        if temp_low >= len(thisaxis):
+                            raise ValueError("the lower value of your slice on the %s axis is higher than the highest value of the axis coordinates!"%thisdim)
+                        logger.debug(strm("i found",thisaxis[temp_low],"for the low end of the slice",
+                            thisargs))
+                    temp_high_float = temp_high
                     if temp_high == inf:
                         temp_high = len(thisaxis)-1
                     elif temp_high == -inf:
@@ -6512,13 +6561,18 @@ class nddata (object):
                     else:
                         logger.debug(strm("looking for",temp_high))
                         temp_high = searchsorted(thisaxis,temp_high)
-                        logger.debug(strm("i found",thisaxis[temp_high]))
+                    # at this point, the result is inclusive if temp_high is
+                    # not an exact match, but exclusive if it is
+                    if temp_high<len(thisaxis) and thisaxis[temp_high] == temp_high_float:
+                        temp_high += 1 # make it inclusive
                     if sign(temp[0]) == -1:
                         temp_high = len(thisaxis) -1 -temp_high
                         temp_low = len(thisaxis) -1 -temp_low
                         temp_high, temp_low = temp_low, temp_high
                     del temp
-                    slicedict[thisdim] = slice(temp_low,temp_high+1,None) # inclusive
+                    if temp_low == temp_high:
+                        temp_high += 1
+                    slicedict[thisdim] = slice(temp_low,temp_high,None) # inclusive
                     axesdict[thisdim] = axesdict[thisdim][slicedict[thisdim]]
                 elif thisop == hash('idx'):
                     if axesdict[thisdim] is None:
@@ -6564,6 +6618,30 @@ class nddata (object):
         you want to put it -- it does **not** include the directory where
         the file lives.
         The directory can be passed to the `directory` argument.
+
+        You can use either :func:`~pyspecdata.find_file` or
+        :func:`~pyspecdata.nddata_hdf5` to read the data, as shown below.
+        When reading this, please note that HDF5 files store *multiple* datasets,
+        and each is named (here, the name is `test_data`).
+
+        .. code-block:: python
+
+            from pyspecdata import *
+            init_logging('debug')
+            a = nddata(r_[0:5:10j], 'x')
+            a.name('test_data')
+            try:
+                a.hdf5_write('example.h5',getDATADIR(exp_type='Sam'))
+            except:
+                print("file already exists, not creating again -- delete the file or node if wanted")
+            # read the file by the "raw method"
+            b = nddata_hdf5('example.h5/test_data',
+                    getDATADIR(exp_type='Sam'))
+            print("found data:",b)
+            # or use the find file method
+            c = find_file('example.h5', exp_type='Sam',
+                    expno='test_data')
+            print("found data:",c)
         
         Parameters
         ----------
