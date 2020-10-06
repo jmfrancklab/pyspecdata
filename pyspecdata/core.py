@@ -4003,12 +4003,22 @@ class nddata (object):
     #}}}
     #{{{ integrate, differentiate, and sum
     def integrate(self, thisaxis, backwards=False, cumulative=False):
-        r'''this performs an integration -- which is similar to a sum, except that it takes the axis into account, i.e., it performs:
-            $\int f(x) dx$
+        r'''Performs an integration -- which is similar to a sum, except that it takes the axis into account, *i.e.*, it performs:
+            :math:`\int f(x) dx`
             rather than
-            $\sum_i f(x_i)$
+            :math:`\sum_i f(x_i)`
 
             Gaussian quadrature, etc, is planned for a future version.
+
+            Parameters
+            ==========
+            thisaxis:
+                The dimension that you want to integrate along
+            cumulative: boolean (default False)
+                Perform a cumulative integral (analogous to a cumulative sum)
+                -- *e.g.* for ESR.
+            backwards: boolean (default False)
+                for cumulative integration -- perform the integration backwards
             '''
         if backwards is True:
             self.data = self[thisaxis,::-1].data
