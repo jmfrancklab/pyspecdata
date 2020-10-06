@@ -80,11 +80,11 @@ def _ft_shift(self,thisaxis,p2,shift_axis = None,verbose = False):
     # move second half first -- the following are analogous to the numpy function, but uses slices instead
     sourceslice[thisaxis] = slice(p2,n)
     targetslice[thisaxis] = slice(None,n-p2)
-    newdata[targetslice]  = self.data[sourceslice]
+    newdata[tuple(targetslice)]  = self.data[tuple(sourceslice)]
     # move first half second (the negative frequencies)
     sourceslice[thisaxis] = slice(None,p2)
     targetslice[thisaxis] = slice(-p2,None)
-    newdata[targetslice]  = self.data[sourceslice]
+    newdata[tuple(targetslice)]  = self.data[tuple(sourceslice)]
     self.data = newdata
     if shift_axis is not None and shift_axis:
         axisname = self.dimlabels[thisaxis]

@@ -395,7 +395,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             logger.debug('Identified a bruker 1d file')
             #{{{ Bruker 1D
             data = bruker_nmr.load_1D(file_reference, expno_as_str, dimname=dimname)
-            s.set_prop('postproc_type',s.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
+            data.set_prop('postproc_type',data.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
             #}}}
         else:
             logger.debug('Identified a potential prospa file')
