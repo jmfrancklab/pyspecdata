@@ -7031,7 +7031,7 @@ class fitdata(nddata):
             if len(self.dimlabels) == 1:
                 fit_axis = self.dimlabels[0]
             else:
-                raise IndexError("I can't figure out the fit axis!")
+                raise IndexError("Right now, we can only auto-determine the fit axis if there is a single axis")
         self.fit_axis = fit_axis
         #{{{ in the class, only store the forced values and indices they are set to
         self.set_to = None
