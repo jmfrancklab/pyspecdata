@@ -2855,6 +2855,13 @@ class nddata (object):
     def _contains_symbolic(self,string):
         return string[:9] == 'symbolic_' and hasattr(self,string)
     #{{{ for printing
+    def __repr_pretty__(self, p, cycle):
+        if cycle:
+            p.text('...')
+        else:
+            p.text(str(self))
+    def __repr__(self):
+        return str(self)
     def __str__(self):
         def show_array(x,indent = ''):
             x = repr(x)
@@ -3571,7 +3578,6 @@ class nddata (object):
         >>> b = nddata(r_[0:3],'b')
         >>> print a.C.dot(b)
         >>> print a.data.dot(b.data)
-)
         >>> a = nddata(r_[0:27],[3,3,3],['a','b','c'])
         >>> b = nddata(r_[0:9],[3,3],['a','b'])
         >>> print a.C.dot(b)
@@ -4061,12 +4067,22 @@ class nddata (object):
     #}}}
     #{{{ integrate, differentiate, and sum
     def integrate(self, thisaxis, backwards=False, cumulative=False):
-        r'''this performs an integration -- which is similar to a sum, except that it takes the axis into account, i.e., it performs:
-            $\int f(x) dx$
+        r'''Performs an integration -- which is similar to a sum, except that it takes the axis into account, *i.e.*, it performs:
+            :math:`\int f(x) dx`
             rather than
-            $\sum_i f(x_i)$
+            :math:`\sum_i f(x_i)`
 
             Gaussian quadrature, etc, is planned for a future version.
+
+            Parameters
+            ==========
+            thisaxis:
+                The dimension that you want to integrate along
+            cumulative: boolean (default False)
+                Perform a cumulative integral (analogous to a cumulative sum)
+                -- *e.g.* for ESR.
+            backwards: boolean (default False)
+                for cumulative integration -- perform the integration backwards
             '''
         if backwards is True:
             self.data = self[thisaxis,::-1].data
@@ -7050,7 +7066,7 @@ class fitdata(nddata):
             if len(self.dimlabels) == 1:
                 fit_axis = self.dimlabels[0]
             else:
-                raise IndexError("I can't figure out the fit axis!")
+                raise IndexError("Right now, we can only auto-determine the fit axis if there is a single axis")
         self.fit_axis = fit_axis
         #{{{ in the class, only store the forced values and indices they are set to
         self.set_to = None
