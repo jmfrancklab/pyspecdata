@@ -3607,10 +3607,12 @@ class nddata (object):
         self.reorder(new_order)
         U, Sigma, Vh = svd(self.data, full_matrices=False)
         U = nddata(U,all_but + [todim,'SV'])
+        Vh = nddata(Vh,all_but + ['SV',fromdim])
+        Sigma = nddata(Sigma, all_but + ['SV'])
         # {{{ label the axes
         for j in all_but:
             U.setaxis(j,self.getaxis(j))
-            V.setaxis(j,self.getaxis(j))
+            Vh.setaxis(j,self.getaxis(j))
         U.setaxis(todim,self.getaxis(todim))
         Vh.setaxis(fromdim,self.getaxis(fromdim))
         # }}}
