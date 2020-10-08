@@ -27,7 +27,6 @@ print("*** *** ***")
 print(ndshape(M))
 print(ndshape(logT1))
 print("*** *** ***")
-quit()
 solution = M.C.nnls('vd',logT1, lambda x,y: 1-2*exp(-x/10**(y)), l='BRD')
 
 def nnls_reg(K,b,val):
@@ -93,5 +92,5 @@ print("opt. λ mean:",L_opt_vec.C.mean(t1_name).item(),"±",L_opt_vec.run(std,t1
 plot(solution,':',label='pyspecdata-BRD')
 print("BRD mean:",solution.C.mean(t1_name).item(),"±",solution.run(std,t1_name).item())
 legend()
-show();quit()
+show()
 
