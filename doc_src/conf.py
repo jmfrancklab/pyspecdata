@@ -16,10 +16,9 @@ import sys
 import os
 import shlex
 import sphinx_rtd_theme
-from pyspecdata.version import __version__
 import mock
  
-autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_toolkits', 'get_ipython']
+autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_toolkits', 'get_ipython', 'matplotlib', 'tables']
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -27,6 +26,7 @@ autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_too
 #sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../..'))
 sys.path.append(os.path.abspath('..'))
+from pyspecdata.version import __version__
 
 # -- General configuration ------------------------------------------------
 
@@ -45,8 +45,8 @@ extensions = [
     'sphinx.ext.autosummary',# should allow numpydoc
     #'matplotlib.sphinxext.only_directives',
     #'matplotlib.sphinxext.plot_directive',
-    'IPython.sphinxext.ipython_console_highlighting',
-    'IPython.sphinxext.ipython_directive',
+    #'IPython.sphinxext.ipython_console_highlighting',
+    #'IPython.sphinxext.ipython_directive',
 ]
 
 autosummary_generate = True
