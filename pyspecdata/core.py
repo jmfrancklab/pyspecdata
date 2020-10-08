@@ -2851,6 +2851,13 @@ class nddata (object):
     def _contains_symbolic(self,string):
         return string[:9] == 'symbolic_' and hasattr(self,string)
     #{{{ for printing
+    def __repr_pretty__(self, p, cycle):
+        if cycle:
+            p.text('...')
+        else:
+            p.text(str(self))
+    def __repr__(self):
+        return str(self)
     def __str__(self):
         def show_array(x,indent = ''):
             x = repr(x)
@@ -3551,7 +3558,6 @@ class nddata (object):
         >>> b = nddata(r_[0:3],'b')
         >>> print a.C.dot(b)
         >>> print a.data.dot(b.data)
-
         >>> a = nddata(r_[0:27],[3,3,3],['a','b','c'])
         >>> b = nddata(r_[0:9],[3,3],['a','b'])
         >>> print a.C.dot(b)
