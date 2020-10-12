@@ -40,6 +40,7 @@ def search_filename(searchstring,exp_type,
         print_result=True,
         unique=False):
     r"""Use regular expression `searchstring` to find a file inside the directory indicated by `exp_type`
+    (For information on how to set up the file searching mechanism, see :func:`~pyspecdata.datadir.register_directory`).
 
     Parameters
     ----------
@@ -125,7 +126,7 @@ def find_file(searchstring,
 
     It looks at the top level of the directory first, and if that fails, starts to look recursively.
     Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
-    (For a more thorough description, see :func:`~pyspecdata.datadir.getDATADIR`).
+    (For information on how to set up the file searching mechanism, see :func:`~pyspecdata.datadir.register_directory`).
 
     Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
     (so that you can make sure they are properly synced to the cloud, etc.).
@@ -245,10 +246,11 @@ def find_file(searchstring,
         else:
             if postproc_type in list(postproc_lookup.keys()):
                 data = postproc_lookup[postproc_type](data,**kwargs)
+                if 'fl' in kwargs.keys(): kwargs.pop('fl')
                 logger.debug('this file was postprocessed successfully')
             else:
                 logger.debug('postprocessing not defined for file with postproc_type %s --> it should be defined in the postproc_type dictionary in load_files.__init__.py'+postproc_type)
-            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing (you have %s)"%str(kwargs)
+            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing (you have %s) -- the postproc function should pop the keys from the dictionary after use"%str(kwargs)
             return data
 def format_listofexps(args):
     """**Phased out**: leaving documentation so we can interpret and update old code
@@ -393,7 +395,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             logger.debug('Identified a bruker 1d file')
             #{{{ Bruker 1D
             data = bruker_nmr.load_1D(file_reference, expno_as_str, dimname=dimname)
-            s.set_prop('postproc_type',s.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
+            data.set_prop('postproc_type',data.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
             #}}}
         else:
             logger.debug('Identified a potential prospa file')

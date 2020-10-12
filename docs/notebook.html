@@ -240,15 +240,6 @@ preferences → typesetting → processing tools.</p>
 <p>Alec, can you check this out and update documentation??</p>
 </div>
 </li>
-<li><p>The <cite>‘paramset_pyspecdata’</cite> module.
-Just run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup_paramset.py</span> <span class="pre">install</span></code> from repository root directory (the same directory where you run
-<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></code>
-or
-<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">develop</span></code>)</p>
-<p>(This external module is simply used
-to store the context in which the code is called – <em>i.e.</em>, from within
-python <em>vs.</em> from the command line.)</p>
-</li>
 <li><p>It’s assumed that your latex files are stored in a “notebook directory.”
 In some cases, during the first run, an explanatory error will appear – just follow the instructions.</p></li>
 </ol>
@@ -297,6 +288,7 @@ versions – while it previously required LaTeX to be run with shell-escape enab
 <code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span></code> doesn’t require this.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span></code> just calls <code class="docutils literal notranslate"><span class="pre">pdflatex</span></code> followed
 by <code class="docutils literal notranslate"><span class="pre">update_notebook_pythonscripts</span></code></p></li>
+<li><p>To compile, use <code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span> <span class="pre">--xelatex</span></code></p></li>
 </ul>
 <div class="section" id="the-latex-end">
 <h3>The LaTeX end<a class="headerlink" href="#the-latex-end" title="Permalink to this headline">¶</a></h3>

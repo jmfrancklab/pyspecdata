@@ -25,34 +25,57 @@ ext_modules.append(Extension(name = 'pyspecdata._nnls',
         define_macros = [('ADD_UNDERSCORE',None)],
         extra_compile_args = ['-g'],# debug flags
         ))
-
-setup(
-    name='pySpecData',
-    author='J. M. Franck',
-    version=__version__,
-    packages=setuptools.find_packages(),
-    license='LICENSE.md',
-    author_email='jmfranck@notgiven.com',
-    url='http://github.com/jmfranck/pyspecdata',
-    description='object-oriented N-dimensional data processing with notebook functionality',
-    long_description=open('README.rst',encoding='utf-8').read(),
-    install_requires=[
-        "sympy",
-        "numpy",
-        "scipy",
-        "h5py",
-        "matplotlib",
-        "pillow",
-        ],
-    ext_modules = ext_modules,
-    entry_points=dict(console_scripts=
-        ['scons_continuous=pyspecdata.latexscripts:repeat_scons',
-        'update_notebook_pythonscripts=pyspecdata.latexscripts:main',
-        'pdflatex_notebook_wrapper=pyspecdata.latexscripts:wraplatex',
-        'pdflatex_notebook_view_wrapper=pyspecdata.latexscripts:wrapviewer',
-        'pyspecdata_dataconfig=pyspecdata.latexscripts:genconfig']
-        ),
-)
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+if on_rtd:
+    setup(
+        name='pySpecData',
+        author='J. M. Franck',
+        version=__version__,
+        packages=setuptools.find_packages(),
+        license='LICENSE.md',
+        author_email='jmfranck@notgiven.com',
+        url='http://github.com/jmfranck/pyspecdata',
+        description='object-oriented N-dimensional data processing with notebook functionality',
+        long_description=open('README.rst',encoding='utf-8').read(),
+        install_requires=[
+            "sympy",
+            "numpy",
+            "scipy",
+            "h5py",
+            "matplotlib",
+            "pillow",
+            ],
+    )
+else:
+    setup(
+        name='pySpecData',
+        author='J. M. Franck',
+        version=__version__,
+        packages=setuptools.find_packages(),
+        license='LICENSE.md',
+        author_email='jmfranck@notgiven.com',
+        url='http://github.com/jmfranck/pyspecdata',
+        description='object-oriented N-dimensional data processing with notebook functionality',
+        long_description=open('README.rst',encoding='utf-8').read(),
+        install_requires=[
+            "sympy",
+            "numpy",
+            "scipy",
+            "h5py",
+            "matplotlib",
+            "pillow",
+            ],
+        ext_modules = ext_modules,
+        entry_points=dict(console_scripts=
+            ['scons_continuous=pyspecdata.latexscripts:repeat_scons',
+            'update_notebook_pythonscripts=pyspecdata.latexscripts:main',
+            'pdflatex_notebook_wrapper=pyspecdata.latexscripts:wraplatex',
+            'pdflatex_notebook_view_wrapper=pyspecdata.latexscripts:wrapviewer',
+            'pyspecdata_dataconfig=pyspecdata.latexscripts:genconfig',
+            'pyspecdata_register_dir=pyspecdata.datadir:register_directory',
+            ]
+            ),
+    )
 tryagain = False
 
 print("You can now run pyspecdata_dataconfig to generate a template configuration file (which will show up in your home directory).")
