@@ -3697,7 +3697,6 @@ class nddata (object):
             "dotdims (respectively)",
             dot_dim_A,
             dot_dim_B))
-        quit()
         # {{{ unset the "along" setting
         if hasattr(self,'_matmul_along'):
             del(self._matmul_along)
