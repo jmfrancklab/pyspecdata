@@ -31,6 +31,7 @@ from .datadir import _my_config
 from sys import exc_info
 from os import listdir,environ
 from os.path import sep as path_sep
+import time
 # {{{ determine the figure style, and load the appropriate modules
 _figure_mode_setting = _my_config.get_setting('figures', section='mode', environ='pyspecdata_figures')
 if _figure_mode_setting is None:
@@ -3709,7 +3710,9 @@ class nddata (object):
         B.data = moveaxis(B.data,ax_idx,-2) # row position
         logger.debug(strm("after movement",A.data.shape))
         logger.debug(strm("after movement",B.data.shape))
+        time_matmul = time.time()
         self.data = matmul(A.data,B.data)
+        logger.debug(strm("matmul took",time.time()-time_matmul))
         logger.debug(strm("after mult",self.data.shape))
         self.data = self.data[...,0,0]
         logger.debug(strm("remove extras",self.data.shape))
