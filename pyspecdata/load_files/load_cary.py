@@ -110,8 +110,6 @@ def load_cary(filename):
                 #raise ValueError(strm("not yet set up for Tstore_type",param['Tstore_type']))
             #alldata.append(data)
     retval = {}
-    print(len(alldata))
-    print(len(names))
     for n,j in enumerate(alldata):
         repcounter = 0
         #orig_name = j.name()
