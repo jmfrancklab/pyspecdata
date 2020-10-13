@@ -69,7 +69,15 @@ from numpy.core import rec
 from matplotlib.pyplot import cm
 from copy import deepcopy 
 import traceback
-import sympy# doesn't like to be imported from fornotebook as part of a *
+# {{{ have to do this, or sympy spews meaningless warnings
+from sympy.core import Symbol as sympy_symbol# doesn't like to be imported from fornotebook as part of a *
+from sympy.core import Expr as sympy_expr # doesn't like to be imported from fornotebook as part of a *
+from sympy.utilities import lambdify
+from sympy.core import var as sympy_var
+from sympy.core import diff as sympy_diff
+from sympy.printing import latex as sympy_latex
+from sympy.functions.elementary.miscellaneous import sqrt as sympy_sqrt
+# }}}
 from scipy.optimize import leastsq
 from scipy.signal import fftconvolve
 import scipy.sparse as sparse
@@ -167,7 +175,7 @@ nextfigure({'lplotproperty':value})
 
 def issympy(x):
     'tests if something is sympy (based on the module name)'
-    return isinstance(x,sympy.Expr)
+    return isinstance(x,sympy_expr)
 
 #{{{ function trickery
 def mydiff(data,axis = -1):
@@ -5404,7 +5412,7 @@ class nddata (object):
             else:
                 if issympy(args[0]):
                     func = args[0]
-                    symbols_in_func = func.atoms(sympy.Symbol)
+                    symbols_in_func = func.atoms(sympy_symbol)
                     logger.debug(strm('identified this as a sympy expression (',func,') with symbols',symbols_in_func))
                     symbols_not_in_dimlabels = set(map(str,symbols_in_func))-set(self.dimlabels)
                     if len(symbols_not_in_dimlabels)>0:
@@ -5421,10 +5429,10 @@ class nddata (object):
         if issympy(func):
             logging.debug(strm("about to run sympy lambdify, symbols_in_func is",symbols_in_func))
             try:
-                lambdified_func = sympy.lambdify(list(symbols_in_func), func,
+                lambdified_func = lambdify(list(symbols_in_func), func,
                         modules=mat2array)
             except Exception as e:
-                raise ValueError(strm('Error parsing axis variables',list(map(sympy.var,axisnames)),
+                raise ValueError(strm('Error parsing axis variables',list(map(sympy_var,axisnames)),
                     'that you passed and function',func,'that you passed') +
                     explain_error(e))
             func = lambdified_func
@@ -5556,17 +5564,17 @@ class nddata (object):
                 return self
         elif len(args) == 1 and issympy(args[0]):
             func = args[0]
-            symbols_in_func = func.atoms(sympy.Symbol)
+            symbols_in_func = func.atoms(sympy_symbol)
             logger.debug(strm('identified this as a sympy expression (',func,') with symbols',symbols_in_func))
             symbols_not_in_dimlabels = set(map(str,symbols_in_func))-set(self.dimlabels)
             if len(symbols_not_in_dimlabels)>0:
                 raise ValueError("You passed a symbolic function, but the symbols"+str(symbols_not_in_dimlabels)+" are not axes")
             logging.debug(strm("about to run sympy lambdify, symbols_in_func is",symbols_in_func))
             try:
-                lambdified_func = sympy.lambdify(list(symbols_in_func), func,
+                lambdified_func = lambdify(list(symbols_in_func), func,
                         modules=mat2array)
             except Exception as e:
-                raise ValueError(strm('Error parsing axis variables',list(map(sympy.var,axisnames)),
+                raise ValueError(strm('Error parsing axis variables',list(map(sympy_var,axisnames)),
                     'that you passed and function',func,'that you passed') +
                     explain_error(e))
             value = lambdified_func
@@ -6009,9 +6017,9 @@ class nddata (object):
             for j in range(len(new_axis)): # j is the index in the hash table
                 copy_to_slice[axis_number + 1]     = j
                 copy_from_slice[axis_number]       = where(indices == j)[0]
-                self.data[copy_to_slice]           = old_data[copy_from_slice]
+                self.data[tuple(copy_to_slice)]    = old_data[tuple(copy_from_slice)]
                 if has_data_error:
-                    data_error_location[copy_to_slice] = old_error[copy_from_slice]
+                    data_error_location[tuple(copy_to_slice)] = old_error[tuple(copy_from_slice)]
                 logger.debug(strm("(chunk auto) ",j,'matches at',x_strip_current_field[copy_from_slice[axis_number]]))
                 self.axis_coords[axis_number][:,j] = x_strip_current_field[copy_from_slice[axis_number]]
             #}}}
@@ -7083,7 +7091,7 @@ class fitdata(nddata):
         fprime = zeros([len(parameters),number_of_i])
         for j in range(0,len(parameters)):
             thisvar = self.symbolic_dict[parameters[j]]
-            mydiff_sym[j] = sympy.diff(self.symbolic_func,thisvar)
+            mydiff_sym[j] = sympy_diff(self.symbolic_func,thisvar)
             #print r'$\frac{\partial %s}{\partial %s}=%s$'%(self.function_name,repr(thisvar),sympy.latex(mydiff).replace('$','')),'\n\n'
             try:
                 mydiff = mydiff_sym[j].subs(solution_list)
@@ -7108,8 +7116,8 @@ class fitdata(nddata):
         r'''A property of the fitdata class which stores a string
         output of the functional form of the desired fit expression
         provided in func:`functional_form` in LaTeX format'''
-        retval = sympy.latex(self.symbolic_expr).replace('$','')
-        return r'$f(%s)='%(sympy.latex(self.fit_axis)) + retval + r'$'
+        retval = sympy_latex(self.symbolic_expr).replace('$','')
+        return r'$f(%s)='%(sympy_latex(self.fit_axis)) + retval + r'$'
     @function_string.setter
     def function_string(self):
         raise ValueError("You cannot set the string directly -- change the functional_form property instead!")
@@ -7127,7 +7135,7 @@ class fitdata(nddata):
         assert issympy(sym_expr), "for now, the functional form must be a sympy expression!"
         self.symbolic_expr = sym_expr
         #{{{ adapted from fromaxis, trying to adapt the variable
-        symbols_in_expr = self.symbolic_expr.atoms(sympy.Symbol)
+        symbols_in_expr = self.symbolic_expr.atoms(sympy_symbol)
         #logger.debug(strm('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr))
         print('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr)
         symbols_in_expr = set(map(str,symbols_in_expr))
@@ -7147,13 +7155,13 @@ class fitdata(nddata):
         #}}}
         self.fit_axis = list(self.fit_axis)[0]
         # redefine as real to avoid weird piecewise derivatives
-        self.fit_axis_sym = sympy.var(self.fit_axis,real=True) 
+        self.fit_axis_sym = sympy_var(self.fit_axis,real=True) 
         self.symbolic_vars = list(self.symbolic_vars)
         self.symbolic_vars.sort() # so I get consistent behavior
-        self.symbolic_vars = [sympy.var(j,real=True) for j in self.symbolic_vars]
+        self.symbolic_vars = [sympy_var(j,real=True) for j in self.symbolic_vars]
         self.symbol_list = [str(j) for j in self.symbolic_vars]
         args = self.symbolic_vars + [self.fit_axis]
-        self.fitfunc_multiarg = sympy.lambdify(tuple(args), self.symbolic_expr, modules=mat2array)
+        self.fitfunc_multiarg = lambdify(tuple(args), self.symbolic_expr, modules=mat2array)
         def raw_fn(p,x):
             assert len(p)==len(self.symbolic_vars), "length of parameter passed to fitfunc_raw doesn't match number of symbolic parameters"
             return self.fitfunc_multiarg(
@@ -7216,7 +7224,7 @@ class fitdata(nddata):
         # note for this code, that it depends on above code I later moved to  parameter_derivatives
         #for j in range(0,shape(covarmatrix)[0]):
         #    for k in range(0,shape(covarmatrix)[0]):
-        #        #mydiff_second = sympy.diff(mydiff_sym[j],self.symbolic_vars[k]).subs(solution_list)
+        #        #mydiff_second = sympy_diff(mydiff_sym[j],self.symbolic_vars[k]).subs(solution_list)
         #        #fdprime = array([mydiff_second.subs(x,xvals[l])/sigma[l] for l in range(0,len(xvals))]) # only divide by sigma once, since there is only one f
         #        #try:
         #        temp = 1.0/(fprime[j,:] * fprime[k,:])
@@ -7416,7 +7424,7 @@ class fitdata(nddata):
         #     way the function looks.  Though this is a pain, it's
         #     better.
         for j in range(0,len(self.symbol_list)):
-            symbol = sympy.latex(self.symbolic_vars[j]).replace('$','')
+            symbol = sympy_latex(self.symbolic_vars[j]).replace('$','')
             logger.debug(strm('DEBUG: replacing symbol "',symbol,'"'))
             location = retval.find(symbol)
             while location != -1:
@@ -7743,8 +7751,8 @@ class fitdata(nddata):
 def sqrt(arg):
     if isinstance(arg,nddata):
         return arg**0.5
-    elif isinstance(arg,sympy.symbol.Symbol):
-        return sympy.sqrt(arg)
+    elif isinstance(arg,sympy_symbol):
+        return sympy_sqrt(arg)
     else:
         return np_sqrt(arg)
 

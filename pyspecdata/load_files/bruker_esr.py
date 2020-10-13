@@ -46,9 +46,9 @@ def xepr(filename, dimname='', verbose=False):
     # {{{ load the data
     with open(filename_spc,'rb') as fp:
         if all([j == 'REAL' for j in ikkf]):
-            data = fromstring(fp.read(),'>f8')
+            data = frombuffer(fp.read(),'>f8')
         elif all([j == 'CPLX' for j in ikkf]):
-            data = fromstring(fp.read(),'>c16')
+            data = frombuffer(fp.read(),'>c16')
         else:
             raise ValueError('the data type (IKKF) is givn as '
                     +' '.join(ikkf)
