@@ -114,7 +114,7 @@ def load_cary(filename):
         while new_name in retval.keys():
             repcounter += 1
             new_name = orig_name + '_rep%03d'%repcounter
-        if repcounter > 0:
+        #if repcounter > 0:
             #logging.warn("You have a duplicate spectrum name!!! -- renamed it from %s to %s"%(orig_name,new_name))
         retval[new_name] = j
         #retval[new_name].name(new_name) # this messes with the keys -- not sure why?
