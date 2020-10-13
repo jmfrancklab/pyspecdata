@@ -27,8 +27,8 @@ def load_bindata(fp,param):
     #        logging.debug(strm("try",j,"offset",result))
     retval = fromfile(fp, dtype=[('x','<f4'),('y','<f4')], count=param['points'])
     #logging.debug(retval)
-    retval = nddata(retval['y'],'wavelength' ).setaxis('wavelength',retval['x']
-            ).set_units('wavelength',x_unit).set_units(y_unit)
+    retval = nddata(retval['y'],'$\lambda$' ).setaxis('$\lambda$',retval['x']
+            ).set_units('$\lambda$',x_unit)#.set_units(y_unit)
     return retval
 def load_header(fp, param):
     retval = fromfile(fp, dtype=[
@@ -76,6 +76,7 @@ def load_cary(filename):
         file_end = fp.tell()
         fp.seek(marker,0)
         alldata = []
+        names = []
         while fp.tell() < file_end-4:
             param['blockoffset'] = fp.tell()
             logging.debug(strm("blockoffset",param['blockoffset']))
@@ -94,7 +95,9 @@ def load_cary(filename):
                 param = load_header(fp, param)
                 logging.debug(strm("param:",param))
                 data = load_bindata(fp, param)
-                data.name(param['spectrum_name'])
+                #data.name(param['spectrum_name'])
+                names.append(param['spectrum_name'])
+
                 logging.debug(strm("at this point, we are at",
                         fp.tell(),"relative to end of block",
                         param['blockoffset']+param['blocklen'],
@@ -106,9 +109,15 @@ def load_cary(filename):
                 #raise ValueError(strm("not yet set up for Tstore_type",param['Tstore_type']))
             alldata.append(data)
     retval = {}
+    print(len(alldata))
     for n,j in enumerate(alldata):
         repcounter = 0
-        orig_name = j.name()
+        #orig_name = j.name()
+        if n < len(names):
+            orig_name = names[n]
+        else:
+            orig_name = names[len(names)-1]
+
         logging.debug("orig name for %d is %s"%(n,orig_name))
         new_name = orig_name
         while new_name in retval.keys():
