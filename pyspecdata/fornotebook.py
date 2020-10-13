@@ -11,7 +11,6 @@ import warnings
 # sympy doesn't like to be imported from fornotebook as part of a *
 warnings.filterwarnings("ignore")
 from .core import *
-#warnings.resetwarnings()
 from scipy.io import savemat,loadmat
 from os.path import exists as path_exists
 from os import name as os_name
