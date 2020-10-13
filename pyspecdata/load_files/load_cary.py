@@ -97,6 +97,7 @@ def load_cary(filename):
                 data = load_bindata(fp, param)
                 #data.name(param['spectrum_name'])
                 names.append(param['spectrum_name'])
+                alldata.append(data)
 
                 logging.debug(strm("at this point, we are at",
                         fp.tell(),"relative to end of block",
@@ -107,9 +108,10 @@ def load_cary(filename):
                 logging.info(strm("skipping block of type",param['Tstore_type']))
                 fp.seek(param['blockoffset']+param['blocklen'], 0)
                 #raise ValueError(strm("not yet set up for Tstore_type",param['Tstore_type']))
-            alldata.append(data)
+            #alldata.append(data)
     retval = {}
     print(len(alldata))
+    print(len(names))
     for n,j in enumerate(alldata):
         repcounter = 0
         #orig_name = j.name()
