@@ -70,7 +70,7 @@ from numpy.core import rec
 from matplotlib.pyplot import cm
 from copy import deepcopy 
 import traceback
-import sympy
+import sympy# doesn't like to be imported from fornotebook as part of a *
 from scipy.optimize import leastsq
 from scipy.signal import fftconvolve
 import scipy.sparse as sparse
@@ -686,7 +686,7 @@ def make_ndarray(array_to_conv,name_forprint = 'unknown'):
         pass
     elif type(array_to_conv) in [list,ndarray] and len(array_to_conv) > 0:
         array_to_conv = rec.fromarrays([array_to_conv],names = 'LISTELEMENTS') #list(rec.fromarrays([b])['f0']) to convert back
-    elif type(array_to_conv) in [list,ndarray] and len(array_to_conv) is 0:
+    elif type(array_to_conv) in [list,ndarray] and len(array_to_conv) == 0:
         array_to_conv = None
     elif array_to_conv is  None:
         pass
@@ -749,8 +749,8 @@ def emptytest(x): # test is it is one of various forms of empty
            return False
        #don't want the following, because then I may need to pop, etc
        #if type(x) is list and all(map(lambda x: x is None,x)): return True
-   if size(x) is 1 and x is None: return True
-   if size(x) is 0: return True
+   if size(x) == 1 and x is None: return True
+   if size(x) == 0: return True
    return False
 def lsafen(*string,**kwargs):
     "see lsafe, but with an added double newline"
@@ -1528,7 +1528,7 @@ def expand_x(*args):
         for j in range(2):
             if args[j] is None:
                 pass
-            elif args[j] is 0:
+            elif args[j] == 0:
                 xlims[j] = 0
             else:
                 xlims[j] = args[j]*(xlims[j]-thismean) + thismean
@@ -1552,7 +1552,7 @@ def expand_y(*args):
         for j in range(2):
             if args[j] is None:
                 pass
-            elif args[j] is 0:
+            elif args[j] == 0:
                 ylims[j] = 0
             else:
                 ylims[j] = args[j]*(ylims[j]-thismean) + thismean
@@ -2680,7 +2680,7 @@ def concat(datalist,dimname,chop = False):
             newdimsize += 1
             shapetocheck = list(shapes[j].shape)
         #}}}
-        if j is 0:
+        if j == 0:
             shapetocheckagainst = shapetocheck
         else:
             if any(~(array(shapetocheck) == array(shapetocheckagainst))):
@@ -3364,20 +3364,20 @@ class nddata (object):
         .. todo::
                 several options below -- enumerate them in the documentation
         '''
-        if (len(args) is 1) and isscalar(args[0]):
+        if (len(args) == 1) and isscalar(args[0]):
             if args[0] == 0:
                 args = (zeros_like(self.data),)
             else:
                 args = (ones_like(self.data) * args[0],)
-        if (len(args) is 1) and (isinstance(args[0], ndarray)):
+        if (len(args) == 1) and (isinstance(args[0], ndarray)):
             self.data_error = reshape(args[0],shape(self.data))
-        elif (len(args) is 1) and (isinstance(args[0], list)):
+        elif (len(args) == 1) and (isinstance(args[0], list)):
             self.data_error = reshape(array(args[0]),shape(self.data))
-        elif (len(args) is 2) and (isinstance(args[0], str)) and (isinstance(args[1], ndarray)):
+        elif (len(args) == 2) and (isinstance(args[0], str)) and (isinstance(args[1], ndarray)):
             self.axis_coords_error[self.axn(args[0])] = args[1]
-        elif (len(args) is 2) and (isinstance(args[0], str)) and (isscalar(args[1])):
+        elif (len(args) == 2) and (isinstance(args[0], str)) and (isscalar(args[1])):
             self.axis_coords_error[self.axn(args[0])] = args[1]*ones_like(self.getaxis(args[0]))
-        elif (len(args) is 1) and args[0] is None:
+        elif (len(args) == 1) and args[0] is None:
             self.data_error = None
         else:
             raise TypeError(' '.join(map(repr,['Not a valid argument to set_error:',list(map(type,args))])))
@@ -3394,12 +3394,12 @@ class nddata (object):
     #{{{ get error
     def get_error(self,*args):
         '''get a copy of the errors\neither set_error('axisname',error_for_axis) or set_error(error_for_data)'''
-        if (len(args) is 0):
+        if (len(args) == 0):
             if self.data_error is None:
                 return None
             else:
                 return real(self.data_error)
-        elif (len(args) is 1):
+        elif (len(args) == 1):
             thearg = args[0]
             if isinstance(thearg, str_):
                 thearg = str(thearg) # like in the other spot, this became necessary with some upgrade, though I'm not sure that I should maybe just change the error functions to treat the numpy string in the same way
@@ -3625,6 +3625,7 @@ class nddata (object):
         multiplication (represents the rows/columns)."""
         self._matmul_along = dimname
         return self
+    #@profile
     def dot(self,arg):
         """This will perform a dot product or a matrix multiplication.
         If one dimension in ``arg`` matches that in ``self``,
@@ -3812,6 +3813,7 @@ class nddata (object):
             return retval
         else:
             raise ValueError("I don't know what to do with an argument of type"+repr(type(arg)))
+    #@profile
     def __matmul__(self,arg):
         assert type(arg) is nddata, "currently matrix multiplication only allowed if both are nddata"
         return self.C.dot(arg)
@@ -6562,8 +6564,11 @@ class nddata (object):
                 if isscalar(target):
                     sensible_list.append((hash('idx'),dimname,target))
                 elif type(target) in [tuple,list]:
-                    assert len(target)==2, strm("for",args[j],"I expected a 'dimname':(range_start,range_stop)")
-                    sensible_list.append((hash('range'),dimname,target[0],target[1]))
+                    assert len(target) in [1,2], strm("for",args[j],"I expected a 'dimname':(range_start,range_stop)")
+                    if len(target) == 1:
+                        sensible_list.append((hash('range'),dimname,target[0],None))
+                    else:
+                        sensible_list.append((hash('range'),dimname,target[0],target[1]))
                 j += 1
             else:# works for str and str_
                 raise ValueError("I have read in slice argument",args[:j],"but then I get confused!")
@@ -7001,7 +7006,7 @@ class subplot_dim():
             ylabel(y)
             title(t)
             grid(g)
-        elif (isinstance(args, tuple)) and (len(args) is 3):
+        elif (isinstance(args, tuple)) and (len(args) == 3):
             # the second value passed is 
             whichsmall = args[2]
             break_into = args[1]
@@ -7463,7 +7468,7 @@ class fitdata(nddata):
         else:
             return None
     def covarmat(self,*names):
-        if (len(names) == 1) and (names[0] is 'recarray'):
+        if (len(names) == 1) and (names[0] == 'recarray'):
             if hasattr(self,'active_mask'):
                 active_symbols = [x for x in self.symbol_list if self.active_mask[self._pn(x)]]
             else:

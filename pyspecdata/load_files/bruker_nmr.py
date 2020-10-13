@@ -194,7 +194,7 @@ def load_1D(file_reference, *subpath, **kwargs):
     shiftpoints = int(det_phcorr(v)) # use the canned routine to calculate the second order phase shift
     #print 'shiftpoints = ',shiftpoints
     data.setaxis('t2',lambda x: x-shiftpoints/v['SW_h'])
-    print('yes, I called with %d shiftpoints'%shiftpoints)
+    logger.debug('yes, I called with %d shiftpoints'%shiftpoints)
     # finally, I will probably need to add in the first order phase shift for the decimation --> just translate this
     data.set_prop('title',
             load_title(file_reference,*subpath))
