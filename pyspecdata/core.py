@@ -3682,6 +3682,14 @@ class nddata (object):
                 raise ValueError("I can't determine the dimension for matrix"
                         " multiplication!  Either have only one matching dimension,"
                         " or use .along(")
+        logger.debug(strm("initial shapes are self:",
+            ndshape(self),
+            "arg:",
+            ndshape(arg),
+            "dotdims (respectively)",
+            dot_dim_A,
+            dot_dim_B))
+        quit()
         # {{{ unset the "along" setting
         if hasattr(self,'_matmul_along'):
             del(self._matmul_along)
