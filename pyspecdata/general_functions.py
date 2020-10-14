@@ -94,7 +94,7 @@ def autostringconvert(arg):
         return str(arg)
     else:
         return arg
-def check_ascending_axis(u,tolerance = 1e-7,additional_message = []):
+def check_ascending_axis(u,tolerance = 1e-7,additional_message = [], allow_descending=False):
     r"""Check that the array `u` is ascending and equally spaced, and return the
     spacing, `du`.  This is a common check needed for FT functions, shears,
     etc.
@@ -125,7 +125,8 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = []):
     assert all(abs(diff(u) - du)/du < tolerance), thismsg# absolute
     #   tolerance can be large relative to a du of ns -- don't use
     #   allclose/isclose, since they are more recent numpy additions
-    assert du > 0, thismsg
+    if not allow_descending:
+        assert du > 0, thismsg
     return du
 
 def level_str_to_int(level):
