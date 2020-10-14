@@ -3726,6 +3726,21 @@ class nddata (object):
         uninvolved_dims = [[rename_redundant[1] if j==rename_redundant[0] else j
             for j in self.dimlabels if j != dot_dim_self]]
         uninvolved_dims += [[j for j in arg.dimlabels if j!=dot_dim_arg]]
+        mult_dims = [[dot_dim_self],[dot_dim_arg]]
+        # {{{ dimensions involved in multiplication must not be
+        # repeated
+        for k,l in [(1,0),(0,1)]:
+            for j in range(len(uninvolved_dims[k])-1,-1,-1):
+                if uninvolved_dims[k][j] not in uninvolved_dims[l]:
+                    mult_dims[k].insert(k,uninvolved_dims[k].pop(j))
+                    break
+        orig_mult_dims = mult_dims[0] + mult_dims[1]
+        logger.debug(strm('mult_dims',mult_dims))
+        for j in range(2):
+            if len(mult_dims[j]) < 2:
+                mult_dims[j].insert(j,'XXX_ADDED_XXX')
+        logger.debug(strm('mult_dims',mult_dims))
+        # }}}
         # {{{ construct the dictionary right away
         axis_coords_dict = self.mkd(self.axis_coords)
         axis_units_dict = self.mkd(self.axis_coords_units)
@@ -3739,7 +3754,10 @@ class nddata (object):
             assert axis_units_dict[j] == arg_axis_units_dict[j]
             assert axis_coords_error_dict[j] == arg_axis_coords_error_dict[j]
         info_needed_from_arg = (set(uninvolved_dims[0]) |
-                set(uninvolved_dims[1])) - set(self.dimlabels) - set([rename_redundant[1]])
+                set(uninvolved_dims[1]) |
+                set(orig_mult_dims)
+                ) - set(self.dimlabels) - set([rename_redundant[1]])
+        logger.debug(strm("info needed from arg for dimensions",info_needed_from_arg))
         for j in info_needed_from_arg:
             axis_coords_dict[j] = arg_axis_coords_dict[j]
             axis_units_dict[j] = arg_axis_units_dict[j]
@@ -3747,23 +3765,14 @@ class nddata (object):
         # }}}
         if (self.get_error() is not None) or (arg.get_error() is not None):
             raise ValueError("we plan to include error propagation here, but not yet provided")
-        # we need to get into this shape:
-        # self: uninvolved_dims[0][0],...,uninvolved_dims[0][-1],dot_dim_self
-        # arg: uninvolved_dims[1][0],...,dot_dim_arg,uninvolved_dims[1][-1]
-        # importantly, uninvolved_dims[?][-1] can mismatch,
-        # but uninvolved_dims[?][0:-1] must match
-        output_shape = []
-        if len(uninvolved_dims[0]) > 0:
-            output_shape.append(uninvolved_dims[0][-1])
-        if len(uninvolved_dims[1]) > 0:
-            output_shape.append(uninvolved_dims[1][-1])
-        logger.debug(strm("shape of self before multiplication",ndshape(self)))
-        logger.debug(strm("shape of arg before multiplication",ndshape(arg)))
-        self_temp_list = list(uninvolved_dims[0][:-1])
-        arg_temp_list = list(uninvolved_dims[1][:-1])
+        # we need to get into the shape:
+        # uninvolved_dims+mult_dims
+        output_shape = [mult_dims[0][0], mult_dims[1][1]]
+        # {{{ pull alternately from the end of arg and self, matching
+        # where possible
+        self_temp_list = list(uninvolved_dims[0])
+        arg_temp_list = list(uninvolved_dims[1])
         while len(self_temp_list)>0 or len(arg_temp_list)>0:
-            # pull alternately from the end of arg and self,
-            # matching where possible
             if len(arg_temp_list)>0:
                 thisdim = arg_temp_list.pop(-1)
                 if thisdim in self_temp_list:
@@ -3774,31 +3783,27 @@ class nddata (object):
                 if thisdim in arg_temp_list:
                     arg_temp_list.remove(thisdim)
                 output_shape = [thisdim] + output_shape
+        # }}}
         logger.debug(strm("output_shape",output_shape))
         self_new_order = tuple(self.axn(rename_redundant[0]
             if j == rename_redundant[1] else j)
-            for j in output_shape[:-1]+[dot_dim_self]
+            for j in output_shape[:-1] + [dot_dim_self]
             if j in self.dimlabels + [rename_redundant[1]])
+        logger.debug(strm('self_new_order',self_new_order,'self.data.shape',self.data.shape))
         self_formult_data = self.data.transpose(self_new_order)
-        added_dims = []
-        if len(arg.dimlabels) > 1:
-            arg_new_order = tuple(arg.axn(j) for j in
-                    output_shape[:-2]+[dot_dim_arg,output_shape[-1]] if j
-                    in arg.dimlabels)
-            arg_formult_data = arg.data.transpose(arg_new_order)
-            logger.debug(strm("new orders for self and arg are:",self_new_order,arg_new_order))
-        else:
-            arg_formult_data = arg.data.reshape(-1,1)
-            added_dims += [-1]
-            logger.debug(strm("new orders for self is:",
-                self_new_order,"while arg is 1D"))
-        if len(self.dimlabels) == 1:
-            self_formult_data = self_formult_data.reshape(1,-1)
-            added_dims += [-2]
+        logger.debug(strm("list searched:",output_shape[:-2] +
+            [dot_dim_arg] + [output_shape[-1]]))
+        arg_new_order = tuple(arg.axn(j) for j in
+                output_shape[:-2] + [dot_dim_arg] + [output_shape[-1]]
+                if j in arg.dimlabels)
+        logger.debug(strm('arg_new_order',arg_new_order,'arg.data.shape',arg.data.shape))
+        arg_formult_data = arg.data.transpose(arg_new_order)
+        logger.debug(strm("new orders for self and arg are:",self_new_order,arg_new_order))
         # {{{ insert singleton dims where needed
-        for j,thisdim in enumerate(output_shape[:-2]):
+        for j,thisdim in enumerate(output_shape[:-2]+mult_dims[0]):
             if thisdim not in self.dimlabels and thisdim != rename_redundant[1]:
                 self_formult_data = expand_dims(self_formult_data,j)
+        for j,thisdim in enumerate(output_shape[:-2]+mult_dims[1]):
             if thisdim not in arg.dimlabels:
                 arg_formult_data = expand_dims(arg_formult_data,j)
         # }}}
@@ -3807,11 +3812,11 @@ class nddata (object):
         time_matmul = time.time()
         self.data = matmul(self_formult_data,arg_formult_data)
         # {{{ remove singleton dimensions that we added
-        if len(added_dims) > 0:
-            this_slice = [slice(None,None)] * len(self.data.shape)
-            for j in added_dims:
-                this_slice[j] = 0
+        if 'XXX_ADDED_XXX' in output_shape:
+            this_slice = tuple(0 if j=='XXX_ADDED_XXX' else slice(None,None)
+                    for j in output_shape)
             self.data = self.data[tuple(this_slice)]
+            output_shape = [j for j in output_shape if j!= 'XXX_ADDED_XXX']
         # }}}
         logger.debug(strm("matmul took",time.time()-time_matmul))
         self.dimlabels = output_shape
