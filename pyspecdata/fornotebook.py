@@ -6,6 +6,10 @@ python code is embedded in a python environment inside latex.
 '''
 import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+#from pylab import *
+import warnings
+# sympy doesn't like to be imported from fornotebook as part of a *
+warnings.filterwarnings("ignore")
 from .core import *
 from scipy.io import savemat,loadmat
 from os.path import exists as path_exists
@@ -733,7 +737,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
             for peakset in peakmask:
                 plot(x[peakset],smoothed[peakset])
         lplot('error_plot'+figname+'.png',width=6)
-        print(r'\begin{verbatim}lengths: ',list(map(len,allpeaks_top_x)),'\end{verbatim}')
+        print(r'\begin{verbatim}lengths: ',list(map(len,allpeaks_top_x)),r'\end{verbatim}')
         return
     allpeaks_top = nddata(allpeaks_top,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
     allpeaks_bottom = nddata(allpeaks_bottom,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
