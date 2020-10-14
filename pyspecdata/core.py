@@ -3456,6 +3456,8 @@ class nddata (object):
     #}}}
     #{{{ rename
     def rename(self,previous,new):
+        self.dimlabels = list(self.dimlabels) # otherwise, it weirdly
+        # changes the names of copies/sources
         self.dimlabels[self.dimlabels.index(previous)] = new
         return self
     #}}}
@@ -3628,12 +3630,46 @@ class nddata (object):
         self.reorder(orig_order)
         return U, Sigma, Vh
     #{{{ arithmetic
-    def along(self,dimname):
-        """Specifies the dimension for the next matrix
-        multiplication (represents the rows/columns)."""
+    def along(self,dimname,rename_redundant=None):
+        r"""Specifies the dimension for the next matrix
+        multiplication (represents the rows/columns).
+
+        Parameters
+        ==========
+        dimname: str
+            The next time matrix multiplication is called,
+            'dimname' will be summed over.
+            That is, `dimname` will become the columns position if this
+            is the first matrix.
+
+            If `along` is not called for the second matrix,
+            `dimname` will also take the position of rows for that
+            matrix!
+        rename_redundant: tuple of str or (default) None
+            If you are multiplying two different matrices,
+            then it is only sensible that before the multiplication,
+            you should identify the dimension representing the row
+            space of the right matrix and the column space of the left
+            matrix with different names.
+
+            **However** sometimes
+            (*e.g.* constructing projection matrices)
+            you may want to start with two matrices where both the
+            row space of the right matrix and the column space of the
+            left have the same name.
+            If so, you will want to rename the column space of the
+            resulting matrix -- then you pass
+            ``rename_redundant=('orig name','new name')``
+        """
+        assert dimname in self.dimlabels
         self._matmul_along = dimname
+        if rename_redundant is None:
+            if hasattr(self,'_rename_redundant'):
+                del self._rename_redundant
+        else:
+            self._rename_redundant = rename_redundant
+            assert self._rename_redundant[0] in self.dimlabels
         return self
-    #@profile
     def dot(self,arg):
         """This will perform a dot product or a matrix multiplication.
         If one dimension in ``arg`` matches that in ``self``,
@@ -3648,44 +3684,22 @@ class nddata (object):
         :func:`~pyspecdata.nddata.along` to specify the dimensions for matrix
         multiplication / dot product.
 
-        Note that
-
-        >>> C = A @ B
-
-        is equivalent to
-
-        >>> C = A.C.dot(B)
-
-        >>> a = nddata(r_[0:9],[3,3],['a','b'])
-        >>> b = nddata(r_[0:3],'b')
-        >>> print a.C.dot(b)
-        >>> print a.data.dot(b.data)
-        >>> a = nddata(r_[0:27],[3,3,3],['a','b','c'])
-        >>> b = nddata(r_[0:9],[3,3],['a','b'])
-        >>> print a.C.dot(b)
-        >>> print tensordot(a.data,b.data,axes=((0,1),(0,1)))
-
-        >>> a = nddata(r_[0:27],[3,3,3],['a','b','c'])
-        >>> b = nddata(r_[0:9],[3,3],['a','d'])
-        >>> print a.C.dot(b)
-        >>> print tensordot(a.data,b.data,axes=((0),(0)))
-
         .. literalinclude:: ../examples/matrix_mult.py
         """
         if hasattr(self,'_matmul_along'):
-            dot_dim_A = self._matmul_along
+            dot_dim_self = self._matmul_along
             if hasattr(arg,'_matmul_along'):
-                dot_dim_B = arg._matmul_along
+                dot_dim_arg = arg._matmul_along
             else:
-                dot_dim_B = dot_dim_A
+                dot_dim_arg = dot_dim_self
         elif hasattr(arg,'_matmul_along'):
-            dot_dim_B = arg._matmul_along
-            dot_dim_A = dot_dim_B
+            dot_dim_arg = arg._matmul_along
+            dot_dim_self = dot_dim_arg
         else:
             matching_dims = set(self.dimlabels) & set(arg.dimlabels)
             if len(matching_dims) == 1:
-                dot_dim_A = list(matching_dims)[0]
-                dot_dim_B = dot_dim_A
+                dot_dim_self = list(matching_dims)[0]
+                dot_dim_arg = dot_dim_self
             else:
                 raise ValueError("I can't determine the dimension for matrix"
                         " multiplication!  Either have only one matching dimension,"
@@ -3695,50 +3709,125 @@ class nddata (object):
             "arg:",
             ndshape(arg),
             "dotdims (respectively)",
-            dot_dim_A,
-            dot_dim_B))
+            dot_dim_self,
+            dot_dim_arg))
         # {{{ unset the "along" setting
         if hasattr(self,'_matmul_along'):
             del(self._matmul_along)
         if hasattr(arg,'_matmul_along'):
             del(arg._matmul_along)
         # }}}
-        if dot_dim_B != dot_dim_A:
-            arg = arg.C.rename(dot_dim_B,dot_dim_A)
-        A,B = self.aligndata(arg)
-        # {{{ store the dictionaries for later use
-        axis_coords_dict = A.mkd(A.axis_coords)
-        axis_units_dict = A.mkd(A.axis_coords_units)
-        axis_coords_error_dict = A.mkd(A.axis_coords_error)
+        if hasattr(self,'_rename_redundant'):
+            renamed_dim = self._rename_redundant[0]
+            rename_redundant = self._rename_redundant
+            del self._rename_redundant
+        else:
+            rename_redundant = ['XXXRENAMED','XXXRENAMED']
+        uninvolved_dims = [[rename_redundant[1] if j==rename_redundant[0] else j
+            for j in self.dimlabels if j != dot_dim_self]]
+        uninvolved_dims += [[j for j in arg.dimlabels if j!=dot_dim_arg]]
+        # {{{ construct the dictionary right away
+        axis_coords_dict = self.mkd(self.axis_coords)
+        axis_units_dict = self.mkd(self.axis_coords_units)
+        axis_coords_error_dict = self.mkd(self.axis_coords_error)
+        arg_axis_coords_dict = arg.mkd(arg.axis_coords)
+        arg_axis_units_dict = arg.mkd(arg.axis_coords_units)
+        arg_axis_coords_error_dict = arg.mkd(arg.axis_coords_error)
+        shared_info = set(self.dimlabels) & set(arg.dimlabels)
+        for j in shared_info:
+            assert axis_coords_dict[j] == arg_axis_coords_dict[j]
+            assert axis_units_dict[j] == arg_axis_units_dict[j]
+            assert axis_coords_error_dict[j] == arg_axis_coords_error_dict[j]
+        info_needed_from_arg = (set(uninvolved_dims[0]) |
+                set(uninvolved_dims[1])) - set(self.dimlabels) - set([rename_redundant[1]])
+        for j in info_needed_from_arg:
+            axis_coords_dict[j] = arg_axis_coords_dict[j]
+            axis_units_dict[j] = arg_axis_units_dict[j]
+            axis_coords_error_dict[j] = arg_axis_coords_error_dict[j]
         # }}}
-        # manipulate "self" directly
-        self.dimlabels = [j for j in A.dimlabels if j != dot_dim_A]
         if (self.get_error() is not None) or (arg.get_error() is not None):
             raise ValueError("we plan to include error propagation here, but not yet provided")
-        ax_idx = A.axn(dot_dim_A) # should be the same for both, since they are aligned
-        logger.debug(strm("shape of A is",ndshape(A)))
-        logger.debug(strm("shape of B is",ndshape(B)))
-        A.data = A.data[...,newaxis]
-        B.data = B.data[...,newaxis]
-        logger.debug(strm("add a new axis",A.data.shape))
-        logger.debug(strm("add a new axis",B.data.shape))
-        A.data = moveaxis(A.data,ax_idx,-1) # columns position
-        B.data = moveaxis(B.data,ax_idx,-2) # row position
-        logger.debug(strm("after movement",A.data.shape))
-        logger.debug(strm("after movement",B.data.shape))
-        time_matmul = time.time()
-        self.data = matmul(A.data,B.data)
-        logger.debug(strm("matmul took",time.time()-time_matmul))
-        logger.debug(strm("after mult",self.data.shape))
-        self.data = self.data[...,0,0]
-        logger.debug(strm("remove extras",self.data.shape))
-        # {{{ use the dictionaries to reconstruct the metadata
-        self.axis_coords = self.fld(axis_coords_dict)
-        self.axis_coords_units = self.fld(axis_units_dict)
-        self.axis_coords_error = self.fld(axis_coords_error_dict)
+        # we need to get into this shape:
+        # self: uninvolved_dims[0][0],...,uninvolved_dims[0][-1],dot_dim_self
+        # arg: uninvolved_dims[1][0],...,dot_dim_arg,uninvolved_dims[1][-1]
+        # importantly, uninvolved_dims[?][-1] can mismatch,
+        # but uninvolved_dims[?][0:-1] must match
+        output_shape = []
+        if len(uninvolved_dims[0]) > 0:
+            output_shape.append(uninvolved_dims[0][-1])
+        if len(uninvolved_dims[1]) > 0:
+            output_shape.append(uninvolved_dims[1][-1])
+        logger.debug(strm("shape of self before multiplication",ndshape(self)))
+        logger.debug(strm("shape of arg before multiplication",ndshape(arg)))
+        self_temp_list = list(uninvolved_dims[0][:-1])
+        arg_temp_list = list(uninvolved_dims[1][:-1])
+        while len(self_temp_list)>0 or len(arg_temp_list)>0:
+            # pull alternately from the end of arg and self,
+            # matching where possible
+            if len(arg_temp_list)>0:
+                thisdim = arg_temp_list.pop(-1)
+                if thisdim in self_temp_list:
+                    self_temp_list.remove(thisdim)
+                output_shape = [thisdim] + output_shape
+            if len(self_temp_list)>0:
+                thisdim = self_temp_list.pop(-1)
+                if thisdim in arg_temp_list:
+                    arg_temp_list.remove(thisdim)
+                output_shape = [thisdim] + output_shape
+        logger.debug(strm("output_shape",output_shape))
+        self_new_order = tuple(self.axn(rename_redundant[0]
+            if j == rename_redundant[1] else j)
+            for j in output_shape[:-1]+[dot_dim_self]
+            if j in self.dimlabels + [rename_redundant[1]])
+        self_formult_data = self.data.transpose(self_new_order)
+        added_dims = []
+        if len(arg.dimlabels) > 1:
+            arg_new_order = tuple(arg.axn(j) for j in
+                    output_shape[:-2]+[dot_dim_arg,output_shape[-1]] if j
+                    in arg.dimlabels)
+            arg_formult_data = arg.data.transpose(arg_new_order)
+            logger.debug(strm("new orders for self and arg are:",self_new_order,arg_new_order))
+        else:
+            arg_formult_data = arg.data.reshape(-1,1)
+            added_dims += [-1]
+            logger.debug(strm("new orders for self is:",
+                self_new_order,"while arg is 1D"))
+        if len(self.dimlabels) == 1:
+            self_formult_data = self_formult_data.reshape(1,-1)
+            added_dims += [-2]
+        # {{{ insert singleton dims where needed
+        for j,thisdim in enumerate(output_shape[:-2]):
+            if thisdim not in self.dimlabels and thisdim != rename_redundant[1]:
+                self_formult_data = expand_dims(self_formult_data,j)
+            if thisdim not in arg.dimlabels:
+                arg_formult_data = expand_dims(arg_formult_data,j)
         # }}}
-        print("self.data.shape",self.data.shape)
-        print("ndshape",ndshape(self))
+        logger.debug(strm("raw nddata about to be multiplied are",
+            self_formult_data.shape,arg_formult_data.shape))
+        time_matmul = time.time()
+        self.data = matmul(self_formult_data,arg_formult_data)
+        # {{{ remove singleton dimensions that we added
+        if len(added_dims) > 0:
+            this_slice = [slice(None,None)] * len(self.data.shape)
+            for j in added_dims:
+                this_slice[j] = 0
+            self.data = self.data[tuple(this_slice)]
+        # }}}
+        logger.debug(strm("matmul took",time.time()-time_matmul))
+        self.dimlabels = output_shape
+        # {{{ use the dictionaries to reconstruct the metadata
+        self.axis_coords = []
+        self.axis_coords_units = []
+        self.axis_coords_error = []
+        for j,thisdim in enumerate(self.dimlabels):
+            if thisdim == rename_redundant[1]:
+                thisdim = rename_redundant[0]
+            self.axis_coords.append(axis_coords_dict[thisdim])
+            self.axis_coords_units.append(axis_units_dict[thisdim])
+            self.axis_coords_error.append(axis_coords_error_dict[thisdim])
+        # }}}
+        logger.debug(strm("self.data.shape",self.data.shape))
+        logger.debug(strm("ndshape",ndshape(self)))
         return self
     def __add__(self,arg):
         if isscalar(arg):
