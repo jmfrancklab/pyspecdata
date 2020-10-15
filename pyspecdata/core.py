@@ -7074,7 +7074,7 @@ class fitdata(nddata):
         output of the functional form of the desired fit expression
         provided in func:`functional_form` in LaTeX format'''
         retval = sympy.latex(self.symbolic_expr).replace('$','')
-        return r'$f(%s)='%(sympy.latex(self.fit_axis)) + retval + r'$'
+        return r'$f(%s)='%(sympy.latex(sympy.Symbol(self.fit_axis))) + retval + r'$'
     @function_string.setter
     def function_string(self):
         raise ValueError("You cannot set the string directly -- change the functional_form property instead!")
