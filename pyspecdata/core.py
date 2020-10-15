@@ -46,6 +46,19 @@ from .general_functions import inside_sphinx
 if not inside_sphinx():
     from pylab import *
     from pylab import seed as pl_seed
+    # the following are functions that can be called on nddata -- this isn't done
+    # in the technical ufunc fashion, which we should look into
+    _dict_of_functions = {'exp':exp,
+            'sin':sin,
+            'cos':cos,
+            'tan':tan,
+            'sinh':sinh,
+            'cosh':cosh,
+            'tanh':tanh,
+            'log':log,
+            'log10':log10,
+            'conjugate':conj,
+            }
 else:
     pi = 3.14
 from types import FunctionType as function
@@ -748,18 +761,10 @@ def unmake_ndarray(array_to_conv,name_forprint = 'unknown'):
 #}}}
 #}}}
 def emptytest(x): # test is it is one of various forms of empty
-   if type(x) in [list,array]:
-       if len(x) == 0:
-           return True
-       elif x is array(None):
-           return True
-       elif len(x) > 0:
-           return False
-       #don't want the following, because then I may need to pop, etc
-       #if type(x) is list and all(map(lambda x: x is None,x)): return True
-   if size(x) == 1 and x is None: return True
-   if size(x) == 0: return True
-   return False
+    if x is None: return True
+    if size(x) == 0: return True
+    if size(x) == 1 and x == None: return True
+    return False
 def lsafen(*string,**kwargs):
     "see lsafe, but with an added double newline"
     string = list(string)
@@ -3750,9 +3755,31 @@ class nddata (object):
         arg_axis_coords_error_dict = arg.mkd(arg.axis_coords_error)
         shared_info = set(self.dimlabels) & set(arg.dimlabels)
         for j in shared_info:
-            assert all(axis_coords_dict[j] == arg_axis_coords_dict[j])
-            assert all(axis_units_dict[j] == arg_axis_units_dict[j])
-            assert all(axis_coords_error_dict[j] == arg_axis_coords_error_dict[j])
+            if emptytest(axis_coords_dict[j]):
+                assert emptytest(arg_axis_coords_dict[j]), "axis coords don't match for %s"%j
+            else:
+                assert axis_coords_dict[j].dtype == arg_axis_coords_dict[j].dtype, "both arrays must be of the same type!"+strm(
+                        " The current array has dtype",axis_coords_dict[j].dtype,
+                        "and the one you're trying to multiply is",arg_axis_coords_dict[j].dtype)
+                if len(axis_coords_dict[j].dtype) == 0:
+                    assert all(isclose(axis_coords_dict[j],arg_axis_coords_dict[j])), "axis coords don't match for %s"%j
+                else:# structured array
+                    all([allclose(axis_coords_dict[j][name],
+                        arg_axis_coords_dict[j][name]) for name in
+                        axis_coords_dict[j].dtype.names])
+            if emptytest(axis_units_dict[j]):
+                assert emptytest(arg_axis_units_dict[j]), "axis units don't match for %s"%j
+            else:
+                assert all(axis_units_dict[j] == arg_axis_units_dict[j]), "axis units don't match for %s"%j
+            if emptytest(axis_coords_error_dict[j]):
+                assert emptytest(arg_axis_coords_error_dict[j]), "axis errors don't match for %s"%j
+            else:
+                print("error dict for isclose",axis_coords_error_dict[j] is None,
+                    arg_axis_coords_error_dict[j] is None)
+                print("error dict for isclose",repr(axis_coords_error_dict[j]),
+                    repr(arg_axis_coords_error_dict[j]))
+                assert all(isclose(axis_coords_error_dict[j],
+                    arg_axis_coords_error_dict[j])), "axis errors don't match for %s"%j
         info_needed_from_arg = (set(uninvolved_dims[0]) |
                 set(uninvolved_dims[1]) |
                 set(orig_mult_dims)
@@ -6365,16 +6392,7 @@ class nddata (object):
         return self
     # {{{ standard trig functions
     def __getattribute__(self,arg):
-        fundict = {'exp':exp,
-                'sin':sin,
-                'cos':cos,
-                'tan':tan,
-                'sinh':sinh,
-                'cosh':cosh,
-                'tanh':tanh,
-                'log':log,
-                'log10':log10,
-                }
+        fundict = _dict_of_functions
         if arg in list(fundict.keys()):
             argf = fundict[arg]
             def retfun():
@@ -6889,7 +6907,7 @@ class nddata (object):
             #{{{ separate them into data and axes
             mydataattrs = list(filter((lambda x: x[0:4] == 'data'),myattrs))
             myotherattrs = list(filter((lambda x: x[0:4] != 'data'),myattrs))
-            myotherattrs = [x for x in myotherattrs if x not in ['C','sin','cos','exp','log10']]
+            myotherattrs = [x for x in myotherattrs if x not in set(['C'])|set(_dict_of_functions.keys())]
             myaxisattrs = list(filter((lambda x: x[0:4] == 'axis'),myotherattrs))
             myotherattrs = list(filter((lambda x: x[0:4] != 'axis'),myotherattrs))
             logger.debug(strm(lsafe('data attributes:',list(zip(mydataattrs,[type(self.__getattribute__(x)) for x in mydataattrs]))),'\n\n'))
