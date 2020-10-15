@@ -3750,9 +3750,9 @@ class nddata (object):
         arg_axis_coords_error_dict = arg.mkd(arg.axis_coords_error)
         shared_info = set(self.dimlabels) & set(arg.dimlabels)
         for j in shared_info:
-            assert axis_coords_dict[j] == arg_axis_coords_dict[j]
-            assert axis_units_dict[j] == arg_axis_units_dict[j]
-            assert axis_coords_error_dict[j] == arg_axis_coords_error_dict[j]
+            assert all(axis_coords_dict[j] == arg_axis_coords_dict[j])
+            assert all(axis_units_dict[j] == arg_axis_units_dict[j])
+            assert all(axis_coords_error_dict[j] == arg_axis_coords_error_dict[j])
         info_needed_from_arg = (set(uninvolved_dims[0]) |
                 set(uninvolved_dims[1]) |
                 set(orig_mult_dims)
@@ -3827,9 +3827,13 @@ class nddata (object):
         for j,thisdim in enumerate(self.dimlabels):
             if thisdim == rename_redundant[1]:
                 thisdim = rename_redundant[0]
-            self.axis_coords.append(axis_coords_dict[thisdim])
-            self.axis_coords_units.append(axis_units_dict[thisdim])
-            self.axis_coords_error.append(axis_coords_error_dict[thisdim])
+                self.axis_coords.append(copy(axis_coords_dict[thisdim]))
+                self.axis_coords_units.append(copy(axis_units_dict[thisdim]))
+                self.axis_coords_error.append(copy(axis_coords_error_dict[thisdim]))
+            else:
+                self.axis_coords.append(axis_coords_dict[thisdim])
+                self.axis_coords_units.append(axis_units_dict[thisdim])
+                self.axis_coords_error.append(axis_coords_error_dict[thisdim])
         # }}}
         logger.debug(strm("self.data.shape",self.data.shape))
         logger.debug(strm("ndshape",ndshape(self)))

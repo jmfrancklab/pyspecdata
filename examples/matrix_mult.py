@@ -13,15 +13,17 @@ init_logging('debug')
 # Nonetheless, we wanted to give the simplest working example possible.
 
 # First, we demonstrate matrix multiplication
+# for all the below, I attach an axis to make sure the routines work with the
+# axes attached
 
-a_nd = nddata(random(10*2048),[10,2048],['x','y'])
+a_nd = nddata(random(10*2048),[10,2048],['x','y']).setaxis('x','#').setaxis('y','#')
 a = a_nd.data
 # in the next line, note how only the dimension that goes away is named the
 # same!
 #
 # if you think about the matrix a transforming from one vector space (labeled
 # y) to another (labeled x) this makes sense
-a2_nd = nddata(random(10*2048),[2048,10],['y','z'])
+a2_nd = nddata(random(10*2048),[2048,10],['y','z']).setaxis('y','#').setaxis('z','#')
 a2 = a2_nd.data
 
 # multiply two different matrices
@@ -36,7 +38,7 @@ b_nd = a_nd @ a2_nd
 time3 = time.time()
 assert b_nd.dimlabels == ['x','z'], b_nd.dimlabels
 assert all(isclose(b,b_nd.data))
-print("total time",(time2-time1),"vs raw",((time3-time2)/(time2-time1)))
+print("total time",(time3-time2),"time/(time for raw)",((time3-time2)/(time2-time1)))
 assert ((time3-time2)/(time2-time1))<1
 
 # calculate a projection matrix
@@ -48,16 +50,18 @@ time2 = time.time()
 b_nd = a_nd.along('y',('x','x_new')) @ a_nd
 time3 = time.time()
 assert b_nd.dimlabels == ['x_new','x'], b_nd.dimlabels
+assert all(b_nd.getaxis('x_new') == b_nd.getaxis('x'))
+assert (id(b_nd.getaxis('x_new')) != id(b_nd.getaxis('x')))
 assert all(isclose(b,b_nd.data))
 if time2-time1>0:
-    print("total time",(time2-time1),"vs raw",((time3-time2)/(time2-time1)))
+    print("total time",(time3-time2),"time/(time for raw)",((time3-time2)/(time2-time1)))
     assert ((time3-time2)/(time2-time1))<1.1
 
 # now, a standard dot product note how I don't need `along` here, since it's
 # unambiguous
 
-a_nd = nddata(random(10),[10],['myaxis'])
-b_nd = nddata(random(10),[10],['myaxis'])
+a_nd = nddata(random(10),[10],['myaxis']).setaxis('myaxis','#')
+b_nd = nddata(random(10),[10],['myaxis']).setaxis('myaxis','#')
 a = a_nd.data
 b = b_nd.data
 assert all(isclose(a.dot(b),(a_nd @ b_nd).data))
@@ -73,7 +77,7 @@ assert all(isclose(a.dot(b),(a_nd @ b_nd).data))
 # This will take the dot product of our 10 2048-long vectors, and present them
 # 10-long array
 
-a_nd = nddata(random(10*2048),[10,2048],['x','y'])
+a_nd = nddata(random(10*2048),[10,2048],['x','y']).setaxis('x','#').setaxis('y','#')
 a = a_nd.data
 b_nd = a_nd.along('y') @ a_nd
 b = matmul(a_nd.data.reshape(10,1,2048),
