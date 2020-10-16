@@ -5388,15 +5388,19 @@ class nddata (object):
         if len(args) == 1:
             if isinstance(args[0], str):
                 axisname = args[0]
-                retval = self.retaxis(axisname)
                 #{{{ copied from old retaxis function, then added the overwrite capability
-                thisaxis = self._axis_inshape(axisname)
                 if overwrite:
+                    retval = self.retaxis(axisname)
+                    thisaxis = self._axis_inshape(axisname)
                     self.data = thisaxis
                     return self
                 else:
-                    retval = nddata(thisaxis,thisaxis.shape,list(self.dimlabels)).labels(axisname,thisaxis.flatten())
-                    retval.axis_coords_units = list(self.axis_coords_units)
+                    axis_data = self.getaxis(axisname).flatten()
+                    retval = nddata(axis_data,axis_data.shape,[axisname]).setaxis(axisname,axis_data)
+                    if self.axis_coords_units is None:
+                        retval.axis_coords_units = None
+                    else:
+                        retval.axis_coords_units = [self.axis_coords_units[self.axn(axisname)]]
                     retval.data_units = self.data_units
                     retval.name(self.name())
                     return retval
