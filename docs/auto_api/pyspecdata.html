@@ -2194,11 +2194,21 @@ do this.</p>
 <dl class="py method">
 <dt id="pyspecdata.core.nddata.integrate">
 <code class="sig-name descname">integrate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">thisaxis</span></em>, <em class="sig-param"><span class="n">backwards</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">cumulative</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.integrate" title="Permalink to this definition">¶</a></dt>
-<dd><p>this performs an integration – which is similar to a sum, except that it takes the axis into account, i.e., it performs:
-$int f(x) dx$
+<dd><p>Performs an integration – which is similar to a sum, except that it takes the axis into account, <em>i.e.</em>, it performs:
+<span class="math notranslate nohighlight">\(\int f(x) dx\)</span>
 rather than
-$sum_i f(x_i)$</p>
+<span class="math notranslate nohighlight">\(\sum_i f(x_i)\)</span></p>
 <p>Gaussian quadrature, etc, is planned for a future version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>thisaxis</strong> – The dimension that you want to integrate along</p></li>
+<li><p><strong>cumulative</strong> (<em>boolean</em><em> (</em><em>default False</em><em>)</em>) – Perform a cumulative integral (analogous to a cumulative sum)
+– <em>e.g.</em> for ESR.</p></li>
+<li><p><strong>backwards</strong> (<em>boolean</em><em> (</em><em>default False</em><em>)</em>) – for cumulative integration – perform the integration backwards</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -3091,6 +3101,9 @@ computer and (<em>e.g.</em> after transferring via ssh or a syncing client) on a
 user’s laptop.
 While it will return a default directory without any arguments, it is
 typically used with the keyword argument <cite>exp_type</cite>, described below.</p>
+<p>Note that <strong>the most common way</strong> to use this mechanism is to set up your directories using
+the pyspecdata_register_dir shell command – see
+<a class="reference internal" href="#pyspecdata.datadir.register_directory" title="pyspecdata.datadir.register_directory"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_directory()</span></code></a>.</p>
 <p>It returns the directory ending in a trailing (back)slash.</p>
 <p>It is determined by a call to <cite>MyConfig.get_setting</cite> with the setting name
 <cite>data_directory</cite> and the environment variable set to <code class="docutils literal notranslate"><span class="pre">PYTHON_DATA_DIR</span></code>.</p>
@@ -3186,6 +3199,27 @@ rclone copy -v –include ‘200110_pulse_2.h5’ g_syr:exp_data/test_equip C:\U
 <dt id="pyspecdata.datadir.rclone_search">
 <code class="sig-prename descclassname">pyspecdata.datadir.</code><code class="sig-name descname">rclone_search</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fname</span></em>, <em class="sig-param"><span class="n">dirname</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.datadir.rclone_search" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt id="pyspecdata.datadir.register_directory">
+<code class="sig-prename descclassname">pyspecdata.datadir.</code><code class="sig-name descname">register_directory</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.datadir.register_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>The shell command <cite>pyspecdata_register_dir WHICHDIR</cite> will register the
+directory WHICHDIR (substitute with the name of a directory on your
+computer) so that it can be automatically discovered by
+<a class="reference internal" href="#pyspecdata.find_file" title="pyspecdata.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_file()</span></code></a> or
+<a class="reference internal" href="#pyspecdata.search_filename" title="pyspecdata.search_filename"><code class="xref py py-func docutils literal notranslate"><span class="pre">search_filename()</span></code></a>
+after executing this shell command
+you can use the <cite>exp_type</cite> argument of those commands where you only give
+the lowest level subdirectory (or the final couple subdirectories) that
+contains your data.</p>
+<p>Key to the way this mechanism works</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>this feature was installed on 9/24/20: you need to re-run
+<cite>setup.py</cite> in order to get this command to work for the first time if
+you installed pyspecdata before that date.</p>
+</div>
+</dd></dl>
 
 </div>
 <div class="section" id="module-pyspecdata.figlist">
@@ -6553,7 +6587,7 @@ and not return a figure list in the output</p>
 <dd><p>Find the file  given by the regular expression <cite>searchstring</cite> inside the directory identified by <cite>exp_type</cite>, load the nddata object, and postprocess with the function <cite>postproc</cite>.</p>
 <p>It looks at the top level of the directory first, and if that fails, starts to look recursively.
 Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
-(For a more thorough description, see <a class="reference internal" href="#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a>).</p>
+(For information on how to set up the file searching mechanism, see <a class="reference internal" href="#pyspecdata.datadir.register_directory" title="pyspecdata.datadir.register_directory"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_directory()</span></code></a>).</p>
 <p>Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
 (so that you can make sure they are properly synced to the cloud, etc.).</p>
 <p>It calls <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
@@ -6919,6 +6953,9 @@ computer and (<em>e.g.</em> after transferring via ssh or a syncing client) on a
 user’s laptop.
 While it will return a default directory without any arguments, it is
 typically used with the keyword argument <cite>exp_type</cite>, described below.</p>
+<p>Note that <strong>the most common way</strong> to use this mechanism is to set up your directories using
+the pyspecdata_register_dir shell command – see
+<a class="reference internal" href="#pyspecdata.datadir.register_directory" title="pyspecdata.datadir.register_directory"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_directory()</span></code></a>.</p>
 <p>It returns the directory ending in a trailing (back)slash.</p>
 <p>It is determined by a call to <cite>MyConfig.get_setting</cite> with the setting name
 <cite>data_directory</cite> and the environment variable set to <code class="docutils literal notranslate"><span class="pre">PYTHON_DATA_DIR</span></code>.</p>
@@ -8224,11 +8261,21 @@ do this.</p>
 <dl class="py method">
 <dt id="pyspecdata.nddata.integrate">
 <code class="sig-name descname">integrate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">thisaxis</span></em>, <em class="sig-param"><span class="n">backwards</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">cumulative</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.integrate" title="Permalink to this definition">¶</a></dt>
-<dd><p>this performs an integration – which is similar to a sum, except that it takes the axis into account, i.e., it performs:
-$int f(x) dx$
+<dd><p>Performs an integration – which is similar to a sum, except that it takes the axis into account, <em>i.e.</em>, it performs:
+<span class="math notranslate nohighlight">\(\int f(x) dx\)</span>
 rather than
-$sum_i f(x_i)$</p>
+<span class="math notranslate nohighlight">\(\sum_i f(x_i)\)</span></p>
 <p>Gaussian quadrature, etc, is planned for a future version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>thisaxis</strong> – The dimension that you want to integrate along</p></li>
+<li><p><strong>cumulative</strong> (<em>boolean</em><em> (</em><em>default False</em><em>)</em>) – Perform a cumulative integral (analogous to a cumulative sum)
+– <em>e.g.</em> for ESR.</p></li>
+<li><p><strong>backwards</strong> (<em>boolean</em><em> (</em><em>default False</em><em>)</em>) – for cumulative integration – perform the integration backwards</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -9233,7 +9280,8 @@ cubic interpolant gives the best results:</p>
 <dl class="py function">
 <dt id="pyspecdata.search_filename">
 <code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">search_filename</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">searchstring</span></em>, <em class="sig-param"><span class="n">exp_type</span></em>, <em class="sig-param"><span class="n">print_result</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">unique</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.search_filename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use regular expression <cite>searchstring</cite> to find a file inside the directory indicated by <cite>exp_type</cite></p>
+<dd><p>Use regular expression <cite>searchstring</cite> to find a file inside the directory indicated by <cite>exp_type</cite>
+(For information on how to set up the file searching mechanism, see <a class="reference internal" href="#pyspecdata.datadir.register_directory" title="pyspecdata.datadir.register_directory"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_directory()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

@@ -1,0 +1,32 @@
+pyspecdata.nddata\_ft
+=====================
+
+.. currentmodule:: pyspecdata
+
+.. autoclass:: nddata_ft
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~nddata_ft.__init__
+      ~nddata_ft.convolve
+      ~nddata_ft.extend_for_shear
+      ~nddata_ft.ft
+      ~nddata_ft.ft_clear_startpoints
+      ~nddata_ft.ft_state_to_str
+      ~nddata_ft.ftshift
+      ~nddata_ft.get_ft_prop
+      ~nddata_ft.ift
+      ~nddata_ft.set_ft_prop
+      ~nddata_ft.shear
+   
+   
+
+   
+   
+   
