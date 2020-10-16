@@ -1260,7 +1260,7 @@ def h5join(firsttuple,secondtuple,
 def gridandtick(ax,rotation=(0,0),precision=(2,2),
         labelstring=('',''),gridcolor=r_[0,0,0],
         formatonly = False,fixed_y_locator = None,
-        logarithmic = False,use_grid = True,
+        use_grid = True,
         spines = None,y = True):
     #{{{ taken from matplotlib examples
     def adjust_spines(ax,spines):
@@ -1297,15 +1297,16 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
         widthexp = floor(log(width)/log(10.))-1
         scalefactor = 10**widthexp
         width /= scalefactor
-        majorLocator = MultipleLocator(5*scalefactor)
+        majorLocator = MaxNLocator(nbins='auto', steps=[1,5,10])
         #majorFormatter = FormatStrFormatter('%0.'+'%d'%precision[0]+'f'+labelstring[0])# labelstring can be used, for instance, for pi
         #ax.xaxis.set_major_formatter(majorFormatter)
-        minorLocator   = MultipleLocator(1*scalefactor)
+        minorLocator = MaxNLocator(min_n_ticks=5, nbins=5,steps=[1,5,10])
         ax.xaxis.set_major_locator(majorLocator)
         #for the minor ticks, use no labels; default NullFormatter
         ax.xaxis.set_minor_locator(minorLocator)
         #}}}
         if y:
+            logarithmic = True if ax.get_yaxis().get_scale() == 'log' else False
             #{{{ y ticks
             width = abs(diff(ax.get_ylim()))
             if width==0:
@@ -1315,20 +1316,17 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
             width /= scalefactor
             if fixed_y_locator is None:
                 if logarithmic:
+                    print("logarithmic")
                     majorLocator = LogLocator(10)
-                else:
-                    majorLocator   = MultipleLocator(5*scalefactor)
-            else:
-                majorLocator   = MultipleLocator(fixed_y_locator[4::5])
-            #majorFormatter = FormatStrFormatter('%0.'+'%d'%precision[1]+'f'+labelstring[1])# labelstring can be used, for instance, for pi
-            #ax.yaxis.set_major_formatter(majorFormatter)
-            if fixed_y_locator is None:
-                if logarithmic:
                     minorLocator = LogLocator(10,subs=r_[0:11])
                 else:
-                    minorLocator   = MultipleLocator(1*scalefactor)
+                    majorLocator = MaxNLocator(nbins='auto', steps=[1,5,10])
+                    minorLocator = MaxNLocator(nbins=5,steps=[1,5,10])
             else:
-                minorLocator   = FixedLocator(fixed_y_locator)
+                majorLocator = MultipleLocator(fixed_y_locator[4::5])
+                minorLocator = FixedLocator(fixed_y_locator)
+            #majorFormatter = FormatStrFormatter('%0.'+'%d'%precision[1]+'f'+labelstring[1])# labelstring can be used, for instance, for pi
+            #ax.yaxis.set_major_formatter(majorFormatter)
             ax.yaxis.set_major_locator(majorLocator)
             #for the minor ticks, use no labels; default NullFormatter
             ax.yaxis.set_minor_locator(minorLocator)
@@ -2143,6 +2141,7 @@ class figlist(object):
                     print('\n\n')
                     print(kwargs.pop('print_string'))
                     print('\n\n')
+            gcf().tight_layout()
         #}}}
         if len(args) == 1:
             if (args[0][:-4] == '.pdf') or (args[0][:-4] == '.png') or (args[0][:-4] == '.jpg'):
@@ -3971,14 +3970,7 @@ class nddata (object):
             return A
         #}}}
         #{{{ shape and multiply
-        try:
-            A,B = self.aligndata(arg)
-        except Exception as e:
-            if arg.name() is not None and self.name() is not None:
-                raise ValueError(strm("Error aligning right (arg)", arg.name(),
-                    "with left (self)", self.name())+explain_error(e))
-            else:
-                raise ValueError("Error aligning"+explain_error(e))
+        A,B = self.aligndata(arg)
         retval = A.copy()
         retval.data = A.data * B.data
         #}}}
@@ -5611,15 +5603,19 @@ class nddata (object):
         if len(args) == 1:
             if isinstance(args[0], str):
                 axisname = args[0]
-                retval = self.retaxis(axisname)
                 #{{{ copied from old retaxis function, then added the overwrite capability
-                thisaxis = self._axis_inshape(axisname)
                 if overwrite:
+                    retval = self.retaxis(axisname)
+                    thisaxis = self._axis_inshape(axisname)
                     self.data = thisaxis
                     return self
                 else:
-                    retval = nddata(thisaxis,thisaxis.shape,list(self.dimlabels)).labels(axisname,thisaxis.flatten())
-                    retval.axis_coords_units = list(self.axis_coords_units)
+                    axis_data = self.getaxis(axisname).flatten()
+                    retval = nddata(axis_data,axis_data.shape,[axisname]).setaxis(axisname,axis_data)
+                    if self.axis_coords_units is None:
+                        retval.axis_coords_units = None
+                    else:
+                        retval.axis_coords_units = [self.axis_coords_units[self.axn(axisname)]]
                     retval.data_units = self.data_units
                     retval.name(self.name())
                     return retval
@@ -6782,7 +6778,7 @@ class nddata (object):
                             thisargs))
                     temp_high_float = temp_high
                     if temp_high == inf:
-                        temp_high = len(thisaxis)-1
+                        temp_high = len(thisaxis) # not an exact match (inf doesn't match the index), so needs to be inclusive already
                     elif temp_high == -inf:
                         raise ValueError(strm("this is not going to work -- I interpret range",thisargs,"I get to",temp_low,",",temp_high))
                     else:
