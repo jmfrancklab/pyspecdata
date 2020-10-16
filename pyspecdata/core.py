@@ -31,6 +31,7 @@ from .datadir import _my_config
 from sys import exc_info
 from os import listdir,environ
 from os.path import sep as path_sep
+
 # {{{ determine the figure style, and load the appropriate modules
 _figure_mode_setting = _my_config.get_setting('figures', section='mode', environ='pyspecdata_figures')
 if _figure_mode_setting is None:
@@ -68,7 +69,15 @@ from numpy.core import rec
 from matplotlib.pyplot import cm
 from copy import deepcopy 
 import traceback
-import sympy
+# {{{ have to do this, or sympy spews meaningless warnings
+from sympy.core import Symbol as sympy_symbol# doesn't like to be imported from fornotebook as part of a *
+from sympy.core import Expr as sympy_expr # doesn't like to be imported from fornotebook as part of a *
+from sympy.utilities import lambdify
+from sympy.core import var as sympy_var
+from sympy.core import diff as sympy_diff
+from sympy.printing import latex as sympy_latex
+from sympy.functions.elementary.miscellaneous import sqrt as sympy_sqrt
+# }}}
 from scipy.optimize import leastsq
 from scipy.signal import fftconvolve
 import scipy.sparse as sparse
@@ -166,7 +175,7 @@ nextfigure({'lplotproperty':value})
 
 def issympy(x):
     'tests if something is sympy (based on the module name)'
-    return isinstance(x,sympy.Expr)
+    return isinstance(x,sympy_expr)
 
 #{{{ function trickery
 def mydiff(data,axis = -1):
@@ -684,7 +693,7 @@ def make_ndarray(array_to_conv,name_forprint = 'unknown'):
         pass
     elif type(array_to_conv) in [list,ndarray] and len(array_to_conv) > 0:
         array_to_conv = rec.fromarrays([array_to_conv],names = 'LISTELEMENTS') #list(rec.fromarrays([b])['f0']) to convert back
-    elif type(array_to_conv) in [list,ndarray] and len(array_to_conv) is 0:
+    elif type(array_to_conv) in [list,ndarray] and len(array_to_conv) == 0:
         array_to_conv = None
     elif array_to_conv is  None:
         pass
@@ -747,8 +756,8 @@ def emptytest(x): # test is it is one of various forms of empty
            return False
        #don't want the following, because then I may need to pop, etc
        #if type(x) is list and all(map(lambda x: x is None,x)): return True
-   if size(x) is 1 and x is None: return True
-   if size(x) is 0: return True
+   if size(x) == 1 and x is None: return True
+   if size(x) == 0: return True
    return False
 def lsafen(*string,**kwargs):
     "see lsafe, but with an added double newline"
@@ -1245,7 +1254,7 @@ def h5join(firsttuple,secondtuple,
 def gridandtick(ax,rotation=(0,0),precision=(2,2),
         labelstring=('',''),gridcolor=r_[0,0,0],
         formatonly = False,fixed_y_locator = None,
-        logarithmic = False,use_grid = True,
+        use_grid = True,
         spines = None,y = True):
     #{{{ taken from matplotlib examples
     def adjust_spines(ax,spines):
@@ -1282,15 +1291,16 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
         widthexp = floor(log(width)/log(10.))-1
         scalefactor = 10**widthexp
         width /= scalefactor
-        majorLocator = MultipleLocator(5*scalefactor)
+        majorLocator = MaxNLocator(nbins='auto', steps=[1,5,10])
         #majorFormatter = FormatStrFormatter('%0.'+'%d'%precision[0]+'f'+labelstring[0])# labelstring can be used, for instance, for pi
         #ax.xaxis.set_major_formatter(majorFormatter)
-        minorLocator   = MultipleLocator(1*scalefactor)
+        minorLocator = MaxNLocator(min_n_ticks=5, nbins=5,steps=[1,5,10])
         ax.xaxis.set_major_locator(majorLocator)
         #for the minor ticks, use no labels; default NullFormatter
         ax.xaxis.set_minor_locator(minorLocator)
         #}}}
         if y:
+            logarithmic = True if ax.get_yaxis().get_scale() == 'log' else False
             #{{{ y ticks
             width = abs(diff(ax.get_ylim()))
             if width==0:
@@ -1300,20 +1310,17 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
             width /= scalefactor
             if fixed_y_locator is None:
                 if logarithmic:
+                    print("logarithmic")
                     majorLocator = LogLocator(10)
-                else:
-                    majorLocator   = MultipleLocator(5*scalefactor)
-            else:
-                majorLocator   = MultipleLocator(fixed_y_locator[4::5])
-            #majorFormatter = FormatStrFormatter('%0.'+'%d'%precision[1]+'f'+labelstring[1])# labelstring can be used, for instance, for pi
-            #ax.yaxis.set_major_formatter(majorFormatter)
-            if fixed_y_locator is None:
-                if logarithmic:
                     minorLocator = LogLocator(10,subs=r_[0:11])
                 else:
-                    minorLocator   = MultipleLocator(1*scalefactor)
+                    majorLocator = MaxNLocator(nbins='auto', steps=[1,5,10])
+                    minorLocator = MaxNLocator(nbins=5,steps=[1,5,10])
             else:
-                minorLocator   = FixedLocator(fixed_y_locator)
+                majorLocator = MultipleLocator(fixed_y_locator[4::5])
+                minorLocator = FixedLocator(fixed_y_locator)
+            #majorFormatter = FormatStrFormatter('%0.'+'%d'%precision[1]+'f'+labelstring[1])# labelstring can be used, for instance, for pi
+            #ax.yaxis.set_major_formatter(majorFormatter)
             ax.yaxis.set_major_locator(majorLocator)
             #for the minor ticks, use no labels; default NullFormatter
             ax.yaxis.set_minor_locator(minorLocator)
@@ -1526,7 +1533,7 @@ def expand_x(*args):
         for j in range(2):
             if args[j] is None:
                 pass
-            elif args[j] is 0:
+            elif args[j] == 0:
                 xlims[j] = 0
             else:
                 xlims[j] = args[j]*(xlims[j]-thismean) + thismean
@@ -1550,7 +1557,7 @@ def expand_y(*args):
         for j in range(2):
             if args[j] is None:
                 pass
-            elif args[j] is 0:
+            elif args[j] == 0:
                 ylims[j] = 0
             else:
                 ylims[j] = args[j]*(ylims[j]-thismean) + thismean
@@ -2128,6 +2135,7 @@ class figlist(object):
                     print('\n\n')
                     print(kwargs.pop('print_string'))
                     print('\n\n')
+            gcf().tight_layout()
         #}}}
         if len(args) == 1:
             if (args[0][:-4] == '.pdf') or (args[0][:-4] == '.png') or (args[0][:-4] == '.jpg'):
@@ -2676,7 +2684,7 @@ def concat(datalist,dimname,chop = False):
             newdimsize += 1
             shapetocheck = list(shapes[j].shape)
         #}}}
-        if j is 0:
+        if j == 0:
             shapetocheckagainst = shapetocheck
         else:
             if any(~(array(shapetocheck) == array(shapetocheckagainst))):
@@ -3359,20 +3367,20 @@ class nddata (object):
         .. todo::
                 several options below -- enumerate them in the documentation
         '''
-        if (len(args) is 1) and isscalar(args[0]):
+        if (len(args) == 1) and isscalar(args[0]):
             if args[0] == 0:
                 args = (zeros_like(self.data),)
             else:
                 args = (ones_like(self.data) * args[0],)
-        if (len(args) is 1) and (isinstance(args[0], ndarray)):
+        if (len(args) == 1) and (isinstance(args[0], ndarray)):
             self.data_error = reshape(args[0],shape(self.data))
-        elif (len(args) is 1) and (isinstance(args[0], list)):
+        elif (len(args) == 1) and (isinstance(args[0], list)):
             self.data_error = reshape(array(args[0]),shape(self.data))
-        elif (len(args) is 2) and (isinstance(args[0], str)) and (isinstance(args[1], ndarray)):
+        elif (len(args) == 2) and (isinstance(args[0], str)) and (isinstance(args[1], ndarray)):
             self.axis_coords_error[self.axn(args[0])] = args[1]
-        elif (len(args) is 2) and (isinstance(args[0], str)) and (isscalar(args[1])):
+        elif (len(args) == 2) and (isinstance(args[0], str)) and (isscalar(args[1])):
             self.axis_coords_error[self.axn(args[0])] = args[1]*ones_like(self.getaxis(args[0]))
-        elif (len(args) is 1) and args[0] is None:
+        elif (len(args) == 1) and args[0] is None:
             self.data_error = None
         else:
             raise TypeError(' '.join(map(repr,['Not a valid argument to set_error:',list(map(type,args))])))
@@ -3389,12 +3397,12 @@ class nddata (object):
     #{{{ get error
     def get_error(self,*args):
         '''get a copy of the errors\neither set_error('axisname',error_for_axis) or set_error(error_for_data)'''
-        if (len(args) is 0):
+        if (len(args) == 0):
             if self.data_error is None:
                 return None
             else:
                 return real(self.data_error)
-        elif (len(args) is 1):
+        elif (len(args) == 1):
             thearg = args[0]
             if isinstance(thearg, str_):
                 thearg = str(thearg) # like in the other spot, this became necessary with some upgrade, though I'm not sure that I should maybe just change the error functions to treat the numpy string in the same way
@@ -3551,6 +3559,17 @@ class nddata (object):
     #}}}
     #}}}
     #{{{ arithmetic
+    def along(self,dimname):
+        """Specifies the dimension for the next matrix
+        multiplication (represents the rows/columns)."""
+        self._matmul_along = dimname
+        return self
+    def along(self,dimname):
+        """Specifies the dimension for the next matrix
+        multiplication (represents the rows/columns)."""
+        self._matmul_along = dimname
+        return self
+    #@profile
     def dot(self,arg):
         """Tensor dot of self with arg -- dot all matching dimension labels.  This can be used to do matrix multiplication, but note that the order of doesn't matter, since the dimensions that are contracted are determined by matching the dimension names, not the order of the dimension.
 
@@ -3682,6 +3701,10 @@ class nddata (object):
             return retval
         else:
             raise ValueError("I don't know what to do with an argument of type"+repr(type(arg)))
+    #@profile
+    def __matmul__(self,arg):
+        assert type(arg) is nddata, "currently matrix multiplication only allowed if both are nddata"
+        return self.C.dot(arg)
     def __mul__(self,arg):
         #{{{ do scalar multiplication
         if isscalar(arg):
@@ -3696,14 +3719,7 @@ class nddata (object):
             return A
         #}}}
         #{{{ shape and multiply
-        try:
-            A,B = self.aligndata(arg)
-        except Exception as e:
-            if arg.name() is not None and self.name() is not None:
-                raise ValueError(strm("Error aligning right (arg)", arg.name(),
-                    "with left (self)", self.name())+explain_error(e))
-            else:
-                raise ValueError("Error aligning"+explain_error(e))
+        A,B = self.aligndata(arg)
         retval = A.copy()
         retval.data = A.data * B.data
         #}}}
@@ -5372,15 +5388,19 @@ class nddata (object):
         if len(args) == 1:
             if isinstance(args[0], str):
                 axisname = args[0]
-                retval = self.retaxis(axisname)
                 #{{{ copied from old retaxis function, then added the overwrite capability
-                thisaxis = self._axis_inshape(axisname)
                 if overwrite:
+                    retval = self.retaxis(axisname)
+                    thisaxis = self._axis_inshape(axisname)
                     self.data = thisaxis
                     return self
                 else:
-                    retval = nddata(thisaxis,thisaxis.shape,list(self.dimlabels)).labels(axisname,thisaxis.flatten())
-                    retval.axis_coords_units = list(self.axis_coords_units)
+                    axis_data = self.getaxis(axisname).flatten()
+                    retval = nddata(axis_data,axis_data.shape,[axisname]).setaxis(axisname,axis_data)
+                    if self.axis_coords_units is None:
+                        retval.axis_coords_units = None
+                    else:
+                        retval.axis_coords_units = [self.axis_coords_units[self.axn(axisname)]]
                     retval.data_units = self.data_units
                     retval.name(self.name())
                     return retval
@@ -5388,7 +5408,7 @@ class nddata (object):
             else:
                 if issympy(args[0]):
                     func = args[0]
-                    symbols_in_func = func.atoms(sympy.Symbol)
+                    symbols_in_func = func.atoms(sympy_symbol)
                     logger.debug(strm('identified this as a sympy expression (',func,') with symbols',symbols_in_func))
                     symbols_not_in_dimlabels = set(map(str,symbols_in_func))-set(self.dimlabels)
                     if len(symbols_not_in_dimlabels)>0:
@@ -5405,10 +5425,10 @@ class nddata (object):
         if issympy(func):
             logging.debug(strm("about to run sympy lambdify, symbols_in_func is",symbols_in_func))
             try:
-                lambdified_func = sympy.lambdify(list(symbols_in_func), func,
+                lambdified_func = lambdify(list(symbols_in_func), func,
                         modules=mat2array)
             except Exception as e:
-                raise ValueError(strm('Error parsing axis variables',list(map(sympy.var,axisnames)),
+                raise ValueError(strm('Error parsing axis variables',list(map(sympy_var,axisnames)),
                     'that you passed and function',func,'that you passed') +
                     explain_error(e))
             func = lambdified_func
@@ -5540,17 +5560,17 @@ class nddata (object):
                 return self
         elif len(args) == 1 and issympy(args[0]):
             func = args[0]
-            symbols_in_func = func.atoms(sympy.Symbol)
+            symbols_in_func = func.atoms(sympy_symbol)
             logger.debug(strm('identified this as a sympy expression (',func,') with symbols',symbols_in_func))
             symbols_not_in_dimlabels = set(map(str,symbols_in_func))-set(self.dimlabels)
             if len(symbols_not_in_dimlabels)>0:
                 raise ValueError("You passed a symbolic function, but the symbols"+str(symbols_not_in_dimlabels)+" are not axes")
             logging.debug(strm("about to run sympy lambdify, symbols_in_func is",symbols_in_func))
             try:
-                lambdified_func = sympy.lambdify(list(symbols_in_func), func,
+                lambdified_func = lambdify(list(symbols_in_func), func,
                         modules=mat2array)
             except Exception as e:
-                raise ValueError(strm('Error parsing axis variables',list(map(sympy.var,axisnames)),
+                raise ValueError(strm('Error parsing axis variables',list(map(sympy_var,axisnames)),
                     'that you passed and function',func,'that you passed') +
                     explain_error(e))
             value = lambdified_func
@@ -5993,9 +6013,9 @@ class nddata (object):
             for j in range(len(new_axis)): # j is the index in the hash table
                 copy_to_slice[axis_number + 1]     = j
                 copy_from_slice[axis_number]       = where(indices == j)[0]
-                self.data[copy_to_slice]           = old_data[copy_from_slice]
+                self.data[tuple(copy_to_slice)]    = old_data[tuple(copy_from_slice)]
                 if has_data_error:
-                    data_error_location[copy_to_slice] = old_error[copy_from_slice]
+                    data_error_location[tuple(copy_to_slice)] = old_error[tuple(copy_from_slice)]
                 logger.debug(strm("(chunk auto) ",j,'matches at',x_strip_current_field[copy_from_slice[axis_number]]))
                 self.axis_coords[axis_number][:,j] = x_strip_current_field[copy_from_slice[axis_number]]
             #}}}
@@ -6458,8 +6478,11 @@ class nddata (object):
                 if isscalar(target):
                     sensible_list.append((hash('idx'),dimname,target))
                 elif type(target) in [tuple,list]:
-                    assert len(target)==2, strm("for",args[j],"I expected a 'dimname':(range_start,range_stop)")
-                    sensible_list.append((hash('range'),dimname,target[0],target[1]))
+                    assert len(target) in [1,2], strm("for",args[j],"I expected a 'dimname':(range_start,range_stop)")
+                    if len(target) == 1:
+                        sensible_list.append((hash('range'),dimname,target[0],None))
+                    else:
+                        sensible_list.append((hash('range'),dimname,target[0],target[1]))
                 j += 1
             else:# works for str and str_
                 raise ValueError("I have read in slice argument",args[:j],"but then I get confused!")
@@ -6542,7 +6565,7 @@ class nddata (object):
                             thisargs))
                     temp_high_float = temp_high
                     if temp_high == inf:
-                        temp_high = len(thisaxis)-1
+                        temp_high = len(thisaxis) # not an exact match (inf doesn't match the index), so needs to be inclusive already
                     elif temp_high == -inf:
                         raise ValueError(strm("this is not going to work -- I interpret range",thisargs,"I get to",temp_low,",",temp_high))
                     else:
@@ -6897,7 +6920,7 @@ class subplot_dim():
             ylabel(y)
             title(t)
             grid(g)
-        elif (isinstance(args, tuple)) and (len(args) is 3):
+        elif (isinstance(args, tuple)) and (len(args) == 3):
             # the second value passed is 
             whichsmall = args[2]
             break_into = args[1]
@@ -7064,7 +7087,7 @@ class fitdata(nddata):
         fprime = zeros([len(parameters),number_of_i])
         for j in range(0,len(parameters)):
             thisvar = self.symbolic_dict[parameters[j]]
-            mydiff_sym[j] = sympy.diff(self.symbolic_func,thisvar)
+            mydiff_sym[j] = sympy_diff(self.symbolic_func,thisvar)
             #print r'$\frac{\partial %s}{\partial %s}=%s$'%(self.function_name,repr(thisvar),sympy.latex(mydiff).replace('$','')),'\n\n'
             try:
                 mydiff = mydiff_sym[j].subs(solution_list)
@@ -7089,8 +7112,8 @@ class fitdata(nddata):
         r'''A property of the fitdata class which stores a string
         output of the functional form of the desired fit expression
         provided in func:`functional_form` in LaTeX format'''
-        retval = sympy.latex(self.symbolic_expr).replace('$','')
-        return r'$f(%s)='%(sympy.latex(self.fit_axis)) + retval + r'$'
+        retval = sympy_latex(self.symbolic_expr).replace('$','')
+        return r'$f(%s)='%(sympy_latex(self.fit_axis)) + retval + r'$'
     @function_string.setter
     def function_string(self):
         raise ValueError("You cannot set the string directly -- change the functional_form property instead!")
@@ -7108,7 +7131,7 @@ class fitdata(nddata):
         assert issympy(sym_expr), "for now, the functional form must be a sympy expression!"
         self.symbolic_expr = sym_expr
         #{{{ adapted from fromaxis, trying to adapt the variable
-        symbols_in_expr = self.symbolic_expr.atoms(sympy.Symbol)
+        symbols_in_expr = self.symbolic_expr.atoms(sympy_symbol)
         #logger.debug(strm('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr))
         print('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr)
         symbols_in_expr = set(map(str,symbols_in_expr))
@@ -7128,13 +7151,13 @@ class fitdata(nddata):
         #}}}
         self.fit_axis = list(self.fit_axis)[0]
         # redefine as real to avoid weird piecewise derivatives
-        self.fit_axis_sym = sympy.var(self.fit_axis,real=True) 
+        self.fit_axis_sym = sympy_var(self.fit_axis,real=True) 
         self.symbolic_vars = list(self.symbolic_vars)
         self.symbolic_vars.sort() # so I get consistent behavior
-        self.symbolic_vars = [sympy.var(j,real=True) for j in self.symbolic_vars]
+        self.symbolic_vars = [sympy_var(j,real=True) for j in self.symbolic_vars]
         self.symbol_list = [str(j) for j in self.symbolic_vars]
         args = self.symbolic_vars + [self.fit_axis]
-        self.fitfunc_multiarg = sympy.lambdify(tuple(args), self.symbolic_expr, modules=mat2array)
+        self.fitfunc_multiarg = lambdify(tuple(args), self.symbolic_expr, modules=mat2array)
         def raw_fn(p,x):
             assert len(p)==len(self.symbolic_vars), "length of parameter passed to fitfunc_raw doesn't match number of symbolic parameters"
             return self.fitfunc_multiarg(
@@ -7197,7 +7220,7 @@ class fitdata(nddata):
         # note for this code, that it depends on above code I later moved to  parameter_derivatives
         #for j in range(0,shape(covarmatrix)[0]):
         #    for k in range(0,shape(covarmatrix)[0]):
-        #        #mydiff_second = sympy.diff(mydiff_sym[j],self.symbolic_vars[k]).subs(solution_list)
+        #        #mydiff_second = sympy_diff(mydiff_sym[j],self.symbolic_vars[k]).subs(solution_list)
         #        #fdprime = array([mydiff_second.subs(x,xvals[l])/sigma[l] for l in range(0,len(xvals))]) # only divide by sigma once, since there is only one f
         #        #try:
         #        temp = 1.0/(fprime[j,:] * fprime[k,:])
@@ -7359,7 +7382,7 @@ class fitdata(nddata):
         else:
             return None
     def covarmat(self,*names):
-        if (len(names) == 1) and (names[0] is 'recarray'):
+        if (len(names) == 1) and (names[0] == 'recarray'):
             if hasattr(self,'active_mask'):
                 active_symbols = [x for x in self.symbol_list if self.active_mask[self._pn(x)]]
             else:
@@ -7397,7 +7420,7 @@ class fitdata(nddata):
         #     way the function looks.  Though this is a pain, it's
         #     better.
         for j in range(0,len(self.symbol_list)):
-            symbol = sympy.latex(self.symbolic_vars[j]).replace('$','')
+            symbol = sympy_latex(self.symbolic_vars[j]).replace('$','')
             logger.debug(strm('DEBUG: replacing symbol "',symbol,'"'))
             location = retval.find(symbol)
             while location != -1:
@@ -7724,8 +7747,8 @@ class fitdata(nddata):
 def sqrt(arg):
     if isinstance(arg,nddata):
         return arg**0.5
-    elif isinstance(arg,sympy.symbol.Symbol):
-        return sympy.sqrt(arg)
+    elif isinstance(arg,sympy_symbol):
+        return sympy_sqrt(arg)
     else:
         return np_sqrt(arg)
 
