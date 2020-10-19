@@ -16,6 +16,7 @@ pyspecdata.core.nddata
       ~nddata.__init__
       ~nddata.add_noise
       ~nddata.aligndata
+      ~nddata.along
       ~nddata.argmax
       ~nddata.argmin
       ~nddata.axis

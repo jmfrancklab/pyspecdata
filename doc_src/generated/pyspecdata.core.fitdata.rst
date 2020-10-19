@@ -17,6 +17,7 @@ pyspecdata.core.fitdata
       ~fitdata.add_inactive_p
       ~fitdata.add_noise
       ~fitdata.aligndata
+      ~fitdata.along
       ~fitdata.analytical_covariance
       ~fitdata.argmax
       ~fitdata.argmin
