@@ -1,6 +1,10 @@
 These are some examples.
+.. include:: ../README.rst
+
+
 .. toctree::
 /auto_Examples/plot_fit_fake_data
+
 
 .. only :: html
  
