@@ -29,7 +29,6 @@ autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_too
 sys.path.insert(0, os.path.abspath('../..'))
 sys.path.append(os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('../pyspecdata'))
-sys.path.append('doc_src/examples/README.rst')
 print("sys.path is",sys.path)
 from pyspecdata.version import __version__
 

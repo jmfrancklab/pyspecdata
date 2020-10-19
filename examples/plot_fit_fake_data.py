@@ -9,6 +9,7 @@ from pyspecdata import *
 from pyspecdata import fitdata 
 from sympy import symbols
 import numpy as np
+fl = figlist_var()
 # %%
 # creating a fake data recovery curve
 tau = nddata(r_[0:2:100j], 'tau')
@@ -29,9 +30,8 @@ f.fit()
 print("output:",f.output())
 print("latex:",f.latex())
 T1 = 1./f.output('R_1')
-with figlist_var() as fl: 
-    fl.next('fit with guess')
-    fl.plot(fake_data,'o',label='fake data')
-    fl.plot(f.eval(100),label='fit')
-    fl.plot(guess,label='guess')
+fl.next('fit with guess')
+fl.plot(fake_data,'o',label='fake data')
+fl.plot(f.eval(100),label='fit')
+fl.plot(guess,label='guess')
 

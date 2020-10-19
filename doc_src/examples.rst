@@ -14,5 +14,10 @@ Here are some examples to help navigate the different functions and tools includ
 
 Here is an example of the use of fitdata and setting a initial guess then plotting simultaneously.
 
-.. plot:: ../examples/fit_fake_data.py
+.. plot:: ../examples/plot_fit_fake_data.py
     :include-source:
+
+.. toctree::
+    :maxdepth: 2
+    :caption: example of fitdata
+    auto_examples/plot_fit_fake_data
