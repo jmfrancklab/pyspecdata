@@ -17,12 +17,29 @@ f.set_guess({M0:-500, Mi:500, R1:2})
 f.settoguess()
 guess = f.eval(100)
 f.fit()
-print("output:",f.output())
-print("latex:",f.latex())
+# {{{ this is just to show all the parameters
+list_symbs = []
+for j,k in f.output().items():
+    s_repr = sympy.latex(sympy.Symbol(j))
+    list_symbs.append(f'${s_repr} = {k:0.5g}$')
+list_symbs = '\n'.join(list_symbs)
+# }}}
 T1 = 1./f.output('R_1')
 with figlist_var() as fl: 
     fl.next('fit with guess')
-    fl.plot(fake_data,'o',label='fake data')
-    fl.plot(f.eval(100),label='fit')
     fl.plot(guess,label='guess')
+    fl.plot(fake_data,'o',label='fake data')
+    thisline = fl.plot(f.eval(100),label='fit')
+    # {{{ just put the text
+    ax = gca()
+    text(0.5,0.5,f.latex(),
+            ha='center',va='center',
+            color=thisline[0].get_color(),
+            transform = ax.transAxes)
+    text(0.5,0.5,(3*'\n')+list_symbs,
+            ha='center',va='top',
+            size=10,
+            color=thisline[0].get_color(),
+            transform = ax.transAxes)
+    # }}}
 
