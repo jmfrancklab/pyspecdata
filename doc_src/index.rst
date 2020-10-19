@@ -99,6 +99,7 @@ These and further details are covered in the various sections of the documentati
     fitdata.rst
     figlist.rst
     units.rst
+    auto_examples/index.rst
 
 
 Indices and tables

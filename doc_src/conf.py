@@ -51,8 +51,13 @@ extensions = [
     'matplotlib.sphinxext.plot_directive',
     #'IPython.sphinxext.ipython_console_highlighting',
     #'IPython.sphinxext.ipython_directive',
+    'sphinx_gallery.gen_gallery',
 ]
 
+sphinx_gallery_conf = {
+        'examples_dirs': '.../examples', #path to examples scripts
+        'doc_src': 'doc_src', #path to where to save gallery generated output
+        }
 autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
