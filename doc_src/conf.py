@@ -29,6 +29,7 @@ autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_too
 sys.path.insert(0, os.path.abspath('../..'))
 sys.path.append(os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('../pyspecdata'))
+sys.path.append('doc_src/examples/README.rst')
 print("sys.path is",sys.path)
 from pyspecdata.version import __version__
 
@@ -55,8 +56,8 @@ extensions = [
 ]
 
 sphinx_gallery_conf = {
-        'examples_dirs': '.../auto_examples', #path to examples scripts
-        'auto_examples': 'auto_examples', #path to where to save gallery generated output
+        'examples_dirs': '.../examples', #path to examples scripts
+        'gallery_dirs': 'auto_examples', #path to where to save gallery generated output
         }
 autosummary_generate = True
 
