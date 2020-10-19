@@ -55,7 +55,7 @@ extensions = [
 ]
 
 sphinx_gallery_conf = {
-        'examples_dirs': '.../examples', #path to examples scripts
+        'examples_dirs': '.../auto_examples', #path to examples scripts
         'auto_examples': 'auto_examples', #path to where to save gallery generated output
         }
 autosummary_generate = True
