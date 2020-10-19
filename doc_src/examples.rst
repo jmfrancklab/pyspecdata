@@ -17,7 +17,10 @@ Here is an example of the use of fitdata and setting a initial guess then plotti
 .. plot:: ../examples/plot_fit_fake_data.py
     :include-source:
 
-.. toctree::
-    :maxdepth: 2
-    :caption: example of fitdata
-    auto_examples/plot_fit_fake_data
+.. raw:: html
+
+.. only:: html
+
+ .. figure:: /auto_examples/images/fitdata.png
+     
+     :ref:'plot_fit_fake_data.py'
