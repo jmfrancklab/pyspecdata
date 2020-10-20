@@ -52,7 +52,6 @@ pyspecdata.load\_files.prospa module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 
