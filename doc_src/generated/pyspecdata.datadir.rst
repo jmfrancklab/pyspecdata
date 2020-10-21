@@ -1,11 +1,7 @@
-﻿pyspecdata.datadir
+pyspecdata.datadir
 ==================
 
 .. automodule:: pyspecdata.datadir
-
-   
-   
-   
 
    
    
@@ -36,6 +32,3 @@
    
    
    
-
-
-

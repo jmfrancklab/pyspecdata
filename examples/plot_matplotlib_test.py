@@ -1,3 +1,9 @@
+""" 
+Example for plotting matplotlib
+===============================
+this example creates plots utilizing
+matplotlib functions
+"""
 # testing for compatability of pyspecdata + matplotlib
 # plotting utils
 from pyspecdata import *
