@@ -42,6 +42,8 @@ def xepr(filename, dimname='', verbose=False):
     v = new_v
     # }}}
     ikkf = v['IKKF']
+    if type(ikkf) == str: ikkf = [ikkf]
+        
     # }}}
     # {{{ load the data
     with open(filename_spc,'rb') as fp:
