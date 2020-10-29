@@ -1,3 +1,9 @@
+"""
+Saving an HDF5 file
+===================
+Example of how to save 
+data to an HDF5 file.
+"""
 from pyspecdata import *
 init_logging('debug')
 a = nddata(r_[0:5:10j], 'x')

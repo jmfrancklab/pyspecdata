@@ -5396,7 +5396,8 @@ class nddata (object):
                     return self
                 else:
                     axis_data = self.getaxis(axisname).flatten()
-                    retval = nddata(axis_data,axis_data.shape,[axisname]).setaxis(axisname,axis_data)
+                    # copy is needed here, or data and axis will be the same object
+                    retval = nddata(axis_data,axis_data.shape,[axisname]).setaxis(axisname,copy(axis_data))
                     if self.axis_coords_units is None:
                         retval.axis_coords_units = None
                     else:
