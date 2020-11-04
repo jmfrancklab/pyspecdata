@@ -97,7 +97,7 @@ def series(file_reference, *subpath, **kwargs):
         else:
             new_guess = len(data)/(td2_zf//2)
             print(lsafen("WARNING!, chopping the length of the data to fit the specified td1 of ",td1,"points!\n(specified ",list(zip(mydimnames,mydimsizes)),' td2_zf=%d)'%td2_zf))
-            #logger.debug(strm("maybe this works:",size_it_might_be == len(data)))
+            logger.debug(strm("maybe this works:",size_it_might_be == len(data)))
             data = data[0:size_it_should_be]
             data = bruker_data(data,mydimsizes,mydimnames)
     logger.debug(strm('data straight from nddata =',data))
