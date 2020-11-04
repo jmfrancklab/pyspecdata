@@ -1,10 +1,7 @@
 """testing for compatability of pyspecdata + matplotlib
 plotting utils"""
 from pyspecdata import *
-from pyspecdata import fitdata 
 from matplotlib.patches import Ellipse
-#from pylab import figure,subplot,plot,xlim,ylim,show # doesn't work
-#from pylab import * # does work
 # {{{ this is the contents of pylab.py -- works
 # need to go through and figure out which lines
 # are actually needed and which are not

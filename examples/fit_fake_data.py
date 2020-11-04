@@ -6,10 +6,15 @@ then fits the exponential with the fitdata
 function.
 """  
 from pyspecdata import *
-from pyspecdata import fitdata 
 from sympy import symbols, latex, Symbol
 from sympy import exp as s_exp
-import numpy as np
+# {{{ this is the contents of pylab.py -- works
+# need to go through and figure out which lines
+# are actually needed and which are not
+# -- I have already stripped out some
+from matplotlib.pyplot import figure, subplot, show, xlim, ylim, plot, gca
+from numpy import * # I think it wasn't importing from numpy b/c it seems we're inside sphinx
+# }}}
 #{{{creating a fake data recovery curve
 tau = nddata(r_[0:2:100j], 'tau')
 fake_data = 102*(1-2*exp(-tau*6.0))
@@ -36,6 +41,7 @@ for j,k in f.output().items():
 list_symbs = '\n'.join(list_symbs)
 # }}}
 T1 = 1./f.output('R_1')
+# }}}
 with figlist_var() as fl: 
     fl.next('fit with guess')
     fl.plot(guess,label='guess')
@@ -52,5 +58,3 @@ with figlist_var() as fl:
             size=10,
             color=thisline[0].get_color(),
             transform = ax.transAxes)
-    # }}}
-

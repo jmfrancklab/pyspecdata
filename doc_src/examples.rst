@@ -16,11 +16,3 @@ Here is an example of the use of fitdata and setting a initial guess then plotti
 
 .. plot:: ../examples/fit_fake_data.py
     :include-source:
-
-.. raw:: html
-
-.. only:: html
-
- .. figure:: /auto_examples/images/fitdata.png
-     
-     :ref:'fit_fake_data.py'
