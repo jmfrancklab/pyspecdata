@@ -1,6 +1,6 @@
 from ..general_functions import *
-if not inside_sphinx():
-    from pylab import r_,fft,ifft
+from numpy import r_
+import numpy as np
 from .ft_shift import _find_index,thinkaboutit_message
 
 def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
@@ -109,7 +109,7 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
         #{{{ need to calculate du and all checks here so I can calculate new u
         du = check_ascending_axis(u,tolerance,"In order to perform FT or IFT")
         #}}}
-        dv = double(1) / du / double(padded_length) # so padded length gives the SW
+        dv = np.double(1) / du / np.double(padded_length) # so padded length gives the SW
         v = r_[0:padded_length] * dv # v is the name of the *new* axis.  Note
         #   that we stop one index before the SW, which is what we want
         desired_startpoint = self.get_ft_prop(axes[j],['start','time'])
@@ -179,7 +179,7 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
         self._ft_shift(thisaxis,p2_pre)
         #}}}
         #{{{ the actual (I)FFT portion of the routine
-        self.data = ifft(self.data,
+        self.data = np.fft.ifft(self.data,
                             axis=thisaxis)
         self.axis_coords[thisaxis] = v
         #}}}

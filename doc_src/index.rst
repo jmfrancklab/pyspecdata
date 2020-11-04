@@ -14,6 +14,14 @@ Please note this package is heavily utilized by three other packages that our la
 *   `Classes for communicating with instruments <https://github.com/jmfrancklab/inst_notebooks/>`_.
 *   `Convenient SpinCore NMR Extension <https://github.com/jmfrancklab/spincore_apps/>`_.
 
+Examples!
+=========
+
+.. include:: auto_examples/index.rst
+
+Some more explanation
+=====================
+
 In practice, this means that it makes the code for processing spectral data shorter and more quickly legible.
 It *automatically* handles the following issues, without any additional code:
 
@@ -100,6 +108,7 @@ These and further details are covered in the various sections of the documentati
     figlist.rst
     units.rst
     examples.rst 
+    auto_examples/index.rst
 
 
 Indices and tables

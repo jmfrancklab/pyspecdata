@@ -1,10 +1,9 @@
-"""
-Example for fitdata function
-============================
+"""Fitting Data
+==============
+
 This example creates fake data with noise
 then fits the exponential with the fitdata
-function.
-"""  
+function."""  
 from pyspecdata import *
 from sympy import symbols, latex, Symbol
 from sympy import exp as s_exp

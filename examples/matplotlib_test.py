@@ -1,15 +1,12 @@
-"""testing for compatability of pyspecdata + matplotlib
-plotting utils"""
+"""Matplotlib Example
+==================
+
+this is a basic example that should generate images in
+sphinx, but still imports pyspecdata"""
 from pyspecdata import *
 from matplotlib.patches import Ellipse
-# {{{ this is the contents of pylab.py -- works
-# need to go through and figure out which lines
-# are actually needed and which are not
-# -- I have already stripped out some
-from matplotlib.pyplot import figure, subplot, show, xlim, ylim, plot
-from numpy import * # I think it wasn't importing from numpy b/c it seems we're inside sphinx
-# }}}
-
+from numpy import *
+from matplotlib.pyplot import subplot, xlim, ylim
 
 delta = 45.0 # degrees
 
