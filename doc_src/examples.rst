@@ -14,7 +14,7 @@ Here are some examples to help navigate the different functions and tools includ
 
 Here is an example of the use of fitdata and setting a initial guess then plotting simultaneously.
 
-.. plot:: ../examples/plot_fit_fake_data.py
+.. plot:: ../examples/fit_fake_data.py
     :include-source:
 
 .. raw:: html
@@ -23,4 +23,4 @@ Here is an example of the use of fitdata and setting a initial guess then plotti
 
  .. figure:: /auto_examples/images/fitdata.png
      
-     :ref:'plot_fit_fake_data.py'
+     :ref:'fit_fake_data.py'
