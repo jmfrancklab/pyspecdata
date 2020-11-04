@@ -1,3 +1,4 @@
+"A simple demonstration of an image plot, nested inside a figure list"
 from pyspecdata import *
 # let's make some fake inversion recovery data
 vd = nddata(r_[0,0.05,0.1,0.15,0.2,0.3,0.4,0.6,0.8,1.0,2.0,3.0,5.0],'vd')
