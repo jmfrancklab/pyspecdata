@@ -35,6 +35,14 @@ b_nd = a_nd @ a2_nd
 # the previous is unambiguous b/c only 'y' is shared between the two,
 # but I can do the following for clarity:
 # b_nd = a_nd.along('y') @ a2_nd
+# 
+# Note that "along" gives the dimension along which the sum is performed -- and
+# so this dimension goes away upon matrix multiplication.
+# If only one dimension is shared between the matrices, then we know to take
+# the sum along the shared dimension.
+# For example, here a2_nd transforms from a space called "z" into a space called "y",
+# while a_nd transforms from "y" into "x" -- so it's obvious that a_nd @ a2_nd should
+# transform from "z" into "y".
 time3 = time.time()
 assert b_nd.dimlabels == ['x','z'], b_nd.dimlabels
 assert all(isclose(b,b_nd.data))
