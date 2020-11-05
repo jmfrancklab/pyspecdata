@@ -1,5 +1,4 @@
 from ..general_functions import *
-from numpy import r_,c_,ix_
 from ..ndshape import ndshape_base as ndshape
 from pylab import gca,sca,imshow,xlabel,ylabel,title,colorbar,setp
 def image(A,x=[],y=[],**kwargs):
@@ -63,9 +62,9 @@ def image(A,x=[],y=[],**kwargs):
             y_label = '$'+y_label+'$'# whole expression is in math mode
         A = A.data
     if isinstance(x, list):
-        x = np.array(x)
+        x = array(x)
     if isinstance(y, list):
-        y = np.array(y)
+        y = array(y)
     if len(x)==0:
         x = [1,A.shape[1]]
     else:
@@ -95,7 +94,7 @@ def image(A,x=[],y=[],**kwargs):
     while A.ndim > 2:# to substitude for imagehsvm, etc., so that we just need a ersion of ft
         # order according to how it's ordered in the memory
         # the innermost two will form the image -- first add a line to the end of the images we're going to join up
-        tempsize = np.array(A.shape) # make a tuple the right shape
+        tempsize = array(A.shape) # make a tuple the right shape
         if linecounter == 0 and spacing < 1.0:
             spacing = round(prod(tempsize[0:-1])) # find the length of the thing not counting the columns
         tempsize[-2] = 2*linecounter + spacing # all dims are the same except the image row, to which I add an increasing number of rows
@@ -116,7 +115,7 @@ def image(A,x=[],y=[],**kwargs):
         A = A[:,::-1]
         kwargs['origin'] = 'lower'
         # }}}
-    if np.iscomplexobj(A):# this just tests the datatype
+    if iscomplexobj(A):# this just tests the datatype
         A = imagehsv(A,**imagehsvkwargs)
         retval = imshow(A,extent=myext,**kwargs)
     else:
@@ -135,14 +134,14 @@ def imagehsv(A,logscale = False,black = False):
     "This provides the HSV mapping used to plot complex number"
     # compare to http://www.rapidtables.com/convert/color/hsv-to-rgb.htm
     n = 256
-    mask = np.isnan(A)
+    mask = isnan(A)
     A[mask] = 0
     mask = mask.reshape(-1,1)
     intensity = abs(A).reshape(-1,1)
     intensity /= abs(A).max()
     if logscale:
         raise ValueError("logscale is deprecated, use the cropped_log function instead")
-    #theta = (n-1.)*np.mod(np.angle(A)/pi/2.0,1)# angle in 255*cycles
+    #theta = (n-1.)*mod(angle(A)/pi/2.0,1)# angle in 255*cycles
     if black:
         if black is True:
             V = intensity
@@ -153,35 +152,35 @@ def imagehsv(A,logscale = False,black = False):
         S = intensity
         V = 1.0 # always
     C = V*S
-    H = (np.angle(-1*A).reshape(-1,1)+pi)/2./pi*6. # divide into 60 degree chunks -- the -1 is to rotate so red is at origin
-    X = C * (1-abs(np.mod(H,2)-1))
+    H = (angle(-1*A).reshape(-1,1)+pi)/2./pi*6. # divide into 60 degree chunks -- the -1 is to rotate so red is at origin
+    X = C * (1-abs(mod(H,2)-1))
     m = V-C
-    colors = np.ones(list(A.shape) + [3])
+    colors = ones(list(A.shape) + [3])
     origshape = colors.shape
     colors = colors.reshape(-1,3)
-    rightarray = c_[C, X, np.zeros_like(X)]
+    rightarray = c_[C, X, zeros_like(X)]
     # http://en.wikipedia.org/wiki/HSL_and_HSV#From_HSV,
     # except that the order was messed up
-    thismask = np.where(H<1)[0]
+    thismask = where(H<1)[0]
     # C X 0
     colors[ix_(thismask,[0,1,2])] = rightarray[ix_(thismask,[0,1,2])]
-    thismask = np.where(np.logical_and(H>=1,
+    thismask = where(logical_and(H>=1,
         H<2))[0]
     # X C 0
     colors[ix_(thismask,[1,0,2])] = rightarray[ix_(thismask,[0,1,2])]
-    thismask = np.where(np.logical_and(H>=2,
+    thismask = where(logical_and(H>=2,
         H<3))[0]
     # X 0 C
     colors[ix_(thismask,[1,2,0])] = rightarray[ix_(thismask,[0,1,2])]
-    thismask = np.where(np.logical_and(H>=3,
+    thismask = where(logical_and(H>=3,
         H<4))[0]
     # 0 X C
     colors[ix_(thismask,[2,1,0])] = rightarray[thismask,:]
-    thismask = np.where(np.logical_and(H>=4,
+    thismask = where(logical_and(H>=4,
         H<5))[0]
     # 0 C X
     colors[ix_(thismask,[2,0,1])] = rightarray[thismask,:]
-    thismask = np.where(H>5)[0]
+    thismask = where(H>5)[0]
     # C 0 X
     colors[ix_(thismask,[0,2,1])] = rightarray[thismask,:]
     colors += m
@@ -194,7 +193,7 @@ def imagehsv(A,logscale = False,black = False):
         # if the background is white, make the separators black
         colors[mask * r_[True,True,True]] = 0.0
     colors = colors.reshape(origshape)
-    return np.uint8(colors.round())
+    return uint8(colors.round())
 
 def fl_image(self,A,**kwargs):
     r"""Called as `fl.image()` where `fl` is the `figlist_var`
