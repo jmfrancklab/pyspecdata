@@ -4732,12 +4732,18 @@ class nddata (object):
                 demand_real(j.data,"(this message pertains to the new %s axis pulled from the second argument's data)"%str(j.dimlabels[0]))
         # }}}
         logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?'))
+        # to enable nddata kernel
+        kernel_nddata = False
         if isinstance(kernel_func, tuple):
             assert callable(kernel_func[0]) and callable(kernel_func[1]), "third argument is tuple of kernel functions"
+        elif type(kernel_func) == nddata:
+            kernel_nddata = True
+            print("OK")
         else:
             assert callable(kernel_func), "third argument is kernel function"
             kernel_func = [kernel_func]
-        assert len(kernel_func) == len(dimname)
+        if not kernel_nddata:
+            assert len(kernel_func) == len(dimname)
         # at this point kernel_func and newaxis_dict are both lists with length
         # equal to dimnames (length 1 for 1D and 2 for 2D)
         twoD = len(dimname) > 1
