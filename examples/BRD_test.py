@@ -13,6 +13,7 @@ true_F = Gaussian_1d(logT1.C.run(lambda x: 10**(x)),6,0.3)
 
 
 K = (1.-2*exp(-vd_list/10**(logT1)))
+
 K.reorder('vd') # make sure vd along rows
 print(shape(K))
 print(shape(true_F))
@@ -21,6 +22,8 @@ M = K @ true_F # the fake data
 print(shape(M))
 #M.setaxis('vd',y_axis)
 M.add_noise(0.2, seed=937162211)
+
+solution1 = M.C.nnls('vd',logT1, K, l='BRD')
 
 # this is here to test the integrated 1D-BRD (for pyspecdata)
 print("*** *** ***")
@@ -89,6 +92,8 @@ plot(true_F,label='True')
 print("true mean:",true_F.C.mean(t1_name).item(),"±",true_F.run(std,t1_name).item())
 plot(L_opt_vec,label='L-Curve')
 print("opt. λ mean:",L_opt_vec.C.mean(t1_name).item(),"±",L_opt_vec.run(std,t1_name).item())
+plot(solution1,':',label='pyspecdata-BRD (nddata kernel)')
+print("BRD mean:",solution1.C.mean(t1_name).item(),"±",solution1.run(std,t1_name).item())
 plot(solution,':',label='pyspecdata-BRD')
 print("BRD mean:",solution.C.mean(t1_name).item(),"±",solution.run(std,t1_name).item())
 legend()
