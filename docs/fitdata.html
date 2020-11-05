@@ -241,11 +241,10 @@ nddata metadata.</p>
 <dl class="py method">
 <dt id="pyspecdata.core.fitdata.eval">
 <code class="sig-name descname">eval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">taxis</span></em>, <em class="sig-param"><span class="n">set_what</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">set_to</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.eval" title="Permalink to this definition">¶</a></dt>
-<dd><p>after we have fit, eval calculates the fit function along the axis taxis.
+<dd><p>after we have fit, evaluate the fit function along the axis taxis
 set_what and set_to allow you to forcibly set_what a specific symbol to a
 specific value –&gt; however, this does not affect the class, but only
-the return value. The specific value defines the number of evenly spaced points
-along the taxis</p>
+the return value</p>
 </dd></dl>
 
 <dl class="py method">
@@ -257,7 +256,7 @@ along the taxis</p>
 <dl class="py method">
 <dt id="pyspecdata.core.fitdata.fitfunc">
 <code class="sig-name descname">fitfunc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.fitfunc" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is the function that does the actual fitting, and takes a properly ordered list of parameters as well as an ndarray for the x axis.</p>
+<dd><p>this wraps fitfunc_raw (which gives the actual form of the fit function) to take care of forced variables</p>
 </dd></dl>
 
 <dl class="py method">
@@ -333,7 +332,7 @@ resulting values.</p>
 <dl class="py method">
 <dt id="pyspecdata.core.fitdata.residual">
 <code class="sig-name descname">residual</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">sigma</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.residual" title="Permalink to this definition">¶</a></dt>
-<dd><p>just the residual (error) function</p>
+<dd><p>just the error function</p>
 </dd></dl>
 
 <dl class="py method">
