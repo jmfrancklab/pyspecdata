@@ -4738,7 +4738,6 @@ class nddata (object):
             assert callable(kernel_func[0]) and callable(kernel_func[1]), "third argument is tuple of kernel functions"
         elif type(kernel_func) == nddata:
             kernel_nddata = True
-            print("OK")
         else:
             assert callable(kernel_func), "third argument is kernel function"
             kernel_func = [kernel_func]
@@ -4761,21 +4760,22 @@ class nddata (object):
         for j in range(len(dimname)):
             data_axes[j],fit_axes[j] = data_axes[j].aligndata(fit_axes[j])
         # note I specified K1_ret and K2_ret for returning kernels as properties of the nddata
-        kernels = [kernel_func[j](data_axes[j],fit_axes[j]).squeeze() for j in range(len(dimname))]
-        logger.debug(strm('K%d dimlabels'%j,kernels[j].dimlabels,'and raw shape',kernels[j].data.shape) for j in range(len(dimname)))
-        svd_return = []
-        for j in range(len(dimname)):
-            svd_return.append(np.linalg.svd(kernels[j].data,full_matrices=False))
-        U1 = (svd_return[0])[0]
-        S1 = (svd_return[0])[1]
-        V1 = (svd_return[0])[2]
-        default_cut = 1e-2
-        s1 = where(S1 > default_cut)[0][-1]
-        U1 = U1[:,0:s1]
-        S1 = S1[0:s1]
-        V1 = V1[0:s1,:]
-        S1 = S1*eye(s1)
-        logger.debug(strm('Compressed SVD of K1:',[x.shape for x in (U1,S1,V1)]))
+        if not kernel_nddata:
+            kernels = [kernel_func[j](data_axes[j],fit_axes[j]).squeeze() for j in range(len(dimname))]
+            logger.debug(strm('K%d dimlabels'%j,kernels[j].dimlabels,'and raw shape',kernels[j].data.shape) for j in range(len(dimname)))
+            svd_return = []
+            for j in range(len(dimname)):
+                svd_return.append(np.linalg.svd(kernels[j].data,full_matrices=False))
+            U1 = (svd_return[0])[0]
+            S1 = (svd_return[0])[1]
+            V1 = (svd_return[0])[2]
+            default_cut = 1e-2
+            s1 = where(S1 > default_cut)[0][-1]
+            U1 = U1[:,0:s1]
+            S1 = S1[0:s1]
+            V1 = V1[0:s1,:]
+            S1 = S1*eye(s1)
+            logger.debug(strm('Compressed SVD of K1:',[x.shape for x in (U1,S1,V1)]))
         #{{{ prepping 2D
         if twoD:
             U2 = (svd_return[1])[0]
@@ -4807,14 +4807,18 @@ class nddata (object):
                 data_fornnls = data_fornnls.reshape((prod(data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
                 #}}}
         if not twoD:
-            K = S1 @ V1
-            data_fornnls = U1.T @ self.data
-            logger.debug(strm(shape(K)))
-            logger.debug(strm(shape(data_fornnls)))
-            if len(data_fornnls.shape) > 2:
-                data_fornnls = data_fornnls.reshape((prod(
-                    data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
-            logger.debug(strm('shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
+            if not kernel_nddata:
+                K = S1 @ V1
+                data_fornnls = U1.T @ self.data
+                logger.debug(strm(shape(K)))
+                logger.debug(strm(shape(data_fornnls)))
+                if len(data_fornnls.shape) > 2:
+                    data_fornnls = data_fornnls.reshape((prod(
+                        data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
+                logger.debug(strm('shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
+            else:
+                data_fornnls = self.data
+                K = kernel_func.data
         #{{{ BRD code
         if l == 'BRD':
             def chi(x_vec,val):
@@ -4930,7 +4934,8 @@ class nddata (object):
             residual_nddata = residual
         # store the kernel and the residual as properties
         self.set_prop('nnls_kernel',K)
-        self.set_prop('s1',s1)
+        if not kernel_nddata:
+            self.set_prop('s1',s1)
         self.set_prop('nnls_residual',residual_nddata)
         if twoD:
             self.set_prop('s2',s2)
