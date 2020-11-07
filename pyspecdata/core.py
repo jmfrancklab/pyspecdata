@@ -44,7 +44,7 @@ if _figure_mode_setting == 'latex':
 # }}} -- continued below
 from .general_functions import inside_sphinx
 import numpy as np
-from numpy import r_
+from numpy import r_,c_,nan,inf
 from numpy import pi
 from matplotlib.pyplot import rc, rcParams, plot, figure, gca, title, text, gcf, show
 from types import FunctionType as function
@@ -179,7 +179,7 @@ def mydiff(data,axis = -1):
     newdata = np.zeros(np.shape(data),dtype = data.dtype)
     indices = [slice(None,None,None)]*len(data.shape)
     indices[axis] = slice(None,-1,None)
-    newdata[indices] = diff(data,axis = axis)
+    newdata[indices] = np.diff(data,axis = axis)
     #setfrom = list(indices)
     #indices[axis] = -1
     #setfrom[axis] = 0
@@ -273,7 +273,7 @@ def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,ax = None,ti
     logger.debug(strm('(indices,labels) (len %d):'%len(temp),lsafen(temp)))
     logger.debug(strm('I get these labels (len %d):'%len(labels),labels,'for the data (len %d)'%len(mystructarray),lsafen(mystructarray)))
     indices = np.array(indices)
-    indiv_width = min(diff(indices))*(1-spacing)
+    indiv_width = min(np.diff(indices))*(1-spacing)
     remaining_fields = [x for x in mystructarray.dtype.names if x not in list_of_text_fields] # so they are in the right order, since set does not preserve order
     logger.debug(strm('The list of remaining (i.e. non-text) fields is',lsafen(remaining_fields)))
     colors = ['b','g','r','c','m','k']
@@ -324,8 +324,8 @@ def lookup_rec(A,B,indexpair):
             A[indexpair[0]], 'and', B[indexpair[1]], '!'))
     whichisindex = joined[0][1].dtype.names.index(indexpair[1])
     allbutindex = lambda x: list(x)[0:whichisindex]+list(x)[whichisindex+1:]
-    joined = concatenate([np.array(tuple(list(j[0])+allbutindex(j[1])),
-                    dtype = dtype(j[0].dtype.descr+allbutindex(j[1].dtype.descr))).reshape(1) for j in joined])
+    joined = np.concatenate([np.array(tuple(list(j[0])+allbutindex(j[1])),
+                    dtype = np.dtype(j[0].dtype.descr+allbutindex(j[1].dtype.descr))).reshape(1) for j in joined])
     return joined
 def reorder_rec(myarray,listofnames,first = True):
     try:
@@ -434,9 +434,9 @@ def decorate_rec(xxx_todo_changeme2, xxx_todo_changeme3,drop_rows = False):
     B_reduced.dtype.names = tuple([field_mapping[x] for x in B_reduced.dtype.names])
     #{{{ now find the list of indices for B that match each value of A
     old_B_reduced_names,old_B_reduced_types = tuple(zip(*tuple(B_reduced.dtype.descr)))
-    B_reduced.dtype = dtype(list(zip(A_reduced.dtype.names,old_B_reduced_types)))
+    B_reduced.dtype = np.dtype(list(zip(A_reduced.dtype.names,old_B_reduced_types)))
     if A_reduced.dtype != B_reduced.dtype:
-        B_reduced.dtype = dtype(list(zip(old_B_reduced_names,old_B_reduced_types)))
+        B_reduced.dtype = np.dtype(list(zip(old_B_reduced_names,old_B_reduced_types)))
         raise TypeError(strm('The datatype of A_reduced=', A_reduced.dtype,
             'and B_reduced=', B_reduced.dtype,
             'are not the same,  which is going to create problems!'))
@@ -495,7 +495,7 @@ def decorate_rec(xxx_todo_changeme2, xxx_todo_changeme3,drop_rows = False):
             new_dtypes)+explain_error(e))
     #}}}
     logger.debug(strm("(decorate\\_rec):: add data:",repr(add_data)))
-    for name in dtype(new_dtypes).names:
+    for name in np.dtype(new_dtypes).names:
         logger.debug(strm("(decorate\\_rec):: trying to add data for",name,':',add_data[name][:]))
         retval[name][:] = add_data[name][:]
     #}}}
@@ -558,7 +558,7 @@ def applyto_rec(myfunc,myarray,mylist):
         logger.debug(strm(lsafen("(applyto rec): the array is now",repr(myarray))))
         j += 1
     #}}}
-    combined = concatenate(combined)
+    combined = np.concatenate(combined)
     logger.debug(strm(lsafen("(applyto rec): final result",repr(combined),"has length",len(combined))))
     return combined
 def meanstd_rec(myarray,mylist,standard_error = False):
@@ -608,7 +608,7 @@ def meanstd_rec(myarray,mylist,standard_error = False):
         logger.debug(strm(lsafen("(meanstd rec): the array is now",repr(myarray))))
         j += 1
     #}}}
-    combined = concatenate(combined)
+    combined = np.concatenate(combined)
     logger.debug(strm(lsafen("(meanstd rec): final result",repr(combined),"has length",len(combined))))
     return combined
 def make_rec(*args,**kwargs):
@@ -657,7 +657,7 @@ def make_rec(*args,**kwargs):
         if isinstance(k, np.ndarray):
             types[j] = k.dtype
     try:
-        mydtype = dtype(list(zip(names,types,shapes)))
+        mydtype = np.dtype(list(zip(names,types,shapes)))
     except Exception as e:
         raise ValueError(strm('problem trying to make names',names,' types',
             types,'shapes',shapes)+explain_error(e))
@@ -1281,7 +1281,7 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
     if not formatonly:
         #{{{x ticks
         # determine the size
-        width = abs(diff(ax.get_xlim()))
+        width = abs(np.diff(ax.get_xlim()))
         if width==0:
             raise ValueError('x axis width is zero')
         widthexp = np.floor(np.log(width)/np.log(10.))-1
@@ -1298,7 +1298,7 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
         if y:
             logarithmic = True if ax.get_yaxis().get_scale() == 'log' else False
             #{{{ y ticks
-            width = abs(diff(ax.get_ylim()))
+            width = abs(np.diff(ax.get_ylim()))
             if width==0:
                 raise ValueError('y axis width is zero')
             widthexp = np.floor(np.log(width)/np.log(10.))-1
@@ -1395,7 +1395,7 @@ def whereblocks(a):
     """returns contiguous chunks where the condition is true
     but, see the "contiguous" method, which is more OO"""
     parselist = np.where(a)[0]
-    jumps_at = np.where(diff(parselist)>1)[0]+1
+    jumps_at = np.where(np.diff(parselist)>1)[0]+1
     retlist = []
     lastjump = 0
     for jump in jumps_at:
@@ -1521,7 +1521,7 @@ def expand_x(*args):
     # this is matplotlib code to expand the x axis
     ax = gca()
     xlims = np.array(ax.get_xlim())
-    width = abs(diff(xlims))
+    width = abs(np.diff(xlims))
     thismean = mean(xlims)
     if len(args) > 0:
         if len(args) == 1 and isinstance(args, tuple):
@@ -1545,7 +1545,7 @@ def expand_y(*args):
     # this is matplotlib code to expand the x axis
     ax = gca()
     ylims = np.array(ax.get_ylim())
-    width = abs(diff(ylims))
+    width = abs(np.diff(ylims))
     thismean = mean(ylims)
     if len(args) > 0:
         if len(args) == 1 and isinstance(args, tuple):
@@ -1662,7 +1662,7 @@ def contour_plot(xvals,yvals,zvals,color = 'k',alpha = 1.0,npts = 300,**kwargs):
 def plot_updown(data,axis,color1,color2,symbol = '',**kwargs):
     if symbol == '':
         symbol = 'o'
-    change = r_[1,diff(data.getaxis(axis))]
+    change = r_[1,np.diff(data.getaxis(axis))]
     changemask = change > 0
     if 'force_color' in list(kwargs.keys()) and kwargs['force_color'] == True:
         if hasattr(data,'other_info'):
@@ -2277,7 +2277,7 @@ class figlist(object):
             for j,y in enumerate(finer_ylist):
                 x_linedata = plotdata.getaxis(x_dim)/rescale
                 z_linedata = plotdata[y_dim:(y*rescale)].data.flatten()/z_norm
-                self.mlab.plot3d(x_linedata,y*ones_like(x_linedata),
+                self.mlab.plot3d(x_linedata,y*np.ones_like(x_linedata),
                         z_linedata+lensoffset,
                         color = (0,0,0), line_width = line_width,
                         tube_radius = tube_radius)
@@ -2312,7 +2312,7 @@ class figlist(object):
             for j,x in enumerate(finer_xlist):
                 y_linedata = plotdata.getaxis(y_dim)/(rescale*y_rescale)
                 z_linedata = plotdata[x_dim:(x*rescale)].data.flatten()/z_norm
-                self.mlab.plot3d(x*ones_like(y_linedata),y_linedata,
+                self.mlab.plot3d(x*np.ones_like(y_linedata),y_linedata,
                         z_linedata+lensoffset,
                         color = (0,0,0), line_width = line_width,
                         tube_radius = tube_radius)
@@ -2508,7 +2508,7 @@ def plot(*args,**kwargs):
     #{{{ semilog where appropriate
     if (myx is not None) and (len(myx)>1) and all(myx>0): # by doing this and making myplotfunc global, we preserve the plot style if we want to tack on one point
         try:
-            b = diff(np.log10(myx))
+            b = np.diff(np.log10(myx))
         except Exception as e:
             raise Exception(strm('likely a problem with the type of the x label, which is',myx,explain_error(e)))
         if (np.size(b)>3) and all(abs((b-b[0])/b[0])<1e-4) and not ('nosemilog' in list(kwargs.keys())):
@@ -2554,7 +2554,7 @@ def plot(*args,**kwargs):
     if normalize is not None and normalize:
         myy /= myy.max()
     #{{{ hsv plots when we have multiple lines
-    if len(np.shape(myy.squeeze()))>1 and sum(np.array(np.shape(myy))>1):
+    if len(np.shape(myy.squeeze()))>1 and np.sum(np.array(np.shape(myy))>1):
         #{{{ hsv plots
         retval = []
         for j in range(0,myy.shape[1]):
@@ -2829,7 +2829,7 @@ class nddata (object):
             self.data = np.reshape(data,sizes)
         except:
             try:
-                error_string = strm("While initializing nddata, you are trying trying to reshape a",data.shape,"array (",data.size,"data elements) with list of sizes",list(zip(dimlabels,sizes)),"(implying that there are ",prod(sizes),"data elements)")
+                error_string = strm("While initializing nddata, you are trying trying to reshape a",data.shape,"array (",data.size,"data elements) with list of sizes",list(zip(dimlabels,sizes)),"(implying that there are ",np.prod(sizes),"data elements)")
             except TypeError:
                 error_string = strm("While initializing nddata, you are trying trying to reshape a",data.shape,"array (",data.size,"data elements) with list of sizes",sizes)
             raise ValueError(error_string)
@@ -3041,7 +3041,7 @@ class nddata (object):
         y = self.getaxis(y_axis)[None,:]
         if 'levels' not in list(kwargs.keys()):
             levels = r_[self.data.min():self.data.max():30j]
-        cs = contour(x*ones_like(y),ones_like(x)*y,self.data,**kwargs)
+        cs = contour(x*np.ones_like(y),np.ones_like(x)*y,self.data,**kwargs)
         if labels:
             clabel(cs,inline = 1,fontsize = 10)
         xlabel(self.unitify_axis(x_axis))
@@ -3365,9 +3365,9 @@ class nddata (object):
         '''
         if (len(args) == 1) and np.isscalar(args[0]):
             if args[0] == 0:
-                args = (zeros_like(self.data),)
+                args = (np.zeros_like(self.data),)
             else:
-                args = (ones_like(self.data) * args[0],)
+                args = (np.ones_like(self.data) * args[0],)
         if (len(args) == 1) and (isinstance(args[0], np.ndarray)):
             self.data_error = np.reshape(args[0],np.shape(self.data))
         elif (len(args) == 1) and (isinstance(args[0], list)):
@@ -3375,7 +3375,7 @@ class nddata (object):
         elif (len(args) == 2) and (isinstance(args[0], str)) and (isinstance(args[1], np.ndarray)):
             self.axis_coords_error[self.axn(args[0])] = args[1]
         elif (len(args) == 2) and (isinstance(args[0], str)) and (np.isscalar(args[1])):
-            self.axis_coords_error[self.axn(args[0])] = args[1]*ones_like(self.getaxis(args[0]))
+            self.axis_coords_error[self.axn(args[0])] = args[1]*np.ones_like(self.getaxis(args[0]))
         elif (len(args) == 1) and args[0] is None:
             self.data_error = None
         else:
@@ -3774,7 +3774,7 @@ class nddata (object):
         Aerr = A.get_error()
         Berr = B.get_error()
         Rerr = 0.0 # we can have error on one or both, so we're going to need to add up the variances
-        dt128 = dtype('complex128')
+        dt128 = np.dtype('complex128')
         if Aerr is not None:
             if (A.data.dtype is dt128) or (B.data.dtype is dt128):# this should avoid the error that Ryan gets
                 Rerr += (np.complex128(Aerr)/np.complex128(B.data))**2
@@ -3804,7 +3804,7 @@ class nddata (object):
         retval.set_error(Rerr)
         return retval
     def __invert__(self):
-        if self.data.dtype is dtype('bool'):
+        if self.data.dtype is np.dtype('bool'):
             self.data = ~self.data
             return self
         else:
@@ -4077,7 +4077,7 @@ class nddata (object):
                 print("| doesn't contain: ",axes[j])
                 print('|-----------------------------')
                 raise
-            self.data = sum(self.data,
+            self.data = np.sum(self.data,
                     axis=thisindex)
             self._pop_axis_info(thisindex)
         return self
@@ -4093,7 +4093,7 @@ class nddata (object):
                 raise
             temp = list(self.data.shape)
             temp[thisindex] = 1
-            self.data = sum(self.data,
+            self.data = np.sum(self.data,
                     axis=thisindex)
             self.data = self.data.reshape(temp)
         return self
@@ -4143,12 +4143,12 @@ class nddata (object):
         startingpower = 0
         if force_y_intercept is not None:
             startingpower = 1
-        L =  concatenate([x**j for j in range(startingpower,order+1)],axis=1) # note the totally AWESOME way in which this is done!
+        L =  np.concatenate([x**j for j in range(startingpower,order+1)],axis=1) # note the totally AWESOME way in which this is done!
         #print 'fitting to matrix',L
         if force_y_intercept is not None:
             y -= force_y_intercept
-        c = dot(pinv(L),y)
-        fity = dot(L,c)
+        c = np.dot(pinv(L),y)
+        fity = np.dot(L,c)
         if force_y_intercept is not None:
             #print "\n\nDEBUG: forcing from",fity[0],"to"
             fity += force_y_intercept
@@ -4164,11 +4164,11 @@ class nddata (object):
     #{{{ max and mean
     def _wrapaxisfuncs(self,func):
         #{{{ for convenience, wrap the max and min functions
-        if func == max:
+        if func == np.max:
             func = amax
-        if func == min:
+        if func == np.min:
             func = amin
-        if func == diff:
+        if func == np.diff:
             func = mydiff
         return func
         #}}}
@@ -4222,7 +4222,7 @@ class nddata (object):
         raw_index = process_kwargs([("raw_index",False)],kwargs)
         if len(axes) == 0:
             raw_indices = dict(zip(self.dimlabels,
-                unravel_index(self.data.ravel().argmin(),self.data.shape)))
+                np.unravel_index(self.data.ravel().argmin(),self.data.shape)))
             if raw_index:
                 return raw_indices
             else:
@@ -4332,7 +4332,7 @@ class nddata (object):
             if self.data_error is not None:
                 this_axis_length = self.data.shape[thisindex]
                 try:
-                    self.data_error = sqrt(sum((self.data*self.data_error)**2,
+                    self.data_error = sqrt(np.sum((self.data*self.data_error)**2,
                             axis=thisindex)/(this_axis_length**2))
                 except:
                     raise ValueError(strm('shape of data',np.shape(self.data),'shape of data error',np.shape(self.data_error)))
@@ -4730,17 +4730,17 @@ class nddata (object):
             logger.debug(strm('Lexicographically ordered data:',data_fornnls.shape))
             if len(data_fornnls.shape) > 2:
                 logger.debug(strm('Reshpaing data..'))
-                data_fornnls = data_fornnls.reshape((prod(data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
+                data_fornnls = data_fornnls.reshape((np.prod(data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
             
             if l == 'BRD':
                 def chi(x_vec,val):
-                    return 0.5*dot(x_vec.T,dot(dd_chi(G(x_vec),val**2),x_vec)) - dot(x_vec.T,data_fornnls[:,newaxis])
+                    return 0.5*np.dot(x_vec.T,np.dot(dd_chi(G(x_vec),val**2),x_vec)) - np.dot(x_vec.T,data_fornnls[:,newaxis])
                 def d_chi(x_vec,val):
-                    return dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
+                    return np.dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
                 def dd_chi(G,val):
                     return G + (val**2)*eye(np.shape(G)[0])
                 def G(x_vec):
-                    return dot(K,dot(square_heaviside(x_vec),K.T))
+                    return np.dot(K,np.dot(square_heaviside(x_vec),K.T))
                 def H(product):
                     if product <= 0:
                         return 0
@@ -4749,7 +4749,7 @@ class nddata (object):
                 def square_heaviside(x_vec):
                     diag_heavi = []
                     for q in range(np.shape(K.T)[0]):
-                        pull_val = dot(K.T[q,:],x_vec)
+                        pull_val = np.dot(K.T[q,:],x_vec)
                         temp = pull_val[0]
                         temp = H(temp)
                         diag_heavi.append(temp)
@@ -4760,7 +4760,7 @@ class nddata (object):
                     alpha_converged = False
                     factor = sqrt(s1*s2)
                     T = linalg.inv(dd_chi(G(input_vec),val**2))
-                    dot_product = dot(input_vec.T,dot(T,input_vec))
+                    dot_product = np.dot(input_vec.T,np.dot(T,input_vec))
                     ans = dot_product*factor
                     ans = ans/linalg.norm(input_vec)/dot_product
                     tol = 1e-3
@@ -4772,7 +4772,7 @@ class nddata (object):
                 def newton_min(input_vec,val):
                     fder = dd_chi(G(input_vec),val)
                     fval = d_chi(input_vec,val)
-                    return (input_vec + dot(linalg.inv(fder),fval))
+                    return (input_vec + np.dot(linalg.inv(fder),fval))
                 def mod_BRD(guess,maxiter=20):
                     smoothing_param = guess
                     alpha_converged = False
@@ -4782,7 +4782,7 @@ class nddata (object):
                         retval,residual = this_nnls.nnls_regularized(K,data_fornnls,l=smoothing_param)
                         f_vec = retval[:,newaxis]
                         alpha = smoothing_param**2
-                        c_vec = dot(K,f_vec) - data_fornnls[:,newaxis]
+                        c_vec = np.dot(K,f_vec) - data_fornnls[:,newaxis]
                         c_vec /= -1*alpha
                         c_update = newton_min(c_vec,smoothing_param)
                         alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
@@ -4864,7 +4864,7 @@ class nddata (object):
             logger.debug(strm('shape of the data is',ndshape(self),'is it fortran ordered?',isfortran(self.data)))
             data_fornnls = self.data
             if len(data_fornnls.shape) > 2:
-                data_fornnls = data_fornnls.reshape((prod(
+                data_fornnls = data_fornnls.reshape((np.prod(
                     data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
             logger.debug(strm('shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
             retval, residual = this_nnls.nnls_regularized(K.data, data_fornnls, l=l)
@@ -5146,8 +5146,8 @@ class nddata (object):
             idx = np.r_[idx, mask.size-1] # Edit
         idx.shape = (-1,2) # idx is 2x2 array of start,stop
         logger.debug(strm('(contiguous) DEBUG idx is',idx))
-        logger.debug(strm("(contiguous) diffs for blocks",diff(idx,axis=1)))
-        block_order = diff(idx, axis=1).flatten().argsort()[::-1]
+        logger.debug(strm("(contiguous) diffs for blocks",np.diff(idx,axis=1)))
+        block_order = np.diff(idx, axis=1).flatten().argsort()[::-1]
         logger.debug(strm("(contiguous) in descending order, the blocks are therefore",idx[block_order,:]))
         return self.getaxis(axis)[idx[block_order,:]]
     def to_ppm(self):
@@ -5444,7 +5444,7 @@ class nddata (object):
         if len(list_of_axes) == 0:
             return nddata(float(func()))
             #raise ValueError(strm("Doesn't seem like there are axes -- the axis names that you passed are",axisnames))
-        newshape = ones_like(list_of_axes[0].shape)
+        newshape = np.ones_like(list_of_axes[0].shape)
         for j in list_of_axes:
             newshape *= np.array(j.shape)
         if overwrite:
@@ -5497,7 +5497,7 @@ class nddata (object):
         u = self.getaxis(axis)
         thismsg = "In order to expand, the axis must be equally spaced (and ascending)"
         du = (u[-1] - u[0])/(len(u)-1.)
-        assert all(abs(diff(u) - du)/du < tolerance), thismsg# absolute
+        assert all(abs(np.diff(u) - du)/du < tolerance), thismsg# absolute
         # figure out how many points I need to add, and on which side of the axis
         thismsg = "In order to expand, the axis must be ascending (and equally spaced)"
         assert du > 0, thismsg# ascending
@@ -5792,7 +5792,7 @@ class nddata (object):
         new_shape = list(self.data.shape)[:-len(dimstocollapse)]
         logger.debug(strm("dimensions to keep",new_shape))
         dimstocollapse_shapes = np.array(self.data.shape[-len(dimstocollapse):])
-        new_shape += [dimstocollapse_shapes.prod()]
+        new_shape += [dimstocollapse_shapes.np.prod()]
         self.data = self.data.reshape(new_shape)
         if self.get_error() is not None:
             self.set_error(self.get_error().reshape(new_shape))
@@ -5912,10 +5912,10 @@ class nddata (object):
         if np.any([j == -1 for j in shapesout]):
             j = shapesout.index(-1)
             if j < len(shapesout)-1:
-                shapesout[j] = int(round(ndshape(self)[axisin]/prod(r_[shapesout[0:j],shapesout[j+1:]])))
+                shapesout[j] = int(round(ndshape(self)[axisin]/np.prod(r_[shapesout[0:j],shapesout[j+1:]])))
             else:
-                shapesout[j] = int(round(ndshape(self)[axisin]/prod(shapesout[0:j])))
-        if prod(shapesout) != ndshape(self)[axisin]:
+                shapesout[j] = int(round(ndshape(self)[axisin]/np.prod(shapesout[0:j])))
+        if np.prod(shapesout) != ndshape(self)[axisin]:
             raise ValueError("The size of the axis (%s) you're trying to split (%s) doesn't match the size of the axes you're trying to split it into (%s = %s)"%(repr(axisin),repr(ndshape(self)[axisin]),repr(axesout),repr(shapesout)))
         thisaxis = self.axn(axisin)
         if self.getaxis(axisin) is not None and len(self.getaxis(axisin)) > 0:
@@ -6113,7 +6113,7 @@ class nddata (object):
             key = B.data # now the next part will handle this
         if isinstance(key, np.ndarray):# if selector is an np.ndarray
             logger.debug("initially, rightdata appears to be np.ndarray")
-            if key.dtype is not dtype('bool'):
+            if key.dtype is not np.dtype('bool'):
                 raise ValueError("I don't know what to do with an np.ndarray subscript that has dtype "+repr(key.dtype))
             if key.shape != self.data.shape:
                 raise ValueError("The shape of your logical mask "
@@ -6317,7 +6317,7 @@ class nddata (object):
             1 is "ones_like" 0 is "zeros_like", etc.
         '''
         retval = self.copy(data=False)
-        retval.data = empty_like(self.data)
+        retval.data = np.empty_like(self.data)
         retval.data[:] = value
         return retval
     def __getitem__(self,args):
@@ -6337,7 +6337,7 @@ class nddata (object):
         elif isinstance(args, nddata):
             #{{{ try the nddata mask
             A = args
-            if isinstance(A,nddata) and A.data.dtype is dtype("bool"):
+            if isinstance(A,nddata) and A.data.dtype is np.dtype("bool"):
                 thisshape = ndshape(A)
                 nonsingleton = []
                 for thisdim in A.dimlabels:
@@ -6349,7 +6349,7 @@ class nddata (object):
                     self.setaxis(nonsingleton[0],self.getaxis(nonsingleton[0])[A.data.flatten()])
                 _,B = self.aligndata(A)
                 A = B.data # now the next part will handle this
-                if A.dtype is not dtype('bool'):
+                if A.dtype is not np.dtype('bool'):
                     raise ValueError("I don't know what to do with an np.ndarray subscript that has dtype "+repr(A.dtype))
                 if A.shape != self.data.shape:
                     temp = np.array(A.shape) == 1
@@ -6526,11 +6526,11 @@ class nddata (object):
                         +" selection, but to do that, your axis coordinates need to"
                         +f" be labeled! (The axis coordinates of {thisdim} aren't"
                         +" labeled)")
-                    temp = diff(axesdict[thisdim]) 
-                    if not all(temp*sign(temp[0])>0):
-                        raise ValueError(strm("you can only use the range format on data where the axis is in consecutively increasing or decreasing order, and the differences that I see are",temp*sign(temp[0])),
+                    temp = np.diff(axesdict[thisdim]) 
+                    if not all(temp*np.sign(temp[0])>0):
+                        raise ValueError(strm("you can only use the range format on data where the axis is in consecutively increasing or decreasing order, and the differences that I see are",temp*np.sign(temp[0])),
                                 "if you like, you can still do this by first calling .sort( on the %s axis"%thisdim)
-                    if sign(temp[0]) == -1:
+                    if np.sign(temp[0]) == -1:
                         thisaxis = axesdict[thisdim][::-1]
                     else:
                         thisaxis = axesdict[thisdim]
@@ -6572,7 +6572,7 @@ class nddata (object):
                     # not an exact match, but exclusive if it is
                     if temp_high<len(thisaxis) and thisaxis[temp_high] == temp_high_float:
                         temp_high += 1 # make it inclusive
-                    if sign(temp[0]) == -1:
+                    if np.sign(temp[0]) == -1:
                         temp_high = len(thisaxis) -1 -temp_high
                         temp_low = len(thisaxis) -1 -temp_low
                         temp_high, temp_low = temp_low, temp_high
@@ -6964,13 +6964,13 @@ def pinvr(C,alpha):
     S = diag(S / (S**2 + alpha**2))
     if np.any(~np.isfinite(S)):
         raise ValueError('pinvr error, problem with S/(S^2+alpha^2) --> set your regularization higher')
-    return dot(conj(transpose(V)),
-            dot(S,conj(transpose(U))))
+    return np.dot(conj(transpose(V)),
+            np.dot(S,conj(transpose(U))))
 def sech(x):
     return 1./cosh(x)
 def spectrogram(waveform,f_start,f_stop,npoints_fdom=40,tdom_div=2):
     npoints_tdom = waveform.len/tdom_div # this seems to be more legible than above 
-    resolution = diff(waveform.x[0:2])
+    resolution = np.diff(waveform.x[0:2])
 
     sigma = abs(f_start-f_stop)/np.double(npoints_fdom)
     #print "sigma = %f resolution = %f"%(sigma,resolution)
@@ -6994,9 +6994,9 @@ def spectrogram(waveform,f_start,f_stop,npoints_fdom=40,tdom_div=2):
     return gca()
 image = this_plotting.image.image
 def colormap(points,colors,n=256):
-    r = interp(np.linspace(0,1,n),points,colors[:,0].flatten())
-    g = interp(np.linspace(0,1,n),points,colors[:,1].flatten())
-    b = interp(np.linspace(0,1,n),points,colors[:,2].flatten())
+    r = np.interp(np.linspace(0,1,n),points,colors[:,0].flatten())
+    g = np.interp(np.linspace(0,1,n),points,colors[:,1].flatten())
+    b = np.interp(np.linspace(0,1,n),points,colors[:,2].flatten())
     return np.reshape(r_[r,g,b],(3,n)).T
 def myfilter(x,center = 250e3,sigma = 100e3):
     x = (x-center)**2
@@ -7175,7 +7175,7 @@ class fitdata(nddata):
             fprime_prod = fprime1 * fprime2
             fprime_prod = fprime_prod.reshape(-1,f2).T # direct product form
             try:
-                covarmat = dot(pinv(fprime_prod),(sigma**2).reshape(-1,1))
+                covarmat = np.dot(pinv(fprime_prod),(sigma**2).reshape(-1,1))
             except ValueError as e:
                 raise ValueError(strm('shape of fprime_prod', np.shape(fprime_prod),
                     'shape of inverse', np.shape(pinv(fprime_prod)),
@@ -7187,8 +7187,8 @@ class fitdata(nddata):
                         covarmatrix[l,m] /= 2
         else:
             sigma = self.get_error()
-            #covarmatrix = dot(pinv(f),
-            #        dot(diag(sigma**2),pinv(f.T)))
+            #covarmatrix = np.dot(pinv(f),
+            #        np.dot(diag(sigma**2),pinv(f.T)))
             J = matrix(fprime.T)
             #W = matrix(diag(1./sigma**2))
             #S = matrix(diag(sigma**2))
@@ -7278,7 +7278,7 @@ class fitdata(nddata):
     def residual(self,p,x,y,sigma):
         '''just the residual (error) function'''
         fit = self.fitfunc(p,x)
-        normalization = sum(1.0/sigma)
+        normalization = np.sum(1.0/sigma)
         #print 'DEBUG: y=',y,'\nfit=',fit,'\nsigma=',sigma,'\n\n'
         sigma[sigma == 0.0] = 1
         try:
@@ -7303,11 +7303,11 @@ class fitdata(nddata):
         yerr = yerr[mask]
         x = x[mask]
         L = c_[x.reshape((-1,1)),np.ones((len(x),1))]
-        retval = dot(pinv(L,rcond = 1e-17),y)
+        retval = np.dot(pinv(L,rcond = 1e-17),y)
         logger.debug(r'\label{fig:pinv_figure_text}y=',y,'yerr=',yerr,'%s='%x_axis,x,'L=',L)
         logger.debug('\n\n')
-        logger.debug('recalc y = ',dot(L,retval))
-        logger.debug('recalc E = ',1.0-1.0/dot(L,retval))
+        logger.debug('recalc y = ',np.dot(L,retval))
+        logger.debug('recalc E = ',1.0-1.0/np.dot(L,retval))
         logger.debug('actual E = ',self.data)
         return retval
     def linear(self,*args,**kwargs):
@@ -7599,7 +7599,7 @@ class fitdata(nddata):
             self.covariance = cov
         if self.covariance is not None:
             try:
-                self.covariance *= sum(infodict["fvec"]**2)/dof # scale by chi_v "RMS of residuals"
+                self.covariance *= np.sum(infodict["fvec"]**2)/dof # scale by chi_v "RMS of residuals"
             except TypeError as e:
                 raise TypeError(strm("type(self.covariance)",type(self.covariance),
                     "type(infodict[fvec])",type(infodict["fvec"]),
@@ -7704,7 +7704,7 @@ class fitdata(nddata):
                 alpha = 0.1 # maybe I can rather estimate this based on the change in the residual, similar to in L-M?
                 logger.debug(strm('\n\n.core.guess) value of residual before regularization %d:'%j,thisresidual))
                 while regularization_bad:
-                    newguess = np.real(np.array(thisguess) + dot(pinvr(fprime.T,alpha),(y-f_at_guess)).flatten())
+                    newguess = np.real(np.array(thisguess) + np.dot(pinvr(fprime.T,alpha),(y-f_at_guess)).flatten())
                     mask = newguess < self.guess_lb
                     newguess[mask] = self.guess_lb[mask]
                     mask = newguess > self.guess_ub
