@@ -154,7 +154,7 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
                     " smaller than dv ({:0.2f}), but it's {:0.2f} -- what's going"
                     " on??").format(dv,p2_post_discrepancy)
             phaseshift =  self.fromaxis(axes[j],
-                    lambda q: exp(1j*2*pi*q*p2_post_discrepancy))
+                    lambda q: np.exp(1j*2*pi*q*p2_post_discrepancy))
             try:
                 self.data *= phaseshift.data
             except TypeError as e:
@@ -211,7 +211,7 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
                     " smaller than du ({:0.2f}), but it's {:0.2f} -- what's going"
                     " on??").format(du,p2_pre_discrepancy)
             result = self * self.fromaxis(axes[j],
-                    lambda f: exp(-1j*2*pi*f*p2_pre_discrepancy))
+                    lambda f: np.exp(-1j*2*pi*f*p2_pre_discrepancy))
             self.data = result.data
         #}}}
     return self

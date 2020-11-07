@@ -44,7 +44,7 @@ if _figure_mode_setting == 'latex':
 # }}} -- continued below
 from .general_functions import inside_sphinx
 import numpy as np
-from numpy import r_
+from numpy import r_,c_,nan,inf
 from numpy import pi
 from matplotlib.pyplot import rc, rcParams, plot, figure, gca, title, text, gcf, show
 from types import FunctionType as function
@@ -179,7 +179,7 @@ def mydiff(data,axis = -1):
     newdata = np.zeros(np.shape(data),dtype = data.dtype)
     indices = [slice(None,None,None)]*len(data.shape)
     indices[axis] = slice(None,-1,None)
-    newdata[indices] = diff(data,axis = axis)
+    newdata[indices] = np.diff(data,axis = axis)
     #setfrom = list(indices)
     #indices[axis] = -1
     #setfrom[axis] = 0
@@ -273,7 +273,7 @@ def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,ax = None,ti
     logger.debug(strm('(indices,labels) (len %d):'%len(temp),lsafen(temp)))
     logger.debug(strm('I get these labels (len %d):'%len(labels),labels,'for the data (len %d)'%len(mystructarray),lsafen(mystructarray)))
     indices = np.array(indices)
-    indiv_width = min(diff(indices))*(1-spacing)
+    indiv_width = min(np.diff(indices))*(1-spacing)
     remaining_fields = [x for x in mystructarray.dtype.names if x not in list_of_text_fields] # so they are in the right order, since set does not preserve order
     logger.debug(strm('The list of remaining (i.e. non-text) fields is',lsafen(remaining_fields)))
     colors = ['b','g','r','c','m','k']
@@ -325,7 +325,7 @@ def lookup_rec(A,B,indexpair):
     whichisindex = joined[0][1].dtype.names.index(indexpair[1])
     allbutindex = lambda x: list(x)[0:whichisindex]+list(x)[whichisindex+1:]
     joined = np.concatenate([np.array(tuple(list(j[0])+allbutindex(j[1])),
-                    dtype = dtype(j[0].dtype.descr+allbutindex(j[1].dtype.descr))).reshape(1) for j in joined])
+                    dtype = np.dtype(j[0].dtype.descr+allbutindex(j[1].dtype.descr))).reshape(1) for j in joined])
     return joined
 def reorder_rec(myarray,listofnames,first = True):
     try:
@@ -434,9 +434,9 @@ def decorate_rec(xxx_todo_changeme2, xxx_todo_changeme3,drop_rows = False):
     B_reduced.dtype.names = tuple([field_mapping[x] for x in B_reduced.dtype.names])
     #{{{ now find the list of indices for B that match each value of A
     old_B_reduced_names,old_B_reduced_types = tuple(zip(*tuple(B_reduced.dtype.descr)))
-    B_reduced.dtype = dtype(list(zip(A_reduced.dtype.names,old_B_reduced_types)))
+    B_reduced.dtype = np.dtype(list(zip(A_reduced.dtype.names,old_B_reduced_types)))
     if A_reduced.dtype != B_reduced.dtype:
-        B_reduced.dtype = dtype(list(zip(old_B_reduced_names,old_B_reduced_types)))
+        B_reduced.dtype = np.dtype(list(zip(old_B_reduced_names,old_B_reduced_types)))
         raise TypeError(strm('The datatype of A_reduced=', A_reduced.dtype,
             'and B_reduced=', B_reduced.dtype,
             'are not the same,  which is going to create problems!'))
@@ -495,7 +495,7 @@ def decorate_rec(xxx_todo_changeme2, xxx_todo_changeme3,drop_rows = False):
             new_dtypes)+explain_error(e))
     #}}}
     logger.debug(strm("(decorate\\_rec):: add data:",repr(add_data)))
-    for name in dtype(new_dtypes).names:
+    for name in np.dtype(new_dtypes).names:
         logger.debug(strm("(decorate\\_rec):: trying to add data for",name,':',add_data[name][:]))
         retval[name][:] = add_data[name][:]
     #}}}
@@ -657,7 +657,7 @@ def make_rec(*args,**kwargs):
         if isinstance(k, np.ndarray):
             types[j] = k.dtype
     try:
-        mydtype = dtype(list(zip(names,types,shapes)))
+        mydtype = np.dtype(list(zip(names,types,shapes)))
     except Exception as e:
         raise ValueError(strm('problem trying to make names',names,' types',
             types,'shapes',shapes)+explain_error(e))
@@ -1281,7 +1281,7 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
     if not formatonly:
         #{{{x ticks
         # determine the size
-        width = abs(diff(ax.get_xlim()))
+        width = abs(np.diff(ax.get_xlim()))
         if width==0:
             raise ValueError('x axis width is zero')
         widthexp = np.floor(np.log(width)/np.log(10.))-1
@@ -1298,7 +1298,7 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
         if y:
             logarithmic = True if ax.get_yaxis().get_scale() == 'log' else False
             #{{{ y ticks
-            width = abs(diff(ax.get_ylim()))
+            width = abs(np.diff(ax.get_ylim()))
             if width==0:
                 raise ValueError('y axis width is zero')
             widthexp = np.floor(np.log(width)/np.log(10.))-1
@@ -1395,7 +1395,7 @@ def whereblocks(a):
     """returns contiguous chunks where the condition is true
     but, see the "contiguous" method, which is more OO"""
     parselist = np.where(a)[0]
-    jumps_at = np.where(diff(parselist)>1)[0]+1
+    jumps_at = np.where(np.diff(parselist)>1)[0]+1
     retlist = []
     lastjump = 0
     for jump in jumps_at:
@@ -1521,7 +1521,7 @@ def expand_x(*args):
     # this is matplotlib code to expand the x axis
     ax = gca()
     xlims = np.array(ax.get_xlim())
-    width = abs(diff(xlims))
+    width = abs(np.diff(xlims))
     thismean = mean(xlims)
     if len(args) > 0:
         if len(args) == 1 and isinstance(args, tuple):
@@ -1545,7 +1545,7 @@ def expand_y(*args):
     # this is matplotlib code to expand the x axis
     ax = gca()
     ylims = np.array(ax.get_ylim())
-    width = abs(diff(ylims))
+    width = abs(np.diff(ylims))
     thismean = mean(ylims)
     if len(args) > 0:
         if len(args) == 1 and isinstance(args, tuple):
@@ -1662,7 +1662,7 @@ def contour_plot(xvals,yvals,zvals,color = 'k',alpha = 1.0,npts = 300,**kwargs):
 def plot_updown(data,axis,color1,color2,symbol = '',**kwargs):
     if symbol == '':
         symbol = 'o'
-    change = r_[1,diff(data.getaxis(axis))]
+    change = r_[1,np.diff(data.getaxis(axis))]
     changemask = change > 0
     if 'force_color' in list(kwargs.keys()) and kwargs['force_color'] == True:
         if hasattr(data,'other_info'):
@@ -2277,7 +2277,7 @@ class figlist(object):
             for j,y in enumerate(finer_ylist):
                 x_linedata = plotdata.getaxis(x_dim)/rescale
                 z_linedata = plotdata[y_dim:(y*rescale)].data.flatten()/z_norm
-                self.mlab.plot3d(x_linedata,y*ones_like(x_linedata),
+                self.mlab.plot3d(x_linedata,y*np.ones_like(x_linedata),
                         z_linedata+lensoffset,
                         color = (0,0,0), line_width = line_width,
                         tube_radius = tube_radius)
@@ -2312,7 +2312,7 @@ class figlist(object):
             for j,x in enumerate(finer_xlist):
                 y_linedata = plotdata.getaxis(y_dim)/(rescale*y_rescale)
                 z_linedata = plotdata[x_dim:(x*rescale)].data.flatten()/z_norm
-                self.mlab.plot3d(x*ones_like(y_linedata),y_linedata,
+                self.mlab.plot3d(x*np.ones_like(y_linedata),y_linedata,
                         z_linedata+lensoffset,
                         color = (0,0,0), line_width = line_width,
                         tube_radius = tube_radius)
@@ -2508,7 +2508,7 @@ def plot(*args,**kwargs):
     #{{{ semilog where appropriate
     if (myx is not None) and (len(myx)>1) and all(myx>0): # by doing this and making myplotfunc global, we preserve the plot style if we want to tack on one point
         try:
-            b = diff(np.log10(myx))
+            b = np.diff(np.log10(myx))
         except Exception as e:
             raise Exception(strm('likely a problem with the type of the x label, which is',myx,explain_error(e)))
         if (np.size(b)>3) and all(abs((b-b[0])/b[0])<1e-4) and not ('nosemilog' in list(kwargs.keys())):
@@ -2554,7 +2554,7 @@ def plot(*args,**kwargs):
     if normalize is not None and normalize:
         myy /= myy.max()
     #{{{ hsv plots when we have multiple lines
-    if len(np.shape(myy.squeeze()))>1 and sum(np.array(np.shape(myy))>1):
+    if len(np.shape(myy.squeeze()))>1 and np.sum(np.array(np.shape(myy))>1):
         #{{{ hsv plots
         retval = []
         for j in range(0,myy.shape[1]):
@@ -3041,7 +3041,7 @@ class nddata (object):
         y = self.getaxis(y_axis)[None,:]
         if 'levels' not in list(kwargs.keys()):
             levels = r_[self.data.min():self.data.max():30j]
-        cs = contour(x*ones_like(y),ones_like(x)*y,self.data,**kwargs)
+        cs = contour(x*np.ones_like(y),np.ones_like(x)*y,self.data,**kwargs)
         if labels:
             clabel(cs,inline = 1,fontsize = 10)
         xlabel(self.unitify_axis(x_axis))
@@ -3365,9 +3365,9 @@ class nddata (object):
         '''
         if (len(args) == 1) and np.isscalar(args[0]):
             if args[0] == 0:
-                args = (zeros_like(self.data),)
+                args = (np.zeros_like(self.data),)
             else:
-                args = (ones_like(self.data) * args[0],)
+                args = (np.ones_like(self.data) * args[0],)
         if (len(args) == 1) and (isinstance(args[0], np.ndarray)):
             self.data_error = np.reshape(args[0],np.shape(self.data))
         elif (len(args) == 1) and (isinstance(args[0], list)):
@@ -3375,7 +3375,7 @@ class nddata (object):
         elif (len(args) == 2) and (isinstance(args[0], str)) and (isinstance(args[1], np.ndarray)):
             self.axis_coords_error[self.axn(args[0])] = args[1]
         elif (len(args) == 2) and (isinstance(args[0], str)) and (np.isscalar(args[1])):
-            self.axis_coords_error[self.axn(args[0])] = args[1]*ones_like(self.getaxis(args[0]))
+            self.axis_coords_error[self.axn(args[0])] = args[1]*np.ones_like(self.getaxis(args[0]))
         elif (len(args) == 1) and args[0] is None:
             self.data_error = None
         else:
@@ -3774,7 +3774,7 @@ class nddata (object):
         Aerr = A.get_error()
         Berr = B.get_error()
         Rerr = 0.0 # we can have error on one or both, so we're going to need to add up the variances
-        dt128 = dtype('complex128')
+        dt128 = np.dtype('complex128')
         if Aerr is not None:
             if (A.data.dtype is dt128) or (B.data.dtype is dt128):# this should avoid the error that Ryan gets
                 Rerr += (np.complex128(Aerr)/np.complex128(B.data))**2
@@ -3804,7 +3804,7 @@ class nddata (object):
         retval.set_error(Rerr)
         return retval
     def __invert__(self):
-        if self.data.dtype is dtype('bool'):
+        if self.data.dtype is np.dtype('bool'):
             self.data = ~self.data
             return self
         else:
@@ -4077,7 +4077,7 @@ class nddata (object):
                 print("| doesn't contain: ",axes[j])
                 print('|-----------------------------')
                 raise
-            self.data = sum(self.data,
+            self.data = np.sum(self.data,
                     axis=thisindex)
             self._pop_axis_info(thisindex)
         return self
@@ -4093,7 +4093,7 @@ class nddata (object):
                 raise
             temp = list(self.data.shape)
             temp[thisindex] = 1
-            self.data = sum(self.data,
+            self.data = np.sum(self.data,
                     axis=thisindex)
             self.data = self.data.reshape(temp)
         return self
@@ -4164,11 +4164,11 @@ class nddata (object):
     #{{{ max and mean
     def _wrapaxisfuncs(self,func):
         #{{{ for convenience, wrap the max and min functions
-        if func == max:
+        if func == np.max:
             func = amax
-        if func == min:
+        if func == np.min:
             func = amin
-        if func == diff:
+        if func == np.diff:
             func = mydiff
         return func
         #}}}
@@ -4222,7 +4222,7 @@ class nddata (object):
         raw_index = process_kwargs([("raw_index",False)],kwargs)
         if len(axes) == 0:
             raw_indices = dict(zip(self.dimlabels,
-                unravel_index(self.data.ravel().argmin(),self.data.shape)))
+                np.unravel_index(self.data.ravel().argmin(),self.data.shape)))
             if raw_index:
                 return raw_indices
             else:
@@ -4332,7 +4332,7 @@ class nddata (object):
             if self.data_error is not None:
                 this_axis_length = self.data.shape[thisindex]
                 try:
-                    self.data_error = sqrt(sum((self.data*self.data_error)**2,
+                    self.data_error = sqrt(np.sum((self.data*self.data_error)**2,
                             axis=thisindex)/(this_axis_length**2))
                 except:
                     raise ValueError(strm('shape of data',np.shape(self.data),'shape of data error',np.shape(self.data_error)))
@@ -5146,8 +5146,8 @@ class nddata (object):
             idx = np.r_[idx, mask.size-1] # Edit
         idx.shape = (-1,2) # idx is 2x2 array of start,stop
         logger.debug(strm('(contiguous) DEBUG idx is',idx))
-        logger.debug(strm("(contiguous) diffs for blocks",diff(idx,axis=1)))
-        block_order = diff(idx, axis=1).flatten().argsort()[::-1]
+        logger.debug(strm("(contiguous) diffs for blocks",np.diff(idx,axis=1)))
+        block_order = np.diff(idx, axis=1).flatten().argsort()[::-1]
         logger.debug(strm("(contiguous) in descending order, the blocks are therefore",idx[block_order,:]))
         return self.getaxis(axis)[idx[block_order,:]]
     def to_ppm(self):
@@ -5443,7 +5443,7 @@ class nddata (object):
         if len(list_of_axes) == 0:
             return nddata(float(func()))
             #raise ValueError(strm("Doesn't seem like there are axes -- the axis names that you passed are",axisnames))
-        newshape = ones_like(list_of_axes[0].shape)
+        newshape = np.ones_like(list_of_axes[0].shape)
         for j in list_of_axes:
             newshape *= np.array(j.shape)
         if overwrite:
@@ -5496,7 +5496,7 @@ class nddata (object):
         u = self.getaxis(axis)
         thismsg = "In order to expand, the axis must be equally spaced (and ascending)"
         du = (u[-1] - u[0])/(len(u)-1.)
-        assert all(abs(diff(u) - du)/du < tolerance), thismsg# absolute
+        assert all(abs(np.diff(u) - du)/du < tolerance), thismsg# absolute
         # figure out how many points I need to add, and on which side of the axis
         thismsg = "In order to expand, the axis must be ascending (and equally spaced)"
         assert du > 0, thismsg# ascending
@@ -6112,7 +6112,7 @@ class nddata (object):
             key = B.data # now the next part will handle this
         if isinstance(key, np.ndarray):# if selector is an np.ndarray
             logger.debug("initially, rightdata appears to be np.ndarray")
-            if key.dtype is not dtype('bool'):
+            if key.dtype is not np.dtype('bool'):
                 raise ValueError("I don't know what to do with an np.ndarray subscript that has dtype "+repr(key.dtype))
             if key.shape != self.data.shape:
                 raise ValueError("The shape of your logical mask "
@@ -6316,7 +6316,7 @@ class nddata (object):
             1 is "ones_like" 0 is "zeros_like", etc.
         '''
         retval = self.copy(data=False)
-        retval.data = empty_like(self.data)
+        retval.data = np.empty_like(self.data)
         retval.data[:] = value
         return retval
     def __getitem__(self,args):
@@ -6336,7 +6336,7 @@ class nddata (object):
         elif isinstance(args, nddata):
             #{{{ try the nddata mask
             A = args
-            if isinstance(A,nddata) and A.data.dtype is dtype("bool"):
+            if isinstance(A,nddata) and A.data.dtype is np.dtype("bool"):
                 thisshape = ndshape(A)
                 nonsingleton = []
                 for thisdim in A.dimlabels:
@@ -6348,7 +6348,7 @@ class nddata (object):
                     self.setaxis(nonsingleton[0],self.getaxis(nonsingleton[0])[A.data.flatten()])
                 _,B = self.aligndata(A)
                 A = B.data # now the next part will handle this
-                if A.dtype is not dtype('bool'):
+                if A.dtype is not np.dtype('bool'):
                     raise ValueError("I don't know what to do with an np.ndarray subscript that has dtype "+repr(A.dtype))
                 if A.shape != self.data.shape:
                     temp = np.array(A.shape) == 1
@@ -6525,11 +6525,11 @@ class nddata (object):
                         +" selection, but to do that, your axis coordinates need to"
                         +f" be labeled! (The axis coordinates of {thisdim} aren't"
                         +" labeled)")
-                    temp = diff(axesdict[thisdim]) 
-                    if not all(temp*sign(temp[0])>0):
-                        raise ValueError(strm("you can only use the range format on data where the axis is in consecutively increasing or decreasing order, and the differences that I see are",temp*sign(temp[0])),
+                    temp = np.diff(axesdict[thisdim]) 
+                    if not all(temp*np.sign(temp[0])>0):
+                        raise ValueError(strm("you can only use the range format on data where the axis is in consecutively increasing or decreasing order, and the differences that I see are",temp*np.sign(temp[0])),
                                 "if you like, you can still do this by first calling .sort( on the %s axis"%thisdim)
-                    if sign(temp[0]) == -1:
+                    if np.sign(temp[0]) == -1:
                         thisaxis = axesdict[thisdim][::-1]
                     else:
                         thisaxis = axesdict[thisdim]
@@ -6571,7 +6571,7 @@ class nddata (object):
                     # not an exact match, but exclusive if it is
                     if temp_high<len(thisaxis) and thisaxis[temp_high] == temp_high_float:
                         temp_high += 1 # make it inclusive
-                    if sign(temp[0]) == -1:
+                    if np.sign(temp[0]) == -1:
                         temp_high = len(thisaxis) -1 -temp_high
                         temp_low = len(thisaxis) -1 -temp_low
                         temp_high, temp_low = temp_low, temp_high
@@ -6969,7 +6969,7 @@ def sech(x):
     return 1./cosh(x)
 def spectrogram(waveform,f_start,f_stop,npoints_fdom=40,tdom_div=2):
     npoints_tdom = waveform.len/tdom_div # this seems to be more legible than above 
-    resolution = diff(waveform.x[0:2])
+    resolution = np.diff(waveform.x[0:2])
 
     sigma = abs(f_start-f_stop)/np.double(npoints_fdom)
     #print "sigma = %f resolution = %f"%(sigma,resolution)
@@ -7277,7 +7277,7 @@ class fitdata(nddata):
     def residual(self,p,x,y,sigma):
         '''just the residual (error) function'''
         fit = self.fitfunc(p,x)
-        normalization = sum(1.0/sigma)
+        normalization = np.sum(1.0/sigma)
         #print 'DEBUG: y=',y,'\nfit=',fit,'\nsigma=',sigma,'\n\n'
         sigma[sigma == 0.0] = 1
         try:
@@ -7598,7 +7598,7 @@ class fitdata(nddata):
             self.covariance = cov
         if self.covariance is not None:
             try:
-                self.covariance *= sum(infodict["fvec"]**2)/dof # scale by chi_v "RMS of residuals"
+                self.covariance *= np.sum(infodict["fvec"]**2)/dof # scale by chi_v "RMS of residuals"
             except TypeError as e:
                 raise TypeError(strm("type(self.covariance)",type(self.covariance),
                     "type(infodict[fvec])",type(infodict["fvec"]),

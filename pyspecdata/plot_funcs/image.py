@@ -1,5 +1,6 @@
 from ..general_functions import *
-from numpy import r_,c_,ix_
+from numpy import r_,c_,ix_,nan
+import numpy as np
 from ..ndshape import ndshape_base as ndshape
 from pylab import gca,sca,imshow,xlabel,ylabel,title,colorbar,setp
 def image(A,x=[],y=[],**kwargs):
@@ -112,11 +113,11 @@ def image(A,x=[],y=[],**kwargs):
         tempsize[-2] = 2*linecounter + spacing # all dims are the same except the image row, to which I add an increasing number of rows
         #print "iterate (A.ndim=%d) -- now linecounter is "%A.ndim,linecounter
         linecounter += tempsize[-2] # keep track of the extra lines at the end
-        A = concatenate((A,nan*zeros(tempsize)),axis=(A.ndim-2)) # concatenate along the rows
+        A = np.concatenate((A,nan*np.zeros(tempsize)),axis=(A.ndim-2)) # concatenate along the rows
         tempsize = r_[A.shape[0:-3],A.shape[-2:]]
         tempsize[-2] *= A.shape[-3]
         try:
-            A = A.reshape(int64(tempsize)) # now join them up
+            A = A.reshape(np.int64(tempsize)) # now join them up
         except:
             raise IndexError(strm("problem with tempsize",tempsize,
                 "of type",type(tempsize),"dtype",tempsize.dtype))
