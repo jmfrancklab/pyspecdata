@@ -324,7 +324,7 @@ def lookup_rec(A,B,indexpair):
             A[indexpair[0]], 'and', B[indexpair[1]], '!'))
     whichisindex = joined[0][1].dtype.names.index(indexpair[1])
     allbutindex = lambda x: list(x)[0:whichisindex]+list(x)[whichisindex+1:]
-    joined = concatenate([np.array(tuple(list(j[0])+allbutindex(j[1])),
+    joined = np.concatenate([np.array(tuple(list(j[0])+allbutindex(j[1])),
                     dtype = dtype(j[0].dtype.descr+allbutindex(j[1].dtype.descr))).reshape(1) for j in joined])
     return joined
 def reorder_rec(myarray,listofnames,first = True):
@@ -558,7 +558,7 @@ def applyto_rec(myfunc,myarray,mylist):
         logger.debug(strm(lsafen("(applyto rec): the array is now",repr(myarray))))
         j += 1
     #}}}
-    combined = concatenate(combined)
+    combined = np.concatenate(combined)
     logger.debug(strm(lsafen("(applyto rec): final result",repr(combined),"has length",len(combined))))
     return combined
 def meanstd_rec(myarray,mylist,standard_error = False):
@@ -608,7 +608,7 @@ def meanstd_rec(myarray,mylist,standard_error = False):
         logger.debug(strm(lsafen("(meanstd rec): the array is now",repr(myarray))))
         j += 1
     #}}}
-    combined = concatenate(combined)
+    combined = np.concatenate(combined)
     logger.debug(strm(lsafen("(meanstd rec): final result",repr(combined),"has length",len(combined))))
     return combined
 def make_rec(*args,**kwargs):
@@ -2829,7 +2829,7 @@ class nddata (object):
             self.data = np.reshape(data,sizes)
         except:
             try:
-                error_string = strm("While initializing nddata, you are trying trying to reshape a",data.shape,"array (",data.size,"data elements) with list of sizes",list(zip(dimlabels,sizes)),"(implying that there are ",prod(sizes),"data elements)")
+                error_string = strm("While initializing nddata, you are trying trying to reshape a",data.shape,"array (",data.size,"data elements) with list of sizes",list(zip(dimlabels,sizes)),"(implying that there are ",np.prod(sizes),"data elements)")
             except TypeError:
                 error_string = strm("While initializing nddata, you are trying trying to reshape a",data.shape,"array (",data.size,"data elements) with list of sizes",sizes)
             raise ValueError(error_string)
@@ -4143,12 +4143,12 @@ class nddata (object):
         startingpower = 0
         if force_y_intercept is not None:
             startingpower = 1
-        L =  concatenate([x**j for j in range(startingpower,order+1)],axis=1) # note the totally AWESOME way in which this is done!
+        L =  np.concatenate([x**j for j in range(startingpower,order+1)],axis=1) # note the totally AWESOME way in which this is done!
         #print 'fitting to matrix',L
         if force_y_intercept is not None:
             y -= force_y_intercept
-        c = dot(pinv(L),y)
-        fity = dot(L,c)
+        c = np.dot(pinv(L),y)
+        fity = np.dot(L,c)
         if force_y_intercept is not None:
             #print "\n\nDEBUG: forcing from",fity[0],"to"
             fity += force_y_intercept
@@ -4730,17 +4730,17 @@ class nddata (object):
             logger.debug(strm('Lexicographically ordered data:',data_fornnls.shape))
             if len(data_fornnls.shape) > 2:
                 logger.debug(strm('Reshpaing data..'))
-                data_fornnls = data_fornnls.reshape((prod(data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
+                data_fornnls = data_fornnls.reshape((np.prod(data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
             
             if l == 'BRD':
                 def chi(x_vec,val):
-                    return 0.5*dot(x_vec.T,dot(dd_chi(G(x_vec),val**2),x_vec)) - dot(x_vec.T,data_fornnls[:,newaxis])
+                    return 0.5*np.dot(x_vec.T,np.dot(dd_chi(G(x_vec),val**2),x_vec)) - np.dot(x_vec.T,data_fornnls[:,newaxis])
                 def d_chi(x_vec,val):
-                    return dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
+                    return np.dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
                 def dd_chi(G,val):
                     return G + (val**2)*eye(np.shape(G)[0])
                 def G(x_vec):
-                    return dot(K,dot(square_heaviside(x_vec),K.T))
+                    return np.dot(K,np.dot(square_heaviside(x_vec),K.T))
                 def H(product):
                     if product <= 0:
                         return 0
@@ -4749,7 +4749,7 @@ class nddata (object):
                 def square_heaviside(x_vec):
                     diag_heavi = []
                     for q in range(np.shape(K.T)[0]):
-                        pull_val = dot(K.T[q,:],x_vec)
+                        pull_val = np.dot(K.T[q,:],x_vec)
                         temp = pull_val[0]
                         temp = H(temp)
                         diag_heavi.append(temp)
@@ -4760,7 +4760,7 @@ class nddata (object):
                     alpha_converged = False
                     factor = sqrt(s1*s2)
                     T = linalg.inv(dd_chi(G(input_vec),val**2))
-                    dot_product = dot(input_vec.T,dot(T,input_vec))
+                    dot_product = np.dot(input_vec.T,np.dot(T,input_vec))
                     ans = dot_product*factor
                     ans = ans/linalg.norm(input_vec)/dot_product
                     tol = 1e-3
@@ -4772,7 +4772,7 @@ class nddata (object):
                 def newton_min(input_vec,val):
                     fder = dd_chi(G(input_vec),val)
                     fval = d_chi(input_vec,val)
-                    return (input_vec + dot(linalg.inv(fder),fval))
+                    return (input_vec + np.dot(linalg.inv(fder),fval))
                 def mod_BRD(guess,maxiter=20):
                     smoothing_param = guess
                     alpha_converged = False
@@ -4782,7 +4782,7 @@ class nddata (object):
                         retval,residual = this_nnls.nnls_regularized(K,data_fornnls,l=smoothing_param)
                         f_vec = retval[:,newaxis]
                         alpha = smoothing_param**2
-                        c_vec = dot(K,f_vec) - data_fornnls[:,newaxis]
+                        c_vec = np.dot(K,f_vec) - data_fornnls[:,newaxis]
                         c_vec /= -1*alpha
                         c_update = newton_min(c_vec,smoothing_param)
                         alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
@@ -4864,7 +4864,7 @@ class nddata (object):
             logger.debug(strm('shape of the data is',ndshape(self),'is it fortran ordered?',isfortran(self.data)))
             data_fornnls = self.data
             if len(data_fornnls.shape) > 2:
-                data_fornnls = data_fornnls.reshape((prod(
+                data_fornnls = data_fornnls.reshape((np.prod(
                     data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
             logger.debug(strm('shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
             retval, residual = this_nnls.nnls_regularized(K.data, data_fornnls, l=l)
@@ -5791,7 +5791,7 @@ class nddata (object):
         new_shape = list(self.data.shape)[:-len(dimstocollapse)]
         logger.debug(strm("dimensions to keep",new_shape))
         dimstocollapse_shapes = np.array(self.data.shape[-len(dimstocollapse):])
-        new_shape += [dimstocollapse_shapes.prod()]
+        new_shape += [dimstocollapse_shapes.np.prod()]
         self.data = self.data.reshape(new_shape)
         if self.get_error() is not None:
             self.set_error(self.get_error().reshape(new_shape))
@@ -5911,10 +5911,10 @@ class nddata (object):
         if np.any([j == -1 for j in shapesout]):
             j = shapesout.index(-1)
             if j < len(shapesout)-1:
-                shapesout[j] = int(round(ndshape(self)[axisin]/prod(r_[shapesout[0:j],shapesout[j+1:]])))
+                shapesout[j] = int(round(ndshape(self)[axisin]/np.prod(r_[shapesout[0:j],shapesout[j+1:]])))
             else:
-                shapesout[j] = int(round(ndshape(self)[axisin]/prod(shapesout[0:j])))
-        if prod(shapesout) != ndshape(self)[axisin]:
+                shapesout[j] = int(round(ndshape(self)[axisin]/np.prod(shapesout[0:j])))
+        if np.prod(shapesout) != ndshape(self)[axisin]:
             raise ValueError("The size of the axis (%s) you're trying to split (%s) doesn't match the size of the axes you're trying to split it into (%s = %s)"%(repr(axisin),repr(ndshape(self)[axisin]),repr(axesout),repr(shapesout)))
         thisaxis = self.axn(axisin)
         if self.getaxis(axisin) is not None and len(self.getaxis(axisin)) > 0:
@@ -6963,8 +6963,8 @@ def pinvr(C,alpha):
     S = diag(S / (S**2 + alpha**2))
     if np.any(~np.isfinite(S)):
         raise ValueError('pinvr error, problem with S/(S^2+alpha^2) --> set your regularization higher')
-    return dot(conj(transpose(V)),
-            dot(S,conj(transpose(U))))
+    return np.dot(conj(transpose(V)),
+            np.dot(S,conj(transpose(U))))
 def sech(x):
     return 1./cosh(x)
 def spectrogram(waveform,f_start,f_stop,npoints_fdom=40,tdom_div=2):
@@ -6993,9 +6993,9 @@ def spectrogram(waveform,f_start,f_stop,npoints_fdom=40,tdom_div=2):
     return gca()
 image = this_plotting.image.image
 def colormap(points,colors,n=256):
-    r = interp(np.linspace(0,1,n),points,colors[:,0].flatten())
-    g = interp(np.linspace(0,1,n),points,colors[:,1].flatten())
-    b = interp(np.linspace(0,1,n),points,colors[:,2].flatten())
+    r = np.interp(np.linspace(0,1,n),points,colors[:,0].flatten())
+    g = np.interp(np.linspace(0,1,n),points,colors[:,1].flatten())
+    b = np.interp(np.linspace(0,1,n),points,colors[:,2].flatten())
     return np.reshape(r_[r,g,b],(3,n)).T
 def myfilter(x,center = 250e3,sigma = 100e3):
     x = (x-center)**2
@@ -7174,7 +7174,7 @@ class fitdata(nddata):
             fprime_prod = fprime1 * fprime2
             fprime_prod = fprime_prod.reshape(-1,f2).T # direct product form
             try:
-                covarmat = dot(pinv(fprime_prod),(sigma**2).reshape(-1,1))
+                covarmat = np.dot(pinv(fprime_prod),(sigma**2).reshape(-1,1))
             except ValueError as e:
                 raise ValueError(strm('shape of fprime_prod', np.shape(fprime_prod),
                     'shape of inverse', np.shape(pinv(fprime_prod)),
@@ -7186,8 +7186,8 @@ class fitdata(nddata):
                         covarmatrix[l,m] /= 2
         else:
             sigma = self.get_error()
-            #covarmatrix = dot(pinv(f),
-            #        dot(diag(sigma**2),pinv(f.T)))
+            #covarmatrix = np.dot(pinv(f),
+            #        np.dot(diag(sigma**2),pinv(f.T)))
             J = matrix(fprime.T)
             #W = matrix(diag(1./sigma**2))
             #S = matrix(diag(sigma**2))
@@ -7302,11 +7302,11 @@ class fitdata(nddata):
         yerr = yerr[mask]
         x = x[mask]
         L = c_[x.reshape((-1,1)),np.ones((len(x),1))]
-        retval = dot(pinv(L,rcond = 1e-17),y)
+        retval = np.dot(pinv(L,rcond = 1e-17),y)
         logger.debug(r'\label{fig:pinv_figure_text}y=',y,'yerr=',yerr,'%s='%x_axis,x,'L=',L)
         logger.debug('\n\n')
-        logger.debug('recalc y = ',dot(L,retval))
-        logger.debug('recalc E = ',1.0-1.0/dot(L,retval))
+        logger.debug('recalc y = ',np.dot(L,retval))
+        logger.debug('recalc E = ',1.0-1.0/np.dot(L,retval))
         logger.debug('actual E = ',self.data)
         return retval
     def linear(self,*args,**kwargs):
@@ -7703,7 +7703,7 @@ class fitdata(nddata):
                 alpha = 0.1 # maybe I can rather estimate this based on the change in the residual, similar to in L-M?
                 logger.debug(strm('\n\n.core.guess) value of residual before regularization %d:'%j,thisresidual))
                 while regularization_bad:
-                    newguess = np.real(np.array(thisguess) + dot(pinvr(fprime.T,alpha),(y-f_at_guess)).flatten())
+                    newguess = np.real(np.array(thisguess) + np.dot(pinvr(fprime.T,alpha),(y-f_at_guess)).flatten())
                     mask = newguess < self.guess_lb
                     newguess[mask] = self.guess_lb[mask]
                     mask = newguess > self.guess_ub
