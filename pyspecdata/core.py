@@ -4710,7 +4710,7 @@ class nddata (object):
                     raise ValueError("you are not allows to pass nnls complex data:\nif it makes sense for you, try yourdata.real.nnls( where you now have yourdata.nnls("+'\n'+addtxt)
                 else:
                     raise ValueError("I expect double-precision floating point (float64), but you passed me data of dtype "+str(x.dtype)+'\n'+addtxt)
-        demand_real(self.data)
+        #demand_real(self.data)
         # establish variables as lists
         if type(dimname) is str and type(newaxis_dict) is nddata:
             dimname = [dimname]
@@ -4722,14 +4722,14 @@ class nddata (object):
             raise ValueError(strm("I didn't understand what you specified for the new axes (dimension:",
                 dimname,"and new axes",newaxis_dict))
         # make sure axes are real
-        for j in dimname:
-            demand_real(self.getaxis(j),"(this message pertains to the %s axis)"%j)
+        #for j in dimname:
+            #demand_real(self.getaxis(j),"(this message pertains to the %s axis)"%j)
         for j in newaxis_dict:
             assert len(j.dimlabels) == 1, "must be one-dimensional, has dimensions:"+str(j.dimlabels)
-            if j.getaxis(j.dimlabels[0]) is not None:
-                demand_real(j.getaxis(j.dimlabels[0]),"(this message pertains to the new %s axis pulled from the second argument's axis)"%str(j.dimlabels[0]))
-            else:
-                demand_real(j.data,"(this message pertains to the new %s axis pulled from the second argument's data)"%str(j.dimlabels[0]))
+            #if j.getaxis(j.dimlabels[0]) is not None:
+                #demand_real(j.getaxis(j.dimlabels[0]),"(this message pertains to the new %s axis pulled from the second argument's axis)"%str(j.dimlabels[0]))
+            #else:
+                #demand_real(j.data,"(this message pertains to the new %s axis pulled from the second argument's data)"%str(j.dimlabels[0]))
         # }}}
         logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?'))
         # to enable nddata kernel
