@@ -396,9 +396,9 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
     if genpng == True:
         alsosave = fname.replace('.pdf','.png')
     if grid:
-        gridandtick(gca())
+        gridandtick(plt.gca())
     if fig is None:
-        fig = gcf()
+        fig = plt.gcf()
     if mlab:
         temp = fig.scene.anti_aliasing_frames
         fig.scene.disable_render = True
@@ -434,7 +434,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
         fig.scene.disable_render = False
         fig.scene.anti_aliasing_frames = temp
     else:
-        ax = gca()
+        ax = plt.gca()
         if equal_aspect:
             ax.set_aspect('equal')
         fig.autofmt_xdate()
@@ -442,7 +442,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
             autopad_figure(centered = centered,figname = fname)
     # replaced outer_legend with appropriate modification to the "legend" option of figlist.show_prep(), same with legend option
         if not boundaries:
-            ax = gca()
+            ax = plt.gca()
             for j in list(ax.spines.keys()):
                 ax.spines[j].set_visible(False)
             setp(ax.get_xticklabels(),visible = False)
@@ -456,7 +456,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
             if len(this_ylabel) > 0:
                 ax.set_ylabel(this_ylabel + r" $\rightarrow$")
         try:
-            savefig(fname, dpi=dpi,
+            plt.savefig(fname, dpi=dpi,
                     facecolor=(1,1,1,0),
                     bbox_inches='tight')
         except ValueError as exc_string:
@@ -467,7 +467,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
         except IOError as e:
             raise IOError("This is giving an IOError -- check that you haven't maybe changed directories" + os.getcwd().replace('\\','/'))
         if alsosave != None:
-            savefig(alsosave,
+            plt.savefig(alsosave,
                     dpi=dpi,
                     facecolor=(1,1,1,0))
     if figure:
@@ -497,7 +497,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
         bufwr(r'''{\color{red}{\tiny %s}:}\begin{tiny}\fn{%s}\end{tiny}'''%('file:',fname))
         bufwr('\n\n'+r'\hrulefill'+'\n\n')
         bufwr(r'''\end{minipage} }''', end=' ')
-    clf()
+    plt.clf()
     sys.stdout.buffer.flush()
     return
 def ordplot(x,y,labels,formatstring):
@@ -711,7 +711,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
         allpeaks_top_x = nddata(allpeaks_top_x,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
     except:
         print(r'\begin{verbatim} If you have an error here, probably change smoothing (%0.2f) or threshold (%0.2f)\end{verbatim}'%(smoothing,threshold),'\n\n')
-        clf()
+        plt.clf()
         for j in range(0,nslices):
             thisslice = data['power',j].data
             #curvature = diff(fftconvolve(thisslice,k,mode='same'),n=2)
@@ -727,7 +727,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
         allpeaks_bottom_x = nddata(allpeaks_bottom_x,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
     except:
         print(r'\begin{verbatim} If you have an error here, probably change smoothing (%0.2f) or threshold (%0.2f)\end{verbatim}'%(smoothing,threshold),'\n\n')
-        clf()
+        plt.clf()
         for j in range(0,nslices):
             thisslice = data['power',j].data
             #curvature = diff(fftconvolve(thisslice,k,mode='same'),n=2)
@@ -836,15 +836,15 @@ def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'ref
           legendstr.append('\n'.join(textwrap.wrap(explabel[k]+':'+retval[1][0],50))+'\n')
        ylabel(r'$\Omega$')
        titlestr = 'Noise scans (smoothed %0.2f $kHz$) for CNSI spectrometer\n'%(smoothing/1e3)
-       title(titlestr+r'$n V$ RG/ disk units = %0.3f, mask (%0.3f,%0.3f)'%(calibration*1e9,mask_start,mask_stop))
-       ax = gca()
+       plt.title(titlestr+r'$n V$ RG/ disk units = %0.3f, mask (%0.3f,%0.3f)'%(calibration*1e9,mask_start,mask_stop))
+       ax = plt.gca()
        ylims = list(ax.get_ylim())
-       #gridandtick(gca(),formatonly = True)
-       gridandtick(gca(),logarithmic = True)
+       #gridandtick(plt.gca(),formatonly = True)
+       gridandtick(plt.gca(),logarithmic = True)
        subplot(122)
        grid(False)
        lg = autolegend(linelist,legendstr)
-       ax = gca()
+       ax = plt.gca()
        ax.get_xaxis().set_visible(False)
        ax.get_yaxis().set_visible(False)
        for x in list(ax.spines.values()):

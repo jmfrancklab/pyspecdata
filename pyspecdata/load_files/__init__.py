@@ -17,6 +17,7 @@ from . import bruker_nmr
 from . import prospa
 from . import bruker_esr
 from . import acert
+import numpy as np
 from .open_subpath import open_subpath
 from ..datadir import getDATADIR
 from ..datadir import _my_config,log_fname

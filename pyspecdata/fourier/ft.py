@@ -90,7 +90,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
                 "dimlabels is: ",self.dimlabels))
         padded_length = self.data.shape[thisaxis]
         if pad is True:
-            padded_length = int(2**(ceil(log2(padded_length))))
+            padded_length = int(2**(np.ceil(log2(padded_length))))
         elif pad:
             padded_length = pad
         u = self.getaxis(axes[j]) # here, u is time
@@ -168,7 +168,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
             newdata[thisaxis] = padded_length
             targetslice = [slice(None,None,None)] * len(newdata)
             targetslice[thisaxis] = slice(None,self.data.shape[thisaxis])
-            newdata = zeros(newdata,dtype = self.data.dtype)
+            newdata = np.zeros(newdata,dtype = self.data.dtype)
             newdata[targetslice] = self.data
             self.data = newdata
             u = r_[0:padded_length] * du + u[0]
@@ -225,5 +225,5 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
             add_to_axis = (automix - carrier) / sw
             if verbose: print("which is",add_to_axis,"times the sw of",sw,"off from the automix value of",automix)
             x = self.getaxis(axes[j])
-            x += round(add_to_axis)*sw
+            x += np.round(add_to_axis)*sw
     return self
