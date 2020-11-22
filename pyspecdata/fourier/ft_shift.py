@@ -155,15 +155,15 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
         t='reset'
         f='reset'
     if f is None:
-        assert t is not 'current'
+        assert t != 'current'
         f='current'
     elif t is None:
-        assert f is not 'current'
+        assert f != 'current'
         t='current'
-    if f is 'current':
+    if f == 'current':
         pass
     else:
-        if f is 'reset':
+        if f == 'reset':
             f=None
         df = _get_ft_df(self,axis)
         orig_f = self.get_ft_prop(axis,['start','freq'])
@@ -187,10 +187,10 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
         self.set_ft_prop(axis,['freq','not','aliased'],None)
         if nearest is False:
             self.set_ft_prop(axis,['time','not','aliased'],True)
-    if t is 'current':
+    if t == 'current':
         pass
     else:
-        if t is 'reset':
+        if t == 'reset':
             t=None
         dt = _get_ft_dt(self,axis)
         orig_t = self.get_ft_prop(axis,['start','time'])
