@@ -6174,7 +6174,7 @@ class nddata (object):
                 self.setaxis(axesout[j],new_axes[j])
                 self.set_units(axesout[j],orig_axis_units)
         return self
-    def chunk_auto(self,axis_name,which_field,dimname = None):
+    def chunk_auto(self,axis_name,dimname=None):
         r'''assuming that axis "axis_name" is currently labeled with a structured array, choose one field ("which_field") of that structured array to generate a new dimension
         Note that for now, by definition, no error is allowed on the axes.
         However, once I upgrade to using structured arrays to handle axis and data errors, I will want to deal with that appropriately here.'''
@@ -6184,6 +6184,7 @@ class nddata (object):
                 a.dimlabels = [str(j[0]) if len(j) == 1 else j for j in a.dimlabels.tolist()]
             return a
         axis_number = self.axn(axis_name)
+        which_field = self.getaxis(axis_name).dtype.names[-1]
         new_axis,indices = unique(self.getaxis(axis_name)[which_field],
                 return_inverse = True) # we are essentially creating a hash table for the axis.  According to numpy documentation, the hash indices that this returns should also be sorted sorted.
         logger.debug(strm("(chunk auto) indices look like this:",indices))
