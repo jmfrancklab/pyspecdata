@@ -99,12 +99,12 @@ import numpy.lib.recfunctions as recf
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
 from .datadir import getDATADIR,log_fname
-from . import fourier as this_fourier
 from . import axis_manipulation
 from . import nnls as this_nnls
 from . import plot_funcs as this_plotting
 from .general_functions import *
 from .ndshape import ndshape_base
+from .fourier import nddata_ft
 #rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
 rc('image',aspect='auto',interpolation='nearest')
 #rcParams['text.usetex'] = True
@@ -2752,7 +2752,7 @@ def concat(datalist,dimname,chop = False):
     newdatalist.other_info = other_info_out
     return newdatalist
 #}}}
-class nddata (object):
+class nddata (nddata_ft):
     """This is the detailed API reference.
     For an introduction on how to use ND-Data, see the :ref:`Main ND-Data Documentation <nddata-summary-label>`.
     """
@@ -4806,23 +4806,11 @@ class nddata (object):
             axis_name = axis_name + ' / ' + yunits
         return axis_name
     #{{{ the following are all in the desired format -- the repetition at the end is because each function is in its own file (module) of the same name
-    _ft_conj = this_fourier._ft_conj
-    ft = this_fourier.ft
-    set_ft_prop = this_fourier.set_ft_prop
-    get_ft_prop = this_fourier.get_ft_prop
-    ft_state_to_str = this_fourier.ft_state_to_str
-    ft_clear_startpoints = this_fourier.ft_clear_startpoints
-    ift = this_fourier.ift
-    _ft_shift = this_fourier._ft_shift
-    ftshift = this_fourier.ftshift
-    convolve = this_fourier.convolve
-    extend_for_shear = this_fourier.extend_for_shear
     linear_shear = axis_manipulation.linear_shear
     inhomog_coords = axis_manipulation.inhomog_coords
     secsy_transform_manual = axis_manipulation.secsy_transform_manual
     secsy_transform = axis_manipulation.secsy_transform
     register_axis = axis_manipulation.register_axis
-    fourier_shear = this_fourier.shear
     #}}}
     #}}}
     def nnls(self, dimname, newaxis_dict, kernel_func, l=0):

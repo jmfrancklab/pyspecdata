@@ -28,6 +28,14 @@ pyspecdata.load\_files.bruker\_nmr module
    :undoc-members:
    :show-inheritance:
 
+pyspecdata.load\_files.load\_cary module
+----------------------------------------
+
+.. automodule:: pyspecdata.load_files.load_cary
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pyspecdata.load\_files.open\_subpath module
 -------------------------------------------
 

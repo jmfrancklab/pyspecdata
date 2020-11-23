@@ -22,3 +22,4 @@ lapack-3.4.0/SRC/rem_objs.a
 lapack-3.4.0/SRC/xobjs.a
 nnls/_nnlsmodule.c
 demos/.ipynb_checkpoints/
+README.htm

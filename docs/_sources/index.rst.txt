@@ -93,12 +93,13 @@ These and further details are covered in the various sections of the documentati
     :maxdepth: 2
 
     
-    modules.rst
-    notebook.rst
     nddata.rst
+    classes.rst
     fitdata.rst
+    notebook.rst
     figlist.rst
     units.rst
+    modules.rst
 
 
 Indices and tables

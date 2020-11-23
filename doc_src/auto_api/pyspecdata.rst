@@ -15,6 +15,14 @@ Subpackages
 Submodules
 ----------
 
+pyspecdata.axis\_class module
+-----------------------------
+
+.. automodule:: pyspecdata.axis_class
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pyspecdata.core module
 ----------------------
 
