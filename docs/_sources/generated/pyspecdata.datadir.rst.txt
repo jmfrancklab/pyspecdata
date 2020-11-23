@@ -15,6 +15,7 @@ pyspecdata.datadir
       grab_data_directory
       log_fname
       rclone_search
+      register_directory
    
    
 

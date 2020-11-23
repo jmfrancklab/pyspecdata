@@ -115,6 +115,7 @@ def series(file_reference, *subpath, **kwargs):
             load_title(file_reference, *subpath))
     SFO1 = v['SFO1']
     BF1 = v['BF1']
+    O1 = v['O1']
     v['TD2'] = int(v['TD'])
     del v['TD']
     v.update(v2)
@@ -124,6 +125,7 @@ def series(file_reference, *subpath, **kwargs):
         # for, e.g. 2H experiments, a bad SFO1 (1H) is stored in acqu2, which we don't want
         print("warning: ignoring second dimension SFO1, since it's probably wrong")
         v['SFO1'] = SFO1
+        v['O1'] = O1
         v['BF1'] = BF1
     with open_subpath(file_reference, *(subpath+('pulseprogram',)),mode='r') as fp:
         ppg = fp.read()
@@ -194,7 +196,7 @@ def load_1D(file_reference, *subpath, **kwargs):
     shiftpoints = int(det_phcorr(v)) # use the canned routine to calculate the second order phase shift
     #print 'shiftpoints = ',shiftpoints
     data.setaxis('t2',lambda x: x-shiftpoints/v['SW_h'])
-    print('yes, I called with %d shiftpoints'%shiftpoints)
+    logger.debug('yes, I called with %d shiftpoints'%shiftpoints)
     # finally, I will probably need to add in the first order phase shift for the decimation --> just translate this
     data.set_prop('title',
             load_title(file_reference,*subpath))
@@ -259,8 +261,12 @@ def load_jcamp(file_reference,*subpath):
             return NaN
         elif val[0] == '<' and val[-1] == '>':
             return val[1:-1]
-        else:
+        elif '.' in val:
             return double(val)
+        elif 'e-' in val.lower():
+            return double(val)
+        else:
+            return int(val)
     fp = open_subpath(file_reference,*subpath)
     lines = fp.readlines()
     if isinstance(lines[0],bytes):
