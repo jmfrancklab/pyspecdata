@@ -2119,7 +2119,9 @@ class figlist(object):
                         raise Exception(strm('error while trying to run autolegend function for',k,'\n\tfiglist is',self.figurelist,explain_error(e)))
     def show(self,*args,**kwargs):
         self.basename = None # must be turned off, so it can cycle through lists, etc, on its own
-        if 'line_spacing' in list(kwargs.keys()): kwargs.pop('line_spacing')# for latex only
+        line_spacing,block = process_kwargs([('line_spacing',''),
+                                              ('block',False)
+                                              ],kwargs)
         if len(kwargs) > 0:
             raise ValueError("didn't understand kwargs "+repr(kwargs))
         logger.debug(strm("before show_prep, figlist is",self.figurelist))
@@ -2145,7 +2147,7 @@ class figlist(object):
             self.mlab.show()
         else:
             #print "not running mlab show!"
-            show()
+            show(block=block)
     def label_point(self, data, axis, value, thislabel,
             show_point=True, xscale=1, **new_kwargs):
         """only works for 1D data: assume you've passed a single-point nddata, and label it
@@ -3308,7 +3310,9 @@ class nddata (object):
                         raise ValueError(strm("Your",thisaxis,"axis doesn't seem to have any sensible values!"))
                     #{{{ find the average order of magnitude, rounded down to the nearest power of 3
 
-                    average_oom = log10(abs(data_to_test))/3.
+                    average_oom = abs(data_to_test)
+                    average_oom = average_oom[average_oom != 0]
+                    average_oom = log10(average_oom)/3.
                     logger.debug(strm("for axis: dtype",data_to_test.dtype))
                     logger.debug(strm("for axis: dtype",data_to_test))
                     logger.debug(strm("for axis: oom:",average_oom))
