@@ -52,6 +52,30 @@ class nddata_ft(object):
     convolve = convolve
     extend_for_shear = extend_for_shear
     shear = shear
+    def copy_ft_props(self, arg, from_axis=None, to_axis=None):
+        """Copy the FT properties from one array to another.
+
+
+        Parameters
+        ==========
+        arg: nddata
+            copy FT properties from this data
+        from_axis: str
+            copy info from this axis
+        from_axis: str
+            copy info to this axis
+        """
+        list_of_ft_props = [j for j in arg.get_props() if j.startswith('FT')]
+        if len(list_of_ft_props)==0: raise ValueError("No FT properties in the argument!")
+        logger.debug(strm("these are the FT properties",list_of_ft_props))
+        assert to_axis in self.dimlabels
+        assert from_axis in arg.dimlabels
+        for j in list_of_ft_props:
+            assert j in ['FT','FT_start_time','FT_start_freq',
+                    'FT_time_not_aliased',
+                    'FT_freq_not_aliased'],"I don't understand the (ostensibly FT) property "+str(j)
+            self.set_prop(j,{to_axis:arg.get_prop(j)[from_axis]})
+        return
 __all__ = ["_ft_conj",
         "convolve",
         "ft",
