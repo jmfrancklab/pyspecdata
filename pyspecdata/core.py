@@ -2120,7 +2120,7 @@ class figlist(object):
     def show(self,*args,**kwargs):
         self.basename = None # must be turned off, so it can cycle through lists, etc, on its own
         line_spacing,block = process_kwargs([('line_spacing',''),
-                                              ('block',False)
+                                              ('block',None)
                                               ],kwargs)
         if len(kwargs) > 0:
             raise ValueError("didn't understand kwargs "+repr(kwargs))
@@ -2130,13 +2130,15 @@ class figlist(object):
         #{{{ just copy from fornnotebook to get the print string functionality
         kwargs = {}
         for figname in self.figurelist:
-            logger.debug(strm("showing figure"+lsafen(figname)))
+            logger.debug(strm("showing figure \"%s\""%lsafen(figname)))
+            self.next(figname)
             if isinstance(figname, dict):
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
                     print('\n\n')
                     print(kwargs.pop('print_string'))
                     print('\n\n')
+            gcf().tight_layout()
             gcf().tight_layout()
         #}}}
         if len(args) == 1:
