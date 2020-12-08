@@ -106,7 +106,7 @@ rcParams['legend.fontsize'] = 12
 rcParams['axes.grid'] = False
 rcParams['font.size'] = 18
 rcParams['image.cmap'] = 'jet'
-rcParams['figure.figsize']=(16,12)
+rcParams['figure.figsize']=(7*(1+sqrt(5))/2,7)
 if inside_sphinx():
     mat2array = []
 else:

@@ -4,7 +4,7 @@
 To learn more about pyspecdata, you can head over to the `documentation <http://jmfrancklab.github.io/pyspecdata>`_.
 
 If you already know that you want to install,
-and you are using Anaconda, you should see `conda_upgrade.md <conda_upgrade.md>`_.
+see :ref:`installation`.
 
 Please note this package is heavily utilized by three other packages that our lab manages on github:
 
@@ -187,12 +187,25 @@ History/Roadmap
 1.2.0
     Implement a version of figure list that can be interfaced with Qt.
 
+.. _installation:
+Installation
+============
 
-Installation Notes
-==================
+On Windows with `Anaconda 3.X`_.
+-- just run
+``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython``
+followed by ``conda install -c msys2 m2w64-toolchain``.
+Then install either via pip (if not a developer) or follow the :ref:`installation-for-developers` below.
 
-*Highly Recommended:* 
-Install the following packages using a good package-management system (conda or linux package manager), rather than relying on `pip` or `setuptools` to install them:
+On CentOS7, we've tested
+``yum install python-matplotlib python-matplotlib-qt4 python-devel sympy h5py python-tables scipy``
+(after running ``yum install epel-release`` to install the EPEL distribution)
+
+On Mac, your python distribution needs to have a working Fortran compiler, since some of the modules use Fortran.
+
+More generally,
+these instructions are based on the fact that it's *Highly Recommended* 
+that you install the following packages using a good package-management system (conda or linux package manager), rather than relying on `pip` or `setuptools` to install them:
 
 * numpy
 
@@ -210,14 +223,6 @@ Install the following packages using a good package-management system (conda or 
 
 * The python libraries, and a Fortran compiler.  Under anaconda, these are supplied by `libpython` and `mingw`, respectively.
 
-For example, on Windows with `Anaconda 2.7`_.
--- just run
-``conda install -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw``.
-
-On CentOS7, we've tested
-``yum install python-matplotlib python-matplotlib-qt4 python-devel sympy h5py python-tables scipy``
-(after running ``yum install epel-release`` to install the EPEL distribution)
-
 (If you don't install these packages with your system `pip` will try to install them, and there is a good chance it will fail -- it's known not to work great with several of these; `setuptools` should error out and tell you to install the packages.)
 
 *mayavi*: Mayavi can be used (and gives very nice graphics), but frequently lags behind common Python distros.
@@ -225,15 +230,16 @@ Therefore, this package was written so that it doesn't depend on mayavi.
 Rather, you can just import ``mayavi.mlab`` and pass it to any figure list that you initialize:
 ``figlist_var(mlab = mayavi.mlab)``
 
+.. _installation-for-developers:
+
 Installation for developers
 ---------------------------
 
-(Once these are installed,
+Once these are installed,
 to install from github, just ``git clone https://github.com/jmfranck/pyspecdata.git`` then move to the directory where setup.py lives,
 and do
-``python setup_paramset.py install``
-followed by
-``python setup.py develop``)
+``python setup.py develop``.
+Make sure that this terminates with a successful message, and without any compilation errors.
 
 *Important note for conda on Windows 10:*
 For reasons that we don't understand, the Fortran compiler can give odd errors, depending on which terminal you are using to install.
