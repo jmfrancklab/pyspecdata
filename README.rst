@@ -4,7 +4,7 @@
 To learn more about pyspecdata, you can head over to the `documentation <http://jmfrancklab.github.io/pyspecdata>`_.
 
 If you already know that you want to install,
-see :ref:`installation`.
+see `Installation <#installation>`_
 
 Please note this package is heavily utilized by three other packages that our lab manages on github:
 
@@ -187,7 +187,6 @@ History/Roadmap
 1.2.0
     Implement a version of figure list that can be interfaced with Qt.
 
-.. _installation:
 Installation
 ============
 
@@ -195,7 +194,7 @@ On Windows with `Anaconda 3.X`_.
 -- just run
 ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython``
 followed by ``conda install -c msys2 m2w64-toolchain``.
-Then install either via pip (if not a developer) or follow the :ref:`installation-for-developers` below.
+Then install either via pip (if not a developer) or follow the `installation for developers <#installation-for-developers>`_ below.
 
 On CentOS7, we've tested
 ``yum install python-matplotlib python-matplotlib-qt4 python-devel sympy h5py python-tables scipy``
@@ -230,8 +229,6 @@ Therefore, this package was written so that it doesn't depend on mayavi.
 Rather, you can just import ``mayavi.mlab`` and pass it to any figure list that you initialize:
 ``figlist_var(mlab = mayavi.mlab)``
 
-.. _installation-for-developers:
-
 Installation for developers
 ---------------------------
 
@@ -259,115 +256,6 @@ If you are on windows, you will need some additional packages to enable compilat
 * mingw
 
 The last one is specific to Windows, and provide things like the ``gcc`` and ``gfortran`` compiler.
-
-Quick-Start
-===========
-
-To get started with this code:
-
-1. Install a good Python 2.7 distribution
-
-   * On Windows or MacOS: `Anaconda 2.7 <https://www.continuum.io/downloads>`_.  When installing select "install for all users."
-
-2. Install libraries that pyspecdata depends on. (If you're interested in why you need to do this first, see installation notes below.)
-
-   * On Windows or MacOS: in the Anaconda Prompt, run ``conda install numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw``.
-
-   * For Mac, you can also use homebrew.
-     Note that, in the current version python is renamed to `python2`,
-     and `pip` to `pip2`.
-     Most packages can just be installed with `pip2` under homebrew.
-     If you want HDF5 functionality, you will need to run `brew tap homebrew/science` followed by `brew install hdf5`.
-
-   * On Linux, just use your package manager (``aptitude``, ``yum``, *etc.*) to install these libraries.
-
-3. Install `paramset_pyspecdata`: ``pip install paramset_pyspecdata``,
-   then `pyspecdata`: ``pip install pyspecdata``
-   or follow the "Installation for developers" section above.
-
-   * If you have difficulties with the install, check that you have a gfortran
-     compiler installed (in conda windows, this comes from mingw) and that, if
-     you are using windows, you are trying to install from a standard dos
-     prompt (we like to use git bash, but anaconda and related compilers can
-     misbehave from git bash sometimes).
-
-4. Set up directories.
-   You can run the command `pyspecdata_dataconfig` to assist with this.
-
-   It creates a file in your home directory
-   called ``_pyspecdata`` (Windows  -- note the underscore)
-   or ``.pyspecdata`` (Mac or Linux).
-
-   Here is an example -- you can copy and paste it as a starting point:
-
-   ::
-
-        [General]
-        data_directory = c:/Users/yourusername/exp_data
-        notebook_directory = c:/Users/yourusername/notebook
-
-   Note that any backslashes are substituted with forward slashes.
-   Also note that you will
-   need to change the directories to refer to real directories that already
-   exist or that you create on your hard drive (see below).
-   Note that on Windows, you can use notebook, *etc.* to create this file,
-   but it cannot have a .txt, *etc.* `extension <http://www.wikihow.com/Change-a-File-Extension>`_.
-
-   * Where is my "home directory"? (Where do I put the `_pyspecdata` file?)
-
-       * On Windows, your home directory is likely something like
-         ``C:\Users\yourusername``.
-         You can access your home directory by opening any file folder window, and
-         starting to type your name in the address bar -- it's the first folder that shows up
-         underneath.
-
-       * On MacOS and Linux, it's the directory indicated by ``~``.  On Linux,
-         this typically expands to ``/home/yourusername``.
-
-       * On any OS, you can always find your home directory in Python using ``import os;print os.path.expanduser('~')``
-
-   * What are these directories? → You can either create them or point to existing directories.
-
-       * ``data_directory`` must be set.  It is a directory, anywhere on the
-         hard drive, where you store all your raw experimental data.  It must
-         contain at least one subdirectory -- each subdirectory stores
-         different "experiment types," typically acquired on different instruments
-         (*e.g.* you might have subdirectories named ``400MHz_NMR``,
-         ``500MHz_NMR``, ``95GHz_ESR``, and ``Xband_ESR``).
-
-           * The library now supports having datasets packed into `.zip` or `.tgz` files.
-             For example, Bruker NMR files typically comprise a directory with several subdirectories for the numbered experiments.
-             We routinely pack these up as zip files on the spectrometer, and directly read the data from the zip files.
-
-           * If you're setting up a lab, you might want to separately sync each different
-             experiment type folders using `seafile <https://www.seafile.com/en/home/>`_.
-
-             Or you can sync the whole data directory with dropbox.
-
-       * If set, the ``notebook_directory`` is intended to contain latex
-         files with embedded python code, as well as some processed
-         output.
-
-   * *Do not* use quotes to surround the directory name.  Even if it contains
-     spaces, do not use quotes, and do not escape spaces with backslashes.
-
-   * Note that on Windows, your desktop folder is typically in ``C:\Users\yourusername\Desktop``
-
-   * Why do I need to do this?
-
-       * Setting this configuration allows you to move code between different
-         computers (*e.g.* a spectrometer computer, a desktop, and a laptop),
-         and re-use the same code, even though the locations of the files are
-         changing.  This should work even across different operating systems.
-
-       * It specifically enables functions like ``find_file(...)``,
-         ``get_datadir(...)``, *etc.* that can search the data directory for a
-         file name matching some basic criteria.
-         You should always use these to load your data,
-         and *never* use the absolute path.
-
-       * The GUI tool that will allow you to set up ``_pyspecdata`` by pointing
-         and clicking has not yet been set up.
 
 Notes on compilation of NNLS
 ============================
