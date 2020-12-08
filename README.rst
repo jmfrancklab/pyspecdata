@@ -190,11 +190,11 @@ History/Roadmap
 Installation
 ============
 
-On Windows with `Anaconda 3.X`_.
--- just run
+On Windows with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
+just run
 ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython``
-followed by ``conda install -c msys2 m2w64-toolchain``.
-Then install either via pip (if not a developer) or follow the `installation for developers <#installation-for-developers>`_ below.
+followed by ``conda install -c msys2 m2w64-toolchain`` (the libpython and m2w64-toolchain are only required if you are a developer).
+Then (if not a developer) install either via pip (`pip install pyspecdata`) or (if you want to be able to develop or modify the code) follow the `installation for developers <#installation-for-developers>`_ below.
 
 On CentOS7, we've tested
 ``yum install python-matplotlib python-matplotlib-qt4 python-devel sympy h5py python-tables scipy``
@@ -243,22 +243,8 @@ For reasons that we don't understand, the Fortran compiler can give odd errors, 
 This appears to be Windows' fault, rather than conda's (?).
 We highly recommend trying both the Anaconda prompt, as well as the standard dos prompt (press start: type `cmd`) if you experience errors related to compilation.
 
-For compiled extensions
-```````````````````````
-
-All compiled extensions are currently stripped out, but will be slowly
-    added back in.
-
-If you are on windows, you will need some additional packages to enable compilation:
-
-* libpython
-
-* mingw
-
-The last one is specific to Windows, and provide things like the ``gcc`` and ``gfortran`` compiler.
-
-Notes on compilation of NNLS
-============================
+Notes on compilation of compiled extensions
+===========================================
 
 We recently added a compiled extension that performs non-negative least-squares for regularization (DOSY/Relaxometry/etc.)
 
