@@ -243,8 +243,9 @@ For reasons that we don't understand, the Fortran compiler can give odd errors, 
 This appears to be Windows' fault, rather than conda's (?).
 We highly recommend trying both the Anaconda prompt, as well as the standard dos prompt (press start: type `cmd`) if you experience errors related to compilation.
 
+
 Notes on compilation of compiled extensions
-===========================================
+-------------------------------------------
 
 We recently added a compiled extension that performs non-negative least-squares for regularization (DOSY/Relaxometry/etc.)
 
@@ -256,3 +257,19 @@ We recommend using the normal dos command prompt (cmd) to install pyspecdata, an
 (Recent versions of mingw appear to put .bat files in a preferential location
 in the path, and these .bat files seem to mess everything up, including
 compatibility with the git bash prompt.)
+
+Further installation notes
+--------------------------
+
+Upon upgrading from Python 2.X to 3.X, we made some notes in
+`conda_upgrade.md <conda_upgrade.md>`_;
+this includes some useful (but possibly dated) instructions on how to
+implement different environments in anaconda,
+how to deal with AppLocker permissions, and Windows permissions generally,
+if you run into any of these issues.
+
+Open an issue!
+--------------
+
+If you have issues with installing or using pyspecdata, don't hesitate to open
+an issue on this page!
