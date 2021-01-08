@@ -14,10 +14,8 @@ Please note this package is heavily utilized by three other packages that our la
 *   `Classes for communicating with instruments <https://github.com/jmfrancklab/inst_notebooks/>`_.
 *   `Convenient SpinCore NMR Extension <https://github.com/jmfrancklab/spincore_apps/>`_.
 
-Examples!
-=========
 
-.. include:: auto_examples/index.rst
+:ref:`<sphx_glr_auto_examples> See pySpecData examples here`.
 
 Some more explanation
 =====================
@@ -108,7 +106,12 @@ These and further details are covered in the various sections of the documentati
     figlist.rst
     units.rst
     examples.rst 
-    auto_examples/index.rst
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Example Gallery
+
+    auto_examples/index
 
 
 Indices and tables

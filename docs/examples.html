@@ -1,15 +1,21 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Examples &mdash; pySpecData 0.9.5.3.1 documentation</title>
+  <title>Examples &mdash; pySpecData 0.9.5.3.2 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery-dataframe.css" type="text/css" />
 
   
   
@@ -17,7 +23,9 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -25,17 +33,15 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="auto_examples/index.html" />
+    <link rel="prev" title="Units" href="units.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -49,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> pySpecData
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> pySpecData
           
 
           
@@ -59,7 +65,7 @@
             
             
               <div class="version">
-                0.9.5.3.1
+                0.9.5.3.2
               </div>
             
           
@@ -76,6 +82,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -83,18 +90,26 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fitdata.html">the fitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/matplotlib_test.html">Matplotlib Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/image_plot.html">Plotting Routines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/fit_fake_data.html">Fitting Data</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -133,7 +148,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Examples</li>
     
@@ -165,21 +180,15 @@ code to work as-is – as you see from my comments I can’t just import the
 functions that I need from pylab – I’m guessing there some other function
 that is called by sphinx that also needs to by imported</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># testing for compatability of pyspecdata + matplotlib</span>
-<span class="c1"># plotting utils</span>
-<span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="n">fitdata</span> 
-<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Ellipse</span>
-<span class="c1">#from pylab import figure,subplot,plot,xlim,ylim,show # doesn&#39;t work</span>
-<span class="c1">#from pylab import * # does work</span>
-<span class="c1"># {{{ this is the contents of pylab.py -- works</span>
-<span class="c1"># need to go through and figure out which lines</span>
-<span class="c1"># are actually needed and which are not</span>
-<span class="c1"># -- I have already stripped out some</span>
-<span class="kn">from</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">import</span> <span class="n">figure</span><span class="p">,</span> <span class="n">subplot</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">plot</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span> <span class="c1"># I think it wasn&#39;t importing from numpy b/c it seems we&#39;re inside sphinx</span>
-<span class="c1"># }}}</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Matplotlib Example</span>
+<span class="sd">==================</span>
 
+<span class="sd">this is a basic example that should generate images in</span>
+<span class="sd">sphinx, but still imports pyspecdata&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Ellipse</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">import</span> <span class="n">subplot</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span>
 
 <span class="n">delta</span> <span class="o">=</span> <span class="mf">45.0</span> <span class="c1"># degrees</span>
 
@@ -215,11 +224,22 @@ that is called by sphinx that also needs to by imported</p>
 <p class="caption"><span class="caption-text">(<a class="reference external" href="./../examples/matplotlib_test_01.png">png</a>, <a class="reference external" href="./../examples/matplotlib_test_01.hires.png">hires.png</a>, <a class="reference external" href="./../examples/matplotlib_test_01.pdf">pdf</a>)</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
 </div>
 <p>Here is an example of the use of fitdata and setting a initial guess then plotting simultaneously.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="n">fitdata</span> 
-<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">symbols</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Fitting Data</span>
+<span class="sd">==============</span>
+
+<span class="sd">This example creates fake data with noise</span>
+<span class="sd">then fits the exponential with the fitdata</span>
+<span class="sd">function.&quot;&quot;&quot;</span>  
+<span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">symbols</span><span class="p">,</span> <span class="n">latex</span><span class="p">,</span> <span class="n">Symbol</span>
+<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">exp</span> <span class="k">as</span> <span class="n">s_exp</span>
+<span class="c1"># {{{ this is the contents of pylab.py -- works</span>
+<span class="c1"># need to go through and figure out which lines</span>
+<span class="c1"># are actually needed and which are not</span>
+<span class="c1"># -- I have already stripped out some</span>
+<span class="kn">from</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">import</span> <span class="n">figure</span><span class="p">,</span> <span class="n">subplot</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">gca</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span> <span class="c1"># I think it wasn&#39;t importing from numpy b/c it seems we&#39;re inside sphinx</span>
+<span class="c1"># }}}</span>
 <span class="c1">#{{{creating a fake data recovery curve</span>
 <span class="n">tau</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">:</span><span class="mi">100</span><span class="n">j</span><span class="p">],</span> <span class="s1">&#39;tau&#39;</span><span class="p">)</span>
 <span class="n">fake_data</span> <span class="o">=</span> <span class="mi">102</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">tau</span><span class="o">*</span><span class="mf">6.0</span><span class="p">))</span>
@@ -227,8 +247,8 @@ that is called by sphinx that also needs to by imported</p>
 <span class="c1">#}}}</span>
 <span class="c1">#{{{ fitting data</span>
 <span class="n">f</span> <span class="o">=</span> <span class="n">fitdata</span><span class="p">(</span><span class="n">fake_data</span><span class="p">)</span>
-<span class="n">M0</span><span class="p">,</span><span class="n">Mi</span><span class="p">,</span><span class="n">R1</span><span class="p">,</span><span class="n">vd</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="s2">&quot;M_0 M_inf R_1 tau&quot;</span><span class="p">,</span><span class="n">real</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">f</span><span class="o">.</span><span class="n">functional_form</span> <span class="o">=</span> <span class="n">Mi</span> <span class="o">+</span> <span class="p">(</span><span class="n">M0</span><span class="o">-</span><span class="n">Mi</span><span class="p">)</span><span class="o">*</span><span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">vd</span><span class="o">*</span><span class="n">R1</span><span class="p">)</span>
+<span class="n">M0</span><span class="p">,</span><span class="n">Mi</span><span class="p">,</span><span class="n">R1</span><span class="p">,</span><span class="n">vd</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="s2">&quot;M_0 M_inf R_1 tau&quot;</span><span class="p">,</span><span class="n">real</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">functional_form</span> <span class="o">=</span> <span class="n">Mi</span> <span class="o">+</span> <span class="p">(</span><span class="n">M0</span><span class="o">-</span><span class="n">Mi</span><span class="p">)</span><span class="o">*</span><span class="n">s_exp</span><span class="p">(</span><span class="o">-</span><span class="n">vd</span><span class="o">*</span><span class="n">R1</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">strm</span><span class="p">(</span><span class="s2">&quot;Functional Form&quot;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">functional_form</span><span class="p">))</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">strm</span><span class="p">(</span><span class="s2">&quot;Functional Form&quot;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">functional_form</span><span class="p">))</span>
 <span class="n">f</span><span class="o">.</span><span class="n">set_guess</span><span class="p">({</span><span class="n">M0</span><span class="p">:</span><span class="o">-</span><span class="mi">500</span><span class="p">,</span> <span class="n">Mi</span><span class="p">:</span><span class="mi">500</span><span class="p">,</span> <span class="n">R1</span><span class="p">:</span><span class="mi">2</span><span class="p">})</span>
@@ -237,15 +257,38 @@ that is called by sphinx that also needs to by imported</p>
 <span class="n">f</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;output:&quot;</span><span class="p">,</span><span class="n">f</span><span class="o">.</span><span class="n">output</span><span class="p">())</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;latex:&quot;</span><span class="p">,</span><span class="n">f</span><span class="o">.</span><span class="n">latex</span><span class="p">())</span>
+<span class="c1">#}}}</span>
+<span class="c1"># {{{ this is just to show all the parameters</span>
+<span class="n">list_symbs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">j</span><span class="p">,</span><span class="n">k</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">output</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">s_repr</span> <span class="o">=</span> <span class="n">latex</span><span class="p">(</span><span class="n">Symbol</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+    <span class="n">list_symbs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">s_repr</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">k</span><span class="si">:</span><span class="s1">0.5g</span><span class="si">}</span><span class="s1">$&#39;</span><span class="p">)</span>
+<span class="n">list_symbs</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">list_symbs</span><span class="p">)</span>
+<span class="c1"># }}}</span>
 <span class="n">T1</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">f</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="s1">&#39;R_1&#39;</span><span class="p">)</span>
+<span class="c1"># }}}</span>
 <span class="k">with</span> <span class="n">figlist_var</span><span class="p">()</span> <span class="k">as</span> <span class="n">fl</span><span class="p">:</span> 
     <span class="n">fl</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="s1">&#39;fit with guess&#39;</span><span class="p">)</span>
-    <span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fake_data</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;fake data&#39;</span><span class="p">)</span>
-    <span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;fit&#39;</span><span class="p">)</span>
     <span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">guess</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;guess&#39;</span><span class="p">)</span>
+    <span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fake_data</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;fake data&#39;</span><span class="p">)</span>
+    <span class="n">thisline</span> <span class="o">=</span> <span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;fit&#39;</span><span class="p">)</span>
+    <span class="c1"># {{{ just put the text</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">gca</span><span class="p">()</span>
+    <span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="n">f</span><span class="o">.</span><span class="n">latex</span><span class="p">(),</span>
+            <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span><span class="n">va</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">thisline</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_color</span><span class="p">(),</span>
+            <span class="n">transform</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">)</span>
+    <span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,(</span><span class="mi">3</span><span class="o">*</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">+</span><span class="n">list_symbs</span><span class="p">,</span>
+            <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span><span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span>
+            <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">thisline</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_color</span><span class="p">(),</span>
+            <span class="n">transform</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>(<a class="reference external" href="./../examples/fit_fake_data.py">Source code</a>)</p>
+<p>(<a class="reference external" href="./../examples/fit_fake_data.py">Source code</a>, <a class="reference external" href="./../examples/fit_fake_data.png">png</a>, <a class="reference external" href="./../examples/fit_fake_data.hires.png">hires.png</a>, <a class="reference external" href="./../examples/fit_fake_data.pdf">pdf</a>)</p>
+<div class="figure align-default">
+<img alt="_images/fit_fake_data.png" src="_images/fit_fake_data.png" />
+</div>
 </div>
 
 
@@ -254,16 +297,33 @@ that is called by sphinx that also needs to by imported</p>
           </div>
           <footer>
   
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="auto_examples/index.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="units.html" class="btn btn-neutral float-left" title="Units" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2016, John M. Franck
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -274,7 +334,6 @@ that is called by sphinx that also needs to by imported</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

@@ -66,7 +66,7 @@ def det_new_pdf_name(thisargv):
     if (len(tex_basename) > 1) and (tex_basename[-1] in ['basic','fancy','georgia']):
         new_pdf_basename = '_'.join(tex_basename[:-1])
     else:
-        new_pdf_basename = '_'.join(tex_basename + ['copy'])
+        new_pdf_basename = '_'.join(tex_basename)
     return orig_tex_basename,new_pdf_basename
 def genconfig():
     '''creates a template configuration directory'''
