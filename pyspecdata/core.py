@@ -107,7 +107,7 @@ rcParams['legend.fontsize'] = 12
 rcParams['axes.grid'] = False
 rcParams['font.size'] = 18
 rcParams['image.cmap'] = 'jet'
-rcParams['figure.figsize']=(7*(1+sqrt(5))/2,7)
+rcParams['figure.figsize']=(7*(1+np.sqrt(5))/2,7)
 mat2array = [{'ImmutableMatrix': np.array}, 'numpy']# for sympy returns arrays rather than the stupid matrix class
 logger = logging.getLogger('pyspecdata.core')
 #{{{ constants
@@ -1254,6 +1254,8 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
         formatonly = False,fixed_y_locator = None,
         use_grid = True,
         spines = None,y = True):
+    defaultMajorLocator = lambda: mticker.MaxNLocator(min_n_ticks=4, steps=[1,2,5,10])
+    defaultMinorLocator = lambda: mticker.AutoMinorLocator(n=5)
     #{{{ taken from matplotlib examples
     def adjust_spines(ax,spines):
         xlabel = ax.get_xlabel()
@@ -1289,10 +1291,10 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
         widthexp = np.floor(np.log(width)/np.log(10.))-1
         scalefactor = 10**widthexp
         width /= scalefactor
-        majorLocator = mticker.MaxNLocator(nbins='auto', steps=[1,5,10])
+        majorLocator = defaultMajorLocator()
         #majorFormatter = FormatStrFormatter('%0.'+'%d'%precision[0]+'f'+labelstring[0])# labelstring can be used, for instance, for pi
         #ax.xaxis.set_major_formatter(majorFormatter)
-        minorLocator = mticker.MaxNLocator(min_n_ticks=5, nbins=5,steps=[1,5,10])
+        minorLocator = defaultMinorLocator()
         ax.xaxis.set_major_locator(majorLocator)
         #for the minor ticks, use no labels; default NullFormatter
         ax.xaxis.set_minor_locator(minorLocator)
@@ -1312,8 +1314,8 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
                     majorLocator = mticker.LogLocator(10)
                     minorLocator = mticker.LogLocator(10,subs=r_[0:11])
                 else:
-                    majorLocator = mticker.MaxNLocator(nbins='auto', steps=[1,5,10])
-                    minorLocator = mticker.MaxNLocator(nbins=5,steps=[1,5,10])
+                    majorLocator = defaultMajorLocator()
+                    minorLocator = defaultMinorLocator()
             else:
                 majorLocator = mticker.MultipleLocator(fixed_y_locator[4::5])
                 minorLocator = mticker.FixedLocator(fixed_y_locator)
@@ -1323,10 +1325,11 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
             #for the minor ticks, use no labels; default NullFormatter
             ax.yaxis.set_minor_locator(minorLocator)
             #}}}
-    ax.yaxis.grid(use_grid,which='major',color=gridcolor,alpha=0.15,linestyle='-')
-    ax.xaxis.grid(use_grid,which='major',color=gridcolor,alpha=0.15,linestyle='-')
-    ax.yaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.075,linestyle='-')
-    ax.xaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.075,linestyle='-')
+    if use_grid:
+        ax.yaxis.grid(use_grid,which='major',color=gridcolor,alpha=0.15,linestyle='-')
+        ax.xaxis.grid(use_grid,which='major',color=gridcolor,alpha=0.15,linestyle='-')
+        ax.yaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.075,linestyle='-')
+        ax.xaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.075,linestyle='-')
     labels = ax.get_xticklabels()
     plt.setp(labels,rotation=rotation[0],fontsize=10)
     if y:
