@@ -107,7 +107,7 @@ rcParams['legend.fontsize'] = 12
 rcParams['axes.grid'] = False
 rcParams['font.size'] = 18
 rcParams['image.cmap'] = 'jet'
-rcParams['figure.figsize']=(16,12)
+rcParams['figure.figsize']=(7*(1+sqrt(5))/2,7)
 mat2array = [{'ImmutableMatrix': np.array}, 'numpy']# for sympy returns arrays rather than the stupid matrix class
 logger = logging.getLogger('pyspecdata.core')
 #{{{ constants
@@ -2117,7 +2117,9 @@ class figlist(object):
                         raise Exception(strm('error while trying to run autolegend function for',k,'\n\tfiglist is',self.figurelist,explain_error(e)))
     def show(self,*args,**kwargs):
         self.basename = None # must be turned off, so it can cycle through lists, etc, on its own
-        if 'line_spacing' in list(kwargs.keys()): kwargs.pop('line_spacing')# for latex only
+        line_spacing,block = process_kwargs([('line_spacing',''),
+                                              ('block',None)
+                                              ],kwargs)
         if len(kwargs) > 0:
             raise ValueError("didn't understand kwargs "+repr(kwargs))
         logger.debug(strm("before show_prep, figlist is",self.figurelist))
@@ -2126,7 +2128,8 @@ class figlist(object):
         #{{{ just copy from fornnotebook to get the print string functionality
         kwargs = {}
         for figname in self.figurelist:
-            logger.debug(strm("showing figure"+lsafen(figname)))
+            logger.debug(strm("showing figure \"%s\""%lsafen(figname)))
+            self.next(figname)
             if isinstance(figname, dict):
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
@@ -2143,7 +2146,7 @@ class figlist(object):
             self.mlab.show()
         else:
             #print "not running mlab show!"
-            show()
+            show(block=block)
     def label_point(self, data, axis, value, thislabel,
             show_point=True, xscale=1, **new_kwargs):
         """only works for 1D data: assume you've passed a single-point nddata, and label it
@@ -3305,10 +3308,11 @@ class nddata (object):
                     if len(data_to_test) == 0:
                         raise ValueError(strm("Your",thisaxis,"axis doesn't seem to have any sensible values!"))
                     #{{{ find the average order of magnitude, rounded down to the nearest power of 3
-
-                    average_oom = np.log10(abs(data_to_test))/3.
-                    logger.debug(strm("for axis: np.dtype",data_to_test.dtype))
-                    logger.debug(strm("for axis: np.dtype",data_to_test))
+                    average_oom = abs(data_to_test)
+                    average_oom = average_oom[average_oom != 0]
+                    average_oom = np.log10(average_oom)/3.
+                    logger.debug(strm("for axis: dtype",data_to_test.dtype))
+                    logger.debug(strm("for axis: dtype",data_to_test))
                     logger.debug(strm("for axis: oom:",average_oom))
                     average_oom = average_oom[np.isfinite(average_oom)].mean()
                     #}}}

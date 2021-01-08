@@ -13,10 +13,11 @@ def image(A,x=[],y=[],**kwargs):
         if k in ['black','logscale']:
             imagehsvkwargs[k] = kwargs.pop(k)
     #}}}
-    spacing,ax,x_first,origin = process_kwargs([('spacing',1),
+    spacing,ax,x_first,origin,renumber = process_kwargs([('spacing',1),
         ('ax',gca()),
         ('x_first',False),
-        ('origin','lower')],kwargs,
+        ('origin','lower'),
+        ('renumber',None)],kwargs,
         pass_through = True)
     if x_first: # then the first dimension should be the column
         # dimesion (i.e. last)
@@ -29,7 +30,12 @@ def image(A,x=[],y=[],**kwargs):
     sca(ax)
     setlabels = False
     if hasattr(A,'dimlabels'):
+        if renumber is not None:
+            if type(renumber) is str:
+                renumber = [renumber]
         for thisaxis in A.dimlabels:
+            if renumber is not None and thisaxis in renumber:
+                A.setaxis(thisaxis,'#')
             try:
                 check_ascending_axis(A.getaxis(thisaxis), allow_descending=True)
             except:
