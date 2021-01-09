@@ -1,4 +1,8 @@
-"""an example of saving nddata to hdf5 files, which preserves all of the nddata
+"""
+Saving HDF5 Files
+=================
+
+an example of saving nddata to hdf5 files, which preserves all of the nddata
 information flawlessly"""
 from pyspecdata import *
 #init_logging('debug')

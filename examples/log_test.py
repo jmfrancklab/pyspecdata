@@ -1,4 +1,8 @@
-"""a demonstration of the logging functionality -- output is logged to
+"""
+Logging Functionality
+=====================
+
+a demonstration of the logging functionality -- output is logged to
 `~/pyspecdata.log` (or the same name with a number included if multiple scripts
 are running at the same time"""
 
