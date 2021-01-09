@@ -5934,7 +5934,7 @@ class nddata (object):
             for j in range(len(axes_tmp.shape)):
                 this_slicer = [0]*len(axes_tmp.shape)
                 this_slicer[j] = slice(None,None,None)
-                new_axes.append(axes_tmp[this_slicer])
+                new_axes.append(copy(axes_tmp[this_slicer]))
         else:
             new_axes = None
         #{{{ if there is a list of axis coordinates, add in slots for the new axes
@@ -5965,7 +5965,7 @@ class nddata (object):
                 self.setaxis(axesout[j],new_axes[j])
                 self.set_units(axesout[j],orig_axis_units)
         return self
-    def chunk_auto(self,axis_name,which_field,dimname = None):
+    def chunk_auto(self,axis_name,which_field=None,dimname=None):
         r'''assuming that axis "axis_name" is currently labeled with a structured array, choose one field ("which_field") of that structured array to generate a new dimension
         Note that for now, by definition, no error is allowed on the axes.
         However, once I upgrade to using structured arrays to handle axis and data errors, I will want to deal with that appropriately here.'''
@@ -5974,6 +5974,8 @@ class nddata (object):
             if isinstance(a.dimlabels,recarray):
                 a.dimlabels = [str(j[0]) if len(j) == 1 else j for j in a.dimlabels.tolist()]
             return a
+        if which_field is None:
+            which_field = self.getaxis(axis_name).dtype.names[0]
         axis_number = self.axn(axis_name)
         new_axis,indices = unique(self.getaxis(axis_name)[which_field],
                 return_inverse = True) # we are essentially creating a hash table for the axis.  According to numpy documentation, the hash indices that this returns should also be sorted sorted.
