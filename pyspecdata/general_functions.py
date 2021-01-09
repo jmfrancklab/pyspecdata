@@ -138,21 +138,34 @@ def level_str_to_int(level):
         else:
             raise ValueError("if you give me level as a string, give me 'info' or 'debug'")
     return level
-def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspecdata.log'):
-    r"""A decent logging setup to log to `~/pyspecdata.log` (and `~/pyspecdata.XX.log` if that's taken).
+def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspecdata.%d.log', fileno=0):
+    r"""Initialize a decent logging setup to log to `~/pyspecdata.log` (and `~/pyspecdata.XX.log` if that's taken).
 
-    By default, everything above "debug" is logged to a file, while everything above "info" is printed to stdout.
+    By default, everything above "debug" is logged to a
+    file, while everything above "info" is printed to
+    stdout.
+
+    Do NOT log if run from within a notebook (it's fair to
+    assume that you will run first before embedding)
     """
     FORMAT = "--> %(filename)s(%(lineno)s):%(name)s %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"
     level = level_str_to_int(level)
     stdout_level = level_str_to_int(stdout_level)
     min_level = min([level,stdout_level])
     formatter = logging.Formatter(FORMAT)
-    log_filename = os.path.join(os.path.expanduser('~'),filename)
+    log_filename = os.path.join(os.path.expanduser('~'),filename%fileno)
     if os.path.exists(log_filename):
         # manually remove, and then use append -- otherwise, it won't write to
         # file immediately
-        os.remove(log_filename)
+        try:
+            os.remove(log_filename)
+        except:
+            if fileno == 0:
+                print(f"{log_filename} appears to be locked or otherwise inaccessible: I'm going to explore other options for fileno")
+            if fileno > 20:
+                raise ValueError("I'm not going to increase fileno above 20 -- that's crazy time!")
+            return init_logging(level=level, filename=filename, fileno=fileno+1)
+    print(f"logging output to {log_filename}")
     logger = logging.getLogger()
     logger.setLevel(min_level) # even if I set the handler level, it won't
     #                        print w/out this
