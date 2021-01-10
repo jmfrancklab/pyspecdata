@@ -86,7 +86,9 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">List of Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../notebook.html#setting-up-the-notebook">Setting up the notebook</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../notebook.html#requirements">Requirements</a></li>
@@ -103,10 +105,9 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
 </ul>
 
             
@@ -152,9 +153,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="../notebook.html">LaTeX Notebook Functionality</a> &raquo;</li>
-        
-          <li><a href="../pyspecdata.html">N-dimensional Data (nddata)</a> &raquo;</li>
+          <li><a href="../nddata.html">ND-Data</a> &raquo;</li>
         
           <li><a href="../axis_manipulation.html">Axis Manipulation Functions</a> &raquo;</li>
         
@@ -185,9 +184,9 @@
 <dd><p>Interpolate the data so that the given axes are in register with a set of specified values. Does not change the spacing of the axis labels.</p>
 <p>It finds the axis label position that is closest to the values given in <cite>arg</cite>, then interpolates (Fourier/sinc method) the data onto a new, slightly shifted, axis that passes exactly through the value given.
 To do this, it uses
-<a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.ft_clear_startpoints" title="pyspecdata.core.nddata.ft_clear_startpoints"><code class="xref py py-func docutils literal notranslate"><span class="pre">.ft_clear_startpoints()</span></code></a>
+<code class="xref py py-func docutils literal notranslate"><span class="pre">.ft_clear_startpoints()</span></code>
 and uses
-<a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.set_ft_prop" title="pyspecdata.core.nddata.set_ft_prop"><code class="xref py py-func docutils literal notranslate"><span class="pre">.set_ft_prop()</span></code></a>
+<code class="xref py py-func docutils literal notranslate"><span class="pre">.set_ft_prop()</span></code>
 to override the “not aliased” flag.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

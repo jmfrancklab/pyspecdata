@@ -39,7 +39,6 @@ pyspecdata.core.nddata
       ~nddata.extend
       ~nddata.extend_for_shear
       ~nddata.fld
-      ~nddata.fourier_shear
       ~nddata.fromaxis
       ~nddata.ft
       ~nddata.ft_clear_startpoints
