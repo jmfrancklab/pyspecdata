@@ -5801,7 +5801,7 @@ class nddata (object):
         new_shape = list(self.data.shape)[:-len(dimstocollapse)]
         logger.debug(strm("dimensions to keep",new_shape))
         dimstocollapse_shapes = np.array(self.data.shape[-len(dimstocollapse):])
-        new_shape += [dimstocollapse_shapes.np.prod()]
+        new_shape += [dimstocollapse_shapes.prod()]
         self.data = self.data.reshape(new_shape)
         if self.get_error() is not None:
             self.set_error(self.get_error().reshape(new_shape))
