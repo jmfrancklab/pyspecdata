@@ -4396,7 +4396,7 @@ class nddata (object):
             absdata = abs(self)
             phaseinfo = self/absdata
             self.data = absdata.data
-        self.run(log10)
+        self.run(np.log10)
         if subplot_axes is None:# then do all
             self.data -= self.data.flatten().max() - magnitude # span only 4 orders of magnitude
         else:
