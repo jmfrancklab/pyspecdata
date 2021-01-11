@@ -7675,8 +7675,8 @@ class fitdata(nddata):
 
         Returns
         -------
-        self:
-            dictionary of variables that will be used in setting the guess fit
+        self: nddata
+            The modified nddata
         """
 
         input_guesses = set(dict_of_values.keys())

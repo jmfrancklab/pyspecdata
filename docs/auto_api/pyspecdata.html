@@ -487,7 +487,7 @@ and determines the axis values as follows:
 <dt id="pyspecdata.axis_class.nddata_axis.references">
 <em class="property">property </em><code class="sig-name descname">references</code><a class="headerlink" href="#pyspecdata.axis_class.nddata_axis.references" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns OrderedDict of all names and aliases such that keys all point to the current instance (<cite>self</cite>)</p>
-<p>the idea is that this should be placed in a <cite>ChainMap</cite> object to be used by the <a class="reference internal" href="../axis_object_plan.html#pyspecdata.axis_class.axis_collection" title="pyspecdata.axis_class.axis_collection"><code class="xref py py-class docutils literal notranslate"><span class="pre">axis_collection</span></code></a> class that contains the axis.</p>
+<p>the idea is that this should be placed in a <cite>ChainMap</cite> object to be used by the <a class="reference internal" href="#pyspecdata.axis_class.axis_collection" title="pyspecdata.axis_class.axis_collection"><code class="xref py py-class docutils literal notranslate"><span class="pre">axis_collection</span></code></a> class that contains the axis.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1156,21 +1156,28 @@ nddata metadata.</p>
 <dl class="py method">
 <dt id="pyspecdata.core.fitdata.eval">
 <code class="sig-name descname">eval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">taxis</span></em>, <em class="sig-param"><span class="n">set_what</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">set_to</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.eval" title="Permalink to this definition">¶</a></dt>
-<dd><p>eval calculates the fit function along the axis taxis.</p>
+<dd><p>calculate the fit function along the axis taxis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>int</strong> – number of evenly spaced points along the t-axis along the fit</p></li>
+<li><p><strong>taxis</strong> (<em>ndarray</em><em>, </em><em>int</em>) – <dl class="field-list simple">
+<dt class="field-odd">if ndarray</dt>
+<dd class="field-odd"><p>the new axis coordinates along which we want to calculate the fit.</p>
+</dd>
+<dt class="field-even">if int</dt>
+<dd class="field-even"><p>number of evenly spaced points along the t-axis along the fit</p>
+</dd>
+</dl>
+</p></li>
 <li><p><strong>set_what</strong> (<em>'str'</em><em>, </em><em>optional</em>) – forcibly sets a specific symbol</p></li>
-<li><p><strong>set_to</strong> (<em>int</em><em>, </em><em>optional</em>) – the specific value (int) you are assigning the symbol you included</p></li>
+<li><p><strong>set_to</strong> (<em>double</em><em>, </em><em>optional</em>) – the specific value (int) you are assigning the symbol you included</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>self</strong> – calculated fit function along the t-axis with a set
-amount of points along the fit and specifically set symbols with values.</p>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1286,7 +1293,22 @@ resulting values.</p>
 <dl class="py method">
 <dt id="pyspecdata.core.fitdata.set_guess">
 <code class="sig-name descname">set_guess</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dict_of_values</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.set_guess" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>sets parameters to guess/estimated value to compare fit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dict_of_values</strong> (<em>dict</em>) – dictionary of values set to parameters in fit equation.
+Allows for the setting of multiple variables depending on
+what’s defined in this dictionary. The keys of the dictionary
+must be sympy symbols</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>self</strong> – The modified nddata</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="pyspecdata.core.fitdata.settoguess">
@@ -1687,7 +1709,7 @@ true
 <strong>Currently only supported for 1D data</strong></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>adapted from stackexchange post <a class="reference external" href="http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-np.array">http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-np.array</a></p>
+<p>adapted from stackexchange post <a class="reference external" href="http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-array">http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-array</a></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1901,14 +1923,14 @@ without an <cite>axisname</cite> argument – the axis names are then
 inferred from the symbolic expression.</p></li>
 <li><p><strong>inputfunc</strong> (<em>function</em>) – A function (typically a lambda function) that taxes the values of the axis given by <cite>axisname</cite> as input.</p></li>
 <li><p><strong>overwrite</strong> (<em>bool</em>) – Defaults to <cite>False</cite>. If set to <cite>True</cite>, it overwrites <cite>self</cite> with <cite>retval</cite>.</p></li>
-<li><p><strong>as_array</strong> (<em>bool</em>) – Defaults to <cite>False</cite>. If set to <cite>True</cite>, <cite>retval</cite> is a properly dimensioned numpy np.ndarray rather than an nddata.</p></li>
+<li><p><strong>as_array</strong> (<em>bool</em>) – Defaults to <cite>False</cite>. If set to <cite>True</cite>, <cite>retval</cite> is a properly dimensioned numpy ndarray rather than an nddata.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>retval</strong> – An expression calculated from the axis(es) given by <cite>axisname</cite> or inferred from <cite>inputsymbolic</cite>.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>nddata | np.ndarray</p>
+<dd class="field-odd"><p>nddata | ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2768,7 +2790,7 @@ function call.</p>
 </ul>
 </p></li>
 <li><p><strong>noaxis</strong> (<em>bool</em>) – if set, then just skip calculating the axis for the new dimension,
-which otherwise is typically a complicated record np.array</p></li>
+which otherwise is typically a complicated record array</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -2885,13 +2907,13 @@ allow for smooshing to determine a new axes that is standard
 <dl class="py method">
 <dt id="pyspecdata.core.ndshape.alloc">
 <code class="sig-name descname">alloc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dtype</span><span class="o">=</span><span class="default_value">'complex128'</span></em>, <em class="sig-param"><span class="n">labels</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.ndshape.alloc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use the shape object to allocate an np.empty nddata object.</p>
+<dd><p>Use the shape object to allocate an empty nddata object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>labels</strong> – Needs documentation</p></li>
-<li><p><strong>format</strong> (<em>0</em><em>, </em><em>1</em><em>, or </em><em>None</em>) – What goes in the allocated np.array.
-<cite>None</cite> uses numpy np.empty.</p></li>
+<li><p><strong>format</strong> (<em>0</em><em>, </em><em>1</em><em>, or </em><em>None</em>) – What goes in the allocated array.
+<cite>None</cite> uses numpy empty.</p></li>
 </ul>
 </dd>
 </dl>
@@ -3956,9 +3978,13 @@ coming from, supply some extra text for the respective message.</p></li>
 
 <dl class="py function">
 <dt id="pyspecdata.general_functions.init_logging">
-<code class="sig-prename descclassname">pyspecdata.general_functions.</code><code class="sig-name descname">init_logging</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">level</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">stdout_level</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">'pyspecdata.log'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.general_functions.init_logging" title="Permalink to this definition">¶</a></dt>
-<dd><p>A decent logging setup to log to <cite>~/pyspecdata.log</cite> (and <cite>~/pyspecdata.XX.log</cite> if that’s taken).</p>
-<p>By default, everything above “debug” is logged to a file, while everything above “info” is printed to stdout.</p>
+<code class="sig-prename descclassname">pyspecdata.general_functions.</code><code class="sig-name descname">init_logging</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">level</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">stdout_level</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">'pyspecdata.%d.log'</span></em>, <em class="sig-param"><span class="n">fileno</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.general_functions.init_logging" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize a decent logging setup to log to <cite>~/pyspecdata.log</cite> (and <cite>~/pyspecdata.XX.log</cite> if that’s taken).</p>
+<p>By default, everything above “debug” is logged to a
+file, while everything above “info” is printed to
+stdout.</p>
+<p>Do NOT log if run from within a notebook (it’s fair to
+assume that you will run first before embedding)</p>
 </dd></dl>
 
 <dl class="py function">
@@ -7199,21 +7225,28 @@ nddata metadata.</p>
 <dl class="py method">
 <dt id="pyspecdata.fitdata.eval">
 <code class="sig-name descname">eval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">taxis</span></em>, <em class="sig-param"><span class="n">set_what</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">set_to</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fitdata.eval" title="Permalink to this definition">¶</a></dt>
-<dd><p>eval calculates the fit function along the axis taxis.</p>
+<dd><p>calculate the fit function along the axis taxis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>int</strong> – number of evenly spaced points along the t-axis along the fit</p></li>
+<li><p><strong>taxis</strong> (<em>ndarray</em><em>, </em><em>int</em>) – <dl class="field-list simple">
+<dt class="field-odd">if ndarray</dt>
+<dd class="field-odd"><p>the new axis coordinates along which we want to calculate the fit.</p>
+</dd>
+<dt class="field-even">if int</dt>
+<dd class="field-even"><p>number of evenly spaced points along the t-axis along the fit</p>
+</dd>
+</dl>
+</p></li>
 <li><p><strong>set_what</strong> (<em>'str'</em><em>, </em><em>optional</em>) – forcibly sets a specific symbol</p></li>
-<li><p><strong>set_to</strong> (<em>int</em><em>, </em><em>optional</em>) – the specific value (int) you are assigning the symbol you included</p></li>
+<li><p><strong>set_to</strong> (<em>double</em><em>, </em><em>optional</em>) – the specific value (int) you are assigning the symbol you included</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>self</strong> – calculated fit function along the t-axis with a set
-amount of points along the fit and specifically set symbols with values.</p>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -7329,7 +7362,22 @@ resulting values.</p>
 <dl class="py method">
 <dt id="pyspecdata.fitdata.set_guess">
 <code class="sig-name descname">set_guess</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dict_of_values</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fitdata.set_guess" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>sets parameters to guess/estimated value to compare fit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dict_of_values</strong> (<em>dict</em>) – dictionary of values set to parameters in fit equation.
+Allows for the setting of multiple variables depending on
+what’s defined in this dictionary. The keys of the dictionary
+must be sympy symbols</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>self</strong> – The modified nddata</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="pyspecdata.fitdata.settoguess">
@@ -7545,9 +7593,13 @@ generate a search string that matches one or more criteria</p>
 
 <dl class="py function">
 <dt id="pyspecdata.init_logging">
-<code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">init_logging</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">level</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">stdout_level</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">'pyspecdata.log'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.init_logging" title="Permalink to this definition">¶</a></dt>
-<dd><p>A decent logging setup to log to <cite>~/pyspecdata.log</cite> (and <cite>~/pyspecdata.XX.log</cite> if that’s taken).</p>
-<p>By default, everything above “debug” is logged to a file, while everything above “info” is printed to stdout.</p>
+<code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">init_logging</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">level</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">stdout_level</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">'pyspecdata.%d.log'</span></em>, <em class="sig-param"><span class="n">fileno</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.init_logging" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize a decent logging setup to log to <cite>~/pyspecdata.log</cite> (and <cite>~/pyspecdata.XX.log</cite> if that’s taken).</p>
+<p>By default, everything above “debug” is logged to a
+file, while everything above “info” is printed to
+stdout.</p>
+<p>Do NOT log if run from within a notebook (it’s fair to
+assume that you will run first before embedding)</p>
 </dd></dl>
 
 <dl class="py function">
@@ -9077,7 +9129,7 @@ true
 <strong>Currently only supported for 1D data</strong></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>adapted from stackexchange post <a class="reference external" href="http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-np.array">http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-np.array</a></p>
+<p>adapted from stackexchange post <a class="reference external" href="http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-array">http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-array</a></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -9291,14 +9343,14 @@ without an <cite>axisname</cite> argument – the axis names are then
 inferred from the symbolic expression.</p></li>
 <li><p><strong>inputfunc</strong> (<em>function</em>) – A function (typically a lambda function) that taxes the values of the axis given by <cite>axisname</cite> as input.</p></li>
 <li><p><strong>overwrite</strong> (<em>bool</em>) – Defaults to <cite>False</cite>. If set to <cite>True</cite>, it overwrites <cite>self</cite> with <cite>retval</cite>.</p></li>
-<li><p><strong>as_array</strong> (<em>bool</em>) – Defaults to <cite>False</cite>. If set to <cite>True</cite>, <cite>retval</cite> is a properly dimensioned numpy np.ndarray rather than an nddata.</p></li>
+<li><p><strong>as_array</strong> (<em>bool</em>) – Defaults to <cite>False</cite>. If set to <cite>True</cite>, <cite>retval</cite> is a properly dimensioned numpy ndarray rather than an nddata.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>retval</strong> – An expression calculated from the axis(es) given by <cite>axisname</cite> or inferred from <cite>inputsymbolic</cite>.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>nddata | np.ndarray</p>
+<dd class="field-odd"><p>nddata | ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -10158,7 +10210,7 @@ function call.</p>
 </ul>
 </p></li>
 <li><p><strong>noaxis</strong> (<em>bool</em>) – if set, then just skip calculating the axis for the new dimension,
-which otherwise is typically a complicated record np.array</p></li>
+which otherwise is typically a complicated record array</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -10275,13 +10327,13 @@ allow for smooshing to determine a new axes that is standard
 <dl class="py method">
 <dt id="pyspecdata.ndshape.alloc">
 <code class="sig-name descname">alloc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dtype</span><span class="o">=</span><span class="default_value">'complex128'</span></em>, <em class="sig-param"><span class="n">labels</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.ndshape.alloc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use the shape object to allocate an np.empty nddata object.</p>
+<dd><p>Use the shape object to allocate an empty nddata object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>labels</strong> – Needs documentation</p></li>
-<li><p><strong>format</strong> (<em>0</em><em>, </em><em>1</em><em>, or </em><em>None</em>) – What goes in the allocated np.array.
-<cite>None</cite> uses numpy np.empty.</p></li>
+<li><p><strong>format</strong> (<em>0</em><em>, </em><em>1</em><em>, or </em><em>None</em>) – What goes in the allocated array.
+<cite>None</cite> uses numpy empty.</p></li>
 </ul>
 </dd>
 </dl>

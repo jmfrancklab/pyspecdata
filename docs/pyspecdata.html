@@ -769,7 +769,7 @@ true
 <strong>Currently only supported for 1D data</strong></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>adapted from stackexchange post <a class="reference external" href="http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-np.array">http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-np.array</a></p>
+<p>adapted from stackexchange post <a class="reference external" href="http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-array">http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-array</a></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -968,14 +968,14 @@ without an <cite>axisname</cite> argument – the axis names are then
 inferred from the symbolic expression.</p></li>
 <li><p><strong>inputfunc</strong> (<em>function</em>) – A function (typically a lambda function) that taxes the values of the axis given by <cite>axisname</cite> as input.</p></li>
 <li><p><strong>overwrite</strong> (<em>bool</em>) – Defaults to <cite>False</cite>. If set to <cite>True</cite>, it overwrites <cite>self</cite> with <cite>retval</cite>.</p></li>
-<li><p><strong>as_array</strong> (<em>bool</em>) – Defaults to <cite>False</cite>. If set to <cite>True</cite>, <cite>retval</cite> is a properly dimensioned numpy np.ndarray rather than an nddata.</p></li>
+<li><p><strong>as_array</strong> (<em>bool</em>) – Defaults to <cite>False</cite>. If set to <cite>True</cite>, <cite>retval</cite> is a properly dimensioned numpy ndarray rather than an nddata.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>retval</strong> – An expression calculated from the axis(es) given by <cite>axisname</cite> or inferred from <cite>inputsymbolic</cite>.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>nddata | np.ndarray</p>
+<dd class="field-odd"><p>nddata | ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1725,7 +1725,7 @@ function call.</p>
 </ul>
 </p></li>
 <li><p><strong>noaxis</strong> (<em>bool</em>) – if set, then just skip calculating the axis for the new dimension,
-which otherwise is typically a complicated record np.array</p></li>
+which otherwise is typically a complicated record array</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
