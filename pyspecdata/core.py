@@ -7663,6 +7663,21 @@ class fitdata(nddata):
         print(r'\end{verbatim}')
         return recordlist # collect into a single recordlist np.array
     def set_guess(self,dict_of_values):
+        """sets parameters to guess/estimated value to compare fit.
+        
+        Parameters
+        ----------
+        dict_of_values: **kwargs 
+            dictionary of values set to parameters in fit equation.
+            Allows for the setting of multiple variables depending on 
+            what's defined in this dictionary.
+
+        Returns
+        -------
+        **kwargs:
+            dictionary of variables that will be used in setting the guess fit
+        """
+
         input_guesses = set(dict_of_values.keys())
         print(input_guesses)
         symbols_not_present = input_guesses-set(self.symbolic_vars)
