@@ -7667,14 +7667,15 @@ class fitdata(nddata):
         
         Parameters
         ----------
-        dict_of_values: **kwargs 
+        dict_of_values: dict 
             dictionary of values set to parameters in fit equation.
             Allows for the setting of multiple variables depending on 
-            what's defined in this dictionary.
+            what's defined in this dictionary. The keys of the dictionary
+            must be sympy symbols
 
         Returns
         -------
-        **kwargs:
+        self:
             dictionary of variables that will be used in setting the guess fit
         """
 
@@ -7686,7 +7687,7 @@ class fitdata(nddata):
         symbols_not_set = set(self.symbolic_vars) - input_guesses
         self.guess_dict = dict_of_values
         self.guess_dict.update({k:1 for k in symbols_not_set})
-        return
+        return self
     def guess(self,use_pseudoinverse=False):
         r'''old code that I am preserving here -- provide the guess for our parameters; by default, based on pseudoinverse'''
         if use_pseudoinverse:
