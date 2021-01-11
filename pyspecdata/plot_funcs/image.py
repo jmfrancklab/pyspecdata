@@ -13,7 +13,6 @@ def image(A,x=[],y=[],**kwargs):
         if k in ['black','logscale']:
             imagehsvkwargs[k] = kwargs.pop(k)
     #}}}
-    if 'ax' in kwargs.keys(): print("I was passed an axis")
     spacing,ax,x_first,origin,renumber = process_kwargs([('spacing',1),
         ('ax',gca()),
         ('x_first',False),
