@@ -13,12 +13,14 @@ def image(A,x=[],y=[],**kwargs):
         if k in ['black','logscale']:
             imagehsvkwargs[k] = kwargs.pop(k)
     #}}}
+    if 'ax' in kwargs.keys(): print("I was passed an axis")
     spacing,ax,x_first,origin,renumber = process_kwargs([('spacing',1),
         ('ax',gca()),
         ('x_first',False),
         ('origin','lower'),
         ('renumber',None)],kwargs,
         pass_through = True)
+    sca(ax)
     if x_first: # then the first dimension should be the column
         # dimesion (i.e. last)
         if hasattr(A,'dimlabels'):# if I try to use isinstance, I get a circular import
@@ -309,6 +311,7 @@ def fl_image(self,A,**kwargs):
         ('ax',gca()),
         ('human_units',True),
         ],kwargs,pass_through = True)
+    sca(ax)
     if human_units:
         firstarg = self.check_units(A,-1,0) # check units, and if need be convert to human units, where x is the last dimension and y is the first
     else:
