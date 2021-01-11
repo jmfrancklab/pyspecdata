@@ -1,7 +1,11 @@
-pyspecdata.datadir
+﻿pyspecdata.datadir
 ==================
 
 .. automodule:: pyspecdata.datadir
+
+   
+   
+   
 
    
    
@@ -15,6 +19,7 @@ pyspecdata.datadir
       grab_data_directory
       log_fname
       rclone_search
+      register_directory
    
    
 
@@ -31,3 +36,6 @@ pyspecdata.datadir
    
    
    
+
+
+

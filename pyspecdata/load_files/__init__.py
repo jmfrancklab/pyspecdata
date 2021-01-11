@@ -17,6 +17,7 @@ from . import bruker_nmr
 from . import prospa
 from . import bruker_esr
 from . import acert
+import numpy as np
 from .open_subpath import open_subpath
 from ..datadir import getDATADIR
 from ..datadir import _my_config,log_fname
@@ -40,6 +41,7 @@ def search_filename(searchstring,exp_type,
         print_result=True,
         unique=False):
     r"""Use regular expression `searchstring` to find a file inside the directory indicated by `exp_type`
+    (For information on how to set up the file searching mechanism, see :func:`~pyspecdata.datadir.register_directory`).
 
     Parameters
     ----------
@@ -125,7 +127,7 @@ def find_file(searchstring,
 
     It looks at the top level of the directory first, and if that fails, starts to look recursively.
     Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
-    (For a more thorough description, see :func:`~pyspecdata.datadir.getDATADIR`).
+    (For information on how to set up the file searching mechanism, see :func:`~pyspecdata.datadir.register_directory`).
 
     Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
     (so that you can make sure they are properly synced to the cloud, etc.).
@@ -378,7 +380,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             zf = ZipFile(filename)
             list_of_files = [j.split('/') for j in zf.namelist()]
             basename = os.path.normpath(filename).split(os.path.sep)[-1].split('.')[0]
-            assert all([j[0] == basename for j in list_of_files]), strm("I expected that the zip file contains a directory called ",basename,"which contains your NMR data -- this appears not to be the case.  (Note that with future extensions, other formats will be possible.)")
+            assert all([j[0] == basename for j in list_of_files]), strm("I expected that the zip file %s contains a directory called %s which contains your NMR data -- this appears not to be the case.  (Note that with future extensions, other formats will be possible.)"%(filename,basename))
             file_reference = (zf,
                     filename,
                     basename)
@@ -394,7 +396,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             logger.debug('Identified a bruker 1d file')
             #{{{ Bruker 1D
             data = bruker_nmr.load_1D(file_reference, expno_as_str, dimname=dimname)
-            s.set_prop('postproc_type',s.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
+            data.set_prop('postproc_type',data.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
             #}}}
         else:
             logger.debug('Identified a potential prospa file')
