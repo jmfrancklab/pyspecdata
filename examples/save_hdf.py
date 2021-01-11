@@ -1,5 +1,10 @@
+"""
+Saving HDF5 Files
+=================
+
+an example of saving nddata to hdf5 files, which preserves all of the nddata
+information flawlessly"""
 from pyspecdata import *
-init_logging('debug')
 a = nddata(r_[0:5:10j], 'x')
 a.name('test_data')
 try:

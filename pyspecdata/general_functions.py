@@ -6,31 +6,13 @@ them."""
 import os
 import sys
 from matplotlib.pylab import gci
+from numpy import pi
 def inside_sphinx():
     if len(sys.argv) > 0:
         return os.path.basename(sys.argv[0]) == "sphinx-build"
     else:
         return False
-if not inside_sphinx():
-    from numpy import *
-else:
-    # {{{ sphinx dummy objects
-    #      there is a better way of doing sphinx dummy objects, but this seems to work
-    def exp(*args,**kwargs):
-        return None
-    def rc(*args,**kwargs):
-        return None
-    def plot(*args,**kwargs):
-        return None
-    rcParams = {}
-    class rclass (object):
-        def __init__(self):
-            print("initializing")
-            return
-        def __getitem__(self,*args,**kwargs):
-            return
-    r_ = rclass()
-    # }}}
+import numpy as np
 import logging
 import re
 
@@ -122,7 +104,7 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = [], allow_desce
     thismsg = ', '.join(additional_message + ["the axis must be ascending (and equally spaced)"])
     assert du > 0, thismsg
     thismsg = ', '.join(additional_message + ["the axis must be equally spaced (and ascending)"])
-    assert all(abs(diff(u) - du)/du < tolerance), thismsg# absolute
+    assert all(abs(np.diff(u) - du)/du < tolerance), thismsg# absolute
     #   tolerance can be large relative to a du of ns -- don't use
     #   allclose/isclose, since they are more recent numpy additions
     if not allow_descending:

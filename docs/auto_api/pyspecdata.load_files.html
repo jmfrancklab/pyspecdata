@@ -1,15 +1,22 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyspecdata.load_files package &mdash; pySpecData 0.9.5.3.1 documentation</title>
+  <title>pyspecdata.load_files package &mdash; pySpecData 0.9.5.3.2 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery_custom.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery-dataframe.css" type="text/css" />
 
   
   
@@ -17,7 +24,9 @@
   
 
   
-  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -25,15 +34,11 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
 </head>
@@ -49,7 +54,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> pySpecData
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> pySpecData
           
 
           
@@ -59,7 +64,7 @@
             
             
               <div class="version">
-                0.9.5.3.1
+                0.9.5.3.2
               </div>
             
           
@@ -76,6 +81,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -91,10 +97,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
 </ul>
+<p class="caption"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">PySpecData Examples</a></li>
+</ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -133,7 +144,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../index.html">Docs</a> &raquo;</li>
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>pyspecdata.load_files package</li>
     
@@ -292,7 +303,7 @@ where I pass an ndshape-based slice, instead.</p></li>
 <li><p><em>A dictionary of the relevant results.</em></p></li>
 <li><p><em>Because of the format of the .dsc files, this is a dictionary of</em></p></li>
 <li><p><em>dictionaries, where the top-level keys are the hash-block (*i.e.*</em></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">#DESC</span></code>, <em>etc.</em>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">#DESC</span></code>, *etc.*).</p></li>
 </ul>
 </p>
 </dd>
@@ -374,6 +385,17 @@ from the ser file storing the raw data
 </dd>
 </dl>
 </dd></dl>
+
+</div>
+<div class="section" id="module-pyspecdata.load_files.load_cary">
+<span id="pyspecdata-load-files-load-cary-module"></span><h2>pyspecdata.load_files.load_cary module<a class="headerlink" href="#module-pyspecdata.load_files.load_cary" title="Permalink to this headline">¶</a></h2>
+<p>written based on igor code
+(under GPL license)
+taken from <a class="reference external" href="https://github.com/Yohko/importtool/blob/master/Igor%20Procedures/import%20tool/import_VARIAN_CARY_BIN.ipf">here</a>.</p>
+<dl class="py function">
+<dt id="pyspecdata.load_files.load_cary.load_cary">
+<code class="sig-prename descclassname">pyspecdata.load_files.load_cary.</code><code class="sig-name descname">load_cary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.load_cary.load_cary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-pyspecdata.load_files.open_subpath">
@@ -470,7 +492,7 @@ it will try to load this experiment number from all the directories.</p></li>
 experiments sorted into different directories, this argument
 specifies the type of experiment see <a class="reference internal" href="pyspecdata.html#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a> for
 more info.</p></li>
-<li><p><strong>postproc</strong> (<a class="reference internal" href="pyspecdata.html#pyspecdata.function" title="pyspecdata.function"><em>function</em></a><em>, </em><em>str</em><em>, or </em><em>None</em>) – <p>This function is fed the nddata data and the remaining keyword
+<li><p><strong>postproc</strong> (<em>function</em><em>, </em><em>str</em><em>, or </em><em>None</em>) – <p>This function is fed the nddata data and the remaining keyword
 arguments (<cite>kwargs</cite>) as arguments.
 It’s assumed that each module for each different file type
 provides a dictionary called <cite>postproc_lookup</cite> (some are already
@@ -518,6 +540,27 @@ This, in turn, is used to choose the type of post-processing.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt id="pyspecdata.load_files.bruker_dir">
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">bruker_dir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">search_string</span></em>, <em class="sig-param"><span class="n">exp_type</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>A generator that returns a 3-tuple of dirname, expno, and dataset for a directory</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyspecdata.load_files.bruker_load_t1_axis">
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">bruker_load_t1_axis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_load_t1_axis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pyspecdata.load_files.bruker_load_title">
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">bruker_load_title</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_load_title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pyspecdata.load_files.cw">
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">cw</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.cw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt id="id0">
@@ -549,7 +592,7 @@ it will try to load this experiment number from all the directories.</p></li>
 experiments sorted into different directories, this argument
 specifies the type of experiment see <a class="reference internal" href="pyspecdata.html#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a> for
 more info.</p></li>
-<li><p><strong>postproc</strong> (<a class="reference internal" href="pyspecdata.html#pyspecdata.function" title="pyspecdata.function"><em>function</em></a><em>, </em><em>str</em><em>, or </em><em>None</em>) – <p>This function is fed the nddata data and the remaining keyword
+<li><p><strong>postproc</strong> (<em>function</em><em>, </em><em>str</em><em>, or </em><em>None</em>) – <p>This function is fed the nddata data and the remaining keyword
 arguments (<cite>kwargs</cite>) as arguments.
 It’s assumed that each module for each different file type
 provides a dictionary called <cite>postproc_lookup</cite> (some are already
@@ -594,65 +637,6 @@ This, in turn, is used to choose the type of post-processing.</p>
 </p></li>
 <li><p><strong>lookup</strong> (<em>dictionary with str:function pairs</em>) – types of postprocessing to add to the <cite>postproc_lookup</cite> dictionary</p></li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="pyspecdata.load_files.search_filename">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">search_filename</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">searchstring</span></em>, <em class="sig-param"><span class="n">exp_type</span></em>, <em class="sig-param"><span class="n">print_result</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">unique</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.search_filename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use regular expression <cite>searchstring</cite> to find a file inside the directory indicated by <cite>exp_type</cite>
-(For information on how to set up the file searching mechanism, see <a class="reference internal" href="pyspecdata.html#pyspecdata.datadir.register_directory" title="pyspecdata.datadir.register_directory"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_directory()</span></code></a>).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>searchstring</strong> (<em>str</em>) – Most commonly, this is just a fragment of the file name,
-with any literal <code class="docutils literal notranslate"><span class="pre">*</span></code>, <code class="docutils literal notranslate"><span class="pre">.</span></code>, or <code class="docutils literal notranslate"><span class="pre">?</span></code> characters preceded by
-a backslash.
-More generally, it is a regular expression,
-where <code class="docutils literal notranslate"><span class="pre">.*searchstring.*</span></code> matches a filename inside the
-directory appropriate for <cite>exp_type</cite>.</p></li>
-<li><p><strong>exp_type</strong> (<em>str</em>) – Since the function assumes that you have different types of
-experiments sorted into different directories, this argument
-specifies the type of experiment see <a class="reference internal" href="pyspecdata.html#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a> for
-more info.</p></li>
-<li><p><strong>unique</strong> (<em>boolean</em><em> (</em><em>default False</em><em>)</em>) – If true, then throw an error unless only one file is found.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="pyspecdata.load_files.load_indiv_file">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">load_indiv_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">dimname</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">return_acq</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">add_sizes</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">add_dims</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">use_sweep</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">indirect_dimlabels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expno</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.load_indiv_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Open the file given by <cite>filename</cite>, use file signature magic and/or
-filename extension(s) to identify the file type, and call the appropriate
-function to open it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dimname</strong> (<em>str</em>) – When there is a single indirect dimension composed of several scans,
-call the indirect dimension <cite>dimname</cite>.</p></li>
-<li><p><strong>return_acq</strong> (<em>DEPRECATED</em>) – </p></li>
-<li><p><strong>add_sizes</strong> (<em>list</em>) – the sizes associated with the dimensions in add_dims</p></li>
-<li><p><strong>add_dims</strong> (<em>list</em>) – Can only be used with <cite>dimname</cite>.
-Break the dimension <cite>dimname</cite> into several dimensions,
-with the names given by the list <cite>add_dims</cite> and sizes given by <cite>add_sizes</cite>.
-If the product of the sizes is not the same as the original dimension
-given by <cite>dimname</cite>,
-retain it as the “outermost” (leftmost) dimension.
-<code class="xref py py-func docutils literal notranslate"><span class="pre">pyspecdata.core.chunkoff()</span></code> is used to do this, like so:
-<code class="docutils literal notranslate"><span class="pre">data.chunkoff(dimname,add_dims,add_sizes)</span></code></p></li>
-<li><p><strong>indirect_dimlabels</strong> (<em>str</em><em> or </em><em>None</em>) – passed through to <cite>acert.load_pulse</cite> (names an indirect dimension when dimlabels isn’t provided)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>the nddata containing the data,
-or else, <cite>None</cite>, indicating that this is part of a pair of
-files that should be skipped</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -697,13 +681,43 @@ experiment</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.load_files.load_t1_axis">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">load_t1_axis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.load_t1_axis" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="pyspecdata.load_files.load_indiv_file">
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">load_indiv_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">dimname</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">return_acq</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">add_sizes</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">add_dims</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">use_sweep</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">indirect_dimlabels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expno</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.load_indiv_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open the file given by <cite>filename</cite>, use file signature magic and/or
+filename extension(s) to identify the file type, and call the appropriate
+function to open it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimname</strong> (<em>str</em>) – When there is a single indirect dimension composed of several scans,
+call the indirect dimension <cite>dimname</cite>.</p></li>
+<li><p><strong>return_acq</strong> (<em>DEPRECATED</em>) – </p></li>
+<li><p><strong>add_sizes</strong> (<em>list</em>) – the sizes associated with the dimensions in add_dims</p></li>
+<li><p><strong>add_dims</strong> (<em>list</em>) – Can only be used with <cite>dimname</cite>.
+Break the dimension <cite>dimname</cite> into several dimensions,
+with the names given by the list <cite>add_dims</cite> and sizes given by <cite>add_sizes</cite>.
+If the product of the sizes is not the same as the original dimension
+given by <cite>dimname</cite>,
+retain it as the “outermost” (leftmost) dimension.
+<code class="xref py py-func docutils literal notranslate"><span class="pre">pyspecdata.core.chunkoff()</span></code> is used to do this, like so:
+<code class="docutils literal notranslate"><span class="pre">data.chunkoff(dimname,add_dims,add_sizes)</span></code></p></li>
+<li><p><strong>indirect_dimlabels</strong> (<em>str</em><em> or </em><em>None</em>) – passed through to <cite>acert.load_pulse</cite> (names an indirect dimension when dimlabels isn’t provided)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the nddata containing the data,
+or else, <cite>None</cite>, indicating that this is part of a pair of
+files that should be skipped</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or None</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.load_files.bruker_load_t1_axis">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">bruker_load_t1_axis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_load_t1_axis" title="Permalink to this definition">¶</a></dt>
+<dt id="pyspecdata.load_files.load_t1_axis">
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">load_t1_axis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.load_t1_axis" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -712,20 +726,28 @@ experiment</p>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.load_files.bruker_load_title">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">bruker_load_title</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_load_title" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt id="pyspecdata.load_files.bruker_dir">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">bruker_dir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">search_string</span></em>, <em class="sig-param"><span class="n">exp_type</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.bruker_dir" title="Permalink to this definition">¶</a></dt>
-<dd><p>A generator that returns a 3-tuple of dirname, expno, and dataset for a directory</p>
+<dt id="pyspecdata.load_files.search_filename">
+<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">search_filename</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">searchstring</span></em>, <em class="sig-param"><span class="n">exp_type</span></em>, <em class="sig-param"><span class="n">print_result</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">unique</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.search_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use regular expression <cite>searchstring</cite> to find a file inside the directory indicated by <cite>exp_type</cite>
+(For information on how to set up the file searching mechanism, see <a class="reference internal" href="pyspecdata.html#pyspecdata.datadir.register_directory" title="pyspecdata.datadir.register_directory"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_directory()</span></code></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>searchstring</strong> (<em>str</em>) – Most commonly, this is just a fragment of the file name,
+with any literal <code class="docutils literal notranslate"><span class="pre">*</span></code>, <code class="docutils literal notranslate"><span class="pre">.</span></code>, or <code class="docutils literal notranslate"><span class="pre">?</span></code> characters preceded by
+a backslash.
+More generally, it is a regular expression,
+where <code class="docutils literal notranslate"><span class="pre">.*searchstring.*</span></code> matches a filename inside the
+directory appropriate for <cite>exp_type</cite>.</p></li>
+<li><p><strong>exp_type</strong> (<em>str</em>) – Since the function assumes that you have different types of
+experiments sorted into different directories, this argument
+specifies the type of experiment see <a class="reference internal" href="pyspecdata.html#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a> for
+more info.</p></li>
+<li><p><strong>unique</strong> (<em>boolean</em><em> (</em><em>default False</em><em>)</em>) – If true, then throw an error unless only one file is found.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
-
-<dl class="py function">
-<dt id="pyspecdata.load_files.cw">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">cw</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.cw" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </div>
 </div>
@@ -741,11 +763,19 @@ experiment</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2016, John M. Franck
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -756,7 +786,6 @@ experiment</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

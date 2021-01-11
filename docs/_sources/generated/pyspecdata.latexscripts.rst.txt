@@ -1,7 +1,11 @@
-pyspecdata.latexscripts
+﻿pyspecdata.latexscripts
 =======================
 
 .. automodule:: pyspecdata.latexscripts
+
+   
+   
+   
 
    
    
@@ -32,3 +36,6 @@ pyspecdata.latexscripts
    
    
    
+
+
+

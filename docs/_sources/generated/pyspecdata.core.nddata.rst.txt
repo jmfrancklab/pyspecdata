@@ -1,4 +1,4 @@
-pyspecdata.core.nddata
+﻿pyspecdata.core.nddata
 ======================
 
 .. currentmodule:: pyspecdata.core
@@ -16,6 +16,7 @@ pyspecdata.core.nddata
       ~nddata.__init__
       ~nddata.add_noise
       ~nddata.aligndata
+      ~nddata.along
       ~nddata.argmax
       ~nddata.argmin
       ~nddata.axis
