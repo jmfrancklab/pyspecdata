@@ -5092,7 +5092,7 @@ class nddata (object):
         **Currently only supported for 1D data**
         
         .. note::
-            adapted from stackexchange post http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-np.array
+            adapted from stackexchange post http://stackoverflow.com/questions/4494404/find-large-number-of-consecutive-values-fulfilling-condition-in-a-numpy-array
 
         Parameters
         ----------
@@ -5381,11 +5381,11 @@ class nddata (object):
         overwrite : bool
             Defaults to `False`. If set to `True`, it overwrites `self` with `retval`.
         as_array : bool
-            Defaults to `False`. If set to `True`, `retval` is a properly dimensioned numpy np.ndarray rather than an nddata.
+            Defaults to `False`. If set to `True`, `retval` is a properly dimensioned numpy ndarray rather than an nddata.
 
         Returns
         =======
-        retval : nddata | np.ndarray
+        retval : nddata | ndarray
             An expression calculated from the axis(es) given by `axisname` or inferred from `inputsymbolic`.
         '''
         overwrite,as_array = process_kwargs([('overwrite',False),
@@ -5732,7 +5732,7 @@ class nddata (object):
 
         noaxis : bool
             if set, then just skip calculating the axis for the new dimension,
-            which otherwise is typically a complicated record np.array
+            which otherwise is typically a complicated record array
 
         Returns
         -------
@@ -6885,15 +6885,15 @@ class nddata_hdf5 (nddata):
 class ndshape (ndshape_base):
     r'''The ndshape class, including the allocation method''' 
     def alloc(self,dtype='complex128',labels = False,format = 0):
-        r'''Use the shape object to allocate an np.empty nddata object.
+        r'''Use the shape object to allocate an empty nddata object.
 
         Parameters
         ----------
         labels : 
             Needs documentation
         format : 0, 1, or None
-            What goes in the allocated np.array.
-            `None` uses numpy np.empty.
+            What goes in the allocated array.
+            `None` uses numpy empty.
         '''
         try:
             if format == 0:
@@ -6947,7 +6947,7 @@ class subplot_dim():
             print('type of args: ',type(args))
         return ax
 #}}}
-def fa(input,dtype='complex128'):# make a fortran np.array
+def fa(input,dtype='complex128'):# make a fortran array
     return np.array(input,order='F',dtype=np.dtype) # will need transpose reverses the dimensions, since the bracketing still works in C order (inner is last index), but F tells it to store it appropriately in memory
 def ndgrid(*input):
     thissize = list([1])
@@ -7459,23 +7459,22 @@ class fitdata(nddata):
             taxis = np.linspace(taxis[0],taxis[1],300)
         return taxis
     def eval(self,taxis,set_what = None,set_to = None):
-        """
-        eval calculates the fit function along the axis taxis.
+        """calculate the fit function along the axis taxis.
         
         Parameters
         ----------
-        int: 
-            number of evenly spaced points along the t-axis along the fit
+        taxis: ndarray, int
+            :if ndarray: the new axis coordinates along which we want to calculate the fit.
+            :if int: number of evenly spaced points along the t-axis along the fit
         set_what: 'str', optional
             forcibly sets a specific symbol
-        set_to: int, optional
+        set_to: double, optional
             the specific value (int) you are assigning the symbol you included
 
         Returns
         -------
         self: nddata
-            calculated fit function along the t-axis with a set 
-            amount of points along the fit and specifically set symbols with values.
+            the fit function evaluated along the axis coordinates that were passed
         """
         if isinstance(set_what, dict):
             set_to = list(set_what.values())
