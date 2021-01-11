@@ -374,7 +374,7 @@ def lambda_rec(myarray,myname,myfunction,*varargs):
             newrow, "which appears not to be a numpy np.array")+explain_error(e))
     new_field_type[0] = myname
     starting_names = myarray.dtype.names
-    #{{{ make the np.dtype
+    #{{{ make the dtype
     new_dtype = list(myarray.dtype.descr)
     #{{{ determine if I need to pop one of the existing rows due to a name conflict
     eliminate = None
@@ -1230,8 +1230,8 @@ def h5join(firsttuple,secondtuple,
         retval = decorate_rec((retval,tableindices),(mystructarray,mystructarrayindices)) # this must be the problem, since the above looks fine
     except Exception as e:
         raise Exception(strm('Some problems trying to decorate the table',
-            retval, 'of np.dtype', retval.dtype, 'with the structured np.array',
-            mystructarray, 'of np.dtype', mystructarray.dtype, explain_error(e)))
+            retval, 'of dtype', retval.dtype, 'with the structured np.array',
+            mystructarray, 'of dtype', mystructarray.dtype, explain_error(e)))
     if pop_fields is not None:
         if select_fields is not None:
             raise ValueError("It doesn't make sense to specify pop_fields and select_fields at the same time!!")
@@ -3805,8 +3805,6 @@ class nddata (object):
             Rerr = sqrt(np.real(Rerr)) # convert back to stdev --> note that this has problems with complex numbers, hence the "abs" above
         except AttributeError as e:
             raise AttributeError(strm("Rerr gave an attribute error when you passed",Rerr) + explain_error(e))
-        #print "DEBUG: step 3",Rerr
-        #print "Rerr np.dtype",Rerr.dtype
         if Aerr is None and Berr is None:
             Rerr = None
         #}}}
@@ -5821,7 +5819,7 @@ class nddata (object):
                     j in axes_with_labels]# an appropriate spec. for a structured np.array
             axes_with_labels_size = [self.getaxis(j).size for j in axes_with_labels]
             #}}}
-            logger.debug(strm("the np.dtype that I want is:",axes_with_labels_dtype))
+            logger.debug(strm("the dtype that I want is:",axes_with_labels_dtype))
             logger.debug(strm("the axes that have labels are:",axes_with_labels))
             logger.debug(strm("the axes that have labels have sizes:",axes_with_labels_size))
             # {{{ we construct a multidimensional axis
@@ -5855,7 +5853,7 @@ class nddata (object):
                 logger.debug(strm("shape of multidim_axis_label is now",multidim_axis_label.shape))
                 logger.debug(strm("multidim_axis_label is:\n",repr(multidim_axis_label)))
             else:
-                raise ValueError("You requested that smoosh generate an axis, but I don't know what np.dtype to assign to it (what fields to use).  This is likely because you don't have axes assigned to the dimensions you're trying to smoosh.  Consider calling smoosh with noaxis=True, instead")
+                raise ValueError("You requested that smoosh generate an axis, but I don't know what dtype to assign to it (what fields to use).  This is likely because you don't have axes assigned to the dimensions you're trying to smoosh.  Consider calling smoosh with noaxis=True, instead")
             axis_coords_dict[dimname] = multidim_axis_label
             axis_coords_error_dict[dimname] = multidim_axis_error
             # }}}
@@ -6123,7 +6121,7 @@ class nddata (object):
         if isinstance(key, np.ndarray):# if selector is an np.ndarray
             logger.debug("initially, rightdata appears to be np.ndarray")
             if key.dtype is not np.dtype('bool'):
-                raise ValueError("I don't know what to do with an np.ndarray subscript that has np.dtype "+repr(key.dtype))
+                raise ValueError("I don't know what to do with an np.ndarray subscript that has dtype "+repr(key.dtype))
             if key.shape != self.data.shape:
                 raise ValueError("The shape of your logical mask "
                         +repr(key.shape)
@@ -6359,7 +6357,7 @@ class nddata (object):
                 _,B = self.aligndata(A)
                 A = B.data # now the next part will handle this
                 if A.dtype is not np.dtype('bool'):
-                    raise ValueError("I don't know what to do with an np.ndarray subscript that has np.dtype "+repr(A.dtype))
+                    raise ValueError("I don't know what to do with an np.ndarray subscript that has dtype "+repr(A.dtype))
                 if A.shape != self.data.shape:
                     temp = np.array(A.shape) == 1
                     if all( np.array(A.shape)[temp] == np.array(self.data.shape)[temp]):
@@ -6371,7 +6369,7 @@ class nddata (object):
             else:
                 errmsg = "you passed a single argument of type "+repr(type(A))
                 if isinstance(A, nddata):
-                    errmsg += " with np.dtype "+repr(A.data.dtype)
+                    errmsg += " with dtype "+repr(A.data.dtype)
                 errmsg += " -- I don't know what to do with this"
                 raise ValueError(errmsg)
             #}}}
@@ -6898,15 +6896,15 @@ class ndshape (ndshape_base):
         try:
             if format == 0:
                 try:
-                    emptyar = np.zeros(tuple(self.shape),dtype=np.dtype)
+                    emptyar = np.zeros(tuple(self.shape),dtype=dtype)
                 except TypeError:
-                    raise TypeError("You passed a type of "+repr(np.dtype)+", which was likely not understood (you also passed a shape of "+repr(tuple(self.shape))+")")
+                    raise TypeError("You passed a type of "+repr(dtype)+", which was likely not understood (you also passed a shape of "+repr(tuple(self.shape))+")")
             elif format == 1:
-                emptyar = np.ones(tuple(self.shape),dtype=np.dtype)
+                emptyar = np.ones(tuple(self.shape),dtype=dtype)
             elif format is None:
-                emptyar = np.empty(tuple(self.shape),dtype=np.dtype)
+                emptyar = np.empty(tuple(self.shape),dtype=dtype)
             else:
-                emptyar = format*np.ones(tuple(self.shape),dtype=np.dtype)
+                emptyar = format*np.ones(tuple(self.shape),dtype=dtype)
         except TypeError as e:
             raise TypeError(strm('Wrong type for self.shape',list(map(type,self.shape)),'this probably means that you swapped the size and name arguments -- ',self.shape,'should be numbers, not names'))
         retval = nddata(emptyar,self.shape,self.dimlabels)
@@ -6948,7 +6946,7 @@ class subplot_dim():
         return ax
 #}}}
 def fa(input,dtype='complex128'):# make a fortran array
-    return np.array(input,order='F',dtype=np.dtype) # will need transpose reverses the dimensions, since the bracketing still works in C order (inner is last index), but F tells it to store it appropriately in memory
+    return np.array(input,order='F',dtype=dtype) # will need transpose reverses the dimensions, since the bracketing still works in C order (inner is last index), but F tells it to store it appropriately in memory
 def ndgrid(*input):
     thissize = list([1])
     thissize = thissize * len(input)
