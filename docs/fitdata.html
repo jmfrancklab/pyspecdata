@@ -13,6 +13,7 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery_custom.css" type="text/css" />
   <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
   <link rel="stylesheet" href="_static/gallery-binder.css" type="text/css" />
   <link rel="stylesheet" href="_static/gallery-dataframe.css" type="text/css" />
@@ -259,25 +260,21 @@ nddata metadata.</p>
 <dl class="py method">
 <dt id="pyspecdata.core.fitdata.eval">
 <code class="sig-name descname">eval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">taxis</span></em>, <em class="sig-param"><span class="n">set_what</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">set_to</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.eval" title="Permalink to this definition">¶</a></dt>
-<dd><p>after we have fit, eval calculates the fit function along the axis taxis.
-set_what and set_to allow you to forcibly set_what a specific symbol to a
-specific value –&gt; however, this does not affect the class, but only
-the return value. The specific value defines the number of evenly spaced points
-along the taxis.</p>
+<dd><p>eval calculates the fit function along the axis taxis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>set_what</strong> (<em>specific symbol you wish to assign</em><em> or </em><em>have included in the evaluation</em>) – </p></li>
-<li><p><strong>set_to</strong> (<em>the specific value</em><em> (</em><em>int</em><em>) </em><em>you are assigning the symbol you included</em>) – </p></li>
-<li><p><strong>int</strong> (<em>number of evenly spaced points along the taxis along the fit</em>) – </p></li>
+<li><p><strong>int</strong> – number of evenly spaced points along the t-axis along the fit</p></li>
+<li><p><strong>set_what</strong> (<em>'str'</em><em>, </em><em>optional</em>) – forcibly sets a specific symbol</p></li>
+<li><p><strong>set_to</strong> (<em>int</em><em>, </em><em>optional</em>) – the specific value (int) you are assigning the symbol you included</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>newdata</strong> (<em>nddata of the calculated fit function along the axis taxis with a set</em>)</p></li>
-<li><p><em>amount of points along the fit and specifically set symbols with values.</em></p></li>
-</ul>
-</p>
+<dd class="field-even"><p><strong>self</strong> – calculated fit function along the t-axis with a set
+amount of points along the fit and specifically set symbols with values.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
