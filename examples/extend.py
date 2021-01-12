@@ -9,7 +9,7 @@ d = nddata(normal(size=10000)+1j*normal(size=10000), [100,100], ['y','x']).label
 with figlist_var() as fl:
     fl.next('random data')
     fl.image(d)
-    d.extend('x',extent=10)
+    d.extend('x',extent=-10)
     fl.next('extend along $x$')
     fl.image(d)
     fl.show();quit()
