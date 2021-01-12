@@ -5533,7 +5533,8 @@ class nddata (object):
             newdata = fill_with * np.ones(newdata,dtype = self.data.dtype)
         newdata_slice = [slice(None,None,None)] * len(newdata.shape)
         if extent < u[0]:
-            newdata_slice[self.axn(axis)] = slice(-(abs(start_index)+len(u)),len(u),None)
+            newdata_slice[self.axn(axis)] = slice(abs(start_index),abs(start_index)+len(u),None)
+            #newdata_slice[self.axn(axis)] = slice(-(abs(start_index)+len(u)),len(u),None)
             #newdata_slice[self.axn(axis)] = slice((abs(start_index)+len(u)),-len(u),None)
         elif extent > u[-1]:
             newdata_slice[self.axn(axis)] = slice(-start_index,len(u)-start_index,None)
