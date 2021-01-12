@@ -5545,7 +5545,7 @@ class nddata (object):
         # since start_index is negative, -start_index points have been added to
         # the beginning of the data (and the original data is len(u) in length)
         newdata_slice[self.axn(axis)] = slice(-start_index,len(u)-start_index,None)
-        newdata[newdata_slice] = self.data
+        newdata[tuple(newdata_slice)] = self.data
         self.data = newdata
         #}}}
         # construct the new axis

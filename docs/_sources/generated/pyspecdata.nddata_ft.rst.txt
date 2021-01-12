@@ -1,4 +1,4 @@
-pyspecdata.nddata\_ft
+﻿pyspecdata.nddata\_ft
 =====================
 
 .. currentmodule:: pyspecdata
@@ -15,6 +15,7 @@ pyspecdata.nddata\_ft
    
       ~nddata_ft.__init__
       ~nddata_ft.convolve
+      ~nddata_ft.copy_ft_props
       ~nddata_ft.extend_for_shear
       ~nddata_ft.ft
       ~nddata_ft.ft_clear_startpoints

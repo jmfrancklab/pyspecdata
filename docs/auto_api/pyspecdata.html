@@ -487,7 +487,7 @@ and determines the axis values as follows:
 <dt id="pyspecdata.axis_class.nddata_axis.references">
 <em class="property">property </em><code class="sig-name descname">references</code><a class="headerlink" href="#pyspecdata.axis_class.nddata_axis.references" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns OrderedDict of all names and aliases such that keys all point to the current instance (<cite>self</cite>)</p>
-<p>the idea is that this should be placed in a <cite>ChainMap</cite> object to be used by the <a class="reference internal" href="#pyspecdata.axis_class.axis_collection" title="pyspecdata.axis_class.axis_collection"><code class="xref py py-class docutils literal notranslate"><span class="pre">axis_collection</span></code></a> class that contains the axis.</p>
+<p>the idea is that this should be placed in a <cite>ChainMap</cite> object to be used by the <a class="reference internal" href="../axis_object_plan.html#pyspecdata.axis_class.axis_collection" title="pyspecdata.axis_class.axis_collection"><code class="xref py py-class docutils literal notranslate"><span class="pre">axis_collection</span></code></a> class that contains the axis.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1866,14 +1866,21 @@ This is designed to be called as abs(instance).cropped_log(), so it doesn’t ma
 <dl class="py method">
 <dt id="pyspecdata.core.nddata.extend">
 <code class="sig-name descname">extend</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">extent</span></em>, <em class="sig-param"><span class="n">fill_with</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.extend" title="Permalink to this definition">¶</a></dt>
-<dd><p>If <cite>axis</cite> is uniformly ascending with spacing <span class="math notranslate nohighlight">\(dx\)</span>,
-then extend by adding a point every <span class="math notranslate nohighlight">\(dx\)</span> until the axis
+<dd><p>Extend the (domain of the) dataset and fill with a pre-set value.</p>
+<p>The coordinates associated with
+<cite>axis</cite> must be uniformly ascending with spacing <span class="math notranslate nohighlight">\(dx\)</span>.
+The function will extend <cite>self</cite>
+by adding a point every <span class="math notranslate nohighlight">\(dx\)</span> until the axis
 includes the point <cite>extent</cite>.  Fill the newly created datapoints with <cite>fill_with</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>axis</strong> (<em>str</em>) – name of the axis to extend</p></li>
-<li><p><strong>extent</strong> (<em>double</em>) – extend the axis <cite>axis</cite> out to this point</p></li>
+<li><p><strong>extent</strong> (<em>double</em>) – <p>Extend the axis coordinates of <cite>axis</cite> out to this value.</p>
+<p>The value of <cite>extent</cite> must be less the smallest (most negative)
+axis coordinate or greater than the largest (most positive)
+axis coordinate.</p>
+</p></li>
 <li><p><strong>fill_with</strong> (<em>double</em>) – fill the new data points with this value (defaults to 0)</p></li>
 <li><p><strong>tolerance</strong> (<em>double</em>) – when checking for ascending axis labels, etc.,
 values/differences must match to within tolerance
@@ -9286,14 +9293,21 @@ This is designed to be called as abs(instance).cropped_log(), so it doesn’t ma
 <dl class="py method">
 <dt id="pyspecdata.nddata.extend">
 <code class="sig-name descname">extend</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">extent</span></em>, <em class="sig-param"><span class="n">fill_with</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.extend" title="Permalink to this definition">¶</a></dt>
-<dd><p>If <cite>axis</cite> is uniformly ascending with spacing <span class="math notranslate nohighlight">\(dx\)</span>,
-then extend by adding a point every <span class="math notranslate nohighlight">\(dx\)</span> until the axis
+<dd><p>Extend the (domain of the) dataset and fill with a pre-set value.</p>
+<p>The coordinates associated with
+<cite>axis</cite> must be uniformly ascending with spacing <span class="math notranslate nohighlight">\(dx\)</span>.
+The function will extend <cite>self</cite>
+by adding a point every <span class="math notranslate nohighlight">\(dx\)</span> until the axis
 includes the point <cite>extent</cite>.  Fill the newly created datapoints with <cite>fill_with</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>axis</strong> (<em>str</em>) – name of the axis to extend</p></li>
-<li><p><strong>extent</strong> (<em>double</em>) – extend the axis <cite>axis</cite> out to this point</p></li>
+<li><p><strong>extent</strong> (<em>double</em>) – <p>Extend the axis coordinates of <cite>axis</cite> out to this value.</p>
+<p>The value of <cite>extent</cite> must be less the smallest (most negative)
+axis coordinate or greater than the largest (most positive)
+axis coordinate.</p>
+</p></li>
 <li><p><strong>fill_with</strong> (<em>double</em>) – fill the new data points with this value (defaults to 0)</p></li>
 <li><p><strong>tolerance</strong> (<em>double</em>) – when checking for ascending axis labels, etc.,
 values/differences must match to within tolerance

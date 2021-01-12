@@ -25,7 +25,8 @@ are running at the same time
 
  .. code-block:: none
 
-    --> log_test.py(11):root             <module> 2021-01-11 11:36:28,252
+    logging output to C:\Users\johnf\pyspecdata.0.log
+    --> log_test.py(11):root             <module> 2021-01-12 09:41:32,450
     INFO: Something, something, something, dark side...
 
 
@@ -47,7 +48,7 @@ are running at the same time
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.002 seconds)
+   **Total running time of the script:** ( 0 minutes  0.004 seconds)
 
 
 .. _sphx_glr_download_auto_examples_log_test.py:

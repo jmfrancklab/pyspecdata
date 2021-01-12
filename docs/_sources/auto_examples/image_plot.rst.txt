@@ -13,7 +13,7 @@ Plotting Routines
 
 A simple demonstration of a multi-line *vs.*
 image plot with
-`<https://en.wikipedia.org/wiki/Domain_coloring> domain coloring`_, nested
+`domain coloring <https://en.wikipedia.org/wiki/Domain_coloring>`_, nested
 inside a figure list.
 
 We specifically test a safety feature that doesn't allow image plots
@@ -50,32 +50,7 @@ and show how to deal with this.
 
  .. code-block:: none
 
-    C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-      return array(a, dtype, copy=False, order=order)
-    C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-      return array(a, dtype, copy=False, order=order)
-    C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-      return array(a, dtype, copy=False, order=order)
-    C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-      return array(a, dtype, copy=False, order=order)
-    C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-      return array(a, dtype, copy=False, order=order)
-    C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-      return array(a, dtype, copy=False, order=order)
-    C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-      return array(a, dtype, copy=False, order=order)
-    C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-      return array(a, dtype, copy=False, order=order)
-    C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-      return array(a, dtype, copy=False, order=order)
-    C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-      return array(a, dtype, copy=False, order=order)
-    C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-      return array(a, dtype, copy=False, order=order)
-    C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-      return array(a, dtype, copy=False, order=order)
-    C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-      return array(a, dtype, copy=False, order=order)
+    you are trying to determine the SI prefix of aset of numbers that are described by integers.  This isprobably not a good idea!!
 
 
 
@@ -99,7 +74,7 @@ and show how to deal with this.
     signal_amp.ft('t2', shift=True)
     with figlist_var() as fl:
         fl.next('1D data')
-        fl.plot(signal_amp)
+        fl.plot(signal_amp.real) # without .real, newer versions of matplotlib raise a warning
         generated_error = False
         # If I were to just run the following command (not nested in try/except)
         fl.next('this figure intentionally blank!')
@@ -116,7 +91,7 @@ and show how to deal with this.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.499 seconds)
+   **Total running time of the script:** ( 0 minutes  1.033 seconds)
 
 
 .. _sphx_glr_download_auto_examples_image_plot.py:

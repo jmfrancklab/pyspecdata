@@ -1,0 +1,403 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Fourier Aliasing &mdash; pySpecData 0.9.5.3.2 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery_custom.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="BRD NNLS" href="BRD_test.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> pySpecData
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5.3.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">List of Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Example Gallery</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">PySpecData Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="log_test.html">Logging Functionality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="errorprop.html">Error Propagation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matplotlib_test.html">Matplotlib Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="save_hdf.html">Saving HDF5 Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="image_plot.html">Plotting Routines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_mult.html">Matrix Multiplication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_fake_data.html">Fitting Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fourier_pre_post.html">Frequency and Time Shifting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fourier_padding.html">Fourier Padding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BRD_test.html">BRD NNLS</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Fourier Aliasing</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pySpecData</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">PySpecData Examples</a> &raquo;</li>
+        
+      <li>Fourier Aliasing</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/auto_examples/fourier_aliasing.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-fourier-aliasing-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
+</div>
+<div class="sphx-glr-example-title section" id="fourier-aliasing">
+<span id="sphx-glr-auto-examples-fourier-aliasing-py"></span><h1>Fourier Aliasing<a class="headerlink" href="#fourier-aliasing" title="Permalink to this headline">¶</a></h1>
+<p>Here, we show that we can view the Fourier transform as an infinitely repeat
+set of replicates (aliases, <em>s.t.</em>
+<span class="math notranslate nohighlight">\(Ш(
+u/t_{dw})*      ilde{f}(
+u)\)</span>) and view any of those aliases
+(of width <span class="math notranslate nohighlight">\(SW=1/t_{dw}\)</span>)
+that we choose.</p>
+<ul class="sphx-glr-horizontal">
+<li><img alt="ft" class="sphx-glr-multi-img" src="../_images/sphx_glr_fourier_aliasing_001.png" />
+</li>
+<li><img alt="ift" class="sphx-glr-multi-img" src="../_images/sphx_glr_fourier_aliasing_002.png" />
+</li>
+</ul>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{&#39;name&#39;: None, &#39;FT&#39;: {&#39;t&#39;: True}, &#39;FT_freq_not_aliased&#39;: {&#39;t&#39;: False}, &#39;FT_time_not_aliased&#39;: {&#39;t&#39;: True}, &#39;FT_start_time&#39;: {&#39;t&#39;: -10.019569471624266}}
+is it safe? False
+what is the initial desired startpoint? {&#39;t&#39;: -10.019569471624266}
+-----------------------
+starting standard
+what is the initial desired startpoint? {&#39;t&#39;: -10.019569471624266}
+and what is the actual first t index (t_start) after I ift?:  t_start is -10.019569471624267 and dt is 0.039138943248532954
+-----------------------
+starting integral shift for 2
+what is the initial desired startpoint? -10.019569471624266
+now, I try to reset the startpoint to -9.941291585127201
+my dt 0.039138943248532954 _get_ft_dt 0.03913909255232162
+is it safe? False
+And the actual t startpoint after ift?  -9.941291585127203
+the difference between the two? -1.7763568394002505e-15
+-----------------------
+-----------------------
+starting integral shift for -250
+what is the initial desired startpoint? -10.019569471624266
+now, I try to reset the startpoint to -19.804305283757508
+my dt 0.039138943248532954 _get_ft_dt 0.03913909255232162
+is it safe? False
+And the actual t startpoint after ift?  -19.804305283757337
+the difference between the two? 1.7053025658242404e-13
+-----------------------
+-----------------------
+starting integral shift for 1000
+what is the initial desired startpoint? -10.019569471624266
+now, I try to reset the startpoint to 29.119373776908688
+my dt 0.039138943248532954 _get_ft_dt 0.03913909255232162
+is it safe? False
+And the actual t startpoint after ift?  29.11937377690802
+the difference between the two? -6.679101716144942e-13
+-----------------------
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># from JF noteobok sec:fourier_aliasing_test</span>
+<span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pyspecdata.fourier.ft_shift</span> <span class="kn">import</span> <span class="n">_get_ft_dt</span>
+<span class="n">fl</span> <span class="o">=</span> <span class="n">figlist_var</span><span class="p">()</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">r_</span><span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">512</span><span class="n">j</span><span class="p">]</span>
+<span class="n">t</span> <span class="o">-=</span> <span class="n">t</span><span class="p">[</span><span class="n">argmin</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">t</span><span class="p">))]</span> <span class="c1"># to be sure that an index exactly equals zero</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">empty_like</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">complex128</span><span class="p">),[</span><span class="o">-</span><span class="mi">1</span><span class="p">],[</span><span class="s1">&#39;t&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">setaxis</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">set_units</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="s1">&#39;s&#39;</span><span class="p">)</span> <span class="c1"># set the units to s, which are automatically converted to Hz upon FT</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">fromaxis</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">complex128</span><span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mf">2.</span><span class="o">/</span><span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+<span class="n">test_non_integral</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">data</span><span class="o">.</span><span class="n">ft</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="n">shift</span> <span class="o">=</span> <span class="n">test_non_integral</span><span class="p">)</span><span class="c1"># this is required for the non-integral shift!</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">other_info</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;is it safe?&quot;</span><span class="p">,</span><span class="n">data</span><span class="o">.</span><span class="n">get_ft_prop</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,[</span><span class="s1">&#39;freq&#39;</span><span class="p">,</span><span class="s1">&#39;not&#39;</span><span class="p">,</span><span class="s1">&#39;aliased&#39;</span><span class="p">]))</span>
+<span class="n">fl</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="s1">&#39;ft&#39;</span><span class="p">)</span>
+<span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">runcopy</span><span class="p">(</span><span class="n">imag</span><span class="p">),</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">expand_x</span><span class="p">()</span>
+<span class="n">expand_y</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;what is the initial desired startpoint?&quot;</span><span class="p">,</span><span class="n">data</span><span class="o">.</span><span class="n">get_prop</span><span class="p">(</span><span class="s2">&quot;FT_start_time&quot;</span><span class="p">))</span>
+
+<span class="c1"># https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.pyplot.plot.html</span>
+<span class="n">default_plot_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mew</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-----------------------&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;starting standard&quot;</span><span class="p">)</span>
+<span class="n">forplot</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># keep and re-use the gaussian</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;what is the initial desired startpoint?&quot;</span><span class="p">,</span><span class="n">forplot</span><span class="o">.</span><span class="n">get_prop</span><span class="p">(</span><span class="s2">&quot;FT_start_time&quot;</span><span class="p">))</span>
+<span class="n">forplot</span><span class="o">.</span><span class="n">ift</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+<span class="c1">#forplot = forplot[&#39;t&#39;:(-2,2)]</span>
+<span class="n">t_start</span> <span class="o">=</span> <span class="n">forplot</span><span class="o">.</span><span class="n">getaxis</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">fl</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="s1">&#39;ift&#39;</span><span class="p">)</span>
+<span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">forplot</span><span class="p">,</span><span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;$t_</span><span class="si">{start}</span><span class="s1">$: standard </span><span class="si">%0.2f</span><span class="s1">s&#39;</span><span class="o">%</span><span class="n">t_start</span><span class="p">,</span><span class="o">**</span><span class="n">default_plot_kwargs</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">test_non_integral</span><span class="p">:</span>
+    <span class="n">fl</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="s1">&#39;ift -- non-integral&#39;</span><span class="p">)</span>
+    <span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">forplot</span><span class="p">,</span><span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;$t_</span><span class="si">{start}</span><span class="s1">$: standard </span><span class="si">%0.2f</span><span class="s1">s&#39;</span><span class="o">%</span><span class="n">t_start</span><span class="p">,</span><span class="o">**</span><span class="n">default_plot_kwargs</span><span class="p">)</span>
+<span class="c1">#fl.plot(forplot.runcopy(imag),label = &#39;I: standard&#39;,**default_plot_kwargs)</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="n">diff</span><span class="p">(</span><span class="n">forplot</span><span class="o">.</span><span class="n">getaxis</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)[</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;and what is the actual first t index (t_start) after I ift?: &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;t_start is&quot;</span><span class="p">,</span><span class="n">t_start</span><span class="p">,</span><span class="s2">&quot;and dt is&quot;</span><span class="p">,</span><span class="n">dt</span><span class="p">)</span>
+
+<span class="n">symbols</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">([</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;s&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">this_integer</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">250</span><span class="p">,</span><span class="mi">1000</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-----------------------&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;starting integral shift for&quot;</span><span class="p">,</span><span class="n">this_integer</span><span class="p">)</span>
+    <span class="n">forplot</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># keep and re-use the gaussian</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;what is the initial desired startpoint?&quot;</span><span class="p">,</span><span class="n">forplot</span><span class="o">.</span><span class="n">get_ft_prop</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="s2">&quot;start_time&quot;</span><span class="p">))</span>
+    <span class="n">new_startpoint</span> <span class="o">=</span> <span class="n">t_start</span> <span class="o">+</span> <span class="n">this_integer</span> <span class="o">*</span> <span class="n">dt</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;now, I try to reset the startpoint to&quot;</span><span class="p">,</span><span class="n">new_startpoint</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;my dt&quot;</span><span class="p">,</span><span class="n">dt</span><span class="p">,</span><span class="s2">&quot;_get_ft_dt&quot;</span><span class="p">,</span><span class="n">_get_ft_dt</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;t&#39;</span><span class="p">))</span>
+    <span class="n">forplot</span><span class="o">.</span><span class="n">ft_clear_startpoints</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="n">t</span> <span class="o">=</span> <span class="n">new_startpoint</span><span class="p">,</span><span class="n">f</span> <span class="o">=</span> <span class="s1">&#39;current&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;is it safe?&quot;</span><span class="p">,</span><span class="n">data</span><span class="o">.</span><span class="n">get_ft_prop</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,[</span><span class="s1">&#39;freq&#39;</span><span class="p">,</span><span class="s1">&#39;not&#39;</span><span class="p">,</span><span class="s1">&#39;aliased&#39;</span><span class="p">]))</span>
+    <span class="n">fl</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="s1">&#39;ift&#39;</span><span class="p">)</span>
+    <span class="n">forplot</span><span class="o">.</span><span class="n">ift</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;And the actual t startpoint after ift? &quot;</span><span class="p">,</span><span class="n">forplot</span><span class="o">.</span><span class="n">getaxis</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;the difference between the two?&quot;</span><span class="p">,</span><span class="n">forplot</span><span class="o">.</span><span class="n">getaxis</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">forplot</span><span class="o">.</span><span class="n">get_ft_prop</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="s2">&quot;start_time&quot;</span><span class="p">))</span>
+    <span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
+    <span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">forplot</span><span class="p">,</span><span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;$t_</span><span class="si">{start}</span><span class="s1">$: shifted by </span><span class="si">%0.0f</span><span class="s1">pts $</span><span class="se">\\</span><span class="s1">rightarrow$ </span><span class="si">%0.2f</span><span class="s1">s&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">this_integer</span><span class="p">,</span><span class="n">new_startpoint</span><span class="p">),</span><span class="o">**</span><span class="n">default_plot_kwargs</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-----------------------&quot;</span><span class="p">)</span>
+    <span class="c1">#fl.plot(forplot.runcopy(imag),label = &#39;I: integral shifted&#39;,**default_plot_kwargs)</span>
+<span class="n">expand_x</span><span class="p">()</span>
+<span class="n">expand_y</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">test_non_integral</span><span class="p">:</span>
+    <span class="n">symbols</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">([</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;s&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">this_float</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">10.75</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-----------------------&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;starting non-integral shift for&quot;</span><span class="p">,</span><span class="n">this_float</span><span class="p">)</span>
+        <span class="n">forplot</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># keep and re-use the gaussian</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;what is the initial desired startpoint?&quot;</span><span class="p">,</span><span class="n">forplot</span><span class="o">.</span><span class="n">get_ft_prop</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="s2">&quot;start_time&quot;</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;is it safe?&quot;</span><span class="p">,</span><span class="n">data</span><span class="o">.</span><span class="n">get_ft_prop</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,[</span><span class="s1">&#39;freq&#39;</span><span class="p">,</span><span class="s1">&#39;not&#39;</span><span class="p">,</span><span class="s1">&#39;aliased&#39;</span><span class="p">]))</span>
+        <span class="n">new_startpoint</span> <span class="o">=</span> <span class="n">t_start</span> <span class="o">+</span> <span class="n">this_float</span> <span class="o">*</span> <span class="n">dt</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;now, I try to reset the startpoint to&quot;</span><span class="p">,</span><span class="n">new_startpoint</span><span class="p">)</span>
+        <span class="n">forplot</span><span class="o">.</span><span class="n">ft_clear_startpoints</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="n">t</span> <span class="o">=</span> <span class="n">new_startpoint</span><span class="p">,</span><span class="n">f</span> <span class="o">=</span> <span class="s1">&#39;current&#39;</span><span class="p">)</span>
+        <span class="n">fl</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="s1">&#39;ift -- non-integral&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;is it safe?&quot;</span><span class="p">,</span><span class="n">data</span><span class="o">.</span><span class="n">get_ft_prop</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,[</span><span class="s1">&#39;freq&#39;</span><span class="p">,</span><span class="s1">&#39;not&#39;</span><span class="p">,</span><span class="s1">&#39;aliased&#39;</span><span class="p">]))</span>
+        <span class="n">forplot</span><span class="o">.</span><span class="n">ift</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;And the actual t startpoint after ift? &quot;</span><span class="p">,</span><span class="n">forplot</span><span class="o">.</span><span class="n">getaxis</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;the difference between the two?&quot;</span><span class="p">,</span><span class="n">forplot</span><span class="o">.</span><span class="n">getaxis</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">forplot</span><span class="o">.</span><span class="n">get_ft_prop</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="s2">&quot;start_time&quot;</span><span class="p">))</span>
+        <span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
+        <span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;markersize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">10.0</span>
+        <span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">forplot</span><span class="p">,</span><span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;$t_</span><span class="si">{start}</span><span class="s1">$: shifted by </span><span class="si">%0.0f</span><span class="s1">pts $</span><span class="se">\\</span><span class="s1">rightarrow$ </span><span class="si">%0.2f</span><span class="s1">s&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">this_float</span><span class="p">,</span><span class="n">new_startpoint</span><span class="p">),</span><span class="o">**</span><span class="n">default_plot_kwargs</span><span class="p">)</span>
+        <span class="c1">#fl.plot(forplot.runcopy(imag),label = &#39;I: integral shifted&#39;,**default_plot_kwargs)</span>
+    <span class="c1">#{{{ these are manually set for a nice view of the peak of the gaussian</span>
+    <span class="n">xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ylim</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span><span class="mf">1.04</span><span class="p">)</span>
+    <span class="c1">#}}}</span>
+
+<span class="n">fl</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="s1">&#39;interpolation_test_150824.pdf&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.811 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-fourier-aliasing-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/54c91e6b35ea86f52bd26d115eb9b78b/fourier_aliasing.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">fourier_aliasing.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/dfa773b4416f7231e591994b51082c7b/fourier_aliasing.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">fourier_aliasing.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="BRD_test.html" class="btn btn-neutral float-left" title="BRD NNLS" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2016, John M. Franck
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

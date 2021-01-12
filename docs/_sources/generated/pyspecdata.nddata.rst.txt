@@ -1,4 +1,4 @@
-pyspecdata.nddata
+﻿pyspecdata.nddata
 =================
 
 .. currentmodule:: pyspecdata
@@ -16,6 +16,7 @@ pyspecdata.nddata
       ~nddata.__init__
       ~nddata.add_noise
       ~nddata.aligndata
+      ~nddata.along
       ~nddata.argmax
       ~nddata.argmin
       ~nddata.axis
@@ -31,6 +32,7 @@ pyspecdata.nddata
       ~nddata.convolve
       ~nddata.copy
       ~nddata.copy_axes
+      ~nddata.copy_ft_props
       ~nddata.copy_props
       ~nddata.copyaxes
       ~nddata.cropped_log
@@ -112,6 +114,7 @@ pyspecdata.nddata
       ~nddata.squeeze
       ~nddata.sum
       ~nddata.sum_nopop
+      ~nddata.svd
       ~nddata.to_ppm
       ~nddata.unitify_axis
       ~nddata.units_texsafe

@@ -3,7 +3,7 @@
 
 A simple demonstration of a multi-line *vs.*
 image plot with
-`<https://en.wikipedia.org/wiki/Domain_coloring> domain coloring`_, nested
+`domain coloring <https://en.wikipedia.org/wiki/Domain_coloring>`_, nested
 inside a figure list.
 
 We specifically test a safety feature that doesn't allow image plots
@@ -22,7 +22,7 @@ signal_amp.set_units('s')
 signal_amp.ft('t2', shift=True)
 with figlist_var() as fl:
     fl.next('1D data')
-    fl.plot(signal_amp)
+    fl.plot(signal_amp.real) # without .real, newer versions of matplotlib raise a warning
     generated_error = False
     # If I were to just run the following command (not nested in try/except)
     fl.next('this figure intentionally blank!')

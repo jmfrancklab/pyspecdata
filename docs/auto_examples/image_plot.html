@@ -104,6 +104,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">PySpecData Examples</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="log_test.html">Logging Functionality</a></li>
 <li class="toctree-l2"><a class="reference internal" href="matplotlib_test.html">Matplotlib Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extend.html">Extend</a></li>
 <li class="toctree-l2"><a class="reference internal" href="save_hdf.html">Saving HDF5 Files</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Plotting Routines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fit_fake_data.html">Fitting Data</a></li>
@@ -184,7 +185,7 @@
 <span id="sphx-glr-auto-examples-image-plot-py"></span><h1>Plotting Routines<a class="headerlink" href="#plotting-routines" title="Permalink to this headline">¶</a></h1>
 <p>A simple demonstration of a multi-line <em>vs.</em>
 image plot with
-<a href="#id1"><span class="problematic" id="id2">`&lt;https://en.wikipedia.org/wiki/Domain_coloring&gt; domain coloring`_</span></a>, nested
+<a class="reference external" href="https://en.wikipedia.org/wiki/Domain_coloring">domain coloring</a>, nested
 inside a figure list.</p>
 <p>We specifically test a safety feature that doesn’t allow image plots
 to have unevenly spaced axes,
@@ -198,32 +199,7 @@ and show how to deal with this.</p>
 </li>
 </ul>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-  return array(a, dtype, copy=False, order=order)
-C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-  return array(a, dtype, copy=False, order=order)
-C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-  return array(a, dtype, copy=False, order=order)
-C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-  return array(a, dtype, copy=False, order=order)
-C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-  return array(a, dtype, copy=False, order=order)
-C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-  return array(a, dtype, copy=False, order=order)
-C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-  return array(a, dtype, copy=False, order=order)
-C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-  return array(a, dtype, copy=False, order=order)
-C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-  return array(a, dtype, copy=False, order=order)
-C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-  return array(a, dtype, copy=False, order=order)
-C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-  return array(a, dtype, copy=False, order=order)
-C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-  return array(a, dtype, copy=False, order=order)
-C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWarning: Casting complex values to real discards the imaginary part
-  return array(a, dtype, copy=False, order=order)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>you are trying to determine the SI prefix of aset of numbers that are described by integers.  This isprobably not a good idea!!
 </pre></div>
 </div>
 <div class="line-block">
@@ -241,7 +217,7 @@ C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWar
 <span class="n">signal_amp</span><span class="o">.</span><span class="n">ft</span><span class="p">(</span><span class="s1">&#39;t2&#39;</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">with</span> <span class="n">figlist_var</span><span class="p">()</span> <span class="k">as</span> <span class="n">fl</span><span class="p">:</span>
     <span class="n">fl</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="s1">&#39;1D data&#39;</span><span class="p">)</span>
-    <span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">signal_amp</span><span class="p">)</span>
+    <span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">signal_amp</span><span class="o">.</span><span class="n">real</span><span class="p">)</span> <span class="c1"># without .real, newer versions of matplotlib raise a warning</span>
     <span class="n">generated_error</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="c1"># If I were to just run the following command (not nested in try/except)</span>
     <span class="n">fl</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="s1">&#39;this figure intentionally blank!&#39;</span><span class="p">)</span>
@@ -256,7 +232,7 @@ C:\ProgramData\Anaconda3\lib\site-packages\numpy\core\_asarray.py:85: ComplexWar
     <span class="k">assert</span> <span class="n">generated_error</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.499 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.033 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-image-plot-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/eff600a34d96f42a4eb316a8696d86ea/image_plot.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">image_plot.py</span></code></a></p>

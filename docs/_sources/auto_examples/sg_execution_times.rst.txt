@@ -5,16 +5,18 @@
 
 Computation times
 =================
-**00:01.242** total execution time for **auto_examples** files:
+**00:01.033** total execution time for **auto_examples** files:
 
 +---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_image_plot.py` (``image_plot.py``)           | 00:00.499 | 0.0 MB |
+| :ref:`sphx_glr_auto_examples_image_plot.py` (``image_plot.py``)           | 00:01.033 | 0.0 MB |
 +---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_fit_fake_data.py` (``fit_fake_data.py``)     | 00:00.493 | 0.0 MB |
+| :ref:`sphx_glr_auto_examples_extend.py` (``extend.py``)                   | 00:00.000 | 0.0 MB |
 +---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_matplotlib_test.py` (``matplotlib_test.py``) | 00:00.204 | 0.0 MB |
+| :ref:`sphx_glr_auto_examples_fit_fake_data.py` (``fit_fake_data.py``)     | 00:00.000 | 0.0 MB |
 +---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_save_hdf.py` (``save_hdf.py``)               | 00:00.044 | 0.0 MB |
+| :ref:`sphx_glr_auto_examples_log_test.py` (``log_test.py``)               | 00:00.000 | 0.0 MB |
 +---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_log_test.py` (``log_test.py``)               | 00:00.002 | 0.0 MB |
+| :ref:`sphx_glr_auto_examples_matplotlib_test.py` (``matplotlib_test.py``) | 00:00.000 | 0.0 MB |
++---------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_save_hdf.py` (``save_hdf.py``)               | 00:00.000 | 0.0 MB |
 +---------------------------------------------------------------------------+-----------+--------+

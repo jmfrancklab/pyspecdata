@@ -56,6 +56,27 @@ various functions.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Demonstrate how to extend past the limits of the data.">
+
+.. only:: html
+
+ .. figure:: /auto_examples/images/thumb/sphx_glr_extend_thumb.png
+     :alt: Extend
+
+     :ref:`sphx_glr_auto_examples_extend.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/extend
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="an example of saving nddata to hdf5 files, which preserves all of the nddata information flawle...">
 
 .. only:: html
@@ -77,7 +98,7 @@ various functions.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="A simple demonstration of a multi-line *vs.* image plot with `&lt;https://en.wikipedia.org/wiki/Do...">
+    <div class="sphx-glr-thumbcontainer" tooltip="A simple demonstration of a multi-line *vs.* image plot with `domain coloring &lt;https://en.wikip...">
 
 .. only:: html
 

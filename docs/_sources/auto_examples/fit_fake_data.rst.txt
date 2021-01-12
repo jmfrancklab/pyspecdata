@@ -30,14 +30,14 @@ function.
 
     Getting symbolic function
     Getting symbolic function
-    {M_inf, R_1, M_0}
+    {R_1, M_0, M_inf}
     {\bf Warning:} You have no error associated with your plot, and I want to flag this for now
 
 
-    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:7530: Warning: You have no error associated with your plot, and I want to flag this for now
+    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:7535: Warning: You have no error associated with your plot, and I want to flag this for now
       warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
-    output: {'M_0': -103.60096801721463, 'M_inf': 102.07339216807071, 'R_1': 6.066826986936988}
-    latex: $f(\tau)=102.07 + \left(-1.04\times 10^{2} - 102.07\right) e^{- 6.07 \tau}$
+    output: {'M_0': -102.42378444846382, 'M_inf': 102.1750905774885, 'R_1': 5.9911568873602645}
+    latex: $f(\tau)=102.18 + \left(-1.02\times 10^{2} - 102.18\right) e^{- 5.99 \tau}$
 
 
 
@@ -106,7 +106,7 @@ function.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.493 seconds)
+   **Total running time of the script:** ( 0 minutes  0.602 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fit_fake_data.py:
