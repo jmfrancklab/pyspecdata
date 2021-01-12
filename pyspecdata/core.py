@@ -5491,7 +5491,8 @@ class nddata (object):
         axis : str
             name of the axis to extend
         extent : double
-            extend the axis `axis` out to this point
+            extend the axis `axis` out to this point (i.e.,this is the value which
+            you wish to extend the axis out to) 
         fill_with : double
             fill the new data points with this value (defaults to 0)
         tolerance : double
