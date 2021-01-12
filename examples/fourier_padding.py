@@ -1,4 +1,12 @@
+"""
+Fourier Padding
+===============
+
+Demonstrates that we can zero fill (pad) either the Fourier Transform or the
+Inverse Fourier Transform, and that everything works out as expected.
+"""
 # from JF notebook sec:fourier_padding_test
+from pylab import *
 from pyspecdata import *
 fl = figlist_var()
 t = r_[-3:10:1024j]

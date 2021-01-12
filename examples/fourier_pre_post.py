@@ -1,4 +1,12 @@
+"""
+Frequency and Time Shifting
+===========================
+
+Here we show that relabeling an axis before or after a Fourier Transform
+generates the expected result.
+"""
 # from JF notebook sec:task4126
+from pylab import *
 from pyspecdata import *
 fl = figlist_var()
 t = r_[2.5:12:1024j]

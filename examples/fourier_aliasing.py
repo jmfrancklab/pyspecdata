@@ -1,4 +1,15 @@
+"""
+Fourier Aliasing
+================
+
+Here, we show that we can view the Fourier transform as an infinitely repeat
+set of replicates (aliases, *s.t.*
+:math:`Ш(\nu/t_{dw})*\tilde{f}(\nu)`) and view any of those aliases
+(of width :math:`SW=1/t_{dw}`)
+that we choose.
+"""
 # from JF noteobok sec:fourier_aliasing_test
+from pylab import *
 from pyspecdata import *
 from pyspecdata.fourier.ft_shift import _get_ft_dt
 fl = figlist_var()

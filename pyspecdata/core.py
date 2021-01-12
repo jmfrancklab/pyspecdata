@@ -44,7 +44,7 @@ if _figure_mode_setting == 'latex':
 # }}} -- continued below
 from .general_functions import inside_sphinx
 import numpy as np
-from numpy import r_,c_,nan,inf
+from numpy import r_,c_,nan,inf,newaxis
 from numpy import pi
 from matplotlib.pyplot import rc, rcParams, plot, figure, title, text, show
 import matplotlib.pyplot as plt
@@ -219,7 +219,7 @@ def make_bar_graph_indices(mystructarray,list_of_text_fields,
     r"This is a recursive function that is used as part of textlabel_bargraph; it does NOT work without the sorting given at the beginning of that function"
     #{{{ if there are still text fields left, then break down the np.array further, otherwise, just return the indices for this subarray
     if len(list_of_text_fields) > 0:
-        unique_values = unique(mystructarray[list_of_text_fields[0]])# the return_index argument doesn't do what it's supposed to all the time, so I have to manually find the start indices, as given in the following line
+        unique_values = np.unique(mystructarray[list_of_text_fields[0]])# the return_index argument doesn't do what it's supposed to all the time, so I have to manually find the start indices, as given in the following line
         start_indices = [np.nonzero(mystructarray[list_of_text_fields[0]] == val)[0][0] for val in unique_values]
         # find the structured np.array for the unique value
         index_values = []
@@ -325,7 +325,7 @@ def lookup_rec(A,B,indexpair):
     raise RuntimeError('You should now use decorate_rec!!')
     if type(indexpair) not in [tuple,list]:
         indexpair = (indexpair,indexpair)
-    Bini = copy(B)
+    Bini = np.copy(B)
     B = recf.drop_fields(B,( set(B.dtype.names) & set(A.dtype.names) ) - {indexpair[1]}) # indexpair for B gets dropped later anyways
     joined = []
     for j in A:
@@ -834,7 +834,7 @@ def copy_maybe_none(input):
         return None
     else:
         if isinstance(input, list):
-            return list(map(copy,input))
+            return list(map(np.copy,input))
         else:
             return input.copy()
 def maprep(*mylist):
@@ -3227,7 +3227,7 @@ class nddata (nddata_ft):
         for j in values:
             retval.append(np.argmin(abs(x - j)))
         retval = np.array(retval)
-        return unique(retval)
+        return np.unique(retval)
     #}}}
     #{{{ dictionary functions -- these convert between two formats:
     # dictionary -- stuff labeled according the dimension label.
@@ -3761,7 +3761,7 @@ class nddata (nddata_ft):
                         " The current array has dtype",axis_coords_dict[j].dtype,
                         "and the one you're trying to multiply is",arg_axis_coords_dict[j].dtype)
                 if len(axis_coords_dict[j].dtype) == 0:
-                    assert all(isclose(axis_coords_dict[j],arg_axis_coords_dict[j])), "axis coords don't match for %s"%j
+                    assert all(np.isclose(axis_coords_dict[j],arg_axis_coords_dict[j])), "axis coords don't match for %s"%j
                 else:# structured array
                     all([allclose(axis_coords_dict[j][name],
                         arg_axis_coords_dict[j][name]) for name in
@@ -3777,7 +3777,7 @@ class nddata (nddata_ft):
                     arg_axis_coords_error_dict[j] is None)
                 print("error dict for isclose",repr(axis_coords_error_dict[j]),
                     repr(arg_axis_coords_error_dict[j]))
-                assert all(isclose(axis_coords_error_dict[j],
+                assert all(np.isclose(axis_coords_error_dict[j],
                     arg_axis_coords_error_dict[j])), "axis errors don't match for %s"%j
         info_needed_from_arg = (set(uninvolved_dims[0]) |
                 set(uninvolved_dims[1]) |
@@ -3828,15 +3828,15 @@ class nddata (nddata_ft):
         # {{{ insert singleton dims where needed
         for j,thisdim in enumerate(output_shape[:-2]+mult_dims[0]):
             if thisdim not in self.dimlabels and thisdim != rename_redundant[1]:
-                self_formult_data = expand_dims(self_formult_data,j)
+                self_formult_data = np.expand_dims(self_formult_data,j)
         for j,thisdim in enumerate(output_shape[:-2]+mult_dims[1]):
             if thisdim not in arg.dimlabels:
-                arg_formult_data = expand_dims(arg_formult_data,j)
+                arg_formult_data = np.expand_dims(arg_formult_data,j)
         # }}}
         logger.debug(strm("raw nddata about to be multiplied are",
             self_formult_data.shape,arg_formult_data.shape))
         time_matmul = time.time()
-        self.data = matmul(self_formult_data,arg_formult_data)
+        self.data = np.matmul(self_formult_data,arg_formult_data)
         # {{{ remove singleton dimensions that we added
         if 'XXX_ADDED_XXX' in output_shape:
             this_slice = tuple(0 if j=='XXX_ADDED_XXX' else slice(None,None)
@@ -3853,9 +3853,9 @@ class nddata (nddata_ft):
         for j,thisdim in enumerate(self.dimlabels):
             if thisdim == rename_redundant[1]:
                 thisdim = rename_redundant[0]
-                self.axis_coords.append(copy(axis_coords_dict[thisdim]))
-                self.axis_coords_units.append(copy(axis_units_dict[thisdim]))
-                self.axis_coords_error.append(copy(axis_coords_error_dict[thisdim]))
+                self.axis_coords.append(np.copy(axis_coords_dict[thisdim]))
+                self.axis_coords_units.append(np.copy(axis_units_dict[thisdim]))
+                self.axis_coords_error.append(np.copy(axis_coords_error_dict[thisdim]))
             else:
                 self.axis_coords.append(axis_coords_dict[thisdim])
                 self.axis_coords_units.append(axis_units_dict[thisdim])
@@ -4894,8 +4894,8 @@ class nddata (nddata_ft):
         """
         # {{{ type checking
         def demand_real(x, addtxt=''):
-            if not x.dtype == float64:
-                if x.dtype == complex128:
+            if not x.dtype == np.float64:
+                if x.dtype == np.complex128:
                     raise ValueError("you are not allows to pass nnls complex data:\nif it makes sense for you, try yourdata.real.nnls( where you now have yourdata.nnls("+'\n'+addtxt)
                 else:
                     raise ValueError("I expect double-precision floating point (float64), but you passed me data of dtype "+str(x.dtype)+'\n'+addtxt)
@@ -4957,7 +4957,7 @@ class nddata (nddata_ft):
         U1 = U1[:,0:s1]
         S1 = S1[0:s1]
         V1 = V1[0:s1,:]
-        S1 = S1*eye(s1)
+        S1 = S1*np.eye(s1)
         logger.debug(strm('Compressed SVD of K1:',[x.shape for x in (U1,S1,V1)]))
         #{{{ prepping 2D
         if twoD:
@@ -4968,7 +4968,7 @@ class nddata (nddata_ft):
             U2 = U2[:,0:s2]
             S2 = S2[0:s2]
             V2 = V2[0:s2,:]
-            S2 = S2*eye(s2)
+            S2 = S2*np.eye(s2)
             logger.debug(strm('Compressed SVD K2:',[x.shape for x in (U2,S2,V2)]))
             K1 = S1.dot(V1)
             K1_ret = K1
@@ -5005,7 +5005,7 @@ class nddata (nddata_ft):
             def d_chi(x_vec,val):
                 return np.dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
             def dd_chi(G,val):
-                return G + (val**2)*eye(np.shape(G)[0])
+                return G + (val**2)*np.eye(np.shape(G)[0])
             def G(x_vec):
                 return np.dot(K,np.dot(square_heaviside(x_vec),K.T))
             def H(product):
@@ -5021,7 +5021,7 @@ class nddata (nddata_ft):
                     temp = H(temp)
                     diag_heavi.append(temp)
                 diag_heavi = np.array(diag_heavi)
-                square_heavi = diag_heavi*eye(np.shape(diag_heavi)[0])
+                square_heavi = diag_heavi*np.eye(np.shape(diag_heavi)[0])
                 return square_heavi
             def optimize_alpha(input_vec,val):
                 alpha_converged = False
@@ -5029,10 +5029,10 @@ class nddata (nddata_ft):
                     factor = sqrt(s1*s2)
                 if not twoD:
                     factor = sqrt(input_vec.shape[0])
-                T = linalg.inv(dd_chi(G(input_vec),val**2))
+                T = np.linalg.inv(dd_chi(G(input_vec),val**2))
                 dot_product = np.dot(input_vec.T,np.dot(T,input_vec))
                 ans = dot_product*factor
-                ans = ans/linalg.norm(input_vec)/dot_product
+                ans = ans/np.linalg.norm(input_vec)/dot_product
                 tol = 1e-6
                 if abs(ans-val**2) <= tol:
                     logger.debug(strm('ALPHA HAS CONVERGED.'))
@@ -5042,7 +5042,7 @@ class nddata (nddata_ft):
             def newton_min(input_vec,val):
                 fder = dd_chi(G(input_vec),val)
                 fval = d_chi(input_vec,val)
-                return (input_vec + np.dot(linalg.inv(fder),fval))
+                return (input_vec + np.dot(np.linalg.inv(fder),fval))
             def mod_BRD(guess,maxiter=20):
                 smoothing_param = guess
                 alpha_converged = False
@@ -5070,7 +5070,7 @@ class nddata (nddata_ft):
             retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=mod_BRD(guess=1.0))
         else:
             retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=l)
-        logger.debug(strm('coming back from fortran, residual type is',type(residual))+ strm(residual.dtype if isinstance(residual, ndarray) else ''))
+        logger.debug(strm('coming back from fortran, residual type is',type(residual))+ strm(residual.dtype if isinstance(residual, np.ndarray) else ''))
         newshape = []
         if not np.isscalar(l):
             newshape.append(len(l))
@@ -5533,7 +5533,7 @@ class nddata (nddata_ft):
                     thisax = thisax.copy()
                 self.setaxis(thisdim,thisax)
                 if other.get_error(thisdim) is not None:
-                    self.set_error(thisdim, copy(other.get_error(thisdim)))
+                    self.set_error(thisdim, np.copy(other.get_error(thisdim)))
                 if other.get_units(thisdim) is not None:
                     self.set_units(thisdim, other.get_units(thisdim))
         return self
@@ -6174,18 +6174,18 @@ class nddata (nddata_ft):
             return a
         axis_number = self.axn(axis_name)
         which_field = self.getaxis(axis_name).dtype.names[-1]
-        new_axis,indices = unique(self.getaxis(axis_name)[which_field],
+        new_axis,indices = np.unique(self.getaxis(axis_name)[which_field],
                 return_inverse = True) # we are essentially creating a hash table for the axis.  According to numpy documentation, the hash indices that this returns should also be sorted sorted.
         logger.debug(strm("(chunk auto) indices look like this:",indices))
         #{{{ check that there are equal numbers of all the unique new_axis
-        index_count = np.array([count_nonzero(indices == j) for j in range(indices.max()+1)])
+        index_count = np.array([np.count_nonzero(indices == j) for j in range(indices.max()+1)])
         if all(index_count == index_count[0]):
             logger.debug(strm("(chunk auto) Yes, there are equal numbers of all unique new_axis! (Each element of the hash table has been indexed the same number of times.)"))
             #}}}
             #{{{ store the old shape and generate the new shape
             current_shape = list(self.data.shape)
             logger.debug(strm("(chunk auto) old shape -- ",current_shape))
-            new_shape = insert(current_shape,axis_number + 1,len(new_axis))
+            new_shape = np.insert(current_shape,axis_number + 1,len(new_axis))
             new_shape[axis_number] /= len(new_axis) # the indices of the hash table become the new dimension
             #}}}
             #{{{ actually reorder the data and error -- perhaps a view would be more efficient here
@@ -6247,7 +6247,7 @@ class nddata (nddata_ft):
             # duplicate labels
             test_axis = self.axis_coords[axis_number].T
             logger.debug(strm("(chunk auto) test axis -- ",test_axis))
-            test_axis = ascontiguousarray(test_axis).flatten().view([('',test_axis.dtype)]*test_axis.shape[1])
+            test_axis = np.ascontiguousarray(test_axis).flatten().view([('',test_axis.dtype)]*test_axis.shape[1])
             if all(test_axis == test_axis[0]):
                 self.axis_coords[axis_number] = self.axis_coords[axis_number][:,0].reshape(1,-1)
                 logger.debug(strm("(chunk auto) collapsed to", self.axis_coords[axis_number]))
@@ -7152,7 +7152,7 @@ def ndgrid(*input):
     thissize = thissize * len(input)
     output = list()
     for j in range(0,len(input)):
-        tempsize = copy(thissize)
+        tempsize = np.copy(thissize)
         tempsize[j] = input[j].size
         output.append(input[j].reshape(tempsize))
     return output
@@ -7168,7 +7168,7 @@ def pinvr(C,alpha):
         raise ValueError('pinvr error, V is not finite')
     if np.any(~np.isfinite(S)):
         raise ValueError('pinvr error, S is not finite')
-    S = diag(S / (S**2 + alpha**2))
+    S = np.diag(S / (S**2 + alpha**2))
     if np.any(~np.isfinite(S)):
         raise ValueError('pinvr error, problem with S/(S^2+alpha^2) --> set your regularization higher')
     return np.dot(np.conj(transpose(V)),
@@ -7395,27 +7395,27 @@ class fitdata(nddata):
         else:
             sigma = self.get_error()
             #covarmatrix = np.dot(pinv(f),
-            #        np.dot(diag(sigma**2),pinv(f.T)))
+            #        np.dot(np.diag(sigma**2),pinv(f.T)))
             J = matrix(fprime.T)
-            #W = matrix(diag(1./sigma**2))
-            #S = matrix(diag(sigma**2))
+            #W = matrix(np.diag(1./sigma**2))
+            #S = matrix(np.diag(sigma**2))
             #if hasattr(self,'data_covariance'):
             #    print "covariance data is present"
             S = matrix(self.get_covariance())
             Omegainv = S**-1
-            #S = matrix(diag(sigma**2))
-            #G = matrix(diag(1./sigma))
+            #S = matrix(np.diag(sigma**2))
+            #G = matrix(np.diag(1./sigma))
             #G = S**(-1/2) # analog of the above
             #covarmatrix = ((J.T * W * J)**-1) * J.T * W
             print('a')
-            minimizer = inv(J.T * Omegainv * J) * J.T * Omegainv
+            minimizer = np.linalg.inv(J.T * Omegainv * J) * J.T * Omegainv
             covarmatrix = minimizer * S * minimizer.T
             #covarmatrix = np.array(covarmatrix * S * covarmatrix.T)
             #covarmatrix = np.array((J.T * G.T * G * J)**-1 * J.T * G.T * G * S * G.T * G * J * (J.T * G.T * G * J)**-1)
             #try:
             #    betapremult = (J.T * Omegainv * J)**-1 * J.T * Omegainv
             #except:
-            #    print 'from sigma','\n\n',diag(sigma**2),'\n\n','from covarmatrix','\n\n',S,'\n\n'
+            #    print 'from sigma','\n\n',np.diag(sigma**2),'\n\n','from covarmatrix','\n\n',S,'\n\n'
             #    raise RuntimeError('problem generating estimator (word?)')
             #covarmatrix = np.array( betapremult * S * betapremult.T)
         #print "shape of fprime",np.shape(fprime),"shape of fprime_prod",np.shape(fprime_prod),'sigma = ',sigma,'covarmat=',covarmatrix,'\n'
