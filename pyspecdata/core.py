@@ -5502,16 +5502,21 @@ class nddata (object):
         """
         # check for uniformly ascending
         u = self.getaxis(axis)
-        thismsg = "In order to expand, the axis must be equally spaced (and ascending)"
         du = (u[-1] - u[0])/(len(u)-1.)
         assert all(abs(np.diff(u) - du)/du < tolerance), thismsg# absolute
         # figure out how many points I need to add, and on which side of the axis
         thismsg = "In order to expand, the axis must be ascending (and equally spaced)"
         assert du > 0, thismsg# ascending
         start_index = 0
-        stop_index = extent 
+        stop_index = len(u) # this is the index at which the data
+        #                     stops.  To start with, we assume the
+        #                     data stops where the original
+        #                     position stops, and if needed, we
+        #                     added points with stop_index_addto
+        logger.debug(strm("attempting to extend axis that runs from",u[0],
+            "to",u[-1],"out to",extent))
         if extent < u[0]:
-            start_index = int(-(u[0] - extent) // du) # the part after the negative is positive
+            start_index = -int((u[0] - extent) // du) # the part after the negative is positive
             if (start_index * du + (u[0] - extent))/du < -tolerance:# the first quantity here is negative
                 start_index -= 1
         elif extent > u[-1]:
@@ -5523,29 +5528,20 @@ class nddata (object):
             raise RuntimeError("extent ({:g}) needs to be further than the bounds on '{:s}', which are {:g} and {:g}".format(extent,axis,u[0],u[-1]))
         #{{{ create a new np.array, and put self.data into it
         newdata = list(self.data.shape)
-        if extent < u[0]:
-            newdata[self.axn(axis)] = len(u)+abs(start_index)
-        elif extent > u[-1]:
-            newdata[self.axn(axis)] = len(u)+stop_index - start_index
+        newdata[self.axn(axis)] = stop_index - start_index
         if fill_with == 0:
             newdata = np.zeros(newdata,dtype = self.data.dtype)
         else:
             newdata = fill_with * np.ones(newdata,dtype = self.data.dtype)
         newdata_slice = [slice(None,None,None)] * len(newdata.shape)
-        if extent < u[0]:
-            newdata_slice[self.axn(axis)] = slice(abs(start_index),abs(start_index)+len(u),None)
-            #newdata_slice[self.axn(axis)] = slice(-(abs(start_index)+len(u)),len(u),None)
-            #newdata_slice[self.axn(axis)] = slice((abs(start_index)+len(u)),-len(u),None)
-        elif extent > u[-1]:
-            newdata_slice[self.axn(axis)] = slice(-start_index,len(u)-start_index,None)
+        # since start_index is negative, -start_index points have been added to
+        # the beginning of the data (and the original data is len(u) in length)
+        newdata_slice[self.axn(axis)] = slice(-start_index,len(u)-start_index,None)
         newdata[newdata_slice] = self.data
         self.data = newdata
         #}}}
         # construct the new axis
-        if extent < u[-1]:
-            new_u = u[0] + du * r_[start_index:len(u)]
-        elif extent > u[-1]:
-            new_u = u[0] + du * r_[start_index:len(u)+stop_index]
+        new_u = u[0] + du * r_[start_index:stop_index]
         self.setaxis(axis,new_u)
         return self
     def setaxis(self,*args):
