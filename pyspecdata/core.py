@@ -5481,8 +5481,12 @@ class nddata (object):
         else:
             return None
     def extend(self,axis,extent, fill_with=0, tolerance=1e-5):
-        r"""If `axis` is uniformly ascending with spacing :math:`dx`,
-        then extend by adding a point every :math:`dx` until the axis
+        r"""Extend the (domain of the) dataset and fill with a pre-set value.
+
+        The coordinates associated with
+        `axis` must be uniformly ascending with spacing :math:`dx`.
+        The function will extend `self`
+        by adding a point every :math:`dx` until the axis
         includes the point `extent`.  Fill the newly created datapoints with `fill_with`.
 
         Parameters
@@ -5491,8 +5495,11 @@ class nddata (object):
         axis : str
             name of the axis to extend
         extent : double
-            extend the axis `axis` out to this point (i.e.,this is the value which
-            you wish to extend the axis out to) 
+            Extend the axis coordinates of `axis` out to this value.
+
+            The value of `extent` must be less the smallest (most negative)
+            axis coordinate or greater than the largest (most positive)
+            axis coordinate.
         fill_with : double
             fill the new data points with this value (defaults to 0)
         tolerance : double
