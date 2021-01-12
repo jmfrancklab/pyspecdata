@@ -5481,8 +5481,12 @@ class nddata (object):
         else:
             return None
     def extend(self,axis,extent, fill_with=0, tolerance=1e-5):
-        r"""If `axis` is uniformly ascending with spacing :math:`dx`,
-        then extend by adding a point every :math:`dx` until the axis
+        r"""Extend the (domain of the) dataset and fill with a pre-set value.
+
+        The coordinates associated with
+        `axis` must be uniformly ascending with spacing :math:`dx`.
+        The function will extend `self`
+        by adding a point every :math:`dx` until the axis
         includes the point `extent`.  Fill the newly created datapoints with `fill_with`.
 
         Parameters
@@ -5491,7 +5495,11 @@ class nddata (object):
         axis : str
             name of the axis to extend
         extent : double
-            extend the axis `axis` out to this point
+            Extend the axis coordinates of `axis` out to this value.
+
+            The value of `extent` must be less the smallest (most negative)
+            axis coordinate or greater than the largest (most positive)
+            axis coordinate.
         fill_with : double
             fill the new data points with this value (defaults to 0)
         tolerance : double
@@ -5502,16 +5510,21 @@ class nddata (object):
         """
         # check for uniformly ascending
         u = self.getaxis(axis)
-        thismsg = "In order to expand, the axis must be equally spaced (and ascending)"
         du = (u[-1] - u[0])/(len(u)-1.)
         assert all(abs(np.diff(u) - du)/du < tolerance), thismsg# absolute
         # figure out how many points I need to add, and on which side of the axis
         thismsg = "In order to expand, the axis must be ascending (and equally spaced)"
         assert du > 0, thismsg# ascending
         start_index = 0
-        stop_index = len(u)
+        stop_index = len(u) # this is the index at which the data
+        #                     stops.  To start with, we assume the
+        #                     data stops where the original
+        #                     position stops, and if needed, we
+        #                     added points with stop_index_addto
+        logger.debug(strm("attempting to extend axis that runs from",u[0],
+            "to",u[-1],"out to",extent))
         if extent < u[0]:
-            start_index = int(-(u[0] - extent) // du) # the part after the negative is positive
+            start_index = -int((u[0] - extent) // du) # the part after the negative is positive
             if (start_index * du + (u[0] - extent))/du < -tolerance:# the first quantity here is negative
                 start_index -= 1
         elif extent > u[-1]:
@@ -5529,14 +5542,9 @@ class nddata (object):
         else:
             newdata = fill_with * np.ones(newdata,dtype = self.data.dtype)
         newdata_slice = [slice(None,None,None)] * len(newdata.shape)
+        # since start_index is negative, -start_index points have been added to
+        # the beginning of the data (and the original data is len(u) in length)
         newdata_slice[self.axn(axis)] = slice(-start_index,len(u)-start_index,None)
-        logger.debug(strm("-------------------------"))
-        logger.debug(strm("shape of newdata",newdata.shape))
-        logger.debug(strm("shape of self.data",self.data.shape))
-        logger.debug(strm("len of u",len(u)))
-        logger.debug(strm("start index",start_index))
-        logger.debug(strm("shape of slice",newdata[newdata_slice].shape))
-        logger.debug(strm("-------------------------"))
         newdata[newdata_slice] = self.data
         self.data = newdata
         #}}}
