@@ -14,6 +14,12 @@ Please note this package is heavily utilized by three other packages that our la
 *   `Classes for communicating with instruments <https://github.com/jmfrancklab/inst_notebooks/>`_.
 *   `Convenient SpinCore NMR Extension <https://github.com/jmfrancklab/spincore_apps/>`_.
 
+
+:ref:`See pySpecData examples here <sphx_glr_auto_examples>`.
+
+Some more explanation
+=====================
+
 In practice, this means that it makes the code for processing spectral data shorter and more quickly legible.
 It *automatically* handles the following issues, without any additional code:
 
@@ -100,6 +106,12 @@ These and further details are covered in the various sections of the documentati
     figlist.rst
     units.rst
     modules.rst
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Example Gallery
+
+    auto_examples/index
 
 
 Indices and tables

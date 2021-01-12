@@ -3,8 +3,10 @@ List of Classes
 
 .. autosummary::
     :toctree: generated
+
     ~pyspecdata.nddata_ft
 
 .. autosummary::
     :toctree: generated
+
     ~pyspecdata.nddata

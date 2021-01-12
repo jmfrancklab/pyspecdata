@@ -1,15 +1,22 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>the fitdata class &mdash; pySpecData 0.9.5.3.1 documentation</title>
+  <title>the fitdata class &mdash; pySpecData 0.9.5.3.2 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery_custom.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery-dataframe.css" type="text/css" />
 
   
   
@@ -17,7 +24,9 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -25,19 +34,15 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="LaTeX Notebook Functionality" href="notebook.html" />
-    <link rel="prev" title="List of Classes" href="classes.html" /> 
+    <link rel="next" title="The Figure List" href="figlist.html" />
+    <link rel="prev" title="Documentation of Notebook Helper Functions" href="latexscripts.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -51,7 +56,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> pySpecData
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> pySpecData
           
 
           
@@ -61,7 +66,7 @@
             
             
               <div class="version">
-                0.9.5.3.1
+                0.9.5.3.2
               </div>
             
           
@@ -78,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -86,21 +92,25 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="classes.html">List of Classes</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">the fitdata class</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#creating-new-types-of-fitdata-modules">creating new types of fitdata modules</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -139,7 +149,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>the fitdata class</li>
     
@@ -186,6 +196,14 @@ general <span class="math notranslate nohighlight">\(T_1\)</span> recovery curve
 starting point for making new fit classes. Then, we can make instances
 of the new class, and use their methods (described in the subsequent
 section) next.</p>
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<p>the option block :no-inherited-members: doesn’t work – not sure how to modify class.rst
+I put a template from stackexchange inside _templates
+– see <a class="reference external" href="https://stackoverflow.com/questions/28147432/how-to-customize-sphinx-ext-autosummary-rst-template">https://stackoverflow.com/questions/28147432/how-to-customize-sphinx-ext-autosummary-rst-template</a>
+on how to use it</p>
+<p>then, I need to link to or include generated/pyspecdata.core.fitdata.rst</p>
+</div>
 <dl class="py class">
 <dt id="pyspecdata.core.fitdata">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">fitdata</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata" title="Permalink to this definition">¶</a></dt>
@@ -242,10 +260,30 @@ nddata metadata.</p>
 <dl class="py method">
 <dt id="pyspecdata.core.fitdata.eval">
 <code class="sig-name descname">eval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">taxis</span></em>, <em class="sig-param"><span class="n">set_what</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">set_to</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.eval" title="Permalink to this definition">¶</a></dt>
-<dd><p>after we have fit, evaluate the fit function along the axis taxis
-set_what and set_to allow you to forcibly set_what a specific symbol to a
-specific value –&gt; however, this does not affect the class, but only
-the return value</p>
+<dd><p>calculate the fit function along the axis taxis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>taxis</strong> (<em>ndarray</em><em>, </em><em>int</em>) – <dl class="field-list simple">
+<dt class="field-odd">if ndarray</dt>
+<dd class="field-odd"><p>the new axis coordinates along which we want to calculate the fit.</p>
+</dd>
+<dt class="field-even">if int</dt>
+<dd class="field-even"><p>number of evenly spaced points along the t-axis along the fit</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>set_what</strong> (<em>'str'</em><em>, </em><em>optional</em>) – forcibly sets a specific symbol</p></li>
+<li><p><strong>set_to</strong> (<em>double</em><em>, </em><em>optional</em>) – the specific value (int) you are assigning the symbol you included</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -257,7 +295,7 @@ the return value</p>
 <dl class="py method">
 <dt id="pyspecdata.core.fitdata.fitfunc">
 <code class="sig-name descname">fitfunc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.fitfunc" title="Permalink to this definition">¶</a></dt>
-<dd><p>this wraps fitfunc_raw (which gives the actual form of the fit function) to take care of forced variables</p>
+<dd><p>This is the function that does the actual fitting, and takes a properly ordered list of parameters as well as an np.ndarray for the x axis.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -333,7 +371,27 @@ resulting values.</p>
 <dl class="py method">
 <dt id="pyspecdata.core.fitdata.residual">
 <code class="sig-name descname">residual</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">sigma</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.residual" title="Permalink to this definition">¶</a></dt>
-<dd><p>just the error function</p>
+<dd><p>just the residual (error) function</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.core.fitdata.set_guess">
+<code class="sig-name descname">set_guess</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dict_of_values</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.set_guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>sets parameters to guess/estimated value to compare fit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dict_of_values</strong> (<em>dict</em>) – dictionary of values set to parameters in fit equation.
+Allows for the setting of multiple variables depending on
+what’s defined in this dictionary. The keys of the dictionary
+must be sympy symbols</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>self</strong> – The modified nddata</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -355,10 +413,10 @@ resulting values.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="notebook.html" class="btn btn-neutral float-right" title="LaTeX Notebook Functionality" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="figlist.html" class="btn btn-neutral float-right" title="The Figure List" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="classes.html" class="btn btn-neutral float-left" title="List of Classes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="latexscripts.html" class="btn btn-neutral float-left" title="Documentation of Notebook Helper Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -367,11 +425,19 @@ resulting values.</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2016, John M. Franck
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -382,7 +448,6 @@ resulting values.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

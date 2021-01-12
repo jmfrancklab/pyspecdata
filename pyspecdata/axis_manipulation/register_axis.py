@@ -1,4 +1,5 @@
 from ..general_functions import *
+import numpy as np
 if not inside_sphinx():
     from pylab import r_
 
@@ -21,7 +22,7 @@ def register_axis(self,arg,nearest=None):
     '''
     for k,v in arg.items():
         x = self.getaxis(k)
-        idx = argmin(abs(x - v))
+        idx = np.argmin(abs(x - v))
         offset = (v # where I want to be
                 - x[idx]) # where I actually am
         offset += x[0] # since the following takes the startpoint

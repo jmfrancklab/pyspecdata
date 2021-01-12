@@ -1,4 +1,4 @@
-pyspecdata.core.fitdata
+﻿pyspecdata.core.fitdata
 =======================
 
 .. currentmodule:: pyspecdata.core
@@ -17,6 +17,7 @@ pyspecdata.core.fitdata
       ~fitdata.add_inactive_p
       ~fitdata.add_noise
       ~fitdata.aligndata
+      ~fitdata.along
       ~fitdata.analytical_covariance
       ~fitdata.argmax
       ~fitdata.argmin
@@ -47,6 +48,7 @@ pyspecdata.core.fitdata
       ~fitdata.fit
       ~fitdata.fitfunc
       ~fitdata.fld
+      ~fitdata.fourier_shear
       ~fitdata.fromaxis
       ~fitdata.ft
       ~fitdata.ft_clear_startpoints
@@ -118,6 +120,7 @@ pyspecdata.core.fitdata
       ~fitdata.secsy_transform_manual
       ~fitdata.set_error
       ~fitdata.set_ft_prop
+      ~fitdata.set_guess
       ~fitdata.set_plot_color
       ~fitdata.set_prop
       ~fitdata.set_to

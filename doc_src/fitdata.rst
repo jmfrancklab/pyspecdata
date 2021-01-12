@@ -37,7 +37,7 @@ section) next.
 .. currentmodule:: pyspecdata.core
 
 .. todo::
-    :no-inherited-members: doesn't work -- not sure how to modify class.rst
+    the option block :no-inherited-members: doesn't work -- not sure how to modify class.rst
     I put a template from stackexchange inside _templates
     -- see https://stackoverflow.com/questions/28147432/how-to-customize-sphinx-ext-autosummary-rst-template
     on how to use it

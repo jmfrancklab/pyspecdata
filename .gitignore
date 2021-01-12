@@ -1,9 +1,13 @@
 .scf
 *.egg-info
 *.pyc
+.idea/
 _build/
 build/
 doc/auto_api/
+doc_src/auto_api/
+doc_src/auto_examples/
+doc_src/generated/
 dist/
 *.pyd
 .*.swp

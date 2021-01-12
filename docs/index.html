@@ -1,15 +1,22 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to pySpecData’s documentation! &mdash; pySpecData 0.9.5.3.1 documentation</title>
+  <title>Welcome to pySpecData’s documentation! &mdash; pySpecData 0.9.5.3.2 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery_custom.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery-dataframe.css" type="text/css" />
 
   
   
@@ -17,7 +24,9 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -25,18 +34,14 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="ND-Data" href="nddata.html" /> 
+    <link rel="next" title="List of Modules and Sub-Packages" href="modules.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -50,7 +55,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> pySpecData
+            <a href="#" class="icon icon-home" alt="Documentation Home"> pySpecData
           
 
           
@@ -60,7 +65,7 @@
             
             
               <div class="version">
-                0.9.5.3.1
+                0.9.5.3.2
               </div>
             
           
@@ -77,6 +82,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -85,18 +91,22 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="classes.html">List of Classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fitdata.html">the fitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -135,7 +145,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="#">Docs</a> &raquo;</li>
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
         
       <li>Welcome to pySpecData’s documentation!</li>
     
@@ -165,6 +175,10 @@
 <li><p><a class="reference external" href="https://github.com/jmfrancklab/inst_notebooks/">Classes for communicating with instruments</a>.</p></li>
 <li><p><a class="reference external" href="https://github.com/jmfrancklab/spincore_apps/">Convenient SpinCore NMR Extension</a>.</p></li>
 </ul>
+<p><a class="reference internal" href="auto_examples/index.html#sphx-glr-auto-examples"><span class="std std-ref">See pySpecData examples here</span></a>.</p>
+</div>
+<div class="section" id="some-more-explanation">
+<h1>Some more explanation<a class="headerlink" href="#some-more-explanation" title="Permalink to this headline">¶</a></h1>
 <p>In practice, this means that it makes the code for processing spectral data shorter and more quickly legible.
 It <em>automatically</em> handles the following issues, without any additional code:</p>
 <ul class="simple">
@@ -233,6 +247,26 @@ PDF laboratory notebook showing every step of your data processing.
 These and further details are covered in the various sections of the documentation:</p>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.core">core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.figlist">figlist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.general_functions">general_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.datadir">datadir</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.load_files">load_files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.fornotebook">fornotebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.latexscripts">latexscripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.ipy">ipy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.ndshape">ndshape</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.units">units</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebook.html#setting-up-the-notebook">Setting up the notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebook.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebook.html#running-the-notebook">Running the notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebook.html#how-it-works">How it works</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="nddata.html#multidimensional-data">Multidimensional data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nddata.html#building-an-nddata-from-numpy-arrays">Building an nddata from numpy arrays</a></li>
@@ -245,31 +279,18 @@ These and further details are covered in the various sections of the documentati
 <li class="toctree-l2"><a class="reference internal" href="nddata.html#methods-by-sub-topic">Methods by Sub-Topic</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="classes.html">List of Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fitdata.html">the fitdata class</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="fitdata.html#creating-new-types-of-fitdata-modules">creating new types of fitdata modules</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebook.html#setting-up-the-notebook">Setting up the notebook</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebook.html#requirements">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebook.html#running-the-notebook">Running the notebook</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebook.html#how-it-works">How it works</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.core">core</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.figlist">figlist</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.general_functions">general_functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.datadir">datadir</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.load_files">load_files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.fornotebook">fornotebook</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.latexscripts">latexscripts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.ipy">ipy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.ndshape">ndshape</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules.html#module-pyspecdata.units">units</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a><ul>
 </ul>
 </li>
 </ul>
@@ -293,7 +314,7 @@ These and further details are covered in the various sections of the documentati
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="nddata.html" class="btn btn-neutral float-right" title="ND-Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="modules.html" class="btn btn-neutral float-right" title="List of Modules and Sub-Packages" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>
@@ -303,11 +324,19 @@ These and further details are covered in the various sections of the documentati
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2016, John M. Franck
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -318,7 +347,6 @@ These and further details are covered in the various sections of the documentati
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

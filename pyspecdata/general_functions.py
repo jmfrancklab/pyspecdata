@@ -6,31 +6,13 @@ them."""
 import os
 import sys
 from matplotlib.pylab import gci
+from numpy import pi
 def inside_sphinx():
     if len(sys.argv) > 0:
         return os.path.basename(sys.argv[0]) == "sphinx-build"
     else:
         return False
-if not inside_sphinx():
-    from numpy import *
-else:
-    # {{{ sphinx dummy objects
-    #      there is a better way of doing sphinx dummy objects, but this seems to work
-    def exp(*args,**kwargs):
-        return None
-    def rc(*args,**kwargs):
-        return None
-    def plot(*args,**kwargs):
-        return None
-    rcParams = {}
-    class rclass (object):
-        def __init__(self):
-            print("initializing")
-            return
-        def __getitem__(self,*args,**kwargs):
-            return
-    r_ = rclass()
-    # }}}
+import numpy as np
 import logging
 import re
 
@@ -122,7 +104,7 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = [], allow_desce
     thismsg = ', '.join(additional_message + ["the axis must be ascending (and equally spaced)"])
     assert du > 0, thismsg
     thismsg = ', '.join(additional_message + ["the axis must be equally spaced (and ascending)"])
-    assert all(abs(diff(u) - du)/du < tolerance), thismsg# absolute
+    assert all(abs(np.diff(u) - du)/du < tolerance), thismsg# absolute
     #   tolerance can be large relative to a du of ns -- don't use
     #   allclose/isclose, since they are more recent numpy additions
     if not allow_descending:
@@ -138,21 +120,34 @@ def level_str_to_int(level):
         else:
             raise ValueError("if you give me level as a string, give me 'info' or 'debug'")
     return level
-def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspecdata.log'):
-    r"""A decent logging setup to log to `~/pyspecdata.log` (and `~/pyspecdata.XX.log` if that's taken).
+def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspecdata.%d.log', fileno=0):
+    r"""Initialize a decent logging setup to log to `~/pyspecdata.log` (and `~/pyspecdata.XX.log` if that's taken).
 
-    By default, everything above "debug" is logged to a file, while everything above "info" is printed to stdout.
+    By default, everything above "debug" is logged to a
+    file, while everything above "info" is printed to
+    stdout.
+
+    Do NOT log if run from within a notebook (it's fair to
+    assume that you will run first before embedding)
     """
     FORMAT = "--> %(filename)s(%(lineno)s):%(name)s %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"
     level = level_str_to_int(level)
     stdout_level = level_str_to_int(stdout_level)
     min_level = min([level,stdout_level])
     formatter = logging.Formatter(FORMAT)
-    log_filename = os.path.join(os.path.expanduser('~'),filename)
+    log_filename = os.path.join(os.path.expanduser('~'),filename%fileno)
     if os.path.exists(log_filename):
         # manually remove, and then use append -- otherwise, it won't write to
         # file immediately
-        os.remove(log_filename)
+        try:
+            os.remove(log_filename)
+        except:
+            if fileno == 0:
+                print(f"{log_filename} appears to be locked or otherwise inaccessible: I'm going to explore other options for fileno")
+            if fileno > 20:
+                raise ValueError("I'm not going to increase fileno above 20 -- that's crazy time!")
+            return init_logging(level=level, filename=filename, fileno=fileno+1)
+    print(f"logging output to {log_filename}")
     logger = logging.getLogger()
     logger.setLevel(min_level) # even if I set the handler level, it won't
     #                        print w/out this
