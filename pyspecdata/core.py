@@ -4449,7 +4449,8 @@ class nddata (object):
                 else:
                     raise e
             self.data = func(self.data,axis=thisindex)
-            self._pop_axis_info(thisindex)
+            if self.data.shape[thisindex] == 1:
+                self._pop_axis_info(thisindex)
             return self
         else:
             retval = func(self.data)
