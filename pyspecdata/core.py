@@ -208,7 +208,7 @@ def make_bar_graph_indices(mystructarray,list_of_text_fields,
     r"This is a recursive function that is used as part of textlabel_bargraph; it does NOT work without the sorting given at the beginning of that function"
     #{{{ if there are still text fields left, then break down the np.array further, otherwise, just return the indices for this subarray
     if len(list_of_text_fields) > 0:
-        unique_values = unique(mystructarray[list_of_text_fields[0]])# the return_index argument doesn't do what it's supposed to all the time, so I have to manually find the start indices, as given in the following line
+        unique_values = np.unique(mystructarray[list_of_text_fields[0]])# the return_index argument doesn't do what it's supposed to all the time, so I have to manually find the start indices, as given in the following line
         start_indices = [np.nonzero(mystructarray[list_of_text_fields[0]] == val)[0][0] for val in unique_values]
         # find the structured np.array for the unique value
         index_values = []
@@ -3223,7 +3223,7 @@ class nddata (object):
         for j in values:
             retval.append(np.argmin(abs(x - j)))
         retval = np.array(retval)
-        return unique(retval)
+        return np.unique(retval)
     #}}}
     #{{{ dictionary functions -- these convert between two formats:
     # dictionary -- stuff labeled according the dimension label.
@@ -5981,18 +5981,18 @@ class nddata (object):
                 a.dimlabels = [str(j[0]) if len(j) == 1 else j for j in a.dimlabels.tolist()]
             return a
         axis_number = self.axn(axis_name)
-        new_axis,indices = unique(self.getaxis(axis_name)[which_field],
+        new_axis,indices = np.unique(self.getaxis(axis_name)[which_field],
                 return_inverse = True) # we are essentially creating a hash table for the axis.  According to numpy documentation, the hash indices that this returns should also be sorted sorted.
         logger.debug(strm("(chunk auto) indices look like this:",indices))
         #{{{ check that there are equal numbers of all the unique new_axis
-        index_count = np.array([count_nonzero(indices == j) for j in range(indices.max()+1)])
+        index_count = np.array([np.count_nonzero(indices == j) for j in range(indices.max()+1)])
         if all(index_count == index_count[0]):
             logger.debug(strm("(chunk auto) Yes, there are equal numbers of all unique new_axis! (Each element of the hash table has been indexed the same number of times.)"))
             #}}}
             #{{{ store the old shape and generate the new shape
             current_shape = list(self.data.shape)
             logger.debug(strm("(chunk auto) old shape -- ",current_shape))
-            new_shape = insert(current_shape,axis_number + 1,len(new_axis))
+            new_shape = np.insert(current_shape,axis_number + 1,len(new_axis))
             new_shape[axis_number] /= len(new_axis) # the indices of the hash table become the new dimension
             #}}}
             #{{{ actually reorder the data and error -- perhaps a view would be more efficient here
@@ -6054,7 +6054,7 @@ class nddata (object):
             # duplicate labels
             test_axis = self.axis_coords[axis_number].T
             logger.debug(strm("(chunk auto) test axis -- ",test_axis))
-            test_axis = ascontiguousarray(test_axis).flatten().view([('',test_axis.dtype)]*test_axis.shape[1])
+            test_axis = np.ascontiguousarray(test_axis).flatten().view([('',test_axis.dtype)]*test_axis.shape[1])
             if all(test_axis == test_axis[0]):
                 self.axis_coords[axis_number] = self.axis_coords[axis_number][:,0].reshape(1,-1)
                 logger.debug(strm("(chunk auto) collapsed to", self.axis_coords[axis_number]))
