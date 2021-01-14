@@ -98,6 +98,27 @@ various functions.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Load cw Bruker ESR data, both 1D and 2D.">
+
+.. only:: html
+
+ .. figure:: /auto_examples/images/thumb/sphx_glr_esr_example_thumb.png
+     :alt: Bruker cw ESR Data
+
+     :ref:`sphx_glr_auto_examples_esr_example.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/esr_example
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="A simple demonstration of a multi-line *vs.* image plot with `domain coloring &lt;https://en.wikip...">
 
 .. only:: html
@@ -137,6 +158,27 @@ various functions.
    :hidden:
 
    /auto_examples/fit_fake_data
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This examples shows how you would *currently* generate a plot that shows projections of a 2D im...">
+
+.. only:: html
+
+ .. figure:: /auto_examples/images/thumb/sphx_glr_plot_container_thumb.png
+     :alt: Plot Container
+
+     :ref:`sphx_glr_auto_examples_plot_container.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/plot_container
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>
