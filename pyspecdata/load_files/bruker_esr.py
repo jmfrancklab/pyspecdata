@@ -1,6 +1,6 @@
 from ..core import *
 from ..general_functions import strm
-from numpy import fromstring, genfromtxt
+from numpy import fromstring, genfromtxt, frombuffer, array
 import re
 from io import StringIO
 logger = logging.getLogger('pyspecdata.load_files.bruker_esr')
