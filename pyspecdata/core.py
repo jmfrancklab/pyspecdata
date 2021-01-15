@@ -265,7 +265,7 @@ def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,ax = None,ti
     error_fields = [str(j) for j in mystructarray.dtype.names if j[-6:] == '_ERROR']
     if len(error_fields) > 0:
         mystructarray_errors = mystructarray[error_fields]
-        logger.debug("found error fields:",mystructarray_errors)
+        logger.debug(strm("found error fields:",mystructarray_errors))
     mystructarray = mystructarray[[str(j) for j in mystructarray.dtype.names if j not in error_fields]]
     if othersort is not None:
         list_of_text_fields.append(othersort)
@@ -936,7 +936,7 @@ def h5child(thisnode,childname,clear = False,create = None):
             childnode = None
         else:
             childnode = h5file.create_group(thisnode,childname)
-            logger.debug('created',childname)
+            logger.debug(strm('created',childname))
     return childnode
 def h5remrows(bottomnode,tablename,searchstring):
     if isinstance(searchstring, dict):
@@ -985,7 +985,7 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
         if match_row is not None:
             if isinstance(match_row, dict):
                 match_row = h5searchstring(match_row)
-            logger.debug("trying to match row according to",lsafen(match_row))
+            logger.debug(strm("trying to match row according to",lsafen(match_row)))
             mytable.flush()
             try:
                 matches = mytable.read_where(match_row)
@@ -2693,7 +2693,7 @@ def concat(datalist,dimname,chop = False):
         else:
             if np.any(~(np.array(shapetocheck) == np.array(shapetocheckagainst))):
                 if chop:
-                    logger.debug(repr(shapetocheck),lsafen(repr(shapetocheckagainst)))
+                    logger.debug(strm(repr(shapetocheck),lsafen(repr(shapetocheckagainst))))
                     raise ValueError(strm('For item ',j,'in concat, ',
                         shapetocheck,'!=',shapetocheckagainst,
                         'where all the shapes of the things',
@@ -7320,11 +7320,11 @@ class fitdata(nddata):
         x = x[mask]
         L = c_[x.reshape((-1,1)),np.ones((len(x),1))]
         retval = np.dot(pinv(L,rcond = 1e-17),y)
-        logger.debug(r'\label{fig:pinv_figure_text}y=',y,'yerr=',yerr,'%s='%x_axis,x,'L=',L)
+        logger.debug(strm(r'\label{fig:pinv_figure_text}y=',y,'yerr=',yerr,'%s='%x_axis,x,'L=',L))
         logger.debug('\n\n')
-        logger.debug('recalc y = ',np.dot(L,retval))
-        logger.debug('recalc E = ',1.0-1.0/np.dot(L,retval))
-        logger.debug('actual E = ',self.data)
+        logger.debug(strm('recalc y = ',np.dot(L,retval)))
+        logger.debug(strm('recalc E = ',1.0-1.0/np.dot(L,retval)))
+        logger.debug(strm('actual E = ',self.data))
         return retval
     def linear(self,*args,**kwargs):
         r'''return the linear-form function, either smoothly along the fit function, or on the raw data, depending on whether or not the taxis argument is given
@@ -7728,8 +7728,8 @@ class fitdata(nddata):
             #}}}
             lastresidual = thisresidual
             for j in range(0,numguesssteps):
-                logger.debug('\n\n.core.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\end{verbatim}')
-                logger.debug('\n\n.core.guess) shape of parameter derivatives',np.shape(fprime),'shape of output',np.shape(y),'\n\n')
+                logger.debug(strm('\n\n.core.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\end{verbatim}'))
+                logger.debug(strm('\n\n.core.guess) shape of parameter derivatives',np.shape(fprime),'shape of output',np.shape(y),'\n\n'))
                 regularization_bad = True
                 alpha_max = 100.
                 alpha_mult = 2.
