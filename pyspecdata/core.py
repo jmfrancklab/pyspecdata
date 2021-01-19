@@ -2513,6 +2513,12 @@ def plot(*args,**kwargs):
         #    kwargs.update('label',myy_name)
         # }}}
     #}}}
+    # {{{ allow list arguments
+    if type(myy) is list:
+        myy = np.array(myy)
+    if type(myx) is list:
+        myx = np.array(myx)
+    # }}}
     #{{{ semilog where appropriate
     if (myx is not None) and (len(myx)>1) and all(myx>0): # by doing this and making myplotfunc global, we preserve the plot style if we want to tack on one point
         try:
