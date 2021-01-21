@@ -211,8 +211,9 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
         #       zero, then the pre-ft data was shifted, and I must reflect
         #       that by performing a post-ft phase shift
         if p2_pre_discrepancy is not None:
-            assert abs(p2_pre_discrepancy)<abs(du),("I expect the discrepancy to be"
-                    " smaller than du ({:0.2f}), but it's {:0.2f} -- what's going"
+            assert abs(p2_pre_discrepancy)<abs(du) or np.isclose(
+                    abs(p2_pre_discrepancy),abs(du)),("I expect the discrepancy to be"
+                    " smaller than du ({:0.5g}), but it's {:0.5g} -- what's going"
                     " on??").format(du,p2_pre_discrepancy)
             result = self * self.fromaxis(axes[j],
                     lambda f: np.exp(1j*2*pi*f*p2_pre_discrepancy))

@@ -120,6 +120,36 @@ N_A = 6.02214179e23
 gammabar_H = 4.258e7
 gammabar_e = 2.807e10 # this is for a nitroxide
 #}}}
+def det_oom(data_to_test):
+    """determine the average order of magnitude -- for prefixing units
+
+    Parameters
+    ==========
+    data_to_test: ndarray
+        a numpy array (e.g. the result of a .getaxis( call
+    Returns
+    =======
+    average_oom: int
+        the average order of magnitude, rounded to the nearest multiple of 3
+    """
+    try:
+        data_to_test = data_to_test[np.isfinite(data_to_test)]
+    except:
+        raise ValueError(strm('data_to_test is',data_to_test,'isfinite is',np.isfinite(data_to_test)))
+    if len(data_to_test) == 0:
+        raise ValueError("this axis doesn't seem to have any sensible values!")
+    #{{{ find the average order of magnitude, rounded down to the nearest power of 3
+    average_oom = abs(data_to_test)
+    average_oom = average_oom[average_oom != 0]
+    average_oom = np.log10(average_oom)/3.
+    logger.debug(strm("dtype",data_to_test.dtype))
+    logger.debug(strm("oom:",average_oom))
+    average_oom = average_oom[np.isfinite(average_oom)].mean()
+    #}}}
+    logger.debug(strm("the average oom is",average_oom*3))
+    average_oom = 3*np.floor(average_oom)
+    logger.debug(strm("I round this to",average_oom))
+    return average_oom
 def apply_oom(average_oom,numbers,prev_label=''):
     """scale numbers by the order of magnitude average_oom and change the
     name of the units by adding the appropriate SI prefix
@@ -3308,26 +3338,8 @@ class nddata (object):
             prev_label = self.get_units(thisaxis)
             if prev_label is not None and len(prev_label)>0:
                 data_to_test = self.getaxis(thisaxis)
-                logger.debug(strm("the axis",thisaxis,"looks like this:",data_to_test))
                 if data_to_test is not None:
-                    try:
-                        data_to_test = data_to_test[np.isfinite(data_to_test)]
-                    except:
-                        raise ValueError(strm('data_to_test is',data_to_test,'isfinite is',np.isfinite(data_to_test)))
-                    if len(data_to_test) == 0:
-                        raise ValueError(strm("Your",thisaxis,"axis doesn't seem to have any sensible values!"))
-                    #{{{ find the average order of magnitude, rounded down to the nearest power of 3
-                    average_oom = abs(data_to_test)
-                    average_oom = average_oom[average_oom != 0]
-                    average_oom = np.log10(average_oom)/3.
-                    logger.debug(strm("for axis: dtype",data_to_test.dtype))
-                    logger.debug(strm("for axis: dtype",data_to_test))
-                    logger.debug(strm("for axis: oom:",average_oom))
-                    average_oom = average_oom[np.isfinite(average_oom)].mean()
-                    #}}}
-                    logger.debug(strm("for axis",thisaxis,"the average oom is",average_oom*3))
-                    average_oom = 3*np.floor(average_oom)
-                    logger.debug(strm("for axis",thisaxis,"I np.round this to",average_oom))
+                    average_oom = det_oom(data_to_test)
                     x = self.getaxis(thisaxis)
                     result_label = apply_oom(average_oom,x,prev_label=prev_label)
                     self.set_units(thisaxis,result_label)
