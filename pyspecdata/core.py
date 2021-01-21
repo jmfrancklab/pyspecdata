@@ -120,6 +120,36 @@ N_A = 6.02214179e23
 gammabar_H = 4.258e7
 gammabar_e = 2.807e10 # this is for a nitroxide
 #}}}
+def det_oom(data_to_test):
+    """determine the average order of magnitude -- for prefixing units
+
+    Parameters
+    ==========
+    data_to_test: ndarray
+        a numpy array (e.g. the result of a .getaxis( call
+    Returns
+    =======
+    average_oom: int
+        the average order of magnitude, rounded to the nearest multiple of 3
+    """
+    try:
+        data_to_test = data_to_test[np.isfinite(data_to_test)]
+    except:
+        raise ValueError(strm('data_to_test is',data_to_test,'isfinite is',np.isfinite(data_to_test)))
+    if len(data_to_test) == 0:
+        raise ValueError("this axis doesn't seem to have any sensible values!")
+    #{{{ find the average order of magnitude, rounded down to the nearest power of 3
+    average_oom = abs(data_to_test)
+    average_oom = average_oom[average_oom != 0]
+    average_oom = np.log10(average_oom)/3.
+    logger.debug(strm("dtype",data_to_test.dtype))
+    logger.debug(strm("oom:",average_oom))
+    average_oom = average_oom[np.isfinite(average_oom)].mean()
+    #}}}
+    logger.debug(strm("the average oom is",average_oom*3))
+    average_oom = 3*np.floor(average_oom)
+    logger.debug(strm("I round this to",average_oom))
+    return average_oom
 def apply_oom(average_oom,numbers,prev_label=''):
     """scale numbers by the order of magnitude average_oom and change the
     name of the units by adding the appropriate SI prefix
@@ -265,7 +295,7 @@ def textlabel_bargraph(mystructarray,othersort = None,spacing = 0.1,ax = None,ti
     error_fields = [str(j) for j in mystructarray.dtype.names if j[-6:] == '_ERROR']
     if len(error_fields) > 0:
         mystructarray_errors = mystructarray[error_fields]
-        logger.debug("found error fields:",mystructarray_errors)
+        logger.debug(strm("found error fields:",mystructarray_errors))
     mystructarray = mystructarray[[str(j) for j in mystructarray.dtype.names if j not in error_fields]]
     if othersort is not None:
         list_of_text_fields.append(othersort)
@@ -936,7 +966,7 @@ def h5child(thisnode,childname,clear = False,create = None):
             childnode = None
         else:
             childnode = h5file.create_group(thisnode,childname)
-            logger.debug('created',childname)
+            logger.debug(strm('created',childname))
     return childnode
 def h5remrows(bottomnode,tablename,searchstring):
     if isinstance(searchstring, dict):
@@ -985,7 +1015,7 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
         if match_row is not None:
             if isinstance(match_row, dict):
                 match_row = h5searchstring(match_row)
-            logger.debug("trying to match row according to",lsafen(match_row))
+            logger.debug(strm("trying to match row according to",lsafen(match_row)))
             mytable.flush()
             try:
                 matches = mytable.read_where(match_row)
@@ -2513,6 +2543,12 @@ def plot(*args,**kwargs):
         #    kwargs.update('label',myy_name)
         # }}}
     #}}}
+    # {{{ allow list arguments
+    if type(myy) is list:
+        myy = np.array(myy)
+    if type(myx) is list:
+        myx = np.array(myx)
+    # }}}
     #{{{ semilog where appropriate
     if (myx is not None) and (len(myx)>1) and all(myx>0): # by doing this and making myplotfunc global, we preserve the plot style if we want to tack on one point
         try:
@@ -2693,7 +2729,7 @@ def concat(datalist,dimname,chop = False):
         else:
             if np.any(~(np.array(shapetocheck) == np.array(shapetocheckagainst))):
                 if chop:
-                    logger.debug(repr(shapetocheck),lsafen(repr(shapetocheckagainst)))
+                    logger.debug(strm(repr(shapetocheck),lsafen(repr(shapetocheckagainst))))
                     raise ValueError(strm('For item ',j,'in concat, ',
                         shapetocheck,'!=',shapetocheckagainst,
                         'where all the shapes of the things',
@@ -3302,26 +3338,8 @@ class nddata (object):
             prev_label = self.get_units(thisaxis)
             if prev_label is not None and len(prev_label)>0:
                 data_to_test = self.getaxis(thisaxis)
-                logger.debug(strm("the axis",thisaxis,"looks like this:",data_to_test))
                 if data_to_test is not None:
-                    try:
-                        data_to_test = data_to_test[np.isfinite(data_to_test)]
-                    except:
-                        raise ValueError(strm('data_to_test is',data_to_test,'isfinite is',np.isfinite(data_to_test)))
-                    if len(data_to_test) == 0:
-                        raise ValueError(strm("Your",thisaxis,"axis doesn't seem to have any sensible values!"))
-                    #{{{ find the average order of magnitude, rounded down to the nearest power of 3
-                    average_oom = abs(data_to_test)
-                    average_oom = average_oom[average_oom != 0]
-                    average_oom = np.log10(average_oom)/3.
-                    logger.debug(strm("for axis: dtype",data_to_test.dtype))
-                    logger.debug(strm("for axis: dtype",data_to_test))
-                    logger.debug(strm("for axis: oom:",average_oom))
-                    average_oom = average_oom[np.isfinite(average_oom)].mean()
-                    #}}}
-                    logger.debug(strm("for axis",thisaxis,"the average oom is",average_oom*3))
-                    average_oom = 3*np.floor(average_oom)
-                    logger.debug(strm("for axis",thisaxis,"I np.round this to",average_oom))
+                    average_oom = det_oom(data_to_test)
                     x = self.getaxis(thisaxis)
                     result_label = apply_oom(average_oom,x,prev_label=prev_label)
                     self.set_units(thisaxis,result_label)
@@ -7320,11 +7338,11 @@ class fitdata(nddata):
         x = x[mask]
         L = c_[x.reshape((-1,1)),np.ones((len(x),1))]
         retval = np.dot(pinv(L,rcond = 1e-17),y)
-        logger.debug(r'\label{fig:pinv_figure_text}y=',y,'yerr=',yerr,'%s='%x_axis,x,'L=',L)
+        logger.debug(strm(r'\label{fig:pinv_figure_text}y=',y,'yerr=',yerr,'%s='%x_axis,x,'L=',L))
         logger.debug('\n\n')
-        logger.debug('recalc y = ',np.dot(L,retval))
-        logger.debug('recalc E = ',1.0-1.0/np.dot(L,retval))
-        logger.debug('actual E = ',self.data)
+        logger.debug(strm('recalc y = ',np.dot(L,retval)))
+        logger.debug(strm('recalc E = ',1.0-1.0/np.dot(L,retval)))
+        logger.debug(strm('actual E = ',self.data))
         return retval
     def linear(self,*args,**kwargs):
         r'''return the linear-form function, either smoothly along the fit function, or on the raw data, depending on whether or not the taxis argument is given
@@ -7728,8 +7746,8 @@ class fitdata(nddata):
             #}}}
             lastresidual = thisresidual
             for j in range(0,numguesssteps):
-                logger.debug('\n\n.core.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\end{verbatim}')
-                logger.debug('\n\n.core.guess) shape of parameter derivatives',np.shape(fprime),'shape of output',np.shape(y),'\n\n')
+                logger.debug(strm('\n\n.core.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\end{verbatim}'))
+                logger.debug(strm('\n\n.core.guess) shape of parameter derivatives',np.shape(fprime),'shape of output',np.shape(y),'\n\n'))
                 regularization_bad = True
                 alpha_max = 100.
                 alpha_mult = 2.

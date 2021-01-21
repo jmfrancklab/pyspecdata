@@ -97,7 +97,6 @@ with figlist_var() as fl:
     fl.next("test figure", fig=fig, ax=axCentral)
 
     fl.image(test_data, ax=axCentral, human_units=False)
-    axCentral.set_aspect('auto')
     axCentral.set_title("")
     fl.plot(test_data.C.sum("y"), ax=axTop, human_units=False)
     axTop.autoscale(enable=True, tight=True)  # axis tight
