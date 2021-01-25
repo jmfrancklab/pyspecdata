@@ -1361,10 +1361,10 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
         ax.yaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.075,linestyle='-')
         ax.xaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.075,linestyle='-')
     labels = ax.get_xticklabels()
-    plt.setp(labels,rotation=rotation[0],fontsize=10)
+    plt.setp(labels,rotation=rotation[0])
     if y:
         labels = ax.get_yticklabels()
-        plt.setp(labels,rotation=rotation[1],fontsize=10)
+        plt.setp(labels,rotation=rotation[1])
     fig = plt.gcf()
     fig.autofmt_xdate()
     return
