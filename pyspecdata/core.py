@@ -4072,11 +4072,11 @@ class nddata (object):
         if t is None:
             raise ValueError("You can't call integrate on an unlabeled axis")
         if cumulative:
-            self.run_nopop(cumsum,thisaxis)
+            self.run_nopop(np.cumsum,thisaxis)
             if backwards is True:
                 self.data = self[thisaxis,::-1].data
         else:
-            self.run(sum,thisaxis)
+            self.run(np.sum,thisaxis)
         self.data *= dt
         return self
     def diff(self,thisaxis,backwards = False):
@@ -4289,7 +4289,7 @@ class nddata (object):
                 bins = n_bins)
         retval = nddata(np.double(bins),[-1],['values']).labels('values',
                 vals[:-1]+(vals[1]-vals[0])*0.5)
-        retval.run_nopop(cumsum,'values')
+        retval.run_nopop(np.cumsum,'values')
         if normalized:
             print('final value',retval['values',-1])
             retval /= retval['values',-1]
@@ -4320,11 +4320,11 @@ class nddata (object):
         inf_mask |= np.isinf(weight_matrix.data)
         assert not np.any(inf_mask)
         #}}}
-        normalization = weight_matrix.copy().run(sum,axisname)
+        normalization = weight_matrix.copy().run(np.sum,axisname)
         weight_matrix /= normalization
         self.data *= weight_matrix.data
         self.set_error(None)
-        self.run(sum,axisname)
+        self.run(np.sum,axisname)
         #}}}
         return self
     def mean(self,*args,**kwargs):
@@ -4374,7 +4374,7 @@ class nddata (object):
             logger.debug(strm("return error is",return_error))
         return self
     def mean_nopop(self,axis):
-        self = self.run_nopop(mean,axis=axis)
+        self = self.run_nopop(np.mean,axis=axis)
         return self
     #}}}
     #{{{ running functions and popping dimensions
@@ -4954,9 +4954,9 @@ class nddata (object):
         thisaxis = nddata(self.getaxis(thisaxisname),[-1],[thisaxisname])
         self.setaxis(thisaxisname,[])
         self.chunkoff(thisaxisname,['avg'],[decimation])
-        self.run(mean,'avg')
+        self.run(np.mean,'avg')
         thisaxis.chunkoff(thisaxisname,['avg'],[decimation])
-        thisaxis.run(mean,'avg')
+        thisaxis.run(np.mean,'avg')
         self.setaxis(thisaxisname,thisaxis.data)
         return self
     def histogram(*args,**kwargs):
