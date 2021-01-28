@@ -4466,9 +4466,29 @@ class nddata (object):
                             repr(self.dimlabels)+")")
                 else:
                     raise e
+            logger.debug(strm(
+                "called function",
+                func,
+                "on axis",
+                axis,
+                "which has index",
+                thisindex))
+            logger.debug(strm(
+                "data type before",
+                type(self.data),
+                "shape before",
+                self.data.shape))
+            shape_before = self.data.shape
             self.data = func(self.data,axis=thisindex)
-            if self.data.shape[thisindex] == 1:
+            shape_after = self.data.shape
+            logger.debug(strm(
+                "data of type",
+                type(self.data),
+                "looks like",
+                self.data))
+            if len(shape_after) == len(shape_before)-1:
                 self._pop_axis_info(thisindex)
+                logger.debug('popping axis info')
             return self
         else:
             retval = func(self.data)
@@ -4476,7 +4496,9 @@ class nddata (object):
                 self.data = retval
                 return self
             else:
-                return retval
+                raise ValueError("the function you've "
+                "chosen doesn't return data that's the "
+                "same size as what you started with")
     def run_nopop(self,func,axis):
         func = self._wrapaxisfuncs(func)
         try:
@@ -6267,6 +6289,8 @@ class nddata (object):
     def imag(self):
         "Return the imag component of the data"
         retval = self.copy(data=False)
+        # data=False excludes the error
+        retval.data_error = self.data_error
         retval.data = self.data.imag
         return retval
     @imag.setter
@@ -6276,6 +6300,8 @@ class nddata (object):
     def real(self):
         "Return the real component of the data"
         retval = self.copy(data=False)
+        # data=False excludes the error
+        retval.data_error = self.data_error
         retval.data = self.data.real
         return retval
     @real.setter
@@ -7163,7 +7189,7 @@ class fitdata(nddata):
         #{{{ adapted from fromaxis, trying to adapt the variable
         symbols_in_expr = self.symbolic_expr.atoms(sympy_symbol)
         #logger.debug(strm('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr))
-        logger.info(strm('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr))
+        logger.debug(strm('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr))
         symbols_in_expr = set(map(str,symbols_in_expr))
         # the next are the parameters
         self.fit_axis = set(self.dimlabels) & symbols_in_expr
