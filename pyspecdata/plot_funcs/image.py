@@ -6,6 +6,7 @@ from pylab import gca,sca,imshow,xlabel,ylabel,title,colorbar,setp
 def image(A,x=[],y=[],**kwargs):
     r"Please don't call image directly anymore -- use the image method of figurelist"
     x_inverted = False
+    y_inverted = False
     A.squeeze()# drop any singleton dimensions, which cause problems
     #{{{ pull out kwargs for imagehsv
     imagehsvkwargs = {}
@@ -51,6 +52,8 @@ def image(A,x=[],y=[],**kwargs):
         templabels = list(A.dimlabels)
         if A.get_prop('x_inverted'):
             x_inverted = True
+        if A.get_prop('y_inverted'):
+            y_inverted = True
         x_label = templabels[-1]
         if A.getaxis(x_label) is None:
             x = r_[0,ndshape(A)[x_label]]
@@ -148,6 +151,9 @@ def image(A,x=[],y=[],**kwargs):
     if x_inverted:
         these_xlims = ax.get_xlim()
         ax.set_xlim((max(these_xlims),min(these_xlims)))
+    if y_inverted:
+        these_ylims = ax.get_ylim()
+        ax.set_ylim((max(these_ylims),min(these_ylims)))
     return retval
 
 def imagehsv(A,logscale = False,black = False):

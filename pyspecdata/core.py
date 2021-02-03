@@ -5198,8 +5198,19 @@ class nddata (object):
         block_order = np.diff(idx, axis=1).flatten().argsort()[::-1]
         logger.debug(strm("(contiguous) in descending order, the blocks are therefore",idx[block_order,:]))
         return self.getaxis(axis)[idx[block_order,:]]
-    def to_ppm(self):
+    def to_ppm(self, axis='t2', freq_param='SFO1', offset_param='OFFSET'):
         """Function that converts from Hz to ppm using Bruker parameters
+        
+        Parameters
+        ==========
+        axis: str, 't2' default
+            label of the dimension you want to convert from frequency to ppm
+        freq_param: str
+            name of the acquisition parameter that stores the carrier frequency
+            for this dimension
+        offset_param: str
+            name of the processing parameter that stores the offset of the ppm
+            reference (TMS, DSS, etc.)
 
         .. todo::
 
@@ -5207,17 +5218,20 @@ class nddata (object):
 
             make this part of an inherited bruker class
         """
-        if self.get_units('t2') == 'ppm': return
-        offset = self.get_prop('proc')['OFFSET']
-        sfo1 = self.get_prop('acq')['SFO1']
-        if not self.get_ft_prop('t2'):
-            self.ft('t2', shift=True) # this fourier transforms along t2, overwriting the data that was in self
-        self.setaxis('t2', lambda x:
-                x/sfo1).set_units('t2','ppm')
-        max_ppm = self.getaxis('t2').max()
-        self.setaxis('t2', lambda x:
+        if self.get_units(axis) == 'ppm': return
+        offset = self.get_prop('proc')[offset_param]
+        sfo1 = self.get_prop('acq')[freq_param]
+        if not self.get_ft_prop(axis):
+            self.ft(axis, shift=True) # this fourier transforms along t2, overwriting the data that was in self
+        self.setaxis(axis, lambda x:
+                x/sfo1).set_units(axis,'ppm')
+        max_ppm = self.getaxis(axis).max()
+        self.setaxis(axis, lambda x:
                 (x-max_ppm+offset))
-        self.set_prop('x_inverted',True)
+        if axis=='t2':
+            self.set_prop('x_inverted',True)
+        elif axis=='t1':
+            self.set_prop('y_inverted',True)
         return self
     #}}}
     def multimin(self,minfunc,axisname,filterwidth,numberofmins):
