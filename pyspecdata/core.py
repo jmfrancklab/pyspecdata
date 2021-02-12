@@ -2973,9 +2973,12 @@ class nddata (object):
         if np.any(this_size > max_dimsize):
             print(lsafen("Warning! The data is big (%s), so I'm automatically downsampling"%(ndshape(self))))
             for j in np.where(this_size > max_dimsize):
-                downsampling = np.ceil(np.double(this_size[j]) / max_dimsize)
-                print('downsampling',self.dimlabels[j],'by',downsampling)
-                sortedself = sortedself[self.dimlabels[j],0::downsampling]
+                downsampling = int(np.ceil(np.double(this_size[0]) / max_dimsize))
+                downsampling = int(np.ceil(np.double(this_size[1]) / max_dimsize))
+                print('downsampling',self.dimlabels[0],'by',downsampling)
+                print('downsampling',self.dimlabels[1],'by',downsampling)
+                sortedself = sortedself[self.dimlabels[0],0::downsampling]
+                sortedself = sortedself[self.dimlabels[1],0::downsampling]
             print(lsafen("I reduced to a max of max_dimsize = %d so the data is now %s"%(max_dimsize,ndshape(sortedself))))
 
         x_axis,y_axis = sortedself.sort_and_xy()
