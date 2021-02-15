@@ -9,61 +9,55 @@ to retype them every time.
 """
 import matplotlib.pyplot as plt
 from numpy import exp, linspace, pi, random, sign, sin
-from pyspecdata import *
-from symfit import Parameter, Variable
+from sympy import *
 from lmfit import Parameters, minimize
+from pyspecdata import *
 from lmfit.printfuncs import report_fit
-import sympy as sp
 import numpy as np
-import symfit as sf
-from pylab import ndarray
-#{{{make sympy expression with symfit and lambdify
-A = Parameter('A', value = 14.0)
-period = Parameter('period', value = 5.4321)
-shift = Parameter('shift', value = 0.12345)
-decay = Parameter('decay', value = 0.01000)
-x = Variable('x')
-expression = A*sp.sin(shift + x/period)*sp.exp(-(x*decay)**2).subs({A:A, shift:shift, 
-    period:period,
-    decay:decay})
-#}}}
-#{{{parameters for actual data
+#{{{ creating data
 p_true = Parameters()
-p_true.add('A', value=14.0)
+p_true.add('amp', value=14.0)
 p_true.add('period', value=5.4321)
 p_true.add('shift', value=0.12345)
 p_true.add('decay', value=0.01000)
-#}}}
-fit_function = sf.lambdify([x],expression.subs({A:A.value,
-        period:period.value,
-        shift:shift.value,
-        decay:decay.value}),
-        modules=[{'ImmutableMatrix':ndarray}, 'numpy','scipy'])
 
-#{{{ define the equation that we are fitting to and residual
-def residual(pars, x, data=None):
+
+def data_maker(pars, x,data=None):
+    argu = (x * pars['decay'])**2
     shift = pars['shift']
     if abs(shift) > pi/2:
         shift = shift - sign(shift)*pi
-    model = fit_function        
+    model = pars['amp'] * sin(shift + x/pars['period']) * exp(-argu)
     if data is None:
         return model
-    return model(x) - data(x)
-#}}}
-#{{{making data taht is to be fit
+    return model-data
 random.seed(0)
-x = nddata(linspace(0, 250, 1500),'x')
-noise = random.normal(scale=2.80)#, size=x.size)
-data = residual(p_true, x)
+x = linspace(0, 250, 1500)
+noise = random.normal(scale=2.80, size=x.size)
+data = data_maker(p_true, x) + noise
+quit()
+mydata = nddata(data,[-1]['x']).setaxis('x',x)
+print(mydata)
+quit()
 #}}}
-#{{{fitting parameters for lmfit
+true_values={A:14.0,period:5.4321,shift:0.12345,
+        decay:0.01000}
+A, shift, period, decay, x = symbols('A shift period decay x')
+expr = A*sin(shift+x/period)*exp(-(x*decay)**2)
+print(expr.atoms(Symbol))
+fit_params = Parameters()
+
+for this_symbol in expr.atoms(Symbol):
+    fit_params.add('%s'%this_symbol)
+for j in fit_params:
+    print("fit param ---",j)
+quit()
 fit_params = Parameters()
 fit_params.add('amp', value=13.0, max=20, min=0.0)
 fit_params.add('period', value=2, max=10)
 fit_params.add('shift', value=0.0, max=pi/2., min=-pi/2.)
 fit_params.add('decay', value=0.02, max=0.10, min=0.00)
-#}}}
-#{{{minimizing lmfit function
+
 out = minimize(residual, fit_params, args=(x,), kws={'data': data})
 fit = residual(out.params, x)
 
