@@ -15,31 +15,40 @@ from lmfit import Parameters, minimize
 from lmfit.printfuncs import report_fit
 import sympy as sp
 import numpy as np
+import symfit as sf
+from pylab import ndarray
 #{{{make sympy expression with symfit and lambdify
 A = Parameter('A', value = 14.0)
 period = Parameter('period', value = 5.4321)
 shift = Parameter('shift', value = 0.12345)
 decay = Parameter('decay', value = 0.01000)
 x = Variable('x')
-expression = A*sp.sin(shift + x/period)*sp.exp(-(x*decay)**2)
-l_expression = lambdify([x],expression)
+expression = A*sp.sin(shift + x/period)*sp.exp(-(x*decay)**2).subs({A:A, shift:shift, 
+    period:period,
+    decay:decay})
 #}}}
 #{{{parameters for actual data
 p_true = Parameters()
-p_true.add('amp', value=14.0)
+p_true.add('A', value=14.0)
 p_true.add('period', value=5.4321)
 p_true.add('shift', value=0.12345)
 p_true.add('decay', value=0.01000)
 #}}}
+fit_function = sf.lambdify([x],expression.subs({A:A.value,
+        period:period.value,
+        shift:shift.value,
+        decay:decay.value}),
+        modules=[{'ImmutableMatrix':ndarray}, 'numpy','scipy'])
+
 #{{{ define the equation that we are fitting to and residual
 def residual(pars, x, data=None):
     shift = pars['shift']
     if abs(shift) > pi/2:
         shift = shift - sign(shift)*pi
-    model = l_expression
+    model = fit_function        
     if data is None:
         return model
-    return model - data
+    return model(x) - data(x)
 #}}}
 #{{{making data taht is to be fit
 random.seed(0)
