@@ -20,9 +20,7 @@ p_true.add('amp', value=14.0)
 p_true.add('period', value=5.4321)
 p_true.add('shift', value=0.12345)
 p_true.add('decay', value=0.01000)
-
-
-def data_maker(pars, x,data=None):
+def make_data(pars, x,data=None):
     argu = (x * pars['decay'])**2
     shift = pars['shift']
     if abs(shift) > pi/2:
@@ -30,12 +28,11 @@ def data_maker(pars, x,data=None):
     model = pars['amp'] * sin(shift + x/pars['period']) * exp(-argu)
     if data is None:
         return model
-    return model-data
+    return model - data
 random.seed(0)
 x = linspace(0, 250, 1500)
 noise = random.normal(scale=2.80, size=x.size)
-data = data_maker(p_true, x) + noise
-quit()
+data = make_data(p_true, x) + noise
 mydata = nddata(data,[-1]['x']).setaxis('x',x)
 print(mydata)
 quit()
