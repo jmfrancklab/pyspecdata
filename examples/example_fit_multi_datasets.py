@@ -12,7 +12,8 @@ TODO: this should be using the Model interface / built-in models!
 """
 import matplotlib.pyplot as plt
 import numpy as np
-
+from pyspecdata import *
+import sympy as sp
 from lmfit import Parameters, minimize, report_fit
 
 
@@ -45,7 +46,7 @@ def objective(params, x, data):
 ###############################################################################
 # Create five simulated Gaussian data sets
 
-x = np.linspace(-1, 2, 151)
+x = nddata(np.linspace(-1, 2, 151),'x')
 data = []
 for _ in np.arange(5):
     params = Parameters()
