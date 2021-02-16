@@ -9,7 +9,7 @@ to retype them every time.
 """
 import matplotlib.pyplot as plt
 from numpy import exp, linspace, pi, random, sign, sin
-from sympy import *
+import sympy as sp
 from lmfit import Parameters, minimize
 from pyspecdata import *
 from lmfit.printfuncs import report_fit
@@ -30,32 +30,41 @@ def make_data(pars, x,data=None):
         return model
     return model - data
 random.seed(0)
-x = linspace(0, 250, 1500)
+x = np.linspace(0, 250, 32)
 noise = random.normal(scale=2.80, size=x.size)
 data = make_data(p_true, x) + noise
-mydata = nddata(data,[-1]['x']).setaxis('x',x)
+mydata = nddata(data,[-1],['x']).setaxis('x',x)
 print(mydata)
-quit()
 #}}}
-true_values={A:14.0,period:5.4321,shift:0.12345,
-        decay:0.01000}
-A, shift, period, decay, x = symbols('A shift period decay x')
-expr = A*sin(shift+x/period)*exp(-(x*decay)**2)
-print(expr.atoms(Symbol))
+x_axis = nddata(np.linspace(0,250,1500),'x_axis')
+A, shift, period, decay, x = sp.symbols('A shift period decay x')
+expr = A*sp.sin(shift+x/period)*sp.exp(-(x*decay)**2)
+print(expr.atoms(sp.Symbol))
 fit_params = Parameters()
-
-for this_symbol in expr.atoms(Symbol):
+axis_names = set(mydata.dimlabels)
+variable_names = axis_names & expr.atoms(sp.Symbol)
+parameter_names = expr.atoms(sp.Symbol) - variable_names
+for this_symbol in expr.atoms(sp.Symbol):
     fit_params.add('%s'%this_symbol)
 for j in fit_params:
     print("fit param ---",j)
-quit()
+def make_fn(pars,x,data=None):
+    x_axis =nddata(np.linspace(0,250,1500),'x_axis') 
+    fn = lambdify([x_axis],expr.subs({A:pars['A'],shift:pars['shift'],
+        period:pars['period'],decay:pars['decay']}),
+        modules=[{'ImmutableMatrix':np.ndarray},'numpy','scipy'])
+    l_fn = fn(x_axis)
+    fn_nddata = nddata(l_fn,[-1],['x']).setaxis('x',x_axis)
+    model = fn_nddata
+    if data is None:
+        return model
+    return model - data
 fit_params = Parameters()
-fit_params.add('amp', value=13.0, max=20, min=0.0)
+fit_params.add('A', value=13.0, max=20, min=0.0)
 fit_params.add('period', value=2, max=10)
 fit_params.add('shift', value=0.0, max=pi/2., min=-pi/2.)
 fit_params.add('decay', value=0.02, max=0.10, min=0.00)
-
-out = minimize(residual, fit_params, args=(x,), kws={'data': data})
+out = minimize(make_fn, fit_params, args=(x_axis,), kws={'data': mydata})
 fit = residual(out.params, x)
 
 ###############################################################################
