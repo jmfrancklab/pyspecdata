@@ -11,16 +11,18 @@ import matplotlib.pyplot as plt
 from numpy import exp, linspace, pi, random, sign, sin
 import sympy as sp
 from lmfit import Parameters, minimize
-from pyspecdata import *
 from lmfit.printfuncs import report_fit
 import numpy as np
+from pyspecdata import *
 #{{{ creating data
+true_values = {'amp':14.0,
+        'period':5.4321,
+        'shift':0.12345,
+        'decay':0.01000}
 p_true = Parameters()
-p_true.add('amp', value=14.0)
-p_true.add('period', value=5.4321)
-p_true.add('shift', value=0.12345)
-p_true.add('decay', value=0.01000)
-def make_data(pars, x,data=None):
+for k,v in true_values.items():
+    p_true.add(k,value=v)
+def residual_orig(pars, x, data=None):
     argu = (x * pars['decay'])**2
     shift = pars['shift']
     if abs(shift) > pi/2:
@@ -30,50 +32,53 @@ def make_data(pars, x,data=None):
         return model
     return model - data
 random.seed(0)
-x = np.linspace(0, 250, 32)
+x = linspace(0, 250, 1500)
 noise = random.normal(scale=2.80, size=x.size)
-data = make_data(p_true, x) + noise
+data = residual_orig(p_true, x) + noise
 mydata = nddata(data,[-1],['x']).setaxis('x',x)
 #}}}
-x_axis = nddata(np.linspace(0,250,1500),'x_axis')
 A, shift, period, decay, x = sp.symbols('A shift period decay x')
 expr = A*sp.sin(shift+x/period)*sp.exp(-(x*decay)**2)
 print(expr.atoms(sp.Symbol))
 fit_params = Parameters()
-axis_names = set(mydata.dimlabels)
-variable_names = axis_names & expr.atoms(sp.Symbol)
-parameter_names = expr.atoms(sp.Symbol) - variable_names
-for this_symbol in expr.atoms(sp.Symbol):
-    fit_params.add('%s'%this_symbol)
+# {{{ decide which symbols are parameters vs. variables
+all_symbols = expr.atoms(sp.Symbol)
+axis_names = set([sp.Symbol(j) for j in mydata.dimlabels])
+variable_symbols = axis_names & all_symbols
+parameter_symbols = all_symbols - variable_symbols
+variable_symbols = tuple(variable_symbols)
+variable_names = tuple([str(j) for j in variable_symbols])
+parameter_symbols = tuple(parameter_symbols)
+parameter_names = tuple([str(j) for j in parameter_symbols])
+print("all symbols are",all_symbols,"axis names are",axis_names,"variable names are",variable_names,"parameter names are",parameter_names)
+# }}}
+guesses = {'A':dict(value=13.0, max=20, min=0.0),
+        'period':dict(value=2, max=10),
+        'shift':dict(value=0.0, max=pi/2., min=-pi/2.),
+        'decay':dict(value=0.02, max=0.10, min=0.00),}
+for this_symbol in parameter_names:
+    kwargs = {}
+    if this_symbol in guesses.keys():
+        print("applying bounds for",this_symbol)
+        kwargs.update(guesses[str(this_symbol)])
+    fit_params.add(this_symbol, **kwargs)
 for j in fit_params:
     print("fit param ---",j)
-def function(pars,x):
-    function = expr.subs({A:pars['amp'],shift:pars['shift'],
-        period:pars['period'],decay:pars['decay']})
-    print(function.atoms(sp.Symbol))
-    return function
-function = function(p_true, x)
-quit()
-def make_fn(pars,x,data=None):
-    x_axis =nddata(np.linspace(0,250,1500),'x_axis')
-    fn = lambdify('x_axis',expr.subs({A:pars['A'],shift:pars['shift'],
-        period:pars['period'],decay:pars['decay']}),
+print(fit_params)
+fn = lambdify(variable_symbols + parameter_symbols,
+        expr,
         modules=[{'ImmutableMatrix':np.ndarray},'numpy','scipy'])
-    print("YOU GOT TO HERE B")
-    l_fn = np.ndarray(fn([x_axis]))#.data)
-    print("YOU GOT TO HERE A")
-    fn_nddata = nddata(l_fn,[-1],['x']).setaxis('x',x_axis)
-    model = fn_nddata
+def residual(pars, x, data=None):
+    parlist = [fit_params[j] for j in parameter_names]
+    model = fn(x, *parlist)
     if data is None:
         return model
     return model - data
-fit_params = Parameters()
-fit_params.add('A', value=13.0, max=20, min=0.0)
-fit_params.add('period', value=2, max=10)
-fit_params.add('shift', value=0.0, max=pi/2., min=-pi/2.)
-fit_params.add('decay', value=0.02, max=0.10, min=0.00)
-out = minimize(make_fn, fit_params, args=(x_axis,), kws={'data': mydata})
-fit = residual(out.params, x)
+out = minimize(residual, fit_params, args=(mydata.getaxis('x'),), kws={'data': mydata.data})
+fit = mydata.copy(data=False)
+guess = mydata.copy(data=False)
+guess.data = residual(fit_params, mydata.getaxis('x'))
+fit.data = residual(out.params, mydata.getaxis('x'))
 
 ###############################################################################
 # This gives the following fitting results:
@@ -83,6 +88,7 @@ report_fit(out, show_correl=True, modelpars=p_true)
 ###############################################################################
 # and shows the plot below:
 #
-plt.plot(x, data, 'ro')
-plt.plot(x, fit, 'b')
+plot(mydata, 'ro')
+plot(fit, 'b', alpha=0.5)
+plot(guess, 'g--')
 plt.show()
