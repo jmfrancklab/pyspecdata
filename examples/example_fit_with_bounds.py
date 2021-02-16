@@ -34,7 +34,6 @@ x = np.linspace(0, 250, 32)
 noise = random.normal(scale=2.80, size=x.size)
 data = make_data(p_true, x) + noise
 mydata = nddata(data,[-1],['x']).setaxis('x',x)
-print(mydata)
 #}}}
 x_axis = nddata(np.linspace(0,250,1500),'x_axis')
 A, shift, period, decay, x = sp.symbols('A shift period decay x')
@@ -48,12 +47,21 @@ for this_symbol in expr.atoms(sp.Symbol):
     fit_params.add('%s'%this_symbol)
 for j in fit_params:
     print("fit param ---",j)
+def function(pars,x):
+    function = expr.subs({A:pars['amp'],shift:pars['shift'],
+        period:pars['period'],decay:pars['decay']})
+    print(function.atoms(sp.Symbol))
+    return function
+function = function(p_true, x)
+quit()
 def make_fn(pars,x,data=None):
-    x_axis =nddata(np.linspace(0,250,1500),'x_axis') 
-    fn = lambdify([x_axis],expr.subs({A:pars['A'],shift:pars['shift'],
+    x_axis =nddata(np.linspace(0,250,1500),'x_axis')
+    fn = lambdify('x_axis',expr.subs({A:pars['A'],shift:pars['shift'],
         period:pars['period'],decay:pars['decay']}),
         modules=[{'ImmutableMatrix':np.ndarray},'numpy','scipy'])
-    l_fn = fn(x_axis)
+    print("YOU GOT TO HERE B")
+    l_fn = np.ndarray(fn([x_axis]))#.data)
+    print("YOU GOT TO HERE A")
     fn_nddata = nddata(l_fn,[-1],['x']).setaxis('x',x_axis)
     model = fn_nddata
     if data is None:
