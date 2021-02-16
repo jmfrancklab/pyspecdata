@@ -6464,6 +6464,11 @@ class nddata (object):
                 raise ValueError(errmsg)
             #}}}
         else:
+            if type(args) is not slice:
+                if type(args) not in [tuple, list]:
+                    raise ValueError("the first argument to your nddata slice/index is not a string -- I don't understand that!  Are you trying to pass nddata to a function that only accepts numpy ndarrays?")
+                elif type(args[0]) is not str:
+                    raise ValueError("the first argument to your nddata slice/index is not a string -- I don't understand that!  Are you trying to pass nddata to a function that only accepts numpy ndarrays?")
             slicedict,axesdict,errordict,unitsdict = self._parse_slices(args)
             if not isinstance(args, slice) and isinstance(args[1], list) and isinstance(args[0], str) and len(args) == 2:
                 return concat([self[args[0],x] for x in args[1]],args[0])
