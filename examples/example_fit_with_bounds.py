@@ -14,7 +14,53 @@ from lmfit import Parameters, minimize
 from lmfit.printfuncs import report_fit
 import numpy as np
 from pyspecdata import *
-#{{{ creating data
+# {{{ helper function(s)
+def gen_from_expr(expr, guesses={}):
+    """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
+
+    Parameters
+    ==========
+    expr: sympy expression
+    guesses: dict
+        dictionary of keyword arguments for guesses (value) or constraints
+        (min/max)
+
+    Returns
+    =======
+    pars: lmfit.Parameters
+    parameter_names: tuple
+        ordered list of the names of the arguments  to fn
+    fn: function
+        the fit function
+    """
+    # {{{ decide which symbols are parameters vs. variables
+    all_symbols = expr.atoms(sp.Symbol)
+    axis_names = set([sp.Symbol(j) for j in empty_data.dimlabels])
+    variable_symbols = axis_names & all_symbols
+    parameter_symbols = all_symbols - variable_symbols
+    variable_symbols = tuple(variable_symbols)
+    variable_names = tuple([str(j) for j in variable_symbols])
+    parameter_symbols = tuple(parameter_symbols)
+    parameter_names = tuple([str(j) for j in parameter_symbols])
+    print("all symbols are", all_symbols, "axis names are", axis_names,
+            "variable names are", variable_names, "parameter names are", parameter_names)
+    # }}}
+    pars = Parameters()
+    for this_name in parameter_names:
+        kwargs = {}
+        if this_name in guesses.keys():
+            print("applying bounds for",this_name)
+            kwargs.update(guesses[str(this_name)])
+        pars.add(this_name, **kwargs)
+    for j in pars:
+        print("fit param ---",j)
+    print(pars)
+    fn = lambdify(variable_symbols + parameter_symbols,
+            expr,
+            modules=[{'ImmutableMatrix':np.ndarray},'numpy','scipy'])
+    return pars, parameter_names, fn
+# }}}
+#{{{ creating fake data
 true_values = {'A':14.0,
         'period':5.4321,
         'shift':0.12345,
@@ -28,36 +74,13 @@ empty_data = nddata(x_vals,'x').copy(data=False)
 #}}}
 A, shift, period, decay, x = sp.symbols('A shift period decay x')
 expr = A*sp.sin(shift+x/period)*sp.exp(-(x*decay)**2)
-print(expr.atoms(sp.Symbol))
-# {{{ decide which symbols are parameters vs. variables
-all_symbols = expr.atoms(sp.Symbol)
-axis_names = set([sp.Symbol(j) for j in empty_data.dimlabels])
-variable_symbols = axis_names & all_symbols
-parameter_symbols = all_symbols - variable_symbols
-variable_symbols = tuple(variable_symbols)
-variable_names = tuple([str(j) for j in variable_symbols])
-parameter_symbols = tuple(parameter_symbols)
-parameter_names = tuple([str(j) for j in parameter_symbols])
-print("all symbols are", all_symbols, "axis names are", axis_names,
-        "variable names are", variable_names, "parameter names are", parameter_names)
-# }}}
-guesses = {'A':dict(value=13.0, max=20, min=0.0),
-        'period':dict(value=2, max=10),
-        'shift':dict(value=0.0, max=pi/2., min=-pi/2.),
-        'decay':dict(value=0.02, max=0.10, min=0.00),}
-fit_params = Parameters()
-for this_name in parameter_names:
-    kwargs = {}
-    if this_name in guesses.keys():
-        print("applying bounds for",this_name)
-        kwargs.update(guesses[str(this_name)])
-    fit_params.add(this_name, **kwargs)
-for j in fit_params:
-    print("fit param ---",j)
-print(fit_params)
-fn = lambdify(variable_symbols + parameter_symbols,
-        expr,
-        modules=[{'ImmutableMatrix':np.ndarray},'numpy','scipy'])
+# seems likely that Parameters is an ordered list, in which case, we don't need
+# parameter_names -- **however** we need to check the documentation to see that
+# this is true
+fit_params, parameter_names, fn = gen_from_expr(expr, {'A':dict(value=13.0, max=20, min=0.0),
+            'period':dict(value=2, max=10),
+            'shift':dict(value=0.0, max=pi/2., min=-pi/2.),
+            'decay':dict(value=0.02, max=0.10, min=0.00),})
 def residual(pars, x, data=None):
     parlist = [pars[j] for j in parameter_names]
     print("parlist",parlist)
