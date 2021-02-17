@@ -69,7 +69,8 @@ def residual_orig(pars, x, data=None):
         return model
     return model - data
 def residual(pars, x, data=None):
-    parlist = [fit_params[j] for j in parameter_names]
+    parlist = [pars[j] for j in parameter_names]
+    print("parlist",parlist)
     shift = pars['shift']
     if abs(shift) > pi/2:
         shift = shift - sign(shift)*pi
@@ -78,10 +79,10 @@ def residual(pars, x, data=None):
         return model
     return model - data
 mydata = empty_data.copy(data=False)
-mydata.data = residual(p_true, x_vals) + noise
-out = minimize(residual, fit_params, args=(mydata.getaxis('x'),), kws={'data': mydata.data})
+mydata.data = residual(p_true, mydata.getaxis('x')) + noise
 guess = empty_data.copy(data=False)
 guess.data = residual(fit_params, empty_data.getaxis('x'))
+out = minimize(residual, fit_params, args=(mydata.getaxis('x'),), kws={'data': mydata.data})
 fit = empty_data.copy(data=False)
 fit.data = residual(out.params, empty_data.getaxis('x'))
 
@@ -93,7 +94,8 @@ report_fit(out, show_correl=True, modelpars=p_true)
 ###############################################################################
 # and shows the plot below:
 #
-plot(mydata, 'ro')
-plot(fit, 'b', alpha=0.5)
-#plot(guess, 'g--')
+plot(mydata, 'ro', label='data')
+plot(fit, 'b', alpha=0.5, label='fit')
+plot(guess, 'g--', label='guess')
+plt.legend()
 plt.show()
