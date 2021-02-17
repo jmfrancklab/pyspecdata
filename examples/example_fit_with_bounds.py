@@ -15,70 +15,75 @@ from lmfit.printfuncs import report_fit
 import numpy as np
 from pyspecdata import *
 #{{{ creating data
-true_values = {'amp':14.0,
+true_values = {'A':14.0,
         'period':5.4321,
         'shift':0.12345,
         'decay':0.01000}
 p_true = Parameters()
 for k,v in true_values.items():
     p_true.add(k,value=v)
-def residual_orig(pars, x, data=None):
-    argu = (x * pars['decay'])**2
-    shift = pars['shift']
-    if abs(shift) > pi/2:
-        shift = shift - sign(shift)*pi
-    model = pars['amp'] * sin(shift + x/pars['period']) * exp(-argu)
-    if data is None:
-        return model
-    return model - data
 random.seed(0)
-x = linspace(0, 250, 1500)
-noise = random.normal(scale=2.80, size=x.size)
-data = residual_orig(p_true, x) + noise
-mydata = nddata(data,[-1],['x']).setaxis('x',x)
+x_vals = linspace(0, 250, 1500)
+empty_data = nddata(x_vals,'x').copy(data=False)
+noise = random.normal(scale=2.80, size=x_vals.size)
 #}}}
 A, shift, period, decay, x = sp.symbols('A shift period decay x')
 expr = A*sp.sin(shift+x/period)*sp.exp(-(x*decay)**2)
 print(expr.atoms(sp.Symbol))
-fit_params = Parameters()
 # {{{ decide which symbols are parameters vs. variables
 all_symbols = expr.atoms(sp.Symbol)
-axis_names = set([sp.Symbol(j) for j in mydata.dimlabels])
+axis_names = set([sp.Symbol(j) for j in empty_data.dimlabels])
 variable_symbols = axis_names & all_symbols
 parameter_symbols = all_symbols - variable_symbols
 variable_symbols = tuple(variable_symbols)
 variable_names = tuple([str(j) for j in variable_symbols])
 parameter_symbols = tuple(parameter_symbols)
 parameter_names = tuple([str(j) for j in parameter_symbols])
-print("all symbols are",all_symbols,"axis names are",axis_names,"variable names are",variable_names,"parameter names are",parameter_names)
+print("all symbols are", all_symbols, "axis names are", axis_names,
+        "variable names are", variable_names, "parameter names are", parameter_names)
 # }}}
 guesses = {'A':dict(value=13.0, max=20, min=0.0),
         'period':dict(value=2, max=10),
         'shift':dict(value=0.0, max=pi/2., min=-pi/2.),
         'decay':dict(value=0.02, max=0.10, min=0.00),}
-for this_symbol in parameter_names:
+fit_params = Parameters()
+for this_name in parameter_names:
     kwargs = {}
-    if this_symbol in guesses.keys():
-        print("applying bounds for",this_symbol)
-        kwargs.update(guesses[str(this_symbol)])
-    fit_params.add(this_symbol, **kwargs)
+    if this_name in guesses.keys():
+        print("applying bounds for",this_name)
+        kwargs.update(guesses[str(this_name)])
+    fit_params.add(this_name, **kwargs)
 for j in fit_params:
     print("fit param ---",j)
 print(fit_params)
 fn = lambdify(variable_symbols + parameter_symbols,
         expr,
         modules=[{'ImmutableMatrix':np.ndarray},'numpy','scipy'])
+def residual_orig(pars, x, data=None):
+    argu = (x * pars['decay'])**2
+    shift = pars['shift']
+    if abs(shift) > pi/2:
+        shift = shift - sign(shift)*pi
+    model = pars['A'] * sin(shift + x/pars['period']) * exp(-argu)
+    if data is None:
+        return model
+    return model - data
 def residual(pars, x, data=None):
     parlist = [fit_params[j] for j in parameter_names]
+    shift = pars['shift']
+    if abs(shift) > pi/2:
+        shift = shift - sign(shift)*pi
     model = fn(x, *parlist)
     if data is None:
         return model
     return model - data
+mydata = empty_data.copy(data=False)
+mydata.data = residual(p_true, x_vals) + noise
 out = minimize(residual, fit_params, args=(mydata.getaxis('x'),), kws={'data': mydata.data})
-fit = mydata.copy(data=False)
-guess = mydata.copy(data=False)
-guess.data = residual(fit_params, mydata.getaxis('x'))
-fit.data = residual(out.params, mydata.getaxis('x'))
+guess = empty_data.copy(data=False)
+guess.data = residual(fit_params, empty_data.getaxis('x'))
+fit = empty_data.copy(data=False)
+fit.data = residual(out.params, empty_data.getaxis('x'))
 
 ###############################################################################
 # This gives the following fitting results:
@@ -90,5 +95,5 @@ report_fit(out, show_correl=True, modelpars=p_true)
 #
 plot(mydata, 'ro')
 plot(fit, 'b', alpha=0.5)
-plot(guess, 'g--')
+#plot(guess, 'g--')
 plt.show()
