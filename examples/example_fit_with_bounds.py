@@ -25,7 +25,6 @@ for k,v in true_values.items():
 random.seed(0)
 x_vals = linspace(0, 250, 1500)
 empty_data = nddata(x_vals,'x').copy(data=False)
-noise = random.normal(scale=2.80, size=x_vals.size)
 #}}}
 A, shift, period, decay, x = sp.symbols('A shift period decay x')
 expr = A*sp.sin(shift+x/period)*sp.exp(-(x*decay)**2)
@@ -59,15 +58,6 @@ print(fit_params)
 fn = lambdify(variable_symbols + parameter_symbols,
         expr,
         modules=[{'ImmutableMatrix':np.ndarray},'numpy','scipy'])
-def residual_orig(pars, x, data=None):
-    argu = (x * pars['decay'])**2
-    shift = pars['shift']
-    if abs(shift) > pi/2:
-        shift = shift - sign(shift)*pi
-    model = pars['A'] * sin(shift + x/pars['period']) * exp(-argu)
-    if data is None:
-        return model
-    return model - data
 def residual(pars, x, data=None):
     parlist = [pars[j] for j in parameter_names]
     print("parlist",parlist)
@@ -79,7 +69,8 @@ def residual(pars, x, data=None):
         return model
     return model - data
 mydata = empty_data.copy(data=False)
-mydata.data = residual(p_true, mydata.getaxis('x')) + noise
+mydata.data = residual(p_true, mydata.getaxis('x'))
+mydata.add_noise(2.8)
 guess = empty_data.copy(data=False)
 guess.data = residual(fit_params, empty_data.getaxis('x'))
 out = minimize(residual, fit_params, args=(mydata.getaxis('x'),), kws={'data': mydata.data})
