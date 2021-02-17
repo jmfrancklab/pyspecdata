@@ -72,6 +72,7 @@ random.seed(0)
 x_vals = linspace(0, 250, 1500)
 empty_data = nddata(x_vals,'x').copy(data=False)
 #}}}
+#{{{making sympy expression
 A, shift, period, decay, x = sp.symbols('A shift period decay x')
 expr = A*sp.sin(shift+x/period)*sp.exp(-(x*decay)**2)
 # seems likely that Parameters is an ordered list, in which case, we don't need
@@ -94,6 +95,8 @@ def residual(pars, x, data=None):
 mydata = empty_data.copy(data=False)
 mydata.data = residual(p_true, mydata.getaxis('x'))
 mydata.add_noise(2.8)
+print("THIS IS THE TYPE OF MYDATA",type(mydata))
+quit()
 guess = empty_data.copy(data=False)
 guess.data = residual(fit_params, empty_data.getaxis('x'))
 out = minimize(residual, fit_params, args=(mydata.getaxis('x'),), kws={'data': mydata.data})
