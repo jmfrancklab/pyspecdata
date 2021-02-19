@@ -63,6 +63,7 @@ def gen_from_expr(expr, guesses={}):
     return pars, parameter_names, fn
 # }}}
 #{{{creating true values for data 
+true_p = []
 for j in np.arange(5):    
     true_values = {'amp%d'%j:0.60 + 9.50*np.random.rand(),
             'cen%d'%j:-0.20 + 1.20*np.random.rand(),
@@ -70,6 +71,7 @@ for j in np.arange(5):
     p_true = Parameters()
     for k,v in true_values.items():
         p_true.add(k,value=v)
+    true_p.append(p_true)   
 x_vals = np.linspace(-1, 2, 151)
 empty_data = nddata(x_vals,'x').copy(data=False)
 #}}}
@@ -115,13 +117,18 @@ def objective(params, x, data):
 
 ###############################################################################
 # Create five simulated Gaussian data sets
-
+fit_params,parameter_names,fn = gen_from_expr(expr, {
+fit_params = Parameters()
+for iy, y in enumerate(mydata):
+    fit_params.add('amp%i'%(iy+1),value=0.5,min=0.0, max=200)
+    fit_params.add('cen%i'(iy+1),value=0.4,min=-2.0,max=2.0)
 mydata= []
 for j in np.arange(5):
     dat = empty_data.copy(data=False)
-    dat = gauss(p_true[j],empty_data.getaxis('x')) + np.random.normal(size=x_vals.size, scale=0.1)
+    dat = gen_from_expr(expr, {'amp%d'%j:dict(value)
     mydata.append(dat)
     mydata[j] = nddata(mydata[j],[-1],['x'])
+quit()    
 guess = []
 for j in np.arange(5):
     guess_data = empty_data.copy(data=False)
