@@ -2,7 +2,7 @@ from ..general_functions import *
 from numpy import r_,c_,ix_,nan
 import numpy as np
 from ..ndshape import ndshape_base as ndshape
-from pylab import gca,sca,imshow,xlabel,ylabel,title,colorbar,setp
+from pylab import gca,sca,imshow,xlabel,ylabel,title,colorbar,setp,zeros
 from matplotlib import axes
 from matplotlib.pyplot import subplots
 def image(A,x=[],y=[],**kwargs):
@@ -118,6 +118,8 @@ def image(A,x=[],y=[],**kwargs):
         # order according to how it's ordered in the memory
         # the innermost two will form the image -- first add a line to the end of the images we're going to join up
 
+        print(A.shape)
+    
         # determine num of axes objects needed
         num_axes_obj = 1
         for dim_idx in range(A.ndim):
@@ -126,6 +128,10 @@ def image(A,x=[],y=[],**kwargs):
                 break
             else:
                 num_axes_obj *= A.shape[counter]
+        axes_list = zeros(num_axes_obj)
+        axes_list = axes_list.reshape(tuple(A.shape[-1*A.ndim+x] for x in range(0,A.ndim-1)))
+        print(axes_list)
+        quit()
 
         # generate diff axes vars using list comprehension
         axes_list = [axes for x in range(A.ndim)]
