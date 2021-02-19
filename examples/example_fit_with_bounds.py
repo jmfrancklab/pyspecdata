@@ -68,6 +68,8 @@ true_values = {'A':14.0,
 p_true = Parameters()
 for k,v in true_values.items():
     p_true.add(k,value=v)
+print(p_true)
+quit()
 random.seed(0)
 x_vals = linspace(0, 250, 1500)
 empty_data = nddata(x_vals,'x').copy(data=False)
