@@ -2,8 +2,7 @@ from ..general_functions import *
 from numpy import r_,c_,ix_,nan
 import numpy as np
 from ..ndshape import ndshape_base as ndshape
-from pylab import gca,sca,imshow,xlabel,ylabel,title,colorbar,setp,zeros,ones
-from matplotlib import axes
+from pylab import gca,sca,imshow,xlabel,ylabel,title,colorbar,setp
 def image(A,x=[],y=[],**kwargs):
     r"Please don't call image directly anymore -- use the image method of figurelist"
     x_inverted = False
@@ -24,7 +23,6 @@ def image(A,x=[],y=[],**kwargs):
     if x_first: # then the first dimension should be the column
         # dimesion (i.e. last)
         if hasattr(A,'dimlabels'):# if I try to use isinstance, I get a circular import
-            pen 
             new_dimlabels = list(A.dimlabels)
             temp = new_dimlabels.pop(0)
             A = A.copy().reorder(new_dimlabels + [temp])
@@ -116,91 +114,21 @@ def image(A,x=[],y=[],**kwargs):
     while A.ndim > 2:# to substitude for imagehsvm, etc., so that we just need a ersion of ft
         # order according to how it's ordered in the memory
         # the innermost two will form the image -- first add a line to the end of the images we're going to join up
-
-        print(A.shape)
-   
-        # determine list of divisions
-        # still needs to be put into algorithm for more than 3 dim
-        div_list = [1]
-        div_list = (div_list + [2])*(A.shape[-1*A.ndim] - 1) + div_list
-
-        # determine num of axes objects needed
-        num_axes_obj = 1
-        for dim_idx in range(A.ndim):
-            counter = -1*(A.ndim - dim_idx)
-            if counter == -1:
-                break
-            else:
-                num_axes_obj *= A.shape[counter]
-        axes_list = [[1.] * 4] * num_axes_obj
-        #axes_list = zeros(num_axes_obj,4)
-        print(axes_list)
-        print(len(axes_list))
-        axes_list = np.array(axes_list)
-        print(axes_list.shape)
-        reshape_tuple = list(A.shape[-1*A.ndim+x] for x in range(0,A.ndim-1))
-        reshape_tuple.append(-1)
-        reshape_tuple = tuple(reshape_tuple)
-        axes_list = axes_list.reshape(reshape_tuple)
-
-        top_border = 0.1
-        bottom_border = 0.1
-        left_border = 0.1
-        right_border = 0.1
-        
-        division_scale = 0.01
-        division_space = sum(div_list) * division_scale
-
-        height = (1. - (top_border+bottom_border+division_space))/num_axes_obj
-        width = 1. - (left_border+right_border)
-        div_list.insert(0,0)
-        div_counter = 0
-        for outer_index in range(A.shape[-1*A.ndim]):
-            for inner_index in range(A.shape[-1*A.ndim + 1]):
-                #print(outer_index,inner_index)
-                print(div_counter)
-                if div_counter == 0:
-                    axes_list[outer_index,inner_index] = [ left_border,
-                            bottom_border,
-                            width,
-                            height ]
-                else:
-                    axes_list[outer_index,inner_index] = [ left_border,
-                            bottom_border*div_counter+(div_list[div_counter]*division_scale),
-                            width,
-                            height ]
-                div_counter += 1
-        print(axes_list)
-        quit()
-        # end newer code
-
-        # older code 
         tempsize = np.array(A.shape) # make a tuple the right shape
         if linecounter == 0 and spacing < 1.0:
             spacing = round(prod(tempsize[0:-1])) # find the length of the thing not counting the columns
         tempsize[-2] = 2*linecounter + spacing # all dims are the same except the image row, to which I add an increasing number of rows
         #print "iterate (A.ndim=%d) -- now linecounter is "%A.ndim,linecounter
         linecounter += tempsize[-2] # keep track of the extra lines at the end
-        print(A.shape)
         A = np.concatenate((A,nan*np.zeros(tempsize)),axis=(A.ndim-2)) # concatenate along the rows
-        print("Here 1")
-        print(tempsize)
         tempsize = r_[A.shape[0:-3],A.shape[-2:]]
-        print("Here 2")
-        print(tempsize)
         tempsize[-2] *= A.shape[-3]
-        print("Here 3")
-        print(tempsize)
         try:
             A = A.reshape(np.int64(tempsize)) # now join them up
         except:
             raise IndexError(strm("problem with tempsize",tempsize,
                 "of type",type(tempsize),"dtype",tempsize.dtype))
-    print("Here 4")
-    print(A.shape)
     A = A[:A.shape[0]-linecounter,:] # really I should an extra counter besides linecounter now that I am using "spacing", but leave alone for now, to be sure I don't cut off data
-    print("Here 5")
-    print(A.shape)
     if origin == 'flip':
         # {{{ if origin is "flip", we need to manually flip the data
         A = A[::-1,:]
@@ -208,8 +136,6 @@ def image(A,x=[],y=[],**kwargs):
         kwargs['origin'] = 'lower'
         # }}}
     if np.iscomplexobj(A):# this just tests the datatype
-        #print("Here 6")
-        #quit()
         A = imagehsv(A,**imagehsvkwargs)
         retval = imshow(A,extent=myext,**kwargs)
     else:
