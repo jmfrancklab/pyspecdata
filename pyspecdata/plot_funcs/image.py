@@ -2,9 +2,8 @@ from ..general_functions import *
 from numpy import r_,c_,ix_,nan
 import numpy as np
 from ..ndshape import ndshape_base as ndshape
-from pylab import gca,sca,imshow,xlabel,ylabel,title,colorbar,setp,zeros
+from pylab import gca,sca,imshow,xlabel,ylabel,title,colorbar,setp,zeros,ones
 from matplotlib import axes
-from matplotlib.pyplot import subplots
 def image(A,x=[],y=[],**kwargs):
     r"Please don't call image directly anymore -- use the image method of figurelist"
     x_inverted = False
@@ -119,7 +118,33 @@ def image(A,x=[],y=[],**kwargs):
         # the innermost two will form the image -- first add a line to the end of the images we're going to join up
 
         print(A.shape)
-    
+   
+        # determine list of divisions
+        div_list = [1]
+        div_list = (div_list + [2])*(A.shape[-1*A.ndim] - 1) + div_list
+        print(div_list)
+        quit()
+
+
+        print("START")
+        print(A.shape[-1*A.ndim + 1])
+        div_list = []
+        for x in range(0,A.ndim):
+            div_list.append(1 * (A.shape[-1*A.ndim + 1] - 1))
+        print(div_list)
+        quit()
+         
+
+
+
+        for x in range(0,A.ndim-1):
+            #print(A.shape[-1*A.ndim + x])
+            temp = ones(A.shape[-1*A.ndim + x]-1)*(1+x)
+            div_list.append(list(temp))
+        print(div_list)
+
+
+
         # determine num of axes objects needed
         num_axes_obj = 1
         for dim_idx in range(A.ndim):
@@ -130,14 +155,9 @@ def image(A,x=[],y=[],**kwargs):
                 num_axes_obj *= A.shape[counter]
         axes_list = zeros(num_axes_obj)
         axes_list = axes_list.reshape(tuple(A.shape[-1*A.ndim+x] for x in range(0,A.ndim-1)))
+        print(axes_list.shape)
         print(axes_list)
-        quit()
 
-        # generate diff axes vars using list comprehension
-        axes_list = [axes for x in range(A.ndim)]
-
-        print(A.shape)
-        tempsize = np.array(A.shape)
         # end newer code
 
         # older code 
@@ -174,7 +194,6 @@ def image(A,x=[],y=[],**kwargs):
         kwargs['origin'] = 'lower'
         # }}}
     if np.iscomplexobj(A):# this just tests the datatype
-        fig,axes_list = subplots(num_axes_obj,1)
         #print("Here 6")
         #quit()
         A = imagehsv(A,**imagehsvkwargs)
