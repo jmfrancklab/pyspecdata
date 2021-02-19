@@ -12,15 +12,15 @@ ph2 = nddata(r_[0,2]/4.,'ph2')
 s *= exp(1j*2*pi*ph1)
 s *= exp(1j*2*pi*ph2)
 s['t2',0] *= 0.5
-s.ft('t2',shift=True)
+#s.ft('t2',shift=True)
 s.reorder('t2',first=False)
-s.ft(['ph1','ph2'])
-fl.next('Time domain')
-fl.image(s)
-fl.next('F domain')
-fl.image(s)
-fl.show();quit()
+print(ndshape(s))
+s.reorder(['ph1'],first=True)
+print(ndshape(s))
 
+
+A = ndshape(s)
+A.ndim = len(shape(A))
 
 # begin new code
 # determine list of divisions
@@ -52,7 +52,7 @@ bottom_border = 0.1
 left_border = 0.1
 right_border = 0.1
 
-division_scale = 0.01
+division_scale = 0.05
 division_space = sum(div_list) * division_scale
 
 height = (1. - (top_border+bottom_border+division_space))/num_axes_obj
@@ -80,13 +80,11 @@ print(axes_list)
 for outer_index in range(A.shape[-1*A.ndim]):
     for inner_index in range(A.shape[-1*A.ndim + 1]):
         temp = list(axes_list[outer_index,inner_index])
-        print(temp)
-        ax1 = Axes(rect=temp)
-        kwargs['ax'] = ax1
-        A = imagehsv(A[outer_index,inner_index],**imagehsvkwargs)
-        retval = imshow(A,extent=myext,**kwargs)
-
-
+        #ax1 = Axes(rect=temp)
+        #kwargs['ax'] = temp
+        figure(1);
+        image(s['ph1',0],ax=axes(temp))
+show()
 
 #s = nddata(['t2','ph1','ph2'],[2048,4,2])
 print(ndshape(s))
