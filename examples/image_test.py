@@ -9,14 +9,17 @@ s = exp(1j*2*pi*5*t_axis - t_axis/800e-3 )
 s += exp(1j*2*pi*-30*t_axis - t_axis/800e-3)
 ph1 = nddata(r_[0:4]/4.,'ph1')
 ph2 = nddata(r_[0,2]/4.,'ph2')
+repeats = nddata(r_[1:50],'repeats')
+s *= repeats
 s *= exp(1j*2*pi*ph1)
 s *= exp(1j*2*pi*ph2)
 s['t2',0] *= 0.5
 #s.ft('t2',shift=True)
-s.reorder('t2',first=False)
+s.reorder(['repeats','t2'],first=False)
 print(ndshape(s))
-s.reorder(['ph1'],first=True)
-print(ndshape(s))
+fl.next('look at data with repeat dimension')
+fl.image(s)
+fl.show();quit()
 
 
 A = ndshape(s)
@@ -26,13 +29,16 @@ A.ndim = len(shape(A))
 # determine list of divisions
 # still needs to be put into algorithm for more than 3 dim
 div_list = [1]
-div_list = (div_list + [2])*(A.shape[-1*A.ndim] - 1) + div_list
+#div_list = (div_list + [2])*(A.shape[-1*A.ndim] - 2) + div_list
+div_list = (div_list )*(A.shape[-1*A.ndim] - 2) + div_list
 
 # determine num of axes objects needed
 num_axes_obj = 1
 for dim_idx in range(A.ndim):
     counter = -1*(A.ndim - dim_idx)
     if counter == -1:
+        break
+    elif counter == -2:
         break
     else:
         num_axes_obj *= A.shape[counter]
@@ -42,7 +48,7 @@ print(axes_list)
 print(len(axes_list))
 axes_list = np.array(axes_list)
 print(axes_list.shape)
-reshape_tuple = list(A.shape[-1*A.ndim+x] for x in range(0,A.ndim-1))
+reshape_tuple = list(A.shape[-1*A.ndim+x] for x in range(0,A.ndim-2))
 reshape_tuple.append(-1)
 reshape_tuple = tuple(reshape_tuple)
 axes_list = axes_list.reshape(reshape_tuple)
@@ -57,12 +63,17 @@ division_space = sum(div_list) * division_scale
 
 height = (1. - (top_border+bottom_border+division_space))/num_axes_obj
 width = 1. - (left_border+right_border)
+print(width)
 div_list.insert(0,0)
+print(div_list)
 div_counter = 0
 for outer_index in range(A.shape[-1*A.ndim]):
     for inner_index in range(A.shape[-1*A.ndim + 1]):
         #print(outer_index,inner_index)
-        print(div_counter)
+        print(left_border)
+        print(bottom_border)
+        print(width)
+        print(height)
         if div_counter == 0:
             axes_list[outer_index,inner_index] = [ left_border,
                     bottom_border,
