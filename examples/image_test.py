@@ -1,15 +1,13 @@
 from pylab import *
 from pyspecdata import *
 
-fl = figlist_var()
-
 # Generate fake data
 t_axis = nddata(r_[0:2:2048j],'t2')
 s = exp(1j*2*pi*5*t_axis - t_axis/800e-3 )
 s += exp(1j*2*pi*-30*t_axis - t_axis/800e-3)
 ph1 = nddata(r_[0:4]/4.,'ph1')
 ph2 = nddata(r_[0,2]/4.,'ph2')
-repeats = nddata(r_[1:50],'repeats')
+repeats = nddata(r_[1:3],'repeats')
 s *= repeats
 s *= exp(1j*2*pi*ph1)
 s *= exp(1j*2*pi*ph2)
@@ -17,10 +15,8 @@ s['t2',0] *= 0.5
 #s.ft('t2',shift=True)
 s.reorder(['repeats','t2'],first=False)
 print(ndshape(s))
-fl.next('look at data with repeat dimension')
-fl.image(s)
-fl.show();quit()
-
+s.reorder(['ph1','repeats'],first=True)
+print(ndshape(s))
 
 A = ndshape(s)
 A.ndim = len(shape(A))
@@ -30,7 +26,8 @@ A.ndim = len(shape(A))
 # still needs to be put into algorithm for more than 3 dim
 div_list = [1]
 #div_list = (div_list + [2])*(A.shape[-1*A.ndim] - 2) + div_list
-div_list = (div_list )*(A.shape[-1*A.ndim] - 2) + div_list
+div_list = (div_list )*(A.shape[-1*A.ndim + 1] - 2) + div_list
+div_list = (div_list + [2])*(A.shape[-1*A.ndim] - 1) + div_list
 
 # determine num of axes objects needed
 num_axes_obj = 1
@@ -42,6 +39,7 @@ for dim_idx in range(A.ndim):
         break
     else:
         num_axes_obj *= A.shape[counter]
+print(num_axes_obj)
 axes_list = [[1.] * 4] * num_axes_obj
 #axes_list = zeros(num_axes_obj,4)
 print(axes_list)
@@ -58,18 +56,17 @@ bottom_border = 0.1
 left_border = 0.1
 right_border = 0.1
 
-division_scale = 0.05
+div_list.insert(0,0)
+division_scale = 0.02
 division_space = sum(div_list) * division_scale
 
 height = (1. - (top_border+bottom_border+division_space))/num_axes_obj
+
 width = 1. - (left_border+right_border)
-print(width)
-div_list.insert(0,0)
-print(div_list)
 div_counter = 0
+
 for outer_index in range(A.shape[-1*A.ndim]):
     for inner_index in range(A.shape[-1*A.ndim + 1]):
-        #print(outer_index,inner_index)
         print(left_border)
         print(bottom_border)
         print(width)
@@ -81,7 +78,8 @@ for outer_index in range(A.shape[-1*A.ndim]):
                     height ]
         else:
             axes_list[outer_index,inner_index] = [ left_border,
-                    bottom_border*div_counter+(div_list[div_counter]*division_scale),
+                    #bottom_border*div_counter+(div_list[div_counter]*division_scale),
+                    bottom_border + div_counter*height + div_list[div_counter]*division_scale,
                     width,
                     height ]
         div_counter += 1
@@ -91,10 +89,8 @@ print(axes_list)
 for outer_index in range(A.shape[-1*A.ndim]):
     for inner_index in range(A.shape[-1*A.ndim + 1]):
         temp = list(axes_list[outer_index,inner_index])
-        #ax1 = Axes(rect=temp)
-        #kwargs['ax'] = temp
         figure(1);
-        image(s['ph1',0],ax=axes(temp))
+        image(s['ph1',outer_index]['repeats',inner_index],ax=axes(temp))
 show()
 
 #s = nddata(['t2','ph1','ph2'],[2048,4,2])
