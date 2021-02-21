@@ -7,7 +7,8 @@ s = exp(1j*2*pi*5*t_axis - t_axis/800e-3 )
 s += exp(1j*2*pi*-30*t_axis - t_axis/800e-3)
 ph1 = nddata(r_[0:4]/4.,'ph1')
 ph2 = nddata(r_[0,2]/4.,'ph2')
-repeats = nddata(r_[1:3],'repeats')
+# this cannot start at 0 since we multiply s by it
+repeats = nddata(r_[1:5],'repeats')
 s *= repeats
 s *= exp(1j*2*pi*ph1)
 s *= exp(1j*2*pi*ph2)
@@ -60,10 +61,11 @@ div_list.insert(0,0)
 division_scale = 0.02
 division_space = sum(div_list) * division_scale
 
-height = (1. - (top_border+bottom_border+division_space))/num_axes_obj
+height = (1. - (top_border+bottom_border+division_space))/float(num_axes_obj)
 
 width = 1. - (left_border+right_border)
 div_counter = 0
+print(div_list)
 
 for outer_index in range(A.shape[-1*A.ndim]):
     for inner_index in range(A.shape[-1*A.ndim + 1]):
@@ -77,9 +79,14 @@ for outer_index in range(A.shape[-1*A.ndim]):
                     width,
                     height ]
         else:
+            #print("*** *** ***")
+            #print(bottom_border + div_counter*height + sum(div_list[:div_counter])*division_scale)
+            #print("*** *** ***")
             axes_list[outer_index,inner_index] = [ left_border,
                     #bottom_border*div_counter+(div_list[div_counter]*division_scale),
-                    bottom_border + div_counter*height + div_list[div_counter]*division_scale,
+                    #bottom_border + div_counter*height + div_list[div_counter]*division_scale,
+                    bottom_border + div_counter*height + div_counter*division_scale,
+                    #bottom_border + div_counter*height + sum(div_list[:div_counter])*division_scale,
                     width,
                     height ]
         div_counter += 1
