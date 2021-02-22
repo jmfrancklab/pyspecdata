@@ -2,6 +2,10 @@ from pyspecdata import *
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.lines as lines
+#import matplotlib.patches
+##import matplotlib.patches.ArrowStyle
+#import matplotlib.patches.ArrowStyle.get_styles
+#import matplotlib.axes.Axes.annotate
 #{{{generating subplots with space between
 bottoms = [0.13, 0.35, 0.63, 0.8]
 height = 0.1
@@ -82,6 +86,14 @@ x35,y35 = fig.transFigure.inverted().transform(r_[x35,y35])
 x4_text,_ = fig.transFigure.inverted().transform(r_[x3_text,0])
 x4,y4 = fig.transFigure.inverted().transform(r_[x4,y4])
 x45,y45 = fig.transFigure.inverted().transform(r_[x45,y45])
+
+def make_arrow(ax,x1,y1,x2,y2):
+    trans = ax.get_xaxis_transform()
+    ax.annotate("",(x1,y1),(x2,y2),
+            xycoords="figure fraction",ha="right", va="center",size=20,
+            arrowprops=dict(arrowstyle='simple',fc='white',ec='k'),
+            bbox=dict(boxstyle='square',fc='white'),
+            annotation_clip=False)
 lineA = lines.Line2D([x1,x15],[y1,y15],
         linewidth=3, color='k', transform=fig.transFigure,
         clip_on=False)
@@ -118,6 +130,21 @@ lineD = lines.Line2D([x13,x14],[y13,y14],
         linewidth=3, color='k',transform=fig.transFigure,
         clip_on=False)
 #}}}
+#{{{making arrows for ph1
+make_arrow(list_of_axes[0],0.14,0.128,0.14,0.132)
+make_arrow(list_of_axes[0],0.14,0.23,0.14,0.226)
+make_arrow(list_of_axes[1],0.14,0.35,0.14,0.36)
+make_arrow(list_of_axes[1],0.14,0.458,0.14,0.448)
+make_arrow(list_of_axes[2],0.14,0.63,0.14,0.64)
+make_arrow(list_of_axes[2],0.14,0.736,0.14,0.732)
+make_arrow(list_of_axes[3],0.14,0.797,0.14,0.801)
+make_arrow(list_of_axes[3],0.14,0.902,0.14,0.898)
+#}}}
+###{making arrows for ph2
+make_arrow(list_of_axes[0],0.12,0.128,0.12,0.25)
+make_arrow(list_of_axes[1],0.12,0.458,0.12,0.335)
+make_arrow(list_of_axes[2],0.12,0.63,0.12,0.75)
+make_arrow(list_of_axes[3],0.12,0.902,0.12,0.81)
 fig.add_artist(lineA)
 fig.add_artist(lineA1)
 fig.add_artist(lineB)
