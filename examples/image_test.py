@@ -1,5 +1,6 @@
 from pylab import *
 from pyspecdata import *
+import matplotlib.lines as lines
 
 # Generate fake data
 t_axis = nddata(r_[0:2:2048j],'t2')
@@ -109,32 +110,46 @@ for outer_index in range(A.shape[-1*A.ndim]):
         axes(temp).set_xlabel(None)
         axes(temp).xaxis.set_ticks([])
 
-        # Put inner phase cycle labels, according to dimension and value
+        ## Put inner phase cycle labels, according to dimension and value
+        # A little tricker than the outer phase cycle labels
         x1,y1 = axes(temp).transAxes.transform(r_[0,1])
         x2,y2 = axes(temp).transAxes.transform(r_[0,0])
         x1-=40
-        x_text = x1-50
         x2-=40
+        x_text = x1-50
+        x1-=49
+        x2-=49
         x1,y1 = fig.transFigure.inverted().transform(r_[x1,y1])
         x_text,_ = fig.transFigure.inverted().transform(r_[x_text,0])
         x2,y2 = fig.transFigure.inverted().transform(r_[x2,y2])
         axes_obj_label = A.dimlabels[-1*A.ndim+1]+'=%d'%(inner_index)
-        text(x_text, temp[1], axes_obj_label, va='center', ha='right', rotation=90,
+        text(x_text, temp[1]+0.04, axes_obj_label, va='center', ha='right', rotation=90,
                 transform = fig.transFigure, color='k')
+        line_inner = lines.Line2D([x1,x2],[y1,y2],linewidth=3, color='k',
+                transform=fig.transFigure,clip_on=False)
+        fig.add_artist(line_inner)
 
         # Put outer phase cycle labels, according to dimension and value
+        # Set these each time you reach the end of the inner loop
         if (inner_index == A.shape[-1*A.ndim+1]-1):
             x1,y1 = axes(temp).transAxes.transform(r_[0,1])
             x2,y2 = axes(temp).transAxes.transform(r_[0,0])
             x1-=40
-            x_text = x1-100
             x2-=40
+            x_text = x1-100
+            x1-=90
+            x2-=90
+            y1-=25
+            y2-=25
             x1,y1 = fig.transFigure.inverted().transform(r_[x1,y1])
             x_text,_ = fig.transFigure.inverted().transform(r_[x_text,0])
             x2,y2 = fig.transFigure.inverted().transform(r_[x2,y2])
             axes_obj_label = A.dimlabels[-1*A.ndim]+'=%d'%(outer_index)
             text(x_text, temp[1], axes_obj_label, va='center', ha='right', rotation=90,
                     transform = fig.transFigure, color='k')
+            line_outer = lines.Line2D([x1,x2],[y1,y2],linewidth=3, color='k',
+                    transform=fig.transFigure,clip_on=False)
+            fig.add_artist(line_outer)
 
 
         # Put x-axis labels and ticks on bottom-most axes object
