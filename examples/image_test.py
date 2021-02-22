@@ -98,6 +98,7 @@ for outer_index in range(A.shape[-1*A.ndim]):
         print(outer_index,inner_index)
 
 
+
     #thisaxes.set_ylabel('repeats')
     #thisaxes.yaxis.set_minor_locator(minorLocator())
     #thisaxes.yaxis.set_ticks_position('both')
@@ -119,10 +120,18 @@ for outer_index in range(A.shape[-1*A.ndim]):
     for inner_index in range(A.shape[-1*A.ndim + 1]):
         temp = list(axes_list[outer_index,inner_index])
         this_ax = axes(temp)
-        this_ax.set_ylabel(A.dimlabels[-2])
-        this_ax.yaxis.set_minor_locator(minorLocator())
         figure(1);
-        image(s['ph1',outer_index]['ph2',inner_index],ax=this_ax)
+        image(s['ph1',outer_index]['ph2',inner_index],ax=axes(temp))
+        axes(temp).set_ylabel(A.dimlabels[-2])
+        axes(temp).yaxis.set_minor_locator(minorLocator())
         axes(temp).yaxis.set_ticks_position('both')
+        axes(temp).set_xlabel(None)
+        axes(temp).xaxis.set_ticks([])
+        if (outer_index == 0) and (inner_index == 0):
+            axes(temp).set_xlabel(A.dimlabels[-1])
+            axes(temp).xaxis.set_major_locator(majorLocator())
+            axes(temp).xaxis.set_minor_locator(minorLocator())
+        
+
         
 show();quit()
