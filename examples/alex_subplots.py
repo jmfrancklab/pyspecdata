@@ -44,14 +44,14 @@ for j,thisaxes in enumerate(list_of_axes):
 # for the following, use the transforms
 
 #{{{labeling ph1 for independent plots
-fig.text(0.08,0.25,'ph1=0',ha='center',va='bottom',rotation='vertical')
-fig.text(0.08,0.38,'ph1=1',ha='center',va='bottom',rotation='vertical')
-fig.text(0.08,0.67,'ph1=0',ha='center',va='bottom',rotation='vertical')
-fig.text(0.08,0.8,'ph1=1',ha='center',va='bottom',rotation='vertical')
+fig.text(0.14,0.145,'ph1=0',ha='center',va='bottom',rotation='vertical')
+fig.text(0.14,0.37,'ph1=1',ha='center',va='bottom',rotation='vertical')
+fig.text(0.14,0.65,'ph1=0',ha='center',va='bottom',rotation='vertical')
+fig.text(0.14,0.82,'ph1=1',ha='center',va='bottom',rotation='vertical')
 #}}}
 #{{{adding outer dimension labels
-fig.text(0.06,0.31,'ph2=0',ha='center',va='bottom',rotation='vertical')
-fig.text(0.06,0.75,'ph2=1',ha='center',va='bottom',rotation='vertical')
+fig.text(0.12,0.26,'ph2=0',ha='center',va='bottom',rotation='vertical')
+fig.text(0.12,0.75,'ph2=1',ha='center',va='bottom',rotation='vertical')
 #}}}
 #{{{Adding lines to separate ph1 and repeats
 x1,y1 = list_of_axes[3].transAxes.transform(r_[0,1])
