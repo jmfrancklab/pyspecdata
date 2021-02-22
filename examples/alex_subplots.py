@@ -130,6 +130,7 @@ lineD = lines.Line2D([x13,x14],[y13,y14],
         linewidth=3, color='k',transform=fig.transFigure,
         clip_on=False)
 #}}}
+#{{{making arrows for ph1
 make_arrow(list_of_axes[0],0.14,0.128,0.14,0.132)
 make_arrow(list_of_axes[0],0.14,0.23,0.14,0.226)
 make_arrow(list_of_axes[1],0.14,0.35,0.14,0.36)
@@ -137,6 +138,13 @@ make_arrow(list_of_axes[1],0.14,0.458,0.14,0.448)
 make_arrow(list_of_axes[2],0.14,0.63,0.14,0.64)
 make_arrow(list_of_axes[2],0.14,0.736,0.14,0.732)
 make_arrow(list_of_axes[3],0.14,0.797,0.14,0.801)
+make_arrow(list_of_axes[3],0.14,0.902,0.14,0.898)
+#}}}
+###{making arrows for ph2
+make_arrow(list_of_axes[0],0.12,0.128,0.12,0.25)
+make_arrow(list_of_axes[1],0.12,0.458,0.12,0.335)
+make_arrow(list_of_axes[2],0.12,0.63,0.12,0.75)
+make_arrow(list_of_axes[3],0.12,0.902,0.12,0.81)
 fig.add_artist(lineA)
 fig.add_artist(lineA1)
 fig.add_artist(lineB)
