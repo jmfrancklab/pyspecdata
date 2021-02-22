@@ -108,23 +108,22 @@ for outer_index in range(A.shape[-1*A.ndim]):
         axes(temp).yaxis.set_ticks_position('both')
         axes(temp).set_xlabel(None)
         axes(temp).xaxis.set_ticks([])
-        # Put x-axis labels and ticks on bottom-most axes object
-        if (outer_index == 0) and (inner_index == 0):
-            axes(temp).set_xlabel(A.dimlabels[-1])
-            axes(temp).xaxis.set_major_locator(majorLocator())
-            axes(temp).xaxis.set_minor_locator(minorLocator())
+
+        # Put inner phase cycle labels, according to dimension and value
+        x1,y1 = axes(temp).transAxes.transform(r_[0,1])
+        x2,y2 = axes(temp).transAxes.transform(r_[0,0])
+        x1-=40
+        x_text = x1-50
+        x2-=40
+        x1,y1 = fig.transFigure.inverted().transform(r_[x1,y1])
+        x_text,_ = fig.transFigure.inverted().transform(r_[x_text,0])
+        x2,y2 = fig.transFigure.inverted().transform(r_[x2,y2])
+        axes_obj_label = A.dimlabels[-1*A.ndim+1]+'=%d'%(inner_index)
+        text(x_text, temp[1], axes_obj_label, va='center', ha='right', rotation=90,
+                transform = fig.transFigure, color='k')
+
+        # Put outer phase cycle labels, according to dimension and value
         if (inner_index == A.shape[-1*A.ndim+1]-1):
-            x1,y1 = axes(temp).transAxes.transform(r_[0,1])
-            x2,y2 = axes(temp).transAxes.transform(r_[0,0])
-            x1-=40
-            x_text = x1-50
-            x2-=40
-            x1,y1 = fig.transFigure.inverted().transform(r_[x1,y1])
-            x_text,_ = fig.transFigure.inverted().transform(r_[x_text,0])
-            x2,y2 = fig.transFigure.inverted().transform(r_[x2,y2])
-            text(x_text, temp[1], A.dimlabels[-1*A.ndim+1], va='center', ha='right', rotation=90,
-                    transform = fig.transFigure, color='r')
-        if (outer_index == A.shape[-1*A.ndim]-1):
             x1,y1 = axes(temp).transAxes.transform(r_[0,1])
             x2,y2 = axes(temp).transAxes.transform(r_[0,0])
             x1-=40
@@ -133,12 +132,16 @@ for outer_index in range(A.shape[-1*A.ndim]):
             x1,y1 = fig.transFigure.inverted().transform(r_[x1,y1])
             x_text,_ = fig.transFigure.inverted().transform(r_[x_text,0])
             x2,y2 = fig.transFigure.inverted().transform(r_[x2,y2])
-            if inner_index == 0:
-                text(x_text, temp[1], A.dimlabels[-1*A.ndim], va='center', ha='right', rotation=90,
-                        transform = fig.transFigure, color='g')
-            if inner_index == 1:
-                text(x_text, temp[1], 'test 2', va='center', ha='right', rotation=90,
-                        transform = fig.transFigure, color='g')
+            axes_obj_label = A.dimlabels[-1*A.ndim]+'=%d'%(outer_index)
+            text(x_text, temp[1], axes_obj_label, va='center', ha='right', rotation=90,
+                    transform = fig.transFigure, color='k')
+
+
+        # Put x-axis labels and ticks on bottom-most axes object
+        if (outer_index == 0) and (inner_index == 0):
+            axes(temp).set_xlabel(A.dimlabels[-1])
+            axes(temp).xaxis.set_major_locator(majorLocator())
+            axes(temp).xaxis.set_minor_locator(minorLocator())
         # Put x-axis ticks on top-most axes object
         if (outer_index == A.shape[-1*A.ndim]-1) and (inner_index == A.shape[-1*A.ndim+1]-1):
             axes(temp).xaxis.set_major_locator(majorLocator())
