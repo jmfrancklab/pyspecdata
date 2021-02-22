@@ -55,8 +55,8 @@ axes_list = axes_list.reshape(reshape_tuple)
 
 top_border = 0.1
 bottom_border = 0.1
-left_border = 0.1
-right_border = 0.1
+left_border = 0.2
+right_border = 0.2
 
 division_scale = 0.03
 division_space = sum(div_list) * division_scale
@@ -96,28 +96,12 @@ minorLocator = lambda: mticker.AutoMinorLocator(n=5)
 for outer_index in range(A.shape[-1*A.ndim]):
     for inner_index in range(A.shape[-1*A.ndim + 1]):
         print(outer_index,inner_index)
-    #thisaxes.set_ylabel('repeats')
-    #thisaxes.yaxis.set_minor_locator(minorLocator())
-    #thisaxes.yaxis.set_ticks_position('both')
-    #if j == len(list_of_axes)-1:
-    #    thisaxes.xaxis.set_major_locator(majorLocator())
-    #    #for the minor ticks, use no labels; default NullFormatter
-    #    thisaxes.xaxis.set_minor_locator(minorLocator())
-    #    thisaxes.xaxis.tick_top()
-    #    labels = [item.get_text() for item in thisaxes.get_xticklabels()]
-    #    empty_string_labels = ['']*len(labels)
-    #    thisaxes.set_xticklabels(empty_string_labels)
-    #elif j == 0:
-    #    thisaxes.set_xlabel('this is the x axis')
-    #    thisaxes.xaxis.set_major_locator(majorLocator())
-    #    thisaxes.xaxis.set_minor_locator(minorLocator())
-    #else:
-    #    thisaxes.set_xticks([])
 for outer_index in range(A.shape[-1*A.ndim]):
     for inner_index in range(A.shape[-1*A.ndim + 1]):
         temp = list(axes_list[outer_index,inner_index])
         this_ax = axes(temp)
-        figure(1);
+        fig = figure(1)
+        fig;
         image(s['ph1',outer_index]['ph2',inner_index],ax=axes(temp))
         axes(temp).set_ylabel(A.dimlabels[-2])
         axes(temp).yaxis.set_minor_locator(minorLocator())
@@ -129,6 +113,32 @@ for outer_index in range(A.shape[-1*A.ndim]):
             axes(temp).set_xlabel(A.dimlabels[-1])
             axes(temp).xaxis.set_major_locator(majorLocator())
             axes(temp).xaxis.set_minor_locator(minorLocator())
+        if (inner_index == A.shape[-1*A.ndim+1]-1):
+            x1,y1 = axes(temp).transAxes.transform(r_[0,1])
+            x2,y2 = axes(temp).transAxes.transform(r_[0,0])
+            x1-=40
+            x_text = x1-50
+            x2-=40
+            x1,y1 = fig.transFigure.inverted().transform(r_[x1,y1])
+            x_text,_ = fig.transFigure.inverted().transform(r_[x_text,0])
+            x2,y2 = fig.transFigure.inverted().transform(r_[x2,y2])
+            text(x_text, temp[1], A.dimlabels[-1*A.ndim+1], va='center', ha='right', rotation=90,
+                    transform = fig.transFigure, color='r')
+        if (outer_index == A.shape[-1*A.ndim]-1):
+            x1,y1 = axes(temp).transAxes.transform(r_[0,1])
+            x2,y2 = axes(temp).transAxes.transform(r_[0,0])
+            x1-=40
+            x_text = x1-100
+            x2-=40
+            x1,y1 = fig.transFigure.inverted().transform(r_[x1,y1])
+            x_text,_ = fig.transFigure.inverted().transform(r_[x_text,0])
+            x2,y2 = fig.transFigure.inverted().transform(r_[x2,y2])
+            if inner_index == 0:
+                text(x_text, temp[1], A.dimlabels[-1*A.ndim], va='center', ha='right', rotation=90,
+                        transform = fig.transFigure, color='g')
+            if inner_index == 1:
+                text(x_text, temp[1], 'test 2', va='center', ha='right', rotation=90,
+                        transform = fig.transFigure, color='g')
         # Put x-axis ticks on top-most axes object
         if (outer_index == A.shape[-1*A.ndim]-1) and (inner_index == A.shape[-1*A.ndim+1]-1):
             axes(temp).xaxis.set_major_locator(majorLocator())
@@ -138,7 +148,6 @@ for outer_index in range(A.shape[-1*A.ndim]):
             labels = [item.get_text() for item in axes(temp).get_xticklabels()]
             empty_string_labels = ['']*len(labels)
             axes(temp).set_xticklabels(empty_string_labels)
-        
 
-        
+
 show();quit()
