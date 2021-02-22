@@ -5,18 +5,18 @@ from pyspecdata import *
 t_axis = nddata(r_[0:2:2048j],'t2')
 s = exp(1j*2*pi*5*t_axis - t_axis/800e-3 )
 s += exp(1j*2*pi*-30*t_axis - t_axis/800e-3)
-ph1 = nddata(r_[0:4]/4.,'ph1')
+ph1 = nddata(r_[0:8]/4.,'ph1')
 ph2 = nddata(r_[0,2]/4.,'ph2')
 # this cannot start at 0 since we multiply s by it
-repeats = nddata(r_[1:5],'repeats')
-s *= repeats
+repeats = nddata(r_[1:6],'repeats')
+s *= repeats/repeats
+s.add_noise(0.3)
 s *= exp(1j*2*pi*ph1)
 s *= exp(1j*2*pi*ph2)
-s['t2',0] *= 0.5
+#s['t2',0] *= 0.5
 #s.ft('t2',shift=True)
+#s.ft(['ph1','ph2'])
 s.reorder(['repeats','t2'],first=False)
-print(ndshape(s))
-s.reorder(['ph1','repeats'],first=True)
 print(ndshape(s))
 
 A = ndshape(s)
@@ -90,5 +90,5 @@ for outer_index in range(A.shape[-1*A.ndim]):
     for inner_index in range(A.shape[-1*A.ndim + 1]):
         temp = list(axes_list[outer_index,inner_index])
         figure(1);
-        image(s['ph1',outer_index]['repeats',inner_index],ax=axes(temp))
+        image(s['ph1',outer_index]['ph2',inner_index],ax=axes(temp))
 show();quit()
