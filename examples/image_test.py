@@ -96,9 +96,6 @@ minorLocator = lambda: mticker.AutoMinorLocator(n=5)
 for outer_index in range(A.shape[-1*A.ndim]):
     for inner_index in range(A.shape[-1*A.ndim + 1]):
         print(outer_index,inner_index)
-
-
-
     #thisaxes.set_ylabel('repeats')
     #thisaxes.yaxis.set_minor_locator(minorLocator())
     #thisaxes.yaxis.set_ticks_position('both')
@@ -127,10 +124,20 @@ for outer_index in range(A.shape[-1*A.ndim]):
         axes(temp).yaxis.set_ticks_position('both')
         axes(temp).set_xlabel(None)
         axes(temp).xaxis.set_ticks([])
+        # Put x-axis labels and ticks on bottom-most axes object
         if (outer_index == 0) and (inner_index == 0):
             axes(temp).set_xlabel(A.dimlabels[-1])
             axes(temp).xaxis.set_major_locator(majorLocator())
             axes(temp).xaxis.set_minor_locator(minorLocator())
+        # Put x-axis ticks on top-most axes object
+        if (outer_index == A.shape[-1*A.ndim]-1) and (inner_index == A.shape[-1*A.ndim+1]-1):
+            axes(temp).xaxis.set_major_locator(majorLocator())
+            #for the minor ticks, use no labels; default NullFormatter
+            axes(temp).xaxis.set_minor_locator(minorLocator())
+            axes(temp).xaxis.tick_top()
+            labels = [item.get_text() for item in axes(temp).get_xticklabels()]
+            empty_string_labels = ['']*len(labels)
+            axes(temp).set_xticklabels(empty_string_labels)
         
 
         
