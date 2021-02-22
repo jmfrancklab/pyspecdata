@@ -87,28 +87,28 @@ x4_text,_ = fig.transFigure.inverted().transform(r_[x3_text,0])
 x4,y4 = fig.transFigure.inverted().transform(r_[x4,y4])
 x45,y45 = fig.transFigure.inverted().transform(r_[x45,y45])
 
-lineA = lines.Line2D([0.125,0.15],[0.8,0.8],linestyle='--',
+lineA = lines.Line2D([0.12,0.15],[0.8,0.8],linestyle='--',
         linewidth=1.5, color='k', transform=fig.transFigure,
         clip_on=False)
-lineA1 = lines.Line2D([0.125,0.17],[0.9,0.9],linestyle='--',
+lineA1 = lines.Line2D([0.12,0.17],[0.9,0.9],linestyle='--',
         linewidth=1.5,color='k',transform=fig.transFigure,
         clip_on=False)
-lineB = lines.Line2D([0.125,0.15],[0.735,0.735],linestyle='--',
+lineB = lines.Line2D([0.12,0.15],[0.735,0.735],linestyle='--',
         linewidth=1.5, color='k',transform=fig.transFigure,
         clip_on=False)
-lineB1 = lines.Line2D([0.125,0.17],[0.63,0.63],linestyle='--',
+lineB1 = lines.Line2D([0.12,0.17],[0.63,0.63],linestyle='--',
         linewidth=1.5,color='k',transform=fig.transFigure,
         clip_on=False)
-lineC = lines.Line2D([0.125,0.15],[0.35,0.35],linestyle='--',
+lineC = lines.Line2D([0.12,0.15],[0.35,0.35],linestyle='--',
         linewidth=1.5,color='k',transform=fig.transFigure,
         clip_on=False)
-lineC1 = lines.Line2D([0.125,0.17],[0.46,0.46],linestyle='--',
+lineC1 = lines.Line2D([0.12,0.17],[0.46,0.46],linestyle='--',
         linewidth=1.5,color='k',transform=fig.transFigure,
         clip_on=False)
-lineD = lines.Line2D([0.125,0.15],[0.23,0.23],linestyle='--',
+lineD = lines.Line2D([0.12,0.15],[0.23,0.23],linestyle='--',
         linewidth=1.5,color='k',transform=fig.transFigure,
         clip_on=False)
-lineD1 = lines.Line2D([0.125,0.17],[0.13,0.13],linestyle='--',
+lineD1 = lines.Line2D([0.12,0.17],[0.13,0.13],linestyle='--',
         linewidth=1.5,color='k',transform=fig.transFigure,
         clip_on=False)
 #}}}
