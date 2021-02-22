@@ -87,24 +87,17 @@ x4_text,_ = fig.transFigure.inverted().transform(r_[x3_text,0])
 x4,y4 = fig.transFigure.inverted().transform(r_[x4,y4])
 x45,y45 = fig.transFigure.inverted().transform(r_[x45,y45])
 
-def make_arrow(ax,x1,y1,x2,y2):
-    trans = ax.get_xaxis_transform()
-    ax.annotate("",(x1,y1),(x2,y2),
-            xycoords="figure fraction",ha="right", va="center",size=20,
-            arrowprops=dict(arrowstyle='simple',fc='white',ec='k'),
-            bbox=dict(boxstyle='square',fc='white'),
-            annotation_clip=False)
-lineA = lines.Line2D([x1,x15],[y1,y15],
-        linewidth=3, color='k', transform=fig.transFigure,
+lineA = lines.Line2D([x1,x15],[y1,y15],linestyle='--',
+        linewidth=1.5, color='k', transform=fig.transFigure,
         clip_on=False)
-lineA1 = lines.Line2D([x2,x25],[y2,y25],
-        linewidth=3,color='k',transform=fig.transFigure,
+lineA1 = lines.Line2D([x2,x25],[y2,y25],linestyle='--',
+        linewidth=1.5,color='k',transform=fig.transFigure,
         clip_on=False)
-lineC = lines.Line2D([x3,x35],[y3,y35],
-        linewidth=3,color='k',transform=fig.transFigure,
+lineC = lines.Line2D([x3,x35],[y3,y35],linestyle='--',
+        linewidth=1.5,color='k',transform=fig.transFigure,
         clip_on=False)
-lineC1 = lines.Line2D([x4,x45],[y4,y45],
-        linewidth=3,color='k',transform=fig.transFigure,
+lineC1 = lines.Line2D([x4,x45],[y4,y45],linestyle='--',
+        linewidth=1.5,color='k',transform=fig.transFigure,
         clip_on=False)
 #}}}
 #{{{separating ph2 and ph1
@@ -124,33 +117,42 @@ x14-=65
 x13,y13 = fig.transFigure.inverted().transform(r_[x13,y13])
 x14_text,_ = fig.transFigure.inverted().transform(r_[x13_text,0])
 x14,y14 = fig.transFigure.inverted().transform(r_[x14,y14])
-lineB = lines.Line2D([x11,x12],[y11,y12], linewidth=3, color='k', transform=fig.transFigure,
+lineB = lines.Line2D([x11,x12],[y11,y12], linestyle='--',linewidth=1.5, color='k', transform=fig.transFigure,
         clip_on=False)
-lineD = lines.Line2D([x13,x14],[y13,y14],
-        linewidth=3, color='k',transform=fig.transFigure,
+lineD = lines.Line2D([x13,x14],[y13,y14], linestyle='--',
+        linewidth=1.5, color='k',transform=fig.transFigure,
         clip_on=False)
 #}}}
+def make_arrow(ax,x1,y1,x2,y2):
+    trans = ax.get_xaxis_transform()
+    ax.annotate("",(x1,y1),(x2,y2),
+            xycoords="figure fraction",ha="right", va="center",size=8,
+            arrowprops=dict(arrowstyle='simple',fc='k',ec='k'),
+            bbox=dict(boxstyle='square',fc='white'),
+            annotation_clip=False)
+
 #{{{making arrows for ph1
-make_arrow(list_of_axes[0],0.14,0.128,0.14,0.132)
-make_arrow(list_of_axes[0],0.14,0.23,0.14,0.226)
-make_arrow(list_of_axes[1],0.14,0.35,0.14,0.36)
-make_arrow(list_of_axes[1],0.14,0.458,0.14,0.448)
-make_arrow(list_of_axes[2],0.14,0.63,0.14,0.64)
-make_arrow(list_of_axes[2],0.14,0.736,0.14,0.732)
-make_arrow(list_of_axes[3],0.14,0.797,0.14,0.801)
-make_arrow(list_of_axes[3],0.14,0.902,0.14,0.898)
+make_arrow(list_of_axes[0],0.14,0.128,0.14,0.155)
+make_arrow(list_of_axes[0],0.14,0.23,0.14,0.203)
+make_arrow(list_of_axes[1],0.14,0.35,0.14,0.377)
+make_arrow(list_of_axes[1],0.14,0.458,0.14,0.428)
+make_arrow(list_of_axes[2],0.14,0.63,0.14,0.657)
+make_arrow(list_of_axes[2],0.14,0.736,0.14,0.709)
+make_arrow(list_of_axes[3],0.14,0.797,0.14,0.824)
+make_arrow(list_of_axes[3],0.14,0.902,0.14,0.875)
 #}}}
 ###{making arrows for ph2
+
 make_arrow(list_of_axes[0],0.12,0.128,0.12,0.25)
 make_arrow(list_of_axes[1],0.12,0.458,0.12,0.335)
 make_arrow(list_of_axes[2],0.12,0.63,0.12,0.75)
 make_arrow(list_of_axes[3],0.12,0.902,0.12,0.81)
-fig.add_artist(lineA)
-fig.add_artist(lineA1)
-fig.add_artist(lineB)
-fig.add_artist(lineC)
-fig.add_artist(lineC1)
-fig.add_artist(lineD)
+#fig.add_artist(lineA)
+#fig.add_artist(lineA1)
+#fig.add_artist(lineB)
+#fig.add_artist(lineC)
+#fig.add_artist(lineC1)
+#fig.add_artist(lineD)
 
 show()
 
