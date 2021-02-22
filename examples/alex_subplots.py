@@ -7,7 +7,8 @@ import matplotlib.lines as lines
 #import matplotlib.patches.ArrowStyle.get_styles
 #import matplotlib.axes.Axes.annotate
 #{{{generating subplots with space between
-bottoms = [0.13, 0.35, 0.63, 0.8]
+bottoms = [0.13, 0.35, 0.63, 0.8] # this is a semi-random set of numbers -- in
+#                                   reality, this would come from Alec's code
 height = 0.1
 fig=plt.figure(1)
 list_of_axes = []
