@@ -58,8 +58,8 @@ fig.text(0.12,0.26,'ph2=0',ha='center',va='bottom',rotation='vertical')
 fig.text(0.12,0.75,'ph2=1',ha='center',va='bottom',rotation='vertical')
 #}}}
 #{{{Adding lines to separate ph1 and repeats
-x1,y1 = list_of_axes[3].transAxes.transform(r_[0,1])
-x15,y15 = list_of_axes[3].transAxes.transform(r_[0,0])
+x1,y1 = list_of_axes[3].transAxes.transform(r_[0,0])
+x15,y15 = list_of_axes[3].transAxes.transform(r_[1,0])
 x2,y2 = list_of_axes[2].transAxes.transform(r_[0,1])
 x25,y25 = list_of_axes[2].transAxes.transform(r_[0,0])
 x3,y3 = list_of_axes[1].transAxes.transform(r_[0,1])
@@ -87,16 +87,28 @@ x4_text,_ = fig.transFigure.inverted().transform(r_[x3_text,0])
 x4,y4 = fig.transFigure.inverted().transform(r_[x4,y4])
 x45,y45 = fig.transFigure.inverted().transform(r_[x45,y45])
 
-lineA = lines.Line2D([x1,x15],[y1,y15],linestyle='--',
+lineA = lines.Line2D([0.125,0.15],[0.8,0.8],linestyle='--',
         linewidth=1.5, color='k', transform=fig.transFigure,
         clip_on=False)
-lineA1 = lines.Line2D([x2,x25],[y2,y25],linestyle='--',
+lineA1 = lines.Line2D([0.125,0.17],[0.9,0.9],linestyle='--',
         linewidth=1.5,color='k',transform=fig.transFigure,
         clip_on=False)
-lineC = lines.Line2D([x3,x35],[y3,y35],linestyle='--',
+lineB = lines.Line2D([0.125,0.15],[0.735,0.735],linestyle='--',
+        linewidth=1.5, color='k',transform=fig.transFigure,
+        clip_on=False)
+lineB1 = lines.Line2D([0.125,0.17],[0.63,0.63],linestyle='--',
         linewidth=1.5,color='k',transform=fig.transFigure,
         clip_on=False)
-lineC1 = lines.Line2D([x4,x45],[y4,y45],linestyle='--',
+lineC = lines.Line2D([0.125,0.15],[0.35,0.35],linestyle='--',
+        linewidth=1.5,color='k',transform=fig.transFigure,
+        clip_on=False)
+lineC1 = lines.Line2D([0.125,0.17],[0.46,0.46],linestyle='--',
+        linewidth=1.5,color='k',transform=fig.transFigure,
+        clip_on=False)
+lineD = lines.Line2D([0.125,0.15],[0.23,0.23],linestyle='--',
+        linewidth=1.5,color='k',transform=fig.transFigure,
+        clip_on=False)
+lineD1 = lines.Line2D([0.125,0.17],[0.13,0.13],linestyle='--',
         linewidth=1.5,color='k',transform=fig.transFigure,
         clip_on=False)
 #}}}
@@ -117,11 +129,6 @@ x14-=65
 x13,y13 = fig.transFigure.inverted().transform(r_[x13,y13])
 x14_text,_ = fig.transFigure.inverted().transform(r_[x13_text,0])
 x14,y14 = fig.transFigure.inverted().transform(r_[x14,y14])
-lineB = lines.Line2D([x11,x12],[y11,y12], linestyle='--',linewidth=1.5, color='k', transform=fig.transFigure,
-        clip_on=False)
-lineD = lines.Line2D([x13,x14],[y13,y14], linestyle='--',
-        linewidth=1.5, color='k',transform=fig.transFigure,
-        clip_on=False)
 #}}}
 def make_arrow(ax,x1,y1,x2,y2):
     trans = ax.get_xaxis_transform()
@@ -147,12 +154,13 @@ make_arrow(list_of_axes[0],0.12,0.128,0.12,0.25)
 make_arrow(list_of_axes[1],0.12,0.458,0.12,0.335)
 make_arrow(list_of_axes[2],0.12,0.63,0.12,0.75)
 make_arrow(list_of_axes[3],0.12,0.902,0.12,0.81)
-#fig.add_artist(lineA)
-#fig.add_artist(lineA1)
-#fig.add_artist(lineB)
-#fig.add_artist(lineC)
-#fig.add_artist(lineC1)
-#fig.add_artist(lineD)
-
+fig.add_artist(lineA)
+fig.add_artist(lineA1)
+fig.add_artist(lineB)
+fig.add_artist(lineB1)
+fig.add_artist(lineC)
+fig.add_artist(lineC1)
+fig.add_artist(lineD)
+fig.add_artist(lineD1)
 show()
 
