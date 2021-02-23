@@ -37,9 +37,33 @@ axes_bottom += grid_bottom
 axes_top = grid_bottom + grid_top
 fig = figure()
 ax_list = []
+yMajorLocator = lambda: mticker.MaxNLocator(steps=[1,2,5,10])
+majorLocator = lambda: mticker.MaxNLocator(min_n_ticks=4, steps=[1,2,5,10])
+minorLocator = lambda: mticker.AutoMinorLocator(n=5)
 for j,b in enumerate(axes_bottom):
     ax_list.append(axes([0.2,b,0.7,axes_height], figure=fig)) # lbwh
-    ax_list[-1].get_xaxis().set_visible(False)
+    if j == 0:
+        ax_list[-1].set_xlabel(a_shape.dimlabels[-1])
+        ax_list[-1].xaxis.set_major_locator(majorLocator())
+        ax_list[-1].xaxis.set_minor_locator(minorLocator())
+    elif (j == len(axes_bottom)-1):
+        ax_list[-1].xaxis.set_major_locator(majorLocator())
+        #for the minor ticks, use no labels; default NullFormatter
+        ax_list[-1].xaxis.set_minor_locator(minorLocator())
+        ax_list[-1].xaxis.tick_top()
+        labels = [item.get_text() for item in ax_list[-1].get_xticklabels()]
+        empty_string_labels = ['']*len(labels)
+        ax_list[-1].set_xticklabels(empty_string_labels)
+    else:
+        ax_list[-1].xaxis.set_ticks([])
+        ax_list[-1].get_xaxis().set_visible(False)
+        ax_list[-1].set_xlabel(None)
+    ax_list[-1].set_ylabel(a_shape.dimlabels[-2])
+    ax_list[-1].yaxis.set_minor_locator(minorLocator())
+    ax_list[-1].yaxis.set_ticks_position('both')
+
+
+
 # to drop into ax_list, just do
 # A.smoosh(a_shape.dimlabels, 'smooshed', noaxis=True)
 # in ax_list[0] put A['smooshed',0], etc
@@ -50,7 +74,6 @@ for dim_name_idx,dim_name in enumerate(a_shape.dimlabels[:-2]):
     for dim_counter_idx,dim_counter in enumerate(range(a_shape.shape[dim_name_idx])):
         print(idx[dim_name,dim_counter].data.ravel())
 
-quit()
 show();quit()
 A = ndshape(s)
 
