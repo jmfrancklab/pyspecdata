@@ -29,4 +29,7 @@ for j,b in enumerate(axes_bottom):
 # to drop into ax_list, just do
 # A.smoosh(a_shape.dimlabels, 'smooshed', noaxis=True)
 # in ax_list[0] put A['smooshed',0], etc
+idx = nddata(r_[0:prod(a_shape.shape)],[-1],['smooshed'])
+idx.chunk('smooshed',a_shape.dimlabels,a_shape.shape)
+print(idx)
 show()
