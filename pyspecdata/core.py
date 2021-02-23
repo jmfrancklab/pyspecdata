@@ -4172,7 +4172,7 @@ class nddata (object):
         #print 'fitting to matrix',L
         if force_y_intercept is not None:
             y -= force_y_intercept
-        c = np.dot(pinv(L),y)
+        c = np.dot(np.linalg.pinv(L),y)
         fity = np.dot(L,c)
         if force_y_intercept is not None:
             #print "\n\nDEBUG: forcing from",fity[0],"to"
@@ -7238,7 +7238,7 @@ class fitdata(nddata):
                 covarmat = np.dot(np.linalg.pinv(fprime_prod),(sigma**2).reshape(-1,1))
             except ValueError as e:
                 raise ValueError(strm('shape of fprime_prod', np.shape(fprime_prod),
-                    'shape of inverse', np.shape(pinv(fprime_prod)),
+                    'shape of inverse', np.shape(np.linalg.pinv(fprime_prod)),
                     'shape of sigma', np.shape(sigma))+explain_error(e))
             covarmatrix = covarmat.reshape(f1,f1)
             for l in range(0,f1): 
@@ -7363,7 +7363,7 @@ class fitdata(nddata):
         yerr = yerr[mask]
         x = x[mask]
         L = c_[x.reshape((-1,1)),np.ones((len(x),1))]
-        retval = np.dot(pinv(L,rcond = 1e-17),y)
+        retval = np.dot(np.linalg.pinv(L,rcond = 1e-17),y)
         logger.debug(strm(r'\label{fig:pinv_figure_text}y=',y,'yerr=',yerr,'%s='%x_axis,x,'L=',L))
         logger.debug('\n\n')
         logger.debug(strm('recalc y = ',np.dot(L,retval)))
