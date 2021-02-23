@@ -46,6 +46,11 @@ for j,b in enumerate(axes_bottom):
 idx = nddata(r_[0:prod(a_shape.shape[:-2])],[-1],['smooshed'])
 idx.chunk('smooshed',a_shape.dimlabels[:-2],a_shape.shape[:-2])
 
+for dim_name_idx,dim_name in enumerate(a_shape.dimlabels[:-2]):
+    for dim_counter_idx,dim_counter in enumerate(range(a_shape.shape[dim_name_idx])):
+        print(idx[dim_name,dim_counter].data.ravel())
+
+quit()
 show();quit()
 A = ndshape(s)
 
