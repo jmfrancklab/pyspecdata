@@ -7235,7 +7235,7 @@ class fitdata(nddata):
             fprime_prod = fprime1 * fprime2
             fprime_prod = fprime_prod.reshape(-1,f2).T # direct product form
             try:
-                covarmat = np.dot(pinv(fprime_prod),(sigma**2).reshape(-1,1))
+                covarmat = np.dot(np.linalg.pinv(fprime_prod),(sigma**2).reshape(-1,1))
             except ValueError as e:
                 raise ValueError(strm('shape of fprime_prod', np.shape(fprime_prod),
                     'shape of inverse', np.shape(pinv(fprime_prod)),
