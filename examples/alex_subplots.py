@@ -66,10 +66,10 @@ for j,thisaxes in enumerate(list_of_axes):
 # for the following, use the transforms
 
 #{{{labeling ph1 for independent plots
-fig.text(0.14,0.145,'ph1=0',ha='center',va='bottom',rotation='vertical')
-fig.text(0.14,0.37,'ph1=1',ha='center',va='bottom',rotation='vertical')
-fig.text(0.14,0.65,'ph1=0',ha='center',va='bottom',rotation='vertical')
-fig.text(0.14,0.82,'ph1=1',ha='center',va='bottom',rotation='vertical')
+fig.text(0.13,0.145,'ph1=0',ha='center',va='bottom',rotation='vertical')
+fig.text(0.13,0.37,'ph1=1',ha='center',va='bottom',rotation='vertical')
+fig.text(0.13,0.65,'ph1=0',ha='center',va='bottom',rotation='vertical')
+fig.text(0.13,0.82,'ph1=1',ha='center',va='bottom',rotation='vertical')
 #}}}
 #{{{adding outer dimension labels
 fig.text(0.07,0.25,'ph2=0',ha='center',va='bottom',rotation='vertical')
@@ -166,7 +166,10 @@ def add_label(x,y,thetext):
 #{{{drawing brackets on figure
 draw_bracket(0.08,y4+0.05,0.315,x_width=0.04)
 draw_bracket(0.08,y2+0.03,0.28,x_width=0.04)
-draw_bracket(0.12,y45+0.05,0.12,x_width=0.02)
+draw_bracket(0.135,y45+0.05,0.1,x_width=0.02)
+draw_bracket(0.135,y35+0.05,0.1,x_width=0.02)
+draw_bracket(0.135,y25+0.05,0.1,x_width=0.02)
+draw_bracket(0.135,y15+0.05,0.1,x_width=0.02)
 #}}}
 show()
 
