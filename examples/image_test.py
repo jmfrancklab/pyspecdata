@@ -78,14 +78,14 @@ for j in range(len(ax_list)):
 idx = nddata(r_[0:prod(a_shape.shape[:-2])],[-1],['smooshed'])
 idx.chunk('smooshed',a_shape.dimlabels[:-2],a_shape.shape[:-2])
 
-def draw_span(ax1, ax2, label, allow_for_text=10, allow_for_ticks=40):
+def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_ticks=50):
     x1,y1 = ax1.transAxes.transform(r_[0,1])
     x2,y2 = ax2.transAxes.transform(r_[0,0])
     x1-=allow_for_ticks
     x_text = x1-allow_for_ticks
     x2-=allow_for_ticks
     x1,y1 = fig.transFigure.inverted().transform(r_[x1,y1])
-    x_text,_ = fig.transFigure.inverted().transform(r_[x_text,0])
+    x_text,_ = fig.transFigure.inverted().transform(r_[x_text+this_label_num*40,0])
     x2,y2 = fig.transFigure.inverted().transform(r_[x2,y2])
     lineA = lines.Line2D([x1,x2],[y1,y2],
             linewidth=3, color='r', transform=fig.transFigure,
@@ -93,7 +93,7 @@ def draw_span(ax1, ax2, label, allow_for_text=10, allow_for_ticks=40):
     text(x_text, (y2+y1)/2, label, va='center', ha='right', rotation=90, transform=fig.transFigure, color='r')
     fig.add_artist(lineA)
 
-for thisdim in a_shape.dimlabels[:-2]:
+for dim_index,thisdim in enumerate(a_shape.dimlabels[:-2]):
     # generate labels for the dimensions, outside in
     # use definition of idx in code
     for j in range(a_shape[thisdim]):
@@ -101,5 +101,8 @@ for thisdim in a_shape.dimlabels[:-2]:
         last_axes = ax_list[idx[thisdim,j].data.ravel()[-1]]
         print(first_axes)
         print(last_axes)
-        draw_span(first_axes,last_axes,"%s=%d"%(thisdim,j))
+        #for label_num in range(len(a_shape.dimlabels[:-2])):
+        draw_span(first_axes,last_axes,"%s=%d"%(thisdim,j),
+                this_label_num=dim_index)
+        
 show();quit()
