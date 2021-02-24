@@ -41,7 +41,7 @@ yMajorLocator = lambda: mticker.MaxNLocator(steps=[1,2,5,10])
 majorLocator = lambda: mticker.MaxNLocator(min_n_ticks=4, steps=[1,2,5,10])
 minorLocator = lambda: mticker.AutoMinorLocator(n=5)
 for j,b in enumerate(axes_bottom):
-    ax_list.append(axes([0.2,b,0.7,axes_height], figure=fig)) # lbwh
+    ax_list.append(axes([0.2,b,0.7,axes_height])) # lbwh
     if j == 0:
         ax_list[-1].set_xlabel(a_shape.dimlabels[-1])
         ax_list[-1].xaxis.set_major_locator(majorLocator())
@@ -62,13 +62,19 @@ for j,b in enumerate(axes_bottom):
     ax_list[-1].yaxis.set_minor_locator(minorLocator())
     ax_list[-1].yaxis.set_ticks_position('both')
 
-
-
 # to drop into ax_list, just do
 # A.smoosh(a_shape.dimlabels, 'smooshed', noaxis=True)
 # in ax_list[0] put A['smooshed',0], etc
 idx = nddata(r_[0:prod(a_shape.shape[:-2])],[-1],['smooshed'])
 idx.chunk('smooshed',a_shape.dimlabels[:-2],a_shape.shape[:-2])
+
+A = s.smoosh(a_shape.dimlabels[:-2],'smooshed',noaxis=True)
+A.reorder('smooshed',first=True)
+for j in range(len(ax_list)):
+    print(ax_list[j])
+    image(A['smooshed',j],ax=ax_list[j])
+show();quit()
+
 
 for dim_name_idx,dim_name in enumerate(a_shape.dimlabels[:-2]):
     for dim_counter_idx,dim_counter in enumerate(range(a_shape.shape[dim_name_idx])):
