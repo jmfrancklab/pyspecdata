@@ -43,17 +43,19 @@ minorLocator = lambda: mticker.AutoMinorLocator(n=5)
 for j,b in enumerate(axes_bottom):
     ax_list.append(axes([0.2,b,0.7,axes_height])) # lbwh
     if j == 0:
-        ax_list[-1].set_xlabel(a_shape.dimlabels[-1])
+        #ax_list[-1].set_xlabel(a_shape.dimlabels[-1])
         ax_list[-1].xaxis.set_major_locator(majorLocator())
         ax_list[-1].xaxis.set_minor_locator(minorLocator())
     elif (j == len(axes_bottom)-1):
         ax_list[-1].xaxis.set_major_locator(majorLocator())
+        ax_list[-1].set_xlabel(None)
         #for the minor ticks, use no labels; default NullFormatter
         ax_list[-1].xaxis.set_minor_locator(minorLocator())
         ax_list[-1].xaxis.tick_top()
         labels = [item.get_text() for item in ax_list[-1].get_xticklabels()]
         empty_string_labels = ['']*len(labels)
         ax_list[-1].set_xticklabels(empty_string_labels)
+        ax_list[-1].set_xlabel(None)
     else:
         ax_list[-1].xaxis.set_ticks([])
         ax_list[-1].get_xaxis().set_visible(False)
@@ -71,8 +73,9 @@ idx.chunk('smooshed',a_shape.dimlabels[:-2],a_shape.shape[:-2])
 A = s.smoosh(a_shape.dimlabels[:-2],'smooshed',noaxis=True)
 A.reorder('smooshed',first=True)
 for j in range(len(ax_list)):
-    print(ax_list[j])
     image(A['smooshed',j],ax=ax_list[j])
+    if not j == 0:
+        ax_list[j].set_xlabel(None)
 show();quit()
 
 
