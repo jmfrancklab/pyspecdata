@@ -84,6 +84,7 @@ def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_tick
     x1-=allow_for_ticks
     x_text = x1-allow_for_ticks
     x2-=allow_for_ticks
+    # following line to create an offset for different dimension labels
     label_spacing = this_label_num*40
     x1,y1 = fig.transFigure.inverted().transform(r_[x1+label_spacing,y1])
     x_text,_ = fig.transFigure.inverted().transform(r_[x_text+label_spacing,0])
@@ -102,8 +103,6 @@ for dim_index,thisdim in enumerate(a_shape.dimlabels[:-2]):
     for j in range(a_shape[thisdim]):
         first_axes = ax_list[idx[thisdim,j].data.ravel()[0]]
         last_axes = ax_list[idx[thisdim,j].data.ravel()[-1]]
-        print(first_axes)
-        print(last_axes)
         draw_span(first_axes,last_axes,"%s=%d"%(thisdim,j),
                 this_label_num=this_dim_index)
         
