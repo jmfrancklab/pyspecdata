@@ -25,11 +25,15 @@ grid_top = 0.8
 total_spacing = 0.2
 a_shape = ndshape(s)
 divisions = []
-for j,thisdim in enumerate(a_shape.dimlabels[:-2]):
+dim_index_list_rev = r_[0:len(a_shape.dimlabels[:-2])][::-1]
+dim_labels_rev = (a_shape.dimlabels[:-2])[::-1]
+#for j,thisdim in enumerate(a_shape.dimlabels[:-2]):
+for j,thisdim in enumerate(dim_labels_rev):
     old = [j/2.0 for j in divisions]
     divisions = (old + [1])*(a_shape[thisdim]-1)+old
     print("for",thisdim,"I get",divisions)
 divisions = [j*total_spacing/sum(divisions) for j in divisions]
+print(divisions)
 axes_height = (grid_top-grid_bottom-total_spacing)/prod(a_shape.shape[:-2])
 axes_bottom = np.cumsum([axes_height+j for j in divisions]) # becomes ndarray
 axes_bottom = r_[0,axes_bottom]
@@ -64,6 +68,7 @@ for j,b in enumerate(axes_bottom):
     ax_list[-1].yaxis.set_minor_locator(minorLocator())
     ax_list[-1].yaxis.set_ticks_position('both')
 
+print(ndshape(s))
 A = s.smoosh(a_shape.dimlabels[:-2],'smooshed',noaxis=True)
 A.reorder('smooshed',first=True)
 for j in range(len(ax_list)):
@@ -71,26 +76,33 @@ for j in range(len(ax_list)):
     if not j == 0:
         ax_list[j].set_xlabel(None)
 
-
 # to drop into ax_list, just do
 # A.smoosh(a_shape.dimlabels, 'smooshed', noaxis=True)
 # in ax_list[0] put A['smooshed',0], etc
 idx = nddata(r_[0:prod(a_shape.shape[:-2])],[-1],['smooshed'])
 idx.chunk('smooshed',a_shape.dimlabels[:-2],a_shape.shape[:-2])
 
-def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_ticks=50):
+def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_ticks=130):
     x1,y1 = ax1.transAxes.transform(r_[0,1])
     x2,y2 = ax2.transAxes.transform(r_[0,0])
     x1-=allow_for_ticks
-    x_text = x1-allow_for_ticks
+    x_text = x1-allow_for_text
     x2-=allow_for_ticks
     # following line to create an offset for different dimension labels
     label_spacing = this_label_num*40
     x1,y1 = fig.transFigure.inverted().transform(r_[x1+label_spacing,y1])
+    print("*** *** ***")
+    print(y1)
+    print(y2)
+    print("*** *** ***")
     x_text,_ = fig.transFigure.inverted().transform(r_[x_text+label_spacing,0])
     x2,y2 = fig.transFigure.inverted().transform(r_[x2+label_spacing,y2])
+    if "ph1" in label:
+        this_color = 'g'
+    else:
+        this_color = 'r'
     lineA = lines.Line2D([x1,x2],[y1,y2],
-            linewidth=3, color='r', transform=fig.transFigure,
+            linewidth=3, color=this_color, transform=fig.transFigure,
             clip_on=False)
     text(x_text, (y2+y1)/2, label, va='center', ha='right', rotation=90, transform=fig.transFigure, color='r')
     fig.add_artist(lineA)
@@ -102,7 +114,9 @@ for dim_index,thisdim in enumerate(a_shape.dimlabels[:-2]):
     this_dim_index = dim_index_list_rev[dim_index]
     for j in range(a_shape[thisdim]):
         first_axes = ax_list[idx[thisdim,j].data.ravel()[0]]
+        print(first_axes)
         last_axes = ax_list[idx[thisdim,j].data.ravel()[-1]]
+        print(last_axes)
         draw_span(first_axes,last_axes,"%s=%d"%(thisdim,j),
                 this_label_num=this_dim_index)
         
