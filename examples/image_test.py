@@ -16,7 +16,7 @@ s *= exp(1j*2*pi*ph1)
 s *= exp(1j*2*pi*ph2)
 #s['t2',0] *= 0.5
 #s.ft('t2',shift=True)
-#s.ft(['ph1','ph2'])
+s.ft(['ph1','ph2'])
 s.reorder(['repeats','t2'],first=False)
 print(ndshape(s))
 
@@ -25,7 +25,6 @@ grid_top = 0.8
 total_spacing = 0.2
 a_shape = ndshape(s)
 divisions = []
-dim_index_list_rev = r_[0:len(a_shape.dimlabels[:-2])][::-1]
 dim_labels_rev = (a_shape.dimlabels[:-2])[::-1]
 #for j,thisdim in enumerate(a_shape.dimlabels[:-2]):
 for j,thisdim in enumerate(dim_labels_rev):
@@ -82,7 +81,7 @@ for j in range(len(ax_list)):
 idx = nddata(r_[0:prod(a_shape.shape[:-2])],[-1],['smooshed'])
 idx.chunk('smooshed',a_shape.dimlabels[:-2],a_shape.shape[:-2])
 
-def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_ticks=130):
+def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_ticks=100):
     x1,y1 = ax1.transAxes.transform(r_[0,1])
     x2,y2 = ax2.transAxes.transform(r_[0,0])
     x1-=allow_for_ticks
@@ -91,10 +90,6 @@ def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_tick
     # following line to create an offset for different dimension labels
     label_spacing = this_label_num*40
     x1,y1 = fig.transFigure.inverted().transform(r_[x1+label_spacing,y1])
-    print("*** *** ***")
-    print(y1)
-    print(y2)
-    print("*** *** ***")
     x_text,_ = fig.transFigure.inverted().transform(r_[x_text+label_spacing,0])
     x2,y2 = fig.transFigure.inverted().transform(r_[x2+label_spacing,y2])
     if "ph1" in label:
