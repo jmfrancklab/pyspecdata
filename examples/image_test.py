@@ -24,7 +24,7 @@ s.reorder('ph2',first=True)
 print(ndshape(s))
 
 grid_bottom = 0.0
-bottom_pad = 0.1
+bottom_pad = 0.15
 grid_bottom += bottom_pad
 grid_top = 1.0
 top_pad = 0.05
@@ -103,27 +103,33 @@ def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_tick
 
 label_placed = zeros(num_dims)
 
-def place_labels(ax1, label, label_placed, this_label_num, allow_for_text=10, allow_for_ticks=100):
-    if not label_placed[this_label_num]:
-        print("*** *** ***")
-        print("GOING TO PLACE LABEL...")
-        print("*** *** ***")
+def place_labels(ax1, label, label_placed, this_label_num, check_for_label_num = True, allow_for_text=10, allow_for_ticks=100, y_adjustment = 55):
+    if check_for_label_num:
+        if not label_placed[this_label_num]:
+            x1,y1 = ax1.transAxes.transform(r_[0,1])
+            x1-=allow_for_ticks
+            x_text = x1-allow_for_text
+            label_spacing = this_label_num*65
+            y1 -= y_adjustment
+            #x1,y1 = fig.transFigure.inverted().transform(r_[x1-label_spacing,y1])
+            x_text,y1 = fig.transFigure.inverted().transform(r_[x_text-label_spacing,y1])
+            text(x_text, y1, label, va='center', ha='right', rotation=45, transform=fig.transFigure, color='k')
+            label_placed[this_label_num] = 1
+    else:
         x1,y1 = ax1.transAxes.transform(r_[0,1])
         x1-=allow_for_ticks
         x_text = x1-allow_for_text
         label_spacing = this_label_num*65
-        y1 -= 35
+        y1 -= y_adjustment
         #x1,y1 = fig.transFigure.inverted().transform(r_[x1-label_spacing,y1])
         x_text,y1 = fig.transFigure.inverted().transform(r_[x_text-label_spacing,y1])
         text(x_text, y1, label, va='center', ha='right', rotation=45, transform=fig.transFigure, color='k')
-        label_placed[this_label_num] = 1
-    label_placed[this_label_num] = 1
 
 for j in range(len(ax_list)):
     image(A['smooshed',j],ax=ax_list[j])
+    ax_list[j].set_ylabel(None)
     if not j == 0:
         ax_list[j].set_xlabel(None)
-        ax_list[j].set_ylabel(None)
 
 # to drop into ax_list, just do
 # A.smoosh(a_shape.dimlabels, 'smooshed', noaxis=True)
@@ -153,5 +159,7 @@ def decorate_axes(idx,remaining_dim,depth):
             decorate_axes(idx_slice,new_remaining_dim,depth)
 print("call recursive function")
 decorate_axes(idx,remaining_dim,depth)
+place_labels(axes([LHS_labels+LHS_pad,axes_bottom[0],width,0]),"%s"%(a_shape.dimlabels[-2]), label_placed,
+        this_label_num=0, check_for_label_num = False, allow_for_text = -75, y_adjustment=55)
 
 show();quit()
