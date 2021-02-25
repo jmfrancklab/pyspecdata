@@ -70,7 +70,7 @@ for j,b in enumerate(axes_bottom):
     ax_list[-1].yaxis.set_ticks_position('both')
 
 print(ndshape(s))
-A = s.smoosh(a_shape.dimlabels[:-2],'smooshed',noaxis=True)
+A = s.smoosh(a_shape.dimlabels[::-1][2:],'smooshed',noaxis=True)
 A.reorder('smooshed',first=True)
 for j in range(len(ax_list)):
     image(A['smooshed',j],ax=ax_list[j])
@@ -81,7 +81,7 @@ for j in range(len(ax_list)):
 # A.smoosh(a_shape.dimlabels, 'smooshed', noaxis=True)
 # in ax_list[0] put A['smooshed',0], etc
 idx = nddata(r_[0:prod(a_shape.shape[:-2])],[-1],['smooshed'])
-idx.chunk('smooshed',a_shape.dimlabels[:-2],a_shape.shape[:-2])
+idx.chunk('smooshed',a_shape.dimlabels[::-1][2:],a_shape.shape[::-1][2:])
 
 def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_ticks=100):
     x1,y1 = ax1.transAxes.transform(r_[0,1])
