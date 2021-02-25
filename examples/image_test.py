@@ -16,7 +16,7 @@ s *= exp(1j*2*pi*ph1)
 s *= exp(1j*2*pi*ph2)
 #s['t2',0] *= 0.5
 #s.ft('t2',shift=True)
-s.ft(['ph1','ph2'])
+#s.ft(['ph1','ph2'])
 s.reorder(['repeats','t2'],first=False)
 print(ndshape(s))
 
@@ -68,6 +68,7 @@ for j,b in enumerate(axes_bottom):
     ax_list[-1].yaxis.set_ticks_position('both')
 
 print(ndshape(s))
+quit()
 A = s.smoosh(a_shape.dimlabels[:-2],'smooshed',noaxis=True)
 A.reorder('smooshed',first=True)
 for j in range(len(ax_list)):
@@ -92,14 +93,10 @@ def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_tick
     x1,y1 = fig.transFigure.inverted().transform(r_[x1+label_spacing,y1])
     x_text,_ = fig.transFigure.inverted().transform(r_[x_text+label_spacing,0])
     x2,y2 = fig.transFigure.inverted().transform(r_[x2+label_spacing,y2])
-    if "ph1" in label:
-        this_color = 'g'
-    else:
-        this_color = 'r'
     lineA = lines.Line2D([x1,x2],[y1,y2],
-            linewidth=3, color=this_color, transform=fig.transFigure,
+            linewidth=3, color='k', transform=fig.transFigure,
             clip_on=False)
-    text(x_text, (y2+y1)/2, label, va='center', ha='right', rotation=90, transform=fig.transFigure, color='r')
+    text(x_text, (y2+y1)/2, label, va='center', ha='right', rotation=90, transform=fig.transFigure, color='k')
     fig.add_artist(lineA)
 
 dim_index_list_rev = r_[0:len(a_shape.dimlabels[:-2])][::-1]
@@ -109,10 +106,8 @@ for dim_index,thisdim in enumerate(a_shape.dimlabels[:-2]):
     this_dim_index = dim_index_list_rev[dim_index]
     for j in range(a_shape[thisdim]):
         first_axes = ax_list[idx[thisdim,j].data.ravel()[0]]
-        print(first_axes)
         last_axes = ax_list[idx[thisdim,j].data.ravel()[-1]]
-        print(last_axes)
-        draw_span(first_axes,last_axes,"%s=%d"%(thisdim,j),
+        draw_span(last_axes,first_axes,"%s=%d"%(thisdim,j),
                 this_label_num=this_dim_index)
         
 show();quit()
