@@ -25,9 +25,11 @@ grid_top = 0.8
 total_spacing = 0.2
 a_shape = ndshape(s)
 divisions = []
-dim_labels_rev = (a_shape.dimlabels[:-2])[::-1]
-#for j,thisdim in enumerate(a_shape.dimlabels[:-2]):
-for j,thisdim in enumerate(dim_labels_rev):
+print(a_shape.dimlabels)
+print(a_shape.dimlabels[::-1])
+print(a_shape.dimlabels[::-1][2:])
+# should be looping in backward order from printed shape
+for j,thisdim in enumerate(a_shape.dimlabels[::-1][2:]):
     old = [j/2.0 for j in divisions]
     divisions = (old + [1])*(a_shape[thisdim]-1)+old
     print("for",thisdim,"I get",divisions)
@@ -68,7 +70,6 @@ for j,b in enumerate(axes_bottom):
     ax_list[-1].yaxis.set_ticks_position('both')
 
 print(ndshape(s))
-quit()
 A = s.smoosh(a_shape.dimlabels[:-2],'smooshed',noaxis=True)
 A.reorder('smooshed',first=True)
 for j in range(len(ax_list)):
@@ -99,11 +100,12 @@ def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_tick
     text(x_text, (y2+y1)/2, label, va='center', ha='right', rotation=90, transform=fig.transFigure, color='k')
     fig.add_artist(lineA)
 
-dim_index_list_rev = r_[0:len(a_shape.dimlabels[:-2])][::-1]
+#dim_index_list_rev = r_[0:len(a_shape.dimlabels[:-2])][::-1]
 for dim_index,thisdim in enumerate(a_shape.dimlabels[:-2]):
     # generate labels for the dimensions, outside in
     # use definition of idx in code
-    this_dim_index = dim_index_list_rev[dim_index]
+    #this_dim_index = dim_index_list_rev[dim_index]
+    this_dim_index = dim_index
     for j in range(a_shape[thisdim]):
         first_axes = ax_list[idx[thisdim,j].data.ravel()[0]]
         last_axes = ax_list[idx[thisdim,j].data.ravel()[-1]]
