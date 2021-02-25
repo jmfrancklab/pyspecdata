@@ -23,8 +23,12 @@ s.reorder(['repeats','t2'],first=False)
 s.reorder('ph2',first=True)
 print(ndshape(s))
 
-grid_bottom = 0.2
-grid_top = 0.8
+grid_bottom = 0.0
+bottom_pad = 0.1
+grid_bottom += bottom_pad
+grid_top = 1.0
+top_pad = 0.05
+grid_top -= top_pad
 total_spacing = 0.2
 a_shape = ndshape(s)
 num_dims = len(a_shape.dimlabels[:-2])
@@ -79,19 +83,6 @@ for j,b in enumerate(axes_bottom):
 print(ndshape(s))
 A = s.smoosh(a_shape.dimlabels[:-2],'smooshed',noaxis=True)
 A.reorder('smooshed',first=True)
-for j in range(len(ax_list)):
-    A.unitify_axis('t2')
-    image(A['smooshed',j],ax=ax_list[j])
-    if not j == 0:
-        ax_list[j].set_xlabel(None)
-        ax_list[j].set_ylabel(None)
-
-# to drop into ax_list, just do
-# A.smoosh(a_shape.dimlabels, 'smooshed', noaxis=True)
-# in ax_list[0] put A['smooshed',0], etc
-idx = nddata(r_[0:prod(a_shape.shape[:-2])],[-1],['smooshed'])
-idx.chunk('smooshed',a_shape.dimlabels[:-2],a_shape.shape[:-2])
-print(idx)
 
 def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_ticks=100):
     x1,y1 = ax1.transAxes.transform(r_[0,1])
@@ -110,6 +101,35 @@ def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_tick
     text(x_text, (y2+y1)/2, label, va='center', ha='right', rotation=90, transform=fig.transFigure, color='k')
     fig.add_artist(lineA)
 
+label_placed = zeros(num_dims)
+
+def place_labels(ax1, label, label_placed, this_label_num, allow_for_text=10, allow_for_ticks=100):
+    if not label_placed[this_label_num]:
+        print("*** *** ***")
+        print("GOING TO PLACE LABEL...")
+        print("*** *** ***")
+        x1,y1 = ax1.transAxes.transform(r_[0,1])
+        x1-=allow_for_ticks
+        x_text = x1-allow_for_text
+        label_spacing = this_label_num*65
+        y1 -= 35
+        #x1,y1 = fig.transFigure.inverted().transform(r_[x1-label_spacing,y1])
+        x_text,y1 = fig.transFigure.inverted().transform(r_[x_text-label_spacing,y1])
+        text(x_text, y1, label, va='center', ha='right', rotation=45, transform=fig.transFigure, color='k')
+        label_placed[this_label_num] = 1
+    label_placed[this_label_num] = 1
+
+for j in range(len(ax_list)):
+    image(A['smooshed',j],ax=ax_list[j])
+    if not j == 0:
+        ax_list[j].set_xlabel(None)
+        ax_list[j].set_ylabel(None)
+
+# to drop into ax_list, just do
+# A.smoosh(a_shape.dimlabels, 'smooshed', noaxis=True)
+# in ax_list[0] put A['smooshed',0], etc
+idx = nddata(r_[0:prod(a_shape.shape[:-2])],[-1],['smooshed'])
+idx.chunk('smooshed',a_shape.dimlabels[:-2],a_shape.shape[:-2])
 
 remaining_dim = a_shape.dimlabels[:-2]
 depth = num_dims
@@ -119,15 +139,14 @@ def decorate_axes(idx,remaining_dim,depth):
     print("This dim is",thisdim)
     print(ndshape(idx))
     depth -= 1
-    print("*** *** ***")
-    print(depth)
-    print("*** *** ***")
     for j in range(a_shape[thisdim]):
         idx_slice = idx[thisdim,j]
         print("For",thisdim,"element",j,idx_slice.data.ravel())
         first_axes = ax_list[idx_slice.data.ravel()[0]]
         last_axes = ax_list[idx_slice.data.ravel()[-1]]
         draw_span(last_axes,first_axes,"%d"%(j),
+                this_label_num=depth)
+        place_labels(ax_list[0],"%s"%(thisdim), label_placed,
                 this_label_num=depth)
         new_remaining_dim = remaining_dim[1:]
         if len(remaining_dim) > 1:
