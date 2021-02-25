@@ -27,17 +27,14 @@ grid_bottom = 0.2
 grid_top = 0.8
 total_spacing = 0.2
 a_shape = ndshape(s)
+num_dims = len(a_shape.dimlabels[:-2])
 divisions = []
-print(a_shape.dimlabels)
-print(a_shape.dimlabels[::-1])
-print(a_shape.dimlabels[::-1][2:])
 # should be looping in backward order from printed shape
 for j,thisdim in enumerate(a_shape.dimlabels[::-1][2:]):
     old = [j/2.0 for j in divisions]
     divisions = (old + [1])*(a_shape[thisdim]-1)+old
     print("for",thisdim,"I get",divisions)
 divisions = [j*total_spacing/sum(divisions) for j in divisions]
-print(divisions)
 axes_height = (grid_top-grid_bottom-total_spacing)/prod(a_shape.shape[:-2])
 axes_bottom = np.cumsum([axes_height+j for j in divisions]) # becomes ndarray
 axes_bottom = r_[0,axes_bottom]
@@ -48,8 +45,15 @@ ax_list = []
 yMajorLocator = lambda: mticker.MaxNLocator(steps=[1,2,5,10])
 majorLocator = lambda: mticker.MaxNLocator(min_n_ticks=4, steps=[1,2,5,10])
 minorLocator = lambda: mticker.AutoMinorLocator(n=5)
+
+#labels_space = num_dims*
+LHS_pad = 0.05
+RHS_pad = 0.05
+LHS_labels = 0.08*num_dims
+width = 1.-(LHS_pad+RHS_pad+LHS_labels)
+
 for j,b in enumerate(axes_bottom):
-    ax_list.append(axes([0.2,b,0.7,axes_height])) # lbwh
+    ax_list.append(axes([LHS_labels+LHS_pad,b,width,axes_height])) # lbwh
     if j == 0:
         #ax_list[-1].set_xlabel(a_shape.dimlabels[-1])
         ax_list[-1].xaxis.set_major_locator(majorLocator())
@@ -68,17 +72,19 @@ for j,b in enumerate(axes_bottom):
         ax_list[-1].xaxis.set_ticks([])
         ax_list[-1].get_xaxis().set_visible(False)
         ax_list[-1].set_xlabel(None)
-    ax_list[-1].set_ylabel(a_shape.dimlabels[-2])
-    ax_list[-1].yaxis.set_minor_locator(minorLocator())
-    ax_list[-1].yaxis.set_ticks_position('both')
+    #ax_list[-1].set_ylabel(a_shape.dimlabels[-2])
+    #ax_list[-1].yaxis.set_minor_locator(minorLocator())
+    #ax_list[-1].yaxis.set_ticks_position('both')
 
 print(ndshape(s))
 A = s.smoosh(a_shape.dimlabels[:-2],'smooshed',noaxis=True)
 A.reorder('smooshed',first=True)
 for j in range(len(ax_list)):
+    A.unitify_axis('t2')
     image(A['smooshed',j],ax=ax_list[j])
     if not j == 0:
         ax_list[j].set_xlabel(None)
+        ax_list[j].set_ylabel(None)
 
 # to drop into ax_list, just do
 # A.smoosh(a_shape.dimlabels, 'smooshed', noaxis=True)
@@ -94,10 +100,10 @@ def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_tick
     x_text = x1-allow_for_text
     x2-=allow_for_ticks
     # following line to create an offset for different dimension labels
-    label_spacing = this_label_num*40
-    x1,y1 = fig.transFigure.inverted().transform(r_[x1+label_spacing,y1])
-    x_text,_ = fig.transFigure.inverted().transform(r_[x_text+label_spacing,0])
-    x2,y2 = fig.transFigure.inverted().transform(r_[x2+label_spacing,y2])
+    label_spacing = this_label_num*70
+    x1,y1 = fig.transFigure.inverted().transform(r_[x1-label_spacing,y1])
+    x_text,_ = fig.transFigure.inverted().transform(r_[x_text-label_spacing,0])
+    x2,y2 = fig.transFigure.inverted().transform(r_[x2-label_spacing,y2])
     lineA = lines.Line2D([x1,x2],[y1,y2],
             linewidth=3, color='k', transform=fig.transFigure,
             clip_on=False)
@@ -113,12 +119,15 @@ def decorate_axes(idx,remaining_dim,depth):
     print("This dim is",thisdim)
     print(ndshape(idx))
     depth += 1
+    print("*** *** ***")
+    print(depth)
+    print("*** *** ***")
     for j in range(a_shape[thisdim]):
         idx_slice = idx[thisdim,j]
         print("For",thisdim,"element",j,idx_slice.data.ravel())
         first_axes = ax_list[idx_slice.data.ravel()[0]]
         last_axes = ax_list[idx_slice.data.ravel()[-1]]
-        draw_span(last_axes,first_axes,"%s=%d"%(thisdim,j),
+        draw_span(last_axes,first_axes,"%d"%(j),
                 this_label_num=depth)
         new_remaining_dim = remaining_dim[1:]
         if len(remaining_dim) > 1:
