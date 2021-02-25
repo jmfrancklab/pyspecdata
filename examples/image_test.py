@@ -112,13 +112,13 @@ def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_tick
 
 
 remaining_dim = a_shape.dimlabels[:-2]
-depth = -1
+depth = num_dims
 def decorate_axes(idx,remaining_dim,depth):
     thisdim=remaining_dim[0]
     print("This is remaining dim",remaining_dim)
     print("This dim is",thisdim)
     print(ndshape(idx))
-    depth += 1
+    depth -= 1
     print("*** *** ***")
     print(depth)
     print("*** *** ***")
