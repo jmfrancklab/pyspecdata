@@ -8,16 +8,19 @@ s = exp(1j*2*pi*5*t_axis - t_axis/800e-3 )
 s += exp(1j*2*pi*-30*t_axis - t_axis/800e-3)
 ph1 = nddata(r_[0:4]/4.,'ph1')
 ph2 = nddata(r_[0,2]/4.,'ph2')
+ph3 = nddata(r_[0,1,2]/4.,'ph3')
 # this cannot start at 0 since we multiply s by it
 repeats = nddata(r_[1:6],'repeats')
 s *= repeats/repeats
 s.add_noise(0.3)
 s *= exp(1j*2*pi*ph1)
 s *= exp(1j*2*pi*ph2)
+s *= exp(1j*2*pi*ph3)
 #s['t2',0] *= 0.5
 #s.ft('t2',shift=True)
-s.ft(['ph1','ph2'])
+#s.ft(['ph1','ph2'])
 s.reorder(['repeats','t2'],first=False)
+s.reorder('ph2',first=True)
 print(ndshape(s))
 
 grid_bottom = 0.2
@@ -82,6 +85,7 @@ for j in range(len(ax_list)):
 # in ax_list[0] put A['smooshed',0], etc
 idx = nddata(r_[0:prod(a_shape.shape[:-2])],[-1],['smooshed'])
 idx.chunk('smooshed',a_shape.dimlabels[:-2],a_shape.shape[:-2])
+print(idx)
 
 def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_ticks=100):
     x1,y1 = ax1.transAxes.transform(r_[0,1])
@@ -100,16 +104,26 @@ def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_tick
     text(x_text, (y2+y1)/2, label, va='center', ha='right', rotation=90, transform=fig.transFigure, color='k')
     fig.add_artist(lineA)
 
-#dim_index_list_rev = r_[0:len(a_shape.dimlabels[:-2])][::-1]
-for dim_index,thisdim in enumerate(a_shape.dimlabels[:-2]):
-    # generate labels for the dimensions, outside in
-    # use definition of idx in code
-    #this_dim_index = dim_index_list_rev[dim_index]
-    this_dim_index = dim_index
+
+remaining_dim = a_shape.dimlabels[:-2]
+depth = -1
+def decorate_axes(idx,remaining_dim,depth):
+    thisdim=remaining_dim[0]
+    print("This is remaining dim",remaining_dim)
+    print("This dim is",thisdim)
+    print(ndshape(idx))
+    depth += 1
     for j in range(a_shape[thisdim]):
-        first_axes = ax_list[idx[thisdim,j].data.ravel()[0]]
-        last_axes = ax_list[idx[thisdim,j].data.ravel()[-1]]
+        idx_slice = idx[thisdim,j]
+        print("For",thisdim,"element",j,idx_slice.data.ravel())
+        first_axes = ax_list[idx_slice.data.ravel()[0]]
+        last_axes = ax_list[idx_slice.data.ravel()[-1]]
         draw_span(last_axes,first_axes,"%s=%d"%(thisdim,j),
-                this_label_num=this_dim_index)
-        
+                this_label_num=depth)
+        new_remaining_dim = remaining_dim[1:]
+        if len(remaining_dim) > 1:
+            decorate_axes(idx_slice,new_remaining_dim,depth)
+print("call recursive function")
+decorate_axes(idx,remaining_dim,depth)
+
 show();quit()
