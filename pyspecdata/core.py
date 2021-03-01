@@ -4754,15 +4754,15 @@ class nddata (object):
             U2 = U2[:,0:s2]
             S2 = S2[0:s2]
             V2 = V2[0:s2,:]
-            S1 = S1*eye(s1)
-            S2 = S2*eye(s2)
+            S1 = S1*np.eye(s1)
+            S2 = S2*np.eye(s2)
             logger.debug(strm('Compressed SVD of K1:',[x.shape for x in (U1,S1,V1)]))
             logger.debug(strm('Compressed SVD K2:',[x.shape for x in (U2,S2,V2)]))
             # would generate projected data here
             # compress data here
             K1 = S1.dot(V1)
             K2 = S2.dot(V2)
-            K = K1[:,newaxis,:,newaxis]*K2[newaxis,:,newaxis,:]
+            K = K1[:,np.newaxis,:,np.newaxis]*K2[np.newaxis,:,np.newaxis,:]
             K = K.reshape(K1.shape[0]*K2.shape[0],K1.shape[1]*K2.shape[1])
             logger.debug(strm('Compressed K0, K1, and K2:',[x.shape for x in (K,K1,K2)]))
 
@@ -4784,9 +4784,9 @@ class nddata (object):
                 def chi(x_vec,val):
                     return 0.5*np.dot(x_vec.T,np.dot(dd_chi(G(x_vec),val**2),x_vec)) - np.dot(x_vec.T,data_fornnls[:,newaxis])
                 def d_chi(x_vec,val):
-                    return np.dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
+                    return np.dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,np.newaxis]
                 def dd_chi(G,val):
-                    return G + (val**2)*eye(np.shape(G)[0])
+                    return G + (val**2)*np.eye(np.shape(G)[0])
                 def G(x_vec):
                     return np.dot(K,np.dot(square_heaviside(x_vec),K.T))
                 def H(product):
@@ -4802,15 +4802,15 @@ class nddata (object):
                         temp = H(temp)
                         diag_heavi.append(temp)
                     diag_heavi = np.array(diag_heavi)
-                    square_heavi = diag_heavi*eye(np.shape(diag_heavi)[0])
+                    square_heavi = diag_heavi*np.eye(np.shape(diag_heavi)[0])
                     return square_heavi
                 def optimize_alpha(input_vec,val):
                     alpha_converged = False
                     factor = sqrt(s1*s2)
-                    T = linalg.inv(dd_chi(G(input_vec),val**2))
+                    T = np.linalg.inv(dd_chi(G(input_vec),val**2))
                     dot_product = np.dot(input_vec.T,np.dot(T,input_vec))
                     ans = dot_product*factor
-                    ans = ans/linalg.norm(input_vec)/dot_product
+                    ans = ans/np.linalg.norm(input_vec)/dot_product
                     tol = 1e-3
                     if abs(ans-val**2) <= tol:
                         logger.debug(strm('ALPHA HAS CONVERGED.'))
@@ -4820,7 +4820,7 @@ class nddata (object):
                 def newton_min(input_vec,val):
                     fder = dd_chi(G(input_vec),val)
                     fval = d_chi(input_vec,val)
-                    return (input_vec + np.dot(linalg.inv(fder),fval))
+                    return (input_vec + np.dot(np.linalg.inv(fder),fval))
                 def mod_BRD(guess,maxiter=20):
                     smoothing_param = guess
                     alpha_converged = False
@@ -4828,9 +4828,9 @@ class nddata (object):
                         logger.debug(strm('ITERATION NO.',iter))
                         logger.debug(strm('CURRENT LAMBDA',smoothing_param))
                         retval,residual = this_nnls.nnls_regularized(K,data_fornnls,l=smoothing_param)
-                        f_vec = retval[:,newaxis]
+                        f_vec = retval[:,np.newaxis]
                         alpha = smoothing_param**2
-                        c_vec = np.dot(K,f_vec) - data_fornnls[:,newaxis]
+                        c_vec = np.dot(K,f_vec) - data_fornnls[:,np.newaxis]
                         c_vec /= -1*alpha
                         c_update = newton_min(c_vec,smoothing_param)
                         alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
