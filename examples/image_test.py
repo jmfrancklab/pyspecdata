@@ -135,6 +135,9 @@ def image_new(this_nddata,this_fig_obj):
             empty_string_labels = ['']*len(labels)
             ax1.set_xticklabels(empty_string_labels)
             ax1.set_xlabel(None)
+            ax1.tick_params(bottom=False)
+            ax1.set_ylabel(None)
+            ax1.set_yticklabels(empty_string_labels)
 
     for j in range(len(ax_list)):
         image(A['smooshed',j],ax=ax_list[j])
