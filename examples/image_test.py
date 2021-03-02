@@ -83,9 +83,12 @@ def image_new(this_nddata,this_fig_obj):
         #ax_list[-1].yaxis.set_minor_locator(minorLocator())
         #ax_list[-1].yaxis.set_ticks_position('both')
 
-    print(ndshape(s))
-    A = s.smoosh(a_shape.dimlabels[:-2],'smooshed',noaxis=True)
-    A.reorder('smooshed',first=True)
+    if len(a_shape.dimlabels) > 3:
+        A = s.smoosh(a_shape.dimlabels[:-2],'smooshed',noaxis=True)
+        A.reorder('smooshed',first=True)
+    else:
+        A = this_nddata.C
+        A.rename(a_shape.dimlabels[:-2][0],'smooshed')
 
     def draw_span(ax1, ax2, label, this_label_num, allow_for_text=10, allow_for_ticks=100):
         x1,y1 = ax1.transAxes.transform(r_[0,1])
