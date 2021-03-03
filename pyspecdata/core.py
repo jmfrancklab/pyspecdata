@@ -4782,7 +4782,7 @@ class nddata (object):
             
             if l == 'BRD':
                 def chi(x_vec,val):
-                    return 0.5*np.dot(x_vec.T,np.dot(dd_chi(G(x_vec),val**2),x_vec)) - np.dot(x_vec.T,data_fornnls[:,newaxis])
+                    return 0.5*np.dot(x_vec.T,np.dot(dd_chi(G(x_vec),val**2),x_vec)) - np.dot(x_vec.T,data_fornnls[:,np.newaxis])
                 def d_chi(x_vec,val):
                     return np.dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,np.newaxis]
                 def dd_chi(G,val):
