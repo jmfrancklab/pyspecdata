@@ -42,19 +42,19 @@ def gen_from_expr(expr, guesses={}):
     variable_names = tuple([str(j) for j in variable_symbols])
     parameter_symbols = tuple(parameter_symbols)
     parameter_names = tuple([str(j) for j in parameter_symbols])
-    print("all symbols are", all_symbols, "axis names are", axis_names,
-            "variable names are", variable_names, "parameter names are", parameter_names)
+    logger.info(strm("all symbols are", all_symbols, "axis names are", axis_names,
+            "variable names are", variable_names, "parameter names are", parameter_names))
     # }}}
     pars = Parameters()
     for this_name in parameter_names:
         kwargs = {}
         if this_name in guesses.keys():
-            print("applying bounds for",this_name)
+            logger.info(strm("applying bounds for",this_name))
             kwargs.update(guesses[str(this_name)])
         pars.add(this_name, **kwargs)
     for j in pars:
-        print("fit param ---",j)
-    print(pars)
+        logger.info(strm("fit param ---",j))
+    logger.info(strm(pars))
     fn = lambdify(variable_symbols + parameter_symbols,
             expr,
             modules=[{'ImmutableMatrix':np.ndarray},'numpy','scipy'])
@@ -68,8 +68,7 @@ true_values = {'A':14.0,
 p_true = Parameters()
 for k,v in true_values.items():
     p_true.add(k,value=v)
-print(p_true)
-quit()
+logger.info(strm(p_true))
 random.seed(0)
 x_vals = linspace(0, 250, 1500)
 empty_data = nddata(x_vals,'x').copy(data=False)
@@ -86,7 +85,7 @@ fit_params, parameter_names, fn = gen_from_expr(expr, {'A':dict(value=13.0, max=
             'decay':dict(value=0.02, max=0.10, min=0.00),})
 def residual(pars, x, data=None):
     parlist = [pars[j] for j in parameter_names]
-    print("parlist",parlist)
+    logger.info(strm("parlist",parlist))
     shift = pars['shift']
     if abs(shift) > pi/2:
         shift = shift - sign(shift)*pi
@@ -97,8 +96,7 @@ def residual(pars, x, data=None):
 mydata = empty_data.copy(data=False)
 mydata.data = residual(p_true, mydata.getaxis('x'))
 mydata.add_noise(2.8)
-print("THIS IS THE TYPE OF MYDATA",type(mydata))
-quit()
+logger.info(strm("THIS IS THE TYPE OF MYDATA",type(mydata)))
 guess = empty_data.copy(data=False)
 guess.data = residual(fit_params, empty_data.getaxis('x'))
 out = minimize(residual, fit_params, args=(mydata.getaxis('x'),), kws={'data': mydata.data})
