@@ -117,11 +117,10 @@ def objective(params, x, data):
 
 ###############################################################################
 # Create five simulated Gaussian data sets
-fit_params,parameter_names,fn = gen_from_expr(expr, {
-fit_params = Parameters()
 for iy, y in enumerate(mydata):
     fit_params.add('amp%i'%(iy+1),value=0.5,min=0.0, max=200)
     fit_params.add('cen%i'(iy+1),value=0.4,min=-2.0,max=2.0)
+    fit_params.add('sig_%i'%(iy+1),value=0.3,min=0.01,max=3.0)
 mydata= []
 for j in np.arange(5):
     dat = empty_data.copy(data=False)
