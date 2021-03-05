@@ -150,15 +150,20 @@ def image(A,x=[],y=[],**kwargs):
         ax.set_xlim((max(these_xlims),min(these_xlims)))
     return retval
 
-def imagehsv(A,logscale = False,black = False):
+def imagehsv(A, logscale=False, black=False, scaling=None):
     "This provides the HSV mapping used to plot complex number"
     # compare to http://www.rapidtables.com/convert/color/hsv-to-rgb.htm
     n = 256
     mask = np.isnan(A)
     A[mask] = 0
+    if scaling is None:
+        A /= abs(A).max()
+    else:
+        A /= scaling
+        mask |= abs(A) > 1.0
+        A[mask] = 0
     mask = mask.reshape(-1,1)
     intensity = abs(A).reshape(-1,1)
-    intensity /= abs(A).max()
     if logscale:
         raise ValueError("logscale is deprecated, use the cropped_log function instead")
     #theta = (n-1.)*np.mod(np.angle(A)/pi/2.0,1)# angle in 255*cycles
