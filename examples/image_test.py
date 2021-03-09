@@ -25,6 +25,71 @@ print(ndshape(s))
 
 fl = figlist_var()
 
+def imagehsv(A,logscale = False,black = False):
+    "This provides the HSV mapping used to plot complex number"
+    # compare to http://www.rapidtables.com/convert/color/hsv-to-rgb.htm
+    n = 256
+    mask = np.isnan(A)
+    A[mask] = 0
+    mask = mask.reshape(-1,1)
+    intensity = abs(A).reshape(-1,1)
+    intensity /= abs(A).max()
+    if logscale:
+        raise ValueError("logscale is deprecated, use the cropped_log function instead")
+    #theta = (n-1.)*np.mod(np.angle(A)/pi/2.0,1)# angle in 255*cycles
+    if black:
+        if black is True:
+            V = intensity
+        else:
+            V = intensity*black + (1.0-black)
+        S = 1.0 # always
+    else:
+        S = intensity
+        V = 1.0 # always
+    C = V*S
+    H = (np.angle(-1*A).reshape(-1,1)+pi)/2./pi*6. # divide into 60 degree chunks -- the -1 is to rotate so red is at origin
+    X = C * (1-abs(np.mod(H,2)-1))
+    m = V-C
+    colors = np.ones(list(A.shape) + [3])
+    origshape = colors.shape
+    colors = colors.reshape(-1,3)
+    rightarray = c_[C, X, np.zeros_like(X)]
+    # http://en.wikipedia.org/wiki/HSL_and_HSV#From_HSV,
+    # except that the order was messed up
+    thismask = np.where(H<1)[0]
+    # C X 0
+    colors[ix_(thismask,[0,1,2])] = rightarray[ix_(thismask,[0,1,2])]
+    thismask = np.where(np.logical_and(H>=1,
+        H<2))[0]
+    # X C 0
+    colors[ix_(thismask,[1,0,2])] = rightarray[ix_(thismask,[0,1,2])]
+    thismask = np.where(np.logical_and(H>=2,
+        H<3))[0]
+    # X 0 C
+    colors[ix_(thismask,[1,2,0])] = rightarray[ix_(thismask,[0,1,2])]
+    thismask = np.where(np.logical_and(H>=3,
+        H<4))[0]
+    # 0 X C
+    colors[ix_(thismask,[2,1,0])] = rightarray[thismask,:]
+    thismask = np.where(np.logical_and(H>=4,
+        H<5))[0]
+    # 0 C X
+    colors[ix_(thismask,[2,0,1])] = rightarray[thismask,:]
+    thismask = np.where(H>5)[0]
+    # C 0 X
+    colors[ix_(thismask,[0,2,1])] = rightarray[thismask,:]
+    colors += m
+    colors *= (n-1)
+    if black:
+        # if the background is black, make the separators white
+        # here, we have to remember that we're already scaled up to a scale of 0--255
+        colors[mask * r_[True,True,True]] = 255.0
+    else:
+        # if the background is white, make the separators black
+        colors[mask * r_[True,True,True]] = 0.0
+    colors = colors.reshape(origshape)
+    return np.uint8(colors.round())
+
 def image_new(this_nddata,this_fig_obj):
     grid_bottom = 0.0
     bottom_pad = 0.15
@@ -140,7 +205,7 @@ def image_new(this_nddata,this_fig_obj):
             ax1.set_yticklabels(empty_string_labels)
 
     for j in range(len(ax_list)):
-        image(A['smooshed',j],ax=ax_list[j])
+        imagehsv(A['smooshed',j],ax=ax_list[j])
         ax_list[j].set_ylabel(None)
         if not j == 0:
             ax_list[j].set_xlabel(None)
@@ -176,8 +241,11 @@ def image_new(this_nddata,this_fig_obj):
             this_label_num=0, check_for_label_num = False, allow_for_text = -75, y_adjustment=55)
     return 
 
+print(ndshape(s))
+print(s.data)
+quit()
+A = imagehsv(s.data)
+imshow(A)
+quit()
 image_new(s,fl)
-fl.show()
-
-
-show();quit()
+imshow();quit()
