@@ -67,26 +67,27 @@ true_p = []
 for j in np.arange(5):    
     true_values = {'amp%d'%j:0.60 + 9.50*np.random.rand(),
             'cen%d'%j:-0.20 + 1.20*np.random.rand(),
-            'sigma%d'%j:0.25 + 0.03*np.random.rand()}
+            'sigma':0.25 + 0.03*np.random.rand()}
     p_true = Parameters()
     for k,v in true_values.items():
         p_true.add(k,value=v)
     true_p.append(p_true)   
+print("HERE ARE THE TRUE PARAMETERS",true_p)    
 x_vals = np.linspace(-1, 2, 151)
 empty_data = nddata(x_vals,'x').copy(data=False)
 #}}}
 #{{{sympy expression
-amp, cen, sigma, x = sp.symbols('amp cen sigma x')
-expr = amp*sp.exp(-(x-cen)**2 / (2*sigma**2))
 #}}}
-for j in np.arange(5):
-    fit_params, parameter_names, fn = gen_from_expr(expr, {'amp%d'%j: dict(value=0.5, max=200, min=0.5),
-        'cen%d'%j:dict(value=0.4, max=2.0, min=-2.0),
-        'sigma%d'%j:dict(value=0.3, max=3.0,min=0.01)})
+amp, cen, sigma, x = sp.symbols('amp cen sigma x')
+expr =amp*sp.exp(-(x-cen)**2 / (2*sigma**2))
+
+for _ in np.arange(5):
+    fit_params, parameter_names, fn = gen_from_expr(expr, {'amp': dict(value=0.5, max=200, min=0.5),
+        'cen':dict(value=0.4, max=2.0, min=-2.0),
+        'sigma':dict(value=0.3, max=3.0,min=0.01)})
 def gauss(pars, x, data = None):
     """Gaussian lineshape."""
     parlist = [pars[j] for j in parameter_names]
-    print("parlist",parlist)
     model = fn(x, *parlist)
     if data is None:
         return model
@@ -117,16 +118,17 @@ def objective(params, x, data):
 
 ###############################################################################
 # Create five simulated Gaussian data sets
-for iy, y in enumerate(mydata):
-    fit_params.add('amp%i'%(iy+1),value=0.5,min=0.0, max=200)
-    fit_params.add('cen%i'(iy+1),value=0.4,min=-2.0,max=2.0)
-    fit_params.add('sig_%i'%(iy+1),value=0.3,min=0.01,max=3.0)
+#for iy, y in enumerate(mydata):
+#    fit_params.add('amp%i'%(iy+1),value=0.5,min=0.0, max=200)
+#    fit_params.add('cen%i'(iy+1),value=0.4,min=-2.0,max=2.0)
+#    fit_params.add('sig_%i'%(iy+1),value=0.3,min=0.01,max=3.0)
 mydata= []
-for j in np.arange(5):
+for _ in np.arange(5):
     dat = empty_data.copy(data=False)
-    dat = gen_from_expr(expr, {'amp%d'%j:dict(value)
+    dat = gauss(true_p[j],dat.getaxis('x'))
+    dat.add_noise(2.8)
     mydata.append(dat)
-    mydata[j] = nddata(mydata[j],[-1],['x'])
+    #mydata[j] = nddata(mydata[j],[-1],['x'])
 quit()    
 guess = []
 for j in np.arange(5):
