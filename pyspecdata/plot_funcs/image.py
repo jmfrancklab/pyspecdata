@@ -153,6 +153,7 @@ def image(A,x=[],y=[],**kwargs):
 def imagehsv(A, logscale=False, black=False, scaling=None):
     "This provides the HSV mapping used to plot complex number"
     # compare to http://www.rapidtables.com/convert/color/hsv-to-rgb.htm
+    A = A.copy()
     n = 256
     mask = np.isnan(A)
     A[mask] = 0
