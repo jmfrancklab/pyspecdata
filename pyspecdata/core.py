@@ -4172,7 +4172,7 @@ class nddata (object):
         #print 'fitting to matrix',L
         if force_y_intercept is not None:
             y -= force_y_intercept
-        c = np.dot(pinv(L),y)
+        c = np.dot(np.linalg.pinv(L),y)
         fity = np.dot(L,c)
         if force_y_intercept is not None:
             #print "\n\nDEBUG: forcing from",fity[0],"to"
@@ -4558,41 +4558,44 @@ class nddata (object):
             isft = False
         if is_axis:
             yunits = self.units_texsafe(axis_name)
-            j = axis_name.find('_')
-            if j > -1:
-                prevword = axis_name[0:j]
-                if j+1< len(axis_name):
-                    followword = axis_name[j+1:]
+            ph_re = re.compile('^ph([0-9])')
+            m = ph_re.match(axis_name)
+            if m:
+                if isft:
+                    axis_name = '$\\Delta p_%s$'%m.groups()[0]
                 else:
-                    followword = []
-                k = followword.find(' ')
-                if k > -1 and k < len(followword):
-                    followword = followword[:k]
-                k = followword.find('_')
-                if len(followword) > 0:
-                    if not (k > -1) and (len(prevword) < 2 or len(followword) < 2):
-                        if len(followword) > 1:
-                            axis_name = axis_name[:j+1+len(followword)]  + '}$' + axis_name[j+1+len(followword):]
-                            axis_name = axis_name[:j+1] + '{' + axis_name[j+1:]
-                        else:
-                            axis_name = axis_name[0:j+2] + '$' + axis_name[j+2:]
-                        axis_name = '$'+axis_name
-            if isft:
-                t_idx = axis_name.find('t')
-                if t_idx>-1:
-                    if t_idx+1 < len(axis_name) and axis_name[t_idx+1].isalpha():
-                        axis_name = r'F{'+axis_name+r'}'
+                    axis_name = '$\\varphi_%s$'%m.groups()[0]
+            else:
+                j = axis_name.find('_')
+                if j > -1:
+                    prevword = axis_name[0:j]
+                    if j+1< len(axis_name):
+                        followword = axis_name[j+1:]
                     else:
-                        axis_name = axis_name.replace('t','\\nu ')
-                        if axis_name[0] != '$':
-                            axis_name = '$' + axis_name + '$'
-                #elif axis_name[:2] == 'ph':
-                #    if len(axis_name) > 2:
-                #        axis_name = r'$\Delta c_{'+axis_name[2:]+'}$'
-                #    else:
-                #        axis_name = r'$\Delta c$'
-                else:
-                    axis_name = r'F{'+axis_name+r'}'
+                        followword = []
+                    k = followword.find(' ')
+                    if k > -1 and k < len(followword):
+                        followword = followword[:k]
+                    k = followword.find('_')
+                    if len(followword) > 0:
+                        if not (k > -1) and (len(prevword) < 2 or len(followword) < 2):
+                            if len(followword) > 1:
+                                axis_name = axis_name[:j+1+len(followword)]  + '}$' + axis_name[j+1+len(followword):]
+                                axis_name = axis_name[:j+1] + '{' + axis_name[j+1:]
+                            else:
+                                axis_name = axis_name[0:j+2] + '$' + axis_name[j+2:]
+                            axis_name = '$'+axis_name
+                if isft:
+                    t_idx = axis_name.find('t')
+                    if t_idx>-1:
+                        if t_idx+1 < len(axis_name) and axis_name[t_idx+1].isalpha():
+                            axis_name = r'F{'+axis_name+r'}'
+                        else:
+                            axis_name = axis_name.replace('t','\\nu ')
+                            if axis_name[0] != '$':
+                                axis_name = '$' + axis_name + '$'
+                    else:
+                        axis_name = r'F{'+axis_name+r'}'
         else:
             yunits = self.units_texsafe()
         if yunits is not None:
@@ -7235,10 +7238,10 @@ class fitdata(nddata):
             fprime_prod = fprime1 * fprime2
             fprime_prod = fprime_prod.reshape(-1,f2).T # direct product form
             try:
-                covarmat = np.dot(pinv(fprime_prod),(sigma**2).reshape(-1,1))
+                covarmat = np.dot(np.linalg.pinv(fprime_prod),(sigma**2).reshape(-1,1))
             except ValueError as e:
                 raise ValueError(strm('shape of fprime_prod', np.shape(fprime_prod),
-                    'shape of inverse', np.shape(pinv(fprime_prod)),
+                    'shape of inverse', np.shape(np.linalg.pinv(fprime_prod)),
                     'shape of sigma', np.shape(sigma))+explain_error(e))
             covarmatrix = covarmat.reshape(f1,f1)
             for l in range(0,f1): 
@@ -7363,7 +7366,7 @@ class fitdata(nddata):
         yerr = yerr[mask]
         x = x[mask]
         L = c_[x.reshape((-1,1)),np.ones((len(x),1))]
-        retval = np.dot(pinv(L,rcond = 1e-17),y)
+        retval = np.dot(np.linalg.pinv(L,rcond = 1e-17),y)
         logger.debug(strm(r'\label{fig:pinv_figure_text}y=',y,'yerr=',yerr,'%s='%x_axis,x,'L=',L))
         logger.debug('\n\n')
         logger.debug(strm('recalc y = ',np.dot(L,retval)))
