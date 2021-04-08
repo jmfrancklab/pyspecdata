@@ -4045,7 +4045,7 @@ class nddata (object):
         return selfout,argout
     #}}}
     #{{{ integrate, differentiate, and sum
-    def integrate(self, thisaxis, backwards=False, cumulative=False):
+    def integrate(self, thisaxis, error_slice, backwards=False, cumulative=False):
         r'''Performs an integration -- which is similar to a sum, except that it takes the axis into account, *i.e.*, it performs:
             :math:`\int f(x) dx`
             rather than
@@ -4077,8 +4077,13 @@ class nddata (object):
                 self.data = self[thisaxis,::-1].data
         else:
             self.run(np.sum,thisaxis)
+        n_indirect = error_slice.data.size / ndshape(error_slice)[thisaxis]
+        myerror = (dt**2)*sum(abs(error_slice.data)**2)
+        myerror = sqrt(myerror / n_indirect)
+        assert self.data.size == error_slice.data.size/n_indirect
+
         self.data *= dt
-        return self
+        return self, myerror
     def diff(self,thisaxis,backwards = False):
         if backwards is True:
             self.data = self[thisaxis,::-1].data
