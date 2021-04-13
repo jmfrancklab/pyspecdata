@@ -2459,7 +2459,11 @@ def plot(*args,**kwargs):
     x_inverted = False
     #{{{ parse nddata
     if isinstance(myy,nddata):
+        if len(myy.dimlabels) > 2:
+            raise ValueError("plot with more than 2D is not really supported, and errorbar plots will fail, so collapse your dims!")
         myy = myy.copy()
+        if myy.get_error() is not None:
+            logging.debug(strm("shapes at top of function",ndshape(myy), myy.data.shape, myy.data_error.shape))
         # {{{ automatically reduce any singleton dimensions
         if not len(myy.dimlabels) == 1:
             if np.any(np.array(myy.data.shape) == 1):
@@ -2508,15 +2512,17 @@ def plot(*args,**kwargs):
                 else:
                     return ax.errorbar(*tebargs,**tebkwargs)
             myplotfunc = thiserrbarplot
+            logger.debug("this is an errorbar plot")
             #{{{ pop any singleton dims
             myyerror = myy.get_error()
             myyerror = np.squeeze(myyerror)
             #}}}
-            kwargs.update({'yerr':myyerror})
+            kwargs.update({'yerr':None})
             valueforxerr = myy.get_error(myy.dimlabels[longest_dim])
             if valueforxerr is not None: # if we have x errorbars too
                 #print "DEBUG decided to assign to xerr:",valueforxerr
                 kwargs.update({'xerr':valueforxerr})
+            logging.debug(strm("shapes after splitting nddata",myy.data.shape, myyerror.shape))
         #{{{ deal with axis labels along y
         try:
             yaxislabels = myy.getaxis(myy.dimlabels[last_not_longest])
@@ -2539,6 +2545,10 @@ def plot(*args,**kwargs):
             myy = myy.data
         else:
             myy = np.squeeze(myy.data.transpose([longest_dim]+all_but_longest))
+            if 'yerr' in kwargs.keys():
+                myyerror = np.squeeze(myyerror.transpose([longest_dim]+all_but_longest))
+        if 'yerr' in kwargs.keys():
+            logging.debug(strm("halfway checkpoint",myy.shape, myyerror.shape))
         #if len(myy.data) == 1 and 'label' not in kwargs.keys() and myy_name is not None:
         #    kwargs.update('label',myy_name)
         # }}}
@@ -2554,13 +2564,15 @@ def plot(*args,**kwargs):
         try:
             b = np.diff(np.log10(myx))
         except Exception as e:
-            raise Exception(strm('likely a problem with the type of the x label, which is',myx,explain_error(e)))
+            raise Exception(strm('likely a problem with the type of the x label, which is',myx))
         if (np.size(b)>3) and all(abs((b-b[0])/b[0])<1e-4) and not ('nosemilog' in list(kwargs.keys())):
             if 'plottype' not in list(kwargs.keys()):
                 myplotfunc = ax.semilogx
     if ('nosemilog' in list(kwargs.keys())):
         #print 'this should pop nosemilog'
         kwargs.pop('nosemilog')
+    if 'yerr' in kwargs.keys():
+        logging.debug(strm("halfway checkpoint",myy.data.shape, myyerror.shape))
     if 'plottype' in list(kwargs.keys()):
         if kwargs['plottype'] == 'semilogy':
             myplotfunc = ax.semilogy
@@ -2601,10 +2613,16 @@ def plot(*args,**kwargs):
     if len(np.shape(myy.squeeze()))>1 and np.sum(np.array(np.shape(myy))>1):
         #{{{ hsv plots
         retval = []
+        if 'yerr' in kwargs.keys():
+            logger.debug("I see error")
+        else:
+            logger.debug("I do not see error")
         for j in range(0,myy.shape[1]):
             #{{{ this is the way to assign plot arguments
             plotargs = [k for k in (myx,myy[:,j],myformat) if k is not None]
             #}}}
+            if 'yerr' in kwargs.keys():
+                kwargs['yerr'] = myyerror[:,j]
             #{{{ here, i update the kwargs to include the specific color for this line
             newkwargs = kwargs.copy() # kwargs is a dict
             newkwargs.update({'color':cm.hsv(np.double(j)/np.double(myy.shape[1]))})
@@ -2613,6 +2631,14 @@ def plot(*args,**kwargs):
             if has_labels:
                 newkwargs.update({'label':yaxislabels[j]})
             #}}}
+            if 'yerr' in newkwargs.keys():
+                logging.debug(strm("shapes before plot",plotargs[0].shape,
+                    plotargs[1].shape, newkwargs['yerr'].shape))
+                #myplotfunc = ax.plot
+                #newkwargs.pop('yerr')
+            elif len(plotargs)>1 and isinstance(plotargs[1],np.ndarray):
+                logging.debug(strm("shapes before plot",plotargs[0].shape,
+                    plotargs[1].shape))
             if np.any(np.isinf(myy)):
                 myy[np.isinf(myy)] = NaN # added this to prevent an overflow error
             try:
@@ -2624,14 +2650,16 @@ def plot(*args,**kwargs):
                     list(map(len, plotargs)), "and", len(newkwargs),
                     "\noptions", newkwargs, "of len",
                     ', '.join([str(type(j)) + " " + str(j) if np.isscalar(j)
-                        else str(len(j)) for j in list(newkwargs.values())]),
-                    explain_error(e)))
+                        else str(len(j)) for j in list(newkwargs.values())])))
             if x_inverted:
                 these_xlims = ax.get_xlim()
                 ax.set_xlim((max(these_xlims),min(these_xlims)))
         #}}}
         #}}}
     else:
+        logger.debug(strm("here are the kwargs",kwargs))
+        if kwargs['yerr'] is None:
+            kwargs['yerr'] = myyerror
         plotargs = [j for j in [myx,np.real(myy),myformat] if j is not None]
         try:
             #print 'DEBUG plotting with args',plotargs,'and kwargs',kwargs,'\n\n'
@@ -5242,7 +5270,13 @@ class nddata (object):
         if isinstance(intensity, type(emptyfunction)):
             intensity = intensity(lambda x: self.data)
         return_complex = np.iscomplexobj(self.data)
-        self.data += box_muller(self.data.size, return_complex=return_complex).reshape(self.data.shape) * intensity
+        if return_complex:
+            self.data += (
+                    intensity*np.random.normal(size=self.data.shape)
+                    +
+                    1j*intensity*np.random.normal(size=self.data.shape))
+        else:
+            self.data += intensity*np.random.normal(size=self.data.shape)
         return self
     #{{{ functions to manipulate and return the axes
     def reorder(self,*axes,**kwargs):
