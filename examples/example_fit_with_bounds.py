@@ -83,6 +83,7 @@ fit_params, parameter_names, fn = gen_from_expr(expr, {'A':dict(value=13.0, max=
             'period':dict(value=2, max=10),
             'shift':dict(value=0.0, max=pi/2., min=-pi/2.),
             'decay':dict(value=0.02, max=0.10, min=0.00),})
+print("PARAMETER NAMES ARE:",parameter_names)
 def residual(pars, x, data=None):
     parlist = [pars[j] for j in parameter_names]
     print("THIS IS PARLIST",parlist)
@@ -90,6 +91,7 @@ def residual(pars, x, data=None):
     shift = pars['shift']
     if abs(shift) > pi/2:
         shift = shift - sign(shift)*pi
+    print("TYPE OF PARLIST",type(parlist))    
     model = fn(x, *parlist)
     if data is None:
         return model
