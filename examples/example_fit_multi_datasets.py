@@ -74,7 +74,7 @@ print("TRUE VALUES ARE:",true_values)
 p_true = Parameters()
 mydata_params = []
 for j in np.arange(5):
-    for k,v in true_values[j+1].items():
+    for k,v in true_values[j].items():
         p_true.add(k,value=v)
     mydata_params.append(p_true)    
   
@@ -101,10 +101,14 @@ for j in np.arange(5):
     fit_params.append(parameters)
     parameter_names.append(param_names)
     fn.append(function)
+print("PARAMETER NAMES ARE",parameter_names)    
 def objective(pars, x, data=None):
     """Calculate total residual for fits of Gaussians to several data sets."""
-    parlist = [pars[j] for j in parameter_names]
-    logger.info(strm("parlist",parlist))
+    parlist =[]
+    for j in np.arange(5):
+        params = [pars[j] for j in parameter_names]
+        parlist.append(params)
+    print("PARLIST:",parlist)    
     model = fn(x, *parlist)
     if data is None:
         return model
