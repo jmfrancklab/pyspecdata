@@ -2658,7 +2658,7 @@ def plot(*args,**kwargs):
         #}}}
     else:
         logger.debug(strm("here are the kwargs",kwargs))
-        if kwargs['yerr'] is None:
+        if 'yerr' in kwargs.keys() and kwargs['yerr'] is None:
             kwargs['yerr'] = myyerror
         plotargs = [j for j in [myx,np.real(myy),myformat] if j is not None]
         try:
