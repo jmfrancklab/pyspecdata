@@ -2009,6 +2009,8 @@ class figlist(object):
         """
         if 'label' in kwargs.keys() or 'label_format_string' in kwargs.keys():
             self.use_autolegend()
+        if 'alpha' not in kwargs.keys():
+            kwargs['alpha'] = 0.5
         human_units = True
         if 'human_units' in list(kwargs.keys()):
             human_units = kwargs.pop('human_units')
@@ -6559,7 +6561,7 @@ class nddata (object):
                 dimname = args[j]
                 if isinstance(dimname, np.str_):
                     dimname = str(dimname) # on upgrading + using on windows, this became necessary, for some reason I don't understand
-                elif isinstance(args[j+1],type(testf)):
+                if isinstance(args[j+1],type(testf)):
                     sensible_list.append((hash('func'),dimname,args[j+1]))
                 else:
                     sensible_list.append((hash('np'),dimname,args[j+1]))
@@ -6577,6 +6579,10 @@ class nddata (object):
                         sensible_list.append((hash('range'),dimname,target[0],None))
                     else:
                         sensible_list.append((hash('range'),dimname,target[0],target[1]))
+                elif isinstance(target, np.ndarray) and target.size==2:
+                    sensible_list.append((hash('range'),dimname,target[0],target[1]))
+                else:
+                    raise ValueError("for part of your slice, you said for dimension",dimname,"you wanted",target,"but the second argument must be a tuple, list, or array of length 2!")
                 j += 1
             else:# works for str and np.str_
                 raise ValueError("I have read in slice argument",args[:j],"but then I get confused!")
