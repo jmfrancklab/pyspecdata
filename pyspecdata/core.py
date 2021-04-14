@@ -625,9 +625,9 @@ def meanstd_rec(myarray,mylist,standard_error = False):
             try:
                 newrow[thisfield] = np.mean(myarray_subset[thisfield])
                 if standard_error:
-                    newrow[thisfield+"_ERROR"] = std(myarray_subset[thisfield])/sqrt(len(myarray_subset[thisfield]))
+                    newrow[thisfield+"_ERROR"] = np.std(myarray_subset[thisfield])/sqrt(len(myarray_subset[thisfield]))
                 else:
-                    newrow[thisfield+"_ERROR"] = std(myarray_subset[thisfield])
+                    newrow[thisfield+"_ERROR"] = np.std(myarray_subset[thisfield])
             except:
                 raise RuntimeError("error in meanstd_rec:  You usually get this",
                         "when one of the fields that you have NOT passed in the",
@@ -4390,7 +4390,7 @@ class nddata (object):
                 except:
                     raise ValueError(strm('shape of data',np.shape(self.data),'shape of data error',np.shape(self.data_error)))
             if return_error: # since I think this is causing an error
-                thiserror = std(self.data,
+                thiserror = np.std(self.data,
                         axis=thisindex)
                 if np.isscalar(thiserror):
                     thiserror = r_[thiserror]
