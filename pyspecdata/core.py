@@ -625,9 +625,9 @@ def meanstd_rec(myarray,mylist,standard_error = False):
             try:
                 newrow[thisfield] = np.mean(myarray_subset[thisfield])
                 if standard_error:
-                    newrow[thisfield+"_ERROR"] = std(myarray_subset[thisfield])/sqrt(len(myarray_subset[thisfield]))
+                    newrow[thisfield+"_ERROR"] = np.std(myarray_subset[thisfield])/sqrt(len(myarray_subset[thisfield]))
                 else:
-                    newrow[thisfield+"_ERROR"] = std(myarray_subset[thisfield])
+                    newrow[thisfield+"_ERROR"] = np.std(myarray_subset[thisfield])
             except:
                 raise RuntimeError("error in meanstd_rec:  You usually get this",
                         "when one of the fields that you have NOT passed in the",
@@ -4390,7 +4390,7 @@ class nddata (object):
                 except:
                     raise ValueError(strm('shape of data',np.shape(self.data),'shape of data error',np.shape(self.data_error)))
             if return_error: # since I think this is causing an error
-                thiserror = std(self.data,
+                thiserror = np.std(self.data,
                         axis=thisindex)
                 if np.isscalar(thiserror):
                     thiserror = r_[thiserror]
@@ -6556,7 +6556,7 @@ class nddata (object):
                 dimname = args[j]
                 if isinstance(dimname, np.str_):
                     dimname = str(dimname) # on upgrading + using on windows, this became necessary, for some reason I don't understand
-                elif isinstance(args[j+1],type(testf)):
+                if isinstance(args[j+1],type(testf)):
                     sensible_list.append((hash('func'),dimname,args[j+1]))
                 else:
                     sensible_list.append((hash('np'),dimname,args[j+1]))
@@ -6574,6 +6574,10 @@ class nddata (object):
                         sensible_list.append((hash('range'),dimname,target[0],None))
                     else:
                         sensible_list.append((hash('range'),dimname,target[0],target[1]))
+                elif isinstance(target, np.ndarray) and target.size==2:
+                    sensible_list.append((hash('range'),dimname,target[0],target[1]))
+                else:
+                    raise ValueError("for part of your slice, you said for dimension",dimname,"you wanted",target,"but the second argument must be a tuple, list, or array of length 2!")
                 j += 1
             else:# works for str and np.str_
                 raise ValueError("I have read in slice argument",args[:j],"but then I get confused!")
