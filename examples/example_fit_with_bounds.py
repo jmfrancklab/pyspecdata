@@ -83,21 +83,23 @@ fit_params, parameter_names, fn = gen_from_expr(expr, {'A':dict(value=13.0, max=
             'period':dict(value=2, max=10),
             'shift':dict(value=0.0, max=pi/2., min=-pi/2.),
             'decay':dict(value=0.02, max=0.10, min=0.00),})
-print("PARAMETER NAMES ARE:",parameter_names)
 def residual(pars, x, data=None):
+    print("PARAMETER NAMES ARE:",parameter_names)
     parlist = [pars[j] for j in parameter_names]
     print("THIS IS PARLIST",parlist)
     logger.info(strm("parlist",parlist))
     shift = pars['shift']
     if abs(shift) > pi/2:
         shift = shift - sign(shift)*pi
-    print("TYPE OF PARLIST",type(parlist))    
     model = fn(x, *parlist)
     if data is None:
         return model
     return model - data
+print("P_TRUE IS",p_true)
+#quit()
 mydata = empty_data.copy(data=False)
 mydata.data = residual(p_true, mydata.getaxis('x'))
+quit()
 mydata.add_noise(2.8)
 logger.info(strm("THIS IS THE TYPE OF MYDATA",type(mydata)))
 guess = empty_data.copy(data=False)

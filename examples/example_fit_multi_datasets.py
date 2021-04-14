@@ -103,10 +103,9 @@ for j in np.arange(5):
     fn.append(function)
 def objective(pars, x, data=None):
     """Calculate total residual for fits of Gaussians to several data sets."""
-    print("PARAMETER_NAMES ARE",parameter_names)
-    param_names = [item for sublist in parameter_names for item in sublist]
-    print("PARAM NAMES ARE",param_names)
-    parlist = [pars[j] for j in param_names]
+    print("PARAMETER NAMES ARE",parameter_names)
+    for j in np.arange(len(pars)):
+        parlist = [pars[k] for k in parameter_names[j][k]]
     print("PARLIST IS",parlist)
     logger.info(strm("parlist",parlist))
     model = fn(x, *parlist)
