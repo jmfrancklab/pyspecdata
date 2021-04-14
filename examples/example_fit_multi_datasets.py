@@ -101,14 +101,14 @@ for j in np.arange(5):
     fit_params.append(parameters)
     parameter_names.append(param_names)
     fn.append(function)
-print("PARAMETER NAMES ARE",parameter_names)    
 def objective(pars, x, data=None):
     """Calculate total residual for fits of Gaussians to several data sets."""
-    parlist =[]
-    for j in np.arange(5):
-        params = [pars[j] for j in parameter_names]
-        parlist.append(params)
-    print("PARLIST:",parlist)    
+    print("PARAMETER_NAMES ARE",parameter_names)
+    param_names = [item for sublist in parameter_names for item in sublist]
+    print("PARAM NAMES ARE",param_names)
+    parlist = [pars[j] for j in param_names]
+    print("PARLIST IS",parlist)
+    logger.info(strm("parlist",parlist))
     model = fn(x, *parlist)
     if data is None:
         return model
@@ -120,6 +120,8 @@ def objective(pars, x, data=None):
     # now flatten this to a 1D array, as minimize() needs
     return resid.flatten()
 mydata = []
+print("THIS IS P_TRUE",p_true)
+#quit()
 for j in np.arange(5):
     dat = empty_data[j].copy(data=False)
     dat.data = objective(p_true,dat.getaxis('x'))
