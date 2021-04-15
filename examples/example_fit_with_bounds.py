@@ -86,11 +86,12 @@ fit_params, parameter_names, fn = gen_from_expr(expr, {'A':dict(value=13.0, max=
 def residual(pars, x, data=None):
     print("PARAMETER NAMES ARE:",parameter_names)
     parlist = [pars[j] for j in parameter_names]
-    print("THIS IS PARLIST",parlist)
     logger.info(strm("parlist",parlist))
     shift = pars['shift']
     if abs(shift) > pi/2:
         shift = shift - sign(shift)*pi
+    print("THIS IS PARLIST",*parlist)
+
     model = fn(x, *parlist)
     if data is None:
         return model

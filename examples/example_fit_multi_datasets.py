@@ -77,7 +77,7 @@ for j in np.arange(5):
     for k,v in true_values[j].items():
         p_true.add(k,value=v)
     mydata_params.append(p_true)    
-  
+print("P TRUE IS", p_true)  
 empty_data = []    
 for _ in np.arange(5):
     edata = nddata(x,'x').copy(data=False)
@@ -101,64 +101,66 @@ for j in np.arange(5):
     fit_params.append(parameters)
     parameter_names.append(param_names)
     fn.append(function)
+print("FIT PARAMS ARE",fit_params)
+fit_pars = Parameters()
+fits = []
+for j in np.arange(5):
+    for k,v in fit_params[j].items():
+        fit_pars.add(k,value=v)
+    fits.append(fit_pars)    
 def objective(pars, x, data=None):
     """Calculate total residual for fits of Gaussians to several data sets."""
-    print(parameter_names)
-    parlist = [pars[j] for j in parameter_names]
-    print("PARLIST IS",parlist)
+    name_list = [item for sublist in parameter_names for item in sublist]
+    name_tuple = tuple(name_list)
+    parlist = [pars[j] for j in name_list]
     logger.info(strm("parlist",parlist))
-    model = fn(x, *parlist)
+    par_list = []
+    par_list.append([parlist[0],parlist[1],parlist[2]])
+    par_list.append([parlist[3],parlist[4],parlist[5]])
+    par_list.append([parlist[6],parlist[7],parlist[8]])
+    par_list.append([parlist[9],parlist[10],parlist[11]])
+    par_list.append([parlist[12],parlist[13],parlist[14]])
+    for j in np.arange(5):
+        print("PARLIST IS", *par_list[j])
+        model = fn[j](*par_list[j])
     if data is None:
+        print("DATA IS NOT NONE")
         return model
-    ndata, _ = data.shape
+    ndata = data.shape
     resid = 0.0*data[:]
      # make residual per data set
-    for i in range(ndata):
-        resid[i, :] = data[i, :] - model
+    for i in range(len(ndata)):
+        resid[i:] = data[i:] - model
     # now flatten this to a 1D array, as minimize() needs
     return resid.flatten()
 mydata = []
-print("THIS IS P_TRUE",p_true)
-#quit()
 for j in np.arange(5):
     dat = empty_data[j].copy(data=False)
     dat.data = objective(p_true,dat.getaxis('x'))
     mydata.append(dat)
-print(mydata)
+print("THIS IS MYDATA",mydata)
 quit()
 guess = []
-for _ in np.arange(5):
-    fit = empty_data.copy(data= False)
-    fit.data = objective(fit_params, empty_data.getaxis('x'))
+for j in np.arange(5):
+    fit = empty_data[j].copy(data= False)
+    fit.data = objective(fit_pars, fit.getaxis('x'))
     guess.append(fit)
-quit()    
-
-
-
-
-data = []
-for _ in np.arange(5):
-    params = Parameters()
-    amp = 0.60 + 9.50*np.random.rand()
-    cen = -0.20 + 1.20*np.random.rand()
-    sig = 0.25 + 0.03*np.random.rand()
-    dat =gauss(x, amp, cen, sig) + np.random.normal(size=x.size, scale=0.1)
-    data.append(dat)
-print(data)
-data = np.array(data)
-print("NPARRAY OF DATA:",data)
-fit_params = Parameters()
 ###############################################################################
 # Run the global fit and show the fitting result
-
-out = minimize(objective, fit_params, args=(x, data))
-report_fit(out.params)
-
+fitting = []
+for j in np.arange(5):
+    out = minimize(objective, fit_pars, args=(mydata[j].getaxis('x'),),kws={'data':mydata[j].data})
+    fit=empty_data[j].copy(data=False)
+    fit.data = objective(out.params,empty_data[j].getaxis('x'))
+    report_fit(out, show_correl=True,modelpars=p_true)
+    fitting.append(fit)
 ###############################################################################
 # Plot the data sets and fits
-
 plt.figure()
-for i in range(5):
-    y_fit = gauss_dataset(out.params, i, x)
-    plt.plot(x, data[i, :], 'o', x, y_fit, '-')
+for j in np.arange(5):
+    print('fit result',fitting[j])
+    plot(mydata[j],'-',label='mydata')
+    #plot(fitting[j],'o',label='fitting')
+    #plot(guess[j],'--',label='guess')
+plt.legend()
 plt.show()
