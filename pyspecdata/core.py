@@ -625,9 +625,9 @@ def meanstd_rec(myarray,mylist,standard_error = False):
             try:
                 newrow[thisfield] = np.mean(myarray_subset[thisfield])
                 if standard_error:
-                    newrow[thisfield+"_ERROR"] = std(myarray_subset[thisfield])/sqrt(len(myarray_subset[thisfield]))
+                    newrow[thisfield+"_ERROR"] = np.std(myarray_subset[thisfield])/sqrt(len(myarray_subset[thisfield]))
                 else:
-                    newrow[thisfield+"_ERROR"] = std(myarray_subset[thisfield])
+                    newrow[thisfield+"_ERROR"] = np.std(myarray_subset[thisfield])
             except:
                 raise RuntimeError("error in meanstd_rec:  You usually get this",
                         "when one of the fields that you have NOT passed in the",
@@ -2459,7 +2459,11 @@ def plot(*args,**kwargs):
     x_inverted = False
     #{{{ parse nddata
     if isinstance(myy,nddata):
+        if len(myy.dimlabels) > 2:
+            raise ValueError("plot with more than 2D is not really supported, and errorbar plots will fail, so collapse your dims!")
         myy = myy.copy()
+        if myy.get_error() is not None:
+            logging.debug(strm("shapes at top of function",ndshape(myy), myy.data.shape, myy.data_error.shape))
         # {{{ automatically reduce any singleton dimensions
         if not len(myy.dimlabels) == 1:
             if np.any(np.array(myy.data.shape) == 1):
@@ -2508,15 +2512,17 @@ def plot(*args,**kwargs):
                 else:
                     return ax.errorbar(*tebargs,**tebkwargs)
             myplotfunc = thiserrbarplot
+            logger.debug("this is an errorbar plot")
             #{{{ pop any singleton dims
             myyerror = myy.get_error()
             myyerror = np.squeeze(myyerror)
             #}}}
-            kwargs.update({'yerr':myyerror})
+            kwargs.update({'yerr':None})
             valueforxerr = myy.get_error(myy.dimlabels[longest_dim])
             if valueforxerr is not None: # if we have x errorbars too
                 #print "DEBUG decided to assign to xerr:",valueforxerr
                 kwargs.update({'xerr':valueforxerr})
+            logging.debug(strm("shapes after splitting nddata",myy.data.shape, myyerror.shape))
         #{{{ deal with axis labels along y
         try:
             yaxislabels = myy.getaxis(myy.dimlabels[last_not_longest])
@@ -2539,6 +2545,10 @@ def plot(*args,**kwargs):
             myy = myy.data
         else:
             myy = np.squeeze(myy.data.transpose([longest_dim]+all_but_longest))
+            if 'yerr' in kwargs.keys():
+                myyerror = np.squeeze(myyerror.transpose([longest_dim]+all_but_longest))
+        if 'yerr' in kwargs.keys():
+            logging.debug(strm("halfway checkpoint",myy.shape, myyerror.shape))
         #if len(myy.data) == 1 and 'label' not in kwargs.keys() and myy_name is not None:
         #    kwargs.update('label',myy_name)
         # }}}
@@ -2554,13 +2564,15 @@ def plot(*args,**kwargs):
         try:
             b = np.diff(np.log10(myx))
         except Exception as e:
-            raise Exception(strm('likely a problem with the type of the x label, which is',myx,explain_error(e)))
+            raise Exception(strm('likely a problem with the type of the x label, which is',myx))
         if (np.size(b)>3) and all(abs((b-b[0])/b[0])<1e-4) and not ('nosemilog' in list(kwargs.keys())):
             if 'plottype' not in list(kwargs.keys()):
                 myplotfunc = ax.semilogx
     if ('nosemilog' in list(kwargs.keys())):
         #print 'this should pop nosemilog'
         kwargs.pop('nosemilog')
+    if 'yerr' in kwargs.keys():
+        logging.debug(strm("halfway checkpoint",myy.data.shape, myyerror.shape))
     if 'plottype' in list(kwargs.keys()):
         if kwargs['plottype'] == 'semilogy':
             myplotfunc = ax.semilogy
@@ -2601,10 +2613,16 @@ def plot(*args,**kwargs):
     if len(np.shape(myy.squeeze()))>1 and np.sum(np.array(np.shape(myy))>1):
         #{{{ hsv plots
         retval = []
+        if 'yerr' in kwargs.keys():
+            logger.debug("I see error")
+        else:
+            logger.debug("I do not see error")
         for j in range(0,myy.shape[1]):
             #{{{ this is the way to assign plot arguments
             plotargs = [k for k in (myx,myy[:,j],myformat) if k is not None]
             #}}}
+            if 'yerr' in kwargs.keys():
+                kwargs['yerr'] = myyerror[:,j]
             #{{{ here, i update the kwargs to include the specific color for this line
             newkwargs = kwargs.copy() # kwargs is a dict
             newkwargs.update({'color':cm.hsv(np.double(j)/np.double(myy.shape[1]))})
@@ -2613,6 +2631,14 @@ def plot(*args,**kwargs):
             if has_labels:
                 newkwargs.update({'label':yaxislabels[j]})
             #}}}
+            if 'yerr' in newkwargs.keys():
+                logging.debug(strm("shapes before plot",plotargs[0].shape,
+                    plotargs[1].shape, newkwargs['yerr'].shape))
+                #myplotfunc = ax.plot
+                #newkwargs.pop('yerr')
+            elif len(plotargs)>1 and isinstance(plotargs[1],np.ndarray):
+                logging.debug(strm("shapes before plot",plotargs[0].shape,
+                    plotargs[1].shape))
             if np.any(np.isinf(myy)):
                 myy[np.isinf(myy)] = NaN # added this to prevent an overflow error
             try:
@@ -2624,14 +2650,16 @@ def plot(*args,**kwargs):
                     list(map(len, plotargs)), "and", len(newkwargs),
                     "\noptions", newkwargs, "of len",
                     ', '.join([str(type(j)) + " " + str(j) if np.isscalar(j)
-                        else str(len(j)) for j in list(newkwargs.values())]),
-                    explain_error(e)))
+                        else str(len(j)) for j in list(newkwargs.values())])))
             if x_inverted:
                 these_xlims = ax.get_xlim()
                 ax.set_xlim((max(these_xlims),min(these_xlims)))
         #}}}
         #}}}
     else:
+        logger.debug(strm("here are the kwargs",kwargs))
+        if 'yerr' in kwargs.keys() and kwargs['yerr'] is None:
+            kwargs['yerr'] = myyerror
         plotargs = [j for j in [myx,np.real(myy),myformat] if j is not None]
         try:
             #print 'DEBUG plotting with args',plotargs,'and kwargs',kwargs,'\n\n'
@@ -4172,7 +4200,7 @@ class nddata (object):
         #print 'fitting to matrix',L
         if force_y_intercept is not None:
             y -= force_y_intercept
-        c = np.dot(pinv(L),y)
+        c = np.dot(np.linalg.pinv(L),y)
         fity = np.dot(L,c)
         if force_y_intercept is not None:
             #print "\n\nDEBUG: forcing from",fity[0],"to"
@@ -4362,7 +4390,7 @@ class nddata (object):
                 except:
                     raise ValueError(strm('shape of data',np.shape(self.data),'shape of data error',np.shape(self.data_error)))
             if return_error: # since I think this is causing an error
-                thiserror = std(self.data,
+                thiserror = np.std(self.data,
                         axis=thisindex)
                 if np.isscalar(thiserror):
                     thiserror = r_[thiserror]
@@ -4754,15 +4782,15 @@ class nddata (object):
             U2 = U2[:,0:s2]
             S2 = S2[0:s2]
             V2 = V2[0:s2,:]
-            S1 = S1*eye(s1)
-            S2 = S2*eye(s2)
+            S1 = S1*np.eye(s1)
+            S2 = S2*np.eye(s2)
             logger.debug(strm('Compressed SVD of K1:',[x.shape for x in (U1,S1,V1)]))
             logger.debug(strm('Compressed SVD K2:',[x.shape for x in (U2,S2,V2)]))
             # would generate projected data here
             # compress data here
             K1 = S1.dot(V1)
             K2 = S2.dot(V2)
-            K = K1[:,newaxis,:,newaxis]*K2[newaxis,:,newaxis,:]
+            K = K1[:,np.newaxis,:,np.newaxis]*K2[np.newaxis,:,np.newaxis,:]
             K = K.reshape(K1.shape[0]*K2.shape[0],K1.shape[1]*K2.shape[1])
             logger.debug(strm('Compressed K0, K1, and K2:',[x.shape for x in (K,K1,K2)]))
 
@@ -4784,9 +4812,9 @@ class nddata (object):
                 def chi(x_vec,val):
                     return 0.5*np.dot(x_vec.T,np.dot(dd_chi(G(x_vec),val**2),x_vec)) - np.dot(x_vec.T,data_fornnls[:,newaxis])
                 def d_chi(x_vec,val):
-                    return np.dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
+                    return np.dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,np.newaxis]
                 def dd_chi(G,val):
-                    return G + (val**2)*eye(np.shape(G)[0])
+                    return G + (val**2)*np.eye(np.shape(G)[0])
                 def G(x_vec):
                     return np.dot(K,np.dot(square_heaviside(x_vec),K.T))
                 def H(product):
@@ -4802,15 +4830,15 @@ class nddata (object):
                         temp = H(temp)
                         diag_heavi.append(temp)
                     diag_heavi = np.array(diag_heavi)
-                    square_heavi = diag_heavi*eye(np.shape(diag_heavi)[0])
+                    square_heavi = diag_heavi*np.eye(np.shape(diag_heavi)[0])
                     return square_heavi
                 def optimize_alpha(input_vec,val):
                     alpha_converged = False
                     factor = sqrt(s1*s2)
-                    T = linalg.inv(dd_chi(G(input_vec),val**2))
+                    T = np.linalg.inv(dd_chi(G(input_vec),val**2))
                     dot_product = np.dot(input_vec.T,np.dot(T,input_vec))
                     ans = dot_product*factor
-                    ans = ans/linalg.norm(input_vec)/dot_product
+                    ans = ans/np.linalg.norm(input_vec)/dot_product
                     tol = 1e-3
                     if abs(ans-val**2) <= tol:
                         logger.debug(strm('ALPHA HAS CONVERGED.'))
@@ -4820,7 +4848,7 @@ class nddata (object):
                 def newton_min(input_vec,val):
                     fder = dd_chi(G(input_vec),val)
                     fval = d_chi(input_vec,val)
-                    return (input_vec + np.dot(linalg.inv(fder),fval))
+                    return (input_vec + np.dot(np.linalg.inv(fder),fval))
                 def mod_BRD(guess,maxiter=20):
                     smoothing_param = guess
                     alpha_converged = False
@@ -4828,9 +4856,9 @@ class nddata (object):
                         logger.debug(strm('ITERATION NO.',iter))
                         logger.debug(strm('CURRENT LAMBDA',smoothing_param))
                         retval,residual = this_nnls.nnls_regularized(K,data_fornnls,l=smoothing_param)
-                        f_vec = retval[:,newaxis]
+                        f_vec = retval[:,np.newaxis]
                         alpha = smoothing_param**2
-                        c_vec = np.dot(K,f_vec) - data_fornnls[:,newaxis]
+                        c_vec = np.dot(K,f_vec) - data_fornnls[:,np.newaxis]
                         c_vec /= -1*alpha
                         c_update = newton_min(c_vec,smoothing_param)
                         alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
@@ -5242,7 +5270,13 @@ class nddata (object):
         if isinstance(intensity, type(emptyfunction)):
             intensity = intensity(lambda x: self.data)
         return_complex = np.iscomplexobj(self.data)
-        self.data += box_muller(self.data.size, return_complex=return_complex).reshape(self.data.shape) * intensity
+        if return_complex:
+            self.data += (
+                    intensity*np.random.normal(size=self.data.shape)
+                    +
+                    1j*intensity*np.random.normal(size=self.data.shape))
+        else:
+            self.data += intensity*np.random.normal(size=self.data.shape)
         return self
     #{{{ functions to manipulate and return the axes
     def reorder(self,*axes,**kwargs):
@@ -6527,7 +6561,7 @@ class nddata (object):
                 dimname = args[j]
                 if isinstance(dimname, np.str_):
                     dimname = str(dimname) # on upgrading + using on windows, this became necessary, for some reason I don't understand
-                elif isinstance(args[j+1],type(testf)):
+                if isinstance(args[j+1],type(testf)):
                     sensible_list.append((hash('func'),dimname,args[j+1]))
                 else:
                     sensible_list.append((hash('np'),dimname,args[j+1]))
@@ -6545,6 +6579,10 @@ class nddata (object):
                         sensible_list.append((hash('range'),dimname,target[0],None))
                     else:
                         sensible_list.append((hash('range'),dimname,target[0],target[1]))
+                elif isinstance(target, np.ndarray) and target.size==2:
+                    sensible_list.append((hash('range'),dimname,target[0],target[1]))
+                else:
+                    raise ValueError("for part of your slice, you said for dimension",dimname,"you wanted",target,"but the second argument must be a tuple, list, or array of length 2!")
                 j += 1
             else:# works for str and np.str_
                 raise ValueError("I have read in slice argument",args[:j],"but then I get confused!")
@@ -7240,10 +7278,10 @@ class fitdata(nddata):
             fprime_prod = fprime1 * fprime2
             fprime_prod = fprime_prod.reshape(-1,f2).T # direct product form
             try:
-                covarmat = np.dot(pinv(fprime_prod),(sigma**2).reshape(-1,1))
+                covarmat = np.dot(np.linalg.pinv(fprime_prod),(sigma**2).reshape(-1,1))
             except ValueError as e:
                 raise ValueError(strm('shape of fprime_prod', np.shape(fprime_prod),
-                    'shape of inverse', np.shape(pinv(fprime_prod)),
+                    'shape of inverse', np.shape(np.linalg.pinv(fprime_prod)),
                     'shape of sigma', np.shape(sigma))+explain_error(e))
             covarmatrix = covarmat.reshape(f1,f1)
             for l in range(0,f1): 
@@ -7368,7 +7406,7 @@ class fitdata(nddata):
         yerr = yerr[mask]
         x = x[mask]
         L = c_[x.reshape((-1,1)),np.ones((len(x),1))]
-        retval = np.dot(pinv(L,rcond = 1e-17),y)
+        retval = np.dot(np.linalg.pinv(L,rcond = 1e-17),y)
         logger.debug(strm(r'\label{fig:pinv_figure_text}y=',y,'yerr=',yerr,'%s='%x_axis,x,'L=',L))
         logger.debug('\n\n')
         logger.debug(strm('recalc y = ',np.dot(L,retval)))
