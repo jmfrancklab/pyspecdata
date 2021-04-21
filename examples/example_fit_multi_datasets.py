@@ -98,7 +98,8 @@ fn=[]
 for j in np.arange(5):
     parameters, param_names, function = gen_from_expr(expr[j], {'amp_%i'%(j+1):dict(value=0.5, min=0.0,max=200),
         'cen_%i'%(j+1):dict(value=0.4,min=-2.0,max=2.0),
-        'sig_%i'%(j+1):dict(value=0.3,min=0.01,max=3.0)})
+        'sig_%i'%(j+1):dict(value=0.3,min=0.01,max=3.0),
+        'x':dict(value=x)})
     fit_params.append(parameters)
     parameter_names.append(param_names)
     fn.append(function)
@@ -111,7 +112,7 @@ for j in np.arange(5):
 for j in np.arange(5):
     fits.pop(j)
     fits.pop(j)
-def objective(pars, x, k=2,data=None):
+def objective(pars, x=x, k=2,data=None):
     """Calculate total residual for fits of Gaussians to several data sets."""
     parameter_name = parameter_names[k]
     for j in np.arange(3):
@@ -135,7 +136,7 @@ def objective(pars, x, k=2,data=None):
 mydata = []
 for j in np.arange(5):
     dat = empty_data[j].copy(data=False)
-    dat.data = objective(mydata_params[j],x,k=j)
+    dat.data = objective(mydata_params[j],x='x',k=j)
     mydata.append(dat)
 guess = []
 for j in np.arange(5):
@@ -147,11 +148,11 @@ for j in np.arange(5):
 fitting = []
 out = []
 for j in np.arange(5):
-    outs = minimize(objective,fits[j],args=(x,j,),kws={'data':mydata[j].data})
+    outs = minimize(objective,fits[j],args=('x',j,),kws={'data':mydata[j].data})
     out.append(outs)
 for j in np.arange(5):    
     fit=empty_data[j].copy(data=False)
-    fit.data = objective(out[j].params,x,k=j)
+    fit.data = objective(out[j].params,'x',k=j)
     report_fit(out[j], show_correl=True,modelpars=p_true)
     fitting.append(fit)
 ###############################################################################
