@@ -63,7 +63,7 @@ def gen_from_expr(expr, guesses={}):
 
 ###############################################################################
 # Create five simulated Gaussian data sets
-x = np.linspace(-1,2,151)
+x_vals = np.linspace(-1,2,151)
 true_values = []
 for j in np.arange(5):
     values = {'amp_%d'%(j+1):0.60 + 9.50*np.random.rand(),
@@ -81,13 +81,14 @@ for j in np.arange(5):
     mydata_params.pop(j)
 empty_data = []    
 for _ in np.arange(5):
-    edata = nddata(x,'x').copy(data=False)
+    edata = nddata(x_vals,'x').copy(data=False)
     empty_data.append(edata)
 empty_data=np.array(empty_data)
 fit_params = []
 amp = [sp.symbols('amp_%d' %(i+1)) for i in np.arange(5)]
 cen = [sp.symbols('cen_%d' %(i+1)) for i in np.arange(5)]
 sig = [sp.symbols('sig_%d' %(i+1)) for i in np.arange(5)]
+x = sp.symbols('x')
 expr = []
 for j in np.arange(5):
     expression = amp[j] * sp.exp(-(x-cen[j])**2 / (2.*sig[j]**2))
@@ -98,8 +99,8 @@ fn=[]
 for j in np.arange(5):
     parameters, param_names, function = gen_from_expr(expr[j], {'amp_%i'%(j+1):dict(value=0.5, min=0.0,max=200),
         'cen_%i'%(j+1):dict(value=0.4,min=-2.0,max=2.0),
-        'sig_%i'%(j+1):dict(value=0.3,min=0.01,max=3.0),
-        'x':dict(value=x)})
+        'sig_%i'%(j+1):dict(value=0.3,min=0.01,max=3.0)})#,
+        #'x':dict(value=x)})
     fit_params.append(parameters)
     parameter_names.append(param_names)
     fn.append(function)
@@ -112,7 +113,7 @@ for j in np.arange(5):
 for j in np.arange(5):
     fits.pop(j)
     fits.pop(j)
-def objective(pars, x=x, k=2,data=None):
+def objective(pars, x, k=2,data=None):
     """Calculate total residual for fits of Gaussians to several data sets."""
     parameter_name = parameter_names[k]
     for j in np.arange(3):
@@ -120,7 +121,7 @@ def objective(pars, x=x, k=2,data=None):
         parlist = [pars[j] for j in parameter_name]
         logger.info(strm("parlist",parlist))
     models =[]
-    model = fn[j](*parlist)
+    model = fn[j](x, *parlist)
     if data is None:
         return model
     ndata = data.shape
@@ -136,23 +137,23 @@ def objective(pars, x=x, k=2,data=None):
 mydata = []
 for j in np.arange(5):
     dat = empty_data[j].copy(data=False)
-    dat.data = objective(mydata_params[j],x='x',k=j)
+    dat.data = objective(mydata_params[j],dat.getaxis('x'),k=j)
     mydata.append(dat)
 guess = []
 for j in np.arange(5):
     fit = empty_data[j].copy(data= False)
-    fit.data = objective(fits[j], 'x',k=j)
+    fit.data = objective(fits[j], fit.getaxis('x'),k=j)
     guess.append(fit)
 ###############################################################################
 # Run the global fit and show the fitting result
 fitting = []
 out = []
 for j in np.arange(5):
-    outs = minimize(objective,fits[j],args=('x',j,),kws={'data':mydata[j].data})
+    outs = minimize(objective,fits[j],args=(mydata[j].getaxis('x'),j,),kws={'data':mydata[j].data})
     out.append(outs)
 for j in np.arange(5):    
     fit=empty_data[j].copy(data=False)
-    fit.data = objective(out[j].params,'x',k=j)
+    fit.data = objective(out[j].params,fit.getaxis('x'),k=j)
     report_fit(out[j], show_correl=True,modelpars=p_true)
     fitting.append(fit)
 ###############################################################################
@@ -161,7 +162,7 @@ plt.figure()
 for j in np.arange(5):
     print('fit result',fitting[j])
     plt.plot(mydata[j].data,'o',label='data%d'%j)
-    plot(fitting[j],'-',label='fitting%d'%j,alpha=0.5)
+    plot(fitting[j].data,'-',label='fitting%d'%j,alpha=0.5)
     plot(guess[j].data,'--',label='guess%d'%j)
 plt.legend()
 plt.show()
