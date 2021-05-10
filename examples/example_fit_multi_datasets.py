@@ -11,6 +11,7 @@ TODO: this should be using the Model interface / built-in models!
 
 """
 import matplotlib.pyplot as plt
+from numpy import linspace
 import numpy as np
 import sympy as sp
 from pyspecdata import *
@@ -63,10 +64,9 @@ def gen_from_expr(expr, guesses={}):
 
 ###############################################################################
 # Create five simulated Gaussian data sets
-x_vals = np.linspace(-1,2,151)
 true_values = []
 for j in np.arange(5):
-    values = {'amp_%d'%(j+1):0.60 + 9.50*np.random.rand(),
+    values = {'amp_%d'%(j+1):4.40,#0.60 + 9.50*np.random.rand(),
             'cen_%d'%(j+1):-0.20 + 1.20*np.random.rand(),
             'sig_%d'%(j+1):0.25 + 0.03*np.random.rand()}
     true_values.append(values)
@@ -79,6 +79,8 @@ for j in np.arange(5):
 for j in np.arange(5):
     mydata_params.pop(j)
     mydata_params.pop(j)
+x_vals = linspace(-1.0,3.0,151)
+
 empty_data = []    
 for _ in np.arange(5):
     edata = nddata(x_vals,'x').copy(data=False)
@@ -91,15 +93,15 @@ sig = [sp.symbols('sig_%d' %(i+1)) for i in np.arange(5)]
 x = sp.symbols('x')
 expr = []
 for j in np.arange(5):
-    expression = (amp[j]/sig[j]) * sp.exp(-(x-cen[j])**2 / (2.*sig[j]**2)) #preserves integral under curve
+    expression = (amp[j]) * sp.exp(-(x-cen[j])**2 / (2.*sig[j]**2)) #preserves integral under curve
     expr.append(expression)
 fit_params=[]
 parameter_names=[]
 fn=[]
 for j in np.arange(5):
-    parameters, param_names, function = gen_from_expr(expr[j], {'amp_%i'%(j+1):dict(value=0.5, min=0.0,max=200),
-        'cen_%i'%(j+1):dict(value=0.4,min=-2.0,max=2.0),
-        'sig_%i'%(j+1):dict(value=0.3,min=0.01,max=3.0)})#,
+    parameters, param_names, function = gen_from_expr(expr[j], {'amp_%i'%(j+1):dict(value=4.0, min=0.0,max=200),
+        'cen_%i'%(j+1):dict(value=0.2,min=-1.0,max=3.0),
+        'sig_%i'%(j+1):dict(value=0.3,min=-1.0,max=3.0)})#,
         #'x':dict(value=x)})
     fit_params.append(parameters)
     parameter_names.append(param_names)
@@ -161,8 +163,8 @@ for j in np.arange(5):
 plt.figure()
 for j in np.arange(5):
     print('fit result',fitting[j])
-    plt.plot(mydata[j].data,'o',label='data%d'%j)
-    plot(fitting[j].data,'-',label='fitting%d'%j,alpha=0.5)
-    plot(guess[j].data,'--',label='guess%d'%j)
+    plt.plot(x_vals, mydata[j].data,'o',label='data%d'%j)
+    plot(x_vals, fitting[j].data,'-',label='fitting%d'%j,alpha=0.5)
+    plot(x_vals, guess[j].data,'--',label='guess%d'%j)
 plt.legend()
 plt.show()
