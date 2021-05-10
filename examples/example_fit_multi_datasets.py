@@ -12,10 +12,12 @@ TODO: this should be using the Model interface / built-in models!
 """
 import matplotlib.pyplot as plt
 from numpy import linspace
+from numpy.random import seed
 import numpy as np
 import sympy as sp
 from pyspecdata import *
 from lmfit import Parameters, minimize, report_fit
+seed(15816)
 
 def gen_from_expr(expr, guesses={}):
     """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
@@ -101,7 +103,7 @@ fn=[]
 for j in np.arange(5):
     parameters, param_names, function = gen_from_expr(expr[j], {'amp_%i'%(j+1):dict(value=1.0, min=0.0,max=10),
         'cen_%i'%(j+1):dict(value=0.2,min=-1.0,max=3.0),
-        'sig_%i'%(j+1):dict(value=0.3,min=-1.0,max=3.0)})#,
+        'sig_%i'%(j+1):dict(value=0.3,min=0.0,max=3.0)})#,
         #'x':dict(value=x)})
     fit_params.append(parameters)
     parameter_names.append(param_names)
@@ -163,8 +165,8 @@ for j in np.arange(5):
 plt.figure()
 for j in np.arange(5):
     print('fit result',fitting[j])
-    plt.plot(x_vals, mydata[j].data,'o',label='data%d'%j)
-    plot(x_vals, fitting[j].data,'-',label='fitting%d'%j,alpha=0.5)
-    plot(x_vals, guess[j].data,'--',label='guess%d'%j)
+    plot(mydata[j],'o',label='data%d'%j)
+    plot(fitting[j],'-',label='fitting%d'%j,alpha=0.5)
+    plot(guess[j],'--',label='guess%d'%j)
 plt.legend()
 plt.show()
