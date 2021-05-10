@@ -5,7 +5,7 @@ Fit Multiple Data Sets
 Fitting multiple (simulated) Gaussian data sets simultaneously.
 
 All minimizers require the residual array to be one-dimensional. Therefore, in
-the ``objective`` we need to ```flatten``` the array before returning it.
+the ``residual`` we need to ```flatten``` the array before returning it.
 
 TODO: this should be using the Model interface / built-in models!
 
@@ -129,7 +129,7 @@ for j in np.arange(5):
 for j in np.arange(5):
     fits.pop(j)
     fits.pop(j)
-def objective(pars, x, k=2,data=None):
+def residual(pars, x, k=2,data=None):
     """Calculate total residual for fits of Gaussians to several data sets."""
     parameter_name = parameter_names[k]
     for j in np.arange(3):
@@ -153,23 +153,27 @@ def objective(pars, x, k=2,data=None):
 mydata = []
 for j in np.arange(5):
     dat = empty_data[j].copy(data=False)
-    dat.data = objective(mydata_params[j],dat.getaxis('x'),k=j)
+    dat.data = residual(mydata_params[j],dat.getaxis('x'),k=j)
     mydata.append(dat)
 guess = []
 for j in np.arange(5):
     fit = empty_data[j].copy(data= False)
-    fit.data = objective(fits[j], fit.getaxis('x'),k=j)
+    fit.data = residual(fits[j], fit.getaxis('x'),k=j)
     guess.append(fit)
 ###############################################################################
 # Run the global fit and show the fitting result
 fitting = []
 out = []
+raise ValueError("the way that you are calling minimize is absolutely wrong."
+        "In their example, the only call minimize once! "
+        "You are just doing a 1D minimization on each separate dataset -- this is not "
+        "a global fitting.")
 for j in np.arange(5):
-    outs = minimize(objective,fits[j],args=(mydata[j].getaxis('x'),j,),kws={'data':mydata[j].data})
+    outs = minimize(residual,fits[j],args=(mydata[j].getaxis('x'),j,),kws={'data':mydata[j].data})
     out.append(outs)
 for j in np.arange(5):    
     fit=empty_data[j].copy(data=False)
-    fit.data = objective(out[j].params,fit.getaxis('x'),k=j)
+    fit.data = residual(out[j].params,fit.getaxis('x'),k=j)
     report_fit(out[j], show_correl=True,modelpars=p_true)
     fitting.append(fit)
 ###############################################################################
