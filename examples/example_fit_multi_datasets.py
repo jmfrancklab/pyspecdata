@@ -12,12 +12,13 @@ TODO: this should be using the Model interface / built-in models!
 """
 import matplotlib.pyplot as plt
 from numpy import linspace
-from numpy.random import seed
 import numpy as np
 import sympy as sp
 from pyspecdata import *
 from lmfit import Parameters, minimize, report_fit
-seed(15816)
+logger = init_logging(level='debug')
+np.random.seed(15816)
+logger.debug(strm("first value",np.random.rand()))
 
 def gen_from_expr(expr, guesses={}):
     """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
@@ -67,20 +68,26 @@ def gen_from_expr(expr, guesses={}):
 ###############################################################################
 # Create five simulated Gaussian data sets
 true_values = []
+logger.debug(strm("second value",np.random.rand()))
 for j in np.arange(5):
     values = {'amp_%d'%(j+1):4.40,#0.60 + 9.50*np.random.rand(),
             'cen_%d'%(j+1):-0.20 + 1.20*np.random.rand(),
             'sig_%d'%(j+1):0.25 + 0.03*np.random.rand()}
     true_values.append(values)
+logger.debug(strm("third value",np.random.rand()))
+logger.debug(strm("values for true function",true_values))
 mydata_params = []
 p_true = [Parameters(),Parameters(),Parameters(),Parameters(),Parameters()]
 for j in np.arange(5):
     for k,v in true_values[j].items():
             p_true[j].add(k,value=v)
             mydata_params.append(p_true[j])
+logger.debug(strm("p_true",p_true))
+# {{{ what is this doing????
 for j in np.arange(5):
     mydata_params.pop(j)
     mydata_params.pop(j)
+# }}}
 x_vals = linspace(-1.0,3.0,151)
 
 empty_data = []    
