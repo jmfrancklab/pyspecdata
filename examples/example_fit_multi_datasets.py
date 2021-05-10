@@ -99,7 +99,7 @@ fit_params=[]
 parameter_names=[]
 fn=[]
 for j in np.arange(5):
-    parameters, param_names, function = gen_from_expr(expr[j], {'amp_%i'%(j+1):dict(value=4.0, min=0.0,max=200),
+    parameters, param_names, function = gen_from_expr(expr[j], {'amp_%i'%(j+1):dict(value=1.0, min=0.0,max=10),
         'cen_%i'%(j+1):dict(value=0.2,min=-1.0,max=3.0),
         'sig_%i'%(j+1):dict(value=0.3,min=-1.0,max=3.0)})#,
         #'x':dict(value=x)})
