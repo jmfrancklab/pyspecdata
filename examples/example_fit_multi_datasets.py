@@ -20,6 +20,7 @@ logger = init_logging(level='debug')
 np.random.seed(15816)
 logger.debug(strm("first value",np.random.rand()))
 
+# {{{ helper function(s)
 def gen_from_expr(expr, guesses={}):
     """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
 
@@ -64,9 +65,10 @@ def gen_from_expr(expr, guesses={}):
             expr,
             modules=[{'ImmutableMatrix':np.ndarray},'numpy','scipy'])
     return pars, parameter_names, fn
+# }}}
 
-###############################################################################
-# Create five simulated Gaussian data sets
+#{{{ creating fake data
+#    (five simulated gaussian datasets)
 true_values = []
 logger.debug(strm("second value",np.random.rand()))
 for j in np.arange(5):
@@ -88,6 +90,7 @@ for j in np.arange(5):
     mydata_params.pop(j)
     mydata_params.pop(j)
 # }}}
+# }}}
 x_vals = linspace(-1.0,3.0,151)
 
 empty_data = []    
@@ -96,6 +99,7 @@ for _ in np.arange(5):
     empty_data.append(edata)
 empty_data=np.array(empty_data)
 fit_params = []
+#{{{making sympy expression
 amp = [sp.symbols('amp_%d' %(i+1)) for i in np.arange(5)]
 cen = [sp.symbols('cen_%d' %(i+1)) for i in np.arange(5)]
 sig = [sp.symbols('sig_%d' %(i+1)) for i in np.arange(5)]
@@ -115,6 +119,7 @@ for j in np.arange(5):
     fit_params.append(parameters)
     parameter_names.append(param_names)
     fn.append(function)
+#}}}
 fits = []
 fit_pars = [Parameters(),Parameters(),Parameters(),Parameters(),Parameters()]
 for j in np.arange(5):
