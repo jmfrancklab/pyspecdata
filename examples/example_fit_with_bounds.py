@@ -83,7 +83,9 @@ fit_params, parameter_names, fn = gen_from_expr(expr, {'A':dict(value=13.0, max=
             'period':dict(value=2, max=10),
             'shift':dict(value=0.0, max=pi/2., min=-pi/2.),
             'decay':dict(value=0.02, max=0.10, min=0.00),})
+#}}}
 def residual(pars, x, data=None):
+    "calculate the residual OR if data is None, return fake data"
     print("PARAMETER NAMES ARE:",parameter_names)
     parlist = [pars[j] for j in parameter_names]
     print("PARLIST IS",parlist)
@@ -98,28 +100,28 @@ def residual(pars, x, data=None):
         return model
     return model - data
 print("P_TRUE IS",p_true)
-#quit()
+# {{{ nddata to generate the fake data
 mydata = empty_data.copy(data=False)
 mydata.data = residual(p_true, mydata.getaxis('x'))
-#quit()
 mydata.add_noise(2.8)
+# }}}
+# {{{ nddata of the guess
 logger.info(strm("THIS IS THE TYPE OF MYDATA",type(mydata)))
 guess = empty_data.copy(data=False)
 guess.data = residual(fit_params, empty_data.getaxis('x'))
+# }}}
+# {{{ run the fit and generate nddata
 out = minimize(residual, fit_params, args=(mydata.getaxis('x'),), kws={'data': mydata.data})
 fit = empty_data.copy(data=False)
 fit.data = residual(out.params, empty_data.getaxis('x'))
+# }}}
 
-###############################################################################
-# This gives the following fitting results:
 
+# {{{ report the fit and generate the plot
 report_fit(out, show_correl=True, modelpars=p_true)
-
-###############################################################################
-# and shows the plot below:
-#
 plot(mydata, 'ro', label='data')
 plot(fit, 'b', alpha=0.5, label='fit')
 plot(guess, 'g--', label='guess')
+# }}}
 plt.legend()
 plt.show()
