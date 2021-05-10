@@ -91,7 +91,7 @@ sig = [sp.symbols('sig_%d' %(i+1)) for i in np.arange(5)]
 x = sp.symbols('x')
 expr = []
 for j in np.arange(5):
-    expression = amp[j] * sp.exp(-(x-cen[j])**2 / (2.*sig[j]**2))
+    expression = (amp[j]/sig[j]) * sp.exp(-(x-cen[j])**2 / (2.*sig[j]**2)) #preserves integral under curve
     expr.append(expression)
 fit_params=[]
 parameter_names=[]
