@@ -94,19 +94,16 @@ def residual(pars, x, data=None):
     if abs(shift) > pi/2:
         shift = shift - sign(shift)*pi
     print("THIS IS PARLIST",*parlist)
-
     model = fn(x, *parlist)
     if data is None:
         return model
     return model - data
-print("P_TRUE IS",p_true)
 # {{{ nddata to generate the fake data
 mydata = empty_data.copy(data=False)
 mydata.data = residual(p_true, mydata.getaxis('x'))
 mydata.add_noise(2.8)
 # }}}
 # {{{ nddata of the guess
-logger.info(strm("THIS IS THE TYPE OF MYDATA",type(mydata)))
 guess = empty_data.copy(data=False)
 guess.data = residual(fit_params, empty_data.getaxis('x'))
 # }}}
@@ -115,7 +112,6 @@ out = minimize(residual, fit_params, args=(mydata.getaxis('x'),), kws={'data': m
 fit = empty_data.copy(data=False)
 fit.data = residual(out.params, empty_data.getaxis('x'))
 # }}}
-
 
 # {{{ report the fit and generate the plot
 report_fit(out, show_correl=True, modelpars=p_true)
