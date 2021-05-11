@@ -72,9 +72,9 @@ def gen_from_expr(expr, guesses={}):
 true_values = []
 logger.debug(strm("second value",np.random.rand()))
 for j in np.arange(3):
-    values = {'amp_%d'%(j+1):0.60 + 9.50,
-            'cen_%d'%(j+1):-0.20 + 1.20,
-            'sig_%d'%(j+1):0.25 + 0.03}
+    values = {'amp_%d'%(j+1):20 + 2*np.random.rand(),
+            'cen_%d'%(j+1):-0.20 + 3.0*np.random.rand(),
+            'sig_%d'%(j+1):0.25 + 0.03*np.random.rand()}
     true_values.append(values)
 logger.debug(strm("third value",np.random.rand()))
 logger.debug(strm("values for true function",true_values))
@@ -87,7 +87,7 @@ for j in np.arange(3):
 logger.info(strm("p_true",p_true))
 random.seed(0)
 # }}}
-x_vals = linspace(-5.0,5.0,50)
+x_vals = linspace(-5.0,5.0,501)
 empty_data = []    
 for _ in np.arange(3):
     edata = nddata(x_vals,'x').copy(data=False)
@@ -106,8 +106,8 @@ fit_params=[]
 parameter_names=[]
 fn=[]
 for j in np.arange(3):
-    parameters, param_names, function = gen_from_expr(expr[j], {'amp_%i'%(j+1):dict(value=10, min=0.0,max=200),
-        'cen_%i'%(j+1):dict(value=1.0,min=-5.0,max=5.0),
+    parameters, param_names, function = gen_from_expr(expr[j], {'amp_%i'%(j+1):dict(value=20.0, min=0.0,max=200),
+        'cen_%i'%(j+1):dict(value=2.0,min=-1.0,max=5.0),
         'sig_%i'%(j+1):dict(value=0.3,min=0.01,max=5.0),})    
     fit_params.append(parameters)
     parameter_names.append(param_names)
@@ -145,7 +145,7 @@ for j in np.arange(3):
     dat = empty_data[j].copy(data=False)
     print("MYDATA_PARAMS:",mydata_params[j])
     dat.data = residual(mydata_params[j],dat.getaxis('x'),k=j,data=None)
-    dat.add_noise(1.8)
+    dat.add_noise(0.8)
     mydata.append(dat)
 guess = []
 for j in np.arange(3):
