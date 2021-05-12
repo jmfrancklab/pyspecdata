@@ -2,7 +2,8 @@
 Fit Multiple Data Sets
 ======================
 
-Fitting multiple (simulated) Gaussian data sets simultaneously.
+Adapts the example from lmfit to use sympy and pyspecdata to
+Fit multiple (simulated) Gaussian data sets simultaneously.
 
 All minimizers require the residual array to be one-dimensional. Therefore, in
 the ``residual`` we need to ```flatten``` the array before returning it.
@@ -11,15 +12,13 @@ TODO: this should be using the Model interface / built-in models!
 
 """
 import matplotlib.pyplot as plt
-from numpy import linspace, random
+from numpy import exp, linspace, pi, random
 import numpy as np
 import sympy as sp
 from pyspecdata import *
-from lmfit import Parameters, minimize, report_fit
-logger = init_logging(level='debug')
+from lmfit import Parameters, minimize
+from lmfit.printfuncs import report_fit
 np.random.seed(15816)
-logger.debug(strm("first value",np.random.rand()))
-fl=figlist_var()
 # {{{ helper function(s)
 def gen_from_expr(expr, guesses={}):
     """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
@@ -66,18 +65,13 @@ def gen_from_expr(expr, guesses={}):
             modules=[{'ImmutableMatrix':np.ndarray},'numpy','scipy'])
     return pars, parameter_names, fn
 # }}}
-
-#{{{ creating fake data
-#    (five simulated gaussian datasets)
+#{{{ creating fake data(simulated gaussian datasets)
 true_values = []
-logger.debug(strm("second value",np.random.rand()))
 for j in np.arange(3):
     values = {'amp_%d'%(j+1):20 + 2*np.random.rand(),
             'cen_%d'%(j+1):-0.20 + 3.0*np.random.rand(),
             'sig_%d'%(j+1):0.25 + 0.03*np.random.rand()}
     true_values.append(values)
-logger.debug(strm("third value",np.random.rand()))
-logger.debug(strm("values for true function",true_values))
 mydata_params = []
 p_true = [Parameters(),Parameters(),Parameters(),Parameters(),Parameters()]
 for j in np.arange(3):
@@ -86,13 +80,12 @@ for j in np.arange(3):
             mydata_params.append(p_true[j])
 logger.info(strm("p_true",p_true))
 random.seed(0)
-# }}}
 x_vals = linspace(-5.0,5.0,501)
 empty_data = []    
 for _ in np.arange(3):
     edata = nddata(x_vals,'x').copy(data=False)
     empty_data.append(edata)
-#empty_data=np.array(empty_data)
+#}}}
 #{{{making sympy expression
 amp = [sp.symbols('amp_%d' %(i+1)) for i in np.arange(3)]
 cen = [sp.symbols('cen_%d' %(i+1)) for i in np.arange(3)]
@@ -102,13 +95,16 @@ expr = []
 for j in np.arange(3):
     expression = (amp[j]) * sp.exp(-(x-cen[j])**2 / (2.*sig[j]**2)) #preserves integral under curve
     expr.append(expression)
+#seems likely that Parameters is an ordered list, in which case, we don't need
+#parameter names -- **however** we need to check the documentation to see that
+#this is true
 fit_params=[]
 parameter_names=[]
 fn=[]
 for j in np.arange(3):
-    parameters, param_names, function = gen_from_expr(expr[j], {'amp_%i'%(j+1):dict(value=20.0, min=0.0,max=200),
-        'cen_%i'%(j+1):dict(value=2.0,min=-1.0,max=5.0),
-        'sig_%i'%(j+1):dict(value=0.3,min=0.01,max=5.0),})    
+    parameters, param_names, function = gen_from_expr(expr[j], {'amp_%i'%(j+1):dict(value=21.0, min=0.0,max=200),
+        'cen_%i'%(j+1):dict(value=1.0,min=-1.0,max=5.0),
+        'sig_%i'%(j+1):dict(value=0.25,min=0.01,max=5.0),})    
     fit_params.append(parameters)
     parameter_names.append(param_names)
     fn.append(function)
@@ -116,12 +112,10 @@ for j in np.arange(3):
 def residual(pars, x, k=2, data=None):
     """Calculate total residual for fits of Gaussians to several data sets."""
     parameter_name = parameter_names[k]
-    print("PARAMETER NAMES ARE:", parameter_name)
-    #for j in np.arange(3):
+    logger.info(strm("PARAMETER NAMES ARE:", parameter_name))
     parlist = [pars[j] for j in parameter_name]
     logger.info(strm("parlist",parlist))
     models =[]
-    #for j in np.arange(3):
     model = fn[k](x, *parlist)
     if data is None:
         return model
@@ -139,21 +133,23 @@ def residual(pars, x, k=2, data=None):
 for j in np.arange(3):
     mydata_params.pop(j)
     mydata_params.pop(j)
-#}}}    
+#}}}  
+#{{{nddata to generate the fake data
 mydata = []
 for j in np.arange(3):
     dat = empty_data[j].copy(data=False)
-    print("MYDATA_PARAMS:",mydata_params[j])
     dat.data = residual(mydata_params[j],dat.getaxis('x'),k=j,data=None)
     dat.add_noise(0.8)
     mydata.append(dat)
+#}}}
+#{{{nddata of the guess
 guess = []
 for j in np.arange(3):
     fit = empty_data[j].copy(data= False)
     fit.data = residual(fit_params[j], empty_data[j].getaxis('x'),k=j)
     guess.append(fit)
-###############################################################################
-# Run the global fit and show the fitting result
+#}}}    
+#{{{ Run the global fit and generate nddata
 fitting = []
 out = []
 #raise ValueError("the way that you are calling minimize is absolutely wrong."
@@ -165,13 +161,14 @@ for j in np.arange(3):
     fits=empty_data[j].copy(data=False)
     fits.data = residual(out.params,fits.getaxis('x'),k=j)
     fitting.append(fits)
-###############################################################################
-# Plot the data sets and fits
-plt.figure()
+#}}}
+
+#{{{report the fit and generate the plot
+report_fit(out,show_correl=True,modelpars=mydata_params)
 for j in np.arange(3):
-    print("MYDATA%d:"%j,mydata[j])
     plot(mydata[j],'o',label='data%d'%j)
-    plot(fitting[j],'-',label='fitting%d'%j,alpha=0.5)
+    plot(fitting[j],'-',label='fitting%d'%j)
     plot(guess[j],'--',label='guess%d'%j)
+#}}}    
 plt.legend()
 plt.show()
