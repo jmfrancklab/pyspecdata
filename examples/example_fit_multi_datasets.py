@@ -65,7 +65,8 @@ def gen_from_expr(expr, guesses={}):
             modules=[{'ImmutableMatrix':np.ndarray},'numpy','scipy'])
     return pars, parameter_names, fn
 # }}}
-#{{{ creating fake data(simulated gaussian datasets)
+#{{{ creating fake data
+#    (simulated gaussian datasets)
 true_values = []
 for j in np.arange(3):
     values = {'amp_%d'%(j+1):20 + 2*np.random.rand(),
