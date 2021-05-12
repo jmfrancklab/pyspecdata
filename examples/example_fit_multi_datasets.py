@@ -153,10 +153,10 @@ for j in np.arange(3):
 #{{{ Run the global fit and generate nddata
 fitting = []
 out = []
-#raise ValueError("the way that you are calling minimize is absolutely wrong."
-#        "In their example, the only call minimize once! "
-#        "You are just doing a 1D minimization on each separate dataset -- this is not "
-#        "a global fitting.")
+raise ValueError("the way that you are calling minimize is absolutely wrong."
+        "In their example, the only call minimize once! "
+        "You are just doing a 1D minimization on each separate dataset -- this is not "
+        "a global fitting.")
 for j in np.arange(3):
     out = minimize(residual,fit_params[j], args=(mydata[j].getaxis('x'),j,), kws={'data':mydata[j].data})
     fits=empty_data[j].copy(data=False)
