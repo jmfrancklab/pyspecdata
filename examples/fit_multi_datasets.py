@@ -86,11 +86,10 @@ def gen_from_expr(expr, global_params, n_datasets=3, guesses={}):
     n_fn_params = 3
     def outer_fun(*args):
         # outer function goes here
-        data = nddata(np.linspace(-5,5,151),'x').copy(data=False)
-        data = np.array(data)
         var_args = args[0:n_vars]
         par_args = args[n_vars:]
         for j in range(n_datasets):
+            data = np.empty((n_datasets,1500)) 
             these_pars = par_args[j*n_fn_params:(j+1)*n_fn_params]
             data[j,:] = fn(*tuple(var_args+these_pars))
         return data    
@@ -144,7 +143,7 @@ fit_params, parameter_names, fn = gen_from_expr(expression, {'amp_%i'%(j+1):dict
 #    (simulated gaussian datasets)
 mydata = empty_data.copy(data=False)
 mydata.data = residual(p_true,mydata.getaxis('x'))
-dat.add_noise(0.8)
+mydata.add_noise(0.8)
 quit()
 mydata = np.array(mydata)
     
