@@ -21,15 +21,30 @@ from lmfit.printfuncs import report_fit
 from collections import ChainMap
 np.random.seed(15816)
 # {{{ helper function(s)
-def gen_from_expr(expr, guesses={}):
+def gen_from_expr(expr, global_params, n_datasets, guesses={}):
     """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
 
     Parameters
     ==========
-    expr: sympy expression
+    expr: sympy expression for the 1D function that describes every dataset.
+        Note that the parameters for different datasets can be related to each
+        other by one or more expressions that depend on global parameters
+        (see `global_params`)
     guesses: dict
         dictionary of keyword arguments for guesses (value) or constraints
         (min/max)
+    global_params: dict
+        if any of the variables is a global variable,
+        add to this dictionary as a key,
+        whose value gives a new sympy expression,
+        where the variables of the new expression
+        are assumed to be global variables
+
+        note that if a given symbol in expr is not found in this dictionary,
+        then that means that a new, numbered global variable will
+        be created for every dataset
+    n_datasets: integer
+        How many 1D datasets?
 
     Returns
     =======
@@ -48,8 +63,11 @@ def gen_from_expr(expr, guesses={}):
     variable_names = tuple([str(j) for j in variable_symbols])
     parameter_symbols = tuple(parameter_symbols)
     parameter_names = tuple([str(j) for j in parameter_symbols])
-    print("all symbols are", all_symbols, "axis names are", axis_names,
-            "variable names are", variable_names, "parameter names are", parameter_names)
+    parameter_names = ['%s_%d'%(p,j)
+            for j in range(n_datasets)
+            for p in parameter_names] # organizes datasets together
+    logger.info(strm("all symbols are", all_symbols, "axis names are", axis_names,
+            "variable names are", variable_names, "parameter names are", parameter_names))
     # }}}
     pars = Parameters()
     for this_name in parameter_names:
@@ -64,7 +82,9 @@ def gen_from_expr(expr, guesses={}):
     fn = lambdify(variable_symbols + parameter_symbols,
             expr,
             modules=[{'ImmutableMatrix':np.ndarray},'numpy','scipy'])
-    return pars, parameter_names, fn
+    def outer_fun(*args):
+        # outer function goes here
+    return pars, parameter_names, outer_fn
 # }}}
 def residual(pars, x, data=None):
     """Calculate total residual for fits of Gaussians to several data sets."""
