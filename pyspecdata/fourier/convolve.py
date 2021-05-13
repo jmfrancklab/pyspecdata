@@ -1,3 +1,4 @@
+from pylab import *
 from ..general_functions import inside_sphinx
 if not inside_sphinx():
     from pylab import r_,fft,ifft,ifftshift,fftshift
