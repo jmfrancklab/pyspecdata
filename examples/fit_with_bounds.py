@@ -14,6 +14,7 @@ from lmfit import Parameters, minimize
 from lmfit.printfuncs import report_fit
 import numpy as np
 from pyspecdata import *
+init_logging(level='debug')
 # {{{ helper function(s)
 def gen_from_expr(expr, guesses={}):
     """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
@@ -87,7 +88,7 @@ fit_params, parameter_names, fn = gen_from_expr(expr, {'A':dict(value=13.0, max=
 def residual(pars, x, data=None):
     "calculate the residual OR if data is None, return fake data"
     logger.info(strm("PARAMETER NAMES ARE:",parameter_names))
-    parlist = [pars[j] for j in parameter_names]
+    parlist = [pars[j].value for j in parameter_names]
     logger.info(strm("parlist",parlist))
     shift = pars['shift']
     if abs(shift) > pi/2:
