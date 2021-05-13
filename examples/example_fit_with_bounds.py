@@ -86,9 +86,11 @@ fit_params, parameter_names, fn = gen_from_expr(expr, {'A':dict(value=13.0, max=
 #}}}
 def residual(pars, x, data=None):
     "calculate the residual OR if data is None, return fake data"
-    logger.info(strm("PARAMETER NAMES ARE:",parameter_names))
+    print("PARAMETER NAMES ARE:",parameter_names)
+    print("PARS ARE",pars)
     parlist = [pars[j] for j in parameter_names]
-    logger.info(strm("parlist",parlist))
+    print("parlist",parlist)
+    quit()
     shift = pars['shift']
     if abs(shift) > pi/2:
         shift = shift - sign(shift)*pi
