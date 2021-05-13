@@ -21,7 +21,7 @@ from lmfit.printfuncs import report_fit
 from collections import ChainMap
 np.random.seed(15816)
 # {{{ helper function(s)
-def gen_from_expr(expr, global_params, n_datasets, guesses={}):
+def gen_from_expr(expr, global_params, n_datasets=3, guesses={}):
     """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
 
     Parameters
@@ -56,7 +56,7 @@ def gen_from_expr(expr, global_params, n_datasets, guesses={}):
     """
     # {{{ decide which symbols are parameters vs. variables
     all_symbols = expr.atoms(sp.Symbol)
-    axis_names = set([sp.Symbol(j) for j in empty_data[0].dimlabels])
+    axis_names = set([sp.Symbol(j) for j in empty_data.dimlabels])
     variable_symbols = axis_names & all_symbols
     parameter_symbols = all_symbols - variable_symbols
     variable_symbols = tuple(variable_symbols)
@@ -82,9 +82,19 @@ def gen_from_expr(expr, global_params, n_datasets, guesses={}):
     fn = lambdify(variable_symbols + parameter_symbols,
             expr,
             modules=[{'ImmutableMatrix':np.ndarray},'numpy','scipy'])
+    n_vars = 1
+    n_fn_params = 3
     def outer_fun(*args):
         # outer function goes here
-    return pars, parameter_names, outer_fn
+        data = nddata(np.linspace(-5,5,151),'x').copy(data=False)
+        data = np.array(data)
+        var_args = args[0:n_vars]
+        par_args = args[n_vars:]
+        for j in range(n_datasets):
+            these_pars = par_args[j*n_fn_params:(j+1)*n_fn_params]
+            data[j,:] = fn(*tuple(var_args+these_pars))
+        return data    
+    return pars, parameter_names, outer_fun
 # }}}
 def residual(pars, x, data=None):
     """Calculate total residual for fits of Gaussians to several data sets."""
@@ -100,7 +110,6 @@ def residual(pars, x, data=None):
     resid = 0.0*data[:]
     print(ndata)
     print("MODEL IS",model)
-    quit()
     for i in range(ndata):
         resid[i, :] = data[i, :] - model
     # now flatten this to a 1D array, as minimize() needs
@@ -108,57 +117,35 @@ def residual(pars, x, data=None):
     for j in range(len(resids)):
         return resids[j].flatten()
 #{{{making sympy expression
-expr = []
+p_true = Parameters()
 for j in np.arange(3):
-    amp = [sp.symbols('amp_%d' %(j+1))]
-    cen = [sp.symbols('cen_%d' %(j+1))]
-    sig = [sp.symbols('sig_%d' %(j+1))]
-    x = sp.symbols('x')
-    expression = (amp[j]) * sp.exp(-(x-cen[j])**2 / (2.*sig[j]**2)) #preserves integral under curve
-    #expr.append(expression)
+    values = {'amp_%d'%(j):20 + 2*np.random.rand(),
+            'cen_%d'%(j):-0.20 + 3.0*np.random.rand(),
+            'sig_%d'%(j):0.25 + 0.03*np.random.rand()}
+    for k,v in values.items():
+            p_true.add(k,value=v)
+x_vals = linspace(0,250,1500)
+empty_data = nddata(x_vals,'x').copy(data=False)
+#for j in np.arange(3):
+#    amp = [sp.symbols('amp_%d' %(j+1))]
+#    cen = [sp.symbols('cen_%d' %(j+1))]
+#    sig = [sp.symbols('sig_%d' %(j+1))]
+amp,cen,sig,x=sp.symbols('amp cen sig x')
+expression = (amp) * sp.exp(-(x-cen)**2 / (2.*sig**2)) #preserves integral under curve
 #seems likely that Parameters is an ordered list, in which case, we don't need
 #parameter names -- **however** we need to check the documentation to see that
 #this is true
-#parameter_names=[]
-#fn=[]
-#guess_params = []
-#for j in np.arange(3):
-    parameters, param_names, function = gen_from_expr(expr[j], {'amp_%i'%(j+1):dict(value=21.0, min=0.0,max=200),
+fit_params, parameter_names, fn = gen_from_expr(expression, {'amp_%i'%(j+1):dict(value=21.0, min=0.0,max=200),
         'cen_%i'%(j+1):dict(value=0.5,min=-5.0,max=5.0),
         'sig_%i'%(j+1):dict(value=0.25,min=0.01,max=5.0),})
-    #guess_params.append(parameters)
-    #parameter_names.append(param_names)
-    #fn.append(function)
-
 #}}}
 
 #{{{ creating fake data
 #    (simulated gaussian datasets)
-#true_values = []
-#mydata_params = []
-#for j in np.arange(3):
-    values = {'amp_%d'%(j+1):20 + 2*np.random.rand(),
-            'cen_%d'%(j+1):-0.20 + 3.0*np.random.rand(),
-            'sig_%d'%(j+1):0.25 + 0.03*np.random.rand()}
-    #true_values.append(values)
-    #p_true = [Parameters(),Parameters(),Parameters()]
-    for k,v in values.items():
-            p_true.add(k,value=v)
-    #mydata_params.append(p_true[j])
-    random.seed(0)
-    x_vals = linspace(-5.0,5.0,501)
-    #empty_data = []    
-    empty_data = nddata(x_vals,'x').copy(data=False)
-    #empty_data.append(edata)
-#}}}
-#{{{nddata to generate the fake data
-#mydata = []
-#print("mydata_params are",mydata_params)
-#for j in np.arange(3):
-    mydata = empty_data[j].copy(data=False)
-    mydata.data = residual(p_true,mydata.getaxis('x'),data=None)
-    dat.add_noise(0.8)
-    mydata.append(dat)
+mydata = empty_data.copy(data=False)
+mydata.data = residual(p_true,mydata.getaxis('x'))
+dat.add_noise(0.8)
+quit()
 mydata = np.array(mydata)
     
 fit_params = Parameters()
