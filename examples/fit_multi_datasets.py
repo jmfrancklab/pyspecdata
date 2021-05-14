@@ -89,7 +89,7 @@ def gen_from_expr(expr, global_params, n_datasets=3, guesses={}):
         var_args = args[0:n_vars]
         par_args = args[n_vars:]
         for j in range(n_datasets):
-            data = np.empty((n_datasets,1500)) 
+            data = np.empty((n_datasets,151)) 
             these_pars = par_args[j*n_fn_params:(j+1)*n_fn_params]
             data[j,:] = fn(*tuple(var_args+these_pars))
         return data    
@@ -107,14 +107,14 @@ def residual(pars, x, data=None):
         return model
     ndata = data.shape
     resid = 0.0*data[:]
-    print(ndata)
-    print("MODEL IS",model)
     for i in range(ndata):
-        resid[i, :] = data[i, :] - model
+        resid[i, :] = data[i, :] - model[i,:]
+        print("RESID",resid)
+        #resid.flatten()
     # now flatten this to a 1D array, as minimize() needs
-    np.concatenate(resids)
-    for j in range(len(resids)):
-        return resids[j].flatten()
+        np.concatenate(resid)
+    for j in range(len(resid)):
+        return resid.flatten()
 #{{{making sympy expression
 p_true = Parameters()
 for j in np.arange(3):
@@ -123,12 +123,8 @@ for j in np.arange(3):
             'sig_%d'%(j):0.25 + 0.03*np.random.rand()}
     for k,v in values.items():
             p_true.add(k,value=v)
-x_vals = linspace(0,250,1500)
-empty_data = nddata(x_vals,'x').copy(data=False)
-#for j in np.arange(3):
-#    amp = [sp.symbols('amp_%d' %(j+1))]
-#    cen = [sp.symbols('cen_%d' %(j+1))]
-#    sig = [sp.symbols('sig_%d' %(j+1))]
+x_vals = linspace(-5,5,151)
+empty_data = ndshape([151,3],['x','data']).alloc(format=None)
 amp,cen,sig,x=sp.symbols('amp cen sig x')
 expression = (amp) * sp.exp(-(x-cen)**2 / (2.*sig**2)) #preserves integral under curve
 #seems likely that Parameters is an ordered list, in which case, we don't need
@@ -141,44 +137,34 @@ fit_params, parameter_names, fn = gen_from_expr(expression, {'amp_%i'%(j+1):dict
 
 #{{{ creating fake data
 #    (simulated gaussian datasets)
-mydata = empty_data.copy(data=False)
-mydata.data = residual(p_true,mydata.getaxis('x'))
-mydata.add_noise(0.8)
-quit()
+mydata = ndshape(empty_data)
+mydata.data = residual(p_true,x_vals)
+#mydata.add_noise(0.8)
 mydata = np.array(mydata)
-    
-fit_params = Parameters()
-for iy,y in enumerate(mydata):
-    fit_params.add('amp_%i'%(iy+1),value=0.5,min=0.0,max=200)
-    fit_params.add('cen_%i'%(iy+1),value=0.4,min=-2.0,max=2.0)
-    fit_params.add('sig_%i'%(iy+1),value=0.3,min=0.01,max=3.0)
+print(mydata)
 #}}}
 #{{{nddata of the guess
-guess = []
-for j in np.arange(3):
-    fit = empty_data[j].copy(data= False)
-    fit.data = residual(guess_params[j], empty_data[j].getaxis('x'),k=j)
-    guess.append(fit)
+guess = empty_data.copy(data=False)
+guess.data = residual(fit_params, x_vals)
+guess = np.array(mydata,ndmin=3)
 #}}}    
 #{{{ Run the global fit and generate nddata
-fitting = []
 #raise ValueError("the way that you are calling minimize is absolutely wrong."
 #        "In their example, the only call minimize once! "
 #        "You are just doing a 1D minimization on each separate dataset -- this is not "
 #        "a global fitting.")
-out = minimize(objective,fit_params, args=(x_vals,), kws={'data':mydata.data})
-#for j in np.arange(5):    
-#    fits=empty_data[j].copy(data=False)
-#    fits.data = residual(out.params,fits.getaxis('x'),k=j)
-#    fitting.append(fits)
+print("FIT PARAMS ARE",fit_params)
+#out = minimize(residual,fit_params, args=(mydata.getaxis('x'),), kws={'data':mydata.data})
+#fit = empty_data.copy(data=False)
+#fit.data = residual(out.params, empty_data.getaxis('x'))
+#quit()
 #}}}
-
+print(nddata(mydata['data':1]))
 #{{{report the fit and generate the plot
 #report_fit(out,show_correl=True,modelpars=mydata_params)
-for j in np.arange(3):
-    plot(mydata[j],'o',label='data%d'%j)
-    #plot(fitting[j],'-',label='fitting%d'%j)
-    plot(guess[j],'--',label='guess%d'%j)
+plot(mydata,label='data')
+  #plot(fitting[j],'-',label='fitting%d'%j)
+#plot(guess,'--',label='guess%d'%j)
 #}}}    
 plt.legend()
 plt.show()
