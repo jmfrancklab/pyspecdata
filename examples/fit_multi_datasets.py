@@ -98,12 +98,13 @@ def gen_from_expr(expr, global_params, n_datasets=3, guesses={}):
 def residual(pars, x, data=None):
     """Calculate total residual for fits of Gaussians to several data sets."""
     #parameter_name = parameter_names[k]
-    #print("PARAMETER NAMES ARE:", parameter_name)
+    print("PARAMETER NAMES ARE:", parameter_names)
     #print("pars are",pars)
-    parlist = [pars[j] for j in parameter_names]
-    #print("parlist",parlist)
-    model = fn(x, *parlist)
+    parlist = [pars[j].value for j in parameter_names]
+    print("parlist",parlist)
+    model = function(x, *parlist)
     if data is None:
+        print("RETURNING MODEL")
         return model
     ndata = data.shape
     resid = 0.0*data[:]
@@ -118,26 +119,29 @@ def residual(pars, x, data=None):
 #{{{making sympy expression
 p_true = Parameters()
 for j in np.arange(3):
-    values = {'amp_%d'%(j):20 + 2*np.random.rand(),
-            'cen_%d'%(j):-0.20 + 3.0*np.random.rand(),
+    values = {'amp_%d'%(j):0.6 + 9.5*np.random.rand(),
+            'cen_%d'%(j):-0.20 + 0.2*np.random.rand(),
             'sig_%d'%(j):0.25 + 0.03*np.random.rand()}
     for k,v in values.items():
             p_true.add(k,value=v)
-x_vals = linspace(-5,5,151)
+print("p_true is:",p_true)            
+x_vals = linspace(-1,2,151)
 empty_data = ndshape([151,3],['x','data']).alloc(format=None)
 amp,cen,sig,x=sp.symbols('amp cen sig x')
 expression = (amp) * sp.exp(-(x-cen)**2 / (2.*sig**2)) #preserves integral under curve
 #seems likely that Parameters is an ordered list, in which case, we don't need
 #parameter names -- **however** we need to check the documentation to see that
 #this is true
-fit_params, parameter_names, fn = gen_from_expr(expression, {'amp_%i'%(j+1):dict(value=21.0, min=0.0,max=200),
-        'cen_%i'%(j+1):dict(value=0.5,min=-5.0,max=5.0),
-        'sig_%i'%(j+1):dict(value=0.25,min=0.01,max=5.0),})
+for j in np.arange(3):    
+    fit_params, parameter_names, function = gen_from_expr(expression, {'amp_%i'%(j+1):dict(value=21.0, min=0.0,max=200),
+            'cen_%i'%(j+1):dict(value=0.5,min=-5.0,max=5.0),
+            'sig_%i'%(j+1):dict(value=0.25,min=0.01,max=5.0),})
 #}}}
 
 #{{{ creating fake data
 #    (simulated gaussian datasets)
-mydata = nddata(residual(p_true,x_vals),['datasets','x']).setaxis('x',x_vals)
+dat = residual(p_true,x_vals)
+mydata = nddata(dat.data,['datasets','x']).setaxis('x',x_vals)
 #}}}
 #{{{nddata of the guess
 guess = nddata(residual(fit_params, x_vals),['datasets','x']).setaxis('x',x_vals)
@@ -147,7 +151,6 @@ guess = nddata(residual(fit_params, x_vals),['datasets','x']).setaxis('x',x_vals
 #        "In their example, the only call minimize once! "
 #        "You are just doing a 1D minimization on each separate dataset -- this is not "
 #        "a global fitting.")
-print("FIT PARAMS ARE",fit_params)
 #out = minimize(residual,fit_params, args=(mydata.getaxis('x'),), kws={'data':mydata.data})
 #fit = empty_data.copy(data=False)
 #fit.data = residual(out.params, empty_data.getaxis('x'))
@@ -155,11 +158,15 @@ print("FIT PARAMS ARE",fit_params)
 #}}}
 #{{{report the fit and generate the plot
 #report_fit(out,show_correl=True,modelpars=mydata_params)
-print("shapes:",ndshape(mydata))
-print("shape of data",mydata.data.shape)
-plot(mydata,label='data')
-  #plot(fitting[j],'-',label='fitting%d'%j)
-#plot(guess,'--',label='guess%d'%j)
+#print("shapes:",ndshape(mydata))
+#print("shape of data",mydata.data.shape)
+print(ndshape(mydata))
+for j in range(3):    
+    print("DATASET %d"%j)
+    print(mydata['datasets',j])
+    plot(x_vals,mydata['datasets',j].data,label='data')
+ #plot(fitting[j],'-',label='fitting%d'%j)
+#plot(guess,'--',label='guess')
 #}}}    
 plt.legend()
 plt.show()
