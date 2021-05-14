@@ -5242,7 +5242,8 @@ class nddata (object):
             self.ft('t2', shift=True) # this fourier transforms along t2, overwriting the data that was in self
         self.setaxis('t2', lambda x:
                 x/sfo1).set_units('t2','ppm')
-        max_ppm = self.getaxis('t2').max()
+        max_ppm = (self.get_prop('acq')['SW_h']/2
+                / sfo1)
         self.setaxis('t2', lambda x:
                 (x-max_ppm+offset))
         self.set_prop('x_inverted',True)
