@@ -137,16 +137,10 @@ fit_params, parameter_names, fn = gen_from_expr(expression, {'amp_%i'%(j+1):dict
 
 #{{{ creating fake data
 #    (simulated gaussian datasets)
-mydata = ndshape(empty_data)
-mydata.data = residual(p_true,x_vals)
-#mydata.add_noise(0.8)
-mydata = np.array(mydata)
-print(mydata)
+mydata = nddata(residual(p_true,x_vals),['datasets','x']).setaxis('x',x_vals)
 #}}}
 #{{{nddata of the guess
-guess = empty_data.copy(data=False)
-guess.data = residual(fit_params, x_vals)
-guess = np.array(mydata,ndmin=3)
+guess = nddata(residual(fit_params, x_vals),['datasets','x']).setaxis('x',x_vals)
 #}}}    
 #{{{ Run the global fit and generate nddata
 #raise ValueError("the way that you are calling minimize is absolutely wrong."
@@ -159,9 +153,10 @@ print("FIT PARAMS ARE",fit_params)
 #fit.data = residual(out.params, empty_data.getaxis('x'))
 #quit()
 #}}}
-print(nddata(mydata['data':1]))
 #{{{report the fit and generate the plot
 #report_fit(out,show_correl=True,modelpars=mydata_params)
+print("shapes:",ndshape(mydata))
+print("shape of data",mydata.data.shape)
 plot(mydata,label='data')
   #plot(fitting[j],'-',label='fitting%d'%j)
 #plot(guess,'--',label='guess%d'%j)
