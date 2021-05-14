@@ -6980,7 +6980,12 @@ class nddata_hdf5 (nddata):
 #}}}
 
 class ndshape (ndshape_base):
-    r'''The ndshape class, including the allocation method''' 
+    r'''A class for describing the shape and dimension names of nddata objects.
+
+    A main goal of this class is to allow easy generation (allocation) of new
+    arrays -- see :func:`alloc`.
+
+    ''' 
     def alloc(self,dtype='complex128',labels = False,format = 0):
         r'''Use the shape object to allocate an empty nddata object.
 
@@ -6991,6 +6996,22 @@ class ndshape (ndshape_base):
         format : 0, 1, or None
             What goes in the allocated array.
             `None` uses numpy empty.
+
+        Example
+        -------
+
+        If you want to create new empty array that's 10x3 with dimensions "x" and "y":
+
+        >>> result = ndshape([10,3],['x','y']).alloc(format=None)
+
+        You can also do things like creating a new array based on the size of
+        an existing array (create a new array without dimension x, but with new
+        dimension z)
+
+        >>> myshape = ndshape(mydata)
+        >>> myshape.pop('x')
+        >>> myshape + (10,'z')
+        >>> result = myshape.alloc(format=None)
         '''
         try:
             if format == 0:
