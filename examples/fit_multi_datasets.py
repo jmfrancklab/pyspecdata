@@ -92,6 +92,38 @@ def gen_from_expr(expr, global_params=1, n_datasets=3, guesses={}):
         return data    
     return pars, parameter_names, outer_fun
 # }}}
+#{{{creating fake data
+p_true = Parameters()
+for j in np.arange(3):
+    values = {'cen_%d'%(j):-0.20 + 1.2*np.random.rand(),
+            'sig_%d'%(j):0.25 + 0.03*np.random.rand(),
+            'amp_%d'%(j):0.6 + 9.5*np.random.rand()}
+    for k,v in values.items():
+            p_true.add(k,value=v)
+logger.info(strm("p_true is:",p_true))            
+random.seed(0)
+x_vals = linspace(-1,2,151)
+empty_data = ndshape([151,3],['x','data']).alloc(format=None)
+#}}}
+#{{{making sympy expression
+amp,cen,sig,x=sp.symbols('amp cen sig x')
+expr = (amp/sig) * sp.exp(-(x-cen)**2 / (2.*sig**2)) #preserves integral under curve
+#seems likely that Parameters is an ordered list, in which case, we don't need
+#parameter names -- **however** we need to check the documentation to see that
+#this is true
+
+#AG:I know you probably don't like the way the guesses are listed out, I tried using a for loop and doing 'amp_%i'%j for example but it returned inf values for the guesses for some reason, so if you can clean this up AND still have it work awesome, I couldn't figure it out sorry!
+
+fit_params, parameter_names, function = gen_from_expr(expr, guesses = {'amp_0':dict(value=15, min=0.0,max=200),
+            'cen_0':dict(value=0.5,min=-2.0,max=2.0),
+            'sig_0':dict(value=0.3,min=0.01,max=3.0),
+            'amp_1':dict(value=15,min=0.0,max=200),
+            'cen_1':dict(value=0.5,min=-2.0,max=2.0),
+            'sig_1':dict(value=0.3,min=0.01,max=3.0),
+            'amp_2':dict(value=15,min=0.0,max=200),
+            'cen_2':dict(value=0.4,min=-2.0,max=2.0),
+            'sig_2':dict(value=0.3,min=0.01,max=3.0)})
+#}}}
 def residual(pars, x, data=None):
     """Calculate total residual for fits of Gaussians to several data sets."""
     logger.info(strm("PARAMETER NAMES ARE:", parameter_names))
@@ -109,33 +141,7 @@ def residual(pars, x, data=None):
         np.concatenate(resid)
     for j in range(len(resid)):
         return resid.flatten()
-#{{{making sympy expression
-p_true = Parameters()
-for j in np.arange(3):
-    values = {'cen_%d'%(j):-0.20 + 1.2*np.random.rand(),
-            'sig_%d'%(j):0.25 + 0.03*np.random.rand(),
-            'amp_%d'%(j):0.6 + 9.5*np.random.rand()}
-    for k,v in values.items():
-            p_true.add(k,value=v)
-logger.info(strm("p_true is:",p_true))            
-x_vals = linspace(-1,2,151)
-empty_data = ndshape([151,3],['x','data']).alloc(format=None)
-amp,cen,sig,x=sp.symbols('amp cen sig x')
-expression = (amp/sig) * sp.exp(-(x-cen)**2 / (2.*sig**2)) #preserves integral under curve
-#seems likely that Parameters is an ordered list, in which case, we don't need
-#parameter names -- **however** we need to check the documentation to see that
-#this is true
-fit_params, parameter_names, function = gen_from_expr(expression, guesses = {'amp_0':dict(value=15, min=0.0,max=200),
-            'cen_0':dict(value=0.5,min=-2.0,max=2.0),
-            'sig_0':dict(value=0.3,min=0.01,max=3.0),
-            'amp_1':dict(value=15,min=0.0,max=200),
-            'cen_1':dict(value=0.5,min=-2.0,max=2.0),
-            'sig_1':dict(value=0.3,min=0.01,max=3.0),
-            'amp_2':dict(value=15,min=0.0,max=200),
-            'cen_2':dict(value=0.4,min=-2.0,max=2.0),
-            'sig_2':dict(value=0.3,min=0.01,max=3.0)})
-#}}}
-#{{{ creating fake data
+#{{{ nddata to generate fake data
 #    (simulated gaussian datasets)
 dat = residual(p_true,x_vals)
 mydata = nddata(dat.data,['datasets','x']).setaxis('x',x_vals)
