@@ -35,6 +35,8 @@ def gen_from_expr(expr, guesses={}):
         the fit function
     """
     # {{{ decide which symbols are parameters vs. variables
+    print("guesses before",guesses)
+    quit()
     all_symbols = expr.atoms(sp.Symbol)
     axis_names = set([sp.Symbol(j) for j in empty_data.dimlabels])
     variable_symbols = axis_names & all_symbols
