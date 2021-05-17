@@ -21,7 +21,7 @@ from lmfit.printfuncs import report_fit
 from collections import ChainMap
 np.random.seed(15816)
 # {{{ helper function(s)
-def gen_from_expr(expr, global_params, n_datasets=3, guesses={}):
+def gen_from_expr(expr, global_params=1, n_datasets=3, guesses={}):
     """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
 
     Parameters
@@ -78,18 +78,15 @@ def gen_from_expr(expr, global_params, n_datasets=3, guesses={}):
         pars.add(this_name, **kwargs)
     for j in pars:
         logger.info(strm("fit param ---",j))
-    logger.info(strm(pars))
     fn = lambdify(variable_symbols + parameter_symbols,
             expr,
             modules=[{'ImmutableMatrix':np.ndarray},'numpy','scipy'])
-    n_vars = 1
-    n_fn_params = 3
-    def outer_fun(*args):
+    def outer_fun(*args,n_vars=1,n_fn_params=3):
         # outer function goes here
         var_args = args[0:n_vars]
         par_args = args[n_vars:]
+        data = np.empty((n_datasets,151)) 
         for j in range(n_datasets):
-            data = np.empty((n_datasets,151)) 
             these_pars = par_args[j*n_fn_params:(j+1)*n_fn_params]
             data[j,:] = fn(*tuple(var_args+these_pars))
         return data    
@@ -97,21 +94,17 @@ def gen_from_expr(expr, global_params, n_datasets=3, guesses={}):
 # }}}
 def residual(pars, x, data=None):
     """Calculate total residual for fits of Gaussians to several data sets."""
-    #parameter_name = parameter_names[k]
-    print("PARAMETER NAMES ARE:", parameter_names)
-    #print("pars are",pars)
+    logger.info(strm("PARAMETER NAMES ARE:", parameter_names))
     parlist = [pars[j].value for j in parameter_names]
-    print("parlist",parlist)
-    model = function(x, *parlist)
+    logger.info(strm("parlist",parlist))
+    model = function(x, *parlist, n_vars = 1, n_fn_params=3)
     if data is None:
-        print("RETURNING MODEL")
         return model
     ndata = data.shape
     resid = 0.0*data[:]
-    for i in range(ndata):
+    for i in range(3):
         resid[i, :] = data[i, :] - model[i,:]
-        print("RESID",resid)
-        #resid.flatten()
+        logger.info(strm("RESID",resid))
     # now flatten this to a 1D array, as minimize() needs
         np.concatenate(resid)
     for j in range(len(resid)):
@@ -119,54 +112,54 @@ def residual(pars, x, data=None):
 #{{{making sympy expression
 p_true = Parameters()
 for j in np.arange(3):
-    values = {'amp_%d'%(j):0.6 + 9.5*np.random.rand(),
-            'cen_%d'%(j):-0.20 + 0.2*np.random.rand(),
-            'sig_%d'%(j):0.25 + 0.03*np.random.rand()}
+    values = {'cen_%d'%(j):-0.20 + 1.2*np.random.rand(),
+            'sig_%d'%(j):0.25 + 0.03*np.random.rand(),
+            'amp_%d'%(j):0.6 + 9.5*np.random.rand()}
     for k,v in values.items():
             p_true.add(k,value=v)
-print("p_true is:",p_true)            
+logger.info(strm("p_true is:",p_true))            
 x_vals = linspace(-1,2,151)
 empty_data = ndshape([151,3],['x','data']).alloc(format=None)
 amp,cen,sig,x=sp.symbols('amp cen sig x')
-expression = (amp) * sp.exp(-(x-cen)**2 / (2.*sig**2)) #preserves integral under curve
+expression = (amp/sig) * sp.exp(-(x-cen)**2 / (2.*sig**2)) #preserves integral under curve
 #seems likely that Parameters is an ordered list, in which case, we don't need
 #parameter names -- **however** we need to check the documentation to see that
 #this is true
-for j in np.arange(3):    
-    fit_params, parameter_names, function = gen_from_expr(expression, {'amp_%i'%(j+1):dict(value=21.0, min=0.0,max=200),
-            'cen_%i'%(j+1):dict(value=0.5,min=-5.0,max=5.0),
-            'sig_%i'%(j+1):dict(value=0.25,min=0.01,max=5.0),})
+fit_params, parameter_names, function = gen_from_expr(expression, guesses = {'amp_0':dict(value=15, min=0.0,max=200),
+            'cen_0':dict(value=0.5,min=-2.0,max=2.0),
+            'sig_0':dict(value=0.3,min=0.01,max=3.0),
+            'amp_1':dict(value=15,min=0.0,max=200),
+            'cen_1':dict(value=0.5,min=-2.0,max=2.0),
+            'sig_1':dict(value=0.3,min=0.01,max=3.0),
+            'amp_2':dict(value=15,min=0.0,max=200),
+            'cen_2':dict(value=0.4,min=-2.0,max=2.0),
+            'sig_2':dict(value=0.3,min=0.01,max=3.0)})
 #}}}
-
 #{{{ creating fake data
 #    (simulated gaussian datasets)
 dat = residual(p_true,x_vals)
 mydata = nddata(dat.data,['datasets','x']).setaxis('x',x_vals)
+mydata.add_noise(1.8)
 #}}}
 #{{{nddata of the guess
-guess = nddata(residual(fit_params, x_vals),['datasets','x']).setaxis('x',x_vals)
+gues = residual(fit_params,x_vals)
+guess = nddata(gues.data,['datasets','x']).setaxis('x',x_vals)
 #}}}    
 #{{{ Run the global fit and generate nddata
 #raise ValueError("the way that you are calling minimize is absolutely wrong."
 #        "In their example, the only call minimize once! "
 #        "You are just doing a 1D minimization on each separate dataset -- this is not "
 #        "a global fitting.")
-#out = minimize(residual,fit_params, args=(mydata.getaxis('x'),), kws={'data':mydata.data})
-#fit = empty_data.copy(data=False)
-#fit.data = residual(out.params, empty_data.getaxis('x'))
-#quit()
+out = minimize(residual,fit_params, args=(mydata.getaxis('x'),), kws={'data':mydata.data})
+fit = residual(out.params, x_vals)
+fits = nddata(fit.data,['datasets','x']).setaxis('x',x_vals)
 #}}}
 #{{{report the fit and generate the plot
-#report_fit(out,show_correl=True,modelpars=mydata_params)
-#print("shapes:",ndshape(mydata))
-#print("shape of data",mydata.data.shape)
-print(ndshape(mydata))
+report_fit(out,show_correl=True,modelpars=p_true)
 for j in range(3):    
-    print("DATASET %d"%j)
-    print(mydata['datasets',j])
-    plot(x_vals,mydata['datasets',j].data,label='data')
- #plot(fitting[j],'-',label='fitting%d'%j)
-#plot(guess,'--',label='guess')
+    plot(x_vals,mydata['datasets',j].data,'o',label='data%d'%j)
+    plot(x_vals,fits['datasets',j],'-',label='fitting%d'%j)
+    plot(x_vals,guess['datasets',j],'--',label='guess%d'%j)
 #}}}    
 plt.legend()
 plt.show()
