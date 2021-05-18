@@ -19,6 +19,7 @@ from pyspecdata import *
 from lmfit import Parameters, minimize
 from lmfit.printfuncs import report_fit
 from collections import ChainMap
+
 np.random.seed(15816)
 # {{{ helper function(s)
 def gen_from_expr(expr, global_params=1, n_datasets=3, guesses={}):
@@ -63,98 +64,119 @@ def gen_from_expr(expr, global_params=1, n_datasets=3, guesses={}):
     variable_names = tuple([str(j) for j in variable_symbols])
     parameter_symbols = tuple(parameter_symbols)
     parameter_names = tuple([str(j) for j in parameter_symbols])
-    parameter_names = ['%s_%d'%(p,j)
-            for j in range(n_datasets)
-            for p in parameter_names] # organizes datasets together
-    logger.info(strm("all symbols are", all_symbols, "axis names are", axis_names,
-            "variable names are", variable_names, "parameter names are", parameter_names))
+    parameter_names = [
+        "%s_%d" % (p, j) for j in range(n_datasets) for p in parameter_names
+    ]  # organizes datasets together
+    logger.info(
+        strm(
+            "all symbols are",
+            all_symbols,
+            "axis names are",
+            axis_names,
+            "variable names are",
+            variable_names,
+            "parameter names are",
+            parameter_names,
+        )
+    )
     # }}}
     pars = Parameters()
     for this_name in parameter_names:
         kwargs = {}
         if this_name in guesses.keys():
-            logger.info(strm("applying bounds for",this_name))
+            logger.info(strm("applying bounds for", this_name))
             kwargs.update(guesses[str(this_name)])
         pars.add(this_name, **kwargs)
     for j in pars:
-        logger.info(strm("fit param ---",j))
-    fn = lambdify(variable_symbols + parameter_symbols,
-            expr,
-            modules=[{'ImmutableMatrix':np.ndarray},'numpy','scipy'])
-    def outer_fun(*args,n_vars=1,n_fn_params=3):
+        logger.info(strm("fit param ---", j))
+    fn = lambdify(
+        variable_symbols + parameter_symbols,
+        expr,
+        modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
+    )
+
+    def outer_fun(*args, n_vars=1, n_fn_params=3):
         # outer function goes here
         var_args = args[0:n_vars]
         par_args = args[n_vars:]
-        data = np.empty((n_datasets,151)) 
+        data = np.empty((n_datasets, 151))
         for j in range(n_datasets):
-            these_pars = par_args[j*n_fn_params:(j+1)*n_fn_params]
-            data[j,:] = fn(*tuple(var_args+these_pars))
-        return data    
+            these_pars = par_args[j * n_fn_params : (j + 1) * n_fn_params]
+            data[j, :] = fn(*tuple(var_args + these_pars))
+        return data
+
     return pars, parameter_names, outer_fun
+
+
 # }}}
-#{{{ creating fake data
+# {{{ creating fake data
 p_true = Parameters()
 for j in np.arange(3):
-    values = {'cen_%d'%(j):-0.20 + 1.2*np.random.rand(),
-            'sig_%d'%(j):0.25 + 0.03*np.random.rand(),
-            'amp_%d'%(j):0.6 + 9.5*np.random.rand()}
-    for k,v in values.items():
-            p_true.add(k,value=v)
-logger.info(strm("p_true is:",p_true))            
-random.seed(0)
-x_vals = linspace(-1,2,151)
-empty_data = ndshape([151,3],['x','data']).alloc(format=None)
-#}}}
-#{{{making sympy expression
-amp,cen,sig,x=sp.symbols('amp cen sig x')
-expr = (amp/sig) * sp.exp(-(x-cen)**2 / (2.*sig**2)) #preserves integral under curve
+    values = {
+        "cen_%d" % (j): -0.20 + 1.2 * np.random.rand(),
+        "sig_%d" % (j): 0.25 + 0.03 * np.random.rand(),
+        "amp_%d" % (j): 0.6 + 9.5 * np.random.rand(),
+    }
+    for k, v in values.items():
+        p_true.add(k, value=v)
+logger.info(strm("p_true is:", p_true))
+x_vals = linspace(-1, 2, 151)
+empty_data = ndshape([151, 3], ["x", "data"]).alloc(format=None)
+# }}}
+# {{{ making sympy expression
+amp, cen, sig, x = sp.symbols("amp cen sig x")
+expr = (amp / sig) * sp.exp(
+    -((x - cen) ** 2) / (2.0 * sig ** 2)
+)  # preserves integral under curve
 # seems likely that Parameters is an ordered list, in which case, we don't need
 # parameter_names -- **however** we need to check the documentation to see that
 # this is true
 
-# AG:I know you probably don't like the way the guesses are listed out, I tried
-# using a for loop and doing 'amp_%i'%j for example but it returned inf values
-# for the guesses for some reason, so if you can clean this up AND still have
-# it work awesome, I couldn't figure it out sorry!
-
-# JF: I haven't tested this,  but it should be something like this -- test,
-# debug, and remove these comments
-
-guess_dict = {('amp_%i'%j):dict(value=15, min=0.0,max=200) for j in range(3)}
-guess_dict.update({('cen_%i'%j):dict(value=0.5,min=-2.0,max=2.0) for j in range(3)})
-guess_dict.update({('sig_%i'%j):dict(value=0.3,min=0.01,max=3.0) for j in range(3)})
+guess_dict = {("amp_%i" % j): dict(value=15, min=0.0, max=200) for j in range(3)}
+guess_dict.update(
+    {("cen_%i" % j): dict(value=0.5, min=-2.0, max=2.0) for j in range(3)}
+)
+guess_dict.update(
+    {("sig_%i" % j): dict(value=0.3, min=0.01, max=3.0) for j in range(3)}
+)
 
 fit_params, parameter_names, myfunc = gen_from_expr(expr, guesses=guess_dict)
-#}}}
+# }}}
 def residual(pars, x, data=None):
     "calculate the residual OR if data is None, return fake data"
     logger.info(strm("PARAMETER NAMES ARE:", parameter_names))
     parlist = [pars[j].value for j in parameter_names]
-    logger.info(strm("parlist",parlist))
-    model = myfunc(x, *parlist, n_vars = 1, n_fn_params=3)
+    logger.info(strm("parlist", parlist))
+    model = myfunc(x, *parlist, n_vars=1, n_fn_params=3)
     if data is None:
         return model
-    return (data-model).ravel()
+    return (data - model).ravel()
+
+
 def make_nddata(data):
-    return nddata(data, ['datasets','x']).setaxis('x', x_vals)
-#{{{ nddata to generate fake data
+    return nddata(data, ["datasets", "x"]).setaxis("x", x_vals)
+
+
+# {{{ nddata to generate fake data
 #    (simulated gaussian datasets)
-mydata = make_nddata(residual(p_true,x_vals))
-mydata.add_noise(1.8)
-#}}}
-#{{{nddata of the guess
-guess = make_nddata(residual(fit_params,x_vals))
-#}}}    
-#{{{ Run the global fit and generate nddata
-out = minimize(residual, fit_params, args=(mydata.getaxis('x'),), kws={'data':mydata.data})
+mydata = make_nddata(residual(p_true, x_vals))
+mydata.add_noise(0.3)
+# }}}
+# {{{ nddata of the guess
+guess = make_nddata(residual(fit_params, x_vals))
+# }}}
+# {{{ Run the global fit and generate nddata
+out = minimize(
+    residual, fit_params, args=(mydata.getaxis("x"),), kws={"data": mydata.data}
+)
 fits = make_nddata(residual(out.params, x_vals))
-#}}}
-#{{{report the fit and generate the plot
+# }}}
+# {{{ report the fit and generate the plot
 report_fit(out, show_correl=True, modelpars=p_true)
-for j in range(3):    
-    plot(x_vals,mydata['datasets',j].data,'o',label='data%d'%j)
-    plot(x_vals,fits['datasets',j],'-',label='fitting%d'%j)
-    plot(x_vals,guess['datasets',j],'--',label='guess%d'%j)
-#}}}    
+for j in range(3):
+    plot(x_vals, mydata["datasets", j].data, "o", label="data%d" % j)
+    plot(x_vals, fits["datasets", j], "-", label="fitting%d" % j)
+    plot(x_vals, guess["datasets", j], "--", label="guess%d" % j)
+# }}}
 plt.legend()
 plt.show()
