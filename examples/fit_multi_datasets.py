@@ -70,8 +70,7 @@ def gen_from_expr(expr, global_params={}, n_datasets=3, guesses={}):
     ]  # organizes datasets together
     global_symbols = tuple(global_symbols)
     global_names = tuple([str(j) for j in global_symbols])
-    print(
-            "all symbols are",
+    print("all symbols are",
             all_symbols,
             "axis names are",
             axis_names,
@@ -94,28 +93,30 @@ def gen_from_expr(expr, global_params={}, n_datasets=3, guesses={}):
         logger.info(strm("fit param ---", j))
     for k,v in global_params.items():    
         g_expr = v 
+    g_symbols = g_expr.atoms(sp.Symbol)
     global_fn = lambdify(
-            global_symbols,
+            g_symbols,
             g_expr,
             modules = [{"ImmutableMatrix": np.ndarray},"numpy","scipy"],
             )
-    g_data = global_fn(*tuple(global_symbols))
     local_fn = lambdify(
-        variable_symbols + parameter_symbols,
+        variable_symbols + parameter_symbols + global_symbols,
         expr,
         modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
     )
     def outer_fn(*args, n_vars=1, n_fn_params=3):
-        # outer function goes here
         var_args = args[0:n_vars]
         par_args = args[n_vars:]
         data = np.empty((n_datasets, 151))
-        print(var_args)
+        g_list = []
         for j in range(n_datasets):
+            g_dat = global_fn(*tuple(g_symbols))
+            g_list.append(g_dat)
+        print(g_list[0])
+        quit()
+        for j in range(n_datasets):    
             these_pars = par_args[j * n_fn_params : (j + 1) * n_fn_params]
-            print(these_pars)
-
-            data[j, :] = local_fn(*tuple(var_args + these_pars))
+            data[j, :] = local_fn(*tuple(var_args + these_pars + g_list[j]))
         return data
 
     return pars, parameter_names, outer_fn
