@@ -92,7 +92,7 @@ def gen_from_expr(expr, global_params=1, n_datasets=3, guesses={}):
         return data    
     return pars, parameter_names, outer_fun
 # }}}
-#{{{creating fake data
+#{{{ creating fake data
 p_true = Parameters()
 for j in np.arange(3):
     values = {'cen_%d'%(j):-0.20 + 1.2*np.random.rand(),
@@ -108,60 +108,49 @@ empty_data = ndshape([151,3],['x','data']).alloc(format=None)
 #{{{making sympy expression
 amp,cen,sig,x=sp.symbols('amp cen sig x')
 expr = (amp/sig) * sp.exp(-(x-cen)**2 / (2.*sig**2)) #preserves integral under curve
-#seems likely that Parameters is an ordered list, in which case, we don't need
-#parameter names -- **however** we need to check the documentation to see that
-#this is true
+# seems likely that Parameters is an ordered list, in which case, we don't need
+# parameter_names -- **however** we need to check the documentation to see that
+# this is true
 
-#AG:I know you probably don't like the way the guesses are listed out, I tried using a for loop and doing 'amp_%i'%j for example but it returned inf values for the guesses for some reason, so if you can clean this up AND still have it work awesome, I couldn't figure it out sorry!
+# AG:I know you probably don't like the way the guesses are listed out, I tried
+# using a for loop and doing 'amp_%i'%j for example but it returned inf values
+# for the guesses for some reason, so if you can clean this up AND still have
+# it work awesome, I couldn't figure it out sorry!
 
-fit_params, parameter_names, function = gen_from_expr(expr, guesses = {'amp_0':dict(value=15, min=0.0,max=200),
-            'cen_0':dict(value=0.5,min=-2.0,max=2.0),
-            'sig_0':dict(value=0.3,min=0.01,max=3.0),
-            'amp_1':dict(value=15,min=0.0,max=200),
-            'cen_1':dict(value=0.5,min=-2.0,max=2.0),
-            'sig_1':dict(value=0.3,min=0.01,max=3.0),
-            'amp_2':dict(value=15,min=0.0,max=200),
-            'cen_2':dict(value=0.4,min=-2.0,max=2.0),
-            'sig_2':dict(value=0.3,min=0.01,max=3.0)})
+# JF: I haven't tested this,  but it should be something like this -- test,
+# debug, and remove these comments
+
+guess_dict = {('amp_%i'%j):dict(value=15, min=0.0,max=200) for j in range(3)}
+guess_dict.update({('cen_%i'%j):dict(value=0.5,min=-2.0,max=2.0) for j in range(3)})
+guess_dict.update({('sig_%i'%j):dict(value=0.3,min=0.01,max=3.0) for j in range(3)})
+
+fit_params, parameter_names, myfunc = gen_from_expr(expr, guesses=guess_dict)
 #}}}
 def residual(pars, x, data=None):
-    """Calculate total residual for fits of Gaussians to several data sets."""
+    "calculate the residual OR if data is None, return fake data"
     logger.info(strm("PARAMETER NAMES ARE:", parameter_names))
     parlist = [pars[j].value for j in parameter_names]
     logger.info(strm("parlist",parlist))
-    model = function(x, *parlist, n_vars = 1, n_fn_params=3)
+    model = myfunc(x, *parlist, n_vars = 1, n_fn_params=3)
     if data is None:
         return model
-    ndata = data.shape
-    resid = 0.0*data[:]
-    for i in range(3):
-        resid[i, :] = data[i, :] - model[i,:]
-        logger.info(strm("RESID",resid))
-    # now flatten this to a 1D array, as minimize() needs
-        np.concatenate(resid)
-    for j in range(len(resid)):
-        return resid.flatten()
+    return (data-model).ravel()
+def make_nddata(data):
+    return nddata(data, ['datasets','x']).setaxis('x', x_vals)
 #{{{ nddata to generate fake data
 #    (simulated gaussian datasets)
-dat = residual(p_true,x_vals)
-mydata = nddata(dat.data,['datasets','x']).setaxis('x',x_vals)
+mydata = make_nddata(residual(p_true,x_vals))
 mydata.add_noise(1.8)
 #}}}
 #{{{nddata of the guess
-gues = residual(fit_params,x_vals)
-guess = nddata(gues.data,['datasets','x']).setaxis('x',x_vals)
+guess = make_nddata(residual(fit_params,x_vals))
 #}}}    
 #{{{ Run the global fit and generate nddata
-#raise ValueError("the way that you are calling minimize is absolutely wrong."
-#        "In their example, the only call minimize once! "
-#        "You are just doing a 1D minimization on each separate dataset -- this is not "
-#        "a global fitting.")
-out = minimize(residual,fit_params, args=(mydata.getaxis('x'),), kws={'data':mydata.data})
-fit = residual(out.params, x_vals)
-fits = nddata(fit.data,['datasets','x']).setaxis('x',x_vals)
+out = minimize(residual, fit_params, args=(mydata.getaxis('x'),), kws={'data':mydata.data})
+fits = make_nddata(residual(out.params, x_vals))
 #}}}
 #{{{report the fit and generate the plot
-report_fit(out,show_correl=True,modelpars=p_true)
+report_fit(out, show_correl=True, modelpars=p_true)
 for j in range(3):    
     plot(x_vals,mydata['datasets',j].data,'o',label='data%d'%j)
     plot(x_vals,fits['datasets',j],'-',label='fitting%d'%j)
