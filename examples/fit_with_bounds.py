@@ -35,8 +35,6 @@ def gen_from_expr(expr, guesses={}):
         the fit function
     """
     # {{{ decide which symbols are parameters vs. variables
-    print("guesses before",guesses)
-    quit()
     all_symbols = expr.atoms(sp.Symbol)
     axis_names = set([sp.Symbol(j) for j in empty_data.dimlabels])
     variable_symbols = axis_names & all_symbols
@@ -71,7 +69,7 @@ true_values = {'A':14.0,
 p_true = Parameters()
 for k,v in true_values.items():
     p_true.add(k,value=v)
-logger.info(strm(p_true))
+logger.info(strm("p_true is:",p_true))            
 random.seed(0)
 x_vals = linspace(0, 250, 1500)
 empty_data = nddata(x_vals,'x').copy(data=False)
@@ -82,20 +80,20 @@ expr = A*sp.sin(shift+x/period)*sp.exp(-(x*decay)**2)
 # seems likely that Parameters is an ordered list, in which case, we don't need
 # parameter_names -- **however** we need to check the documentation to see that
 # this is true
-fit_params, parameter_names, fn = gen_from_expr(expr, {'A':dict(value=13.0, max=20, min=0.0),
+fit_params, parameter_names, myfunc = gen_from_expr(expr, {'A':dict(value=13.0, max=20, min=0.0),
             'period':dict(value=2, max=10),
             'shift':dict(value=0.0, max=pi/2., min=-pi/2.),
             'decay':dict(value=0.02, max=0.10, min=0.00),})
 #}}}
 def residual(pars, x, data=None):
     "calculate the residual OR if data is None, return fake data"
-    logger.info(strm("PARAMETER NAMES ARE:",parameter_names))
+    logger.info(strm("PARAMETER NAMES ARE:", parameter_names))
     parlist = [pars[j].value for j in parameter_names]
     logger.info(strm("parlist",parlist))
     shift = pars['shift']
     if abs(shift) > pi/2:
         shift = shift - sign(shift)*pi
-    model = fn(x, *parlist)
+    model = myfunc(x, *parlist)
     if data is None:
         return model
     return model - data
@@ -109,7 +107,7 @@ guess = empty_data.copy(data=False)
 guess.data = residual(fit_params, empty_data.getaxis('x'))
 # }}}
 # {{{ run the fit and generate nddata
-out = minimize(residual, fit_params, args=(mydata.getaxis('x'),), kws={'data': mydata.data})
+out = minimize(residual, fit_params, args=(mydata.getaxis('x'),), kws={'data':mydata.data})
 fit = empty_data.copy(data=False)
 fit.data = residual(out.params, empty_data.getaxis('x'))
 # }}}
