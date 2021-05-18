@@ -20,9 +20,9 @@ from lmfit import Parameters, minimize
 from lmfit.printfuncs import report_fit
 from collections import ChainMap
 
-np.random.seed(15816)
+#np.random.seed(15816)
 # {{{ helper function(s)
-def gen_from_expr(expr, global_params=1, n_datasets=3, guesses={}):
+def gen_from_expr(expr, global_params={}, n_datasets=3, guesses={}):
     """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
 
     Parameters
@@ -58,8 +58,9 @@ def gen_from_expr(expr, global_params=1, n_datasets=3, guesses={}):
     # {{{ decide which symbols are parameters vs. variables
     all_symbols = expr.atoms(sp.Symbol)
     axis_names = set([sp.Symbol(j) for j in empty_data.dimlabels])
+    global_symbols = set([sp.Symbol(j) for j in (global_params.keys())])
     variable_symbols = axis_names & all_symbols
-    parameter_symbols = all_symbols - variable_symbols
+    parameter_symbols = all_symbols - variable_symbols - global_symbols
     variable_symbols = tuple(variable_symbols)
     variable_names = tuple([str(j) for j in variable_symbols])
     parameter_symbols = tuple(parameter_symbols)
@@ -67,8 +68,9 @@ def gen_from_expr(expr, global_params=1, n_datasets=3, guesses={}):
     parameter_names = [
         "%s_%d" % (p, j) for j in range(n_datasets) for p in parameter_names
     ]  # organizes datasets together
-    logger.info(
-        strm(
+    global_symbols = tuple(global_symbols)
+    global_names = tuple([str(j) for j in global_symbols])
+    print(
             "all symbols are",
             all_symbols,
             "axis names are",
@@ -77,8 +79,9 @@ def gen_from_expr(expr, global_params=1, n_datasets=3, guesses={}):
             variable_names,
             "parameter names are",
             parameter_names,
+            "global names are",
+            global_names,
         )
-    )
     # }}}
     pars = Parameters()
     for this_name in parameter_names:
@@ -89,23 +92,33 @@ def gen_from_expr(expr, global_params=1, n_datasets=3, guesses={}):
         pars.add(this_name, **kwargs)
     for j in pars:
         logger.info(strm("fit param ---", j))
-    fn = lambdify(
+    for k,v in global_params.items():    
+        g_expr = v 
+    global_fn = lambdify(
+            global_symbols,
+            g_expr,
+            modules = [{"ImmutableMatrix": np.ndarray},"numpy","scipy"],
+            )
+    g_data = global_fn(*tuple(global_symbols))
+    local_fn = lambdify(
         variable_symbols + parameter_symbols,
         expr,
         modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
     )
-
-    def outer_fun(*args, n_vars=1, n_fn_params=3):
+    def outer_fn(*args, n_vars=1, n_fn_params=3):
         # outer function goes here
         var_args = args[0:n_vars]
         par_args = args[n_vars:]
         data = np.empty((n_datasets, 151))
+        print(var_args)
         for j in range(n_datasets):
             these_pars = par_args[j * n_fn_params : (j + 1) * n_fn_params]
-            data[j, :] = fn(*tuple(var_args + these_pars))
+            print(these_pars)
+
+            data[j, :] = local_fn(*tuple(var_args + these_pars))
         return data
 
-    return pars, parameter_names, outer_fun
+    return pars, parameter_names, outer_fn
 
 
 # }}}
@@ -125,22 +138,23 @@ empty_data = ndshape([151, 3], ["x", "data"]).alloc(format=None)
 # }}}
 # {{{ making sympy expression
 amp, cen, sig, x = sp.symbols("amp cen sig x")
-expr = (amp / sig) * sp.exp(
+B, y = sp.symbols("B y")
+local_expr = (amp / sig) * sp.exp(
     -((x - cen) ** 2) / (2.0 * sig ** 2)
 )  # preserves integral under curve
 # seems likely that Parameters is an ordered list, in which case, we don't need
 # parameter_names -- **however** we need to check the documentation to see that
 # this is true
 
-guess_dict = {("amp_%i" % j): dict(value=15, min=0.0, max=200) for j in range(3)}
+guess_dict = {("amp_%i" % j): dict(value=15, min=0.0, max=200) for j in range (3)}
 guess_dict.update(
     {("cen_%i" % j): dict(value=0.5, min=-2.0, max=2.0) for j in range(3)}
 )
 guess_dict.update(
     {("sig_%i" % j): dict(value=0.3, min=0.01, max=3.0) for j in range(3)}
 )
-
-fit_params, parameter_names, myfunc = gen_from_expr(expr, guesses=guess_dict)
+global_params = {'amp':B*y}
+fit_params, parameter_names, myfunc = gen_from_expr(local_expr, global_params = global_params,guesses=guess_dict)
 # }}}
 def residual(pars, x, data=None):
     "calculate the residual OR if data is None, return fake data"
