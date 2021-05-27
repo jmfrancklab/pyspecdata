@@ -104,19 +104,25 @@ def gen_from_expr(expr, global_params={}, n_datasets=3, guesses={}):
         expr,
         modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
     )
-    def outer_fn(*args, n_vars=1, n_fn_params=3):
+    n_vars = len(variable_names)
+    n_fn_params = len(parameter_names)
+    print(n_vars)
+    print(n_fn_params)
+    quit()
+    g_vars = 1
+    g_fn_params = 1
+    def outer_fn(*args):
         var_args = args[0:n_vars]
         par_args = args[n_vars:]
+        g_var_args = args[0:g_vars]
+        g_par_args = args[g_vars:]
         data = np.empty((n_datasets, 151))
-        g_list = []
-        for j in range(n_datasets):
-            g_dat = global_fn(*tuple(g_symbols))
-            g_list.append(g_dat)
-        print(g_list[0])
-        quit()
+        g_data = np.empty((n_datasets,151))
         for j in range(n_datasets):    
             these_pars = par_args[j * n_fn_params : (j + 1) * n_fn_params]
-            data[j, :] = local_fn(*tuple(var_args + these_pars + g_list[j]))
+            g_pars = g_par_args[j * g_fn_params : (j + 1) * g_fn_params]
+            g_data = global_fn(*tuple(g_var_args + g_pars))
+            data[j, :] = local_fn(*tuple(var_args + these_pars))
         return data
 
     return pars, parameter_names, outer_fn
@@ -162,7 +168,7 @@ def residual(pars, x, data=None):
     logger.info(strm("PARAMETER NAMES ARE:", parameter_names))
     parlist = [pars[j].value for j in parameter_names]
     logger.info(strm("parlist", parlist))
-    model = myfunc(x, *parlist, n_vars=1, n_fn_params=3)
+    model = myfunc(x, *parlist)
     if data is None:
         return model
     return (data - model).ravel()
