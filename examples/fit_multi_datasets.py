@@ -104,10 +104,11 @@ def gen_from_expr(expr, global_params={}, n_datasets=3, guesses={}):
         expr,
         modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
     )
-    n_vars = len(variable_names)
-    n_fn_params = len(all_symbols)-len(variable_names)
     g_vars = len(global_names)
     g_fn_params = len(g_symbols) - g_vars
+
+    n_vars = len(variable_names)
+    n_fn_params = len(all_symbols)-len(variable_names)-g_fn_params
     def outer_fn(*args):
         var_args = args[0:n_vars]
         par_args = args[n_vars:]
@@ -122,8 +123,8 @@ def gen_from_expr(expr, global_params={}, n_datasets=3, guesses={}):
             g_pars = g_par_args[j * g_fn_params : (j+1) * g_fn_params] 
             g_data[j, :] = global_fn(*tuple(g_var_args + g_pars))
             print("global_fn is", global_fn(*tuple(g_var_args + g_pars)))
-            print("local fn is",local_fn(*tuple(var_args + these_pars)))
-            data[j, :] = local_fn(*tuple(var_args + these_pars))
+            print("local fn is",local_fn(*tuple(var_args + g_pars + these_pars)))
+            data[j, :] = local_fn(*tuple(var_args + g_pars + these_pars))
         return data
 
     return pars, parameter_names, outer_fn
