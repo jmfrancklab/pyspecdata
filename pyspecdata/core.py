@@ -1476,11 +1476,11 @@ def autopad_figure(pad = 0.2,centered = False,figname = 'unknown'):
     #labelsets.append(('left',ax.get_yticklabels()))
     #labelsets.append(('left',ax.get_yticklines()))
     #labelsets.append(('right',ax.get_yticklines()))
-    labelsets.append(('left',[ylabel(ax.get_ylabel())]))
+    labelsets.append(('left',[plt.ylabel(ax.get_ylabel())]))
     #labelsets.append(('bottom',ax.get_xticklabels()))
     #labelsets.append(('bottom',ax.get_xticklines()))
     if len(ax.get_xlabel()) > 0:
-        labelsets.append(('bottom',[xlabel(ax.get_xlabel())]))
+        labelsets.append(('bottom',[plt.xlabel(ax.get_xlabel())]))
     #labelsets.append(('top',ax.get_xticklines()))
     if len(ax.get_title()) > 0:
         pass #labelsets.append(('top',[plt.title(ax.get_title())]))
