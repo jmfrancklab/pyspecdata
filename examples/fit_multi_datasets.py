@@ -107,20 +107,22 @@ def gen_from_expr(expr, global_params={}, n_datasets=3, guesses={}):
     n_vars = len(variable_names)
     n_fn_params = len(all_symbols)-len(variable_names)
     g_vars = len(global_names)
-    g_fn_params = 
+    g_fn_params = len(g_symbols) - g_vars
     def outer_fn(*args):
         var_args = args[0:n_vars]
         par_args = args[n_vars:]
-        print(par_args)
         g_var_args = args[0:g_vars]
         g_par_args = args[g_vars:]
         data = np.empty((n_datasets, 151))
         g_data = np.empty((n_datasets,151))
         for j in range(n_datasets):    
             these_pars = par_args[j * n_fn_params : (j + 1) * n_fn_params]
-            print(these_pars)
-            g_pars = g_par_args[j * g_fn_params : (j + 1) * g_fn_params]
-            g_data = global_fn(*tuple(g_var_args + g_pars))
+            print("these pars are",these_pars)
+            print("var args are",var_args)
+            g_pars = g_par_args[j * g_fn_params : (j+1) * g_fn_params] 
+            g_data[j, :] = global_fn(*tuple(g_var_args + g_pars))
+            print("global_fn is", global_fn(*tuple(g_var_args + g_pars)))
+            print("local fn is",local_fn(*tuple(var_args + these_pars)))
             data[j, :] = local_fn(*tuple(var_args + these_pars))
         return data
 
