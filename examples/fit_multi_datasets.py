@@ -183,7 +183,7 @@ def make_nddata(data):
 # {{{ nddata to generate fake data
 #    (simulated gaussian datasets)
 mydata = make_nddata(residual(p_true, x_vals))
-mydata.add_noise(0.3)
+mydata.add_noise(0.1)
 # }}}
 # {{{ nddata of the guess
 guess = make_nddata(residual(fit_params, x_vals))
