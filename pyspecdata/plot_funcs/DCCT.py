@@ -1,9 +1,11 @@
 from pylab import *
-from pyspecdata import *
-import matplotlib.lines as lines
-from matplotlib.patches import FancyArrow, FancyArrowPatch
+from pyspecdata.core import nddata
+from ..ndshape import ndshape_base as ndshape
+from ..general_functions import *
+#import matplotlib.lines as lines
+import matplotlib.ticker as mticker
+#from matplotlib.patches import FancyArrow, FancyArrowPatch
 from pyspecdata.plot_funcs.image import imagehsv
-
 def DCCT(this_nddata, this_fig_obj, x=[], y=[], custom_scaling=False,
         grid_bottom = 0.0,
         bottom_pad = 0.15,
@@ -32,6 +34,7 @@ def DCCT(this_nddata, this_fig_obj, x=[], y=[], custom_scaling=False,
         subplots scale together, but currently, this means there must be tick labels on both top and bottom
     """
     my_data = this_nddata.C
+    print(ndshape(my_data))
     ordered_labels = {}
     for this_dim in [j for j in my_data.dimlabels if j.startswith('ph')]:
         n_ph = ndshape(my_data)[this_dim]
@@ -256,7 +259,6 @@ def DCCT(this_nddata, this_fig_obj, x=[], y=[], custom_scaling=False,
         sca(ax_list[j])
         imshow(K,extent=myext,**kwargs)
         ax_list[j].set_ylabel(None)
-        print(ndshape(A))
         if pass_frq_slice:
             start_y = A.getaxis(A.dimlabels[1])[0]
             stop_y = A.getaxis(A.dimlabels[1])[-1]
