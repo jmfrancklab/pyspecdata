@@ -94,8 +94,13 @@ def gen_from_expr(expr, global_params={}, n_datasets=3, guesses={}):
     for k,v in global_params.items():    
         g_expr = v 
     g_symbols = g_expr.atoms(sp.Symbol)
+    g_var_sym = {y} & g_symbols
+    g_par_sym = g_symbols - g_var_sym
+    g_var_sym = tuple(g_var_sym)
+    g_par_sym = tuple(g_par_sym)
     global_fn = lambdify(
-            g_symbols,
+            g_var_sym +
+            g_par_sym,
             g_expr,
             modules = [{"ImmutableMatrix": np.ndarray},"numpy","scipy"],
             )
@@ -106,25 +111,28 @@ def gen_from_expr(expr, global_params={}, n_datasets=3, guesses={}):
     )
     g_vars = len(global_names)
     g_fn_params = len(g_symbols) - g_vars
-
     n_vars = len(variable_names)
     n_fn_params = len(all_symbols)-len(variable_names)-g_fn_params
     def outer_fn(*args):
         var_args = args[0:n_vars]
-        par_args = args[n_vars:]
-        g_var_args = args[0:g_vars]
-        g_par_args = args[g_vars:]
+        par_args = args[n_vars+g_fn_params:n_vars+n_fn_params+g_fn_params]
+        g_var_args = args[g_fn_params+n_fn_params+n_vars:g_fn_params+n_fn_params+n_vars
+                +g_vars]
+        g_par_args = args[g_fn_params+n_fn_params+n_vars+g_vars:-g_fn_params]
         data = np.empty((n_datasets, 151))
         g_data = np.empty((n_datasets,151))
         for j in range(n_datasets):    
             these_pars = par_args[j * n_fn_params : (j + 1) * n_fn_params]
-            print("these pars are",these_pars)
-            print("var args are",var_args)
-            g_pars = g_par_args[j * g_fn_params : (j+1) * g_fn_params] 
-            g_data[j, :] = global_fn(*tuple(g_var_args + g_pars))
-            print("global_fn is", global_fn(*tuple(g_var_args + g_pars)))
-            print("local fn is",local_fn(*tuple(var_args + g_pars + these_pars)))
-            data[j, :] = local_fn(*tuple(var_args + g_pars + these_pars))
+            g_dat = global_fn(*tuple(g_var_args + g_par_args))
+            print(g_dat)
+            g_dat = str(g_dat)
+            print(g_dat)
+            print(type(g_dat))
+            print(tuple(g_dat))
+            g_dat = tuple(str(g_dat))
+            print(type(var_args))
+            print(g_dat)
+            data[j, :] = local_fn(*tuple(var_args + g_dat + these_pars))
         return data
 
     return pars, parameter_names, outer_fn
