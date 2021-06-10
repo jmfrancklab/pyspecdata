@@ -1,10 +1,12 @@
-from pylab import *
-from pyspecdata.core import nddata
-from ..ndshape import ndshape_base as ndshape
+import os,sys
+from ..core import nddata
 from ..general_functions import *
-#import matplotlib.lines as lines
+import numpy as np
+from ..ndshape import ndshape_base as nddatashape
+from pylab import *
+import matplotlib.lines as lines
 import matplotlib.ticker as mticker
-#from matplotlib.patches import FancyArrow, FancyArrowPatch
+from matplotlib.patches import FancyArrow, FancyArrowPatch
 from pyspecdata.plot_funcs.image import imagehsv
 def DCCT(this_nddata, this_fig_obj, x=[], y=[], custom_scaling=False,
         grid_bottom = 0.0,
@@ -34,10 +36,9 @@ def DCCT(this_nddata, this_fig_obj, x=[], y=[], custom_scaling=False,
         subplots scale together, but currently, this means there must be tick labels on both top and bottom
     """
     my_data = this_nddata.C
-    print(ndshape(my_data))
     ordered_labels = {}
     for this_dim in [j for j in my_data.dimlabels if j.startswith('ph')]:
-        n_ph = ndshape(my_data)[this_dim]
+        n_ph = nddatashape(my_data)[this_dim]
         this_max_coh_jump = max_coh_jump[this_dim]
         all_possibilities = empty((int((2*this_max_coh_jump+1)/n_ph)+1)*n_ph)
         all_possibilities[:] = nan
@@ -63,7 +64,7 @@ def DCCT(this_nddata, this_fig_obj, x=[], y=[], custom_scaling=False,
     print("DIMLABELS ARE",my_data.dimlabels)
     grid_bottom += bottom_pad
     grid_top -= top_pad
-    a_shape = ndshape(this_nddata)
+    a_shape = nddatashape(this_nddata)
     num_dims = len(a_shape.dimlabels[:-2])
     divisions = []
     # should be looping in backward order from printed shape
@@ -259,6 +260,7 @@ def DCCT(this_nddata, this_fig_obj, x=[], y=[], custom_scaling=False,
         sca(ax_list[j])
         imshow(K,extent=myext,**kwargs)
         ax_list[j].set_ylabel(None)
+        print(nddatashape(A))
         if pass_frq_slice:
             start_y = A.getaxis(A.dimlabels[1])[0]
             stop_y = A.getaxis(A.dimlabels[1])[-1]
@@ -279,7 +281,7 @@ def DCCT(this_nddata, this_fig_obj, x=[], y=[], custom_scaling=False,
         thisdim=remaining_dim[0]
         print("This is remaining dim",remaining_dim)
         print("This dim is",thisdim)
-        print(ndshape(idx))
+        print(nddatashape(idx))
         depth -= 1
         for j in range(a_shape[thisdim]):
             idx_slice = idx[thisdim,j]

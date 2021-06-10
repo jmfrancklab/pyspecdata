@@ -89,7 +89,7 @@ from .datadir import getDATADIR,log_fname
 from . import fourier as this_fourier
 from . import axis_manipulation
 from . import nnls as this_nnls
-from . import plot_funcs as this_plotting
+from .plot_funcs.image import image as this_plotting
 from .general_functions import *
 from .ndshape import ndshape_base
 #rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
@@ -2105,7 +2105,7 @@ class figlist(object):
         else:
             gridandtick(ax,gridcolor = r_[0,0,0])
         return
-    image = this_plotting.image.fl_image
+    image = this_plotting
     def marked_text(self,marker,input_text="",sep='\n'):
         """Creates a named `marker` where we can place text.   If `marker`
         has been used, goes back and places text there."""
@@ -7095,7 +7095,7 @@ def spectrogram(waveform,f_start,f_stop,npoints_fdom=40,tdom_div=2):
     #image(specgram,y=f_axis/1e6,x=t_axis*1e6) # now do an imagehsv (see if we can make imagerybw) plot of the resulting spectrogram
     imshow(abs(specgram),extent=(t_axis[0]*1e6,t_axis[-1]*1e6,f_axis[-1]/1e6,f_axis[0]/1e6)) # now do an imagehsv (see if we can make imagerybw) plot of the resulting spectrogram
     return plt.gca()
-image = this_plotting.image.image
+image = this_plotting
 def colormap(points,colors,n=256):
     r = np.interp(np.linspace(0,1,n),points,colors[:,0].flatten())
     g = np.interp(np.linspace(0,1,n),points,colors[:,1].flatten())

@@ -3,6 +3,7 @@ from .core import *
 from .load_files import *
 from .figlist import *
 from .nnls import *
+from .ndshape import *
 
 #import numpy
 
