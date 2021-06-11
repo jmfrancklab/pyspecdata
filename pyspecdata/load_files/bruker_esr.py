@@ -27,9 +27,12 @@ def xepr(filename, dimname='', verbose=False):
                 " .PAR\n"
                 "This one is called",repr(filename)))
     # {{{ check if the extension is upper or lowercase
+    orig_spc = filename_spc
     if not os.path.exists(filename_spc):
         filename_spc = filename_spc[:-4] + filename_spc[-4:].lower()
         filename_par = filename_par[:-4] + filename_par[-4:].lower()
+    if not os.path.exists(filename_spc):
+        filename_spc = orig_spc
     # }}}
     # }}}
     # {{{ load the parameters
@@ -46,6 +49,14 @@ def xepr(filename, dimname='', verbose=False):
         
     # }}}
     # {{{ load the data
+    if not os.path.exists(filename_spc):
+        # because the spc isn't part of the original search, we
+        # need to log the fact that it's missing manually
+        err = log_fname('missing_data_files',
+                os.path.split(filename_spc)[-1],
+                os.path.split(os.path.split(filename_spc)[0])[-1],
+                err=True)
+        raise IOError("Can't find file %s\n%s"%(filename_spc,err))
     with open(filename_spc,'rb') as fp:
         if all([j == 'REAL' for j in ikkf]):
             data = np.frombuffer(fp.read(),'>f8')
@@ -204,6 +215,12 @@ def winepr(filename, dimname=''):
     # }}}
     # }}}
     # {{{ load the data
+    if not os.path.exists(filename_spc):
+        err = log_fname('missing_data_files',
+                os.path.split(filename_spc)[-1],
+                os.path.split(filename_spc)[0],
+                err=True)
+        raise IOError("Can't find file %s\n%s"%(filename_spc,err))
     with open(filename_spc,'rb') as fp:
         data = fp.read()
     data = np.fromstring(data,'<f4')

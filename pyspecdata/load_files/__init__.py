@@ -91,7 +91,7 @@ def search_filename(searchstring,exp_type,
                 searchstring.replace('.*','*').replace('(','{').replace(')','}').replace('|',','),
                 directory,
                 err=True)
-        raise ValueError("Can't find file specified by search string %s"%searchstring+'\n'+err)
+        raise IOError("Can't find file specified by search string %s"%searchstring+'\n'+err)
     else:
         if len(files) > 1:
             basenames,exts = list(map(set,list(zip(*[j.rsplit('.',1) for j in files if len(j.rsplit('.',1))>1]))))
