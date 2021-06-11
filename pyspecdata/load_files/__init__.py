@@ -444,6 +444,13 @@ def load_indiv_file(filename, dimname='', return_acq=False,
                     else:
                         data = acert.load_pulse(filename, indirect_dimlabels=indirect_dimlabels)
                 else:
+                    if expno is None:
+                        attrlist = []
+                        with h5py.File(filename,'r') as f:
+                            for j in f.keys():
+                                if 'dimlabels' in f[j].attrs and 'data' in f[j].keys():
+                                    attrlist.append(j)
+                        raise ValueError("please select a node from the list and set to expno:\n\t"+'\n\t'.join(attrlist))
                     # assume this is a normal pySpecData HDF5 file
                     dirname, filename = os.path.split(filename)
                     data = nddata_hdf5(filename+'/'+expno,

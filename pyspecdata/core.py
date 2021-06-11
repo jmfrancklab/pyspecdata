@@ -44,7 +44,7 @@ if _figure_mode_setting == 'latex':
 # }}} -- continued below
 from .general_functions import inside_sphinx
 import numpy as np
-from numpy import r_,c_,nan,inf
+from numpy import r_,c_,nan,inf,newaxis
 from numpy import pi
 from matplotlib.pyplot import rc, rcParams, plot, figure, title, text, show
 import matplotlib.pyplot as plt
@@ -1476,11 +1476,11 @@ def autopad_figure(pad = 0.2,centered = False,figname = 'unknown'):
     #labelsets.append(('left',ax.get_yticklabels()))
     #labelsets.append(('left',ax.get_yticklines()))
     #labelsets.append(('right',ax.get_yticklines()))
-    labelsets.append(('left',[ylabel(ax.get_ylabel())]))
+    labelsets.append(('left',[plt.ylabel(ax.get_ylabel())]))
     #labelsets.append(('bottom',ax.get_xticklabels()))
     #labelsets.append(('bottom',ax.get_xticklines()))
     if len(ax.get_xlabel()) > 0:
-        labelsets.append(('bottom',[xlabel(ax.get_xlabel())]))
+        labelsets.append(('bottom',[plt.xlabel(ax.get_xlabel())]))
     #labelsets.append(('top',ax.get_xticklines()))
     if len(ax.get_title()) > 0:
         pass #labelsets.append(('top',[plt.title(ax.get_title())]))
@@ -4787,8 +4787,8 @@ class nddata (object):
             U2 = U2[:,0:s2]
             S2 = S2[0:s2]
             V2 = V2[0:s2,:]
-            S1 = S1*eye(s1)
-            S2 = S2*eye(s2)
+            S1 = S1*np.eye(s1)
+            S2 = S2*np.eye(s2)
             logger.debug(strm('Compressed SVD of K1:',[x.shape for x in (U1,S1,V1)]))
             logger.debug(strm('Compressed SVD K2:',[x.shape for x in (U2,S2,V2)]))
             # would generate projected data here
@@ -4819,7 +4819,7 @@ class nddata (object):
                 def d_chi(x_vec,val):
                     return np.dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
                 def dd_chi(G,val):
-                    return G + (val**2)*eye(np.shape(G)[0])
+                    return G + (val**2)*np.eye(np.shape(G)[0])
                 def G(x_vec):
                     return np.dot(K,np.dot(square_heaviside(x_vec),K.T))
                 def H(product):
@@ -4835,15 +4835,15 @@ class nddata (object):
                         temp = H(temp)
                         diag_heavi.append(temp)
                     diag_heavi = np.array(diag_heavi)
-                    square_heavi = diag_heavi*eye(np.shape(diag_heavi)[0])
+                    square_heavi = diag_heavi*np.eye(np.shape(diag_heavi)[0])
                     return square_heavi
                 def optimize_alpha(input_vec,val):
                     alpha_converged = False
                     factor = sqrt(s1*s2)
-                    T = linalg.inv(dd_chi(G(input_vec),val**2))
+                    T = np.linalg.inv(dd_chi(G(input_vec),val**2))
                     dot_product = np.dot(input_vec.T,np.dot(T,input_vec))
                     ans = dot_product*factor
-                    ans = ans/linalg.norm(input_vec)/dot_product
+                    ans = ans/np.linalg.norm(input_vec)/dot_product
                     tol = 1e-3
                     if abs(ans-val**2) <= tol:
                         logger.debug(strm('ALPHA HAS CONVERGED.'))
@@ -4853,7 +4853,7 @@ class nddata (object):
                 def newton_min(input_vec,val):
                     fder = dd_chi(G(input_vec),val)
                     fval = d_chi(input_vec,val)
-                    return (input_vec + np.dot(linalg.inv(fder),fval))
+                    return (input_vec + np.dot(np.linalg.inv(fder),fval))
                 def mod_BRD(guess,maxiter=20):
                     smoothing_param = guess
                     alpha_converged = False
