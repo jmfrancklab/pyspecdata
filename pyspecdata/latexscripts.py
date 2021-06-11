@@ -143,17 +143,17 @@ def wrapviewer():
         which_command = 'b'
         full_pdf_name = new_pdf_basename+'.pdf'
         full_tex_name = orig_tex_basename+'.tex'
-        if which_command is 'f':#forward
+        if which_command == 'f':#forward
             # no longer used, but make this functional, in case I want it later
             #3/29/14 -- replaced '+sys.argv[2]+' w/ default
             cmdstring = 'evince_vim_dbus.py EVINCE '+full_pdf_name+' 1 '+full_tex_name 
             print(cmdstring)
             os.system(cmdstring)
-        elif which_command is 'i':#inverse
+        elif which_command == 'i':#inverse
             cmdstring = 'evince_vim_dbus.py GVIM default '+full_pdf_name+' '+full_tex_name
             print(cmdstring)
             os.system(cmdstring)
-        elif which_command is 'b':#both
+        elif which_command == 'b':#both
             cmdstring = '~/silentfork.sh evince_vim_dbus.py EVINCE '+full_pdf_name+' 1 '+full_tex_name 
             print(cmdstring)
             os.system(cmdstring)
