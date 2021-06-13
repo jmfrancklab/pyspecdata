@@ -155,6 +155,12 @@ History/Roadmap
     - 0.9.5.4.1
       - ``to_ppm`` should only be a method of inherited class
       - 1.5 and 2.5 D ILT
+
+0.9.5.5
+    - Implement a reader for Cary (Varian) UV-Vis files with examples.
+    - Implement an ``nddata_placeholder`` class for quickly loading and
+      searching through datasets in *e.g.* UV-Vis files or Bruker directories
+      without actually loading all the data from each dataset.
 1.0
     We are working on four major upgrades relative to the 0.9 sequence:
 
