@@ -1,6 +1,6 @@
 from ..general_functions import *
-if not inside_sphinx():
-    from pylab import r_,fft,ifft
+from numpy import r_
+import numpy as np
 from .ft_shift import _find_index,thinkaboutit_message
 
 def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
@@ -90,7 +90,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
                 "dimlabels is: ",self.dimlabels))
         padded_length = self.data.shape[thisaxis]
         if pad is True:
-            padded_length = int(2**(ceil(log2(padded_length))))
+            padded_length = int(2**(np.ceil(np.log2(padded_length))))
         elif pad:
             padded_length = pad
         u = self.getaxis(axes[j]) # here, u is time
@@ -103,8 +103,10 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
         #       I calculate the post-discrepancy here
         #{{{ need to calculate du and all checks here so I can calculate new u
         du = check_ascending_axis(u,tolerance,"In order to perform FT or IFT")
+        self.set_ft_prop(axes[j],['dt'],du)
         #}}}
-        dv = double(1) / du / double(padded_length) # so padded length gives the SW
+        dv = np.double(1) / du / np.double(padded_length) # so padded length gives the SW
+        self.set_ft_prop(axes[j],['df'],dv)
         v = r_[0:padded_length] * dv # v is the name of the *new* axis.  Note
         #   that we stop one index before the SW, which is what we want
         desired_startpoint = self.get_ft_prop(axes[j],['start','freq'])
@@ -153,7 +155,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
                     " smaller than dv ({:0.2f}), but it's {:0.2f} -- what's going"
                     " on??").format(dv,p2_post_discrepancy)
             phaseshift =  self.fromaxis(axes[j],
-                    lambda q: exp(-1j*2*pi*q*p2_post_discrepancy))
+                    lambda q: np.exp(-1j*2*pi*q*p2_post_discrepancy))
             try:
                 self.data *= phaseshift.data
             except TypeError as e:
@@ -168,7 +170,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
             newdata[thisaxis] = padded_length
             targetslice = [slice(None,None,None)] * len(newdata)
             targetslice[thisaxis] = slice(None,self.data.shape[thisaxis])
-            newdata = zeros(newdata,dtype = self.data.dtype)
+            newdata = np.zeros(newdata,dtype = self.data.dtype)
             newdata[targetslice] = self.data
             self.data = newdata
             u = r_[0:padded_length] * du + u[0]
@@ -179,12 +181,12 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
         #}}}
         #{{{ the actual (I)FFT portion of the routine
         if cosine:
-            self.data = fft(self.data,
-                    axis=thisaxis) + ifft(self.data,
+            self.data = np.fft.fft(self.data,
+                    axis=thisaxis) + np.ifft(self.data,
                             axis=thisaxis)
             self.data *= 0.5
         else:
-            self.data = fft(self.data,
+            self.data = np.fft.fft(self.data,
                                 axis=thisaxis)
         self.axis_coords[thisaxis] = v
         #}}}
@@ -211,11 +213,12 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
         #       zero, then the pre-ft data was shifted, and I must reflect
         #       that by performing a post-ft phase shift
         if p2_pre_discrepancy is not None:
-            assert abs(p2_pre_discrepancy)<abs(du),("I expect the discrepancy to be"
-                    " smaller than du ({:0.2f}), but it's {:0.2f} -- what's going"
+            assert abs(p2_pre_discrepancy)<abs(du) or np.isclose(
+                    abs(p2_pre_discrepancy),abs(du)),("I expect the discrepancy to be"
+                    " smaller than du ({:0.5g}), but it's {:0.5g} -- what's going"
                     " on??").format(du,p2_pre_discrepancy)
             result = self * self.fromaxis(axes[j],
-                    lambda f: exp(1j*2*pi*f*p2_pre_discrepancy))
+                    lambda f: np.exp(1j*2*pi*f*p2_pre_discrepancy))
             self.data = result.data
         #}}}
         if automix:
@@ -225,5 +228,5 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
             add_to_axis = (automix - carrier) / sw
             if verbose: print("which is",add_to_axis,"times the sw of",sw,"off from the automix value of",automix)
             x = self.getaxis(axes[j])
-            x += round(add_to_axis)*sw
+            x += np.round(add_to_axis)*sw
     return self

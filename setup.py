@@ -5,11 +5,11 @@ import subprocess
 import sys
 import os
 
-if find_executable("gcc") is None:
-    raise RuntimeError("Please do not give up, but read the following message carefully!\nThis isn't going to work because distutils can't find gcc!\nIf you are on windows, this is probably happening due a problem with Anaconda.  In that case, you need to make sure that the folder that contains mingw gcc is in your path"
-            +r"(something like: C:\ProgramData\Anaconda3\MinGW\bin\)"+'\n'
-            +r"(In windows, you can temporarily add to path with: set PATH:%PATH%;C:\your\path "
-            +'\nIf all else fails, contact the pySpecData developers!')
+#if find_executable("gcc") is None:
+#    raise RuntimeError("Please do not give up, but read the following message carefully!\nThis isn't going to work because distutils can't find gcc!\nIf you are on windows, this is probably happening due a problem with Anaconda.  In that case, you need to make sure that the folder that contains mingw gcc is in your path"
+#            +r"(something like: C:\ProgramData\Anaconda3\MinGW\bin\)"+'\n'
+#            +r"(In windows, you can temporarily add to path with: set PATH:%PATH%;C:\your\path "
+#            +'\nIf all else fails, contact the pySpecData developers!')
 
 general_error = "I couldn't import {:s} -- go install it first!!\n(I'm doing this because dependency-based install of PyQt, and some others does not usually go well -- use your distro software (conda install ..., aptitude, etc) instead)\nIn fact, you probably want to install:\n\tpyqt, unxutils, matplotlib, mingw, and libpython\nAlso, it's recommended to start by running ``python setup.py config --fcompiler=gfortran develop``"
 try:
@@ -25,34 +25,57 @@ ext_modules.append(Extension(name = 'pyspecdata._nnls',
         define_macros = [('ADD_UNDERSCORE',None)],
         extra_compile_args = ['-g'],# debug flags
         ))
-
-setup(
-    name='pySpecData',
-    author='J. M. Franck',
-    version=__version__,
-    packages=setuptools.find_packages(),
-    license='LICENSE.md',
-    author_email='jmfranck@notgiven.com',
-    url='http://github.com/jmfranck/pyspecdata',
-    description='object-oriented N-dimensional data processing with notebook functionality',
-    long_description=open('README.rst',encoding='utf-8').read(),
-    install_requires=[
-        "sympy",
-        "numpy",
-        "scipy",
-        "h5py",
-        "matplotlib",
-        "pillow",
-        ],
-    ext_modules = ext_modules,
-    entry_points=dict(console_scripts=
-        ['scons_continuous=pyspecdata.latexscripts:repeat_scons',
-        'update_notebook_pythonscripts=pyspecdata.latexscripts:main',
-        'pdflatex_notebook_wrapper=pyspecdata.latexscripts:wraplatex',
-        'pdflatex_notebook_view_wrapper=pyspecdata.latexscripts:wrapviewer',
-        'pyspecdata_dataconfig=pyspecdata.latexscripts:genconfig']
-        ),
-)
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+if on_rtd:
+    setup(
+        name='pySpecData',
+        author='J. M. Franck',
+        version=__version__,
+        packages=setuptools.find_packages(),
+        license='LICENSE.md',
+        author_email='jmfranck@notgiven.com',
+        url='http://github.com/jmfranck/pyspecdata',
+        description='object-oriented N-dimensional data processing with notebook functionality',
+        long_description=open('README.rst',encoding='utf-8').read(),
+        install_requires=[
+            "sympy",
+            "numpy",
+            "scipy",
+            "h5py",
+            "matplotlib",
+            "pillow",
+            ],
+    )
+else:
+    setup(
+        name='pySpecData',
+        author='J. M. Franck',
+        version=__version__,
+        packages=setuptools.find_packages(),
+        license='LICENSE.md',
+        author_email='jmfranck@notgiven.com',
+        url='http://github.com/jmfranck/pyspecdata',
+        description='object-oriented N-dimensional data processing with notebook functionality',
+        long_description=open('README.rst',encoding='utf-8').read(),
+        install_requires=[
+            "sympy",
+            "numpy",
+            "scipy",
+            "h5py",
+            "matplotlib",
+            "pillow",
+            ],
+        ext_modules = ext_modules,
+        entry_points=dict(console_scripts=
+            ['scons_continuous=pyspecdata.latexscripts:repeat_scons',
+            'update_notebook_pythonscripts=pyspecdata.latexscripts:main',
+            'pdflatex_notebook_wrapper=pyspecdata.latexscripts:wraplatex',
+            'pdflatex_notebook_view_wrapper=pyspecdata.latexscripts:wrapviewer',
+            'pyspecdata_dataconfig=pyspecdata.latexscripts:genconfig',
+            'pyspecdata_register_dir=pyspecdata.datadir:register_directory',
+            ]
+            ),
+    )
 tryagain = False
 
 print("You can now run pyspecdata_dataconfig to generate a template configuration file (which will show up in your home directory).")

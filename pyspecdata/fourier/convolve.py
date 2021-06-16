@@ -1,6 +1,5 @@
 from ..general_functions import inside_sphinx
-if not inside_sphinx():
-    from pylab import r_,fft,ifft,ifftshift,fftshift
+from pylab import r_,fft,ifft,ifftshift,fftshift,exp,ones_like
 
 def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*(y**2))))):
     r'''Perform a convolution.
@@ -36,7 +35,5 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*
     filtershape = ones_like(self.data.shape)
     filtershape[thisaxis] = len(myfilter)
     myfilter = myfilter.reshape(filtershape)
-    #self.data = ifftshift(ifft(fftshift(fft(self.data,axis = thisaxis),axes = thisaxis)*fftshift(fft(myfilter,axis = thisaxis),axes=thisaxis),axis = thisaxis),axes = thisaxis) # for some reason fftconvolve doesn't work!
     self.data = ifft(fft(self.data,axis = thisaxis)*fft(myfilter,axis = thisaxis),axis = thisaxis)
-    #self.data = fftconvolve(self.data,myfilter,mode='same') # I need this, so the noise doesn't break up my blocks
     return self

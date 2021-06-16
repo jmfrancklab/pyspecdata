@@ -1,0 +1,13 @@
+div.sphx-glr-download a {
+  background-color: #ffc !important;
+  background-image: linear-gradient(to bottom, #EFF, #2980B9) !important;
+  border-radius: 4px !important;
+  border: 1px solid #2980B9 !important;
+  color: #000 !important;
+  display: inline-block !important;
+  font-weight: bold !important;
+  padding: 0.2ex !important;
+  text-align: center !important;
+  font-size: x-small !important;
+  line-height: 0px !important;
+}

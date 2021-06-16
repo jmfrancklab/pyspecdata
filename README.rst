@@ -4,7 +4,7 @@
 To learn more about pyspecdata, you can head over to the `documentation <http://jmfrancklab.github.io/pyspecdata>`_.
 
 If you already know that you want to install,
-and you are using Anaconda, you should see `conda_upgrade.md <conda_upgrade.md>`_.
+see `Installation <#installation>`_
 
 Please note this package is heavily utilized by three other packages that our lab manages on github:
 
@@ -193,12 +193,24 @@ History/Roadmap
 1.2.0
     Implement a version of figure list that can be interfaced with Qt.
 
+Installation
+============
 
-Installation Notes
-==================
+On Windows with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
+just run
+``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython``
+followed by ``conda install -c msys2 m2w64-toolchain`` (the libpython and m2w64-toolchain are only required if you are a developer).
+Then (if not a developer) install either via pip (`pip install pyspecdata`) or (if you want to be able to develop or modify the code) follow the `installation for developers <#installation-for-developers>`_ below.
 
-*Highly Recommended:* 
-Install the following packages using a good package-management system (conda or linux package manager), rather than relying on `pip` or `setuptools` to install them:
+On CentOS7, we've tested
+``yum install python-matplotlib python-matplotlib-qt4 python-devel sympy h5py python-tables scipy``
+(after running ``yum install epel-release`` to install the EPEL distribution)
+
+On Mac, your python distribution needs to have a working Fortran compiler, since some of the modules use Fortran.
+
+More generally,
+these instructions are based on the fact that it's *Highly Recommended* 
+that you install the following packages using a good package-management system (conda or linux package manager), rather than relying on `pip` or `setuptools` to install them:
 
 * numpy
 
@@ -216,14 +228,6 @@ Install the following packages using a good package-management system (conda or 
 
 * The python libraries, and a Fortran compiler.  Under anaconda, these are supplied by `libpython` and `mingw`, respectively.
 
-For example, on Windows with `Anaconda 2.7`_.
--- just run
-``conda install -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw``.
-
-On CentOS7, we've tested
-``yum install python-matplotlib python-matplotlib-qt4 python-devel sympy h5py python-tables scipy``
-(after running ``yum install epel-release`` to install the EPEL distribution)
-
 (If you don't install these packages with your system `pip` will try to install them, and there is a good chance it will fail -- it's known not to work great with several of these; `setuptools` should error out and tell you to install the packages.)
 
 *mayavi*: Mayavi can be used (and gives very nice graphics), but frequently lags behind common Python distros.
@@ -234,143 +238,20 @@ Rather, you can just import ``mayavi.mlab`` and pass it to any figure list that 
 Installation for developers
 ---------------------------
 
-(Once these are installed,
+Once these are installed,
 to install from github, just ``git clone https://github.com/jmfranck/pyspecdata.git`` then move to the directory where setup.py lives,
 and do
-``python setup_paramset.py install``
-followed by
-``python setup.py develop``)
+``python setup.py develop``.
+Make sure that this terminates with a successful message, and without any compilation errors.
 
 *Important note for conda on Windows 10:*
 For reasons that we don't understand, the Fortran compiler can give odd errors, depending on which terminal you are using to install.
 This appears to be Windows' fault, rather than conda's (?).
 We highly recommend trying both the Anaconda prompt, as well as the standard dos prompt (press start: type `cmd`) if you experience errors related to compilation.
 
-For compiled extensions
-```````````````````````
 
-All compiled extensions are currently stripped out, but will be slowly
-    added back in.
-
-If you are on windows, you will need some additional packages to enable compilation:
-
-* libpython
-
-* mingw
-
-The last one is specific to Windows, and provide things like the ``gcc`` and ``gfortran`` compiler.
-
-Quick-Start
-===========
-
-To get started with this code:
-
-1. Install a good Python 2.7 distribution
-
-   * On Windows or MacOS: `Anaconda 2.7 <https://www.continuum.io/downloads>`_.  When installing select "install for all users."
-
-2. Install libraries that pyspecdata depends on. (If you're interested in why you need to do this first, see installation notes below.)
-
-   * On Windows or MacOS: in the Anaconda Prompt, run ``conda install numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw``.
-
-   * For Mac, you can also use homebrew.
-     Note that, in the current version python is renamed to `python2`,
-     and `pip` to `pip2`.
-     Most packages can just be installed with `pip2` under homebrew.
-     If you want HDF5 functionality, you will need to run `brew tap homebrew/science` followed by `brew install hdf5`.
-
-   * On Linux, just use your package manager (``aptitude``, ``yum``, *etc.*) to install these libraries.
-
-3. Install `paramset_pyspecdata`: ``pip install paramset_pyspecdata``,
-   then `pyspecdata`: ``pip install pyspecdata``
-   or follow the "Installation for developers" section above.
-
-   * If you have difficulties with the install, check that you have a gfortran
-     compiler installed (in conda windows, this comes from mingw) and that, if
-     you are using windows, you are trying to install from a standard dos
-     prompt (we like to use git bash, but anaconda and related compilers can
-     misbehave from git bash sometimes).
-
-4. Set up directories.
-   You can run the command `pyspecdata_dataconfig` to assist with this.
-
-   It creates a file in your home directory
-   called ``_pyspecdata`` (Windows  -- note the underscore)
-   or ``.pyspecdata`` (Mac or Linux).
-
-   Here is an example -- you can copy and paste it as a starting point:
-
-   ::
-
-        [General]
-        data_directory = c:/Users/yourusername/exp_data
-        notebook_directory = c:/Users/yourusername/notebook
-
-   Note that any backslashes are substituted with forward slashes.
-   Also note that you will
-   need to change the directories to refer to real directories that already
-   exist or that you create on your hard drive (see below).
-   Note that on Windows, you can use notebook, *etc.* to create this file,
-   but it cannot have a .txt, *etc.* `extension <http://www.wikihow.com/Change-a-File-Extension>`_.
-
-   * Where is my "home directory"? (Where do I put the `_pyspecdata` file?)
-
-       * On Windows, your home directory is likely something like
-         ``C:\Users\yourusername``.
-         You can access your home directory by opening any file folder window, and
-         starting to type your name in the address bar -- it's the first folder that shows up
-         underneath.
-
-       * On MacOS and Linux, it's the directory indicated by ``~``.  On Linux,
-         this typically expands to ``/home/yourusername``.
-
-       * On any OS, you can always find your home directory in Python using ``import os;print os.path.expanduser('~')``
-
-   * What are these directories? → You can either create them or point to existing directories.
-
-       * ``data_directory`` must be set.  It is a directory, anywhere on the
-         hard drive, where you store all your raw experimental data.  It must
-         contain at least one subdirectory -- each subdirectory stores
-         different "experiment types," typically acquired on different instruments
-         (*e.g.* you might have subdirectories named ``400MHz_NMR``,
-         ``500MHz_NMR``, ``95GHz_ESR``, and ``Xband_ESR``).
-
-           * The library now supports having datasets packed into `.zip` or `.tgz` files.
-             For example, Bruker NMR files typically comprise a directory with several subdirectories for the numbered experiments.
-             We routinely pack these up as zip files on the spectrometer, and directly read the data from the zip files.
-
-           * If you're setting up a lab, you might want to separately sync each different
-             experiment type folders using `seafile <https://www.seafile.com/en/home/>`_.
-
-             Or you can sync the whole data directory with dropbox.
-
-       * If set, the ``notebook_directory`` is intended to contain latex
-         files with embedded python code, as well as some processed
-         output.
-
-   * *Do not* use quotes to surround the directory name.  Even if it contains
-     spaces, do not use quotes, and do not escape spaces with backslashes.
-
-   * Note that on Windows, your desktop folder is typically in ``C:\Users\yourusername\Desktop``
-
-   * Why do I need to do this?
-
-       * Setting this configuration allows you to move code between different
-         computers (*e.g.* a spectrometer computer, a desktop, and a laptop),
-         and re-use the same code, even though the locations of the files are
-         changing.  This should work even across different operating systems.
-
-       * It specifically enables functions like ``find_file(...)``,
-         ``get_datadir(...)``, *etc.* that can search the data directory for a
-         file name matching some basic criteria.
-         You should always use these to load your data,
-         and *never* use the absolute path.
-
-       * The GUI tool that will allow you to set up ``_pyspecdata`` by pointing
-         and clicking has not yet been set up.
-
-Notes on compilation of NNLS
-============================
+Notes on compilation of compiled extensions
+-------------------------------------------
 
 We recently added a compiled extension that performs non-negative least-squares for regularization (DOSY/Relaxometry/etc.)
 
@@ -382,3 +263,19 @@ We recommend using the normal dos command prompt (cmd) to install pyspecdata, an
 (Recent versions of mingw appear to put .bat files in a preferential location
 in the path, and these .bat files seem to mess everything up, including
 compatibility with the git bash prompt.)
+
+Further installation notes
+--------------------------
+
+Upon upgrading from Python 2.X to 3.X, we made some notes in
+`conda_upgrade.md <conda_upgrade.md>`_;
+this includes some useful (but possibly dated) instructions on how to
+implement different environments in anaconda,
+how to deal with AppLocker permissions, and Windows permissions generally,
+if you run into any of these issues.
+
+Open an issue!
+--------------
+
+If you have issues with installing or using pyspecdata, don't hesitate to open
+an issue on this page!
