@@ -54,7 +54,7 @@ def xepr(filename, dimname='', verbose=False):
         # need to log the fact that it's missing manually
         err = log_fname('missing_data_files',
                 os.path.split(filename_spc)[-1],
-                os.path.split(os.path.split(filename_spc)[0])[-1],
+                os.path.split(filename_spc)[0],
                 err=True)
         raise IOError("Can't find file %s\n%s"%(filename_spc,err))
     with open(filename_spc,'rb') as fp:
