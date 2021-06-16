@@ -235,8 +235,11 @@ def find_file(searchstring,
         return postproc(data,**kwargs)
     else:
         if postproc is None:
-            postproc_type = data.get_prop('postproc_type')
-            logger.debug(strm("found postproc_type",postproc_type))
+            if type(data) is dict:
+                postproc_type = 'stub'
+            else:
+                postproc_type = data.get_prop('postproc_type')
+                logger.debug(strm("found postproc_type",postproc_type))
         else:
             postproc_type = postproc
         if postproc_type is None:
@@ -300,7 +303,8 @@ def _check_signature(filename):
         OR `None` if the type is unknown.
     """
     file_signatures = {b'\x89\x48\x44\x46\x0d\x0a\x1a\x0a':'HDF5',
-            b'DOS  Format':'DOS Format'}
+            b'DOS  Format':'DOS Format',
+            b'\x11Varian':'Cary UV'}
     max_sig_length = max(list(map(len,list(file_signatures.keys()))))
     with open(filename,'rb') as fp:
         inistring = fp.read(max_sig_length)
@@ -459,6 +463,8 @@ def load_indiv_file(filename, dimname='', return_acq=False,
                     data = bruker_esr.xepr(filename, dimname=dimname)
                 else:
                     raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
+            elif type_by_signature == 'Cary UV':
+                data = load_cary.load_cary(filename)
             else:
                 raise RuntimeError("Type %s not yet supported!"%type_by_signature)
         else:
@@ -486,7 +492,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
     if return_acq:
         raise ValueError('return_acq is deprecated!! All properties are now set directly to the nddata using the set_prop function')
     logger.debug("done with load_indiv_file")
-    if '' in data.dimlabels:
+    if type(data) is not dict and '' in data.dimlabels:
         if ndshape(data)[''] < 2:
             data = data['',0]
         else:
