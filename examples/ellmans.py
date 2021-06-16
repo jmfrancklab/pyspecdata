@@ -1,13 +1,19 @@
+"""
+Manipulation of UV-Vis data
+===========================
+
+After you've looked at the simple UV-Vis example, this one shows how you can
+manipulate UV-Vis data.
+"""
+from pylab import *
 from pyspecdata import *
-from pyspecdata.load_files.load_cary import load_cary
 from itertools import cycle
 color_cycle = cycle(['#1f77b4', '#ff7f0e', '#2ca02c',
     '#d62728', '#9467bd', '#8c564b', '#e377c2',
     '#7f7f7f', '#bcbd22', '#17becf'])
 #init_logging('debug')
-data = load_cary(search_filename('200703_Ellman_before_SL.DSW',
-    exp_type='UV_Vis/Ellmans_Assay',
-    unique=True))
+data = find_file('200703_Ellman_before_SL.DSW',
+    exp_type='UV_Vis/Ellmans_Assay')
 print("the experiments present in this file are:",data.keys())
 with figlist_var() as fl:
     fl.next("UV data")
@@ -35,9 +41,8 @@ with figlist_var() as fl:
     ylabel(d.get_units())
     gridandtick(gca())
     print("now I'm going to try a DSW file")
-    data = load_cary(search_filename('Ras_Stability4',
-        exp_type='Ras_stability/At_RT',
-        unique=True))
+    data = find_file('Ras_Stability4',
+            exp_type='Ras_stability/At_RT')
     print("the experiments present in this file are:",data.keys())
     fl.next("kinetics data")
     for k,thisspectrum in data.items():
