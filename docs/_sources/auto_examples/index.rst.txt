@@ -14,14 +14,14 @@ various functions.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="a demonstration of the logging functionality -- output is logged to ~/pyspecdata.log (or the sa...">
+    <div class="sphx-glr-thumbcontainer" tooltip="A simple demo of loading Cary UV-Vis data. This example just loads a file and plots all the spe...">
 
 .. only:: html
 
- .. figure:: /auto_examples/images/thumb/sphx_glr_log_test_thumb.png
-     :alt: Logging Functionality
+ .. figure:: /auto_examples/images/thumb/sphx_glr_Cary_simple_thumb.png
+     :alt: Simple Cary UV-Vis loading
 
-     :ref:`sphx_glr_auto_examples_log_test.py`
+     :ref:`sphx_glr_auto_examples_Cary_simple.py`
 
 .. raw:: html
 
@@ -31,28 +31,7 @@ various functions.
 .. toctree::
    :hidden:
 
-   /auto_examples/log_test
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="this is a basic example that should generate images in sphinx, but still imports pyspecdata">
-
-.. only:: html
-
- .. figure:: /auto_examples/images/thumb/sphx_glr_matplotlib_test_thumb.png
-     :alt: Matplotlib Example
-
-     :ref:`sphx_glr_auto_examples_matplotlib_test.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /auto_examples/matplotlib_test
+   /auto_examples/Cary_simple
 
 .. raw:: html
 
@@ -74,27 +53,6 @@ various functions.
    :hidden:
 
    /auto_examples/extend
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="an example of saving nddata to hdf5 files, which preserves all of the nddata information flawle...">
-
-.. only:: html
-
- .. figure:: /auto_examples/images/thumb/sphx_glr_save_hdf_thumb.png
-     :alt: Saving HDF5 Files
-
-     :ref:`sphx_glr_auto_examples_save_hdf.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /auto_examples/save_hdf
 
 .. raw:: html
 
@@ -140,6 +98,27 @@ various functions.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="After you&#x27;ve looked at the simple UV-Vis example, this one shows how you can manipulate UV-Vis ...">
+
+.. only:: html
+
+ .. figure:: /auto_examples/images/thumb/sphx_glr_ellmans_thumb.png
+     :alt: Manipulation of UV-Vis data
+
+     :ref:`sphx_glr_auto_examples_ellmans.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/ellmans
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="This example creates fake data with noise then fits the exponential with the fitdata function.">
 
 .. only:: html
@@ -179,6 +158,202 @@ various functions.
    :hidden:
 
    /auto_examples/plot_container
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
+.. _sphx_glr_auto_examples_matplotlib:
+
+Matplotlib Examples
+===================
+
+These are really more for development purposes and checks, and not really intended as part of the documentation.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Test unit support with each of the Matplotlib primitive artist types.">
+
+.. only:: html
+
+ .. figure:: /auto_examples/matplotlib/images/thumb/sphx_glr_artist_tests_thumb.png
+     :alt: Artist tests
+
+     :ref:`sphx_glr_auto_examples_matplotlib_artist_tests.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/matplotlib/artist_tests
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="this is a basic example that should generate images in sphinx, but still imports pyspecdata">
+
+.. only:: html
+
+ .. figure:: /auto_examples/matplotlib/images/thumb/sphx_glr_matplotlib_test_thumb.png
+     :alt: Matplotlib Example
+
+     :ref:`sphx_glr_auto_examples_matplotlib_matplotlib_test.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/matplotlib/matplotlib_test
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="transformation math">
+
+.. only:: html
+
+ .. figure:: /auto_examples/matplotlib/images/thumb/sphx_glr_transf_math_thumb.png
+     :alt: transformation math
+
+     :ref:`sphx_glr_auto_examples_matplotlib_transf_math.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/matplotlib/transf_math
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="draw a span">
+
+.. only:: html
+
+ .. figure:: /auto_examples/matplotlib/images/thumb/sphx_glr_draw_span_thumb.png
+     :alt: draw a span
+
+     :ref:`sphx_glr_auto_examples_matplotlib_draw_span.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/matplotlib/draw_span
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
+.. _sphx_glr_auto_examples_text_only:
+
+Text-Only Examples
+==================
+
+These are examples that only generate text.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="a demonstration of the logging functionality -- output is logged to ~/pyspecdata.log (or the sa...">
+
+.. only:: html
+
+ .. figure:: /auto_examples/text_only/images/thumb/sphx_glr_log_test_thumb.png
+     :alt: Logging Functionality
+
+     :ref:`sphx_glr_auto_examples_text_only_log_test.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/text_only/log_test
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Trying to load an HDF5 file without an expno generates an error with a list of possible node na...">
+
+.. only:: html
+
+ .. figure:: /auto_examples/text_only/images/thumb/sphx_glr_hdf5_error_thumb.png
+     :alt: HDF5 error message
+
+     :ref:`sphx_glr_auto_examples_text_only_hdf5_error.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/text_only/hdf5_error
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="an example of saving nddata to hdf5 files, which preserves all of the nddata information flawle...">
+
+.. only:: html
+
+ .. figure:: /auto_examples/text_only/images/thumb/sphx_glr_save_hdf_thumb.png
+     :alt: Saving HDF5 Files
+
+     :ref:`sphx_glr_auto_examples_text_only_save_hdf.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/text_only/save_hdf
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Basic Units">
+
+.. only:: html
+
+ .. figure:: /auto_examples/text_only/images/thumb/sphx_glr_basic_units_thumb.png
+     :alt: Basic Units
+
+     :ref:`sphx_glr_auto_examples_text_only_basic_units.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/text_only/basic_units
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>

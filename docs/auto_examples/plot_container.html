@@ -33,7 +33,6 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -41,6 +40,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Basic Units" href="basic_units.html" />
     <link rel="prev" title="Fitting Data" href="fit_fake_data.html" /> 
 </head>
 
@@ -102,15 +102,22 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">PySpecData Examples</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="log_test.html">Logging Functionality</a></li>
-<li class="toctree-l2"><a class="reference internal" href="matplotlib_test.html">Matplotlib Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Cary_simple.html">Simple Cary UV-Vis loading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hdf5_error.html">HDF5 error message</a></li>
+<li class="toctree-l2"><a class="reference internal" href="artist_tests.html">Artist tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="extend.html">Extend</a></li>
 <li class="toctree-l2"><a class="reference internal" href="save_hdf.html">Saving HDF5 Files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="esr_example.html">Bruker cw ESR Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="draw_span.html">draw a span</a></li>
 <li class="toctree-l2"><a class="reference internal" href="image_plot.html">Plotting Routines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ellmans.html">Manipulation of UV-Vis data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fit_fake_data.html">Fitting Data</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Plot Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_units.html">Basic Units</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#matplotlib-examples">Matplotlib Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#text-only-examples">Text-Only Examples</a></li>
 </ul>
 
             
@@ -199,7 +206,7 @@ The set_smart_bounds function was deprecated in Matplotlib 3.2 and will be remov
 C:\Users\johnf\notebook\pyspecdata\examples\plot_container.py:26: MatplotlibDeprecationWarning:
 The set_smart_bounds function was deprecated in Matplotlib 3.2 and will be removed two minor releases later.
   spine.set_smart_bounds(True)
-c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2142: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2172: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
   plt.gcf().tight_layout()
 </pre></div>
 </div>
@@ -291,6 +298,7 @@ c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2142: UserWarning: This fi
     <span class="n">fl</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="s2">&quot;test figure&quot;</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axCentral</span><span class="p">)</span>
 
     <span class="n">fl</span><span class="o">.</span><span class="n">image</span><span class="p">(</span><span class="n">test_data</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axCentral</span><span class="p">,</span> <span class="n">human_units</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">axCentral</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
     <span class="n">axCentral</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="n">fl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">test_data</span><span class="o">.</span><span class="n">C</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">),</span> <span class="n">ax</span><span class="o">=</span><span class="n">axTop</span><span class="p">,</span> <span class="n">human_units</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">axTop</span><span class="o">.</span><span class="n">autoscale</span><span class="p">(</span><span class="n">enable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tight</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># axis tight</span>
@@ -306,7 +314,7 @@ c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2142: UserWarning: This fi
     <span class="n">adjust_spines</span><span class="p">(</span><span class="n">axRight</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;bottom&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.144 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.193 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-container-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/1cfae5347dc3aadd250411c34a115068/plot_container.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_container.py</span></code></a></p>
@@ -325,6 +333,8 @@ c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2142: UserWarning: This fi
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="basic_units.html" class="btn btn-neutral float-right" title="Basic Units" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="fit_fake_data.html" class="btn btn-neutral float-left" title="Fitting Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

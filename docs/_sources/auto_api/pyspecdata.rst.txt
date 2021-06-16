@@ -95,6 +95,22 @@ pyspecdata.nnls module
    :undoc-members:
    :show-inheritance:
 
+pyspecdata.placeholder module
+-----------------------------
+
+.. automodule:: pyspecdata.placeholder
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pyspecdata.temp module
+----------------------
+
+.. automodule:: pyspecdata.temp
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pyspecdata.units module
 -----------------------
 

@@ -33,7 +33,6 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -100,6 +99,8 @@
 <p class="caption"><span class="caption-text">Example Gallery</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">PySpecData Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
 </ul>
 
             
@@ -503,8 +504,8 @@ and determines the axis values as follows:
 <span id="pyspecdata-core-module"></span><h2>pyspecdata.core module<a class="headerlink" href="#module-pyspecdata.core" title="Permalink to this headline">¶</a></h2>
 <p>Provides the core components of pyspecdata.
 Currently, this is a very large file that we will slowly break down into separate modules or packages.</p>
-<p>The classes <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata_hdf</span></code>, <a class="reference internal" href="#pyspecdata.core.ndshape" title="pyspecdata.core.ndshape"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code></a>, the
-function <a class="reference internal" href="#pyspecdata.core.plot" title="pyspecdata.core.plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot()</span></code></a>, and the class <a class="reference internal" href="../generated/pyspecdata.core.fitdata.html#pyspecdata.core.fitdata" title="pyspecdata.core.fitdata"><code class="xref py py-class docutils literal notranslate"><span class="pre">fitdata</span></code></a>
+<p>The classes <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata_hdf</span></code>, <a class="reference internal" href="#pyspecdata.core.ndshape" title="pyspecdata.core.ndshape"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code></a>, the
+function <a class="reference internal" href="#pyspecdata.core.plot" title="pyspecdata.core.plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot()</span></code></a>, and the class <a class="reference internal" href="#pyspecdata.core.fitdata" title="pyspecdata.core.fitdata"><code class="xref py py-class docutils literal notranslate"><span class="pre">fitdata</span></code></a>
 are the core components of the N-Dimensional processing routines.
 Start by familiarizing yourself with those.</p>
 <p>The <a class="reference internal" href="#pyspecdata.core.figlist" title="pyspecdata.core.figlist"><code class="xref py py-class docutils literal notranslate"><span class="pre">figlist</span></code></a> is the base class for “Figure lists.”
@@ -610,6 +611,23 @@ The np.array is modified in-place.</p></li>
 keep the np.ones in A
 b_ind and a_ind can be either a single key, or a list of keys;
 if more than one element in B matches that in A, include both options!!</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyspecdata.core.det_oom">
+<code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">det_oom</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_to_test</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.det_oom" title="Permalink to this definition">¶</a></dt>
+<dd><p>determine the average order of magnitude – for prefixing units</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data_to_test</strong> (<em>ndarray</em>) – a numpy array (e.g. the result of a .getaxis( call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>average_oom</strong> – the average order of magnitude, rounded to the nearest multiple of 3</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -818,7 +836,7 @@ current plot in the figurelist</p></li>
 <code class="sig-name descname">A</code><a class="headerlink" href="#pyspecdata.core.figlist.A" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
+<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1087,17 +1105,17 @@ and not return a figure list in the output</p>
 <dl class="py class">
 <dt id="pyspecdata.core.fitdata">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">fitdata</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
 <p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
 <p>The user creates a fitdata class object from an existing nddata
 class object, and on this fitdata object can define the
-<a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.functional_form" title="pyspecdata.core.fitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
+<a class="reference internal" href="#pyspecdata.core.fitdata.functional_form" title="pyspecdata.core.fitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
 data of the original nddata.
 This functional form must be provided as a sympy expression, with
 one of its variables matching the name of the dimension that the
 user would like to fit to.
 The user provides fit coefficients using <code class="xref py py-func docutils literal notranslate"><span class="pre">fit_coeff()</span></code> and
-obtains output using <a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.fit" title="pyspecdata.core.fitdata.fit"><code class="xref py py-func docutils literal notranslate"><span class="pre">fit()</span></code></a> and <a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.eval" title="pyspecdata.core.fitdata.eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.</p>
+obtains output using <a class="reference internal" href="#pyspecdata.core.fitdata.fit" title="pyspecdata.core.fitdata.fit"><code class="xref py py-func docutils literal notranslate"><span class="pre">fit()</span></code></a> and <a class="reference internal" href="#pyspecdata.core.fitdata.eval" title="pyspecdata.core.fitdata.eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.</p>
 <p>If you haven’t done this before,
 create a jupyter notebook (not checked in, just for your own playing around) with:
 <code class="docutils literal notranslate"><span class="pre">`</span>
@@ -1177,7 +1195,7 @@ nddata metadata.</p>
 <dd class="field-odd"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+<dd class="field-even"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1305,7 +1323,7 @@ must be sympy symbols</p>
 <dd class="field-even"><p><strong>self</strong> – The modified nddata</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1326,7 +1344,7 @@ must be sympy symbols</p>
 
 <dl class="py function">
 <dt id="pyspecdata.core.gridandtick">
-<code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">gridandtick</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">0, 0</span></em>, <em class="sig-param"><span class="n">precision</span><span class="o">=</span><span class="default_value">2, 2</span></em>, <em class="sig-param"><span class="n">labelstring</span><span class="o">=</span><span class="default_value">'', ''</span></em>, <em class="sig-param"><span class="n">gridcolor</span><span class="o">=</span><span class="default_value">array([0, 0, 0], dtype=int32)</span></em>, <em class="sig-param"><span class="n">formatonly</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">fixed_y_locator</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_grid</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">spines</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.gridandtick" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">gridandtick</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">(0, 0)</span></em>, <em class="sig-param"><span class="n">precision</span><span class="o">=</span><span class="default_value">(2, 2)</span></em>, <em class="sig-param"><span class="n">labelstring</span><span class="o">=</span><span class="default_value">('', '')</span></em>, <em class="sig-param"><span class="n">gridcolor</span><span class="o">=</span><span class="default_value">array([0, 0, 0], dtype=int32)</span></em>, <em class="sig-param"><span class="n">formatonly</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">fixed_y_locator</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_grid</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">spines</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.gridandtick" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -1559,7 +1577,7 @@ you’re going to do math with them, and that the singleton dimensions
 will be expanded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a><em> or </em><em>np.ndarray</em>) – The nddata that you want to align to <cite>self</cite>.
+<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a><em> or </em><em>np.ndarray</em>) – The nddata that you want to align to <cite>self</cite>.
 If arg is an np.ndarray, it will try to match dimensions to self based
 on the length of the dimension.
 <strong>Note:</strong> currently there is an issue where this will only really
@@ -2180,7 +2198,7 @@ structure.)</p></li>
 </dl>
 <p>Where <span class="math notranslate nohighlight">\(t_{dw}=\frac{1}{\Delta f}\)</span>, is the dwell time (with <span class="math notranslate nohighlight">\(\Delta f\)</span> the spectral width).</p>
 <p><em>Why do we do this?</em> Note that while the analytical integral this corresponds to is normalized, performing
-<a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code></a> followed by <a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> on a discrete sequence is NOT completely invertible
+<a class="reference internal" href="#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code></a> followed by <a class="reference internal" href="#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> on a discrete sequence is NOT completely invertible
 (due to integration of the implied comb function??),
 and would require division by a factor of <span class="math notranslate nohighlight">\(\Delta f\)</span> (the spectral width) in order
 to retrieve the original function</p>
@@ -2429,7 +2447,7 @@ for the data (DOI:10.1109/78.995059).</p>
 distribution (the “fit” dimension);
 <em>e.g.</em> if you are regularizing a set of functions
 <span class="math notranslate nohighlight">\(\np.exp(-\tau*R_1)\)</span>, then this is <span class="math notranslate nohighlight">\(\tau\)</span></p></li>
-<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – a dictionary whose key is the name of the “fit” dimension
+<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – a dictionary whose key is the name of the “fit” dimension
 (<span class="math notranslate nohighlight">\(R_1\)</span> in the example above)
 and whose value is an np.array with the new axis labels.
 OR
@@ -2898,7 +2916,7 @@ allow for smooshing to determine a new axes that is standard
 <dl class="py class">
 <dt id="pyspecdata.core.nddata_hdf5">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">nddata_hdf5</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pathstring</span></em>, <em class="sig-param"><span class="n">directory</span><span class="o">=</span><span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata_hdf5" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
 </dd></dl>
 
 <dl class="py function">
@@ -2958,7 +2976,7 @@ allow for smooshing to determine a new axes that is standard
 
 <dl class="py function">
 <dt id="pyspecdata.core.othergridandtick">
-<code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">othergridandtick</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">0, 0</span></em>, <em class="sig-param"><span class="n">precision</span><span class="o">=</span><span class="default_value">2, 2</span></em>, <em class="sig-param"><span class="n">labelstring</span><span class="o">=</span><span class="default_value">'', ''</span></em>, <em class="sig-param"><span class="n">gridcolor</span><span class="o">=</span><span class="default_value">array([0, 0, 0], dtype=int32)</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">x</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">spines</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.othergridandtick" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">othergridandtick</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">(0, 0)</span></em>, <em class="sig-param"><span class="n">precision</span><span class="o">=</span><span class="default_value">(2, 2)</span></em>, <em class="sig-param"><span class="n">labelstring</span><span class="o">=</span><span class="default_value">('', '')</span></em>, <em class="sig-param"><span class="n">gridcolor</span><span class="o">=</span><span class="default_value">array([0, 0, 0], dtype=int32)</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">x</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">spines</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.othergridandtick" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -3501,7 +3519,7 @@ current plot in the figurelist</p></li>
 <code class="sig-name descname">A</code><a class="headerlink" href="#pyspecdata.figlist.figlist.A" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
+<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4253,6 +4271,39 @@ see scipy for relevant licensing.</p>
 <p>Lawson C., Hanson R.J., (1987) Solving Least Squares Problems, SIAM</p>
 </dd></dl>
 
+</div>
+<div class="section" id="module-pyspecdata.placeholder">
+<span id="pyspecdata-placeholder-module"></span><h2>pyspecdata.placeholder module<a class="headerlink" href="#module-pyspecdata.placeholder" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pyspecdata.placeholder.CachedAttribute">
+<em class="property">class </em><code class="sig-prename descclassname">pyspecdata.placeholder.</code><code class="sig-name descname">CachedAttribute</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">method</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.placeholder.CachedAttribute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Computes attribute value and caches it in the instance.
+From the Python Cookbook (Denis Otkidach)
+This decorator allows you to create a property which can be computed once and
+accessed many times. Sort of like memoization.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="pyspecdata.placeholder.nddata_placeholder">
+<em class="property">class </em><code class="sig-prename descclassname">pyspecdata.placeholder.</code><code class="sig-name descname">nddata_placeholder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">_data_hook</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.placeholder.nddata_placeholder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<p>When you open a file with many datasets, and only want to load one, this is used to store a placeholder to the different datasets.
+Rather than passing the initialization any type of data, you simply pass it one argument: the “data hook”:
+a function that accepts a single argument (self), alters the dimlabels and axes as needed, and returns an ndarray containing the data.</p>
+<p>You can attach only the necessary information to the placeholder, and then
+load it into a dictionary that can be explored by the user as they look for
+the right dataset.</p>
+<dl class="py attribute">
+<dt id="pyspecdata.placeholder.nddata_placeholder.data">
+<code class="sig-name descname">data</code><a class="headerlink" href="#pyspecdata.placeholder.nddata_placeholder.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="pyspecdata-temp-module">
+<h2>pyspecdata.temp module<a class="headerlink" href="#pyspecdata-temp-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-pyspecdata.units">
 <span id="pyspecdata-units-module"></span><h2>pyspecdata.units module<a class="headerlink" href="#module-pyspecdata.units" title="Permalink to this headline">¶</a></h2>
@@ -5644,7 +5695,7 @@ zorder: float</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">scatter()</span></code></dt><dd><p>XY scatter plot with markers of varying size and/or color ( sometimes also called bubble chart).</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">scatter</span></code></dt><dd><p>XY scatter plot with markers of varying size and/or color ( sometimes also called bubble chart).</p>
 </dd>
 </dl>
 </div>
@@ -5891,7 +5942,7 @@ Possible values: <cite>Parameter.POSITIONAL_ONLY</cite>,
 <dl class="py attribute">
 <dt id="pyspecdata.Parameter.empty">
 <code class="sig-name descname">empty</code><a class="headerlink" href="#pyspecdata.Parameter.empty" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">_empty</span></code></p>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">inspect._empty</span></code></p>
 </dd></dl>
 
 <dl class="py method">
@@ -6007,16 +6058,16 @@ Default is False.</p></li>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">InterpolatedUnivariateSpline</span></code></dt><dd><p>Subclass with smoothing forced to 0</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">InterpolatedUnivariateSpline</span></code></dt><dd><p>Subclass with smoothing forced to 0</p>
 </dd>
-<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">LSQUnivariateSpline</span></code></dt><dd><p>Subclass in which knots are user-selected instead of being set by smoothing condition</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">LSQUnivariateSpline</span></code></dt><dd><p>Subclass in which knots are user-selected instead of being set by smoothing condition</p>
 </dd>
-<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">splrep</span></code></dt><dd><p>An older, non object-oriented wrapping of FITPACK</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">splrep</span></code></dt><dd><p>An older, non object-oriented wrapping of FITPACK</p>
 </dd>
 </dl>
-<p><code class="xref py py-class docutils literal notranslate"><span class="pre">splev</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">sproot</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">splint</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">spalde</span></code></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">splev</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">sproot</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">splint</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">spalde</span></code></p>
 <dl class="simple">
-<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">BivariateSpline</span></code></dt><dd><p>A similar class for two-dimensional spline interpolation</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">BivariateSpline</span></code></dt><dd><p>A similar class for two-dimensional spline interpolation</p>
 </dd>
 </dl>
 </div>
@@ -6077,7 +6128,7 @@ spline.</p>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">splantider()</span></code>, <a class="reference internal" href="#pyspecdata.UnivariateSpline.derivative" title="pyspecdata.UnivariateSpline.derivative"><code class="xref py py-meth docutils literal notranslate"><span class="pre">derivative()</span></code></a></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">splantider</span></code>, <a class="reference internal" href="#pyspecdata.UnivariateSpline.derivative" title="pyspecdata.UnivariateSpline.derivative"><code class="xref py py-obj docutils literal notranslate"><span class="pre">derivative</span></code></a></p>
 </div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">UnivariateSpline</span>
@@ -6125,7 +6176,7 @@ spline.</p>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">splder()</span></code>, <a class="reference internal" href="#pyspecdata.UnivariateSpline.antiderivative" title="pyspecdata.UnivariateSpline.antiderivative"><code class="xref py py-meth docutils literal notranslate"><span class="pre">antiderivative()</span></code></a></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">splder</span></code>, <a class="reference internal" href="#pyspecdata.UnivariateSpline.antiderivative" title="pyspecdata.UnivariateSpline.antiderivative"><code class="xref py py-obj docutils literal notranslate"><span class="pre">antiderivative</span></code></a></p>
 </div>
 <p class="rubric">Notes</p>
 <div class="versionadded">
@@ -6415,6 +6466,23 @@ if more than one element in B matches that in A, include both options!!</p>
 </dd></dl>
 
 <dl class="py function">
+<dt id="pyspecdata.det_oom">
+<code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">det_oom</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_to_test</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.det_oom" title="Permalink to this definition">¶</a></dt>
+<dd><p>determine the average order of magnitude – for prefixing units</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data_to_test</strong> (<em>ndarray</em>) – a numpy array (e.g. the result of a .getaxis( call</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>average_oom</strong> – the average order of magnitude, rounded to the nearest multiple of 3</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt id="pyspecdata.dp">
 <code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">dp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">number</span></em>, <em class="sig-param"><span class="n">decimalplaces</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">scientific</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">max_front</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.dp" title="Permalink to this definition">¶</a></dt>
 <dd><p>format out to a certain decimal places, potentially in scientific notation</p>
@@ -6568,9 +6636,9 @@ convolution of <cite>in1</cite> with <cite>in2</cite>.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">convolve()</span></code></dt><dd><p>Uses the direct convolution or FFT convolution algorithm depending on which is faster.</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">convolve</span></code></dt><dd><p>Uses the direct convolution or FFT convolution algorithm depending on which is faster.</p>
 </dd>
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">oaconvolve()</span></code></dt><dd><p>Uses the overlap-add method to do convolution, which is generally faster when the input arrays are large and significantly different in size.</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">oaconvolve</span></code></dt><dd><p>Uses the overlap-add method to do convolution, which is generally faster when the input arrays are large and significantly different in size.</p>
 </dd>
 </dl>
 </div>
@@ -6755,7 +6823,7 @@ current plot in the figurelist</p></li>
 <code class="sig-name descname">A</code><a class="headerlink" href="#pyspecdata.figlist.A" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
+<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a> or numpy array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -7087,10 +7155,10 @@ in the matplotlibrc file.</p>
 <dd><p>Find the file  given by the regular expression <cite>searchstring</cite> inside the directory identified by <cite>exp_type</cite>, load the nddata object, and postprocess with the function <cite>postproc</cite>.</p>
 <p>It looks at the top level of the directory first, and if that fails, starts to look recursively.
 Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
-(For information on how to set up the file searching mechanism, see <a class="reference internal" href="#pyspecdata.datadir.register_directory" title="pyspecdata.datadir.register_directory"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_directory()</span></code></a>).</p>
+(For a more thorough description, see <a class="reference internal" href="#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a>).</p>
 <p>Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
 (so that you can make sure they are properly synced to the cloud, etc.).</p>
-<p>It calls <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
+<p>It calls <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
 <p>If it can’t find any files matching the criterion, it logs the missing file and throws an exception.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -7101,16 +7169,17 @@ a backslash.
 More generally, it is a regular expression,
 where <code class="docutils literal notranslate"><span class="pre">.*searchstring.*</span></code> matches a filename inside the
 directory appropriate for <cite>exp_type</cite>.</p></li>
+<li><p><strong>exp_type</strong> (<em>str</em>) – Gives the name of a directory, known to be pyspecdata, that contains
+the file of interest.
+For a directory to be known to pyspecdata, it must be registered with
+the (terminal/shell/command prompt) command <cite>pyspecdata_register_dir</cite>
+<strong>or</strong> in a directory contained inside (underneath) such a directory.</p></li>
 <li><p><strong>expno</strong> (<em>int</em>) – For Bruker NMR and Prospa files, where the files are stored in numbered
 subdirectories,
 give the number of the subdirectory that you want.
 Currently, this parameter is needed to load Bruker and Kea files.
 If it finds multiple files that match the regular expression,
 it will try to load this experiment number from all the directories.</p></li>
-<li><p><strong>exp_type</strong> (<em>str</em>) – Since the function assumes that you have different types of
-experiments sorted into different directories, this argument
-specifies the type of experiment see <a class="reference internal" href="#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a> for
-more info.</p></li>
 <li><p><strong>postproc</strong> (<em>function</em><em>, </em><em>str</em><em>, or </em><em>None</em>) – <p>This function is fed the nddata data and the remaining keyword
 arguments (<cite>kwargs</cite>) as arguments.
 It’s assumed that each module for each different file type
@@ -7135,22 +7204,22 @@ it sets <cite>postproc_type</cite> to the value of
 This, in turn, is used to choose the type of post-processing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">dimname</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">return_acq</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">add_sizes</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">add_dims</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">use_sweep</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">indirect_dimlabels</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 </dl>
 </p></li>
@@ -7163,7 +7232,7 @@ This, in turn, is used to choose the type of post-processing.</p>
 <dl class="py class">
 <dt id="pyspecdata.fitdata">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">fitdata</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fitdata" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
 <p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
 <p>The user creates a fitdata class object from an existing nddata
 class object, and on this fitdata object can define the
@@ -7253,7 +7322,7 @@ nddata metadata.</p>
 <dd class="field-odd"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+<dd class="field-even"><p><a class="reference internal" href="#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -7381,7 +7450,7 @@ must be sympy symbols</p>
 <dd class="field-even"><p><strong>self</strong> – The modified nddata</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -7522,7 +7591,7 @@ can be rather complex, and otherwise it would take forever).</p>
 
 <dl class="py function">
 <dt id="pyspecdata.gridandtick">
-<code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">gridandtick</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">0, 0</span></em>, <em class="sig-param"><span class="n">precision</span><span class="o">=</span><span class="default_value">2, 2</span></em>, <em class="sig-param"><span class="n">labelstring</span><span class="o">=</span><span class="default_value">'', ''</span></em>, <em class="sig-param"><span class="n">gridcolor</span><span class="o">=</span><span class="default_value">array([0, 0, 0], dtype=int32)</span></em>, <em class="sig-param"><span class="n">formatonly</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">fixed_y_locator</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_grid</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">spines</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.gridandtick" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">gridandtick</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">(0, 0)</span></em>, <em class="sig-param"><span class="n">precision</span><span class="o">=</span><span class="default_value">(2, 2)</span></em>, <em class="sig-param"><span class="n">labelstring</span><span class="o">=</span><span class="default_value">('', '')</span></em>, <em class="sig-param"><span class="n">gridcolor</span><span class="o">=</span><span class="default_value">array([0, 0, 0], dtype=int32)</span></em>, <em class="sig-param"><span class="n">formatonly</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">fixed_y_locator</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_grid</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">spines</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.gridandtick" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -7686,11 +7755,11 @@ If True, <cite>x</cite> has to be an array of monotonically increasing values.</
 
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-class docutils literal notranslate"><span class="pre">splrep</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">splev</span></code></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">splrep</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">splev</span></code></p>
 <dl class="simple">
-<dt><a class="reference internal" href="#pyspecdata.UnivariateSpline" title="pyspecdata.UnivariateSpline"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnivariateSpline</span></code></a></dt><dd><p>An object-oriented wrapper of the FITPACK routines.</p>
+<dt><a class="reference internal" href="#pyspecdata.UnivariateSpline" title="pyspecdata.UnivariateSpline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UnivariateSpline</span></code></a></dt><dd><p>An object-oriented wrapper of the FITPACK routines.</p>
 </dd>
-<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">interp2d</span></code></dt><dd><p>2-D interpolation</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp2d</span></code></dt><dd><p>2-D interpolation</p>
 </dd>
 </dl>
 </div>
@@ -8368,7 +8437,7 @@ optional output variable ‘mesg’ gives more information.</p></li>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">least_squares()</span></code></dt><dd><p>Newer interface to solve nonlinear least-squares problems with bounds on the variables. See <code class="docutils literal notranslate"><span class="pre">method=='lm'</span></code> in particular.</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">least_squares</span></code></dt><dd><p>Newer interface to solve nonlinear least-squares problems with bounds on the variables. See <code class="docutils literal notranslate"><span class="pre">method=='lm'</span></code> in particular.</p>
 </dd>
 </dl>
 </div>
@@ -8453,7 +8522,7 @@ or else, <cite>None</cite>, indicating that this is part of a pair of
 files that should be skipped</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or None</p>
+<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a> or None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -8746,7 +8815,7 @@ zorder: float</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">scatter()</span></code></dt><dd><p>XY scatter plot with markers of varying size and/or color ( sometimes also called bubble chart).</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">scatter</span></code></dt><dd><p>XY scatter plot with markers of varying size and/or color ( sometimes also called bubble chart).</p>
 </dd>
 </dl>
 </div>
@@ -8986,7 +9055,7 @@ you’re going to do math with them, and that the singleton dimensions
 will be expanded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a><em> or </em><em>np.ndarray</em>) – The nddata that you want to align to <cite>self</cite>.
+<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="#pyspecdata.nddata" title="pyspecdata.nddata"><em>nddata</em></a><em> or </em><em>np.ndarray</em>) – The nddata that you want to align to <cite>self</cite>.
 If arg is an np.ndarray, it will try to match dimensions to self based
 on the length of the dimension.
 <strong>Note:</strong> currently there is an issue where this will only really
@@ -9246,7 +9315,7 @@ nddata metadata.</p>
 <dl class="py method">
 <dt id="pyspecdata.nddata.copy_props">
 <code class="sig-name descname">copy_props</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.copy_props" title="Permalink to this definition">¶</a></dt>
-<dd><p>Copy all properties (see <a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.get_prop" title="pyspecdata.nddata.get_prop"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_prop()</span></code></a>) from another nddata
+<dd><p>Copy all properties (see <a class="reference internal" href="#pyspecdata.nddata.get_prop" title="pyspecdata.nddata.get_prop"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_prop()</span></code></a>) from another nddata
 object – note that these include properties pertaining the the FT
 status of various dimensions.</p>
 </dd></dl>
@@ -9607,7 +9676,7 @@ structure.)</p></li>
 </dl>
 <p>Where <span class="math notranslate nohighlight">\(t_{dw}=\frac{1}{\Delta f}\)</span>, is the dwell time (with <span class="math notranslate nohighlight">\(\Delta f\)</span> the spectral width).</p>
 <p><em>Why do we do this?</em> Note that while the analytical integral this corresponds to is normalized, performing
-<a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code></a> followed by <a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> on a discrete sequence is NOT completely invertible
+<a class="reference internal" href="#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code></a> followed by <a class="reference internal" href="#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> on a discrete sequence is NOT completely invertible
 (due to integration of the implied comb function??),
 and would require division by a factor of <span class="math notranslate nohighlight">\(\Delta f\)</span> (the spectral width) in order
 to retrieve the original function</p>
@@ -9856,7 +9925,7 @@ for the data (DOI:10.1109/78.995059).</p>
 distribution (the “fit” dimension);
 <em>e.g.</em> if you are regularizing a set of functions
 <span class="math notranslate nohighlight">\(\np.exp(-\tau*R_1)\)</span>, then this is <span class="math notranslate nohighlight">\(\tau\)</span></p></li>
-<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – a dictionary whose key is the name of the “fit” dimension
+<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><a class="reference internal" href="#pyspecdata.nddata" title="pyspecdata.nddata"><em>nddata</em></a>) – a dictionary whose key is the name of the “fit” dimension
 (<span class="math notranslate nohighlight">\(R_1\)</span> in the example above)
 and whose value is an np.array with the new axis labels.
 OR
@@ -10325,7 +10394,7 @@ allow for smooshing to determine a new axes that is standard
 <dl class="py class">
 <dt id="pyspecdata.nddata_hdf5">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">nddata_hdf5</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pathstring</span></em>, <em class="sig-param"><span class="n">directory</span><span class="o">=</span><span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata_hdf5" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
 </dd></dl>
 
 <dl class="py function">
@@ -10458,7 +10527,7 @@ see scipy for relevant licensing.</p>
 
 <dl class="py function">
 <dt id="pyspecdata.othergridandtick">
-<code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">othergridandtick</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">0, 0</span></em>, <em class="sig-param"><span class="n">precision</span><span class="o">=</span><span class="default_value">2, 2</span></em>, <em class="sig-param"><span class="n">labelstring</span><span class="o">=</span><span class="default_value">'', ''</span></em>, <em class="sig-param"><span class="n">gridcolor</span><span class="o">=</span><span class="default_value">array([0, 0, 0], dtype=int32)</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">x</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">spines</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.othergridandtick" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">othergridandtick</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">(0, 0)</span></em>, <em class="sig-param"><span class="n">precision</span><span class="o">=</span><span class="default_value">(2, 2)</span></em>, <em class="sig-param"><span class="n">labelstring</span><span class="o">=</span><span class="default_value">('', '')</span></em>, <em class="sig-param"><span class="n">gridcolor</span><span class="o">=</span><span class="default_value">array([0, 0, 0], dtype=int32)</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">x</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">spines</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.othergridandtick" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -10807,9 +10876,9 @@ that the event loop is running to have responsive figures.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">ion()</span></code></dt><dd><p>enable interactive mode</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">ion</span></code></dt><dd><p>enable interactive mode</p>
 </dd>
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">ioff()</span></code></dt><dd><p>disable interactive mode</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">ioff</span></code></dt><dd><p>disable interactive mode</p>
 </dd>
 </dl>
 </div>
@@ -10904,9 +10973,9 @@ in interactive sessions and should be avoided in library code.</p>
 <p><a class="reference external" href="http://reference.wolfram.com/legacy/v5_2/Built-inFunctions/AlgebraicComputation/Calculus/D.html">http://reference.wolfram.com/legacy/v5_2/Built-inFunctions/AlgebraicComputation/Calculus/D.html</a></p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-func docutils literal notranslate"><span class="pre">Derivative()</span></code></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Derivative</span></code></p>
 <dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">idiff()</span></code></dt><dd><p>computes the derivative implicitly</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">idiff</span></code></dt><dd><p>computes the derivative implicitly</p>
 </dd>
 </dl>
 </div>
@@ -11167,7 +11236,7 @@ the force option set to True:</p>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-func docutils literal notranslate"><span class="pre">sympy.polys.rootoftools.rootof()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">root()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">real_root()</span></code></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sympy.polys.rootoftools.rootof</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">root</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">real_root</span></code></p>
 </div>
 <p class="rubric">References</p>
 <dl class="footnote brackets">

@@ -33,7 +33,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -100,6 +99,8 @@
 <p class="caption"><span class="caption-text">Example Gallery</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
 </ul>
 
             
@@ -441,6 +442,8 @@
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.latexscripts.cached_filename">cached_filename() (in module pyspecdata.latexscripts)</a>, <a href="latexscripts.html#pyspecdata.latexscripts.cached_filename">[1]</a>
 </li>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.placeholder.CachedAttribute">CachedAttribute (class in pyspecdata.placeholder)</a>
+</li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.fornotebook.calcdistance">calcdistance() (in module pyspecdata.fornotebook)</a>
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.fornotebook.calcfield">calcfield() (in module pyspecdata.fornotebook)</a>
@@ -519,14 +522,14 @@
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.contains">contains() (pyspecdata.Line2D method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.core.nddata.contiguous">contiguous() (pyspecdata.core.nddata method)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.nddata.contiguous">(pyspecdata.nddata method)</a>, <a href="pyspecdata.html#pyspecdata.nddata.contiguous">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.core.nddata.contour">contour() (pyspecdata.core.nddata method)</a>
 
       <ul>
@@ -623,6 +626,8 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.placeholder.nddata_placeholder.data">data (pyspecdata.placeholder.nddata_placeholder attribute)</a>
+</li>
       <li><a href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.prospa.decim_correct">decim_correct() (in module pyspecdata.load_files.prospa)</a>
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.decorate_rec">decorate_rec() (in module pyspecdata)</a>
@@ -641,6 +646,12 @@
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.latexscripts.det_new_pdf_name">det_new_pdf_name() (in module pyspecdata.latexscripts)</a>, <a href="latexscripts.html#pyspecdata.latexscripts.det_new_pdf_name">[1]</a>
 </li>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.det_oom">det_oom() (in module pyspecdata)</a>
+
+      <ul>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.core.det_oom">(in module pyspecdata.core)</a>
+</li>
+      </ul></li>
       <li><a href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.bruker_nmr.det_phcorr">det_phcorr() (in module pyspecdata.load_files.bruker_nmr)</a>
 </li>
       <li><a href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.bruker_nmr.det_rg">det_rg() (in module pyspecdata.load_files.bruker_nmr)</a>
@@ -653,10 +664,10 @@
         <li><a href="auto_api/pyspecdata.html#pyspecdata.nddata.diff">(pyspecdata.nddata method)</a>
 </li>
       </ul></li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.axis_class.axis_collection.dimlabels">dimlabels (pyspecdata.axis_class.axis_collection attribute)</a>, <a href="axis_object_plan.html#pyspecdata.axis_class.axis_collection.dimlabels">[1]</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.axis_class.axis_collection.dimlabels">dimlabels (pyspecdata.axis_class.axis_collection attribute)</a>, <a href="axis_object_plan.html#pyspecdata.axis_class.axis_collection.dimlabels">[1]</a>
+</li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.LightSource.direction">direction() (pyspecdata.LightSource property)</a>
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.datadir.dirformat">dirformat() (in module pyspecdata.datadir)</a>
@@ -1469,14 +1480,16 @@
       </ul></li>
       <li><a href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.prospa.load_2D">load_2D() (in module pyspecdata.load_files.prospa)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.bruker_nmr.load_acqu">load_acqu() (in module pyspecdata.load_files.bruker_nmr)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.prospa.load_acqu">(in module pyspecdata.load_files.prospa)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_cary.load_bindata">load_bindata() (in module pyspecdata.load_files.load_cary)</a>
+</li>
       <li><a href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_cary.load_cary">load_cary() (in module pyspecdata.load_files.load_cary)</a>
 </li>
       <li><a href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.acert.load_cw">load_cw() (in module pyspecdata.load_files.acert)</a>
@@ -1484,6 +1497,8 @@
       <li><a href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.prospa.load_datafile">load_datafile() (in module pyspecdata.load_files.prospa)</a>
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.units.units.load_derived">load_derived() (pyspecdata.units.units method)</a>, <a href="units.html#pyspecdata.units.units.load_derived">[1]</a>
+</li>
+      <li><a href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.load_cary.load_header">load_header() (in module pyspecdata.load_files.load_cary)</a>
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.load_indiv_file">load_indiv_file() (in module pyspecdata)</a>
 
@@ -1681,8 +1696,6 @@
         <li><a href="auto_api/pyspecdata.html#pyspecdata.nddata.mkd">(pyspecdata.nddata method)</a>, <a href="pyspecdata.html#pyspecdata.nddata.mkd">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     module
 
@@ -1747,6 +1760,8 @@
 </li>
         <li><a href="auto_api/pyspecdata.html#module-pyspecdata.nnls">pyspecdata.nnls</a>
 </li>
+        <li><a href="auto_api/pyspecdata.html#module-pyspecdata.placeholder">pyspecdata.placeholder</a>
+</li>
         <li><a href="auto_api/pyspecdata.plot_funcs.html#module-pyspecdata.plot_funcs">pyspecdata.plot_funcs</a>
 </li>
         <li><a href="auto_api/pyspecdata.plot_funcs.html#module-pyspecdata.plot_funcs.image">pyspecdata.plot_funcs.image</a>
@@ -1756,6 +1771,8 @@
         <li><a href="auto_api/pyspecdata.html#module-pyspecdata.version">pyspecdata.version</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.core.nddata.multimin">multimin() (pyspecdata.core.nddata method)</a>
 
       <ul>
@@ -1818,6 +1835,8 @@
         <li><a href="auto_api/pyspecdata.html#pyspecdata.core.nddata_hdf5">(class in pyspecdata.core)</a>
 </li>
       </ul></li>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.placeholder.nddata_placeholder">nddata_placeholder (class in pyspecdata.placeholder)</a>
+</li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.ndgrid">ndgrid() (in module pyspecdata)</a>
 
       <ul>
@@ -2312,6 +2331,13 @@
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#module-pyspecdata.nnls">module</a>
+</li>
+      </ul></li>
+      <li>
+    pyspecdata.placeholder
+
+      <ul>
+        <li><a href="auto_api/pyspecdata.html#module-pyspecdata.placeholder">module</a>
 </li>
       </ul></li>
       <li>
