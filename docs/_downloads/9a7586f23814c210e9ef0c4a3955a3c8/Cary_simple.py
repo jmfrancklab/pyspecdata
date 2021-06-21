@@ -15,7 +15,8 @@ There are three requirements for where this file must be stored:
     google drive, etc, etc.
 -   Our pyspecdata config file (~/.pyspecdata on Linux/Mac or ~/_pyspecdata
     on windows) must know about this "UV_Vis" directory.
-    If not, you can use the `pyspecdata_register_dir` command (see :func:`~pyspecdata.datadir.register_directory`).
+    If not, you can use the `pyspecdata_register_dir` command
+    (see :func:`~pyspecdata.datadir.register_directory`).
 -   The name of the file itself must contain the string "T177R1a_pR_210615" →
     note that you don't need to specify the whole file name, just enough for it
     to be unique.

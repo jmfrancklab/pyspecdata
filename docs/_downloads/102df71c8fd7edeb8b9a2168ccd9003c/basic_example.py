@@ -5,10 +5,15 @@ Here we demonstrate both the coordinate-based slicing notatation, which is
 unique to pySpecData,
 as well the way in which the axis coordinates for a Fourier transform are
 handled automatically.
+We also show how to make a new data object based on the axis coordinates of an
+existing object -- e.g., to create an apodization filter (as here) or to apply
+a frequency-dependent phase shift.
 
 The case considered here is that of an NMR FID that has been acquired with a
 wider spectral width than the signal of interest, and with a longer acquisition
 time.
+As we select an apply filters/apodization to throw out the noise outside the
+bandwidth and time range of the signal, the SNR of the signal improves.
 """
 from pylab import *
 from pyspecdata import *
@@ -18,15 +23,16 @@ t = nddata(r_[0:0.5:1e-3], 't2') # 1 kHz SW
 fake_data = exp(1j*2*pi*100*t-10*t*pi) # 10 Hz wide line at 100 Hz offset
 fake_data.add_noise(0.3).set_units('t2','s')
 plot(fake_data, ax=ax_time, alpha=0.2, label='raw data')
-ax_freq.set_title("time domain")
+ax_time.set_title("time domain")
+ax_freq.set_title("frequency domain")
 fake_data.ft('t2', shift=True)
+assert fake_data.get_ft_prop('t2','dt') == 1e-3
 print("note that the original dwell time is",fake_data.get_ft_prop('t2','dt'),
         "and the original frequency resolution is",fake_data.get_ft_prop('t2','df'))
 plot(fake_data, ax=ax_freq, alpha=0.2, label='raw data')
-ax_time.set_title("frequency domain")
 fig.tight_layout()
 fake_data = fake_data['t2':(-200,200)] # filter the data in the frequency domain by slicing from -200 to 200 Hz
-plot(fake_data, '--', ax=ax_freq, alpha=0.2, label='after frequency slice')
+plot(fake_data, ':', ax=ax_freq, alpha=0.2, label='after frequency slice')
 fake_data.ift('t2') # now, move back into the time domain, where it will have less noise, and with less points
 plot(fake_data, ax=ax_time, alpha=0.5, label='after frequency slice')
 # in the time domain, we can either slice simply:
@@ -48,7 +54,7 @@ truncated_data.ift('t2')
 truncated_data.ft('t2', pad=256)
 plot(truncated_data, ax=ax_freq, alpha=0.5, label='after time slice and zero filling')
 truncated_data.ift('t2')
-plot(truncated_data, '--', ax=ax_time, alpha=0.5, label='after time slice and zero filling')
+plot(truncated_data, ':', ax=ax_time, alpha=0.5, label='after time slice and zero filling')
 ax_time.legend(**dict(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.))
 ax_freq.legend(**dict(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.))
 fig.tight_layout()
