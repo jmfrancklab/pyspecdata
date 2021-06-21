@@ -15,8 +15,7 @@ There are three requirements for where this file must be stored:
     google drive, etc, etc.
 -   Our pyspecdata config file (~/.pyspecdata on Linux/Mac or ~/_pyspecdata
     on windows) must know about this "UV_Vis" directory.
-    If not, you can either edit the file directly or use the
-    :func:`register_directory` command.
+    If not, you can use the `pyspecdata_register_dir` command (see :func:`~pyspecdata.datadir.register_directory`).
 -   The name of the file itself must contain the string "T177R1a_pR_210615" →
     note that you don't need to specify the whole file name, just enough for it
     to be unique.
@@ -30,4 +29,4 @@ print("the experiments present in this file are:",data.keys())
 with figlist_var() as fl:
     fl.next("UV data")
     for j in data.keys():
-        fl.plot(data[j], label=j)
+        fl.plot(data[j], label=j, alpha=0.5)

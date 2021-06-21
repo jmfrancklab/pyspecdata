@@ -92,7 +92,22 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="notebook.html#setting-up-the-notebook">Setting up the notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebook.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebook.html#running-the-notebook">Running the notebook</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="notebook.html#how-it-works">How it works</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="notebook.html#the-latex-end">The LaTeX end</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="notebook.html#the-python-end">The python end</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="pyspecdata.html">N-dimensional Data (nddata)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyspecdata.html#full-list-of-nddata-methods">Full list of <cite>nddata</cite> methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="latexscripts.html">Documentation of Notebook Helper Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ND-Data</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#multidimensional-data">Multidimensional data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#building-an-nddata-from-numpy-arrays">Building an nddata from numpy arrays</a></li>
@@ -195,7 +210,7 @@
             
   <div class="section" id="nd-data">
 <h1>ND-Data<a class="headerlink" href="#nd-data" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="nddata-summary-label"></span><p>(This is an introduction.  For detailed info, see <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span> <span class="pre">documentation</span></code></a>.)</p>
+<span class="target" id="nddata-summary-label"></span><p>(This is an introduction.  For detailed info, see <a class="reference internal" href="pyspecdata.html#id0" title="pyspecdata.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span> <span class="pre">documentation</span></code></a>.)</p>
 <p>The nddata class is built on top of <a class="reference external" href="http://numpy.org">numpy</a>.
 Numpy allows you to create multi-dimensional arrays of data.</p>
 <div class="section" id="multidimensional-data">
@@ -454,11 +469,11 @@ Alternatively, the property <code class="docutils literal notranslate"><span cla
 <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">d.C.ft('t2')</span></code> leaves <code class="docutils literal notranslate"><span class="pre">d</span></code> alone, and returns the FT as a new object
 called <code class="docutils literal notranslate"><span class="pre">a</span></code>.</p>
 <p>This encourages a style where methods are chained together, <em>e.g.</em> <code class="docutils literal notranslate"><span class="pre">d.ft('t2').mean('t1')</span></code>.</p>
-<p>In order to encourage this style, we provide the method <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata.run" title="pyspecdata.nddata.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyspecdata.nddata.run()</span></code></a>, which allows you to run a standard numpy function on the data:
+<p>In order to encourage this style, we provide the method <a class="reference internal" href="pyspecdata.html#pyspecdata.nddata.run" title="pyspecdata.nddata.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyspecdata.nddata.run()</span></code></a>, which allows you to run a standard numpy function on the data:
 <code class="docutils literal notranslate"><span class="pre">d.run(abs)</span></code> will take the absolute value of the data in-place, while
 <code class="docutils literal notranslate"><span class="pre">d.run(std,'t2')</span></code> will run a standard deviation along the ‘t2’ axis
 (this removes the ‘t2’ dimension once you’re done, since it would have a length of only 1 – <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata.run_nopop" title="pyspecdata.nddata.run_nopop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyspecdata.nddata.run_nopop()</span></code></a> would not remove the dimension).</p>
-<p><em>For a full list of methods</em>, see the API documentation: <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.nddata</span></code></a>.</p>
+<p><em>For a full list of methods</em>, see the API documentation: <a class="reference internal" href="pyspecdata.html#id0" title="pyspecdata.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.nddata</span></code></a>.</p>
 </div>
 <div class="section" id="basic-examples">
 <h2>Basic Examples<a class="headerlink" href="#basic-examples" title="Permalink to this headline">¶</a></h2>

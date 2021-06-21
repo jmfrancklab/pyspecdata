@@ -103,14 +103,6 @@ pyspecdata.placeholder module
    :undoc-members:
    :show-inheritance:
 
-pyspecdata.temp module
-----------------------
-
-.. automodule:: pyspecdata.temp
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 pyspecdata.units module
 -----------------------
 
