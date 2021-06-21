@@ -20,6 +20,7 @@ fake_data.add_noise(0.3).set_units('t2','s')
 plot(fake_data, ax=ax_time, alpha=0.2, label='raw data')
 ax_freq.set_title("time domain")
 fake_data.ft('t2', shift=True)
+assert fake_data.get_ft_prop('t2','dt') == 1e-3
 print("note that the original dwell time is",fake_data.get_ft_prop('t2','dt'),
         "and the original frequency resolution is",fake_data.get_ft_prop('t2','df'))
 plot(fake_data, ax=ax_freq, alpha=0.2, label='raw data')
