@@ -34,7 +34,7 @@ function.
     {\bf Warning:} You have no error associated with your plot, and I want to flag this for now
 
 
-    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:7618: Warning: You have no error associated with your plot, and I want to flag this for now
+    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:7622: Warning: You have no error associated with your plot, and I want to flag this for now
       warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
     output: {'M_0': -101.93982969972075, 'M_inf': 101.56320759156917, 'R_1': 6.2145567184875725}
     latex: $f(\tau)=101.56 + \left(-1.02\times 10^{2} - 101.56\right) e^{- 6.21 \tau}$
@@ -106,7 +106,7 @@ function.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.555 seconds)
+   **Total running time of the script:** ( 0 minutes  0.662 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fit_fake_data.py:

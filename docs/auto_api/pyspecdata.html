@@ -1884,10 +1884,10 @@ This is designed to be called as abs(instance).cropped_log(), so it doesn’t ma
 <dl class="py method">
 <dt id="pyspecdata.core.nddata.eval_poly">
 <code class="sig-name descname">eval_poly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c</span></em>, <em class="sig-param"><span class="n">axis</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.eval_poly" title="Permalink to this definition">¶</a></dt>
-<dd><p>Take <cite>c</cite> parameter from polyfit, and apply it along axis <cite>axis</cite></p>
+<dd><p>Take <cite>c</cite> parameter from <a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.polyfit" title="pyspecdata.nddata.polyfit"><code class="xref py py-func docutils literal notranslate"><span class="pre">polyfit()</span></code></a>, and apply it along axis <cite>axis</cite></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>c</strong> (<a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – polynomial coefficients in ascending polynomial order</p>
+<dd class="field-odd"><p><strong>c</strong> (<em>ndarray</em>) – polynomial coefficients in ascending polynomial order</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2512,18 +2512,16 @@ If <a href="#id15"><span class="problematic" id="id16">:str:`BRD`</span></a> is 
 <dt id="pyspecdata.core.nddata.polyfit">
 <code class="sig-name descname">polyfit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">force_y_intercept</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.polyfit" title="Permalink to this definition">¶</a></dt>
 <dd><p>polynomial fitting routine – return the coefficients and the fit
-..note:</p>
+.. note:</p>
 <blockquote>
 <div><p>previously, this returned the fit data as a second argument called <cite>formult</cite>– you
 very infrequently want it to be in the same size as the data, though;
 to duplicate the old behavior, just add the line <code class="docutils literal notranslate"><span class="pre">formult</span> <span class="pre">=</span> <span class="pre">mydata.eval_poly(c,'axisname')</span></code>.</p>
 </div></blockquote>
-<dl class="simple">
-<dt>..warning:</dt><dd><p>for some reason, this version doesn’t use orthogonal polynomials,
-as the numpy routine does – we had diagnosed and determined that
-that creates noticeably different results, so fix that here.</p>
-</dd>
-</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.eval_poly" title="pyspecdata.nddata.eval_poly"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval_poly()</span></code></a></p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -9371,10 +9369,10 @@ This is designed to be called as abs(instance).cropped_log(), so it doesn’t ma
 <dl class="py method">
 <dt id="pyspecdata.nddata.eval_poly">
 <code class="sig-name descname">eval_poly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c</span></em>, <em class="sig-param"><span class="n">axis</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.eval_poly" title="Permalink to this definition">¶</a></dt>
-<dd><p>Take <cite>c</cite> parameter from polyfit, and apply it along axis <cite>axis</cite></p>
+<dd><p>Take <cite>c</cite> parameter from <a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.polyfit" title="pyspecdata.nddata.polyfit"><code class="xref py py-func docutils literal notranslate"><span class="pre">polyfit()</span></code></a>, and apply it along axis <cite>axis</cite></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>c</strong> (<a class="reference internal" href="../pyspecdata.html#id0" title="pyspecdata.nddata"><em>nddata</em></a>) – polynomial coefficients in ascending polynomial order</p>
+<dd class="field-odd"><p><strong>c</strong> (<em>ndarray</em>) – polynomial coefficients in ascending polynomial order</p>
 </dd>
 </dl>
 </dd></dl>
@@ -9999,18 +9997,16 @@ If <a href="#id62"><span class="problematic" id="id63">:str:`BRD`</span></a> is 
 <dt id="pyspecdata.nddata.polyfit">
 <code class="sig-name descname">polyfit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">force_y_intercept</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.polyfit" title="Permalink to this definition">¶</a></dt>
 <dd><p>polynomial fitting routine – return the coefficients and the fit
-..note:</p>
+.. note:</p>
 <blockquote>
 <div><p>previously, this returned the fit data as a second argument called <cite>formult</cite>– you
 very infrequently want it to be in the same size as the data, though;
 to duplicate the old behavior, just add the line <code class="docutils literal notranslate"><span class="pre">formult</span> <span class="pre">=</span> <span class="pre">mydata.eval_poly(c,'axisname')</span></code>.</p>
 </div></blockquote>
-<dl class="simple">
-<dt>..warning:</dt><dd><p>for some reason, this version doesn’t use orthogonal polynomials,
-as the numpy routine does – we had diagnosed and determined that
-that creates noticeably different results, so fix that here.</p>
-</dd>
-</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.eval_poly" title="pyspecdata.nddata.eval_poly"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval_poly()</span></code></a></p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

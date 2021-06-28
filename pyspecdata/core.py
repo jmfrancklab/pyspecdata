@@ -4153,11 +4153,11 @@ class nddata (object):
     #}}}
     #{{{ poly. fit
     def eval_poly(self,c,axis):
-        """Take `c` parameter from polyfit, and apply it along axis `axis`
+        """Take `c` parameter from :func:`~pyspecdata.nddata.polyfit`, and apply it along axis `axis`
 
         Parameters
         ----------
-        c: nddata
+        c: ndarray
             polynomial coefficients in ascending polynomial order
 
         """
@@ -4168,15 +4168,13 @@ class nddata (object):
         return result
     def polyfit(self,axis,order=1,force_y_intercept = None):
         '''polynomial fitting routine -- return the coefficients and the fit
-        ..note:
+        .. note:
             previously, this returned the fit data as a second argument called `formult`-- you
             very infrequently want it to be in the same size as the data, though;
             to duplicate the old behavior, just add the line ``formult = mydata.eval_poly(c,'axisname')``.
 
-        ..warning:
-            for some reason, this version doesn't use orthogonal polynomials,
-            as the numpy routine does -- we had diagnosed and determined that
-            that creates noticeably different results, so fix that here.
+        .. seealso::
+            :func:`~pyspecdata.nddata.eval_poly`
 
         Parameters
         ----------

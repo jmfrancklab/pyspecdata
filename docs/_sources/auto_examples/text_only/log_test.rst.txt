@@ -26,7 +26,7 @@ are running at the same time
  .. code-block:: none
 
     logging output to C:\Users\johnf\pyspecdata.0.log
-    --> log_test.py(11):root             <module> 2021-06-16 12:15:33,086
+    --> log_test.py(11):root             <module> 2021-06-28 18:40:30,058
     INFO: Something, something, something, dark side...
 
 

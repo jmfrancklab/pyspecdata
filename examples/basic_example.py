@@ -1,6 +1,6 @@
 """
-Basic Example
-=============
+Basic Slicing/Filtering Example
+===============================
 Here we demonstrate both the coordinate-based slicing notatation, which is
 unique to pySpecData,
 as well the way in which the axis coordinates for a Fourier transform are
