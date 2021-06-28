@@ -4152,6 +4152,20 @@ class nddata (object):
         return self
     #}}}
     #{{{ poly. fit
+    def apply_poly(self,c,axis):
+        """Take `c` parameter from polyfit, and apply it along axis `axis`
+
+        Parameters
+        ----------
+        c: nddata
+            polynomial coefficients in ascending polynomial order
+
+        """
+        thisaxis = self.fromaxis(axis)
+        result = 0
+        for j in range(len(c)):
+            result += c[j] * thisaxis**j
+        return result
     def polyfit(self,axis,order=1,force_y_intercept = None):
         '''polynomial fitting routine -- return the coefficients and the fit
         ..note:
@@ -4196,23 +4210,20 @@ class nddata (object):
         startingpower = 0
         if force_y_intercept is not None:
             startingpower = 1
-        L =  np.concatenate([x**j for j in range(startingpower,order+1)],axis=1) # note the totally AWESOME way in which this is done!
-        #print 'fitting to matrix',L
-        if force_y_intercept is not None:
+            L =  np.concatenate([x**j for j in range(startingpower,order+1)],axis=1) # note the totally AWESOME way in which this is done!
+            #print 'fitting to matrix',L
             y -= force_y_intercept
-        c = np.dot(np.linalg.pinv(L),y)
-        fity = np.dot(L,c)
-        if force_y_intercept is not None:
+            c = np.dot(np.linalg.pinv(L),y)
+            fity = np.dot(L,c)
             #print "\n\nDEBUG: forcing from",fity[0],"to"
             fity += force_y_intercept
             #print "DEBUG: ",fity[0]
             c = c_[force_y_intercept,c]
+        else:
+            c = np.polyfit(x.ravel(), y, deg=order) # better -- uses Hermite polys
+            c = c[::-1] # give in ascending order, as is sensible
         #}}}
-        #{{{ rather than have to match up everything, just drop the fit data into formult, which should be the same size, shape, etc
-        formult.data = fity
-        formult.set_error(None)
-        #}}}
-        return c,formult
+        return c
     #}}}
     #{{{ max and mean
     def _wrapaxisfuncs(self,func):
@@ -5476,10 +5487,7 @@ class nddata (object):
                     axis_data = self.getaxis(axisname).flatten()
                     # copy is needed here, or data and axis will be the same object
                     retval = nddata(axis_data,axis_data.shape,[axisname]).setaxis(axisname,np.copy(axis_data))
-                    if self.axis_coords_units is None:
-                        retval.axis_coords_units = None
-                    else:
-                        retval.axis_coords_units = [self.axis_coords_units[self.axn(axisname)]]
+                    retval.set_units(axisname,self.get_units(axisname))
                     retval.data_units = self.data_units
                     retval.name(self.name())
                     return retval
