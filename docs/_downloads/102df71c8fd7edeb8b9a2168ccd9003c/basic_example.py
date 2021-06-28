@@ -19,7 +19,7 @@ from pylab import *
 from pyspecdata import *
 
 fig, (ax_time, ax_freq) = subplots(2,1)
-t = nddata(r_[0:0.5:1e-3], 't2') # 1 kHz SW
+t = nddata(r_[0:0.5:1e-3], 't2') # 1 kHz SW with a freq. resolution of 1/0.5=2 Hz
 fake_data = exp(1j*2*pi*100*t-10*t*pi) # 10 Hz wide line at 100 Hz offset
 fake_data.add_noise(0.3).set_units('t2','s')
 plot(fake_data, ax=ax_time, alpha=0.2, label='raw data')

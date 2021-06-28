@@ -467,7 +467,7 @@ use dims=2 if it’s a 2D file</p>
 <div class="section" id="module-pyspecdata.load_files">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyspecdata.load_files" title="Permalink to this headline">¶</a></h2>
 <p>This subpackage holds all the routines for reading raw data in proprietary formats.
-It’s intended to be accessed entirely through the function <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.find_file" title="pyspecdata.load_files.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_file()</span></code></a>,
+It’s intended to be accessed entirely through the function <a class="reference internal" href="../modules.html#pyspecdata.load_files.find_file" title="pyspecdata.load_files.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_file()</span></code></a>,
 which uses <a href="#id1"><span class="problematic" id="id2">:module:`datadir`</span></a> to search for the filename, then automatically identifies
 the file type and calls the appropriate module to load the data into an nddata.</p>
 <p>Currently, Bruker file formats (both ESR and NMR) are supported, as well as
@@ -482,7 +482,7 @@ Whenever it finds a file in the current directory, it will not return data from 
 (For a more thorough description, see <a class="reference internal" href="pyspecdata.html#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a>).</p>
 <p>Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
 (so that you can make sure they are properly synced to the cloud, etc.).</p>
-<p>It calls <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
+<p>It calls <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
 <p>If it can’t find any files matching the criterion, it logs the missing file and throws an exception.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -528,22 +528,22 @@ it sets <cite>postproc_type</cite> to the value of
 This, in turn, is used to choose the type of post-processing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">dimname</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">return_acq</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">add_sizes</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">add_dims</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">use_sweep</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">indirect_dimlabels</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 </dl>
 </p></li>
@@ -583,7 +583,7 @@ Whenever it finds a file in the current directory, it will not return data from 
 (For a more thorough description, see <a class="reference internal" href="pyspecdata.html#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a>).</p>
 <p>Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
 (so that you can make sure they are properly synced to the cloud, etc.).</p>
-<p>It calls <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
+<p>It calls <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
 <p>If it can’t find any files matching the criterion, it logs the missing file and throws an exception.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -629,22 +629,22 @@ it sets <cite>postproc_type</cite> to the value of
 This, in turn, is used to choose the type of post-processing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">dimname</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">return_acq</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">add_sizes</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">add_dims</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">use_sweep</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">indirect_dimlabels</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 </dl>
 </p></li>

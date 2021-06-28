@@ -488,7 +488,7 @@ and determines the axis values as follows:
 <dt id="pyspecdata.axis_class.nddata_axis.references">
 <em class="property">property </em><code class="sig-name descname">references</code><a class="headerlink" href="#pyspecdata.axis_class.nddata_axis.references" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns OrderedDict of all names and aliases such that keys all point to the current instance (<cite>self</cite>)</p>
-<p>the idea is that this should be placed in a <cite>ChainMap</cite> object to be used by the <a class="reference internal" href="../axis_object_plan.html#pyspecdata.axis_class.axis_collection" title="pyspecdata.axis_class.axis_collection"><code class="xref py py-class docutils literal notranslate"><span class="pre">axis_collection</span></code></a> class that contains the axis.</p>
+<p>the idea is that this should be placed in a <cite>ChainMap</cite> object to be used by the <a class="reference internal" href="#pyspecdata.axis_class.axis_collection" title="pyspecdata.axis_class.axis_collection"><code class="xref py py-class docutils literal notranslate"><span class="pre">axis_collection</span></code></a> class that contains the axis.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1882,6 +1882,17 @@ This is designed to be called as abs(instance).cropped_log(), so it doesn’t ma
 </dd></dl>
 
 <dl class="py method">
+<dt id="pyspecdata.core.nddata.eval_poly">
+<code class="sig-name descname">eval_poly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c</span></em>, <em class="sig-param"><span class="n">axis</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.eval_poly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take <cite>c</cite> parameter from polyfit, and apply it along axis <cite>axis</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>c</strong> (<a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – polynomial coefficients in ascending polynomial order</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="pyspecdata.core.nddata.extend">
 <code class="sig-name descname">extend</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">extent</span></em>, <em class="sig-param"><span class="n">fill_with</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.extend" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extend the (domain of the) dataset and fill with a pre-set value.</p>
@@ -2503,7 +2514,9 @@ If <a href="#id15"><span class="problematic" id="id16">:str:`BRD`</span></a> is 
 <dd><p>polynomial fitting routine – return the coefficients and the fit
 ..note:</p>
 <blockquote>
-<div><p>later, should probably branch this off as a new type of fit class</p>
+<div><p>previously, this returned the fit data as a second argument called <cite>formult</cite>– you
+very infrequently want it to be in the same size as the data, though;
+to duplicate the old behavior, just add the line <code class="docutils literal notranslate"><span class="pre">formult</span> <span class="pre">=</span> <span class="pre">mydata.eval_poly(c,'axisname')</span></code>.</p>
 </div></blockquote>
 <dl class="simple">
 <dt>..warning:</dt><dd><p>for some reason, this version doesn’t use orthogonal polynomials,
@@ -2522,11 +2535,10 @@ but the idea should be that multiple fits would be returned.)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>c</strong> (<em>np.ndarray</em>) – a standard numpy np.array containing the coefficients (in ascending polynomial order)</p></li>
-<li><p><strong>formult</strong> (<em>nddata</em>) – an nddata containing the result of the fit</p></li>
-</ul>
-</p>
+<dd class="field-even"><p><strong>c</strong> – a standard numpy np.array containing the coefficients (in ascending polynomial order)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4188,7 +4200,7 @@ This can be used in combination with wrapviewer() and latexmk by using a <code c
 <dl class="py function">
 <dt id="pyspecdata.latexscripts.wrapviewer">
 <code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">wrapviewer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.wrapviewer" title="Permalink to this definition">¶</a></dt>
-<dd><p>see <a class="reference internal" href="../latexscripts.html#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p>
+<dd><p>see <a class="reference internal" href="#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p>
 </dd></dl>
 
 </div>
@@ -7155,7 +7167,7 @@ Whenever it finds a file in the current directory, it will not return data from 
 (For a more thorough description, see <a class="reference internal" href="#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a>).</p>
 <p>Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
 (so that you can make sure they are properly synced to the cloud, etc.).</p>
-<p>It calls <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
+<p>It calls <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
 <p>If it can’t find any files matching the criterion, it logs the missing file and throws an exception.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -7201,22 +7213,22 @@ it sets <cite>postproc_type</cite> to the value of
 This, in turn, is used to choose the type of post-processing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">dimname</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">return_acq</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">add_sizes</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">add_dims</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">use_sweep</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">indirect_dimlabels</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 </dl>
 </p></li>
@@ -9357,6 +9369,17 @@ This is designed to be called as abs(instance).cropped_log(), so it doesn’t ma
 </dd></dl>
 
 <dl class="py method">
+<dt id="pyspecdata.nddata.eval_poly">
+<code class="sig-name descname">eval_poly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c</span></em>, <em class="sig-param"><span class="n">axis</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.eval_poly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take <cite>c</cite> parameter from polyfit, and apply it along axis <cite>axis</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>c</strong> (<a class="reference internal" href="../pyspecdata.html#id0" title="pyspecdata.nddata"><em>nddata</em></a>) – polynomial coefficients in ascending polynomial order</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="pyspecdata.nddata.extend">
 <code class="sig-name descname">extend</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">extent</span></em>, <em class="sig-param"><span class="n">fill_with</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.extend" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extend the (domain of the) dataset and fill with a pre-set value.</p>
@@ -9978,7 +10001,9 @@ If <a href="#id62"><span class="problematic" id="id63">:str:`BRD`</span></a> is 
 <dd><p>polynomial fitting routine – return the coefficients and the fit
 ..note:</p>
 <blockquote>
-<div><p>later, should probably branch this off as a new type of fit class</p>
+<div><p>previously, this returned the fit data as a second argument called <cite>formult</cite>– you
+very infrequently want it to be in the same size as the data, though;
+to duplicate the old behavior, just add the line <code class="docutils literal notranslate"><span class="pre">formult</span> <span class="pre">=</span> <span class="pre">mydata.eval_poly(c,'axisname')</span></code>.</p>
 </div></blockquote>
 <dl class="simple">
 <dt>..warning:</dt><dd><p>for some reason, this version doesn’t use orthogonal polynomials,
@@ -9997,11 +10022,10 @@ but the idea should be that multiple fits would be returned.)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>c</strong> (<em>np.ndarray</em>) – a standard numpy np.array containing the coefficients (in ascending polynomial order)</p></li>
-<li><p><strong>formult</strong> (<em>nddata</em>) – an nddata containing the result of the fit</p></li>
-</ul>
-</p>
+<dd class="field-even"><p><strong>c</strong> – a standard numpy np.array containing the coefficients (in ascending polynomial order)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>

@@ -345,292 +345,295 @@ but aren’t gridded data.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.eval" title="pyspecdata.core.fitdata.eval"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eval</span></code></a>(taxis[, set_what, set_to])</p></td>
 <td><p>calculate the fit function along the axis taxis.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">extend</span></code>(axis, extent[, fill_with, tolerance])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">eval_poly</span></code>(c, axis)</p></td>
+<td><p>Take <cite>c</cite> parameter from polyfit, and apply it along axis <cite>axis</cite></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">extend</span></code>(axis, extent[, fill_with, tolerance])</p></td>
 <td><p>Extend the (domain of the) dataset and fill with a pre-set value.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">extend_for_shear</span></code>(altered_axis, propto_axis, …)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">extend_for_shear</span></code>(altered_axis, propto_axis, …)</p></td>
 <td><p>this is propto_axis helper function for <cite>.fourier.shear</cite></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.fit" title="pyspecdata.core.fitdata.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>([set_what, set_to, force_analytical])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.fit" title="pyspecdata.core.fitdata.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>([set_what, set_to, force_analytical])</p></td>
 <td><p>actually run the fit</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.fitfunc" title="pyspecdata.core.fitdata.fitfunc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitfunc</span></code></a>(p, x)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.fitfunc" title="pyspecdata.core.fitdata.fitfunc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitfunc</span></code></a>(p, x)</p></td>
 <td><p>This is the function that does the actual fitting, and takes a properly ordered list of parameters as well as an np.ndarray for the x axis.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fld</span></code>(dict_in[, noscalar])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fld</span></code>(dict_in[, noscalar])</p></td>
 <td><p>flatten dictionary – return list</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fourier_shear</span></code>(altered_axis, propto_axis, …)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fourier_shear</span></code>(altered_axis, propto_axis, …)</p></td>
 <td><p>the fourier shear method – see .shear() documentation</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fromaxis</span></code>(*args, **kwargs)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fromaxis</span></code>(*args, **kwargs)</p></td>
 <td><p>Generate an nddata object from one of the axis labels.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ft</span></code>(axes[, tolerance, cosine, verbose])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ft</span></code>(axes[, tolerance, cosine, verbose])</p></td>
 <td><p>This performs a Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ft_clear_startpoints</span></code>(axis[, t, f, nearest])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ft_clear_startpoints</span></code>(axis[, t, f, nearest])</p></td>
 <td><p>Clears memory of where the origins in the time and frequency domain are.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ft_state_to_str</span></code>(*axes)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ft_state_to_str</span></code>(*axes)</p></td>
 <td><p>Return a string that lists the FT domain for the given axes.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ftshift</span></code>(axis, value)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ftshift</span></code>(axis, value)</p></td>
 <td><p>FT-based shift.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.gen_indices" title="pyspecdata.core.fitdata.gen_indices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gen_indices</span></code></a>(this_set, set_to)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.gen_indices" title="pyspecdata.core.fitdata.gen_indices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gen_indices</span></code></a>(this_set, set_to)</p></td>
 <td><p>pass this this_set and this_set_to parameters, and it will return: indices,values,mask indices –&gt; gives the indices that are forced values –&gt; the values they are forced to mask –&gt; p[mask] are actually active in the fit</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_covariance</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_covariance</span></code>()</p></td>
 <td><p>this returns the covariance matrix of the data</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_error</span></code>(*args)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_error</span></code>(*args)</p></td>
 <td><p>get a copy of the errors either set_error(‘axisname’,error_for_axis) or set_error(error_for_data)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ft_prop</span></code>(axis[, propname])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ft_prop</span></code>(axis[, propname])</p></td>
 <td><p>Gets the FT property given by <cite>propname</cite>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_plot_color</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_plot_color</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_prop</span></code>([propname])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_prop</span></code>([propname])</p></td>
 <td><p>return arbitrary ND-data properties (typically acquisition parameters <em>etc.</em>) by name (<cite>propname</cite>)</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_units</span></code>(*args)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_units</span></code>(*args)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getaxis</span></code>(axisname)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getaxis</span></code>(axisname)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getaxisshape</span></code>(axisname)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getaxisshape</span></code>(axisname)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gnuplot_save</span></code>(filename)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gnuplot_save</span></code>(filename)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.guess" title="pyspecdata.core.fitdata.guess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">guess</span></code></a>([use_pseudoinverse])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.guess" title="pyspecdata.core.fitdata.guess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">guess</span></code></a>([use_pseudoinverse])</p></td>
 <td><p>old code that I am preserving here – provide the guess for our parameters; by default, based on pseudoinverse</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">hdf5_write</span></code>(h5path[, directory])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">hdf5_write</span></code>(h5path[, directory])</p></td>
 <td><p>Write the nddata to an HDF5 file.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">histogram</span></code>(**kwargs)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">histogram</span></code>(**kwargs)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">human_units</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">human_units</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ift</span></code>(axes[, n, tolerance, verbose])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ift</span></code>(axes[, n, tolerance, verbose])</p></td>
 <td><p>This performs an inverse Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">indices</span></code>(axis_name, values)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">indices</span></code>(axis_name, values)</p></td>
 <td><p>Return a string of indeces that most closely match the axis labels corresponding to values.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">inhomog_coords</span></code>(direct_dim, indirect_dim[, …])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">inhomog_coords</span></code>(direct_dim, indirect_dim[, …])</p></td>
 <td><p>Apply the “inhomogeneity transform,” which rotates the data by <span class="math notranslate nohighlight">\(45^{\circ}\)</span>, and then mirrors the portion with <span class="math notranslate nohighlight">\(t_2&lt;0\)</span> in order to transform from a <span class="math notranslate nohighlight">\((t_1,t_2)\)</span> coordinate system to a <span class="math notranslate nohighlight">\((t_{inh},t_{homog})\)</span> coordinate system.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">integrate</span></code>(thisaxis[, backwards, cumulative])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">integrate</span></code>(thisaxis[, backwards, cumulative])</p></td>
 <td><p>Performs an integration – which is similar to a sum, except that it takes the axis into account, <em>i.e.</em>, it performs: <span class="math notranslate nohighlight">\(\int f(x) dx\)</span> rather than <span class="math notranslate nohighlight">\(\sum_i f(x_i)\)</span></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp</span></code>(axis, axisvalues[, past_bounds, …])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp</span></code>(axis, axisvalues[, past_bounds, …])</p></td>
 <td><p>interpolate data values given axis values</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">invinterp</span></code>(axis, values, **kwargs)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">invinterp</span></code>(axis, values, **kwargs)</p></td>
 <td><p>interpolate axis values given data values</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>()</p></td>
 <td><p>like numpy item – returns a number when zero-dimensional</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">labels</span></code>(*args)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">labels</span></code>(*args)</p></td>
 <td><p>label the dimensions, given in listofstrings with the axis labels given in listofaxes – listofaxes must be a numpy np.array; you can pass either a dictionary or a axis name (string)/axis label (numpy np.array) pair</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.latex" title="pyspecdata.core.fitdata.latex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">latex</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.latex" title="pyspecdata.core.fitdata.latex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">latex</span></code></a>()</p></td>
 <td><p>show the latex string for the function, with all the symbols substituted by their values</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">like</span></code>(value)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">like</span></code>(value)</p></td>
 <td><p>provide “zeros_like” and “ones_like” functionality</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.linear" title="pyspecdata.core.fitdata.linear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">linear</span></code></a>(*args, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.linear" title="pyspecdata.core.fitdata.linear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">linear</span></code></a>(*args, **kwargs)</p></td>
 <td><p>return the linear-form function, either smoothly along the fit function, or on the raw data, depending on whether or not the taxis argument is given can take optional arguments and pass them on to eval</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">linear_shear</span></code>(along_axis, propto_axis, shear_amnt)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">linear_shear</span></code>(along_axis, propto_axis, shear_amnt)</p></td>
 <td><p>the linear shear – see <cite>self.shear</cite> for documentation</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.fitdata.makereal" title="pyspecdata.core.fitdata.makereal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">makereal</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.fitdata.makereal" title="pyspecdata.core.fitdata.makereal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">makereal</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">matchdims</span></code>(other)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">matchdims</span></code>(other)</p></td>
 <td><p>add any dimensions to self that are not present in other</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrices_3d</span></code>([also1d, invert, max_dimsize, …])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">matrices_3d</span></code>([also1d, invert, max_dimsize, …])</p></td>
 <td><p>returns X,Y,Z,x_axis,y_axis matrices X,Y,Z, are suitable for a variety of mesh plotting, etc, routines x_axis and y_axis are the x and y axes</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mayavi_surf</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mayavi_surf</span></code>()</p></td>
 <td><p>use the mayavi surf function, assuming that we’ve already loaded mlab during initialization</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>(*args, **kwargs)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>(*args, **kwargs)</p></td>
 <td><p>Take the mean and (optionally) set the error to the standard deviation</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean_all_but</span></code>(listofdims)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean_all_but</span></code>(listofdims)</p></td>
 <td><p>take the mean over all dimensions not in the list</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean_nopop</span></code>(axis)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean_nopop</span></code>(axis)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean_weighted</span></code>(axisname)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean_weighted</span></code>(axisname)</p></td>
 <td><p>perform  the weighted mean along <cite>axisname</cite> (use $sigma$ from $sigma = $self.get_error() do generate $1/sigma$ weights) for now, it clears the error of <cite>self</cite>, though it would be easy to calculate the new error, since everything is linear</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">meshplot</span></code>([stride, alpha, onlycolor, light, …])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">meshplot</span></code>([stride, alpha, onlycolor, light, …])</p></td>
 <td><p>takes both rotation and light as elevation, azimuth only use the light kwarg to generate a black and white shading display</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">min</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">min</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mkd</span></code>(*arg, **kwargs)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mkd</span></code>(*arg, **kwargs)</p></td>
 <td><p>make dictionary format</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">multimin</span></code>(minfunc, axisname, filterwidth, …)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">multimin</span></code>(minfunc, axisname, filterwidth, …)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code>(*arg)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code>(*arg)</p></td>
 <td><p>args: .name(newname) –&gt; Name the object (for storage, etc) .name() –&gt; Return the name</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nnls</span></code>(dimname, newaxis_dict, kernel_func[, l])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nnls</span></code>(dimname, newaxis_dict, kernel_func[, l])</p></td>
 <td><p>Perform regularized non-negative least-squares “fit” on self.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize</span></code>(axis[, first_figure])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize</span></code>(axis[, first_figure])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">oldtimey</span></code>([alpha, ax, linewidth, …])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">oldtimey</span></code>([alpha, ax, linewidth, …])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.output" title="pyspecdata.core.fitdata.output"><code class="xref py py-obj docutils literal notranslate"><span class="pre">output</span></code></a>(*name)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.output" title="pyspecdata.core.fitdata.output"><code class="xref py py-obj docutils literal notranslate"><span class="pre">output</span></code></a>(*name)</p></td>
 <td><p>give the fit value of a particular symbol, or a dictionary of all values.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.parameter_derivatives" title="pyspecdata.core.fitdata.parameter_derivatives"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parameter_derivatives</span></code></a>(xvals[, set, set_to])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.parameter_derivatives" title="pyspecdata.core.fitdata.parameter_derivatives"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parameter_derivatives</span></code></a>(xvals[, set, set_to])</p></td>
 <td><p>return a matrix containing derivatives of the parameters, can set dict set, or keys set, vals set_to</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.fitdata.pinv" title="pyspecdata.core.fitdata.pinv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pinv</span></code></a>(*args, **kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.fitdata.pinv" title="pyspecdata.core.fitdata.pinv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pinv</span></code></a>(*args, **kwargs)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_labels</span></code>(labels[, fmt])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_labels</span></code>(labels[, fmt])</p></td>
 <td><p>this only works for one axis now</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">polyfit</span></code>(axis[, order, force_y_intercept])</p></td>
-<td><p>polynomial fitting routine – return the coefficients and the fit ..note:     later, should probably branch this off as a new type of fit class</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">polyfit</span></code>(axis[, order, force_y_intercept])</p></td>
+<td><p>polynomial fitting routine – return the coefficients and the fit ..note:     previously, this returned the fit data as a second argument called <cite>formult</cite>– you     very infrequently want it to be in the same size as the data, though;     to duplicate the old behavior, just add the line <code class="docutils literal notranslate"><span class="pre">formult</span> <span class="pre">=</span> <span class="pre">mydata.eval_poly(c,'axisname')</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">popdim</span></code>(dimname)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">popdim</span></code>(dimname)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_mask</span></code>(axisname[, threshold, inversion])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_mask</span></code>(axisname[, threshold, inversion])</p></td>
 <td><p>generate a random mask with about ‘threshold’ of the points thrown out</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_axis</span></code>(arg[, nearest])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_axis</span></code>(arg[, nearest])</p></td>
 <td><p>Interpolate the data so that the given axes are in register with a set of specified values.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.fitdata.remove_inactive_p" title="pyspecdata.core.fitdata.remove_inactive_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_inactive_p</span></code></a>(p)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.fitdata.remove_inactive_p" title="pyspecdata.core.fitdata.remove_inactive_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_inactive_p</span></code></a>(p)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.fitdata.rename" title="pyspecdata.core.fitdata.rename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rename</span></code></a>(previous, new)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.fitdata.rename" title="pyspecdata.core.fitdata.rename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rename</span></code></a>(previous, new)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reorder</span></code>(*axes, **kwargs)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reorder</span></code>(*axes, **kwargs)</p></td>
 <td><p>Reorder the dimensions the first arguments are a list of dimensions</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">replicate_units</span></code>(other)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">replicate_units</span></code>(other)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">repwlabels</span></code>(axis)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">repwlabels</span></code>(axis)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.residual" title="pyspecdata.core.fitdata.residual"><code class="xref py py-obj docutils literal notranslate"><span class="pre">residual</span></code></a>(p, x, y, sigma)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.residual" title="pyspecdata.core.fitdata.residual"><code class="xref py py-obj docutils literal notranslate"><span class="pre">residual</span></code></a>(p, x, y, sigma)</p></td>
 <td><p>just the residual (error) function</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">retaxis</span></code>(axisname)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">retaxis</span></code>(axisname)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code>(*args)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code>(*args)</p></td>
 <td><p>run a standard numpy function on the nddata:</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_avg</span></code>(thisaxisname[, decimation, centered])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_avg</span></code>(thisaxisname[, decimation, centered])</p></td>
 <td><p>a simple running average</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_nopop</span></code>(func, axis)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_nopop</span></code>(func, axis)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">runcopy</span></code>(*args)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">runcopy</span></code>(*args)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">secsy_transform</span></code>(direct_dim, indirect_dim[, …])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">secsy_transform</span></code>(direct_dim, indirect_dim[, …])</p></td>
 <td><p>Shift the time-domain data backwards by the echo time.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">secsy_transform_manual</span></code>(direct_dim, indirect_dim)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">secsy_transform_manual</span></code>(direct_dim, indirect_dim)</p></td>
 <td><p>Shift the time-domain data backwards by the echo time.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error</span></code>(*args)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error</span></code>(*args)</p></td>
 <td><p>set the errors: either</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ft_prop</span></code>(axis[, propname, value])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ft_prop</span></code>(axis[, propname, value])</p></td>
 <td><p>Sets the FT property given by <cite>propname</cite>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.set_guess" title="pyspecdata.core.fitdata.set_guess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_guess</span></code></a>(dict_of_values)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.set_guess" title="pyspecdata.core.fitdata.set_guess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_guess</span></code></a>(dict_of_values)</p></td>
 <td><p>sets parameters to guess/estimated value to compare fit.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_plot_color</span></code>(thiscolor)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_plot_color</span></code>(thiscolor)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_prop</span></code>(*args)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_prop</span></code>(*args)</p></td>
 <td><p>set a ‘property’ of the nddata This is where you can put all unstructured information (e.g.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_to</span></code>(otherinst)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_to</span></code>(otherinst)</p></td>
 <td><p>Set data inside the current instance to that of the other instance.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_units</span></code>(*args)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_units</span></code>(*args)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setaxis</span></code>(*args)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setaxis</span></code>(*args)</p></td>
 <td><p>set or alter the value of the coordinate axis</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.settoguess" title="pyspecdata.core.fitdata.settoguess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">settoguess</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.settoguess" title="pyspecdata.core.fitdata.settoguess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">settoguess</span></code></a>()</p></td>
 <td><p>a debugging function, to easily plot the initial guess</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shear</span></code>(along_axis, propto_axis, shear_amnt[, …])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shear</span></code>(along_axis, propto_axis, shear_amnt[, …])</p></td>
 <td><p>Shear the data <span class="math notranslate nohighlight">\(s\)</span>:</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">smoosh</span></code>(dimstocollapse[, dimname, noaxis])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">smoosh</span></code>(dimstocollapse[, dimname, noaxis])</p></td>
 <td><p>Collapse (smoosh) multiple dimensions into one dimension.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort</span></code>(axisname[, reverse])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort</span></code>(axisname[, reverse])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_and_xy</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_and_xy</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">squeeze</span></code>([return_dropped])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">squeeze</span></code>([return_dropped])</p></td>
 <td><p>squeeze singleton dimensions</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sum</span></code>(axes)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sum</span></code>(axes)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sum_nopop</span></code>(axes)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sum_nopop</span></code>(axes)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_ppm</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_ppm</span></code>()</p></td>
 <td><p>Function that converts from Hz to ppm using Bruker parameters</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unitify_axis</span></code>(axis_name[, is_axis])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unitify_axis</span></code>(axis_name[, is_axis])</p></td>
 <td><p>this just generates an axis label with appropriate units</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">units_texsafe</span></code>(*args)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">units_texsafe</span></code>(*args)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unset_prop</span></code>(arg)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unset_prop</span></code>(arg)</p></td>
 <td><p>remove a ‘property’</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">waterfall</span></code>([alpha, ax, rotation, color, …])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">waterfall</span></code>([alpha, ax, rotation, color, …])</p></td>
 <td><p></p></td>
 </tr>
 </tbody>

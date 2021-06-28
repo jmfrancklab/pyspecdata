@@ -4152,7 +4152,7 @@ class nddata (object):
         return self
     #}}}
     #{{{ poly. fit
-    def apply_poly(self,c,axis):
+    def eval_poly(self,c,axis):
         """Take `c` parameter from polyfit, and apply it along axis `axis`
 
         Parameters
@@ -4169,7 +4169,9 @@ class nddata (object):
     def polyfit(self,axis,order=1,force_y_intercept = None):
         '''polynomial fitting routine -- return the coefficients and the fit
         ..note:
-            later, should probably branch this off as a new type of fit class
+            previously, this returned the fit data as a second argument called `formult`-- you
+            very infrequently want it to be in the same size as the data, though;
+            to duplicate the old behavior, just add the line ``formult = mydata.eval_poly(c,'axisname')``.
 
         ..warning:
             for some reason, this version doesn't use orthogonal polynomials,
@@ -4191,8 +4193,6 @@ class nddata (object):
         -------
         c: np.ndarray
             a standard numpy np.array containing the coefficients (in ascending polynomial order)
-        formult: nddata
-            an nddata containing the result of the fit
         '''
         x = self.getaxis(axis).copy().reshape(-1,1)
         #{{{ make a copy of self with the relevant dimension second to last (i.e. rows)
@@ -4210,15 +4210,11 @@ class nddata (object):
         startingpower = 0
         if force_y_intercept is not None:
             startingpower = 1
-            L =  np.concatenate([x**j for j in range(startingpower,order+1)],axis=1) # note the totally AWESOME way in which this is done!
-            #print 'fitting to matrix',L
+            L = [x**j for j in range(startingpower,order+1)]
+            L =  np.concatenate(L, axis=1) # note the totally AWESOME way in which this is done!
             y -= force_y_intercept
             c = np.dot(np.linalg.pinv(L),y)
-            fity = np.dot(L,c)
-            #print "\n\nDEBUG: forcing from",fity[0],"to"
-            fity += force_y_intercept
-            #print "DEBUG: ",fity[0]
-            c = c_[force_y_intercept,c]
+            c = r_[force_y_intercept,c.ravel()]
         else:
             c = np.polyfit(x.ravel(), y, deg=order) # better -- uses Hermite polys
             c = c[::-1] # give in ascending order, as is sensible

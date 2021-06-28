@@ -35,6 +35,27 @@ various functions.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="A quick demonstration of polynomial fitting.">
+
+.. only:: html
+
+ .. figure:: /auto_examples/images/thumb/sphx_glr_polyfit_thumb.png
+     :alt: Polynomial Fitting
+
+     :ref:`sphx_glr_auto_examples_polyfit.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/polyfit
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Demonstrate how to extend past the limits of the data.">
 
 .. only:: html

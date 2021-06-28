@@ -457,7 +457,7 @@ but aren’t gridded data.</p>
 <td><p>this only works for one axis now</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyspecdata.nddata.polyfit" title="pyspecdata.nddata.polyfit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polyfit</span></code></a>(axis[, order, force_y_intercept])</p></td>
-<td><p>polynomial fitting routine – return the coefficients and the fit ..note:     later, should probably branch this off as a new type of fit class</p></td>
+<td><p>polynomial fitting routine – return the coefficients and the fit ..note:     previously, this returned the fit data as a second argument called <cite>formult</cite>– you     very infrequently want it to be in the same size as the data, though;     to duplicate the old behavior, just add the line <code class="docutils literal notranslate"><span class="pre">formult</span> <span class="pre">=</span> <span class="pre">mydata.eval_poly(c,'axisname')</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata.popdim" title="pyspecdata.nddata.popdim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popdim</span></code></a>(dimname)</p></td>
 <td><p></p></td>
@@ -907,6 +907,17 @@ This is designed to be called as abs(instance).cropped_log(), so it doesn’t ma
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">tensordot</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="n">b</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="p">((</span><span class="mi">0</span><span class="p">),(</span><span class="mi">0</span><span class="p">)))</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.nddata.eval_poly">
+<code class="sig-name descname">eval_poly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c</span></em>, <em class="sig-param"><span class="n">axis</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.eval_poly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take <cite>c</cite> parameter from polyfit, and apply it along axis <cite>axis</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>c</strong> (<a class="reference internal" href="#id0" title="pyspecdata.nddata"><em>nddata</em></a>) – polynomial coefficients in ascending polynomial order</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1466,7 +1477,9 @@ If <a href="#id13"><span class="problematic" id="id14">:str:`BRD`</span></a> is 
 <dd><p>polynomial fitting routine – return the coefficients and the fit
 ..note:</p>
 <blockquote>
-<div><p>later, should probably branch this off as a new type of fit class</p>
+<div><p>previously, this returned the fit data as a second argument called <cite>formult</cite>– you
+very infrequently want it to be in the same size as the data, though;
+to duplicate the old behavior, just add the line <code class="docutils literal notranslate"><span class="pre">formult</span> <span class="pre">=</span> <span class="pre">mydata.eval_poly(c,'axisname')</span></code>.</p>
 </div></blockquote>
 <dl class="simple">
 <dt>..warning:</dt><dd><p>for some reason, this version doesn’t use orthogonal polynomials,
@@ -1485,11 +1498,10 @@ but the idea should be that multiple fits would be returned.)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>c</strong> (<em>np.ndarray</em>) – a standard numpy np.array containing the coefficients (in ascending polynomial order)</p></li>
-<li><p><strong>formult</strong> (<em>nddata</em>) – an nddata containing the result of the fit</p></li>
-</ul>
-</p>
+<dd class="field-even"><p><strong>c</strong> – a standard numpy np.array containing the coefficients (in ascending polynomial order)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
