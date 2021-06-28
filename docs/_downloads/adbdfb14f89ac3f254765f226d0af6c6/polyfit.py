@@ -9,11 +9,18 @@ from pyspecdata import *
 # {{{ generate fake data
 x = nddata(r_[0:10:7j], 'x')
 y = (x-2.0)**2
-y.add_noise(5)
+y.add_noise(2)
 # }}}
 plot(y,'o')
 c = y.polyfit('x', order=2)
 assert len(c)==3
+# math for min:
+# a(x-b)²= ax² - 2abx + ab²
+# c₂ = a
+# c₁ = -2ab
+# c₀ = ab²
+# b = -c₁/(c₂2)
+print("I found the minimum here at",-c[1]/c[2]/2)
 # generate a polynomial that's more finely spaced
 x = nddata(r_[0:10:100j], 'x')
 plot(x.eval_poly(c,'x'))
