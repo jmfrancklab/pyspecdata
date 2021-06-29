@@ -44,7 +44,7 @@ if _figure_mode_setting == 'latex':
 # }}} -- continued below
 from .general_functions import inside_sphinx
 import numpy as np
-from numpy import r_,c_,nan,inf
+from numpy import r_,c_,nan,inf,newaxis
 from numpy import pi
 from matplotlib.pyplot import rc, rcParams, plot, figure, title, text, show
 import matplotlib.pyplot as plt
@@ -1476,11 +1476,11 @@ def autopad_figure(pad = 0.2,centered = False,figname = 'unknown'):
     #labelsets.append(('left',ax.get_yticklabels()))
     #labelsets.append(('left',ax.get_yticklines()))
     #labelsets.append(('right',ax.get_yticklines()))
-    labelsets.append(('left',[ylabel(ax.get_ylabel())]))
+    labelsets.append(('left',[plt.ylabel(ax.get_ylabel())]))
     #labelsets.append(('bottom',ax.get_xticklabels()))
     #labelsets.append(('bottom',ax.get_xticklines()))
     if len(ax.get_xlabel()) > 0:
-        labelsets.append(('bottom',[xlabel(ax.get_xlabel())]))
+        labelsets.append(('bottom',[plt.xlabel(ax.get_xlabel())]))
     #labelsets.append(('top',ax.get_xticklines()))
     if len(ax.get_title()) > 0:
         pass #labelsets.append(('top',[plt.title(ax.get_title())]))
@@ -4152,15 +4152,29 @@ class nddata (object):
         return self
     #}}}
     #{{{ poly. fit
+    def eval_poly(self,c,axis):
+        """Take `c` parameter from :func:`~pyspecdata.nddata.polyfit`, and apply it along axis `axis`
+
+        Parameters
+        ----------
+        c: ndarray
+            polynomial coefficients in ascending polynomial order
+
+        """
+        thisaxis = self.fromaxis(axis)
+        result = 0
+        for j in range(len(c)):
+            result += c[j] * thisaxis**j
+        return result
     def polyfit(self,axis,order=1,force_y_intercept = None):
         '''polynomial fitting routine -- return the coefficients and the fit
-        ..note:
-            later, should probably branch this off as a new type of fit class
+        .. note:
+            previously, this returned the fit data as a second argument called `formult`-- you
+            very infrequently want it to be in the same size as the data, though;
+            to duplicate the old behavior, just add the line ``formult = mydata.eval_poly(c,'axisname')``.
 
-        ..warning:
-            for some reason, this version doesn't use orthogonal polynomials,
-            as the numpy routine does -- we had diagnosed and determined that
-            that creates noticeably different results, so fix that here.
+        .. seealso::
+            :func:`~pyspecdata.nddata.eval_poly`
 
         Parameters
         ----------
@@ -4177,8 +4191,6 @@ class nddata (object):
         -------
         c: np.ndarray
             a standard numpy np.array containing the coefficients (in ascending polynomial order)
-        formult: nddata
-            an nddata containing the result of the fit
         '''
         x = self.getaxis(axis).copy().reshape(-1,1)
         #{{{ make a copy of self with the relevant dimension second to last (i.e. rows)
@@ -4196,23 +4208,16 @@ class nddata (object):
         startingpower = 0
         if force_y_intercept is not None:
             startingpower = 1
-        L =  np.concatenate([x**j for j in range(startingpower,order+1)],axis=1) # note the totally AWESOME way in which this is done!
-        #print 'fitting to matrix',L
-        if force_y_intercept is not None:
+            L = [x**j for j in range(startingpower,order+1)]
+            L =  np.concatenate(L, axis=1) # note the totally AWESOME way in which this is done!
             y -= force_y_intercept
-        c = np.dot(np.linalg.pinv(L),y)
-        fity = np.dot(L,c)
-        if force_y_intercept is not None:
-            #print "\n\nDEBUG: forcing from",fity[0],"to"
-            fity += force_y_intercept
-            #print "DEBUG: ",fity[0]
-            c = c_[force_y_intercept,c]
+            c = np.dot(np.linalg.pinv(L),y)
+            c = r_[force_y_intercept,c.ravel()]
+        else:
+            c = np.polyfit(x.ravel(), y, deg=order) # better -- uses Hermite polys
+            c = c[::-1] # give in ascending order, as is sensible
         #}}}
-        #{{{ rather than have to match up everything, just drop the fit data into formult, which should be the same size, shape, etc
-        formult.data = fity
-        formult.set_error(None)
-        #}}}
-        return c,formult
+        return c
     #}}}
     #{{{ max and mean
     def _wrapaxisfuncs(self,func):
@@ -5476,10 +5481,7 @@ class nddata (object):
                     axis_data = self.getaxis(axisname).flatten()
                     # copy is needed here, or data and axis will be the same object
                     retval = nddata(axis_data,axis_data.shape,[axisname]).setaxis(axisname,np.copy(axis_data))
-                    if self.axis_coords_units is None:
-                        retval.axis_coords_units = None
-                    else:
-                        retval.axis_coords_units = [self.axis_coords_units[self.axn(axisname)]]
+                    retval.set_units(axisname,self.get_units(axisname))
                     retval.data_units = self.data_units
                     retval.name(self.name())
                     return retval

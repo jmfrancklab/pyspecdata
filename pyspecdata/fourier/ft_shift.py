@@ -183,6 +183,8 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
                         " for ft_clear_startpoints!!"))
                 elif nearest:
                     f = round((f-orig_f)/df)*df + orig_f
+            else:
+                f = orig_f - round(n_df)*df
         self.set_ft_prop(axis,['start_freq'],f)
         self.set_ft_prop(axis,['freq','not','aliased'],None)
         if nearest is False:
@@ -198,6 +200,7 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
             orig_t = self.getaxis(axis)[0]
         if t is not None:
             n_dt = (orig_t-t)/dt # number of dt's shifted by
+            print("trying to shift by",n_dt)
             if abs((n_dt - round(n_dt))/n_dt) > 1e-3:
                 if nearest is None:
                     print("discrepancy",abs(orig_t-t) % dt)
@@ -211,6 +214,10 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
                         " for ft_clear_startpoints!!"))
                 elif nearest:
                     t = round((t-orig_t)/dt)*dt + orig_t
+                    print("nearest t is",t)
+            else:
+                t = orig_t - round(n_dt)*dt
+                print("setting t to",t)
         self.set_ft_prop(axis,['start_time'],t)
         self.set_ft_prop(axis,['time','not','aliased'],None)
         if nearest is False:

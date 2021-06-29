@@ -332,7 +332,9 @@ def log_fname(logname,fname,dirname,err=False):
     rclone copy -v --include '200110_pulse_2.h5' g_syr:exp_data/test_equip C:\\Users\\johnf\\exp_data\\test_equip``
     """
     if err:
+        logger.debug(strm("about to call rclone search on",fname,dirname))
         rclone_suggest = rclone_search(fname,dirname)# eventually lump into the error message
+        logger.debug("rclone search done")
     with open(logname+'.log','a+',encoding='utf-8') as fp:
         already_listed = False
         fp.seek(0,0)

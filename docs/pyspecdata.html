@@ -33,7 +33,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -117,6 +116,8 @@
 <p class="caption"><span class="caption-text">Example Gallery</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
 </ul>
 
             
@@ -456,7 +457,7 @@ but aren’t gridded data.</p>
 <td><p>this only works for one axis now</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyspecdata.nddata.polyfit" title="pyspecdata.nddata.polyfit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polyfit</span></code></a>(axis[, order, force_y_intercept])</p></td>
-<td><p>polynomial fitting routine – return the coefficients and the fit ..note:     later, should probably branch this off as a new type of fit class</p></td>
+<td><p>polynomial fitting routine – return the coefficients and the fit .. note:     previously, this returned the fit data as a second argument called <cite>formult</cite>– you     very infrequently want it to be in the same size as the data, though;     to duplicate the old behavior, just add the line <code class="docutils literal notranslate"><span class="pre">formult</span> <span class="pre">=</span> <span class="pre">mydata.eval_poly(c,'axisname')</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata.popdim" title="pyspecdata.nddata.popdim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popdim</span></code></a>(dimname)</p></td>
 <td><p></p></td>
@@ -629,7 +630,7 @@ you’re going to do math with them, and that the singleton dimensions
 will be expanded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a><em> or </em><em>np.ndarray</em>) – The nddata that you want to align to <cite>self</cite>.
+<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="#id0" title="pyspecdata.nddata"><em>nddata</em></a><em> or </em><em>np.ndarray</em>) – The nddata that you want to align to <cite>self</cite>.
 If arg is an np.ndarray, it will try to match dimensions to self based
 on the length of the dimension.
 <strong>Note:</strong> currently there is an issue where this will only really
@@ -906,6 +907,17 @@ This is designed to be called as abs(instance).cropped_log(), so it doesn’t ma
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">tensordot</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="n">b</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="p">((</span><span class="mi">0</span><span class="p">),(</span><span class="mi">0</span><span class="p">)))</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.nddata.eval_poly">
+<code class="sig-name descname">eval_poly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c</span></em>, <em class="sig-param"><span class="n">axis</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.eval_poly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take <cite>c</cite> parameter from <a class="reference internal" href="#pyspecdata.nddata.polyfit" title="pyspecdata.nddata.polyfit"><code class="xref py py-func docutils literal notranslate"><span class="pre">polyfit()</span></code></a>, and apply it along axis <cite>axis</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>c</strong> (<em>ndarray</em>) – polynomial coefficients in ascending polynomial order</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1419,7 +1431,7 @@ for the data (DOI:10.1109/78.995059).</p>
 distribution (the “fit” dimension);
 <em>e.g.</em> if you are regularizing a set of functions
 <span class="math notranslate nohighlight">\(\np.exp(-\tau*R_1)\)</span>, then this is <span class="math notranslate nohighlight">\(\tau\)</span></p></li>
-<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – a dictionary whose key is the name of the “fit” dimension
+<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><a class="reference internal" href="#id0" title="pyspecdata.nddata"><em>nddata</em></a>) – a dictionary whose key is the name of the “fit” dimension
 (<span class="math notranslate nohighlight">\(R_1\)</span> in the example above)
 and whose value is an np.array with the new axis labels.
 OR
@@ -1463,16 +1475,16 @@ If <a href="#id13"><span class="problematic" id="id14">:str:`BRD`</span></a> is 
 <dt id="pyspecdata.nddata.polyfit">
 <code class="sig-name descname">polyfit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">force_y_intercept</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.polyfit" title="Permalink to this definition">¶</a></dt>
 <dd><p>polynomial fitting routine – return the coefficients and the fit
-..note:</p>
+.. note:</p>
 <blockquote>
-<div><p>later, should probably branch this off as a new type of fit class</p>
+<div><p>previously, this returned the fit data as a second argument called <cite>formult</cite>– you
+very infrequently want it to be in the same size as the data, though;
+to duplicate the old behavior, just add the line <code class="docutils literal notranslate"><span class="pre">formult</span> <span class="pre">=</span> <span class="pre">mydata.eval_poly(c,'axisname')</span></code>.</p>
 </div></blockquote>
-<dl class="simple">
-<dt>..warning:</dt><dd><p>for some reason, this version doesn’t use orthogonal polynomials,
-as the numpy routine does – we had diagnosed and determined that
-that creates noticeably different results, so fix that here.</p>
-</dd>
-</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#pyspecdata.nddata.eval_poly" title="pyspecdata.nddata.eval_poly"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval_poly()</span></code></a></p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1484,11 +1496,10 @@ but the idea should be that multiple fits would be returned.)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>c</strong> (<em>np.ndarray</em>) – a standard numpy np.array containing the coefficients (in ascending polynomial order)</p></li>
-<li><p><strong>formult</strong> (<em>nddata</em>) – an nddata containing the result of the fit</p></li>
-</ul>
-</p>
+<dd class="field-even"><p><strong>c</strong> – a standard numpy np.array containing the coefficients (in ascending polynomial order)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
