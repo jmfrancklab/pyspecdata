@@ -105,7 +105,7 @@ def gen_from_expr(expr, global_params={}, n_datasets=3, guesses={}):
             modules = [{"ImmutableMatrix": np.ndarray},"numpy","scipy"],
             )
     local_fn = lambdify(
-        variable_symbols + parameter_symbols + global_symbols,
+        (variable_symbols + parameter_symbols + global_symbols),
         expr,
         modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
     )
@@ -121,18 +121,14 @@ def gen_from_expr(expr, global_params={}, n_datasets=3, guesses={}):
         g_par_args = args[g_fn_params+n_fn_params+n_vars+g_vars:-g_fn_params]
         data = np.empty((n_datasets, 151))
         g_data = np.empty((n_datasets,151))
-        for j in range(n_datasets):    
+        g_dat = global_fn(*tuple(g_var_args + g_par_args))
+        g_dat = [g_dat]
+        g_dat = tuple(g_dat)
+        for j in range(n_datasets):   
             these_pars = par_args[j * n_fn_params : (j + 1) * n_fn_params]
-            g_dat = global_fn(*tuple(g_var_args + g_par_args))
-            print(g_dat)
-            g_dat = str(g_dat)
-            print(g_dat)
-            print(type(g_dat))
-            print(tuple(g_dat))
-            g_dat = tuple(str(g_dat))
-            print(type(var_args))
-            print(g_dat)
-            data[j, :] = local_fn(*tuple(var_args + g_dat + these_pars))
+            print(*tuple(var_args +g_dat+these_pars))
+            print(*tuple(var_args + g_dat + par_args))
+            data[j, :] = local_fn(*tuple(var_args + g_dat + par_args))
         return data
 
     return pars, parameter_names, outer_fn
