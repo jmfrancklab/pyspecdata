@@ -4795,7 +4795,7 @@ class nddata (object):
             # compress data here
             K1 = S1.dot(V1)
             K2 = S2.dot(V2)
-            K = K1[:,newaxis,:,newaxis]*K2[newaxis,:,newaxis,:]
+            K = K1[:,np.newaxis,:,np.newaxis]*K2[np.newaxis,:,np.newaxis,:]
             K = K.reshape(K1.shape[0]*K2.shape[0],K1.shape[1]*K2.shape[1])
             logger.debug(strm('Compressed K0, K1, and K2:',[x.shape for x in (K,K1,K2)]))
 
@@ -4817,7 +4817,7 @@ class nddata (object):
                 def chi(x_vec,val):
                     return 0.5*np.dot(x_vec.T,np.dot(dd_chi(G(x_vec),val**2),x_vec)) - np.dot(x_vec.T,data_fornnls[:,newaxis])
                 def d_chi(x_vec,val):
-                    return np.dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
+                    return np.dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,np.newaxis]
                 def dd_chi(G,val):
                     return G + (val**2)*np.eye(np.shape(G)[0])
                 def G(x_vec):
@@ -4861,9 +4861,9 @@ class nddata (object):
                         logger.debug(strm('ITERATION NO.',iter))
                         logger.debug(strm('CURRENT LAMBDA',smoothing_param))
                         retval,residual = this_nnls.nnls_regularized(K,data_fornnls,l=smoothing_param)
-                        f_vec = retval[:,newaxis]
+                        f_vec = retval[:,np.newaxis]
                         alpha = smoothing_param**2
-                        c_vec = np.dot(K,f_vec) - data_fornnls[:,newaxis]
+                        c_vec = np.dot(K,f_vec) - data_fornnls[:,np.newaxis]
                         c_vec /= -1*alpha
                         c_update = newton_min(c_vec,smoothing_param)
                         alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
@@ -6464,6 +6464,11 @@ class nddata (object):
                 raise ValueError(errmsg)
             #}}}
         else:
+            if type(args) is not slice:
+                if type(args) not in [tuple, list]:
+                    raise ValueError("the first argument to your nddata slice/index is not a string -- I don't understand that!  Are you trying to pass nddata to a function that only accepts numpy ndarrays?")
+                elif type(args[0]) is not str:
+                    raise ValueError("the first argument to your nddata slice/index is not a string -- I don't understand that!  Are you trying to pass nddata to a function that only accepts numpy ndarrays?")
             slicedict,axesdict,errordict,unitsdict = self._parse_slices(args)
             if not isinstance(args, slice) and isinstance(args[1], list) and isinstance(args[0], str) and len(args) == 2:
                 return concat([self[args[0],x] for x in args[1]],args[0])
@@ -6975,7 +6980,12 @@ class nddata_hdf5 (nddata):
 #}}}
 
 class ndshape (ndshape_base):
-    r'''The ndshape class, including the allocation method''' 
+    r'''A class for describing the shape and dimension names of nddata objects.
+
+    A main goal of this class is to allow easy generation (allocation) of new
+    arrays -- see :func:`alloc`.
+
+    ''' 
     def alloc(self,dtype='complex128',labels = False,format = 0):
         r'''Use the shape object to allocate an empty nddata object.
 
@@ -6986,6 +6996,22 @@ class ndshape (ndshape_base):
         format : 0, 1, or None
             What goes in the allocated array.
             `None` uses numpy empty.
+
+        Example
+        -------
+
+        If you want to create new empty array that's 10x3 with dimensions "x" and "y":
+
+        >>> result = ndshape([10,3],['x','y']).alloc(format=None)
+
+        You can also do things like creating a new array based on the size of
+        an existing array (create a new array without dimension x, but with new
+        dimension z)
+
+        >>> myshape = ndshape(mydata)
+        >>> myshape.pop('x')
+        >>> myshape + (10,'z')
+        >>> result = myshape.alloc(format=None)
         '''
         try:
             if format == 0:
