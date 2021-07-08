@@ -4795,7 +4795,7 @@ class nddata (object):
             # compress data here
             K1 = S1.dot(V1)
             K2 = S2.dot(V2)
-            K = K1[:,np.newaxis,:,np.newaxis]*K2[np.newaxis,:,np.newaxis,:]
+            K = K1[:,newaxis,:,newaxis]*K2[newaxis,:,newaxis,:]
             K = K.reshape(K1.shape[0]*K2.shape[0],K1.shape[1]*K2.shape[1])
             logger.debug(strm('Compressed K0, K1, and K2:',[x.shape for x in (K,K1,K2)]))
 
@@ -4817,7 +4817,7 @@ class nddata (object):
                 def chi(x_vec,val):
                     return 0.5*np.dot(x_vec.T,np.dot(dd_chi(G(x_vec),val**2),x_vec)) - np.dot(x_vec.T,data_fornnls[:,newaxis])
                 def d_chi(x_vec,val):
-                    return np.dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,np.newaxis]
+                    return np.dot(dd_chi(G(x_vec),val**2),x_vec) - data_fornnls[:,newaxis]
                 def dd_chi(G,val):
                     return G + (val**2)*np.eye(np.shape(G)[0])
                 def G(x_vec):
@@ -4861,9 +4861,9 @@ class nddata (object):
                         logger.debug(strm('ITERATION NO.',iter))
                         logger.debug(strm('CURRENT LAMBDA',smoothing_param))
                         retval,residual = this_nnls.nnls_regularized(K,data_fornnls,l=smoothing_param)
-                        f_vec = retval[:,np.newaxis]
+                        f_vec = retval[:,newaxis]
                         alpha = smoothing_param**2
-                        c_vec = np.dot(K,f_vec) - data_fornnls[:,np.newaxis]
+                        c_vec = np.dot(K,f_vec) - data_fornnls[:,newaxis]
                         c_vec /= -1*alpha
                         c_update = newton_min(c_vec,smoothing_param)
                         alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
