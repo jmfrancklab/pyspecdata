@@ -5636,7 +5636,8 @@ class nddata (object):
 
         * ``self.setaxis('axisname', values)``: just sets the values
         * ``self.setaxis('axisname', '#')``: just
-            number the axis in numerically increasing order
+            number the axis in numerically increasing order,
+            with integers,
             (e.g. if you have smooshed it from a couple
             other dimensions.)
         * ``self.fromaxis('axisname',inputfunc)``: take the existing function, apply inputfunc, and replace
