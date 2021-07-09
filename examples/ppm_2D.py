@@ -22,4 +22,3 @@ with figlist_var() as fl:
     signal.to_ppm('t1')
     fl.next('after converting to ppm')
     fl.image(signal)
-    fl.show();quit()
