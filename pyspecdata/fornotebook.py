@@ -755,14 +755,14 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
     peaktopeak.labels(['power'],[sqrt(powerseries)])
     peaktopeak.rename('power','$B_1$ / arb')
     plot(peaktopeak,'.-',nosemilog=True)
-    ylabel(r'$\Delta B_{pp}$')
+    plt.ylabel(r'$\Delta B_{pp}$')
     lplot('esr_dataset'+figname+'_pp.pdf')
     #{{{ linearity test
     peaktopeak_squared.data = peaktopeak_squared.data**2
     peaktopeak_squared.labels(['power'],[powerseries])
     peaktopeak_squared.rename('power',r'$p$ / $mW$')
     plot(peaktopeak_squared,'.-',nosemilog=True)
-    ylabel(r'$\Delta B_{pp}^2\propto s^{-1}$')
+    plt.ylabel(r'$\Delta B_{pp}^2\propto s^{-1}$')
     lplot('esr_dataset'+figname+'_pp2.pdf')
     #}}}
     #}}}
@@ -773,7 +773,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
     height.labels(['power'],[sqrt(powerseries)])
     height.rename('power','$B_1$ / arb')
     plot(height,'.-',nosemilog=True)
-    ylabel(r"$y'_m$")
+    plt.ylabel(r"$y'_m$")
     lplot('esr_dataset'+figname+'_height.pdf')
     #{{{linearity test
     b1 = ndshape(height_n23)
@@ -794,7 +794,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
         plot(height_n23/hn23adjustment,'.',nosemilog=True)
     maxp = lambda x: x == x.max()
     plot(r_[0.0,height_n23_avg[newpname,maxp].getaxis(newpname)],r_[1.0,height_n23_avg[newpname,maxp].data[0]/hn23adjustment],'k-',linewidth=2,alpha=0.3,nosemilog=True)
-    ylabel(r"$\propto\frac{y'_m}{B_1}^{-2/3}\propto \frac{1}{1-s_{ESR}}$")
+    plt.ylabel(r"$\propto\frac{y'_m}{B_1}^{-2/3}\propto \frac{1}{1-s_{ESR}}$")
     lplot('esr_dataset'+figname+'_hn23.pdf',width = 3.5)
     #}}}
     #}}}
@@ -834,7 +834,7 @@ def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'ref
           retval = plot_noise(path_list[k],noiseexpno[k],calibration,mask_start,mask_stop,smoothing = smoothing, both = False,retplot = True)
           linelist += retval[0]
           legendstr.append('\n'.join(textwrap.wrap(explabel[k]+':'+retval[1][0],50))+'\n')
-       ylabel(r'$\Omega$')
+       plt.ylabel(r'$\Omega$')
        titlestr = 'Noise scans (smoothed %0.2f $kHz$) for CNSI spectrometer\n'%(smoothing/1e3)
        plt.title(titlestr+r'$n V$ RG/ disk units = %0.3f, mask (%0.3f,%0.3f)'%(calibration*1e9,mask_start,mask_stop))
        ax = plt.gca()

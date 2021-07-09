@@ -101,7 +101,7 @@ Load cw Bruker ESR data, both 1D and 2D.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.666 seconds)
+   **Total running time of the script:** ( 0 minutes  0.519 seconds)
 
 
 .. _sphx_glr_download_auto_examples_esr_example.py:
