@@ -170,6 +170,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
             newdata[thisaxis] = padded_length
             targetslice = [slice(None,None,None)] * len(newdata)
             targetslice[thisaxis] = slice(None,self.data.shape[thisaxis])
+            targetslice = tuple(targetslice)
             newdata = np.zeros(newdata,dtype = self.data.dtype)
             newdata[targetslice] = self.data
             self.data = newdata

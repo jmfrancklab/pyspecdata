@@ -171,6 +171,7 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
             newdata[thisaxis] = padded_length
             targetslice = [slice(None,None,None)] * len(newdata)
             targetslice[thisaxis] = slice(None,self.data.shape[thisaxis])
+            targetslice = tuple(targetslice)
             newdata = np.zeros(newdata,dtype = self.data.dtype)
             newdata[targetslice] = self.data
             self.data = newdata
