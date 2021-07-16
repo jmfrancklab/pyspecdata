@@ -23,17 +23,21 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*
         :math:`\frac{-1}{-i 2 \pi f - R}`
         then ``convfunc = lambda f,R: -1./(-1j*2*pi*f-R)``
     '''
-    #{{{ make a version of x that is oriented along the correct dimension
-    x = self.getaxis(axisname).copy()
-    x_centerpoint = (x[-1]+x[0])/2
-    x -= x_centerpoint # so that zero is in the center
-    x = ifftshift(x) # so that it's convolved about time 0
-    thisaxis = self.axn(axisname)
-    #}}}
+    time_domain = True
+    if self.get_ft_prop(axisname):
+        self.ift(axisname)
+        time_domain = False
+    elif self.get_ft_prop(axisname,['start','freq']) is None:
+        self.ft(axisname, shift=True)
+    else:
+        self.ft(axisname)
+    x = self.fromaxis(axisname)
     myfilter = convfunc(x,filterwidth)
-    myfilter /= myfilter.sum()
-    filtershape = ones_like(self.data.shape)
-    filtershape[thisaxis] = len(myfilter)
-    myfilter = myfilter.reshape(filtershape)
-    self.data = ifft(fft(self.data,axis = thisaxis)*fft(myfilter,axis = thisaxis),axis = thisaxis)
+    newdata = self*myfilter
+    self.data = newdata.data
+    if time_domain:
+        self.ift(axisname)
+    else:
+        self.ft(axisname)
+    print("before return",axisname,self.get_ft_prop(axisname))
     return self
