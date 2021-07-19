@@ -196,17 +196,26 @@ History/Roadmap
 Installation
 ============
 
-On Windows with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
+On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
 just run
 ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython``
 followed by ``conda install -c msys2 m2w64-toolchain`` (the libpython and m2w64-toolchain are only required if you are a developer).
 Then (if not a developer) install either via pip (`pip install pyspecdata`) or (if you want to be able to develop or modify the code) follow the `installation for developers <#installation-for-developers>`_ below.
 
-On CentOS7, we've tested
+On **CentOS7**, we've tested
 ``yum install python-matplotlib python-matplotlib-qt4 python-devel sympy h5py python-tables scipy``
 (after running ``yum install epel-release`` to install the EPEL distribution)
 
-On Mac, your python distribution needs to have a working Fortran compiler, since some of the modules use Fortran.
+On **Debian** (should also work for **Ubuntu**),
+we've tested
+``sudo apt-get install -y python3 python3-matplotlib libpython3.7 python3-dev python3-sympy python3-h5py python3-tables python3-scipy python3-setuptools gfortran``.
+
+To **install as a user on MacOS**, we have it set up for pip, but need to dereference the libraries -- contact us if you have issues with this.
+
+On **MacOS**, if you want to install as a developer your python distribution needs to have a working Fortran compiler, since some of the modules use Fortran.
+We have tested ``conda install -c conda-forge fortran-compiler``, followed by
+``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py``.
+However *due to a problem with more recent versions of MacOS/xcode*, you need to modify ``setup.py`` to tell it where to find the system libraries.
 
 More generally,
 these instructions are based on the fact that it's *Highly Recommended* 
