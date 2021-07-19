@@ -216,6 +216,9 @@ On **MacOS**, if you want to install as a developer your python distribution nee
 We have tested ``conda install -c conda-forge fortran-compiler``, followed by
 ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py``.
 However *due to a problem with more recent versions of MacOS/xcode*, you need to modify ``setup.py`` to tell it where to find the system libraries.
+At about line 27, you need to add something like following as a keyword arg for the `Extension` function:
+``library_dirs = ["/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"],``
+(we recommmend just using keyword completion to find a similar directory that exists).
 
 More generally,
 these instructions are based on the fact that it's *Highly Recommended* 
