@@ -32,7 +32,7 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*
     else:
         self.ft(axisname)
     x = self.fromaxis(axisname)
-    myfilter = convfunc(x,filterwidth)
+    myfilter = convfunc(x,1/filterwidth)
     newdata = self*myfilter
     self.data = newdata.data
     if time_domain:
