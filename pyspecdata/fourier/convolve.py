@@ -2,7 +2,9 @@ from ..general_functions import inside_sphinx
 from pylab import r_,fft,ifft,ifftshift,fftshift,exp,ones_like
 
 def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*(y**2))))):
-    r'''Perform a convolution.
+    r'''Perform a convolution, by multiplying
+    current dataset in its conjugate domain by the
+    convolution function.
     
     Parameters
     ==========
@@ -11,11 +13,19 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*
         apply the convolution along `axisname`
 
     filterwidth: double
-        width of the convolution function.
+        width of the convolution function (specify
+        in the conjugate domain, since this is
+        where the convolution function is
+        constructed)
+        
 
     convfunc: function
-        A function that takes two arguments -- the first are the axis coordinates and the second is `filterwidth`.
-        Default is a normalized Gaussian of width (:math:`\sigma`)
+        A function defined in the conjugate
+        Fourire domain of self that takes two
+        arguments -- the first are the axis
+        coordinates and the second is
+        `filterwidth`.  Default is a normalized
+        Gaussian of width (:math:`\sigma`)
         `filterwidth`
         :math:`\frac{1}{2 \sigma^2}\exp\left( - \frac{x^2}{2 \sigma^2} \right)`
         For example if you want a complex Lorentzian with `filterwidth` controlled by the rate :math:`R`, 
@@ -38,7 +48,7 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*
         print("detect self in time domain, already FT'd")
         self.ft(axisname)
     x = self.fromaxis(axisname)
-    myfilter = convfunc(x,1/filterwidth)
+    myfilter = convfunc(x,filterwidth)
     newdata = self*myfilter
     self.data = newdata.data
     if time_domain:
