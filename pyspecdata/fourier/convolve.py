@@ -25,11 +25,17 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*
     '''
     time_domain = True
     if self.get_ft_prop(axisname):
+        # detect self in frequency domain
+        print("detect self in frequency domain")
         self.ift(axisname)
         time_domain = False
     elif self.get_ft_prop(axisname,['start','freq']) is None:
+        # detect self in time domain, never FT'd
+        print("detect self in time domain, never FT'd")
         self.ft(axisname, shift=True)
     else:
+        # detect self in time domain, already FT'd
+        print("detect self in time domain, already FT'd")
         self.ft(axisname)
     x = self.fromaxis(axisname)
     myfilter = convfunc(x,filterwidth)
