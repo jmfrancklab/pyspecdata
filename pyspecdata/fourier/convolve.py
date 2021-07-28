@@ -38,7 +38,7 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*
         print("detect self in time domain, already FT'd")
         self.ft(axisname)
     x = self.fromaxis(axisname)
-    myfilter = convfunc(x,filterwidth)
+    myfilter = convfunc(x,1/filterwidth)
     newdata = self*myfilter
     self.data = newdata.data
     if time_domain:
