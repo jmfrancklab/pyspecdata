@@ -1,9 +1,11 @@
 """
-Convolution
-===========
-Demonstrate a convolution.
-In particular, the convolution wasn't previously aware of the time axis, but
-now it is.
+Unitary FT
+==========
+Demonstrate new argument to ft and ift that allows you to take an FT that's
+unitary in the vector sense -- this way, you don't have to e.g. multiply by dt
+and divide by the  number of points.
+(This is a standard capability with raw numpy, but we just had not much use for
+it before)
 """
 from pylab import *
 from pyspecdata import *
