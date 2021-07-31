@@ -3,7 +3,7 @@ from numpy import r_
 import numpy as np
 from .ft_shift import _find_index,thinkaboutit_message
 
-def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
+def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,unitary=False,**kwargs):
     r"""This performs an inverse Fourier transform along the axes identified by the string or list of strings `axes`.
 
     It adjusts normalization and units so that the result conforms to
@@ -40,6 +40,8 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
         ..note ::
             In the code, this is controlled by `p2_post` (the integral
             :math:`\Delta t` and `p2_post_discrepancy` -- the non-integral.
+    unitary : boolean (False)
+        return a result that is vector-unitary
     """
     if verbose: print("check 1",self.data.dtype)
     #{{{ process arguments
@@ -203,8 +205,11 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
             #   phase-shift above
         #}}}
         #{{{ adjust the normalization appropriately
-        self.data *= padded_length * du # here, the algorithm divides by
-        #       padded_length, so for integration, we need to not do that
+        if unitary:
+            self.data *= np.sqrt(padded_length)
+        else:
+            self.data *= padded_length * du # here, the algorithm divides by
+            #       padded_length, so for integration, we need to not do that
         #}}}
         #{{{ finally, if "p2_pre" for the pre-shift didn't correspond exactly to
         #       zero, then the pre-ift data was shifted, and I must reflect

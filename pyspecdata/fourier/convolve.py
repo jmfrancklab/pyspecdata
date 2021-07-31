@@ -1,12 +1,12 @@
 from ..general_functions import inside_sphinx
-from pylab import r_,fft,ifft,ifftshift,fftshift,exp,ones_like
+from pylab import r_,fft,ifft,ifftshift,fftshift,exp,ones_like,sqrt,pi
 from pyspecdata import init_logging,strm
 logger = init_logging("debug")
 
-def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*(y**2))))):
-    r'''Perform a convolution on the data in its
-    current domain via multiplication in its
-    conjugate domain.
+def convolve(self,axisname,filterwidth,convfunc = (lambda x,y:
+    exp(-(x**2)/(2.0*(y**2)))/(y*sqrt(2*pi)))
+    ):
+    r'''Perform a convolution.
     
     Parameters
     ==========
@@ -16,8 +16,8 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*
 
     filterwidth: double
         width of the convolution function
-        (this value must be provided in the same
-        domain as that in which the data exists
+        (the units of this value are specified in the
+        same domain as that in which the data exists
         when you call this function on said data)
 
     convfunc: function
@@ -34,26 +34,29 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y: exp(-(x**2)/(2.0*
         then ``convfunc = lambda f,R: -1./(-1j*2*pi*f-R)``
     '''
     time_domain = True
+    x = self.fromaxis(axisname)
+    myfilter = convfunc(x,filterwidth)
     if self.get_ft_prop(axisname):
         # detect self in frequency domain
-        logger.info(strm("detect self in frequency domain"))
+        logger.debug(strm("detect self in frequency domain"))
         self.ift(axisname)
+        myfilter.ift(axisname)
         time_domain = False
     elif self.get_ft_prop(axisname,['start','freq']) is None:
         # detect self in time domain, never FT'd
-        logger.info(strm("detect self in time domain, never FT'd"))
+        logger.debug(strm("detect self in time domain, never FT'd"))
         self.ft(axisname, shift=True)
+        myfilter.ft(axisname)
     else:
         # detect self in time domain, already FT'd
-        logger.info(strm("detect self in time domain, already FT'd"))
+        logger.debug(strm("detect self in time domain, already FT'd"))
         self.ft(axisname)
-    x = self.fromaxis(axisname)
-    myfilter = convfunc(x,1/filterwidth)
+        myfilter.ft(axisname)
     newdata = self*myfilter
     self.data = newdata.data
     if time_domain:
         self.ift(axisname)
     else:
         self.ft(axisname)
-    logger.info(strm("before return",axisname,self.get_ft_prop(axisname)))
+    logger.debug(strm("before return",axisname,self.get_ft_prop(axisname)))
     return self
