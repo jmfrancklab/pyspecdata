@@ -1,7 +1,6 @@
 from ..general_functions import inside_sphinx
 from pylab import r_,fft,ifft,ifftshift,fftshift,exp,ones_like,sqrt,pi
 from pyspecdata import init_logging,strm
-from ..ndshape import ndshape_base as ndshape
 logger = init_logging("debug")
 
 def convolve(self,axisname,filterwidth,convfunc = (lambda x,y:
@@ -49,7 +48,6 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y:
         logger.debug(strm("detect self in frequency domain"))
         self.ift(axisname)
         myfilter.ift(axisname)
-        print("orig ndshape",ndshape(myfilter))
         if enforce_causality:
             # this is horribly inefficient, but the most straightforward way I
             # can think of doing this -- would be greatly helped if we could
@@ -58,26 +56,14 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y:
             tlen = myfilter.getaxis(axisname)[-1]-orig_start
             assert orig_start-2*tlen < 0, "the time origin (%f vs tlen %f) is at too high of a positive value for me to try to enforce causality"%(orig_start,tlen)
             # create a negative part for it to alias into:
-            print("extending to",-myfilter.getaxis(axisname)[-1])
             myfilter.extend(axisname,-myfilter.getaxis(axisname)[-1])
-            print("start time",myfilter.get_ft_prop(axisname,
-                    ['start','time']))
-            print(myfilter.getaxis(axisname)[r_[0,-1]])
             myfilter.ft(axisname)
-            print("start time",myfilter.get_ft_prop(axisname,
-                    ['start','time']))
             # recalculate the filter on the new axis
             x = myfilter.fromaxis(axisname)
-            print("x start time",x.get_ft_prop(axisname,
-                    ['start','time']))
             myfilter = convfunc(x,filterwidth)
             myfilter.ift(axisname)
-            print("start time",myfilter.get_ft_prop(axisname,
-                    ['start','time']))
             # throw out the stuff to the left of the original time origin
-            print("ndshape before slice",ndshape(myfilter),myfilter.getaxis(axisname)[r_[0,-1]])
             myfilter = myfilter[axisname:(orig_start,None)]
-            print("ndshape after slice",ndshape(myfilter),myfilter.getaxis(axisname)[r_[0,-1]])
         time_domain = False
     elif self.get_ft_prop(axisname,['start','freq']) is None:
         # detect self in time domain, never FT'd
