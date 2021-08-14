@@ -5630,6 +5630,13 @@ class nddata (object):
         # construct the new axis
         new_u = u[0] + du * r_[start_index:stop_index]
         self.setaxis(axis,new_u)
+        if start_index < 0:
+            # if we are extending to negative values, we need to inform
+            # the FT machinery!
+            if self.get_ft_prop(axis):
+                self.set_ft_prop(axis, ["start","freq"], new_u[0])
+            else:
+                self.set_ft_prop(axis, ["start","time"], new_u[0])
         return self
     def setaxis(self,*args):
         """set or alter the value of the coordinate axis

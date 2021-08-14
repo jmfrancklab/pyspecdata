@@ -62,11 +62,6 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y:
             myfilter.extend(axisname,-myfilter.getaxis(axisname)[-1])
             print("start time",myfilter.get_ft_prop(axisname,
                     ['start','time']))
-            myfilter.set_ft_prop(axisname,
-                    ['start','time'],
-                    -myfilter.getaxis(axisname)[-1])
-            print("start time",myfilter.get_ft_prop(axisname,
-                    ['start','time']))
             print(myfilter.getaxis(axisname)[r_[0,-1]])
             myfilter.ft(axisname)
             print("start time",myfilter.get_ft_prop(axisname,
