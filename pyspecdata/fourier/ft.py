@@ -3,7 +3,7 @@ from numpy import r_
 import numpy as np
 from .ft_shift import _find_index,thinkaboutit_message
 
-def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
+def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,unitary=False,**kwargs):
     r"""This performs a Fourier transform along the axes identified by the string or list of strings `axes`.
 
     It adjusts normalization and units so that the result conforms to
@@ -33,6 +33,8 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
         sampling scope, and it's severely aliased over.
     cosine : boolean
         yields a sum of the fft and ifft, for a cosine transform
+    unitary : boolean (False)
+        return a result that is vector-unitary
     """
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
@@ -208,7 +210,10 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
             #   phase-shift above
         #}}}
         #{{{ adjust the normalization appropriately
-        self.data *= du # this gives the units in the integral noted in the docstring
+        if unitary:
+            self.data /= np.sqrt(padded_length)
+        else:
+            self.data *= du # this gives the units in the integral noted in the docstring
         #}}}
         #{{{ finally, if "p2_pre" for the pre-shift didn't correspond exactly to
         #       zero, then the pre-ft data was shifted, and I must reflect
