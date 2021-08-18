@@ -7,14 +7,7 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,unitary=False,**kwarg
     r"""This performs an inverse Fourier transform along the axes identified by the string or list of strings `axes`.
 
     It adjusts normalization and units so that the result conforms to
-            :math:`s(t)=t_{dw} \int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df`
-    Where :math:`t_{dw}=\frac{1}{\Delta f}`, is the dwell time (with :math:`\Delta f` the spectral width).
-
-    *Why do we do this?* Note that while the analytical integral this corresponds to is normalized, performing
-    :meth:`~pyspecdata.nddata.ft` followed by :meth:`~pyspecdata.nddata.ift` on a discrete sequence is NOT completely invertible
-    (due to integration of the implied comb function??),
-    and would require division by a factor of :math:`\Delta f` (the spectral width) in order
-    to retrieve the original function
+            :math:`s(t)=\int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df`
 
     **pre-IFT**, we use the axis to cyclically permute :math:`f=0` to the first index
 

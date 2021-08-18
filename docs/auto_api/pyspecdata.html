@@ -1896,7 +1896,7 @@ This is designed to be called as abs(instance).cropped_log(), so it doesn’t ma
 <dl class="py method">
 <dt id="pyspecdata.core.nddata.eval_poly">
 <code class="sig-name descname">eval_poly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c</span></em>, <em class="sig-param"><span class="n">axis</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.eval_poly" title="Permalink to this definition">¶</a></dt>
-<dd><p>Take <cite>c</cite> parameter from <a class="reference internal" href="#pyspecdata.nddata.polyfit" title="pyspecdata.nddata.polyfit"><code class="xref py py-func docutils literal notranslate"><span class="pre">polyfit()</span></code></a>, and apply it along axis <cite>axis</cite></p>
+<dd><p>Take <cite>c</cite> parameter from <a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.polyfit" title="pyspecdata.nddata.polyfit"><code class="xref py py-func docutils literal notranslate"><span class="pre">polyfit()</span></code></a>, and apply it along axis <cite>axis</cite></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>c</strong> (<em>ndarray</em>) – polynomial coefficients in ascending polynomial order</p>
@@ -1991,9 +1991,6 @@ inferred from the symbolic expression.</p></li>
 <dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt\)</span></p>
 </dd>
 </dl>
-<p>Note that, as noted in the <a class="reference internal" href="pyspecdata.fourier.html#pyspecdata.fourier.ift.ift" title="pyspecdata.fourier.ift.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> documentation,
-the inverse transform doesn’t correspond to the equivalent
-expression for the IFT.</p>
 <p><strong>pre-FT</strong>, we use the axis to cyclically permute <span class="math notranslate nohighlight">\(t=0\)</span> to the first index</p>
 <p><strong>post-FT</strong>, we assume that the data has previously been IFT’d
 If this is the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> will cause an error
@@ -2217,15 +2214,9 @@ structure.)</p></li>
 <code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.ift" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs an inverse Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
-<dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=t_{dw} \int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
+<dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=\int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
 </dd>
 </dl>
-<p>Where <span class="math notranslate nohighlight">\(t_{dw}=\frac{1}{\Delta f}\)</span>, is the dwell time (with <span class="math notranslate nohighlight">\(\Delta f\)</span> the spectral width).</p>
-<p><em>Why do we do this?</em> Note that while the analytical integral this corresponds to is normalized, performing
-<a class="reference internal" href="#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code></a> followed by <a class="reference internal" href="#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> on a discrete sequence is NOT completely invertible
-(due to integration of the implied comb function??),
-and would require division by a factor of <span class="math notranslate nohighlight">\(\Delta f\)</span> (the spectral width) in order
-to retrieve the original function</p>
 <p><strong>pre-IFT</strong>, we use the axis to cyclically permute <span class="math notranslate nohighlight">\(f=0\)</span> to the first index</p>
 <p><strong>post-IFT</strong>, we assume that the data has previously been FT’d
 If this is the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> will cause an error
@@ -2536,7 +2527,7 @@ to duplicate the old behavior, just add the line <code class="docutils literal n
 </div></blockquote>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="#pyspecdata.nddata.eval_poly" title="pyspecdata.nddata.eval_poly"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval_poly()</span></code></a></p>
+<p><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.eval_poly" title="pyspecdata.nddata.eval_poly"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval_poly()</span></code></a></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -4215,7 +4206,7 @@ This can be used in combination with wrapviewer() and latexmk by using a <code c
 <dl class="py function">
 <dt id="pyspecdata.latexscripts.wrapviewer">
 <code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">wrapviewer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.wrapviewer" title="Permalink to this definition">¶</a></dt>
-<dd><p>see <a class="reference internal" href="../latexscripts.html#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p>
+<dd><p>see <a class="reference internal" href="#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p>
 </dd></dl>
 
 </div>
@@ -6847,7 +6838,7 @@ current plot in the figurelist</p></li>
 <code class="sig-name descname">A</code><a class="headerlink" href="#pyspecdata.figlist.A" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a> or numpy array</p>
+<dd class="field-odd"><p><a class="reference internal" href="../pyspecdata.html#id0" title="pyspecdata.nddata">nddata</a> or numpy array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -7346,7 +7337,7 @@ nddata metadata.</p>
 <dd class="field-odd"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a></p>
+<dd class="field-even"><p><a class="reference internal" href="../pyspecdata.html#id0" title="pyspecdata.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -7474,7 +7465,7 @@ must be sympy symbols</p>
 <dd class="field-even"><p><strong>self</strong> – The modified nddata</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="../pyspecdata.html#id0" title="pyspecdata.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -8546,7 +8537,7 @@ or else, <cite>None</cite>, indicating that this is part of a pair of
 files that should be skipped</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a> or None</p>
+<dd class="field-odd"><p><a class="reference internal" href="../pyspecdata.html#id0" title="pyspecdata.nddata">nddata</a> or None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -9079,7 +9070,7 @@ you’re going to do math with them, and that the singleton dimensions
 will be expanded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="#pyspecdata.nddata" title="pyspecdata.nddata"><em>nddata</em></a><em> or </em><em>np.ndarray</em>) – The nddata that you want to align to <cite>self</cite>.
+<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="../pyspecdata.html#id0" title="pyspecdata.nddata"><em>nddata</em></a><em> or </em><em>np.ndarray</em>) – The nddata that you want to align to <cite>self</cite>.
 If arg is an np.ndarray, it will try to match dimensions to self based
 on the length of the dimension.
 <strong>Note:</strong> currently there is an issue where this will only really
@@ -9350,7 +9341,7 @@ nddata metadata.</p>
 <dl class="py method">
 <dt id="pyspecdata.nddata.copy_props">
 <code class="sig-name descname">copy_props</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.copy_props" title="Permalink to this definition">¶</a></dt>
-<dd><p>Copy all properties (see <a class="reference internal" href="#pyspecdata.nddata.get_prop" title="pyspecdata.nddata.get_prop"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_prop()</span></code></a>) from another nddata
+<dd><p>Copy all properties (see <a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.get_prop" title="pyspecdata.nddata.get_prop"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_prop()</span></code></a>) from another nddata
 object – note that these include properties pertaining the the FT
 status of various dimensions.</p>
 </dd></dl>
@@ -9397,7 +9388,7 @@ This is designed to be called as abs(instance).cropped_log(), so it doesn’t ma
 <dl class="py method">
 <dt id="pyspecdata.nddata.eval_poly">
 <code class="sig-name descname">eval_poly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c</span></em>, <em class="sig-param"><span class="n">axis</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.eval_poly" title="Permalink to this definition">¶</a></dt>
-<dd><p>Take <cite>c</cite> parameter from <a class="reference internal" href="#pyspecdata.nddata.polyfit" title="pyspecdata.nddata.polyfit"><code class="xref py py-func docutils literal notranslate"><span class="pre">polyfit()</span></code></a>, and apply it along axis <cite>axis</cite></p>
+<dd><p>Take <cite>c</cite> parameter from <a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.polyfit" title="pyspecdata.nddata.polyfit"><code class="xref py py-func docutils literal notranslate"><span class="pre">polyfit()</span></code></a>, and apply it along axis <cite>axis</cite></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>c</strong> (<em>ndarray</em>) – polynomial coefficients in ascending polynomial order</p>
@@ -9492,9 +9483,6 @@ inferred from the symbolic expression.</p></li>
 <dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt\)</span></p>
 </dd>
 </dl>
-<p>Note that, as noted in the <a class="reference internal" href="pyspecdata.fourier.html#pyspecdata.fourier.ift.ift" title="pyspecdata.fourier.ift.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> documentation,
-the inverse transform doesn’t correspond to the equivalent
-expression for the IFT.</p>
 <p><strong>pre-FT</strong>, we use the axis to cyclically permute <span class="math notranslate nohighlight">\(t=0\)</span> to the first index</p>
 <p><strong>post-FT</strong>, we assume that the data has previously been IFT’d
 If this is the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> will cause an error
@@ -9718,15 +9706,9 @@ structure.)</p></li>
 <code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.ift" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs an inverse Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
-<dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=t_{dw} \int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
+<dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=\int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
 </dd>
 </dl>
-<p>Where <span class="math notranslate nohighlight">\(t_{dw}=\frac{1}{\Delta f}\)</span>, is the dwell time (with <span class="math notranslate nohighlight">\(\Delta f\)</span> the spectral width).</p>
-<p><em>Why do we do this?</em> Note that while the analytical integral this corresponds to is normalized, performing
-<a class="reference internal" href="#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code></a> followed by <a class="reference internal" href="#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> on a discrete sequence is NOT completely invertible
-(due to integration of the implied comb function??),
-and would require division by a factor of <span class="math notranslate nohighlight">\(\Delta f\)</span> (the spectral width) in order
-to retrieve the original function</p>
 <p><strong>pre-IFT</strong>, we use the axis to cyclically permute <span class="math notranslate nohighlight">\(f=0\)</span> to the first index</p>
 <p><strong>post-IFT</strong>, we assume that the data has previously been FT’d
 If this is the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> will cause an error
@@ -9975,7 +9957,7 @@ for the data (DOI:10.1109/78.995059).</p>
 distribution (the “fit” dimension);
 <em>e.g.</em> if you are regularizing a set of functions
 <span class="math notranslate nohighlight">\(\np.exp(-\tau*R_1)\)</span>, then this is <span class="math notranslate nohighlight">\(\tau\)</span></p></li>
-<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><a class="reference internal" href="#pyspecdata.nddata" title="pyspecdata.nddata"><em>nddata</em></a>) – a dictionary whose key is the name of the “fit” dimension
+<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><a class="reference internal" href="../pyspecdata.html#id0" title="pyspecdata.nddata"><em>nddata</em></a>) – a dictionary whose key is the name of the “fit” dimension
 (<span class="math notranslate nohighlight">\(R_1\)</span> in the example above)
 and whose value is an np.array with the new axis labels.
 OR
@@ -10037,7 +10019,7 @@ to duplicate the old behavior, just add the line <code class="docutils literal n
 </div></blockquote>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="#pyspecdata.nddata.eval_poly" title="pyspecdata.nddata.eval_poly"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval_poly()</span></code></a></p>
+<p><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.eval_poly" title="pyspecdata.nddata.eval_poly"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval_poly()</span></code></a></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

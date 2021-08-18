@@ -9,10 +9,6 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,unitary=False,**k
     It adjusts normalization and units so that the result conforms to
             :math:`\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt`
 
-    Note that, as noted in the :meth:`~pyspecdata.fourier.ift.ift` documentation,
-    the inverse transform doesn't correspond to the equivalent
-    expression for the IFT.
-
     **pre-FT**, we use the axis to cyclically permute :math:`t=0` to the first index
 
     **post-FT**, we assume that the data has previously been IFT'd

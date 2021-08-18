@@ -1019,9 +1019,6 @@ inferred from the symbolic expression.</p></li>
 <dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt\)</span></p>
 </dd>
 </dl>
-<p>Note that, as noted in the <a class="reference internal" href="auto_api/pyspecdata.fourier.html#pyspecdata.fourier.ift.ift" title="pyspecdata.fourier.ift.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> documentation,
-the inverse transform doesn’t correspond to the equivalent
-expression for the IFT.</p>
 <p><strong>pre-FT</strong>, we use the axis to cyclically permute <span class="math notranslate nohighlight">\(t=0\)</span> to the first index</p>
 <p><strong>post-FT</strong>, we assume that the data has previously been IFT’d
 If this is the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> will cause an error
@@ -1210,15 +1207,9 @@ structure.)</p></li>
 <code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.ift" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs an inverse Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
-<dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=t_{dw} \int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
+<dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=\int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
 </dd>
 </dl>
-<p>Where <span class="math notranslate nohighlight">\(t_{dw}=\frac{1}{\Delta f}\)</span>, is the dwell time (with <span class="math notranslate nohighlight">\(\Delta f\)</span> the spectral width).</p>
-<p><em>Why do we do this?</em> Note that while the analytical integral this corresponds to is normalized, performing
-<a class="reference internal" href="#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code></a> followed by <a class="reference internal" href="#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> on a discrete sequence is NOT completely invertible
-(due to integration of the implied comb function??),
-and would require division by a factor of <span class="math notranslate nohighlight">\(\Delta f\)</span> (the spectral width) in order
-to retrieve the original function</p>
 <p><strong>pre-IFT</strong>, we use the axis to cyclically permute <span class="math notranslate nohighlight">\(f=0\)</span> to the first index</p>
 <p><strong>post-IFT</strong>, we assume that the data has previously been FT’d
 If this is the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> will cause an error
