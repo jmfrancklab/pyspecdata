@@ -40,8 +40,6 @@ bandwidth and time range of the signal, the SNR of the signal improves.
 
     note that the original dwell time is 0.001 and the original frequency resolution is 2.0
     note that the new dwell time of the truncated data is 0.0024875621890547263 and the new frequency resolution is 4.962962962962963
-    c:\users\johnf\notebook\pyspecdata\pyspecdata\fourier\ft.py:174: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-      newdata[targetslice] = self.data
 
 
 
@@ -101,7 +99,7 @@ bandwidth and time range of the signal, the SNR of the signal improves.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.252 seconds)
+   **Total running time of the script:** ( 0 minutes  0.251 seconds)
 
 
 .. _sphx_glr_download_auto_examples_basic_example.py:

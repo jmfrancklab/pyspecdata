@@ -5,14 +5,14 @@
 
 Computation times
 =================
-**00:00.460** total execution time for **auto_examples_matplotlib** files:
+**00:00.409** total execution time for **auto_examples_matplotlib** files:
 
 +--------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_matplotlib_matplotlib_test.py` (``matplotlib_test.py``) | 00:00.166 | 0.0 MB |
+| :ref:`sphx_glr_auto_examples_matplotlib_draw_span.py` (``draw_span.py``)             | 00:00.133 | 0.0 MB |
 +--------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_matplotlib_draw_span.py` (``draw_span.py``)             | 00:00.141 | 0.0 MB |
+| :ref:`sphx_glr_auto_examples_matplotlib_matplotlib_test.py` (``matplotlib_test.py``) | 00:00.131 | 0.0 MB |
 +--------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_matplotlib_transf_math.py` (``transf_math.py``)         | 00:00.090 | 0.0 MB |
+| :ref:`sphx_glr_auto_examples_matplotlib_transf_math.py` (``transf_math.py``)         | 00:00.089 | 0.0 MB |
 +--------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_matplotlib_artist_tests.py` (``artist_tests.py``)       | 00:00.062 | 0.0 MB |
+| :ref:`sphx_glr_auto_examples_matplotlib_artist_tests.py` (``artist_tests.py``)       | 00:00.057 | 0.0 MB |
 +--------------------------------------------------------------------------------------+-----------+--------+

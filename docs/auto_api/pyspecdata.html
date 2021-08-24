@@ -99,6 +99,7 @@
 <p class="caption"><span class="caption-text">Example Gallery</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">PySpecData Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#individual-functions">Individual Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
 </ul>
@@ -504,8 +505,8 @@ and determines the axis values as follows:
 <span id="pyspecdata-core-module"></span><h2>pyspecdata.core module<a class="headerlink" href="#module-pyspecdata.core" title="Permalink to this headline">¶</a></h2>
 <p>Provides the core components of pyspecdata.
 Currently, this is a very large file that we will slowly break down into separate modules or packages.</p>
-<p>The classes <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata_hdf</span></code>, <a class="reference internal" href="#pyspecdata.core.ndshape" title="pyspecdata.core.ndshape"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code></a>, the
-function <a class="reference internal" href="#pyspecdata.core.plot" title="pyspecdata.core.plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot()</span></code></a>, and the class <a class="reference internal" href="../generated/pyspecdata.core.fitdata.html#pyspecdata.core.fitdata" title="pyspecdata.core.fitdata"><code class="xref py py-class docutils literal notranslate"><span class="pre">fitdata</span></code></a>
+<p>The classes <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata_hdf</span></code>, <a class="reference internal" href="#pyspecdata.core.ndshape" title="pyspecdata.core.ndshape"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code></a>, the
+function <a class="reference internal" href="#pyspecdata.core.plot" title="pyspecdata.core.plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot()</span></code></a>, and the class <a class="reference internal" href="#pyspecdata.core.fitdata" title="pyspecdata.core.fitdata"><code class="xref py py-class docutils literal notranslate"><span class="pre">fitdata</span></code></a>
 are the core components of the N-Dimensional processing routines.
 Start by familiarizing yourself with those.</p>
 <p>The <a class="reference internal" href="#pyspecdata.core.figlist" title="pyspecdata.core.figlist"><code class="xref py py-class docutils literal notranslate"><span class="pre">figlist</span></code></a> is the base class for “Figure lists.”
@@ -836,7 +837,7 @@ current plot in the figurelist</p></li>
 <code class="sig-name descname">A</code><a class="headerlink" href="#pyspecdata.core.figlist.A" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
+<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1105,17 +1106,17 @@ and not return a figure list in the output</p>
 <dl class="py class">
 <dt id="pyspecdata.core.fitdata">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">fitdata</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
 <p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
 <p>The user creates a fitdata class object from an existing nddata
 class object, and on this fitdata object can define the
-<a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.functional_form" title="pyspecdata.core.fitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
+<a class="reference internal" href="#pyspecdata.core.fitdata.functional_form" title="pyspecdata.core.fitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
 data of the original nddata.
 This functional form must be provided as a sympy expression, with
 one of its variables matching the name of the dimension that the
 user would like to fit to.
 The user provides fit coefficients using <code class="xref py py-func docutils literal notranslate"><span class="pre">fit_coeff()</span></code> and
-obtains output using <a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.fit" title="pyspecdata.core.fitdata.fit"><code class="xref py py-func docutils literal notranslate"><span class="pre">fit()</span></code></a> and <a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.eval" title="pyspecdata.core.fitdata.eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.</p>
+obtains output using <a class="reference internal" href="#pyspecdata.core.fitdata.fit" title="pyspecdata.core.fitdata.fit"><code class="xref py py-func docutils literal notranslate"><span class="pre">fit()</span></code></a> and <a class="reference internal" href="#pyspecdata.core.fitdata.eval" title="pyspecdata.core.fitdata.eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.</p>
 <p>If you haven’t done this before,
 create a jupyter notebook (not checked in, just for your own playing around) with:
 <code class="docutils literal notranslate"><span class="pre">`</span>
@@ -1195,7 +1196,7 @@ nddata metadata.</p>
 <dd class="field-odd"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+<dd class="field-even"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1323,7 +1324,7 @@ must be sympy symbols</p>
 <dd class="field-even"><p><strong>self</strong> – The modified nddata</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1577,7 +1578,7 @@ you’re going to do math with them, and that the singleton dimensions
 will be expanded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a><em> or </em><em>np.ndarray</em>) – The nddata that you want to align to <cite>self</cite>.
+<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a><em> or </em><em>np.ndarray</em>) – The nddata that you want to align to <cite>self</cite>.
 If arg is an np.ndarray, it will try to match dimensions to self based
 on the length of the dimension.
 <strong>Note:</strong> currently there is an issue where this will only really
@@ -1790,21 +1791,32 @@ Defaults to True</p>
 
 <dl class="py method">
 <dt id="pyspecdata.core.nddata.convolve">
-<code class="sig-name descname">convolve</code><span class="sig-paren">(</span><em class="sig-param">axisname</em>, <em class="sig-param">filterwidth</em>, <em class="sig-param">convfunc=&lt;function &lt;lambda&gt;&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.convolve" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">convolve</code><span class="sig-paren">(</span><em class="sig-param">axisname</em>, <em class="sig-param">filterwidth</em>, <em class="sig-param">convfunc=&lt;function &lt;lambda&gt;&gt;</em>, <em class="sig-param">enforce_causality=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.convolve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform a convolution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>axisname</strong> (<em>str</em>) – apply the convolution along <cite>axisname</cite></p></li>
-<li><p><strong>filterwidth</strong> (<em>double</em>) – width of the convolution function.</p></li>
-<li><p><strong>convfunc</strong> (<em>function</em>) – A function that takes two arguments – the first are the axis coordinates and the second is <cite>filterwidth</cite>.
-Default is a normalized Gaussian of width (<span class="math notranslate nohighlight">\(\sigma\)</span>)
-<cite>filterwidth</cite>
+<li><p><strong>filterwidth</strong> (<em>double</em>) – width of the convolution function
+(the units of this value are specified in the
+same domain as that in which the data exists
+when you call this function on said data)</p></li>
+<li><p><strong>convfunc</strong> (<em>function</em>) – A function that takes two
+arguments – the first are the axis
+coordinates and the second is
+<cite>filterwidth</cite> (see <cite>filterwidth</cite>).
+Default is a normalized Gaussian of width
+(<span class="math notranslate nohighlight">\(\sigma\)</span>) <cite>filterwidth</cite>
 <span class="math notranslate nohighlight">\(\frac{1}{2 \sigma^2}\exp\left( - \frac{x^2}{2 \sigma^2} \right)\)</span>
 For example if you want a complex Lorentzian with <cite>filterwidth</cite> controlled by the rate <span class="math notranslate nohighlight">\(R\)</span>,
 <em>i.e.</em>
 <span class="math notranslate nohighlight">\(\frac{-1}{-i 2 \pi f - R}\)</span>
 then <code class="docutils literal notranslate"><span class="pre">convfunc</span> <span class="pre">=</span> <span class="pre">lambda</span> <span class="pre">f,R:</span> <span class="pre">-1./(-1j*2*pi*f-R)</span></code></p></li>
+<li><p><strong>enforce_causality</strong> (<em>boolean</em>) – make sure that the ift of the filter doesn’t get aliased to high
+time values.
+This only makes sense for frequency-domain data whose
+corresponding time-domain data has a startpoint at or near zero.
+It is ignored if you call a convolution on time-domain data.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1973,15 +1985,12 @@ inferred from the symbolic expression.</p></li>
 
 <dl class="py method">
 <dt id="pyspecdata.core.nddata.ft">
-<code class="sig-name descname">ft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">cosine</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.ft" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">cosine</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.ft" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs a Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
 <dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt\)</span></p>
 </dd>
 </dl>
-<p>Note that, as noted in the <a class="reference internal" href="pyspecdata.fourier.html#pyspecdata.fourier.ift.ift" title="pyspecdata.fourier.ift.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> documentation,
-the inverse transform doesn’t correspond to the equivalent
-expression for the IFT.</p>
 <p><strong>pre-FT</strong>, we use the axis to cyclically permute <span class="math notranslate nohighlight">\(t=0\)</span> to the first index</p>
 <p><strong>post-FT</strong>, we assume that the data has previously been IFT’d
 If this is the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> will cause an error
@@ -1998,6 +2007,7 @@ dimension size up to the nearest integral power of 2.</p></li>
 useful for the specific case where the data has been captured on a
 sampling scope, and it’s severely aliased over.</p></li>
 <li><p><strong>cosine</strong> (<em>boolean</em>) – yields a sum of the fft and ifft, for a cosine transform</p></li>
+<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>False</em><em>)</em>) – return a result that is vector-unitary</p></li>
 </ul>
 </dd>
 </dl>
@@ -2201,18 +2211,12 @@ structure.)</p></li>
 
 <dl class="py method">
 <dt id="pyspecdata.core.nddata.ift">
-<code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.ift" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.ift" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs an inverse Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
-<dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=t_{dw} \int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
+<dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=\int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
 </dd>
 </dl>
-<p>Where <span class="math notranslate nohighlight">\(t_{dw}=\frac{1}{\Delta f}\)</span>, is the dwell time (with <span class="math notranslate nohighlight">\(\Delta f\)</span> the spectral width).</p>
-<p><em>Why do we do this?</em> Note that while the analytical integral this corresponds to is normalized, performing
-<a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code></a> followed by <a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> on a discrete sequence is NOT completely invertible
-(due to integration of the implied comb function??),
-and would require division by a factor of <span class="math notranslate nohighlight">\(\Delta f\)</span> (the spectral width) in order
-to retrieve the original function</p>
 <p><strong>pre-IFT</strong>, we use the axis to cyclically permute <span class="math notranslate nohighlight">\(f=0\)</span> to the first index</p>
 <p><strong>post-IFT</strong>, we assume that the data has previously been FT’d
 If this is the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> will cause an error
@@ -2220,7 +2224,8 @@ If this is not the case, passing <code class="docutils literal notranslate"><spa
 <code class="docutils literal notranslate"><span class="pre">shift=None</span></code> will choose True, if and only if this is not the case</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>pad</strong> (<em>int</em><em> or </em><em>boolean</em>) – <p><cite>pad</cite> specifies a zero-filling.  If it’s a number, then it gives
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pad</strong> (<em>int</em><em> or </em><em>boolean</em>) – <p><cite>pad</cite> specifies a zero-filling.  If it’s a number, then it gives
 the length of the zero-filled dimension.  If it is just <cite>True</cite>,
 then the size of the dimension is determined by rounding the
 dimension size up to the nearest integral power of 2.   It uses the
@@ -2235,7 +2240,9 @@ do this.</p>
 <span class="math notranslate nohighlight">\(\Delta t\)</span> and <cite>p2_post_discrepancy</cite> – the non-integral.</p>
 </dd>
 </dl>
-</p>
+</p></li>
+<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>False</em><em>)</em>) – return a result that is vector-unitary</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -2458,7 +2465,7 @@ for the data (DOI:10.1109/78.995059).</p>
 distribution (the “fit” dimension);
 <em>e.g.</em> if you are regularizing a set of functions
 <span class="math notranslate nohighlight">\(\np.exp(-\tau*R_1)\)</span>, then this is <span class="math notranslate nohighlight">\(\tau\)</span></p></li>
-<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – a dictionary whose key is the name of the “fit” dimension
+<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – a dictionary whose key is the name of the “fit” dimension
 (<span class="math notranslate nohighlight">\(R_1\)</span> in the example above)
 and whose value is an np.array with the new axis labels.
 OR
@@ -2741,7 +2748,8 @@ and assigns them to the element of the current instance.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">self.setaxis('axisname',</span> <span class="pre">values)</span></code>: just sets the values</p></li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">self.setaxis('axisname',</span> <span class="pre">'#')</span></code>: just</dt><dd><p>number the axis in numerically increasing order
+<dt><code class="docutils literal notranslate"><span class="pre">self.setaxis('axisname',</span> <span class="pre">'#')</span></code>: just</dt><dd><p>number the axis in numerically increasing order,
+with integers,
 (e.g. if you have smooshed it from a couple
 other dimensions.)</p>
 </dd>
@@ -2926,7 +2934,7 @@ allow for smooshing to determine a new axes that is standard
 <dl class="py class">
 <dt id="pyspecdata.core.nddata_hdf5">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">nddata_hdf5</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pathstring</span></em>, <em class="sig-param"><span class="n">directory</span><span class="o">=</span><span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata_hdf5" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
 </dd></dl>
 
 <dl class="py function">
@@ -3529,7 +3537,7 @@ current plot in the figurelist</p></li>
 <code class="sig-name descname">A</code><a class="headerlink" href="#pyspecdata.figlist.figlist.A" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
+<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4297,7 +4305,7 @@ accessed many times. Sort of like memoization.</p>
 <dl class="py class">
 <dt id="pyspecdata.placeholder.nddata_placeholder">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.placeholder.</code><code class="sig-name descname">nddata_placeholder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">_data_hook</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.placeholder.nddata_placeholder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
 <p>When you open a file with many datasets, and only want to load one, this is used to store a placeholder to the different datasets.
 Rather than passing the initialization any type of data, you simply pass it one argument: the “data hook”:
 a function that accepts a single argument (self), alters the dimlabels and axes as needed, and returns an ndarray containing the data.</p>
@@ -7239,7 +7247,7 @@ This, in turn, is used to choose the type of post-processing.</p>
 <dl class="py class">
 <dt id="pyspecdata.fitdata">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">fitdata</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fitdata" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
 <p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
 <p>The user creates a fitdata class object from an existing nddata
 class object, and on this fitdata object can define the
@@ -9275,21 +9283,32 @@ Defaults to True</p>
 
 <dl class="py method">
 <dt id="pyspecdata.nddata.convolve">
-<code class="sig-name descname">convolve</code><span class="sig-paren">(</span><em class="sig-param">axisname</em>, <em class="sig-param">filterwidth</em>, <em class="sig-param">convfunc=&lt;function &lt;lambda&gt;&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.convolve" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">convolve</code><span class="sig-paren">(</span><em class="sig-param">axisname</em>, <em class="sig-param">filterwidth</em>, <em class="sig-param">convfunc=&lt;function &lt;lambda&gt;&gt;</em>, <em class="sig-param">enforce_causality=True</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.convolve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform a convolution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>axisname</strong> (<em>str</em>) – apply the convolution along <cite>axisname</cite></p></li>
-<li><p><strong>filterwidth</strong> (<em>double</em>) – width of the convolution function.</p></li>
-<li><p><strong>convfunc</strong> (<em>function</em>) – A function that takes two arguments – the first are the axis coordinates and the second is <cite>filterwidth</cite>.
-Default is a normalized Gaussian of width (<span class="math notranslate nohighlight">\(\sigma\)</span>)
-<cite>filterwidth</cite>
+<li><p><strong>filterwidth</strong> (<em>double</em>) – width of the convolution function
+(the units of this value are specified in the
+same domain as that in which the data exists
+when you call this function on said data)</p></li>
+<li><p><strong>convfunc</strong> (<em>function</em>) – A function that takes two
+arguments – the first are the axis
+coordinates and the second is
+<cite>filterwidth</cite> (see <cite>filterwidth</cite>).
+Default is a normalized Gaussian of width
+(<span class="math notranslate nohighlight">\(\sigma\)</span>) <cite>filterwidth</cite>
 <span class="math notranslate nohighlight">\(\frac{1}{2 \sigma^2}\exp\left( - \frac{x^2}{2 \sigma^2} \right)\)</span>
 For example if you want a complex Lorentzian with <cite>filterwidth</cite> controlled by the rate <span class="math notranslate nohighlight">\(R\)</span>,
 <em>i.e.</em>
 <span class="math notranslate nohighlight">\(\frac{-1}{-i 2 \pi f - R}\)</span>
 then <code class="docutils literal notranslate"><span class="pre">convfunc</span> <span class="pre">=</span> <span class="pre">lambda</span> <span class="pre">f,R:</span> <span class="pre">-1./(-1j*2*pi*f-R)</span></code></p></li>
+<li><p><strong>enforce_causality</strong> (<em>boolean</em>) – make sure that the ift of the filter doesn’t get aliased to high
+time values.
+This only makes sense for frequency-domain data whose
+corresponding time-domain data has a startpoint at or near zero.
+It is ignored if you call a convolution on time-domain data.</p></li>
 </ul>
 </dd>
 </dl>
@@ -9458,15 +9477,12 @@ inferred from the symbolic expression.</p></li>
 
 <dl class="py method">
 <dt id="pyspecdata.nddata.ft">
-<code class="sig-name descname">ft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">cosine</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.ft" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">cosine</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.ft" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs a Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
 <dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt\)</span></p>
 </dd>
 </dl>
-<p>Note that, as noted in the <a class="reference internal" href="pyspecdata.fourier.html#pyspecdata.fourier.ift.ift" title="pyspecdata.fourier.ift.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> documentation,
-the inverse transform doesn’t correspond to the equivalent
-expression for the IFT.</p>
 <p><strong>pre-FT</strong>, we use the axis to cyclically permute <span class="math notranslate nohighlight">\(t=0\)</span> to the first index</p>
 <p><strong>post-FT</strong>, we assume that the data has previously been IFT’d
 If this is the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> will cause an error
@@ -9483,6 +9499,7 @@ dimension size up to the nearest integral power of 2.</p></li>
 useful for the specific case where the data has been captured on a
 sampling scope, and it’s severely aliased over.</p></li>
 <li><p><strong>cosine</strong> (<em>boolean</em>) – yields a sum of the fft and ifft, for a cosine transform</p></li>
+<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>False</em><em>)</em>) – return a result that is vector-unitary</p></li>
 </ul>
 </dd>
 </dl>
@@ -9686,18 +9703,12 @@ structure.)</p></li>
 
 <dl class="py method">
 <dt id="pyspecdata.nddata.ift">
-<code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.ift" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.ift" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs an inverse Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
-<dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=t_{dw} \int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
+<dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=\int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
 </dd>
 </dl>
-<p>Where <span class="math notranslate nohighlight">\(t_{dw}=\frac{1}{\Delta f}\)</span>, is the dwell time (with <span class="math notranslate nohighlight">\(\Delta f\)</span> the spectral width).</p>
-<p><em>Why do we do this?</em> Note that while the analytical integral this corresponds to is normalized, performing
-<a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code></a> followed by <a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> on a discrete sequence is NOT completely invertible
-(due to integration of the implied comb function??),
-and would require division by a factor of <span class="math notranslate nohighlight">\(\Delta f\)</span> (the spectral width) in order
-to retrieve the original function</p>
 <p><strong>pre-IFT</strong>, we use the axis to cyclically permute <span class="math notranslate nohighlight">\(f=0\)</span> to the first index</p>
 <p><strong>post-IFT</strong>, we assume that the data has previously been FT’d
 If this is the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> will cause an error
@@ -9705,7 +9716,8 @@ If this is not the case, passing <code class="docutils literal notranslate"><spa
 <code class="docutils literal notranslate"><span class="pre">shift=None</span></code> will choose True, if and only if this is not the case</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>pad</strong> (<em>int</em><em> or </em><em>boolean</em>) – <p><cite>pad</cite> specifies a zero-filling.  If it’s a number, then it gives
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pad</strong> (<em>int</em><em> or </em><em>boolean</em>) – <p><cite>pad</cite> specifies a zero-filling.  If it’s a number, then it gives
 the length of the zero-filled dimension.  If it is just <cite>True</cite>,
 then the size of the dimension is determined by rounding the
 dimension size up to the nearest integral power of 2.   It uses the
@@ -9720,7 +9732,9 @@ do this.</p>
 <span class="math notranslate nohighlight">\(\Delta t\)</span> and <cite>p2_post_discrepancy</cite> – the non-integral.</p>
 </dd>
 </dl>
-</p>
+</p></li>
+<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>False</em><em>)</em>) – return a result that is vector-unitary</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -10226,7 +10240,8 @@ and assigns them to the element of the current instance.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">self.setaxis('axisname',</span> <span class="pre">values)</span></code>: just sets the values</p></li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">self.setaxis('axisname',</span> <span class="pre">'#')</span></code>: just</dt><dd><p>number the axis in numerically increasing order
+<dt><code class="docutils literal notranslate"><span class="pre">self.setaxis('axisname',</span> <span class="pre">'#')</span></code>: just</dt><dd><p>number the axis in numerically increasing order,
+with integers,
 (e.g. if you have smooshed it from a couple
 other dimensions.)</p>
 </dd>
@@ -10411,7 +10426,7 @@ allow for smooshing to determine a new axes that is standard
 <dl class="py class">
 <dt id="pyspecdata.nddata_hdf5">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">nddata_hdf5</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pathstring</span></em>, <em class="sig-param"><span class="n">directory</span><span class="o">=</span><span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata_hdf5" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
 </dd></dl>
 
 <dl class="py function">

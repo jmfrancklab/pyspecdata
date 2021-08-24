@@ -5484,6 +5484,7 @@ class nddata (object):
                     retval.set_units(axisname,self.get_units(axisname))
                     retval.data_units = self.data_units
                     retval.name(self.name())
+                    retval.copy_props(self) # be sure to include info about ft startpoint
                     return retval
                 #}}}
             else:
@@ -5545,6 +5546,7 @@ class nddata (object):
                 retval.axis_coords_units = list(self.axis_coords_units)
                 retval.data_units = self.data_units
                 retval.name(self.name())
+                retval.copy_props(self) # be sure to include info about ft startpoint
                 return retval
     def getaxis(self,axisname):
         if self.axis_coords is None or len(self.axis_coords) == 0:
@@ -5628,6 +5630,13 @@ class nddata (object):
         # construct the new axis
         new_u = u[0] + du * r_[start_index:stop_index]
         self.setaxis(axis,new_u)
+        if start_index < 0:
+            # if we are extending to negative values, we need to inform
+            # the FT machinery!
+            if self.get_ft_prop(axis):
+                self.set_ft_prop(axis, ["start","freq"], new_u[0])
+            else:
+                self.set_ft_prop(axis, ["start","time"], new_u[0])
         return self
     def setaxis(self,*args):
         """set or alter the value of the coordinate axis
@@ -5636,7 +5645,8 @@ class nddata (object):
 
         * ``self.setaxis('axisname', values)``: just sets the values
         * ``self.setaxis('axisname', '#')``: just
-            number the axis in numerically increasing order
+            number the axis in numerically increasing order,
+            with integers,
             (e.g. if you have smooshed it from a couple
             other dimensions.)
         * ``self.fromaxis('axisname',inputfunc)``: take the existing function, apply inputfunc, and replace

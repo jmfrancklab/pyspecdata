@@ -99,6 +99,7 @@
 <p class="caption"><span class="caption-text">Example Gallery</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">PySpecData Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#individual-functions">Individual Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
 </ul>
@@ -286,7 +287,7 @@ but aren’t gridded data.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.contour" title="pyspecdata.core.nddata.contour"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contour</span></code></a>([labels])</p></td>
 <td><p>Contour plot – kwargs are passed to the matplotlib <cite>contour</cite> function.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.convolve" title="pyspecdata.core.nddata.convolve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convolve</span></code></a>(axisname, filterwidth[, convfunc])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.convolve" title="pyspecdata.core.nddata.convolve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convolve</span></code></a>(axisname, filterwidth[, convfunc, …])</p></td>
 <td><p>Perform a convolution.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.copy" title="pyspecdata.core.nddata.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a>([data])</p></td>
@@ -328,7 +329,7 @@ but aren’t gridded data.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.fromaxis" title="pyspecdata.core.nddata.fromaxis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fromaxis</span></code></a>(*args, **kwargs)</p></td>
 <td><p>Generate an nddata object from one of the axis labels.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.ft" title="pyspecdata.core.nddata.ft"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ft</span></code></a>(axes[, tolerance, cosine, verbose])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.ft" title="pyspecdata.core.nddata.ft"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ft</span></code></a>(axes[, tolerance, cosine, verbose, unitary])</p></td>
 <td><p>This performs a Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.ft_clear_startpoints" title="pyspecdata.core.nddata.ft_clear_startpoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ft_clear_startpoints</span></code></a>(axis[, t, f, nearest])</p></td>
@@ -376,7 +377,7 @@ but aren’t gridded data.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.human_units" title="pyspecdata.core.nddata.human_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">human_units</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.ift" title="pyspecdata.core.nddata.ift"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ift</span></code></a>(axes[, n, tolerance, verbose])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.ift" title="pyspecdata.core.nddata.ift"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ift</span></code></a>(axes[, n, tolerance, verbose, unitary])</p></td>
 <td><p>This performs an inverse Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.indices" title="pyspecdata.core.nddata.indices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">indices</span></code></a>(axis_name, values)</p></td>

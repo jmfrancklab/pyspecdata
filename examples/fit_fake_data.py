@@ -1,5 +1,5 @@
-"""Fitting Data
-==============
+"""Fitting Data (Nonlinear + Symbolic)
+======================================
 
 This example creates fake data with noise
 then fits the exponential with the fitdata
