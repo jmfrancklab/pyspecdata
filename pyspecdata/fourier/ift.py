@@ -37,6 +37,8 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,unitary=False,**kwarg
         return a result that is vector-unitary
     """
     if verbose: print("check 1",self.data.dtype)
+    if self.data.dtype == np.float64:
+        self.data = np.complex128(self.data) # everything is done assuming complex data
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
     if (isinstance(axes, str)):

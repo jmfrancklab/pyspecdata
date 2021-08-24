@@ -32,6 +32,8 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,unitary=False,**k
     unitary : boolean (False)
         return a result that is vector-unitary
     """
+    if self.data.dtype == np.float64:
+        self.data = np.complex128(self.data) # everything is done assuming complex data
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
     if (isinstance(axes, str)):
