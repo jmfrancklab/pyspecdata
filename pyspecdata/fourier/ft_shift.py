@@ -202,7 +202,7 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
         if t is not None:
             n_dt = (orig_t-t)/dt # number of dt's shifted by
             logging.debug(strm("trying to shift by",n_dt))
-            if abs((n_dt - round(n_dt))/n_dt) > 1e-3:
+            if n_dt != 0 and abs((n_dt - round(n_dt))/n_dt) > 1e-3:
                 if nearest is None:
                     logging.debug(strm("discrepancy",abs(orig_t-t) % dt))
                     raise ValueError(strm("You need to explicitly"
