@@ -59,13 +59,13 @@ sphinx_gallery_conf = {
         'examples_dirs': ['../examples'], #path to examples scripts
         'gallery_dirs': ['auto_examples'], #path to where to save gallery generated output
         'filename_pattern': '.py', # modified to make more general
-        #'image_srcset': ['2x'],
-        #'reference_url': {
-        #    'pyspecdata': None,
-        #    },
-        #"doc_module": ("pyspecdata",),
+        'image_srcset': ['2x'],
+        'reference_url': {
+            'pyspecdata': None,
+            },
+        "doc_module": ("pyspecdata",),
         ## directory where function/class granular galleries are stored
-        #'backreferences_dir'  : 'gen_modules/backreferences',
+        'backreferences_dir'  : 'gen_modules/backreferences',
         }
 autosummary_generate = True
 
