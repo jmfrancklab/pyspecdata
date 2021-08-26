@@ -25,5 +25,4 @@ s.reorder(['ph1','ph2','vd','t2'])
 print(ndshape(s))
 DCCT(this_nddata=s,this_fig_obj=figure())
 fl.show()
-s.ft(['ph1','ph2'])
-quit()
+

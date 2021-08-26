@@ -73,7 +73,7 @@ def gen_from_expr(expr, guesses={}):
         expr,
         modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
     )
-    return pars, parameter_names, fn
+    return pars, fn
 
 
 # }}}
