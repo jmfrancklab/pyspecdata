@@ -92,7 +92,7 @@ expr = A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2))
 # seems likely that Parameters is an ordered list, in which case, we don't need
 # parameter_names -- **however** we need to check the documentation to see that
 # this is true
-fit_params, parameter_names, myfunc = gen_from_expr(
+fit_params, myfunc = gen_from_expr(
     expr,
     {
         "A": dict(value=13.0, max=20, min=0.0),
