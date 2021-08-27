@@ -31,8 +31,6 @@ def gen_from_expr(expr, guesses={}):
     Returns
     =======
     pars: lmfit.Parameters
-    parameter_names: tuple
-        ordered list of the names of the arguments  to fn
     fn: function
         the fit function
     """
@@ -89,28 +87,22 @@ empty_data = nddata(x_vals, "x").copy(data=False)
 # {{{making sympy expression
 A, shift, period, decay, x = sp.symbols("A shift period decay x")
 expr = A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2))
-# seems likely that Parameters is an ordered list, in which case, we don't need
-# parameter_names -- **however** we need to check the documentation to see that
-# this is true
 fit_params, myfunc = gen_from_expr(
     expr,
     {
         "A": dict(value=13.0, max=20, min=0.0),
-        "period": dict(value=2, max=10),
         "shift": dict(value=0.0, max=pi / 2.0, min=-pi / 2.0),
+        "period": dict(value=2, max=10),
         "decay": dict(value=0.02, max=0.10, min=0.00),
     },
 )
 # }}}
 def residual(pars, x, data=None):
     "calculate the residual OR if data is None, return fake data"
-    logger.info(strm("PARAMETER NAMES ARE:", parameter_names))
-    parlist = [pars[j].value for j in parameter_names]
-    logger.info(strm("parlist", parlist))
     shift = pars["shift"]
     if abs(shift) > pi / 2:
         shift = shift - sign(shift) * pi
-    model = myfunc(x, *parlist)
+    model = myfunc(x, **pars.valuesdict())
     if data is None:
         return model
     return model - data
