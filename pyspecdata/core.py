@@ -1863,17 +1863,17 @@ class figlist(object):
         if hasattr(self,'current'): # if not, this is the first plot
             if not hasattr(self,'pushlist'):
                 self.pushlist = []
-            if not hasattr(self,'pushbasenamelist'):
-                self.pushbasenamelist = []
-            self.pushlist.append(self.current)
-            self.pushbasenamelist.append(self.basename)
+            logger.debug(strm("about to push marker, basename'",self.basename,"' and name '",self.current,"'"))
+            self.pushlist.append(
+                    (self.basename,self.current))
         return
     def pop_marker(self):
         """use the plot on the top of the "stack" (see push_marker) as the current plot"""
         if hasattr(self,'pushlist') and len(self.pushlist) > 0: # otherwise, we called push with no current plot
-            if hasattr(self,'pushbasenamelist'):
-                self.basename = self.pushbasenamelist.pop()
-            self.next(self.pushlist.pop())
+            bn,fn = self.pushlist.pop()
+            self.basename = None # because basename is already in "current"
+            self.next(fn)
+            self.basename = bn
         return
     def get_num_figures(self):
         cleanlist = [x for x in self.figurelist if isinstance(x, str)]
@@ -1926,7 +1926,7 @@ class figlist(object):
         # }}}
         if name.find('/') > 0:
             raise ValueError("don't include slashes in the figure name, that's just too confusing")
-        logger.debug(strm('called with',name))
+        logger.debug(strm('with basename appended, this is',name))
         if name in self.figurelist:# figure already exists
             if hasattr(self,'mlab'):
                 # with this commit, I removed the kwargs and bgcolor, not sure why
@@ -2392,6 +2392,16 @@ class figlist(object):
             else:
                 self.show()
             return
+    def __repr__(self):
+        result = ""
+        counter=0
+        for j in self.figurelist:
+            if type(j) == dict:
+                result = result+str(j)+"\n"
+            else:
+                counter += 1
+                result = result+"%d: "%counter+str(j)+"\n"
+        return result
 def text_on_plot(x,y,thistext,coord = 'axes',**kwargs):
     ax = plt.gca()
     if coord == 'axes':
