@@ -36,6 +36,7 @@ def gen_from_expr(expr, guesses={}):
     """
     # {{{ decide which symbols are parameters vs. variables
     all_symbols = expr.atoms(sp.Symbol)
+    # you need to pass "empty_data" to the function to enable the following line to work
     axis_names = set([sp.Symbol(j) for j in empty_data.dimlabels])
     variable_symbols = axis_names & all_symbols
     parameter_symbols = all_symbols - variable_symbols
@@ -72,17 +73,15 @@ def gen_from_expr(expr, guesses={}):
         modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
     )
     return pars, fn
-
-
-# }}}
-# {{{ creating fake data
-true_values = {"A": 14.0, "period": 5.4321, "shift": 0.12345, "decay": 0.01000}
-p_true = Parameters()
-for k, v in true_values.items():
-    p_true.add(k, value=v)
-logger.info(strm("p_true is:", p_true))
-x_vals = linspace(0, 250, 1500)
-empty_data = nddata(x_vals, "x").copy(data=False)
+def residual(pars, x, data=None):
+    "calculate the residual OR if data is None, return fake data"
+    shift = pars["shift"]
+    if abs(shift) > pi / 2:
+        shift = shift - sign(shift) * pi
+    model = myfunc(x, **pars.valuesdict())
+    if data is None:
+        return model
+    return model - data
 # }}}
 # {{{making sympy expression
 A, shift, period, decay, x = sp.symbols("A shift period decay x")
@@ -97,18 +96,18 @@ fit_params, myfunc = gen_from_expr(
     },
 )
 # }}}
-def residual(pars, x, data=None):
-    "calculate the residual OR if data is None, return fake data"
-    shift = pars["shift"]
-    if abs(shift) > pi / 2:
-        shift = shift - sign(shift) * pi
-    model = myfunc(x, **pars.valuesdict())
-    if data is None:
-        return model
-    return model - data
 
 
 # {{{ nddata to generate the fake data
+# {{{ create the "true" parameters for the fake data
+true_values = {"A": 14.0, "period": 5.4321, "shift": 0.12345, "decay": 0.01000}
+p_true = Parameters()
+for k, v in true_values.items():
+    p_true.add(k, value=v)
+logger.info(strm("p_true is:", p_true))
+x_vals = linspace(0, 250, 1500)
+empty_data = nddata(x_vals, "x").copy(data=False)
+# }}}
 mydata = empty_data.copy(data=False)
 mydata.data = residual(p_true, mydata.getaxis("x"))
 mydata.add_noise(2.8)
