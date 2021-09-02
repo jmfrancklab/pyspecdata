@@ -36,7 +36,8 @@ def gen_from_expr(expr, guesses={}):
     """
     # {{{ decide which symbols are parameters vs. variables
     all_symbols = expr.atoms(sp.Symbol)
-    # you need to pass "empty_data" to the function to enable the following line to work
+    x_vals = linspace(0, 250, 1500)
+    empty_data = nddata(x_vals, "x").copy(data=False)
     axis_names = set([sp.Symbol(j) for j in empty_data.dimlabels])
     variable_symbols = axis_names & all_symbols
     parameter_symbols = all_symbols - variable_symbols
