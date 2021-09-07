@@ -146,7 +146,7 @@ def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspe
             if fileno > 20:
                 raise ValueError("I'm not going to increase fileno above 20 -- that's crazy time!")
             return init_logging(level=level, filename=filename, fileno=fileno+1)
-    print(f"logging output to {log_filename}")
+    print("-"*10+"  "+f"logging output to {log_filename}"+"  "+"-"*10)
     logger = logging.getLogger()
     logger.setLevel(min_level) # even if I set the handler level, it won't
     #                        print w/out this

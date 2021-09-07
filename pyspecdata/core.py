@@ -2068,7 +2068,7 @@ class figlist(object):
                         if isinstance(testunits, tuple) and testunits[1] is None:
                             pass
                         else:
-                            raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(self.units[self.current],theseunits))
+                            raise ValueError("for figure '%s' the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(self.current,self.units[self.current],theseunits))
                 else:
                     self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]))
         logger.debug(strm("-"*30))
@@ -4587,7 +4587,10 @@ class nddata (object):
         return self
     def item(self):
         r"like numpy item -- returns a number when zero-dimensional"
-        return self.data.item()
+        try:
+            return self.data.item()
+        except:
+            raise ValueError("your data has shape: "+str(ndshape(self))+" so you can't call item")
     #}}}
     #{{{ ft-related functions
     def unitify_axis(self,axis_name,
@@ -6677,7 +6680,8 @@ class nddata (object):
                         logger.debug(strm("looking for",temp_low))
                         temp_low = np.searchsorted(thisaxis,temp_low)
                         if temp_low >= len(thisaxis):
-                            raise ValueError("the lower value of your slice on the %s axis is higher than the highest value of the axis coordinates!"%thisdim)
+                            raise ValueError("the lower value of your slice %s on the \"%s\" axis (which runs from %g to %g) is higher than the highest value of the axis coordinates!"%(
+                                (str((thisargs[0], thisargs[1])), thisdim,)+tuple(self.getaxis(thisdim)[r_[0,-1]])))
                         logger.debug(strm("i found",thisaxis[temp_low],"for the low end of the slice",
                             thisargs))
                     temp_high_float = temp_high
