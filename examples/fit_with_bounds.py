@@ -19,6 +19,11 @@ init_logging(level="debug")
 np.random.seed(15816)
 # {{{ helper function(s)
 class myfitclass (object):
+    def this_expression(self):
+        A, shift, period, decay, x = sp.symbols("A shift period decay x")
+        expr = A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2))
+        return expr
+
     def gen_from_expr(self, expr, data, guesses={}):
         """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
 
@@ -98,10 +103,9 @@ x_vals = linspace(0, 250, 1500)
 empty_data = nddata(x_vals, "x").copy(data=False)
 # }}}
 # {{{making sympy expression
-A, shift, period, decay, x = sp.symbols("A shift period decay x")
-expr = A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2))
+
 fit_params = thisfit.gen_from_expr(
-    expr,
+    thisfit.this_expression,
     empty_data,
     guesses={
         "A": dict(value=13.0, max=20, min=0.0),
