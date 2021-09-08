@@ -63,7 +63,7 @@ class myfitclass (nddata):
         variable_symbols = axis_names & all_symbols
         parameter_symbols = all_symbols - variable_symbols
         variable_symbols = tuple(variable_symbols)
-        variable_names = tuple([str(j) for j in variable_symbols])
+        self.variable_names = tuple([str(j) for j in variable_symbols])
         parameter_symbols = tuple(parameter_symbols)
         parameter_names = tuple([str(j) for j in parameter_symbols])
         logger.debug(
@@ -73,7 +73,7 @@ class myfitclass (nddata):
                 "axis names are",
                 axis_names,
                 "variable names are",
-                variable_names,
+                self.variable_names,
                 "parameter names are",
                 parameter_names,
             )
@@ -114,9 +114,9 @@ class myfitclass (nddata):
             logger.info(strm("fit param ---", j))
         logger.info(strm(self.pars))
         return
-    def residual(self, pars, x, data=None):
+    def residual(self, pars, data=None):
         "calculate the residual OR if data is None, return fake data"
-        model = self.fn(x, **pars.valuesdict())
+        model = self.fn(*(self.getaxis(j) for j in self.variable_names), **pars.valuesdict())
         if data is None:
             return model
         return model - data
@@ -159,19 +159,19 @@ for k, v in true_values.items():
 logger.info(strm("p_true is:", p_true))
 # }}}
 mydata = empty_data.copy(data=False)
-mydata.data = thisfit.residual(p_true, mydata.getaxis("x"))
+mydata.data = thisfit.residual(p_true)
 mydata.add_noise(2.8)
 # }}}
 # {{{ nddata of the guess
 guess = empty_data.copy(data=False)
-guess.data = thisfit.residual(thisfit.pars, empty_data.getaxis("x"))
+guess.data = thisfit.residual(thisfit.pars)
 # }}}
 # {{{ run the fit and generate nddata
 out = minimize(
-    thisfit.residual, thisfit.pars, args=(mydata.getaxis("x"),), kws={"data": mydata.data}
+    thisfit.residual, thisfit.pars, kws={"data": mydata.data}
 )
 fit = empty_data.copy(data=False)
-fit.data = thisfit.residual(out.params, empty_data.getaxis("x"))
+fit.data = thisfit.residual(out.params)
 # }}}
 
 # {{{ report the fit and generate the plot
