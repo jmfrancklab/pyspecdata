@@ -87,15 +87,25 @@ class myfitclass (nddata):
         self.pars = Parameters()
         for this_name in parameter_names:
             self.pars.add(this_name)
-    def set_guess(self,guesses):
-        """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
+    def set_guess(self,*args,**kwargs):
+        """set both the guess and the bounds
 
         Parameters
         ==========
-        guesses: dict
-            dictionary of keyword arguments for guesses (value) or constraints
+        guesses: dict of dicts
+            each dict has a keyword giving the parameter and a value
+            that comprises a dict with guesses (value) and/or constraints
             (min/max)
+
+            Can be passed either as the only argument, or a kwarg called
+            guesses, or as the kwargs themselves.
         """
+        if len(args) == 1 and type(args[0]) == dict:
+            guesses = args[0]
+        elif len(kwargs) == 1 and 'guesses' in kwargs.keys():
+            guesses = kwargs['guesses']
+        else:
+            guesses = kwargs
         for this_name in self.pars.keys():
             if this_name in guesses.keys():
                 for k,v in guesses[this_name].items():
@@ -104,13 +114,8 @@ class myfitclass (nddata):
             logger.info(strm("fit param ---", j))
         logger.info(strm(self.pars))
         return
-
-
     def residual(self, pars, x, data=None):
         "calculate the residual OR if data is None, return fake data"
-        shift = pars["shift"]
-        if abs(shift) > pi / 2:
-            shift = shift - sign(shift) * pi
         model = self.fn(x, **pars.valuesdict())
         if data is None:
             return model
