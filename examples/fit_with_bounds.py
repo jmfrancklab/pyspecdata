@@ -21,7 +21,6 @@ np.random.seed(15816)
 class myfitclass (object):
     def __init__(self):
         self.expression = None
-    expression = (2+2)
     def gen_from_expr(self,data, guesses={}):
         """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
 
