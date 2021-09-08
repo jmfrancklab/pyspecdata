@@ -35,7 +35,7 @@ class myfitclass (nddata):
 
         Parameters
         ==========
-        expr: sympy expression
+        symbolic_expr: sympy expression
         guesses: dict
             dictionary of keyword arguments for guesses (value) or constraints
             (min/max)
@@ -71,6 +71,11 @@ class myfitclass (nddata):
         )
         # }}}
         pars = Parameters()
+        self.fn = lambdify(
+            variable_symbols + parameter_symbols,
+            self.expression,
+            modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
+        )
         for this_name in parameter_names:
             kwargs = {}
             if this_name in guesses.keys():
@@ -80,11 +85,6 @@ class myfitclass (nddata):
         for j in pars:
             logger.info(strm("fit param ---", j))
         logger.info(strm(pars))
-        self.fn = lambdify(
-            variable_symbols + parameter_symbols,
-            self.expression,
-            modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
-        )
         return pars
 
 
