@@ -142,12 +142,10 @@ thisfit = myfitclass(empty_data)
 A, shift, period, decay, x = sp.symbols("A shift period decay x")
 thisfit.functional_form = (A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2)))
 thisfit.set_guess(
-    guesses={
-        "A": dict(value=13.0, max=20, min=0.0),
-        "shift": dict(value=0.0, max=pi / 2.0, min=-pi / 2.0),
-        "period": dict(value=2, max=10),
-        "decay": dict(value=0.02, max=0.10, min=0.00),
-    },
+        A = dict(value=13.0, max=20, min=0.0),
+        shift = dict(value=0.0, max=pi / 2.0, min=-pi / 2.0),
+        period = dict(value=2, max=10),
+        decay = dict(value=0.02, max=0.10, min=0.00),
 )
 # }}}
 
