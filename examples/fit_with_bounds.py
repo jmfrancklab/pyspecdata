@@ -30,7 +30,7 @@ class myfitclass (nddata):
         else:
             nddata.__init__(self,*args,**kwargs)
         return
-    def gen_from_expr(self, guesses={}):
+    def gen_from_expr(self):
         """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
 
         Parameters
@@ -70,22 +70,31 @@ class myfitclass (nddata):
             )
         )
         # }}}
-        pars = Parameters()
         self.fn = lambdify(
             variable_symbols + parameter_symbols,
             self.expression,
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
         )
+        self.pars = Parameters()
         for this_name in parameter_names:
-            kwargs = {}
+            self.pars.add(this_name)
+    def set_guess(self,guesses):
+        """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
+
+        Parameters
+        ==========
+        guesses: dict
+            dictionary of keyword arguments for guesses (value) or constraints
+            (min/max)
+        """
+        for this_name in self.pars.keys():
             if this_name in guesses.keys():
-                logger.debug(strm("applying bounds for", this_name))
-                kwargs.update(guesses[str(this_name)])
-            pars.add(this_name, **kwargs)
-        for j in pars:
+                for k,v in guesses[this_name].items():
+                    setattr(self.pars[this_name],k,v)
+        for j in self.pars:
             logger.info(strm("fit param ---", j))
-        logger.info(strm(pars))
-        return pars
+        logger.info(strm(self.pars))
+        return
 
 
     def residual(self, pars, x, data=None):
@@ -108,7 +117,8 @@ thisfit = myfitclass(empty_data)
 # {{{making sympy expression
 A, shift, period, decay, x = sp.symbols("A shift period decay x")
 thisfit.expression = (A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2)))
-fit_params = thisfit.gen_from_expr(
+thisfit.gen_from_expr()
+thisfit.set_guess(
     guesses={
         "A": dict(value=13.0, max=20, min=0.0),
         "shift": dict(value=0.0, max=pi / 2.0, min=-pi / 2.0),
@@ -133,11 +143,11 @@ mydata.add_noise(2.8)
 # }}}
 # {{{ nddata of the guess
 guess = empty_data.copy(data=False)
-guess.data = thisfit.residual(fit_params, empty_data.getaxis("x"))
+guess.data = thisfit.residual(thisfit.pars, empty_data.getaxis("x"))
 # }}}
 # {{{ run the fit and generate nddata
 out = minimize(
-    thisfit.residual, fit_params, args=(mydata.getaxis("x"),), kws={"data": mydata.data}
+    thisfit.residual, thisfit.pars, args=(mydata.getaxis("x"),), kws={"data": mydata.data}
 )
 fit = empty_data.copy(data=False)
 fit.data = thisfit.residual(out.params, empty_data.getaxis("x"))
