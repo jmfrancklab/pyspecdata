@@ -19,6 +19,8 @@ init_logging(level="debug")
 np.random.seed(15816)
 # {{{ helper function(s)
 class myfitclass (object):
+    def __init__(self):
+        self.expression = None
     expression = (2+2)
     def gen_from_expr(self,data, guesses={}):
         """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
@@ -42,6 +44,8 @@ class myfitclass (object):
             the fit function
         """
         # {{{ decide which symbols are parameters vs. variables
+        if self.expression is None:
+            raise ValueError("what expression are you fitting with??")
         all_symbols = self.expression.atoms(sp.Symbol)
         axis_names = set([sp.Symbol(j) for j in data.dimlabels])
         variable_symbols = axis_names & all_symbols
