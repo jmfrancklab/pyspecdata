@@ -115,6 +115,16 @@ class myfitclass (nddata):
         if data is None:
             return model
         return model - data
+    @property
+    def function_string(self):
+        r'''A property of the fitdata class which stores a string
+        output of the functional form of the desired fit expression
+        provided in func:`functional_form` in LaTeX format'''
+        retval = sympy_latex(self.symbolic_expr).replace('$','')
+        return r'$f(%s)='%(sympy_latex(sympy_symbol(self.fit_axis))) + retval + r'$'
+    @function_string.setter
+    def function_string(self):
+        raise ValueError("You cannot set the string directly -- change the functional_form property instead!")
 
 
 # }}}
