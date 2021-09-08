@@ -30,7 +30,15 @@ class myfitclass (nddata):
         else:
             nddata.__init__(self,*args,**kwargs)
         return
-    def gen_from_expr(self):
+    @property
+    def functional_form(self):
+        r'''A property of the fitdata class which is set by the user,
+        takes as input a sympy expression of the desired fit
+        expression'''
+        print("Getting symbolic function")
+        return self.symbolic_expr
+    @functional_form.setter
+    def functional_form(self,this_expr):
         """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
 
         Parameters
@@ -46,6 +54,7 @@ class myfitclass (nddata):
         fn: function
             the fit function
         """
+        self.expression = this_expr
         # {{{ decide which symbols are parameters vs. variables
         if self.expression is None:
             raise ValueError("what expression are you fitting with??")
@@ -116,8 +125,7 @@ empty_data = nddata(x_vals, "x").copy(data=False)
 thisfit = myfitclass(empty_data)
 # {{{making sympy expression
 A, shift, period, decay, x = sp.symbols("A shift period decay x")
-thisfit.expression = (A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2)))
-thisfit.gen_from_expr()
+thisfit.functional_form = (A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2)))
 thisfit.set_guess(
     guesses={
         "A": dict(value=13.0, max=20, min=0.0),
