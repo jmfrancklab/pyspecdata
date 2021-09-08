@@ -114,9 +114,15 @@ class myfitclass (nddata):
             logger.info(strm("fit param ---", j))
         logger.info(strm(self.pars))
         return
+    def run_lambda(self,pars):
+        """actually run the lambda function we separate this in case we want
+        our function to involve something else, as well (e.g. taking a Fourier
+        transform)"""
+        return self.fn(*(self.getaxis(j) for j in self.variable_names), **pars.valuesdict())
+
     def residual(self, pars, data=None):
         "calculate the residual OR if data is None, return fake data"
-        model = self.fn(*(self.getaxis(j) for j in self.variable_names), **pars.valuesdict())
+        model = self.run_lambda(pars)
         if data is None:
             return model
         return model - data
