@@ -18,20 +18,24 @@ from pyspecdata import *
 init_logging(level="debug")
 np.random.seed(15816)
 # {{{ helper function(s)
-class myfitclass (object):
-    def __init__(self):
+class myfitclass (nddata):
+    def __init__(self,*args,**kwargs):
+        # copied from fitdata
         self.expression = None
-    def gen_from_expr(self,data, guesses={}):
+        if isinstance(args[0],nddata):
+            # move nddata attributes into the current instance
+            myattrs = normal_attrs(args[0])
+            for j in range(0,len(myattrs)):
+                self.__setattr__(myattrs[j],args[0].__getattribute__(myattrs[j]))
+        else:
+            nddata.__init__(self,*args,**kwargs)
+        return
+    def gen_from_expr(self, guesses={}):
         """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
 
         Parameters
         ==========
         expr: sympy expression
-        data: nddata
-            An nddata that has the same dimension labels as your data (or the data
-            itself). 
-            This is not manipulated, and is needed to determine which symbols in
-            expr correspond to dimension names.
         guesses: dict
             dictionary of keyword arguments for guesses (value) or constraints
             (min/max)
@@ -46,7 +50,7 @@ class myfitclass (object):
         if self.expression is None:
             raise ValueError("what expression are you fitting with??")
         all_symbols = self.expression.atoms(sp.Symbol)
-        axis_names = set([sp.Symbol(j) for j in data.dimlabels])
+        axis_names = set([sp.Symbol(j) for j in self.dimlabels])
         variable_symbols = axis_names & all_symbols
         parameter_symbols = all_symbols - variable_symbols
         variable_symbols = tuple(variable_symbols)
@@ -96,16 +100,15 @@ class myfitclass (object):
 
 
 # }}}
-thisfit = myfitclass()
 # {{{ a lot of what's below depends on knowing what the shape and dimension labels of my data are, so define that here
 x_vals = linspace(0, 250, 1500)
 empty_data = nddata(x_vals, "x").copy(data=False)
 # }}}
+thisfit = myfitclass(empty_data)
 # {{{making sympy expression
 A, shift, period, decay, x = sp.symbols("A shift period decay x")
 thisfit.expression = (A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2)))
 fit_params = thisfit.gen_from_expr(
-    empty_data,
     guesses={
         "A": dict(value=13.0, max=20, min=0.0),
         "shift": dict(value=0.0, max=pi / 2.0, min=-pi / 2.0),

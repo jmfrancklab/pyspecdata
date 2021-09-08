@@ -219,10 +219,11 @@ def mydiff(data,axis = -1):
     return newdata
 #}}}
 def normal_attrs(obj):
-    myattrs = [x for x in dir(obj) if not ismethod(obj.__getattribute__(x))]
-    myattrs = [x for x in myattrs if not x[0:2] == '__']
+    myattrs = [x for x in dir(obj)]
     # next line filters out properties
     myattrs = [x for x in myattrs if x not in ['C','angle','imag','real']]
+    myattrs = [x for x in myattrs if not ismethod(obj.__getattribute__(x))]
+    myattrs = [x for x in myattrs if not x[0:2] == '__']
     return myattrs
 def showtype(x):
     if isinstance(x, np.ndarray):
