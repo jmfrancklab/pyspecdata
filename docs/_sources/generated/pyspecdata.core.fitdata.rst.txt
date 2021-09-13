@@ -43,6 +43,7 @@
       ~fitdata.diff
       ~fitdata.dot
       ~fitdata.eval
+      ~fitdata.eval_poly
       ~fitdata.extend
       ~fitdata.extend_for_shear
       ~fitdata.fit

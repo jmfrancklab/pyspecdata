@@ -119,6 +119,10 @@ def level_str_to_int(level):
         else:
             raise ValueError("if you give me level as a string, give me 'info' or 'debug'")
     return level
+if 'pyspecdata_figures' in os.environ and os.environ['pyspecdata_figures'] == 'latex':
+    print_log_info = False
+else:
+    print_log_info = True
 def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspecdata.%d.log', fileno=0):
     r"""Initialize a decent logging setup to log to `~/pyspecdata.log` (and `~/pyspecdata.XX.log` if that's taken).
 
@@ -142,11 +146,13 @@ def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspe
             os.remove(log_filename)
         except:
             if fileno == 0:
-                print(f"{log_filename} appears to be locked or otherwise inaccessible: I'm going to explore other options for fileno")
+                if print_log_info:
+                    print(f"{log_filename} appears to be locked or otherwise inaccessible: I'm going to explore other options for fileno")
             if fileno > 20:
                 raise ValueError("I'm not going to increase fileno above 20 -- that's crazy time!")
             return init_logging(level=level, filename=filename, fileno=fileno+1)
-    print(f"logging output to {log_filename}")
+    if print_log_info:
+        print("-"*10+"  "+f"logging output to {log_filename}"+"  "+"-"*10)
     logger = logging.getLogger()
     logger.setLevel(min_level) # even if I set the handler level, it won't
     #                        print w/out this

@@ -8,8 +8,8 @@
 
     .. _sphx_glr_auto_examples_fit_fake_data.py:
 
-Fitting Data
-==============
+Fitting Data (Nonlinear + Symbolic)
+======================================
 
 This example creates fake data with noise
 then fits the exponential with the fitdata
@@ -30,14 +30,14 @@ function.
 
     Getting symbolic function
     Getting symbolic function
-    {R_1, M_0, M_inf}
+    {M_inf, M_0, R_1}
     {\bf Warning:} You have no error associated with your plot, and I want to flag this for now
 
 
-    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:7535: Warning: You have no error associated with your plot, and I want to flag this for now
+    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:7630: Warning: You have no error associated with your plot, and I want to flag this for now
       warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
-    output: {'M_0': -102.42378444846382, 'M_inf': 102.1750905774885, 'R_1': 5.9911568873602645}
-    latex: $f(\tau)=102.18 + \left(-1.02\times 10^{2} - 102.18\right) e^{- 5.99 \tau}$
+    output: {'M_0': -106.32402218255355, 'M_inf': 102.85503749824008, 'R_1': 6.068636059275985}
+    latex: $f(\tau)=102.86 + \left(-1.06\times 10^{2} - 102.86\right) e^{- 6.07 \tau}$
 
 
 
@@ -106,7 +106,7 @@ function.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.602 seconds)
+   **Total running time of the script:** ( 0 minutes  0.413 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fit_fake_data.py:
