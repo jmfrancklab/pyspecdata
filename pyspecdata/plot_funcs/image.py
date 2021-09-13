@@ -10,7 +10,7 @@ def image(A,x=[],y=[],**kwargs):
     #{{{ pull out kwargs for imagehsv
     imagehsvkwargs = {}
     for k,v in list(kwargs.items()):
-        if k in ['black','logscale']:
+        if k in ['black','logscale','scaling']:
             imagehsvkwargs[k] = kwargs.pop(k)
     #}}}
     spacing,ax,x_first,origin,renumber = process_kwargs([('spacing',1),
