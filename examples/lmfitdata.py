@@ -18,7 +18,9 @@ class lmfitdata (nddata):
     '''
     def __init__(self,*args,**kwargs):
         # copied from fitdata
-        self.expression = None
+        fit_axis = None
+        if 'fit_axis' in list(kwargs.keys()):
+            fit_axis = kwargs.pop('fit_axis')
         if isinstance(args[0],nddata):
             # move nddata attributes into the current instance
             myattrs = normal_attrs(args[0])
@@ -26,7 +28,19 @@ class lmfitdata (nddata):
                 self.__setattr__(myattrs[j],args[0].__getattribute__(myattrs[j]))
         else:
             nddata.__init__(self,*args,**kwargs)
+        if fit_axis is None:
+            if len(self.dimlabels) == 1:
+                fit_axis = self.dimlabels[0]
+            else:
+                raise IndexError("Right now, we can only auto-determine the fit axis if there is a single axis")
+        
+        self.set_indices = None
+        self.active_indices = None
+        self.fit_axis = fit_axis
+        self.set_to = None
+        self.expression = None
         return
+    
     @property
     def functional_form(self):
         r'''A property of the myfitclass class which is set by the user,
@@ -41,10 +55,8 @@ class lmfitdata (nddata):
         Parameters
         ==========
         symbolic_expr: sympy expression
-        guesses: dict
-            dictionary of keyword arguments for guesses (value) or constraints
-            (min/max)
         """
+        assert issympy(this_expr), "for now, the functional form must be a sympy expression"
         self.expression = this_expr
         # {{{ decide which symbols are parameters vs. variables
         if self.expression is None:
@@ -57,6 +69,8 @@ class lmfitdata (nddata):
         self.variable_names = tuple([str(j) for j in variable_symbols])
         parameter_symbols = tuple(parameter_symbols)
         parameter_names = tuple([str(j) for j in parameter_symbols])
+        self.fit_axis = set(self.dimlabels)
+        self.symbol_list = [str(j) for j in variable_symbols]
         logger.debug(
             strm(
                 "all symbols are",
@@ -69,15 +83,32 @@ class lmfitdata (nddata):
                 parameter_names,
             )
         )
+        self.symbolic_vars = all_symbols - self.fit_axis
+        self.fit_axis = list(self.fit_axis)[0]
         # }}}
         self.fn = lambdify(
             variable_symbols + parameter_symbols,
             self.expression,
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
         )
+        
         self.pars = Parameters()
         for this_name in parameter_names:
             self.pars.add(this_name)
+        def add_inactive_p(self,p):
+            if self.set_indices is not None:
+                #{{{uncollapse the function
+                temp = p.copy()
+                p = np.zeros(len(self.symbol_list))
+                p[self.active_mask] = temp
+                #}}}
+                p[self.set_indices] = self.set_to
+            return p    
+        def fcn(p,x):
+            p = self.add_inactive_p(p)
+            assert len(p)==len(self.symbol_list),"length of parameter passed to fitfunc doesnt match number of symbolic parameters"
+            return self.fn(*tuple(list(p) + [x]))
+        self.fitfunc = fcn
     def set_guess(self,*args,**kwargs):
         """set both the guess and the bounds
 
@@ -104,7 +135,204 @@ class lmfitdata (nddata):
         for j in self.pars:
             logger.info(strm("fit param ---", j))
         logger.info(strm(self.pars))
+        self.guess_dict = guesses
         return
+    def _pn(self,name):
+        return self.symbol_list.index(name)
+    def _active_symbols(self):
+        if not hasattr(self,'active_symbols'):
+            if self.set_indices is not None:
+                self.active_symbols = [x for x in self.symbol_list if self.active_mask[self._pn(x)]]
+            else:
+                self.active_symbols = list(self.symbol_list)
+        return self.active_symbols       
+    def parameter_derivatives(self,xvals,set = None, set_to=None):
+        r'return a matrix containing derivatives of the parameters, can set dict set, or keys set, vals set_to'
+        logger.debug(strm('parameter derivatives is called'))
+        if np.iscomplex(self.data.flatten()[0]):
+            print(lsafen('Warning, taking only real part of fitting data!'))
+        if isinstance(set,dict):
+            set_to = list(set.values())
+            set = list(set.keys())
+        solution_list = dict([(self.symbolic_dict[k],set_t[j])
+            if k in set
+            else (self.symbolic_dict[k],self.output(k))
+            for j,k in enumerate(self.symbol_list)])
+        number_of_i = len(xvals)
+        parameters = self._active_symbols()
+        mydiff_sym = [[]] * len(self.symbolic_vars)
+        x = self.symbolic_x
+        fprime = np.zeros([len(parameters),number_of_i])
+        for j in range(0,len(parameters)):
+            thisvar = self.symbolic_dict[parameters[j]]
+            mydiff_sym[j] = sympy_diff(self.symbolic_func, thisvar)
+            try:
+                mydiff = mydiff_sym[j].subs(solution_list)
+            except Exception as e:
+                raise ValueError(strm('error trying to substitute',mydiff_sym[j],
+                    'with', solution_list) + explain_error(e))
+            try:
+                fprime[j,:] = np.array([complex(mydiff.subs(x,xvals[k])) for k in range(0,len(xvals))])
+            except ValueError as e:
+                raise ValueError(strm('Trying to set index',j,
+                    'np.shape(fprime)',np.shape(fprime),
+                    'np.shape(xvals)',np.shape(xvals),'the thing I\'m trying to',
+                    'compute looks like this',
+                    [mydiff.subs(x,xvals[k]) for k in range(0,len(xvals))]))
+            except Exception as e:
+                raise ValueError(strm('Trying to set index',j,
+                'np.shape(fprime)',np.shape(fprime),
+                'np.shape(xvals)',np.shape(xvals))+explain_error(e))
+        return fprime        
+
+    def guess(self, use_pseudoinverse=False):
+        r'''Old code that we are preserving here -- provide the guess for our parameters; by default, based on pseudoinverse'''
+        if use_pseudoinverse:
+            self.has_grad = False
+            if np.iscomplex(self.data.flatten()[0]):
+                print(lsafen('Warning, taking only real part of fitting data!'))
+            y = np.real(self.data)
+            which_starting_guess = 0
+            thisguess = self.starting_guesses[which_starting_guess]
+            numguesssteps = 20
+            new_y_shape = list(y.shape)
+            new_y_shape.append(1)
+            y = y.reshape(tuple(new_y_shape))
+            guess_dict = dict(list(zip(self.variable_names,list(thisguess))))
+            fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+            f_at_guess = np.real(self.eval(None,set = guess_dict).data)
+            try:
+                f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
+            except:
+                raise ValueError(strm("trying to reshape f_at_ini_guess from",f_at_guess.shape,
+                    "to", new_y_shape))
+            thisresidual = sqrt((y-f_at_guess)**2).sum()
+            lastresidual = thisresidual
+            for j in range(0,numguesssteps):
+                logger.debug(strm('\n\n.core.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\en{verbatim}'))
+                logger.debug(strm('\n\n.core.guess) shape of parameter derivatives',np.shape(fprime),'shape of output',np.shape(y),'\n\n'))
+                regularization_bad = True
+                alpha_max = 100.
+                alpha_mult = 2.
+                alpha = 0.1
+                logger.debug(strm('\n\n.core.guess) value of residual before regularization %d:'%j,thisresidual))
+                while regularization_bad:
+                    newguess = np.real(np.array(thisguess) + np.dot(pinvr(fprime.T,alpha),(y-f_at_guess)).flatten())
+                    mask = newguess < self.guess_lb
+                    newguess[mask] = self.guess_lb[mask]
+                    mask = newguess > self.guess_ub
+                    newguess[mask] = self.guess_ub[mask]
+                    if np.any(isnan(newguess)):
+                        logger.debug(strm('\n\n.core.guess) Regularization blows up $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha))
+                        alpha *= alpha_mult
+                    else:
+                        guess_dict = dict(list(zip(self.variable_names,list(newguess))))
+                        f_at_guess = np.real(self.eval(None,set = guess_dict).data)
+                        try:
+                            f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
+                        except:
+                            raise IndexError(strm('trying to reshape f_at_ini_guess from',
+                                f_at_guess.shape,'to',new_y_shape))
+                        thisresidual = sqrt((y-f_at_guess)**2).sum()
+                        if (thisresidual - lastresidual)/lastresidual > 0.10:
+                            alpha *= alpha_mult
+                            logger.debug(strm('\n\n.core.guess) Regularized Pinv gave a step uphill $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha))
+                        else:
+                            regularization_bad = False
+                            thisguess = newguess
+                            lastresidual = thisresidual
+                            fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+                    if alpha > alpha_max:
+                        print("\n\n.core.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max)
+                        if which_starting_guess >= len(self.starting_guesses)-1:
+                            print("\n\n.core.guess) {\\color{red}Warning!!} ran out of guesses!!%d\n\n"%alpha_max)
+                            return thisguess
+                        else:
+                            which_starting_guess += 1
+                            thisguess = self.starting_guesses[which_starting_guess]
+                            print("\n\n.core.guess) try a new starting guess:",lsafen(thisguess))
+                            j = 0
+                            guess_dict = dict(list(zip(self.variable_names,list(thisguess))))
+                            fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
+                            f_at_guess = np.real(self.eval(None,set = guess_dict).data)
+                            try:
+                                f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
+                            except:
+                                raise RuntimeError(strm("trying to reshape f_at_ini_guess from",
+                                    f_at_guess.shape,"to",new_y_shape))
+                            thisresidual = sqrt((y-f_at_guess)**2).sum()
+                            regularization_bad=False
+                logger.debug(strm('\n\n.core.guess) new value of guess after regularization:',lsafen(newguess)))
+                logger.debug(strm('\n\n.core.guess) value of residual after regularization:',thisresidual))
+            return thisguess
+        else:
+            if hasattr(self,'guess_dict'):
+                return [self.guess_dict[k] for k in self.variable_names]
+            else:
+                return [1.0]*len(self.variable_names)
+    def settoguess(self):
+        'a debugging function, to easily plot the initial guess'
+        self.fit_coeff = np.real(self.guess())
+        return self
+    def _taxis(self,taxis):
+        r'You can enter None, to get the fit along the same range as the data, an integer to give the number of points, or a range of data, which will return 300 points'
+        if taxis is None:
+            taxis = self.getaxis(self.fit_axis).copy()
+        elif isinstance(taxis, int):
+            taxis = np.linspace(self.getaxis(self.fit_axis).min(),
+                    self.getaxis(self.fit_axis).manx(),
+                    taxis)
+        elif not np.isscalar(taxis) and len(taxis) == 2:
+            taxis = np.linspace(taxis[0],taxis[1],300)
+        return taxis    
+    def eval(self,taxis,set_what = None, set_to = None):
+        """Calculate the fit function along the axis taxis.
+
+        Parameters
+        ----------
+        taxis: ndarray, int
+            :if ndarray: the new axis coordinates along which we want to calculate the fit.
+            :if int: number of evenly spaced points along the t-axis along the fit
+        set_what: 'str', optional
+            forcibly sets a specific symbol
+        set_to: double, optional
+            the specific value(int) you are assigning the symbol you included
+        
+        Returns
+        -------
+        self: nddata
+            the fit function evaluated along the axis coordinates that were passed
+        """
+        if isinstance(set_what, dict):
+            set_to = list(set_what.values())
+            set_what = list(set_what.keys())
+        taxis = self._taxis(taxis)
+        if hasattr(self,'fit_coeff') and self.fit_coeff is not None:
+            p = self.fit_coeff.copy()
+        else:
+            p = np.array([NaN]*len(self.variable_names))
+        #{{{LOCALLY apply any forced values
+        if set_what is not None:
+            if self.set_indices is not None:
+                raise ValueError("You're trying to set indices in an eval"
+                        " function for a function that was fit constrained; this"
+                        " is not currently supported")
+            set_indices,set_to,active_mask = self.gen_indices(set_what,set_to)
+            p[set_indices] = set_to
+        #}}}
+        #{{{ make a new blank np.array with the fit axis expanded to fit taxis
+        newdata = ndshape(self)
+        newdata[self.fit_axis] = np.size(taxis)
+        newdata = newdata.alloc()
+        newdata.set_plot_color(self.get_plot_color())
+        #}}}
+        #{{{keep all axis labels the same, except the expanded one
+        newdata.axis_coords = list(newdata.axis_coords)
+        newdata.labels([self.fit_axis],list([taxis]))
+        #}}}
+        newdata.data[:] = self.fn(p,taxis).flatten()
+        return newdata
+
     def run_lambda(self,pars):
         """actually run the lambda function we separate this in case we want
         our function to involve something else, as well (e.g. taking a Fourier
@@ -117,6 +345,73 @@ class lmfitdata (nddata):
         if data is None:
             return model
         return model - data
+    def copy(self): 
+        namelist = []
+        vallist = []
+        for j in dir(self):
+            if self._contains_symbolic(j):
+                namelist.append(j)
+                vallist.append(self.__getattribute__(j))
+                self.__delattr__(j)
+        new = deepcopy(self)
+        for j in range(0,len(namelist)):
+            new.__setattr__(namelist[j],vallist[j])
+        for j in range(0,len(namelist)):
+            self.__setattr__(namelist[j],vallist[j])
+        return new    
+    def gen_indices(self,this_set,set_to):
+        r'''pass this this_set and this_set\_to parameters, and it will return:
+        indices,values,mask
+        indices --> gives the indices that are forced
+        values --> the values they are forced to
+        mask --> p[mask] are actually active in the fit'''
+        if not isinstance(this_set, list):
+            this_set = [this_set]
+        if not isinstance(set_to, list):
+            set_to = [set_to]
+        if len(this_set) != len(set_to):
+            raise ValueError(strm('length of this_set=',this_set,
+                'and set_to', set_to, 'are not the same!'))
+        logger.debug("*** *** *** *** *** ***")
+        logger.debug(str(this_set))
+        logger.debug("*** *** *** *** *** ***")
+        set_indices = list(map(self.symbol_list.index,this_set))
+        active_mask = np.ones(len(self.symbol_list),dtype=bool)
+        active_mask[set_indices] = False
+        return set_indices,set_to,active_mask
+    def output(self, *name):
+        r'''give the fit value of a particular symbol, or a dictionary of all values.
+
+        Parameters
+        -----------
+        name: str (optional)
+            name of the symbol.
+            If no name is passed, then output returns a dictionary of the 
+            resulting values.
+
+        Returns
+        -------
+        retval: dict or float
+            Either a dictionary of all the values, or the value itself
+        '''
+        if not hasattr(self,'fit_coeff') or self.fit_coeff is None:
+            return None
+        p = self.fit_coeff.copy()
+        if self.set_indices is not None:
+            temp = p.copy()
+            p = np.zeros(len(self.symbol_list))
+            p[self.active_mask] = temp
+            p[self.set_indices] = self.set_to
+        if len(name) == 1:
+            try:
+                return p[self.symbol_list.index(name[0])]
+            except:
+                raise ValueError(strm("While running output: couldn't find",
+                    name, "in", self.variable_names))
+        elif len(name) == 0:
+            return {self.variable_names[j]:p[j] for j in range(len(p))}
+        else:
+            raise ValueError(strm("You can't pass", len(name),"arguments to .output()"))
     @property
     def function_string(self):
         r'''A property of the myfitclass class which stores a string
