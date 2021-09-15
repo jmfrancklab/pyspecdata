@@ -32,7 +32,7 @@ class myfitclass (nddata):
         return
     @property
     def functional_form(self):
-        r'''A property of the fitdata class which is set by the user,
+        r'''A property of the myfitclass class which is set by the user,
         takes as input a sympy expression of the desired fit
         expression'''
         print("Getting symbolic function")
@@ -47,12 +47,6 @@ class myfitclass (nddata):
         guesses: dict
             dictionary of keyword arguments for guesses (value) or constraints
             (min/max)
-
-        Returns
-        =======
-        pars: lmfit.Parameters
-        fn: function
-            the fit function
         """
         self.expression = this_expr
         # {{{ decide which symbols are parameters vs. variables
@@ -128,7 +122,7 @@ class myfitclass (nddata):
         return model - data
     @property
     def function_string(self):
-        r'''A property of the fitdata class which stores a string
+        r'''A property of the myfitclass class which stores a string
         output of the functional form of the desired fit expression
         provided in func:`functional_form` in LaTeX format'''
         retval = sympy_latex(self.symbolic_expr).replace('$','')
@@ -154,8 +148,6 @@ thisfit.set_guess(
         decay = dict(value=0.02, max=0.10, min=0.00),
 )
 # }}}
-
-
 # {{{ nddata to generate the fake data
 # {{{ create the "true" parameters for the fake data
 true_values = {"A": 14.0, "period": 5.4321, "shift": 0.12345, "decay": 0.01000}
