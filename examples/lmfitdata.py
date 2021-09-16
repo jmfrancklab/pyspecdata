@@ -47,7 +47,7 @@ class lmfitdata (nddata):
         takes as input a sympy expression of the desired fit
         expression'''
         print("Getting symbolic function")
-        return self.symbolic_expr
+        return self.expression
     @functional_form.setter
     def functional_form(self,this_expr):
         """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
@@ -64,11 +64,11 @@ class lmfitdata (nddata):
         all_symbols = self.expression.atoms(sp.Symbol)
         axis_names = set([sp.Symbol(j) for j in self.dimlabels])
         variable_symbols = axis_names & all_symbols
-        parameter_symbols = all_symbols - variable_symbols
+        self.parameter_symbols = all_symbols - variable_symbols
         variable_symbols = tuple(variable_symbols)
         self.variable_names = tuple([str(j) for j in variable_symbols])
-        parameter_symbols = tuple(parameter_symbols)
-        parameter_names = tuple([str(j) for j in parameter_symbols])
+        parameter_symbols = tuple(self.parameter_symbols)
+        self.parameter_names = tuple([str(j) for j in self.parameter_symbols])
         self.fit_axis = set(self.dimlabels)
         self.symbol_list = [str(j) for j in variable_symbols]
         logger.debug(
@@ -80,35 +80,45 @@ class lmfitdata (nddata):
                 "variable names are",
                 self.variable_names,
                 "parameter names are",
-                parameter_names,
+                self.parameter_names,
             )
         )
-        self.symbolic_vars = all_symbols - self.fit_axis
+        print( "all symbols are",
+                all_symbols,
+                "axis names are",
+                axis_names,
+                "variable names are",
+                self.variable_names,
+                "parameter names are",
+                self.parameter_names,
+            )
+
+        self.symbolic_vars = all_symbols - axis_names
         self.fit_axis = list(self.fit_axis)[0]
         # }}}
-        self.fn = lambdify(
+        self.fitfunc_multiarg = lambdify(
             variable_symbols + parameter_symbols,
             self.expression,
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
         )
-        
-        self.pars = Parameters()
-        for this_name in parameter_names:
-            self.pars.add(this_name)
-        def add_inactive_p(self,p):
-            if self.set_indices is not None:
-                #{{{uncollapse the function
-                temp = p.copy()
-                p = np.zeros(len(self.symbol_list))
-                p[self.active_mask] = temp
-                #}}}
-                p[self.set_indices] = self.set_to
-            return p    
-        def fcn(p,x):
+        def fn(p,x):
             p = self.add_inactive_p(p)
-            assert len(p)==len(self.symbol_list),"length of parameter passed to fitfunc doesnt match number of symbolic parameters"
-            return self.fn(*tuple(list(p) + [x]))
-        self.fitfunc = fcn
+            assert len(p)==len(self.parameter_names),"length of parameter passed to fitfunc doesnt match number of symbolic parameters"
+            return self.fitfunc_multiarg(*tuple(list(p) + [x]))
+        self.fitfunc = fn
+        self.pars = Parameters()
+        for this_name in self.parameter_names:
+            self.pars.add(this_name)
+    def add_inactive_p(self,p):
+        if self.set_indices is not None:
+            #{{{uncollapse the function
+            temp = p.copy()
+            p = np.zeros(len(self.symbol_list))
+            p[self.active_mask] = temp
+            #}}}
+            p[self.set_indices] = self.set_to
+        return p    
+        return self.fn(*tuple(list(p) + [x]))
     def set_guess(self,*args,**kwargs):
         """set both the guess and the bounds
 
@@ -267,7 +277,10 @@ class lmfitdata (nddata):
             return thisguess
         else:
             if hasattr(self,'guess_dict'):
-                return [self.guess_dict[k] for k in self.variable_names]
+                self.guess_dictionary = {k:self.guess_dict[k]['value'] for k in self.guess_dict.keys()}
+                print(self.parameter_names)
+                print(self.guess_dictionary)
+                return [self.guess_dictionary[k] for k in self.parameter_names]
             else:
                 return [1.0]*len(self.variable_names)
     def settoguess(self):
@@ -280,7 +293,7 @@ class lmfitdata (nddata):
             taxis = self.getaxis(self.fit_axis).copy()
         elif isinstance(taxis, int):
             taxis = np.linspace(self.getaxis(self.fit_axis).min(),
-                    self.getaxis(self.fit_axis).manx(),
+                    self.getaxis(self.fit_axis).max(),
                     taxis)
         elif not np.isscalar(taxis) and len(taxis) == 2:
             taxis = np.linspace(taxis[0],taxis[1],300)
@@ -330,14 +343,125 @@ class lmfitdata (nddata):
         newdata.axis_coords = list(newdata.axis_coords)
         newdata.labels([self.fit_axis],list([taxis]))
         #}}}
-        newdata.data[:] = self.fn(p,taxis).flatten()
+        print("HERE",p)
+        print("TAXIS",taxis)
+        newdata.data[:] = self.fitfunc(p,taxis).flatten()
         return newdata
+    def thatresidual(self,p,x,y,sigma):
+        fit = self.fitfunc(p,x)
+        normalization = np.sum(1.0/sigma)
+        sigma[sigma == 0.0] = 1
+        try:
+            # as noted here: https://stackoverflow.com/questions/6949370/scipy-leastsq-dfun-usage
+            # this needs to be fit - y, not vice versa
+            retval = (fit-y)/sigma #* normalization
+        except ValueError as e:
+            raise ValueError(strm('your error (',np.shape(sigma),
+                    ') probably doesn\'t match y (',
+                    np.shape(y),') and fit (',np.shape(fit),')')
+                    + explain_error(e))
+        return retval
+
+    def fit(self, set_what=None, set_to=None, force_analytical=False):
+        r'''actually run the fit'''
+        if isinstance(set_what, dict):
+            set_to = list(set_what.values())
+            set_what = list(set_what.keys())
+        x = self.getaxis(self.fit_axis)
+        if np.iscomplex(self.data.flatten()[0]):
+            logger.debug(strm('Warning, taking only real part of fitting data'))
+        y = np.real(self.data)
+        sigma = self.get_error()
+        if sigma is None:
+            print('{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n')
+            warnings.warn('You have no error associated with your plot, and I want to flag this for now', Warning)
+            sigma = np.ones(np.shape(y))
+        if set_what is None:
+            p_ini = self.guess()
+        if set_what is not None:
+            self.set_indices, self.set_to, self.active_mask = self.gen_indices(set_what,set_to)
+            p_ini = self.remove_inactive_(p_ini)
+        leastsq_args = (self.thatresidual, p_ini)
+        leastsq_kwargs = {'args':(x,y,sigma),
+                'full_output':True}
+        p_out,this_cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
+        try:
+            p_out,this_cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
+        except TypeError as err:
+            if not isinstance(x,np.ndarray) and not isinstance(y,np.ndarray):
+                raise TypeError(strm('leastsq failed because the two arrays',
+                    "aren\'t of the right",
+                    'type','type(x):',type(x),'type(y):',type(y)))
+            else:
+                if np.any(np.shape(x) != np.shape(y)):
+                    raise RuntimeError(strm('leastsq failed because the two arrays do'
+                        "not match in size",
+                        'np.shape(x):', np.shape(x),
+                        'np.shape(y):',np.shape(y)))
+            raise TypeError(strm('leastsq failed because of a type error!',
+                'type(x):',showtype(x),'type(y):',showtype(y),
+                'type(sigma)',showtype(sigma),'np.shape(x):',np.shape(x),
+                'np.shape(y):',np.shape(y),'np.shape(sigma',np.shape(sigma),
+                'p_ini',type(p_ini),p_ini))
+        except ValueError as err:
+            raise ValueError(strm('leastsq failed with "',err,
+                '", maybe there is something wrong with the input:',
+                self))
+        except Exception as e:
+            raise ValueError('leastsq failed; I don\'t know why')
+        if success not in [1,2,3,4]:
+            if mesg.find('maxfev'):
+                leastsq_kwargs.update({'maxfev':50000})
+                p_out, this_cov, infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
+                if success != 1:
+                    if mesg.find('two consecutive iterates'):
+                        print(r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n')
+                        print(r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n')
+                        infodict_keys = list(infodict.keys())
+                        infodict_vals = list(infodict.values())
+                        if 'nfev' in infodict_keys:
+                            infodict_keys[infodict_keys.index('nfev')] = 'nfev, number of function calls'
+                        if 'fvec' in infodict_keys:
+                            infodict_keys[infodict_keys.index('fvec')] = 'fvec, the function evaluated at the output'
+                        if 'fjac' in infodict_keys:
+                            infodict_keys[infodict_keys.index('fjac')] = 'fjac, A permutation of the R matrix of a QR factorization of the final approximate Jacobian matrix, stored column wise. Together with ipvt, the covariance of the estimate can be approximated.'
+                        if 'ipvt' in infodict_keys:
+                            infodict_keys[infodict_keys.index('ipvt')] = 'ipvt, an integer np.array of length N which defines a permutation matrix, p, such that fjac*p = q*r, where r is upper triangular with diagonal elements of nonincreasing magnitude. Column j of p is column ipvt(j) of the identity matrix'
+                        if 'qtf' in infodict_keys:
+                            infodict_keys[infodict_keys.index('qtf')] = 'qtf, the vector (transpose(q)*fvec)'
+                        for k,v in zip(infodict_keys, infodict_vals):
+                            print(r'{\color{red}{\bf %s}'%(k,v),'\n\n')
+                    else:
+                        raise RuntimeError(strm('leastsq finished with an error message:', mesg))
+                else:
+                    raise RuntimeError(strm('leastsq finished with an error message:',mesg))
+            else:
+                logger.debug("Fit finished successfully with a code of %d and a message ``%s''"%(success, mesg))
+            self.fit_coeff = p_out
+            dof = len(x) - len(p_out)
+            if hasattr(self,'symbolic_x') and force_analytical:
+                self.covariance = self.analytical_covriance()
+            else:
+                if force_analytical: raise RuntimeError(strm("I can't take the analytical",
+                    "covariance! This is problematic."))
+                if this_cov is None:
+                    print(r'{\color{red}'+lsafen('cov is none! why?, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,this_cov,infodict,mesg,success),'}\n')
+                self.covariance = this_cov
+            if self.covariance is not None:
+                try:
+                    self.covariance *= np.sum(infodict["fvec"]**2)/dof
+                except TypeError as e:
+                    raise TypeError(strm("type(self.covariance)",type(self.covariance),
+                        "type(infodict[fvec])",type(infodict["fvec"]),
+                        "type(dof)",type(dof)))
+            logger.debug(strm("at end of fit covariance is shape",np.shape(self.covariance),"fit coeff shape",np.shape(self.fit_coeff)))
+            return
 
     def run_lambda(self,pars):
         """actually run the lambda function we separate this in case we want
         our function to involve something else, as well (e.g. taking a Fourier
         transform)"""
-        return self.fn(*(self.getaxis(j) for j in self.variable_names), **pars.valuesdict())
+        return self.fitfunc_multiarg(*(self.getaxis(j) for j in self.variable_names), **pars.valuesdict())
 
     def residual(self, pars, data=None):
         "calculate the residual OR if data is None, return fake data"

@@ -31,6 +31,7 @@ thisfit.set_guess(
         period = dict(value=2, max=10),
         decay = dict(value=0.02, max=0.10, min=0.00),
 )
+thisfit.settoguess()
 # }}}
 # {{{ nddata to generate the fake data
 # {{{ create the "true" parameters for the fake data
@@ -54,13 +55,14 @@ out = minimize(
 )
 fit = empty_data.copy(data=False)
 fit.data = thisfit.residual(out.params)
-# }}}
 
+# }}}
 # {{{ report the fit and generate the plot
 report_fit(out, show_correl=True, modelpars=p_true)
 plot(mydata, "ro", label="data")
 plot(fit, "b", alpha=0.5, label="fit")
 plot(guess, "g--", label="guess")
+plot(newguess, 'k',label="please work")
 # }}}
 plt.legend()
 plt.show()
