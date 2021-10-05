@@ -1,7 +1,7 @@
 from ..general_functions import inside_sphinx
 from pylab import r_,fft,ifft,ifftshift,fftshift,exp,ones_like,sqrt,pi
 from pyspecdata import init_logging,strm
-logger = init_logging("debug")
+import logging
 
 def convolve(self,axisname,filterwidth,convfunc = (lambda x,y:
     exp(-(x**2)/(2.0*(y**2)))/(y*sqrt(2*pi))),
@@ -45,7 +45,7 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y:
     myfilter = convfunc(x,filterwidth)
     if self.get_ft_prop(axisname):
         # detect self in frequency domain
-        logger.debug(strm("detect self in frequency domain"))
+        logging.debug(strm("detect self in frequency domain"))
         self.ift(axisname)
         myfilter.ift(axisname)
         if enforce_causality:
@@ -67,13 +67,13 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y:
         time_domain = False
     elif self.get_ft_prop(axisname,['start','freq']) is None:
         # detect self in time domain, never FT'd
-        logger.debug(strm("detect self in time domain, never FT'd"))
+        logging.debug(strm("detect self in time domain, never FT'd"))
         self.ft(axisname, shift=True)
         # here enforcing causality wouldn't have the same meaning, so we don't do it
         myfilter.ft(axisname)
     else:
         # detect self in time domain, already FT'd
-        logger.debug(strm("detect self in time domain, already FT'd"))
+        logging.debug(strm("detect self in time domain, already FT'd"))
         self.ft(axisname)
         myfilter.ft(axisname)
     newdata = self*myfilter
@@ -82,5 +82,5 @@ def convolve(self,axisname,filterwidth,convfunc = (lambda x,y:
         self.ift(axisname)
     else:
         self.ft(axisname)
-    logger.debug(strm("before return",axisname,self.get_ft_prop(axisname)))
+    logging.debug(strm("before return",axisname,self.get_ft_prop(axisname)))
     return self

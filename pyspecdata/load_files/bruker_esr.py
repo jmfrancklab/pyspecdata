@@ -170,18 +170,6 @@ def xepr(filename, dimname='', verbose=False):
     for k,val in dim_units.items():
         data.set_units(k,val)
     # }}}
-    # {{{ use the parameters to rescale the data
-    logger.debug("There is a parameter called DModGain as well as"
-            " Gain -- not sure what that is")
-    rg = v.pop('Gain')
-    if np.isscalar(rg) or rg[1] != 'dB':
-        raise ValueError(strm("The gain from the file is not given in"
-                " dB -- not sure what's up.  I get",rg,"for gain"))
-    #data /= 10**(rg[0]/10.0)
-    #data /= modulation
-    # here, for winepr, I divided by the number of scans, but I'm
-    # fairly sure I don't wan to do that
-    # }}}
     data.other_info.update(v)
     data.reorder(b0_texstr)
     if 'Microwave Power' in data.dimlabels:

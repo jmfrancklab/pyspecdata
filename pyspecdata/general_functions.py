@@ -123,7 +123,7 @@ if 'pyspecdata_figures' in os.environ and os.environ['pyspecdata_figures'] == 'l
     print_log_info = False
 else:
     print_log_info = True
-def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspecdata.%d.log', fileno=0, orig_call=True):
+def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspecdata.%d.log', fileno=0):
     r"""Initialize a decent logging setup to log to `~/pyspecdata.log` (and `~/pyspecdata.XX.log` if that's taken).
 
     By default, everything above "debug" is logged to a
@@ -133,8 +133,6 @@ def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspe
     Do NOT log if run from within a notebook (it's fair to
     assume that you will run first before embedding)
     """
-    if orig_call:
-        print("called init_logging")
     FORMAT = "--> %(filename)s(%(lineno)s):%(name)s %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"
     level = level_str_to_int(level)
     stdout_level = level_str_to_int(stdout_level)
@@ -154,7 +152,7 @@ def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspe
             if fileno > 20:
                 raise ValueError("I'm not going to increase fileno above 20 -- that's crazy time!")
             local_print = False
-            return init_logging(level=level, filename=filename, fileno=fileno+1, orig_call=False)
+            return init_logging(level=level, filename=filename, fileno=fileno+1)
     if print_log_info and local_print:
         print("-"*10+"  "+f"logging output to {log_filename}"+"  "+"-"*10)
     logger = logging.getLogger()

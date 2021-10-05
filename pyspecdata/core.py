@@ -4266,14 +4266,16 @@ class nddata (object):
                 print('error, dimlabels is: ',self.dimlabels)
                 print("doesn't contain: ",axes[j])
                 raise
-            if raw_index:
-                self.data = np.argmax(self.data,
+            temp = self.data.copy()
+            temp[~np.isfinite(temp)] = temp[np.isfinite(temp)].min()
+            argmax_result = np.argmax(temp,
                         axis=thisindex)
+            if raw_index:
+                self.data = argmax_result 
             else:
                 if self.axis_coords[thisindex] is None:
                     raise ValueError("It doesn't make sense to call argmax if you have removed the axis coordinates! (getaxis yields None for %s"%thisindex)
-                self.data = self.axis_coords[thisindex][np.argmax(self.data,
-                    axis=thisindex)]
+                self.data = self.axis_coords[thisindex][argmax_result]
             self._pop_axis_info(thisindex)
         return self
     def argmin(self,*axes,**kwargs):
@@ -4304,12 +4306,14 @@ class nddata (object):
                 print('error, dimlabels is: ',self.dimlabels)
                 print("doesn't contain: ",axes[j])
                 raise
-            if raw_index:
-                self.data = np.argmin(self.data,
+            temp = self.data.copy()
+            temp[~np.isfinite(temp)] = temp[np.isfinite(temp)].max()
+            argmin_result = np.argmin(temp,
                         axis=thisindex)
+            if raw_index:
+                self.data = argmin_result
             else:
-                self.data = self.axis_coords[thisindex][np.argmin(self.data,
-                    axis=thisindex)]
+                self.data = self.axis_coords[thisindex][argmin_result]
             self._pop_axis_info(thisindex)
         return self
     def max(self):
@@ -4457,7 +4461,7 @@ class nddata (object):
             self.data = absdata.data
         self.run(np.log10)
         if subplot_axes is None:# then do all
-            self.data -= self.data.flatten().max() - magnitude # span only 4 orders of magnitude
+            self.data -= self.data[np.isfinite(self.data)].flatten().max() - magnitude # span only 4 orders of magnitude
         else:
             print("smooshing along subplot_axes",subplot_axes)
             newdata = self.copy().smoosh(subplot_axes,dimname = 'subplot')
