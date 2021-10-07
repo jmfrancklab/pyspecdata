@@ -34,10 +34,10 @@ class lmfitdata (nddata):
             else:
                 raise IndexError("Right now, we can only auto-determine the fit axis if there is a single axis")
         
-        self.set_indices = None
-        self.active_indices = None
         self.fit_axis = fit_axis
         self.set_to = None
+        self.set_indices = None
+        self.active_indices = None
         self.expression = None
         return
     
@@ -65,6 +65,7 @@ class lmfitdata (nddata):
         axis_names = set([sp.Symbol(j) for j in self.dimlabels])
         variable_symbols = axis_names & all_symbols
         self.parameter_symbols = all_symbols - variable_symbols
+        this_axis = variable_symbols
         variable_symbols = tuple(variable_symbols)
         self.variable_names = tuple([str(j) for j in variable_symbols])
         parameter_symbols = tuple(self.parameter_symbols)
@@ -96,11 +97,19 @@ class lmfitdata (nddata):
         self.symbolic_vars = all_symbols - axis_names
         self.fit_axis = list(self.fit_axis)[0]
         # }}}
+        self.symbolic_vars = list(self.symbolic_vars)
+        args = self.symbolic_vars + [str(*this_axis)]
         self.fitfunc_multiarg = lambdify(
+            args,
+            self.expression,
+            modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
+        )
+        self.fitfunc_multiarg_v2 = lambdify(
             variable_symbols + parameter_symbols,
             self.expression,
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
         )
+
         def fn(p,x):
             p = self.add_inactive_p(p)
             assert len(p)==len(self.parameter_names),"length of parameter passed to fitfunc doesnt match number of symbolic parameters"
@@ -343,8 +352,6 @@ class lmfitdata (nddata):
         newdata.axis_coords = list(newdata.axis_coords)
         newdata.labels([self.fit_axis],list([taxis]))
         #}}}
-        print("HERE",p)
-        print("TAXIS",taxis)
         newdata.data[:] = self.fitfunc(p,taxis).flatten()
         return newdata
     def thatresidual(self,p,x,y,sigma):
@@ -380,7 +387,7 @@ class lmfitdata (nddata):
             p_ini = self.guess()
         if set_what is not None:
             self.set_indices, self.set_to, self.active_mask = self.gen_indices(set_what,set_to)
-            p_ini = self.remove_inactive_(p_ini)
+            p_ini = self.remove_inactive_p(p_ini)
         leastsq_args = (self.thatresidual, p_ini)
         leastsq_kwargs = {'args':(x,y,sigma),
                 'full_output':True}
@@ -409,7 +416,7 @@ class lmfitdata (nddata):
                 self))
         except Exception as e:
             raise ValueError('leastsq failed; I don\'t know why')
-        if success not in [1,2,3,4]:
+        if success not in [1,2,3,4,5]:
             if mesg.find('maxfev'):
                 leastsq_kwargs.update({'maxfev':50000})
                 p_out, this_cov, infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
@@ -429,8 +436,8 @@ class lmfitdata (nddata):
                             infodict_keys[infodict_keys.index('ipvt')] = 'ipvt, an integer np.array of length N which defines a permutation matrix, p, such that fjac*p = q*r, where r is upper triangular with diagonal elements of nonincreasing magnitude. Column j of p is column ipvt(j) of the identity matrix'
                         if 'qtf' in infodict_keys:
                             infodict_keys[infodict_keys.index('qtf')] = 'qtf, the vector (transpose(q)*fvec)'
-                        for k,v in zip(infodict_keys, infodict_vals):
-                            print(r'{\color{red}{\bf %s}'%(k,v),'\n\n')
+                        #for k,v in zip(infodict_keys, infodict_vals):
+                            #print(r'{\color{red}{\bf %s}'%(k,v),'\n\n')
                     else:
                         raise RuntimeError(strm('leastsq finished with an error message:', mesg))
                 else:
@@ -461,7 +468,8 @@ class lmfitdata (nddata):
         """actually run the lambda function we separate this in case we want
         our function to involve something else, as well (e.g. taking a Fourier
         transform)"""
-        return self.fitfunc_multiarg(*(self.getaxis(j) for j in self.variable_names), **pars.valuesdict())
+        print(self.getaxis(j) for j in self.variable_names)
+        return self.fitfunc_multiarg_v2(*(self.getaxis(j) for j in self.variable_names), **pars.valuesdict())
 
     def residual(self, pars, data=None):
         "calculate the residual OR if data is None, return fake data"
