@@ -139,6 +139,7 @@ def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspe
     min_level = min([level,stdout_level])
     formatter = logging.Formatter(FORMAT)
     log_filename = os.path.join(os.path.expanduser('~'),filename%fileno)
+    local_print = True
     if os.path.exists(log_filename):
         # manually remove, and then use append -- otherwise, it won't write to
         # file immediately
@@ -150,8 +151,9 @@ def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspe
                     print(f"{log_filename} appears to be locked or otherwise inaccessible: I'm going to explore other options for fileno")
             if fileno > 20:
                 raise ValueError("I'm not going to increase fileno above 20 -- that's crazy time!")
+            local_print = False
             return init_logging(level=level, filename=filename, fileno=fileno+1)
-    if print_log_info:
+    if print_log_info and local_print:
         print("-"*10+"  "+f"logging output to {log_filename}"+"  "+"-"*10)
     logger = logging.getLogger()
     logger.setLevel(min_level) # even if I set the handler level, it won't
