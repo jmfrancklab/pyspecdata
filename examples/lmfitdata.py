@@ -93,7 +93,6 @@ class lmfitdata (nddata):
                 "parameter names are",
                 self.parameter_names,
             )
-
         self.symbolic_vars = all_symbols - axis_names
         self.fit_axis = list(self.fit_axis)[0]
         # }}}
@@ -109,7 +108,6 @@ class lmfitdata (nddata):
             self.expression,
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
         )
-
         def fn(p,x):
             p = self.add_inactive_p(p)
             assert len(p)==len(self.parameter_names),"length of parameter passed to fitfunc doesnt match number of symbolic parameters"
@@ -127,7 +125,6 @@ class lmfitdata (nddata):
             #}}}
             p[self.set_indices] = self.set_to
         return p    
-        return self.fn(*tuple(list(p) + [x]))
     def set_guess(self,*args,**kwargs):
         """set both the guess and the bounds
 
@@ -156,142 +153,15 @@ class lmfitdata (nddata):
         logger.info(strm(self.pars))
         self.guess_dict = guesses
         return
-    def _pn(self,name):
-        return self.symbol_list.index(name)
-    def _active_symbols(self):
-        if not hasattr(self,'active_symbols'):
-            if self.set_indices is not None:
-                self.active_symbols = [x for x in self.symbol_list if self.active_mask[self._pn(x)]]
-            else:
-                self.active_symbols = list(self.symbol_list)
-        return self.active_symbols       
-    def parameter_derivatives(self,xvals,set = None, set_to=None):
-        r'return a matrix containing derivatives of the parameters, can set dict set, or keys set, vals set_to'
-        logger.debug(strm('parameter derivatives is called'))
-        if np.iscomplex(self.data.flatten()[0]):
-            print(lsafen('Warning, taking only real part of fitting data!'))
-        if isinstance(set,dict):
-            set_to = list(set.values())
-            set = list(set.keys())
-        solution_list = dict([(self.symbolic_dict[k],set_t[j])
-            if k in set
-            else (self.symbolic_dict[k],self.output(k))
-            for j,k in enumerate(self.symbol_list)])
-        number_of_i = len(xvals)
-        parameters = self._active_symbols()
-        mydiff_sym = [[]] * len(self.symbolic_vars)
-        x = self.symbolic_x
-        fprime = np.zeros([len(parameters),number_of_i])
-        for j in range(0,len(parameters)):
-            thisvar = self.symbolic_dict[parameters[j]]
-            mydiff_sym[j] = sympy_diff(self.symbolic_func, thisvar)
-            try:
-                mydiff = mydiff_sym[j].subs(solution_list)
-            except Exception as e:
-                raise ValueError(strm('error trying to substitute',mydiff_sym[j],
-                    'with', solution_list) + explain_error(e))
-            try:
-                fprime[j,:] = np.array([complex(mydiff.subs(x,xvals[k])) for k in range(0,len(xvals))])
-            except ValueError as e:
-                raise ValueError(strm('Trying to set index',j,
-                    'np.shape(fprime)',np.shape(fprime),
-                    'np.shape(xvals)',np.shape(xvals),'the thing I\'m trying to',
-                    'compute looks like this',
-                    [mydiff.subs(x,xvals[k]) for k in range(0,len(xvals))]))
-            except Exception as e:
-                raise ValueError(strm('Trying to set index',j,
-                'np.shape(fprime)',np.shape(fprime),
-                'np.shape(xvals)',np.shape(xvals))+explain_error(e))
-        return fprime        
-
-    def guess(self, use_pseudoinverse=False):
+    def guess(self):
         r'''Old code that we are preserving here -- provide the guess for our parameters; by default, based on pseudoinverse'''
-        if use_pseudoinverse:
-            self.has_grad = False
-            if np.iscomplex(self.data.flatten()[0]):
-                print(lsafen('Warning, taking only real part of fitting data!'))
-            y = np.real(self.data)
-            which_starting_guess = 0
-            thisguess = self.starting_guesses[which_starting_guess]
-            numguesssteps = 20
-            new_y_shape = list(y.shape)
-            new_y_shape.append(1)
-            y = y.reshape(tuple(new_y_shape))
-            guess_dict = dict(list(zip(self.variable_names,list(thisguess))))
-            fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
-            f_at_guess = np.real(self.eval(None,set = guess_dict).data)
-            try:
-                f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
-            except:
-                raise ValueError(strm("trying to reshape f_at_ini_guess from",f_at_guess.shape,
-                    "to", new_y_shape))
-            thisresidual = sqrt((y-f_at_guess)**2).sum()
-            lastresidual = thisresidual
-            for j in range(0,numguesssteps):
-                logger.debug(strm('\n\n.core.guess) '+r'\begin{verbatim} fprime = \n',fprime,'\nf_at_guess\n',f_at_guess,'y=\n',y,'\n',r'\en{verbatim}'))
-                logger.debug(strm('\n\n.core.guess) shape of parameter derivatives',np.shape(fprime),'shape of output',np.shape(y),'\n\n'))
-                regularization_bad = True
-                alpha_max = 100.
-                alpha_mult = 2.
-                alpha = 0.1
-                logger.debug(strm('\n\n.core.guess) value of residual before regularization %d:'%j,thisresidual))
-                while regularization_bad:
-                    newguess = np.real(np.array(thisguess) + np.dot(pinvr(fprime.T,alpha),(y-f_at_guess)).flatten())
-                    mask = newguess < self.guess_lb
-                    newguess[mask] = self.guess_lb[mask]
-                    mask = newguess > self.guess_ub
-                    newguess[mask] = self.guess_ub[mask]
-                    if np.any(isnan(newguess)):
-                        logger.debug(strm('\n\n.core.guess) Regularization blows up $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha))
-                        alpha *= alpha_mult
-                    else:
-                        guess_dict = dict(list(zip(self.variable_names,list(newguess))))
-                        f_at_guess = np.real(self.eval(None,set = guess_dict).data)
-                        try:
-                            f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
-                        except:
-                            raise IndexError(strm('trying to reshape f_at_ini_guess from',
-                                f_at_guess.shape,'to',new_y_shape))
-                        thisresidual = sqrt((y-f_at_guess)**2).sum()
-                        if (thisresidual - lastresidual)/lastresidual > 0.10:
-                            alpha *= alpha_mult
-                            logger.debug(strm('\n\n.core.guess) Regularized Pinv gave a step uphill $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n'%alpha))
-                        else:
-                            regularization_bad = False
-                            thisguess = newguess
-                            lastresidual = thisresidual
-                            fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
-                    if alpha > alpha_max:
-                        print("\n\n.core.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max)
-                        if which_starting_guess >= len(self.starting_guesses)-1:
-                            print("\n\n.core.guess) {\\color{red}Warning!!} ran out of guesses!!%d\n\n"%alpha_max)
-                            return thisguess
-                        else:
-                            which_starting_guess += 1
-                            thisguess = self.starting_guesses[which_starting_guess]
-                            print("\n\n.core.guess) try a new starting guess:",lsafen(thisguess))
-                            j = 0
-                            guess_dict = dict(list(zip(self.variable_names,list(thisguess))))
-                            fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
-                            f_at_guess = np.real(self.eval(None,set = guess_dict).data)
-                            try:
-                                f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
-                            except:
-                                raise RuntimeError(strm("trying to reshape f_at_ini_guess from",
-                                    f_at_guess.shape,"to",new_y_shape))
-                            thisresidual = sqrt((y-f_at_guess)**2).sum()
-                            regularization_bad=False
-                logger.debug(strm('\n\n.core.guess) new value of guess after regularization:',lsafen(newguess)))
-                logger.debug(strm('\n\n.core.guess) value of residual after regularization:',thisresidual))
-            return thisguess
+        if hasattr(self,'guess_dict'):
+            self.guess_dictionary = {k:self.guess_dict[k]['value'] for k in self.guess_dict.keys()}
+            print(self.parameter_names)
+            print(self.guess_dictionary)
+            return [self.guess_dictionary[k] for k in self.parameter_names]
         else:
-            if hasattr(self,'guess_dict'):
-                self.guess_dictionary = {k:self.guess_dict[k]['value'] for k in self.guess_dict.keys()}
-                print(self.parameter_names)
-                print(self.guess_dictionary)
-                return [self.guess_dictionary[k] for k in self.parameter_names]
-            else:
-                return [1.0]*len(self.variable_names)
+            return [1.0]*len(self.variable_names)
     def settoguess(self):
         'a debugging function, to easily plot the initial guess'
         self.fit_coeff = np.real(self.guess())
