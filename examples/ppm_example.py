@@ -17,12 +17,13 @@ for A, nu, R in [
     (1, 750, 1.2),
     (1, 10, 0.08),
 ]:
-    nu = SFO1 + nu # it's really unclear why this is done!
+    #nu = SFO1 + nu # it's really unclear why this is done!
     signal += A * exp(1j * 2 * pi * nu * x - x / R)
 signal.set_units("t2", "s")
 signal.ft("t2", shift=True)
 
 # Parameters needed by to_ppm to work
+# pulled from BV_polymer_apr27_2021
 signal.set_prop('acq',{'SFO1':400.130438262389,'SW_h':4807.69230769231,'O1':438.262389})
 signal.set_prop('proc',{'OFFSET':12.50096})
 
