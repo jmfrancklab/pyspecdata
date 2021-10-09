@@ -4317,9 +4317,9 @@ class nddata (object):
             self._pop_axis_info(thisindex)
         return self
     def max(self):
-        return self.data.max()
+        return self.data[np.isfinite(self.data)].max()
     def min(self):
-        return self.data.min()
+        return self.data[np.isfinite(self.data)].min()
     def cdf(self,normalized = True,max_bins = 500):
         """calculate the Cumulative Distribution Function for the data along `axis_name`
 
