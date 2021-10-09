@@ -52,11 +52,13 @@ newfit.settoguess()
 guess = newfit.eval(100)
 # }}}
 # {{{ run the fit and generate nddata
+# again, now that this is a class, why is this not handled by the fit method?
 out = minimize(
     thisfit.residual, newfit.pars, kws={"data": mydata.data}
 )
 fit = empty_data.copy(data=False)
 fit.data = newfit.residual(out.params)
+# everything between this and the last comment should be part of the fit method, no?
 # }}}
 # {{{ report the fit and generate the plot
 report_fit(out, show_correl=True, modelpars=p_true)

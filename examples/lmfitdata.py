@@ -1,3 +1,4 @@
+# just put this in the package
 import matplotlib.pyplot as plt
 from numpy import exp, linspace, pi, random, sign, sin
 import sympy as sp

@@ -25,12 +25,17 @@ empty_data = nddata(r_[0:2:100j],'tau')
 #}}}
 #{{{ fitting data
 f = fitdata(fake_data)
-fM0, fMi, fR1, fvd = sp.symbols("M_0 M_inf R_1 tau",real=True)
-f.functional_form = fMi + (fM0-fMi)*sp.exp(-fvd*fR1)
-f.set_guess({fM0:-500, fMi:500, fR1:2})
+M0,Mi,R1,vd = sp.symbols("M_0 M_inf R_1 tau",real=True)
+f.functional_form = Mi + (M0-Mi)*sp.exp(-vd*R1)
+logger.info(strm("Functional Form", f.functional_form))
+logger.info(strm("Functional Form", f.functional_form))
+f.set_guess({M0:-500, Mi:500, R1:2})
 f.settoguess()
-fitdataguess = f.eval(100)
+guess = f.eval(100)
 f.fit()
+print("output:",f.output())
+print("latex:",f.latex())
+#}}}
 # {{{ this is just to show all the parameters
 list_symbs = []
 for j,k in f.output().items():
@@ -42,7 +47,6 @@ T1 = 1./f.output('R_1')
 # }}}
 #}}}
 #{{{lmfitdata method
-M0,Mi,R1,vd = sp.symbols("M0 Mi R1 tau")
 thisfit = lmfitdata(empty_data)
 newfit = lmfitdata(fake_data)
 newfit.functional_form = (Mi + (M0-Mi)*sp.exp(-(vd*R1)))
@@ -54,6 +58,8 @@ newfit.set_guess(
 newfit.settoguess()
 newguess = newfit.eval(100)
 newfit.fit()
+# I don't understand -- minimize should be called as part of the fit
+# method, above -- why are you calling it explicitly here?
 out = minimize(
         thisfit.residual, newfit.pars, kws={"data":fake_data.data})
 newerfit = empty_data.copy(data=False)
@@ -61,9 +67,21 @@ newerfit.data = newfit.residual(out.params)
 #}}}
 with figlist_var() as fl: 
     fl.next('fit with guess')
-    fl.plot(fitdataguess,label='fitdata guess')
-    fl.plot(newguess,label='lmfitdata guess')
+    fl.plot(fitdataguess, label='fitdata guess')
+    fl.plot(newguess, label='lmfitdata guess')
     fl.plot(fake_data,'o',label='fake data')
     thisline = fl.plot(f.eval(100),label='fit data fit')
     thatline = fl.plot(newerfit,':',label='lmfitdata fit')
+    # {{{ just put the text
+    ax = gca()
+    text(0.5,0.5,f.latex(),
+            ha='center',va='center',
+            color=thisline[0].get_color(),
+            transform = ax.transAxes)
+    text(0.5,0.5,(3*'\n')+list_symbs,
+            ha='center',va='top',
+            size=10,
+            color=thisline[0].get_color(),
+            transform = ax.transAxes)
+    # }}}
 
