@@ -11,8 +11,6 @@ import sympy as sp
 # are actually needed and which are not
 # -- I have already stripped out some
 from lmfit import Parameters, minimize
-from lmfit.printfuncs import report_fit
-from lmfitdata import lmfitdata
 from matplotlib.pyplot import figure, subplot, show, xlim, ylim, plot, gca
 from numpy import * # I think it wasn't importing from numpy b/c it seems we're inside sphinx
 # }}}

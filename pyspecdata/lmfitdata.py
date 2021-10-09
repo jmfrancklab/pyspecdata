@@ -1,11 +1,11 @@
 # just put this in the package
-import matplotlib.pyplot as plt
-from numpy import exp, linspace, pi, random, sign, sin
 import sympy as sp
 from lmfit import Parameters, minimize
 from lmfit.printfuncs import report_fit
 import numpy as np
-from pyspecdata import *
+from .core import nddata, normal_attrs, issympy
+from .general_functions import strm
+import logging
 class lmfitdata (nddata):
     r'''Inherits from an nddata and enables curve fitting through use of a sympy expression.
 
@@ -73,7 +73,7 @@ class lmfitdata (nddata):
         self.parameter_names = tuple([str(j) for j in self.parameter_symbols])
         self.fit_axis = set(self.dimlabels)
         self.symbol_list = [str(j) for j in variable_symbols]
-        logger.debug(
+        logging.debug(
             strm(
                 "all symbols are",
                 all_symbols,
@@ -99,12 +99,12 @@ class lmfitdata (nddata):
         # }}}
         self.symbolic_vars = list(self.symbolic_vars)
         args = self.symbolic_vars + [str(*this_axis)]
-        self.fitfunc_multiarg = lambdify(
+        self.fitfunc_multiarg = sp.lambdify(
             args,
             self.expression,
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
         )
-        self.fitfunc_multiarg_v2 = lambdify(
+        self.fitfunc_multiarg_v2 = sp.lambdify(
             variable_symbols + parameter_symbols,
             self.expression,
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
@@ -150,8 +150,8 @@ class lmfitdata (nddata):
                 for k,v in guesses[this_name].items():
                     setattr(self.pars[this_name],k,v)
         for j in self.pars:
-            logger.info(strm("fit param ---", j))
-        logger.info(strm(self.pars))
+            logging.info(strm("fit param ---", j))
+        logging.info(strm(self.pars))
         self.guess_dict = guesses
         return
     def guess(self):
@@ -247,7 +247,7 @@ class lmfitdata (nddata):
             set_what = list(set_what.keys())
         x = self.getaxis(self.fit_axis)
         if np.iscomplex(self.data.flatten()[0]):
-            logger.debug(strm('Warning, taking only real part of fitting data'))
+            logging.debug(strm('Warning, taking only real part of fitting data'))
         y = np.real(self.data)
         sigma = self.get_error()
         if sigma is None:
@@ -314,7 +314,7 @@ class lmfitdata (nddata):
                 else:
                     raise RuntimeError(strm('leastsq finished with an error message:',mesg))
             else:
-                logger.debug("Fit finished successfully with a code of %d and a message ``%s''"%(success, mesg))
+                logging.debug("Fit finished successfully with a code of %d and a message ``%s''"%(success, mesg))
             self.fit_coeff = p_out
             dof = len(x) - len(p_out)
             if hasattr(self,'symbolic_x') and force_analytical:
@@ -332,7 +332,7 @@ class lmfitdata (nddata):
                     raise TypeError(strm("type(self.covariance)",type(self.covariance),
                         "type(infodict[fvec])",type(infodict["fvec"]),
                         "type(dof)",type(dof)))
-            logger.debug(strm("at end of fit covariance is shape",np.shape(self.covariance),"fit coeff shape",np.shape(self.fit_coeff)))
+            logging.debug(strm("at end of fit covariance is shape",np.shape(self.covariance),"fit coeff shape",np.shape(self.fit_coeff)))
             return
 
     def run_lambda(self,pars):
@@ -375,9 +375,9 @@ class lmfitdata (nddata):
         if len(this_set) != len(set_to):
             raise ValueError(strm('length of this_set=',this_set,
                 'and set_to', set_to, 'are not the same!'))
-        logger.debug("*** *** *** *** *** ***")
-        logger.debug(str(this_set))
-        logger.debug("*** *** *** *** *** ***")
+        logging.debug("*** *** *** *** *** ***")
+        logging.debug(str(this_set))
+        logging.debug("*** *** *** *** *** ***")
         set_indices = list(map(self.symbol_list.index,this_set))
         active_mask = np.ones(len(self.symbol_list),dtype=bool)
         active_mask[set_indices] = False
