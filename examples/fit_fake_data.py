@@ -21,7 +21,6 @@ fl=figlist_var()
 tau = nddata(r_[0:2:100j], 'tau')
 fake_data = 102*(1-2*exp(-tau*6.0))
 fake_data.add_noise(5.0)
-empty_data = nddata(r_[0:2:100j],'tau')
 #}}}
 #{{{ fitting data
 f = fitdata(fake_data)
@@ -47,14 +46,13 @@ T1 = 1./f.output('R_1')
 # }}}
 #}}}
 #{{{lmfitdata method
-thisfit = lmfitdata(empty_data)
 newfit = lmfitdata(fake_data)
 newfit.functional_form = (Mi + (M0-Mi)*sp.exp(-(vd*R1)))
-thisfit.functional_form = newfit.functional_form
 newfit.set_guess(
-        M0 = dict(value=-500, max=0, min=-501),
-        Mi=dict(value=500, max = 501, min=0), 
-        R1=dict(value=5, max = 6, min = 1))
+        M_0 = dict(value=-500, max=0, min=-501),
+        M_inf=dict(value=500, max = 501, min=0), 
+        R_1=dict(value=5, max = 6, min = 1))
+# the following is failing for me
 newfit.settoguess()
 newguess = newfit.eval(100)
 newfit.fit()
@@ -62,7 +60,6 @@ newfit.fit()
 # method, above -- why are you calling it explicitly here?
 out = minimize(
         thisfit.residual, newfit.pars, kws={"data":fake_data.data})
-newerfit = empty_data.copy(data=False)
 newerfit.data = newfit.residual(out.params)
 #}}}
 with figlist_var() as fl: 
