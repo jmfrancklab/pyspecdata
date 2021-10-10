@@ -6564,6 +6564,78 @@ class nddata (object):
             else:
                 raise ValueError("If you have more than one dimension, you need to tell me which one!!")
         return axes
+    def get_range(self,dimname,start,stop):
+        """get raw indices that can be used to generate a slice for the start and (non-inclusive) stop
+
+        Uses the same code as the standard slicing format (the 'range' option of parseslices)
+
+        Parameters
+        ==========
+        dimname: str
+            name of the dimension
+        start: float
+            the coordinate for the start of the range
+        stop: float
+            the coordinate for the stop of the range
+            
+        Return
+        ======
+        start: int
+            the index corresponding to the start of the range
+        stop: int
+            the index corresponding to the stop of the range
+        """
+        axesdict = self.mkd(self.axis_coords)
+        if axesdict[dimname] is None:
+            raise ValueError("You passed a range-type slice"
+            +" selection, but to do that, your axis coordinates need to"
+            +f" be labeled! (The axis coordinates of {dimname} aren't"
+            +" labeled)")
+        temp = np.diff(axesdict[dimname]) 
+        if not all(temp*np.sign(temp[0])>0):
+            raise ValueError(strm("you can only use the range format on data where the axis is in consecutively increasing or decreasing order, and the differences that I see are",temp*np.sign(temp[0])),
+                    "if you like, you can still do this by first calling .sort( on the %s axis"%dimname)
+        if np.sign(temp[0]) == -1:
+            thisaxis = axesdict[dimname][::-1]
+        else:
+            thisaxis = axesdict[dimname]
+        if start is None:
+            start = -inf
+        if stop is None:
+            stop = inf
+        if start > stop:
+            start,stop = stop,start
+        # at this point, start is indeed the lower value, and stop indeed the higher
+        if start == inf:
+            raise ValueError(strm("this is not going to work -- I interpret range",start,stop,"I get to",start,",",stop))
+        elif start == -inf:
+            start = 0
+        else:
+            logger.debug(strm("looking for",start))
+            start = np.searchsorted(thisaxis,start)
+            if start >= len(thisaxis):
+                raise ValueError("the lower value of your slice %s on the \"%s\" axis (which runs from %g to %g) is higher than the highest value of the axis coordinates!"%(
+                    (str((thisargs[0], thisargs[1])), dimname,)+tuple(self.getaxis(dimname)[r_[0,-1]])))
+        stop_float = stop
+        if stop == inf:
+            stop = len(thisaxis) # not an exact match (inf doesn't match the index), so needs to be inclusive already
+        elif stop == -inf:
+            raise ValueError(strm("this is not going to work -- I interpret range",thisargs,"I get to",start,",",stop))
+        else:
+            logger.debug(strm("looking for",stop))
+            stop = np.searchsorted(thisaxis,stop)
+        # at this point, the result is inclusive if stop is
+        # not an exact match, but exclusive if it is
+        if stop<len(thisaxis) and thisaxis[stop] == stop_float:
+            stop += 1 # make it inclusive
+        if np.sign(temp[0]) == -1:
+            stop = len(thisaxis) -1 -stop
+            start = len(thisaxis) -1 -start
+            stop, start = start, stop
+        del temp
+        if start == stop:
+            stop += 1
+        return start, stop
     def _parse_slices(self,args):
         """This controls nddata slicing:
             it previously took
