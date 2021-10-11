@@ -489,7 +489,7 @@ and determines the axis values as follows:
 <dt id="pyspecdata.axis_class.nddata_axis.references">
 <em class="property">property </em><code class="sig-name descname">references</code><a class="headerlink" href="#pyspecdata.axis_class.nddata_axis.references" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns OrderedDict of all names and aliases such that keys all point to the current instance (<cite>self</cite>)</p>
-<p>the idea is that this should be placed in a <cite>ChainMap</cite> object to be used by the <a class="reference internal" href="#pyspecdata.axis_class.axis_collection" title="pyspecdata.axis_class.axis_collection"><code class="xref py py-class docutils literal notranslate"><span class="pre">axis_collection</span></code></a> class that contains the axis.</p>
+<p>the idea is that this should be placed in a <cite>ChainMap</cite> object to be used by the <a class="reference internal" href="../axis_object_plan.html#pyspecdata.axis_class.axis_collection" title="pyspecdata.axis_class.axis_collection"><code class="xref py py-class docutils literal notranslate"><span class="pre">axis_collection</span></code></a> class that contains the axis.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -505,8 +505,8 @@ and determines the axis values as follows:
 <span id="pyspecdata-core-module"></span><h2>pyspecdata.core module<a class="headerlink" href="#module-pyspecdata.core" title="Permalink to this headline">¶</a></h2>
 <p>Provides the core components of pyspecdata.
 Currently, this is a very large file that we will slowly break down into separate modules or packages.</p>
-<p>The classes <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata_hdf</span></code>, <a class="reference internal" href="#pyspecdata.core.ndshape" title="pyspecdata.core.ndshape"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code></a>, the
-function <a class="reference internal" href="#pyspecdata.core.plot" title="pyspecdata.core.plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot()</span></code></a>, and the class <a class="reference internal" href="#pyspecdata.core.fitdata" title="pyspecdata.core.fitdata"><code class="xref py py-class docutils literal notranslate"><span class="pre">fitdata</span></code></a>
+<p>The classes <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata_hdf</span></code>, <a class="reference internal" href="#pyspecdata.core.ndshape" title="pyspecdata.core.ndshape"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code></a>, the
+function <a class="reference internal" href="#pyspecdata.core.plot" title="pyspecdata.core.plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot()</span></code></a>, and the class <a class="reference internal" href="../generated/pyspecdata.core.fitdata.html#pyspecdata.core.fitdata" title="pyspecdata.core.fitdata"><code class="xref py py-class docutils literal notranslate"><span class="pre">fitdata</span></code></a>
 are the core components of the N-Dimensional processing routines.
 Start by familiarizing yourself with those.</p>
 <p>The <a class="reference internal" href="#pyspecdata.core.figlist" title="pyspecdata.core.figlist"><code class="xref py py-class docutils literal notranslate"><span class="pre">figlist</span></code></a> is the base class for “Figure lists.”
@@ -837,7 +837,7 @@ current plot in the figurelist</p></li>
 <code class="sig-name descname">A</code><a class="headerlink" href="#pyspecdata.core.figlist.A" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
+<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1106,17 +1106,17 @@ and not return a figure list in the output</p>
 <dl class="py class">
 <dt id="pyspecdata.core.fitdata">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">fitdata</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
 <p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
 <p>The user creates a fitdata class object from an existing nddata
 class object, and on this fitdata object can define the
-<a class="reference internal" href="#pyspecdata.core.fitdata.functional_form" title="pyspecdata.core.fitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
+<a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.functional_form" title="pyspecdata.core.fitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
 data of the original nddata.
 This functional form must be provided as a sympy expression, with
 one of its variables matching the name of the dimension that the
 user would like to fit to.
 The user provides fit coefficients using <code class="xref py py-func docutils literal notranslate"><span class="pre">fit_coeff()</span></code> and
-obtains output using <a class="reference internal" href="#pyspecdata.core.fitdata.fit" title="pyspecdata.core.fitdata.fit"><code class="xref py py-func docutils literal notranslate"><span class="pre">fit()</span></code></a> and <a class="reference internal" href="#pyspecdata.core.fitdata.eval" title="pyspecdata.core.fitdata.eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.</p>
+obtains output using <a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.fit" title="pyspecdata.core.fitdata.fit"><code class="xref py py-func docutils literal notranslate"><span class="pre">fit()</span></code></a> and <a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.eval" title="pyspecdata.core.fitdata.eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.</p>
 <p>If you haven’t done this before,
 create a jupyter notebook (not checked in, just for your own playing around) with:
 <code class="docutils literal notranslate"><span class="pre">`</span>
@@ -1196,7 +1196,7 @@ nddata metadata.</p>
 <dd class="field-odd"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+<dd class="field-even"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1324,7 +1324,7 @@ must be sympy symbols</p>
 <dd class="field-even"><p><strong>self</strong> – The modified nddata</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1578,7 +1578,7 @@ you’re going to do math with them, and that the singleton dimensions
 will be expanded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a><em> or </em><em>np.ndarray</em>) – The nddata that you want to align to <cite>self</cite>.
+<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a><em> or </em><em>np.ndarray</em>) – The nddata that you want to align to <cite>self</cite>.
 If arg is an np.ndarray, it will try to match dimensions to self based
 on the length of the dimension.
 <strong>Note:</strong> currently there is an issue where this will only really
@@ -2136,6 +2136,29 @@ If several such matches are found, the error message is informative.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="pyspecdata.core.nddata.get_range">
+<code class="sig-name descname">get_range</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dimname</span></em>, <em class="sig-param"><span class="n">start</span></em>, <em class="sig-param"><span class="n">stop</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.get_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>get raw indices that can be used to generate a slice for the start and (non-inclusive) stop</p>
+<p>Uses the same code as the standard slicing format (the ‘range’ option of parseslices)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimname</strong> (<em>str</em>) – name of the dimension</p></li>
+<li><p><strong>start</strong> (<em>float</em>) – the coordinate for the start of the range</p></li>
+<li><p><strong>stop</strong> (<em>float</em>) – the coordinate for the stop of the range</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>start</strong> (<em>int</em>) – the index corresponding to the start of the range</p></li>
+<li><p><strong>stop</strong> (<em>int</em>) – the index corresponding to the stop of the range</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="pyspecdata.core.nddata.get_units">
 <code class="sig-name descname">get_units</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.get_units" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -2465,7 +2488,7 @@ for the data (DOI:10.1109/78.995059).</p>
 distribution (the “fit” dimension);
 <em>e.g.</em> if you are regularizing a set of functions
 <span class="math notranslate nohighlight">\(\np.exp(-\tau*R_1)\)</span>, then this is <span class="math notranslate nohighlight">\(\tau\)</span></p></li>
-<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – a dictionary whose key is the name of the “fit” dimension
+<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – a dictionary whose key is the name of the “fit” dimension
 (<span class="math notranslate nohighlight">\(R_1\)</span> in the example above)
 and whose value is an np.array with the new axis labels.
 OR
@@ -2934,7 +2957,7 @@ allow for smooshing to determine a new axes that is standard
 <dl class="py class">
 <dt id="pyspecdata.core.nddata_hdf5">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">nddata_hdf5</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pathstring</span></em>, <em class="sig-param"><span class="n">directory</span><span class="o">=</span><span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata_hdf5" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
 </dd></dl>
 
 <dl class="py function">
@@ -2946,7 +2969,9 @@ allow for smooshing to determine a new axes that is standard
 <dt id="pyspecdata.core.ndshape">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.core.</code><code class="sig-name descname">ndshape</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.ndshape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyspecdata.ndshape.ndshape_base" title="pyspecdata.ndshape.ndshape_base"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.ndshape.ndshape_base</span></code></a></p>
-<p>The ndshape class, including the allocation method</p>
+<p>A class for describing the shape and dimension names of nddata objects.</p>
+<p>A main goal of this class is to allow easy generation (allocation) of new
+arrays – see <a class="reference internal" href="#pyspecdata.core.ndshape.alloc" title="pyspecdata.core.ndshape.alloc"><code class="xref py py-func docutils literal notranslate"><span class="pre">alloc()</span></code></a>.</p>
 <dl class="py method">
 <dt id="pyspecdata.core.ndshape.alloc">
 <code class="sig-name descname">alloc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dtype</span><span class="o">=</span><span class="default_value">'complex128'</span></em>, <em class="sig-param"><span class="n">labels</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.ndshape.alloc" title="Permalink to this definition">¶</a></dt>
@@ -2960,6 +2985,20 @@ allow for smooshing to determine a new axes that is standard
 </ul>
 </dd>
 </dl>
+<p class="rubric">Example</p>
+<p>If you want to create new empty array that’s 10x3 with dimensions “x” and “y”:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">ndshape</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">alloc</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also do things like creating a new array based on the size of
+an existing array (create a new array without dimension x, but with new
+dimension z)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">myshape</span> <span class="o">=</span> <span class="n">ndshape</span><span class="p">(</span><span class="n">mydata</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myshape</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myshape</span> <span class="o">+</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myshape</span><span class="o">.</span><span class="n">alloc</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </dd></dl>
@@ -3537,7 +3576,7 @@ current plot in the figurelist</p></li>
 <code class="sig-name descname">A</code><a class="headerlink" href="#pyspecdata.figlist.figlist.A" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
+<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4206,7 +4245,7 @@ This can be used in combination with wrapviewer() and latexmk by using a <code c
 <dl class="py function">
 <dt id="pyspecdata.latexscripts.wrapviewer">
 <code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">wrapviewer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.wrapviewer" title="Permalink to this definition">¶</a></dt>
-<dd><p>see <a class="reference internal" href="#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p>
+<dd><p>see <a class="reference internal" href="../latexscripts.html#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p>
 </dd></dl>
 
 </div>
@@ -4305,7 +4344,7 @@ accessed many times. Sort of like memoization.</p>
 <dl class="py class">
 <dt id="pyspecdata.placeholder.nddata_placeholder">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.placeholder.</code><code class="sig-name descname">nddata_placeholder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">_data_hook</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.placeholder.nddata_placeholder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
 <p>When you open a file with many datasets, and only want to load one, this is used to store a placeholder to the different datasets.
 Rather than passing the initialization any type of data, you simply pass it one argument: the “data hook”:
 a function that accepts a single argument (self), alters the dimlabels and axes as needed, and returns an ndarray containing the data.</p>
@@ -7173,7 +7212,7 @@ Whenever it finds a file in the current directory, it will not return data from 
 (For a more thorough description, see <a class="reference internal" href="#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a>).</p>
 <p>Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
 (so that you can make sure they are properly synced to the cloud, etc.).</p>
-<p>It calls <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
+<p>It calls <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
 <p>If it can’t find any files matching the criterion, it logs the missing file and throws an exception.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -7219,22 +7258,22 @@ it sets <cite>postproc_type</cite> to the value of
 This, in turn, is used to choose the type of post-processing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">dimname</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">return_acq</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">add_sizes</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">add_dims</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-odd">use_sweep</dt>
-<dd class="field-odd"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-odd"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 <dt class="field-even">indirect_dimlabels</dt>
-<dd class="field-even"><p>passed to <a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
+<dd class="field-even"><p>passed to <a class="reference internal" href="../temp_stubs.html#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 </dl>
 </p></li>
@@ -7247,7 +7286,7 @@ This, in turn, is used to choose the type of post-processing.</p>
 <dl class="py class">
 <dt id="pyspecdata.fitdata">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">fitdata</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fitdata" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
 <p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
 <p>The user creates a fitdata class object from an existing nddata
 class object, and on this fitdata object can define the
@@ -9628,6 +9667,29 @@ If several such matches are found, the error message is informative.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="pyspecdata.nddata.get_range">
+<code class="sig-name descname">get_range</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dimname</span></em>, <em class="sig-param"><span class="n">start</span></em>, <em class="sig-param"><span class="n">stop</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.get_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>get raw indices that can be used to generate a slice for the start and (non-inclusive) stop</p>
+<p>Uses the same code as the standard slicing format (the ‘range’ option of parseslices)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimname</strong> (<em>str</em>) – name of the dimension</p></li>
+<li><p><strong>start</strong> (<em>float</em>) – the coordinate for the start of the range</p></li>
+<li><p><strong>stop</strong> (<em>float</em>) – the coordinate for the stop of the range</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>start</strong> (<em>int</em>) – the index corresponding to the start of the range</p></li>
+<li><p><strong>stop</strong> (<em>int</em>) – the index corresponding to the stop of the range</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="pyspecdata.nddata.get_units">
 <code class="sig-name descname">get_units</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.get_units" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -10426,7 +10488,7 @@ allow for smooshing to determine a new axes that is standard
 <dl class="py class">
 <dt id="pyspecdata.nddata_hdf5">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">nddata_hdf5</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pathstring</span></em>, <em class="sig-param"><span class="n">directory</span><span class="o">=</span><span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata_hdf5" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
 </dd></dl>
 
 <dl class="py function">
@@ -10438,7 +10500,9 @@ allow for smooshing to determine a new axes that is standard
 <dt id="pyspecdata.ndshape">
 <em class="property">class </em><code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">ndshape</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.ndshape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyspecdata.ndshape.ndshape_base" title="pyspecdata.ndshape.ndshape_base"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.ndshape.ndshape_base</span></code></a></p>
-<p>The ndshape class, including the allocation method</p>
+<p>A class for describing the shape and dimension names of nddata objects.</p>
+<p>A main goal of this class is to allow easy generation (allocation) of new
+arrays – see <a class="reference internal" href="#pyspecdata.ndshape.alloc" title="pyspecdata.ndshape.alloc"><code class="xref py py-func docutils literal notranslate"><span class="pre">alloc()</span></code></a>.</p>
 <dl class="py method">
 <dt id="pyspecdata.ndshape.alloc">
 <code class="sig-name descname">alloc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dtype</span><span class="o">=</span><span class="default_value">'complex128'</span></em>, <em class="sig-param"><span class="n">labels</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.ndshape.alloc" title="Permalink to this definition">¶</a></dt>
@@ -10452,6 +10516,20 @@ allow for smooshing to determine a new axes that is standard
 </ul>
 </dd>
 </dl>
+<p class="rubric">Example</p>
+<p>If you want to create new empty array that’s 10x3 with dimensions “x” and “y”:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">ndshape</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">alloc</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also do things like creating a new array based on the size of
+an existing array (create a new array without dimension x, but with new
+dimension z)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">myshape</span> <span class="o">=</span> <span class="n">ndshape</span><span class="p">(</span><span class="n">mydata</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myshape</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myshape</span> <span class="o">+</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">myshape</span><span class="o">.</span><span class="n">alloc</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </dd></dl>
