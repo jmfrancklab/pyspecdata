@@ -14,7 +14,6 @@ from lmfit import Parameters, minimize
 from lmfit.printfuncs import report_fit
 import numpy as np
 from pyspecdata import *
-from lmfitdata import lmfitdata
 init_logging(level="debug")
 np.random.seed(15816)
 fl=figlist_var()
@@ -53,15 +52,8 @@ guess = newfit.eval(100)
 # }}}
 # {{{ run the fit and generate nddata
 # again, now that this is a class, why is this not handled by the fit method?
-out = minimize(
-    thisfit.residual, newfit.pars, kws={"data": mydata.data}
-)
-fit = empty_data.copy(data=False)
-fit.data = newfit.residual(out.params)
-# everything between this and the last comment should be part of the fit method, no?
-# }}}
-# {{{ report the fit and generate the plot
-report_fit(out, show_correl=True, modelpars=p_true)
+fit = thisfit.fit(newfit, mydata)
+#{{{plot the data with fits and guesses
 plot(mydata, "ro", label="data")
 plot(fit, "b", alpha=0.5, label="fit")
 plot(guess, "g--", label="guess")

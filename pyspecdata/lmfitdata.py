@@ -6,6 +6,7 @@ import numpy as np
 from .core import nddata, normal_attrs, issympy
 from .general_functions import strm
 import logging
+from pyspecdata import *
 class lmfitdata (nddata):
     r'''Inherits from an nddata and enables curve fitting through use of a sympy expression.
 
@@ -64,7 +65,7 @@ class lmfitdata (nddata):
             raise ValueError("what expression are you fitting with??")
         all_symbols = self.expression.atoms(sp.Symbol)
         axis_names = set([sp.Symbol(j) for j in self.dimlabels])
-        variable_symbols = axis_names & all_symbols
+        variable_symbols = (axis_names & all_symbols)
         self.parameter_symbols = all_symbols - variable_symbols
         this_axis = variable_symbols
         variable_symbols = tuple(variable_symbols)
@@ -72,7 +73,7 @@ class lmfitdata (nddata):
         parameter_symbols = tuple(self.parameter_symbols)
         self.parameter_names = tuple([str(j) for j in self.parameter_symbols])
         self.fit_axis = set(self.dimlabels)
-        self.symbol_list = [str(j) for j in variable_symbols]
+        self.symbol_list = [str(j) for j in parameter_symbols]
         logging.debug(
             strm(
                 "all symbols are",
@@ -240,100 +241,25 @@ class lmfitdata (nddata):
                     + explain_error(e))
         return retval
 
-    def fit(self, set_what=None, set_to=None, force_analytical=False):
-        r'''actually run the fit'''
-        if isinstance(set_what, dict):
-            set_to = list(set_what.values())
-            set_what = list(set_what.keys())
-        x = self.getaxis(self.fit_axis)
-        if np.iscomplex(self.data.flatten()[0]):
-            logging.debug(strm('Warning, taking only real part of fitting data'))
-        y = np.real(self.data)
-        sigma = self.get_error()
-        if sigma is None:
-            print('{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n')
-            warnings.warn('You have no error associated with your plot, and I want to flag this for now', Warning)
-            sigma = np.ones(np.shape(y))
-        if set_what is None:
-            p_ini = self.guess()
-        if set_what is not None:
-            self.set_indices, self.set_to, self.active_mask = self.gen_indices(set_what,set_to)
-            p_ini = self.remove_inactive_p(p_ini)
-        leastsq_args = (self.thatresidual, p_ini)
-        leastsq_kwargs = {'args':(x,y,sigma),
-                'full_output':True}
-        p_out,this_cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
-        try:
-            p_out,this_cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
-        except TypeError as err:
-            if not isinstance(x,np.ndarray) and not isinstance(y,np.ndarray):
-                raise TypeError(strm('leastsq failed because the two arrays',
-                    "aren\'t of the right",
-                    'type','type(x):',type(x),'type(y):',type(y)))
-            else:
-                if np.any(np.shape(x) != np.shape(y)):
-                    raise RuntimeError(strm('leastsq failed because the two arrays do'
-                        "not match in size",
-                        'np.shape(x):', np.shape(x),
-                        'np.shape(y):',np.shape(y)))
-            raise TypeError(strm('leastsq failed because of a type error!',
-                'type(x):',showtype(x),'type(y):',showtype(y),
-                'type(sigma)',showtype(sigma),'np.shape(x):',np.shape(x),
-                'np.shape(y):',np.shape(y),'np.shape(sigma',np.shape(sigma),
-                'p_ini',type(p_ini),p_ini))
-        except ValueError as err:
-            raise ValueError(strm('leastsq failed with "',err,
-                '", maybe there is something wrong with the input:',
-                self))
-        except Exception as e:
-            raise ValueError('leastsq failed; I don\'t know why')
-        if success not in [1,2,3,4,5]:
-            if mesg.find('maxfev'):
-                leastsq_kwargs.update({'maxfev':50000})
-                p_out, this_cov, infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
-                if success != 1:
-                    if mesg.find('two consecutive iterates'):
-                        print(r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n')
-                        print(r'{\color{red}{\bf Original message:}',lsafe(mesg),'}','\n\n')
-                        infodict_keys = list(infodict.keys())
-                        infodict_vals = list(infodict.values())
-                        if 'nfev' in infodict_keys:
-                            infodict_keys[infodict_keys.index('nfev')] = 'nfev, number of function calls'
-                        if 'fvec' in infodict_keys:
-                            infodict_keys[infodict_keys.index('fvec')] = 'fvec, the function evaluated at the output'
-                        if 'fjac' in infodict_keys:
-                            infodict_keys[infodict_keys.index('fjac')] = 'fjac, A permutation of the R matrix of a QR factorization of the final approximate Jacobian matrix, stored column wise. Together with ipvt, the covariance of the estimate can be approximated.'
-                        if 'ipvt' in infodict_keys:
-                            infodict_keys[infodict_keys.index('ipvt')] = 'ipvt, an integer np.array of length N which defines a permutation matrix, p, such that fjac*p = q*r, where r is upper triangular with diagonal elements of nonincreasing magnitude. Column j of p is column ipvt(j) of the identity matrix'
-                        if 'qtf' in infodict_keys:
-                            infodict_keys[infodict_keys.index('qtf')] = 'qtf, the vector (transpose(q)*fvec)'
-                        #for k,v in zip(infodict_keys, infodict_vals):
-                            #print(r'{\color{red}{\bf %s}'%(k,v),'\n\n')
-                    else:
-                        raise RuntimeError(strm('leastsq finished with an error message:', mesg))
-                else:
-                    raise RuntimeError(strm('leastsq finished with an error message:',mesg))
-            else:
-                logging.debug("Fit finished successfully with a code of %d and a message ``%s''"%(success, mesg))
-            self.fit_coeff = p_out
-            dof = len(x) - len(p_out)
-            if hasattr(self,'symbolic_x') and force_analytical:
-                self.covariance = self.analytical_covriance()
-            else:
-                if force_analytical: raise RuntimeError(strm("I can't take the analytical",
-                    "covariance! This is problematic."))
-                if this_cov is None:
-                    print(r'{\color{red}'+lsafen('cov is none! why?, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,this_cov,infodict,mesg,success),'}\n')
-                self.covariance = this_cov
-            if self.covariance is not None:
-                try:
-                    self.covariance *= np.sum(infodict["fvec"]**2)/dof
-                except TypeError as e:
-                    raise TypeError(strm("type(self.covariance)",type(self.covariance),
-                        "type(infodict[fvec])",type(infodict["fvec"]),
-                        "type(dof)",type(dof)))
-            logging.debug(strm("at end of fit covariance is shape",np.shape(self.covariance),"fit coeff shape",np.shape(self.fit_coeff)))
-            return
+    def fit(self, newfit, actualdata):
+        r'''actually run the fit
+        Parameters
+        ==========
+        thisfit: lmfitdata
+                    original true data
+        newfit:  lmfitdata
+                    the lmfitdata instance of the actual data
+        data:    nddata
+                    data being fit
+                    '''
+        out = minimize(self.residual, newfit.pars, kws={"data":actualdata.data})
+        fit = self.C
+        fit.data = newfit.residual(out.params)
+        report_fit(out,show_correl=True)
+        self.fit_coeff =[]
+        for name, param in out.params.items():
+            self.fit_coeff.append(param.value)
+        return fit
 
     def run_lambda(self,pars):
         """actually run the lambda function we separate this in case we want
@@ -415,12 +341,47 @@ class lmfitdata (nddata):
             return {self.variable_names[j]:p[j] for j in range(len(p))}
         else:
             raise ValueError(strm("You can't pass", len(name),"arguments to .output()"))
+    def latex(self):
+        r'''show the latex string for the function, with all the symbols substituted by their values'''
+        # this should actually be generic to fitdata
+        p = self.fit_coeff
+        retval = self.function_string
+        printfargs = []
+        allsymb = []
+        locations = []
+        # {{{ I replace the symbols manually
+        #     Note that I came back and tried to use sympy to do this,
+        #     but then realize that sympy will automatically simplify,
+        #     e.g. numbers in the denominator, so it ends up changing the
+        #     way the function looks.  Though this is a pain, it's
+        #     better.
+        for j in range(0,len(self.symbol_list)):
+            symbol = sympy_latex(self.symbolic_vars[j]).replace('$','')
+            logger.debug(strm('DEBUG: replacing symbol "',symbol,'"'))
+            location = retval.find(symbol)
+            while location != -1:
+                if retval[location-1] == '-':
+                    newstring = retval[:location-1]+dp(-1*p[j])+retval[location+len(symbol):] # replace the symbol in the written function with the appropriate number
+                else:
+                    newstring = retval[:location]+dp(p[j])+retval[location+len(symbol):] # replace the symbol in the written function with the appropriate number
+                logger.debug(strm(r"trying to replace",
+                    retval[location:location+len(symbol)]))
+                retval = newstring
+                locations += [location]
+                allsymb += [symbol]
+                location = retval.find(symbol)
+        # }}}
+        logger.debug(strm(r"trying to generate",self.function_string,
+            '\n',retval,'\n',[allsymb[x] for x in np.argsort(locations)],
+            '\n',printfargs))
+        return retval
+    
     @property
     def function_string(self):
         r'''A property of the myfitclass class which stores a string
         output of the functional form of the desired fit expression
         provided in func:`functional_form` in LaTeX format'''
-        retval = sympy_latex(self.symbolic_expr).replace('$','')
+        retval = sympy_latex(self.expression).replace('$','')
         return r'$f(%s)='%(sympy_latex(sympy_symbol(self.fit_axis))) + retval + r'$'
     @function_string.setter
     def function_string(self):
