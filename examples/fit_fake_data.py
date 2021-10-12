@@ -11,8 +11,6 @@ import sympy as sp
 # are actually needed and which are not
 # -- I have already stripped out some
 from lmfit import Parameters, minimize
-#from lmfit.printfuncs import report_fit
-#from lmfitdata import lmfitdata
 from matplotlib.pyplot import figure, subplot, show, xlim, ylim, plot, gca
 from numpy import * # I think it wasn't importing from numpy b/c it seems we're inside sphinx
 # }}}
@@ -21,7 +19,6 @@ fl=figlist_var()
 tau = nddata(r_[0:2:100j], 'tau')
 fake_data = 102*(1-2*exp(-tau*6.0))
 fake_data.add_noise(5.0)
-empty_data = nddata(r_[0:2:100j],'tau')
 #}}}
 #{{{ fitting data
 f = fitdata(fake_data)
@@ -40,11 +37,9 @@ T1 = 1./f.output('R_1')
 # }}}
 #}}}
 #{{{lmfitdata method
-thisfit = lmfitdata(empty_data)
 newfit = lmfitdata(fake_data)
 M0,Mi,R1,vd = sp.symbols("M_0 M_inf R_1 tau")
 newfit.functional_form = (Mi + (M0-Mi)*sp.exp(-(vd*R1)))
-thisfit.functional_form = newfit.functional_form
 newfit.set_guess(
         M_inf=dict(value=500, max = 501, min=0), 
         M_0 = dict(value=-500, max=0, min=-501),
@@ -52,7 +47,7 @@ newfit.set_guess(
 # the following is failing for me
 newfit.settoguess()
 newguess = newfit.eval(100)
-fit = thisfit.fit(newfit,fake_data)
+fit = newfit.fit(newfit,fake_data)
 #}}}
 with figlist_var() as fl: 
     fl.next('fit with guess')
@@ -63,7 +58,7 @@ with figlist_var() as fl:
     thatline = fl.plot(fit,':',linewidth = 1.2,label='lmfitdata fit')
     # {{{ just put the text
     ax = gca()
-    text(0.6, 0.5, "LMFIT RESULT: %s"%thisfit.latex(),
+    text(0.6, 0.5, "LMFIT RESULT: %s"%newfit.latex(),
             ha='center',va='center',
             color=thatline[0].get_color(),
             transform = ax.transAxes)
