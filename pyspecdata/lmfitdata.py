@@ -3,10 +3,10 @@ import sympy as sp
 from lmfit import Parameters, minimize
 from lmfit.printfuncs import report_fit
 import numpy as np
-from .core import nddata, normal_attrs, issympy
+from .core import nddata, normal_attrs, issympy, ndshape, sympy_latex, sympy_symbol, dp
 from .general_functions import strm
-import logging
-from pyspecdata import *
+import logging, warnings
+
 class lmfitdata (nddata):
     r'''Inherits from an nddata and enables curve fitting through use of a sympy expression.
 
@@ -64,8 +64,8 @@ class lmfitdata (nddata):
         if self.expression is None:
             raise ValueError("what expression are you fitting with??")
         all_symbols = self.expression.atoms(sp.Symbol)
-        axis_names = set([sp.Symbol(j,real=True) for j in self.dimlabels])
-        variable_symbols = (axis_names & all_symbols)
+        axis_names = set([sp.Symbol(j, real=True) for j in self.dimlabels])
+        variable_symbols = axis_names & all_symbols
         self.parameter_symbols = all_symbols - variable_symbols
         this_axis = variable_symbols
         variable_symbols = tuple(variable_symbols)
@@ -266,21 +266,21 @@ class lmfitdata (nddata):
         # and then copy over what you can
         x = self.getaxis(self.fit_axis)
         if np.iscomplex(self.data.flatten()[0]):
-            logger.debug(strm('Warning, taking only real part of fitting data!'))
+            logging.debug(strm('Warning, taking only real part of fitting data!'))
         y = np.real(self.data)
         sigma = self.get_error()
         if sigma is None:
             print('{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n')
             warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
             sigma = np.ones(np.shape(y))
-        out = minimize(self.residual, self.pars, kws={"data":self.data})
-        fit = self.C
-        fit.data = self.residual(out.params)
-        report_fit(out,show_correl=True)
-        self.fit_coeff =[]
-        for name, param in out.params.items():
-            self.fit_coeff.append(param.value)
-        return fit
+        out = minimize(self.residual, self.pars,
+                kws={"data":self.data})
+        # can you capture the following as a string? maybe return it?
+        report_fit(out, show_correl=True)
+        # {{{ capture the result for ouput, etc
+        self.fit_coeff = [out.params[j] for j in self.symbol_list]
+        # }}}
+        return
 
     def run_lambda(self,pars):
         """actually run the lambda function we separate this in case we want
@@ -378,21 +378,21 @@ class lmfitdata (nddata):
         #     better.
         for j in range(0,len(self.symbol_list)):
             symbol = sympy_latex(self.symbolic_vars[j]).replace('$','')
-            logger.debug(strm('DEBUG: replacing symbol "',symbol,'"'))
+            logging.debug(strm('DEBUG: replacing symbol "',symbol,'"'))
             location = retval.find(symbol)
             while location != -1:
                 if retval[location-1] == '-':
                     newstring = retval[:location-1]+dp(-1*p[j])+retval[location+len(symbol):] # replace the symbol in the written function with the appropriate number
                 else:
                     newstring = retval[:location]+dp(p[j])+retval[location+len(symbol):] # replace the symbol in the written function with the appropriate number
-                logger.debug(strm(r"trying to replace",
+                logging.debug(strm(r"trying to replace",
                     retval[location:location+len(symbol)]))
                 retval = newstring
                 locations += [location]
                 allsymb += [symbol]
                 location = retval.find(symbol)
         # }}}
-        logger.debug(strm(r"trying to generate",self.function_string,
+        logging.debug(strm(r"trying to generate",self.function_string,
             '\n',retval,'\n',[allsymb[x] for x in np.argsort(locations)],
             '\n',printfargs))
         return retval

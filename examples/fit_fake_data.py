@@ -34,8 +34,8 @@ with figlist_var() as fl:
     f.set_guess({M0:-500, Mi:500, R1:2})
     f.settoguess()
     fl.next('fit with guess')
-    fl.plot(fake_data,'o',label='fake data')
-    fl.plot(f.eval(100), label='fitdata guess')
+    fl.plot(fake_data,'o',alpha=0.5,label='fake data')
+    fl.plot(f.eval(100), alpha=0.5, label='fitdata guess')
     f.fit()
     print("output:",f.output())
     print("latex:",f.latex())
@@ -51,11 +51,11 @@ with figlist_var() as fl:
             M_inf=dict(value=500, max = 501, min=0), 
             R_1=dict(value=5, max = 6, min = 1))
     newfit.settoguess()
-    fl.plot(newfit.eval(100), label='lmfitdata guess')
+    fl.plot(newfit.eval(100), alpha=0.5, label='lmfitdata guess')
     newfit.fit()
     #}}}
-    thisline = fl.plot(f.eval(100),label='fit data fit')
-    thatline = fl.plot(newfit.eval(100),':',linewidth = 1.2,label='lmfitdata fit')
+    thisline = fl.plot(f.eval(100), alpha=0.5, label='fit data fit')
+    thatline = fl.plot(newfit.eval(100),':', alpha=0.5, linewidth = 3,label='lmfitdata fit')
     # {{{ just put the text
     ax = gca()
     text(0.6, 0.5, "LMFIT RESULT: %s"%newfit.latex(),

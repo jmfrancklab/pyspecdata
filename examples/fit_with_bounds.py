@@ -21,7 +21,7 @@ fl=figlist_var()
 empty_data = nddata(r_[0:250:1500j],'x')
 # }}}
 # {{{making sympy expression
-A, shift, period, decay, x = sp.symbols("A shift period decay x",real=True)
+A, shift, period, decay, x = sp.symbols("A shift period decay x", real=True)
 thisfit = lmfitdata(empty_data)
 thisfit.functional_form = (A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2)))
 logger.info(strm("Functional Form:", thisfit.functional_form))
