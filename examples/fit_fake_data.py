@@ -28,13 +28,13 @@ functional_form = Mi + (M0-Mi)*sp.exp(-vd*R1)
 with figlist_var() as fl: 
     #{{{ fitting data
     f = fitdata(fake_data)
-    fl.plot(fake_data,'o',label='fake data')
     f.functional_form = functional_form
     logger.info(strm("Functional Form", f.functional_form))
     logger.info(strm("Functional Form", f.functional_form))
     f.set_guess({M0:-500, Mi:500, R1:2})
     f.settoguess()
     fl.next('fit with guess')
+    fl.plot(fake_data,'o',label='fake data')
     fl.plot(f.eval(100), label='fitdata guess')
     f.fit()
     print("output:",f.output())
@@ -56,10 +56,10 @@ with figlist_var() as fl:
     # without arguments, and it just runs minimize
     # it should absolutely not take fake_data or the class as arguments, since it
     # should already  know about it from the line `newfit=lmfitdata(fake_data)`
-    fit = newfit.fit(newfit,fake_data)
+    newfit.fit()
     #}}}
     thisline = fl.plot(f.eval(100),label='fit data fit')
-    thatline = fl.plot(fit,':',linewidth = 1.2,label='lmfitdata fit')
+    thatline = fl.plot(newfit.eval(100),':',linewidth = 1.2,label='lmfitdata fit')
     # {{{ just put the text
     ax = gca()
     text(0.6, 0.5, "LMFIT RESULT: %s"%newfit.latex(),

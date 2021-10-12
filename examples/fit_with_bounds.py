@@ -21,7 +21,7 @@ fl=figlist_var()
 empty_data = nddata(r_[0:250:1500j],'x')
 # }}}
 # {{{making sympy expression
-A, shift, period, decay, x = sp.symbols("A shift period decay x")
+A, shift, period, decay, x = sp.symbols("A shift period decay x",real=True)
 thisfit = lmfitdata(empty_data)
 thisfit.functional_form = (A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2)))
 logger.info(strm("Functional Form:", thisfit.functional_form))
@@ -52,10 +52,10 @@ guess = newfit.eval(100)
 # }}}
 # {{{ run the fit and generate nddata
 # again, now that this is a class, why is this not handled by the fit method?
-fit = thisfit.fit(newfit, mydata)
+newfit.fit()
 #{{{plot the data with fits and guesses
 plot(mydata, "ro", label="data")
-plot(fit, "b", alpha=0.5, label="fit")
+plot(newfit.eval(100), "b", alpha=0.5, label="fit")
 plot(guess, "g--", label="guess")
 # }}}
 plt.legend()

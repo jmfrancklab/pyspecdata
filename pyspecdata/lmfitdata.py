@@ -252,9 +252,6 @@ class lmfitdata (nddata):
         data:    nddata
                     data being fit
         '''
-        # if you compare this against fit from lmfitdata, it's actually
-        # doing a bit more than what's done here
-        #
         # we can ignore set_what, since I think there's a mechanism in
         # lmfit to take care of that (it's for fixing parameters)
         # but the rest of what it's doing is to pull apart the
@@ -267,9 +264,18 @@ class lmfitdata (nddata):
         #
         # But you  should read through and see what the previous fit method is doing
         # and then copy over what you can
-        out = minimize(self.residual, newfit.pars, kws={"data":actualdata.data})
+        x = self.getaxis(self.fit_axis)
+        if np.iscomplex(self.data.flatten()[0]):
+            logger.debug(strm('Warning, taking only real part of fitting data!'))
+        y = np.real(self.data)
+        sigma = self.get_error()
+        if sigma is None:
+            print('{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n')
+            warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
+            sigma = np.ones(np.shape(y))
+        out = minimize(self.residual, self.pars, kws={"data":self.data})
         fit = self.C
-        fit.data = newfit.residual(out.params)
+        fit.data = self.residual(out.params)
         report_fit(out,show_correl=True)
         self.fit_coeff =[]
         for name, param in out.params.items():
