@@ -2,10 +2,11 @@ from pylab import *
 from pyspecdata import *
 
 # make peaks on a frequency axis
-x = nddata(r_[0:8:49152j], "t2")
+x = nddata(r_[0:6.8157439:32768j], "t2")
 x.set_units("t2", "s")
 
 # generate time-domain signal
+SW_H = 1./(x.getaxis('t2')[1] - x.getaxis('t2')[0])
 signal = 0 * x  # create an array of zeros that's the right shape
 SFO1 = 400.130438262389
 TMS_shift = 12.5
@@ -24,7 +25,7 @@ signal.ft("t2", shift=True)
 
 # Parameters needed by to_ppm to work
 # pulled from BV_polymer_apr27_2021
-signal.set_prop('acq',{'SFO1':400.130438262389,'SW_h':4807.69230769231,'O1':438.262389})
+signal.set_prop('acq',{'SFO1':SFO1,'SW_h':SW_H,'O1':438.262389})
 signal.set_prop('proc',{'OFFSET':12.50096})
 
 # Copy of signal to demonstrate truncation
