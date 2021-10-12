@@ -1,6 +1,7 @@
 # just put this in the package
 import sympy as sp
-from lmfit import Parameters, minimize
+from lmfit import Parameters, minimize,Minimizer
+import lmfit
 from lmfit.printfuncs import report_fit
 import numpy as np
 from .core import nddata, normal_attrs, issympy, ndshape, sympy_latex, sympy_symbol, dp
@@ -252,7 +253,10 @@ class lmfitdata(nddata):
         return newdata
 
     def thatresidual(self, p, x, y, sigma):
-        fit = self.fitfunc(p, x)
+        fit = self.run_lambda(p)
+        #self.fitfunc(p, x)
+        sigma = self.get_error()
+        print("SIGMA",sigma)
         normalization = np.sum(1.0 / sigma)
         sigma[sigma == 0.0] = 1
         try:
@@ -302,16 +306,13 @@ class lmfitdata(nddata):
             logging.debug(strm("Warning, taking only real part of fitting data!"))
         y = np.real(self.data)
         sigma = self.get_error()
-        if sigma is None:
-            print(
-                "{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n"
-            )
-            warnings.warn(
-                "You have no error associated with your plot, and I want to flag this for now",
-                Warning,
-            )
-            sigma = np.ones(np.shape(y))
-        out = minimize(self.residual, self.pars, kws={"data": self.data})
+        p_ini = self.guess()
+        fitter = Minimizer(self.residual, self.pars, fcn_kws={"data":self.data},is_weighted=True)
+        fitter.minimize(method='emcee')
+        quit()
+        out = minimize(self.residual, self.pars, kws={"data": self.data},is_weighted=True)
+        self.fit_coeff = out
+        self.covariance = out.covar
         # can you capture the following as a string? maybe return it?
         report_fit(out, show_correl=True)
         # {{{ capture the result for ouput, etc
@@ -330,7 +331,21 @@ class lmfitdata(nddata):
 
     def residual(self, pars, data=None):
         "calculate the residual OR if data is None, return fake data"
+        sigma = self.get_error()
+        if sigma is None:
+            print(
+                "{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n"
+            )
+            warnings.warn(
+                "You have no error associated with your plot, and I want to flag this for now",
+                Warning,
+            )
+            sigma = np.ones(np.shape(y))
+        print("SIGMA",sigma)
         model = self.run_lambda(pars)
+        normalization = np.sum(1.0/sigma)
+        sigma[sigma == 0.0] =1
+        model = (model-y)/sigma
         if data is None:
             return model
         return model - data
