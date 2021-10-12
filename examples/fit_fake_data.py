@@ -52,10 +52,6 @@ with figlist_var() as fl:
             R_1=dict(value=5, max = 6, min = 1))
     newfit.settoguess()
     fl.plot(newfit.eval(100), label='lmfitdata guess')
-    # the following isn't equivalent to fitdata -- fit should be called
-    # without arguments, and it just runs minimize
-    # it should absolutely not take fake_data or the class as arguments, since it
-    # should already  know about it from the line `newfit=lmfitdata(fake_data)`
     newfit.fit()
     #}}}
     thisline = fl.plot(f.eval(100),label='fit data fit')
