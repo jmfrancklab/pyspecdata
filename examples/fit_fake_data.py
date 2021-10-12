@@ -20,38 +20,44 @@ tau = nddata(r_[0:2:100j], 'tau')
 fake_data = 102*(1-2*exp(-tau*6.0))
 fake_data.add_noise(5.0)
 #}}}
-#{{{ fitting data
-f = fitdata(fake_data)
+# {{{ define the expression of the functional form once, and then use it
+#     for both types of classes
 M0,Mi,R1,vd = sp.symbols("M_0 M_inf R_1 tau",real=True)
-f.functional_form = Mi + (M0-Mi)*sp.exp(-vd*R1)
-logger.info(strm("Functional Form", f.functional_form))
-logger.info(strm("Functional Form", f.functional_form))
-f.set_guess({M0:-500, Mi:500, R1:2})
-f.settoguess()
-fitdataguess = f.eval(100)
-f.fit()
-print("output:",f.output())
-print("latex:",f.latex())
-#}}}
-T1 = 1./f.output('R_1')
+functional_form = Mi + (M0-Mi)*sp.exp(-vd*R1)
 # }}}
-#}}}
-#{{{lmfitdata method
-newfit = lmfitdata(fake_data)
-newfit.functional_form = (Mi + (M0-Mi)*sp.exp(-(vd*R1)))
-newfit.set_guess(
-        M_inf=dict(value=500, max = 501, min=0), 
-        M_0 = dict(value=-500, max=0, min=-501),
-        R_1=dict(value=5, max = 6, min = 1))
-newfit.settoguess()
-newguess = newfit.eval(100)
-fit = newfit.fit(newfit,fake_data)
-#}}}
 with figlist_var() as fl: 
-    fl.next('fit with guess')
-    fl.plot(fitdataguess, label='fitdata guess')
-    fl.plot(newguess, label='lmfitdata guess')
+    #{{{ fitting data
+    f = fitdata(fake_data)
     fl.plot(fake_data,'o',label='fake data')
+    f.functional_form = functional_form
+    logger.info(strm("Functional Form", f.functional_form))
+    logger.info(strm("Functional Form", f.functional_form))
+    f.set_guess({M0:-500, Mi:500, R1:2})
+    f.settoguess()
+    fl.next('fit with guess')
+    fl.plot(f.eval(100), label='fitdata guess')
+    f.fit()
+    print("output:",f.output())
+    print("latex:",f.latex())
+    #}}}
+    T1 = 1./f.output('R_1')
+    # }}}
+    #}}}
+    #{{{lmfitdata method
+    newfit = lmfitdata(fake_data)
+    newfit.functional_form = functional_form
+    newfit.set_guess(
+            M_0 = dict(value=-500, max=0, min=-501),
+            M_inf=dict(value=500, max = 501, min=0), 
+            R_1=dict(value=5, max = 6, min = 1))
+    newfit.settoguess()
+    fl.plot(newfit.eval(100), label='lmfitdata guess')
+    # the following isn't equivalent to fitdata -- fit should be called
+    # without arguments, and it just runs minimize
+    # it should absolutely not take fake_data or the class as arguments, since it
+    # should already  know about it from the line `newfit=lmfitdata(fake_data)`
+    fit = newfit.fit(newfit,fake_data)
+    #}}}
     thisline = fl.plot(f.eval(100),label='fit data fit')
     thatline = fl.plot(fit,':',linewidth = 1.2,label='lmfitdata fit')
     # {{{ just put the text

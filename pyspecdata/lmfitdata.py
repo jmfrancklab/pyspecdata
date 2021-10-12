@@ -241,7 +241,7 @@ class lmfitdata (nddata):
                     + explain_error(e))
         return retval
 
-    def fit(self, newfit, actualdata):
+    def fit(self):
         r'''actually run the fit
         Parameters
         ==========
@@ -251,7 +251,22 @@ class lmfitdata (nddata):
                     the lmfitdata instance of the actual data
         data:    nddata
                     data being fit
-                    '''
+        '''
+        # if you compare this against fit from lmfitdata, it's actually
+        # doing a bit more than what's done here
+        #
+        # we can ignore set_what, since I think there's a mechanism in
+        # lmfit to take care of that (it's for fixing parameters)
+        # but the rest of what it's doing is to pull apart the
+        # error, axis, etc, to be fed to minimize.
+        #
+        # It also automatically converts complex data to real data, and
+        # does other things for error handling -- let's not just throw this out
+        #
+        # I think that a lot of this could be copied with little modification
+        #
+        # But you  should read through and see what the previous fit method is doing
+        # and then copy over what you can
         out = minimize(self.residual, newfit.pars, kws={"data":actualdata.data})
         fit = self.C
         fit.data = newfit.residual(out.params)
