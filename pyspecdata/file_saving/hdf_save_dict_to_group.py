@@ -1,11 +1,18 @@
 from ..general_functions import *
-from pylab import * 
+import numpy as np
 logger = logging.getLogger('pyspecdata.hdf_save_dict_to_group')
 
 def hdf_save_dict_to_group(group,data):
-    '''
+    '''save a nested dictionary object "data" as an HDF5 node
+
     Copied as-is from ACERT hfesr code
     All numpy arrays are datasets.
+
+    Parameters
+    =========
+    group: h5py group (node)
+    data: nested dictionary
+        May contain numpy arrays
     '''
     for k,v in data.items():
         if issubclass(type(v),np.ndarray):
