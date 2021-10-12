@@ -5242,15 +5242,15 @@ class nddata (object):
         """
         if self.get_units('t2') == 'ppm': return
         offset = self.get_prop('proc')['OFFSET']
-        SR = self.get_prop('proc')['SR']
+        SF = self.get_prop('proc')['SF']
         sfo1 = self.get_prop('acq')['SFO1']
-        tms_hz = (SR-sfo1)*1e6
+        tms_hz = (SF-sfo1)*1e6
         if not self.get_ft_prop('t2'):
             self.ft('t2', shift=True) # this fourier transforms along t2, overwriting the data that was in self
         self.setaxis('t2', lambda x:
                 x-tms_hz).set_units('t2','ppm')
         self.setaxis('t2', lambda x:
-                x/SR).set_units('t2','ppm')
+                x/SF).set_units('t2','ppm')
         self.set_prop('x_inverted',True)
         return self
     #}}}
