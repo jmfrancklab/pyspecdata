@@ -38,13 +38,11 @@ T1 = 1./f.output('R_1')
 #}}}
 #{{{lmfitdata method
 newfit = lmfitdata(fake_data)
-M0,Mi,R1,vd = sp.symbols("M_0 M_inf R_1 tau")
 newfit.functional_form = (Mi + (M0-Mi)*sp.exp(-(vd*R1)))
 newfit.set_guess(
         M_inf=dict(value=500, max = 501, min=0), 
         M_0 = dict(value=-500, max=0, min=-501),
         R_1=dict(value=5, max = 6, min = 1))
-# the following is failing for me
 newfit.settoguess()
 newguess = newfit.eval(100)
 fit = newfit.fit(newfit,fake_data)

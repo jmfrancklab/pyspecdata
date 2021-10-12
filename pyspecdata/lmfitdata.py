@@ -64,7 +64,7 @@ class lmfitdata (nddata):
         if self.expression is None:
             raise ValueError("what expression are you fitting with??")
         all_symbols = self.expression.atoms(sp.Symbol)
-        axis_names = set([sp.Symbol(j) for j in self.dimlabels])
+        axis_names = set([sp.Symbol(j,real=True) for j in self.dimlabels])
         variable_symbols = (axis_names & all_symbols)
         self.parameter_symbols = all_symbols - variable_symbols
         this_axis = variable_symbols
