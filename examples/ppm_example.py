@@ -12,7 +12,7 @@ signal = 0 * x  # create an array of zeros that's the right shape
 SFO1 = 400.1307334
 BF1 = 400.13
 SF = 400.1301846
-TMS_shift = 0.
+TMS_shift = (SF-SFO1)*1e6
 for A, nu, R in [
     (0.1, TMS_shift, 0.04),
     (1, 25, 0.08),
