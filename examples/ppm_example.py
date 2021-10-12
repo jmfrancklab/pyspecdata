@@ -11,6 +11,7 @@ SW_h = 1./(x.getaxis('t2')[1] - x.getaxis('t2')[0])
 signal = 0 * x  # create an array of zeros that's the right shape
 SFO1 = 400.1307334
 BF1 = 400.13
+SF = 400.1301846
 TMS_shift = 0.
 for A, nu, R in [
     (0.1, TMS_shift, 0.04),
@@ -25,9 +26,8 @@ for A, nu, R in [
 signal.set_units("t2", "s")
 signal.ft("t2", shift=True)
 
-SF = SFO1+TMS_shift*1e-6
 OFFSET = (SFO1/SF-1) * 1.0e6 + 0.5 * SW_h * SFO1/SF
-signal.set_prop('acq',{'SFO1':SFO1,'SW_h':SW_h,'O1':438.262389})
+signal.set_prop('acq',{'SFO1':SFO1,'SW_h':SW_h})
 signal.set_prop('proc',{'SF':SF,
     'OFFSET':OFFSET})
 
