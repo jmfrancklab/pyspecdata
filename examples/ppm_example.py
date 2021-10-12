@@ -33,7 +33,7 @@ signal.set_prop('proc',{'SF':SF,
     'OFFSET':OFFSET})
 
 # Copy of signal to demonstrate truncation
-signal_truncated = signal.C
+signal_sliced = signal.C
 
 with figlist_var() as fl:
     fl.next("full spectrum, Hz")
@@ -41,9 +41,9 @@ with figlist_var() as fl:
     signal.to_ppm()
     fl.next("full spectrum, ppm")
     fl.plot(signal)
-    signal_truncated = signal_truncated["t2":(0.2e3, 1.4e3)]
-    fl.next("truncated spectrum, Hz")
-    fl.plot(signal_truncated)
-    signal_truncated.to_ppm()
-    fl.next("truncated spectrum, ppm")
-    fl.plot(signal_truncated)
+    signal_sliced = signal_sliced["t2":(0.2e3, 1.4e3)]
+    fl.next("sliced spectrum, Hz")
+    fl.plot(signal_sliced)
+    signal_sliced.to_ppm()
+    fl.next("sliced spectrum, ppm")
+    fl.plot(signal_sliced)
