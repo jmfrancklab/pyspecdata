@@ -1,7 +1,6 @@
 # just put this in the package
 import sympy as sp
-from lmfit import Parameters, minimize,Minimizer
-import lmfit
+from lmfit import Parameters, minimize
 from lmfit.printfuncs import report_fit
 import numpy as np
 from .core import nddata, normal_attrs, issympy, ndshape, sympy_latex, sympy_symbol, dp
@@ -252,32 +251,6 @@ class lmfitdata(nddata):
         newdata.data[:] = self.fitfunc(p, taxis).flatten()
         return newdata
 
-    def thatresidual(self, p, x, y, sigma):
-        fit = self.run_lambda(p)
-        #self.fitfunc(p, x)
-        sigma = self.get_error()
-        print("SIGMA",sigma)
-        normalization = np.sum(1.0 / sigma)
-        sigma[sigma == 0.0] = 1
-        try:
-            # as noted here: https://stackoverflow.com/questions/6949370/scipy-leastsq-dfun-usage
-            # this needs to be fit - y, not vice versa
-            retval = (fit - y) / sigma  # * normalization
-        except ValueError as e:
-            raise ValueError(
-                strm(
-                    "your error (",
-                    np.shape(sigma),
-                    ") probably doesn't match y (",
-                    np.shape(y),
-                    ") and fit (",
-                    np.shape(fit),
-                    ")",
-                )
-                + explain_error(e)
-            )
-        return retval
-
     def fit(self):
         r"""actually run the fit
         Parameters
@@ -306,13 +279,18 @@ class lmfitdata(nddata):
             logging.debug(strm("Warning, taking only real part of fitting data!"))
         y = np.real(self.data)
         sigma = self.get_error()
-        p_ini = self.guess()
-        fitter = Minimizer(self.residual, self.pars, fcn_kws={"data":self.data},is_weighted=True)
-        fitter.minimize(method='emcee')
-        quit()
-        out = minimize(self.residual, self.pars, kws={"data": self.data},is_weighted=True)
-        self.fit_coeff = out
-        self.covariance = out.covar
+        if sigma is None:
+            print(
+                "{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n"
+            )
+            warnings.warn(
+                "You have no error associated with your plot, and I want to flag this for now",
+                Warning,
+            )
+            sigma = np.ones(np.shape(y))
+        min_args = (self.residual, self.pars)
+        min_kwargs={'args':(x,y,sigma)}
+        out = minimize(*min_args,**min_kwargs, kws={"data": self.data})
         # can you capture the following as a string? maybe return it?
         report_fit(out, show_correl=True)
         # {{{ capture the result for ouput, etc
@@ -329,26 +307,21 @@ class lmfitdata(nddata):
             *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
         )
 
-    def residual(self, pars, data=None):
+    def residual(self, pars, x, y, sigma, data=None):
         "calculate the residual OR if data is None, return fake data"
-        sigma = self.get_error()
-        if sigma is None:
-            print(
-                "{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n"
-            )
-            warnings.warn(
-                "You have no error associated with your plot, and I want to flag this for now",
-                Warning,
-            )
-            sigma = np.ones(np.shape(y))
-        print("SIGMA",sigma)
-        model = self.run_lambda(pars)
+        fit = self.run_lambda(pars)
         normalization = np.sum(1.0/sigma)
-        sigma[sigma == 0.0] =1
-        model = (model-y)/sigma
+        sigma[sigma == 0.0] = 1
+        try:
+            retval = (fit - y)/sigma
+        except ValueError as e:
+            raise ValueError(strm('your error (',np.shape(sigma),
+                    ') probably doesn\'t match y (',
+                    np.shape(y),') and fit (',np.shape(fit),')')
+                    + explain_error(e))
         if data is None:
-            return model
-        return model - data
+            return fit
+        return retval
 
     def copy(self):
         namelist = []
