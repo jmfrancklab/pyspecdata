@@ -304,12 +304,13 @@ def rclone_search(fname,dirname):
                             for j in os.path.split(k)
                             if len(j) > 0]
                     logging.debug(strm("foundpath is",foundpath))
-                retval += '\nYou should be able to retrieve this file with:\n'+strm(
+                cmd = strm(
                         "rclone copy -v --include '%s' %s%s %s"%(foundpath[-1],
-                    thisremote,
-                    '/'.join(foundpath[:-1]),
-                    # dirname below needs to be replaced with path relative to current directory
-                    os.path.normpath(os.path.join(dirname)).replace('\\','\\\\')))
+                            thisremote,
+                            '/'.join(foundpath[:-1]),
+                            # dirname below needs to be replaced with path relative to current directory
+                            os.path.normpath(os.path.join(dirname)).replace('\\','\\\\')))
+                retval += '\nYou should be able to retrieve this file with:\n'+cmd
     return retval
 def log_fname(logname,fname,dirname,err=False):
     r"""logs the file name either used or missing.
@@ -332,7 +333,9 @@ def log_fname(logname,fname,dirname,err=False):
     rclone copy -v --include '200110_pulse_2.h5' g_syr:exp_data/test_equip C:\\Users\\johnf\\exp_data\\test_equip``
     """
     if err:
+        logger.debug(strm("about to call rclone search on",fname,dirname))
         rclone_suggest = rclone_search(fname,dirname)# eventually lump into the error message
+        logger.debug("rclone search done")
     with open(logname+'.log','a+',encoding='utf-8') as fp:
         already_listed = False
         fp.seek(0,0)

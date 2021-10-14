@@ -27,9 +27,12 @@ def xepr(filename, dimname='', verbose=False):
                 " .PAR\n"
                 "This one is called",repr(filename)))
     # {{{ check if the extension is upper or lowercase
+    orig_spc = filename_spc
     if not os.path.exists(filename_spc):
         filename_spc = filename_spc[:-4] + filename_spc[-4:].lower()
         filename_par = filename_par[:-4] + filename_par[-4:].lower()
+    if not os.path.exists(filename_spc):
+        filename_spc = orig_spc
     # }}}
     # }}}
     # {{{ load the parameters
@@ -46,6 +49,14 @@ def xepr(filename, dimname='', verbose=False):
         
     # }}}
     # {{{ load the data
+    if not os.path.exists(filename_spc):
+        # because the spc isn't part of the original search, we
+        # need to log the fact that it's missing manually
+        err = log_fname('missing_data_files',
+                os.path.split(filename_spc)[-1],
+                os.path.split(filename_spc)[0],
+                err=True)
+        raise IOError("Can't find file %s\n%s"%(filename_spc,err))
     with open(filename_spc,'rb') as fp:
         if all([j == 'REAL' for j in ikkf]):
             data = np.frombuffer(fp.read(),'>f8')
@@ -159,18 +170,6 @@ def xepr(filename, dimname='', verbose=False):
     for k,val in dim_units.items():
         data.set_units(k,val)
     # }}}
-    # {{{ use the parameters to rescale the data
-    logger.debug("There is a parameter called DModGain as well as"
-            " Gain -- not sure what that is")
-    rg = v.pop('Gain')
-    if np.isscalar(rg) or rg[1] != 'dB':
-        raise ValueError(strm("The gain from the file is not given in"
-                " dB -- not sure what's up.  I get",rg,"for gain"))
-    #data /= 10**(rg[0]/10.0)
-    #data /= modulation
-    # here, for winepr, I divided by the number of scans, but I'm
-    # fairly sure I don't wan to do that
-    # }}}
     data.other_info.update(v)
     data.reorder(b0_texstr)
     if 'Microwave Power' in data.dimlabels:
@@ -204,6 +203,12 @@ def winepr(filename, dimname=''):
     # }}}
     # }}}
     # {{{ load the data
+    if not os.path.exists(filename_spc):
+        err = log_fname('missing_data_files',
+                os.path.split(filename_spc)[-1],
+                os.path.split(filename_spc)[0],
+                err=True)
+        raise IOError("Can't find file %s\n%s"%(filename_spc,err))
     with open(filename_spc,'rb') as fp:
         data = fp.read()
     data = np.fromstring(data,'<f4')

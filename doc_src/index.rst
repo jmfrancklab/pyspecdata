@@ -15,7 +15,10 @@ Please note this package is heavily utilized by three other packages that our la
 *   `Convenient SpinCore NMR Extension <https://github.com/jmfrancklab/spincore_apps/>`_.
 
 
-:ref:`See pySpecData examples here <sphx_glr_auto_examples>`.
+:ref:`See pySpecData examples here <sphx_glr_auto_examples>`,
+and for a simple example applied to 1D data, see
+:ref:`here <sphx_glr_auto_examples_basic_example.py>`.
+
 
 Some more explanation
 =====================

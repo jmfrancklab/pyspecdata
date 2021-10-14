@@ -3,18 +3,11 @@ from numpy import r_
 import numpy as np
 from .ft_shift import _find_index,thinkaboutit_message
 
-def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
+def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,unitary=False,**kwargs):
     r"""This performs an inverse Fourier transform along the axes identified by the string or list of strings `axes`.
 
     It adjusts normalization and units so that the result conforms to
-            :math:`s(t)=t_{dw} \int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df`
-    Where :math:`t_{dw}=\frac{1}{\Delta f}`, is the dwell time (with :math:`\Delta f` the spectral width).
-
-    *Why do we do this?* Note that while the analytical integral this corresponds to is normalized, performing
-    :meth:`~pyspecdata.nddata.ft` followed by :meth:`~pyspecdata.nddata.ift` on a discrete sequence is NOT completely invertible
-    (due to integration of the implied comb function??),
-    and would require division by a factor of :math:`\Delta f` (the spectral width) in order
-    to retrieve the original function
+            :math:`s(t)=\int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df`
 
     **pre-IFT**, we use the axis to cyclically permute :math:`f=0` to the first index
 
@@ -40,8 +33,12 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
         ..note ::
             In the code, this is controlled by `p2_post` (the integral
             :math:`\Delta t` and `p2_post_discrepancy` -- the non-integral.
+    unitary : boolean (False)
+        return a result that is vector-unitary
     """
     if verbose: print("check 1",self.data.dtype)
+    if self.data.dtype == np.float64:
+        self.data = np.complex128(self.data) # everything is done assuming complex data
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
     if (isinstance(axes, str)):
@@ -171,6 +168,7 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
             newdata[thisaxis] = padded_length
             targetslice = [slice(None,None,None)] * len(newdata)
             targetslice[thisaxis] = slice(None,self.data.shape[thisaxis])
+            targetslice = tuple(targetslice)
             newdata = np.zeros(newdata,dtype = self.data.dtype)
             newdata[targetslice] = self.data
             self.data = newdata
@@ -202,8 +200,11 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
             #   phase-shift above
         #}}}
         #{{{ adjust the normalization appropriately
-        self.data *= padded_length * du # here, the algorithm divides by
-        #       padded_length, so for integration, we need to not do that
+        if unitary:
+            self.data *= np.sqrt(padded_length)
+        else:
+            self.data *= padded_length * du # here, the algorithm divides by
+            #       padded_length, so for integration, we need to not do that
         #}}}
         #{{{ finally, if "p2_pre" for the pre-shift didn't correspond exactly to
         #       zero, then the pre-ift data was shifted, and I must reflect

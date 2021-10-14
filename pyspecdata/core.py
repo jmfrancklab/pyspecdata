@@ -1863,17 +1863,17 @@ class figlist(object):
         if hasattr(self,'current'): # if not, this is the first plot
             if not hasattr(self,'pushlist'):
                 self.pushlist = []
-            if not hasattr(self,'pushbasenamelist'):
-                self.pushbasenamelist = []
-            self.pushlist.append(self.current)
-            self.pushbasenamelist.append(self.basename)
+            logger.debug(strm("about to push marker, basename'",self.basename,"' and name '",self.current,"'"))
+            self.pushlist.append(
+                    (self.basename,self.current))
         return
     def pop_marker(self):
         """use the plot on the top of the "stack" (see push_marker) as the current plot"""
         if hasattr(self,'pushlist') and len(self.pushlist) > 0: # otherwise, we called push with no current plot
-            if hasattr(self,'pushbasenamelist'):
-                self.basename = self.pushbasenamelist.pop()
-            self.next(self.pushlist.pop())
+            bn,fn = self.pushlist.pop()
+            self.basename = None # because basename is already in "current"
+            self.next(fn)
+            self.basename = bn
         return
     def get_num_figures(self):
         cleanlist = [x for x in self.figurelist if isinstance(x, str)]
@@ -1926,7 +1926,7 @@ class figlist(object):
         # }}}
         if name.find('/') > 0:
             raise ValueError("don't include slashes in the figure name, that's just too confusing")
-        logger.debug(strm('called with',name))
+        logger.debug(strm('with basename appended, this is',name))
         if name in self.figurelist:# figure already exists
             if hasattr(self,'mlab'):
                 # with this commit, I removed the kwargs and bgcolor, not sure why
@@ -2070,7 +2070,7 @@ class figlist(object):
                         if isinstance(testunits, tuple) and testunits[1] is None:
                             pass
                         else:
-                            raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(self.units[self.current],theseunits))
+                            raise ValueError("for figure '%s' the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(self.current,self.units[self.current],theseunits))
                 else:
                     self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]))
         logger.debug(strm("-"*30))
@@ -2394,6 +2394,16 @@ class figlist(object):
             else:
                 self.show()
             return
+    def __repr__(self):
+        result = ""
+        counter=0
+        for j in self.figurelist:
+            if type(j) == dict:
+                result = result+str(j)+"\n"
+            else:
+                counter += 1
+                result = result+"%d: "%counter+str(j)+"\n"
+        return result
 def text_on_plot(x,y,thistext,coord = 'axes',**kwargs):
     ax = plt.gca()
     if coord == 'axes':
@@ -4154,15 +4164,29 @@ class nddata (object):
         return self
     #}}}
     #{{{ poly. fit
+    def eval_poly(self,c,axis):
+        """Take `c` parameter from :func:`~pyspecdata.nddata.polyfit`, and apply it along axis `axis`
+
+        Parameters
+        ----------
+        c: ndarray
+            polynomial coefficients in ascending polynomial order
+
+        """
+        thisaxis = self.fromaxis(axis)
+        result = 0
+        for j in range(len(c)):
+            result += c[j] * thisaxis**j
+        return result
     def polyfit(self,axis,order=1,force_y_intercept = None):
         '''polynomial fitting routine -- return the coefficients and the fit
-        ..note:
-            later, should probably branch this off as a new type of fit class
+        .. note:
+            previously, this returned the fit data as a second argument called `formult`-- you
+            very infrequently want it to be in the same size as the data, though;
+            to duplicate the old behavior, just add the line ``formult = mydata.eval_poly(c,'axisname')``.
 
-        ..warning:
-            for some reason, this version doesn't use orthogonal polynomials,
-            as the numpy routine does -- we had diagnosed and determined that
-            that creates noticeably different results, so fix that here.
+        .. seealso::
+            :func:`~pyspecdata.nddata.eval_poly`
 
         Parameters
         ----------
@@ -4179,8 +4203,6 @@ class nddata (object):
         -------
         c: np.ndarray
             a standard numpy np.array containing the coefficients (in ascending polynomial order)
-        formult: nddata
-            an nddata containing the result of the fit
         '''
         x = self.getaxis(axis).copy().reshape(-1,1)
         #{{{ make a copy of self with the relevant dimension second to last (i.e. rows)
@@ -4198,23 +4220,16 @@ class nddata (object):
         startingpower = 0
         if force_y_intercept is not None:
             startingpower = 1
-        L =  np.concatenate([x**j for j in range(startingpower,order+1)],axis=1) # note the totally AWESOME way in which this is done!
-        #print 'fitting to matrix',L
-        if force_y_intercept is not None:
+            L = [x**j for j in range(startingpower,order+1)]
+            L =  np.concatenate(L, axis=1) # note the totally AWESOME way in which this is done!
             y -= force_y_intercept
-        c = np.dot(np.linalg.pinv(L),y)
-        fity = np.dot(L,c)
-        if force_y_intercept is not None:
-            #print "\n\nDEBUG: forcing from",fity[0],"to"
-            fity += force_y_intercept
-            #print "DEBUG: ",fity[0]
-            c = c_[force_y_intercept,c]
+            c = np.dot(np.linalg.pinv(L),y)
+            c = r_[force_y_intercept,c.ravel()]
+        else:
+            c = np.polyfit(x.ravel(), y, deg=order) # better -- uses Hermite polys
+            c = c[::-1] # give in ascending order, as is sensible
         #}}}
-        #{{{ rather than have to match up everything, just drop the fit data into formult, which should be the same size, shape, etc
-        formult.data = fity
-        formult.set_error(None)
-        #}}}
-        return c,formult
+        return c
     #}}}
     #{{{ max and mean
     def _wrapaxisfuncs(self,func):
@@ -4253,14 +4268,16 @@ class nddata (object):
                 print('error, dimlabels is: ',self.dimlabels)
                 print("doesn't contain: ",axes[j])
                 raise
-            if raw_index:
-                self.data = np.argmax(self.data,
+            temp = self.data.copy()
+            temp[~np.isfinite(temp)] = temp[np.isfinite(temp)].min()
+            argmax_result = np.argmax(temp,
                         axis=thisindex)
+            if raw_index:
+                self.data = argmax_result 
             else:
                 if self.axis_coords[thisindex] is None:
                     raise ValueError("It doesn't make sense to call argmax if you have removed the axis coordinates! (getaxis yields None for %s"%thisindex)
-                self.data = self.axis_coords[thisindex][np.argmax(self.data,
-                    axis=thisindex)]
+                self.data = self.axis_coords[thisindex][argmax_result]
             self._pop_axis_info(thisindex)
         return self
     def argmin(self,*axes,**kwargs):
@@ -4291,18 +4308,20 @@ class nddata (object):
                 print('error, dimlabels is: ',self.dimlabels)
                 print("doesn't contain: ",axes[j])
                 raise
-            if raw_index:
-                self.data = np.argmin(self.data,
+            temp = self.data.copy()
+            temp[~np.isfinite(temp)] = temp[np.isfinite(temp)].max()
+            argmin_result = np.argmin(temp,
                         axis=thisindex)
+            if raw_index:
+                self.data = argmin_result
             else:
-                self.data = self.axis_coords[thisindex][np.argmin(self.data,
-                    axis=thisindex)]
+                self.data = self.axis_coords[thisindex][argmin_result]
             self._pop_axis_info(thisindex)
         return self
     def max(self):
-        return self.data.max()
+        return self.data[np.isfinite(self.data)].max()
     def min(self):
-        return self.data.min()
+        return self.data[np.isfinite(self.data)].min()
     def cdf(self,normalized = True,max_bins = 500):
         """calculate the Cumulative Distribution Function for the data along `axis_name`
 
@@ -4444,7 +4463,7 @@ class nddata (object):
             self.data = absdata.data
         self.run(np.log10)
         if subplot_axes is None:# then do all
-            self.data -= self.data.flatten().max() - magnitude # span only 4 orders of magnitude
+            self.data -= self.data[np.isfinite(self.data)].flatten().max() - magnitude # span only 4 orders of magnitude
         else:
             print("smooshing along subplot_axes",subplot_axes)
             newdata = self.copy().smoosh(subplot_axes,dimname = 'subplot')
@@ -4574,7 +4593,10 @@ class nddata (object):
         return self
     def item(self):
         r"like numpy item -- returns a number when zero-dimensional"
-        return self.data.item()
+        try:
+            return self.data.item()
+        except:
+            raise ValueError("your data has shape: "+str(ndshape(self))+" so you can't call item")
     #}}}
     #{{{ ft-related functions
     def unitify_axis(self,axis_name,
@@ -5242,14 +5264,15 @@ class nddata (object):
         """
         if self.get_units('t2') == 'ppm': return
         offset = self.get_prop('proc')['OFFSET']
+        SF = self.get_prop('proc')['SF']
         sfo1 = self.get_prop('acq')['SFO1']
+        tms_hz = (SF-sfo1)*1e6
         if not self.get_ft_prop('t2'):
             self.ft('t2', shift=True) # this fourier transforms along t2, overwriting the data that was in self
         self.setaxis('t2', lambda x:
-                x/sfo1).set_units('t2','ppm')
-        max_ppm = self.getaxis('t2').max()
+                x-tms_hz).set_units('t2','ppm')
         self.setaxis('t2', lambda x:
-                (x-max_ppm+offset))
+                x/SF).set_units('t2','ppm')
         self.set_prop('x_inverted',True)
         return self
     #}}}
@@ -5481,12 +5504,10 @@ class nddata (object):
                     axis_data = self.getaxis(axisname).flatten()
                     # copy is needed here, or data and axis will be the same object
                     retval = nddata(axis_data,axis_data.shape,[axisname]).setaxis(axisname,np.copy(axis_data))
-                    if self.axis_coords_units is None:
-                        retval.axis_coords_units = None
-                    else:
-                        retval.axis_coords_units = [self.axis_coords_units[self.axn(axisname)]]
+                    retval.set_units(axisname,self.get_units(axisname))
                     retval.data_units = self.data_units
                     retval.name(self.name())
+                    retval.copy_props(self) # be sure to include info about ft startpoint
                     return retval
                 #}}}
             else:
@@ -5548,6 +5569,7 @@ class nddata (object):
                 retval.axis_coords_units = list(self.axis_coords_units)
                 retval.data_units = self.data_units
                 retval.name(self.name())
+                retval.copy_props(self) # be sure to include info about ft startpoint
                 return retval
     def getaxis(self,axisname):
         if self.axis_coords is None or len(self.axis_coords) == 0:
@@ -5631,6 +5653,13 @@ class nddata (object):
         # construct the new axis
         new_u = u[0] + du * r_[start_index:stop_index]
         self.setaxis(axis,new_u)
+        if start_index < 0:
+            # if we are extending to negative values, we need to inform
+            # the FT machinery!
+            if self.get_ft_prop(axis):
+                self.set_ft_prop(axis, ["start","freq"], new_u[0])
+            else:
+                self.set_ft_prop(axis, ["start","time"], new_u[0])
         return self
     def setaxis(self,*args):
         """set or alter the value of the coordinate axis
@@ -5639,7 +5668,8 @@ class nddata (object):
 
         * ``self.setaxis('axisname', values)``: just sets the values
         * ``self.setaxis('axisname', '#')``: just
-            number the axis in numerically increasing order
+            number the axis in numerically increasing order,
+            with integers,
             (e.g. if you have smooshed it from a couple
             other dimensions.)
         * ``self.fromaxis('axisname',inputfunc)``: take the existing function, apply inputfunc, and replace
@@ -6466,6 +6496,11 @@ class nddata (object):
                 raise ValueError(errmsg)
             #}}}
         else:
+            if type(args) is not slice:
+                if type(args) not in [tuple, list]:
+                    raise ValueError("the first argument to your nddata slice/index is not a string -- I don't understand that!  Are you trying to pass nddata to a function that only accepts numpy ndarrays?")
+                elif type(args[0]) is not str:
+                    raise ValueError("the first argument to your nddata slice/index is not a string -- I don't understand that!  Are you trying to pass nddata to a function that only accepts numpy ndarrays?")
             slicedict,axesdict,errordict,unitsdict = self._parse_slices(args)
             if not isinstance(args, slice) and isinstance(args[1], list) and isinstance(args[0], str) and len(args) == 2:
                 return concat([self[args[0],x] for x in args[1]],args[0])
@@ -6535,6 +6570,78 @@ class nddata (object):
             else:
                 raise ValueError("If you have more than one dimension, you need to tell me which one!!")
         return axes
+    def get_range(self,dimname,start,stop):
+        """get raw indices that can be used to generate a slice for the start and (non-inclusive) stop
+
+        Uses the same code as the standard slicing format (the 'range' option of parseslices)
+
+        Parameters
+        ==========
+        dimname: str
+            name of the dimension
+        start: float
+            the coordinate for the start of the range
+        stop: float
+            the coordinate for the stop of the range
+            
+        Return
+        ======
+        start: int
+            the index corresponding to the start of the range
+        stop: int
+            the index corresponding to the stop of the range
+        """
+        axesdict = self.mkd(self.axis_coords)
+        if axesdict[dimname] is None:
+            raise ValueError("You passed a range-type slice"
+            +" selection, but to do that, your axis coordinates need to"
+            +f" be labeled! (The axis coordinates of {dimname} aren't"
+            +" labeled)")
+        temp = np.diff(axesdict[dimname]) 
+        if not all(temp*np.sign(temp[0])>0):
+            raise ValueError(strm("you can only use the range format on data where the axis is in consecutively increasing or decreasing order, and the differences that I see are",temp*np.sign(temp[0])),
+                    "if you like, you can still do this by first calling .sort( on the %s axis"%dimname)
+        if np.sign(temp[0]) == -1:
+            thisaxis = axesdict[dimname][::-1]
+        else:
+            thisaxis = axesdict[dimname]
+        if start is None:
+            start = -inf
+        if stop is None:
+            stop = inf
+        if start > stop:
+            start,stop = stop,start
+        # at this point, start is indeed the lower value, and stop indeed the higher
+        if start == inf:
+            raise ValueError(strm("this is not going to work -- I interpret range",start,stop,"I get to",start,",",stop))
+        elif start == -inf:
+            start = 0
+        else:
+            logger.debug(strm("looking for",start))
+            start = np.searchsorted(thisaxis,start)
+            if start >= len(thisaxis):
+                raise ValueError("the lower value of your slice %s on the \"%s\" axis (which runs from %g to %g) is higher than the highest value of the axis coordinates!"%(
+                    (str((thisargs[0], thisargs[1])), dimname,)+tuple(self.getaxis(dimname)[r_[0,-1]])))
+        stop_float = stop
+        if stop == inf:
+            stop = len(thisaxis) # not an exact match (inf doesn't match the index), so needs to be inclusive already
+        elif stop == -inf:
+            raise ValueError(strm("this is not going to work -- I interpret range",thisargs,"I get to",start,",",stop))
+        else:
+            logger.debug(strm("looking for",stop))
+            stop = np.searchsorted(thisaxis,stop)
+        # at this point, the result is inclusive if stop is
+        # not an exact match, but exclusive if it is
+        if stop<len(thisaxis) and thisaxis[stop] == stop_float:
+            stop += 1 # make it inclusive
+        if np.sign(temp[0]) == -1:
+            stop = len(thisaxis) -1 -stop
+            start = len(thisaxis) -1 -start
+            stop, start = start, stop
+        del temp
+        if start == stop:
+            stop += 1
+        return start, stop
     def _parse_slices(self,args):
         """This controls nddata slicing:
             it previously took
@@ -6660,7 +6767,8 @@ class nddata (object):
                         logger.debug(strm("looking for",temp_low))
                         temp_low = np.searchsorted(thisaxis,temp_low)
                         if temp_low >= len(thisaxis):
-                            raise ValueError("the lower value of your slice on the %s axis is higher than the highest value of the axis coordinates!"%thisdim)
+                            raise ValueError("the lower value of your slice %s on the \"%s\" axis (which runs from %g to %g) is higher than the highest value of the axis coordinates!"%(
+                                (str((thisargs[0], thisargs[1])), thisdim,)+tuple(self.getaxis(thisdim)[r_[0,-1]])))
                         logger.debug(strm("i found",thisaxis[temp_low],"for the low end of the slice",
                             thisargs))
                     temp_high_float = temp_high
@@ -6977,7 +7085,12 @@ class nddata_hdf5 (nddata):
 #}}}
 
 class ndshape (ndshape_base):
-    r'''The ndshape class, including the allocation method''' 
+    r'''A class for describing the shape and dimension names of nddata objects.
+
+    A main goal of this class is to allow easy generation (allocation) of new
+    arrays -- see :func:`alloc`.
+
+    ''' 
     def alloc(self,dtype='complex128',labels = False,format = 0):
         r'''Use the shape object to allocate an empty nddata object.
 
@@ -6988,6 +7101,22 @@ class ndshape (ndshape_base):
         format : 0, 1, or None
             What goes in the allocated array.
             `None` uses numpy empty.
+
+        Example
+        -------
+
+        If you want to create new empty array that's 10x3 with dimensions "x" and "y":
+
+        >>> result = ndshape([10,3],['x','y']).alloc(format=None)
+
+        You can also do things like creating a new array based on the size of
+        an existing array (create a new array without dimension x, but with new
+        dimension z)
+
+        >>> myshape = ndshape(mydata)
+        >>> myshape.pop('x')
+        >>> myshape + (10,'z')
+        >>> result = myshape.alloc(format=None)
         '''
         try:
             if format == 0:
@@ -7630,9 +7759,9 @@ class fitdata(nddata):
         leastsq_args = (self.residual, p_ini)
         leastsq_kwargs = {'args':(x,y,sigma),
                     'full_output':True}# 'maxfev':1000*(len(p_ini)+1)}
-        p_out,np.cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
+        p_out,this_cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
         try:
-           p_out,np.cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
+           p_out,this_cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
         #{{{ just give various explicit errors
         except TypeError as err:
             if not isinstance(x, np.ndarray) and not isinstance(y, np.ndarray):
@@ -7661,7 +7790,7 @@ class fitdata(nddata):
             #{{{ up maximum number of evals
             if mesg.find('maxfev'):
                 leastsq_kwargs.update({ 'maxfev':50000 })
-                p_out,np.cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
+                p_out,this_cov,infodict,mesg,success = leastsq(*leastsq_args,**leastsq_kwargs)
                 if success != 1:
                     if mesg.find('two consecutive iterates'):
                         print(r'{\Large\color{red}{\bf Warning data is not fit!!! output shown for debug purposes only!}}','\n\n')
@@ -7697,9 +7826,9 @@ class fitdata(nddata):
         else:
             if force_analytical: raise RuntimeError(strm("I can't take the analytical",
                 "covariance!  This is problematic."))
-            if np.cov is None:
-                print(r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,np.cov,infodict,mesg,success),'}\n')
-            self.covariance = np.cov
+            if this_cov is None:
+                print(r'{\color{red}'+lsafen('cov is none! why?!, x=',x,'y=',y,'sigma=',sigma,'p_out=',p_out,'success=',success,'output:',p_out,this_cov,infodict,mesg,success),'}\n')
+            self.covariance = this_cov
         if self.covariance is not None:
             try:
                 self.covariance *= np.sum(infodict["fvec"]**2)/dof # scale by chi_v "RMS of residuals"

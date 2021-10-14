@@ -3,15 +3,11 @@ from numpy import r_
 import numpy as np
 from .ft_shift import _find_index,thinkaboutit_message
 
-def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
+def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,unitary=False,**kwargs):
     r"""This performs a Fourier transform along the axes identified by the string or list of strings `axes`.
 
     It adjusts normalization and units so that the result conforms to
             :math:`\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt`
-
-    Note that, as noted in the :meth:`~pyspecdata.fourier.ift.ift` documentation,
-    the inverse transform doesn't correspond to the equivalent
-    expression for the IFT.
 
     **pre-FT**, we use the axis to cyclically permute :math:`t=0` to the first index
 
@@ -33,7 +29,11 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
         sampling scope, and it's severely aliased over.
     cosine : boolean
         yields a sum of the fft and ifft, for a cosine transform
+    unitary : boolean (False)
+        return a result that is vector-unitary
     """
+    if self.data.dtype == np.float64:
+        self.data = np.complex128(self.data) # everything is done assuming complex data
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
     if (isinstance(axes, str)):
@@ -170,6 +170,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
             newdata[thisaxis] = padded_length
             targetslice = [slice(None,None,None)] * len(newdata)
             targetslice[thisaxis] = slice(None,self.data.shape[thisaxis])
+            targetslice = tuple(targetslice)
             newdata = np.zeros(newdata,dtype = self.data.dtype)
             newdata[targetslice] = self.data
             self.data = newdata
@@ -207,7 +208,10 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
             #   phase-shift above
         #}}}
         #{{{ adjust the normalization appropriately
-        self.data *= du # this gives the units in the integral noted in the docstring
+        if unitary:
+            self.data /= np.sqrt(padded_length)
+        else:
+            self.data *= du # this gives the units in the integral noted in the docstring
         #}}}
         #{{{ finally, if "p2_pre" for the pre-shift didn't correspond exactly to
         #       zero, then the pre-ft data was shifted, and I must reflect

@@ -8,6 +8,8 @@ from pylab import *
 from pyspecdata import *
 from numpy.random import normal, seed
 from matplotlib.ticker import NullLocator, MultipleLocator, FormatStrFormatter
+rcParams['image.aspect'] = 'auto' # needed for sphinx gallery
+# sphinx_gallery_thumbnail_number = 3
 seed(7919)
 d = nddata(normal(size=10000)+1j*normal(size=10000), [100,100], ['y','x']).labels(
         {'x':r_[0:1:100j],
