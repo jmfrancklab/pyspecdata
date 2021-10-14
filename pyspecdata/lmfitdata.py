@@ -164,10 +164,11 @@ class lmfitdata(nddata):
         for this_name in self.pars.keys():
             if this_name in guesses.keys():
                 if type(guesses[this_name]) is dict:
+                    self.guess_dict[this_name] = {}
                     for k, v in guesses[this_name].items():
                         setattr(self.pars[this_name], k, v)
-                        self.guess_dict[this_name] = {k:v}
-                elif np.isscalar(this_name):
+                        self.guess_dict[this_name][k] = v
+                elif np.isscalar(guesses[this_name]):
                     self.pars[this_name].value = guesses[this_name]
                     self.guess_dict[this_name] = {"value":guesses[this_name]}
                 else:
