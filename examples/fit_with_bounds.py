@@ -32,7 +32,7 @@ logger.info(strm("Functional Form:", thisfit.functional_form))
 true_values = {"A": 14.0, "period": 5.4321, "shift": 0.12345, "decay": 0.01000}
 thisfit.set_guess(true_values)
 thisfit.settoguess()
-mydata = thisfit.output()
+mydata = thisfit.eval()
 mydata.add_noise(2.8)
 # }}}
 # {{{Making guess data

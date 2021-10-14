@@ -209,7 +209,7 @@ class lmfitdata(nddata):
             taxis = np.linspace(taxis[0], taxis[1], 300)
         return taxis
 
-    def eval(self, taxis, set_what=None, set_to=None):
+    def eval(self, taxis=None, set_what=None, set_to=None):
         """Calculate the fit function along the axis taxis.
 
         Parameters
@@ -230,7 +230,10 @@ class lmfitdata(nddata):
         if isinstance(set_what, dict):
             set_to = list(set_what.values())
             set_what = list(set_what.keys())
-        taxis = self._taxis(taxis)
+        if taxis is None:
+            taxis = self.getaxis(self.fit_axis)
+        else:
+            taxis = self._taxis(taxis)
         if hasattr(self, "fit_coeff") and self.fit_coeff is not None:
             p = self.fit_coeff.copy()
         else:
