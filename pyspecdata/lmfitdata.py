@@ -61,7 +61,7 @@ class lmfitdata(nddata):
 
         Parameters
         ==========
-        symbolic_expr: sympy expression
+        this_expr: sympy expression
         """
         assert issympy(
             this_expr
@@ -160,18 +160,26 @@ class lmfitdata(nddata):
             guesses = kwargs["guesses"]
         else:
             guesses = kwargs
+        self.guess_dict = {}
         for this_name in self.pars.keys():
             if this_name in guesses.keys():
-                for k, v in guesses[this_name].items():
-                    setattr(self.pars[this_name], k, v)
+                if type(guesses[this_name]) is dict:
+                    for k, v in guesses[this_name].items():
+                        setattr(self.pars[this_name], k, v)
+                        self.guess_dict[this_name] = {k:v}
+                elif np.isscalar(this_name):
+                    self.pars[this_name].value = guesses[this_name]
+                    self.guess_dict[this_name] = {"value":guesses[this_name]}
+                else:
+                    raise ValueError("what are the keys to your guesses???")
         for j in self.pars:
             logging.info(strm("fit param ---", j))
         logging.info(strm(self.pars))
-        self.guess_dict = guesses
         return
 
     def guess(self):
-        r"""Old code that we are preserving here -- provide the guess for our parameters; by default, based on pseudoinverse"""
+        r"""Old code that we are preserving here -- provide the guess for our
+        parameters; by default, based on pseudoinverse"""
         if hasattr(self, "guess_dict"):
             self.guess_dictionary = {
                 k: self.guess_dict[k]["value"] for k in self.guess_dict.keys()
@@ -252,16 +260,7 @@ class lmfitdata(nddata):
         return newdata
 
     def fit(self):
-        r"""actually run the fit
-        Parameters
-        ==========
-        thisfit: lmfitdata
-                    original true data
-        newfit:  lmfitdata
-                    the lmfitdata instance of the actual data
-        data:    nddata
-                    data being fit
-        """
+        r"""actually run the fit"""
         # we can ignore set_what, since I think there's a mechanism in
         # lmfit to take care of that (it's for fixing parameters)
         # but the rest of what it's doing is to pull apart the
@@ -279,22 +278,17 @@ class lmfitdata(nddata):
             logging.debug(strm("Warning, taking only real part of fitting data!"))
         y = np.real(self.data)
         sigma = self.get_error()
-        if sigma is None:
-            print(
-                "{\\bf Warning:} You have no error associated with your plot, and I want to flag this for now\n\n"
-            )
-            warnings.warn(
-                "You have no error associated with your plot, and I want to flag this for now",
-                Warning,
-            )
-            sigma = np.ones(np.shape(y))
-        min_args = (self.residual, self.pars)
-        min_kwargs={'args':(x,y,sigma)}
-        out = minimize(*min_args,**min_kwargs, kws={"data": self.data})
+        out = minimize(
+            self.residual,
+            self.pars,
+            args=(x, y, sigma),
+        )
         # can you capture the following as a string? maybe return it?
         report_fit(out, show_correl=True)
         # {{{ capture the result for ouput, etc
         self.fit_coeff = [out.params[j] for j in self.symbol_list]
+        assert out.success
+        self.covariance = out.covar
         # }}}
         return
 
@@ -307,20 +301,33 @@ class lmfitdata(nddata):
             *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
         )
 
-    def residual(self, pars, x, y, sigma, data=None):
+    def residual(self, pars, x, y, sigma=None):
         "calculate the residual OR if data is None, return fake data"
         fit = self.run_lambda(pars)
-        normalization = np.sum(1.0/sigma)
-        sigma[sigma == 0.0] = 1
+        if sigma is not None:
+            normalization = np.sum(1.0 / sigma[sigma != 0.0 and np.isfinite(sigma)])
+            sigma[sigma == 0.0] = 1
+            sigma[~np.isfinite(sigma)] = 1
         try:
-            retval = (fit - y)/sigma
+            # as noted here: https://stackoverflow.com/questions/6949370/scipy-leastsq-dfun-usage
+            # this needs to be fit - y, not vice versa
+            if sigma is not None:
+                retval = (fit - y) / sigma * normalization
+            else:
+                retval = fit - y
         except ValueError as e:
-            raise ValueError(strm('your error (',np.shape(sigma),
-                    ') probably doesn\'t match y (',
-                    np.shape(y),') and fit (',np.shape(fit),')')
-                    + explain_error(e))
-        if data is None:
-            return fit
+            raise ValueError(
+                strm(
+                    "your error (",
+                    np.shape(sigma),
+                    ") probably doesn't match y (",
+                    np.shape(y),
+                    ") and fit (",
+                    np.shape(fit),
+                    ")",
+                )
+                + explain_error(e)
+            )
         return retval
 
     def copy(self):
