@@ -42,7 +42,7 @@ with figlist_var() as fl:
     gridandtick(gca())
     print("now I'm going to try a DSW file")
     data = find_file('Ras_Stability4',
-            exp_type='Ras_stability/At_RT')
+            exp_type='UV_Vis/Ras_stability/At_RT')
     print("the experiments present in this file are:",data.keys())
     fl.next("kinetics data")
     for k,thisspectrum in data.items():
