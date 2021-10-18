@@ -1,3 +1,10 @@
+"""
+ppm Example
+===========
+
+Demonstrates how to convert from offset in Hz to 
+ppm scale
+"""
 from pylab import *
 from pyspecdata import *
 #pull parameters from RM1_sept30_1H_211001 expno 1
