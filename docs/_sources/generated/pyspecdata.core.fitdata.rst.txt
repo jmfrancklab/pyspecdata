@@ -61,6 +61,7 @@
       ~fitdata.get_ft_prop
       ~fitdata.get_plot_color
       ~fitdata.get_prop
+      ~fitdata.get_range
       ~fitdata.get_units
       ~fitdata.getaxis
       ~fitdata.getaxisshape
