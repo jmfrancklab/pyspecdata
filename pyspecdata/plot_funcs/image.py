@@ -161,7 +161,7 @@ def imagehsv(A, logscale=False, black=False, scaling=None):
         A /= abs(A).max()
     else:
         A /= scaling
-        mask |= abs(A) > 1.0
+        mask |= abs(A) > 1.0 + 1e-7
         A[mask] = 0
     mask = mask.reshape(-1,1)
     intensity = abs(A).reshape(-1,1)
