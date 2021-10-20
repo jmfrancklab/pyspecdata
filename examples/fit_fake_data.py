@@ -14,7 +14,15 @@ import sympy as sp
 from lmfit import Parameters, minimize
 from matplotlib.pyplot import figure, subplot, show, xlim, ylim, plot, gca
 from numpy import *  # I think it wasn't importing from numpy b/c it seems we're inside sphinx
-
+def list_symbs(f):
+    # {{{ this is just to show all the parameters
+    list_symbs = []
+    for j,k in f.output().items():
+        s_repr = sp.latex(sp.Symbol(j))
+        list_symbs.append(f'${s_repr} = {k:0.5g}$')
+    list_symbs = '\n'.join(list_symbs)
+    # }}}
+    return list_symbs
 # }}}
 fl = figlist_var()
 # {{{creating a fake data recovery curve
@@ -39,6 +47,7 @@ with figlist_var() as fl:
     fl.plot(fake_data, "o", alpha=0.5, label="fake data")
     fl.plot(f.eval(100), alpha=0.5, label="fitdata guess")
     f.fit()
+    print('-'*5,"Results for fitdata:",'-'*5)
     print("output:", f.output())
     print("latex:", f.latex())
     # }}}
@@ -56,6 +65,9 @@ with figlist_var() as fl:
     newfit.settoguess()
     fl.plot(newfit.eval(100), alpha=0.5, label="lmfitdata guess")
     newfit.fit()
+    print('-'*5,"Results for lmfitdata:",'-'*5)
+    print("output:", newfit.output())
+    print("latex:", newfit.latex())
     # }}}
     thisline = fl.plot(f.eval(100), alpha=0.5, label="fit data fit")
     thatline = fl.plot(
@@ -66,19 +78,29 @@ with figlist_var() as fl:
     text(
         0.6,
         0.5,
-        "LMFIT RESULT: %s" % newfit.latex(),
+        "lmfitdata RESULT: %s" % newfit.latex(),
         ha="center",
         va="center",
         color=thatline[0].get_color(),
         transform=ax.transAxes,
     )
+    text(0.6,0.5,(3*'\n')+list_symbs(newfit),
+            ha='center',va='top',
+            size=10,
+            color=thisline[0].get_color(),
+            transform = ax.transAxes)
     text(
         0.6,
         0.25,
-        "FITDATA RESULT:%s" % f.latex(),
+        "fitdata RESULT:%s" % f.latex(),
         ha="center",
         va="center",
         color=thisline[0].get_color(),
         transform=ax.transAxes,
     )
+    text(0.6,0.25,(3*'\n')+list_symbs(f),
+            ha='center',va='top',
+            size=10,
+            color=thisline[0].get_color(),
+            transform = ax.transAxes)
     # }}}
