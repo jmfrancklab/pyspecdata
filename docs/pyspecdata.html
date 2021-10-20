@@ -1159,6 +1159,29 @@ If several such matches are found, the error message is informative.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="pyspecdata.nddata.get_range">
+<code class="sig-name descname">get_range</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dimname</span></em>, <em class="sig-param"><span class="n">start</span></em>, <em class="sig-param"><span class="n">stop</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.get_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>get raw indices that can be used to generate a slice for the start and (non-inclusive) stop</p>
+<p>Uses the same code as the standard slicing format (the ‘range’ option of parseslices)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimname</strong> (<em>str</em>) – name of the dimension</p></li>
+<li><p><strong>start</strong> (<em>float</em>) – the coordinate for the start of the range</p></li>
+<li><p><strong>stop</strong> (<em>float</em>) – the coordinate for the stop of the range</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>start</strong> (<em>int</em>) – the index corresponding to the start of the range</p></li>
+<li><p><strong>stop</strong> (<em>int</em>) – the index corresponding to the stop of the range</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="pyspecdata.nddata.hdf5_write">
 <code class="sig-name descname">hdf5_write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">h5path</span></em>, <em class="sig-param"><span class="n">directory</span><span class="o">=</span><span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.hdf5_write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the nddata to an HDF5 file.</p>

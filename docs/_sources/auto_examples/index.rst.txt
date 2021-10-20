@@ -179,6 +179,48 @@ various functions.
    :hidden:
 
    /auto_examples/plot_container
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Adapt one of the examples from lmfit to use sympy and pyspecdata. Eventually, we want to use pa...">
+
+.. only:: html
+
+ .. figure:: /auto_examples/images/thumb/sphx_glr_fit_with_bounds_thumb.png
+     :alt: Fit Using Bounds
+
+     :ref:`sphx_glr_auto_examples_fit_with_bounds.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/fit_with_bounds
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This makes use of the package pint, which is a very nice package for handling units.">
+
+.. only:: html
+
+ .. figure:: /auto_examples/images/thumb/sphx_glr_QESR_thumb.png
+     :alt: Quantitative ESR
+
+     :ref:`sphx_glr_auto_examples_QESR.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/QESR
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>
