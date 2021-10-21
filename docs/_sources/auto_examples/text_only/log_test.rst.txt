@@ -26,8 +26,8 @@ are running at the same time
  .. code-block:: none
 
     C:\Users\johnf\pyspecdata.0.log appears to be locked or otherwise inaccessible: I'm going to explore other options for fileno
-    logging output to C:\Users\johnf\pyspecdata.2.log
-    --> log_test.py(11):root             <module> 2021-09-08 13:06:20,700
+    ----------  logging output to C:\Users\johnf\pyspecdata.1.log  ----------
+    --> log_test.py(11):root             <module> 2021-10-20 20:59:18,613
     INFO: Something, something, something, dark side...
 
 
@@ -49,7 +49,7 @@ are running at the same time
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.004 seconds)
+   **Total running time of the script:** ( 0 minutes  0.012 seconds)
 
 
 .. _sphx_glr_download_auto_examples_text_only_log_test.py:
