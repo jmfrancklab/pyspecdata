@@ -6616,7 +6616,7 @@ class nddata (object):
             start = np.searchsorted(thisaxis,start)
             if start >= len(thisaxis):
                 raise ValueError("the lower value of your slice %s on the \"%s\" axis (which runs from %g to %g) is higher than the highest value of the axis coordinates!"%(
-                    (str((thisargs[0], thisargs[1])), dimname,)+tuple(self.getaxis(dimname)[r_[0,-1]])))
+                    (str((start, stop)), dimname,)+tuple(self.getaxis(dimname)[r_[0,-1]])))
         stop_float = stop
         if stop == inf:
             stop = len(thisaxis) # not an exact match (inf doesn't match the index), so needs to be inclusive already
