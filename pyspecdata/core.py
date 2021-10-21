@@ -2009,6 +2009,8 @@ class figlist(object):
         """
         if 'label' in kwargs.keys() or 'label_format_string' in kwargs.keys():
             self.use_autolegend()
+        if 'alpha' not in kwargs.keys():
+            kwargs['alpha'] = 0.5
         human_units = True
         if 'human_units' in list(kwargs.keys()):
             human_units = kwargs.pop('human_units')
@@ -4608,41 +4610,44 @@ class nddata (object):
             isft = False
         if is_axis:
             yunits = self.units_texsafe(axis_name)
-            j = axis_name.find('_')
-            if j > -1:
-                prevword = axis_name[0:j]
-                if j+1< len(axis_name):
-                    followword = axis_name[j+1:]
+            ph_re = re.compile('^ph([0-9])')
+            m = ph_re.match(axis_name)
+            if m:
+                if isft:
+                    axis_name = '$\\Delta p_%s$'%m.groups()[0]
                 else:
-                    followword = []
-                k = followword.find(' ')
-                if k > -1 and k < len(followword):
-                    followword = followword[:k]
-                k = followword.find('_')
-                if len(followword) > 0:
-                    if not (k > -1) and (len(prevword) < 2 or len(followword) < 2):
-                        if len(followword) > 1:
-                            axis_name = axis_name[:j+1+len(followword)]  + '}$' + axis_name[j+1+len(followword):]
-                            axis_name = axis_name[:j+1] + '{' + axis_name[j+1:]
-                        else:
-                            axis_name = axis_name[0:j+2] + '$' + axis_name[j+2:]
-                        axis_name = '$'+axis_name
-            if isft:
-                t_idx = axis_name.find('t')
-                if t_idx>-1:
-                    if t_idx+1 < len(axis_name) and axis_name[t_idx+1].isalpha():
-                        axis_name = r'F{'+axis_name+r'}'
+                    axis_name = '$\\varphi_%s$'%m.groups()[0]
+            else:
+                j = axis_name.find('_')
+                if j > -1:
+                    prevword = axis_name[0:j]
+                    if j+1< len(axis_name):
+                        followword = axis_name[j+1:]
                     else:
-                        axis_name = axis_name.replace('t','\\nu ')
-                        if axis_name[0] != '$':
-                            axis_name = '$' + axis_name + '$'
-                #elif axis_name[:2] == 'ph':
-                #    if len(axis_name) > 2:
-                #        axis_name = r'$\Delta c_{'+axis_name[2:]+'}$'
-                #    else:
-                #        axis_name = r'$\Delta c$'
-                else:
-                    axis_name = r'F{'+axis_name+r'}'
+                        followword = []
+                    k = followword.find(' ')
+                    if k > -1 and k < len(followword):
+                        followword = followword[:k]
+                    k = followword.find('_')
+                    if len(followword) > 0:
+                        if not (k > -1) and (len(prevword) < 2 or len(followword) < 2):
+                            if len(followword) > 1:
+                                axis_name = axis_name[:j+1+len(followword)]  + '}$' + axis_name[j+1+len(followword):]
+                                axis_name = axis_name[:j+1] + '{' + axis_name[j+1:]
+                            else:
+                                axis_name = axis_name[0:j+2] + '$' + axis_name[j+2:]
+                            axis_name = '$'+axis_name
+                if isft:
+                    t_idx = axis_name.find('t')
+                    if t_idx>-1:
+                        if t_idx+1 < len(axis_name) and axis_name[t_idx+1].isalpha():
+                            axis_name = r'F{'+axis_name+r'}'
+                        else:
+                            axis_name = axis_name.replace('t','\\nu ')
+                            if axis_name[0] != '$':
+                                axis_name = '$' + axis_name + '$'
+                    else:
+                        axis_name = r'F{'+axis_name+r'}'
         else:
             yunits = self.units_texsafe()
         if yunits is not None:
