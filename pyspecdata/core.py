@@ -6759,6 +6759,7 @@ class nddata (object):
                         if temp_low > temp_high:
                             temp_low,temp_high = temp_high,temp_low
                     # at this point, temp_low is indeed the lower value, and temp_high indeed the higher
+                    logger.debug(strm("after initial processing, range is",temp_low,temp_high))
                     if temp_low == inf:
                         raise ValueError(strm("this is not going to work -- I interpret range",thisargs,"I get to",temp_low,",",temp_high))
                     elif temp_low == -inf:
@@ -6783,8 +6784,10 @@ class nddata (object):
                     # not an exact match, but exclusive if it is
                     if temp_high<len(thisaxis) and thisaxis[temp_high] == temp_high_float:
                         temp_high += 1 # make it inclusive
+                    logger.debug(strm("before looking at direction of axis, I have",temp_low,temp_high))
                     if np.sign(temp[0]) == -1:
-                        temp_high = len(thisaxis) -1 -temp_high
+                        logger.debug("identified descending axis")
+                        temp_high = len(thisaxis) -temp_high
                         temp_low = len(thisaxis) -1 -temp_low
                         temp_high, temp_low = temp_low, temp_high
                     del temp
