@@ -54,7 +54,7 @@ Trying to load an HDF5 file without an expno generates an error with a list of p
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.010 seconds)
+   **Total running time of the script:** ( 0 minutes  0.006 seconds)
 
 
 .. _sphx_glr_download_auto_examples_text_only_hdf5_error.py:

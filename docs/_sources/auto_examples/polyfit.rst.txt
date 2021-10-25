@@ -27,7 +27,7 @@ A quick demonstration of polynomial fitting.
 
  .. code-block:: none
 
-    I found the minimum here at 2.2439517595298
+    I found the minimum here at 2.287703036064049
 
 
 
@@ -70,7 +70,7 @@ A quick demonstration of polynomial fitting.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.116 seconds)
+   **Total running time of the script:** ( 0 minutes  0.096 seconds)
 
 
 .. _sphx_glr_download_auto_examples_polyfit.py:

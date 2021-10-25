@@ -41,7 +41,7 @@ The comments describe how the new proposed objects will work.
     C:\Users\johnf\notebook\pyspecdata\examples\plot_container.py:26: MatplotlibDeprecationWarning: 
     The set_smart_bounds function was deprecated in Matplotlib 3.2 and will be removed two minor releases later.
       spine.set_smart_bounds(True)
-    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2172: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2174: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       plt.gcf().tight_layout()
 
 
@@ -157,7 +157,7 @@ The comments describe how the new proposed objects will work.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.138 seconds)
+   **Total running time of the script:** ( 0 minutes  0.310 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_container.py:

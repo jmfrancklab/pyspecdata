@@ -2009,6 +2009,8 @@ class figlist(object):
         """
         if 'label' in kwargs.keys() or 'label_format_string' in kwargs.keys():
             self.use_autolegend()
+        if 'alpha' not in kwargs.keys():
+            kwargs['alpha'] = 0.5
         human_units = True
         if 'human_units' in list(kwargs.keys()):
             human_units = kwargs.pop('human_units')
@@ -4608,41 +4610,44 @@ class nddata (object):
             isft = False
         if is_axis:
             yunits = self.units_texsafe(axis_name)
-            j = axis_name.find('_')
-            if j > -1:
-                prevword = axis_name[0:j]
-                if j+1< len(axis_name):
-                    followword = axis_name[j+1:]
+            ph_re = re.compile('^ph([0-9])')
+            m = ph_re.match(axis_name)
+            if m:
+                if isft:
+                    axis_name = '$\\Delta p_%s$'%m.groups()[0]
                 else:
-                    followword = []
-                k = followword.find(' ')
-                if k > -1 and k < len(followword):
-                    followword = followword[:k]
-                k = followword.find('_')
-                if len(followword) > 0:
-                    if not (k > -1) and (len(prevword) < 2 or len(followword) < 2):
-                        if len(followword) > 1:
-                            axis_name = axis_name[:j+1+len(followword)]  + '}$' + axis_name[j+1+len(followword):]
-                            axis_name = axis_name[:j+1] + '{' + axis_name[j+1:]
-                        else:
-                            axis_name = axis_name[0:j+2] + '$' + axis_name[j+2:]
-                        axis_name = '$'+axis_name
-            if isft:
-                t_idx = axis_name.find('t')
-                if t_idx>-1:
-                    if t_idx+1 < len(axis_name) and axis_name[t_idx+1].isalpha():
-                        axis_name = r'F{'+axis_name+r'}'
+                    axis_name = '$\\varphi_%s$'%m.groups()[0]
+            else:
+                j = axis_name.find('_')
+                if j > -1:
+                    prevword = axis_name[0:j]
+                    if j+1< len(axis_name):
+                        followword = axis_name[j+1:]
                     else:
-                        axis_name = axis_name.replace('t','\\nu ')
-                        if axis_name[0] != '$':
-                            axis_name = '$' + axis_name + '$'
-                #elif axis_name[:2] == 'ph':
-                #    if len(axis_name) > 2:
-                #        axis_name = r'$\Delta c_{'+axis_name[2:]+'}$'
-                #    else:
-                #        axis_name = r'$\Delta c$'
-                else:
-                    axis_name = r'F{'+axis_name+r'}'
+                        followword = []
+                    k = followword.find(' ')
+                    if k > -1 and k < len(followword):
+                        followword = followword[:k]
+                    k = followword.find('_')
+                    if len(followword) > 0:
+                        if not (k > -1) and (len(prevword) < 2 or len(followword) < 2):
+                            if len(followword) > 1:
+                                axis_name = axis_name[:j+1+len(followword)]  + '}$' + axis_name[j+1+len(followword):]
+                                axis_name = axis_name[:j+1] + '{' + axis_name[j+1:]
+                            else:
+                                axis_name = axis_name[0:j+2] + '$' + axis_name[j+2:]
+                            axis_name = '$'+axis_name
+                if isft:
+                    t_idx = axis_name.find('t')
+                    if t_idx>-1:
+                        if t_idx+1 < len(axis_name) and axis_name[t_idx+1].isalpha():
+                            axis_name = r'F{'+axis_name+r'}'
+                        else:
+                            axis_name = axis_name.replace('t','\\nu ')
+                            if axis_name[0] != '$':
+                                axis_name = '$' + axis_name + '$'
+                    else:
+                        axis_name = r'F{'+axis_name+r'}'
         else:
             yunits = self.units_texsafe()
         if yunits is not None:
@@ -6616,7 +6621,7 @@ class nddata (object):
             start = np.searchsorted(thisaxis,start)
             if start >= len(thisaxis):
                 raise ValueError("the lower value of your slice %s on the \"%s\" axis (which runs from %g to %g) is higher than the highest value of the axis coordinates!"%(
-                    (str((thisargs[0], thisargs[1])), dimname,)+tuple(self.getaxis(dimname)[r_[0,-1]])))
+                    (str((start, stop)), dimname,)+tuple(self.getaxis(dimname)[r_[0,-1]])))
         stop_float = stop
         if stop == inf:
             stop = len(thisaxis) # not an exact match (inf doesn't match the index), so needs to be inclusive already
@@ -6754,6 +6759,7 @@ class nddata (object):
                         if temp_low > temp_high:
                             temp_low,temp_high = temp_high,temp_low
                     # at this point, temp_low is indeed the lower value, and temp_high indeed the higher
+                    logger.debug(strm("after initial processing, range is",temp_low,temp_high))
                     if temp_low == inf:
                         raise ValueError(strm("this is not going to work -- I interpret range",thisargs,"I get to",temp_low,",",temp_high))
                     elif temp_low == -inf:
@@ -6778,8 +6784,10 @@ class nddata (object):
                     # not an exact match, but exclusive if it is
                     if temp_high<len(thisaxis) and thisaxis[temp_high] == temp_high_float:
                         temp_high += 1 # make it inclusive
+                    logger.debug(strm("before looking at direction of axis, I have",temp_low,temp_high))
                     if np.sign(temp[0]) == -1:
-                        temp_high = len(thisaxis) -1 -temp_high
+                        logger.debug("identified descending axis")
+                        temp_high = len(thisaxis) -temp_high
                         temp_low = len(thisaxis) -1 -temp_low
                         temp_high, temp_low = temp_low, temp_high
                     del temp

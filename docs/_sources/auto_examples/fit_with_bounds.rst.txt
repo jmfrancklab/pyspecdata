@@ -29,19 +29,18 @@ to retype them every time.
 
  .. code-block:: none
 
-    C:\Users\johnf\pyspecdata.0.log appears to be locked or otherwise inaccessible: I'm going to explore other options for fileno
-    logging output to C:\Users\johnf\pyspecdata.1.log
-    --> fit_with_bounds.py(78):pyspecdata.core        gen_from_expr 2021-09-08 13:06:18,220
-    INFO: fit param --- shift
-    --> fit_with_bounds.py(78):pyspecdata.core        gen_from_expr 2021-09-08 13:06:18,220
-    INFO: fit param --- A
-    --> fit_with_bounds.py(78):pyspecdata.core        gen_from_expr 2021-09-08 13:06:18,220
+    ----------  logging output to C:\Users\johnf\pyspecdata.0.log  ----------
+    --> fit_with_bounds.py(78):pyspecdata.core        gen_from_expr 2021-10-20 20:59:09,050
     INFO: fit param --- period
-    --> fit_with_bounds.py(78):pyspecdata.core        gen_from_expr 2021-09-08 13:06:18,222
+    --> fit_with_bounds.py(78):pyspecdata.core        gen_from_expr 2021-10-20 20:59:09,051
     INFO: fit param --- decay
-    --> fit_with_bounds.py(79):pyspecdata.core        gen_from_expr 2021-09-08 13:06:18,222
-    INFO: Parameters([('shift', <Parameter 'shift', value=0.0, bounds=[-1.5707963267948966:1.5707963267948966]>), ('A', <Parameter 'A', value=13.0, bounds=[0.0:20]>), ('period', <Parameter 'period', value=2, bounds=[-inf:10]>), ('decay', <Parameter 'decay', value=0.02, bounds=[0.0:0.1]>)])
-    --> fit_with_bounds.py(126):pyspecdata.core             <module> 2021-09-08 13:06:18,226
+    --> fit_with_bounds.py(78):pyspecdata.core        gen_from_expr 2021-10-20 20:59:09,051
+    INFO: fit param --- A
+    --> fit_with_bounds.py(78):pyspecdata.core        gen_from_expr 2021-10-20 20:59:09,051
+    INFO: fit param --- shift
+    --> fit_with_bounds.py(79):pyspecdata.core        gen_from_expr 2021-10-20 20:59:09,051
+    INFO: Parameters([('period', <Parameter 'period', value=2, bounds=[-inf:10]>), ('decay', <Parameter 'decay', value=0.02, bounds=[0.0:0.1]>), ('A', <Parameter 'A', value=13.0, bounds=[0.0:20]>), ('shift', <Parameter 'shift', value=0.0, bounds=[-1.5707963267948966:1.5707963267948966]>)])
+    --> fit_with_bounds.py(126):pyspecdata.core             <module> 2021-10-20 20:59:09,058
     INFO: p_true is: Parameters([('A', <Parameter 'A', value=14.0, bounds=[-inf:inf]>), ('period', <Parameter 'period', value=5.4321, bounds=[-inf:inf]>), ('shift', <Parameter 'shift', value=0.12345, bounds=[-inf:inf]>), ('decay', <Parameter 'decay', value=0.01, bounds=[-inf:inf]>)])
     [[Fit Statistics]]
         # fitting method   = leastsq
@@ -53,13 +52,13 @@ to retype them every time.
         Akaike info crit   = 3044.23758
         Bayesian info crit = 3065.49046
     [[Variables]]
-        shift:   0.12600174 +/- 0.02404379 (19.08%) (init = 0), model_value = 0.12345
-        A:       13.8601431 +/- 0.24258034 (1.75%) (init = 13), model_value = 14
-        period:  5.42001503 +/- 0.01376176 (0.25%) (init = 2), model_value = 5.4321
+        period:  5.42001504 +/- 0.01376177 (0.25%) (init = 2), model_value = 5.4321
         decay:   0.00979390 +/- 1.9852e-04 (2.03%) (init = 0.02), model_value = 0.01
+        A:       13.8601431 +/- 0.24258034 (1.75%) (init = 13), model_value = 14
+        shift:   0.12600174 +/- 0.02404378 (19.08%) (init = 0), model_value = 0.12345
     [[Correlations]] (unreported correlations are < 0.100)
-        C(shift, period) =  0.800
-        C(A, decay)      =  0.576
+        C(period, shift) =  0.800
+        C(decay, A)      =  0.576
 
 
 
@@ -217,7 +216,7 @@ to retype them every time.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.472 seconds)
+   **Total running time of the script:** ( 0 minutes  1.002 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fit_with_bounds.py:
