@@ -185,8 +185,6 @@ class lmfitdata(nddata):
             self.guess_dictionary = {
                 k: self.guess_dict[k]["value"] for k in self.guess_dict.keys()
             }
-            print(self.parameter_names)
-            print(self.guess_dictionary)
             return [self.guess_dictionary[k] for k in self.parameter_names]
         else:
             return [1.0] * len(self.variable_names)
@@ -290,7 +288,10 @@ class lmfitdata(nddata):
         # can you capture the following as a string? maybe return it?
         report_fit(out, show_correl=True)
         # {{{ capture the result for ouput, etc
-        self.fit_coeff = [out.params[j] for j in self.symbol_list]
+        values_dict = out.params.valuesdict()
+        self.fit_coeff = []
+        for key,value in values_dict.items():
+            self.fit_coeff.append(value)
         assert out.success
         self.covariance = out.covar
         # }}}
@@ -300,7 +301,7 @@ class lmfitdata(nddata):
         """actually run the lambda function we separate this in case we want
         our function to involve something else, as well (e.g. taking a Fourier
         transform)"""
-        print(self.getaxis(j) for j in self.variable_names)
+        logging.info(strm(self.getaxis(j) for j in self.variable_names))
         return self.fitfunc_multiarg_v2(
             *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
         )
@@ -409,11 +410,11 @@ class lmfitdata(nddata):
                         "While running output: couldn't find",
                         name,
                         "in",
-                        self.variable_names,
+                        self.symbol_list,
                     )
                 )
         elif len(name) == 0:
-            return {self.variable_names[j]: p[j] for j in range(len(p))}
+            return {self.symbol_list[j]: p[j] for j in range(len(p))}
         else:
             raise ValueError(
                 strm("You can't pass", len(name), "arguments to .output()")

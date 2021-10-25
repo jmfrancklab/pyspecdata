@@ -19,6 +19,7 @@ def list_symbs(f):
     list_symbs = []
     for j,k in f.output().items():
         s_repr = sp.latex(sp.Symbol(j))
+        print("S_REPR IS",s_repr)
         list_symbs.append(f'${s_repr} = {k:0.5g}$')
     list_symbs = '\n'.join(list_symbs)
     # }}}
@@ -75,20 +76,8 @@ with figlist_var() as fl:
     )
     # {{{ just put the text
     ax = gca()
-    text(
-        0.6,
-        0.5,
-        "lmfitdata RESULT: %s" % newfit.latex(),
-        ha="center",
-        va="center",
-        color=thatline[0].get_color(),
-        transform=ax.transAxes,
-    )
-    text(0.6,0.5,(3*'\n')+list_symbs(newfit),
-            ha='center',va='top',
-            size=10,
-            color=thisline[0].get_color(),
-            transform = ax.transAxes)
+    print("GETTING FIT RESULTS FOR FITDATA")
+    print(f.output())
     text(
         0.6,
         0.25,
@@ -99,6 +88,22 @@ with figlist_var() as fl:
         transform=ax.transAxes,
     )
     text(0.6,0.25,(3*'\n')+list_symbs(f),
+            ha='center',va='top',
+            size=10,
+            color=thisline[0].get_color(),
+            transform = ax.transAxes)
+    print("GETTING RESULTS FOR LMFITDATA")
+    print(newfit.output())
+    text(
+        0.6,
+        0.5,
+        "lmfitdata RESULT: %s" % newfit.latex(),
+        ha="center",
+        va="center",
+        color=thatline[0].get_color(),
+        transform=ax.transAxes,
+    )
+    text(0.6,0.5,(3*'\n')+list_symbs(newfit),
             ha='center',va='top',
             size=10,
             color=thisline[0].get_color(),
