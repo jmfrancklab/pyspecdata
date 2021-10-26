@@ -288,10 +288,7 @@ class lmfitdata(nddata):
         # can you capture the following as a string? maybe return it?
         report_fit(out, show_correl=True)
         # {{{ capture the result for ouput, etc
-        values_dict = out.params.valuesdict()
-        self.fit_coeff = []
-        for key,value in values_dict.items():
-            self.fit_coeff.append(value)
+        self.fit_coeff = [out.params[j].value for j in self.symbol_list]
         assert out.success
         self.covariance = out.covar
         # }}}
