@@ -19,7 +19,6 @@ def list_symbs(f):
     list_symbs = []
     for j,k in f.output().items():
         s_repr = sp.latex(sp.Symbol(j))
-        print("S_REPR IS",s_repr)
         list_symbs.append(f'${s_repr} = {k:0.5g}$')
     list_symbs = '\n'.join(list_symbs)
     # }}}
@@ -37,75 +36,74 @@ M0, Mi, R1, vd = sp.symbols("M_0 M_inf R_1 tau", real=True)
 functional_form = Mi + (M0 - Mi) * sp.exp(-vd * R1)
 # }}}
 with figlist_var() as fl:
-    # {{{ fitting data
-    f = fitdata(fake_data)
-    f.functional_form = functional_form
-    logger.info(strm("Functional Form", f.functional_form))
-    logger.info(strm("Functional Form", f.functional_form))
-    f.set_guess({M0: -500, Mi: 500, R1: 2})
-    f.settoguess()
+    # {{{ use fitdata
+    fitdata_instance = fitdata(fake_data)
+    fitdata_instance.functional_form = functional_form
+    logger.info(strm("Functional Form", fitdata_instance.functional_form))
+    logger.info(strm("Functional Form", fitdata_instance.functional_form))
+    fitdata_instance.set_guess({M0: -500, Mi: 500, R1: 2})
+    fitdata_instance.settoguess()
     fl.next("fit with guess")
     fl.plot(fake_data, "o", alpha=0.5, label="fake data")
-    fl.plot(f.eval(100), alpha=0.5, label="fitdata guess")
-    f.fit()
+    fl.plot(fitdata_instance.eval(100), alpha=0.5, label="fitdata guess")
+    fitdata_instance.fit()
     print('-'*5,"Results for fitdata:",'-'*5)
-    print("output:", f.output())
-    print("latex:", f.latex())
+    print("output:", fitdata_instance.output())
+    print("latex:", fitdata_instance.latex())
+    T1 = 1.0 / fitdata_instance.output("R_1")
     # }}}
-    T1 = 1.0 / f.output("R_1")
-    # }}}
-    # }}}
-    # {{{lmfitdata method
-    newfit = lmfitdata(fake_data)
-    newfit.functional_form = functional_form
-    newfit.set_guess(
+    # {{{ lmfitdata method
+    lmfitdata_instance = lmfitdata(fake_data)
+    lmfitdata_instance.functional_form = functional_form
+    lmfitdata_instance.set_guess(
         M_0=dict(value=-500, max=0, min=-501),
         M_inf=dict(value=500, max=501, min=0),
         R_1=dict(value=5, max=6, min=1),
     )
-    newfit.settoguess()
-    fl.plot(newfit.eval(100), alpha=0.5, label="lmfitdata guess")
-    newfit.fit()
+    lmfitdata_instance.settoguess()
+    fl.plot(lmfitdata_instance.eval(100), alpha=0.5, label="lmfitdata guess")
+    lmfitdata_instance.fit()
     print('-'*5,"Results for lmfitdata:",'-'*5)
-    print("output:", newfit.output())
-    print("latex:", newfit.latex())
+    print("output:", lmfitdata_instance.output())
+    print("latex:", lmfitdata_instance.latex())
+    T1 = 1.0 / lmfitdata_instance.output("R_1")
     # }}}
-    thisline = fl.plot(f.eval(100), alpha=0.5, label="fit data fit")
-    thatline = fl.plot(
-        newfit.eval(100), ":", alpha=0.5, linewidth=3, label="lmfitdata fit"
+    fitdata_line = fl.plot(fitdata_instance.eval(100), alpha=0.5, label="fit data fit")
+    lmfitdata_line = fl.plot(
+        lmfitdata_instance.eval(100), ":", alpha=0.5, linewidth=3, label="lmfitdata fit"
     )
     # {{{ just put the text
     ax = gca()
-    print("GETTING FIT RESULTS FOR FITDATA")
-    print(f.output())
-    text(
-        0.6,
-        0.25,
-        "fitdata RESULT:%s" % f.latex(),
-        ha="center",
-        va="center",
-        color=thisline[0].get_color(),
-        transform=ax.transAxes,
-    )
-    text(0.6,0.25,(3*'\n')+list_symbs(f),
-            ha='center',va='top',
-            size=10,
-            color=thisline[0].get_color(),
-            transform = ax.transAxes)
-    print("GETTING RESULTS FOR LMFITDATA")
-    print(newfit.output())
+    # {{{ lmfitdata
     text(
         0.6,
         0.5,
-        "lmfitdata RESULT: %s" % newfit.latex(),
+        "lmfitdata RESULT: %s" % lmfitdata_instance.latex(),
         ha="center",
         va="center",
-        color=thatline[0].get_color(),
+        color=lmfitdata_line[0].get_color(),
         transform=ax.transAxes,
     )
-    text(0.6,0.5,(3*'\n')+list_symbs(newfit),
+    text(0.6,0.5,(3*'\n')+list_symbs(lmfitdata_instance),
             ha='center',va='top',
             size=10,
-            color=thisline[0].get_color(),
+            color=fitdata_line[0].get_color(),
             transform = ax.transAxes)
+    # }}}
+    # {{{ fitdata
+    text(
+        0.6,
+        0.25,
+        "fitdata RESULT: %s" % fitdata_instance.latex(),
+        ha="center",
+        va="center",
+        color=fitdata_line[0].get_color(),
+        transform=ax.transAxes,
+    )
+    text(0.6,0.25,(3*'\n')+list_symbs(fitdata_instance),
+            ha='center',va='top',
+            size=10,
+            color=fitdata_line[0].get_color(),
+            transform = ax.transAxes)
+    # }}}
     # }}}
