@@ -3,7 +3,7 @@ from numpy import r_
 import numpy as np
 from .ft_shift import _find_index,thinkaboutit_message
 
-def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,unitary=False,**kwargs):
+def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,unitary=None,**kwargs):
     r"""This performs an inverse Fourier transform along the axes identified by the string or list of strings `axes`.
 
     It adjusts normalization and units so that the result conforms to
@@ -33,7 +33,7 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,unitary=False,**kwarg
         ..note ::
             In the code, this is controlled by `p2_post` (the integral
             :math:`\Delta t` and `p2_post_discrepancy` -- the non-integral.
-    unitary : boolean (False)
+    unitary : boolean (None)
         return a result that is vector-unitary
     """
     if verbose: print("check 1",self.data.dtype)
@@ -57,10 +57,26 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,unitary=False,**kwarg
         raise ValueError("shiftornot is obsolete --> use shift instead")
     shift,pad = process_kwargs([
         ('shift',False),
-        ('pad',False)],
+        ('pad',False),
+        ],
         kwargs)
     if not (isinstance(shift, list)):
         shift = [shift]*len(axes)
+    if not (isinstance(unitary, list)):
+        unitary = [unitary]*len(axes)
+    for j in range(0,len(axes)):
+        #print("called IFT on",axes[j],", unitary",unitary[j],"and property",
+        #        self.get_ft_prop(axes[j],"unitary"))
+        if self.get_ft_prop(axes[j],"unitary") is None: # has not been called
+            if unitary[j] is None:
+                unitary[j]=False
+            self.set_ft_prop(axes[j],"unitary",unitary[j])
+        else:
+            if unitary[j] is None:
+                unitary[j] = self.get_ft_prop(axes[j],"unitary")
+            else:
+                raise ValueError("Call ft or ift with unitary only the first time, and it will be set thereafter.\nOR if you really want to override mid-way use self.set_ft_prop(axisname,\"unitary\",True/False) before calling ft or ift")
+        #print("for",axes[j],"set to",unitary[j])
     #}}}
     for j in range(0,len(axes)):
         do_post_shift = False
@@ -200,7 +216,7 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,unitary=False,**kwarg
             #   phase-shift above
         #}}}
         #{{{ adjust the normalization appropriately
-        if unitary:
+        if unitary[j]:
             self.data *= np.sqrt(padded_length)
         else:
             self.data *= padded_length * du # here, the algorithm divides by

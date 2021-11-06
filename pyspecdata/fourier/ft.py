@@ -3,7 +3,7 @@ from numpy import r_
 import numpy as np
 from .ft_shift import _find_index,thinkaboutit_message
 
-def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,unitary=False,**kwargs):
+def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,unitary=None,**kwargs):
     r"""This performs a Fourier transform along the axes identified by the string or list of strings `axes`.
 
     It adjusts normalization and units so that the result conforms to
@@ -29,7 +29,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,unitary=False,**k
         sampling scope, and it's severely aliased over.
     cosine : boolean
         yields a sum of the fft and ifft, for a cosine transform
-    unitary : boolean (False)
+    unitary : boolean (None)
         return a result that is vector-unitary
     """
     if self.data.dtype == np.float64:
@@ -59,6 +59,21 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,unitary=False,**k
         kwargs)
     if not (isinstance(shift, list)):
         shift = [shift]*len(axes)
+    if not (isinstance(unitary, list)):
+        unitary = [unitary]*len(axes)
+    for j in range(0,len(axes)):
+        #print("called FT on",axes[j],", unitary",unitary[j],"and property",
+        #        self.get_ft_prop(axes[j],"unitary"))
+        if self.get_ft_prop(axes[j],"unitary") is None: # has not been called
+            if unitary[j] is None:
+                unitary[j]=False
+            self.set_ft_prop(axes[j],"unitary",unitary[j])
+        else:
+            if unitary[j] is None:
+                unitary[j] = self.get_ft_prop(axes[j],"unitary")
+            else:
+                raise ValueError("Call ft or ift with unitary only the first time, and it will be set thereafter.\nOR if you really want to override mid-way use self.set_ft_prop(axisname,\"unitary\",True/False) before calling ft or ift")
+        #print("for",axes[j],"set to",unitary[j])
     #}}}
     for j in range(0,len(axes)):
         do_post_shift = False
@@ -208,7 +223,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,unitary=False,**k
             #   phase-shift above
         #}}}
         #{{{ adjust the normalization appropriately
-        if unitary:
+        if unitary[j]:
             self.data /= np.sqrt(padded_length)
         else:
             self.data *= du # this gives the units in the integral noted in the docstring
