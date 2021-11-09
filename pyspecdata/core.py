@@ -1678,21 +1678,21 @@ def contour_plot(xvals,yvals,zvals,color = 'k',alpha = 1.0,npts = 300,**kwargs):
     zi_min = zi[np.isfinite(zi)].min()
     zi_max = zi[np.isfinite(zi)].max()
     levels = r_[zi_min:zi_max:40j]
-    CS = contour(xi,yi,zi,levels,colors = color,
+    CS = plt.contour(xi,yi,zi,levels,colors = color,
             alpha = 0.25*alpha)
     oldspacing = levels[1]-levels[0]
     levels = r_[zi_min:zi_max:oldspacing*5]
     try:
-        CS = contour(xi,yi,zi,levels,colors = color,
+        CS = plt.contour(xi,yi,zi,levels,colors = color,
             alpha = alpha,**kwargs)
     except Exception as e:
         raise Exception(strm("Is there something wrong with your levels?:",levels,"min z",zi_min,"max z",zi_max,explain_error(e)))
-    clabel(CS,fontsize = 9,inline = 1,
+    plt.clabel(CS,fontsize = 9,inline = 1,
         #fmt = r'$k_\sigma/k_{\sigma,bulk} = %0.2f$',
         fmt = r'%0.2f',
         use_clabeltext = True,
         inline_spacing = inline_spacing,
-        alpha = alpha)
+        )
     #}}}
 def plot_updown(data,axis,color1,color2,symbol = '',**kwargs):
     if symbol == '':
@@ -2518,6 +2518,8 @@ def plot(*args,**kwargs):
                 myx = r_[0:myy.data.shape[longest_dim]]
         if not noerr and isinstance(myy.data_error, np.ndarray) and len(myy.data_error)>0: #then this should be an errorbar plot
             def thiserrbarplot(*tebargs,**tebkwargs):
+                if 'capsize' not in tebkwargs:
+                    tebkwargs.update({'capsize':6})
                 if isinstance(tebargs[-1], str):
                     tebkwargs.update({'fmt':tebargs[-1]})
                     return ax.errorbar(*tebargs[:-1],**tebkwargs)
@@ -3127,7 +3129,7 @@ class nddata (object):
             levels = r_[self.data.min():self.data.max():30j]
         cs = contour(x*np.ones_like(y),np.ones_like(x)*y,self.data,**kwargs)
         if labels:
-            clabel(cs,inline = 1,fontsize = 10)
+            plt.clabel(cs,inline = 1,fontsize = 10)
         xlabel(self.unitify_axis(x_axis))
         ylabel(self.unitify_axis(y_axis))
         return cs
