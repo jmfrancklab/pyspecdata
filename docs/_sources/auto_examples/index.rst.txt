@@ -140,14 +140,14 @@ various functions.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example creates fake data with noise then fits the exponential with the fitdata function.">
+    <div class="sphx-glr-thumbcontainer" tooltip="Adapt one of the examples from lmfit to use sympy and pyspecdata. Eventually, we want to use pa...">
 
 .. only:: html
 
- .. figure:: /auto_examples/images/thumb/sphx_glr_fit_fake_data_thumb.png
-     :alt: Fitting Data (Nonlinear + Symbolic)
+ .. figure:: /auto_examples/images/thumb/sphx_glr_fit_with_bounds_thumb.png
+     :alt: Fit Using Bounds
 
-     :ref:`sphx_glr_auto_examples_fit_fake_data.py`
+     :ref:`sphx_glr_auto_examples_fit_with_bounds.py`
 
 .. raw:: html
 
@@ -157,7 +157,7 @@ various functions.
 .. toctree::
    :hidden:
 
-   /auto_examples/fit_fake_data
+   /auto_examples/fit_with_bounds
 
 .. raw:: html
 
@@ -182,6 +182,27 @@ various functions.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="This example creates fake data with noise then fits the exponential with the fitdata function.">
+
+.. only:: html
+
+ .. figure:: /auto_examples/images/thumb/sphx_glr_fit_fake_data_thumb.png
+     :alt: Fitting Data (Nonlinear + Symbolic)
+
+     :ref:`sphx_glr_auto_examples_fit_fake_data.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/fit_fake_data
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="This examples shows how you would *currently* generate a plot that shows projections of a 2D im...">
 
 .. only:: html
@@ -200,27 +221,6 @@ various functions.
    :hidden:
 
    /auto_examples/plot_container
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Adapt one of the examples from lmfit to use sympy and pyspecdata. Eventually, we want to use pa...">
-
-.. only:: html
-
- .. figure:: /auto_examples/images/thumb/sphx_glr_fit_with_bounds_thumb.png
-     :alt: Fit Using Bounds
-
-     :ref:`sphx_glr_auto_examples_fit_with_bounds.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /auto_examples/fit_with_bounds
 
 .. raw:: html
 

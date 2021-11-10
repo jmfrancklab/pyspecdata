@@ -1985,7 +1985,7 @@ inferred from the symbolic expression.</p></li>
 
 <dl class="py method">
 <dt id="pyspecdata.core.nddata.ft">
-<code class="sig-name descname">ft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">cosine</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.ft" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">cosine</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.ft" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs a Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
 <dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt\)</span></p>
@@ -2007,7 +2007,7 @@ dimension size up to the nearest integral power of 2.</p></li>
 useful for the specific case where the data has been captured on a
 sampling scope, and it’s severely aliased over.</p></li>
 <li><p><strong>cosine</strong> (<em>boolean</em>) – yields a sum of the fft and ifft, for a cosine transform</p></li>
-<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>False</em><em>)</em>) – return a result that is vector-unitary</p></li>
+<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>None</em><em>)</em>) – return a result that is vector-unitary</p></li>
 </ul>
 </dd>
 </dl>
@@ -2234,7 +2234,7 @@ structure.)</p></li>
 
 <dl class="py method">
 <dt id="pyspecdata.core.nddata.ift">
-<code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.ift" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.ift" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs an inverse Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
 <dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=\int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
@@ -2264,7 +2264,7 @@ do this.</p>
 </dd>
 </dl>
 </p></li>
-<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>False</em><em>)</em>) – return a result that is vector-unitary</p></li>
+<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>None</em><em>)</em>) – return a result that is vector-unitary</p></li>
 </ul>
 </dd>
 </dl>
@@ -4246,6 +4246,176 @@ This can be used in combination with wrapviewer() and latexmk by using a <code c
 <dt id="pyspecdata.latexscripts.wrapviewer">
 <code class="sig-prename descclassname">pyspecdata.latexscripts.</code><code class="sig-name descname">wrapviewer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.wrapviewer" title="Permalink to this definition">¶</a></dt>
 <dd><p>see <a class="reference internal" href="../latexscripts.html#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyspecdata.lmfitdata">
+<span id="pyspecdata-lmfitdata-module"></span><h2>pyspecdata.lmfitdata module<a class="headerlink" href="#module-pyspecdata.lmfitdata" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pyspecdata.lmfitdata.lmfitdata">
+<em class="property">class </em><code class="sig-prename descclassname">pyspecdata.lmfitdata.</code><code class="sig-name descname">lmfitdata</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
+<p>The user creates a lmfitdata class object from an existing nddata
+class object, and on this lmfitdata object can define the
+<a class="reference internal" href="#pyspecdata.lmfitdata.functional_form" title="pyspecdata.lmfitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
+data of the original nddata.
+This functional form must be provided as a sympy expression, with
+one of its variables matching the name of the dimension that the
+user would like to fit to.</p>
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.lmfitdata.add_inactive_p">
+<code class="sig-name descname">add_inactive_p</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.add_inactive_p" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.lmfitdata.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a full copy of this instance.</p>
+<p>Because methods typically change the data in place, you might want to
+use this frequently.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>boolean</em>) – <p>Default to True.
+False doesn’t copy the data – this is for internal use,
+<em>e.g.</em> when you want to copy all the metadata and perform a
+calculation on the data.</p>
+<p>The code for this also provides the definitive list of the
+nddata metadata.</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.lmfitdata.eval">
+<code class="sig-name descname">eval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">taxis</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">set_what</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">set_to</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.eval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the fit function along the axis taxis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>taxis</strong> (<em>ndarray</em><em>, </em><em>int</em>) – <dl class="field-list simple">
+<dt class="field-odd">if ndarray</dt>
+<dd class="field-odd"><p>the new axis coordinates along which we want to calculate the fit.</p>
+</dd>
+<dt class="field-even">if int</dt>
+<dd class="field-even"><p>number of evenly spaced points along the t-axis along the fit</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>set_what</strong> (<em>'str'</em><em>, </em><em>optional</em>) – forcibly sets a specific symbol</p></li>
+<li><p><strong>set_to</strong> (<em>double</em><em>, </em><em>optional</em>) – the specific value(int) you are assigning the symbol you included</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.lmfitdata.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>actually run the fit</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.lmfitdata.function_string">
+<em class="property">property </em><code class="sig-name descname">function_string</code><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.function_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property of the myfitclass class which stores a string
+output of the functional form of the desired fit expression
+provided in func:<cite>functional_form</cite> in LaTeX format</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.lmfitdata.functional_form">
+<em class="property">property </em><code class="sig-name descname">functional_form</code><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.functional_form" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property of the myfitclass class which is set by the user,
+takes as input a sympy expression of the desired fit
+expression</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.lmfitdata.gen_indices">
+<code class="sig-name descname">gen_indices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">this_set</span></em>, <em class="sig-param"><span class="n">set_to</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.gen_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>pass this this_set and this_set_to parameters, and it will return:
+indices,values,mask
+indices –&gt; gives the indices that are forced
+values –&gt; the values they are forced to
+mask –&gt; p[mask] are actually active in the fit</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.lmfitdata.guess">
+<code class="sig-name descname">guess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Old code that we are preserving here – provide the guess for our
+parameters; by default, based on pseudoinverse</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.lmfitdata.latex">
+<code class="sig-name descname">latex</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.latex" title="Permalink to this definition">¶</a></dt>
+<dd><p>show the latex string for the function, with all the symbols substituted by their values</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.lmfitdata.output">
+<code class="sig-name descname">output</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.output" title="Permalink to this definition">¶</a></dt>
+<dd><p>give the fit value of a particular symbol, or a dictionary of all values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em><em> (</em><em>optional</em><em>)</em>) – name of the symbol.
+If no name is passed, then output returns a dictionary of the
+resulting values.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>retval</strong> – Either a dictionary of all the values, or the value itself</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict or float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.lmfitdata.residual">
+<code class="sig-name descname">residual</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pars</span></em>, <em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">sigma</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.residual" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate the residual OR if data is None, return fake data</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.lmfitdata.run_lambda">
+<code class="sig-name descname">run_lambda</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pars</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.run_lambda" title="Permalink to this definition">¶</a></dt>
+<dd><p>actually run the lambda function we separate this in case we want
+our function to involve something else, as well (e.g. taking a Fourier
+transform)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.lmfitdata.set_guess">
+<code class="sig-name descname">set_guess</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.set_guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>set both the guess and the bounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>guesses</strong> (<em>dict of dicts</em>) – <p>each dict has a keyword giving the parameter and a value
+that comprises a dict with guesses (value) and/or constraints
+(min/max)</p>
+<p>Can be passed either as the only argument, or a kwarg called
+guesses, or as the kwargs themselves.</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.lmfitdata.settoguess">
+<code class="sig-name descname">settoguess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.settoguess" title="Permalink to this definition">¶</a></dt>
+<dd><p>a debugging function, to easily plot the initial guess</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -8546,6 +8716,173 @@ If this functionality is unavailable, using it raises NotImplementedError.</p>
 entries ‘.’ and ‘..’ even if they are present in the directory.</p>
 </dd></dl>
 
+<dl class="py class">
+<dt id="pyspecdata.lmfitdata">
+<em class="property">class </em><code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">lmfitdata</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.core.nddata</span></code></a></p>
+<p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
+<p>The user creates a lmfitdata class object from an existing nddata
+class object, and on this lmfitdata object can define the
+<a class="reference internal" href="#pyspecdata.lmfitdata.functional_form" title="pyspecdata.lmfitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
+data of the original nddata.
+This functional form must be provided as a sympy expression, with
+one of its variables matching the name of the dimension that the
+user would like to fit to.</p>
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.add_inactive_p">
+<code class="sig-name descname">add_inactive_p</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.add_inactive_p" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a full copy of this instance.</p>
+<p>Because methods typically change the data in place, you might want to
+use this frequently.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>boolean</em>) – <p>Default to True.
+False doesn’t copy the data – this is for internal use,
+<em>e.g.</em> when you want to copy all the metadata and perform a
+calculation on the data.</p>
+<p>The code for this also provides the definitive list of the
+nddata metadata.</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.eval">
+<code class="sig-name descname">eval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">taxis</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">set_what</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">set_to</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.eval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the fit function along the axis taxis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>taxis</strong> (<em>ndarray</em><em>, </em><em>int</em>) – <dl class="field-list simple">
+<dt class="field-odd">if ndarray</dt>
+<dd class="field-odd"><p>the new axis coordinates along which we want to calculate the fit.</p>
+</dd>
+<dt class="field-even">if int</dt>
+<dd class="field-even"><p>number of evenly spaced points along the t-axis along the fit</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>set_what</strong> (<em>'str'</em><em>, </em><em>optional</em>) – forcibly sets a specific symbol</p></li>
+<li><p><strong>set_to</strong> (<em>double</em><em>, </em><em>optional</em>) – the specific value(int) you are assigning the symbol you included</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="../pyspecdata.html#id0" title="pyspecdata.nddata">nddata</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>actually run the fit</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.function_string">
+<em class="property">property </em><code class="sig-name descname">function_string</code><a class="headerlink" href="#pyspecdata.lmfitdata.function_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property of the myfitclass class which stores a string
+output of the functional form of the desired fit expression
+provided in func:<cite>functional_form</cite> in LaTeX format</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.functional_form">
+<em class="property">property </em><code class="sig-name descname">functional_form</code><a class="headerlink" href="#pyspecdata.lmfitdata.functional_form" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property of the myfitclass class which is set by the user,
+takes as input a sympy expression of the desired fit
+expression</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.gen_indices">
+<code class="sig-name descname">gen_indices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">this_set</span></em>, <em class="sig-param"><span class="n">set_to</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.gen_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>pass this this_set and this_set_to parameters, and it will return:
+indices,values,mask
+indices –&gt; gives the indices that are forced
+values –&gt; the values they are forced to
+mask –&gt; p[mask] are actually active in the fit</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.guess">
+<code class="sig-name descname">guess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Old code that we are preserving here – provide the guess for our
+parameters; by default, based on pseudoinverse</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.latex">
+<code class="sig-name descname">latex</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.latex" title="Permalink to this definition">¶</a></dt>
+<dd><p>show the latex string for the function, with all the symbols substituted by their values</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.output">
+<code class="sig-name descname">output</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.output" title="Permalink to this definition">¶</a></dt>
+<dd><p>give the fit value of a particular symbol, or a dictionary of all values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em><em> (</em><em>optional</em><em>)</em>) – name of the symbol.
+If no name is passed, then output returns a dictionary of the
+resulting values.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>retval</strong> – Either a dictionary of all the values, or the value itself</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict or float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.residual">
+<code class="sig-name descname">residual</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pars</span></em>, <em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">sigma</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.residual" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate the residual OR if data is None, return fake data</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.run_lambda">
+<code class="sig-name descname">run_lambda</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pars</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.run_lambda" title="Permalink to this definition">¶</a></dt>
+<dd><p>actually run the lambda function we separate this in case we want
+our function to involve something else, as well (e.g. taking a Fourier
+transform)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.set_guess">
+<code class="sig-name descname">set_guess</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.set_guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>set both the guess and the bounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>guesses</strong> (<em>dict of dicts</em>) – <p>each dict has a keyword giving the parameter and a value
+that comprises a dict with guesses (value) and/or constraints
+(min/max)</p>
+<p>Can be passed either as the only argument, or a kwarg called
+guesses, or as the kwargs themselves.</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyspecdata.lmfitdata.settoguess">
+<code class="sig-name descname">settoguess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.settoguess" title="Permalink to this definition">¶</a></dt>
+<dd><p>a debugging function, to easily plot the initial guess</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt id="pyspecdata.load_indiv_file">
 <code class="sig-prename descclassname">pyspecdata.</code><code class="sig-name descname">load_indiv_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">dimname</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">return_acq</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">add_sizes</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">add_dims</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">use_sweep</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">indirect_dimlabels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expno</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_indiv_file" title="Permalink to this definition">¶</a></dt>
@@ -9516,7 +9853,7 @@ inferred from the symbolic expression.</p></li>
 
 <dl class="py method">
 <dt id="pyspecdata.nddata.ft">
-<code class="sig-name descname">ft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">cosine</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.ft" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">cosine</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.ft" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs a Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
 <dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt\)</span></p>
@@ -9538,7 +9875,7 @@ dimension size up to the nearest integral power of 2.</p></li>
 useful for the specific case where the data has been captured on a
 sampling scope, and it’s severely aliased over.</p></li>
 <li><p><strong>cosine</strong> (<em>boolean</em>) – yields a sum of the fft and ifft, for a cosine transform</p></li>
-<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>False</em><em>)</em>) – return a result that is vector-unitary</p></li>
+<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>None</em><em>)</em>) – return a result that is vector-unitary</p></li>
 </ul>
 </dd>
 </dl>
@@ -9765,7 +10102,7 @@ structure.)</p></li>
 
 <dl class="py method">
 <dt id="pyspecdata.nddata.ift">
-<code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.ift" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.ift" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs an inverse Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
 <dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=\int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
@@ -9795,7 +10132,7 @@ do this.</p>
 </dd>
 </dl>
 </p></li>
-<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>False</em><em>)</em>) – return a result that is vector-unitary</p></li>
+<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>None</em><em>)</em>) – return a result that is vector-unitary</p></li>
 </ul>
 </dd>
 </dl>

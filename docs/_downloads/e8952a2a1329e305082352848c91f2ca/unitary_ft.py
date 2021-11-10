@@ -34,7 +34,10 @@ plot(
     alpha=0.5,
     label="vector norm=%g" % linalg.norm(fake_data.data),
 )
-fake_data.ift("t2", unitary=True)
+fake_data.ift(
+    "t2"
+)  # because we already used "unitary" for the ft, it knows the ift is unitary.
+#    In fact, passing "unitary" as a keyword argument will generate an error here
 logger.info(
     strm("vector norm of fake data, after unitary ift", linalg.norm(fake_data.data))
 )

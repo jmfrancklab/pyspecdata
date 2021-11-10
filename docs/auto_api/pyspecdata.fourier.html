@@ -212,7 +212,7 @@ It is ignored if you call a convolution on time-domain data.</p></li>
 <span id="pyspecdata-fourier-ft-module"></span><h2>pyspecdata.fourier.ft module<a class="headerlink" href="#module-pyspecdata.fourier.ft" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt id="pyspecdata.fourier.ft.ft">
-<code class="sig-prename descclassname">pyspecdata.fourier.ft.</code><code class="sig-name descname">ft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">cosine</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft.ft" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.fourier.ft.</code><code class="sig-name descname">ft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">cosine</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft.ft" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs a Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
 <dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt\)</span></p>
@@ -234,7 +234,7 @@ dimension size up to the nearest integral power of 2.</p></li>
 useful for the specific case where the data has been captured on a
 sampling scope, and it’s severely aliased over.</p></li>
 <li><p><strong>cosine</strong> (<em>boolean</em>) – yields a sum of the fft and ifft, for a cosine transform</p></li>
-<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>False</em><em>)</em>) – return a result that is vector-unitary</p></li>
+<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>None</em><em>)</em>) – return a result that is vector-unitary</p></li>
 </ul>
 </dd>
 </dl>
@@ -330,7 +330,7 @@ It is not the most efficient way to do this.</p>
 <span id="pyspecdata-fourier-ift-module"></span><h2>pyspecdata.fourier.ift module<a class="headerlink" href="#module-pyspecdata.fourier.ift" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt id="pyspecdata.fourier.ift.ift">
-<code class="sig-prename descclassname">pyspecdata.fourier.ift.</code><code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ift.ift" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.fourier.ift.</code><code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ift.ift" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs an inverse Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
 <dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=\int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
@@ -360,7 +360,7 @@ do this.</p>
 </dd>
 </dl>
 </p></li>
-<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>False</em><em>)</em>) – return a result that is vector-unitary</p></li>
+<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>None</em><em>)</em>) – return a result that is vector-unitary</p></li>
 </ul>
 </dd>
 </dl>
@@ -426,7 +426,7 @@ It is ignored if you call a convolution on time-domain data.</p></li>
 
 <dl class="py function">
 <dt id="pyspecdata.fourier.ft">
-<code class="sig-prename descclassname">pyspecdata.fourier.</code><code class="sig-name descname">ft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">cosine</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.fourier.</code><code class="sig-name descname">ft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">cosine</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs a Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
 <dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt\)</span></p>
@@ -448,7 +448,7 @@ dimension size up to the nearest integral power of 2.</p></li>
 useful for the specific case where the data has been captured on a
 sampling scope, and it’s severely aliased over.</p></li>
 <li><p><strong>cosine</strong> (<em>boolean</em>) – yields a sum of the fft and ifft, for a cosine transform</p></li>
-<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>False</em><em>)</em>) – return a result that is vector-unitary</p></li>
+<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>None</em><em>)</em>) – return a result that is vector-unitary</p></li>
 </ul>
 </dd>
 </dl>
@@ -528,7 +528,7 @@ It is not the most efficient way to do this.</p>
 
 <dl class="py function">
 <dt id="pyspecdata.fourier.ift">
-<code class="sig-prename descclassname">pyspecdata.fourier.</code><code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ift" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyspecdata.fourier.</code><code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">unitary</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ift" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs an inverse Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
 <dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=\int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
@@ -558,7 +558,7 @@ do this.</p>
 </dd>
 </dl>
 </p></li>
-<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>False</em><em>)</em>) – return a result that is vector-unitary</p></li>
+<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>None</em><em>)</em>) – return a result that is vector-unitary</p></li>
 </ul>
 </dd>
 </dl>

@@ -215,7 +215,10 @@ it before)</p>
     <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;vector norm=</span><span class="si">%g</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><a href="../../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fake_data</span></a></a><span class="o">.</span><span class="n">data</span><span class="p">),</span>
 <span class="p">)</span>
-<a href="../../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fake_data</span><span class="o">.</span><span class="n">ift</span></a></a><span class="p">(</span><span class="s2">&quot;t2&quot;</span><span class="p">,</span> <span class="n">unitary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a href="../../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fake_data</span><span class="o">.</span><span class="n">ift</span></a></a><span class="p">(</span>
+    <span class="s2">&quot;t2&quot;</span>
+<span class="p">)</span>  <span class="c1"># because we already used &quot;unitary&quot; for the ft, it knows the ift is unitary.</span>
+<span class="c1">#    In fact, passing &quot;unitary&quot; as a keyword argument will generate an error here</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
     <span class="n">strm</span><span class="p">(</span><span class="s2">&quot;vector norm of fake data, after unitary ift&quot;</span><span class="p">,</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><a href="../../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fake_data</span></a></a><span class="o">.</span><span class="n">data</span><span class="p">))</span>
 <span class="p">)</span>
@@ -225,7 +228,7 @@ it before)</p>
 <span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.359 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.304 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-indiv-funcs-unitary-ft-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e8952a2a1329e305082352848c91f2ca/unitary_ft.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">unitary_ft.py</span></code></a></p>

@@ -79,6 +79,14 @@ pyspecdata.latexscripts module
    :undoc-members:
    :show-inheritance:
 
+pyspecdata.lmfitdata module
+---------------------------
+
+.. automodule:: pyspecdata.lmfitdata
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pyspecdata.ndshape module
 -------------------------
 

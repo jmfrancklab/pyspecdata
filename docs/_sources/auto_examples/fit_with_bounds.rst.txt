@@ -30,18 +30,218 @@ to retype them every time.
  .. code-block:: none
 
     ----------  logging output to C:\Users\johnf\pyspecdata.0.log  ----------
-    --> fit_with_bounds.py(78):pyspecdata.core        gen_from_expr 2021-10-20 20:59:09,050
+    all symbols are {period, decay, A, x, shift} axis names are {x} variable names are ('x',) parameter names are ('period', 'A', 'decay', 'shift')
+    Getting symbolic function
+    --> fit_with_bounds.py(25):pyspecdata.core             <module> 2021-11-10 14:16:03,354
+    INFO: Functional Form: A*exp(-decay**2*x**2)*sin(shift + x/period)
+    --> lmfitdata.py(177):root            set_guess 2021-11-10 14:16:03,355
     INFO: fit param --- period
-    --> fit_with_bounds.py(78):pyspecdata.core        gen_from_expr 2021-10-20 20:59:09,051
-    INFO: fit param --- decay
-    --> fit_with_bounds.py(78):pyspecdata.core        gen_from_expr 2021-10-20 20:59:09,051
+    --> lmfitdata.py(177):root            set_guess 2021-11-10 14:16:03,355
     INFO: fit param --- A
-    --> fit_with_bounds.py(78):pyspecdata.core        gen_from_expr 2021-10-20 20:59:09,051
+    --> lmfitdata.py(177):root            set_guess 2021-11-10 14:16:03,355
+    INFO: fit param --- decay
+    --> lmfitdata.py(177):root            set_guess 2021-11-10 14:16:03,355
     INFO: fit param --- shift
-    --> fit_with_bounds.py(79):pyspecdata.core        gen_from_expr 2021-10-20 20:59:09,051
-    INFO: Parameters([('period', <Parameter 'period', value=2, bounds=[-inf:10]>), ('decay', <Parameter 'decay', value=0.02, bounds=[0.0:0.1]>), ('A', <Parameter 'A', value=13.0, bounds=[0.0:20]>), ('shift', <Parameter 'shift', value=0.0, bounds=[-1.5707963267948966:1.5707963267948966]>)])
-    --> fit_with_bounds.py(126):pyspecdata.core             <module> 2021-10-20 20:59:09,058
-    INFO: p_true is: Parameters([('A', <Parameter 'A', value=14.0, bounds=[-inf:inf]>), ('period', <Parameter 'period', value=5.4321, bounds=[-inf:inf]>), ('shift', <Parameter 'shift', value=0.12345, bounds=[-inf:inf]>), ('decay', <Parameter 'decay', value=0.01, bounds=[-inf:inf]>)])
+    --> lmfitdata.py(178):root            set_guess 2021-11-10 14:16:03,355
+    INFO: Parameters([('period', <Parameter 'period', value=5.4321, bounds=[-inf:inf]>), ('A', <Parameter 'A', value=14.0, bounds=[-inf:inf]>), ('decay', <Parameter 'decay', value=0.01, bounds=[-inf:inf]>), ('shift', <Parameter 'shift', value=0.12345, bounds=[-inf:inf]>)])
+    Getting symbolic function
+    all symbols are {period, decay, A, x, shift} axis names are {x} variable names are ('x',) parameter names are ('period', 'A', 'decay', 'shift')
+    --> lmfitdata.py(177):root            set_guess 2021-11-10 14:16:03,362
+    INFO: fit param --- period
+    --> lmfitdata.py(177):root            set_guess 2021-11-10 14:16:03,363
+    INFO: fit param --- A
+    --> lmfitdata.py(177):root            set_guess 2021-11-10 14:16:03,363
+    INFO: fit param --- decay
+    --> lmfitdata.py(177):root            set_guess 2021-11-10 14:16:03,363
+    INFO: fit param --- shift
+    --> lmfitdata.py(178):root            set_guess 2021-11-10 14:16:03,363
+    INFO: Parameters([('period', <Parameter 'period', value=2, bounds=[-inf:10]>), ('A', <Parameter 'A', value=13.0, bounds=[0.0:20]>), ('decay', <Parameter 'decay', value=0.02, bounds=[0.0:0.1]>), ('shift', <Parameter 'shift', value=0.0, bounds=[-1.5707963267948966:1.5707963267948966]>)])
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,366
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,366
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,367
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,367
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,368
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,368
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,368
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,369
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,369
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,369
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,369
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,370
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,370
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,370
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,370
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,371
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,371
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,371
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,371
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,372
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,372
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,372
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,372
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,373
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,373
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,373
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,373
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,374
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,374
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,375
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,375
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,376
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,376
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,376
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,376
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,377
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,377
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,377
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,378
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,378
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,378
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,378
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,379
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,379
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,379
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,379
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,380
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,380
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,380
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,381
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,381
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,382
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,382
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,383
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,383
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,383
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,383
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,384
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,384
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,384
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,385
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,385
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,386
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,386
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,386
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,386
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,386
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,387
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,387
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,387
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,387
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,388
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,388
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,388
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,388
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,389
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,389
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,389
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,389
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,390
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,390
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,390
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,390
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,390
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,391
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,392
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,392
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,393
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,393
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,393
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,394
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,395
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
+    --> lmfitdata.py(301):root           run_lambda 2021-11-10 14:16:03,396
+    INFO: <generator object lmfitdata.run_lambda.<locals>.<genexpr> at 0x0000024B00054EB0>
     [[Fit Statistics]]
         # fitting method   = leastsq
         # function evals   = 90
@@ -52,13 +252,13 @@ to retype them every time.
         Akaike info crit   = 3044.23758
         Bayesian info crit = 3065.49046
     [[Variables]]
-        period:  5.42001504 +/- 0.01376177 (0.25%) (init = 2), model_value = 5.4321
-        decay:   0.00979390 +/- 1.9852e-04 (2.03%) (init = 0.02), model_value = 0.01
-        A:       13.8601431 +/- 0.24258034 (1.75%) (init = 13), model_value = 14
-        shift:   0.12600174 +/- 0.02404378 (19.08%) (init = 0), model_value = 0.12345
+        period:  5.42001504 +/- 0.01376176 (0.25%) (init = 2)
+        A:       13.8601431 +/- 0.24258034 (1.75%) (init = 13)
+        decay:   0.00979390 +/- 1.9852e-04 (2.03%) (init = 0.02)
+        shift:   0.12600175 +/- 0.02404379 (19.08%) (init = 0)
     [[Correlations]] (unreported correlations are < 0.100)
         C(period, shift) =  0.800
-        C(decay, A)      =  0.576
+        C(A, decay)      =  0.576
 
 
 
@@ -80,134 +280,38 @@ to retype them every time.
 
     init_logging(level="debug")
     np.random.seed(15816)
-    # {{{ helper function(s)
-    class myfitclass (object):
-        def __init__(self):
-            self.expression = None
-        expression = (2+2)
-        def gen_from_expr(self,data, guesses={}):
-            """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
-
-            Parameters
-            ==========
-            expr: sympy expression
-            data: nddata
-                An nddata that has the same dimension labels as your data (or the data
-                itself). 
-                This is not manipulated, and is needed to determine which symbols in
-                expr correspond to dimension names.
-            guesses: dict
-                dictionary of keyword arguments for guesses (value) or constraints
-                (min/max)
-
-            Returns
-            =======
-            pars: lmfit.Parameters
-            fn: function
-                the fit function
-            """
-            # {{{ decide which symbols are parameters vs. variables
-            if self.expression is None:
-                raise ValueError("what expression are you fitting with??")
-            all_symbols = self.expression.atoms(sp.Symbol)
-            axis_names = set([sp.Symbol(j) for j in data.dimlabels])
-            variable_symbols = axis_names & all_symbols
-            parameter_symbols = all_symbols - variable_symbols
-            variable_symbols = tuple(variable_symbols)
-            variable_names = tuple([str(j) for j in variable_symbols])
-            parameter_symbols = tuple(parameter_symbols)
-            parameter_names = tuple([str(j) for j in parameter_symbols])
-            logger.debug(
-                strm(
-                    "all symbols are",
-                    all_symbols,
-                    "axis names are",
-                    axis_names,
-                    "variable names are",
-                    variable_names,
-                    "parameter names are",
-                    parameter_names,
-                )
-            )
-            # }}}
-            pars = Parameters()
-            for this_name in parameter_names:
-                kwargs = {}
-                if this_name in guesses.keys():
-                    logger.debug(strm("applying bounds for", this_name))
-                    kwargs.update(guesses[str(this_name)])
-                pars.add(this_name, **kwargs)
-            for j in pars:
-                logger.info(strm("fit param ---", j))
-            logger.info(strm(pars))
-            self.fn = lambdify(
-                variable_symbols + parameter_symbols,
-                self.expression,
-                modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
-            )
-            return pars
-
-
-        def residual(self, pars, x, data=None):
-            "calculate the residual OR if data is None, return fake data"
-            shift = pars["shift"]
-            if abs(shift) > pi / 2:
-                shift = shift - sign(shift) * pi
-            model = self.fn(x, **pars.valuesdict())
-            if data is None:
-                return model
-            return model - data
-
-
-    # }}}
-    thisfit = myfitclass()
-    # {{{ a lot of what's below depends on knowing what the shape and dimension labels of my data are, so define that here
-    x_vals = linspace(0, 250, 1500)
-    empty_data = nddata(x_vals, "x").copy(data=False)
-    # }}}
-    # {{{making sympy expression
-    A, shift, period, decay, x = sp.symbols("A shift period decay x")
-    thisfit.expression = (A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2)))
-    fit_params = thisfit.gen_from_expr(
-        empty_data,
-        guesses={
-            "A": dict(value=13.0, max=20, min=0.0),
-            "shift": dict(value=0.0, max=pi / 2.0, min=-pi / 2.0),
-            "period": dict(value=2, max=10),
-            "decay": dict(value=0.02, max=0.10, min=0.00),
-        },
-    )
-    # }}}
-
-
-    # {{{ nddata to generate the fake data
-    # {{{ create the "true" parameters for the fake data
+    fl = figlist_var()
+    A, shift, period, decay, x = sp.symbols("A shift period decay x", real=True)
+    # create an empty dataset that we will drop the fake data into
+    thisfit = lmfitdata(nddata(r_[0:250:1500j], "x"))
+    thisfit.functional_form = A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2))
+    logger.info(strm("Functional Form:", thisfit.functional_form))
+    # {{{ create the "true" parameters for the fake data by pretending like
+    #     the true values are a guess, and then outputting the guess data
     true_values = {"A": 14.0, "period": 5.4321, "shift": 0.12345, "decay": 0.01000}
-    p_true = Parameters()
-    for k, v in true_values.items():
-        p_true.add(k, value=v)
-    logger.info(strm("p_true is:", p_true))
-    # }}}
-    mydata = empty_data.copy(data=False)
-    mydata.data = thisfit.residual(p_true, mydata.getaxis("x"))
+    thisfit.set_guess(true_values)
+    thisfit.settoguess()
+    mydata = thisfit.eval()
     mydata.add_noise(2.8)
     # }}}
-    # {{{ nddata of the guess
-    guess = empty_data.copy(data=False)
-    guess.data = thisfit.residual(fit_params, empty_data.getaxis("x"))
+    # {{{Making guess data
+    newfit = lmfitdata(mydata)
+    newfit.functional_form = thisfit.functional_form
+    newfit.set_guess(
+        A=dict(value=13.0, max=20, min=0.0),
+        shift=dict(value=0.0, max=pi / 2.0, min=-pi / 2.0),
+        period=dict(value=2, max=10),
+        decay=dict(value=0.02, max=0.10, min=0.00),
+    )
+    newfit.settoguess()
+    guess = newfit.eval(100)
     # }}}
     # {{{ run the fit and generate nddata
-    out = minimize(
-        thisfit.residual, fit_params, args=(mydata.getaxis("x"),), kws={"data": mydata.data}
-    )
-    fit = empty_data.copy(data=False)
-    fit.data = thisfit.residual(out.params, empty_data.getaxis("x"))
-    # }}}
-
-    # {{{ report the fit and generate the plot
-    report_fit(out, show_correl=True, modelpars=p_true)
+    # again, now that this is a class, why is this not handled by the fit method?
+    newfit.fit()
+    # {{{plot the data with fits and guesses
     plot(mydata, "ro", label="data")
-    plot(fit, "b", alpha=0.5, label="fit")
+    plot(newfit.eval(100), "b", alpha=0.5, label="fit")
     plot(guess, "g--", label="guess")
     # }}}
     plt.legend()
@@ -216,7 +320,7 @@ to retype them every time.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.002 seconds)
+   **Total running time of the script:** ( 0 minutes  0.231 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fit_with_bounds.py:

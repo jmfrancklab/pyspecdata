@@ -57,7 +57,10 @@ it before)
         alpha=0.5,
         label="vector norm=%g" % linalg.norm(fake_data.data),
     )
-    fake_data.ift("t2", unitary=True)
+    fake_data.ift(
+        "t2"
+    )  # because we already used "unitary" for the ft, it knows the ift is unitary.
+    #    In fact, passing "unitary" as a keyword argument will generate an error here
     logger.info(
         strm("vector norm of fake data, after unitary ift", linalg.norm(fake_data.data))
     )
@@ -69,7 +72,7 @@ it before)
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.359 seconds)
+   **Total running time of the script:** ( 0 minutes  0.304 seconds)
 
 
 .. _sphx_glr_download_auto_examples_indiv_funcs_unitary_ft.py:
