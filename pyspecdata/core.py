@@ -118,6 +118,7 @@ epsilon_0 = 8.854187817e-12
 hbar = 6.6260695729e-34/2./pi
 N_A = 6.02214179e23
 gammabar_H = 4.258e7
+gammabar_D = gammabar_H*61.422391/400.13 # ratio from Bruker BF
 gammabar_e = 2.807e10 # this is for a nitroxide
 #}}}
 def det_oom(data_to_test):
