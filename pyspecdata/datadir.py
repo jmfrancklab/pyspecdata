@@ -258,15 +258,16 @@ def getDATADIR(*args,**kwargs):
         # {{{ determine the experiment subdirectory
         exp_directory = _my_config.get_setting(exp_type, section='ExpTypes')
         if exp_directory is None:
-            exp_directory = walk_and_grab_best_match(base_data_dir)
+            logger.debug(strm("I found no directory matches for exp_type "+exp_type+", so now I want to look inside all the known exptypes"))
+            for t,d in dict(_my_config._config_parser.items('ExpTypes')).items():
+                exp_directory = walk_and_grab_best_match(d)
+                if exp_directory is not None:
+                    break
             if exp_directory is None:
-                logger.debug(strm("I found no directory matches for exp_type "+exp_type+", so now I want to look inside all the known exptypes"))
-                for t,d in dict(_my_config._config_parser.items('ExpTypes')).items():
-                    exp_directory = walk_and_grab_best_match(d)
-                    if exp_directory is not None:
-                        break
-                if exp_directory is None:
-                    raise ValueError(strm("I found no directory matches for exp_type "+exp_type+", even after searching inside all the known exptypes"))
+                raise ValueError(strm("I found no directory matches for exp_type "+exp_type+", even after searching inside all the known exptypes"))
+        if exp_directory is None:
+            logger.debug(strm("I found no directory matches for exp_type "+exp_type+", after walking the known exptypes, so I'm going to walk data_directory"))
+            exp_directory = walk_and_grab_best_match(base_data_dir)
         retval = (exp_directory,) + args
         # }}}
     else:
