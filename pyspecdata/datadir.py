@@ -14,7 +14,7 @@ from subprocess import call as subprocess_call
 logger = logging.getLogger('pyspecdata.datadir')
 class MyConfig(object):
     r'''Provides an easy interface to the pyspecdata configuration file.
-    Only one instance _my_config should be created -- this instance is used by
+    Only one instance pyspec_config should be created -- this instance is used by
     the other functions in this module.
     '''
     def __init__(self):
@@ -124,17 +124,17 @@ class MyConfig(object):
             logger.debug(strm("I pulled",this_key,"from the configuration file -- it is",retval))
         self.config_vars[this_key] = retval
         return retval
-_my_config = MyConfig()
+pyspec_config = MyConfig()
 def get_notebook_dir(*args):
     r'''Returns the notebook directory.  If arguments are passed, it returns the directory underneath the notebook directory, ending in a trailing (back)slash
     
     It is determined by a call to `MyConfig.get_setting` with the environment variable set to ``PYTHON_NOTEBOOK_DIR`` and default ``~/notebook``.
     '''
-    base_notebook_dir = _my_config.get_setting('notebook_directory',environ = 'PYTHON_NOTEBOOK_DIR',default = '~/notebook')
+    base_notebook_dir = pyspec_config.get_setting('notebook_directory',environ = 'PYTHON_NOTEBOOK_DIR',default = '~/notebook')
     if not os.path.exists(base_notebook_dir):
         base_notebook_dir = os.path.expanduser(base_notebook_dir)
         if not os.path.exists(base_notebook_dir):
-            raise ValueError("It seems that your notebook directory (the main directory containing your latex files) isn't either (1) called \"notebook\" and immediately underneath your home directory or (2) registered in the [General] block of your "+_my_config.config_location+"file.\nThis probably means that you want to add a line like\nnotebook_directory = [path to your main notebook directory here]\nTo the [General] block of "+_my_config.config_location)
+            raise ValueError("It seems that your notebook directory (the main directory containing your latex files) isn't either (1) called \"notebook\" and immediately underneath your home directory or (2) registered in the [General] block of your "+pyspec_config.config_location+"file.\nThis probably means that you want to add a line like\nnotebook_directory = [path to your main notebook directory here]\nTo the [General] block of "+pyspec_config.config_location)
     retval = (base_notebook_dir,) + args
     if len(retval[-1]) != 0:
         retval = retval + ('',)
@@ -207,7 +207,7 @@ def getDATADIR(*args,**kwargs):
             can be rather complex, and otherwise it would take forever).
     '''
     exp_type = process_kwargs([('exp_type',None)],kwargs)
-    base_data_dir = _my_config.get_setting('data_directory',environ = 'PYTHON_DATA_DIR',default = '~/experimental_data')
+    base_data_dir = pyspec_config.get_setting('data_directory',environ = 'PYTHON_DATA_DIR',default = '~/experimental_data')
     if exp_type is not None and '/' in exp_type:
         exp_type = os.path.normpath(exp_type)
     # the following is from https://stackoverflow.com/questions/229186/os-walk-without-digging-into-directories-below
@@ -250,18 +250,18 @@ def getDATADIR(*args,**kwargs):
         else:
             return None
         # {{{ I would like to do something like the following, but it's not allowed in either ConfigParser or SafeConfigParser
-        #base_dir = _my_config.get_setting('ExpTypes','base')
-        #if base_dir is None: _my_config.set_setting('ExpTypes','base',base_dir)
+        #base_dir = pyspec_config.get_setting('ExpTypes','base')
+        #if base_dir is None: pyspec_config.set_setting('ExpTypes','base',base_dir)
         #if base_dir in exp_directory: exp_directory = [exp_directory.replace(base_dir,'%(base)s')]
         # }}}
-        _my_config.set_setting('ExpTypes',exp_type,exp_directory)
+        pyspec_config.set_setting('ExpTypes',exp_type,exp_directory)
         return exp_directory
     if exp_type is not None:
         # {{{ determine the experiment subdirectory
-        exp_directory = _my_config.get_setting(exp_type, section='ExpTypes')
+        exp_directory = pyspec_config.get_setting(exp_type, section='ExpTypes')
         if exp_directory is None:
             logger.debug(strm("I found no directory matches for exp_type "+exp_type+", so now I want to look inside all the known exptypes"))
-            for t,d in dict(_my_config._config_parser.items('ExpTypes')).items():
+            for t,d in dict(pyspec_config._config_parser.items('ExpTypes')).items():
                 exp_directory = walk_and_grab_best_match(d)
                 if exp_directory is not None:
                     break
@@ -381,5 +381,5 @@ def register_directory():
     exp_directory = os.path.normpath(os.path.expanduser(exp_directory))
     _,exp_type = os.path.split(exp_directory)
     logger.debug(strm("trying to register directory",exp_directory,"as",exp_type))
-    _my_config.set_setting('ExpTypes',exp_type,exp_directory)
+    pyspec_config.set_setting('ExpTypes',exp_type,exp_directory)
     return

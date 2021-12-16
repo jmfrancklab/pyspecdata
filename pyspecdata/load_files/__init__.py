@@ -20,7 +20,7 @@ from . import acert
 from . import load_cary
 from .open_subpath import open_subpath
 from ..datadir import getDATADIR
-from ..datadir import _my_config,log_fname
+from ..datadir import pyspec_config,log_fname
 from ..general_functions import process_kwargs,strm
 from ..core import *
 from builtins import any # numpy has an "any" function, which is very annoying
@@ -70,7 +70,7 @@ def search_filename(searchstring,exp_type,
         if os.path.isdir(inp_directory):
             files = re.findall('.*' + searchstring + '.*','\n'.join(dirlist))
         else:
-            raise IOError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s\nYou might need to change the value associated with this exp_type in %s"%(inp_directory,searchstring,_my_config.config_location))
+            raise IOError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s\nYou might need to change the value associated with this exp_type in %s"%(inp_directory,searchstring,pyspec_config.config_location))
         logger.debug(strm("after running findall, files is",files))
         if len(files) == 0:
             files = []
