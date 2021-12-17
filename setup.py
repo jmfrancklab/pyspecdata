@@ -44,6 +44,7 @@ if on_rtd:
             "h5py",
             "matplotlib",
             "pillow",
+            "lmfit",
             ],
     )
 else:
@@ -64,6 +65,7 @@ else:
             "h5py",
             "matplotlib",
             "pillow",
+            "lmfit",
             ],
         ext_modules = ext_modules,
         entry_points=dict(console_scripts=
