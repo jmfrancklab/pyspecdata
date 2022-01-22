@@ -7076,11 +7076,10 @@ class nddata_hdf5 (nddata):
                     temp = len(temp)
                 det_shape.append(temp)
             try:
-                self.data = self.data.reshape(tuple([len(self.getaxis(x)) for x in mydimlabels]))
+                self.data = self.data.reshape(detshape)
             except:
                 raise RuntimeError(strm("The data is of shape", self.data.shape,
-                    "and I try to reshape it into", tuple([len(self.getaxis(x))
-                        for x in mydimlabels]), "corresponding to the dimensions",mydimlabels,"--> this fails!"))
+                    "and I try to reshape it into", det_shape, "corresponding to the dimensions",mydimlabels,"--> this fails!"))
         #}}}
         for remainingattribute in list(datadict.keys()):
             self.__setattr__(remainingattribute,datadict[remainingattribute])
