@@ -3829,6 +3829,8 @@ class nddata (object):
                 return result
     def __truediv__(self,arg):
         return self.__div__(arg)
+    def __rtruediv__(self,arg):
+        return self.__rdiv__(arg)
     def __div__(self,arg):
         if np.isscalar(arg):
             A = self.copy()
