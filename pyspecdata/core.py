@@ -7078,7 +7078,7 @@ class nddata_hdf5 (nddata):
                     temp = len(temp)
                 det_shape.append(temp)
             try:
-                self.data = self.data.reshape(detshape)
+                self.data = self.data.reshape(det_shape)
             except:
                 raise RuntimeError(strm("The data is of shape", self.data.shape,
                     "and I try to reshape it into", det_shape, "corresponding to the dimensions",mydimlabels,"--> this fails!"))
