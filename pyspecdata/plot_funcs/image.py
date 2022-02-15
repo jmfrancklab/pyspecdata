@@ -3,7 +3,8 @@ from numpy import r_,c_,ix_,nan
 import numpy as np
 from ..ndshape import ndshape_base as ndshape
 from pylab import gca,sca,imshow,xlabel,ylabel,title,colorbar,setp
-def image(A,x=[],y=[],**kwargs):
+import logging
+def image(A,x=[],y=[],allow_nonuniform=True,**kwargs):
     r"Please don't call image directly anymore -- use the image method of figurelist"
     x_inverted = False
     A.squeeze()# drop any singleton dimensions, which cause problems
@@ -40,13 +41,17 @@ def image(A,x=[],y=[],**kwargs):
             try:
                 check_ascending_axis(A.getaxis(thisaxis), allow_descending=True)
             except:
-                raise ValueError("You are not allowed to use image on data that"
-                " doesn't have a uniformly spaced axis -- it is likely a"
-                " misrepresentation of the data you are looking at."
-                " For example, if you are looking at NMR data with a set of"
-                " variable delays that are unevenly spaced, relabel this axis"
-                " by index number --> .C.setaxis('%s','#').set_units('%s','scan"
-                " #').\nThen you have an accurate representation of your data"%(2*(thisaxis,)))
+                if allow_nonuniform:
+                    logging.debug("Automatically changed to numbered axis along %s"%thisaxis)
+                    A.setaxis(thisaxis,'#').set_units(thisaxis,"#")
+                else:
+                    raise ValueError("You are not allowed to use image on data that"
+                    " doesn't have a uniformly spaced axis -- it is likely a"
+                    " misrepresentation of the data you are looking at."
+                    " For example, if you are looking at NMR data with a set of"
+                    " variable delays that are unevenly spaced, relabel this axis"
+                    " by index number --> .C.setaxis('%s','#').set_units('%s','scan"
+                    " #').\nThen you have an accurate representation of your data"%(2*(thisaxis,)))
         setlabels = True
         templabels = list(A.dimlabels)
         if A.get_prop('x_inverted'):
