@@ -4,6 +4,7 @@ from .load_files import *
 from .figlist import *
 from .nnls import *
 from .lmfitdata import lmfitdata
+from .lmfitdata import lmfitglobal
 
 #import numpy
 

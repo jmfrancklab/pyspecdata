@@ -7,6 +7,17 @@ from .core import nddata, normal_attrs, issympy, ndshape, sympy_latex, sympy_sym
 from .general_functions import strm
 import logging, warnings
 
+class lmfitglobal(nddata):
+    r"""Based on lmfitdata class, new class which
+    will perform global fit on multitude of
+    lmfitdata classes
+    """
+    def __init__(self, *args, **kwargs):
+        self.datasets = {'data':args[0],
+                'data_params':args[1]}
+        self.global_fns = args[2]
+        return
+
 
 class lmfitdata(nddata):
     r"""Inherits from an nddata and enables curve fitting through use of a sympy expression.
@@ -483,3 +494,4 @@ class lmfitdata(nddata):
         raise ValueError(
             "You cannot set the string directly -- change the functional_form property instead!"
         )
+
