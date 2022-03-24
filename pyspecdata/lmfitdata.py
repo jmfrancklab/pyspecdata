@@ -13,9 +13,20 @@ class lmfitglobal(nddata):
     lmfitdata classes
     """
     def __init__(self, *args, **kwargs):
+        # pull in lmfitdata and power axis
         self.datasets = {'data':args[0],
                 'data_params':args[1]}
+        # deal with fit axis and all init from fitdata
+        fit_axis = nddata(args[1],'p')
+
+        self.fit_axis = fit_axis
+        self.set_to = None
+        self.set_indices = None
+        self.active_indices = None
+
         self.global_fns = args[2]
+        self.expression = self.global_fns
+
         return
 
 
