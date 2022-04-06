@@ -2542,7 +2542,7 @@ def plot(*args,**kwargs):
         try:
             yaxislabels = myy.getaxis(myy.dimlabels[last_not_longest])
         except:
-            pass
+            yaxislabels = None
         # at this point, if there is no axis label, it will break and go to pass
         if yaxislabels is not None:
             if len(yaxislabels) > 0:
@@ -2575,7 +2575,7 @@ def plot(*args,**kwargs):
         myx = np.array(myx)
     # }}}
     #{{{ semilog where appropriate
-    if (myx is not None) and (len(myx)>1) and all(myx>0): # by doing this and making myplotfunc global, we preserve the plot style if we want to tack on one point
+    if (myx is not None) and (len(myx)>1) and all(myx>0.0): # by doing this and making myplotfunc global, we preserve the plot style if we want to tack on one point
         try:
             b = np.diff(np.log10(myx))
         except Exception as e:

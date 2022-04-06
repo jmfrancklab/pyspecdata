@@ -266,7 +266,11 @@ def getDATADIR(*args,**kwargs):
                 if exp_directory is not None:
                     break
             if exp_directory is None:
-                raise ValueError(strm("I found no directory matches for exp_type "+exp_type+", even after searching inside all the known exptypes"))
+                logger.debug(strm("I found no directory matches for exp_type "+exp_type+", even after searching inside all the known exptypes"))
+                d = dict(pyspec_config._config_parser.items('General'))['data_directory']
+                exp_directory = walk_and_grab_best_match(d)
+                if exp_directory is None:
+                    raise ValueError("even after walking the whole data directory, I can't find a match for "+exp_type)
         if exp_directory is None:
             logger.debug(strm("I found no directory matches for exp_type "+exp_type+", after walking the known exptypes, so I'm going to walk data_directory"))
             exp_directory = walk_and_grab_best_match(base_data_dir)
