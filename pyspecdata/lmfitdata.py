@@ -314,6 +314,21 @@ class lmfitdata(nddata):
         return self.fitfunc_multiarg_v2(
             *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
         )
+    def jacobian(self,pars): 
+        "cache the symbolic jacobian and/or use it to compute the numeric result"
+        if not hasattr(self.jacobian_symbolic):
+            self.jacobian_symbolic = [sp.diff(self.expression,j,1) for j in self.parameter_symbols]
+            self.jacobian_lambda = [ sp.lambdify(
+                self.variable_symbols + self.parameter_symbols,
+                j,
+                modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
+                ) for j in jacobian_symbolic ]
+        jacobian_array = array([
+            j(
+                *(self.getaxis(k) for k in self.variable_names), **pars.valuesdict()
+                )
+            for j in self.jacobian_lambda])
+        return jacobian_array
 
     def residual(self, pars, x, y, sigma=None):
         "calculate the residual OR if data is None, return fake data"
