@@ -31,18 +31,8 @@ signal_amp.ft('t2', shift=True)
 with figlist_var() as fl:
     fl.next('1D data')
     fl.plot(signal_amp.real) # without .real, newer versions of matplotlib raise a warning
-    generated_error = False
-    # If I were to just run the following command (not nested in try/except)
-    fl.next('this figure intentionally blank!')
-    try:
-        fl.image(signal_amp)
-    except:
-        generated_error = True
-    # (try it).
-    # I would get an error that tells me to do this
-    fl.next('image plot -- good axis')
-    fl.image(signal_amp.C.setaxis('vd','#').set_units('vd','scan #'))
-    assert generated_error
+    fl.next("image plot")
+    fl.image(signal_amp)
     fig, ax_list = subplots(1,3, figsize=(20,5))
     # Finally demonstrate how we can control the scale of different images
     # relative to each other.

@@ -52,7 +52,7 @@ class lmfitdata(nddata):
         r"""A property of the myfitclass class which is set by the user,
         takes as input a sympy expression of the desired fit
         expression"""
-        print("Getting symbolic function")
+        logging.debug("Getting symbolic function")
         return self.expression
 
     @functional_form.setter
@@ -68,19 +68,23 @@ class lmfitdata(nddata):
         ), "for now, the functional form must be a sympy expression"
         self.expression = this_expr
         # {{{ decide which symbols are parameters vs. variables
+        #     here, I discriminate "names" which are strings from "symbols"
         if self.expression is None:
             raise ValueError("what expression are you fitting with??")
         all_symbols = self.expression.atoms(sp.Symbol)
-        axis_names = set([sp.Symbol(j, real=True) for j in self.dimlabels])
-        variable_symbols = axis_names & all_symbols
-        self.parameter_symbols = all_symbols - variable_symbols
-        this_axis = variable_symbols
-        variable_symbols = tuple(variable_symbols)
-        self.variable_names = tuple([str(j) for j in variable_symbols])
-        parameter_symbols = tuple(self.parameter_symbols)
-        self.parameter_names = tuple([str(j) for j in self.parameter_symbols])
+        all_symbol_names = set([str(j) for j in all_symbols])
+        axis_names = set(self.dimlabels)
+        variable_symbol_names = axis_names & all_symbol_names
+        parameter_symbol_names = all_symbol_names - variable_symbol_names
+        this_axis = variable_symbol_names
+        self.variable_names = tuple(variable_symbol_names)
+        self.variable_symbols = [j for j in all_symbols if str(j) in
+                variable_symbol_names]
+        self.parameter_symbols = [j for j in all_symbols if str(j) in
+                parameter_symbol_names]
+        self.parameter_names = tuple([str(j) for j in
+            self.parameter_symbols])
         self.fit_axis = set(self.dimlabels)
-        self.symbol_list = [str(j) for j in parameter_symbols]
         logging.debug(
             strm(
                 "all symbols are",
@@ -93,7 +97,7 @@ class lmfitdata(nddata):
                 self.parameter_names,
             )
         )
-        print(
+        logging.debug(
             "all symbols are",
             all_symbols,
             "axis names are",
@@ -103,18 +107,16 @@ class lmfitdata(nddata):
             "parameter names are",
             self.parameter_names,
         )
-        self.symbolic_vars = all_symbols - axis_names
         self.fit_axis = list(self.fit_axis)[0]
         # }}}
-        self.symbolic_vars = list(self.symbolic_vars)
-        args = self.symbolic_vars + [str(*this_axis)]
+        args = self.parameter_symbols + [str(*this_axis)]
         self.fitfunc_multiarg = sp.lambdify(
             args,
             self.expression,
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
         )
         self.fitfunc_multiarg_v2 = sp.lambdify(
-            variable_symbols + parameter_symbols,
+            self.variable_symbols + self.parameter_symbols,
             self.expression,
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
         )
@@ -135,7 +137,7 @@ class lmfitdata(nddata):
         if self.set_indices is not None:
             # {{{uncollapse the function
             temp = p.copy()
-            p = np.zeros(len(self.symbol_list))
+            p = np.zeros(len(self.parameter_names))
             p[self.active_mask] = temp
             # }}}
             p[self.set_indices] = self.set_to
@@ -161,8 +163,11 @@ class lmfitdata(nddata):
         else:
             guesses = kwargs
         self.guess_dict = {}
+        logging.debug(strm("guesses",guesses))
+        logging.debug(strm("pars",self.pars.keys()))
         for this_name in self.pars.keys():
             if this_name in guesses.keys():
+                logging.debug(strm("adding",this_name))
                 if type(guesses[this_name]) is dict:
                     self.guess_dict[this_name] = {}
                     for k, v in guesses[this_name].items():
@@ -173,9 +178,11 @@ class lmfitdata(nddata):
                     self.guess_dict[this_name] = {"value":guesses[this_name]}
                 else:
                     raise ValueError("what are the keys to your guesses???")
+                logging.debug(strm("now dict is",self.guess_dict))
         for j in self.pars:
-            logging.info(strm("fit param ---", j))
-        logging.info(strm(self.pars))
+            logging.debug(strm("fit param ---", j))
+        logging.debug(strm(self.pars))
+        logging.debug(strm(self.guess_dict))
         return
 
     def guess(self):
@@ -257,6 +264,12 @@ class lmfitdata(nddata):
         # {{{keep all axis labels the same, except the expanded one
         newdata.axis_coords = list(newdata.axis_coords)
         newdata.labels([self.fit_axis], list([taxis]))
+        if self.get_units(self.fit_axis) is not None:
+            newdata.set_units(self.fit_axis,
+                    self.get_units(self.fit_axis))
+        if self.get_error(self.fit_axis) is not None:
+            newdata.set_error(self.fit_axis,
+                    self.get_error(self.fit_axis))
         # }}}
         newdata.data[:] = self.fitfunc(p, taxis).flatten()
         return newdata
@@ -285,12 +298,11 @@ class lmfitdata(nddata):
             self.pars,
             args=(x, y, sigma),
         )
-        # can you capture the following as a string? maybe return it?
-        report_fit(out, show_correl=True)
         # {{{ capture the result for ouput, etc
-        self.fit_coeff = [out.params[j].value for j in self.symbol_list]
+        self.fit_coeff = [out.params[j].value for j in self.parameter_names]
         assert out.success
-        self.covariance = out.covar
+        if hasattr(out,'covar'):
+            self.covariance = out.covar
         # }}}
         return
 
@@ -298,7 +310,7 @@ class lmfitdata(nddata):
         """actually run the lambda function we separate this in case we want
         our function to involve something else, as well (e.g. taking a Fourier
         transform)"""
-        logging.info(strm(self.getaxis(j) for j in self.variable_names))
+        logging.debug(strm(self.getaxis(j) for j in self.variable_names))
         return self.fitfunc_multiarg_v2(
             *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
         )
@@ -370,8 +382,8 @@ class lmfitdata(nddata):
         logging.debug("*** *** *** *** *** ***")
         logging.debug(str(this_set))
         logging.debug("*** *** *** *** *** ***")
-        set_indices = list(map(self.symbol_list.index, this_set))
-        active_mask = np.ones(len(self.symbol_list), dtype=bool)
+        set_indices = list(map(self.parameter_names.index, this_set))
+        active_mask = np.ones(len(self.parameter_names), dtype=bool)
         active_mask[set_indices] = False
         return set_indices, set_to, active_mask
 
@@ -395,23 +407,23 @@ class lmfitdata(nddata):
         p = self.fit_coeff.copy()
         if self.set_indices is not None:
             temp = p.copy()
-            p = np.zeros(len(self.symbol_list))
+            p = np.zeros(len(self.parameter_names))
             p[self.active_mask] = temp
             p[self.set_indices] = self.set_to
         if len(name) == 1:
             try:
-                return p[self.symbol_list.index(name[0])]
+                return p[self.parameter_names.index(name[0])]
             except:
                 raise ValueError(
                     strm(
                         "While running output: couldn't find",
                         name,
                         "in",
-                        self.symbol_list,
+                        self.parameter_names,
                     )
                 )
         elif len(name) == 0:
-            return {self.symbol_list[j]: p[j] for j in range(len(p))}
+            return {self.parameter_names[j]: p[j] for j in range(len(p))}
         else:
             raise ValueError(
                 strm("You can't pass", len(name), "arguments to .output()")
@@ -431,8 +443,8 @@ class lmfitdata(nddata):
         #     e.g. numbers in the denominator, so it ends up changing the
         #     way the function looks.  Though this is a pain, it's
         #     better.
-        for j in range(0, len(self.symbol_list)):
-            symbol = sympy_latex(self.symbolic_vars[j]).replace("$", "")
+        for j in range(0, len(self.parameter_names)):
+            symbol = sympy_latex(self.parameter_symbols[j]).replace("$", "")
             logging.debug(strm('DEBUG: replacing symbol "', symbol, '"'))
             location = retval.find(symbol)
             while location != -1:

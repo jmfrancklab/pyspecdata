@@ -28,8 +28,9 @@ d.chunk_auto('harmonic','phase')
 
 print(ndshape(d))
 
-plot(d['phase',0], alpha=0.5)
-plot(d['phase',1], ':', alpha=0.5)
+figure(1)
+plot(d['phase',0]['Microwave Power',3], alpha=0.5)
+plot(d['phase',1]['Microwave Power',3], ':', alpha=0.5)
 title("1D Data with Multiple Harmonics")
 
 # %%
@@ -38,7 +39,7 @@ title("1D Data with Multiple Harmonics")
 d = find_file("Power.*Sat.*200303",
         exp_type='francklab_esr/Sam')
 d.chunk_auto('harmonic','phase')
-figure()
+figure(2)
 image(d['harmonic',0]['phase',0].C.setaxis('Microwave Power','#').set_units('Microwave Power','scan #'))
 title("2D Power Saturation")
 plt.gca().set_aspect('auto')

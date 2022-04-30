@@ -44,6 +44,7 @@ if _figure_mode_setting == 'latex':
 # }}} -- continued below
 from .general_functions import inside_sphinx
 import numpy as np
+import time
 from numpy import r_,c_,nan,inf,newaxis
 from numpy import pi
 from matplotlib.pyplot import rc, rcParams, plot, figure, title, text, show
@@ -1798,7 +1799,7 @@ class figlist(object):
             ('black',0.9),
             ('env',''),
             ('mlab','BLANK'),
-            ('file_name','BLANK'),
+            ('file_name',f'randgen{int(time.time()*10):d}.pdf'),
             ('line_spacing','BLANK'),
             ],
                 kwargs, pass_through=True)
@@ -2472,8 +2473,6 @@ def plot(*args,**kwargs):
     x_inverted = False
     #{{{ parse nddata
     if isinstance(myy,nddata):
-        if len(myy.dimlabels) > 2:
-            raise ValueError("plot with more than 2D is not really supported, and errorbar plots will fail, so collapse your dims!")
         myy = myy.copy()
         if myy.get_error() is not None:
             logging.debug(strm("shapes at top of function",ndshape(myy), myy.data.shape, myy.data_error.shape))
