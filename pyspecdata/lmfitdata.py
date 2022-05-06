@@ -13,22 +13,67 @@ class lmfitglobal(nddata):
     lmfitdata classes
     """
     def __init__(self, *args, **kwargs):
-        # pull in lmfitdata and power axis
-        self.datasets = {'data':args[0],
-                'data_params':args[1]}
-        # deal with fit axis and all init from fitdata
-        fit_axis = nddata(args[1],'p')
+        self.global_dict = args[0]
+        self.global_params = args[0].keys()
 
-        self.fit_axis = fit_axis
-        self.set_to = None
-        self.set_indices = None
-        self.active_indices = None
-
-        self.global_fns = args[2]
-        self.expression = self.global_fns
-
+        self.datasets = []
+        self.params_list = []
         return
 
+    def append(self, dataset, dataset_param):
+        self.datasets.append(dataset)
+        self.params_list.append(dataset_param)
+
+        temp_vars = dataset.variable_names
+        temp_params = dataset.parameter_names
+
+        global_list = []
+        local_list = []
+
+        print(self.global_params)
+
+        for i,j in enumerate(temp_vars):
+            if j in self.global_params:
+                    print("Detected global param")
+                    global_list.append(j)
+            else:
+                    print("Detected local param")
+                    local_list.append(j)
+        for i,j in enumerate(temp_params):
+            if j in self.global_params:
+                    print("Detected global param")
+                    global_list.append(j)
+            else:
+                    print("Detected local param")
+                    local_list.append(j)
+
+        #{{{
+        #for i,j in enumerate(temp_vars):
+        #    for k,l in enumerate(self.global_params):
+        #        if j == l:
+        #            print("Detected global param")
+        #            global_list.append(j)
+        #        else:
+        #            print("Detected local param")
+        #            if j in local_list:
+        #                None
+        #            else:
+        #                local_list.append(j)
+        #for i,j in enumerate(temp_params):
+        #    for k,l in enumerate(self.global_params):
+        #        if j == l:
+        #            print("Detected global param")
+        #            global_list.append(j)
+        #        else:
+        #            print("Detected local param")
+        #            if j in local_list:
+        #                None
+        #            else:
+        #                local_list.append(j)
+        #}}}
+        print("Global params",global_list)
+        print("Local params",local_list)
+        return
 
 class lmfitdata(nddata):
     r"""Inherits from an nddata and enables curve fitting through use of a sympy expression.
