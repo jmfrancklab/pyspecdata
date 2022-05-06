@@ -17,12 +17,12 @@ class lmfitglobal(nddata):
         self.global_params = args[0].keys()
 
         self.datasets = []
-        self.params_list = []
+        self.var_list = []
         return
 
-    def append(self, dataset, dataset_param):
+    def append(self, dataset, dataset_var):
         self.datasets.append(dataset)
-        self.params_list.append(dataset_param)
+        self.var_list.append(dataset_var)
 
         temp_vars = dataset.variable_names
         temp_params = dataset.parameter_names
