@@ -27,52 +27,30 @@ class lmfitglobal(nddata):
         temp_vars = dataset.variable_names
         temp_params = dataset.parameter_names
 
-        global_list = []
-        local_list = []
-
-        print(self.global_params)
+        global_params_list = []
+        local_params_list = []
 
         for i,j in enumerate(temp_vars):
             if j in self.global_params:
                     print("Detected global param")
-                    global_list.append(j)
+                    global_params_list.append(j)
             else:
                     print("Detected local param")
-                    local_list.append(j)
+                    local_params_list.append(j)
         for i,j in enumerate(temp_params):
             if j in self.global_params:
                     print("Detected global param")
-                    global_list.append(j)
+                    global_params_list.append(j)
             else:
                     print("Detected local param")
-                    local_list.append(j)
+                    local_params_list.append(j)
 
-        #{{{
-        #for i,j in enumerate(temp_vars):
-        #    for k,l in enumerate(self.global_params):
-        #        if j == l:
-        #            print("Detected global param")
-        #            global_list.append(j)
-        #        else:
-        #            print("Detected local param")
-        #            if j in local_list:
-        #                None
-        #            else:
-        #                local_list.append(j)
-        #for i,j in enumerate(temp_params):
-        #    for k,l in enumerate(self.global_params):
-        #        if j == l:
-        #            print("Detected global param")
-        #            global_list.append(j)
-        #        else:
-        #            print("Detected local param")
-        #            if j in local_list:
-        #                None
-        #            else:
-        #                local_list.append(j)
-        #}}}
-        print("Global params",global_list)
-        print("Local params",local_list)
+        print("Global params",global_params_list)
+        print("Local params",local_params_list)
+        
+        print("RUNNING...")
+        # the order of the parameters used in run_lambda
+        self.pars_order = list(dataset.pars.keys())
         return
 
 class lmfitdata(nddata):
