@@ -37,14 +37,21 @@ class lmfitglobal(nddata):
 
         self.global_vars_list.append(dataset_vars)
         for i,j in enumerate(temp_vars):
-            self.local_vars_list.append(temp_vars[i])
+            if j in self.local_vars_list:
+                None
+            else:
+                self.local_vars_list.append(temp_vars[i])
         for i,j in enumerate(temp_params):
             if j in self.global_params:
-                    print("Detected global param")
-                    self.global_params_list.append(j)
+                    if j in self.global_params_list:
+                        None
+                    else:
+                        self.global_params_list.append(j)
             else:
-                    print("Detected local param")
-                    self.local_params_list.append(j)
+                    if j in self.local_params_list:
+                        None
+                    else:
+                        self.local_params_list.append(j)
 
         print("Global vars",self.global_vars_list)
         print("Local vars",self.local_vars_list)
