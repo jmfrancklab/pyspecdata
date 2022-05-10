@@ -6,6 +6,7 @@ import numpy as np
 from .core import nddata, normal_attrs, issympy, ndshape, sympy_latex, sympy_symbol, dp
 from .general_functions import strm
 import logging, warnings
+from copy import deepcopy
 
 class lmfitglobal(nddata):
     r"""Based on lmfitdata class, new class which
@@ -13,23 +14,62 @@ class lmfitglobal(nddata):
     lmfitdata classes
     """
     def __init__(self, *args, **kwargs):
-        self.global_dict = args[0]
-        self.global_params = args[0].keys()
+        self.global_expr = args[0].values()
+        self.global_func = args[0].keys()
+        # from functional_form.setter
+        # {{{ decide which symbols are parameters vs. variables
+        #if self.global_expr is None:
+        #    raise ValueError("what expression are you fitting with??")
+        #all_symbols = self.global_expr.atoms(sp.Symbol)
+        #axis_names = set([sp.Symbol(j, real=True) for j in self.dimlabels])
+        #variable_symbols = axis_names & all_symbols
+        #self.parameter_symbols = all_symbols - variable_symbols
+        #this_axis = variable_symbols
+        #variable_symbols = tuple(variable_symbols)
+        #self.variable_names = tuple([str(j) for j in variable_symbols])
+        #parameter_symbols = tuple(self.parameter_symbols)
+        #self.parameter_names = tuple([str(j) for j in self.parameter_symbols])
+        #self.fit_axis = set(self.dimlabels)
+        #self.symbol_list = [str(j) for j in parameter_symbols]
+        #logging.debug(
+        #    strm(
+        #        "all symbols are",
+        #        all_symbols,
+        #        "axis names are",
+        #        axis_names,
+        #        "variable names are",
+        #        self.variable_names,
+        #        "parameter names are",
+        #        self.parameter_names,
+        #    )
+        #)
+        #print(
+        #    "all symbols are",
+        #    all_symbols,
+        #    "axis names are",
+        #    axis_names,
+        #    "variable names are",
+        #    self.variable_names,
+        #    "parameter names are",
+        #    self.parameter_names,
+        #)
+        #self.symbolic_vars = all_symbols - axis_names
+        #self.fit_axis = list(self.fit_axis)[0]
+        # }}}
 
         self.datasets = []
         self.var_list = []
 
-        self.global_vars_list = []
+        self.global_vars_name = []
+        self.global_vars_value = []
         self.local_vars_list = []
-        self.global_params_list = []
+        self.global_func_list = []
         self.local_params_list = []
 
         self.translation_list = []
-
-        #self.global_fns = {'R1':}
         return
 
-    def append(self, dataset, dataset_vars):
+    def append(self, dataset, dataset_dict):
         # datasets is a list of each dataset
         self.datasets.append(dataset)
 
@@ -39,27 +79,31 @@ class lmfitglobal(nddata):
         print("Dataset's parameters are",temp_params)
 
 
-        self.global_vars_list.append(dataset_vars)
+        if dataset_dict.keys() in self.global_vars_name:
+            None
+        else:    
+            self.global_vars_name.append(dataset_dict.keys())
+        self.global_vars_value.append(dataset_dict.values())
         for i,j in enumerate(temp_vars):
             if j in self.local_vars_list:
                 None
             else:
                 self.local_vars_list.append(temp_vars[i])
         for i,j in enumerate(temp_params):
-            if j in self.global_params:
-                    if j in self.global_params_list:
+            if j in self.global_func:
+                    if j in self.global_func_list:
                         None
                     else:
-                        self.global_params_list.append(j)
+                        self.global_func_list.append(j)
             else:
                     if j in self.local_params_list:
                         None
                     else:
                         self.local_params_list.append(j)
 
-        print("Global vars",self.global_vars_list)
+        print("Global vars",self.global_vars_name)
         print("Local vars",self.local_vars_list)
-        print("Global params",self.global_params_list)
+        print("Global func",self.global_func_list)
         print("Local params",self.local_params_list)
         
         # the order of the parameters used in run_lambda
@@ -67,7 +111,7 @@ class lmfitglobal(nddata):
 
         # create elements of translation list
         translation_element = []
-        for i,j in enumerate(self.global_params_list):
+        for i,j in enumerate(self.global_func_list):
             translation_element.append( ('g',str(j))  )
         for i,j in enumerate(self.local_params_list):
             element_string = str(j+'_'+str(len(self.datasets)))
@@ -77,6 +121,22 @@ class lmfitglobal(nddata):
 
         ## add elements to translation list
         self.translation_list.append(translation_element)
+        return
+
+    def make_params(self):
+        self.pars = Parameters()
+        for i,j in enumerate(self.datasets):
+            for k in (self.datasets[i].pars.keys()):
+                self.pars.add(deepcopy(self.datasets[i].pars[k]))
+                print(self.pars)
+                for L in self.translation_list[i]:
+                    if L[0] == 'l':
+                        for z in self.pars_order:
+                            if z == self.pars[k].name: 
+                                this_index = self.pars_order.index(z)
+                                if this_index == L[2]:
+                                    self.pars[k].name = L[1]
+                                    print(self.pars)
         return
 
 class lmfitdata(nddata):
