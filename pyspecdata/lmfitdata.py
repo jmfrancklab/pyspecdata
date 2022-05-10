@@ -23,6 +23,10 @@ class lmfitglobal(nddata):
         self.local_vars_list = []
         self.global_params_list = []
         self.local_params_list = []
+
+        self.translation_list = []
+
+        #self.global_fns = {'R1':}
         return
 
     def append(self, dataset, dataset_vars):
@@ -58,9 +62,21 @@ class lmfitglobal(nddata):
         print("Global params",self.global_params_list)
         print("Local params",self.local_params_list)
         
-        print("RUNNING...")
         # the order of the parameters used in run_lambda
         self.pars_order = list(dataset.pars.keys())
+
+        # create elements of translation list
+        translation_element = []
+        for i,j in enumerate(self.global_params_list):
+            translation_element.append( ('g',str(j))  )
+        for i,j in enumerate(self.local_params_list):
+            element_string = str(j+'_'+str(len(self.datasets)))
+            if j in self.pars_order:
+                element_position = self.pars_order.index(j)
+            translation_element.append( ('l', element_string, element_position ))
+
+        ## add elements to translation list
+        self.translation_list.append(translation_element)
         return
 
 class lmfitdata(nddata):
