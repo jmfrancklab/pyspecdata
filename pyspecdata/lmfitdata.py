@@ -14,48 +14,8 @@ class lmfitglobal(nddata):
     lmfitdata classes
     """
     def __init__(self, *args, **kwargs):
-        self.global_expr = args[0].values()
-        self.global_func = args[0].keys()
-        # from functional_form.setter
-        # {{{ decide which symbols are parameters vs. variables
-        #if self.global_expr is None:
-        #    raise ValueError("what expression are you fitting with??")
-        #all_symbols = self.global_expr.atoms(sp.Symbol)
-        #axis_names = set([sp.Symbol(j, real=True) for j in self.dimlabels])
-        #variable_symbols = axis_names & all_symbols
-        #self.parameter_symbols = all_symbols - variable_symbols
-        #this_axis = variable_symbols
-        #variable_symbols = tuple(variable_symbols)
-        #self.variable_names = tuple([str(j) for j in variable_symbols])
-        #parameter_symbols = tuple(self.parameter_symbols)
-        #self.parameter_names = tuple([str(j) for j in self.parameter_symbols])
-        #self.fit_axis = set(self.dimlabels)
-        #self.symbol_list = [str(j) for j in parameter_symbols]
-        #logging.debug(
-        #    strm(
-        #        "all symbols are",
-        #        all_symbols,
-        #        "axis names are",
-        #        axis_names,
-        #        "variable names are",
-        #        self.variable_names,
-        #        "parameter names are",
-        #        self.parameter_names,
-        #    )
-        #)
-        #print(
-        #    "all symbols are",
-        #    all_symbols,
-        #    "axis names are",
-        #    axis_names,
-        #    "variable names are",
-        #    self.variable_names,
-        #    "parameter names are",
-        #    self.parameter_names,
-        #)
-        #self.symbolic_vars = all_symbols - axis_names
-        #self.fit_axis = list(self.fit_axis)[0]
-        # }}}
+        self.global_expr = list(args[0].values())[0]
+        self.global_func = list(args[0].keys())[0]
 
         self.datasets = []
         self.var_list = []
@@ -82,7 +42,7 @@ class lmfitglobal(nddata):
         if dataset_dict.keys() in self.global_vars_name:
             None
         else:    
-            self.global_vars_name.append(dataset_dict.keys())
+            self.global_vars_name.append(list(dataset_dict.keys())[0])
         self.global_vars_value.append(dataset_dict.values())
         for i,j in enumerate(temp_vars):
             if j in self.local_vars_list:
@@ -142,17 +102,50 @@ class lmfitglobal(nddata):
                                 if temp_name == k:
                                     new_elem = self.datasets[i].pars[k].name = temp_element[1]
                                     self.pars.add(deepcopy(new_elem))
-                #temp.name = # place approp lab
-                #self.pars.add(deepcopy(temp))
-                #for L in self.translation_list[i]:
-                #    if L[0] == 'l':
-                #        for z in self.pars_order:
-                #            if z == self.pars[k].name: 
-                #                this_index = self.pars_order.index(z)
-                #                if this_index == L[2]:
-                #                    self.pars[k].name = L[1]
-                #                    print(self.pars)
         return
+
+    def inspect_model(self):
+        # from functional_form.setter
+        # {{{ decide which symbols are parameters vs. variables
+        if self.global_expr is None:
+            raise ValueError("Missing global expression.")
+        all_symbols = self.global_expr.atoms(sp.Symbol)
+        axis_names = set([sp.Symbol(j, real=True) for j in self.global_vars_name])
+        variable_symbols = axis_names & all_symbols
+        self.parameter_symbols = all_symbols - variable_symbols
+        this_axis = variable_symbols
+        variable_symbols = tuple(variable_symbols)
+        self.variable_names = tuple([str(j) for j in variable_symbols])
+        parameter_symbols = tuple(self.parameter_symbols)
+        self.parameter_names = tuple([str(j) for j in self.parameter_symbols])
+        self.fit_axis = set(self.global_vars_name)
+        self.symbol_list = [str(j) for j in parameter_symbols]
+        logging.debug(
+            strm(
+                "all symbols are",
+                all_symbols,
+                "axis names are",
+                axis_names,
+                "variable names are",
+                self.variable_names,
+                "parameter names are",
+                self.parameter_names,
+            )
+        )
+        print(
+            "all symbols are",
+            all_symbols,
+            "axis names are",
+            axis_names,
+            "variable names are",
+            self.variable_names,
+            "parameter names are",
+            self.parameter_names,
+        )
+        self.symbolic_vars = all_symbols - axis_names
+        self.fit_axis = list(self.fit_axis)[0]
+        return
+         #}}}
 
 class lmfitdata(nddata):
     r"""Inherits from an nddata and enables curve fitting through use of a sympy expression.
