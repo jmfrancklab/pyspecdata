@@ -125,18 +125,33 @@ class lmfitglobal(nddata):
 
     def make_params(self):
         self.pars = Parameters()
+        print(self.pars_order)
+        print(self.local_params_list)
+        print(self.translation_list)
+        
         for i,j in enumerate(self.datasets):
             for k in (self.datasets[i].pars.keys()):
-                self.pars.add(deepcopy(self.datasets[i].pars[k]))
-                print(self.pars)
-                for L in self.translation_list[i]:
-                    if L[0] == 'l':
-                        for z in self.pars_order:
-                            if z == self.pars[k].name: 
-                                this_index = self.pars_order.index(z)
-                                if this_index == L[2]:
-                                    self.pars[k].name = L[1]
-                                    print(self.pars)
+                for l in self.local_params_list:
+                    if l == k:
+                        temp = self.translation_list[i]
+                        for temp_element in temp:
+                            if temp_element[0] == 'g':
+                                None
+                            else:
+                                temp_name = temp_element[1][:-2]
+                                if temp_name == k:
+                                    new_elem = self.datasets[i].pars[k].name = temp_element[1]
+                                    self.pars.add(deepcopy(new_elem))
+                #temp.name = # place approp lab
+                #self.pars.add(deepcopy(temp))
+                #for L in self.translation_list[i]:
+                #    if L[0] == 'l':
+                #        for z in self.pars_order:
+                #            if z == self.pars[k].name: 
+                #                this_index = self.pars_order.index(z)
+                #                if this_index == L[2]:
+                #                    self.pars[k].name = L[1]
+                #                    print(self.pars)
         return
 
 class lmfitdata(nddata):
