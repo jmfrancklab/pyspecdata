@@ -44,7 +44,7 @@ class lmfitglobal(nddata):
             None
         else:    
             self.global_vars_name.append(list(dataset_dict.keys())[0])
-        self.global_vars_value.append(dataset_dict.values())
+        self.global_vars_value.append(list(dataset_dict.values())[0])
         for i,j in enumerate(temp_vars):
             if j in self.local_vars_list:
                 None
@@ -86,9 +86,6 @@ class lmfitglobal(nddata):
 
     def make_params(self):
         self.pars = Parameters()
-        print(self.pars_order)
-        print(self.local_params_list)
-        print(self.translation_list)
         
         for i,j in enumerate(self.datasets):
             for k in (self.datasets[i].pars.keys()):
@@ -145,11 +142,57 @@ class lmfitglobal(nddata):
             self.parameter_names,
         )
         self.global_params_list = self.parameter_names
-        print(self.global_params_list);quit()
         self.symbolic_vars = all_symbols - axis_names
         self.fit_axis = list(self.fit_axis)[0]
+
+        self.symbolic_vars = list(self.symbolic_vars)
+        args = self.symbolic_vars + [str(*this_axis)]
+        print(variable_symbols)
+        print(parameter_symbols)
+        print(self.global_expr)
+
+        self.fitfunc_multiarg_v2 = sp.lambdify(
+            variable_symbols + parameter_symbols,
+            self.global_expr,
+            modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
+        )
         return
          #}}}
+    #{{{ 'fit' func -- DISREGARD FOR NOW..
+    def fit(self,global_params_dict):
+        r"""actually run the fit"""
+        x = nddata(np.array(self.global_vars_value),str(self.fit_axis))
+        if np.iscomplex(self.data.flatten()[0]):
+            logging.debug(strm("Warning, taking only real part of fitting data!"))
+        y = np.real(self.data)
+        quit()
+        sigma = self.get_error()
+        out = minimize(
+            self.residual,
+            global_params_dict,
+            args=(x, y, sigma),
+        )
+        # can you capture the following as a string? maybe return it?
+        report_fit(out, show_correl=True)
+        # {{{ capture the result for ouput, etc
+        self.fit_coeff = [out.params[j].value for j in self.symbol_list]
+        assert out.success
+        self.covariance = out.covar
+        # }}}
+        return
+    #}}}
+    def run_lambda(self, pars, variable_axis):
+        """actually run the lambda function we separate this in case we want
+        our function to involve something else, as well (e.g. taking a Fourier
+        transform)"""
+        self.setaxis = variable_axis
+        return self.fitfunc_multiarg_v2(
+            *(variable_axis.data,), **pars.valuesdict()
+        )
+    def make_model(self, pars, x, sigma=None):
+        print(pars)
+        fit = self.run_lambda(pars,x)
+        return fit
 
 class lmfitdata(nddata):
     r"""Inherits from an nddata and enables curve fitting through use of a sympy expression.
@@ -256,6 +299,10 @@ class lmfitdata(nddata):
             self.expression,
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
         )
+        #print(variable_symbols)
+        #print(parameter_symbols)
+        #print(self.expression)
+        #quit()
         self.fitfunc_multiarg_v2 = sp.lambdify(
             variable_symbols + parameter_symbols,
             self.expression,
@@ -319,7 +366,6 @@ class lmfitdata(nddata):
         for j in self.pars:
             logging.info(strm("fit param ---", j))
         logging.info(strm(self.pars))
-        print(self.pars)
         return
 
     def guess(self):
@@ -442,6 +488,10 @@ class lmfitdata(nddata):
         """actually run the lambda function we separate this in case we want
         our function to involve something else, as well (e.g. taking a Fourier
         transform)"""
+        print(pars)
+        print("*******")
+        print(pars.valuesdict())
+        quit()
         logging.info(strm(self.getaxis(j) for j in self.variable_names))
         return self.fitfunc_multiarg_v2(
             *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
