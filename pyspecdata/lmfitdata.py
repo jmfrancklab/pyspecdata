@@ -144,8 +144,135 @@ class lmfitglobal(nddata):
         )
         self.symbolic_vars = all_symbols - axis_names
         self.fit_axis = list(self.fit_axis)[0]
+        #}}}
+
+        self.symbolic_vars = list(self.symbolic_vars)
+        args = self.symbolic_vars + [str(*this_axis)]
+
+        self.fitfunc_multiarg_v2 = sp.lambdify(
+            variable_symbols + parameter_symbols,
+            self.global_expr,
+            modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
+        )
         return
-         #}}}
+
+    def set_guess(self, *args, **kwargs):
+        """set both the guess and the bounds
+
+        Parameters
+        ==========
+        guesses: dict of dicts
+            each dict has a keyword giving the parameter and a value
+            that comprises a dict with guesses (value) and/or constraints
+            (min/max)
+
+            Can be passed either as the only argument, or a kwarg called
+            guesses, or as the kwargs themselves.
+        """
+        if len(args) == 1 and type(args[0]) == dict:
+            guesses = args[0]
+        elif len(kwargs) == 1 and "guesses" in kwargs.keys():
+            guesses = kwargs["guesses"]
+        else:
+            guesses = kwargs
+        self.guess_dict = {}
+        for this_name in self.pars.keys():
+            if this_name in guesses.keys():
+                if type(guesses[this_name]) is dict:
+                    self.guess_dict[this_name] = {}
+                    for k, v in guesses[this_name].items():
+                        setattr(self.pars[this_name], k, v)
+                        self.guess_dict[this_name][k] = v
+                elif np.isscalar(guesses[this_name]):
+                    self.pars[this_name].value = guesses[this_name]
+                    self.guess_dict[this_name] = {"value":guesses[this_name]}
+                else:
+                    raise ValueError("what are the keys to your guesses???")
+        for j in self.pars:
+            logging.info(strm("fit param ---", j))
+        logging.info(strm(self.pars))
+        return
+
+    def guess(self):
+        r"""Old code that we are preserving here -- provide the guess for our
+        parameters; by default, based on pseudoinverse"""
+        if hasattr(self, "guess_dict"):
+            self.guess_dictionary = {
+                k: self.guess_dict[k]["value"] for k in self.guess_dict.keys()
+            }
+            return [self.guess_dictionary[k] for k in self.pars]
+        else:
+            return [1.0] * len(self.variable_names)
+
+    def settoguess(self):
+        "a debugging function, to easily plot the initial guess"
+        self.fit_coeff = np.real(self.guess())
+        return self
+
+    def fit(self):
+        r"""actually run the fit"""
+        for i,j in enumerate(self.datasets):
+            x = self.datasets[i].getaxis(self.datasets[i].fit_axis)
+            if np.iscomplex(self.datasets[i].data.flatten()[0]):
+                logging.debug(strm("Warning, taking only real part of fitting data!"))
+            y = np.real(self.datasets[i].data)
+            sigma = self.datasets[i].get_error()
+            out = minimize(
+                self.datasets[i].residual,
+                self.datasets[i].pars,
+                args=(x, y, sigma),
+            )
+            quit()
+            # can you capture the following as a string? maybe return it?
+            report_fit(out, show_correl=True)
+            # {{{ capture the result for ouput, etc
+            self.fit_coeff = [out.params[j].value for j in self.symbol_list]
+            assert out.success
+            self.covariance = out.covar
+        # }}}
+        return
+
+    def run_lambda(self, pars):
+        """actually run the lambda function we separate this in case we want
+        our function to involve something else, as well (e.g. taking a Fourier
+        transform)"""
+        logging.info(strm(self.getaxis(j) for j in self.variable_names))
+        return self.fitfunc_multiarg_v2(
+            *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
+        )
+
+    def residual(self, pars, x, y, sigma=None):
+        "calculate the residual OR if data is None, return fake data"
+        fit = self.run_lambda(pars)
+        if sigma is not None:
+            normalization = np.sum(1.0 / sigma[sigma != 0.0 and np.isfinite(sigma)])
+            sigma[sigma == 0.0] = 1
+            sigma[~np.isfinite(sigma)] = 1
+        try:
+            # as noted here: https://stackoverflow.com/questions/6949370/scipy-leastsq-dfun-usage
+            # this needs to be fit - y, not vice versa
+            if sigma is not None:
+                retval = (fit - y) / sigma * normalization
+            else:
+                retval = fit - y
+        except ValueError as e:
+            raise ValueError(
+                strm(
+                    "your error (",
+                    np.shape(sigma),
+                    ") probably doesn't match y (",
+                    np.shape(y),
+                    ") and fit (",
+                    np.shape(fit),
+                    ")",
+                )
+                + explain_error(e)
+            )
+        return retval
+
+
+
+
 
 class lmfitdata(nddata):
     r"""Inherits from an nddata and enables curve fitting through use of a sympy expression.
