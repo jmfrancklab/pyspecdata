@@ -25,6 +25,7 @@ class lmfitglobal(nddata):
         self.local_vars_list = []
         self.global_func_list = []
         self.local_params_list = []
+        self.global_params_list = []
 
         self.translation_list = []
         return
@@ -143,6 +144,8 @@ class lmfitglobal(nddata):
             "parameter names are",
             self.parameter_names,
         )
+        self.global_params_list = self.parameter_names
+        print(self.global_params_list);quit()
         self.symbolic_vars = all_symbols - axis_names
         self.fit_axis = list(self.fit_axis)[0]
         return
