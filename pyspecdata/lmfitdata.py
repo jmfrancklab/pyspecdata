@@ -193,6 +193,9 @@ class lmfitglobal(nddata):
         print(pars)
         fit = self.run_lambda(pars,x)
         return fit
+    def member_model(self, member_idx, member_model_input):
+        return self.datasets[member_idx].make_model(member_model_input)
+
 
 class lmfitdata(nddata):
     r"""Inherits from an nddata and enables curve fitting through use of a sympy expression.
@@ -450,7 +453,6 @@ class lmfitdata(nddata):
         # }}}
         newdata.data[:] = self.fitfunc(p, taxis).flatten()
         return newdata
-
     def fit(self):
         r"""actually run the fit"""
         # we can ignore set_what, since I think there's a mechanism in
@@ -488,14 +490,28 @@ class lmfitdata(nddata):
         """actually run the lambda function we separate this in case we want
         our function to involve something else, as well (e.g. taking a Fourier
         transform)"""
-        print(pars)
-        print("*******")
-        print(pars.valuesdict())
-        quit()
         logging.info(strm(self.getaxis(j) for j in self.variable_names))
+        print(self.getaxis(self.variable_names[0]))
+        print(pars.valuesdict())
         return self.fitfunc_multiarg_v2(
             *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
         )
+    def make_model(self,model_input):
+        """"called by member_model in global lmfitdata; provide values of each
+        parameter and produce model output - right now just able to use one
+        parameter (passed in :dict:`model_input`)"""
+        if len(model_input) == 1:
+            model_input_param = str(list(model_input.keys())[0])
+            assert model_input_param in self.parameter_names,("parameter set in model_input is not found in this dataset's list of parameters; check the parameter names")
+            self.pars[model_input_param].value = list(model_input.values())[0]
+            # deal with the fact that Parameter name does not match
+            # Parameters dictionary key for the member dataset
+            for i,j in enumerate(self.pars):
+                self.pars[j].name = j
+            return self.run_lambda(self.pars),self.getaxis(self.variable_names[0])
+        else:
+            raise ValueError("only able to set one parameter with model_input at this time")
+            return
 
     def residual(self, pars, x, y, sigma=None):
         "calculate the residual OR if data is None, return fake data"
