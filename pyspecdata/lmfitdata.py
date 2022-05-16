@@ -190,8 +190,23 @@ class lmfitglobal(nddata):
             *(variable_axis.data,), **pars.valuesdict()
         )
     def make_model(self, pars, x, sigma=None):
-        print(pars)
-        fit = self.run_lambda(pars,x)
+        model_params = Parameters()
+        temp_list = []
+        for i,j in enumerate(self.pars.valuesdict()):
+            print(j)
+            for q in self.translation_list:
+                for r in q:
+                    if j == r[1]:
+                        temp_list.append(j)
+                    else:
+                        None
+        for i,j in enumerate(self.pars.valuesdict()):
+            if j in temp_list:
+                None
+            else:
+                model_params.add(self.pars[j])
+        print(model_params)
+        fit = self.run_lambda(model_params,x)
         return fit
     def member_model(self, member_idx, member_model_input):
         return self.datasets[member_idx].make_model(member_model_input)
