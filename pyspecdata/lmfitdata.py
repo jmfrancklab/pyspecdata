@@ -97,16 +97,6 @@ class lmfitdata(nddata):
                 self.parameter_names,
             )
         )
-        logging.debug(
-            "all symbols are",
-            all_symbols,
-            "axis names are",
-            axis_names,
-            "variable names are",
-            self.variable_names,
-            "parameter names are",
-            self.parameter_names,
-        )
         self.fit_axis = list(self.fit_axis)[0]
         # }}}
         args = self.parameter_symbols + [str(*this_axis)]

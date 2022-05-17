@@ -199,7 +199,7 @@ Installation
 On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
 just run
 ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython``
-followed by ``conda install -c msys2 m2w64-toolchain`` (the libpython and m2w64-toolchain are only required if you are a developer).
+followed by ``conda install -y -c msys2 m2w64-toolchain`` (the libpython and m2w64-toolchain are only required if you are a developer).
 Then (if not a developer) install either via pip (`pip install pyspecdata`) or (if you want to be able to develop or modify the code) follow the `installation for developers <#installation-for-developers>`_ below.
 
 On **CentOS7**, we've tested

@@ -4030,13 +4030,16 @@ class nddata (object):
             try:
                 temp = argout.get_error().copy().transpose(argorder).reshape(argshape)
             except ValueError as Argument:
-                raise ValueError("The argument (argout) has a shape of "
-                        + repr(argout.data.shape)
-                        + " but its error has a shape of" +
-                        repr(argout.get_error().shape) + "(it's " +
-                        repr(argout.get_error()) +
-                        ")!!!\n\n(original argument:\n" +
-                        repr(Argument) + "\n)")
+                if argout.data.shape == (1,) and argout.get_error().shape == ():
+                    temp = np.array(argout.get_error()).reshape((1,)).copy().transpose(argorder).reshape(argshape)
+                else:
+                    raise ValueError("The argument (argout) has a shape of "
+                            + repr(argout.data.shape)
+                            + " but its error has a shape of" +
+                            repr(argout.get_error().shape) + "(it's " +
+                            repr(argout.get_error()) +
+                            ")!!!\n\n(original argument:\n" +
+                            repr(Argument) + "\n)")
             argout.set_error(temp)
         # }}}
         if (len(selfout.axis_coords)>0) or (len(argout.axis_coords)>0):
