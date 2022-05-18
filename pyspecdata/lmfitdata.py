@@ -78,7 +78,7 @@ class lmfitglobal(nddata):
             element_string = str(j+'_'+str(len(self.datasets)))
             if j in self.pars_order:
                 element_position = self.pars_order.index(j)
-            translation_element.append( ('l', element_string, element_position ))
+            translation_element.append( ('l', element_string, str(j) ))
 
         ## add elements to translation list
         self.translation_list.append(translation_element)
@@ -86,7 +86,6 @@ class lmfitglobal(nddata):
 
     def make_params(self):
         self.pars = Parameters()
-        
         for i,j in enumerate(self.datasets):
             for k in (self.datasets[i].pars.keys()):
                 for l in self.local_params_list:
