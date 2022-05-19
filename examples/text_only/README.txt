@@ -1,4 +1,4 @@
 Text-Only Examples
 ==================
 
-These are examples that only generate text.
+This directory (not plotted in docs) includes some text-only examples.

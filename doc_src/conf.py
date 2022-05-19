@@ -17,8 +17,8 @@ import os
 import shlex
 import sphinx_rtd_theme
 import mock
-from matplotlib import rcParams
-print("datapath is",rcParams['datapath'])
+from matplotlib import rcParams, get_data_path
+print("datapath is",get_data_path())
  
 autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_toolkits', 'get_ipython', 'matplotlib', 'tables']
 
@@ -59,6 +59,7 @@ sphinx_gallery_conf = {
         'examples_dirs': ['../examples'], #path to examples scripts
         'gallery_dirs': ['auto_examples'], #path to where to save gallery generated output
         'filename_pattern': '.py', # modified to make more general
+        'ignore_pattern': r'__init__\.py|.*/text_only.*|.*/matplotlib.*',
         #'image_srcset': ['2x'],
         'reference_url': {
             'pyspecdata': None,
