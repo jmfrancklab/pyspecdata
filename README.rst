@@ -111,8 +111,6 @@ On **Debian** (should also work for **Ubuntu**),
 we've tested
 ``sudo apt-get install -y python3 python3-matplotlib libpython3.7 python3-dev python3-sympy python3-h5py python3-tables python3-scipy python3-setuptools gfortran``.  Then follow the `installation for developers <#installation-for-developers>`_ below. 
 
-To **install as a user on MacOS**, we have it set up for pip, but need to dereference the libraries -- contact us if you have issues with this.
-
 On **MacOS**, if you want to install as a developer your python distribution needs to have a working Fortran compiler, since some of the modules use Fortran.
 We have tested ``conda install -c conda-forge fortran-compiler``, followed by
 ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py``.
@@ -120,6 +118,7 @@ However *due to a problem with more recent versions of MacOS/xcode*, you need to
 At about line 27, you need to add something like following as a keyword arg for the `Extension` function:
 ``library_dirs = ["/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"],``
 (we recommmend just using keyword completion to find a similar directory that exists).
+(Feel contact us if you have issues with this or would like to test deployment on pip for a Mac).
 
 **More generally,**
 these instructions are based on the fact that it's *Highly Recommended* 
