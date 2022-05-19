@@ -207,8 +207,19 @@ class lmfitglobal(nddata):
         print(model_params)
         fit = self.run_lambda(model_params,x)
         return fit
+
     def member_model(self, member_idx, member_model_input):
         return self.datasets[member_idx].make_model(member_model_input)
+
+    def residual(self, this_model):
+        ndata = len(self.datasets)
+        resid = 0.0*np.array(self.datasets[:])
+        print(len(self.datasets[0].data))
+        for i in range(ndata):
+            resid[i] = np.array(self.datasets[i]) - self.member_model(i, {'R1':this_model[i]})
+        print(np.shape(resid))
+        quit()
+        return
 
 
 class lmfitdata(nddata):
