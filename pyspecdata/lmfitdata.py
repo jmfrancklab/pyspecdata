@@ -192,7 +192,6 @@ class lmfitglobal(nddata):
         model_params = Parameters()
         temp_list = []
         for i,j in enumerate(self.pars.valuesdict()):
-            print(j)
             for q in self.translation_list:
                 for r in q:
                     if j == r[1]:
@@ -204,23 +203,37 @@ class lmfitglobal(nddata):
                 None
             else:
                 model_params.add(self.pars[j])
-        print(model_params)
         fit = self.run_lambda(model_params,x)
         return fit
 
     def member_model(self, member_idx, member_model_input):
         return self.datasets[member_idx].make_model(member_model_input)
 
-    def residual(self, this_model):
+    def residual(self, parameters):
+        this_model = self.make_model(parameters,
+                nddata(np.array(self.global_vars_value),str(self.fit_axis)))
         ndata = len(self.datasets)
         resid = 0.0*np.array(self.datasets[:])
-        print(len(self.datasets[0].data))
         for i in range(ndata):
-            resid[i] = np.array(self.datasets[i]) - self.member_model(i, {'R1':this_model[i]})
-        print(np.shape(resid))
-        quit()
-        return
+            resid[i] = (self.member_model(0, {'R1':this_model[0]}))[0] - self.datasets[i].data
+        # resid here is shape (5,) once concatenated becomes shape (60,)
+        retval = np.concatenate(resid)
+        retval = retval.real
+        print(type(retval[0]))
+        return retval
 
+    def fit(self):
+        x = self.global_vars_value
+        this_model = self.make_model(self.pars,
+                nddata(np.array(self.global_vars_value),str(self.fit_axis)))
+        y = np.real(this_model.data)
+        print(type(self.residual))
+        print(type(self.pars))
+        out = minimize(
+                self.residual,
+                self.pars,
+                )
+        return out
 
 class lmfitdata(nddata):
     r"""Inherits from an nddata and enables curve fitting through use of a sympy expression.
