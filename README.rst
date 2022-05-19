@@ -200,15 +200,15 @@ On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edit
 just run
 ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython``
 followed by ``conda install -y -c msys2 m2w64-toolchain`` (the libpython and m2w64-toolchain are only required if you are a developer).
-Then (if not a developer) install either via pip (`pip install pyspecdata`) or (if you want to be able to develop or modify the code) follow the `installation for developers <#installation-for-developers>`_ below.
+Then follow the `installation for developers <#installation-for-developers>`_ below. We have a package on pip, but it currently lags behind the github repo.
 
 On **CentOS7**, we've tested
 ``yum install python-matplotlib python-matplotlib-qt4 python-devel sympy h5py python-tables scipy``
-(after running ``yum install epel-release`` to install the EPEL distribution)
+(after running ``yum install epel-release`` to install the EPEL distribution).  Then follow the `installation for developers <#installation-for-developers>`_ below. 
 
 On **Debian** (should also work for **Ubuntu**),
 we've tested
-``sudo apt-get install -y python3 python3-matplotlib libpython3.7 python3-dev python3-sympy python3-h5py python3-tables python3-scipy python3-setuptools gfortran``.
+``sudo apt-get install -y python3 python3-matplotlib libpython3.7 python3-dev python3-sympy python3-h5py python3-tables python3-scipy python3-setuptools gfortran``.  Then follow the `installation for developers <#installation-for-developers>`_ below. 
 
 To **install as a user on MacOS**, we have it set up for pip, but need to dereference the libraries -- contact us if you have issues with this.
 
@@ -220,7 +220,7 @@ At about line 27, you need to add something like following as a keyword arg for 
 ``library_dirs = ["/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"],``
 (we recommmend just using keyword completion to find a similar directory that exists).
 
-More generally,
+**More generally,**
 these instructions are based on the fact that it's *Highly Recommended* 
 that you install the following packages using a good package-management system (conda or linux package manager), rather than relying on `pip` or `setuptools` to install them:
 
