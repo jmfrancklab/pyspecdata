@@ -118,7 +118,7 @@ However *due to a problem with more recent versions of MacOS/xcode*, you need to
 At about line 27, you need to add something like following as a keyword arg for the `Extension` function:
 ``library_dirs = ["/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"],``
 (we recommmend just using keyword completion to find a similar directory that exists).
-(Feel contact us if you have issues with this or would like to test deployment on pip for a Mac).
+(Feel free to contact us if you have issues with this or would like to test deployment on pip for a Mac).
 
 **More generally,**
 these instructions are based on the fact that it's *Highly Recommended* 
