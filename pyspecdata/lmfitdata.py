@@ -157,29 +157,6 @@ class lmfitglobal(nddata):
         )
         return
          #}}}
-    #{{{ 'fit' func -- DISREGARD FOR NOW..
-    def fit(self,global_params_dict):
-        r"""actually run the fit"""
-        x = nddata(np.array(self.global_vars_value),str(self.fit_axis))
-        if np.iscomplex(self.data.flatten()[0]):
-            logging.debug(strm("Warning, taking only real part of fitting data!"))
-        y = np.real(self.data)
-        quit()
-        sigma = self.get_error()
-        out = minimize(
-            self.residual,
-            global_params_dict,
-            args=(x, y, sigma),
-        )
-        # can you capture the following as a string? maybe return it?
-        report_fit(out, show_correl=True)
-        # {{{ capture the result for ouput, etc
-        self.fit_coeff = [out.params[j].value for j in self.symbol_list]
-        assert out.success
-        self.covariance = out.covar
-        # }}}
-        return
-    #}}}
     def run_lambda(self, pars, variable_axis):
         """actually run the lambda function we separate this in case we want
         our function to involve something else, as well (e.g. taking a Fourier
@@ -216,7 +193,6 @@ class lmfitglobal(nddata):
         resid = 0.0*np.array(self.datasets[:])
         for i in range(ndata):
             resid[i] = (self.member_model(0, {'R1':this_model[0]}))[0] - self.datasets[i].data
-        # resid here is shape (5,) once concatenated becomes shape (60,)
         retval = np.concatenate(resid)
         retval = retval.real
         print(type(retval[0]))
