@@ -245,6 +245,11 @@ class lmfitdata(nddata):
             set_indices, set_to, active_mask = self.gen_indices(set_what, set_to)
             p[set_indices] = set_to
         # }}}
+        # JF notes this is a copy of older code -- we should be able to
+        # clean this up by using the newer copy functions -- currently I
+        # see  the copy_props and copyaxes functions, but thought there
+        # was a function to copy everything BUT data -- maybe this is on
+        # the SVD branch or somesuch?
         # {{{ make a new blank np.array with the fit axis expanded to fit taxis
         newdata = ndshape(self)
         newdata[self.fit_axis] = np.size(taxis)
@@ -261,7 +266,9 @@ class lmfitdata(nddata):
             newdata.set_error(self.fit_axis,
                     self.get_error(self.fit_axis))
         # }}}
+        newdata
         newdata.data[:] = self.fitfunc(p, taxis).flatten()
+        newdata.name(str(self.name()))
         return newdata
 
     def fit(self):
@@ -309,7 +316,7 @@ class lmfitdata(nddata):
         "calculate the residual OR if data is None, return fake data"
         fit = self.run_lambda(pars)
         if sigma is not None:
-            normalization = np.sum(1.0 / sigma[sigma != 0.0 and np.isfinite(sigma)])
+            normalization = np.sum(1.0 / sigma[np.logical_and(sigma != 0.0, np.isfinite(sigma))])
             sigma[sigma == 0.0] = 1
             sigma[~np.isfinite(sigma)] = 1
         try:
