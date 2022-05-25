@@ -31,6 +31,20 @@ a = Circle(
     color="b",
 )
 fig.add_artist(a)
+b = Circle(
+    (0.1, 0.1),
+    0.1,  # now, these are in axes coordinates, but are always shifted down by 20 pts, so the circle will always be 20 pts below the corner
+    clip_on=False,
+    transform=(
+        ax.transAxes
+        + ScaledTranslation(
+            0, -20, IdentityTransform()
+        )
+    ),
+    ec="r",
+    fc="none",
+)
+fig.add_artist(b)
 majorLocator = lambda: mticker.MaxNLocator(nbins="auto", steps=[1, 2, 2.5, 5, 10])
 minorLocator = lambda: mticker.AutoMinorLocator(n=5)
 ax.xaxis.set_major_locator(majorLocator())
