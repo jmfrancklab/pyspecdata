@@ -23,7 +23,6 @@ def adjust_spines(ax, spines):
     for loc, spine in ax.spines.items():
         if loc in spines:
             spine.set_position(("outward", 10))  # outward by 10 points
-            spine.set_smart_bounds(True)
         else:
             spine.set_color("none")  # don't draw spine
 
@@ -48,11 +47,10 @@ def adjust_spines(ax, spines):
 # based off an example from matplotlib gallery
 
 # the random data
-test_data = nddata(
-    random.normal(size=100 * 100) + 1j * random.normal(size=100 * 100),
-    [100, 100],
-    ["x", "y"],
-)
+x = nddata(r_[-10:10:100j],'x')
+y = nddata(r_[-10:10:100j],'y')
+test_data = exp(-(x-2)**2/2)*exp(-(y-3)**2/2)
+test_data.add_noise(0.1)
 test_data.setaxis("x", "#").setaxis("y", "#")
 test_data.set_units("x", "s").set_units("y", "m")
 test_data.reorder("y")
