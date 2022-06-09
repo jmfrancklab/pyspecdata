@@ -6,6 +6,7 @@ import numpy as np
 from .core import nddata, normal_attrs, issympy, ndshape, sympy_latex, sympy_symbol, dp
 from .general_functions import strm
 import logging, warnings
+from copy import deepcopy
 
 
 class lmfitdata(nddata):
