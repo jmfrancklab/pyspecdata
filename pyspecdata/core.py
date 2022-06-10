@@ -4625,6 +4625,10 @@ class nddata (object):
                 else:
                     axis_name = '$\\varphi_%s$'%m.groups()[0]
             else:
+                auto_underscore = re.compile('^([a-z]+)([0-9])')
+                m = auto_underscore.match(axis_name)
+                if m:
+                    axis_name = '%s_%s'%(m.groups())
                 j = axis_name.find('_')
                 if j > -1:
                     prevword = axis_name[0:j]
@@ -4653,6 +4657,7 @@ class nddata (object):
                             axis_name = axis_name.replace('t','\\nu ')
                             if axis_name[0] != '$':
                                 axis_name = '$' + axis_name + '$'
+                            axis_name = axis_name.replace(' _','_')
                     else:
                         axis_name = r'F{'+axis_name+r'}'
         else:
