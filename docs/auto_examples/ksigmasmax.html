@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fitting Data (Nonlinear + Symbolic) &mdash; pySpecData 0.9.5.3.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/gallery_custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Fitting Data (Nonlinear + Symbolic)" href="fit_fake_data.html" />
+    <link rel="prev" title="Basic Slicing/Filtering Example" href="basic_example.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> pySpecData
+          </a>
+              <div class="version">
+                0.9.5.3.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">PySpecData Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Cary_simple.html">Simple Cary UV-Vis loading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PR_first_example.html">Simple Cary UV-Vis loading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polyfit.html">Polynomial Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="esr_example.html">Bruker cw ESR Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="image_plot.html">Plotting Routines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppm_example.html">ppm Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ellmans.html">Manipulation of UV-Vis data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_with_bounds.html">Fit Using Bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_example.html">Basic Slicing/Filtering Example</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Fitting Data (Nonlinear + Symbolic)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_fake_data.html">Fitting Data (Nonlinear + Symbolic)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_container.html">Plot Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QESR.html">Quantitative ESR</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#individual-functions">Individual Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#matplotlib-examples">Matplotlib Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#text-only-examples">Text-Only Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pySpecData</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">PySpecData Examples</a> &raquo;</li>
+      <li>Fitting Data (Nonlinear + Symbolic)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/auto_examples/ksigmasmax.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-ksigmasmax-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="fitting-data-nonlinear-symbolic">
+<span id="sphx-glr-auto-examples-ksigmasmax-py"></span><h1>Fitting Data (Nonlinear + Symbolic)<a class="headerlink" href="#fitting-data-nonlinear-symbolic" title="Permalink to this headline">¶</a></h1>
+<p>This example creates fake data with noise
+then fits the exponential with the fitdata
+function.</p>
+<img src="../_images/sphx_glr_ksigmasmax_001.png" srcset="../_images/sphx_glr_ksigmasmax_001.png" alt="fit with guess" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2680: UserWarning: marker is redundantly defined by the &#39;marker&#39; keyword argument and the fmt string &quot;o&quot; (-&gt; marker=&#39;o&#39;). The keyword argument will take precedence.
+  retval = myplotfunc(*plotargs,**kwargs)
+c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2680: UserWarning: linestyle is redundantly defined by the &#39;linestyle&#39; keyword argument and the fmt string &quot;:&quot; (-&gt; linestyle=&#39;:&#39;). The keyword argument will take precedence.
+  retval = myplotfunc(*plotargs,**kwargs)
+----- Results for fitdata: -----
+output for fitdata: {&#39;phalf&#39;: 1.096308584085903, &#39;ksC&#39;: 105.47247235550563}
+latex for fitdata: $f(p)=\frac{105.47 p}{p + 1.10}$
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">sympy</span> <span class="k">as</span> <span class="nn">sp</span>
+
+<span class="c1"># {{{ this is the contents of pylab.py -- works</span>
+<span class="c1"># need to go through and figure out which lines</span>
+<span class="c1"># are actually needed and which are not</span>
+<span class="c1"># -- I have already stripped out some</span>
+<span class="kn">from</span> <span class="nn">lmfit</span> <span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">minimize</span>
+<span class="kn">from</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">import</span> <span class="n">figure</span><span class="p">,</span> <span class="n">subplot</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">gca</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c1"># I think it wasn&#39;t importing from numpy b/c it seems we&#39;re inside sphinx</span>
+
+
+<span class="k">def</span> <span class="nf">list_symbs</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="c1"># {{{ this is just to show all the parameters</span>
+    <span class="n">list_symbs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">output</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">s_repr</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+        <span class="n">list_symbs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;$</span><span class="si">{</span><span class="n">s_repr</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">k</span><span class="si">:</span><span class="s2">0.5g</span><span class="si">}</span><span class="s2">$&quot;</span><span class="p">)</span>
+    <span class="n">list_symbs</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">list_symbs</span><span class="p">)</span>
+    <span class="c1"># }}}</span>
+    <span class="k">return</span> <span class="n">list_symbs</span>
+
+
+<span class="c1"># }}}</span>
+<a href="../auto_api/pyspecdata.html#pyspecdata.core.figlist" title="pyspecdata.core.figlist" class="sphx-glr-backref-module-pyspecdata-core sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fl</span></a> <span class="o">=</span> <a href="../auto_api/pyspecdata.html#pyspecdata.core.figlist" title="pyspecdata.core.figlist" class="sphx-glr-backref-module-pyspecdata-core sphx-glr-backref-type-py-class"><span class="n">figlist_var</span></a><span class="p">()</span>
+<span class="c1"># {{{creating a fake data recovery curve</span>
+<span class="n">p</span> <span class="o">=</span> <a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">nddata</span></a><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">:</span><span class="mi">30</span><span class="n">j</span><span class="p">],</span> <span class="s2">&quot;p&quot;</span><span class="p">)</span>
+<a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fake_data</span></a> <span class="o">=</span> <span class="mi">102</span> <span class="o">*</span> <span class="n">p</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">p</span><span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata.add_noise" title="pyspecdata.nddata.add_noise" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fake_data</span><span class="o">.</span><span class="n">add_noise</span></a><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span>
+<span class="c1"># }}}</span>
+<span class="c1"># {{{ define the expression of the functional form once, and then use it</span>
+<span class="c1">#     for both types of classes</span>
+<span class="c1"># ksC is k_σ sₘₐₓ C</span>
+<span class="n">ksC</span><span class="p">,</span> <span class="n">phalf</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="s2">&quot;ksC phalf p&quot;</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">functional_form</span> <span class="o">=</span> <span class="n">ksC</span><span class="o">*</span><span class="n">p</span><span class="o">/</span><span class="p">(</span><span class="n">phalf</span><span class="o">+</span><span class="n">p</span><span class="p">)</span>
+<span class="c1"># }}}</span>
+<span class="k">with</span> <a href="../auto_api/pyspecdata.html#pyspecdata.core.figlist" title="pyspecdata.core.figlist" class="sphx-glr-backref-module-pyspecdata-core sphx-glr-backref-type-py-class"><span class="n">figlist_var</span></a><span class="p">()</span> <span class="k">as</span> <a href="../auto_api/pyspecdata.html#pyspecdata.core.figlist" title="pyspecdata.core.figlist" class="sphx-glr-backref-module-pyspecdata-core sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fl</span></a><span class="p">:</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.core.figlist.next" title="pyspecdata.core.figlist.next" class="sphx-glr-backref-module-pyspecdata-core sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">next</span></a><span class="p">(</span><span class="s2">&quot;fit with guess&quot;</span><span class="p">)</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.core.figlist.plot" title="pyspecdata.core.figlist.plot" class="sphx-glr-backref-module-pyspecdata-core sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fake_data</span></a><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;fake data&quot;</span><span class="p">)</span>
+
+
+    <span class="c1"># {{{ lmfitdata method</span>
+    <a href="../auto_api/pyspecdata.html#module-pyspecdata.lmfitdata" title="pyspecdata.lmfitdata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">lmfitdata_instance</span></a> <span class="o">=</span> <a href="../auto_api/pyspecdata.html#module-pyspecdata.lmfitdata" title="pyspecdata.lmfitdata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">lmfitdata</span></a><span class="p">(</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fake_data</span></a><span class="p">)</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.lmfitdata.functional_form" title="pyspecdata.lmfitdata.functional_form" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">lmfitdata_instance</span><span class="o">.</span><span class="n">functional_form</span></a> <span class="o">=</span> <span class="n">functional_form</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.lmfitdata.set_guess" title="pyspecdata.lmfitdata.set_guess" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">lmfitdata_instance</span><span class="o">.</span><span class="n">set_guess</span></a><span class="p">(</span>
+        <span class="n">phalf</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+        <span class="n">ksC</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">500</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="c1"># }}}</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.core.figlist.next" title="pyspecdata.core.figlist.next" class="sphx-glr-backref-module-pyspecdata-core sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">next</span></a><span class="p">(</span><span class="s2">&quot;fit with guess&quot;</span><span class="p">)</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.lmfitdata.settoguess" title="pyspecdata.lmfitdata.settoguess" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">lmfitdata_instance</span><span class="o">.</span><span class="n">settoguess</span></a><span class="p">()</span>
+    <span class="n">guess_line</span> <span class="o">=</span> <a href="../auto_api/pyspecdata.html#pyspecdata.core.figlist.plot" title="pyspecdata.core.figlist.plot" class="sphx-glr-backref-module-pyspecdata-core sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span>
+        <a href="../auto_api/pyspecdata.html#pyspecdata.lmfitdata.eval" title="pyspecdata.lmfitdata.eval" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">lmfitdata_instance</span><span class="o">.</span><span class="n">eval</span></a><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;fitdata guess&quot;</span>
+    <span class="p">)</span>
+    <span class="n">thiscolor</span> <span class="o">=</span> <span class="n">guess_line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_color</span><span class="p">()</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.lmfitdata.fit" title="pyspecdata.lmfitdata.fit" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">lmfitdata_instance</span><span class="o">.</span><span class="n">fit</span></a><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;Results for fitdata:&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;output for fitdata:&quot;</span><span class="p">,</span> <a href="../auto_api/pyspecdata.html#pyspecdata.lmfitdata.output" title="pyspecdata.lmfitdata.output" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">lmfitdata_instance</span><span class="o">.</span><span class="n">output</span></a><span class="p">())</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;latex for fitdata:&quot;</span><span class="p">,</span> <a href="../auto_api/pyspecdata.html#pyspecdata.lmfitdata.latex" title="pyspecdata.lmfitdata.latex" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">lmfitdata_instance</span><span class="o">.</span><span class="n">latex</span></a><span class="p">())</span>
+    <span class="n">this_ls</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span>
+    <span class="n">fit_line</span> <span class="o">=</span> <a href="../auto_api/pyspecdata.html#pyspecdata.core.figlist.plot" title="pyspecdata.core.figlist.plot" class="sphx-glr-backref-module-pyspecdata-core sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span>
+        <a href="../auto_api/pyspecdata.html#pyspecdata.lmfitdata.eval" title="pyspecdata.lmfitdata.eval" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">lmfitdata_instance</span><span class="o">.</span><span class="n">eval</span></a><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
+        <span class="n">ls</span><span class="o">=</span><span class="n">this_ls</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">thiscolor</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;fitdata fit&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">gca</span><span class="p">()</span>
+    <span class="n">x_text</span><span class="p">,</span> <span class="n">y_text</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span> <span class="c1"># where we want the text to go</span>
+    <span class="n">text</span><span class="p">(</span>
+        <span class="n">x_text</span><span class="p">,</span>
+        <span class="n">y_text</span><span class="p">,</span>
+        <span class="s2">&quot;fitdata RESULT: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <a href="../auto_api/pyspecdata.html#pyspecdata.lmfitdata.latex" title="pyspecdata.lmfitdata.latex" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">lmfitdata_instance</span><span class="o">.</span><span class="n">latex</span></a><span class="p">(),</span>
+        <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+        <span class="n">va</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">thiscolor</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">text</span><span class="p">(</span>
+        <span class="n">x_text</span><span class="p">,</span>
+        <span class="n">y_text</span><span class="p">,</span>
+        <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">list_symbs</span><span class="p">(</span><a href="../auto_api/pyspecdata.html#module-pyspecdata.lmfitdata" title="pyspecdata.lmfitdata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">lmfitdata_instance</span></a><span class="p">),</span>
+        <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+        <span class="n">va</span><span class="o">=</span><span class="s2">&quot;top&quot;</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">thiscolor</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.369 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-ksigmasmax-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/0f7c5fecb7e4288d9c63148cf5770c5a/ksigmasmax.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">ksigmasmax.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/c797e18245447d5c265ac2ce4449adcb/ksigmasmax.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">ksigmasmax.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="basic_example.html" class="btn btn-neutral float-left" title="Basic Slicing/Filtering Example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="fit_fake_data.html" class="btn btn-neutral float-right" title="Fitting Data (Nonlinear + Symbolic)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2016, John M. Franck.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
