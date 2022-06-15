@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyspecdata.axis_manipulation package &mdash; pySpecData 0.9.5.3.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/gallery_custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> pySpecData
+          </a>
+              <div class="version">
+                0.9.5.3.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">PySpecData Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#individual-functions">Individual Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pySpecData</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>pyspecdata.axis_manipulation package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/auto_api/pyspecdata.axis_manipulation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pyspecdata-axis-manipulation-package">
+<h1>pyspecdata.axis_manipulation package<a class="headerlink" href="#pyspecdata-axis-manipulation-package" title="Permalink to this headline">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-pyspecdata.axis_manipulation.inhomog_coords">
+<span id="pyspecdata-axis-manipulation-inhomog-coords-module"></span><h2>pyspecdata.axis_manipulation.inhomog_coords module<a class="headerlink" href="#module-pyspecdata.axis_manipulation.inhomog_coords" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.axis_manipulation.inhomog_coords.</span></span><span class="sig-name descname"><span class="pre">inhomog_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direct_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indirect_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply the “inhomogeneity transform,” which rotates the data by <span class="math notranslate nohighlight">\(45^{\circ}\)</span>, and then mirrors the portion with <span class="math notranslate nohighlight">\(t_2&lt;0\)</span> in order to transform from a <span class="math notranslate nohighlight">\((t_1,t_2)\)</span> coordinate system to a <span class="math notranslate nohighlight">\((t_{inh},t_{homog})\)</span> coordinate system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>direct_dim</strong> (<em>str</em>) – Label of the direct dimension (typically <span class="math notranslate nohighlight">\(t_2\)</span>)</p></li>
+<li><p><strong>indirect_dim</strong> (<em>str</em>) – Label of the indirect dimension (typically <span class="math notranslate nohighlight">\(t_1\)</span>)</p></li>
+<li><p><strong>method</strong> (<em>'linear'</em><em>, </em><em>'fourier'</em>) – The interpolation method used to rotate the data and to mirror the data.
+<strong>Note</strong> currently, both use a fourier-based mirroring method.</p></li>
+<li><p><strong>plot_name</strong> (<em>str</em>) – the base name for the plots that are generated</p></li>
+<li><p><strong>fl</strong> (<em>figlist_var</em>) – </p></li>
+<li><p><strong>debug_kwargs</strong> (<em>dict</em>) – <p>with keys:</p>
+<dl class="field-list simple">
+<dt class="field-odd"><cite>correct_overlap</cite></dt>
+<dd class="field-odd"><p>if False, doesn’t correct for the overlap error that occurs during mirroring</p>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pyspecdata.axis_manipulation.register_axis">
+<span id="pyspecdata-axis-manipulation-register-axis-module"></span><h2>pyspecdata.axis_manipulation.register_axis module<a class="headerlink" href="#module-pyspecdata.axis_manipulation.register_axis" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.axis_manipulation.register_axis.register_axis">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.axis_manipulation.register_axis.</span></span><span class="sig-name descname"><span class="pre">register_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.register_axis.register_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate the data so that the given axes are in register with a set of specified values. Does not change the spacing of the axis labels.</p>
+<p>It finds the axis label position that is closest to the values given in <cite>arg</cite>, then interpolates (Fourier/sinc method) the data onto a new, slightly shifted, axis that passes exactly through the value given.
+To do this, it uses
+<a class="reference internal" href="pyspecdata.html#pyspecdata.core.nddata.ft_clear_startpoints" title="pyspecdata.core.nddata.ft_clear_startpoints"><code class="xref py py-func docutils literal notranslate"><span class="pre">.ft_clear_startpoints()</span></code></a>
+and uses
+<a class="reference internal" href="pyspecdata.html#pyspecdata.core.nddata.set_ft_prop" title="pyspecdata.core.nddata.set_ft_prop"><code class="xref py py-func docutils literal notranslate"><span class="pre">.set_ft_prop()</span></code></a>
+to override the “not aliased” flag.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arg</strong> (<em>dict</em><em> (</em><em>key</em><em>,</em><em>value = str</em><em>,</em><em>double</em><em>)</em>) – A list of the dimensions that you want to place in register, and the values you want them registered to.</p></li>
+<li><p><strong>nearest</strong> (<em>bool</em><em>, </em><em>optional</em>) – Passed through to ft_clear_startpoints</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pyspecdata.axis_manipulation.secsy">
+<span id="pyspecdata-axis-manipulation-secsy-module"></span><h2>pyspecdata.axis_manipulation.secsy module<a class="headerlink" href="#module-pyspecdata.axis_manipulation.secsy" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.axis_manipulation.secsy.secsy_transform">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.axis_manipulation.secsy.</span></span><span class="sig-name descname"><span class="pre">secsy_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direct_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indirect_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_indirect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fourier'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.secsy.secsy_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shift the time-domain data backwards by the echo time.</p>
+<p>As opposed to <a class="reference internal" href="#pyspecdata.axis_manipulation.secsy_transform_manual" title="pyspecdata.axis_manipulation.secsy_transform_manual"><code class="xref py py-func docutils literal notranslate"><span class="pre">secsy_transform_manual</span></code></a>, this calls on on <code class="xref py py-func docutils literal notranslate"><span class="pre">skew</span></code>,
+rather than directly manipulating the phase of the function, which can lead to aliasing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>has_indirect</strong> (<em>bool</em>) – <p>(This option is largely specific to data loaded by <code class="xref py py-func docutils literal notranslate"><span class="pre">acert_hdf5</span></code>)</p>
+<p>Does the data actually have an indirect dimension?
+If not, assume that there is a constant echo time,
+that can be retrieved with <code class="docutils literal notranslate"><span class="pre">.get_prop('te')</span></code>.</p>
+</p></li>
+<li><p><strong>truncate</strong> (<em>bool</em>) – If this is set, <cite>register_axis &lt;pyspecdata.axis_manipulation.register_axis&gt;</cite> to <span class="math notranslate nohighlight">\(t_{direct}=0\)</span>,
+and then throw out the data for which <span class="math notranslate nohighlight">\(t_{direct}&lt;0\)</span>.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – The shear method (linear or fourier).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.axis_manipulation.secsy.secsy_transform_manual">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.axis_manipulation.secsy.</span></span><span class="sig-name descname"><span class="pre">secsy_transform_manual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direct_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indirect_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_indirect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.secsy.secsy_transform_manual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shift the time-domain data backwards by the echo time.
+As opposed to <a class="reference internal" href="#pyspecdata.axis_manipulation.secsy_transform" title="pyspecdata.axis_manipulation.secsy_transform"><code class="xref py py-func docutils literal notranslate"><span class="pre">secsy_transform</span></code></a>, this directlly manipulates the phase of the function, rather than calling on <code class="xref py py-func docutils literal notranslate"><span class="pre">skew</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>has_indirect</strong> (<em>bool</em>) – <p>(This option is largely specific to data loaded by <code class="xref py py-func docutils literal notranslate"><span class="pre">acert_hdf5</span></code>)</p>
+<p>Does the data actually have an indirect dimension?
+If not, assume that there is a constant echo time,
+that can be retrieved with <code class="docutils literal notranslate"><span class="pre">.get_prop('te')</span></code>.</p>
+</p></li>
+<li><p><strong>truncate</strong> (<em>bool</em>) – If this is set, <cite>register_axis &lt;pyspecdata.axis_manipulation.register_axis&gt;</cite> to <span class="math notranslate nohighlight">\(t_{direct}=0\)</span>,
+and then throw out the data for which <span class="math notranslate nohighlight">\(t_{direct}&lt;0\)</span>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pyspecdata.axis_manipulation.shear">
+<span id="pyspecdata-axis-manipulation-shear-module"></span><h2>pyspecdata.axis_manipulation.shear module<a class="headerlink" href="#module-pyspecdata.axis_manipulation.shear" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.axis_manipulation.shear.linear_shear">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.axis_manipulation.shear.</span></span><span class="sig-name descname"><span class="pre">linear_shear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">along_axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propto_axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shear_amnt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.shear.linear_shear" title="Permalink to this definition">¶</a></dt>
+<dd><p>the linear shear – see <cite>self.shear</cite> for documentation</p>
+</dd></dl>
+
+</section>
+<section id="module-pyspecdata.axis_manipulation">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyspecdata.axis_manipulation" title="Permalink to this headline">¶</a></h2>
+<p>Provides methods that change the position of the data <em>w.r.t.</em> the axis labels.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.axis_manipulation.inhomog_coords">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.axis_manipulation.</span></span><span class="sig-name descname"><span class="pre">inhomog_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direct_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indirect_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.inhomog_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply the “inhomogeneity transform,” which rotates the data by <span class="math notranslate nohighlight">\(45^{\circ}\)</span>, and then mirrors the portion with <span class="math notranslate nohighlight">\(t_2&lt;0\)</span> in order to transform from a <span class="math notranslate nohighlight">\((t_1,t_2)\)</span> coordinate system to a <span class="math notranslate nohighlight">\((t_{inh},t_{homog})\)</span> coordinate system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>direct_dim</strong> (<em>str</em>) – Label of the direct dimension (typically <span class="math notranslate nohighlight">\(t_2\)</span>)</p></li>
+<li><p><strong>indirect_dim</strong> (<em>str</em>) – Label of the indirect dimension (typically <span class="math notranslate nohighlight">\(t_1\)</span>)</p></li>
+<li><p><strong>method</strong> (<em>'linear'</em><em>, </em><em>'fourier'</em>) – The interpolation method used to rotate the data and to mirror the data.
+<strong>Note</strong> currently, both use a fourier-based mirroring method.</p></li>
+<li><p><strong>plot_name</strong> (<em>str</em>) – the base name for the plots that are generated</p></li>
+<li><p><strong>fl</strong> (<em>figlist_var</em>) – </p></li>
+<li><p><strong>debug_kwargs</strong> (<em>dict</em>) – <p>with keys:</p>
+<dl class="field-list simple">
+<dt class="field-odd"><cite>correct_overlap</cite></dt>
+<dd class="field-odd"><p>if False, doesn’t correct for the overlap error that occurs during mirroring</p>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.axis_manipulation.linear_shear">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.axis_manipulation.</span></span><span class="sig-name descname"><span class="pre">linear_shear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">along_axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propto_axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shear_amnt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.linear_shear" title="Permalink to this definition">¶</a></dt>
+<dd><p>the linear shear – see <cite>self.shear</cite> for documentation</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.axis_manipulation.register_axis">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.axis_manipulation.</span></span><span class="sig-name descname"><span class="pre">register_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.register_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate the data so that the given axes are in register with a set of specified values. Does not change the spacing of the axis labels.</p>
+<p>It finds the axis label position that is closest to the values given in <cite>arg</cite>, then interpolates (Fourier/sinc method) the data onto a new, slightly shifted, axis that passes exactly through the value given.
+To do this, it uses
+<a class="reference internal" href="pyspecdata.html#pyspecdata.core.nddata.ft_clear_startpoints" title="pyspecdata.core.nddata.ft_clear_startpoints"><code class="xref py py-func docutils literal notranslate"><span class="pre">.ft_clear_startpoints()</span></code></a>
+and uses
+<a class="reference internal" href="pyspecdata.html#pyspecdata.core.nddata.set_ft_prop" title="pyspecdata.core.nddata.set_ft_prop"><code class="xref py py-func docutils literal notranslate"><span class="pre">.set_ft_prop()</span></code></a>
+to override the “not aliased” flag.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arg</strong> (<em>dict</em><em> (</em><em>key</em><em>,</em><em>value = str</em><em>,</em><em>double</em><em>)</em>) – A list of the dimensions that you want to place in register, and the values you want them registered to.</p></li>
+<li><p><strong>nearest</strong> (<em>bool</em><em>, </em><em>optional</em>) – Passed through to ft_clear_startpoints</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.axis_manipulation.secsy_transform">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.axis_manipulation.</span></span><span class="sig-name descname"><span class="pre">secsy_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direct_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indirect_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_indirect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fourier'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.secsy_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shift the time-domain data backwards by the echo time.</p>
+<p>As opposed to <a class="reference internal" href="#pyspecdata.axis_manipulation.secsy_transform_manual" title="pyspecdata.axis_manipulation.secsy_transform_manual"><code class="xref py py-func docutils literal notranslate"><span class="pre">secsy_transform_manual</span></code></a>, this calls on on <code class="xref py py-func docutils literal notranslate"><span class="pre">skew</span></code>,
+rather than directly manipulating the phase of the function, which can lead to aliasing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>has_indirect</strong> (<em>bool</em>) – <p>(This option is largely specific to data loaded by <code class="xref py py-func docutils literal notranslate"><span class="pre">acert_hdf5</span></code>)</p>
+<p>Does the data actually have an indirect dimension?
+If not, assume that there is a constant echo time,
+that can be retrieved with <code class="docutils literal notranslate"><span class="pre">.get_prop('te')</span></code>.</p>
+</p></li>
+<li><p><strong>truncate</strong> (<em>bool</em>) – If this is set, <cite>register_axis &lt;pyspecdata.axis_manipulation.register_axis&gt;</cite> to <span class="math notranslate nohighlight">\(t_{direct}=0\)</span>,
+and then throw out the data for which <span class="math notranslate nohighlight">\(t_{direct}&lt;0\)</span>.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – The shear method (linear or fourier).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.axis_manipulation.secsy_transform_manual">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.axis_manipulation.</span></span><span class="sig-name descname"><span class="pre">secsy_transform_manual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direct_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indirect_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_indirect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.secsy_transform_manual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shift the time-domain data backwards by the echo time.
+As opposed to <a class="reference internal" href="#pyspecdata.axis_manipulation.secsy_transform" title="pyspecdata.axis_manipulation.secsy_transform"><code class="xref py py-func docutils literal notranslate"><span class="pre">secsy_transform</span></code></a>, this directlly manipulates the phase of the function, rather than calling on <code class="xref py py-func docutils literal notranslate"><span class="pre">skew</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>has_indirect</strong> (<em>bool</em>) – <p>(This option is largely specific to data loaded by <code class="xref py py-func docutils literal notranslate"><span class="pre">acert_hdf5</span></code>)</p>
+<p>Does the data actually have an indirect dimension?
+If not, assume that there is a constant echo time,
+that can be retrieved with <code class="docutils literal notranslate"><span class="pre">.get_prop('te')</span></code>.</p>
+</p></li>
+<li><p><strong>truncate</strong> (<em>bool</em>) – If this is set, <cite>register_axis &lt;pyspecdata.axis_manipulation.register_axis&gt;</cite> to <span class="math notranslate nohighlight">\(t_{direct}=0\)</span>,
+and then throw out the data for which <span class="math notranslate nohighlight">\(t_{direct}&lt;0\)</span>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2016, John M. Franck.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

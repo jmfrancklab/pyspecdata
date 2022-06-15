@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Documentation of Notebook Helper Functions &mdash; pySpecData 0.9.5.3.2 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="_static/gallery_custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="the fitdata class" href="fitdata.html" />
+    <link rel="prev" title="ND-Data" href="nddata.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> pySpecData
+          </a>
+              <div class="version">
+                0.9.5.3.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="notebook.html#setting-up-the-notebook">Setting up the notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebook.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebook.html#running-the-notebook">Running the notebook</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="notebook.html#how-it-works">How it works</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="notebook.html#the-latex-end">The LaTeX end</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="notebook.html#the-python-end">The python end</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyspecdata.html">N-dimensional Data (nddata)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyspecdata.html#full-list-of-nddata-methods">Full list of <cite>nddata</cite> methods</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Documentation of Notebook Helper Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#individual-functions">Individual Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pySpecData</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="notebook.html">LaTeX Notebook Functionality</a> &raquo;</li>
+      <li>Documentation of Notebook Helper Functions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/latexscripts.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyspecdata.latexscripts">
+<span id="documentation-of-notebook-helper-functions"></span><h1>Documentation of Notebook Helper Functions<a class="headerlink" href="#module-pyspecdata.latexscripts" title="Permalink to this headline">¶</a></h1>
+<p>Provides the <code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span></code> shell/dos command, which you run
+instead of your normal Latex command to build a lab notebook.
+The results of python environments are <strong>cached</strong> and <strong>only re-run if the code changes</strong>,
+even if the python environments are moved around.
+This makes the compilation of a Latex lab notebook extremely efficient.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.latexscripts.cache_output_if_needed">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.latexscripts.</span></span><span class="sig-name descname"><span class="pre">cache_output_if_needed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scriptnum_as_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hashstring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showcode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.cache_output_if_needed" title="Permalink to this definition">¶</a></dt>
+<dd><p>if needed, run the python script numbered by scriptnum_as_str that hashes to hashstring, and output the result to the cache ONLY</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.latexscripts.cached_filename">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.latexscripts.</span></span><span class="sig-name descname"><span class="pre">cached_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hashstring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returndir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.cached_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>this sets the format for where the cached file is stored
+we use the first two characters as directory names (so there are just 16 of them</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.latexscripts.det_new_pdf_name">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.latexscripts.</span></span><span class="sig-name descname"><span class="pre">det_new_pdf_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thisargv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.det_new_pdf_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>based on an original tex or pdf name, determine the original basename (i.e., no extension), as well as one with the final word after the underscore removed</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.latexscripts.genconfig">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.latexscripts.</span></span><span class="sig-name descname"><span class="pre">genconfig</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.genconfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>creates a template configuration directory</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.latexscripts.main">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.latexscripts.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>This looks for <cite>scripts/scriptsUsed.csv</cite> inside the notebook directory, and checks whether or not it should be run
+if a command line argument of “flush” is passed, it flushes that script number from the cache</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.latexscripts.sha_string">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.latexscripts.</span></span><span class="sig-name descname"><span class="pre">sha_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">script</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.sha_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert the sha hash to a string</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.latexscripts.wraplatex">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.latexscripts.</span></span><span class="sig-name descname"><span class="pre">wraplatex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.wraplatex" title="Permalink to this definition">¶</a></dt>
+<dd><p>runs the python scripts after running latex also creates a copy of latex without the final portion under the underscore
+This prevents the viewer from hanging while it’s waiting for a refresh.
+This can be used in combination with wrapviewer() and latexmk by using a <code class="docutils literal notranslate"><span class="pre">~/.latexmkrc</span></code> file that looks like this:</p>
+<p>If you pass the <code class="docutils literal notranslate"><span class="pre">--xelatex</span></code> argument, xelatex is used instead of pdflatex
+(note that if you’re using latexmk, you need to add this in the latexmkrc file).</p>
+<div class="highlight-perl notranslate"><div class="highlight"><pre><span></span><span class="nv">$pdflatex</span><span class="o">=</span><span class="sx">q/pdflatex_notebook_wrapper %O -synctex=1 %S/</span><span class="p">;</span><span class="c1"># calls this function</span>
+<span class="nv">$pdf_previewer</span><span class="o">=</span><span class="sx">q/pdflatex_notebook_view_wrapper/</span><span class="p">;</span><span class="c1"># calls the wrapviewer function</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.latexscripts.wrapviewer">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.latexscripts.</span></span><span class="sig-name descname"><span class="pre">wrapviewer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.wrapviewer" title="Permalink to this definition">¶</a></dt>
+<dd><p>see <a class="reference internal" href="#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="nddata.html" class="btn btn-neutral float-left" title="ND-Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="fitdata.html" class="btn btn-neutral float-right" title="the fitdata class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2016, John M. Franck.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

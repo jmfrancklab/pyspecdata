@@ -1,0 +1,161 @@
+﻿pyspecdata.core.fitdata
+=======================
+
+.. currentmodule:: pyspecdata.core
+
+.. autoclass:: fitdata
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~fitdata.__init__
+      ~fitdata.add_inactive_p
+      ~fitdata.add_noise
+      ~fitdata.aligndata
+      ~fitdata.along
+      ~fitdata.analytical_covariance
+      ~fitdata.argmax
+      ~fitdata.argmin
+      ~fitdata.axis
+      ~fitdata.axlen
+      ~fitdata.axn
+      ~fitdata.bootstrap
+      ~fitdata.cdf
+      ~fitdata.check_axis_coords_errors
+      ~fitdata.chunk
+      ~fitdata.chunk_auto
+      ~fitdata.circshift
+      ~fitdata.contiguous
+      ~fitdata.contour
+      ~fitdata.convolve
+      ~fitdata.copy
+      ~fitdata.copy_axes
+      ~fitdata.copy_props
+      ~fitdata.copyaxes
+      ~fitdata.covar
+      ~fitdata.covarmat
+      ~fitdata.cropped_log
+      ~fitdata.diff
+      ~fitdata.dot
+      ~fitdata.eval
+      ~fitdata.eval_poly
+      ~fitdata.extend
+      ~fitdata.extend_for_shear
+      ~fitdata.fit
+      ~fitdata.fitfunc
+      ~fitdata.fld
+      ~fitdata.fourier_shear
+      ~fitdata.fromaxis
+      ~fitdata.ft
+      ~fitdata.ft_clear_startpoints
+      ~fitdata.ft_state_to_str
+      ~fitdata.ftshift
+      ~fitdata.gen_indices
+      ~fitdata.get_covariance
+      ~fitdata.get_error
+      ~fitdata.get_ft_prop
+      ~fitdata.get_plot_color
+      ~fitdata.get_prop
+      ~fitdata.get_range
+      ~fitdata.get_units
+      ~fitdata.getaxis
+      ~fitdata.getaxisshape
+      ~fitdata.gnuplot_save
+      ~fitdata.guess
+      ~fitdata.hdf5_write
+      ~fitdata.histogram
+      ~fitdata.human_units
+      ~fitdata.ift
+      ~fitdata.indices
+      ~fitdata.inhomog_coords
+      ~fitdata.integrate
+      ~fitdata.interp
+      ~fitdata.invinterp
+      ~fitdata.item
+      ~fitdata.labels
+      ~fitdata.latex
+      ~fitdata.like
+      ~fitdata.linear
+      ~fitdata.linear_shear
+      ~fitdata.makereal
+      ~fitdata.matchdims
+      ~fitdata.matrices_3d
+      ~fitdata.max
+      ~fitdata.mayavi_surf
+      ~fitdata.mean
+      ~fitdata.mean_all_but
+      ~fitdata.mean_nopop
+      ~fitdata.mean_weighted
+      ~fitdata.meshplot
+      ~fitdata.min
+      ~fitdata.mkd
+      ~fitdata.multimin
+      ~fitdata.name
+      ~fitdata.nnls
+      ~fitdata.normalize
+      ~fitdata.oldtimey
+      ~fitdata.output
+      ~fitdata.parameter_derivatives
+      ~fitdata.pinv
+      ~fitdata.plot_labels
+      ~fitdata.polyfit
+      ~fitdata.popdim
+      ~fitdata.random_mask
+      ~fitdata.register_axis
+      ~fitdata.remove_inactive_p
+      ~fitdata.rename
+      ~fitdata.reorder
+      ~fitdata.replicate_units
+      ~fitdata.repwlabels
+      ~fitdata.residual
+      ~fitdata.retaxis
+      ~fitdata.run
+      ~fitdata.run_avg
+      ~fitdata.run_nopop
+      ~fitdata.runcopy
+      ~fitdata.secsy_transform
+      ~fitdata.secsy_transform_manual
+      ~fitdata.set_error
+      ~fitdata.set_ft_prop
+      ~fitdata.set_guess
+      ~fitdata.set_plot_color
+      ~fitdata.set_prop
+      ~fitdata.set_to
+      ~fitdata.set_units
+      ~fitdata.setaxis
+      ~fitdata.settoguess
+      ~fitdata.shear
+      ~fitdata.smoosh
+      ~fitdata.sort
+      ~fitdata.sort_and_xy
+      ~fitdata.squeeze
+      ~fitdata.sum
+      ~fitdata.sum_nopop
+      ~fitdata.to_ppm
+      ~fitdata.unitify_axis
+      ~fitdata.units_texsafe
+      ~fitdata.unset_prop
+      ~fitdata.waterfall
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~fitdata.C
+      ~fitdata.angle
+      ~fitdata.function_string
+      ~fitdata.functional_form
+      ~fitdata.imag
+      ~fitdata.real
+      ~fitdata.want_to_prospa_decim_correct
+   
+   
