@@ -4242,9 +4242,9 @@ class nddata (object):
     def _wrapaxisfuncs(self,func):
         #{{{ for convenience, wrap the max and min functions
         if func == np.max:
-            func = amax
+            func = np.amax
         if func == np.min:
-            func = amin
+            func = np.amin
         if func == np.diff:
             func = mydiff
         return func
