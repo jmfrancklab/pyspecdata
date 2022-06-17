@@ -174,8 +174,7 @@ class lmfitdata(nddata):
             logging.debug(strm("fit param ---", j))
         logging.debug(strm(self.pars))
         logging.debug(strm(self.guess_dict))
-        return
-
+        return self
     def guess(self):
         r"""Old code that we are preserving here -- provide the guess for our
         parameters; by default, based on pseudoinverse"""
@@ -302,7 +301,7 @@ class lmfitdata(nddata):
         if hasattr(out,'covar'):
             self.covariance = out.covar
         # }}}
-        return
+        return self
 
     def run_lambda(self, pars):
         """actually run the lambda function we separate this in case we want

@@ -218,3 +218,22 @@ def redim_F_to_C(a):
 def redim_C_to_F(a):
     "see redim_F_to_C"
     return a.ravel(order='C').reshape(a.shape[::-1], order='F')
+def fname_makenice(fname):
+    fname = fname.replace(' ','_')
+    fname = fname.replace('-','m')
+    fname = fname.replace('+','p')
+    fname = fname.replace('.','pt')
+    fname = fname.replace(',','_')
+    fname = fname.replace('\\','_')
+    fname = fname.replace('$','')
+    fname = fname.replace('(','')
+    fname = fname.replace(')','')
+    fname = fname.replace('"','')
+    fname = fname.replace('=','_')
+    fname = fname.replace('\n','_')
+    fname = fname.replace('*','_star_')
+    fname = fname.replace(':','')
+    fname = fname.replace('^','')
+    fname = fname.replace('}','')
+    fname = fname.replace('{','')
+    return fname
