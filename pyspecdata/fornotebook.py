@@ -11,6 +11,7 @@ import warnings
 # sympy doesn't like to be imported from fornotebook as part of a *
 warnings.filterwarnings("ignore")
 from .core import *
+from .general_functions import fname_makenice
 from scipy.io import savemat,loadmat
 from os.path import exists as path_exists
 from os import name as os_name
@@ -374,22 +375,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
         bytextwidth = False
     if print_string is not None:
         print(print_string)
-    fname = fname.replace(' ','_')
-    fname = fname.replace('-','m')
-    fname = fname.replace('+','p')
-    fname = fname.replace('\\','_')
-    fname = fname.replace('$','')
-    fname = fname.replace('(','')
-    fname = fname.replace(')','')
-    fname = fname.replace('"','')
-    fname = fname.replace('=','_')
-    fname = fname.replace('\n','_')
-    fname = fname.replace('*','_star_')
-    fname = fname.replace(':','')
-    fname = fname.replace('^','')
-    fname = fname.replace('}','')
-    fname = fname.replace('{','')
-    fname = r'auto_figures/'+fname
+    fname = r'auto_figures/'+fname_makenice(fname)
     if alsosave != None:
         alsosave = r'auto_figures/'+alsosave
     if gensvg == True:
