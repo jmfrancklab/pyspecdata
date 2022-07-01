@@ -270,7 +270,7 @@ def getDATADIR(*args,**kwargs):
                 d = dict(pyspec_config._config_parser.items('General'))['data_directory']
                 exp_directory = walk_and_grab_best_match(d)
                 if exp_directory is None:
-                    raise ValueError("even after walking the whole data directory, I can't find a match for "+exp_type)
+                    raise ValueError("even after walking the whole data directory, I can't find a match for "+exp_type+".  If that's really a directory that exists on a remote server, etc, then you should add the empty directory to your local file structure, somewhere where it's findable by pyspecdata (listed in your pyspecdata config file)")
         if exp_directory is None:
             logger.debug(strm("I found no directory matches for exp_type "+exp_type+", after walking the known exptypes, so I'm going to walk data_directory"))
             exp_directory = walk_and_grab_best_match(base_data_dir)
@@ -299,7 +299,7 @@ def rclone_search(fname,dirname):
         retval += '\n'+strm("checking remote",thisremote)
         # do NOT quote the filename -- quotes are typically stripped off by the
         # shell -- they would be literal here
-        cmd = ['rclone','--include','*'+fname+'*', 'ls',thisremote]
+        cmd = ['rclone','--include',f'**{dirname}**/*{fname}*', 'ls',thisremote]
         logger.debug("running "+strm(*cmd))
         with Popen(cmd, stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
             for j in proc.stdout:
