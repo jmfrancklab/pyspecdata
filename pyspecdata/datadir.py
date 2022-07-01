@@ -282,6 +282,7 @@ def getDATADIR(*args,**kwargs):
         retval = retval + ('',)
     return os.path.join(*retval)
 def rclone_search(fname,dirname):
+    logger.debug(strm("rclone search called with",fname,dirname))
     retval = "I can't find %s in %s, so I'm going to search for t in your rclone remotes"%(fname,dirname)
     rclone_remotes = []
     try:
@@ -319,7 +320,7 @@ def rclone_search(fname,dirname):
                             os.path.normpath(os.path.join(dirname)).replace('\\','\\\\')))
                 retval += '\nYou should be able to retrieve this file with:\n'+cmd
     return retval
-def log_fname(logname,fname,dirname,err=False):
+def log_fname(logname,fname,dirname,exp_type,err=False):
     r"""logs the file name either used or missing.
 
     Also, by setting the `err` flag to True, you can generate an error message
@@ -340,7 +341,7 @@ def log_fname(logname,fname,dirname,err=False):
     rclone copy -v --include '200110_pulse_2.h5' g_syr:exp_data/test_equip C:\\Users\\johnf\\exp_data\\test_equip``
     """
     if err:
-        logger.debug(strm("about to call rclone search on",fname,dirname))
+        logger.debug(strm("about to call rclone search on fname:",fname,"dirname:",exp_type))
         rclone_suggest = rclone_search(fname,dirname)# eventually lump into the error message
         logger.debug("rclone search done")
     with open(logname+'.log','a+',encoding='utf-8') as fp:
@@ -359,7 +360,7 @@ def log_fname(logname,fname,dirname,err=False):
                 break
         if not already_listed:
             fp.seek(0,os.SEEK_END)# make sure at end of file
-            fp.write('%-70s%-50s\n'%(fname.replace(' ','\\ '),dirname.replace(' ','\\ ')))
+            fp.write('%-70s%-50s%-50s\n'%(fname.replace(' ','\\ '),exp_type.replace(' ','\\ '),dirname.replace(' ','\\ ')))
     if err:
         return rclone_suggest
 def register_directory():
