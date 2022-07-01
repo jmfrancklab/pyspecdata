@@ -281,9 +281,19 @@ def getDATADIR(*args,**kwargs):
     if len(retval[-1]) != 0:
         retval = retval + ('',)
     return os.path.join(*retval)
-def rclone_search(fname,dirname):
-    logger.debug(strm("rclone search called with",fname,dirname))
-    retval = "I can't find %s in %s, so I'm going to search for t in your rclone remotes"%(fname,dirname)
+def rclone_search(fname,exp_type,dirname):
+    logger.debug(strm("rclone search called with",fname,exp_type))
+    remotelocation = pyspec_config.get_setting('RcloneRemotes',exp_type)
+    if remotelocation is not None:
+        logger.debug("remote location previously stored")
+        cmd = strm(
+                "rclone copy -v --include '%s' %s %s"%(fname,
+                    remotelocation,
+                    # dirname below needs to be replaced with path relative to current directory
+                    os.path.normpath(os.path.join(dirname)).replace('\\','\\\\')))
+        retval += '\nBased on previous searches for this exp_type, you should be able to retrieve this file with:\n'+cmd
+        return retval
+    retval = "I can't find %s in %s, so I'm going to search for t in your rclone remotes"%(fname,exp_type)
     rclone_remotes = []
     try:
         with Popen('rclone', stdout=PIPE, stderr=PIPE) as p:
@@ -299,8 +309,8 @@ def rclone_search(fname,dirname):
         retval += '\n'+strm("checking remote",thisremote)
         # do NOT quote the filename -- quotes are typically stripped off by the
         # shell -- they would be literal here
-        cmd = ['rclone','--include',f'**{dirname}**/*{fname}*', 'ls',thisremote]
-        logger.debug("running "+strm(*cmd))
+        cmd = ['rclone','--include',f'**{exp_type}**/*{fname}*', 'ls',thisremote]
+        logger.info("trying to find a file, and running:\n\t"+strm(*cmd))
         with Popen(cmd, stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
             for j in proc.stdout:
                 foundpath = j.split()
@@ -312,13 +322,16 @@ def rclone_search(fname,dirname):
                             for j in os.path.split(k)
                             if len(j) > 0]
                     logging.debug(strm("foundpath is",foundpath))
+                remotelocation = thisremote+'/'.join(foundpath[:-1])
+                logging.debug("about to write to RcloneRemotes")
+                pyspec_config.set_setting('RcloneRemotes',exp_type,remotelocation)
                 cmd = strm(
-                        "rclone copy -v --include '%s' %s%s %s"%(foundpath[-1],
-                            thisremote,
-                            '/'.join(foundpath[:-1]),
+                        "rclone copy -v --include '%s' %s %s"%(foundpath[-1],
+                            remotelocation,
                             # dirname below needs to be replaced with path relative to current directory
                             os.path.normpath(os.path.join(dirname)).replace('\\','\\\\')))
                 retval += '\nYou should be able to retrieve this file with:\n'+cmd
+        logger.debug("Popen has finally terminated!")
     return retval
 def log_fname(logname,fname,dirname,exp_type,err=False):
     r"""logs the file name either used or missing.
@@ -342,7 +355,7 @@ def log_fname(logname,fname,dirname,exp_type,err=False):
     """
     if err:
         logger.debug(strm("about to call rclone search on fname:",fname,"dirname:",exp_type))
-        rclone_suggest = rclone_search(fname,dirname)# eventually lump into the error message
+        rclone_suggest = rclone_search(fname,exp_type,dirname)# eventually lump into the error message
         logger.debug("rclone search done")
     with open(logname+'.log','a+',encoding='utf-8') as fp:
         already_listed = False
@@ -350,7 +363,7 @@ def log_fname(logname,fname,dirname,exp_type,err=False):
         for j in fp:
             j = j.replace(r'\ ','LITERALSPACE')
             try:
-                f, d = j.split()
+                f, e, d = j.split()
             except:
                 raise RuntimeError(strm("there seems to be something wrong with your",logname+'.log',"file (in the current directory).  It should consist of one line per file, with each file containing a file and directory name.  Instead, I find a line with the following elements",j.split(),'\n',"You might try deleting the",logname+'.log',"file"))
             f = f.replace('LITERALSPACE',' ')

@@ -222,7 +222,6 @@ def fname_makenice(fname):
     fname = fname.replace(' ','_')
     fname = fname.replace('-','m')
     fname = fname.replace('+','p')
-    fname = fname.replace('.','pt')
     fname = fname.replace(',','_')
     fname = fname.replace('\\','_')
     fname = fname.replace('$','')
