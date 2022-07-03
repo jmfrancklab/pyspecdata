@@ -109,7 +109,7 @@ On **CentOS7**, we've tested
 
 On **Debian** (should also work for **Ubuntu**),
 we've tested
-``sudo apt-get install -y python3 python3-matplotlib libpython3.7 python3-dev python3-sympy python3-h5py python3-tables python3-scipy python3-setuptools gfortran``.  Then follow the `installation for developers <#installation-for-developers>`_ below. 
+``sudo apt-get install -y python3 python3-matplotlib libpython3.7 python3-dev python3-sympy python3-h5py python3-tables python3-scipy python3-setuptools gfortran pip``.  Then follow the `installation for developers <#installation-for-developers>`_ below. 
 
 On **MacOS**, if you want to install as a developer your python distribution needs to have a working Fortran compiler, since some of the modules use Fortran.
 We have tested ``conda install -c conda-forge fortran-compiler``, followed by

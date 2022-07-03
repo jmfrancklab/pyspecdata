@@ -6248,7 +6248,7 @@ class nddata (object):
             logger.debug("initially, rightdata appears to be nddata")
             _,B = self.aligndata(key)
             key = B.data # now the next part will handle this
-        if isinstance(key, np.ndarray):# if selector is an np.ndarray
+        elif isinstance(key, np.ndarray):# if selector is an np.ndarray
             logger.debug("initially, rightdata appears to be np.ndarray")
             if key.dtype is not np.dtype('bool'):
                 raise ValueError("I don't know what to do with an np.ndarray subscript that has dtype "+repr(key.dtype))
@@ -6260,6 +6260,10 @@ class nddata (object):
                         +" are not compatible (matching or singleton) -- I really don't think that you want to do this!")
             self.data[key] = val
             return
+        elif isinstance(key, str):
+            logger.debug("setting the axis")
+            self.setaxis(key,val)
+            return self
         if isinstance(val,nddata):
             logger.debug("rightdata appears to be nddata after initial treatment")
             #{{{ reorder so the shapes match
@@ -6507,6 +6511,8 @@ class nddata (object):
                 errmsg += " -- I don't know what to do with this"
                 raise ValueError(errmsg)
             #}}}
+        elif isinstance(args,str):
+            return self.getaxis(args)
         else:
             if type(args) is not slice:
                 if type(args) not in [tuple, list]:
@@ -6604,6 +6610,7 @@ class nddata (object):
             the index corresponding to the stop of the range
         """
         axesdict = self.mkd(self.axis_coords)
+        if len(axesdict) == 0: raise ValueError(f"possible that no axes are labeled? {ndshape(self)}")
         if axesdict[dimname] is None:
             raise ValueError("You passed a range-type slice"
             +" selection, but to do that, your axis coordinates need to"
@@ -6808,6 +6815,7 @@ class nddata (object):
                     slicedict[thisdim] = slice(temp_low,temp_high,None) # inclusive
                     axesdict[thisdim] = axesdict[thisdim][slicedict[thisdim]]
                 elif thisop == hash('idx'):
+                    if thisdim not in axesdict.keys(): raise ValueError(f"{thisdim} not in {axesdict.keys()}")
                     if axesdict[thisdim] is None:
                         raise ValueError("You passed a labeled index"
                         +" selection, but to do that, your axis coordinates need to"
