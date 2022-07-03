@@ -365,7 +365,7 @@ def log_fname(logname,fname,dirname,exp_type,err=False):
             try:
                 f, e, d = j.split()
             except:
-                raise RuntimeError(strm("there seems to be something wrong with your",logname+'.log',"file (in the current directory).  It should consist of one line per file, with each file containing a file and directory name.  Instead, I find a line with the following elements",j.split(),'\n',"You might try deleting the",logname+'.log',"file"))
+                raise RuntimeError(strm("there seems to be something wrong with your",logname+'.log',"file (in the current directory).  It should consist of one line per file, with each file containing a file an experiment type and a directory name.  Instead, I find a line with the following elements",j.split(),'\n',"You might try deleting the",logname+'.log',"file"))
             f = f.replace('LITERALSPACE',' ')
             d = d.replace('LITERALSPACE',' ')
             if f == fname and d == dirname:
