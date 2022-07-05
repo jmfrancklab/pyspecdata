@@ -270,7 +270,7 @@ def getDATADIR(*args,**kwargs):
                 d = dict(pyspec_config._config_parser.items('General'))['data_directory']
                 exp_directory = walk_and_grab_best_match(d)
                 if exp_directory is None:
-                    raise ValueError("even after walking the whole data directory, I can't find a match for "+exp_type+".  If that's really a directory that exists on a remote server, etc, then you should add the empty directory to your local file structure, somewhere where it's findable by pyspecdata (listed in your pyspecdata config file)")
+                    raise ValueError("even after walking the whole data directory, I can't find a match for "+exp_type+".  If that's really a directory that exists on a remote server, etc, then you should add the empty directory to your local file structure, somewhere where it's findable by pyspecdata (listed in your pyspecdata config file) -- i.e. mkdir -p "+exp_type+" in the right place")
         if exp_directory is None:
             logger.debug(strm("I found no directory matches for exp_type "+exp_type+", after walking the known exptypes, so I'm going to walk data_directory"))
             exp_directory = walk_and_grab_best_match(base_data_dir)
@@ -282,8 +282,8 @@ def getDATADIR(*args,**kwargs):
         retval = retval + ('',)
     return os.path.join(*retval)
 def rclone_search(fname,exp_type,dirname):
-    logger.debug(strm("rclone search called with",fname,exp_type))
-    remotelocation = pyspec_config.get_setting('RcloneRemotes',exp_type)
+    logger.debug(strm("rclone search called with fname:",fname,"exp_type:",exp_type))
+    remotelocation = pyspec_config.get_setting(exp_type.lower(), section='RcloneRemotes')
     if remotelocation is not None:
         logger.debug("remote location previously stored")
         cmd = strm(
@@ -291,8 +291,10 @@ def rclone_search(fname,exp_type,dirname):
                     remotelocation,
                     # dirname below needs to be replaced with path relative to current directory
                     os.path.normpath(os.path.join(dirname)).replace('\\','\\\\')))
-        retval += '\nBased on previous searches for this exp_type, you should be able to retrieve this file with:\n'+cmd
+        retval = '\nBased on previous searches for this exp_type, you should be able to retrieve this file with:\n'+cmd
         return retval
+    else:
+        logger.debug(f"remote location {exp_type.lower()} not previously stored")
     retval = "I can't find %s in %s, so I'm going to search for t in your rclone remotes"%(fname,exp_type)
     rclone_remotes = []
     try:
@@ -310,7 +312,7 @@ def rclone_search(fname,exp_type,dirname):
         # do NOT quote the filename -- quotes are typically stripped off by the
         # shell -- they would be literal here
         cmd = ['rclone','--include',f'**{exp_type}**/*{fname}*', 'ls',thisremote]
-        logger.info("trying to find a file, and running:\n\t"+strm(*cmd))
+        logger.info("trying to find a file, and running:\n(rclone is not great at this, so it might take a while, but if your file is there it will find it!  Also, after it finds a particular data directory, you will be instead offered a quick hint about how to find your file!)\t"+strm(*cmd))
         with Popen(cmd, stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
             for j in proc.stdout:
                 foundpath = j.split()
