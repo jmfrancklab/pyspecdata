@@ -108,16 +108,19 @@ class MyConfig(object):
             if retval in [None,'']:# it wasn't found from the config file
                 if default is None:
                     return None
-                default = default.split('/')
-                for j in range(len(default)):
-                    if default[j][0] == '.':
-                        default[j] = self.hide_start + default[j][1:]
-                default = os.path.sep.join(default)
+                if type(default) is str and '/' in default:
+                    default = default.split('/')
+                    for j in range(len(default)):
+                        if default[j][0] == '.':
+                            default[j] = self.hide_start + default[j][1:]
+                    default = os.path.sep.join(default)
                 retval = default
                 if retval is None:
                     raise RuntimeError("\nI didn't find the value corresponding to "+this_key
                             +" in the environment variable "+repr(environ)+'\n'+
                             "--> You probably want to run the command-line tool pyspecdata_dataconfig to set up a configuration file")
+                if type(retval) in [int,float]:
+                    retval = str(retval)
                 self._config_parser.set(section,this_key,retval)
             if environ is not None:
                 os.environ[environ] = retval
