@@ -11,3 +11,10 @@ The `exp_type` should have the following characteristics:
 -   It should be unique (in a case-insensitive way)
 -   It should be the name of the last one to three (separated by a *forward* slash) directories/folders where you have a particular type of experiment stored
 -   The name of the folders referred to in `exp_type` should match on the server (google drive, ftp, etc) where the files are stored and on your local computer.
+
+We provide the command XXXX.  You supply this with a csv file containing two columns:
+
+-   `exp_type`
+-   file name
+
+Of the files that you want.  It will then run rclone to copy all those files to your local computer.
