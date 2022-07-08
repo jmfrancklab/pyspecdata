@@ -192,7 +192,7 @@ class lmfitglobal(nddata):
         ndata = len(self.datasets)
         resid = 0.0*np.array(self.datasets[:])
         for i in range(ndata):
-            resid[i] = (self.member_model(0, {'R1':this_model[0]}))[0] - self.datasets[i].data
+            resid[i] = (self.member_model(i, {'R1':this_model[i]}))[0] - self.datasets[i].data
         retval = np.concatenate(resid)
         retval = retval.real
         print(type(retval[0]))
