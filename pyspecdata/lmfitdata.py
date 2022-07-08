@@ -192,7 +192,7 @@ class lmfitglobal(nddata):
         ndata = len(self.datasets)
         resid = 0.0*np.array(self.datasets[:])
         for i in range(ndata):
-            resid[i] = (self.member_model(i, {'R1':this_model[i]}))[0] - self.datasets[i].data
+            resid[i] = (self.member_model(i, {'R1':this_model[i]}))[0] - self.datasets[i].data.real
         retval = np.concatenate(resid)
         retval = retval.real
         print(type(retval[0]))
@@ -203,11 +203,15 @@ class lmfitglobal(nddata):
         this_model = self.make_model(self.pars,
                 nddata(np.array(self.global_vars_value),str(self.fit_axis)))
         y = np.real(this_model.data)
-        print(type(self.residual))
-        print(type(self.pars))
+        print(x)
+        print(y)
+        #print(type(self.residual))
+        print(self.pars)
         out = minimize(
                 self.residual,
                 self.pars,
+                method='nelder',
+                nan_policy='omit',
                 )
         return out
 
