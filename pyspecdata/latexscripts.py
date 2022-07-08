@@ -271,6 +271,19 @@ def cache_output_if_needed(scriptnum_as_str,hashstring,showcode = False,show_err
                 fp_out.write("{\\small {\\color{red} {\\tt ---------------------------}}}\\\\\n")
         fp_out.close()
         return
+def flush_by_content(searchstring):
+    script_dir = os.path.normpath(os.path.join(os.getcwd(),'scripts'))
+    numbers_to_flush = []
+    for thisfile in os.listdir(script_dir):
+        if thisfile.lower().endswith('.py'):
+            with open(thisfile, 'r', encoding='utf-8') as fp:
+                contents = fp.read()
+                if searchstring in contents:
+                    numbers_to_flush.append(thisfile[:-3])
+                    print("found",searchstring,"in",thisfile)
+    for j in numbers_to_flush:
+        flush_script(j)
+    return
 def flush_script(number):
     tex_name = os.path.normpath(os.path.join(os.getcwd(),'scripts',number+'.tex'))
     print("removing:",tex_name)
@@ -307,13 +320,17 @@ if haswatchdog:
         return
 def main():
     r'''This looks for `scripts/scriptsUsed.csv` inside the notebook directory, and checks whether or not it should be run
-    if a command line argument of "flush" is passed, it flushes that script number from the cache'''
+    if a command line argument of "flush" is passed, it flushes that script number (or range, if two arguments) from the cache.
+    If flush is followed by a single string, it will search for all scripts that contain that string and then flush them.'''
     check_image_path()
     if len(sys.argv) > 2:
         if sys.argv[1] == 'flush':
             if len(sys.argv) == 3:
-                flush_script(sys.argv[2])
-                exit()
+                if type(sys.argv[2]) is str:
+                    flush_by_content(sys.argv[2])
+                else:
+                    flush_script(sys.argv[2])
+                    exit()
             elif len(sys.argv) == 4:
                 for j in range(int(sys.argv[2]),int(sys.argv[3])+1):
                     flush_script(str(j))
