@@ -94,7 +94,9 @@ def search_filename(searchstring,exp_type,
     files = look_inside(directory)
     if files is None or len(files) == 0:
         raise RuntimeError("even after rclone_search, I "
-                "can't find this file!")
+                "can't find this file!\n"
+                f"file search string: {searchstring}\n"
+                f"exp type: {exp_type}\n")
     else:
         if len(files) > 1:
             basenames,exts = list(map(set,list(zip(*[j.rsplit('.',1) for j in files if len(j.rsplit('.',1))>1]))))

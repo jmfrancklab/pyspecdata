@@ -86,7 +86,7 @@ import scipy.sparse as sparse
 import numpy.lib.recfunctions as recf
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
-from .datadir import getDATADIR,log_fname
+from .datadir import getDATADIR,log_fname,proc_data_target_dir
 from . import fourier as this_fourier
 from . import axis_manipulation
 from . import nnls as this_nnls

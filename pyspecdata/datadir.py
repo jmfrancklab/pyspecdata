@@ -160,6 +160,16 @@ def grab_data_directory():
             +"data directory was"
             +"\nAll the functionality of this function should now be"
             +"replaced by getDATADIR")
+def proc_data_target_dir(exp_type):
+    """A convenience function for getting a data directory you're going to write data to.
+
+    Provides the full path to the directory corresponding to exp_type.
+
+    If this is the first time you're trying to write to that exp_type, it will create the directory"""
+    data_target = os.path.normpath(getDATADIR('AG_processed_data'))
+    if not os.path.exists(data_target):
+        os.mkdir(data_target)
+    return data_target
 def getDATADIR(*args,**kwargs):
     r'''Used to find a directory containing data in a way that works
     seamlessly across different computers (and operating systems).
@@ -346,6 +356,10 @@ def rclone_search(fname,exp_type,dirname):
             logging.debug("about to write to RcloneRemotes")
             pyspec_config.set_setting('RcloneRemotes',exp_type,remotelocation)
     logger.debug("remote location previously stored")
+    if not fname.startswith('*'):
+        fname = '*' + fname
+    if not fname.endswith('*'):
+        fname = fname + '*'
     cmd = strm(
             "rclone copy -v --include '%s' %s %s"%(fname,
                 remotelocation,
