@@ -29,10 +29,16 @@ def xepr(filename, dimname='', verbose=False):
     # {{{ check if the extension is upper or lowercase
     orig_spc = filename_spc
     if not os.path.exists(filename_spc):
+        logging.debug(f"{filename_spc} doesn't exist -- trying lowercase")
         filename_spc = filename_spc[:-4] + filename_spc[-4:].lower()
-        filename_par = filename_par[:-4] + filename_par[-4:].lower()
     if not os.path.exists(filename_spc):
         filename_spc = orig_spc
+    orig_par = filename_par
+    if not os.path.exists(filename_par):
+        logging.debug(f"{filename_par} doesn't exist -- trying lowercase")
+        filename_par = filename_par[:-4] + filename_par[-4:].lower()
+    if not os.path.exists(filename_par):
+        filename_par = orig_par
     # }}}
     # }}}
     # {{{ load the parameters
@@ -54,6 +60,7 @@ def xepr(filename, dimname='', verbose=False):
         # need to log the fact that it's missing manually
         err = log_fname('missing_data_files',
                 os.path.split(filename_spc)[-1],
+                filename_spc.split(os.path.sep)[-3:-1],
                 os.path.split(filename_spc)[0],
                 err=True)
         raise IOError("Can't find file %s\n%s"%(filename_spc,err))

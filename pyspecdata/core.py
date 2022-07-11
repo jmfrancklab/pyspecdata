@@ -2166,14 +2166,15 @@ class figlist(object):
         kwargs = {}
         for figname in self.figurelist:
             logger.debug(strm("showing figure \"%s\""%lsafen(figname)))
-            self.next(figname)
             if isinstance(figname, dict):
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
                     print('\n\n')
                     print(kwargs.pop('print_string'))
                     print('\n\n')
-            plt.gcf().tight_layout()
+            else:
+                self.next(figname)
+                plt.gcf().tight_layout()
         #}}}
         if len(args) == 1:
             if (args[0][:-4] == '.pdf') or (args[0][:-4] == '.png') or (args[0][:-4] == '.jpg'):
