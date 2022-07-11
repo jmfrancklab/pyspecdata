@@ -27,7 +27,7 @@ For example, :func:`box_muller` is a helper function (based on numerical recipes
 while h5 functions are helper functions for using pytables in a fashion that
 will hopefull be intuitive to those familiar with SQL, etc.
 '''
-from .datadir import pyspec_config
+from .datadir import pyspec_config, unknown_exp_type_name
 from sys import exc_info
 from os import listdir,environ
 from os.path import sep as path_sep
@@ -1099,10 +1099,10 @@ def h5nodebypath(h5path,force = False,only_lowest = False,check_only = False,dir
     logger.debug(strm('the h5path is',h5path))
     if h5path[0] in listdir(directory):
         logger.debug(strm('DEBUG: file exists\n\n'))
-        log_fname('data_files',h5path[0],'notgiven',directory)
+        log_fname('data_files',h5path[0],unknown_exp_type_name,directory)
     else:
         if check_only:
-            errmsg = log_fname('missing_data_files',h5path[0],'notgiven',directory,err=True)
+            errmsg = log_fname('missing_data_files',h5path[0],unknown_exp_type_name,directory)
             raise AttributeError("You're checking for a node in a file (%s) that does not exist"%(h5path[0])
                     +'\n'
                     +errmsg)
