@@ -5,7 +5,7 @@ import re
 from io import StringIO
 logger = logging.getLogger('pyspecdata.load_files.bruker_esr')
 b0_texstr = r'$B_0$'
-def xepr(filename, dimname='', verbose=False):
+def xepr(filename, exp_type=None, dimname='', verbose=False):
     """For opening Xepr files.
     
     Parameters
@@ -52,11 +52,14 @@ def xepr(filename, dimname='', verbose=False):
     if not os.path.exists(filename_spc):
         # because the spc isn't part of the original search, we
         # need to log the fact that it's missing manually
-        err = log_fname('missing_data_files',
-                os.path.split(filename_spc)[-1],
+        if exp_type is None:
+            raise ValueError("I could probably find "
+            "your file remotely, but you called with "
+            "exp_type None!")
+        rclone_search(
                 os.path.split(filename_spc)[0],
-                err=True)
-        raise IOError("Can't find file %s\n%s"%(filename_spc,err))
+                exp_type,
+                os.path.split(filename_spc)[-1])
     with open(filename_spc,'rb') as fp:
         if all([j == 'REAL' for j in ikkf]):
             data = np.frombuffer(fp.read(),'>f8')
@@ -177,7 +180,7 @@ def xepr(filename, dimname='', verbose=False):
         data.setaxis('Microwave Power',lambda x: 10*np.log10(x)).set_units('Microwave Power','dBm')
     if data.get_units(b0_texstr) == 's': data.rename(b0_texstr,'t')
     return data
-def winepr(filename, dimname=''):
+def winepr(filename, dimname='', exp_type=None):
     """For opening WinEPR files.
     
     Parameters
@@ -204,11 +207,14 @@ def winepr(filename, dimname=''):
     # }}}
     # {{{ load the data
     if not os.path.exists(filename_spc):
-        err = log_fname('missing_data_files',
-                os.path.split(filename_spc)[-1],
+        if exp_type is None:
+            raise ValueError("I could probably find "
+            "your file remotely, but you called with "
+            "exp_type None!")
+        rclone_search(
                 os.path.split(filename_spc)[0],
-                err=True)
-        raise IOError("Can't find file %s\n%s"%(filename_spc,err))
+                exp_type,
+                os.path.split(filename_spc)[-1])
     with open(filename_spc,'rb') as fp:
         data = fp.read()
     data = np.fromstring(data,'<f4')
