@@ -2057,7 +2057,7 @@ class figlist(object):
                 if self.current in list(self.units.keys()):
                         theseunits = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
                         if theseunits != self.units[self.current] and theseunits[0] != self.units[self.current]:
-                                raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(theseunits,self.units[self.current]))
+                                raise ValueError("for '%s' the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(self.current,theseunits,self.units[self.current]))
                 else:
                     if isinstance(testdata,nddata):
                         self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
@@ -2405,7 +2405,12 @@ class figlist(object):
                 result = result+str(j)+"\n"
             else:
                 counter += 1
-                result = result+"%d: "%counter+str(j)+"\n"
+                result = result+"%d: "%counter+str(j)+ (
+                        ' '+'|'*3+str(self.units[j])
+                        if j in self.units.keys()
+                        else
+                        ''
+                        ) +"\n"
         return result
 def text_on_plot(x,y,thistext,coord = 'axes',**kwargs):
     ax = plt.gca()
