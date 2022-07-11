@@ -19,7 +19,7 @@ from . import bruker_esr
 from . import acert
 from . import load_cary
 from .open_subpath import open_subpath
-from ..datadir import getDATADIR
+from ..datadir import getDATADIR, rclone_search
 from ..datadir import pyspec_config,log_fname
 from ..general_functions import process_kwargs,strm
 from ..core import *

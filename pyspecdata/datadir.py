@@ -3,7 +3,7 @@ even though the location of the raw spectral data might change.
 
 This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file.
 '''
-import os, sys
+import os, sys, csv
 import configparser
 import platform
 from .general_functions import process_kwargs, strm
@@ -32,6 +32,13 @@ class MyConfig(object):
         return
     def set_setting(self,this_section,this_key,this_value):
         "set `this_key` to `this_value` inside section `this_section`, creating it if necessary"
+        if any(list(type(j) is not str for j in
+            [this_section,this_key,this_value])):
+            raise ValueError("one of section, key, "
+                "value are not a string! They are: "
+                + str(list(type(j) for j in
+                    [this_section,this_key,this_value]))
+                )
         if self._config_parser is None:
             self._config_parser = configparser.SafeConfigParser()
             read_cfg = self._config_parser.read(self.config_location)
@@ -306,17 +313,19 @@ class cached_searcher(object):
             # do NOT quote the filename -- quotes are typically stripped off by the
             # shell -- they would be literal here
             cmd = ['rclone','lsf','-R','--dirs-only',thisremote]
-            logger.info("grabbing all dir info with"+strm(*cmd))
+            logger.info("grabbing all dir info with "
+                    +strm(*cmd)+" ... this might take a minute")
             with Popen(cmd, stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
                 for j in proc.stdout:
                     self.dirlist.append(thisremote+j.strip())
-            print("done checking that remote")
+            logger.info("done checking that remote")
         return
     def search_for(self,exp_type):
         if not self.has_run:
             self.grab_dirlist()
         potential_hits = [j for j in self.dirlist
                 if exp_type.lower() in j.lower()]
+        logger.debug(strm("found potential hits",potential_hits))
         return potential_hits
 cached_searcher_instance = cached_searcher()
 def rclone_search(fname,exp_type,dirname):
@@ -333,6 +342,7 @@ def rclone_search(fname,exp_type,dirname):
         elif len(result) == 0:
             raise ValueError(f"I can't find a remote corresponding to your exp_type {exp_type}")
         else:
+            remotelocation = result[0]
             logging.debug("about to write to RcloneRemotes")
             pyspec_config.set_setting('RcloneRemotes',exp_type,remotelocation)
     logger.debug("remote location previously stored")
@@ -341,8 +351,9 @@ def rclone_search(fname,exp_type,dirname):
                 remotelocation,
                 # dirname below needs to be replaced with path relative to current directory
                 os.path.normpath(os.path.join(dirname)).replace('\\','\\\\')))
-    print(f"I'm about to run\n{cmd}")
+    logger.info(f"I'm about to run\n{cmd}")
     os.system(cmd)
+    logger.info(f"... done")
     return
 def log_fname(logname,fname,dirname,exp_type):
     r"""logs the file name either used or missing into a csv file.
@@ -367,17 +378,21 @@ def log_fname(logname,fname,dirname,exp_type):
     thefields = ["Filename","Path","exp_type"]
     therow = [fname,dirname,exp_type]
     # {{{ read all the info into a set
-    with open(logname+".csv", 'r', encoding='utf-8') as fp:
-        reader = csv.DictReader(fp)
-        all_data = []
-        for row in reader:
-            all_data.append(tuple(row[j] for j in
-                thefields))
-        all_data = set(all_data)
+    if os.path.exists(logname+".csv"):
+        with open(logname+".csv", 'r', encoding='utf-8') as fp:
+            reader = csv.DictReader(fp)
+            all_data = []
+            for row in reader:
+                all_data.append(tuple(row[j] for j in
+                    thefields))
+            all_data = set(all_data)
+    else:
+        all_data = set()
     # }}}
     # {{{ add our info to the set
     therow = dict(zip(thefields, therow))
-    all_data |= set([therow])
+    all_data |= set([tuple(therow[j] for j in
+        thefields)])
     # }}}
     # {{{ write the updated csv
     with open(logname+".csv", 'w', encoding='utf-8') as fp:
