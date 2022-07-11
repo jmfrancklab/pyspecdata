@@ -1099,10 +1099,10 @@ def h5nodebypath(h5path,force = False,only_lowest = False,check_only = False,dir
     logger.debug(strm('the h5path is',h5path))
     if h5path[0] in listdir(directory):
         logger.debug(strm('DEBUG: file exists\n\n'))
-        log_fname('data_files',h5path[0],unknown_exp_type_name,directory)
+        log_fname('data_files',h5path[0],directory,unknown_exp_type_name)
     else:
         if check_only:
-            errmsg = log_fname('missing_data_files',h5path[0],unknown_exp_type_name,directory)
+            errmsg = log_fname('missing_data_files',h5path[0],directory,unknown_exp_type_name)
             raise AttributeError("You're checking for a node in a file (%s) that does not exist"%(h5path[0])
                     +'\n'
                     +errmsg)

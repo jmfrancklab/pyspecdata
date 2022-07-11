@@ -113,8 +113,9 @@ def search_filename(searchstring,exp_type,
             raise ValueError("found more than on file in", directory,
                     "matching", searchstring, "(", retval, ")")
         else:
-            for_logging = os.path.normpath(retval[0]).split(os.path.sep)
-            log_fname('data_files',for_logging[-1],os.path.join(*for_logging[:-1]),exp_type)
+            log_fname('data_files',
+                    *tuple(os.path.split(os.path.normpath(retval[0]))[::-1]+(exp_type,))
+                    )
             return retval[0]
     return retval
 def find_file(searchstring,
@@ -225,9 +226,9 @@ def find_file(searchstring,
             indirect_dimlabels=indirect_dimlabels,
             expno=expno, exp_type=exp_type)
         # }}}
-        for_logging = os.path.normpath(filename).split(os.path.sep)
-        log_fname('data_files',for_logging[-1],os.path.join(*for_logging[:-1]),exp_type)
-        del for_logging
+        log_fname('data_files',
+                *tuple(os.path.split(os.path.normpath(filename))[::-1]+(exp_type,))
+                )
     if data is None:
         raise ValueError(strm(
             "I found no data matching the regexp", searchstring))
