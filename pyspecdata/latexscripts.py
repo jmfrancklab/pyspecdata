@@ -276,11 +276,13 @@ def flush_by_content(searchstring):
     numbers_to_flush = []
     for thisfile in os.listdir(script_dir):
         if thisfile.lower().endswith('.py'):
-            with open(thisfile, 'r', encoding='utf-8') as fp:
+            with open(os.path.join(script_dir,thisfile), 'r', encoding='utf-8') as fp:
                 contents = fp.read()
                 if searchstring in contents:
                     numbers_to_flush.append(thisfile[:-3])
                     print("found",searchstring,"in",thisfile)
+                else:
+                    print("did not find",searchstring,"in",thisfile)
     for j in numbers_to_flush:
         flush_script(j)
     return
@@ -326,10 +328,12 @@ def main():
     if len(sys.argv) > 2:
         if sys.argv[1] == 'flush':
             if len(sys.argv) == 3:
-                if type(sys.argv[2]) is str:
-                    flush_by_content(sys.argv[2])
-                else:
+                try:
+                    int(sys.argv[2])
                     flush_script(sys.argv[2])
+                    exit()
+                except:
+                    flush_by_content(sys.argv[2])
                     exit()
             elif len(sys.argv) == 4:
                 for j in range(int(sys.argv[2]),int(sys.argv[3])+1):
