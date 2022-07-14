@@ -427,8 +427,8 @@ def register_directory():
     you can use the `exp_type` argument of those commands where you only give
     the lowest level subdirectory (or the final couple subdirectories) that
     contains your data.
-
-    Key to the way this mechanism works
+    If the `exp_type` that you are trying to access has a slash in it, you should register the top-most directory.
+    (For example, if you want `UV_Vis/Liam`, then register the directory that provides `UV_Vis`).
 
     .. note::
         this feature was installed on 9/24/20: you need to re-run
