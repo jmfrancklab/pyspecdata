@@ -963,7 +963,7 @@ def h5child(thisnode,childname,clear = False,create = None):
             childnode = None
     except tables.NoSuchNodeError as e:
         if create is False and not clear:
-            raise RuntimeError('Trying to grab a node that does not exist with create = False'+explain_error(e))
+            raise RuntimeError('Trying to grab a node that does not exist with create = False')
         elif clear:
             childnode = None
         else:
@@ -980,7 +980,7 @@ def h5remrows(bottomnode,tablename,searchstring):
             data = thistable.read_where(searchstring).copy()
         except Exception as e:
             raise RuntimeError(strm('Problem trying to remove rows using search string',
-                searchstring, 'in', thistable, explain_error(e)))
+                searchstring, 'in', thistable))
         for row in thistable.where(searchstring):
             if len(thistable) == 1:
                 thistable.remove()
@@ -1058,7 +1058,7 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
                 '\n'.join(map(repr,list(zip(list(mytable.read().dtype.fields.keys()),
                 list(mytable.read().dtype.fields.values()),
                 list(myrowdata.dtype.fields.keys()),
-                list(myrowdata.dtype.fields.values())))))),explain_error(e))
+                list(myrowdata.dtype.fields.values())))))))
         mytable.flush()
     else:
         recorddata = myrowdata
@@ -1068,8 +1068,8 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
                     recorddata)
         except Exception as e:
             raise RuntimeError(strm('Error trying to write record np.array:',
-                repr(recorddata),'from listofdata',listofdata,'and names',listofnames,
-                explain_error(e)))
+                repr(recorddata),'from listofdata',listofdata,'and names',listofnames
+                ))
         mytable.flush()
     return mytable,newindex
 def h5table(bottomnode,tablename,tabledata):

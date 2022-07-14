@@ -131,6 +131,7 @@ def find_file(searchstring,
             add_sizes=[], add_dims=[], use_sweep=None,
             indirect_dimlabels=None,
             lookup={},
+            return_list=False,
             **kwargs):
     r'''Find the file  given by the regular expression `searchstring` inside the directory identified by `exp_type`, load the nddata object, and postprocess with the function `postproc`.
 
@@ -226,7 +227,10 @@ def find_file(searchstring,
             dimname=dimname, return_acq=return_acq,
             add_sizes=add_sizes, add_dims=add_dims, use_sweep=use_sweep,
             indirect_dimlabels=indirect_dimlabels,
-            expno=expno, exp_type=exp_type)
+            expno=expno, exp_type=exp_type,
+            return_list=return_list)
+        if return_list:
+            return data
         # }}}
         log_fname('data_files',
                 *tuple(os.path.split(os.path.normpath(filename))[::-1]+(exp_type,))
@@ -333,7 +337,9 @@ def _check_signature(filename):
                 return None
 def load_indiv_file(filename, dimname='', return_acq=False,
         add_sizes=[], add_dims=[], use_sweep=None,
-        indirect_dimlabels=None, expno=None, exp_type=None):
+        indirect_dimlabels=None, expno=None,
+        exp_type=None,
+        return_list=False):
     """Open the file given by `filename`, use file signature magic and/or
     filename extension(s) to identify the file type, and call the appropriate
     function to open it.
@@ -460,6 +466,10 @@ def load_indiv_file(filename, dimname='', return_acq=False,
                             for j in f.keys():
                                 if 'dimlabels' in f[j].attrs and 'data' in f[j].keys():
                                     attrlist.append(j)
+                        logger.debug("return_list is ",return_list)
+                        if return_list:
+                            print("using return-list -- this should be deprecated in favor of stub loading soon!")
+                            return attrlist
                         raise ValueError("please select a node from the list and set to expno:\n\t"+'\n\t'.join(attrlist))
                     # assume this is a normal pySpecData HDF5 file
                     dirname, filename = os.path.split(filename)

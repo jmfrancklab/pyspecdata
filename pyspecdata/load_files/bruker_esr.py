@@ -1,5 +1,6 @@
 from ..core import *
 from ..general_functions import strm
+from ..datadir import rclone_search
 import numpy as np
 import re
 from io import StringIO
