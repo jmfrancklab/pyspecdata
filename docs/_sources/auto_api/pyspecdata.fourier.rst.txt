@@ -52,7 +52,6 @@ pyspecdata.fourier.shear module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

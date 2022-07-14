@@ -17,9 +17,10 @@ from . import bruker_nmr
 from . import prospa
 from . import bruker_esr
 from . import acert
+from . import load_cary
 from .open_subpath import open_subpath
 from ..datadir import getDATADIR
-from ..datadir import _my_config,log_fname
+from ..datadir import pyspec_config,log_fname
 from ..general_functions import process_kwargs,strm
 from ..core import *
 from builtins import any # numpy has an "any" function, which is very annoying
@@ -69,7 +70,7 @@ def search_filename(searchstring,exp_type,
         if os.path.isdir(inp_directory):
             files = re.findall('.*' + searchstring + '.*','\n'.join(dirlist))
         else:
-            raise IOError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s\nYou might need to change the value associated with this exp_type in %s"%(inp_directory,searchstring,_my_config.config_location))
+            raise IOError("I can't find the directory:\n%s\nin order to get a file that matches:\n%s\nYou might need to change the value associated with this exp_type in %s"%(inp_directory,searchstring,pyspec_config.config_location))
         logger.debug(strm("after running findall, files is",files))
         if len(files) == 0:
             files = []
@@ -89,8 +90,9 @@ def search_filename(searchstring,exp_type,
         err = log_fname('missing_data_files',
                 searchstring.replace('.*','*').replace('(','{').replace(')','}').replace('|',','),
                 directory,
+                exp_type,
                 err=True)
-        raise ValueError("Can't find file specified by search string %s"%searchstring+'\n'+err)
+        raise IOError("Can't find file specified by search string %s"%searchstring+'\n'+err)
     else:
         if len(files) > 1:
             basenames,exts = list(map(set,list(zip(*[j.rsplit('.',1) for j in files if len(j.rsplit('.',1))>1]))))
@@ -106,7 +108,8 @@ def search_filename(searchstring,exp_type,
         if len(retval) == 0:
             raise ValueError("found no files in",directory,"matching",searchstring)
         elif len(retval) > 1:
-            raise ValueError("found more than on file in",directory,"matching",searchstring)
+            raise ValueError("found more than on file in", directory,
+                    "matching", searchstring, "(", retval, ")")
         else:
             return retval[0]
     return retval
@@ -126,7 +129,7 @@ def find_file(searchstring,
 
     It looks at the top level of the directory first, and if that fails, starts to look recursively.
     Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
-    (For information on how to set up the file searching mechanism, see :func:`~pyspecdata.datadir.register_directory`).
+    (For a more thorough description, see :func:`~pyspecdata.datadir.getDATADIR`).
 
     Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
     (so that you can make sure they are properly synced to the cloud, etc.).
@@ -144,6 +147,12 @@ def find_file(searchstring,
         More generally, it is a regular expression,
         where ``.*searchstring.*`` matches a filename inside the
         directory appropriate for `exp_type`.
+    exp_type : str
+        Gives the name of a directory, known to be pyspecdata, that contains
+        the file of interest.
+        For a directory to be known to pyspecdata, it must be registered with
+        the (terminal/shell/command prompt) command `pyspecdata_register_dir`
+        **or** in a directory contained inside (underneath) such a directory.
     expno : int
         For Bruker NMR and Prospa files, where the files are stored in numbered
         subdirectories,
@@ -151,11 +160,6 @@ def find_file(searchstring,
         Currently, this parameter is needed to load Bruker and Kea files.
         If it finds multiple files that match the regular expression,
         it will try to load this experiment number from all the directories.
-    exp_type : str
-        Since the function assumes that you have different types of
-        experiments sorted into different directories, this argument
-        specifies the type of experiment see :func:`~pyspecdata.datadir.getDATADIR` for
-        more info.
     postproc : function, str, or None
         This function is fed the nddata data and the remaining keyword
         arguments (`kwargs`) as arguments.
@@ -210,6 +214,7 @@ def find_file(searchstring,
         err = log_fname('missing_data_files',
                 searchstring.replace('.*','*').replace('(','{').replace(')','}').replace('|',','),
                 directory,
+                exp_type,
                 err=True)
         raise ValueError("Can't find file specified by search string %s"%searchstring+'\n'+err)
     data = None
@@ -224,7 +229,7 @@ def find_file(searchstring,
             expno=expno)
         # }}}
         for_logging = os.path.normpath(filename).split(os.path.sep)
-        log_fname('data_files',for_logging[-1],os.path.join(*for_logging[:-1]))
+        log_fname('data_files',for_logging[-1],os.path.join(*for_logging[:-1]),exp_type)
         del for_logging
     if data is None:
         raise ValueError(strm(
@@ -235,8 +240,11 @@ def find_file(searchstring,
         return postproc(data,**kwargs)
     else:
         if postproc is None:
-            postproc_type = data.get_prop('postproc_type')
-            logger.debug(strm("found postproc_type",postproc_type))
+            if type(data) is dict:
+                postproc_type = 'stub'
+            else:
+                postproc_type = data.get_prop('postproc_type')
+                logger.debug(strm("found postproc_type",postproc_type))
         else:
             postproc_type = postproc
         if postproc_type is None:
@@ -250,7 +258,9 @@ def find_file(searchstring,
                 logger.debug('this file was postprocessed successfully')
             else:
                 logger.debug('postprocessing not defined for file with postproc_type %s --> it should be defined in the postproc_type dictionary in load_files.__init__.py'+postproc_type)
-            assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing (you have %s) -- the postproc function should pop the keys from the dictionary after use"%str(kwargs)
+            assert len(kwargs) == 0, ("there must be no keyword arguments left, "
+                    "because you're done postprocessing (you have %s) "%str(kwargs)
+                    +"-- the postproc function should pop the keys from the dictionary after use")
             return data
 def format_listofexps(args):
     """**Phased out**: leaving documentation so we can interpret and update old code
@@ -301,7 +311,8 @@ def _check_signature(filename):
         OR `None` if the type is unknown.
     """
     file_signatures = {b'\x89\x48\x44\x46\x0d\x0a\x1a\x0a':'HDF5',
-            b'DOS  Format':'DOS Format'}
+            b'DOS  Format':'DOS Format',
+            b'\x11Varian':'Cary UV'}
     max_sig_length = max(list(map(len,list(file_signatures.keys()))))
     with open(filename,'rb') as fp:
         inistring = fp.read(max_sig_length)
@@ -379,7 +390,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             zf = ZipFile(filename)
             list_of_files = [j.split('/') for j in zf.namelist()]
             basename = os.path.normpath(filename).split(os.path.sep)[-1].split('.')[0]
-            assert all([j[0] == basename for j in list_of_files]), strm("I expected that the zip file contains a directory called ",basename,"which contains your NMR data -- this appears not to be the case.  (Note that with future extensions, other formats will be possible.)")
+            assert all([j[0] == basename for j in list_of_files]), strm("I expected that the zip file %s contains a directory called %s which contains your NMR data -- this appears not to be the case.  (Note that with future extensions, other formats will be possible.)"%(filename,basename))
             file_reference = (zf,
                     filename,
                     basename)
@@ -443,6 +454,13 @@ def load_indiv_file(filename, dimname='', return_acq=False,
                     else:
                         data = acert.load_pulse(filename, indirect_dimlabels=indirect_dimlabels)
                 else:
+                    if expno is None:
+                        attrlist = []
+                        with h5py.File(filename,'r') as f:
+                            for j in f.keys():
+                                if 'dimlabels' in f[j].attrs and 'data' in f[j].keys():
+                                    attrlist.append(j)
+                        raise ValueError("please select a node from the list and set to expno:\n\t"+'\n\t'.join(attrlist))
                     # assume this is a normal pySpecData HDF5 file
                     dirname, filename = os.path.split(filename)
                     data = nddata_hdf5(filename+'/'+expno,
@@ -460,6 +478,8 @@ def load_indiv_file(filename, dimname='', return_acq=False,
                     data = bruker_esr.xepr(filename, dimname=dimname)
                 else:
                     raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
+            elif type_by_signature == 'Cary UV':
+                data = load_cary.load_cary(filename)
             else:
                 raise RuntimeError("Type %s not yet supported!"%type_by_signature)
         else:
@@ -487,7 +507,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
     if return_acq:
         raise ValueError('return_acq is deprecated!! All properties are now set directly to the nddata using the set_prop function')
     logger.debug("done with load_indiv_file")
-    if '' in data.dimlabels:
+    if type(data) is not dict and '' in data.dimlabels:
         if ndshape(data)[''] < 2:
             data = data['',0]
         else:

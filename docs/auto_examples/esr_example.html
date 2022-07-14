@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bruker cw ESR Data &mdash; pySpecData 0.9.5.3.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/gallery_custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Plotting Routines" href="image_plot.html" />
+    <link rel="prev" title="Polynomial Fitting" href="polyfit.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> pySpecData
+          </a>
+              <div class="version">
+                0.9.5.3.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">PySpecData Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Cary_simple.html">Simple Cary UV-Vis loading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PR_first_example.html">Simple Cary UV-Vis loading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polyfit.html">Polynomial Fitting</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Bruker cw ESR Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="image_plot.html">Plotting Routines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppm_example.html">ppm Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ellmans.html">Manipulation of UV-Vis data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_with_bounds.html">Fit Using Bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_example.html">Basic Slicing/Filtering Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ksigmasmax.html">Fitting Data (Nonlinear + Symbolic)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_fake_data.html">Fitting Data (Nonlinear + Symbolic)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_container.html">Plot Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QESR.html">Quantitative ESR</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#individual-functions">Individual Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#matplotlib-examples">Matplotlib Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#text-only-examples">Text-Only Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pySpecData</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">PySpecData Examples</a> &raquo;</li>
+      <li>Bruker cw ESR Data</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/auto_examples/esr_example.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-esr-example-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="bruker-cw-esr-data">
+<span id="sphx-glr-auto-examples-esr-example-py"></span><h1>Bruker cw ESR Data<a class="headerlink" href="#bruker-cw-esr-data" title="Permalink to this headline">¶</a></h1>
+<p>Load cw Bruker ESR data, both 1D and 2D.</p>
+<p>Check out the
+<a class="reference external" href="Cary_simple.html">Simple UV</a>
+example to understand how
+pySpecData locates the file here.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>Load some 1D ESR data with harmonic + phase info.
+The data is initial organized into two dimensions – <cite>harmonic</cite> and <cite>$B_0$</cite>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a> <span class="o">=</span> <span class="n">find_file</span><span class="p">(</span><span class="s2">&quot;S175R1a.*DHPC.*200304&quot;</span><span class="p">,</span>
+        <span class="n">exp_type</span><span class="o">=</span><span class="s1">&#39;francklab_esr/Sam&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><a href="../modules.html#module-pyspecdata.ndshape" title="pyspecdata.ndshape" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">ndshape</span></a><span class="p">(</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;here, we see the harmonic axis contains both harmonic and phase info&quot;</span><span class="p">,</span><span class="nb">repr</span><span class="p">(</span><a href="../auto_api/pyspecdata.html#pyspecdata.nddata.getaxis" title="pyspecdata.nddata.getaxis" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">d</span><span class="o">.</span><span class="n">getaxis</span></a><span class="p">(</span><span class="s1">&#39;harmonic&#39;</span><span class="p">)))</span>
+<a href="../pyspecdata.html#pyspecdata.nddata.chunk_auto" title="pyspecdata.nddata.chunk_auto" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">d</span><span class="o">.</span><span class="n">chunk_auto</span></a><span class="p">(</span><span class="s1">&#39;harmonic&#39;</span><span class="p">,</span><span class="s1">&#39;phase&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>c:\users\johnf\notebook\pyspecdata\pyspecdata\load_files\__init__.py:101: UserWarning: found multiple files:
+15N_S175R1a_pR_DHPC_yesterday_200304.DSC
+        15N_S175R1a_pR_DHPC_yesterday_200304.DTA
+        15N_S175R1a_pR_DHPC_today_200304.DSC
+        15N_S175R1a_pR_DHPC_today_200304.DTA
+        15N_S175R1a_pR_DHPC_6om2_200304.DSC
+        15N_S175R1a_pR_DHPC_6om2_200304.DTA
+        15N_S175R1a_pR_DHPC_Power_Sat_PROBE_200304.DSC
+        15N_S175R1a_pR_DHPC_Power_Sat_PROBE_200304.YGF
+        15N_S175R1a_pR_DHPC_Power_Sat_PROBE_200304.DTA
+        15N_S175R1a_pR_DHPC_Power_Sat_PROBE_6G_200304.DSC
+        15N_S175R1a_pR_DHPC_Power_Sat_PROBE_6G_200304.DTA
+        15N_S175R1a_pR_DHPC_Power_Sat_PROBE_6G_200304.YGF
+and opening last
+  warnings.warn(&#39;found multiple files:\n&#39;+&#39;\n\t&#39;.join(files)+&#39;\nand opening last&#39;)
+[(2048, &#39;$B_0$&#39;), (29, &#39;Microwave Power&#39;), (10, &#39;harmonic&#39;)]
+here, we see the harmonic axis contains both harmonic and phase info array([(1,  0), (1, 90), (2,  0), (2, 90), (3,  0), (3, 90), (4,  0),
+       (4, 90), (5,  0), (5, 90)],
+      dtype=[(&#39;harmonic&#39;, &#39;&lt;i4&#39;), (&#39;phase&#39;, &#39;&lt;i4&#39;)])
+
+array([[[[ 1.35123691e-01,  9.33355719e-02],
+         [-2.15844506e-03,  4.24311348e-03],
+         [ 3.87438113e-03, -1.25200723e-03],
+         [-1.25213201e-02, -1.76458983e-03],
+         [-2.56480023e-02, -1.31569727e-02]],
+
+        [[ 1.24296665e-01,  9.06855837e-02],
+         [-3.38730910e-03,  1.83716794e-02],
+         [ 6.11142743e-03,  2.47938357e-03],
+         [-1.03736543e-02,  3.78390350e-03],
+         [-6.51960159e-03,  7.84183646e-03]],
+
+        [[ 9.02066513e-02,  7.53202752e-02],
+         [ 3.42209894e-03, -2.94078689e-03],
+         [-6.87937477e-03, -3.93681725e-03],
+         [ 1.07308936e-02, -3.06718685e-04],
+         [-8.69226692e-03, -1.54939849e-02]],
+
+        ...,
+
+        [[-9.39219973e+00, -1.62756397e+00],
+         [ 5.63628915e-02, -2.59782143e-03],
+         [-1.48878221e-02,  5.55284588e-03],
+         [ 1.29035578e-02,  9.74400862e-03],
+         [-5.81630989e-03, -2.62024735e-02]],
+
+        [[-1.06524003e+01, -1.85981447e+00],
+         [ 3.74512075e-02, -3.70003137e-02],
+         [-5.58493853e-03, -1.09547860e-02],
+         [ 2.75200612e-02,  2.23530402e-02],
+         [ 9.39307707e-03,  6.52418420e-03]],
+
+        [[-1.06038400e+01, -1.84977898e+00],
+         [ 2.95812861e-02, -2.51971316e-02],
+         [-2.65228860e-03,  1.47536786e-02],
+         [-2.01907848e-02,  3.50948872e-05],
+         [-1.27180891e-02, -1.60478281e-02]]],
+
+
+       [[[ 1.33721106e-01,  8.61277495e-02],
+         [-5.52419852e-03,  6.48009494e-04],
+         [-3.27653034e-03, -2.11569122e-03],
+         [-1.29640139e-02,  2.16161962e-03],
+         [-1.23003732e-02, -6.62379998e-03]],
+
+        [[ 1.15731130e-01,  9.32712707e-02],
+         [ 1.64379226e-03,  7.74797231e-03],
+         [ 4.55085366e-03,  2.56388117e-03],
+         [-3.59277668e-03,  2.91991412e-04],
+         [ 2.90795047e-03,  5.82453976e-03]],
+
+        [[ 9.07782858e-02,  7.75620028e-02],
+         [-1.10819162e-03, -3.30888676e-03],
+         [-3.23598057e-03,  2.96188381e-03],
+         [ 9.40688043e-03, -4.13865990e-04],
+         [-1.50182196e-04, -8.25068838e-03]],
+
+        ...,
+
+        [[-9.38976374e+00, -1.62006317e+00],
+         [ 6.14518841e-02, -9.45563002e-03],
+         [-2.18991753e-02,  4.28748329e-03],
+         [ 1.34931409e-02,  1.05989620e-02],
+         [-7.55139645e-03, -2.35486104e-02]],
+
+        [[-1.06667698e+01, -1.86307653e+00],
+         [ 4.04368003e-02, -3.19709969e-02],
+         [-1.31335146e-03, -1.09164369e-02],
+         [ 1.87743976e-02,  1.44602539e-02],
+         [ 1.17496611e-02,  1.92676041e-02]],
+
+        [[-1.06163696e+01, -1.84948875e+00],
+         [ 4.41798335e-02, -2.46046863e-02],
+         [-9.10036985e-03,  9.15231021e-03],
+         [-2.31149330e-02,  2.65264179e-03],
+         [-1.22526006e-02, -1.04807868e-03]]],
+
+
+       [[[ 1.33866256e-01,  8.04812429e-02],
+         [-9.41785932e-03, -1.05836158e-02],
+         [-8.23199997e-03, -3.92306048e-03],
+         [-1.08052193e-02,  2.41559614e-03],
+         [-1.70624646e-03, -3.18841414e-03]],
+
+        [[ 1.16395878e-01,  8.80547566e-02],
+         [ 3.26032830e-03, -5.70395121e-03],
+         [ 2.96374972e-03,  2.07936500e-03],
+         [-3.46175439e-03, -3.89737756e-03],
+         [ 1.74640206e-02,  1.90482394e-04]],
+
+        [[ 9.30007627e-02,  7.52361707e-02],
+         [-1.52467321e-03,  3.15862089e-03],
+         [ 2.56290045e-04,  2.56643511e-03],
+         [ 4.20535216e-03, -2.00319731e-04],
+         [ 3.77377888e-03, -8.31657693e-04]],
+
+        ...,
+
+        [[-9.39374222e+00, -1.62731647e+00],
+         [ 6.57671458e-02, -1.81682112e-02],
+         [-2.42470513e-02,  9.09327405e-03],
+         [ 5.60026352e-03,  2.72003461e-02],
+         [-1.43311265e-02, -1.18121708e-02]],
+
+        [[-1.06712728e+01, -1.87043792e+00],
+         [ 4.71605715e-02, -3.60405759e-02],
+         [-2.20157833e-03, -7.39279616e-03],
+         [ 1.08002370e-02,  5.76262205e-03],
+         [ 1.20814209e-02,  2.78257604e-02]],
+
+        [[-1.06285705e+01, -1.84849430e+00],
+         [ 6.48862830e-02, -1.67032843e-02],
+         [-1.64104003e-02, -5.74233232e-03],
+         [-2.08948514e-02,  4.72865654e-03],
+         [ 1.81264629e-03,  1.30381121e-02]]],
+
+
+       ...,
+
+
+       [[[ 1.31232897e-01,  6.48030490e-02],
+         [ 3.78896911e-03, -8.72058649e-03],
+         [ 2.33399955e-02,  1.74886545e-02],
+         [-1.26181945e-02, -1.96305882e-02],
+         [ 8.47874031e-03, -5.14709757e-03]],
+
+        [[ 1.23094279e-01,  8.35778992e-02],
+         [ 8.53890423e-03,  3.32982173e-04],
+         [ 4.17027927e-04,  7.58618615e-03],
+         [-2.59292013e-03,  1.65170197e-02],
+         [-2.64574794e-03,  2.94084779e-03]],
+
+        [[ 1.09329670e-01,  9.08893290e-02],
+         [-4.28856072e-03, -6.10217061e-03],
+         [-1.59093718e-03, -2.55926282e-03],
+         [-4.70748654e-03,  5.03814252e-03],
+         [ 1.06117178e-02,  4.38574431e-03]],
+
+        ...,
+
+        [[-8.53498722e+00, -1.59292361e+00],
+         [ 5.61597047e-02, -2.05511992e-02],
+         [-7.82573549e-03, -1.90930173e-02],
+         [ 6.95219103e-03, -9.03224950e-03],
+         [-1.56143504e-02,  1.79371331e-02]],
+
+        [[-9.69181638e+00, -1.79251822e+00],
+         [ 5.63126034e-02, -1.86925965e-03],
+         [-9.77168302e-03, -2.43124695e-02],
+         [ 2.49207657e-02, -4.67403159e-03],
+         [ 9.01757424e-03, -1.35451769e-02]],
+
+        [[-9.68869211e+00, -1.78646509e+00],
+         [ 7.78959186e-02, -1.40801681e-02],
+         [-8.60861958e-03,  9.94550858e-03],
+         [-2.47342546e-02,  1.87592775e-03],
+         [-3.25428659e-03, -4.97451744e-03]]],
+
+
+       [[[ 1.23477483e-01,  6.58523230e-02],
+         [ 1.48781778e-02, -1.63965125e-03],
+         [ 2.27542813e-02,  6.91794463e-03],
+         [-1.06007235e-02, -1.88471831e-02],
+         [ 1.75175673e-02, -6.63759083e-03]],
+
+        [[ 1.09693874e-01,  7.70944718e-02],
+         [ 9.64440537e-03,  7.09874916e-03],
+         [ 3.52660032e-03,  4.89265766e-03],
+         [ 9.27408641e-03,  2.03491760e-02],
+         [ 1.82170125e-03,  1.69852481e-03]],
+
+        [[ 1.09576152e-01,  8.87824763e-02],
+         [-6.08606104e-03, -1.41098301e-02],
+         [-5.90846551e-03,  1.64848593e-03],
+         [-9.44190862e-04,  3.19138589e-03],
+         [ 5.06711076e-03,  5.16036272e-03]],
+
+        ...,
+
+        [[-8.53392676e+00, -1.60356083e+00],
+         [ 5.32548307e-02, -2.29790432e-02],
+         [-1.29570596e-02, -2.42390957e-02],
+         [ 6.55619907e-03,  1.20583489e-03],
+         [-1.66136984e-02,  2.04683072e-02]],
+
+        [[-9.68450198e+00, -1.79346645e+00],
+         [ 6.33331973e-02, -1.27653864e-02],
+         [-3.86084599e-03, -1.25009622e-02],
+         [ 1.87416928e-02, -8.41106125e-03],
+         [-6.55354657e-03, -1.77012138e-02]],
+
+        [[-9.69333687e+00, -1.79437273e+00],
+         [ 7.46001378e-02, -1.91066999e-02],
+         [-4.53117227e-03,  9.30420035e-03],
+         [-1.33818308e-02,  1.06178040e-02],
+         [ 2.94841373e-04, -4.74667538e-03]]],
+
+
+       [[[ 1.20286410e-01,  6.34019955e-02],
+         [ 1.99770308e-02,  1.15100136e-02],
+         [ 1.97998529e-02,  2.82483752e-03],
+         [-1.24371992e-02, -2.49115404e-02],
+         [ 2.30459759e-02, -3.99544506e-03]],
+
+        [[ 1.00561678e-01,  8.19117935e-02],
+         [ 3.01269853e-03,  5.20773006e-03],
+         [ 4.42408616e-03,  2.60221965e-03],
+         [ 2.26678973e-02,  1.85884258e-02],
+         [ 8.61196136e-03, -5.82843161e-04]],
+
+        [[ 1.00118416e-01,  9.12498845e-02],
+         [-8.49492166e-03, -1.19677430e-02],
+         [-4.47235078e-03, -2.30273280e-03],
+         [ 6.62286738e-03, -1.47486114e-03],
+         [ 4.02275198e-04,  1.04886133e-02]],
+
+        ...,
+
+        [[-8.53469709e+00, -1.58767785e+00],
+         [ 5.42739694e-02, -3.12149254e-02],
+         [-1.53641216e-02, -2.59993604e-02],
+         [ 1.00460513e-02,  8.12144336e-03],
+         [-1.44917552e-02,  1.96964100e-02]],
+
+        [[-9.68295401e+00, -1.80128329e+00],
+         [ 6.30306466e-02, -2.02741321e-02],
+         [ 3.53186086e-03, -3.29495548e-03],
+         [ 1.94548880e-02, -1.43412054e-02],
+         [-1.63069450e-02, -1.63821792e-02]],
+
+        [[-9.70833391e+00, -1.78569908e+00],
+         [ 8.44041197e-02, -1.74730543e-02],
+         [-3.98369747e-03,  9.82018644e-03],
+         [-5.61949469e-03,  9.94250532e-03],
+         [ 9.59505133e-04,  3.12158676e-03]]]])
+            +/-None
+    dimlabels=[&#39;$B_0$&#39;, &#39;Microwave Power&#39;, &#39;harmonic&#39;, &#39;phase&#39;]
+    axes={`$B_0$&#39;:array([3436.        , 3436.07324219, 3436.14648438, ..., 3585.78027362,
+       3585.85351581, 3585.926758  ])
+                    +/-None,
+            `Microwave Power&#39;:array([-36.98970004, -31.98970004, -26.98970004, -21.98970004,
+       -16.98970004, -11.98970004,  -6.98970004,  -1.98970004,
+         3.01029996,   5.01029996,   7.01029996,   9.01029996,
+        11.01029996,  13.01029996,  14.01029996,  15.01029996,
+        16.01029996,  17.01029996,  18.01029996,  18.51029996,
+        19.01029996,  19.51029996,  20.01029996,  20.51029996,
+        21.01029996,  21.51029996,  22.01029996,  22.51029996,
+        23.01029996])
+                    +/-None,
+            `harmonic&#39;:array([1, 2, 3, 4, 5])
+                    +/-None,
+            `phase&#39;:array([ 0, 90])
+                    +/-None}
+</pre></div>
+</div>
+<p><cite>chunk_auto</cite> breaks the <cite>harmonic</cite> dimensions since it was labeled with an axis that had 2 fields.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><a href="../modules.html#module-pyspecdata.ndshape" title="pyspecdata.ndshape" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">ndshape</span></a><span class="p">(</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a><span class="p">))</span>
+
+<span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a><span class="p">[</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;Microwave Power&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a><span class="p">[</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;Microwave Power&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">title</span><span class="p">(</span><span class="s2">&quot;1D Data with Multiple Harmonics&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_esr_example_001.png" srcset="../_images/sphx_glr_esr_example_001.png" alt="1D Data with Multiple Harmonics" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(2048, &#39;$B_0$&#39;), (29, &#39;Microwave Power&#39;), (5, &#39;harmonic&#39;), (2, &#39;phase&#39;)]
+c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2659: UserWarning: linestyle is redundantly defined by the &#39;linestyle&#39; keyword argument and the fmt string &quot;:&quot; (-&gt; linestyle=&#39;:&#39;). The keyword argument will take precedence.
+  retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
+c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2659: UserWarning: linestyle is redundantly defined by the &#39;linestyle&#39; keyword argument and the fmt string &quot;:&quot; (-&gt; linestyle=&#39;:&#39;). The keyword argument will take precedence.
+  retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
+c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2659: UserWarning: linestyle is redundantly defined by the &#39;linestyle&#39; keyword argument and the fmt string &quot;:&quot; (-&gt; linestyle=&#39;:&#39;). The keyword argument will take precedence.
+  retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
+c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2659: UserWarning: linestyle is redundantly defined by the &#39;linestyle&#39; keyword argument and the fmt string &quot;:&quot; (-&gt; linestyle=&#39;:&#39;). The keyword argument will take precedence.
+  retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
+c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2659: UserWarning: linestyle is redundantly defined by the &#39;linestyle&#39; keyword argument and the fmt string &quot;:&quot; (-&gt; linestyle=&#39;:&#39;). The keyword argument will take precedence.
+  retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
+
+Text(0.5, 1.0, &#39;1D Data with Multiple Harmonics&#39;)
+</pre></div>
+</div>
+<p>Next, let’s load some power-saturation data</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a> <span class="o">=</span> <span class="n">find_file</span><span class="p">(</span><span class="s2">&quot;Power.*Sat.*200303&quot;</span><span class="p">,</span>
+        <span class="n">exp_type</span><span class="o">=</span><span class="s1">&#39;francklab_esr/Sam&#39;</span><span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata.chunk_auto" title="pyspecdata.nddata.chunk_auto" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">d</span><span class="o">.</span><span class="n">chunk_auto</span></a><span class="p">(</span><span class="s1">&#39;harmonic&#39;</span><span class="p">,</span><span class="s1">&#39;phase&#39;</span><span class="p">)</span>
+<span class="n">figure</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">image</span><span class="p">(</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a><span class="p">[</span><span class="s1">&#39;harmonic&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">C</span><span class="o">.</span><span class="n">setaxis</span><span class="p">(</span><span class="s1">&#39;Microwave Power&#39;</span><span class="p">,</span><span class="s1">&#39;#&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">set_units</span><span class="p">(</span><span class="s1">&#39;Microwave Power&#39;</span><span class="p">,</span><span class="s1">&#39;scan #&#39;</span><span class="p">))</span>
+<span class="n">title</span><span class="p">(</span><span class="s2">&quot;2D Power Saturation&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_esr_example_002.png" srcset="../_images/sphx_glr_esr_example_002.png" alt="2D Power Saturation" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>c:\users\johnf\notebook\pyspecdata\pyspecdata\load_files\__init__.py:101: UserWarning: found multiple files:
+15N_S175R1a_pR_DHPC_Power_Sat_200303.DSC
+        15N_S175R1a_pR_DHPC_Power_Sat_200303.YGF
+        15N_S175R1a_pR_DHPC_Power_Sat_200303.DTA
+        15N_S175R1a_pR_DHPC_Power_Sat_6G_200303.DSC
+        15N_S175R1a_pR_DHPC_Power_Sat_6G_200303.DTA
+        15N_S175R1a_pR_DHPC_Power_Sat_6G_200303.YGF
+and opening last
+  warnings.warn(&#39;found multiple files:\n&#39;+&#39;\n\t&#39;.join(files)+&#39;\nand opening last&#39;)
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.641 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-esr-example-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/10ec6d5d2fc68566d76234af4dc47981/esr_example.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">esr_example.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/1716df40710e6957cc0e3052a6a06d4f/esr_example.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">esr_example.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="polyfit.html" class="btn btn-neutral float-left" title="Polynomial Fitting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="image_plot.html" class="btn btn-neutral float-right" title="Plotting Routines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2016, John M. Franck.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
