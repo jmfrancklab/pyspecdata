@@ -12,7 +12,6 @@ pyspecdata.plot\_funcs.image module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

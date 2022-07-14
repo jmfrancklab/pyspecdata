@@ -4,7 +4,7 @@
 To learn more about pyspecdata, you can head over to the `documentation <http://jmfrancklab.github.io/pyspecdata>`_.
 
 If you already know that you want to install,
-and you are using Anaconda, you should see `conda_upgrade.md <conda_upgrade.md>`_.
+see `Installation <#installation>`_
 
 Please note this package is heavily utilized by three other packages that our lab manages on github:
 
@@ -90,109 +90,39 @@ we are happy to work with you to make it work for your purposes.)
 A public-use version 1.0.0, to be accompanied by useful demonstrations, is planned within a year.
 *(Note that the email currently linked to the PyPI account is infrequently checked --if you have interest in this software, please find J. Franck's website and contact by that email.)*
 
-History/Roadmap
----------------
+`Roadmap`_.
 
-(Current version in bold) 
+.. _Roadmap: changelog.rst
 
-0.9.5
-    First version distributed on pypi.python.org.
+Installation
+============
 
-0.9.5.1
-    - 0.9.5.1.1
-      Some important debugging, and also added `pyspecdata.ipy` → executing the following at the top of a jupyter notebook:
+On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
+just run
+``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython``
+followed by ``conda install -y -c msys2 m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
+Then follow the `installation for developers <#installation-for-developers>`_ below. We have a package on pip, but it currently lags behind the github repo.
 
-        .. code-block:: python
+On **CentOS7**, we've tested
+``yum install python-matplotlib python-matplotlib-qt4 python-devel sympy h5py python-tables scipy``
+(after running ``yum install epel-release`` to install the EPEL distribution).  Then follow the `installation for developers <#installation-for-developers>`_ below. 
 
-            %pylab inline
-            %load_ext pyspecdata.ipy
+On **Debian** (should also work for **Ubuntu**),
+we've tested
+``sudo apt-get install -y python3 python3-matplotlib libpython3.7 python3-dev python3-sympy python3-h5py python3-tables python3-scipy python3-setuptools gfortran pip``.  Then follow the `installation for developers <#installation-for-developers>`_ below. 
 
-      will cause nddata to "display" as labeled plots.
+On **MacOS**, if you want to install as a developer your python distribution needs to have a working Fortran compiler, since some of the modules use Fortran.
+We have tested ``conda install -c conda-forge fortran-compiler``, followed by
+``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py``.
+However *due to a problem with more recent versions of MacOS/xcode*, you need to modify ``setup.py`` to tell it where to find the system libraries.
+At about line 27, you need to add something like following as a keyword arg for the `Extension` function:
+``library_dirs = ["/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"],``
+(we recommmend just using keyword completion to find a similar directory that exists).
+(Feel free to contact us if you have issues with this or would like to test deployment on pip for a Mac).
 
-    - 0.9.5.1.2
-      added ability to load power saturation 2D data from Bruker
-
-    - 0.9.5.1.3
-      XEpr data loaded with dBm units rather than W units
-
-      added ``to_ppm`` function for Bruker files
-
-    - 0.9.5.1.4
-      Improved internal logging, and started to remove gratuitous dependencies,
-      ``%load_ext pyspecdata.ipy`` includes
-      ``%pylab inline``, so that only
-
-        .. code-block:: python
-
-            %load_ext pyspecdata.ipy
-
-        is required for jupyter.
-  
-    - 0.9.5.1.6
-
-        - Removed several legacy modules, and added docstrings for the remaining modules.
-
-        - Begin phasing out earlier `CustomError` class.
-
-        - Make `numpy` pretty printing available from the `general_functions` module.
-
-        - Add xelatex support to the notebook wrapper.
-
-        - Start to move file search routines away from demanding a single "data directory."
-
-        - Improved support for 2D Bruker XEPR
-
-        - Made it possible to call standard trig functions with `nddata` as an argument.
-    - 0.9.5.1.7
-        - ILT (Tikhonov regularization) with SVD Kernel compression
-          (1 and 2 dimensions)
-        - ``smoosh`` and ``chunk`` deal with axes properly
-
-0.9.5.3 **Current Version**
-    upgrade to Python 3 and begin to flesh out documentation
-
-0.9.5.4
-    - 0.9.5.4.1
-      - ``to_ppm`` should only be a method of inherited class
-      - 1.5 and 2.5 D ILT
-1.0
-    We are working on four major upgrades relative to the 0.9 sequence:
-
-    - Axes as objects rather than a set of separate attributes of nddata.
-    - Remove dependence on pytables in favor of h5py.
-    - Replace figure lists with “plotting contexts,” which will still
-      enable PDF vs. GUI plotting, but will better integrated with Qt and
-      more object-oriented in nature
-    - Comma-separated indexing to work correctly with all indexing types.
-      (0.9.5 requires sequential brackets rather than comma-separated
-      indexing for some combined range selections.)
-
-1.0.2
-    GUI for setting configuration directories.
-
-    Means for dealing with non-linearly spaced data in image plots
-    (0.9.5 auto-detects log spacing in 1D plots,
-    but pretends that image plots are linear -- we will implement linear spline
-    interpolation algorithm)
-
-1.0.3
-    Bruker DSP phase correction for raw data from newer versions of Topspin that is in sync with the code from nmrglue.
-
-1.0.4
-    Package a make-less copy of lapack to allow a cross-platform build of density matrix propagation routines.
-
-1.1.0
-    Integrate with ACERT NLSL Python package for simulation and fitting of ESR spectra.
-
-1.2.0
-    Implement a version of figure list that can be interfaced with Qt.
-
-
-Installation Notes
-==================
-
-*Highly Recommended:* 
-Install the following packages using a good package-management system (conda or linux package manager), rather than relying on `pip` or `setuptools` to install them:
+**More generally,**
+these instructions are based on the fact that it's *Highly Recommended* 
+that you install the following packages using a good package-management system (conda or linux package manager), rather than relying on `pip` or `setuptools` to install them:
 
 * numpy
 
@@ -210,14 +140,6 @@ Install the following packages using a good package-management system (conda or 
 
 * The python libraries, and a Fortran compiler.  Under anaconda, these are supplied by `libpython` and `mingw`, respectively.
 
-For example, on Windows with `Anaconda 2.7`_.
--- just run
-``conda install -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw``.
-
-On CentOS7, we've tested
-``yum install python-matplotlib python-matplotlib-qt4 python-devel sympy h5py python-tables scipy``
-(after running ``yum install epel-release`` to install the EPEL distribution)
-
 (If you don't install these packages with your system `pip` will try to install them, and there is a good chance it will fail -- it's known not to work great with several of these; `setuptools` should error out and tell you to install the packages.)
 
 *mayavi*: Mayavi can be used (and gives very nice graphics), but frequently lags behind common Python distros.
@@ -228,143 +150,20 @@ Rather, you can just import ``mayavi.mlab`` and pass it to any figure list that 
 Installation for developers
 ---------------------------
 
-(Once these are installed,
+Once these are installed,
 to install from github, just ``git clone https://github.com/jmfranck/pyspecdata.git`` then move to the directory where setup.py lives,
 and do
-``python setup_paramset.py install``
-followed by
-``python setup.py develop``)
+``python setup.py develop``.
+Make sure that this terminates with a successful message, and without any compilation errors.
 
 *Important note for conda on Windows 10:*
 For reasons that we don't understand, the Fortran compiler can give odd errors, depending on which terminal you are using to install.
 This appears to be Windows' fault, rather than conda's (?).
 We highly recommend trying both the Anaconda prompt, as well as the standard dos prompt (press start: type `cmd`) if you experience errors related to compilation.
 
-For compiled extensions
-```````````````````````
 
-All compiled extensions are currently stripped out, but will be slowly
-    added back in.
-
-If you are on windows, you will need some additional packages to enable compilation:
-
-* libpython
-
-* mingw
-
-The last one is specific to Windows, and provide things like the ``gcc`` and ``gfortran`` compiler.
-
-Quick-Start
-===========
-
-To get started with this code:
-
-1. Install a good Python 2.7 distribution
-
-   * On Windows or MacOS: `Anaconda 2.7 <https://www.continuum.io/downloads>`_.  When installing select "install for all users."
-
-2. Install libraries that pyspecdata depends on. (If you're interested in why you need to do this first, see installation notes below.)
-
-   * On Windows or MacOS: in the Anaconda Prompt, run ``conda install numpy scipy sympy pyqt pytables matplotlib h5py libpython mingw``.
-
-   * For Mac, you can also use homebrew.
-     Note that, in the current version python is renamed to `python2`,
-     and `pip` to `pip2`.
-     Most packages can just be installed with `pip2` under homebrew.
-     If you want HDF5 functionality, you will need to run `brew tap homebrew/science` followed by `brew install hdf5`.
-
-   * On Linux, just use your package manager (``aptitude``, ``yum``, *etc.*) to install these libraries.
-
-3. Install `paramset_pyspecdata`: ``pip install paramset_pyspecdata``,
-   then `pyspecdata`: ``pip install pyspecdata``
-   or follow the "Installation for developers" section above.
-
-   * If you have difficulties with the install, check that you have a gfortran
-     compiler installed (in conda windows, this comes from mingw) and that, if
-     you are using windows, you are trying to install from a standard dos
-     prompt (we like to use git bash, but anaconda and related compilers can
-     misbehave from git bash sometimes).
-
-4. Set up directories.
-   You can run the command `pyspecdata_dataconfig` to assist with this.
-
-   It creates a file in your home directory
-   called ``_pyspecdata`` (Windows  -- note the underscore)
-   or ``.pyspecdata`` (Mac or Linux).
-
-   Here is an example -- you can copy and paste it as a starting point:
-
-   ::
-
-        [General]
-        data_directory = c:/Users/yourusername/exp_data
-        notebook_directory = c:/Users/yourusername/notebook
-
-   Note that any backslashes are substituted with forward slashes.
-   Also note that you will
-   need to change the directories to refer to real directories that already
-   exist or that you create on your hard drive (see below).
-   Note that on Windows, you can use notebook, *etc.* to create this file,
-   but it cannot have a .txt, *etc.* `extension <http://www.wikihow.com/Change-a-File-Extension>`_.
-
-   * Where is my "home directory"? (Where do I put the `_pyspecdata` file?)
-
-       * On Windows, your home directory is likely something like
-         ``C:\Users\yourusername``.
-         You can access your home directory by opening any file folder window, and
-         starting to type your name in the address bar -- it's the first folder that shows up
-         underneath.
-
-       * On MacOS and Linux, it's the directory indicated by ``~``.  On Linux,
-         this typically expands to ``/home/yourusername``.
-
-       * On any OS, you can always find your home directory in Python using ``import os;print os.path.expanduser('~')``
-
-   * What are these directories? → You can either create them or point to existing directories.
-
-       * ``data_directory`` must be set.  It is a directory, anywhere on the
-         hard drive, where you store all your raw experimental data.  It must
-         contain at least one subdirectory -- each subdirectory stores
-         different "experiment types," typically acquired on different instruments
-         (*e.g.* you might have subdirectories named ``400MHz_NMR``,
-         ``500MHz_NMR``, ``95GHz_ESR``, and ``Xband_ESR``).
-
-           * The library now supports having datasets packed into `.zip` or `.tgz` files.
-             For example, Bruker NMR files typically comprise a directory with several subdirectories for the numbered experiments.
-             We routinely pack these up as zip files on the spectrometer, and directly read the data from the zip files.
-
-           * If you're setting up a lab, you might want to separately sync each different
-             experiment type folders using `seafile <https://www.seafile.com/en/home/>`_.
-
-             Or you can sync the whole data directory with dropbox.
-
-       * If set, the ``notebook_directory`` is intended to contain latex
-         files with embedded python code, as well as some processed
-         output.
-
-   * *Do not* use quotes to surround the directory name.  Even if it contains
-     spaces, do not use quotes, and do not escape spaces with backslashes.
-
-   * Note that on Windows, your desktop folder is typically in ``C:\Users\yourusername\Desktop``
-
-   * Why do I need to do this?
-
-       * Setting this configuration allows you to move code between different
-         computers (*e.g.* a spectrometer computer, a desktop, and a laptop),
-         and re-use the same code, even though the locations of the files are
-         changing.  This should work even across different operating systems.
-
-       * It specifically enables functions like ``find_file(...)``,
-         ``get_datadir(...)``, *etc.* that can search the data directory for a
-         file name matching some basic criteria.
-         You should always use these to load your data,
-         and *never* use the absolute path.
-
-       * The GUI tool that will allow you to set up ``_pyspecdata`` by pointing
-         and clicking has not yet been set up.
-
-Notes on compilation of NNLS
-============================
+Notes on compilation of compiled extensions
+-------------------------------------------
 
 We recently added a compiled extension that performs non-negative least-squares for regularization (DOSY/Relaxometry/etc.)
 
@@ -376,3 +175,19 @@ We recommend using the normal dos command prompt (cmd) to install pyspecdata, an
 (Recent versions of mingw appear to put .bat files in a preferential location
 in the path, and these .bat files seem to mess everything up, including
 compatibility with the git bash prompt.)
+
+Further installation notes
+--------------------------
+
+Upon upgrading from Python 2.X to 3.X, we made some notes in
+`conda_upgrade.md <conda_upgrade.md>`_;
+this includes some useful (but possibly dated) instructions on how to
+implement different environments in anaconda,
+how to deal with AppLocker permissions, and Windows permissions generally,
+if you run into any of these issues.
+
+Open an issue!
+--------------
+
+If you have issues with installing or using pyspecdata, don't hesitate to open
+an issue on this page!

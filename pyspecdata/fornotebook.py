@@ -11,6 +11,7 @@ import warnings
 # sympy doesn't like to be imported from fornotebook as part of a *
 warnings.filterwarnings("ignore")
 from .core import *
+from .general_functions import fname_makenice
 from scipy.io import savemat,loadmat
 from os.path import exists as path_exists
 from os import name as os_name
@@ -19,9 +20,10 @@ from scipy.signal import fftconvolve
 from datetime import datetime
 from time import mktime
 from PIL import Image
+import numpy as np
 import re
 
-golden_ratio = (1.0 + sqrt(5))/2.0
+golden_ratio = (1.0 + np.sqrt(5))/2.0
 
 def dprint(*stuff):
     print('\n\nDEBUG',' '.join(map(repr(stuff))),'\n\n')
@@ -193,7 +195,7 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
         return retval
     # previously documented
     def this_format_function(x,error_val = None,scientific_notation = scientific_notation):
-        if isinstance(x, str_):
+        if isinstance(x, np.str_):
             if error_val is None:
                 return str(x)
             else:
@@ -204,12 +206,12 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
             if error_val is None or error_val == 0.0:
                 if x == 0.0:
                     return '0.0'
-                powerof = floor(log10(abs(x)))
+                powerof = np.floor(np.log10(abs(x)))
                 if scientific_notation and abs(powerof)>3:
                     if abs(powerof)>3:
                         return ('%%0.%df' % int(number_sf))%float(x/(10**powerof))+r'\magn{%d}'%int(powerof)
                 else:
-                    highest_significant = floor(log10(x))
+                    highest_significant = np.floor(np.log10(x))
                     lowest_significant = highest_significant-(number_sf-1) # the -1 is for number_sf significant figures, not just one
                     x /= 10**lowest_significant
                     x = round(x)
@@ -220,7 +222,7 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
                         thisformat = '%0.0f'
                     return (thisformat)%(x)
             else:
-                highest_significant = floor(log10(error_val))
+                highest_significant = np.floor(np.log10(error_val))
                 lowest_significant = highest_significant-(number_sf-1) # the -1 is for number_sf significant figures, not just one
                 error_val /= 10**lowest_significant
                 x /= 10**lowest_significant
@@ -240,10 +242,10 @@ def lrecordarray(recordlist,columnformat = True,smoosh = True,multi = True,resiz
                 return (format+'\\pm '+format)%(x,error_val)
     def maybe_matrix(x,error = None):
         if error is not None:
-            if isinstance(x, ndarray):
+            if isinstance(x, np.ndarray):
                 if x.shape != error.shape:
                     raise ValueError("shape of the error does not match the shape of the value/matrix")
-        if isinstance(x, ndarray):
+        if isinstance(x, np.ndarray):
             if len(x.shape) == 2:
                 if error is None:
                     #retval = r'\begin{tabular}{'+'c'*x.shape[1]+'}'
@@ -373,22 +375,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
         bytextwidth = False
     if print_string is not None:
         print(print_string)
-    fname = fname.replace(' ','_')
-    fname = fname.replace('-','m')
-    fname = fname.replace('+','p')
-    fname = fname.replace('\\','_')
-    fname = fname.replace('$','')
-    fname = fname.replace('(','')
-    fname = fname.replace(')','')
-    fname = fname.replace('"','')
-    fname = fname.replace('=','_')
-    fname = fname.replace('\n','_')
-    fname = fname.replace('*','_star_')
-    fname = fname.replace(':','')
-    fname = fname.replace('^','')
-    fname = fname.replace('}','')
-    fname = fname.replace('{','')
-    fname = r'auto_figures/'+fname
+    fname = r'auto_figures/'+fname_makenice(fname)
     if alsosave != None:
         alsosave = r'auto_figures/'+alsosave
     if gensvg == True:
@@ -396,9 +383,9 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
     if genpng == True:
         alsosave = fname.replace('.pdf','.png')
     if grid:
-        gridandtick(gca())
+        gridandtick(plt.gca())
     if fig is None:
-        fig = gcf()
+        fig = plt.gcf()
     if mlab:
         temp = fig.scene.anti_aliasing_frames
         fig.scene.disable_render = True
@@ -423,7 +410,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
             data = uint8((data*255).round())
             img = Image.fromarray(data)
             if verbose: print("old size",img.size)
-            newimgsize = tuple(uint((r_[img.size[0],img.size[1]]/resize_factor).round()))
+            newimgsize = tuple(uint((np.r_[img.size[0],img.size[1]]/resize_factor).round()))
             if verbose: print("target new size",newimgsize)
             img = img.resize(newimgsize,Image.ANTIALIAS)
             if verbose: print("new size, after resize",img.size)
@@ -434,7 +421,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
         fig.scene.disable_render = False
         fig.scene.anti_aliasing_frames = temp
     else:
-        ax = gca()
+        ax = plt.gca()
         if equal_aspect:
             ax.set_aspect('equal')
         fig.autofmt_xdate()
@@ -442,7 +429,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
             autopad_figure(centered = centered,figname = fname)
     # replaced outer_legend with appropriate modification to the "legend" option of figlist.show_prep(), same with legend option
         if not boundaries:
-            ax = gca()
+            ax = plt.gca()
             for j in list(ax.spines.keys()):
                 ax.spines[j].set_visible(False)
             setp(ax.get_xticklabels(),visible = False)
@@ -456,7 +443,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
             if len(this_ylabel) > 0:
                 ax.set_ylabel(this_ylabel + r" $\rightarrow$")
         try:
-            savefig(fname, dpi=dpi,
+            plt.savefig(fname, dpi=dpi,
                     facecolor=(1,1,1,0),
                     bbox_inches='tight')
         except ValueError as exc_string:
@@ -467,7 +454,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
         except IOError as e:
             raise IOError("This is giving an IOError -- check that you haven't maybe changed directories" + os.getcwd().replace('\\','/'))
         if alsosave != None:
-            savefig(alsosave,
+            plt.savefig(alsosave,
                     dpi=dpi,
                     facecolor=(1,1,1,0))
     if figure:
@@ -497,7 +484,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
         bufwr(r'''{\color{red}{\tiny %s}:}\begin{tiny}\fn{%s}\end{tiny}'''%('file:',fname))
         bufwr('\n\n'+r'\hrulefill'+'\n\n')
         bufwr(r'''\end{minipage} }''', end=' ')
-    clf()
+    plt.clf()
     sys.stdout.buffer.flush()
     return
 def ordplot(x,y,labels,formatstring):
@@ -512,14 +499,14 @@ def obs_repr(*arg):
     thisstr += r'\o{'
     num = 0
     for j in arg:
-        if type(j) in [double,float,float32]:
-            if log10(j) > 3 or log10(j) < -3:# greater than a thousand or less than a thousandth
-                power = floor(log10(j))
+        if type(j) in [np.double,float,np.float32]:
+            if np.log10(j) > 3 or np.log10(j) < -3:# greater than a thousand or less than a thousandth
+                power = np.floor(np.log10(j))
                 j /= 10**power
                 thisstr += r'$%0.3f\times 10^{%d}$'%(j,power)
             else:
-                if log10(j)<-1:
-                    temp = '%%0.%df'%(floor(-log10(j))+3)
+                if np.log10(j)<-1:
+                    temp = '%%0.%df'%(np.floor(-np.log10(j))+3)
                     thisstr += temp%j
                 else:
                     thisstr += r'%0.3f'%j
@@ -683,7 +670,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
         minind = 1
         #{{{ find the peaks for the segments above threshold
         peakmask = whereblocks(smoothed>smoothed.max()*threshold)
-        indeces = r_[0:len(thisslice)]
+        indeces = np.r_[0:len(thisslice)]
         for peakset in peakmask: # peakset gives the indeces for a given slice
             if len(peakset)>minind:
                 peak_ind = peakset[argmax(thisslice[peakset])]
@@ -699,9 +686,9 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
                 bottom_peak += [thisslice[peak_ind]]
         #}}}
         if (not imageformat):
-            plot(x,thisslice,color=cm.hsv(double(j)/double(nslices)),alpha=0.5)
-            plot(bottom_peak_x,bottom_peak,'o',color=cm.hsv(double(j)/double(nslices)),alpha=0.5)
-            plot(top_peak_x,top_peak,'o',color=cm.hsv(double(j)/double(nslices)),alpha=0.5)
+            plot(x,thisslice,color=cm.hsv(np.double(j)/np.double(nslices)),alpha=0.5)
+            plot(bottom_peak_x,bottom_peak,'o',color=cm.hsv(np.double(j)/np.double(nslices)),alpha=0.5)
+            plot(top_peak_x,top_peak,'o',color=cm.hsv(np.double(j)/np.double(nslices)),alpha=0.5)
         allpeaks_top += [top_peak]
         allpeaks_top_x += [top_peak_x]
         allpeaks_bottom += [bottom_peak]
@@ -711,7 +698,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
         allpeaks_top_x = nddata(allpeaks_top_x,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
     except:
         print(r'\begin{verbatim} If you have an error here, probably change smoothing (%0.2f) or threshold (%0.2f)\end{verbatim}'%(smoothing,threshold),'\n\n')
-        clf()
+        plt.clf()
         for j in range(0,nslices):
             thisslice = data['power',j].data
             #curvature = diff(fftconvolve(thisslice,k,mode='same'),n=2)
@@ -727,7 +714,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
         allpeaks_bottom_x = nddata(allpeaks_bottom_x,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
     except:
         print(r'\begin{verbatim} If you have an error here, probably change smoothing (%0.2f) or threshold (%0.2f)\end{verbatim}'%(smoothing,threshold),'\n\n')
-        clf()
+        plt.clf()
         for j in range(0,nslices):
             thisslice = data['power',j].data
             #curvature = diff(fftconvolve(thisslice,k,mode='same'),n=2)
@@ -742,9 +729,9 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
     allpeaks_top = nddata(allpeaks_top,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
     allpeaks_bottom = nddata(allpeaks_bottom,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
     if imageformat:
-        image(data.data,x=x,y=r_[0:len(powerseries)])
-        plot(r_[0:len(powerseries)],allpeaks_top_x.data)
-        #plot(r_[0:shape(data.data)[1]],allpeaks_bottom_x.data)
+        image(data.data,x=x,y=np.r_[0:len(powerseries)])
+        plot(np.r_[0:len(powerseries)],allpeaks_top_x.data)
+        #plot(np.r_[0:shape(data.data)[1]],allpeaks_bottom_x.data)
         lplot('esr_dataset'+figname+'.png',width=6,grid=False)
     else:
         lplot('esr_dataset'+figname+'.png',width=6)
@@ -752,17 +739,17 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
     #{{{ peak to peak
     peaktopeak = allpeaks_bottom_x - allpeaks_top_x
     peaktopeak_squared = peaktopeak.copy()
-    peaktopeak.labels(['power'],[sqrt(powerseries)])
+    peaktopeak.labels(['power'],[np.sqrt(powerseries)])
     peaktopeak.rename('power','$B_1$ / arb')
     plot(peaktopeak,'.-',nosemilog=True)
-    ylabel(r'$\Delta B_{pp}$')
+    plt.ylabel(r'$\Delta B_{pp}$')
     lplot('esr_dataset'+figname+'_pp.pdf')
     #{{{ linearity test
     peaktopeak_squared.data = peaktopeak_squared.data**2
     peaktopeak_squared.labels(['power'],[powerseries])
     peaktopeak_squared.rename('power',r'$p$ / $mW$')
     plot(peaktopeak_squared,'.-',nosemilog=True)
-    ylabel(r'$\Delta B_{pp}^2\propto s^{-1}$')
+    plt.ylabel(r'$\Delta B_{pp}^2\propto s^{-1}$')
     lplot('esr_dataset'+figname+'_pp2.pdf')
     #}}}
     #}}}
@@ -770,17 +757,17 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
     #{{{ height
     height = (allpeaks_top - allpeaks_bottom)/2
     height_n23 = height.copy()
-    height.labels(['power'],[sqrt(powerseries)])
+    height.labels(['power'],[np.sqrt(powerseries)])
     height.rename('power','$B_1$ / arb')
     plot(height,'.-',nosemilog=True)
-    ylabel(r"$y'_m$")
+    plt.ylabel(r"$y'_m$")
     lplot('esr_dataset'+figname+'_height.pdf')
     #{{{linearity test
     b1 = ndshape(height_n23)
     b1['peak'] = 1
     b1 = b1.alloc()
     #b1['power',:] = powerseries.copy().reshape(-1,1)
-    b1.data = sqrt(powerseries).copy().reshape(b1.data.shape)
+    b1.data = np.sqrt(powerseries).copy().reshape(b1.data.shape)
     height_n23 = height_n23/b1
     height_n23.data = height_n23.data**(-2./3.)
     height_n23.labels(['power'],[powerseries])
@@ -793,8 +780,8 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
     else:
         plot(height_n23/hn23adjustment,'.',nosemilog=True)
     maxp = lambda x: x == x.max()
-    plot(r_[0.0,height_n23_avg[newpname,maxp].getaxis(newpname)],r_[1.0,height_n23_avg[newpname,maxp].data[0]/hn23adjustment],'k-',linewidth=2,alpha=0.3,nosemilog=True)
-    ylabel(r"$\propto\frac{y'_m}{B_1}^{-2/3}\propto \frac{1}{1-s_{ESR}}$")
+    plot(np.r_[0.0,height_n23_avg[newpname,maxp].getaxis(newpname)],np.r_[1.0,height_n23_avg[newpname,maxp].data[0]/hn23adjustment],'k-',linewidth=2,alpha=0.3,nosemilog=True)
+    plt.ylabel(r"$\propto\frac{y'_m}{B_1}^{-2/3}\propto \frac{1}{1-s_{ESR}}$")
     lplot('esr_dataset'+figname+'_hn23.pdf',width = 3.5)
     #}}}
     #}}}
@@ -805,8 +792,8 @@ def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'ref
     # noise tests
     close(1)
     figure(1,figsize=(16,8))
-    v = save_data();our_calibration = double(v['our_calibration']);cnsi_calibration = double(v['cnsi_calibration'])
-    calibration = cnsi_calibration*sqrt(50.0/10.0)*sqrt(50.0/40.0)
+    v = save_data();our_calibration = np.double(v['our_calibration']);cnsi_calibration = np.double(v['cnsi_calibration'])
+    calibration = cnsi_calibration*np.sqrt(50.0/10.0)*np.sqrt(50.0/40.0)
     path_list = []
     explabel = []
     noiseexpno = []
@@ -829,22 +816,22 @@ def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'ref
        ind += 1
        legendstr = []
        linelist = []
-       subplot(121) # so that legend will fit
+       plt.subplot(121) # so that legend will fit
        for k in range(0,len(noiseexpno)):
           retval = plot_noise(path_list[k],noiseexpno[k],calibration,mask_start,mask_stop,smoothing = smoothing, both = False,retplot = True)
           linelist += retval[0]
           legendstr.append('\n'.join(textwrap.wrap(explabel[k]+':'+retval[1][0],50))+'\n')
-       ylabel(r'$\Omega$')
+       plt.ylabel(r'$\Omega$')
        titlestr = 'Noise scans (smoothed %0.2f $kHz$) for CNSI spectrometer\n'%(smoothing/1e3)
-       title(titlestr+r'$n V$ RG/ disk units = %0.3f, mask (%0.3f,%0.3f)'%(calibration*1e9,mask_start,mask_stop))
-       ax = gca()
+       plt.title(titlestr+r'$n V$ RG/ disk units = %0.3f, mask (%0.3f,%0.3f)'%(calibration*1e9,mask_start,mask_stop))
+       ax = plt.gca()
        ylims = list(ax.get_ylim())
-       #gridandtick(gca(),formatonly = True)
-       gridandtick(gca(),logarithmic = True)
-       subplot(122)
+       #gridandtick(plt.gca(),formatonly = True)
+       gridandtick(plt.gca(),logarithmic = True)
+       plt.subplot(122)
        grid(False)
        lg = autolegend(linelist,legendstr)
-       ax = gca()
+       ax = plt.gca()
        ax.get_xaxis().set_visible(False)
        ax.get_yaxis().set_visible(False)
        for x in list(ax.spines.values()):

@@ -36,7 +36,6 @@ pyspecdata.axis\_manipulation.shear module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

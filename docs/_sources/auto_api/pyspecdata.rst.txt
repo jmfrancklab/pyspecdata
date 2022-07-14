@@ -15,6 +15,14 @@ Subpackages
 Submodules
 ----------
 
+pyspecdata.axis\_class module
+-----------------------------
+
+.. automodule:: pyspecdata.axis_class
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pyspecdata.core module
 ----------------------
 
@@ -71,6 +79,14 @@ pyspecdata.latexscripts module
    :undoc-members:
    :show-inheritance:
 
+pyspecdata.lmfitdata module
+---------------------------
+
+.. automodule:: pyspecdata.lmfitdata
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pyspecdata.ndshape module
 -------------------------
 
@@ -83,6 +99,14 @@ pyspecdata.nnls module
 ----------------------
 
 .. automodule:: pyspecdata.nnls
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pyspecdata.placeholder module
+-----------------------------
+
+.. automodule:: pyspecdata.placeholder
    :members:
    :undoc-members:
    :show-inheritance:
@@ -102,7 +126,6 @@ pyspecdata.version module
    :members:
    :undoc-members:
    :show-inheritance:
-
 
 Module contents
 ---------------
