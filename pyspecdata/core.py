@@ -4953,10 +4953,10 @@ class nddata (object):
                     factor = sqrt(s1*s2)
                 if not twoD:
                     factor = sqrt(input_vec.shape[0])
-                T = linalg.inv(dd_chi(G(input_vec),val**2))
+                T = np.linalg.inv(dd_chi(G(input_vec),val**2))
                 dot_product = np.dot(input_vec.T,np.dot(T,input_vec))
                 ans = dot_product*factor
-                ans = ans/linalg.norm(input_vec)/dot_product
+                ans = ans/np.linalg.norm(input_vec)/dot_product
                 tol = 1e-6
                 if abs(ans-val**2) <= tol:
                     logger.debug(strm('ALPHA HAS CONVERGED.'))
@@ -4966,7 +4966,7 @@ class nddata (object):
             def newton_min(input_vec,val):
                 fder = dd_chi(G(input_vec),val)
                 fval = d_chi(input_vec,val)
-                return (input_vec + np.dot(linalg.inv(fder),fval))
+                return (input_vec + np.dot(np.linalg.inv(fder),fval))
             def mod_BRD(guess,maxiter=20):
                 smoothing_param = guess
                 alpha_converged = False
@@ -4994,7 +4994,7 @@ class nddata (object):
             retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=mod_BRD(guess=1.0))
         else:
             retval, residual = this_nnls.nnls_regularized(K,data_fornnls,l=l)
-        logger.debug(strm('coming back from fortran, residual type is',type(residual))+ strm(residual.dtype if isinstance(residual, ndarray) else ''))
+        logger.debug(strm('coming back from fortran, residual type is',type(residual))+ strm(residual.dtype if isinstance(residual, np.ndarray) else ''))
         newshape = []
         if not np.isscalar(l):
             newshape.append(len(l))
