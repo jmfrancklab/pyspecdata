@@ -64,9 +64,9 @@ def xepr(filename, exp_type=None, dimname='', verbose=False):
             "your file remotely, but you called with "
             "exp_type None!")
         rclone_search(
-                os.path.split(filename_spc)[0],
+                os.path.split(filename_spc)[-1],
                 exp_type,
-                os.path.split(filename_spc)[-1])
+                os.path.split(filename_spc)[0])
     with open(filename_spc,'rb') as fp:
         if all([j == 'REAL' for j in ikkf]):
             data = np.frombuffer(fp.read(),'>f8')
