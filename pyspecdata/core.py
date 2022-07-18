@@ -5091,7 +5091,9 @@ class nddata (object):
                 raise ValueError("I can't interpolate imaginary values")
             else:
                 axisvalues = np.real(axisvalues)
+            axisvalues_final = axisvalues
             if past_bounds is None:
+                axisvalues = axisvalues.copy()
                 axisvalues[axisvalues<oldaxis.min()] = oldaxis.min()
                 axisvalues[axisvalues>oldaxis.max()] = oldaxis.max()
             elif not (past_bounds == 'fail'):
@@ -5135,7 +5137,7 @@ class nddata (object):
         rdata = local_interp_func(rdata)
         idata = local_interp_func(idata)
         self.data = rdata + 1j * idata
-        self.setaxis(axis,axisvalues)
+        self.setaxis(axis,axisvalues_final)
         if thiserror is not None:
             rerrvar = local_interp_func(rerrvar,kind = 'linear') # calculate the error variance of the real part, use linear to avoid nan problems
             if thiserror[0].dtype == 'complex128':
