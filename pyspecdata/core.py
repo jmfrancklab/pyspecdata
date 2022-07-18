@@ -98,15 +98,13 @@ rc('image',aspect='auto',interpolation='nearest')
 #rcParams['text.usetex'] = True
 rc('font', family='Arial')# I need this to render unicode
 rcParams['xtick.direction'] = 'out'
-rcParams['xtick.major.size'] = 12
-rcParams['xtick.minor.size'] = 6
 rcParams['ytick.direction'] = 'out'
-rcParams['ytick.major.size'] = 12
-rcParams['ytick.minor.size'] = 6
+#rcParams['ytick.major.size'] = 12
+#rcParams['ytick.minor.size'] = 6
 #rcParams['lines.linewidth'] = 3.0
-rcParams['legend.fontsize'] = 12
+#rcParams['legend.fontsize'] = 12
+#rcParams['font.size'] = 6
 rcParams['axes.grid'] = False
-rcParams['font.size'] = 18
 rcParams['image.cmap'] = 'jet'
 rcParams['figure.figsize']=(7*(1+np.sqrt(5))/2,7)
 mat2array = [{'ImmutableMatrix': np.array}, 'numpy']# for sympy returns arrays rather than the stupid matrix class
@@ -1417,10 +1415,10 @@ def othergridandtick(ax,rotation=(0,0),precision=(2,2),labelstring=('',''),gridc
     plt.grid(True,which='minor',color=gridcolor,alpha=0.1,linestyle='-')
     if x:
         labels = ax.get_xticklabels()
-        plt.setp(labels,rotation=rotation[0],fontsize=10)
+        plt.setp(labels,rotation=rotation[0])
     if y:
         labels = ax.get_yticklabels()
-        plt.setp(labels,rotation=rotation[1],fontsize=10)
+        plt.setp(labels,rotation=rotation[1])
     return
 #}}}
 #{{{ plot wrapper
@@ -1689,7 +1687,7 @@ def contour_plot(xvals,yvals,zvals,color = 'k',alpha = 1.0,npts = 300,**kwargs):
             alpha = alpha,**kwargs)
     except Exception as e:
         raise Exception(strm("Is there something wrong with your levels?:",levels,"min z",zi_min,"max z",zi_max,explain_error(e)))
-    plt.clabel(CS,fontsize = 9,inline = 1,
+    plt.clabel(CS,inline = 1,
         #fmt = r'$k_\sigma/k_{\sigma,bulk} = %0.2f$',
         fmt = r'%0.2f',
         use_clabeltext = True,
@@ -3135,7 +3133,7 @@ class nddata (object):
             levels = r_[self.data.min():self.data.max():30j]
         cs = contour(x*np.ones_like(y),np.ones_like(x)*y,self.data,**kwargs)
         if labels:
-            plt.clabel(cs,inline = 1,fontsize = 10)
+            plt.clabel(cs,inline = 1)
         xlabel(self.unitify_axis(x_axis))
         ylabel(self.unitify_axis(y_axis))
         return cs
