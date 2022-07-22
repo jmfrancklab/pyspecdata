@@ -27,7 +27,7 @@ For example, :func:`box_muller` is a helper function (based on numerical recipes
 while h5 functions are helper functions for using pytables in a fashion that
 will hopefull be intuitive to those familiar with SQL, etc.
 '''
-from .datadir import pyspec_config
+from .datadir import pyspec_config, unknown_exp_type_name
 from sys import exc_info
 from os import listdir,environ
 from os.path import sep as path_sep
@@ -86,7 +86,7 @@ import scipy.sparse as sparse
 import numpy.lib.recfunctions as recf
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline
-from .datadir import getDATADIR,log_fname
+from .datadir import getDATADIR,log_fname,proc_data_target_dir
 from . import fourier as this_fourier
 from . import axis_manipulation
 from . import nnls as this_nnls
@@ -963,7 +963,7 @@ def h5child(thisnode,childname,clear = False,create = None):
             childnode = None
     except tables.NoSuchNodeError as e:
         if create is False and not clear:
-            raise RuntimeError('Trying to grab a node that does not exist with create = False'+explain_error(e))
+            raise RuntimeError('Trying to grab a node that does not exist with create = False')
         elif clear:
             childnode = None
         else:
@@ -980,7 +980,7 @@ def h5remrows(bottomnode,tablename,searchstring):
             data = thistable.read_where(searchstring).copy()
         except Exception as e:
             raise RuntimeError(strm('Problem trying to remove rows using search string',
-                searchstring, 'in', thistable, explain_error(e)))
+                searchstring, 'in', thistable))
         for row in thistable.where(searchstring):
             if len(thistable) == 1:
                 thistable.remove()
@@ -1058,7 +1058,7 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
                 '\n'.join(map(repr,list(zip(list(mytable.read().dtype.fields.keys()),
                 list(mytable.read().dtype.fields.values()),
                 list(myrowdata.dtype.fields.keys()),
-                list(myrowdata.dtype.fields.values())))))),explain_error(e))
+                list(myrowdata.dtype.fields.values())))))))
         mytable.flush()
     else:
         recorddata = myrowdata
@@ -1068,8 +1068,8 @@ def h5addrow(bottomnode,tablename,*args,**kwargs):
                     recorddata)
         except Exception as e:
             raise RuntimeError(strm('Error trying to write record np.array:',
-                repr(recorddata),'from listofdata',listofdata,'and names',listofnames,
-                explain_error(e)))
+                repr(recorddata),'from listofdata',listofdata,'and names',listofnames
+                ))
         mytable.flush()
     return mytable,newindex
 def h5table(bottomnode,tablename,tabledata):
@@ -1099,10 +1099,10 @@ def h5nodebypath(h5path,force = False,only_lowest = False,check_only = False,dir
     logger.debug(strm('the h5path is',h5path))
     if h5path[0] in listdir(directory):
         logger.debug(strm('DEBUG: file exists\n\n'))
-        log_fname('data_files',h5path[0],'notgiven',directory)
+        log_fname('data_files',h5path[0],directory,unknown_exp_type_name)
     else:
         if check_only:
-            errmsg = log_fname('missing_data_files',h5path[0],'notgiven',directory,err=True)
+            errmsg = log_fname('missing_data_files',h5path[0],directory,unknown_exp_type_name)
             raise AttributeError("You're checking for a node in a file (%s) that does not exist"%(h5path[0])
                     +'\n'
                     +errmsg)
@@ -2057,7 +2057,7 @@ class figlist(object):
                 if self.current in list(self.units.keys()):
                         theseunits = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
                         if theseunits != self.units[self.current] and theseunits[0] != self.units[self.current]:
-                                raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(theseunits,self.units[self.current]))
+                                raise ValueError("for '%s' the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(self.current,theseunits,self.units[self.current]))
                 else:
                     if isinstance(testdata,nddata):
                         self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
@@ -2405,7 +2405,12 @@ class figlist(object):
                 result = result+str(j)+"\n"
             else:
                 counter += 1
-                result = result+"%d: "%counter+str(j)+"\n"
+                result = result+"%d: "%counter+str(j)+ (
+                        ' '+'|'*3+str(self.units[j])
+                        if j in self.units.keys()
+                        else
+                        ''
+                        ) +"\n"
         return result
 def text_on_plot(x,y,thistext,coord = 'axes',**kwargs):
     ax = plt.gca()
@@ -5086,7 +5091,9 @@ class nddata (object):
                 raise ValueError("I can't interpolate imaginary values")
             else:
                 axisvalues = np.real(axisvalues)
+            axisvalues_final = axisvalues
             if past_bounds is None:
+                axisvalues = axisvalues.copy()
                 axisvalues[axisvalues<oldaxis.min()] = oldaxis.min()
                 axisvalues[axisvalues>oldaxis.max()] = oldaxis.max()
             elif not (past_bounds == 'fail'):
@@ -5130,7 +5137,7 @@ class nddata (object):
         rdata = local_interp_func(rdata)
         idata = local_interp_func(idata)
         self.data = rdata + 1j * idata
-        self.setaxis(axis,axisvalues)
+        self.setaxis(axis,axisvalues_final)
         if thiserror is not None:
             rerrvar = local_interp_func(rerrvar,kind = 'linear') # calculate the error variance of the real part, use linear to avoid nan problems
             if thiserror[0].dtype == 'complex128':

@@ -19,7 +19,7 @@ from . import bruker_esr
 from . import acert
 from . import load_cary
 from .open_subpath import open_subpath
-from ..datadir import getDATADIR
+from ..datadir import getDATADIR, rclone_search
 from ..datadir import pyspec_config,log_fname
 from ..general_functions import process_kwargs,strm
 from ..core import *
@@ -87,12 +87,16 @@ def search_filename(searchstring,exp_type,
         exptype_msg = ""
         if exp_type is None:
             exptype_msg = "\nYou probably need to set exp_type so I know where inside {1:s} to find the file."
-        err = log_fname('missing_data_files',
+        rclone_search(
                 searchstring.replace('.*','*').replace('(','{').replace(')','}').replace('|',','),
-                directory,
                 exp_type,
-                err=True)
-        raise IOError("Can't find file specified by search string %s"%searchstring+'\n'+err)
+                directory)
+    files = look_inside(directory)
+    if files is None or len(files) == 0:
+        raise RuntimeError("even after rclone_search, I "
+                "can't find this file!\n"
+                f"file search string: {searchstring}\n"
+                f"exp type: {exp_type}\n")
     else:
         if len(files) > 1:
             basenames,exts = list(map(set,list(zip(*[j.rsplit('.',1) for j in files if len(j.rsplit('.',1))>1]))))
@@ -111,6 +115,9 @@ def search_filename(searchstring,exp_type,
             raise ValueError("found more than on file in", directory,
                     "matching", searchstring, "(", retval, ")")
         else:
+            log_fname('data_files',
+                    *tuple(os.path.split(os.path.normpath(retval[0]))[::-1]+(exp_type,))
+                    )
             return retval[0]
     return retval
 def find_file(searchstring,
@@ -124,6 +131,7 @@ def find_file(searchstring,
             add_sizes=[], add_dims=[], use_sweep=None,
             indirect_dimlabels=None,
             lookup={},
+            return_list=False,
             **kwargs):
     r'''Find the file  given by the regular expression `searchstring` inside the directory identified by `exp_type`, load the nddata object, and postprocess with the function `postproc`.
 
@@ -209,14 +217,7 @@ def find_file(searchstring,
     # }}}
     logger.debug(strm("preparing to call search_filename with arguments",(searchstring, exp_type, print_result)))
     files = search_filename(searchstring, exp_type, print_result=print_result)
-    if len(files) == 0:
-        # naive replacement to match rclone-like rules
-        err = log_fname('missing_data_files',
-                searchstring.replace('.*','*').replace('(','{').replace(')','}').replace('|',','),
-                directory,
-                exp_type,
-                err=True)
-        raise ValueError("Can't find file specified by search string %s"%searchstring+'\n'+err)
+    # search_filename will raise an error if it can't find anything even after checking remotely
     data = None
     while data is None and len(files) > 0:
         filename = files.pop(-1)
@@ -226,11 +227,14 @@ def find_file(searchstring,
             dimname=dimname, return_acq=return_acq,
             add_sizes=add_sizes, add_dims=add_dims, use_sweep=use_sweep,
             indirect_dimlabels=indirect_dimlabels,
-            expno=expno)
+            expno=expno, exp_type=exp_type,
+            return_list=return_list)
+        if return_list:
+            return data
         # }}}
-        for_logging = os.path.normpath(filename).split(os.path.sep)
-        log_fname('data_files',for_logging[-1],os.path.join(*for_logging[:-1]),exp_type)
-        del for_logging
+        log_fname('data_files',
+                *tuple(os.path.split(os.path.normpath(filename))[::-1]+(exp_type,))
+                )
     if data is None:
         raise ValueError(strm(
             "I found no data matching the regexp", searchstring))
@@ -333,7 +337,9 @@ def _check_signature(filename):
                 return None
 def load_indiv_file(filename, dimname='', return_acq=False,
         add_sizes=[], add_dims=[], use_sweep=None,
-        indirect_dimlabels=None, expno=None):
+        indirect_dimlabels=None, expno=None,
+        exp_type=None,
+        return_list=False):
     """Open the file given by `filename`, use file signature magic and/or
     filename extension(s) to identify the file type, and call the appropriate
     function to open it.
@@ -460,6 +466,10 @@ def load_indiv_file(filename, dimname='', return_acq=False,
                             for j in f.keys():
                                 if 'dimlabels' in f[j].attrs and 'data' in f[j].keys():
                                     attrlist.append(j)
+                        logger.debug("return_list is ",return_list)
+                        if return_list:
+                            print("using return-list -- this should be deprecated in favor of stub loading soon!")
+                            return attrlist
                         raise ValueError("please select a node from the list and set to expno:\n\t"+'\n\t'.join(attrlist))
                     # assume this is a normal pySpecData HDF5 file
                     dirname, filename = os.path.split(filename)
@@ -475,7 +485,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             elif type_by_signature == 'TXT':
                 if type_by_extension == 'DSC':
                     # DSC identifies the new-format XEpr parameter file, and DTA the binary spectrum
-                    data = bruker_esr.xepr(filename, dimname=dimname)
+                    data = bruker_esr.xepr(filename, dimname=dimname, exp_type=exp_type)
                 else:
                     raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
             elif type_by_signature == 'Cary UV':
