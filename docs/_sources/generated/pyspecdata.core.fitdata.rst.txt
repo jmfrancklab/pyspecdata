@@ -1,4 +1,4 @@
-pyspecdata.core.fitdata
+﻿pyspecdata.core.fitdata
 =======================
 
 .. currentmodule:: pyspecdata.core
@@ -17,6 +17,7 @@ pyspecdata.core.fitdata
       ~fitdata.add_inactive_p
       ~fitdata.add_noise
       ~fitdata.aligndata
+      ~fitdata.along
       ~fitdata.analytical_covariance
       ~fitdata.argmax
       ~fitdata.argmin
@@ -42,6 +43,7 @@ pyspecdata.core.fitdata
       ~fitdata.diff
       ~fitdata.dot
       ~fitdata.eval
+      ~fitdata.eval_poly
       ~fitdata.extend
       ~fitdata.extend_for_shear
       ~fitdata.fit
@@ -59,6 +61,7 @@ pyspecdata.core.fitdata
       ~fitdata.get_ft_prop
       ~fitdata.get_plot_color
       ~fitdata.get_prop
+      ~fitdata.get_range
       ~fitdata.get_units
       ~fitdata.getaxis
       ~fitdata.getaxisshape
@@ -119,6 +122,7 @@ pyspecdata.core.fitdata
       ~fitdata.secsy_transform_manual
       ~fitdata.set_error
       ~fitdata.set_ft_prop
+      ~fitdata.set_guess
       ~fitdata.set_plot_color
       ~fitdata.set_prop
       ~fitdata.set_to

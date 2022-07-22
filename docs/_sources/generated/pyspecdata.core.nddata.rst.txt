@@ -1,4 +1,4 @@
-pyspecdata.core.nddata
+﻿pyspecdata.core.nddata
 ======================
 
 .. currentmodule:: pyspecdata.core
@@ -16,6 +16,7 @@ pyspecdata.core.nddata
       ~nddata.__init__
       ~nddata.add_noise
       ~nddata.aligndata
+      ~nddata.along
       ~nddata.argmax
       ~nddata.argmin
       ~nddata.axis
@@ -36,6 +37,7 @@ pyspecdata.core.nddata
       ~nddata.cropped_log
       ~nddata.diff
       ~nddata.dot
+      ~nddata.eval_poly
       ~nddata.extend
       ~nddata.extend_for_shear
       ~nddata.fld
@@ -50,6 +52,7 @@ pyspecdata.core.nddata
       ~nddata.get_ft_prop
       ~nddata.get_plot_color
       ~nddata.get_prop
+      ~nddata.get_range
       ~nddata.get_units
       ~nddata.getaxis
       ~nddata.getaxisshape

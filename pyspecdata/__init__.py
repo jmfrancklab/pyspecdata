@@ -4,6 +4,7 @@ from .placeholder import nddata_placeholder
 from .load_files import *
 from .figlist import *
 from .nnls import *
+from .lmfitdata import lmfitdata
 
 #import numpy
 
