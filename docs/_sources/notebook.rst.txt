@@ -73,17 +73,7 @@ Requirements
     .. todo::
 
         Alec, can you check this out and update documentation??
-4.  The `'paramset_pyspecdata'` module.
-    Just run ``python setup_paramset.py install`` from repository root directory (the same directory where you run
-    ``python setup.py install``
-    or
-    ``python setup.py develop``)
-
-    (This external module is simply used
-    to store the context in which the code is called -- *i.e.*, from within
-    python *vs.* from the command line.)
-
-5.  It's assumed that your latex files are stored in a "notebook directory."
+4.  It's assumed that your latex files are stored in a "notebook directory."
     In some cases, during the first run, an explanatory error will appear -- just follow the instructions.
 
 Running the notebook
@@ -136,6 +126,7 @@ How it works
   ``pdflatex_notebook_wrapper`` doesn't require this.
 * ``pdflatex_notebook_wrapper`` just calls ``pdflatex`` followed
   by ``update_notebook_pythonscripts`` 
+* To compile, use ``pdflatex_notebook_wrapper --xelatex`` 
 
 The LaTeX end
 `````````````

@@ -1,4 +1,5 @@
 r'''The :class:`ndshape` class allows you to allocate arrays and determine the shape of existing arrays.'''
+import numpy as np
 from .general_functions import *
 
 class ndshape_base ():
@@ -88,13 +89,13 @@ class ndshape_base ():
         dimlabels = arg[1]
         if isinstance(shape, str):
             shape,dimlabels = dimlabels,shape
-        if isscalar(self.shape):
+        if np.isscalar(self.shape):
             self.shape = [self.shape]
-        if isscalar(self.dimlabels):
+        if np.isscalar(self.dimlabels):
             self.dimlabels = [self.dimlabels]
-        if isscalar(shape):
+        if np.isscalar(shape):
             shape = [shape]
-        if isscalar(dimlabels):
+        if np.isscalar(dimlabels):
             dimlabels = [dimlabels]
         self.shape = shape + self.shape
         self.dimlabels = dimlabels + self.dimlabels
@@ -106,13 +107,13 @@ class ndshape_base ():
         dimlabels = arg[1]
         if isinstance(shape, str):
             shape,dimlabels = dimlabels,shape
-        if isscalar(self.shape):
+        if np.isscalar(self.shape):
             self.shape = [self.shape]
-        if isscalar(self.dimlabels):
+        if np.isscalar(self.dimlabels):
             self.dimlabels = [self.dimlabels]
-        if isscalar(shape):
+        if np.isscalar(shape):
             shape = [shape]
-        if isscalar(dimlabels):
+        if np.isscalar(dimlabels):
             dimlabels = [dimlabels]
         self.shape = self.shape + shape
         self.dimlabels = self.dimlabels + dimlabels

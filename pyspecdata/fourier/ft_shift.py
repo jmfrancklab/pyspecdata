@@ -1,5 +1,7 @@
 "shift-related helper functions"
-from numpy import zeros,r_,nonzero,isclose,empty_like,argmin,count_nonzero
+from numpy import r_
+import numpy as np
+import logging
 from ..general_functions import *
 thinkaboutit_message = ("If you think about it, you"
                         " probably don't want to do this.  You either want to fill with"
@@ -73,23 +75,23 @@ def _ft_shift(self,thisaxis,p2,shift_axis = None,verbose = False):
     "\n `shift_axis` is only used after the (i)fft.  It assumes that the axis labels start at zero, and it aliases them over in the same way the data was aliased")
     if p2 == 0: # nothing to be done
         return self
-    newdata = empty_like(self.data)
+    newdata = np.empty_like(self.data)
     n = self.data.shape[thisaxis]
     sourceslice = [slice(None,None,None)] * len(self.data.shape)
     targetslice = [slice(None,None,None)] * len(self.data.shape)
     # move second half first -- the following are analogous to the numpy function, but uses slices instead
     sourceslice[thisaxis] = slice(p2,n)
     targetslice[thisaxis] = slice(None,n-p2)
-    newdata[targetslice]  = self.data[sourceslice]
+    newdata[tuple(targetslice)]  = self.data[tuple(sourceslice)]
     # move first half second (the negative frequencies)
     sourceslice[thisaxis] = slice(None,p2)
     targetslice[thisaxis] = slice(-p2,None)
-    newdata[targetslice]  = self.data[sourceslice]
+    newdata[tuple(targetslice)]  = self.data[tuple(sourceslice)]
     self.data = newdata
     if shift_axis is not None and shift_axis:
         axisname = self.dimlabels[thisaxis]
         x = self.getaxis(axisname)
-        newaxis = empty_like(x)
+        newaxis = np.empty_like(x)
         n = len(x)
         # move second half first -- the following are analogous to the numpy function, but uses slices instead
         sourceslice = slice(p2,n)
@@ -154,15 +156,15 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
         t='reset'
         f='reset'
     if f is None:
-        assert t is not 'current'
+        assert t != 'current'
         f='current'
     elif t is None:
-        assert f is not 'current'
+        assert f != 'current'
         t='current'
-    if f is 'current':
+    if f == 'current':
         pass
     else:
-        if f is 'reset':
+        if f == 'reset':
             f=None
         df = _get_ft_df(self,axis)
         orig_f = self.get_ft_prop(axis,['start','freq'])
@@ -182,14 +184,16 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
                         " for ft_clear_startpoints!!"))
                 elif nearest:
                     f = round((f-orig_f)/df)*df + orig_f
+            else:
+                f = orig_f - round(n_df)*df
         self.set_ft_prop(axis,['start_freq'],f)
         self.set_ft_prop(axis,['freq','not','aliased'],None)
         if nearest is False:
             self.set_ft_prop(axis,['time','not','aliased'],True)
-    if t is 'current':
+    if t == 'current':
         pass
     else:
-        if t is 'reset':
+        if t == 'reset':
             t=None
         dt = _get_ft_dt(self,axis)
         orig_t = self.get_ft_prop(axis,['start','time'])
@@ -197,9 +201,10 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
             orig_t = self.getaxis(axis)[0]
         if t is not None:
             n_dt = (orig_t-t)/dt # number of dt's shifted by
-            if abs((n_dt - round(n_dt))/n_dt) > 1e-3:
+            logging.debug(strm("trying to shift by",n_dt))
+            if n_dt != 0 and abs((n_dt - round(n_dt))/n_dt) > 1e-3:
                 if nearest is None:
-                    print("discrepancy",abs(orig_t-t) % dt)
+                    logging.debug(strm("discrepancy",abs(orig_t-t) % dt))
                     raise ValueError(strm("You need to explicitly"
                         " set `nearest`, since you are trying to shift"
                         " the start point from",orig_t,"to",t,
@@ -210,6 +215,10 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
                         " for ft_clear_startpoints!!"))
                 elif nearest:
                     t = round((t-orig_t)/dt)*dt + orig_t
+                    logging.debug(strm("nearest t is",t))
+            else:
+                t = orig_t - round(n_dt)*dt
+                logging.debug(strm("setting t to",t))
         self.set_ft_prop(axis,['start_time'],t)
         self.set_ft_prop(axis,['time','not','aliased'],None)
         if nearest is False:
@@ -218,19 +227,19 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
 def _get_ft_df(self,axis):
     if self.get_ft_prop(axis):
         # axis is in frequency domain
-        return diff(self.getaxis(axis)[r_[0,1]]).item()
+        return np.diff(self.getaxis(axis)[r_[0,1]]).item()
     else:
         # axis in time domain
         N = len(self.getaxis(axis))
-        return (N)/(N+1)/diff(self.getaxis(axis)[r_[0,-1]]).item()
+        return (N)/(N+1)/np.diff(self.getaxis(axis)[r_[0,-1]]).item()
 def _get_ft_dt(self,axis):
     if self.get_ft_prop(axis):
         # axis is in frequency domain
         N = len(self.getaxis(axis))
-        return (N)/(N+1)/diff(self.getaxis(axis)[r_[0,-1]]).item()
+        return (N)/(N+1)/np.diff(self.getaxis(axis)[r_[0,-1]]).item()
     else:
         # axis in time domain
-        return diff(self.getaxis(axis)[r_[0,1]]).item()
+        return np.diff(self.getaxis(axis)[r_[0,1]]).item()
 def _find_index(u,origin = 0.0,tolerance = 1e-4,verbose = False):
     ("identify the index of `u` (represents either time or frequency) where"
             " `origin` lives -- if it finds a value exactly equal"
@@ -247,19 +256,19 @@ def _find_index(u,origin = 0.0,tolerance = 1e-4,verbose = False):
     if not u[0] < origin < u[-1]:
         alias_number = (origin - u[0]) // SW # subtracting this many SW's from origin
         #                                     will land me back inside the range of u
-        if verbose: print("(_find_index) range of axis:",u[0],u[-1])
-        if verbose: print("(_find_index) alias number is",alias_number)
-        if verbose: print("(_find_index) set origin from",origin, end=' ')
+        if verbose: logging.debug(strm("(_find_index) range of axis:",u[0],u[-1]))
+        if verbose: logging.debug(strm("(_find_index) alias number is",alias_number))
+        if verbose: logging.debug(strm("(_find_index) set origin from",origin, end=' '))
         origin -= alias_number * SW
-        if verbose: print("to",origin)
-    p2 = argmin(abs(u-origin))
-    assert count_nonzero(u[p2] == u) == 1, ("there seem to be"
-            " "+repr(count_nonzero(u[p2] == u))+" values equal"
+        if verbose: logging.debug(strm("to",origin))
+    p2 = np.argmin(abs(u-origin))
+    assert np.count_nonzero(u[p2] == u) == 1, ("there seem to be"
+            " "+repr(np.count_nonzero(u[p2] == u))+" values equal"
             " to "+repr(u[p2])+" but there should be only one")
     if abs(u[p2] - origin) > tolerance * max(abs(u[p2]),abs(origin)):
         p2_discrepancy = origin - u[p2]
     else:
         p2_discrepancy = None
-    if verbose: print("(_find_index) for origin",origin,"I am returning p2",p2,"out of",N,"and discrepancy",p2_discrepancy)
+    if verbose: logging.debug(strm("(_find_index) for origin",origin,"I am returning p2",p2,"out of",N,"and discrepancy",p2_discrepancy))
     alias_number += 1 # because the way that _ft_shift works essentially entails one aliasing
     return p2,p2_discrepancy,alias_number*SW

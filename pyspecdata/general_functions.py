@@ -6,31 +6,13 @@ them."""
 import os
 import sys
 from matplotlib.pylab import gci
+from numpy import pi
 def inside_sphinx():
     if len(sys.argv) > 0:
         return os.path.basename(sys.argv[0]) == "sphinx-build"
     else:
         return False
-if not inside_sphinx():
-    from numpy import *
-else:
-    # {{{ sphinx dummy objects
-    #      there is a better way of doing sphinx dummy objects, but this seems to work
-    def exp(*args,**kwargs):
-        return None
-    def rc(*args,**kwargs):
-        return None
-    def plot(*args,**kwargs):
-        return None
-    rcParams = {}
-    class rclass (object):
-        def __init__(self):
-            print("initializing")
-            return
-        def __getitem__(self,*args,**kwargs):
-            return
-    r_ = rclass()
-    # }}}
+import numpy as np
 import logging
 import re
 
@@ -94,7 +76,7 @@ def autostringconvert(arg):
         return str(arg)
     else:
         return arg
-def check_ascending_axis(u,tolerance = 1e-7,additional_message = []):
+def check_ascending_axis(u,tolerance = 1e-7,additional_message = [], allow_descending=False):
     r"""Check that the array `u` is ascending and equally spaced, and return the
     spacing, `du`.  This is a common check needed for FT functions, shears,
     etc.
@@ -119,32 +101,73 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = []):
     if isinstance(additional_message, str):
         additional_message = [additional_message]
     du = (u[-1]-u[0])/(len(u)-1.) # the dwell gives the bandwidth, whether or not it has been zero padded -- I calculate this way for better accuracy
-    thismsg = ', '.join(additional_message + ["the axis must be ascending (and equally spaced)"])
-    assert du > 0, thismsg
-    thismsg = ', '.join(additional_message + ["the axis must be equally spaced (and ascending)"])
-    assert all(abs(diff(u) - du)/du < tolerance), thismsg# absolute
+    thismsg = ', '.join(additional_message + ["the axis must be equally spaced"])
+    assert all(abs(np.diff(u) - du)/du < tolerance), thismsg# absolute
     #   tolerance can be large relative to a du of ns -- don't use
     #   allclose/isclose, since they are more recent numpy additions
-    assert du > 0, thismsg
+    if not allow_descending:
+        thismsg = ', '.join(additional_message + ["the axis must be equally spaced (and ascending)"])
+        assert du > 0, thismsg
     return du
 
-def init_logging(level=logging.INFO, filename='pyspecdata.log'):
-    "Initialize logging on pyspecdata.log -- do NOT log if run from within a notebook (it's fair to assume that you will run first before embedding)"
-    if level.lower() == 'info':
-        level=logging.INFO
-    elif level.lower() == 'debug':
-        level=logging.DEBUG
+def level_str_to_int(level):
+    if type(level) is str:
+        if level.lower() == 'info':
+            level=logging.INFO
+        elif level.lower() == 'debug':
+            level=logging.DEBUG
+        else:
+            raise ValueError("if you give me level as a string, give me 'info' or 'debug'")
+    return level
+if 'pyspecdata_figures' in os.environ and os.environ['pyspecdata_figures'] == 'latex':
+    print_log_info = False
+else:
+    print_log_info = True
+def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspecdata.%d.log', fileno=0):
+    r"""Initialize a decent logging setup to log to `~/pyspecdata.log` (and `~/pyspecdata.XX.log` if that's taken).
+
+    By default, everything above "debug" is logged to a
+    file, while everything above "info" is printed to
+    stdout.
+
+    Do NOT log if run from within a notebook (it's fair to
+    assume that you will run first before embedding)
+    """
     FORMAT = "--> %(filename)s(%(lineno)s):%(name)s %(funcName)20s %(asctime)20s\n%(levelname)s: %(message)s"
-    log_filename = os.path.join(os.path.expanduser('~'),filename)
+    level = level_str_to_int(level)
+    stdout_level = level_str_to_int(stdout_level)
+    min_level = min([level,stdout_level])
+    formatter = logging.Formatter(FORMAT)
+    log_filename = os.path.join(os.path.expanduser('~'),filename%fileno)
+    local_print = True
     if os.path.exists(log_filename):
         # manually remove, and then use append -- otherwise, it won't write to
         # file immediately
-        os.remove(log_filename)
-    logging.basicConfig(format=FORMAT,
-            filename=log_filename,
-            filemode='a',
-            level=level,
-            )
+        try:
+            os.remove(log_filename)
+        except:
+            if fileno == 0:
+                if print_log_info:
+                    print(f"{log_filename} appears to be locked or otherwise inaccessible: I'm going to explore other options for fileno")
+            if fileno > 20:
+                raise ValueError("I'm not going to increase fileno above 20 -- that's crazy time!")
+            local_print = False
+            return init_logging(level=level, filename=filename, fileno=fileno+1)
+    if print_log_info and local_print:
+        print("-"*10+"  "+f"logging output to {log_filename}"+"  "+"-"*10)
+    logger = logging.getLogger()
+    logger.setLevel(min_level) # even if I set the handler level, it won't
+    #                        print w/out this
+    file_handler = logging.FileHandler(log_filename, mode='a', encoding='utf-8')
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    # can set levels independently with:
+    stdout_handler.setLevel(stdout_level)
+    stdout_handler.setFormatter(formatter)
+    file_handler.setLevel(level)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(stdout_handler)
+    logger.addHandler(file_handler)
+    return logger
 
 def strm(*args):
     return ' '.join(map(str,args))
@@ -195,3 +218,21 @@ def redim_F_to_C(a):
 def redim_C_to_F(a):
     "see redim_F_to_C"
     return a.ravel(order='C').reshape(a.shape[::-1], order='F')
+def fname_makenice(fname):
+    fname = fname.replace(' ','_')
+    fname = fname.replace('-','m')
+    fname = fname.replace('+','p')
+    fname = fname.replace(',','_')
+    fname = fname.replace('\\','_')
+    fname = fname.replace('$','')
+    fname = fname.replace('(','')
+    fname = fname.replace(')','')
+    fname = fname.replace('"','')
+    fname = fname.replace('=','_')
+    fname = fname.replace('\n','_')
+    fname = fname.replace('*','_star_')
+    fname = fname.replace(':','')
+    fname = fname.replace('^','')
+    fname = fname.replace('}','')
+    fname = fname.replace('{','')
+    return fname

@@ -1,5 +1,6 @@
 from ..general_functions import *
-from pylab import * 
+if not inside_sphinx():
+    from pylab import r_
 
 def extend_for_shear(self,altered_axis,propto_axis,skew_amount,verbose = False):
     "this is propto_axis helper function for `.fourier.shear`"

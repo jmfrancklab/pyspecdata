@@ -1,72 +1,44 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>the fitdata class &mdash; pySpecData 0.9.5.1.7 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>the fitdata class &mdash; pySpecData 0.9.5.3.2 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="_static/gallery_custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="The Figure List" href="figlist.html" />
     <link rel="prev" title="Documentation of Notebook Helper Functions" href="latexscripts.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="index.html" class="icon icon-home"> pySpecData
-          
-
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                0.9.5.1.7
+                0.9.5.3.2
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -74,132 +46,56 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">the fitdata class</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#creating-new-types-of-fitdata-modules">creating new types of fitdata modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fitdata-methods-to-override">fitdata Methods to Override</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mandatory">Mandatory</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#init-self-args-kwargs">__init__(self,*args,**kwargs)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#fitfunc-raw-self-p-x-and-fitfunc-raw-symb-self-p-x">fitfunc_raw(self,p,x) and fitfunc_raw_symb(self,p,x)</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#non-mandatory">Non-mandatory</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#guess-self">guess(self)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#linfunc-self-x-y-xerr-none-yerr-none">linfunc(self,x,y,xerr = None,yerr = None)</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#methods-and-attributes-to-use">Methods and attributes to Use</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#available-before-fit">Available before fit</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#instance-function-string">instance.function_string</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#instance-fit">instance.fit(…)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#instance-guess">instance.guess()</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#instance-settoguess">instance.settoguess()</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#after-fitting">After fitting</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#instance-latex">instance.latex()</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#instance-output">instance.output(…)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#instance-eval">instance.eval(…)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#instance-covar">instance.covar(…)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#instance-latex-1">instance.latex()</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#instance-linear">instance.linear()</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#instance-errfunc">instance.errfunc(…)</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#internal">Internal</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#example">example</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#t-1"><span class="math notranslate nohighlight">\(T_1\)</span></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#test-of">test of</a></li>
-</ul>
-</li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#individual-functions">Individual Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
+</ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">pySpecData</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
       <li>the fitdata class</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/fitdata.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="the-fitdata-class">
+             
+  <section id="the-fitdata-class">
 <h1>the fitdata class<a class="headerlink" href="#the-fitdata-class" title="Permalink to this headline">¶</a></h1>
 <p>This is a child class of nddata used for fitting.</p>
-<div class="section" id="creating-new-types-of-fitdata-modules">
+<p>For old fitdata documentation
+(obsolete, for development reference) see <span class="xref std std-ref">fitdata_old</span></p>
+<section id="creating-new-types-of-fitdata-modules">
 <h2>creating new types of fitdata modules<a class="headerlink" href="#creating-new-types-of-fitdata-modules" title="Permalink to this headline">¶</a></h2>
 <p>There is a base class called “fitdata” that defines the basic routines
 necessary for fitting. Currently, the fitdata class only supports
@@ -220,457 +116,244 @@ general <span class="math notranslate nohighlight">\(T_1\)</span> recovery curve
 starting point for making new fit classes. Then, we can make instances
 of the new class, and use their methods (described in the subsequent
 section) next.</p>
-</div>
-<div class="section" id="fitdata-methods-to-override">
-<h2>fitdata Methods to Override<a class="headerlink" href="#fitdata-methods-to-override" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="mandatory">
-<h3>Mandatory<a class="headerlink" href="#mandatory" title="Permalink to this headline">¶</a></h3>
-<p>For easiest (thought not necessarily most efficient) usage, one should
-take advantage of the symbolic math package (sympy), which can
-automatically calculate the gradients based on the functional form.</p>
 <div class="admonition-todo admonition" id="id2">
 <p class="admonition-title">Todo</p>
-<p>actually use the gradients</p>
+<p>the option block :no-inherited-members: doesn’t work – not sure how to modify class.rst
+I put a template from stackexchange inside _templates
+– see <a class="reference external" href="https://stackoverflow.com/questions/28147432/how-to-customize-sphinx-ext-autosummary-rst-template">https://stackoverflow.com/questions/28147432/how-to-customize-sphinx-ext-autosummary-rst-template</a>
+on how to use it</p>
+<p>then, I need to link to or include generated/pyspecdata.core.fitdata.rst</p>
 </div>
-<p>The calculation of these gradients makes some tedious programming – such
-as generating an initial guess to be unnecessary. Therefore, one need
-override only the following functions:</p>
-<div class="section" id="init-self-args-kwargs">
-<h4>__init__(self,*args,**kwargs)<a class="headerlink" href="#init-self-args-kwargs" title="Permalink to this headline">¶</a></h4>
-<p>One begins by defining a routine to initialize the class with the
-correct variable names. This is done with a line of code like the
-following, where one copies the code exactly, changing only the values
-of <code class="docutils literal notranslate"><span class="pre">symbol_list</span></code> and the argument of <code class="docutils literal notranslate"><span class="pre">gen_symbolic</span></code>, which give –
-respectively – the names of the fit parameters (in the order used below)
-and the name (i.e. <span class="math notranslate nohighlight">\(y-\)</span>value) of the function.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;here, we give the particular latex representation and list of symbols for this particular child class&#39;&#39;&#39;</span>
-    <span class="n">fitdata</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">symbol_list</span> <span class="o">=</span> <span class="p">[</span><span class="sa">r</span><span class="s1">&#39;M(\infty)&#39;</span><span class="p">,</span><span class="sa">r</span><span class="s1">&#39;M(0)&#39;</span><span class="p">,</span><span class="sa">r</span><span class="s1">&#39;T_1&#39;</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">starting_guesses</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">double</span><span class="p">,[</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">r_</span><span class="p">[</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mf">0.03</span><span class="p">],</span><span class="n">r_</span><span class="p">[</span><span class="mf">0.001</span><span class="p">,</span><span class="mf">0.001</span><span class="p">,</span><span class="mf">0.001</span><span class="p">],</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mf">4.0</span><span class="p">]])</span><span class="c1"># a series of starting guesses used by the automatic guess routine</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">guess_lb</span> <span class="o">=</span> <span class="n">r_</span><span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span><span class="mf">1e-4</span><span class="p">]</span><span class="c1"># a lower bound applied when running pseudoinverses to generate the starting guesses</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">guess_ub</span> <span class="o">=</span> <span class="n">r_</span><span class="p">[</span><span class="o">+</span><span class="n">inf</span><span class="p">,</span><span class="o">+</span><span class="n">inf</span><span class="p">,</span><span class="mf">20.</span><span class="p">]</span><span class="c1"># an upper bound for the same</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">gen_symbolic</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;M(t)&#39;</span><span class="p">)</span>
-    <span class="k">return</span>
-</pre></div>
-</div>
-<p>Unfortunately, sympy imposes somewhat stringent restrictions on the
-parameter names; while the parameters can be named as words or with a
-word subscript, parameters named with multiple symbols or subscripts do
-not appear to work correctly. In addition, none of the later parameter
-names can contain one of the earlier parameter names as a substring.
-Therefore, if unexpected errors occur, we recommend switching to simple
-(i.e. single letter) parameter names.</p>
-<p>If one is <em>not</em> using symbolic math (not recommended), one define the
-attribute <code class="docutils literal notranslate"><span class="pre">self.function_string</span></code> and <code class="docutils literal notranslate"><span class="pre">self.function_name</span></code> by hand
-(these are strings that give the functional format and name of the y
-values, respectively).</p>
-<p>If you want to see an example that allows “multiplicity” – i.e. a
-biexponential, rather than an exponential – see the <code class="docutils literal notranslate"><span class="pre">t2curve</span></code> class in</p>
-</div>
-<div class="section" id="fitfunc-raw-self-p-x-and-fitfunc-raw-symb-self-p-x">
-<h4>fitfunc_raw(self,p,x) and fitfunc_raw_symb(self,p,x)<a class="headerlink" href="#fitfunc-raw-self-p-x-and-fitfunc-raw-symb-self-p-x" title="Permalink to this headline">¶</a></h4>
-<div class="admonition-todo admonition" id="id3">
-<p class="admonition-title">Todo</p>
-<p>This should be changed.
-We should not have to overload these methods.</p>
-<p>Rather, we should
-use a property, which we set to a sympy expression,
-and let the setter generate whatever we need:</p>
-<p>We should generate the symbol list by using this:
-<a class="reference external" href="https://stackoverflow.com/questions/30018977/how-can-i-get-a-list-of-the-symbols-in-a-sympy-expression">this</a>
-and we should determine the axis being fit by comparing the variables to dimlabels.</p>
-<p>If we actually need <cite>fitfunc_raw_symb</cite> in the form used before,
-we can generate <cite>fitfunc_raw_symb</cite> in a straightforward way.</p>
-<p>We can generate <cite>fitfunc_raw</cite> from <cite>lambdify</cite>.</p>
-<p>We can generate the gradient as part of teh setter.</p>
-</div>
-<p>These defines the functional form of the fit they are defined in terms
-of the parameter vector, <span class="math notranslate nohighlight">\(p\)</span> (this is a list of fit parameters
-that are named in the in the __init__() method), and the data vector
-<span class="math notranslate nohighlight">\(x\)</span> (which is the data along the fit dimension); fitfunc_raw uses
-nddata-compatible functions, which have obvious names</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="o">*</span>
-<span class="c1"># this code written for a module with the above declaration</span>
-<span class="k">def</span> <span class="nf">fitfunc_raw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;just the actual fit function to</span>
-<span class="sd">    return the array y as a function of p</span>
-<span class="sd">    and x&#39;&#39;&#39;</span>
-    <span class="k">return</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">/</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-</pre></div>
-</div>
-<p>one must also generate a <strong>mathematically identical</strong> function that
-rather uses functions from the sympy package. For instance, one must use
-an “exp()” function here than can operate on symbolic variables to
-generate an analytical expression.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sympy</span>
-<span class="c1"># this code written for a module with the above</span>
-<span class="c1">#declaration</span>
-<span class="k">def</span> <span class="nf">fitfunc_raw_symb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;if I&#39;m using a named function, I have</span>
-<span class="sd">    to define separately in terms of sympy</span>
-<span class="sd">    rather than numpy functions&#39;&#39;&#39;</span>
-    <span class="k">return</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">/</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-</pre></div>
-</div>
-<p>It is <strong>highly recommended</strong> that after writing a new class, one first
-checks that the two functions above are mathematically identical (by
-inspection), and then checks that the parameter indices here line up in
-the expected way with the parameter names given in the <code class="docutils literal notranslate"><span class="pre">__init__()</span></code>
-method with the <code class="docutils literal notranslate"><span class="pre">function_string</span></code> method, as used in the example below
-(<a class="reference external" href="#sec:writeup_software_fitfunc_thingstouse_example">1.2.7</a>)</p>
-</div>
-</div>
-<div class="section" id="non-mandatory">
-<h3>Non-mandatory<a class="headerlink" href="#non-mandatory" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="guess-self">
-<h4>guess(self)<a class="headerlink" href="#guess-self" title="Permalink to this headline">¶</a></h4>
-<p>If desired, this function makes an initial guess for the parameter
-vectors. If the fit does not use symbolic algebra, this step is
-mandatory. For instance, one can guess the parameters for the
-<span class="math notranslate nohighlight">\(T_1\)</span> example here based on the initial slope and values near the
-end of the recovery curve as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">guess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;provide the guess for our parameters, which is specific to the type of function&#39;&#39;&#39;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getaxis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_axis</span><span class="p">)</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-    <span class="n">testpoint</span> <span class="o">=</span> <span class="n">argmin</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">/</span><span class="mi">3</span><span class="p">))</span> <span class="c1"># don&#39;t just pull 1/3 of the index, because it can be unevenly spaced</span>
-    <span class="n">initial_slope</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">testpoint</span><span class="p">]</span><span class="o">-</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">testpoint</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">A</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">B</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">testpoint</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="n">testpoint</span><span class="p">]</span><span class="o">*</span><span class="n">initial_slope</span>
-    <span class="n">C</span> <span class="o">=</span> <span class="p">(</span><span class="n">A</span><span class="o">-</span><span class="n">B</span><span class="p">)</span><span class="o">/</span><span class="n">initial_slope</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">C</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">CustomError</span><span class="p">(</span><span class="n">maprep</span><span class="p">(</span><span class="s1">&#39;Negative T1!!! A-B=&#39;</span><span class="p">,</span><span class="n">A</span><span class="o">-</span><span class="n">B</span><span class="p">,</span><span class="s1">&#39;initial_slope=&#39;</span><span class="p">,</span><span class="n">initial_slope</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
-    <span class="n">oldguess</span> <span class="o">=</span> <span class="n">r_</span><span class="p">[</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="o">/</span><span class="mf">2.0</span><span class="p">]</span> <span class="c1"># guesses for the parameters, in the same order</span>
-    <span class="k">return</span> <span class="n">oldguess</span>
-</pre></div>
-</div>
-<p>However, we note that the symbolic algebra version does work quite
-consistently. It employs several steps with the “regularized
-pseudoinverse” routine (i.e. Tikhonov regularized solution via SVD, see
-<a class="reference external" href="#sec:pinvr">[sec:pinvr]</a>).</p>
-<div class="admonition-todo admonition" id="id4">
-<p class="admonition-title">Todo</p>
-<p>While this seems to work very well,
-it is unclear why, since Levenberg-Marquardt, the algorithm at the core
-of scipy’s nonlinear fitting procedure, consists of a series of steps,
-many of which are mathematically identical to a regularized
-pseudoinverse. Maybe this is only when we are using the numerical
-derivative, and it will now happen when we use the analytical
-derivative.</p>
-</div>
-</div>
-<div class="section" id="linfunc-self-x-y-xerr-none-yerr-none">
-<h4>linfunc(self,x,y,xerr = None,yerr = None)<a class="headerlink" href="#linfunc-self-x-y-xerr-none-yerr-none" title="Permalink to this headline">¶</a></h4>
-<p>In the event that we want to use a “linearized format” of the fit
-function, we can use “linfunc” to return this format. This routine
-(which is not designed to be used directly), takes the inputs <span class="math notranslate nohighlight">\(x\)</span>,
-which are the values (i.e. labels) of the fit axis and <span class="math notranslate nohighlight">\(y\)</span>, which
-are the data values at the points given by <span class="math notranslate nohighlight">\(x\)</span>.</p>
-<p>For instance, in the case of a <span class="math notranslate nohighlight">\(T_1\)</span> recovery curve, we may want
-to check the fit by plotting the value <span class="math notranslate nohighlight">\(\ln(M(t)-M(\infty))\)</span> as a
-function of <span class="math notranslate nohighlight">\(t\)</span>, which should be linear, since</p>
-<div class="math notranslate nohighlight">
-\[\begin{aligned}
-        \ln(M(t)-M(\infty)) = \ln(M(0)-M(\infty)) - \frac{t}{T_1}
-        .
-    \end{aligned}\]</div>
-<p>This is coded as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">linfunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">xerr</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span><span class="n">yerr</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;just the actual fit function to return the pair of arrays x&#39;,y&#39; that should be linear</span>
-<span class="sd">    it accepts as inputs x and y, and it uses the output from the fit, where necessary</span>
-<span class="sd">    also optionally propagates the error based on yerr and xerr, which can be passed in to it</span>
-<span class="sd">    For the case of T1, we want to return ln(y-M(\infty)) = ln(M(0)-M(\infty)) - t/T_1</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;M(\infty)&#39;</span><span class="p">)</span><span class="o">-</span><span class="n">y</span> <span class="c1"># the argument for log</span>
-    <span class="n">rety</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">yerr</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">reterr</span> <span class="o">=</span> <span class="n">yerr</span><span class="o">/</span><span class="nb">abs</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
-    <span class="n">mask</span> <span class="o">=</span> <span class="n">isfinite</span><span class="p">(</span><span class="n">rety</span><span class="p">)</span>
-    <span class="n">retx</span> <span class="o">=</span> <span class="n">x</span> <span class="c1"># for instance, in Emax, this is not just x</span>
-    <span class="n">xname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_axis</span> <span class="c1"># same as the fit axis</span>
-    <span class="n">yname</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$ln(M(\infty)-M(t))$&#39;</span>
-    <span class="c1">#{{{ this should be pretty standardized</span>
-    <span class="n">retval</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">rety</span><span class="p">,</span>
-            <span class="p">[</span><span class="n">size</span><span class="p">(</span><span class="n">rety</span><span class="p">),</span><span class="mi">1</span><span class="p">],</span>
-            <span class="p">[</span><span class="n">xname</span><span class="p">,</span><span class="n">yname</span><span class="p">])</span>
-    <span class="n">retval</span><span class="o">.</span><span class="n">labels</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_axis</span><span class="p">],</span>
-            <span class="p">[</span><span class="n">retx</span><span class="o">.</span><span class="n">copy</span><span class="p">()])</span>
-    <span class="k">if</span> <span class="n">yerr</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">retval</span><span class="o">.</span><span class="n">set_error</span><span class="p">(</span><span class="n">reterr</span><span class="p">)</span>
-    <span class="c1">#}}}</span>
-    <span class="k">return</span> <span class="n">retval</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="methods-and-attributes-to-use">
-<h3>Methods and attributes to Use<a class="headerlink" href="#methods-and-attributes-to-use" title="Permalink to this headline">¶</a></h3>
-<p>Because <code class="docutils literal notranslate"><span class="pre">fitdata</span></code> inherits from <code class="docutils literal notranslate"><span class="pre">nddata</span></code>, all of the standard nddata
-methods are available. In addition, the following methods are available.</p>
-</div>
-<div class="section" id="available-before-fit">
-<h3>Available before fit<a class="headerlink" href="#available-before-fit" title="Permalink to this headline">¶</a></h3>
-<p>These are the functions available before the <code class="docutils literal notranslate"><span class="pre">fit</span></code> routine is called.</p>
-<div class="section" id="instance-function-string">
-<h4>instance.function_string<a class="headerlink" href="#instance-function-string" title="Permalink to this headline">¶</a></h4>
-</div>
-<div class="section" id="instance-fit">
-<h4>instance.fit(…)<a class="headerlink" href="#instance-fit" title="Permalink to this headline">¶</a></h4>
-<div class="section" id="instance-fit-1">
-<span id="id5"></span><h5>instance.fit()<a class="headerlink" href="#instance-fit-1" title="Permalink to this headline">¶</a></h5>
-<p>For various reasons, it is best to separate the actual fitting step from
-initialization routine (i.e. function called when we create a new
-instance). This actually fits the data to the curve format specified by
-the particular class (i.e. <code class="docutils literal notranslate"><span class="pre">t1curve,</span> <span class="pre">ksp</span></code>, etc.).</p>
-</div>
-<div class="section" id="instance-fit-set-p1-1-0-p3-2-0">
-<h5>instance.fit(set = {‘p1’:1.0,‘p3’:2.0})<a class="headerlink" href="#instance-fit-set-p1-1-0-p3-2-0" title="Permalink to this headline">¶</a></h5>
-<p>This example will constrain parameter <span class="math notranslate nohighlight">\(p1\)</span> to 1.0 and parameter
-<span class="math notranslate nohighlight">\(p3\)</span> to 2.0, and fit the remaining parameters. One can replace
-“{‘p1’:1.0,‘p3’:2.0}” with any dictionary, where the keys must be the
-names of fit parameters for this class.</p>
-</div>
-<div class="section" id="instance-fit-set-p1-p3-set-to-1-0-2-0">
-<h5>instance.fit(set = [‘p1’,‘p3’], set_to = [1.0,2.0])<a class="headerlink" href="#instance-fit-set-p1-p3-set-to-1-0-2-0" title="Permalink to this headline">¶</a></h5>
-<p>This (older format) does the same thing as the previous example.</p>
-</div>
-</div>
-<div class="section" id="instance-guess">
-<h4>instance.guess()<a class="headerlink" href="#instance-guess" title="Permalink to this headline">¶</a></h4>
-<p>This evaluates the initial guess along the fit axis.</p>
-<div class="admonition-todo admonition" id="id6">
-<p class="admonition-title">Todo</p>
-<p>how is the fit axis determined, and is it possible to fit if the
-data has more than one dimension?</p>
-</div>
-</div>
-<div class="section" id="instance-settoguess">
-<h4>instance.settoguess()<a class="headerlink" href="#instance-settoguess" title="Permalink to this headline">¶</a></h4>
-<p>This function is for <strong>debugging purposes only</strong>. This works similar to
-<code class="docutils literal notranslate"><span class="pre">instance.fit(…)</span></code>, except that it sets the “fit result” to the initial
-guess, and does not take any fixed parameters.</p>
-</div>
-</div>
-<div class="section" id="after-fitting">
-<h3>After fitting<a class="headerlink" href="#after-fitting" title="Permalink to this headline">¶</a></h3>
-<p>These are the functions available after the <code class="docutils literal notranslate"><span class="pre">fit</span></code> routine is called;
-these are not supplied in order, but rather order of importance.</p>
-<div class="section" id="instance-latex">
-<h4>instance.latex()<a class="headerlink" href="#instance-latex" title="Permalink to this headline">¶</a></h4>
-</div>
-<div class="section" id="instance-output">
-<h4>instance.output(…)<a class="headerlink" href="#instance-output" title="Permalink to this headline">¶</a></h4>
-<div class="section" id="instance-output-parametername">
-<h5>instance.output(‘parametername’)<a class="headerlink" href="#instance-output-parametername" title="Permalink to this headline">¶</a></h5>
-<p>Return the value of the parameter named <span class="math notranslate nohighlight">\(parametername\)</span>.</p>
-</div>
-<div class="section" id="instance-output-1">
-<span id="id7"></span><h5>instance.output()<a class="headerlink" href="#instance-output-1" title="Permalink to this headline">¶</a></h5>
-<p>Output a numpy record array with all the symbols and their values. The
-same result is obtained by calling <code class="docutils literal notranslate"><span class="pre">instance.output(’parametername’)</span></code>
-and <code class="docutils literal notranslate"><span class="pre">myoutputs</span> <span class="pre">=</span> <span class="pre">instance.output();</span> <span class="pre">myoutputs[’parametername’]</span></code>.</p>
-</div>
-</div>
-<div class="section" id="instance-eval">
-<h4>instance.eval(…)<a class="headerlink" href="#instance-eval" title="Permalink to this headline">¶</a></h4>
-<p>We may wish to evaluate the fit curve, thus generating the smooth curve
-for purposes of either plotting or further data processing. Therefore,
-this function evaluates the curve fit, and returns an nddata object with
-the same plot color property (see above) as the original data. It can be
-called in several formats.</p>
-<div class="section" id="instance-eval-none">
-<h5>instance.eval(None)<a class="headerlink" href="#instance-eval-none" title="Permalink to this headline">¶</a></h5>
-<p>This just evaluates along the time axis for the data.</p>
-</div>
-<div class="section" id="instance-eval-100">
-<h5>instance.eval(100)<a class="headerlink" href="#instance-eval-100" title="Permalink to this headline">¶</a></h5>
-<p>Returns an nddata with 100 points; 100 can be replaced by any integer.</p>
-</div>
-<div class="section" id="instance-eval-r-0-0-2-100">
-<h5>instance.eval(r_[0:0.2:100])<a class="headerlink" href="#instance-eval-r-0-0-2-100" title="Permalink to this headline">¶</a></h5>
-<p>This will evaluate the function along the fit axis, from 0 to 100, with
-a datapoint every 0.2. Here, <code class="docutils literal notranslate"><span class="pre">r_[0:0.2:100]</span></code> can be replaced by any
-ndarray.</p>
-</div>
-<div class="section" id="instance-eval-set-listordict-set-to-list">
-<h5>instance.eval(…,set = listordict,set_to = list)<a class="headerlink" href="#instance-eval-set-listordict-set-to-list" title="Permalink to this headline">¶</a></h5>
-<p>Sometimes, one may want to see how the evaluated fit would change if a
-parameter were altered. For this reason, this function takes the same
-<code class="docutils literal notranslate"><span class="pre">set</span></code> and <code class="docutils literal notranslate"><span class="pre">set_to</span></code> keyword arguments as <code class="docutils literal notranslate"><span class="pre">fit</span></code>, except that the
-parameters are set on a one-time basis, just for the evaluation.</p>
-</div>
-</div>
-<div class="section" id="instance-covar">
-<h4>instance.covar(…)<a class="headerlink" href="#instance-covar" title="Permalink to this headline">¶</a></h4>
-<div class="section" id="instance-covar-p1">
-<h5>instance.covar(‘p1’)<a class="headerlink" href="#instance-covar-p1" title="Permalink to this headline">¶</a></h5>
-<p>Returns the covariance for the fit parameter <span class="math notranslate nohighlight">\(p1\)</span> (i.e. the
-expected <span class="math notranslate nohighlight">\(\sigma^2\)</span> for this parameter)</p>
-<div class="admonition-todo admonition" id="id8">
-<p class="admonition-title">Todo</p>
-<p>see the theory
-section about fitting errors.</p>
-</div>
-</div>
-<div class="section" id="instance-covar-p1-p2">
-<h5>instance.covar(‘p1’,‘p2’)<a class="headerlink" href="#instance-covar-p1-p2" title="Permalink to this headline">¶</a></h5>
-<p>Returns the covariance between the fit parameters <span class="math notranslate nohighlight">\(p1\)</span> and
-<span class="math notranslate nohighlight">\(p2\)</span>.</p>
-</div>
-<div class="section" id="instance-covarmat-p1-p2-pn">
-<h5>instance.covarmat(‘p1’,‘p2’,…,‘pN’)<a class="headerlink" href="#instance-covarmat-p1-p2-pn" title="Permalink to this headline">¶</a></h5>
-<p>Returns an ndarray containing the covariance matrix for parameters
-<span class="math notranslate nohighlight">\(p1\)</span>…<span class="math notranslate nohighlight">\(pN\)</span>.</p>
-</div>
-<div class="section" id="instance-covar-1">
-<span id="id9"></span><h5>instance.covar()<a class="headerlink" href="#instance-covar-1" title="Permalink to this headline">¶</a></h5>
-<p>Returns an ndarray record array with a labeled covariance matrix. This
-function is ideal for printing with <code class="docutils literal notranslate"><span class="pre">lrecordarray</span></code>; note that this
-includes a field of data called “labels,”</p>
-<div class="admonition-todo admonition" id="id10">
-<p class="admonition-title">Todo</p>
-<p>are the labels actually implemented?</p>
-</div>
-<p>which label the various rows.</p>
-</div>
-</div>
-<div class="section" id="instance-latex-1">
-<span id="id11"></span><h4>instance.latex()<a class="headerlink" href="#instance-latex-1" title="Permalink to this headline">¶</a></h4>
-<p>Shows the function string, with the results of the fit substituted in
-for the appropriate parameters.</p>
-</div>
-<div class="section" id="instance-linear">
-<h4>instance.linear()<a class="headerlink" href="#instance-linear" title="Permalink to this headline">¶</a></h4>
-</div>
-<div class="section" id="instance-errfunc">
-<h4>instance.errfunc(…)<a class="headerlink" href="#instance-errfunc" title="Permalink to this headline">¶</a></h4>
-</div>
-</div>
-<div class="section" id="internal">
-<h3>Internal<a class="headerlink" href="#internal" title="Permalink to this headline">¶</a></h3>
-<p>The following are functions used internally by routines in the fitdata
-class:</p>
-<ul class="simple">
-<li><p>instance._pn(…)</p></li>
-<li><p>instance._taxis(…)</p></li>
-<li><p>instance.add_inactive_p(…)</p></li>
-<li><p>instance.analytical_covariance(…)</p></li>
-<li><p>instance.errfunc(…)</p></li>
-<li><p>instance.fitfunc(p,x) all references to the fit function should be
-made with this method</p></li>
-<li><p>instance.gen_symbolic(…) used above</p></li>
-<li><p>instance.gen_indices(…)</p></li>
-<li><p>instance.parameter_derivatives(…)</p></li>
-<li><p>instance.parameter_gradient(…)</p></li>
-<li><p>instance.remove_inactive_p(…)</p></li>
-<li><p>instance.makereal() efficiently finds the real part of the data to be
-fit</p></li>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pyspecdata.core.</span></span><span class="sig-name descname"><span class="pre">fitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
+<p>The user creates a fitdata class object from an existing nddata
+class object, and on this fitdata object can define the
+<a class="reference internal" href="#pyspecdata.core.fitdata.functional_form" title="pyspecdata.core.fitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
+data of the original nddata.
+This functional form must be provided as a sympy expression, with
+one of its variables matching the name of the dimension that the
+user would like to fit to.
+The user provides fit coefficients using <code class="xref py py-func docutils literal notranslate"><span class="pre">fit_coeff()</span></code> and
+obtains output using <a class="reference internal" href="#pyspecdata.core.fitdata.fit" title="pyspecdata.core.fitdata.fit"><code class="xref py py-func docutils literal notranslate"><span class="pre">fit()</span></code></a> and <a class="reference internal" href="#pyspecdata.core.fitdata.eval" title="pyspecdata.core.fitdata.eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.</p>
+<p>If you haven’t done this before,
+create a jupyter notebook (not checked in, just for your own playing around) with:
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">import</span> <span class="pre">sympy</span> <span class="pre">as</span> <span class="pre">s</span>
+<span class="pre">s.init_printing()</span>
+<span class="pre">`</span></code>
+you can then use <cite>s.symbols(</cite> to create symbols/variables that
+allow you to build the mathematical expression for your fitting
+function</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.analytical_covariance">
+<span class="sig-name descname"><span class="pre">analytical_covariance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.analytical_covariance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Not up to date</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a full copy of this instance.</p>
+<p>Because methods typically change the data in place, you might want to
+use this frequently.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>boolean</em>) – <p>Default to True.
+False doesn’t copy the data – this is for internal use,
+<em>e.g.</em> when you want to copy all the metadata and perform a
+calculation on the data.</p>
+<p>The code for this also provides the definitive list of the
+nddata metadata.</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.covar">
+<span class="sig-name descname"><span class="pre">covar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.covar" title="Permalink to this definition">¶</a></dt>
+<dd><p>give the covariance for the different symbols</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.eval">
+<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">taxis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_what</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.eval" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate the fit function along the axis taxis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>taxis</strong> (<em>ndarray</em><em>, </em><em>int</em>) – <dl class="field-list simple">
+<dt class="field-odd">if ndarray</dt>
+<dd class="field-odd"><p>the new axis coordinates along which we want to calculate the fit.</p>
+</dd>
+<dt class="field-even">if int</dt>
+<dd class="field-even"><p>number of evenly spaced points along the t-axis along the fit</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>set_what</strong> (<em>'str'</em><em>, </em><em>optional</em>) – forcibly sets a specific symbol</p></li>
+<li><p><strong>set_to</strong> (<em>double</em><em>, </em><em>optional</em>) – the specific value (int) you are assigning the symbol you included</p></li>
 </ul>
-</div>
-<div class="section" id="example">
-<span id="sec-writeup-software-fitfunc-thingstouse-example"></span><h3>example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="t-1">
-<h4><span class="math notranslate nohighlight">\(T_1\)</span><a class="headerlink" href="#t-1" title="Permalink to this headline">¶</a></h4>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspecdata.nmr</span> <span class="k">import</span> <span class="o">*</span> <span class="c1"># includes the t1curve class defined here</span>
-<span class="n">obs</span><span class="p">(</span><span class="s1">&#39;Moved the guess function into the base class for 870&#39;</span><span class="p">)</span>
-<span class="n">fl</span> <span class="o">=</span> <span class="n">figlistl</span><span class="p">()</span> <span class="c1"># make a figure list designed for output in latex</span>
-<span class="n">t</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mf">0.</span><span class="p">:</span><span class="mf">2.</span><span class="p">:</span><span class="mi">10</span><span class="n">j</span><span class="p">])</span> <span class="c1"># a numpy array running from 0 to 1 second</span>
-<span class="nb">print</span> <span class="s1">&#39;t is&#39;</span><span class="p">,</span><span class="n">lsafen</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-<span class="n">d</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="mf">2.1</span><span class="o">*</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">t</span><span class="p">),[</span><span class="o">-</span><span class="mi">1</span><span class="p">],[</span><span class="s1">&#39;t&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> <span class="c1"># generate data for a ``fake&#39;&#39; t1 curve from 0 to 1 second</span>
-<span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s1">&#39;example $T_1$ curve&#39;</span><span class="p">)</span> <span class="c1"># give it a name</span>
-<span class="n">d</span> <span class="o">=</span> <span class="n">t1curve</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="c1"># now we initialize a new t1curve object from this example data</span>
-<span class="nb">print</span> <span class="s1">&#39;The functional format: &#39;</span><span class="p">,</span><span class="n">d</span><span class="o">.</span><span class="n">function_string</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span> <span class="c1">#verify that this has the correct functional format.</span>
-<span class="nb">print</span> <span class="s1">&#39;d is&#39;</span><span class="p">,</span><span class="n">lsafen</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-<span class="n">fl</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="s1">&#39;t1test&#39;</span><span class="p">)</span> <span class="c1"># move to the next (here a new) figure named t1test</span>
-<span class="n">plot</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">,</span><span class="n">label</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">())</span> <span class="c1"># really, it should automatically pull the label from the name</span>
-<span class="c1"># now go ahead and fit it</span>
-<span class="n">d</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-<span class="nb">print</span> <span class="s1">&#39;I fit d to&#39;</span><span class="p">,</span><span class="n">d</span><span class="o">.</span><span class="n">latex</span><span class="p">(),</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span>
-<span class="c1"># then, show the fit</span>
-<span class="n">plot</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span><span class="n">label</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">()</span><span class="o">+</span><span class="s1">&#39; fit&#39;</span><span class="p">)</span>
-<span class="n">autolegend</span><span class="p">()</span>
-<span class="n">fl</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="s1">&#39;t1test120131.pdf&#39;</span><span class="p">)</span> <span class="c1"># dump out all our figures.</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="test-of">
-<span id="sec-random-testofksp"></span><h4>test of<a class="headerlink" href="#test-of" title="Permalink to this headline">¶</a></h4>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspecdata.nmr</span> <span class="k">import</span> <span class="o">*</span> <span class="c1"># includes the t1curve class defined here</span>
-<span class="kn">from</span> <span class="nn">nmrfit</span> <span class="k">import</span> <span class="o">*</span> <span class="c1"># includes the t1curve class defined here</span>
-<span class="n">obs</span><span class="p">(</span><span class="s1">&#39;having problems with pinv, rerun!&#39;</span><span class="p">)</span>
-<span class="n">fl</span> <span class="o">=</span> <span class="n">figlistl</span><span class="p">()</span> <span class="c1"># make a figure list designed for output in latex</span>
-<span class="n">p</span> <span class="o">=</span> <span class="n">r_</span><span class="p">[</span><span class="mf">0.</span><span class="p">:</span><span class="mf">1.</span><span class="p">:</span><span class="mi">10</span><span class="n">j</span><span class="p">]</span> <span class="c1"># a numpy array running from 0 to 1 second</span>
-<span class="n">phalf</span> <span class="o">=</span> <span class="mf">0.1</span>
-<span class="nb">print</span> <span class="s1">&#39;p is&#39;</span><span class="p">,</span><span class="n">lsafen</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-<span class="n">d</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">p</span><span class="o">/</span><span class="p">(</span><span class="n">phalf</span><span class="o">+</span><span class="n">p</span><span class="p">),[</span><span class="o">-</span><span class="mi">1</span><span class="p">],[</span><span class="s1">&#39;p&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">labels</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">,</span><span class="n">p</span><span class="p">)</span> <span class="c1"># generate data for a ``fake&#39;&#39; asymptote from 0 to 1 second</span>
-<span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s1">&#39;example asymptote curve&#39;</span><span class="p">)</span> <span class="c1"># give it a name</span>
-<span class="n">d</span> <span class="o">=</span> <span class="n">ksp</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="c1"># now we initialize a new t1curve object from this example data</span>
-<span class="nb">print</span> <span class="s1">&#39;The functional format: &#39;</span><span class="p">,</span><span class="n">d</span><span class="o">.</span><span class="n">function_string</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span> <span class="c1">#verify that this has the correct functional format.</span>
-<span class="nb">print</span> <span class="s1">&#39;d is&#39;</span><span class="p">,</span><span class="n">lsafen</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-<span class="n">fl</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="s1">&#39;asymptotetest&#39;</span><span class="p">)</span> <span class="c1"># move to the next (here a new) figure named asymptotetest</span>
-<span class="n">plot</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">,</span><span class="n">label</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">())</span> <span class="c1"># really, it should automatically pull the label from the name</span>
-<span class="c1"># now go ahead and fit it</span>
-<span class="n">d</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span> <span class="c1"># more dramatic guessing</span>
-<span class="nb">print</span> <span class="s1">&#39;I fit d to&#39;</span><span class="p">,</span><span class="n">d</span><span class="o">.</span><span class="n">latex</span><span class="p">(),</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span>
-<span class="c1"># then, show the fit</span>
-<span class="n">plot</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span><span class="n">label</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">()</span><span class="o">+</span><span class="s1">&#39; fit&#39;</span><span class="p">)</span>
-<span class="n">autolegend</span><span class="p">()</span>
-<span class="n">fl</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="s1">&#39;asymptotetest120201.pdf&#39;</span><span class="p">)</span> <span class="c1"># dump out all our figures.</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set_what</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>actually run the fit</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.fitfunc">
+<span class="sig-name descname"><span class="pre">fitfunc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.fitfunc" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the function that does the actual fitting, and takes a properly ordered list of parameters as well as an np.ndarray for the x axis.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.function_string">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">function_string</span></span><a class="headerlink" href="#pyspecdata.core.fitdata.function_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property of the fitdata class which stores a string
+output of the functional form of the desired fit expression
+provided in func:<cite>functional_form</cite> in LaTeX format</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.functional_form">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">functional_form</span></span><a class="headerlink" href="#pyspecdata.core.fitdata.functional_form" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property of the fitdata class which is set by the user,
+takes as input a sympy expression of the desired fit
+expression</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.gen_indices">
+<span class="sig-name descname"><span class="pre">gen_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">this_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_to</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.gen_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>pass this this_set and this_set_to parameters, and it will return:
+indices,values,mask
+indices –&gt; gives the indices that are forced
+values –&gt; the values they are forced to
+mask –&gt; p[mask] are actually active in the fit</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.guess">
+<span class="sig-name descname"><span class="pre">guess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_pseudoinverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>old code that I am preserving here – provide the guess for our parameters; by default, based on pseudoinverse</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.latex">
+<span class="sig-name descname"><span class="pre">latex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.latex" title="Permalink to this definition">¶</a></dt>
+<dd><p>show the latex string for the function, with all the symbols substituted by their values</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.linear">
+<span class="sig-name descname"><span class="pre">linear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.linear" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the linear-form function, either smoothly along the fit function, or on the raw data, depending on whether or not the taxis argument is given
+can take optional arguments and pass them on to eval</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.output">
+<span class="sig-name descname"><span class="pre">output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.output" title="Permalink to this definition">¶</a></dt>
+<dd><p>give the fit value of a particular symbol, or a dictionary of all values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em><em> (</em><em>optional</em><em>)</em>) – name of the symbol.
+If no name is passed, then output returns a dictionary of the
+resulting values.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>retval</strong> – Either a dictionary of all the values, or the value itself.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict or float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.parameter_derivatives">
+<span class="sig-name descname"><span class="pre">parameter_derivatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xvals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.parameter_derivatives" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a matrix containing derivatives of the parameters, can set dict set, or keys set, vals set_to</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.residual">
+<span class="sig-name descname"><span class="pre">residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.residual" title="Permalink to this definition">¶</a></dt>
+<dd><p>just the residual (error) function</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.set_guess">
+<span class="sig-name descname"><span class="pre">set_guess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_of_values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.set_guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>sets parameters to guess/estimated value to compare fit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dict_of_values</strong> (<em>dict</em>) – dictionary of values set to parameters in fit equation.
+Allows for the setting of multiple variables depending on
+what’s defined in this dictionary. The keys of the dictionary
+must be sympy symbols</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>self</strong> – The modified nddata</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.core.fitdata.settoguess">
+<span class="sig-name descname"><span class="pre">settoguess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.settoguess" title="Permalink to this definition">¶</a></dt>
+<dd><p>a debugging function, to easily plot the initial guess</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="figlist.html" class="btn btn-neutral float-right" title="The Figure List" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="latexscripts.html" class="btn btn-neutral float-left" title="Documentation of Notebook Helper Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="latexscripts.html" class="btn btn-neutral float-left" title="Documentation of Notebook Helper Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="figlist.html" class="btn btn-neutral float-right" title="The Figure List" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2016, John M. Franck
-
-    </p>
+    <p>&#169; Copyright 2016, John M. Franck.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

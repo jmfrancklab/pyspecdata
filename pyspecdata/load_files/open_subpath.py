@@ -2,6 +2,9 @@ from ..core import *
 from ..datadir import dirformat
 import os.path
 from zipfile import ZipFile
+import codecs
+
+utf8reader = codecs.getreader('utf-8')
 
 def open_subpath(file_reference,*subpath,**kwargs):
     """
@@ -15,9 +18,12 @@ def open_subpath(file_reference,*subpath,**kwargs):
     test_only: bool
         just test if the path exists
     """
+    logger.debug(strm("trying to open subpath: ",*subpath,kwargs))
     mode,test_only = process_kwargs([('mode','r'),
-        ('test_only',False)],kwargs)
+        ('test_only',False),
+        ],kwargs)
     if isinstance(file_reference,str):
+        logger.debug("this appears to be a standard (non-zip) file")
         if test_only:
             full_path = os.path.join(file_reference, *subpath)
             if os.path.exists(full_path):
@@ -28,6 +34,7 @@ def open_subpath(file_reference,*subpath,**kwargs):
             fp = open(os.path.join(file_reference,*subpath),mode)
     else:
         if isinstance(file_reference, tuple):
+            logger.debug("this appears to be a zip file")
             if len(file_reference) == 3 and isinstance(file_reference[0], ZipFile):
                 zf = file_reference[0]
                 zip_basename = file_reference[1]
@@ -39,7 +46,10 @@ def open_subpath(file_reference,*subpath,**kwargs):
                     else:
                         return False
                 if subfile in zf.namelist():
-                    return zf.open(subfile)
+                    if 'b' in mode:
+                        return zf.open(subfile)
+                    else:
+                        return utf8reader(zf.open(subfile))
                 else:
                     raise ValueError(subfile+" not found in zip file")
             else:

@@ -1,5 +1,7 @@
 from ..general_functions import *
-from pylab import * 
+import numpy as np
+if not inside_sphinx():
+    from pylab import r_
 
 def register_axis(self,arg,nearest=None):
     r'''Interpolate the data so that the given axes are in register with a set of specified values. Does not change the spacing of the axis labels.
@@ -20,7 +22,7 @@ def register_axis(self,arg,nearest=None):
     '''
     for k,v in arg.items():
         x = self.getaxis(k)
-        idx = argmin(abs(x - v))
+        idx = np.argmin(abs(x - v))
         offset = (v # where I want to be
                 - x[idx]) # where I actually am
         offset += x[0] # since the following takes the startpoint
@@ -30,5 +32,5 @@ def register_axis(self,arg,nearest=None):
         elif self.get_ft_prop(k) is False:
             self.ft(k).ft_clear_startpoints(k,t=offset,f='current',nearest=False)
             self.set_ft_prop(k,'time_not_aliased').ift(k)
-        else: raise ValueError("???")
+        else: raise ValueError("No FT has been performed, so I don't know if you want it shifted or not, so I'm going to fail!")
         return self

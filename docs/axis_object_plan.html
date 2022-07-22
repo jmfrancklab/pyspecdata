@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plan for Axis Objects &mdash; pySpecData 0.9.5.3.2 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="_static/gallery_custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> pySpecData
+          </a>
+              <div class="version">
+                0.9.5.3.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#individual-functions">Individual Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pySpecData</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Plan for Axis Objects</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/axis_object_plan.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="plan-for-axis-objects">
+<h1>Plan for Axis Objects<a class="headerlink" href="#plan-for-axis-objects" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyspecdata.axis_class.nddata_axis">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pyspecdata.axis_class.</span></span><span class="sig-name descname"><span class="pre">nddata_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_class.nddata_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>The axis that gives the list of coordinates along a particular dimension.</p>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>There is no actual code here – this is a proposal for the new axis class</p>
+</div>
+<p>Internally uses the minimum number of variables to store information about the axis.</p>
+<p>Also includes information about the chosen location (alias) in infinitely periodic domains.
+This is analogous to the concept of using <cite>fftshift</cite> in matlab or traditional numpy,
+but more general.</p>
+<p>The <cite>nddata_axis</cite> has overloading routines to deal with the following operations like a standard numpy array
+(<cite>example_axis</cite> below is an instance of <cite>nddata_axis</cite>)</p>
+<dl>
+<dt>indexing</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">retval</span> <span class="o">=</span> <span class="n">example_axis</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>returns the second value along the axis</p>
+</dd>
+<dt>slicing</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">retval</span> <span class="o">=</span> <span class="n">example_axis</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>returns every fifth value from zero up to, but not including, 20</p>
+</dd>
+<dt>nddata-like slicing</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">retval</span> <span class="o">=</span> <span class="n">example_axis</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mf">5.5</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>returns everything where the values of the axis coordinates are between 0 and 5.5 (inclusive)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">retval</span> <span class="o">=</span> <span class="n">example_axis</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="kc">None</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>returns everything where the values of the axis coordinates are 0 (inclusive) or above</p>
+</dd>
+<dt>multiplication</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">retval</span> <span class="o">=</span> <span class="n">example_axis</span> <span class="o">*</span> <span class="n">b</span>
+</pre></div>
+</div>
+<p>or</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">retval</span> <span class="o">=</span> <span class="n">b</span> <span class="o">*</span> <span class="n">example_axis</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>if <code class="docutils literal notranslate"><span class="pre">b</span></code> is a numpy array</dt><dd><p>will return another numpy array</p>
+</dd>
+<dt>if <code class="docutils literal notranslate"><span class="pre">b</span></code> is an nddata</dt><dd><p>will return another nddata
+– note that this replaces the previous use of <code class="docutils literal notranslate"><span class="pre">fromaxis</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt>addition + subtraction + division</dt><dd><p>same rules as multiplication</p>
+</dd>
+<dt>argument of a function</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">retval</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="n">example_axis</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>(or <code class="docutils literal notranslate"><span class="pre">sin</span></code>, <code class="docutils literal notranslate"><span class="pre">cos</span></code>, <em>etc.</em>)
+returns another axis object.
+Note that this just amounts to setting the transf_func attribute, below.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">self.multiplier</span></code> is set to a complex number,
+specialized routines are always used
+(<em>e.g.</em> <code class="docutils literal notranslate"><span class="pre">exp</span></code> can be calculated more efficiently, <em>etc.</em>)</p>
+</dd>
+<dt>interpolation (<code class="docutils literal notranslate"><span class="pre">&#64;</span></code>)</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">retval</span> <span class="o">=</span> <span class="n">b</span> <span class="o">@</span> <span class="n">example_axis</span>
+</pre></div>
+</div>
+<p>Here, <code class="docutils literal notranslate"><span class="pre">b</span></code> must be an nddata,
+and <code class="docutils literal notranslate"><span class="pre">example_axis</span></code> must have a <code class="docutils literal notranslate"><span class="pre">name</span></code> matching one of the dimension labels of <code class="docutils literal notranslate"><span class="pre">b</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">retval</span></code> will consist of <code class="docutils literal notranslate"><span class="pre">b</span></code> interpolated onto the new axis.</p>
+<p>Note that while <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> is typically used for matrix multiplication,
+it is NOT here.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyspecdata.axis_class.nddata_axis.size">
+<span class="sig-name descname"><span class="pre">size</span></span><a class="headerlink" href="#pyspecdata.axis_class.nddata_axis.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>the length of the axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>long</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyspecdata.axis_class.nddata_axis.dx">
+<span class="sig-name descname"><span class="pre">dx</span></span><a class="headerlink" href="#pyspecdata.axis_class.nddata_axis.dx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Step size multiplying the base array.
+For a non-uniform array,
+if possible,
+divide by the smallest step size,
+then multiply by a number that will
+<a class="reference external" href="https://stackoverflow.com/questions/44587875/find-common-factor-to-convert-list-of-floats-to-list-of-integers">convert the resulting floats to integers</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyspecdata.axis_class.nddata_axis.start">
+<span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#pyspecdata.axis_class.nddata_axis.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>determines the starting value of the axis:
+&gt;&gt;&gt; self.start+self.dx*r_[0:self.size]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyspecdata.axis_class.nddata_axis.names">
+<span class="sig-name descname"><span class="pre">names</span></span><a class="headerlink" href="#pyspecdata.axis_class.nddata_axis.names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Names for this dimension that this axis is used to label, in order of preference.
+The first name is the “preferred” name,
+and all subsequent names are “aliases”.
+For example,
+you might want to have a nicely named
+<span class="math notranslate nohighlight">\(B_0\)</span> (stored as <code class="docutils literal notranslate"><span class="pre">$B_0$</span></code> or a sympy variable)
+to describe your axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of strings or sympy variables</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyspecdata.axis_class.nddata_axis.domains">
+<span class="sig-name descname"><span class="pre">domains</span></span><a class="headerlink" href="#pyspecdata.axis_class.nddata_axis.domains" title="Permalink to this definition">¶</a></dt>
+<dd><p>The keys correspond to a list of allowed transformations.
+Currently these are (future plans for <code class="docutils literal notranslate"><span class="pre">(I)LT</span></code>, <code class="docutils literal notranslate"><span class="pre">(I)NUS</span></code>, <code class="docutils literal notranslate"><span class="pre">(I)Wavelet</span></code>)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'FT'</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'IFT'</span></code></p></li>
+</ul>
+<p>These are the names of transformations that have previously been applied
+(or can be applied, though the list doesn’t need to be comprehensive in that case)
+to the <code class="docutils literal notranslate"><span class="pre">nddata</span></code> object that the <code class="docutils literal notranslate"><span class="pre">nddata_axis</span></code> is being used to label.
+<code class="docutils literal notranslate"><span class="pre">I...</span></code> must <strong>always</strong> stand for “inverse”; on application of a transformation,
+the new <code class="docutils literal notranslate"><span class="pre">axis</span></code> object that is generated must have a <cite>domains</cite> attribute
+with the opposite (<code class="docutils literal notranslate"><span class="pre">I</span></code> removed or added) transformation listed.</p>
+<p>The values are <cite>axis</cite> objects that label the data in the conjugate domains (after the transformation has been applied).</p>
+<p>For example,
+on application of the <cite>nddata</cite> <code class="xref py py-func docutils literal notranslate"><span class="pre">nddata.ft()</span></code> method,
+the data will be labeled with an axis that has a <cite>domains</cite> attribute with a key containing <cite>IFT</cite>.
+The value of that key will point to the <cite>axis</cite> object of the data <em>before</em> transformation,
+and will be used in the even of a call to <code class="xref py py-func docutils literal notranslate"><span class="pre">nddata.ift()</span></code>.</p>
+<p>This makes the <cite>get_ft_props</cite> and <cite>set_ft_props</cite> of older versions of <cite>nddata</cite> obsolete.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>OrderedDict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyspecdata.axis_class.nddata_axis.multiplier">
+<span class="sig-name descname"><span class="pre">multiplier</span></span><a class="headerlink" href="#pyspecdata.axis_class.nddata_axis.multiplier" title="Permalink to this definition">¶</a></dt>
+<dd><p>this is <em>only</em> used in the event that
+the axis is subjected to arithmetic involving a complex number
+it changes the way that the axis acts as an argument to various functions (especially <cite>exp</cite>)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>complex, default None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyspecdata.axis_class.nddata_axis.transf_func">
+<span class="sig-name descname"><span class="pre">transf_func</span></span><a class="headerlink" href="#pyspecdata.axis_class.nddata_axis.transf_func" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>this and following attributes pertain only to non-uniform (non-linear) axes</strong>
+a function that is applied to a uniformly spaced axis to achieve non-uniform spacing
+(for example, an axis with <cite>log10</cite> spacing).
+If this is set, the axis is constructed as</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">transf_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="o">*</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.function" title="pyspecdata.function">function</a> or (default) None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyspecdata.axis_class.nddata_axis.uneven_steps">
+<span class="sig-name descname"><span class="pre">uneven_steps</span></span><a class="headerlink" href="#pyspecdata.axis_class.nddata_axis.uneven_steps" title="Permalink to this definition">¶</a></dt>
+<dd><p>if this attribute exists, it must be an array of length <cite>self.size</cite>
+and determines the axis values as follows:
+<cite>self.offset+self.dx*cumsum(self.uneven_steps)</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int or float (default non-existent)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyspecdata.axis_class.nddata_axis.uneven_step_coords">
+<span class="sig-name descname"><span class="pre">uneven_step_coords</span></span><a class="headerlink" href="#pyspecdata.axis_class.nddata_axis.uneven_step_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>if <cite>self.uneven_steps</cite> exists, this stores the value of <cite>cumsum(self.uneven_steps)</cite></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyspecdata.axis_class.nddata_axis.references">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">references</span></span><a class="headerlink" href="#pyspecdata.axis_class.nddata_axis.references" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns OrderedDict of all names and aliases such that keys all point to the current instance (<cite>self</cite>)</p>
+<p>the idea is that this should be placed in a <cite>ChainMap</cite> object to be used by the <a class="reference internal" href="#pyspecdata.axis_class.axis_collection" title="pyspecdata.axis_class.axis_collection"><code class="xref py py-class docutils literal notranslate"><span class="pre">axis_collection</span></code></a> class that contains the axis.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.axis_class.nddata_axis.to_array">
+<span class="sig-name descname"><span class="pre">to_array</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_class.nddata_axis.to_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the axis as a standard numpy array</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyspecdata.axis_class.axis_collection">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pyspecdata.axis_class.</span></span><span class="sig-name descname"><span class="pre">axis_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimlabels</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_class.axis_collection" title="Permalink to this definition">¶</a></dt>
+<dd><p>A collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">axis</span></code> objects.</p>
+<p>Designed so that an instance of <cite>axis_collection</cite> is an attribute of <cite>nddata</cite> called <cite>axes</cite>,
+which behaves like a dictionary whose keys are the <cite>dimlabels</cite> of the <cite>nddata</cite> object,
+and whose values are <code class="xref py py-class docutils literal notranslate"><span class="pre">axis</span></code> objects.</p>
+<p>Used to make sure that no axis names or aliases are duplicated.</p>
+<p>You can add axes to the collection in any of the following ways, where <cite>example_nddata</cite> is an nddata instance.
+(Remember that all <cite>nddata</cite> instances have an attribute <cite>axes</cite> of type <cite>axis_collection</cite>).</p>
+<dl>
+<dt>building a new axis</dt><dd><p><cite>example_nddata.axes[‘t2’] = ax_[0:1.2:100j]</cite>
+or
+<cite>example_nddata.axes[‘t2’] = ax_[0:1.2:0.01]</cite>
+(uses the same notation as numpy <cite>r_[…]</cite>)</p>
+<p>this takes the place of <cite>labels</cite> or <cite>setaxis</cite> in old versions of pyspecdata.</p>
+</dd>
+<dt>associating an existing axis</dt><dd><p><cite>example_nddata.axes += existing_axis</cite> <cite>existing_axis</cite> <strong>must</strong> have a
+name or alias that matches one of <cite>example_nddata.dimlabels</cite>.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyspecdata.axis_class.axis_collection.dimlabels">
+<span class="sig-name descname"><span class="pre">dimlabels</span></span><a class="headerlink" href="#pyspecdata.axis_class.axis_collection.dimlabels" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the same <cite>dimlabels</cite> attribute as the instance of the parent class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyspecdata.axis_class.axis_collection.names_used">
+<span class="sig-name descname"><span class="pre">names_used</span></span><a class="headerlink" href="#pyspecdata.axis_class.axis_collection.names_used" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores a list of all the names and aliases used by the <cite>axis</cite> objects
+that are contained in the collection,
+as well as the axes for any conjugate domains.
+since these need to be unique.</p>
+<p>This is simply
+<cite>ChainMap(ax1.references,ax2.references,…,etc.)</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>ChainMap</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.axis_class.axis_collection.rename">
+<span class="sig-name descname"><span class="pre">rename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oldname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_class.axis_collection.rename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rename an axis. If <cite>oldname</cite> is the preferred name of the axis,
+also go into dimlabels, and change the name
+(since dimlabels is the same list used by the <cite>nddata</cite> that
+contains the collection, it will update the dimlabel there as
+well)</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2016, John M. Franck.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
