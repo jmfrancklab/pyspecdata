@@ -22,7 +22,7 @@ with figlist_var() as fl:
         21*(1 - 2*s.exp(-vd / 0.2))*s.exp(+1j*2*s.pi*100*(t2) - abs(t2)*50*s.pi),
         OrderedDict([
             ("vd" , nddata(r_[0:1:40j], "vd")),
-            ("ph1" , nddata(r_[0, 2] / 4.0, "ph1")),
+            ("ph1" , nddata(r_[0,2] / 4.0, "ph1")),
             ("ph2" , nddata(r_[0:4] / 4.0, "ph2")),
             ("t2" , nddata(r_[0:0.2:256j]-echo_time, "t2"))]),
             {"ph1": 0, "ph2": 1},
@@ -38,12 +38,14 @@ with figlist_var() as fl:
             total_spacing = 0.15,
             label_spacing_multiplier = 55,
             LHS_pad = 0.05,
+            max_coh_jump = {'ph1':1,'ph2':2}
             )
     data.ift(['ph1','ph2'])
     DCCT(data,fl.next('phase cycling domain'),
             total_spacing = 0.15,
             label_spacing_multiplier = 55,
             LHS_pad = 0.05,
+            max_coh_jump = {'ph1':1,'ph2':2}
             )
 
 

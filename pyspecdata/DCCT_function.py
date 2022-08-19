@@ -8,31 +8,7 @@ from pyspecdata.plot_funcs.image import imagehsv
 import logging
 
 
-@FuncFormatter
-def ph2(x, pos):
-    ordered_labels = {}
-    n_ph = 2
-    this_max_coh_jump = 1
-    all_possibilities = empty((int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph)
-    all_possibilities[: this_max_coh_jump + 1] = r_[0 : this_max_coh_jump + 1]
-    all_possibilities[-this_max_coh_jump:] = r_[-this_max_coh_jump:0]
-    all_possibilities = all_possibilities.reshape((-1, n_ph))
-    labels_in_order = []
-    for j in range(n_ph):
-        temp = all_possibilities[:, j]
-        if j == 0:
-            temp = ", ".join(["%d" % j for j in temp[isfinite(temp)]])
-        else:
-            temp = ", ".join(["%+d" % j for j in temp[isfinite(temp)]])
-        if len(temp) == 0:
-            temp = "X"
-        labels_in_order.append(temp)
-    ordered_labels["ph2"] = labels_in_order
-    if x == 0:
-        temp = ("%s") % ordered_labels["ph2"][0]
-    return temp
-
-
+#@FuncFormatter
 diagnostic = False
 
 
@@ -127,11 +103,10 @@ def DCCT(
         labels_in_order = []
         for j in range(n_ph):
             temp = all_possibilities[:, j]
-            temp.sort()
             if j == 0:
-                temp = ", ".join(["%d" % j for j in temp[isfinite(temp)]])
+                temp = ", ".join(["%d" % j for j in sort(temp[isfinite(temp)])])
             else:
-                temp = ", ".join(["%+d" % j for j in temp[isfinite(temp)]])
+                temp = ", ".join(["%+d" % j for j in sort(temp[isfinite(temp)])])
             if len(temp) == 0:
                 temp = "X"
             labels_in_order.append(temp)
