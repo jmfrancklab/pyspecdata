@@ -302,7 +302,7 @@ def DCCT(
                 x_textdisp = [
                     j.get_window_extent().bounds for j in ax1.get_yticklabels()
                 ][0][0]
-            x_textdisp -= 1.7 * text_height - arrow_width_px
+            x_textdisp -= 10.7 * text_height - arrow_width_px
             y_textdisp = -25.0
             if diagnostic:
                 a = Circle(
