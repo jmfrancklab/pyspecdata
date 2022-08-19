@@ -13,11 +13,6 @@ rcParams["image.aspect"] = "auto"  # needed for sphinx gallery
 init_logging(level="debug")
 
 with figlist_var() as fl:
-    # {{{ generate the fake data
-    # this generates fake clean_data w/ a T1 of 0.2s
-    # amplitude of 21, just to pick a random amplitude
-    # offset of 300 Hz, FWHM 10 Hz
-
     # provide the symbols that we use for the fake data:
     t2, td, vd, ph1, ph2 = s.symbols("t2 td vd ph1 ph2")
     echo_time = 5e-3
@@ -44,27 +39,21 @@ with figlist_var() as fl:
                 ),
             {"ph1": 0, "ph2": 1},
             )
+    # reorder into a format more suitable for plotting
     data.reorder(["ph1", "ph2", "vd", "t2"])
-    DCCT(
-        data,
-        fl.next("DCCT - time domain"),
-        total_spacing=0.15,
-        label_spacing_multiplier=55,
-        LHS_pad=0.05,
-    )
-    data.ft("t2")
-    DCCT(
-        data,
-        fl.next("DCCT - frequency domain"),
-        total_spacing=0.15,
-        label_spacing_multiplier=55,
-        LHS_pad=0.05,
-    )
+    # fake_data gives us data already in the coherence domain, so:
     data.ift(["ph1", "ph2"])
-    DCCT(
-        data,
-        fl.next("phase cycling domain"),
+    # keyword arguments to use throughout
+    dcct_kwargs = dict(
         total_spacing=0.15,
         label_spacing_multiplier=55,
         LHS_pad=0.05,
-    )
+        )
+    fig = fl.next("raw data")
+    DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
+    fig = fl.next("DCCT -- time domain")
+    data.ft(["ph1", "ph2"])
+    DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
+    fig = fl.next("DCCT -- frequency domain")
+    data.ft("t2")
+    DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
