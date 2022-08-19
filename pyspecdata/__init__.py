@@ -4,7 +4,7 @@ from .load_files import *
 from .figlist import *
 from .nnls import *
 from .lmfitdata import lmfitdata
-
+from .DCCT_function import DCCT
 #import numpy
 
 # so essentially, __all__ is the namespace that is passed with an import *
