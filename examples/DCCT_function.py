@@ -31,9 +31,20 @@ with figlist_var() as fl:
     DCCT(data,fl.next('DCCT - time domain'),
             total_spacing = 0.15,
             label_spacing_multiplier = 55,
-            #allow_for_text_default = 7,
-            #allow_for_ticks_default = 55,
-            #text_height=10,
             LHS_pad = 0.05,
             )
+    data.ft('t2')
+    DCCT(data,fl.next('DCCT - frequency domain'),
+            total_spacing = 0.15,
+            label_spacing_multiplier = 55,
+            LHS_pad = 0.05,
+            )
+    data.ift(['ph1','ph2'])
+    DCCT(data,fl.next('phase cycling domain'),
+            total_spacing = 0.15,
+            label_spacing_multiplier = 55,
+            LHS_pad = 0.05,
+            )
+
+
 

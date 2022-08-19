@@ -127,6 +127,7 @@ def DCCT(
         labels_in_order = []
         for j in range(n_ph):
             temp = all_possibilities[:, j]
+            temp.sort()
             if j == 0:
                 temp = ", ".join(["%d" % j for j in temp[isfinite(temp)]])
             else:
