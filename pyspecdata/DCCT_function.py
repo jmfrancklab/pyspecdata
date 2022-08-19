@@ -8,31 +8,6 @@ from pyspecdata.plot_funcs.image import imagehsv
 import logging
 
 
-@FuncFormatter
-def ph2(x, pos):
-    ordered_labels = {}
-    n_ph = 2
-    this_max_coh_jump = 1
-    all_possibilities = empty((int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph)
-    all_possibilities[: this_max_coh_jump + 1] = r_[0 : this_max_coh_jump + 1]
-    all_possibilities[-this_max_coh_jump:] = r_[-this_max_coh_jump:0]
-    all_possibilities = all_possibilities.reshape((-1, n_ph))
-    labels_in_order = []
-    for j in range(n_ph):
-        temp = all_possibilities[:, j]
-        if j == 0:
-            temp = ", ".join(["%d" % j for j in temp[isfinite(temp)]])
-        else:
-            temp = ", ".join(["%+d" % j for j in temp[isfinite(temp)]])
-        if len(temp) == 0:
-            temp = "X"
-        labels_in_order.append(temp)
-    ordered_labels["ph2"] = labels_in_order
-    if x == 0:
-        temp = ("%s") % ordered_labels["ph2"][0]
-    return temp
-
-
 diagnostic = False
 
 
@@ -56,7 +31,7 @@ def DCCT(
     pass_frq_slice=False,
     just_2D=False,
     scaling_factor=1,
-    max_coh_jump={"ph1": 2, "ph2": 1},
+    max_coh_jump={"ph1": 1, "ph2": 2},
     direct="t2",
     plot_title="DCCT",
     **kwargs
@@ -119,23 +94,35 @@ def DCCT(
     for this_dim in [j for j in my_data.dimlabels if j.startswith("ph")]:
         n_ph = ndshape(my_data)[this_dim]
         this_max_coh_jump = max_coh_jump[this_dim]
-        all_possibilities = empty((int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph)
+        all_possibilities = empty(
+            (int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph
+        )  # on reviewing, I *believe* this this is designed to fit the array from -this_max_coh_jump to +this_max_coh_jump, but it needs to round up to the closest multiple of n_ph
         all_possibilities[:] = nan
-        all_possibilities[: this_max_coh_jump + 1] = r_[0 : this_max_coh_jump + 1]
-        all_possibilities[-this_max_coh_jump:] = r_[-this_max_coh_jump:0]
-        all_possibilities = all_possibilities.reshape((-1, n_ph))
+        all_possibilities[: this_max_coh_jump + 1] = r_[
+            0 : this_max_coh_jump + 1
+        ]  # label the positive jumps in order
+        all_possibilities[-this_max_coh_jump:] = r_[
+            -this_max_coh_jump:0
+        ]  # and alias the negative ones into the correct locations
+        all_possibilities = all_possibilities.reshape(
+            (-1, n_ph)
+        )  # now, reshape according to the number of dimensions we actually have for descrimination
         labels_in_order = []
         for j in range(n_ph):
-            temp = all_possibilities[:, j]
-            temp.sort()
+            temp = all_possibilities[
+                :, j
+            ]  # grab the columns, which are the labels for all aliases that belong at this index
             if j == 0:
-                temp = ", ".join(["%d" % j for j in temp[isfinite(temp)]])
+                temp = ", ".join(["%d" % j for j in sort(temp[isfinite(temp)])])
             else:
-                temp = ", ".join(["%+d" % j for j in temp[isfinite(temp)]])
+                temp = ", ".join(["%+d" % j for j in sort(temp[isfinite(temp)])])
             if len(temp) == 0:
                 temp = "X"
             labels_in_order.append(temp)
+        # }}}
         ordered_labels[this_dim] = labels_in_order
+        # ordered_labels now contains a list of the labels for each index
+        # of the dimension, in order
     # }}}
     real_data = False
     if cmap is not None:
@@ -528,7 +515,7 @@ def DCCT(
         check_for_label_num=False,
         allow_for_text=-50,
     )
-    #plt.title(plot_title)
+    # plt.title(plot_title)
     if just_2D:
         return LHS_pad + LHS_labels, axes_bottom[0], width, axes_bottom[-1] - top_pad
     else:
@@ -539,4 +526,3 @@ def DCCT(
             width,
             top_pad - RHS_pad,
         )
-
