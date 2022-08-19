@@ -1,3 +1,7 @@
+"""Domain Colored Coherence Transfer (DCCT) function allows us to 
+visualize the complex-valued data, as well as the formalization of the 
+coherence transfer dimensions using domain coloring plotting. 
+"""
 from pylab import *
 from pyspecdata import *
 import matplotlib.lines as lines
@@ -5,9 +9,6 @@ from matplotlib.patches import FancyArrow, FancyArrowPatch, Circle
 from matplotlib.lines import Line2D
 from matplotlib.transforms import ScaledTranslation, IdentityTransform
 from pyspecdata.plot_funcs.image import imagehsv
-import logging
-
-diagnostic = False
 
 def DCCT(
     this_nddata,
@@ -25,6 +26,7 @@ def DCCT(
     LHS_pad=0.01,
     RHS_pad=0.05,
     shareaxis=False,
+    diagnostic = False,
     cmap=None,
     pass_frq_slice=False,
     just_2D=False,
@@ -90,24 +92,6 @@ def DCCT(
     ordered_labels = {}
     # {{{ Generate alias labels - goes to scientific fn
     for this_dim in [j for j in my_data.dimlabels if j.startswith("ph")]:
-        n_ph = ndshape(my_data)[this_dim]
-        this_max_coh_jump = max_coh_jump[this_dim]
-        all_possibilities = empty((int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph)
-        all_possibilities[:] = nan
-        all_possibilities[: this_max_coh_jump + 1] = r_[0 : this_max_coh_jump + 1]
-        all_possibilities[-this_max_coh_jump:] = r_[-this_max_coh_jump:0]
-        all_possibilities = all_possibilities.reshape((-1, n_ph))
-        labels_in_order = []
-        for j in range(n_ph):
-            temp = all_possibilities[:, j]
-            if j == 0:
-                temp = ", ".join(["%d" % j for j in sort(temp[isfinite(temp)])])
-            else:
-                temp = ", ".join(["%+d" % j for j in sort(temp[isfinite(temp)])])
-            if len(temp) == 0:
-                temp = "X"
-            labels_in_order.append(temp)
-        ordered_labels[this_dim] = labels_in_order
         if my_data.get_ft_prop(this_dim):
             n_ph = ndshape(my_data)[this_dim]
             this_max_coh_jump = max_coh_jump[this_dim]

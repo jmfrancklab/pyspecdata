@@ -3,13 +3,26 @@ from pyspecdata import *
 from pyspecdata import DCCT
 from pyspecProcScripts import fake_data
 from numpy.random import normal, seed
+"""Using the DCCT function
+=======================
+
+Visualize a simulated inversion recovery dataset
+utilizing the benefits of the DCCT plotting style.
+
+We can image data in both the phase cycling domain,
+as well as the coherence transfer domain. Artifacts can
+clearly be discerned from signal in the coherence transfer
+domain as well as visualizing the inversion of phase 
+using the domain colored plotting style.
+"""
+
 from numpy.linalg import norm
 import sympy as s
 from collections import OrderedDict
 
 seed(2021)
 rcParams["image.aspect"] = "auto"  # needed for sphinx gallery
-# sphinx_gallery_thumbnail_number = 4
+# sphinx_gallery_thumbnail_number = 2
 init_logging(level="debug")
 
 with figlist_var() as fl:
@@ -38,24 +51,6 @@ with figlist_var() as fl:
                     ]
                 ),
             {"ph1": 0, "ph2": 1},
-            scale=20.)
-    data.reorder(['ph1','ph2','vd','t2'])
-    DCCT(data,fl.next('DCCT - time domain'),
-            total_spacing = 0.15,
-            label_spacing_multiplier = 55,
-            LHS_pad = 0.05,
-            )
-    data.ft('t2')
-    DCCT(data,fl.next('DCCT - frequency domain'),
-            total_spacing = 0.15,
-            label_spacing_multiplier = 55,
-            LHS_pad = 0.05,
-            )
-    data.ift(['ph1','ph2'])
-    DCCT(data,fl.next('phase cycling domain'),
-            total_spacing = 0.15,
-            label_spacing_multiplier = 55,
-            LHS_pad = 0.05,
             )
     # reorder into a format more suitable for plotting
     data.reorder(["ph1", "ph2", "vd", "t2"])
