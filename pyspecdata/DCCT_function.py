@@ -7,10 +7,7 @@ from matplotlib.transforms import ScaledTranslation, IdentityTransform
 from pyspecdata.plot_funcs.image import imagehsv
 import logging
 
-
-#@FuncFormatter
 diagnostic = False
-
 
 def DCCT(
     this_nddata,
@@ -32,7 +29,7 @@ def DCCT(
     pass_frq_slice=False,
     just_2D=False,
     scaling_factor=1,
-    max_coh_jump={"ph1": 2, "ph2": 1},
+    max_coh_jump={"ph1": 1, "ph2": 2},
     direct="t2",
     plot_title="DCCT",
     **kwargs
@@ -111,6 +108,41 @@ def DCCT(
                 temp = "X"
             labels_in_order.append(temp)
         ordered_labels[this_dim] = labels_in_order
+        if my_data.get_ft_prop(this_dim):
+            n_ph = ndshape(my_data)[this_dim]
+            this_max_coh_jump = max_coh_jump[this_dim]
+            all_possibilities = empty(
+                (int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph
+            )  # on reviewing, I *believe* this this is designed to fit the array from -this_max_coh_jump to +this_max_coh_jump, but it needs to round up to the closest multiple of n_ph
+            all_possibilities[:] = nan
+            all_possibilities[: this_max_coh_jump + 1] = r_[
+                0 : this_max_coh_jump + 1
+            ]  # label the positive jumps in order
+            all_possibilities[-this_max_coh_jump:] = r_[
+                -this_max_coh_jump:0
+            ]  # and alias the negative ones into the correct locations
+            all_possibilities = all_possibilities.reshape(
+                (-1, n_ph)
+            )  # now, reshape according to the number of dimensions we actually have for discriminating
+            labels_in_order = []
+            for j in range(n_ph):
+                temp = all_possibilities[
+                    :, j
+                ]  # grab the columns, which are the labels for all aliases that belong at this index
+                if j == 0:
+                    temp = ", ".join(["%d" % j for j in sort(temp[isfinite(temp)])])
+                else:
+                    temp = ", ".join(["%+d" % j for j in sort(temp[isfinite(temp)])])
+                if len(temp) == 0:
+                    temp = "X"
+                labels_in_order.append(temp)
+            # }}}
+            ordered_labels[this_dim] = labels_in_order
+        else:
+            ordered_labels[this_dim] = ['0' if j == 0.0 else f'{j}'
+                    for j in my_data.getaxis(this_dim)]
+        # ordered_labels now contains a list of the labels for each index
+        # of the dimension, in order
     # }}}
     real_data = False
     if cmap is not None:
@@ -466,24 +498,20 @@ def DCCT(
             logging.debug(strm("For", thisdim, "element", j, idx_slice.data.ravel()))
             first_axes = ax_list[idx_slice.data.ravel()[0]]
             last_axes = ax_list[idx_slice.data.ravel()[-1]]
-            if my_data.get_ft_prop(thisdim) == True:
-                if j == 0:
-                    draw_span(
-                        last_axes,
-                        first_axes,
-                        ("%s") % ordered_labels[thisdim][0],
-                        this_label_num=depth,
-                    )
-                else:
-                    draw_span(
-                        last_axes,
-                        first_axes,
-                        ("%s") % ordered_labels[thisdim][j],
-                        this_label_num=depth,
-                    )
+            if j == 0:
+                draw_span(
+                    last_axes,
+                    first_axes,
+                    ("%s") % ordered_labels[thisdim][0],
+                    this_label_num=depth,
+                )
             else:
-                draw_span(last_axes, first_axes, ("%d") % (j), this_label_num=depth)
-
+                draw_span(
+                    last_axes,
+                    first_axes,
+                    ("%s") % ordered_labels[thisdim][j],
+                    this_label_num=depth,
+                )
             place_labels(
                 ax_list[0],
                 "%s" % my_data.unitify_axis("%s" % thisdim),
@@ -503,7 +531,7 @@ def DCCT(
         check_for_label_num=False,
         allow_for_text=-50,
     )
-    #plt.title(plot_title)
+    plt.title(plot_title)
     if just_2D:
         return LHS_pad + LHS_labels, axes_bottom[0], width, axes_bottom[-1] - top_pad
     else:
@@ -514,4 +542,3 @@ def DCCT(
             width,
             top_pad - RHS_pad,
         )
-
