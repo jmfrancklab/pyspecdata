@@ -57,14 +57,14 @@ with figlist_var() as fl:
     # reorder into a format more suitable for plotting
     data.reorder(["ph1", "ph2", "vd", "t2"])
     # fake_data gives us data already in the coherence domain, so:
-    data.ift(["ph1", "ph2"])
+    #data.ift(["ph1", "ph2"])
     # keyword arguments to use throughout
     dcct_kwargs = dict(total_spacing=0.15, label_spacing_multiplier=55, LHS_pad=0.05,)
     fig = fl.next("raw data")
     DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
-    fig = fl.next("DCCT -- time domain")
-    data.ft(["ph1", "ph2"])
-    DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
-    fig = fl.next("DCCT -- frequency domain")
-    data.ft("t2")
-    DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
+    #fig = fl.next("DCCT -- time domain")
+    #data.ft(["ph1", "ph2"])
+    #DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
+    #fig = fl.next("DCCT -- frequency domain")
+    #data.ft("t2")
+    #DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
