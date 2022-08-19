@@ -10,6 +10,7 @@ from matplotlib.lines import Line2D
 from matplotlib.transforms import ScaledTranslation, IdentityTransform
 from pyspecdata.plot_funcs.image import imagehsv
 
+
 def DCCT(
     this_nddata,
     this_fig_obj,
@@ -26,7 +27,7 @@ def DCCT(
     LHS_pad=0.01,
     RHS_pad=0.05,
     shareaxis=False,
-    diagnostic = False,
+    diagnostic=False,
     cmap=None,
     pass_frq_slice=False,
     just_2D=False,
@@ -34,7 +35,7 @@ def DCCT(
     max_coh_jump={"ph1": 1, "ph2": 2},
     direct="t2",
     plot_title="DCCT",
-    **kwargs
+    **kwargs,
 ):
     """DCCT plot
 
@@ -123,8 +124,9 @@ def DCCT(
             # }}}
             ordered_labels[this_dim] = labels_in_order
         else:
-            ordered_labels[this_dim] = ['0' if j == 0.0 else f'{j}'
-                    for j in my_data.getaxis(this_dim)]
+            ordered_labels[this_dim] = [
+                "0" if j == 0.0 else f"{j}" for j in my_data.getaxis(this_dim)
+            ]
         # ordered_labels now contains a list of the labels for each index
         # of the dimension, in order
     # }}}
