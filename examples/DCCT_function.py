@@ -21,7 +21,7 @@ import sympy as s
 from collections import OrderedDict
 
 seed(2021)
-#rcParams["image.aspect"] = "auto"  # needed for sphinx gallery
+rcParams["image.aspect"] = "auto"  # needed for sphinx gallery
 # sphinx_gallery_thumbnail_number = 2
 init_logging(level="debug")
 

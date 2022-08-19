@@ -10,7 +10,6 @@ from matplotlib.lines import Line2D
 from matplotlib.transforms import ScaledTranslation, IdentityTransform
 from pyspecdata.plot_funcs.image import imagehsv
 
-
 def DCCT(
     this_nddata,
     this_fig_obj,
@@ -27,7 +26,7 @@ def DCCT(
     LHS_pad=0.01,
     RHS_pad=0.05,
     shareaxis=False,
-    diagnostic=False,
+    diagnostic = False,
     cmap=None,
     pass_frq_slice=False,
     just_2D=False,
@@ -35,7 +34,7 @@ def DCCT(
     max_coh_jump={"ph1": 1, "ph2": 2},
     direct="t2",
     plot_title="DCCT",
-    **kwargs,
+    **kwargs
 ):
     """DCCT plot
 
@@ -124,9 +123,8 @@ def DCCT(
             # }}}
             ordered_labels[this_dim] = labels_in_order
         else:
-            ordered_labels[this_dim] = [
-                "0" if j == 0.0 else f"{j}" for j in my_data.getaxis(this_dim)
-            ]
+            ordered_labels[this_dim] = ['0' if j == 0.0 else f'{j}'
+                    for j in my_data.getaxis(this_dim)]
         # ordered_labels now contains a list of the labels for each index
         # of the dimension, in order
     # }}}
@@ -140,11 +138,12 @@ def DCCT(
             my_data.data = my_data.data.real
             real_data = True
     my_data.human_units()
-    grid_bottom += bottom_pad #grid_bottom now has coordinates of bottom of first box
-    grid_top -= top_pad #grid_top has coordinates of top of top box
+    grid_bottom += bottom_pad
+    grid_top -= top_pad
     a_shape = ndshape(this_nddata)
     num_dims = len(a_shape.dimlabels[:-2])
     divisions = []
+
     # should be looping in backward order from printed shape
     for j, thisdim in enumerate(a_shape.dimlabels[::-1][2:]):
         old = [j / 2.0 for j in divisions]
@@ -152,24 +151,20 @@ def DCCT(
         logging.debug(strm("for", thisdim, "I get", divisions))
     divisions = [j * total_spacing / sum(divisions) for j in divisions]
     axes_height = (grid_top - grid_bottom - total_spacing) / prod(a_shape.shape[:-2])
-    #{{{create the coordinates for the bottom of each plot
     axes_bottom = np.cumsum([axes_height + j for j in divisions])  # becomes ndarray
     axes_bottom = r_[0, axes_bottom]
     axes_bottom += grid_bottom
-    #}}}
+    axes_top = grid_bottom + grid_top
     fig = this_fig_obj
+    ax_list = []
     yMajorLocator = lambda: mticker.MaxNLocator(nbins="auto", steps=[1, 2, 5, 10])
     majorLocator = lambda: mticker.MaxNLocator(nbins="auto", steps=[1, 2, 2.5, 5, 10])
     minorLocator = lambda: mticker.AutoMinorLocator(n=5)
     LHS_labels, _ = fig.transFigure.inverted().transform(
         (label_spacing_multiplier * num_dims + allow_for_ticks_default, 0)
-    ) #Go from Figure coordinates into data coordinates
+    )
     width = 1.0 - (LHS_pad + RHS_pad + LHS_labels)
-    #take the width of the plot to be the whole screen - the padding on either side and minus the space the labels take up 
-    #{{{loop over the coordinates of the bottom of each individual plot
-    ax_list = []
     for j, b in enumerate(axes_bottom):
-        #if there are no axes_bottoms then create some using the padding sizes,tec.
         if j != 0 and shareaxis:
             ax_list.append(
                 axes(
@@ -179,16 +174,15 @@ def DCCT(
                 )
             )  # lbwh
         else:
-            #making coordinates for each individual stacked plot, (starting point on left side[x coordicnate], starting point for the bottom of the axis[y coordinate],width of plot, height of plot)
             ax_list.append(axes([LHS_labels + LHS_pad, b, width, axes_height]))  # lbwh
     # {{{ adjust tick settings -- AFTER extents are set
-    # {{{ bottom subplot set ticks and label x axis units
+    # {{{ bottom subplot
     ax_list[0].xaxis.set_major_locator(majorLocator())
     ax_list[0].xaxis.set_minor_locator(minorLocator())
     ax_list[0].set_ylabel(None)
     ax_list[0].set_xlabel(my_data.unitify_axis(my_data.dimlabels[-1]), labelpad=20)
     # }}}
-    # {{{intermediate subplots - have same spacing as the bottom but no ticks or labels
+    # {{{ intermediate subplots
     for j in range(1, len(axes_bottom) - 1):
         ax_list[j].xaxis.set_ticks([])
         ax_list[j].get_xaxis().set_visible(False)
@@ -202,7 +196,7 @@ def DCCT(
     if not shareaxis:
         ax_list[-1].set_xticklabels([])
     # }}}
-    # {{{ sets y ticks for all subplots
+    # {{{ all subplots
     for j in range(0, len(axes_bottom)):
         ax_list[j].set_ylabel(a_shape.dimlabels[-2])
         inner_dim = a_shape.dimlabels[-2]
@@ -219,17 +213,15 @@ def DCCT(
             tick.set_va("center")
     # }}}
     # }}}
-    #{{{if theres more dimensions than normal smoosh them
+
     if len(a_shape.dimlabels) > 3:
         A = this_nddata.C.smoosh(a_shape.dimlabels[:-2], "smooshed", noaxis=True)
         A.reorder("smooshed", first=True)
-    #otherwise we are renaming the nddata to A     
     else:
         A = this_nddata.C
         A_data = A.C
         A.rename(a_shape.dimlabels[:-2][0], "smooshed")
-    #}}}
-    #{{{function that draws the vertical lines that dim values will be on
+
     def draw_span(
         ax1,
         ax2,
@@ -238,17 +230,16 @@ def DCCT(
         allow_for_text=allow_for_text_default,
         allow_for_ticks=allow_for_ticks_default,
     ):
-        x1, y1 = ax1.transAxes.transform(r_[0, 0.95]) #top point on plot of interest
-        x2, y2 = ax2.transAxes.transform(r_[0, 0.05]) #bottom point on plot of interest
-        x1 -= allow_for_ticks #move top point to the left to make room for y ticks
-        x_text = x1 - allow_for_text #text will be slightly more to the left of top point
-        x2 -= allow_for_ticks #move bottom point to the left to make room for y ticks
+        x1, y1 = ax1.transAxes.transform(r_[0, 0.95])
+        x2, y2 = ax2.transAxes.transform(r_[0, 0.05])
+        x1 -= allow_for_ticks
+        x_text = x1 - allow_for_text
+        x2 -= allow_for_ticks
         # following line to create an offset for different dimension labels
-        label_spacing = this_label_num * label_spacing_multiplier #amount of space between the x values of each line
-        x1, y1 = fig.transFigure.inverted().transform(r_[x1 - label_spacing, y1])#x1 is moved to the left by the spacing amount to make room for inner dimension values
-        x_text, _ = fig.transFigure.inverted().transform(r_[x_text - label_spacing, 0])#move location of text to match the line
-        x2, y2 = fig.transFigure.inverted().transform(r_[x2 - label_spacing, y2]) #move bottom point of line over to match
-        #{{{Add lines and label for CT values 
+        label_spacing = this_label_num * label_spacing_multiplier
+        x1, y1 = fig.transFigure.inverted().transform(r_[x1 - label_spacing, y1])
+        x_text, _ = fig.transFigure.inverted().transform(r_[x_text - label_spacing, 0])
+        x2, y2 = fig.transFigure.inverted().transform(r_[x2 - label_spacing, y2])
         lineA = lines.Line2D(
             [x1, x2],
             [y1, y2],
@@ -268,10 +259,9 @@ def DCCT(
             color="k",
         )
         fig.add_artist(lineA)
-        #}}}
-    #}}}    
+
     label_placed = zeros(num_dims)
-    print("HEY",label_placed)
+
     def place_labels(
         ax1,
         label,
