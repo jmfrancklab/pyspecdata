@@ -1,8 +1,3 @@
-from pylab import *
-from pyspecdata import *
-from pyspecdata import DCCT
-from pyspecProcScripts import fake_data
-from numpy.random import normal, seed
 """Using the DCCT function
 =======================
 
@@ -16,6 +11,11 @@ domain as well as visualizing the inversion of phase
 using the domain colored plotting style.
 """
 
+from pylab import *
+from pyspecdata import *
+from pyspecdata import DCCT
+from pyspecProcScripts import fake_data
+from numpy.random import normal, seed
 from numpy.linalg import norm
 import sympy as s
 from collections import OrderedDict
