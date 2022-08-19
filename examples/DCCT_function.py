@@ -60,7 +60,7 @@ with figlist_var() as fl:
     data.ift(["ph1", "ph2"])
     # keyword arguments to use throughout
     dcct_kwargs = dict(
-        total_spacing=0.15,
+        total_spacing=0.2,
         label_spacing_multiplier=65,
         LHS_pad=0.05,
         )
