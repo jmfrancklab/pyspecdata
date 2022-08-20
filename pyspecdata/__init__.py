@@ -5,6 +5,7 @@ from .figlist import *
 from .nnls import *
 from .lmfitdata import lmfitdata
 from .DCCT_function import DCCT
+from .generate_fake_data import fake_data
 #import numpy
 
 # so essentially, __all__ is the namespace that is passed with an import *

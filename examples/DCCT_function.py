@@ -13,8 +13,6 @@ using the domain colored plotting style.
 
 from pylab import *
 from pyspecdata import *
-from pyspecdata import DCCT
-from pyspecProcScripts import fake_data
 from numpy.random import normal, seed
 from numpy.linalg import norm
 import sympy as s

@@ -1,5 +1,7 @@
-from sympy import lambdify
 from .fl_dummy import fl_dummy
+from sympy import Symbol as sympy_symbol
+from sympy import lambdify
+from pyspecdata import nddata, ndshape
 import numpy as np
 from numpy.random import normal
 
@@ -15,6 +17,9 @@ def fake_data(
     fl=fl_dummy
 ):
     """Generate fake data subject to noise and frequency variation.
+
+    This includes a variation of the resonance frequency.  The user can adjust the scale and the timescale of the frequency variation, which is modeled by way of spectral density function that describes the random fluctuation of the resonance frequency.  (To avoid confusion, note that this spectral density function does NOT control the noise voltage, which is given by a standard normal distribution of constant variation.)
+
     Parameters
     ==========
     expression: sympy expression
@@ -30,7 +35,7 @@ def fake_data(
         If you do this, the beginning of the axis will be re-set to 0 before returning.
     SD_sigma: list of floats
         Gives the Gaussian σ for the spectral density of the
-        frequency variation.
+        time-dependent variation of the resonance frequency.
         Typically, there are more than one gaussian terms used to
         create the spectral density.
 
@@ -46,7 +51,7 @@ def fake_data(
     scale: float (default 100)
         amplitude of frequency variation
     """
-    mysymbols = expression.atoms(sympy_symbol)
+    mysymbols = list(expression.atoms(sympy_symbol))
     missing = set(str(j) for j in mysymbols) - set(axis_coords.keys())
     assert len(missing) == 0, (
         "all non-phase cycling symbols in your expression must have matching axis coordinates in the dictionary -- you are missing %s!"
@@ -103,4 +108,3 @@ def fake_data(
     data.register_axis({direct: 0})
     data.set_units(direct, "s")
     return data
-

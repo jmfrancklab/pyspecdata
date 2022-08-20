@@ -2,13 +2,18 @@
 visualize the complex-valued data, as well as the formalization of the 
 coherence transfer dimensions using domain coloring plotting. 
 """
-from pylab import *
-from pyspecdata import *
+from numpy import r_,nan
+import numpy as np
+from .core import ndshape, nddata
+from .general_functions import strm, process_kwargs
+import matplotlib.pyplot as plt
 import matplotlib.lines as lines
 from matplotlib.patches import FancyArrow, FancyArrowPatch, Circle
 from matplotlib.lines import Line2D
 from matplotlib.transforms import ScaledTranslation, IdentityTransform
 from pyspecdata.plot_funcs.image import imagehsv
+import matplotlib.ticker as mticker
+import logging
 
 def DCCT(
     this_nddata,
@@ -95,7 +100,7 @@ def DCCT(
         if my_data.get_ft_prop(this_dim):
             n_ph = ndshape(my_data)[this_dim]
             this_max_coh_jump = max_coh_jump[this_dim]
-            all_possibilities = empty(
+            all_possibilities = np.empty(
                 (int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph
             )  # on reviewing, I *believe* this this is designed to fit the array from -this_max_coh_jump to +this_max_coh_jump, but it needs to round up to the closest multiple of n_ph
             all_possibilities[:] = nan
@@ -114,9 +119,9 @@ def DCCT(
                     :, j
                 ]  # grab the columns, which are the labels for all aliases that belong at this index
                 if j == 0:
-                    temp = ", ".join(["%d" % j for j in sort(temp[isfinite(temp)])])
+                    temp = ", ".join(["%d" % j for j in np.sort(temp[np.isfinite(temp)])])
                 else:
-                    temp = ", ".join(["%+d" % j for j in sort(temp[isfinite(temp)])])
+                    temp = ", ".join(["%+d" % j for j in np.sort(temp[np.isfinite(temp)])])
                 if len(temp) == 0:
                     temp = "X"
                 labels_in_order.append(temp)
@@ -150,7 +155,7 @@ def DCCT(
         divisions = (old + [1]) * (a_shape[thisdim] - 1) + old
         logging.debug(strm("for", thisdim, "I get", divisions))
     divisions = [j * total_spacing / sum(divisions) for j in divisions]
-    axes_height = (grid_top - grid_bottom - total_spacing) / prod(a_shape.shape[:-2])
+    axes_height = (grid_top - grid_bottom - total_spacing) / np.prod(a_shape.shape[:-2])
     axes_bottom = np.cumsum([axes_height + j for j in divisions])  # becomes ndarray
     axes_bottom = r_[0, axes_bottom]
     axes_bottom += grid_bottom
@@ -167,14 +172,14 @@ def DCCT(
     for j, b in enumerate(axes_bottom):
         if j != 0 and shareaxis:
             ax_list.append(
-                axes(
+                plt.axes(
                     [LHS_labels + LHS_pad, b, width, axes_height],
                     sharex=ax_list[0],
                     sharey=ax_list[0],
                 )
             )  # lbwh
         else:
-            ax_list.append(axes([LHS_labels + LHS_pad, b, width, axes_height]))  # lbwh
+            ax_list.append(plt.axes([LHS_labels + LHS_pad, b, width, axes_height]))  # lbwh
     # {{{ adjust tick settings -- AFTER extents are set
     # {{{ bottom subplot
     ax_list[0].xaxis.set_major_locator(majorLocator())
@@ -248,7 +253,7 @@ def DCCT(
             transform=fig.transFigure,
             clip_on=False,
         )
-        text(
+        plt.text(
             x_text,
             (y2 + y1) / 2,
             label,
@@ -260,7 +265,7 @@ def DCCT(
         )
         fig.add_artist(lineA)
 
-    label_placed = zeros(num_dims)
+    label_placed = np.zeros(num_dims)
 
     def place_labels(
         ax1,
@@ -353,7 +358,7 @@ def DCCT(
                 fig.add_artist(a)
             x_textfig = x_textdisp + arrow_width_px
             y_textfig = y_textdisp - 5.0
-            text(
+            plt.text(
                 x_textfig,
                 y_textfig,
                 label,
@@ -443,8 +448,8 @@ def DCCT(
                 K = imagehsv(
                     A["smooshed", j].data, **imagehsvkwargs, scaling=abs(A).data.max()
                 )
-        sca(ax_list[j])
-        imshow(K, extent=myext, **kwargs)
+        plt.sca(ax_list[j])
+        plt.imshow(K, extent=myext, **kwargs)
         ax_list[j].set_ylabel(None)
         if pass_frq_slice:
             frq_slice = []
@@ -467,7 +472,7 @@ def DCCT(
     # to drop into ax_list, just do
     # A.smoosh(a_shape.dimlabels, 'smooshed', noaxis=True)
     # in ax_list[0] put A['smooshed',0], etc
-    idx = nddata(r_[0 : prod(a_shape.shape[:-2])], [-1], ["smooshed"])
+    idx = nddata(r_[0 : np.prod(a_shape.shape[:-2])], [-1], ["smooshed"])
     idx.chunk("smooshed", a_shape.dimlabels[:-2], a_shape.shape[:-2])
     remaining_dim = a_shape.dimlabels[:-2]
     depth = num_dims
