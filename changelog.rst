@@ -6,6 +6,13 @@ History/Roadmap
 0.9.5
     First version distributed on pypi.python.org.
 
+
+0.9.5.5
+    - Implement a reader for Cary (Varian) UV-Vis files with examples.
+    - Implement an ``nddata_placeholder`` class for quickly loading and
+      searching through datasets in *e.g.* UV-Vis files or Bruker directories
+      without actually loading all the data from each dataset.
+
 0.9.5.1
     - 0.9.5.1.1
       Some important debugging, and also added `pyspecdata.ipy` → executing the following at the top of a jupyter notebook:
