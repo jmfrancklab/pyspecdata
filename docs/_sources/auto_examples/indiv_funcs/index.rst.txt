@@ -1,0 +1,79 @@
+
+
+.. _sphx_glr_auto_examples_indiv_funcs:
+
+Individual Functions
+====================
+
+These are not very important -- just tests to verify the performance of individual functions.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Demonstrate how to extend past the limits of the data.">
+
+.. only:: html
+
+  .. image:: /auto_examples/indiv_funcs/images/thumb/sphx_glr_extend_thumb.png
+    :alt: Extend
+
+  :ref:`sphx_glr_auto_examples_indiv_funcs_extend.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Extend</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Convolution">
+
+.. only:: html
+
+  .. image:: /auto_examples/indiv_funcs/images/thumb/sphx_glr_convolve_thumb.png
+    :alt: Convolution
+
+  :ref:`sphx_glr_auto_examples_indiv_funcs_convolve.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Convolution</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Unitary FT">
+
+.. only:: html
+
+  .. image:: /auto_examples/indiv_funcs/images/thumb/sphx_glr_unitary_ft_thumb.png
+    :alt: Unitary FT
+
+  :ref:`sphx_glr_auto_examples_indiv_funcs_unitary_ft.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Unitary FT</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/indiv_funcs/extend
+   /auto_examples/indiv_funcs/convolve
+   /auto_examples/indiv_funcs/unitary_ft
+

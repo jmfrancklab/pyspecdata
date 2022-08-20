@@ -55,14 +55,12 @@ manipulate UV-Vis data.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     the experiments present in this file are: dict_keys(['rxn buffer w_o', 'rxn buffer with', 'TCM w_o', 'TCMI36C w_o', 'rxn buff w_ellman', 'elution buff w_ellman', 'TCM w_ellman', 'TCMI36C_w_ellman'])
-    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2680: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2684: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
-    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2680: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2684: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
     now I'm going to try a DSW file
     the experiments present in this file are: dict_keys(['protein_1', 'protein_2', 'protein_3', 'protein_4', 'protein_5', 'protein_6', 'protein_7', 'protein_8', 'protein_9'])
@@ -127,28 +125,23 @@ manipulate UV-Vis data.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.879 seconds)
+   **Total running time of the script:** ( 0 minutes  2.234 seconds)
 
 
 .. _sphx_glr_download_auto_examples_ellmans.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: ellmans.py <ellmans.py>`
 
-     :download:`Download Python source code: ellmans.py <ellmans.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: ellmans.ipynb <ellmans.ipynb>`
+      :download:`Download Jupyter notebook: ellmans.ipynb <ellmans.ipynb>`
 
 
 .. only:: html

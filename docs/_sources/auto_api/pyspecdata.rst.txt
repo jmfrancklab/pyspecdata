@@ -15,6 +15,14 @@ Subpackages
 Submodules
 ----------
 
+pyspecdata.DCCT\_function module
+--------------------------------
+
+.. automodule:: pyspecdata.DCCT_function
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pyspecdata.axis\_class module
 -----------------------------
 
@@ -47,6 +55,14 @@ pyspecdata.figlist module
    :undoc-members:
    :show-inheritance:
 
+pyspecdata.fl\_dummy module
+---------------------------
+
+.. automodule:: pyspecdata.fl_dummy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pyspecdata.fornotebook module
 -----------------------------
 
@@ -59,6 +75,14 @@ pyspecdata.general\_functions module
 ------------------------------------
 
 .. automodule:: pyspecdata.general_functions
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pyspecdata.generate\_fake\_data module
+--------------------------------------
+
+.. automodule:: pyspecdata.generate_fake_data
    :members:
    :undoc-members:
    :show-inheritance:

@@ -37,16 +37,14 @@ to retype them every time.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    ----------  logging output to C:\Users\johnf\pyspecdata.0.log  ----------
-    --> fit_with_bounds.py(25):pyspecdata.core             <module> 2022-05-18 13:03:24,574
+    ----------  logging output to C:\Users\jmfranck\pyspecdata.0.log  ----------
+    --> fit_with_bounds.py(25):pyspecdata.core             <module> 2022-08-19 22:39:36,845
     INFO: Functional Form: A*exp(-decay**2*x**2)*sin(shift + x/period)
-    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2680: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "ro" (-> marker='o'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2684: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "ro" (-> marker='o'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
-    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2680: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string "g--" (-> linestyle='--'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2684: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string "g--" (-> linestyle='--'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
 
 
@@ -108,28 +106,23 @@ to retype them every time.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.244 seconds)
+   **Total running time of the script:** ( 0 minutes  0.169 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fit_with_bounds.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: fit_with_bounds.py <fit_with_bounds.py>`
 
-     :download:`Download Python source code: fit_with_bounds.py <fit_with_bounds.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: fit_with_bounds.ipynb <fit_with_bounds.ipynb>`
+      :download:`Download Jupyter notebook: fit_with_bounds.ipynb <fit_with_bounds.ipynb>`
 
 
 .. only:: html

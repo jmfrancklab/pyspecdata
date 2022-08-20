@@ -5,12 +5,12 @@
 
 Computation times
 =================
-**00:00.691** total execution time for **auto_examples_indiv_funcs** files:
+**00:00.460** total execution time for **auto_examples_indiv_funcs** files:
 
 +-----------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_indiv_funcs_extend.py` (``extend.py``)         | 00:00.391 | 0.0 MB |
+| :ref:`sphx_glr_auto_examples_indiv_funcs_extend.py` (``extend.py``)         | 00:00.234 | 0.0 MB |
 +-----------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_indiv_funcs_convolve.py` (``convolve.py``)     | 00:00.155 | 0.0 MB |
+| :ref:`sphx_glr_auto_examples_indiv_funcs_convolve.py` (``convolve.py``)     | 00:00.116 | 0.0 MB |
 +-----------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_indiv_funcs_unitary_ft.py` (``unitary_ft.py``) | 00:00.144 | 0.0 MB |
+| :ref:`sphx_glr_auto_examples_indiv_funcs_unitary_ft.py` (``unitary_ft.py``) | 00:00.109 | 0.0 MB |
 +-----------------------------------------------------------------------------+-----------+--------+

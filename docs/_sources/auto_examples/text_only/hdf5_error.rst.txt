@@ -29,8 +29,6 @@ Trying to load an HDF5 file without an expno generates an error with a list of p
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     this will print the error message:
@@ -64,28 +62,23 @@ Trying to load an HDF5 file without an expno generates an error with a list of p
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.081 seconds)
+   **Total running time of the script:** ( 0 minutes  4.575 seconds)
 
 
 .. _sphx_glr_download_auto_examples_text_only_hdf5_error.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: hdf5_error.py <hdf5_error.py>`
 
-     :download:`Download Python source code: hdf5_error.py <hdf5_error.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: hdf5_error.ipynb <hdf5_error.ipynb>`
+      :download:`Download Jupyter notebook: hdf5_error.ipynb <hdf5_error.ipynb>`
 
 
 .. only:: html

@@ -751,7 +751,7 @@ Defaults to True</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.nddata.convolve">
-<span class="sig-name descname"><span class="pre">convolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">axisname</span></em>, <em class="sig-param"><span class="pre">filterwidth</span></em>, <em class="sig-param"><span class="pre">convfunc=&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;</span></em>, <em class="sig-param"><span class="pre">enforce_causality=True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.convolve" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">convolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axisname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterwidth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convfunc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gaussian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_causality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.convolve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform a convolution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -765,18 +765,26 @@ when you call this function on said data)</p></li>
 arguments – the first are the axis
 coordinates and the second is
 <cite>filterwidth</cite> (see <cite>filterwidth</cite>).
-Default is a normalized Gaussian of width
-(<span class="math notranslate nohighlight">\(\sigma\)</span>) <cite>filterwidth</cite>
-<span class="math notranslate nohighlight">\(\frac{1}{2 \sigma^2}\exp\left( - \frac{x^2}{2 \sigma^2} \right)\)</span>
+Default is a normalized Gaussian of FWHM
+(<span class="math notranslate nohighlight">\(\lambda\)</span>) <cite>filterwidth</cite>
 For example if you want a complex Lorentzian with <cite>filterwidth</cite> controlled by the rate <span class="math notranslate nohighlight">\(R\)</span>,
 <em>i.e.</em>
 <span class="math notranslate nohighlight">\(\frac{-1}{-i 2 \pi f - R}\)</span>
 then <code class="docutils literal notranslate"><span class="pre">convfunc</span> <span class="pre">=</span> <span class="pre">lambda</span> <span class="pre">f,R:</span> <span class="pre">-1./(-1j*2*pi*f-R)</span></code></p></li>
-<li><p><strong>enforce_causality</strong> (<em>boolean</em>) – make sure that the ift of the filter doesn’t get aliased to high
-time values.
-This only makes sense for frequency-domain data whose
-corresponding time-domain data has a startpoint at or near zero.
-It is ignored if you call a convolution on time-domain data.</p></li>
+<li><p><strong>enforce_causality</strong> (<em>boolean</em>) – <p>make sure that the ift of the filter doesn’t get aliased to high
+time values.</p>
+<p>”Causal” data here means data derived as the FT of time-domain
+data that starts at time zero – like an FID – for which real
+and abs parts are Hermite transform pairs.</p>
+<p><cite>enforce_causality</cite> should be <cite>True</cite> for frequency-domain data
+whose corresponding time-domain data has a startpoint at or near
+zero, with no negative time values – like data derived from the
+FT of an IFT.
+In contrast, for example, if you have frequency-domain data that
+is entirely real (like a power spectral density) then you want to
+set enforce_causality to False.</p>
+<p>It is ignored if you call a convolution on time-domain data.</p>
+</p></li>
 </ul>
 </dd>
 </dl>

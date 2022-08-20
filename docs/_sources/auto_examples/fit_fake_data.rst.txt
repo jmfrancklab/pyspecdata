@@ -36,30 +36,28 @@ function.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2680: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "o" (-> marker='o'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2684: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "o" (-> marker='o'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
     {R_1, M_0, M_inf}
-    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2680: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2684: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
     {\bf Warning:} You have no error associated with your plot, and I want to flag this for now
 
 
-    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:7761: Warning: You have no error associated with your plot, and I want to flag this for now
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:7780: Warning: You have no error associated with your plot, and I want to flag this for now
       warnings.warn('You have no error associated with your plot, and I want to flag this for now',Warning)
     ----- Results for fitdata: -----
-    output for fitdata: {'M_0': -102.57947826900396, 'M_inf': 101.45432666299286, 'R_1': 6.154930469972505}
-    latex for fitdata: $f(\tau)=101.45 + \left(-1.03\times 10^{2} - 101.45\right) e^{- 6.15 \tau}$
-    $T_1$ for fitdata, 0.16247137232152473
-    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2680: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
+    output for fitdata: {'M_0': -99.48529254673812, 'M_inf': 102.62786285665652, 'R_1': 5.929987460212854}
+    latex for fitdata: $f(\tau)=102.63 + \left(-99.49 - 102.63\right) e^{- 5.93 \tau}$
+    $T_1$ for fitdata, 0.1686344206812379
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2684: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
     ----- Results for lmfitdata: -----
-    output for lmfitdata: {'R_1': 6.159606218003255, 'M_0': -102.63911527656171, 'M_inf': 101.4473871537432}
-    latex for lmfitdata: $f(\tau)=101.45 + \left(-1.03\times 10^{2} - 101.45\right) e^{- 6.16 \tau}$
-    $T_1$ for lmfitdata, 0.162348040541489
+    output for lmfitdata: {'R_1': 5.919704155230821, 'M_0': -99.58674391676766, 'M_inf': 102.62290081346362}
+    latex for lmfitdata: $f(\tau)=102.62 + \left(-99.59 - 102.62\right) e^{- 5.92 \tau}$
+    $T_1$ for lmfitdata, 0.16892736085744608
 
 
 
@@ -174,28 +172,23 @@ function.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.274 seconds)
+   **Total running time of the script:** ( 0 minutes  0.308 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fit_fake_data.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: fit_fake_data.py <fit_fake_data.py>`
 
-     :download:`Download Python source code: fit_fake_data.py <fit_fake_data.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: fit_fake_data.ipynb <fit_fake_data.ipynb>`
+      :download:`Download Jupyter notebook: fit_fake_data.ipynb <fit_fake_data.ipynb>`
 
 
 .. only:: html

@@ -81,28 +81,23 @@ sphinx, but still imports pyspecdata
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.128 seconds)
+   **Total running time of the script:** ( 0 minutes  0.082 seconds)
 
 
 .. _sphx_glr_download_auto_examples_matplotlib_matplotlib_test.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: matplotlib_test.py <matplotlib_test.py>`
 
-     :download:`Download Python source code: matplotlib_test.py <matplotlib_test.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: matplotlib_test.ipynb <matplotlib_test.ipynb>`
+      :download:`Download Jupyter notebook: matplotlib_test.ipynb <matplotlib_test.ipynb>`
 
 
 .. only:: html
