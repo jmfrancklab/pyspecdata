@@ -18,7 +18,7 @@ from pylab import subplots
 from pyspecdata import *
 from numpy import *
 rcParams['image.aspect'] = 'auto' # needed for sphinx gallery
-# sphinx_gallery_thumbnail_number = 4
+# sphinx_gallery_thumbnail_number = 3
 
 # let's make some fake inversion recovery data
 vd = nddata(r_[0,0.05,0.1,0.15,0.2,0.3,0.4,0.6,0.8,1.0,2.0,3.0,5.0],'vd')

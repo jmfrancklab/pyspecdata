@@ -62,8 +62,20 @@ parameter is masked out as white here.
          :class: sphx-glr-multi-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    WARNING:pyspecdata.core:you are trying to determine the SI prefix of aset of numbers that are described by integers.  This isprobably not a good idea!!
+    WARNING:pyspecdata.core:you are trying to determine the SI prefix of aset of numbers that are described by integers.  This isprobably not a good idea!!
+    WARNING:pyspecdata.core:you are trying to determine the SI prefix of aset of numbers that are described by integers.  This isprobably not a good idea!!
 
 
+
+
+
+
+|
 
 .. code-block:: default
 
@@ -71,7 +83,7 @@ parameter is masked out as white here.
     from pyspecdata import *
     from numpy import *
     rcParams['image.aspect'] = 'auto' # needed for sphinx gallery
-    # sphinx_gallery_thumbnail_number = 4
+    # sphinx_gallery_thumbnail_number = 3
 
     # let's make some fake inversion recovery data
     vd = nddata(r_[0,0.05,0.1,0.15,0.2,0.3,0.4,0.6,0.8,1.0,2.0,3.0,5.0],'vd')
@@ -100,7 +112,7 @@ parameter is masked out as white here.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.710 seconds)
+   **Total running time of the script:** ( 0 minutes  0.857 seconds)
 
 
 .. _sphx_glr_download_auto_examples_image_plot.py:
