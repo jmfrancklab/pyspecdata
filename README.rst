@@ -105,6 +105,9 @@ while the instructions below work for most cases,
 not everyone's system is set up equally well for Fortran compilation.
 If you experience difficulties, please don't hesitate to reach out to us at jmfranck [at] syr.edu;
 we would be happy for the opportunity to test distribution on new platforms!
+In all situations, note that this is a development library that works very well
+in our hands -- we are happy to hear from you and work with you to try to
+broaden its applicability!
 
 On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
 just run
