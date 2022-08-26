@@ -97,6 +97,15 @@ A public-use version 1.0.0, to be accompanied by useful demonstrations, is plann
 Installation
 ============
 
+**Important note:**
+the package ships Fortran-based extensions that are used to provide fast ILT methods.
+We believe this is a useful feature.
+Unfortunately,
+while the instructions below work for most cases,
+not everyone's system is set up equally well for Fortran compilation.
+If you experience difficulties, please don't hesitate to reach out to us at jmfranck [at] syr.edu;
+we would be happy for the opportunity to test distribution on new platforms!
+
 On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
 just run
 ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython``
