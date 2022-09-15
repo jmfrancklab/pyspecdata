@@ -8,9 +8,11 @@ import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 #from pylab import *
 import warnings
+import sys
 # sympy doesn't like to be imported from fornotebook as part of a *
 warnings.filterwarnings("ignore")
-from .core import *
+from . import core as psp_core
+from .figlist import figlist
 from .general_functions import fname_makenice
 from scipy.io import savemat,loadmat
 from os.path import exists as path_exists
@@ -22,6 +24,7 @@ from time import mktime
 from PIL import Image
 import numpy as np
 import re
+import matplotlib.pyplot as plt
 
 golden_ratio = (1.0 + np.sqrt(5))/2.0
 
@@ -74,7 +77,7 @@ class figlistl (figlist):
         if hasattr(self,'lplot_kwargs'):
             kwargs.update(self.lplot_kwargs)
         for figname in self.figurelist:
-            if verbose: print("showing figure"+lsafen(figname))
+            if verbose: print("showing figure"+psp_core.lsafen(figname))
             if isinstance(figname, dict):
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
@@ -95,7 +98,7 @@ class figlistl (figlist):
                     fig.scene.anti_aliasing_frames = 0
                     #fig.scene.off_screen_rendering = True
                 else:
-                    figure(j)
+                    plt.figure(j)
                 sep = ''
                 if len(string)>0:
                     sep = '_'
@@ -133,7 +136,7 @@ def lplotfigures(figurelist,string,**kwargs):
             if 'print_string' in kwargs:
                 print('\n\n'+kwargs.pop('print_string')+'\n\n')
         else:
-            figure(j+1)
+            plt.figure(j+1)
             try:
                 lplot(figname+string,**kwargs)
             except:
@@ -146,7 +149,7 @@ def figlisterr(figurelist,*args,**kwargs):
         basename = kwargs['basename']
     else:
         basename = thisjobname()
-    print(lsafen("Trying to plot the figurelist",figurelist))
+    print(psp_core.lsafen("Trying to plot the figurelist",figurelist))
     lplotfigures(figurelist,basename+'errplot.pdf')
     return args
 def see_if_math(recnames):
@@ -426,7 +429,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
             ax.set_aspect('equal')
         fig.autofmt_xdate()
         if autopad:
-            autopad_figure(centered = centered,figname = fname)
+            psp_core.autopad_figure(centered = centered,figname = fname)
     # replaced outer_legend with appropriate modification to the "legend" option of figlist.show_prep(), same with legend option
         if not boundaries:
             ax = plt.gca()
@@ -457,7 +460,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
             plt.savefig(alsosave,
                     dpi=dpi,
                     facecolor=(1,1,1,0))
-    if figure:
+    if plt.figure:
         print(r"""
         \begin{figure}[h]
         \end{figure}
@@ -489,7 +492,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
     return
 def ordplot(x,y,labels,formatstring):
         order = argsort(x)
-        plot(x[order],y[order],'o-')
+        psp_core.plot(x[order],y[order],'o-')
         newlabels=[]
         for j in range(0,len(order)): 
             newlabels += [labels[order[j]]]
@@ -599,7 +602,7 @@ def calcfielddata(freq,substance,spec=''):
     save_data({'current_ppt':data[substance+'_nmrelratio']})
 def cpmgseries(filename,plotlabel,tau=None,alpha=None,alphaselect=None):
     data = load_file.prospa.load_datafile(filename,dims=2)
-    plot(data)
+    psp_core.plot(data)
     lplot(plotlabel+'.pdf')
     #data = load_2d(filename)
     #data.ft('t2')
@@ -608,19 +611,19 @@ def cpmgseries(filename,plotlabel,tau=None,alpha=None,alphaselect=None):
     data = process_cpmg(filename)
     if (tau!=None):
         coeff,fit,rms = regularize1d(data.data,data.getaxis('echo'),tau,alpha)
-        plot(alpha,rms)
+        psp_core.plot(alpha,rms)
         if (alphaselect!=None):
             coeff,fit,rms = regularize1d(data.data,data.getaxis('echo'),tau,[alphaselect])
-            plot([alphaselect],rms,'rx')
+            psp_core.plot([alphaselect],rms,'rx')
         axis('tight')
         lplot(plotlabel+'_reg.pdf')
         print('\n\n')
-    plot(data)
+    psp_core.plot(data)
     if (alphaselect!=None):
-        plot(data.getaxis('echo'),fit.flatten(),'r',alpha=0.5,linewidth=2)
+        psp_core.plot(data.getaxis('echo'),fit.flatten(),'r',alpha=0.5,linewidth=2)
     lplot(plotlabel+'_filt.pdf')
     if (alphaselect!=None):
-        plot(tau,coeff.flatten(),'r')
+        psp_core.plot(tau,coeff.flatten(),'r')
     lplot(plotlabel+'_coeff.pdf')
 def cpmgs(exp,number,tau=None,alpha=None,alphaselect=None,first=False):
     #{{{ carry over stored data
@@ -649,7 +652,7 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
     #plot(data,'.-')
     x = data.getaxis('$B_0$').flatten()
     k = exp(-(x-x.mean())**2/2./smoothing**2)
-    nslices = ndshape(data)['power']
+    nslices = psp_core.ndshape(data)['power']
     allpeaks_top = []
     allpeaks_bottom = []
     allpeaks_top_x = []
@@ -686,16 +689,16 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
                 bottom_peak += [thisslice[peak_ind]]
         #}}}
         if (not imageformat):
-            plot(x,thisslice,color=cm.hsv(np.double(j)/np.double(nslices)),alpha=0.5)
-            plot(bottom_peak_x,bottom_peak,'o',color=cm.hsv(np.double(j)/np.double(nslices)),alpha=0.5)
-            plot(top_peak_x,top_peak,'o',color=cm.hsv(np.double(j)/np.double(nslices)),alpha=0.5)
+            psp_core.plot(x,thisslice,color=cm.hsv(np.double(j)/np.double(nslices)),alpha=0.5)
+            psp_core.plot(bottom_peak_x,bottom_peak,'o',color=cm.hsv(np.double(j)/np.double(nslices)),alpha=0.5)
+            psp_core.plot(top_peak_x,top_peak,'o',color=cm.hsv(np.double(j)/np.double(nslices)),alpha=0.5)
         allpeaks_top += [top_peak]
         allpeaks_top_x += [top_peak_x]
         allpeaks_bottom += [bottom_peak]
         allpeaks_bottom_x += [bottom_peak_x]
     num_peaks = len(allpeaks_top_x[0])
     try:
-        allpeaks_top_x = nddata(allpeaks_top_x,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
+        allpeaks_top_x = psp_core.nddata(allpeaks_top_x,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
     except:
         print(r'\begin{verbatim} If you have an error here, probably change smoothing (%0.2f) or threshold (%0.2f)\end{verbatim}'%(smoothing,threshold),'\n\n')
         plt.clf()
@@ -703,15 +706,15 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
             thisslice = data['power',j].data
             #curvature = diff(fftconvolve(thisslice,k,mode='same'),n=2)
             smoothed = fftconvolve(thisslice,k,mode='same') # I need this, so the noise doesn't break up my blocks
-            plot(x,smoothed,alpha=0.1)
+            psp_core.plot(x,smoothed,alpha=0.1)
             peakmask = whereblocks(smoothed>smoothed.max()*threshold)
             for peakset in peakmask:
-                plot(x[peakset],smoothed[peakset])
+                psp_core.plot(x[peakset],smoothed[peakset])
         lplot('error_plot'+figname+'.png',width=6)
         print(r'lengths: ',list(map(len,allpeaks_top_x)),'')
         return
     try:
-        allpeaks_bottom_x = nddata(allpeaks_bottom_x,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
+        allpeaks_bottom_x = psp_core.nddata(allpeaks_bottom_x,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
     except:
         print(r'\begin{verbatim} If you have an error here, probably change smoothing (%0.2f) or threshold (%0.2f)\end{verbatim}'%(smoothing,threshold),'\n\n')
         plt.clf()
@@ -719,19 +722,19 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
             thisslice = data['power',j].data
             #curvature = diff(fftconvolve(thisslice,k,mode='same'),n=2)
             smoothed = fftconvolve(thisslice,k,mode='same') # I need this, so the noise doesn't break up my blocks
-            plot(x,smoothed,alpha=0.1)
+            psp_core.plot(x,smoothed,alpha=0.1)
             peakmask = whereblocks(smoothed<smoothed.min()*threshold)
             for peakset in peakmask:
-                plot(x[peakset],smoothed[peakset])
+                psp_core.plot(x[peakset],smoothed[peakset])
         lplot('error_plot'+figname+'.png',width=6)
         print(r'\begin{verbatim}lengths: ',list(map(len,allpeaks_top_x)),r'\end{verbatim}')
         return
-    allpeaks_top = nddata(allpeaks_top,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
-    allpeaks_bottom = nddata(allpeaks_bottom,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
+    allpeaks_top = psp_core.nddata(allpeaks_top,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
+    allpeaks_bottom = psp_core.nddata(allpeaks_bottom,[nslices,num_peaks],['power','peak']).reorder(['power','peak'])
     if imageformat:
         image(data.data,x=x,y=np.r_[0:len(powerseries)])
-        plot(np.r_[0:len(powerseries)],allpeaks_top_x.data)
-        #plot(np.r_[0:shape(data.data)[1]],allpeaks_bottom_x.data)
+        psp_core.plot(np.r_[0:len(powerseries)],allpeaks_top_x.data)
+        #psp_core.plot(np.r_[0:shape(data.data)[1]],allpeaks_bottom_x.data)
         lplot('esr_dataset'+figname+'.png',width=6,grid=False)
     else:
         lplot('esr_dataset'+figname+'.png',width=6)
@@ -741,14 +744,14 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
     peaktopeak_squared = peaktopeak.copy()
     peaktopeak.labels(['power'],[np.sqrt(powerseries)])
     peaktopeak.rename('power','$B_1$ / arb')
-    plot(peaktopeak,'.-',nosemilog=True)
+    psp_core.plot(peaktopeak,'.-',nosemilog=True)
     plt.ylabel(r'$\Delta B_{pp}$')
     lplot('esr_dataset'+figname+'_pp.pdf')
     #{{{ linearity test
     peaktopeak_squared.data = peaktopeak_squared.data**2
     peaktopeak_squared.labels(['power'],[powerseries])
     peaktopeak_squared.rename('power',r'$p$ / $mW$')
-    plot(peaktopeak_squared,'.-',nosemilog=True)
+    psp_core.plot(peaktopeak_squared,'.-',nosemilog=True)
     plt.ylabel(r'$\Delta B_{pp}^2\propto s^{-1}$')
     lplot('esr_dataset'+figname+'_pp2.pdf')
     #}}}
@@ -759,11 +762,11 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
     height_n23 = height.copy()
     height.labels(['power'],[np.sqrt(powerseries)])
     height.rename('power','$B_1$ / arb')
-    plot(height,'.-',nosemilog=True)
+    psp_core.plot(height,'.-',nosemilog=True)
     plt.ylabel(r"$y'_m$")
     lplot('esr_dataset'+figname+'_height.pdf')
     #{{{linearity test
-    b1 = ndshape(height_n23)
+    b1 = psp_core.ndshape(height_n23)
     b1['peak'] = 1
     b1 = b1.alloc()
     #b1['power',:] = powerseries.copy().reshape(-1,1)
@@ -776,11 +779,11 @@ def esr_saturation(file,powerseries,smoothing=0.2,threshold=0.8,figname = None,h
     height_n23_avg = height_n23.copy()
     height_n23_avg.mean('peak')
     if show_avg == True:
-        plot(height_n23_avg/hn23adjustment,'.',nosemilog=True)
+        psp_core.plot(height_n23_avg/hn23adjustment,'.',nosemilog=True)
     else:
-        plot(height_n23/hn23adjustment,'.',nosemilog=True)
+        psp_core.plot(height_n23/hn23adjustment,'.',nosemilog=True)
     maxp = lambda x: x == x.max()
-    plot(np.r_[0.0,height_n23_avg[newpname,maxp].getaxis(newpname)],np.r_[1.0,height_n23_avg[newpname,maxp].data[0]/hn23adjustment],'k-',linewidth=2,alpha=0.3,nosemilog=True)
+    psp_core.plot(np.r_[0.0,height_n23_avg[newpname,maxp].getaxis(newpname)],np.r_[1.0,height_n23_avg[newpname,maxp].data[0]/hn23adjustment],'k-',linewidth=2,alpha=0.3,nosemilog=True)
     plt.ylabel(r"$\propto\frac{y'_m}{B_1}^{-2/3}\propto \frac{1}{1-s_{ESR}}$")
     lplot('esr_dataset'+figname+'_hn23.pdf',width = 3.5)
     #}}}
@@ -791,7 +794,7 @@ def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'ref
     print('\n\n')
     # noise tests
     close(1)
-    figure(1,figsize=(16,8))
+    plt.figure(1,figsize=(16,8))
     v = save_data();our_calibration = np.double(v['our_calibration']);cnsi_calibration = np.double(v['cnsi_calibration'])
     calibration = cnsi_calibration*np.sqrt(50.0/10.0)*np.sqrt(50.0/40.0)
     path_list = []
@@ -812,7 +815,7 @@ def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'ref
     ind = 0
     smoothing = 5e3
     for j in range(0,1): # for multiple plots $\Rightarrow$ add in j index below if this is what i want
-       figure(1)
+       plt.figure(1)
        ind += 1
        legendstr = []
        linelist = []
@@ -830,7 +833,7 @@ def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'ref
        gridandtick(plt.gca(),logarithmic = True)
        plt.subplot(122)
        grid(False)
-       lg = autolegend(linelist,legendstr)
+       lg = psp_core.autolegend(linelist,legendstr)
        ax = plt.gca()
        ax.get_xaxis().set_visible(False)
        ax.get_yaxis().set_visible(False)
@@ -838,7 +841,7 @@ def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'ref
            x.set_visible(False)
        lplot('noise'+plotlabel+'_%d.pdf'%ind,grid=False,width=5,gensvg=True)
        print('\n\n')
-       figure(2)
+       plt.figure(2)
        legendstr = []
        for k in range(0,len(signalexpno)):
           data = load_file(dirformat(path_list[k])+'%d'%noiseexpno[k],calibration=calibration)
@@ -846,11 +849,11 @@ def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'ref
           x = data.getaxis('t2')
           data['t2',abs(x)>1e3] = 0
           data.ift('t2',shift = True)
-          plot(abs(data['t2',0:300])*1e9)
+          psp_core.plot(abs(data['t2',0:300])*1e9)
           xlabel('signal / $nV$')
           legendstr += [explabel[k]]
        if len(signalexpno)>0:
-           autolegend(legendstr)
+           psp_core.autolegend(legendstr)
            lplot('signal'+plotlabel+'_%d.pdf'%ind,grid=False)
        if (ind % 2) ==  0:
           print('\n\n')

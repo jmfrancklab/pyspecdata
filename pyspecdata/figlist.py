@@ -64,6 +64,7 @@ The figure list gives us three things:
 from . import plot_funcs as this_plotting
 import numpy as np
 from .general_functions import process_kwargs,strm
+from . import core as psp_core
 import time
 import logging
 import matplotlib.pyplot as plt
@@ -244,7 +245,7 @@ class figlist(object):
             else:
                 logging.debug(strm("I'm changing to figure",self.get_fig_number(name),"for",name))
                 fig = self.figdict[name]
-                figure(self.figdict[name].number)
+                plt.figure(self.figdict[name].number)
             self.current = name
             if boundaries is not None:
                 if 'boundaries' not in list(self.propdict[self.current].keys()) or self.propdict[self.current]['boundaries'] != boundaries:
@@ -269,7 +270,7 @@ class figlist(object):
                     fig.scene.render_window.aa_frames = 20
                     fig.scene.anti_aliasing_frames = 20
                 else:
-                    fig = figure(num_figs_before_add+1,**kwargs)
+                    fig = plt.figure(num_figs_before_add+1,**kwargs)
                 fig.add_axes([0.075,0.2,0.6,0.7]) # l b w h
                 self.use_autolegend('outside')
             else:
@@ -280,7 +281,7 @@ class figlist(object):
                         fig.scene.render_window.aa_frames = 20
                         fig.scene.anti_aliasing_frames = 20
                     else:
-                        fig = figure(num_figs_before_add+1,**kwargs)
+                        fig = plt.figure(num_figs_before_add+1,**kwargs)
                 if twinx is not None:
                     fig.add_subplot(111)
             logging.debug(strm('added figure',len(self.figurelist)+1,'because not in figurelist',self.figurelist))
@@ -325,11 +326,11 @@ class figlist(object):
             firstarg = self.check_units(args[0],0,1) # check units, and if need be convert to human units, where x is the first dimension and y is the last
         else:
             firstarg = args[0]
-        if 'label' not in list(kwargs.keys()) and isinstance(args[0],nddata):
+        if 'label' not in list(kwargs.keys()) and isinstance(args[0],psp_core.nddata):
             thisname = args[0].name()
             if thisname is not None:
                 kwargs['label'] = thisname
-        retval = plot(*tuple((firstarg,)+args[1:]),**kwargs)#just a placeholder for now, will later keep units + such
+        retval = psp_core.plot(*tuple((firstarg,)+args[1:]),**kwargs)#just a placeholder for now, will later keep units + such
         ax = plt.gca()
         if ax.get_title() is None or len(ax.get_title()) == 0:
             try:
@@ -352,7 +353,7 @@ class figlist(object):
     def check_units(self, testdata, x_index, y_index):
         logging.debug(strm("-"*30))
         logging.debug(strm("called check_units for figure",self.current))
-        if isinstance(testdata,nddata):
+        if isinstance(testdata,psp_core.nddata):
             logging.debug(strm("(check_units) it's nddata"))
             testdata = testdata.copy().human_units()
             if len(testdata.dimlabels) > 1:
@@ -364,7 +365,7 @@ class figlist(object):
                         if theseunits != self.units[self.current] and theseunits[0] != self.units[self.current]:
                                 raise ValueError("for '%s' the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(self.current,theseunits,self.units[self.current]))
                 else:
-                    if isinstance(testdata,nddata):
+                    if isinstance(testdata,psp_core.nddata):
                         self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
             else:
                 logging.debug(strm("(check_units) only one dimension"))
@@ -447,16 +448,16 @@ class figlist(object):
                 logging.debug(strm("I am about to assign a legend for ",k,". Is it in the figurelist?:",k in self.figurelist))
                 logging.debug(strm("print out the legend object:",plt.gca().legend()))
                 try:
-                    autolegend(**kwargs)
+                    psp_core.autolegend(**kwargs)
                 except:
                     try:
                         self.twinx(orig = True)
                     except Exception as e:
-                        raise Exception(strm('error while trying to run twinx to place legend for',k,'\n\tfiglist is',self.figurelist,explain_error(e)))
+                        raise Exception(strm('error while trying to run twinx to place legend for',k,'\n\tfiglist is',self.figurelist))
                     try:
-                        autolegend(**kwargs)
+                        psp_core.autolegend(**kwargs)
                     except Exception as e:
-                        raise Exception(strm('error while trying to run autolegend function for',k,'\n\tfiglist is',self.figurelist,explain_error(e)))
+                        raise Exception(strm('error while trying to run autolegend function for',k,'\n\tfiglist is',self.figurelist))
     def show(self,*args,**kwargs):
         self.basename = None # must be turned off, so it can cycle through lists, etc, on its own
         line_spacing,block = process_kwargs([('line_spacing',''),
@@ -470,7 +471,7 @@ class figlist(object):
         #{{{ just copy from fornnotebook to get the print string functionality
         kwargs = {}
         for figname in self.figurelist:
-            logging.debug(strm("showing figure \"%s\""%lsafen(figname)))
+            logging.debug(strm("showing figure \"%s\""%psp_core.lsafen(figname)))
             if isinstance(figname, dict):
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
@@ -486,10 +487,14 @@ class figlist(object):
                 print("you passed me a filename, but I'm just burning it")
         if hasattr(self,'mlab'):
             print("running mlab show!")
+            if self.__class__.__name__ is not "figlistl":
+                print(self)
             self.mlab.show()
         else:
             #print "not running mlab show!"
-            show(block=block)
+            if self.__class__.__name__ is not "figlistl":
+                print(self)
+            plt.show(block=block)
     def label_point(self, data, axis, value, thislabel,
             show_point=True, xscale=1, **new_kwargs):
         """only works for 1D data: assume you've passed a single-point nddata, and label it
@@ -514,9 +519,9 @@ class figlist(object):
         y = np.double(data[axis:value].data)
         x_ind = np.argmin(abs(data.getaxis(axis)-value))
         x = data.getaxis(axis)[x_ind]
-        text(x/xscale, y, thislabel, **kwargs)
+        plt.text(x/xscale, y, thislabel, **kwargs)
         if show_point:
-            plot(x/xscale, y, 'o', color=kwargs["color"],
+            plt.plot(x/xscale, y, 'o', color=kwargs["color"],
                     alpha=kwargs["alpha"])
         return
     def header(self,number_above,input_string):
@@ -694,8 +699,6 @@ class figlist(object):
         Otherwise, it gets very confusing.
         '''
         if exception_type is None:
-            if self.__class__.__name__ is not "figlistl":
-                print(self)
             if hasattr(self,'file_name'):
                 if hasattr(self,'line_spacing'):
                     self.show(self.file_name,line_spacing = self.line_spacing)
@@ -704,3 +707,18 @@ class figlist(object):
             else:
                 self.show()
             return
+    def __repr__(self):
+        result = ""
+        counter=0
+        for j in self.figurelist:
+            if type(j) == dict:
+                result = result+str(j)+"\n"
+            else:
+                counter += 1
+                result = result+"%d: "%counter+str(j)+ (
+                        ' '+'|'*3+str(self.units[j])
+                        if j in self.units.keys()
+                        else
+                        ''
+                        ) +"\n"
+        return result
