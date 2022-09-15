@@ -106,7 +106,7 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = [], allow_desce
     #   tolerance can be large relative to a du of ns -- don't use
     #   allclose/isclose, since they are more recent numpy additions
     if not allow_descending:
-        thismsg = ', '.join(additional_message + ["the axis must be equally spaced (and ascending)"])
+        thismsg = ', '.join(additional_message + ["the axis must be equally spaced (and ascending), but differences look like this:", 'du*'+str(abs(np.diff(u))/du)])
         assert du > 0, thismsg
     return du
 

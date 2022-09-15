@@ -3,7 +3,7 @@ import numpy as np
 if not inside_sphinx():
     from pylab import r_
 
-def register_axis(self,arg,nearest=None):
+def register_axis(self,*args,**kwargs):
     r'''Interpolate the data so that the given axes are in register with a set of specified values. Does not change the spacing of the axis labels.
     
     It finds the axis label position that is closest to the values given in `arg`, then interpolates (Fourier/sinc method) the data onto a new, slightly shifted, axis that passes exactly through the value given.
@@ -20,6 +20,15 @@ def register_axis(self,arg,nearest=None):
     nearest: bool, optional
         Passed through to ft_clear_startpoints
     '''
+    nearest = process_kwargs([('nearest',None)],
+            kwargs,
+            pass_through=True)
+    if len(args) == 1 and len(kwargs)==0:
+        arg = args[0]
+    elif len(args) == 0:
+        arg = kwargs
+    else:
+        raise ValueError("I don't understand your arguments, pass arg either as kwargs or as a dictionary!")
     for k,v in arg.items():
         x = self.getaxis(k)
         idx = np.argmin(abs(x - v))

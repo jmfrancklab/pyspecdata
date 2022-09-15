@@ -2,23 +2,9 @@ r'''Provides the core components of pyspecdata.
 Currently, this is a very large file that we will slowly break down into separate modules or packages.
 
 The classes :class:`nddata`, :class:`nddata_hdf`, :class:`ndshape`, the
-function :func:`plot`, and the class :class:`fitdata`
+function :func:`plt.plot`, and the class :class:`fitdata`
 are the core components of the N-Dimensional processing routines.
 Start by familiarizing yourself with those.
-
-The :class:`figlist` is the base class for "Figure lists."
-Figure lists allows you to organize plots and text and to refer to plots
-by name, rather than number.
-They are designed so that same code can be used seamlessly from within
-ipython, jupyter, a python script, or a python environment within latex
-(JMF can also distribute latex code for this -- nice python based
-installer is planned).
-The user does not initialize the figlist class directly,
-but rather initializes ``figlist_var``.
-At the end of this file,
-there is a snippet of code that sets
-``figlist_var`` to choice that's appropriate for the working environment
-(*i.e.*, python, latex environment, *etc.)
 
 There are many helper and utility functions that need to be sorted an documented by JMF,
 and can be ignored.
@@ -32,22 +18,11 @@ from sys import exc_info
 from os import listdir,environ
 from os.path import sep as path_sep
 
-# {{{ determine the figure style, and load the appropriate modules
-_figure_mode_setting = pyspec_config.get_setting('figures', section='mode', environ='pyspecdata_figures')
-if _figure_mode_setting is None:
-    print("Warning!  Figure mode is not set, so I'm going to set it to standard by default!!!")
-    _figure_mode_setting = 'standard'
-    pyspec_config.set_setting('mode','figures','standard')
-if _figure_mode_setting == 'latex':
-    environ['ETS_TOOLKIT'] = 'qt4'
-    import matplotlib; matplotlib.use('Agg')
-# }}} -- continued below
 from .general_functions import inside_sphinx
 import numpy as np
 import time
 from numpy import r_,c_,nan,inf,newaxis
 from numpy import pi
-from matplotlib.pyplot import rc, rcParams, plot, figure, title, text, show
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 from types import FunctionType as function
@@ -90,23 +65,22 @@ from .datadir import getDATADIR,log_fname,proc_data_target_dir
 from . import fourier as this_fourier
 from . import axis_manipulation
 from . import nnls as this_nnls
-from . import plot_funcs as this_plotting
 from .general_functions import *
 from .ndshape import ndshape_base
-#rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
-rc('image',aspect='auto',interpolation='nearest')
-#rcParams['text.usetex'] = True
-rc('font', family='Arial')# I need this to render unicode
-rcParams['xtick.direction'] = 'out'
-rcParams['ytick.direction'] = 'out'
-#rcParams['ytick.major.size'] = 12
-#rcParams['ytick.minor.size'] = 6
-#rcParams['lines.linewidth'] = 3.0
-#rcParams['legend.fontsize'] = 12
-#rcParams['font.size'] = 6
-rcParams['axes.grid'] = False
-rcParams['image.cmap'] = 'jet'
-rcParams['figure.figsize']=(7*(1+np.sqrt(5))/2,7)
+#plt.rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
+plt.rc('image',aspect='auto',interpolation='nearest')
+#plt.rcParams['text.usetex'] = True
+plt.rc('font', family='Arial')# I need this to render unicode
+plt.rcParams['xtick.direction'] = 'out'
+plt.rcParams['ytick.direction'] = 'out'
+#plt.rcParams['ytick.major.size'] = 12
+#plt.rcParams['ytick.minor.size'] = 6
+#plt.rcParams['lines.linewidth'] = 3.0
+#plt.rcParams['legend.fontsize'] = 12
+#plt.rcParams['font.size'] = 6
+plt.rcParams['axes.grid'] = False
+plt.rcParams['image.cmap'] = 'jet'
+plt.rcParams['figure.figsize']=(7*(1+np.sqrt(5))/2,7)
 mat2array = [{'ImmutableMatrix': np.array}, 'numpy']# for sympy returns arrays rather than the stupid matrix class
 logger = logging.getLogger('pyspecdata.core')
 #{{{ constants
@@ -1100,10 +1074,8 @@ def h5nodebypath(h5path,force = False,only_lowest = False,check_only = False,dir
         log_fname('data_files',h5path[0],directory,unknown_exp_type_name)
     else:
         if check_only:
-            errmsg = log_fname('missing_data_files',h5path[0],directory,unknown_exp_type_name)
-            raise AttributeError("You're checking for a node in a file (%s) that does not exist"%(h5path[0])
-                    +'\n'
-                    +errmsg)
+            log_fname('missing_data_files',h5path[0],directory,unknown_exp_type_name)
+            raise AttributeError("You're checking for a node in a file (%s) that does not exist"%(h5path[0]))
         logger.debug(strm('DEBUG: file does not exist\n\n'))
     mode = 'a'
     #if check_only: mode = 'r'
@@ -1423,7 +1395,7 @@ def othergridandtick(ax,rotation=(0,0),precision=(2,2),labelstring=('',''),gridc
 #}}}
 #{{{ plot wrapper
 global OLDplot
-OLDplot = plot
+OLDplot = plt.plot
 global myplotfunc
 myplotfunc = OLDplot
 def whereblocks(a):
@@ -1600,11 +1572,11 @@ def plot_label_points(x,y,labels,**kwargs_passed):
     kwargs = {'alpha':0.5,'color':'g','ha':'left','va':'center','rotation':0,'size':14}
     kwargs.update(kwargs_passed)
     for j in range(0,len(labels)):
-        text(x[j],y[j],labels[j],**kwargs)
+        plt.text(x[j],y[j],labels[j],**kwargs)
 def addlabels(labelstring,x,y,labels):
     r'obsolete -- use plot_label_points'
     for j in range(0,len(labels)):
-        text(x[j],y[j],labelstring%labels[j],alpha=0.5,color='g',ha='left',va='top',rotation=0)
+        plt.text(x[j],y[j],labelstring%labels[j],alpha=0.5,color='g',ha='left',va='top',rotation=0)
 def plot_color_counter(*args,**kwargs):
     """Try not to use this function any more -- the version-to-version support for capturing and setting color cycles in matplotlib is very very bad.  (And, the cycler object in newer versions of matplolib is confusing.) So, just import `cycle` from `itertools`, and use it to build a cycle that you directly call to set your properties.
 
@@ -1671,7 +1643,7 @@ def contour_plot(xvals,yvals,zvals,color = 'k',alpha = 1.0,npts = 300,**kwargs):
     xi = np.linspace(xvals.min(),xvals.max(),npts)
     yi = np.linspace(yvals.min(),yvals.max(),npts)
     #{{{ show the diffusivity
-    #plot(np.array(xvals),np.array(yvals),'k')# to show where everything is
+    #plt.plot(np.array(xvals),np.array(yvals),'k')# to show where everything is
     zi = scipy_griddata((xvals,yvals),
         zvals,
         (xi[None,:],yi[:,None]))
@@ -1703,9 +1675,9 @@ def plot_updown(data,axis,color1,color2,symbol = '',**kwargs):
         if hasattr(data,'other_info'):
             if 'plot_color' in data.get_prop():
                 data.other_info.pop('plot_color')
-    plot(data[axis,changemask],color1+symbol,**kwargs)
+    plt.plot(data[axis,changemask],color1+symbol,**kwargs)
     if len(kwargs) > 0 and 'label' in list(kwargs.keys()): kwargs.pop('label') # if I'm doing a legend, I want it on the first
-    plot(data[axis,~changemask],color2+symbol,**kwargs)
+    plt.plot(data[axis,~changemask],color2+symbol,**kwargs)
     return
 def nextfigure(figurelist,name):
     'obsolete -- now use class'
@@ -1716,10 +1688,10 @@ def nextfigure(figurelist,name):
         print('Boo! not a new style name!')
     logger.debug(strm(lsafe('DEBUG figurelist, called with',name)))
     if name in figurelist:
-        fig = figure(figurelist.index(name)+1)
+        fig = plt.figure(figurelist.index(name)+1)
         logger.debug(strm(lsafen('in',figurelist,'at figure',figurelist.index(name)+1,'switched figures')))
     else:
-        fig = figure(len(figurelist)+1)
+        fig = plt.figure(len(figurelist)+1)
         fig.add_subplot(111)
         logger.debug(strm(lsafen('added, figure',len(figurelist)+1,'because not in figurelist',figurelist)))
         figurelist.append(name)
@@ -1759,955 +1731,6 @@ def figlistini_old(first_figure):
     else:
         logger.debug(strm(lsafen(first_figure.figurelist)))
         return first_figure
-class figlist(object):
-    r"""
-    Attributes
-    ----------
-    basename : str
-        A basename that can be changed to generate different sets of figures with different basenames.
-        For example, this is useful if you are looping over different sets of data,
-        and generating the same set of figures for each set of data (which would correspond to a basename).
-    figurelist : list
-        A list of the figure names
-    figdict : dict
-        A dictionary containing the figurelist and the figure numbers or objects that they correspond to.
-        Keys of this dictionary must be elements of `figurelist`.
-    propdict : dict
-        Maintains various properties for each element in figurelist.
-        Keys of this dictionary must be elements of `figurelist`.
-    """
-    def __init__(self,*arg,**kwargs):
-        r"""Initialize a figure list, which can be used to generate a series of
-        figures from the command line or prompt.  Then the same code (if
-        `figlist_var` is used) can be included inside a ``python`` environment
-        in a latex document.
-
-        Parameters
-        ----------
-        black : double
-            A fractional number giving how "black" "black" is. Typically 1.0 is
-            actually too dark and makes things hard to see.
-        mlab : object
-            If you want to use mayavi, this should be the mlab (module?)
-        file_name : str
-            This is the argument passed to :func:`self.show`, and used to
-            construct the file names.
-        """
-        self.black, self.env, self.mlab, self.file_name, self.line_spacing = process_kwargs([
-            ('black',0.9),
-            ('env',''),
-            ('mlab','BLANK'),
-            ('file_name',f'randgen{int(time.time()*10):d}.pdf'),
-            ('line_spacing','BLANK'),
-            ],
-                kwargs, pass_through=True)
-        if len(kwargs) > 0:
-            self.lplot_kwargs = kwargs
-        if self.mlab == 'BLANK': del self.mlab
-        if self.file_name == 'BLANK': del self.file_name
-        if self.line_spacing == 'BLANK': del self.line_spacing
-        logger.debug('DEBUG: initialize figlist')
-        if len(arg) == 0:
-            self.figurelist = []
-        else:
-            self.figurelist = arg[0]
-        if len(kwargs) > 0:
-            self.figurelist.append(kwargs)
-        self.units = {}
-        self.autolegend_list = {}
-        self.twinx_list = {}
-        self.basename = None
-        return
-    def twinx(self,autopad = False,orig = False,color = None):
-        #self.figurelist.insert(self.get_fig_number(self.current)-1,{'autopad':False}) #doesn't work because it changes the figure number; I can get the number with fig = plt.gcf(); fig.number, but I can't set it; it would be best to switch to using a list that contains all the figure numbers to match all their names -- or alternatively, note that matplotlib allows you to give them names, though I don't know how that works
-        if self.current in list(self.twinx_list.keys()):
-            ax1,ax2 = self.twinx_list[self.current]
-            if color is not None:
-                if 'twinx_color' not in list(self.propdict[self.current].keys()):
-                        ax2.tick_params(axis = 'y',colors = color)
-                        ax2.yaxis.label.set_color(color)
-                        ax2.spines['right'].set_color(color)
-                        self.propdict[self.current]['twinx_color'] = color
-                else:
-                    if color != self.propdict[self.current]['twinx_color']:
-                        raise ValueError("conflicting values for the twinx color have been given!!")
-        else:
-            if autopad: autopad_figure()
-            ax1 = plt.gca()
-            plt.twinx()
-            ax2 = plt.gca()
-            self.twinx_list[self.current] = (ax1,ax2)
-            if color is not None:
-                ax2.tick_params(axis = 'y',colors = color)
-                ax2.yaxis.label.set_color(color)
-                ax2.spines['right'].set_color(color)
-                self.propdict[self.current]['twinx_color'] = color
-        if orig:
-            plt.sca(ax1)
-            return ax1
-        else:
-            plt.sca(ax2)
-            return ax2
-    def use_autolegend(self,value = None):
-        'No argument sets to true if it\'s not already set'
-        if value is None:
-            if not self.current in list(self.autolegend_list.keys()):
-                self.autolegend_list.update({self.current:True})
-            else: #leave it alone
-                return
-        else: #passed an explicit value
-            self.autolegend_list.update({self.current:value})
-            return
-    def push_marker(self):
-        """save the current plot to a "stack" so we can return to it with "pop_marker" """
-        if hasattr(self,'current'): # if not, this is the first plot
-            if not hasattr(self,'pushlist'):
-                self.pushlist = []
-            logger.debug(strm("about to push marker, basename'",self.basename,"' and name '",self.current,"'"))
-            self.pushlist.append(
-                    (self.basename,self.current))
-        return
-    def pop_marker(self):
-        """use the plot on the top of the "stack" (see push_marker) as the current plot"""
-        if hasattr(self,'pushlist') and len(self.pushlist) > 0: # otherwise, we called push with no current plot
-            bn,fn = self.pushlist.pop()
-            self.basename = None # because basename is already in "current"
-            self.next(fn)
-            self.basename = bn
-        return
-    def get_num_figures(self):
-        cleanlist = [x for x in self.figurelist if isinstance(x, str)]
-        return len(cleanlist)
-    def get_fig_number(self,name):
-        cleanlist = [x for x in self.figurelist if isinstance(x, str)]
-        try:
-            return cleanlist.index(name)+1
-        except ValueError:
-            raise ValueError(strm("You are looking for",name,
-                "which isn't in the list of figures",cleanlist))
-    def next(self,input_name, legend=False,
-            boundaries=None, twinx=None, fig=None,
-            **kwargs):
-        r"""Switch to the figure given by input_name, which is used not only as
-        a string-based name for the figure, but also as a default title and as
-        a base name for resulting figure files.
-
-        **In the future, we actually want this to track the appropriate axis object!**
-
-        Parameters
-        ----------
-        legend : bool
-            If this is set, a legend is created *outside* the figure.
-        twinx : {0,1}
-            :1: plots on an overlayed axis (the matplotlib twinx) whose y axis
-                is labeled on the right when you set this for the first time, you
-                can also set a `color` kwarg that controls the coloring of the
-                right axis. 
-            :0: used to switch back to the left (default) axis
-        boundaries :
-            **need to add description**
-        kwargs : dict
-            Any other keyword arguments are passed to the matplotlib (mayavi)
-            figure() function that's used to switch (create) figures.
-        """
-        # {{{ basic setup
-        if not hasattr(self,'figdict'):
-            self.figdict = {} # the dictionary of the various figures
-        if not hasattr(self,'propdict'):
-            self.propdict = {} # the properties belonging to those same figures
-        logger.debug(strm("for plot",input_name,"basename is",self.basename))
-        if (self.basename is not None #basename for groups of figures
-                # I need to check that the basename hasn't already been added
-                and not input_name.startswith(self.basename)):
-            name = self.basename + ' ' + input_name
-        else:
-            logger.debug(strm("not using a basename",self.basename is not None))
-            name = input_name
-        # }}}
-        if name.find('/') > 0:
-            raise ValueError("don't include slashes in the figure name, that's just too confusing")
-        logger.debug(strm('with basename appended, this is',name))
-        if name in self.figurelist:# figure already exists
-            if hasattr(self,'mlab'):
-                # with this commit, I removed the kwargs and bgcolor, not sure why
-                fig = self.mlab.figure(self.get_fig_number(name))
-                fig.scene.render_window.aa_frames = 20
-                fig.scene.anti_aliasing_frames = 20
-            else:
-                logging.debug(strm("I'm changing to figure",self.get_fig_number(name),"for",name))
-                fig = self.figdict[name]
-                figure(self.figdict[name].number)
-            self.current = name
-            #logging.debug(strm('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures'))
-            if boundaries is not None:
-                if 'boundaries' not in list(self.propdict[self.current].keys()) or self.propdict[self.current]['boundaries'] != boundaries:
-                    raise ValueError("You're giving conflicting values for boundaries")
-            if legend:
-                if 'legend' not in list(self.propdict[self.current].keys()) or self.propdict[self.current]['legend'] != legend:
-                    raise ValueError("You're giving conflicting values for legend")
-        else:# figure doesn't exist yet
-            num_figs_before_add = self.get_num_figures()
-            self.current = name
-            if self.current not in list(self.propdict.keys()):
-                self.propdict[self.current] = {}
-            if boundaries == False:
-                self.propdict[self.current]['boundaries'] = False
-                self.setprops(boundaries = False)
-            if legend:
-                self.propdict[self.current]['legend'] = True
-                if 'figsize' not in list(kwargs.keys()):
-                    kwargs.update({'figsize':(12,6)})
-                if hasattr(self,'mlab'):
-                    fig = self.mlab.figure(num_figs_before_add+1,bgcolor = (1,1,1),**kwargs)
-                    fig.scene.render_window.aa_frames = 20
-                    fig.scene.anti_aliasing_frames = 20
-                else:
-                    fig = figure(num_figs_before_add+1,**kwargs)
-                fig.add_axes([0.075,0.2,0.6,0.7]) # l b w h
-                self.use_autolegend('outside')
-            else:
-                self.propdict[self.current]['legend'] = False
-                if fig is None:
-                    if hasattr(self,'mlab'):
-                        fig = self.mlab.figure(num_figs_before_add+1,bgcolor = (1,1,1),**kwargs)
-                        fig.scene.render_window.aa_frames = 20
-                        fig.scene.anti_aliasing_frames = 20
-                    else:
-                        fig = figure(num_figs_before_add+1,**kwargs)
-                if twinx is not None:
-                    fig.add_subplot(111)
-            logger.debug(strm('added figure',len(self.figurelist)+1,'because not in figurelist',self.figurelist))
-            self.figurelist.append(name)
-            self.figdict.update({self.current:fig})
-            if boundaries == False:
-                self.setprops(boundaries = True)# set this back
-        if twinx is not None:
-            self.propdict[self.current]['twinx'] = True
-            if twinx == 0:
-                self.twinx(orig = True)
-                fig = plt.gcf()
-            elif twinx == 1:
-                self.twinx()
-                fig = plt.gcf()
-            else:
-                raise ValueError('If you pass twinx, pass 0 for the original or 1 for the right side')
-            self.figdict.update({self.current:fig})
-        return fig
-    def plot(self,*args,**kwargs):
-        r"""
-        Parameters
-        ----------
-        linestyle: {':','--','.','etc.'}
-            the style of the line
-        plottype: {'semilogy','semilogx','loglog'}
-            Select a logarithmic plotting style.
-        nosemilog: True
-            Typically, if you supply a log-spaced axis,
-            a semilogx plot will be automatically selected.
-            This overrides that behavior.
-            Defaults to False.
-        """
-        if 'label' in kwargs.keys() or 'label_format_string' in kwargs.keys():
-            self.use_autolegend()
-        if 'alpha' not in kwargs.keys():
-            kwargs['alpha'] = 0.5
-        human_units = True
-        if 'human_units' in list(kwargs.keys()):
-            human_units = kwargs.pop('human_units')
-        if human_units:
-            firstarg = self.check_units(args[0],0,1) # check units, and if need be convert to human units, where x is the first dimension and y is the last
-        else:
-            firstarg = args[0]
-        if 'label' not in list(kwargs.keys()) and isinstance(args[0],nddata):
-            thisname = args[0].name()
-            if thisname is not None:
-                kwargs['label'] = thisname
-        retval = plot(*tuple((firstarg,)+args[1:]),**kwargs)#just a placeholder for now, will later keep units + such
-        ax = plt.gca()
-        if ax.get_title() is None or len(ax.get_title()) == 0:
-            try:
-                plt.title(self.current)
-            except:
-                plt.title('untitled')
-        return retval
-    def phaseplot_finalize(self):
-        ("Performs plot decorations that are typically desired for a manual phasing"
-        " plot.  This assumes that the ``y``-axis is given in units of half-cycles"
-        " ($\pi$ radians).")
-        ax = plt.gca()
-        ylim(-1,1)
-        gridandtick(ax)
-        ylabel(r'$\phi / \pi$')
-        # now show the pi/2 lines
-        axhline(y = 0.5,color = 'r',alpha = 0.5,linewidth = 2)
-        axhline(y = -0.5,color = 'r',alpha = 0.5,linewidth = 2)
-        return
-    def check_units(self, testdata, x_index, y_index):
-        logger.debug(strm("-"*30))
-        logger.debug(strm("called check_units for figure",self.current))
-        if isinstance(testdata,nddata):
-            logger.debug(strm("(check_units) it's nddata"))
-            testdata = testdata.copy().human_units()
-            if len(testdata.dimlabels) > 1:
-                logger.debug(strm("(check_units) more than one dimension"))
-                if not hasattr(self,'current'):
-                    raise ValueError("give your plot a name (using .next()) first! (this is used for naming the PDF's etc)")
-                if self.current in list(self.units.keys()):
-                        theseunits = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
-                        if theseunits != self.units[self.current] and theseunits[0] != self.units[self.current]:
-                                raise ValueError("for '%s' the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(self.current,theseunits,self.units[self.current]))
-                else:
-                    if isinstance(testdata,nddata):
-                        self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
-            else:
-                logger.debug(strm("(check_units) only one dimension"))
-                if not hasattr(self,'current'):
-                    self.next('default')
-                if self.current in list(self.units.keys()):
-                    theseunits = (testdata.get_units(testdata.dimlabels[x_index]))
-                    testunits = self.units[self.current]
-                    if theseunits != testunits:
-                        if isinstance(testunits, tuple) and testunits[1] is None:
-                            pass
-                        else:
-                            raise ValueError("for figure '%s' the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(self.current,self.units[self.current],theseunits))
-                else:
-                    self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]))
-        logger.debug(strm("-"*30))
-        return testdata
-    def adjust_spines(self,spines):
-        ax = plt.gca()
-        #{{{ taken from matplotlib examples
-        for loc, spine in list(ax.spines.items()):
-            if loc in spines:
-                spine.set_position(('outward',10)) # outward by 10 points
-                spine.set_smart_bounds(True)
-            else:
-                spine.set_color('none') # don't draw spine
-
-        # turn off ticks where there is no spine
-        if 'left' in spines:
-            ax.yaxis.set_ticks_position('left')
-        else:
-            # no yaxis ticks
-            ax.yaxis.set_ticks([])
-
-        if 'bottom' in spines:
-            ax.xaxis.set_ticks_position('bottom')
-        else:
-            # no xaxis ticks
-            ax.xaxis.set_ticks([])
-        #}}}
-    def grid(self):
-        ax = plt.gca()
-        if self.black:
-            gridandtick(ax,gridcolor = r_[0.5,0.5,0.5])
-        else:
-            gridandtick(ax,gridcolor = r_[0,0,0])
-        return
-    image = this_plotting.image.fl_image
-    def marked_text(self,marker,input_text="",sep='\n'):
-        """Creates a named `marker` where we can place text.   If `marker`
-        has been used, goes back and places text there."""
-        if not hasattr(self,'textdict'):
-            self.textdict = {}
-        if marker in list(self.textdict.keys()):
-            idx = self.textdict[marker]
-            self.figurelist[idx]['print_string'] = (
-                    self.figurelist[idx]['print_string']
-                    + sep + input_text )
-        else:
-            self.setprops(print_string=input_text)
-            idx = len(self.figurelist)-1
-            self.textdict[marker] = idx
-    def text(self,mytext):
-        self.setprops(print_string = mytext)
-    def setprops(self,**kwargs):
-        self.figurelist.append(kwargs)
-    def show_prep(self):
-        for k,v in list(self.autolegend_list.items()):
-            kwargs = {}
-            if v:
-                if isinstance(v, str):
-                    if v[0:7] == 'colored':
-                        kwargs.update(dict(match_colors = True))
-                        v = v[7:]
-                        if v == '':
-                            v = True
-                    if v == 'outside':
-                        kwargs.update(dict(bbox_to_anchor=(1.05,1),loc = 2,borderaxespad=0.))
-                self.next(k)
-                logger.debug(strm("I am about to assign a legend for ",k,". Is it in the figurelist?:",k in self.figurelist))
-                logger.debug(strm("print out the legend object:",plt.gca().legend()))
-                try:
-                    autolegend(**kwargs)
-                except:
-                    try:
-                        self.twinx(orig = True)
-                    except Exception as e:
-                        raise Exception(strm('error while trying to run twinx to place legend for',k,'\n\tfiglist is',self.figurelist,explain_error(e)))
-                    try:
-                        autolegend(**kwargs)
-                    except Exception as e:
-                        raise Exception(strm('error while trying to run autolegend function for',k,'\n\tfiglist is',self.figurelist,explain_error(e)))
-    def show(self,*args,**kwargs):
-        self.basename = None # must be turned off, so it can cycle through lists, etc, on its own
-        line_spacing,block = process_kwargs([('line_spacing',''),
-                                              ('block',None)
-                                              ],kwargs)
-        if len(kwargs) > 0:
-            raise ValueError("didn't understand kwargs "+repr(kwargs))
-        logger.debug(strm("before show_prep, figlist is",self.figurelist))
-        logger.debug(strm("before show_prep, autolegend list is",self.autolegend_list))
-        self.show_prep()
-        #{{{ just copy from fornnotebook to get the print string functionality
-        kwargs = {}
-        for figname in self.figurelist:
-            logger.debug(strm("showing figure \"%s\""%lsafen(figname)))
-            if isinstance(figname, dict):
-                kwargs.update(figname)
-                if 'print_string' in kwargs:
-                    print('\n\n')
-                    print(kwargs.pop('print_string'))
-                    print('\n\n')
-            else:
-                self.next(figname)
-                plt.gcf().tight_layout()
-        #}}}
-        if len(args) == 1:
-            if (args[0][:-4] == '.pdf') or (args[0][:-4] == '.png') or (args[0][:-4] == '.jpg'):
-                print("you passed me a filename, but I'm just burning it")
-        if hasattr(self,'mlab'):
-            print("running mlab show!")
-            self.mlab.show()
-        else:
-            #print "not running mlab show!"
-            show(block=block)
-    def label_point(self, data, axis, value, thislabel,
-            show_point=True, xscale=1, **new_kwargs):
-        """only works for 1D data: assume you've passed a single-point nddata, and label it
-
-        xscale gives the unit scaling
-
-        ..todo::
-
-            Improve the unit scaling, so that this would also work.
-
-            Allow it to include a format string that would use the value.
-        Parameters
-        ----------
-
-        show_point : bool
-
-            Defaults to `True`. Actually generate a point (circle), *vs.*
-            just the label.
-        """
-        kwargs = {'alpha':0.5,'color':'k','ha':'left','va':'bottom','rotation':45,'size':14}
-        kwargs.update(new_kwargs)
-        y = np.double(data[axis:value].data)
-        x_ind = np.argmin(abs(data.getaxis(axis)-value))
-        x = data.getaxis(axis)[x_ind]
-        text(x/xscale, y, thislabel, **kwargs)
-        if show_point:
-            plot(x/xscale, y, 'o', color=kwargs["color"],
-                    alpha=kwargs["alpha"])
-        return
-    def header(self,number_above,input_string):
-        header_list = ['\\section','\\subsection','\\subsubsection','\\paragraph','\\subparagraph']
-        self.text(header_list[number_above+1]+'{%s}'%input_string)
-        return number_above + 1
-    def mesh(self,plotdata,Z_normalization = None,equal_scale = True,
-            lensoffset = 1e-3,
-            show_contours = False,
-            grey_surf = False,
-            **kwargs):
-        plotdata = self.check_units(plotdata,0,1)
-        if hasattr(self,'mlab'):
-            fig = self.figdict[self.current]
-            fig.scene.disable_render = True
-            X,Y,Z,x_axis,y_axis = plotdata.matrices_3d(also1d = True)# return the axes, and also alter "plotdata" so it's downsampled
-            X_normalization = X.max()
-            X /= X_normalization
-            if equal_scale:
-                Y_normalization = X_normalization
-            else:
-                Y_normalization = Y.max()
-            Y /= Y_normalization
-            if Z_normalization is None:
-                Z_normalization = Z.flatten().max()
-            Z /= Z_normalization
-            surf_kwargs = {}
-            if grey_surf:
-                surf_kwargs.update(color = (0.5,0.5,0.5))# opacity and the contour lines don't play well, otherwise I would like to make this transluscent
-            self.mlab.surf(X,Y,Z,**surf_kwargs)
-            if show_contours:
-                contour_kwargs = {'line_width':24}
-                contour_kwargs.update(opacity = 0.5)
-                if not grey_surf:
-                    contour_kwargs.update(color = (1,1,1))
-                self.mlab.contour_surf(X,Y,Z+lensoffset,contours = r_[-1:1:10j].tolist(),**contour_kwargs)
-                contour_kwargs.update(opacity = 0.1)
-                self.mlab.contour_surf(X,Y,Z+lensoffset,contours = r_[-1:1:46j].tolist(),**contour_kwargs)# for some reason, 46 gives alignment (I think 9+1 and 9*5+1)
-            if equal_scale:
-                self.generate_ticks(plotdata,(x_axis,y_axis),X_normalization,Z_normalization)
-            else:
-                self.generate_ticks(plotdata,(x_axis,y_axis),X_normalization,Z_normalization,y_rescale = Y_normalization/X_normalization)
-            fig.scene.disable_render = False
-        else:
-            # this should be upgraded, or rather moved to here
-            plotdata.meshplot(alpha=1.0, cmap=cm.jet, **kwargs)
-        return Z_normalization
-    def generate_ticks(self,plotdata,axes,rescale,z_norm = None,y_rescale = 1,text_scale = 0.05,follow_surface = False,
-            lensoffset = 0.5e-2,
-            line_width = 1e-3,
-            tube_radius = 1e-3,
-            fine_grid = False,
-            ):
-        'generate 3d ticks and grid for mayavi'
-        if follow_surface and z_norm is None:
-            raise ValueError("if you choose to generate the mesh -- i.e. follow the surface -- then you need to pass the z normalization")
-        x_axis,y_axis = axes
-        x_dim = plotdata.dimlabels[0]
-        y_dim = plotdata.dimlabels[1]
-        def gen_list(thisaxis,desired_ticks = 7.):
-            #{{{ out of the following list, choose the one that gives as close as possible to the desired ticks
-            axis_span = thisaxis.max() - thisaxis.min()
-            possible_iterators = r_[0.1,0.5,1,5,10,20,30,50,100,200,500,1000]
-            iterator = possible_iterators[np.argmin(abs(axis_span/desired_ticks -
-                possible_iterators))]
-            #}}}
-            logger.debug(strm('iterator is',iterator))
-            return iterator,r_[np.ceil(thisaxis.min()/iterator):
-                np.floor(thisaxis.max()/iterator)+1]*iterator
-        #{{{ now, I need to get the list of multiples that falls inside the axis span
-        xiterator,xlist = gen_list(x_axis)
-        yiterator,ylist = gen_list(y_axis)
-        logger.debug(strm('range of x ',x_axis.min(),x_axis.max()))
-        logger.debug(strm('xlist',xlist))
-        logger.debug(strm(plotdata.unitify_axis(0)))
-        logger.debug(strm('range of y ',y_axis.min(),y_axis.max()))
-        logger.debug(strm('ylist',ylist))
-        logger.debug(strm(plotdata.unitify_axis(1)))
-        #}}}
-        if xiterator < 1:
-            x_ticklabels = ['{:0.1f}'.format(j) for j in xlist]
-        else:
-            x_ticklabels = ['{:0.0f}'.format(j) for j in xlist]
-        if yiterator < 1:
-            y_ticklabels = ['{:0.1f}'.format(j) for j in ylist]
-        else:
-            y_ticklabels = ['{:0.0f}'.format(j) for j in ylist]
-        #{{{ rescale absolutely everything
-        xlist /= rescale
-        ylist /= (rescale*y_rescale)
-        x_axis /= rescale
-        y_axis /= (rescale*y_rescale)
-        #}}}
-        x_range = r_[x_axis.min(),x_axis.max()]
-        y_range = r_[y_axis.min(),y_axis.max()]
-        extension_factor = text_scale * 3
-        #{{{ y ticks
-        if follow_surface:
-            if fine_grid:
-                dy = ylist[1]-ylist[0]
-                finer_ylist = r_[ylist[0]-dy:ylist[-1]+dy:1j*((len(ylist)+2-1)*5+1)]
-                finer_ylist = finer_ylist[finer_ylist>=y_axis.min()]
-                finer_ylist = finer_ylist[finer_ylist<=y_axis.max()]
-            else:
-                finer_ylist = ylist
-            for j,y in enumerate(finer_ylist):
-                x_linedata = plotdata.getaxis(x_dim)/rescale
-                z_linedata = plotdata[y_dim:(y*rescale)].data.flatten()/z_norm
-                self.mlab.plot3d(x_linedata,y*np.ones_like(x_linedata),
-                        z_linedata+lensoffset,
-                        color = (0,0,0), line_width = line_width,
-                        tube_radius = tube_radius)
-        for j,y in enumerate(ylist):
-            self.mlab.plot3d(x_range+extension_factor*r_[-1,1],
-                    y*np.ones(2),np.zeros(2),
-                    color = (0,0,0), line_width = line_width,
-                    tube_radius = tube_radius)
-            self.mlab.text3d(x_range[0]-2*extension_factor, y, 0,
-                    y_ticklabels[j],color = (0,0,0),
-                    scale = text_scale # in figure units
-                    )
-            self.mlab.text3d(x_range[1]+2*extension_factor, y, 0,
-                    y_ticklabels[j],color = (0,0,0),
-                    scale = text_scale # in figure units
-                    )
-        self.mlab.text3d(x_range[1] + 3 * extension_factor,y_range.mean(), 0,
-                plotdata.unitify_axis(1), color = (0,0,0),
-                scale = text_scale,
-                orient_to_camera = False,
-                orientation = (0,0,90))# the last angle appears to be rotaiton about z
-        #}}}
-        #{{{ x ticks
-        if follow_surface:
-            if fine_grid:
-                dx = xlist[1]-xlist[0]
-                finer_xlist = r_[xlist[0]-dx:xlist[-1]+dx:1j*((len(xlist)+2-1)*5+1)]
-                finer_xlist = finer_xlist[finer_xlist>=x_axis.min()]
-                finer_xlist = finer_xlist[finer_xlist<=x_axis.max()]
-            else:
-                finer_xlist = xlist
-            for j,x in enumerate(finer_xlist):
-                y_linedata = plotdata.getaxis(y_dim)/(rescale*y_rescale)
-                z_linedata = plotdata[x_dim:(x*rescale)].data.flatten()/z_norm
-                self.mlab.plot3d(x*np.ones_like(y_linedata),y_linedata,
-                        z_linedata+lensoffset,
-                        color = (0,0,0), line_width = line_width,
-                        tube_radius = tube_radius)
-        for j,x in enumerate(xlist):
-            self.mlab.plot3d(x*np.ones(2),y_range+extension_factor*r_[-1,1],
-                    np.zeros(2),
-                    color = (0,0,0), line_width = line_width,
-                    tube_radius = tube_radius)
-            self.mlab.text3d(x, y_range[0]-2*extension_factor, 0,
-                    x_ticklabels[j],color = (0,0,0),
-                    scale = text_scale # in figure units
-                    )
-            self.mlab.text3d(x, y_range[1]+2*extension_factor, 0,
-                    x_ticklabels[j],color = (0,0,0),
-                    scale = text_scale # in figure units
-                    )
-        self.mlab.text3d(x_range.mean(), y_range[1] + 3 * extension_factor,
-                0,
-                plotdata.unitify_axis(0), color = (0,0,0),
-                scale = text_scale,
-                orient_to_camera = False,
-                orientation = (0,0,180))# the last angle appears to be rotaiton about z
-        #}}}
-        return
-    def __enter__(self):
-        return self
-    def __exit__(self, exception_type, exception_value, traceback):
-        r'''show the plots, unless there are errors.
-
-        Because this is executed before raising any errors, we want to avoid showing any plots if there are errors.
-        Otherwise, it gets very confusing.
-        '''
-        if exception_type is None:
-            if hasattr(self,'file_name'):
-                if hasattr(self,'line_spacing'):
-                    self.show(self.file_name,line_spacing = self.line_spacing)
-                else:
-                    self.show(self.file_name)
-            else:
-                self.show()
-            return
-    def __repr__(self):
-        result = ""
-        counter=0
-        for j in self.figurelist:
-            if type(j) == dict:
-                result = result+str(j)+"\n"
-            else:
-                counter += 1
-                result = result+"%d: "%counter+str(j)+ (
-                        ' '+'|'*3+str(self.units[j])
-                        if j in self.units.keys()
-                        else
-                        ''
-                        ) +"\n"
-        return result
-def text_on_plot(x,y,thistext,coord = 'axes',**kwargs):
-    ax = plt.gca()
-    if coord == 'axes':
-        newkwargs = {'transform':ax.transAxes,'size':'x-large',"horizontalalignment":'center'}
-    elif coord == 'data':
-        print("Yes, I am using data transform")
-        newkwargs = {'transform':ax.transData,'size':'small',"horizontalalignment":'right'}
-    color = None
-    if 'match_data' in list(kwargs.keys()):
-        if isinstance(kwargs['match_data'], list):
-            color = kwargs['match_data'][-1].get_color() # get the color of the last line
-        elif kwargs['match_data'].get_plot_color() is not None:
-            color = kwargs['match_data'].get_plot_color() # don't know when this works, but apparently, it does!
-        if color is not None:
-            newkwargs.update({'color':color})
-        else:
-            raise ValueError('You passed match_data to text_on_plot, but I can\'t find a color in the object')
-        kwargs.pop('match_data')
-    newkwargs.update(kwargs)
-    return text(x,y,thistext,**newkwargs)
-def plot(*args,**kwargs):
-    """The base plotting function that wraps around matplotlib to do a couple convenient things.
-
-    Parameters
-    ----------
-    label_format_string: str
-        If supplied, it formats the values of the other dimension to turn them into a label string.
-    human_units: bool
-    """
-    global myplotfunc
-    has_labels = False
-    #{{{ deal with axes and some other kwargs
-    ax,human_units,label_format_string,normalize,noerr,longest_is_x = process_kwargs([('ax',plt.gca()),
-        ('human_units',False),
-        ('label_format_string',None),
-        ('normalize',False),
-        ('noerr',False),
-        ('longest_is_x',True),
-        ],kwargs,pass_through = True)
-    #}}}
-    myplotfunc = ax.plot # default
-    #{{{ all possible properties
-    myformat = None 
-    myxlabel = None
-    myylabel = None
-    myx = None
-    myy = None
-    #}}}
-    #{{{assign all the possible combinations
-    if len(args)==1:
-        myy = args[0]
-    elif (len(args)==2) and (isinstance(args[1], str)):
-        myy = args[0]
-        myformat = args[1]
-    else:
-        myx = args[0]
-        myy = args[1]
-    if len(args)==3:
-        myformat = args[2]
-    if np.isscalar(myx):
-        myx = np.array([myx])
-    if np.isscalar(myy):
-        myy = np.array([myy])
-    #}}}
-    x_inverted = False
-    #{{{ parse nddata
-    if isinstance(myy,nddata):
-        myy = myy.copy()
-        if myy.get_error() is not None:
-            logging.debug(strm("shapes at top of function",ndshape(myy), myy.data.shape, myy.data_error.shape))
-        # {{{ automatically reduce any singleton dimensions
-        if not len(myy.dimlabels) == 1:
-            if np.any(np.array(myy.data.shape) == 1):
-                for singleton_dim in [lb for j,lb in enumerate(myy.dimlabels) if myy.data.shape[j] == 1]:
-                    myy = myy[singleton_dim,0]
-        # }}}
-        if len(myy.data.shape)>1 and longest_is_x:
-            longest_dim = np.argmax(myy.data.shape)
-            all_but_longest = set(range(len(myy.data.shape)))^set((longest_dim,))
-            if len(all_but_longest) > 0:
-                last_not_longest = max(all_but_longest)
-            else:
-                last_not_longest = -1
-            all_but_longest = list(all_but_longest) # seems to be sorted by default
-        else:
-            longest_dim = 0 # treat first as x, like before
-            last_not_longest = -1
-            if len(myy.data.shape)>1:
-                all_but_longest = set(range(len(myy.data.shape)))^set((longest_dim,))
-                all_but_longest = list(all_but_longest)
-            else:
-                all_but_longest = []
-        if human_units: myy = myy.human_units()
-        if myy.get_plot_color() is not None\
-            and 'color' not in list(kwargs.keys()):# allow override
-            kwargs.update({'color':myy.get_plot_color()})
-        if myy.name() is not None:
-            myylabel = myy.name()
-        else:
-            myylabel = 'data'
-        myylabel = myy.unitify_axis(myylabel,is_axis = False)
-        if (len(myy.dimlabels)>0):
-            myxlabel = myy.unitify_axis(longest_dim)
-        if myx is None:
-            try:
-                myx = myy.getaxis(myy.dimlabels[longest_dim])
-            except:
-                if len(myy.data.shape) == 0:
-                    raise ValueError("I can't plot zero-dimensional data (typically arises when you have a dataset with one point)")
-                myx = r_[0:myy.data.shape[longest_dim]]
-        if not noerr and isinstance(myy.data_error, np.ndarray) and len(myy.data_error)>0: #then this should be an errorbar plot
-            def thiserrbarplot(*tebargs,**tebkwargs):
-                if 'capsize' not in tebkwargs:
-                    tebkwargs.update({'capsize':6})
-                if isinstance(tebargs[-1], str):
-                    tebkwargs.update({'fmt':tebargs[-1]})
-                    return ax.errorbar(*tebargs[:-1],**tebkwargs)
-                else:
-                    return ax.errorbar(*tebargs,**tebkwargs)
-            myplotfunc = thiserrbarplot
-            logger.debug("this is an errorbar plot")
-            #{{{ pop any singleton dims
-            myyerror = myy.get_error()
-            myyerror = np.squeeze(myyerror)
-            #}}}
-            kwargs.update({'yerr':None})
-            valueforxerr = myy.get_error(myy.dimlabels[longest_dim])
-            if valueforxerr is not None: # if we have x errorbars too
-                #print "DEBUG decided to assign to xerr:",valueforxerr
-                kwargs.update({'xerr':valueforxerr})
-            logging.debug(strm("shapes after splitting nddata",myy.data.shape, myyerror.shape))
-        #{{{ deal with axis labels along y
-        try:
-            yaxislabels = myy.getaxis(myy.dimlabels[last_not_longest])
-        except:
-            yaxislabels = None
-        # at this point, if there is no axis label, it will break and go to pass
-        if yaxislabels is not None:
-            if len(yaxislabels) > 0:
-                if isinstance(yaxislabels[0], np.string_):
-                    has_labels = True
-                elif label_format_string is not None:
-                    yaxislabels = [label_format_string%j for j in yaxislabels]
-                    has_labels = True
-        #}}}
-        # {{{ add label if name is present, and squeeze -- could do this instead of ylabel, above
-        if myy.get_prop('x_inverted'):
-            x_inverted=True
-        #myy_name = myy.name()
-        if len(myy.data.shape) == 1:
-            myy = myy.data
-        else:
-            myy = np.squeeze(myy.data.transpose([longest_dim]+all_but_longest))
-            if 'yerr' in kwargs.keys():
-                myyerror = np.squeeze(myyerror.transpose([longest_dim]+all_but_longest))
-        if 'yerr' in kwargs.keys():
-            logging.debug(strm("halfway checkpoint",myy.shape, myyerror.shape))
-        #if len(myy.data) == 1 and 'label' not in kwargs.keys() and myy_name is not None:
-        #    kwargs.update('label',myy_name)
-        # }}}
-    #}}}
-    # {{{ allow list arguments
-    if type(myy) is list:
-        myy = np.array(myy)
-    if type(myx) is list:
-        myx = np.array(myx)
-    # }}}
-    #{{{ semilog where appropriate
-    if (myx is not None) and (len(myx)>1) and all(myx>0.0): # by doing this and making myplotfunc global, we preserve the plot style if we want to tack on one point
-        try:
-            b = np.diff(np.log10(myx))
-        except Exception as e:
-            raise Exception(strm('likely a problem with the type of the x label, which is',myx))
-        if (np.size(b)>3) and all(abs((b-b[0])/b[0])<1e-4) and not ('nosemilog' in list(kwargs.keys())):
-            if 'plottype' not in list(kwargs.keys()):
-                myplotfunc = ax.semilogx
-    if ('nosemilog' in list(kwargs.keys())):
-        #print 'this should pop nosemilog'
-        kwargs.pop('nosemilog')
-    if 'yerr' in kwargs.keys():
-        logging.debug(strm("halfway checkpoint",myy.data.shape, myyerror.shape))
-    if 'plottype' in list(kwargs.keys()):
-        if kwargs['plottype'] == 'semilogy':
-            myplotfunc = ax.semilogy
-        elif kwargs['plottype'] == 'semilogx':
-            myplotfunc = ax.semilogx
-        elif kwargs['plottype'] == 'loglog':
-            myplotfunc = ax.loglog
-        elif kwargs['plottype'] == 'linear':
-            myplotfunc = ax.plot
-        else:
-            raise ValueError(strm("plot type",kwargs['plottype'],"not allowed!"))
-        kwargs.pop('plottype')
-    #}}}
-    #{{{ take care of manual colors
-    if myformat is not None:
-        colorpos = myformat.find('#')
-        if  colorpos > -1:
-            kwargs.update({'color':myformat[colorpos:colorpos+7]})
-            myformat = myformat[0:colorpos] + myformat[colorpos+7:]
-        ##kwargs.update({'fmt':myformat})
-        linematched = False
-        for linestyle in ['-','--','-.',':','None','  ']:
-            if myformat.find(linestyle) > -1:
-                linematched = True
-                myformat.replace(linestyle,'')
-                kwargs.update({'linestyle':linestyle})
-        for markerlabel in ['o','.','d']:
-            if myformat.find(markerlabel) > -1:
-                if not linematched: kwargs.update({'linestyle':''})
-                myformat.replace(markerlabel,'')
-                kwargs.update({'marker':markerlabel})
-        if len(myformat) == 0:
-            myformat = None
-    #}}}
-    if normalize is not None and normalize:
-        myy /= myy.max()
-    #{{{ hsv plots when we have multiple lines
-    if len(np.shape(myy.squeeze()))>1 and np.sum(np.array(np.shape(myy))>1):
-        #{{{ hsv plots
-        retval = []
-        if 'yerr' in kwargs.keys():
-            logger.debug("I see error")
-        else:
-            logger.debug("I do not see error")
-        for j in range(0,myy.shape[1]):
-            #{{{ this is the way to assign plot arguments
-            plotargs = [k for k in (myx,myy[:,j],myformat) if k is not None]
-            #}}}
-            if 'yerr' in kwargs.keys():
-                kwargs['yerr'] = myyerror[:,j]
-            #{{{ here, i update the kwargs to include the specific color for this line
-            newkwargs = kwargs.copy() # kwargs is a dict
-            newkwargs.update({'color':cm.hsv(np.double(j)/np.double(myy.shape[1]))})
-            #}}}
-            #{{{ here, I update to use the labels
-            if has_labels:
-                newkwargs.update({'label':yaxislabels[j]})
-            #}}}
-            if 'yerr' in newkwargs.keys():
-                logging.debug(strm("shapes before plot",plotargs[0].shape,
-                    plotargs[1].shape, newkwargs['yerr'].shape))
-                #myplotfunc = ax.plot
-                #newkwargs.pop('yerr')
-            elif len(plotargs)>1 and isinstance(plotargs[1],np.ndarray):
-                logging.debug(strm("shapes before plot",plotargs[0].shape,
-                    plotargs[1].shape))
-            if np.any(np.isinf(myy)):
-                myy[np.isinf(myy)] = NaN # added this to prevent an overflow error
-            try:
-                retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
-            except Exception as e:
-                raise RuntimeError(strm("Error trying to plot using function",
-                    myplotfunc, '\nwith',len(plotargs), "arguments",
-                    '\nwhich were\n',plotargs, "\nand had len\n",
-                    list(map(len, plotargs)), "and", len(newkwargs),
-                    "\noptions", newkwargs, "of len",
-                    ', '.join([str(type(j)) + " " + str(j) if np.isscalar(j)
-                        else str(len(j)) for j in list(newkwargs.values())])))
-            if x_inverted:
-                these_xlims = ax.get_xlim()
-                ax.set_xlim((max(these_xlims),min(these_xlims)))
-        #}}}
-        #}}}
-    else:
-        logger.debug(strm("here are the kwargs",kwargs))
-        if 'yerr' in kwargs.keys() and kwargs['yerr'] is None:
-            kwargs['yerr'] = myyerror
-        plotargs = [j for j in [myx,np.real(myy),myformat] if j is not None]
-        try:
-            #print 'DEBUG plotting with args',plotargs,'and kwargs',kwargs,'\n\n'
-            retval = myplotfunc(*plotargs,**kwargs)
-        except Exception as e:
-            raise RuntimeError(strm('error trying to plot',type(myplotfunc),'with value',myplotfunc,
-                    '\nlength of the np.ndarray arguments:',['shape:'+str(np.shape(j)) if isinstance(j, np.ndarray) else j for j in plotargs],
-                    '\nsizes of np.ndarray kwargs',dict([(j,np.shape(kwargs[j])) if isinstance(kwargs[j], np.ndarray) else (j,kwargs[j]) for j in list(kwargs.keys())]),
-                    '\narguments = ',plotargs,
-                    '\nkwargs =',kwargs)+explain_error(e))
-        if x_inverted:
-            these_xlims = ax.get_xlim()
-            ax.set_xlim((max(these_xlims),min(these_xlims)))
-    #{{{ attach labels and such
-    if (myxlabel!=None):
-        ax.set_xlabel(myxlabel)
-    if (myylabel!=None):
-        ax.set_ylabel(myylabel)
-    try:
-        ax.axis('tight')
-    except Exception as e:
-        raise Exception(strm('error trying to set axis tight after plot',
-            myplotfunc, 'with arguments', plotargs, 'and kwargs', kwargs,
-            '\nsizes of arguments:', [np.shape(j) for j in plotargs],
-            '\nsizes of np.ndarray kwargs:',
-            dict([(j, np.shape(kwargs[j])) for j in
-                list(kwargs.keys()) if isinstance(kwargs[j], np.ndarray)])))
-    #plt.grid(True)
-    #}}}
-    return retval
 #}}}
 #{{{general functions
 def box_muller(length, return_complex=True):
@@ -3836,6 +2859,7 @@ class nddata (object):
         return self.__rdiv__(arg)
     def __div__(self,arg):
         if np.isscalar(arg):
+            logger.debug("division by a scalar")
             A = self.copy()
             A.data /= arg
             if A.get_error() is not None:
@@ -5519,7 +4543,11 @@ class nddata (object):
                     self.data = thisaxis
                     return self
                 else:
-                    axis_data = self.getaxis(axisname).flatten()
+                    try:
+                        axis_data = self.getaxis(axisname).flatten()
+                    except:
+                        if self.getaxis(axisname) is None:
+                            raise ValueError("the axis "+str(axisname)+" appears not to have an axis")
                     # copy is needed here, or data and axis will be the same object
                     retval = nddata(axis_data,axis_data.shape,[axisname]).setaxis(axisname,np.copy(axis_data))
                     retval.set_units(axisname,self.get_units(axisname))
@@ -7248,11 +6276,10 @@ def spectrogram(waveform,f_start,f_stop,npoints_fdom=40,tdom_div=2):
     for j in range(0,npoints_fdom):
 
         t_axis, specgram[j,:] = waveform.do_filter(f_axis[j])
-        #plot(t_axis,abs(specgram[j,:])) # leave this in for testing what it does in the fdom
-    #image(specgram,y=f_axis/1e6,x=t_axis*1e6) # now do an imagehsv (see if we can make imagerybw) plot of the resulting spectrogram
-    imshow(abs(specgram),extent=(t_axis[0]*1e6,t_axis[-1]*1e6,f_axis[-1]/1e6,f_axis[0]/1e6)) # now do an imagehsv (see if we can make imagerybw) plot of the resulting spectrogram
+        #plt.plot(t_axis,abs(specgram[j,:])) # leave this in for testing what it does in the fdom
+    #image(specgram,y=f_axis/1e6,x=t_axis*1e6) # now do an imagehsv (see if we can make imagerybw) plt.plot of the resulting spectrogram
+    imshow(abs(specgram),extent=(t_axis[0]*1e6,t_axis[-1]*1e6,f_axis[-1]/1e6,f_axis[0]/1e6)) # now do an imagehsv (see if we can make imagerybw) plt.plot of the resulting spectrogram
     return plt.gca()
-image = this_plotting.image.image
 def colormap(points,colors,n=256):
     r = np.interp(np.linspace(0,1,n),points,colors[:,0].flatten())
     g = np.interp(np.linspace(0,1,n),points,colors[:,1].flatten())
@@ -8047,41 +7074,3 @@ def sqrt(arg):
     else:
         return np_sqrt(arg)
 
-# {{{ determine the figure style, and load the appropriate modules
-if _figure_mode_setting == 'latex':
-    from .fornotebook import *
-    figlist_var = figlistl
-elif _figure_mode_setting == 'standard':
-    def obsn(*x): #because this is used in fornotebook, and I want it defined
-        print(''.join(x),'\n')
-    def obs(*x): #because this is used in fornotebook, and I want it defined
-        print(''.join(map(repr,x)))
-    def lrecordarray(*x,**kwargs):
-        return repr(x) # if I'm not using tex, it's easier to not use the formatting
-    def lsafe(*string,**kwargs):
-        "replacement for normal lsafe -- no escaping"
-        if len(string) > 1:
-            lsafewkargs = lambda x: lsafe(x,**kwargs)
-            return ' '.join(list(map(lsafewkargs,string)))
-        else:
-            string = string[0]
-        #{{{ kwargs
-        spaces = False
-        if 'spaces' in list(kwargs.keys()):
-            spaces = kwargs.pop('spaces')
-        if 'wrap' in list(kwargs.keys()):
-            wrap = kwargs.pop('wrap')
-        else:
-            wrap = None
-        #}}}
-        if not isinstance(string, str):
-            string = repr(string)
-        if wrap is True:
-            wrap = 60
-        if wrap is not None:
-            string = '\n'.join(textwrap.wrap(string,wrap))
-        return string
-    figlist_var = figlist
-else:
-    raise ValueError("I don't understand the figures mode "+_figure_mode_setting)
-# }}}

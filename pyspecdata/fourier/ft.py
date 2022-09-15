@@ -183,6 +183,11 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,unitary=None,**kw
         if not pad is False:
             newdata = list(self.data.shape)
             newdata[thisaxis] = padded_length
+            logging.debug(strm(
+                "attempting padding of rdata from",
+                self.data.shape,
+                "to",
+                newdata))
             targetslice = [slice(None,None,None)] * len(newdata)
             targetslice[thisaxis] = slice(None,self.data.shape[thisaxis])
             targetslice = tuple(targetslice)
