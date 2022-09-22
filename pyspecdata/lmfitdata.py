@@ -36,8 +36,8 @@ class lmfitglobal(nddata):
 
         temp_vars = dataset.variable_names
         temp_params = dataset.parameter_names
-        print("Dataset's variables are",temp_vars)
-        print("Dataset's parameters are",temp_params)
+        logging.info(strm("Dataset's variables are",temp_vars))
+        logging.info(strm("Dataset's parameters are",temp_params))
 
 
         if dataset_dict.keys() in self.global_vars_name:
@@ -62,10 +62,10 @@ class lmfitglobal(nddata):
                     else:
                         self.local_params_list.append(j)
 
-        print("Global vars",self.global_vars_name)
-        print("Local vars",self.local_vars_list)
-        print("Global func",self.global_func_list)
-        print("Local params",self.local_params_list)
+        logging.info(strm("Global vars",self.global_vars_name))
+        logging.info(strm("Local vars",self.local_vars_list))
+        logging.info(strm("Global func",self.global_func_list))
+        logging.info(strm("Local params",self.local_params_list))
         
         # the order of the parameters used in run_lambda
         self.pars_order = list(dataset.pars.keys())
@@ -85,6 +85,7 @@ class lmfitglobal(nddata):
         return
 
     def make_params(self):
+        "creating parameters within each dataset (based on the global specification) that are needed to perform the global fit"
         self.pars = Parameters()
         for i,j in enumerate(self.datasets):
             for k in (self.datasets[i].pars.keys()):
@@ -146,9 +147,9 @@ class lmfitglobal(nddata):
 
         self.symbolic_vars = list(self.symbolic_vars)
         args = self.symbolic_vars + [str(*this_axis)]
-        print(variable_symbols)
-        print(parameter_symbols)
-        print(self.global_expr)
+        logging.info(strm(variable_symbols))
+        logging.info(strm(parameter_symbols))
+        logging.info(strm(self.global_expr))
 
         self.fitfunc_multiarg_v2 = sp.lambdify(
             variable_symbols + parameter_symbols,
@@ -187,6 +188,7 @@ class lmfitglobal(nddata):
         return self.datasets[member_idx].make_model(member_model_input)
 
     def residual(self, parameters):
+        print("residual called")
         this_model = self.make_model(parameters,
                 nddata(np.array(self.global_vars_value),str(self.fit_axis)))
         ndata = len(self.datasets)
@@ -250,7 +252,7 @@ class lmfitdata(nddata):
         r"""A property of the myfitclass class which is set by the user,
         takes as input a sympy expression of the desired fit
         expression"""
-        print("Getting symbolic function")
+        logging.info(strm("Getting symbolic function"))
         return self.expression
 
     @functional_form.setter
@@ -311,9 +313,9 @@ class lmfitdata(nddata):
             self.expression,
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
         )
-        #print(variable_symbols)
-        #print(parameter_symbols)
-        #print(self.expression)
+        #logging.info(strm(variable_symbols))
+        #logging.info(strm(parameter_symbols))
+        #logging.info(strm(self.expression))
         #quit()
         self.fitfunc_multiarg_v2 = sp.lambdify(
             variable_symbols + parameter_symbols,
@@ -500,8 +502,8 @@ class lmfitdata(nddata):
         our function to involve something else, as well (e.g. taking a Fourier
         transform)"""
         logging.info(strm(self.getaxis(j) for j in self.variable_names))
-        print(self.getaxis(self.variable_names[0]))
-        print(pars.valuesdict())
+        logging.info(strm(self.getaxis(self.variable_names[0])))
+        logging.info(strm(pars.valuesdict()))
         return self.fitfunc_multiarg_v2(
             *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
         )
