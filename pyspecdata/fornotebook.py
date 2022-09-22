@@ -460,7 +460,7 @@ def lplot(fname, width=0.33, figure=False, dpi=72, grid=False,
             plt.savefig(alsosave,
                     dpi=dpi,
                     facecolor=(1,1,1,0))
-    if plt.figure:
+    if figure:
         print(r"""
         \begin{figure}[h]
         \end{figure}

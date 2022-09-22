@@ -5,7 +5,7 @@ from pyspecdata import init_logging,strm
 import logging
 
 def convolve(self,axisname,filterwidth,convfunc='gaussian',
-    enforce_causality=True
+    enforce_causality=None
     ):
     r'''Perform a convolution.
     
@@ -50,6 +50,14 @@ def convolve(self,axisname,filterwidth,convfunc='gaussian',
 
         It is ignored if you call a convolution on time-domain data.
     '''
+    was_real = False
+    if self.data.dtype == np.complex128:
+        enforce_causality = True
+    elif self.data.dtype == np.float64:
+        was_real = True
+        enforce_causality = False
+    else:
+        raise ValueError("what is dtype "+str(self.data.dtype))
     if convfunc == 'gaussian':
         def convfunc(x,filterwidth):
             sigma = filterwidth/(2*np.sqrt(2*np.log(2)))
@@ -99,4 +107,5 @@ def convolve(self,axisname,filterwidth,convfunc='gaussian',
     else:
         self.ft(axisname)
     logging.debug(strm("before return",axisname,self.get_ft_prop(axisname)))
+    if was_real: self.data = self.data.real
     return self
