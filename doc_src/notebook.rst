@@ -37,12 +37,24 @@ Requirements
 
 1.  latex packages
 
-    You need to put the texmf tree in a location where it can be found by your latex installation.
+    In order to be able to build a latex notebook where ``\begin{python}...\end{python}`` environments are replaced with the code output,
+    we first need some helper latex style files.
 
-    * Under Windows, add the texmf tree to "miktex settings" under the "roots" tab.
-    * (To do) We should use `this guide
-      <http://ctan.math.washington.edu/tex-archive/info/dtxtut/dtxtut.pdf>`_ or
-      or `this package <https://ctan.org/pkg/makedtx>`_ to package the code and include it here.
+    To make latex files accessible anywhere on your computer, you place them
+    inside a "texmf" directory tree, and then register them with your latex
+    compiler.
+
+    * Note that, similar to a python package, there are strange requirements
+      on the structure and directory names of a texmf directory tree.  You
+      can't just rename the directories as you would like.
+
+    The pyspecdata repo itself now has a subdirectory called ``texmf`` that is a ready-to-go texmf tree for this purpose.
+    So, the ``[LOCATION OF YOUR PYSPECDATA REPO]/texmf``
+
+    How do I register the texmf directory?
+
+    *   Under Windows, you can add the texmf tree graphically to "miktex settings" under the "roots" tab.
+    *   In general (windows or otherwise) you should be able to use the command ``initexmf --register-root=[LOCATION OF YOUR PYSPECDATA REPO]/texmf``
 
     Once you've done this, the shell command ``kpsewhich mypython.sty``
     should return a result

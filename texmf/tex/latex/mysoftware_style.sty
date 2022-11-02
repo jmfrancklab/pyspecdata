@@ -1,0 +1,17 @@
+%%phantomsection
+%%BEGIN formatting for software writeup
+\renewcommand{\paragraph}[1]{\textsc{\oldparagraph{#1}}\textbf{\texttt{\large #1}}\blacktext{$\Rightarrow$}\phantomsection\addcontentsline{toc}{paragraph}{#1}}
+\renewcommand{\subparagraph}[1]{\textbf{\small{\texttt{#1:}}}\phantomsection\addcontentsline{toc}{subparagraph}{#1}}
+\newenvironment{mykwargs}{
+
+\begin{center}
+\vspace{-1.75em}
+\begin{minipage}{0.75\linewidth}
+    \begin{scriptsize}
+}{
+    \end{scriptsize}
+\end{minipage}
+\end{center}
+
+}
+%%END formatting for software writeup

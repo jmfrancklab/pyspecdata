@@ -1,0 +1,231 @@
+\newif\ifoverwritereal
+\overwriterealfalse
+\DeclareOption{overwritereal}{
+\overwriterealtrue
+}
+\ProcessOptions
+\RequirePackage{dsfont}% for unity symbol
+\RequirePackage{amsmath}
+\RequirePackage{amsbsy}
+\RequirePackage{amsfonts}
+\RequirePackage{amssymb}
+\RequirePackage{calc}% for length addition + subtraction
+\RequirePackage{xspace}
+\RequirePackage{bbold}% for mathbb of numerals
+%\RequirePackage{dsfont}% for mathds
+%\RequirePackage{myhyperref}
+\@ifundefined{texorpdfstring}{%
+\newcommand{\texorpdfstring}[2]{#1}
+}{}
+\RequirePackage{textcomp}% among other things, gives \textmu and \textperthousand
+\newcommand\myline{\rule{\linewidth}{0.1mm}}
+\def\Emax{\texorpdfstring{\ensuremath{E_{max}}\xspace}{Emax}}
+\def\Scp{\texorpdfstring{\ensuremath{\text{S}_{c+}}\xspace}{Scp}}
+\def\Scm{\texorpdfstring{\ensuremath{\text{S}_{c-}}\xspace}{Scm}}
+\newcommand{\myft}[3]{\int_{-\infty}^{\infty}e^{-i2\pi #2 #1} #3 d#1 }
+\newcommand\phalf{\ensuremath{p_{1/2}}\xspace}
+\newcommand{\figref}[1]{Fig.~\ref{fig:#1}}
+\newcommand{\tauformyhigh}{33.3\ps}
+\newcommand{\tauw}{\ensuremath{\tau_{c,w}}\xspace}%
+\newcommand{\relativeviscosity}{\ensuremath{\eta/\eta_{H_2O}}\xspace}%
+\newcommand{\capillarydim}{0.6\mm i.d.\ 0.84\mm o.d.\ quartz\xspace}
+%{{{ these had xspace, which turns out to be a pain in the ass
+\newif\ifuseitalics
+%\useitalicsfalse
+\useitalicstrue
+\ifuseitalics
+\newcommand{\optitalics}[1]{\textit{#1}}
+\else
+\newcommand{\optitalics}[1]{#1}
+\fi
+\newcommand{\etal}{\texorpdfstring{\optitalics{et.~al.}\@\xspace}{et al.}}
+\newcommand{\ie}{\optitalics{i.e.}\@\xspace}
+\newcommand{\etc}{\optitalics{etc.}\@\xspace}
+\newcommand{\via}{\optitalics{via}\xspace}
+\newcommand{\vs}{\optitalics{vs.}\@\xspace}
+\newcommand{\eg}{\optitalics{e.g.}\@\xspace}
+%}}} these had xspace, which turns out to be a pain in the ass
+\newcommand{\relaxivityunits}{\ensuremath{\;\mbox{s}^{-1}\mbox{M}^{-1}\!\!}\xspace}%
+\newcommand{\extinctionunits}{\ensuremath{\;\mbox{M}^{-1}\mbox{cm}^{-1}\!\!}\xspace}%
+\newcommand{\diffusionunits}{\ensuremath{\;\mbox{m}^{2}\mbox{s}^{-1}\!\!}\xspace}%
+\newcommand{\Real}[1]{\Re\mathfrak{e}\left[ #1 \right]}
+\newcommand{\Imag}[1]{\Im\mathfrak{m}\left[ #1 \right]}
+\ifoverwritereal
+\let\oldreal = \Re
+\let\oldimag = \Im
+\renewcommand{\Re}{\oldreal\mathfrak{e}\!}
+\renewcommand{\Im}{\oldimag\mathfrak{m}\!}
+\fi
+\def\xsm{\texorpdfstring{\ensuremath{\xi s_{max}}\xspace}{xi smax}}
+\newcommand{\cwdnp}{cw-DNP}
+\newcommand{\fullksigma}{\ensuremath{\ksigma\approx\ksm}}%
+\newcommand\ksigma{\texorpdfstring{\ensuremath{k_\sigma}\xspace}{k\_sigma}}
+\newcommand\permil{\texorpdfstring{\ensuremath{\mbox{\textperthousand}}\xspace}{parts per thousand}}
+\newcommand\ksigmabulk{\texorpdfstring{\ensuremath{k_{\sigma,bulk}}\xspace}{k\_sigma,bulk}}
+\newcommand\ksigmarel{\ensuremath{\ksigma/\ksigmabulk}}
+\newcommand\klowbulk{\texorpdfstring{\ensuremath{k_{low,bulk}}\xspace}{k\_low,bulk}}
+\newcommand\krhobulk{\texorpdfstring{\ensuremath{k_{\rho,bulk}}\xspace}{k\_rho,bulk}}
+\newcommand\klowrel{\ensuremath{\klow/\klowbulk}}
+\newcommand\degC{\ensuremath{^{\circ}\mbox{C}}\xspace}
+\newcommand\krho{\texorpdfstring{\ensuremath{k_\rho}\xspace}{k\_rho}}
+\newcommand\Csl{\texorpdfstring{\ensuremath{C_{SL}}\xspace}{C\_SL}}
+\newcommand\klow{\texorpdfstring{\ensuremath{k_{low}}\xspace}{k\_low}}
+\def\ksm{\texorpdfstring{\ensuremath{k_\sigma s_{max}}\xspace}{k\_sigma smax}}
+\def\xsp{\texorpdfstring{\ensuremath{\xi s(p)}\xspace}{xi s(p)}}
+\newcommand{\Dlocal}{\ensuremath{D_{local}}\xspace}%
+\newcommand{\Dw}{\ensuremath{D_{H_2O}}\xspace}%
+\newcommand{\Dsl}{\ensuremath{D_{SL}}\xspace}%
+\def\ksp{\texorpdfstring{\ensuremath{k_\sigma s(p)}\xspace}{k\_sigma s(p)}}
+\def\smax{\texorpdfstring{\ensuremath{s_{max}}}{smax}}
+\def\tonen{\texorpdfstring{\ensuremath{T_{1,0}}\xspace}{T10}}
+\newcommand{\correltime}{\ensuremath{\tau_{FFHS}}\xspace}%
+\newcommand{\correltimeforwater}{\ensuremath{\tau_{FFHS,bulk}}\xspace}
+\newcommand{\retardationfactor}{\ensuremath{\correltime/\correltimeforwater}\xspace}%
+\newcommand{\hausseri}{\ensuremath{(\left\langle I_z\right\rangle - I_0)}}
+\newcommand{\haussers}{\ensuremath{(\left\langle S_z\right\rangle - S_0)}}
+\newcommand{\gammaratio}{659.32}
+\newcommand{\oht}{4-hydroxy-TEMPO\xspace}
+\newcommand{\FP}{Fabry-P\'{e}rot\xspace}
+\newcommand{\Cat}{Cat$_1$}
+\newcommand{\rhosmax}{\ensuremath{\rho s_{max}}}
+\newcommand{\amt}{4-amino-TEMPO\xspace}
+\newcommand{\ot}{4-oxo-TEMPO\xspace}
+\newcommand{\oNt}{per-deuterated $^{15}$N 4-oxo-TEMPO\xspace}
+\newlength{\mylength}%
+\newlength{\myheightforsubtract}%
+\newlength{\mysecondlength}%
+\newcommand{\obpairtext}{}
+\newcommand{\obpair}[2]{%
+%\renewcommand{\obpairtext}{{\parbox[b][-12pt][c]{3cm}{\begin{center}\begin{footnotesize}#2\end{footnotesize}\end{center}}}}
+\renewcommand{\obpairtext}{\mbox{\begin{footnotesize} #2\end{footnotesize}}}
+\settowidth{\mylength}{\obpairtext}%
+\settowidth{\mysecondlength}{\ensuremath{\displaystyle #1}}%
+%\mbox{lengths \the\mylength \the\mysecondlength}
+\setlength{\mylength}{\maxof{\mylength-\mysecondlength}{0pt}/2}% only shift if the box is greater than the math
+%\mbox{half of max is \the\mylength}
+\hspace{-\mylength}%
+\ensuremath{{\color{dbluecolor}\overbrace{\normalcolor #1}^{\obpairtext}}}%
+\hspace{-\mylength}%
+}
+
+\newcommand{\sfrac}[2]{
+\settowidth{\mylength}{\scriptsize{\ensuremath{#1}}}%
+\settowidth{\mysecondlength}{\scriptsize{\ensuremath{#2}}}%
+\ensuremath{^{#1}\hspace{-\mylength}/_{#2}}}
+
+\newcommand{\ubpairtext}{}
+\newcommand{\ubpair}[2]{%
+\renewcommand{\ubpairtext}{\mbox{\begin{footnotesize} #2\end{footnotesize}}}
+%\renewcommand{\ubpairtext}{\begin{center}\begin{footnotesize}#2\end{footnotesize}\end{center}}
+%\settoheight{\myheightforsubtract}{\ubpairtext}
+\settowidth{\mylength}{\ubpairtext}%
+\settowidth{\mysecondlength}{\ensuremath{\displaystyle #1}}%
+%\mbox{lengths \the\mylength \the\mysecondlength}
+\setlength{\mylength}{\maxof{\mylength-\mysecondlength}{0pt}/2}% only shift if the box is greater than the math
+%\mbox{half of max is \the\mylength}
+\hspace{-\mylength}%
+\ensuremath{{\color{dbluecolor}\underbrace{\normalcolor #1}_{\ubpairtext}}}%
+\hspace{-\mylength}%
+}
+
+\def\ninetytime{\texorpdfstring{\ensuremath{\tau_{90^{\mbox{\tiny o}}}}}{tau90}\xspace}
+%{{{ units
+\def\uM{\texorpdfstring{\ensuremath{\;\mbox{\textmu M}}}{uM}\xspace}
+\def\uW{\texorpdfstring{\ensuremath{\;\mbox{\textmu W}}}{uW}\xspace}
+\def\GW{\texorpdfstring{\ensuremath{\;\frac{\text{G}}{\sqrt{\text{W}}}}}{G/sqrt(W)}\xspace}
+\def\um{\texorpdfstring{\ensuremath{\;\mbox{\textmu m}}}{um}\xspace}
+\def\us{\texorpdfstring{\ensuremath{\;\mbox{\textmu s}}}{us}\xspace}
+\def\ms{\texorpdfstring{\ensuremath{\;\mbox{ms}}}{ms}\xspace}
+\def\mW{\texorpdfstring{\ensuremath{\;\mbox{mW}}}{mW}\xspace}
+\def\uL{\texorpdfstring{\ensuremath{\;\mbox{\textmu L}}}{uL}\xspace}
+\def\uV{\texorpdfstring{\ensuremath{\;\mbox{\textmu V}}}{uV}\xspace}
+\def\mV{\texorpdfstring{\ensuremath{\;\mbox{mV}}}{mV}\xspace}
+\def\mVpp{\texorpdfstring{\ensuremath{\;\mbox{mV}_{pp}}}{mVpp}\xspace}
+\def\mM{\texorpdfstring{\ensuremath{\;\mbox{mM}}}{mM}\xspace}
+\def\mL{\texorpdfstring{\ensuremath{\;\mbox{mL}}}{mL}\xspace}
+\def\mg{\texorpdfstring{\ensuremath{\;\mbox{mg}}}{mg}\xspace}
+\def\cm{\texorpdfstring{\ensuremath{\;\mbox{cm}}}{cm}\xspace}
+\newcommand\Molar{test that this guy is new!}
+\newcommand\s{test that this guy is new!}
+\newcommand\meter{test that this guy is new!}
+\newcommand\nm{test that this guy is new!}
+\newcommand\magn[1]{\texorpdfstring{\ensuremath{\times 10^{#1}}}{e#1}\xspace}
+\newcommand\Ang{\texorpdfstring{\ensuremath{\;\mbox{\AA}}}{Ang.}\xspace}
+\newcommand\GHz{\texorpdfstring{\ensuremath{\;\mbox{GHz}}}{GHz}\xspace}
+\newcommand\MHz{\texorpdfstring{\ensuremath{\;\mbox{MHz}}}{MHz}\xspace}
+\newcommand\Hz{\texorpdfstring{\ensuremath{\;\mbox{Hz}}}{Hz}\xspace}
+\newcommand\Ohm{\texorpdfstring{\ensuremath{\;\Omega}}{Ohms}\xspace}
+\newcommand\kHz{\texorpdfstring{\ensuremath{\;\mbox{kHz}}}{kHz}\xspace}
+\newcommand\mm{\texorpdfstring{\ensuremath{\;\mbox{mm}}}{mm}\xspace}
+\newcommand\W{\texorpdfstring{\ensuremath{\;\mbox{W}}}{W}\xspace}
+\newcommand\K{\texorpdfstring{\ensuremath{\;\mbox{K}}}{K}\xspace}
+\def\Molar{\texorpdfstring{\ensuremath{\;\mbox{M}}}{M}\xspace}
+\def\nm{\texorpdfstring{\ensuremath{\;\mbox{nm}}}{nm}\xspace}
+\def\meter{\texorpdfstring{\ensuremath{\;\mbox{m}}}{m}\xspace}
+\newcommand\secs{\texorpdfstring{\ensuremath{\;\mbox{s}}}{s}\xspace}
+\newcommand\ns{\texorpdfstring{\ensuremath{\;\mbox{ns}}}{ns}\xspace}
+\newcommand\ps{\texorpdfstring{\ensuremath{\;\mbox{ps}}}{ps}\xspace}
+\newcommand\startred{\texorpdfstring{\color{red}}{|**}}
+\newcommand\stopred{\texorpdfstring{\normalcolor}{**|}\xspace}
+\newcommand\myred[1]{\texorpdfstring{{\color{red}#1}}{|**#1**|}}
+%}}}
+
+
+\newcommand{\editpoint}[1]{\phantomsection\addcontentsline{toc}{section}{#1}{\begin{center}\bf #1\end{center}}\phantomsection\addcontentsline{toc}{subsection}{ }\phantomsection\addcontentsline{toc}{subsubsection}{ }\phantomsection\addcontentsline{toc}{paragraph}{ }\phantomsection\addcontentsline{toc}{subparagraph}{ }}
+
+\newcommand{\lastedit}{
+
+\myline
+\editpoint{COMPLETE EDIT TO HERE}\myline\\ }
+
+\newcommand{\DnaSequenceSubfigure}{(a)}
+\newcommand{\SLStructureSubfigure}{(b)}
+\newcommand{\timeder}[1]{\frac{\partial #1}{\partial t}}
+%\newcommand{\ignorecite}[1]{{\@fileswfalse\cite{#1}}}
+%\newcommand{\insideignorecite}[1]{\cite{#1}}
+\newcommand{\ignorecite}[1]{\@fileswfalse{\cite{#1}}}
+\RequirePackage{relsize}
+\newcommand{\changesize}[2]{\texorpdfstring{{\relsize{#1} #2}}{#2}}
+\newcommand{\mysubref}[1]{\textbf{(\subref{#1})}}
+\newcommand{\coherencechange}{\texorpdfstring{\ensuremath{\Delta p}\xspace}{p}}
+\newcommand{\onlinecite}[1]{\nocite{#1}[\citenum{#1}]} 
+% {{{ xRightarrow from https://tex.stackexchange.com/questions/85113/xrightarrow-text
+\newcommand{\xRightarrow}[2][]{\ext@arrow 0359\Rightarrowfill@{#1}{#2}}
+% }}}
+% {{{ xleftrightarrow from http://tex.stackexchange.com/questions/96549/how-do-i-write-above-a-left-right-arrow
+\newcommand\xleftrightarrow[2][]{%
+  \ext@arrow 9999{\longleftrightarrowfill@}{#1}{#2}}
+\newcommand\longleftrightarrowfill@{%
+  \arrowfill@\leftarrow\relbar\rightarrow}
+% }}}
+\newcommand{\rectangle}{{\color{lightgray} \fboxrule0.75pt\fboxsep0pt\fbox{\rule{0.5em}{0pt}\rule{0pt}{1ex}}}}% used to indicate operators, etc.
+\newcommand\unity{\mathds{1}}
+%the following is from http://tex.stackexchange.com/questions/83509/hfill-in-math-mode , and allows you to incorporate \hfill
+\gdef\recallspace{}
+\gdef\recallheight{}
+\newcommand{\startbracket}[2]{#1\gdef\recallspace{\phantom{#1}}%
+\gdef\recallheight{\vphantom{\left[#2\right.}}%
+\left[#2\right.%
+}
+\newcommand{\closebracket}[1]{\recallspace\ \left.#1\recallheight\right]}
+\newcommand{\storespace}[1]{#1\gdef\recallspace{\phantom{#1}}}
+\newcommand{\specialcell}[1]{\ifmeasuring@#1\else\omit$\displaystyle#1$\ignorespaces\fi}
+\newcommand{\pairtext}[2][2cm]{%
+\parbox{#1}{\centering #2}%
+}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\sinc}{sinc}
+\DeclareMathOperator{\rect}{rect}
+\DeclareMathOperator{\ang}{angle}
+\DeclareMathOperator{\erf}{erf}
+\DeclareMathOperator{\erfc}{erfc}
+\DeclareMathAlphabet{\mathsfit}{\encodingdefault}{\sfdefault}{m}{sl}
+\newcommand{\tens}[1]{\mathsfit{#1}}
+\ifxetex
+    %for shah (comb) -- think this only works in xetex
+    \DeclareFontFamily{U}{wncy}{}
+    \DeclareFontShape{U}{wncy}{m}{n}{<->wncyr10}{}
+    \DeclareSymbolFont{mcy}{U}{wncy}{m}{n}
+    \DeclareMathSymbol{\Sh}{\mathord}{mcy}{"58} 
+\fi
+

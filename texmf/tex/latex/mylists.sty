@@ -1,0 +1,256 @@
+\ProvidesPackage{mylists}
+\oddsidemargin -0.75in % add 1in to get margin
+\evensidemargin -0.75in % add 1in to get margin
+\voffset -0.125in
+\topmargin -0.89in
+\textheight 7.5in
+\textwidth 10.5in
+\DeclareOption{nolandscape}{
+    \oddsidemargin -0.5in % add 1in to get margin
+    \evensidemargin -0.5in % add 1in to get margin
+    \voffset -0.5in
+    \topmargin 0in
+    \textwidth 7.5in
+    \textheight 9.25in
+    \headsep 15pt
+}
+\newif\iflatersmall
+\latersmallfalse
+\DeclareOption{latersmall}{
+\latersmalltrue
+}
+\DeclareOption{nobib}{
+\newcommand{\nobib}{nobib}
+}
+\ProcessOptions
+\RequirePackage{mycolors}
+\RequirePackage{paralist}
+\setdefaultenum{(1)}{(a)}{}{}
+\RequirePackage{enumitem}
+\RequirePackage[T1]{fontenc}
+\ifxetex
+    \RequirePackage{libertine}
+    \RequirePackage{fontspec}
+    \setmainfont[Ligatures={Common,Rare,TeX}]{Linux Libertine O}
+\fi
+\renewcommand{\o}[2][]{ {\color{mygreen}{\it #1}} {\color{blue} #2}}
+% the following uses enumitem and is a hack, since it doesn't allow a ``label'' for descriptions, but it works
+\setlist[description,1]{font = \texorpdfstring{$^{1}$}{}}
+\setlist[description,2]{font = \texorpdfstring{$^{2}$}{}}
+\setlist[description,3]{font = \texorpdfstring{$^{3}$}{}}
+\setlist[description,4]{font = \texorpdfstring{$^{4}$}{}}
+\setlist[description,5]{font = \texorpdfstring{$^{5}$}{}}
+\setlist[description,6]{font = \texorpdfstring{$^{6}$}{}}
+\setlist[description,7]{font = \texorpdfstring{$^{7}$}{}}
+\setlist[description,8]{font = \texorpdfstring{$^{8}$}{}}
+\setlistdepth{8}
+%\usepackage[backend=biber,style=verbose-ibid]{biblatex} % this is better, but may not work right 
+%\usepackage[backend=biber,style=verbose,terseinits=true,sorting=none]{biblatex}
+%\usepackage[backend=biber,style=verbose-inote,terseinits=true,sorting=none]{biblatex}
+%{{{ the following was taken from some online post, and seems to work well
+\@ifundefined{nobib}{
+%\usepackage[style=numeric-comp]{biblatex}
+\usepackage[backend=bibtex,style=numeric-comp,url=false,doi=false]{biblatex}% for some stupid reason, bibtex is working, but biber is not
+\bibliography{library_abbrev_ascii}
+\makeatletter
+
+\DeclareFieldFormat[article]{number}{\mkbibparens{#1}}
+\DeclareFieldFormat[article]{year}{\mkbibparens{#1}}
+\DeclareFieldFormat{journaltitle}{\mkbibemph{#1}} % italic journal title 
+\DeclareFieldFormat{pages}{#1}
+\renewbibmacro{in:}{} % remove "in:"
+\renewcommand{\newunitpunct}{\addcomma\space}
+\renewcommand{\newblockpunct}{\addcomma\space}
+%the following is now outdated
+%\DeclareNameFormat{first-last}{\usebibmacro{name:last}{#1}{#3}{#5}{#7}\usebibmacro{name:andothers}}
+\AtEveryCitekey{\clearfield{title}} % remove title
+
+\DeclareCiteCommand{\fullcite}
+  {\usebibmacro{prenote}}
+  {\iffieldundef{doi}
+    {\iffieldundef{url}
+      {\usedriver
+       {\DeclareNameAlias{sortname}{default}}
+       {\thefield{entrytype}}}
+      {\href{\thefield{url}}
+        {\usedriver
+          {\DeclareNameAlias{sortname}{default}}
+          {\thefield{entrytype}}}}}
+    {\href{http://dx.doi.org/\thefield{doi}}{\usedriver
+     {\DeclareNameAlias{sortname}{default}}
+     {\thefield{entrytype}}}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+
+\ExecuteBibliographyOptions{citetracker,sorting=none}
+
+\DeclareCiteCommand{\notefullcite}[\mkbibbrackets]
+  {\usebibmacro{cite:init}%
+  \usebibmacro{prenote}}
+  {\usebibmacro{citeindex}%
+   \usebibmacro{notefullcite}%
+   \usebibmacro{cite:comp}}
+  {}
+  {\usebibmacro{cite:dump}%
+  \usebibmacro{postnote}}
+
+\newbibmacro*{notefullcite}{%
+  \ifciteseen
+    {}
+    {\protect\footnotetext[\thefield{labelnumber}]{% modified both so they are footnote instead of footnotetext, though this does add the extra footnote number, which is annoying
+        \usedriver{}{\thefield{entrytype}}.}}}
+\DeclareCiteCommand{\superfullcite}[\cbx@superscript]%
+  {\usebibmacro{cite:init}%
+   \let\multicitedelim=\supercitedelim
+   \iffieldundef{prenote}
+     {}
+     {\BibliographyWarning{Ignoring prenote argument}}%
+   \iffieldundef{postnote}
+     {}
+     {\BibliographyWarning{Ignoring postnote argument}}}
+  {\usebibmacro{citeindex}%
+   \usebibmacro{superfullcite}%
+   \usebibmacro{cite:comp}}
+  {}
+  {\usebibmacro{cite:dump}}
+
+\newbibmacro*{superfullcite}{%
+  \ifciteseen
+    {}
+    {\xappto\cbx@citehook{%
+        \protect\noexpand\footnotetext[\thefield{labelnumber}]{%
+           \fullcite{\thefield{entrykey}}.}}}}
+
+\newrobustcmd{\cbx@superscript}[1]{%
+  \mkbibsuperscript{#1}%
+  \cbx@citehook
+  \global\let\cbx@citehook=\empty}
+\let\cbx@citehook=\empty
+
+\makeatother
+%}}}}
+
+
+\renewcommand{\cite}[1]{\superfullcite{#1}}
+}{}
+
+%begin specific stuff
+\let\initialspacing=\itemsep
+\let\origduecommand=\due
+\newcommand{\newdue}[4][]{{\color{vdgreencolor}(Was due: \ordinalnum{#4}/#3/#2 #1)}}%
+\newcommand\daybreak[1]{\ \vspace{-4pt}\\ {\color{gray}{\tiny #1}\vspace{0pt}\hrule}}
+\newcommand{\currentfigurewidth}{0.75\linewidth}
+\let\origfinishedtime=\finishedtime
+\let\origmaxtime=\maxtime
+\let\origmarktime=\marktime
+\newcommand\smallspacing{\setlength\itemsep{0pt}\tiny%
+\renewcommand{\due}{\newdue}%
+\renewcommand{\currentfigurewidth}{0.25\linewidth}%
+\renewcommand{\finishedtime}[2][]{\o[##1]{##2}}%
+%\def{\finishedtime}{\donetime}
+\renewcommand\maxtime[1]{}%
+\renewcommand{\marktime}{}%
+}
+\newcommand\smallspacingwithaccount{\setlength\itemsep{0pt}\tiny%
+\renewcommand{\due}{\newdue}%
+\renewcommand{\currentfigurewidth}{0.25\linewidth}%
+}
+\newcommand\nosmallspacing{
+
+\setlength\itemsep{\initialspacing}\small% forgot that this should be small
+\renewcommand{\due}{\origduecommand}%
+\renewcommand{\currentfigurewidth}{0.75\linewidth}%
+\renewcommand{\finishedtime}[2][]{\origfinishedtime[##1]{##2}}%
+\renewcommand{\maxtime}[1]{\origmaxtime{##1}}%
+\renewcommand{\marktime}{\origmarktime}%
+}
+
+\newcommand\blanknumber{\uline{\quad\quad}.}
+\newenvironment{mycols}{
+
+        \vspace{-1ex}\begin{minipage}{\linewidth}
+            \begin{multicols}{2}}{
+            \end{multicols}
+        \end{minipage}\vspace{0.5ex}}
+
+\makeatletter\newenvironment{boxindesc}[1][]{\enddescription% end the current description
+\hspace{-0.9cm}% it seems to need to be manually tabbed back over
+\begin{lrbox}{\@tempboxa}%start the box that we put the minipage into
+\begin{minipage}{\linewidth+0.9cm}% start a new minipage with new description
+        #1
+
+\description
+        }{\enddescription
+\end{minipage}%and end that
+\end{lrbox}%end the lrbox
+\colorbox{lightgreen}{\usebox{\@tempboxa}}%use the lrbox
+\description%and restart the original description
+        }\makeatother
+\makeatletter\newenvironment{subtextbox}{
+
+\pdfstringdefDisableCommands{\renewcommand{\color}[1]{}}%lets me get rid of the color commands in the outline!!
+\begin{lrbox}{\@tempboxa}\begin{minipage}{\linewidth}}{\end{minipage}\end{lrbox}%
+       \colorbox{lightgreen}{\usebox{\@tempboxa}}
+}\makeatother
+%end specific stuff
+
+\renewcommand{\section}[1]{\oldsection{\texorpdfstring{\color{vdgreencolor}#1}{#1}\condhrule{vdgreencolor}}}
+
+%% {{{ allows labeling of description list
+\makeatletter % Redefinition of Description List Items source: http://tex.stackexchange.com/a/1248/13552
+\let\orgdescriptionlabel\descriptionlabel
+\renewcommand*{\descriptionlabel}[1]{%
+  \let\orglabel\label
+  \let\label\@gobble
+  \phantomsection
+  \protected@edef\@currentlabel{#1}%
+  %\edef\@currentlabelname{#1}%
+  \let\label\orglabel
+  \orgdescriptionlabel{#1}%
+}
+\makeatother
+%% }}}
+%{{{ things for putting items in toc
+\let\initialdescriptionlabel=\descriptionlabel
+\let\initialcheckmark=\checkmark
+\let\initialRightarrow=\Rightarrow
+\let\initialBox=\Box
+\let\initialsout=\sout
+\renewcommand\sout[1]{\texorpdfstring{\initialsout{#1}}{-------}}
+\renewcommand\checkmark{\texorpdfstring{\initialcheckmark}{[X]}}
+\renewcommand\Rightarrow{\texorpdfstring{\initialRightarrow}{-->}}
+\renewcommand\Box{\texorpdfstring{\initialBox}{[ ]}}
+\def\resetdescriptionlabel{\renewcommand{\descriptionlabel}{\initialdescriptionlabel}}
+\let\olddescription=\description
+\let\oldenddescription=\enddescription
+\newcommand{\catalogdescriptionlabel}[1][subsubsection]{%
+\renewcommand\descriptionlabel[1]{%
+\initialdescriptionlabel{##1}%
+\phantomsection\addcontentsline{toc}{#1}{##1}%
+}%
+}
+\newcommand\firstlevelcatalog[1][subsubsection]{%
+\catalogdescriptionlabel[#1]%
+\renewcommand\description{\olddescription\supresslowerleveldescriptionlabels}%
+}
+\def\supresslowerleveldescriptionlabels{
+\renewcommand\description{\resetdescriptionlabel\olddescription}
+\renewcommand\enddescription{\oldenddescription\catalogdescriptionlabel}
+}
+%}}}
+%%%
+\newif\ifnotepaper
+\notepapertrue
+\ifnotepaper%(
+\usepackage{background}
+
+\newlength\mylen
+\setlength\mylen{\dimexpr\paperwidth/53\relax}
+
+\SetBgScale{1}
+\SetBgAngle{0}
+\SetBgColor{green!20}
+\SetBgContents{\tikz{\draw[step=\mylen] (-.5\paperwidth,-.5\paperheight) grid (.5\paperwidth,.5\paperheight);}}
+\fi%)
+
+\newcommand{\forlater}{\par\ensuremath{\downarrow}\dotfill\ensuremath{\downarrow}later\iflatersmall\smallspacing\fi}
