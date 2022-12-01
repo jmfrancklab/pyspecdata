@@ -12,6 +12,11 @@ To run the curve for your data:
 -   Just make a copy of this file, change the name of the BSW file to point to your data
 -   Then edit the table inside the OrderedDict below so that it gives the
     correct labels and scan names for all the spectra in your run.
+-   edit the `background` parameter below so that it points to the scan that
+    you want to function as your baseline/background.
+    -   We would rather record the raw absorbance values, rather than rely on
+        the spectrometer to subtract and hide the absorbance values of our
+        baseline.
 """
 from pylab import *
 from pyspecdata import *
