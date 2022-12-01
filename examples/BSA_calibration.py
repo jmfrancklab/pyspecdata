@@ -67,13 +67,13 @@ with figlist_var() as fl:
     plt.axvspan(wv_range[0], wv_range[1], color="k", alpha=0.1)
     for thislabel, thisscan in list_of_runs.items():
         if thislabel in [background, "Water"]:
-            plot(
+            fl.plot(
                 dataWKBSA[thisscan],
                 label=thislabel + "\n(no background subtraction)",
                 alpha=0.5,
             )
         else:
-            plot(dataWKBSA[thisscan] - bg_data, label=thislabel, alpha=0.5)
+            fl.plot(dataWKBSA[thisscan] - bg_data, label=thislabel, alpha=0.5)
     # }}}
     # {{{ pull a list of all of the spectra whose labels express a concentration
     #     (percentage), as well as an array of floating point values for the
