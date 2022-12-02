@@ -46,7 +46,7 @@ for j, thisset in enumerate(list_of_runs):
     for k, v in thisset.items():
         v.name(label_of_run[j])
         #kw = next(thecycler)
-        thisd = v[wv:(280, None)]
+        thisd = v[wv:(278, None)]
         if k not in ["Water"]:
             A280[j][k] = v[wv:(276, 281)].C.mean(wv).item()
         if k not in [f"0 %", "Water"]:
@@ -58,7 +58,7 @@ for j in range(len(finalcurve)):
     x, y = zip(*finalcurve[j].items())
     x = [float(j.replace(f" {whichunits}", "")) for j in x]
     y = list(y)
-    plot(x, array(y)*thisdil, "o", alpha=0.5, label=f"{label_of_run[j]} bsln_adj_A280")
+    plot(x, array(y)*thisdil, "o", alpha=0.5, label=f"{label_of_run[j]} baseline_adj_A280")
     plt.plot(x, y)
     # }}}
     # {{{ A280 standin
