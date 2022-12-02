@@ -1,0 +1,319 @@
+commit 5f710a2d4811177743e3d3a9d1aa2c1d0780cefc
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Mon Aug 8 18:10:58 2022 +0100
+
+    Version v1.59.1
+
+commit f675da905378fee408ef277bf838cfb4d45aa532
+Author: Joram Schrijver <i@joram.io>
+Date:   Sat Aug 6 02:59:00 2022 +0200
+
+    dlna: fix SOAP action header parsing - fixes #6354
+    
+    Changes in github.com/anacrolix/dms changed upnp.ServiceURN to include a
+    namespace identifier. This identifier was previously hardcoded, but is
+    now parsed out of the URN. The old SOAP action header parsing logic was
+    duplicated in rclone and did not handle this field. Resulting responses
+    included a URN with an empty namespace identifier, breaking clients.
+
+commit 5788d3fc29a73b0e1cf43e091736b1abb168e90c
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Wed Jul 20 10:49:00 2022 +0100
+
+    accounting: fix panic in core/stats-reset with unknown group - fixes #6327
+    
+    This also adds tests for the rc commands for stats groups
+
+commit c5a371d9e472081e8e7ccaf139d781debc35ecab
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Fri Aug 5 17:27:21 2022 +0100
+
+    build: disable goimports linter to avoid backporting lots of changes
+
+commit 5e441673e33c6a0dac498cf0090cce12a80efce8
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Thu Aug 4 16:11:22 2022 +0100
+
+    serve sftp: fix checksum detection - Fixes #6351
+    
+    Before this change, rclone serve sftp operating with a new rclone
+    after the md5sum/sha1sum detection was reworked to just run a plain
+    `md5sum`/`sha1sum` command in
+    
+    3ea82032e796d1f1 sftp: support md5/sha1 with rsync.net #3254
+    
+    Failed to signal to the remote that md5sum/sha1sum wasn't supported as
+    in
+    
+    71e172a139f00291 serve/sftp: support empty "md5sum" and "sha1sum" commands
+    
+    We unconditionally return good hashes even if the remote being served
+    doesn't support the hash type in question.
+    
+    This fix checks the hash type is supported and returns an error
+    
+        MD5 hash not supported
+    
+    When the backend is first contacted this will cause the sftp backend
+    to detect that the hash type isn't available.
+    
+    Unfortunately this may have cached the wrong state so editing or
+    remaking the config may be necessary to fix it.
+
+commit 274eca148c1b483ad608c68bae48d570e5b947c9
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Fri Aug 5 15:23:44 2022 +0100
+
+    fs: fix parsing of times and durations of the form "YYYY-MM-DD HH:MM:SS"
+    
+    Before this fix, the parsing code gave an error like this
+    
+        parsing "2022-08-02 07:00:00" as fs.Time failed: expected newline
+    
+    This was due to the Scan call failing to read all the data.
+    
+    This patch fixes that, and redoes the tests
+
+commit 28925414b8185af4e1acb61d8341c9e22fecac22
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Sun Jul 17 12:47:40 2022 +0100
+
+    dropox: fix ChangeNotify was unable to decrypt errors
+    
+    Before this fix, the dropbox backend wasn't decoding the file names
+    received in changenotify events into rclone standard format.
+    
+    This meant that changenotify events for filenames which had encoded
+    characters were failing to be decrypted properly if wrapped in crypt.
+    
+    See: https://forum.rclone.org/t/rclone-vfs-cache-says-file-name-too-long/31535
+
+commit 9563a770a16fa5ce2ee155ae3d6c7b1db2f78569
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Mon Jul 25 10:52:49 2022 +0100
+
+    mega: Fix nil pointer exception when bad node received
+    
+    Fixes: #6336
+
+commit 386ca207928b9346590329e12e19105eac892d97
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Wed Aug 3 17:15:59 2022 +0100
+
+    combine: fix errors with backends shutting down while in use
+    
+    Before this patch backends could be shutdown when they fell out of the
+    cache when they were in use with combine. This was particularly
+    noticeable with the dropbox backend which gave this error when
+    uploading files after the backend was Shutdown.
+    
+        Failed to copy: upload failed: batcher is shutting down
+    
+    This patch gets the combine remote to pin them until it is finished.
+    
+    See: https://forum.rclone.org/t/rclone-combine-upload-failed-batcher-is-shutting-down/32168
+
+commit 8390ba4ca9f18fea546ecdfdf8f86aed5c36030f
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Wed Aug 3 15:03:15 2022 +0100
+
+    build: fix android build after GitHub actions change
+    
+    Before this change the android build started failing with
+    
+        gomobile: ANDROID_NDK_HOME specifies /usr/local/lib/android/sdk/ndk/25.0.8775105
+        which is unusable: unsupported API version 16 (not in 19..33)
+    
+    This was caused by a change to github actions, but is ultimately due
+    to an issue in gomobile with the newest version of the SDK.
+    
+    This change fixes the problem by declaring a minimum API version of 21
+    and using version 21 compilers to build everything and using the
+    default NDK in github actions.
+    
+    See: https://github.com/actions/virtual-environments/issues/5930
+    See: https://github.com/lightningnetwork/lnd/issues/6651
+
+commit 4eea0ca8bb2b41bc52bcf868ef90b4373ca0eece
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Fri Jul 29 17:40:05 2022 +0100
+
+    dropbox: fix infinite loop on uploading a corrupted file
+    
+    Before this change, if rclone attempted to upload a file which read
+    more bytes than the size it declared then the uploader would enter an
+    infinite loop.
+    
+    See: https://forum.rclone.org/t/transfer-percentages-100-again/32109
+
+commit 60d59e260007aa7d7c03d9e34043b79e51bfc9fa
+Author: albertony <12441419+albertony@users.noreply.github.com>
+Date:   Fri Jul 15 10:01:06 2022 +0200
+
+    jottacloud: do not store username in config when using standard auth
+    
+    Previously, with standard auth, the username would be stored in config - but only after
+    entering the non-standard device/mountpoint sequence during config (a feature introduced
+    with #5926). Regardless of that, rclone always requests the username from the api at
+    startup (NewFS).
+    
+    In #6270 (commit 9dbed02329456c71d2052a6365041deda94bc020) this was changed to always
+    store username in config (consistency), and then also use it to avoid the repeated
+    customer info request in NewFs (performance). But, as reported in #6309, it did not work
+    with legacy auth, where user enters username manually, if user entered an email address
+    instead of the internal username required for api requests. This change was therefore
+    recently reverted.
+    
+    The current commit takes another step back to not store the username in config during
+    the non-standard device/mountpoint config sequence (consistentcy). The username will
+    now only be stored in config when using legacy auth, where it is an input parameter.
+
+commit bf0c7e0a6bda758b2779cd8f06e193729001a765
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Tue Jul 12 21:10:04 2022 +0100
+
+    Revert "jottacloud: always store username in config and use it to avoid initial api request"
+    
+    This reverts commit 9dbed02329456c71d2052a6365041deda94bc020.
+    
+    See: #6309
+
+commit 8a8a77ebc55405cf48616df3320d693998085fc0
+Author: Lesmiscore <nao20010128@gmail.com>
+Date:   Fri Jul 22 12:52:48 2022 +0900
+
+    internetarchive: handle hash symbol in the middle of filename
+
+commit d211372c9e66cd1b571d21456847207a3d7193c8
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Wed Jul 20 23:06:35 2022 +0100
+
+    build: disable revive linter pending a fix in golangci-lint
+    
+    The revive linter got extremely slow in golangci-lint 1.47.1 causing
+    the CI to time out.
+    
+    Disable for the time being until it is fixed.
+    
+    See: https://github.com/golangci/golangci-lint/issues/2997
+
+commit 1ebe9a800dde931848c3f1d3f051128b18f2ee52
+Author: albertony <12441419+albertony@users.noreply.github.com>
+Date:   Tue Jul 19 09:15:50 2022 +0200
+
+    sftp: fix issue with WS_FTP by working around failing RealPath
+
+commit 31f0db544fea07f82a47518267015fc8890b44fc
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Sun Jul 17 13:40:45 2022 +0100
+
+    s3: fix --s3-no-head panic: reflect: Elem of invalid type s3.PutObjectInput
+    
+    In
+    
+    22abd785eba35ca2 s3: implement reading and writing of metadata #111
+    
+    The reading information of objects was refactored to use the
+    s3.HeadObjectOutput structure.
+    
+    Unfortunately the code branch with `--s3-no-head` was not tested
+    otherwise this panic would have been discovered.
+    
+    This shows that this is path is not integration tested, so this adds a
+    new integration test.
+    
+    Fixes #6322
+
+commit 37bcc3df14d2a8a857d61e33349ef4a7c41ad63a
+Author: Lesmiscore <nao20010128@gmail.com>
+Date:   Sat Jul 16 12:11:09 2022 +0900
+
+    backend/internetarchive: ignore checksums for files using the different method
+
+commit 74401077dcb98eb669cffb90d521dea97d16d948
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Tue Jul 12 12:13:58 2022 +0100
+
+    dropbox: fix hang on quit with --dropbox-batch-mode off
+    
+    This problem was created by the fact that we are much more diligent
+    about calling Shutdown now, and the dropbox backend had a hang if the
+    batch mode was "off" in the Shutdown method.
+    
+    See: https://forum.rclone.org/t/dropbox-lsjson-in-1-59-stuck-on-commiting-upload/31853
+
+commit d96789e1b8df96142031b8905b1560d39fb7a608
+Author: Nick Naumann <nick.naumann@mailbox.tu-dresden.de>
+Date:   Mon Jul 11 23:31:30 2022 +0200
+
+    sync: update docs and error messages to reflect fixes to overlap checks
+
+commit 69165c09240354dacb33c743b4de2064f8a0db06
+Author: Nick Naumann <nick.naumann@mailbox.tu-dresden.de>
+Date:   Mon Jul 11 23:26:50 2022 +0200
+
+    sync: add filter-sensitivity to --backup-dir option
+    
+    The old Overlapping function and corresponding tests have been removed, as it has been completely replaced by the OverlappingFilterCheck function.
+
+commit c8a2aa310ed4cb318655f8467196edd0426e7851
+Author: albertony <12441419+albertony@users.noreply.github.com>
+Date:   Wed Jul 13 12:29:32 2022 +0200
+
+    docs: fix links to mount command from install docs
+
+commit 9417732f072ee689a3c893dc94db6d6ce35dd624
+Author: r-ricci <ricci@disroot.org>
+Date:   Mon Jul 11 18:34:06 2022 +0100
+
+    union: fix panic due to misalignment of struct field in 32 bit architectures
+    
+    `FS.cacheExpiry` is accessed through sync/atomic.
+    According to the documentation, "On ARM, 386, and 32-bit MIPS, it is
+    the caller's responsibility to arrange for 64-bit alignment of 64-bit
+    words accessed atomically. The first word in a variable or in an
+    allocated struct, array, or slice can be relied upon to be 64-bit
+    aligned."
+    Before commit 1d2fe0d8564bc679ece166c24b24e6fe7dc1455c this field was
+    aligned, but then a new field was added to the structure, causing the
+    test suite to panic on linux/386.
+    No other field is used with sync/atomic, so `cacheExpiry` can just be
+    placed at the beginning of the stuct to ensure it is always aligned.
+
+commit 9ba253a355b42f3e3aecbf97d8a13b4dfad8a8fd
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Sat Jul 9 21:17:47 2022 +0100
+
+    union: fix multiple files being uploaded when roots don't exist
+    
+    See: https://forum.rclone.org/t/union-backend-copying-to-all-remotes-while-it-shouldnt/31781
+
+commit a6fba1f0c6c975c26f87c44d0255bf64acc239db
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Sat Jul 9 21:13:06 2022 +0100
+
+    union: fix duplicated files when using directories with leading /
+    
+    See: https://forum.rclone.org/t/union-backend-copying-to-all-remotes-while-it-shouldnt/31781
+
+commit 80c5850ee8f4efc81a8e1ac7c5e956735182c35b
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Sun Jul 10 15:40:30 2022 +0100
+
+    combine: throw error if duplicate directory name is specified
+    
+    See: https://forum.rclone.org/t/v1-59-combine-qs/31814
+
+commit 727387ab1e97198e06358e67e6d470ece293cfc6
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Sun Jul 10 15:34:48 2022 +0100
+
+    combine: fix docs showing `remote=` instead of `upstreams=`
+    
+    See: https://forum.rclone.org/t/v1-59-combine-qs/31814
+
+commit 8226b6ada25d203c843aa0c0c024ad8928ef9130
+Author: Nick Craig-Wood <nick@craig-wood.com>
+Date:   Sun Jul 17 16:56:29 2022 +0100
+
+    Start v1.59.1-DEV development
