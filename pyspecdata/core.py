@@ -2749,6 +2749,15 @@ def dp(number,decimalplaces=2,scientific=False,max_front=3):
 #}}}
 #{{{ concatenate datalist along dimname
 def concat(datalist,dimname,chop = False):
+    """concatenate multiple datasets together along a new dimension.
+
+    Parameters
+    ==========
+    datalist: list of nddata
+        the data you want to concatenate -- they must have the same ndshape! 
+    dimname: str
+        name of the new dimension
+    """
     #{{{ allocate a new datalist structure  
     newdimsize = 0
     #print 'DEBUG: type(datalist)',type(datalist)
@@ -4176,7 +4185,7 @@ class nddata (object):
     #}}}
     #{{{ poly. fit
     def eval_poly(self,c,axis):
-        """Take `c` parameter from :func:`~pyspecdata.nddata.polyfit`, and apply it along axis `axis`
+        """Take `c` output (array of polynomial coefficents in ascending order) from :func:`~pyspecdata.nddata.polyfit`, and apply it along axis `axis`
 
         Parameters
         ----------
