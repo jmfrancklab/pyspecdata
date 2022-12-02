@@ -5,10 +5,10 @@
 
 Computation times
 =================
-**00:00.857** total execution time for **auto_examples** files:
+**00:00.804** total execution time for **auto_examples** files:
 
 +---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_image_plot.py` (``image_plot.py``)           | 00:00.857 | 0.0 MB |
+| :ref:`sphx_glr_auto_examples_BSA_calibration.py` (``BSA_calibration.py``) | 00:00.804 | 0.0 MB |
 +---------------------------------------------------------------------------+-----------+--------+
 | :ref:`sphx_glr_auto_examples_Cary_simple.py` (``Cary_simple.py``)         | 00:00.000 | 0.0 MB |
 +---------------------------------------------------------------------------+-----------+--------+
@@ -27,6 +27,8 @@ Computation times
 | :ref:`sphx_glr_auto_examples_fit_fake_data.py` (``fit_fake_data.py``)     | 00:00.000 | 0.0 MB |
 +---------------------------------------------------------------------------+-----------+--------+
 | :ref:`sphx_glr_auto_examples_fit_with_bounds.py` (``fit_with_bounds.py``) | 00:00.000 | 0.0 MB |
++---------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_image_plot.py` (``image_plot.py``)           | 00:00.000 | 0.0 MB |
 +---------------------------------------------------------------------------+-----------+--------+
 | :ref:`sphx_glr_auto_examples_polyfit.py` (``polyfit.py``)                 | 00:00.000 | 0.0 MB |
 +---------------------------------------------------------------------------+-----------+--------+

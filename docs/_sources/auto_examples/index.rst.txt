@@ -185,6 +185,23 @@ various functions.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="This example is specifically designed to process data from a BSA calibration curve lab exercise...">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_BSA_calibration_thumb.png
+    :alt: BSA UV-Vis Calibration
+
+  :ref:`sphx_glr_auto_examples_BSA_calibration.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">BSA UV-Vis Calibration</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="This example creates fake data with noise then fits the exponential with the fitdata function.">
 
 .. only:: html
@@ -235,6 +252,7 @@ various functions.
    /auto_examples/fit_with_bounds
    /auto_examples/DCCT_function
    /auto_examples/basic_example
+   /auto_examples/BSA_calibration
    /auto_examples/fit_fake_data
    /auto_examples/QESR
 
