@@ -2707,10 +2707,8 @@ def plot(*args,**kwargs):
     return retval
 #}}}
 #{{{general functions
-def box_muller(length, return_complex=True, seed=None):
+def box_muller(length, return_complex=True):
     r'''algorithm to generate normally distributed noise'''
-    if seed is not None:
-        pl_seed(seed)
     s1 = np.random.rand(length)
     s2 = np.random.rand(length)
     n1 = np.sqrt(-2*np.log(s1))*np.cos(2*pi*s2)
@@ -5314,7 +5312,7 @@ class nddata (object):
             #}}}
     def repwlabels(self,axis):
         return None
-    def add_noise(self,intensity,seed=None):
+    def add_noise(self,intensity):
         '''Add Gaussian (box-muller) noise to the data.
 
         Parameters
