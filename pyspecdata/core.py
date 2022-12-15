@@ -1517,7 +1517,7 @@ def autopad_figure(pad = 0.2,centered = False,figname = 'unknown'):
             l = 0 
             if len(labellist):
                 bbox = mtransforms.Bbox.union(bboxes)
-                bboxi = bbox.transformed(fig.transFigure.inverted())#inverse_transformed(fig.transFigure)
+                bboxi = bbox.transformed(fig.transFigure.inverted())
                 if axisn in ['left','right']:
                     l = bboxi.width
                 if axisn in ['top','bottom']:
