@@ -3704,11 +3704,11 @@ class nddata (object):
         B.data = B.data[...,newaxis]
         logger.debug(strm("add a new axis",A.data.shape))
         logger.debug(strm("add a new axis",B.data.shape))
-        A.data = moveaxis(A.data,ax_idx,-1) # columns position
-        B.data = moveaxis(B.data,ax_idx,-2) # row position
+        A.data = np.moveaxis(A.data,ax_idx,-1) # columns position
+        B.data = np.moveaxis(B.data,ax_idx,-2) # row position
         logger.debug(strm("after movement",A.data.shape))
         logger.debug(strm("after movement",B.data.shape))
-        self.data = matmul(A.data,B.data)
+        self.data = np.matmul(A.data,B.data)
         logger.debug(strm("after mult",self.data.shape))
         self.data = self.data[...,0,0]
         logger.debug(strm("remove extras",self.data.shape))
