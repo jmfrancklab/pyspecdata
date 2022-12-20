@@ -1,7 +1,4 @@
 # coding: utf-8
-
-
-
 try:
     get_ipython().magic('load_ext pyspecdata.ipy')
     in_notebook = True
@@ -9,7 +6,7 @@ except:
     from pyspecdata import *
     in_notebook = False
 from pyspecdata import nnls_regularized
-from numpy import random
+from numpy import *
 import time
 fl=figlist_var()
 init_logging(level='debug')
@@ -331,14 +328,9 @@ solution = s.C.nnls(('tau1','tau2'),
 
 fl.next('Solution')
 fl.image(solution)
-
-
 # 
-
-
 if in_notebook:
     print("in notebook, not calling show")
 else:
     print("not in notebook, calling show")
     fl.show()        
-
