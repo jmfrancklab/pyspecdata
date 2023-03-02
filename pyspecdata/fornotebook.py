@@ -11,6 +11,7 @@ import warnings
 # sympy doesn't like to be imported from fornotebook as part of a *
 warnings.filterwarnings("ignore")
 from .core import *
+from .figlist import figlist
 from .general_functions import fname_makenice
 from scipy.io import savemat,loadmat
 from os.path import exists as path_exists
@@ -48,6 +49,9 @@ class figlistl (figlist):
     def __init__(self,*args,**kwargs):
         super(figlistl,self).__init__(*args,**kwargs)
         self.black = False
+        return
+    def par_break(self):
+        self.text("\\par")
         return
     def show(self,string,line_spacing=True,**kwargs):
         '''latexify the series of figures, where "string" gives the base file name
