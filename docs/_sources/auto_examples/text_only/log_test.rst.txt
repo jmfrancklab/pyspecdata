@@ -36,7 +36,7 @@ are running at the same time
 
     C:\Users\jmfranck\pyspecdata.0.log appears to be locked or otherwise inaccessible: I'm going to explore other options for fileno
     ----------  logging output to C:\Users\jmfranck\pyspecdata.2.log  ----------
-    --> log_test.py(11):root             <module> 2023-03-06 15:30:14,094
+    --> log_test.py(11):root             <module> 2022-08-19 22:39:46,638
     INFO: Something, something, something, dark side...
 
 
@@ -57,7 +57,7 @@ are running at the same time
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.001 seconds)
+   **Total running time of the script:** ( 0 minutes  0.009 seconds)
 
 
 .. _sphx_glr_download_auto_examples_text_only_log_test.py:

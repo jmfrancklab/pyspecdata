@@ -61,7 +61,7 @@ draw a span
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.085 seconds)
+   **Total running time of the script:** ( 0 minutes  0.080 seconds)
 
 
 .. _sphx_glr_download_auto_examples_matplotlib_draw_span.py:

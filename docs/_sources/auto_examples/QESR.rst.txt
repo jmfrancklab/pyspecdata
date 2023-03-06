@@ -106,7 +106,7 @@ very nice package for handling units.
      signal_denom 152012311.1661785 G·W⁰⋅⁵·s 152012311.1661785
     peaksize 2.3925781279922376
     specrange (3494.4472657918905, 3531.0683595876894)
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "." (-> marker='.'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2684: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "." (-> marker='.'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
     C:\Users\jmfranck\git_repos\pyspecdata\examples\QESR.py:86: RankWarning: Polyfit may be poorly conditioned
       c = d_baseline.polyfit(fieldaxis, order=7)
@@ -121,7 +121,7 @@ very nice package for handling units.
      signal_denom 155390362.52542692 G·W⁰⋅⁵·s 155390362.52542692
     peaksize 2.5390625031755008
     specrange (3494.300781416707, 3531.0683595876894)
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "." (-> marker='.'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2684: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "." (-> marker='.'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
     C:\Users\jmfranck\git_repos\pyspecdata\examples\QESR.py:86: RankWarning: Polyfit may be poorly conditioned
       c = d_baseline.polyfit(fieldaxis, order=7)
@@ -136,7 +136,7 @@ very nice package for handling units.
      signal_denom 155390362.52542692 G·W⁰⋅⁵·s 155390362.52542692
     peaksize 2.441406253053325
     specrange (3494.4472657918905, 3531.0683595876894)
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "." (-> marker='.'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2684: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "." (-> marker='.'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
     C:\Users\jmfranck\git_repos\pyspecdata\examples\QESR.py:86: RankWarning: Polyfit may be poorly conditioned
       c = d_baseline.polyfit(fieldaxis, order=7)
@@ -151,7 +151,7 @@ very nice package for handling units.
      signal_denom 185792824.7586626 G·W⁰⋅⁵·s 185792824.7586626
     peaksize 2.441406253053325
     specrange (3494.5937501670737, 3530.921875212506)
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "." (-> marker='.'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2684: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "." (-> marker='.'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
     C:\Users\jmfranck\git_repos\pyspecdata\examples\QESR.py:86: RankWarning: Polyfit may be poorly conditioned
       c = d_baseline.polyfit(fieldaxis, order=7)
@@ -166,7 +166,7 @@ very nice package for handling units.
      signal_denom 189170876.11791104 G·W⁰⋅⁵·s 189170876.11791104
     peaksize 2.441406253053325
     specrange (3494.5937501670737, 3530.921875212506)
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "." (-> marker='.'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2684: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "." (-> marker='.'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
     C:\Users\jmfranck\git_repos\pyspecdata\examples\QESR.py:86: RankWarning: Polyfit may be poorly conditioned
       c = d_baseline.polyfit(fieldaxis, order=7)
@@ -181,7 +181,7 @@ very nice package for handling units.
      signal_denom 182414773.39941418 G·W⁰⋅⁵·s 182414773.39941418
     peaksize 2.441406253053325
     specrange (3494.5937501670737, 3530.921875212506)
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "." (-> marker='.'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2684: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "." (-> marker='.'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
     C:\Users\jmfranck\git_repos\pyspecdata\examples\QESR.py:86: RankWarning: Polyfit may be poorly conditioned
       c = d_baseline.polyfit(fieldaxis, order=7)
@@ -314,7 +314,7 @@ very nice package for handling units.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.756 seconds)
+   **Total running time of the script:** ( 0 minutes  5.364 seconds)
 
 
 .. _sphx_glr_download_auto_examples_QESR.py:

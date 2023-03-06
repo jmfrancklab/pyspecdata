@@ -374,15 +374,15 @@ The data is initial organized into two dimensions -- `harmonic` and `$B_0$`.
  .. code-block:: none
 
     [(2048, '$B_0$'), (29, 'Microwave Power'), (5, 'harmonic'), (2, 'phase')]
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1938: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2663: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
       retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1938: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2663: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
       retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1938: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2663: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
       retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1938: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2663: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
       retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1938: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2663: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
       retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
 
     Text(0.5, 1.0, '1D Data with Multiple Harmonics')
@@ -435,7 +435,7 @@ Next, let's load some power-saturation data
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.333 seconds)
+   **Total running time of the script:** ( 0 minutes  6.028 seconds)
 
 
 .. _sphx_glr_download_auto_examples_esr_example.py:
