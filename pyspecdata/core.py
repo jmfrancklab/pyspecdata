@@ -787,90 +787,16 @@ def emptytest(x): # test is it is one of various forms of np.empty
    if np.size(x) == 1 and x is None: return True
    if np.size(x) == 0: return True
    return False
-def lsafen(*string,**kwargs):
-    "see lsafe, but with an added double newline"
-    string = list(string)
-    string += ['\n\n']
-    return lsafe(*tuple(string),**kwargs)
-def lsafe(*string,**kwargs):
-    "Output properly escaped for latex"
-    if len(string) > 1:
-        lsafewkargs = lambda x: lsafe(x,**kwargs)
-        return ' '.join(list(map(lsafewkargs,string)))
-    else:
-        string = string[0]
-    #{{{ kwargs
-    spaces = False
-    if 'spaces' in list(kwargs.keys()):
-        spaces = kwargs.pop('spaces')
-    if 'wrap' in list(kwargs.keys()):
-        wrap = kwargs.pop('wrap')
-    else:
-        wrap = None
-    #}}}
-    if not isinstance(string, str):
-        string = str(string)
-    if wrap is True:
-        wrap = 60
-    if wrap is not None:
-        string = '\n'.join(textwrap.wrap(string,wrap))
-    string = string.replace('\\','\\textbackslash ')
-    if spaces:
-        string = string.replace(' ','\\ ')
-    string = string.replace('\n\t','\n\n\\quad ')
-    string = string.replace('\t','\\quad ')
-    string = string.replace('_',r'\_')
-    string = string.replace('{',r'\{')
-    string = string.replace('}',r'\}')
-    string = string.replace('$$',r'ACTUALDOUBLEDOLLAR')
-    string = string.replace(']',r'$]$')
-    string = string.replace('[',r'$[$')
-    string = string.replace('<',r'$<$')
-    string = string.replace('>',r'$>$')
-    string = string.replace('$$',r'')
-    string = string.replace('ACTUALDOUBLEDOLLAR',r'$$')
-    string = string.replace('^',r'\^')
-    string = string.replace('#',r'\#')
-    string = string.replace('%',r'\%')
-    string = string.replace('&',r'\&')
-    string = string.replace('+/-',r'\ensuremath{\pm}')
-    string = string.replace('|',r'$|$')
-    return string
-#{{{ errors
-def explain_error(e):
-    '''Allows you to wrap existing errors with more explanation
-
-    For example:
-
-    >    except BaseException  as e:
-    >        raise IndexError("I can't find the node "+pathstring+explain_error(e))
-    >                + '\n'.join(['>\t'+j for j in str(e).split('\n')]))# this indents
-    '''
-    exc_type,exc_obj,exc_tb = exc_info()
-    #code_loc = strm(os.path.relpath(exc_tb.tb_frame.f_code.co_filename,os.getcwd()), 'line', exc_tb.tb_lineno)
-    code_loc = strm(exc_tb.tb_frame.f_code.co_filename, 'line', exc_tb.tb_lineno)
-    return ('\n> Original error (%s -- %s):\n'%(exc_type,code_loc)
-            + '\n'.join(['>\t'+j
-                for j in str(e).split('\n')]))# this indents
 class CustomError(Exception):
     def __init__(self, *value, **kwargs):
         raise NotImplementedError("You should get rid of CustomError and use explain_error instead")
         return
-def copy_maybe_none(input):
-    if input is None:
-        return None
-    else:
-        if isinstance(input, list):
-            return list(map(copy,input))
-        else:
-            return input.copy()
 def maprep(*mylist):
     mylist = list(mylist)
     for j in range(0,len(mylist)):
         if not isinstance(mylist[j], str):
             mylist[j] = mylist[j].__repr__()
     return ' '.join(mylist)
-#}}}
 #{{{ HDF5 functions
 #{{{ helper function for HDF5 search
 def gensearch(labelname,format = '%0.3f',value = None,precision = None):

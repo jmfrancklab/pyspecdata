@@ -64,7 +64,8 @@ The figure list gives us three things:
 from .plot_funcs import image as this_image
 from .general_functions import *
 from . import plot_funcs as this_plotting
-from .core import nddata
+from .core import nddata, autolegend
+from .core import plot as pyspec_plot
 import matplotlib.pyplot as plt
 import time
 import logging
@@ -337,7 +338,7 @@ class figlist(object):
             thisname = args[0].name()
             if thisname is not None:
                 kwargs['label'] = thisname
-        retval = plt.plot(*tuple((firstarg,)+args[1:]),**kwargs)#just a placeholder for now, will later keep units + such
+        retval = pyspec_plot(*tuple((firstarg,)+args[1:]),**kwargs)#just a placeholder for now, will later keep units + such
         ax = plt.gca()
         if ax.get_title() is None or len(ax.get_title()) == 0:
             try:
