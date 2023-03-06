@@ -62,8 +62,9 @@ using the domain colored plotting style.
 
  .. code-block:: none
 
-    ----------  logging output to C:\Users\jmfranck\pyspecdata.0.log  ----------
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2175: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    C:\Users\jmfranck\pyspecdata.0.log appears to be locked or otherwise inaccessible: I'm going to explore other options for fileno
+    ----------  logging output to C:\Users\jmfranck\pyspecdata.1.log  ----------
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\figlist.py:491: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       plt.gcf().tight_layout()
 
 
@@ -139,7 +140,7 @@ using the domain colored plotting style.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.837 seconds)
+   **Total running time of the script:** ( 0 minutes  1.270 seconds)
 
 
 .. _sphx_glr_download_auto_examples_DCCT_function.py:

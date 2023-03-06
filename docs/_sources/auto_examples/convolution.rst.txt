@@ -55,11 +55,11 @@ treated differently.
 
  .. code-block:: none
 
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2684: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2684: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:2175: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\figlist.py:491: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       plt.gcf().tight_layout()
 
 
@@ -101,7 +101,7 @@ treated differently.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.192 seconds)
+   **Total running time of the script:** ( 0 minutes  0.181 seconds)
 
 
 .. _sphx_glr_download_auto_examples_convolution.py:
