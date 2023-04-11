@@ -29,13 +29,6 @@ starting point for making new fit classes. Then, we can make instances
 of the new class, and use their methods (described in the subsequent
 section) next.
 
-.. comment generated the following with 
-    .. autosummary:: 
-        :toctree: generated
-        core.nddata
-
-.. currentmodule:: pyspecdata.core
-
 .. todo::
     the option block :no-inherited-members: doesn't work -- not sure how to modify class.rst
     I put a template from stackexchange inside _templates
@@ -48,6 +41,8 @@ section) next.
     .. autosummary::
         :toctree: generated
         ~fitdata
+
+.. currentmodule:: pyspecdata.core
 
 .. autoclass:: fitdata
     :members:
