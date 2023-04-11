@@ -30,8 +30,6 @@ demonstrate automatic labeling of phase cycling (coherence) axes
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     $\Delta p_1$
@@ -57,28 +55,23 @@ demonstrate automatic labeling of phase cycling (coherence) axes
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.004 seconds)
+   **Total running time of the script:** ( 0 minutes  0.001 seconds)
 
 
 .. _sphx_glr_download_auto_examples_text_only_phase_cycling_labels.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: phase_cycling_labels.py <phase_cycling_labels.py>`
 
-     :download:`Download Python source code: phase_cycling_labels.py <phase_cycling_labels.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: phase_cycling_labels.ipynb <phase_cycling_labels.ipynb>`
+      :download:`Download Jupyter notebook: phase_cycling_labels.ipynb <phase_cycling_labels.ipynb>`
 
 
 .. only:: html

@@ -1,0 +1,178 @@
+\ProvidesPackage{myquantum}
+\RequirePackage{amsmath}
+\RequirePackage{amsfonts}
+\RequirePackage{amssymb}
+\RequirePackage{calc}% for length addition + subtraction
+%{{{ Bras and Kets
+\newlength{\mybraketLength}%
+\newlength{\mybraketHforSub}%
+\newlength{\mybraketSecondLen}%
+
+\newcommand{\Qk}[1]{\ensuremath{\left| #1 \right\rangle}}
+\newcommand{\Qknb}[1]{\ensuremath{\left. \!\!#1 \right\rangle}}
+\newcommand{\Qb}[1]{\ensuremath{\left\langle #1 \right|}}
+
+\newlength\thisbracketlength
+\newlength\thissymbollength
+\newcommand{\lQk}[1]{%
+\settowidth{\thisbracketlength}{\ensuremath{\left.#1\right\rangle}}%
+\settowidth{\thissymbollength}{\ensuremath{#1}}%
+\addtolength{\thisbracketlength}{-\thissymbollength}%
+\ensuremath{\left.\left| #1 \right\rangle\hspace{-0.6\thisbracketlength}\right\rangle}%
+}
+\newcommand{\lQknb}[1]{%
+\settowidth{\thisbracketlength}{\ensuremath{\left.\!\!#1\right\rangle}}%
+\settowidth{\thissymbollength}{\ensuremath{\!\!#1}}%
+\addtolength{\thisbracketlength}{-\thissymbollength}%
+\ensuremath{\left.\left. \!\!#1 \right\rangle\hspace{-0.6\thisbracketlength}\right\rangle}%
+}
+\newcommand{\lQb}[1]{%
+\settowidth{\thisbracketlength}{\ensuremath{\left.#1\right\rangle}}%
+\settowidth{\thissymbollength}{\ensuremath{#1}}%
+\addtolength{\thisbracketlength}{-\thissymbollength}%
+\ensuremath{\left\langle\hspace{-0.6\thisbracketlength}\left\langle #1 \right|\right.}%
+}
+
+\newlength{\mythirdlength}
+\newcommand{\tempphantom}{}
+\newcommand{\braket}[4][]{%the optional argument is to match the size of an adjoining ket
+\settoheight{\mybraketLength}{\ensuremath{#2}}
+\settoheight{\mybraketSecondLen}{\ensuremath{#3}}
+\setlength{\mybraketLength}{\maxof{\mybraketLength}{\mybraketSecondLen}}
+\settoheight{\mybraketSecondLen}{\ensuremath{#4}}
+\setlength{\mybraketLength}{\maxof{\mybraketLength}{\mybraketSecondLen}}
+\settoheight{\mybraketSecondLen}{\ensuremath{#1}}
+\setlength{\mybraketLength}{\maxof{\mybraketLength}{\mybraketSecondLen}}
+%\renewcommand{\tempphantom}{\vphantom{\parbox[][\mybraketLength]{\mybraketLength}{x}}}
+\renewcommand{\tempphantom}{\rule{0pt}{\mybraketLength}}% this is a ``strut''
+\left.%
+\def\temp{#2}\ifx\temp\empty%test for empty
+\else%
+\Qb{\tempphantom #2}%
+\fi%
+#3
+\def\temp{#4}\ifx\temp\empty%test for empty
+% if no ket, then we are done
+\else%
+%{{{ if there is a ket, check if it's isolated or paired with a bra
+\def\temp{#2}\ifx\temp\empty%test for empty
+\Qk{#4}% it's isolated, so this is easy
+\else%
+%{{{ now, we need to check if this is just an inner product, or a full transition w/ operator
+\def\temp{#3}\ifx\temp\empty%test for empty
+%{{{ there is no operator, so we need to leave off the bar for the ket
+\Qknb{\tempphantom #4}%
+%}}}
+\else%
+%{{{ a standard ket 
+\Qk{\tempphantom #4}%
+%}}}
+\fi%
+%}}}
+\fi%
+%}}}
+\fi%
+%{{{ expand the size of the box
+\renewcommand{\tempphantom}{\rule{0pt}{1.5\mybraketLength}}%
+\tempphantom\!%
+%}}}
+\right.% this left/right is needed so that subscripts (e.g. the frame) comes out OK.
+}
+\newcommand{\ketbra}[3][]{%the optional argument is to match the size of an adjoining ket
+\settoheight{\mybraketLength}{\ensuremath{#2}}
+\settoheight{\mybraketSecondLen}{\ensuremath{#3}}
+\setlength{\mybraketLength}{\maxof{\mybraketLength}{\mybraketSecondLen}}
+\settoheight{\mybraketSecondLen}{\ensuremath{#1}}
+\setlength{\mybraketLength}{\maxof{\mybraketLength}{\mybraketSecondLen}}
+%\renewcommand{\tempphantom}{\vphantom{\parbox[][\mybraketLength]{\mybraketLength}{x}}}
+\renewcommand{\tempphantom}{\rule{0pt}{\mybraketLength}}% this is a ``strut''
+\Qk{\tempphantom #2}%
+\!\!%
+\Qb{\tempphantom #3}% it's isolated, so this is easy
+}
+\newcommand{\lketbra}[3][]{%the optional argument is to match the size of an adjoining ket
+\settoheight{\mybraketLength}{\ensuremath{#2}}
+\settoheight{\mybraketSecondLen}{\ensuremath{#3}}
+\setlength{\mybraketLength}{\maxof{\mybraketLength}{\mybraketSecondLen}}
+\settoheight{\mybraketSecondLen}{\ensuremath{#1}}
+\setlength{\mybraketLength}{\maxof{\mybraketLength}{\mybraketSecondLen}}
+%\renewcommand{\tempphantom}{\vphantom{\parbox[][\mybraketLength]{\mybraketLength}{x}}}
+\renewcommand{\tempphantom}{\rule{0pt}{\mybraketLength}}% this is a ``strut''
+\lQk{\tempphantom #2}%
+\!\!%
+\lQb{\tempphantom #3}% it's isolated, so this is easy
+}
+\newcommand{\lbraket}[4][]{%the optional argument is to match the size of an adjoining ket
+\settoheight{\mybraketLength}{\ensuremath{#2}}
+\settoheight{\mybraketSecondLen}{\ensuremath{#3}}
+\setlength{\mybraketLength}{\maxof{\mybraketLength}{\mybraketSecondLen}}
+\settoheight{\mybraketSecondLen}{\ensuremath{#4}}
+\setlength{\mybraketLength}{\maxof{\mybraketLength}{\mybraketSecondLen}}
+\settoheight{\mybraketSecondLen}{\ensuremath{#1}}
+\setlength{\mybraketLength}{\maxof{\mybraketLength}{\mybraketSecondLen}}
+%\renewcommand{\tempphantom}{\vphantom{\parbox[][\mybraketLength]{\mybraketLength}{x}}}
+\renewcommand{\tempphantom}{\rule{0pt}{\mybraketLength}}% this is a ``strut''
+\left.%
+\def\temp{#2}\ifx\temp\empty%test for empty
+\else%
+\lQb{\tempphantom #2}%
+\fi%
+#3
+\def\temp{#4}\ifx\temp\empty%test for empty
+% if no ket, then we are done
+\else%
+%{{{ if there is a ket, check if it's isolated or paired with a bra
+\def\temp{#2}\ifx\temp\empty%test for empty
+\lQk{#4}% it's isolated, so this is easy
+\else%
+%{{{ now, we need to check if this is just an inner product, or a full transition w/ operator
+\def\temp{#3}\ifx\temp\empty%test for empty
+%{{{ there is no operator, so we need to leave off the bar for the ket
+\lQknb{\tempphantom #4}%
+%}}}
+\else%
+%{{{ a standard ket 
+\lQk{\tempphantom #4}%
+%}}}
+\fi%
+%}}}
+\fi%
+%}}}
+\fi%
+%{{{ expand the size of the box
+\renewcommand{\tempphantom}{\rule{0pt}{1.5\mybraketLength}}%
+\tempphantom\!%
+%}}}
+\right.% this left/right is needed so that subscripts (e.g. the frame) comes out OK.
+}
+
+%}}}
+% {{{ Superoperators
+\newlength{\dhatheight}
+\newlength{\dhatwidth}
+\newlength{\dfirsttryheight}
+\newlength{\dsymbolheight}
+\newlength{\dfontsize}
+\newcommand{\doublehat}[1]{%
+    \ensuremath{%
+            \mathchoice%
+            {%
+                \hat{\raisebox{1pt}{\ensuremath{\vphantom{#1}}}\mbox{\smash{\ensuremath{\hat{#1}}}}}
+            }%
+            {%
+                \hat{\raisebox{1pt}{\ensuremath{\vphantom{#1}}}\mbox{\smash{\ensuremath{\hat{#1}}}}}
+            }%
+            {%
+                \hat{\raisebox{-1.2pt}{\ensuremath{\vphantom{#1}}}\mbox{\smash{\ensuremath{\scriptstyle\hat{#1}}}}}
+            }%
+            {scriptscript not supported}%
+    }%
+}
+\newcommand{\superopdef}[2]{\expandafter\def\csname#1superop\endcsname{\ensuremath{\doublehat{\mathcal{#2}}}}}% use def because I can use def with arguments this way -- can't do the same with newcommand
+\newcommand{\LMsuperop}{\ensuremath{\doublehat{\Lambda}}}% because there is no script lambda
+\newcommand{\Gsuperop}{\ensuremath{\doublehat{\Gamma}}}% because there is no script lambda
+% }}}
+% {{{ Liouville space stuff
+\newcommand{\lvleft}{\ensuremath{\langle\!\langle}}
+\newcommand{\lvright}{\ensuremath{\rangle\!\rangle}}
+% }}}

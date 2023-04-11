@@ -1,0 +1,98 @@
+
+
+.. _sphx_glr_auto_examples_matplotlib:
+
+Matplotlib Examples
+===================
+
+(Not plotted in docs).
+These are really more for development purposes and checks, and not really intended as part of the documentation.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Test unit support with each of the Matplotlib primitive artist types.">
+
+.. only:: html
+
+  .. image:: /auto_examples/matplotlib/images/thumb/sphx_glr_artist_tests_thumb.png
+    :alt: Artist tests
+
+  :ref:`sphx_glr_auto_examples_matplotlib_artist_tests.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Artist tests</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="this is a basic example that should generate images in sphinx, but still imports pyspecdata">
+
+.. only:: html
+
+  .. image:: /auto_examples/matplotlib/images/thumb/sphx_glr_matplotlib_test_thumb.png
+    :alt: Matplotlib Example
+
+  :ref:`sphx_glr_auto_examples_matplotlib_matplotlib_test.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Matplotlib Example</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="transformation math">
+
+.. only:: html
+
+  .. image:: /auto_examples/matplotlib/images/thumb/sphx_glr_transf_math_thumb.png
+    :alt: transformation math
+
+  :ref:`sphx_glr_auto_examples_matplotlib_transf_math.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">transformation math</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="draw a span">
+
+.. only:: html
+
+  .. image:: /auto_examples/matplotlib/images/thumb/sphx_glr_draw_span_thumb.png
+    :alt: draw a span
+
+  :ref:`sphx_glr_auto_examples_matplotlib_draw_span.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">draw a span</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/matplotlib/artist_tests
+   /auto_examples/matplotlib/matplotlib_test
+   /auto_examples/matplotlib/transf_math
+   /auto_examples/matplotlib/draw_span
+

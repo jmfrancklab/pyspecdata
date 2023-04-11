@@ -32,13 +32,11 @@ are running at the same time
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    C:\Users\johnf\pyspecdata.0.log appears to be locked or otherwise inaccessible: I'm going to explore other options for fileno
-    ----------  logging output to C:\Users\johnf\pyspecdata.1.log  ----------
-    --> log_test.py(11):root             <module> 2022-05-18 13:03:32,214
+    C:\Users\jmfranck\pyspecdata.0.log appears to be locked or otherwise inaccessible: I'm going to explore other options for fileno
+    ----------  logging output to C:\Users\jmfranck\pyspecdata.2.log  ----------
+    --> log_test.py(11):root             <module> 2023-03-06 15:30:14,094
     INFO: Something, something, something, dark side...
 
 
@@ -59,28 +57,23 @@ are running at the same time
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.002 seconds)
+   **Total running time of the script:** ( 0 minutes  0.001 seconds)
 
 
 .. _sphx_glr_download_auto_examples_text_only_log_test.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: log_test.py <log_test.py>`
 
-     :download:`Download Python source code: log_test.py <log_test.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: log_test.ipynb <log_test.ipynb>`
+      :download:`Download Jupyter notebook: log_test.ipynb <log_test.ipynb>`
 
 
 .. only:: html

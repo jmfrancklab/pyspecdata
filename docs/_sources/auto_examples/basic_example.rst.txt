@@ -46,15 +46,13 @@ bandwidth and time range of the signal, the SNR of the signal improves.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     note that the original dwell time is 0.001 and the original frequency resolution is 2.0
-    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2680: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
     note that the new dwell time of the truncated data is 0.0024875621890547263 and the new frequency resolution is 4.962962962962963
-    c:\users\johnf\notebook\pyspecdata\pyspecdata\core.py:2680: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
 
 
@@ -114,28 +112,23 @@ bandwidth and time range of the signal, the SNR of the signal improves.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.225 seconds)
+   **Total running time of the script:** ( 0 minutes  0.160 seconds)
 
 
 .. _sphx_glr_download_auto_examples_basic_example.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: basic_example.py <basic_example.py>`
 
-     :download:`Download Python source code: basic_example.py <basic_example.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: basic_example.ipynb <basic_example.ipynb>`
+      :download:`Download Jupyter notebook: basic_example.ipynb <basic_example.ipynb>`
 
 
 .. only:: html

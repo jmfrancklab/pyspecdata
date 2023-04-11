@@ -407,28 +407,23 @@ Basic Units
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.008 seconds)
+   **Total running time of the script:** ( 0 minutes  0.006 seconds)
 
 
 .. _sphx_glr_download_auto_examples_text_only_basic_units.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: basic_units.py <basic_units.py>`
 
-     :download:`Download Python source code: basic_units.py <basic_units.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: basic_units.ipynb <basic_units.ipynb>`
+      :download:`Download Jupyter notebook: basic_units.ipynb <basic_units.ipynb>`
 
 
 .. only:: html

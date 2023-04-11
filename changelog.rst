@@ -1,11 +1,14 @@
 History/Roadmap
 ---------------
 
-(Current version in bold) 
+(Current version in bold -- future plans below) 
 
-0.9.5
-    First version distributed on pypi.python.org.
-
+**0.9.5.6**
+    - Updated sphinx gallery with DCCT plots
+      accompanying domain colored coherence transfer
+      preprint.
+0.9.5.5
+    - Implement a reader for Cary (Varian) UV-Vis files with examples.
 0.9.5.1
     - 0.9.5.1.1
       Some important debugging, and also added `pyspecdata.ipy` → executing the following at the top of a jupyter notebook:
@@ -63,9 +66,13 @@ History/Roadmap
     - 0.9.5.4.1
       - ``to_ppm`` should only be a method of inherited class
       - 1.5 and 2.5 D ILT
+0.9.5
+    First version distributed on pypi.python.org.
 
-0.9.5.5
-    - Implement a reader for Cary (Varian) UV-Vis files with examples.
+Future Plans
+^^^^^^^^^^^^
+
+0.9.5.7
     - Implement an ``nddata_placeholder`` class for quickly loading and
       searching through datasets in *e.g.* UV-Vis files or Bruker directories
       without actually loading all the data from each dataset.

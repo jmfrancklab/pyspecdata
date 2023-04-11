@@ -108,13 +108,16 @@ even though the location of the raw spectral data might change.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.datadir.grab_data_directory" title="pyspecdata.datadir.grab_data_directory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grab_data_directory</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.datadir.log_fname" title="pyspecdata.datadir.log_fname"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_fname</span></code></a>(logname, fname, dirname[, err])</p></td>
-<td><p>logs the file name either used or missing.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.datadir.log_fname" title="pyspecdata.datadir.log_fname"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_fname</span></code></a>(logname, fname, dirname, exp_type)</p></td>
+<td><p>logs the file name either used or missing into a csv file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.datadir.rclone_search" title="pyspecdata.datadir.rclone_search"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rclone_search</span></code></a>(fname, dirname)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.datadir.proc_data_target_dir" title="pyspecdata.datadir.proc_data_target_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">proc_data_target_dir</span></code></a>(exp_type)</p></td>
+<td><p>A convenience function for getting a data directory you're going to write data to.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.datadir.rclone_search" title="pyspecdata.datadir.rclone_search"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rclone_search</span></code></a>(fname, exp_type, dirname)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.datadir.register_directory" title="pyspecdata.datadir.register_directory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_directory</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.datadir.register_directory" title="pyspecdata.datadir.register_directory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_directory</span></code></a>()</p></td>
 <td><p>The shell command <cite>pyspecdata_register_dir WHICHDIR</cite> will register the directory WHICHDIR (substitute with the name of a directory on your computer) so that it can be automatically discovered by <a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.find_file" title="pyspecdata.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_file()</span></code></a> or <a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.search_filename" title="pyspecdata.search_filename"><code class="xref py py-func docutils literal notranslate"><span class="pre">search_filename()</span></code></a> after executing this shell command you can use the <cite>exp_type</cite> argument of those commands where you only give the lowest level subdirectory (or the final couple subdirectories) that contains your data.</p></td>
 </tr>
 </tbody>
@@ -128,6 +131,9 @@ even though the location of the raw spectral data might change.</p>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.datadir.MyConfig" title="pyspecdata.datadir.MyConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MyConfig</span></code></a>()</p></td>
 <td><p>Provides an easy interface to the pyspecdata configuration file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.datadir.cached_searcher" title="pyspecdata.datadir.cached_searcher"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cached_searcher</span></code></a>()</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>

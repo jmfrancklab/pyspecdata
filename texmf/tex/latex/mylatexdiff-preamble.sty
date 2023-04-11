@@ -1,0 +1,29 @@
+%DIF PREAMBLE EXTENSION ADDED BY LATEXDIFF
+%DIF UNDERLINE PREAMBLE %DIF PREAMBLE
+\usepackage[normalem]{ulem} %DIF PREAMBLE
+\usepackage{soul}
+\usepackage{cancel}
+\usepackage{mycolors}
+\providecommand{\DIFadd}[1]{\relax\ifmmode{\mbox{\sethlcolor{lightyellow}\hl{\mbox{\ensuremath{#1}}}}}\else\sethlcolor{lightyellow}\hl{#1}\fi} %DIF PREAMBLE
+\providecommand{\DIFmovesource}[1]{\begingroup\color{darkgreen}\DIFadd{\textit{[text moved to \mbox{line \lineref{line:#1_target} on p~\pageref{line:#1_target}}]}}\endgroup}
+\providecommand{\DIFmovetarget}[2]{\begingroup\color{darkgreen}\DIFadd{\textit{[text moved from \mbox{line \lineref{line:#1_source} on p~\pageref{line:#1_target}}]}} #2\endgroup} %DIF PREAMBLE
+%\providecommand{\DIFadd}[1]{{\protect\color{dbluecolor}\uwave{#1}}} %DIF PREAMBLE 
+%\providecommand{\DIFdel}[1]{\ifmmode\xcancel{{\color{redgray} #1}}\else{\protect\color{redgray}\sout{#1}}\fi}%DIF PREAMBLE 
+\providecommand{\DIFdel}[1]{\ifmmode{\color{red}\xcancel{{\color{red} #1}}}\else{\protect\color{red}\sout{#1}}\fi}%DIF PREAMBLE 
+%DIF SAFE PREAMBLE %DIF PREAMBLE
+\providecommand{\DIFaddbegin}{} %DIF PREAMBLE 
+\providecommand{\DIFaddend}{} %DIF PREAMBLE 
+\providecommand{\DIFdelbegin}{} %DIF PREAMBLE 
+\providecommand{\DIFdelend}{} %DIF PREAMBLE 
+%DIF FLOATSAFE PREAMBLE %DIF PREAMBLE
+\providecommand{\DIFaddFL}[1]{\protect\DIFadd{#1}} %DIF PREAMBLE 
+\providecommand{\DIFdelFL}[1]{\protect\DIFdel{#1}} %DIF PREAMBLE 
+\providecommand{\DIFaddbeginFL}{} %DIF PREAMBLE 
+\providecommand{\DIFaddendFL}{} %DIF PREAMBLE 
+\providecommand{\DIFdelbeginFL}{} %DIF PREAMBLE 
+\providecommand{\DIFdelendFL}{} %DIF PREAMBLE 
+%DIF END PREAMBLE EXTENSION ADDED BY LATEXDIFF
+\pdfstringdefDisableCommands{\renewcommand{\DIFdel}{}}
+\pdfstringdefDisableCommands{\renewcommand{\DIFadd}{}}
+\newenvironment{DIFnomarkup}{}{}
+\newcommand{\diffexpl}{\fbox{\textbf{Key:}\ \DIFadd{Added text}\ \DIFdel{Deleted text} {\color{darkgreen}Moved text}}}

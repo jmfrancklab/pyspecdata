@@ -97,10 +97,22 @@ A public-use version 1.0.0, to be accompanied by useful demonstrations, is plann
 Installation
 ============
 
+**Important note:**
+the package ships Fortran-based extensions that are used to provide fast ILT methods.
+We believe this is a useful feature.
+Unfortunately,
+while the instructions below work for most cases,
+not everyone's system is set up equally well for Fortran compilation.
+If you experience difficulties, please don't hesitate to reach out to us at jmfranck [at] syr.edu;
+we would be happy for the opportunity to test distribution on new platforms!
+In all situations, note that this is a development library that works very well
+in our hands -- we are happy to hear from you and work with you to try to
+broaden its applicability!
+
 On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
 just run
-``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython``
-followed by ``conda install -y -c msys2 m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
+``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython ``
+followed by ``conda install -y m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
 Then follow the `installation for developers <#installation-for-developers>`_ below. We have a package on pip, but it currently lags behind the github repo.
 
 On **CentOS7**, we've tested

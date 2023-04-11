@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Convolution Example &mdash; pySpecData 0.9.5.3.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/gallery_custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Plotting Routines" href="image_plot.html" />
+    <link rel="prev" title="Bruker cw ESR Data" href="esr_example.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> pySpecData
+          </a>
+              <div class="version">
+                0.9.5.3.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">PySpecData Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Cary_simple.html">Simple Cary UV-Vis loading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polyfit.html">Polynomial Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="esr_example.html">Bruker cw ESR Data</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Simple Convolution Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="image_plot.html">Plotting Routines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppm_example.html">ppm Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ellmans.html">Manipulation of UV-Vis data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_with_bounds.html">Fit Using Bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DCCT_function.html">Using the DCCT function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_example.html">Basic Slicing/Filtering Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BSA_calibration.html">BSA UV-Vis Calibration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_fake_data.html">Fitting Data (Nonlinear + Symbolic)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QESR.html">Quantitative ESR</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#individual-functions">Individual Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#matplotlib-examples">Matplotlib Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#text-only-examples">Text-Only Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pySpecData</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">PySpecData Examples</a> &raquo;</li>
+      <li>Simple Convolution Example</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/auto_examples/convolution.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-convolution-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="simple-convolution-example">
+<span id="sphx-glr-auto-examples-convolution-py"></span><h1>Simple Convolution Example<a class="headerlink" href="#simple-convolution-example" title="Permalink to this headline">¶</a></h1>
+<p>Since we use convolution a bit for signal analysis, test it here.</p>
+<p>This also demonstrates the point that, when performing convolution, it’s
+important to distinguish between signals that are “causal” (like an FID –
+consisting of real and imag that are Hermite transform pairs) vs. “non-causal”
+(e.g. take the real part or the energy of a causal signal, or analyze a noise
+PSD).
+We show the time-domain signal by way of explanation as to how these are
+treated differently.</p>
+<ul class="sphx-glr-horizontal">
+<li><img src="../_images/sphx_glr_convolution_001.png" srcset="../_images/sphx_glr_convolution_001.png" alt="Time domain" class = "sphx-glr-multi-img"/></li>
+<li><img src="../_images/sphx_glr_convolution_002.png" srcset="../_images/sphx_glr_convolution_002.png" alt="Fourier transform" class = "sphx-glr-multi-img"/></li>
+</ul>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: linestyle is redundantly defined by the &#39;linestyle&#39; keyword argument and the fmt string &quot;:&quot; (-&gt; linestyle=&#39;:&#39;). The keyword argument will take precedence.
+  retval = myplotfunc(*plotargs,**kwargs)
+c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: linestyle is redundantly defined by the &#39;linestyle&#39; keyword argument and the fmt string &quot;:&quot; (-&gt; linestyle=&#39;:&#39;). The keyword argument will take precedence.
+  retval = myplotfunc(*plotargs,**kwargs)
+c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\figlist.py:491: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  plt.gcf().tight_layout()
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
+<a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t</span></a></a></a> <span class="o">=</span> <a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">nddata</span></a></a></a><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">:</span><span class="mi">1024</span><span class="n">j</span><span class="p">],</span><span class="s1">&#39;t&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">set_units</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+<a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">signal</span></a></a></a> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="mi">100</span><span class="o">*</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t</span></a></a></a><span class="o">-</span><span class="mi">20</span><span class="o">*</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t</span></a></a></a><span class="o">/</span><span class="n">pi</span><span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata.add_noise" title="pyspecdata.nddata.add_noise" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.add_noise" title="pyspecdata.nddata.add_noise" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.add_noise" title="pyspecdata.nddata.add_noise" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">signal</span><span class="o">.</span><span class="n">add_noise</span></a></a></a><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="k">with</span> <a href="../modules.html#module-pyspecdata.figlist" title="pyspecdata.figlist" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><a href="../modules.html#module-pyspecdata.figlist" title="pyspecdata.figlist" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><a href="../modules.html#module-pyspecdata.figlist" title="pyspecdata.figlist" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">figlist_var</span></a></a></a><span class="p">()</span> <span class="k">as</span> <a href="../modules.html#module-pyspecdata.figlist" title="pyspecdata.figlist" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><a href="../modules.html#module-pyspecdata.figlist" title="pyspecdata.figlist" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><a href="../modules.html#module-pyspecdata.figlist" title="pyspecdata.figlist" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">fl</span></a></a></a><span class="p">:</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.figlist.next" title="pyspecdata.figlist.next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.next" title="pyspecdata.figlist.next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.next" title="pyspecdata.figlist.next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">next</span></a></a></a><span class="p">(</span><span class="s1">&#39;Time domain&#39;</span><span class="p">)</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">plot</span></a></a></a><span class="p">(</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">signal</span></a></a></a><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;original&#39;</span><span class="p">)</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.figlist.next" title="pyspecdata.figlist.next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.next" title="pyspecdata.figlist.next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.next" title="pyspecdata.figlist.next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">next</span></a></a></a><span class="p">(</span><span class="s1">&#39;Fourier transform&#39;</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">signal</span><span class="o">.</span><span class="n">ft</span></a></a></a><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">signal_real_copy</span></a></a></a> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata.real" title="pyspecdata.nddata.real" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><a href="../pyspecdata.html#pyspecdata.nddata.real" title="pyspecdata.nddata.real" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><a href="../pyspecdata.html#pyspecdata.nddata.real" title="pyspecdata.nddata.real" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">signal</span><span class="o">.</span><span class="n">real</span></a></a></a>
+    <a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">signal_real_copy_noncausal</span></a></a></a> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata.real" title="pyspecdata.nddata.real" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><a href="../pyspecdata.html#pyspecdata.nddata.real" title="pyspecdata.nddata.real" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><a href="../pyspecdata.html#pyspecdata.nddata.real" title="pyspecdata.nddata.real" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">signal</span><span class="o">.</span><span class="n">real</span></a></a></a>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">plot</span></a></a></a><span class="p">(</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">signal</span></a></a></a><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;original&#39;</span><span class="p">)</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata.convolve" title="pyspecdata.nddata.convolve" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.convolve" title="pyspecdata.nddata.convolve" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.convolve" title="pyspecdata.nddata.convolve" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">signal</span><span class="o">.</span><span class="n">convolve</span></a></a></a><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata.convolve" title="pyspecdata.nddata.convolve" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.convolve" title="pyspecdata.nddata.convolve" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.convolve" title="pyspecdata.nddata.convolve" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">signal_real_copy</span><span class="o">.</span><span class="n">convolve</span></a></a></a><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata.convolve" title="pyspecdata.nddata.convolve" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.convolve" title="pyspecdata.nddata.convolve" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.convolve" title="pyspecdata.nddata.convolve" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">signal_real_copy_noncausal</span><span class="o">.</span><span class="n">convolve</span></a></a></a><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span> <span class="n">enforce_causality</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">plot</span></a></a></a><span class="p">(</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">signal</span></a></a></a><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;after convolve&#39;</span><span class="p">)</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">plot</span></a></a></a><span class="p">(</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">signal_real_copy</span></a></a></a><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;real copy, after convolve&#39;</span><span class="p">)</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">plot</span></a></a></a><span class="p">(</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">signal_real_copy_noncausal</span></a></a></a><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;real copy, after convolve, treat as non-causal&#39;</span><span class="p">)</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.figlist.next" title="pyspecdata.figlist.next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.next" title="pyspecdata.figlist.next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.next" title="pyspecdata.figlist.next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">next</span></a></a></a><span class="p">(</span><span class="s1">&#39;Time domain&#39;</span><span class="p">)</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">signal</span><span class="o">.</span><span class="n">ift</span></a></a></a><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">signal_real_copy</span><span class="o">.</span><span class="n">ift</span></a></a></a><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">signal_real_copy_noncausal</span><span class="o">.</span><span class="n">ift</span></a></a></a><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">plot</span></a></a></a><span class="p">(</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">signal</span></a></a></a><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;after convolve&#39;</span><span class="p">)</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">plot</span></a></a></a><span class="p">(</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">signal_real_copy</span></a></a></a><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;real copy, after convolve&#39;</span><span class="p">)</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">plot</span></a></a></a><span class="p">(</span><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">signal_real_copy_noncausal</span></a></a></a><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;real copy, after convolve, treat as non-causal&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.181 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-convolution-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/92ad2c93778d8259304630bd1851c276/convolution.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">convolution.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/3f2bc1679b98040bba4694362b0af235/convolution.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">convolution.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="esr_example.html" class="btn btn-neutral float-left" title="Bruker cw ESR Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="image_plot.html" class="btn btn-neutral float-right" title="Plotting Routines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2016, John M. Franck.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

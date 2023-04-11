@@ -1,0 +1,32 @@
+\ProvidesPackage{myparagraphformatting}
+\RequirePackage[compact]{titlesec}
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+\DeclareOption{noparagraph}{\@ifundefined{noparagraph}{\newcommand{\noparagraph}{test}}{}}
+\DeclareOption{nohrule}{\newcommand{\nohrule}{test}}
+\ProcessOptions
+\RequirePackage[normalem]{ulem}
+%\RequirePackage{myhyperref}
+\pdfstringdefDisableCommands{\renewcommand{\color}{}}
+\pdfstringdefDisableCommands{\renewcommand{\sout}{}}
+\pdfstringdefDisableCommands{\renewcommand{\uwave}{}}
+\pdfstringdefDisableCommands{\renewcommand{\uline}{}}
+\let\oldsubsubsection = \subsubsection
+\let\oldparagraph = \paragraph
+\let\oldsubparagraph = \subparagraph
+\newcommand{\outlineblank}[2][-->]{\phantomsection\addcontentsline{toc}{#2}{#1}}
+\newcommand{\condhrule}[1]{\@ifundefined{nohrule}{\texorpdfstring{\color{#1}\hrulefill}{}}{}}
+
+\titleformat{\section}[runin]{\color{black}\normalfont\Large\bfseries}{\thesection}{3pt}{}[\texorpdfstring{\color{black}\hrulefill}{}\\ \hspace*{-5pt}]%\titleformat{command}[shape (eg. runin)]{format}{label}{sep}{before}[after]
+\titleformat{\subsection}[runin]{\color{darkgray}\normalfont\bfseries}{\thesubsection}{3pt}{}[\condhrule{gray}\normalcolor\\ \hspace*{-5pt}]%\titleformat{command}[shape (eg. runin)]{format}{label}{sep}{before}[after]
+\titleformat{\subsubsection}[runin]{\color{gray}\normalfont\bfseries\small}{\thesubsubsection}{3pt}{}[\condhrule{lightgray}\normalcolor\\ ]%\titleformat{command}[shape (eg. runin)]{format}{label}{sep}{before}[after]
+
+\@ifundefined{noparagraph}{
+    \renewcommand{\theparagraph}{\thesubsubsection\Alph{paragraph}}
+    \titleformat{\paragraph}[runin]{\color{gray}\normalfont\bfseries}{}{3pt}{\hspace{0.75em}\uline{\tiny \theparagraph\ }}[:]%\titleformat{command}[shape (eg. runin)]{format}{label}{sep}{before}[after]
+    \let\myparagraph=\paragraph
+    \renewcommand{\subparagraph}[1]{{\small\textbf{\uline{#1:}}}\phantomsection\addcontentsline{toc}{subparagraph}{#1}}
+    \let\mysubparagraph=\subparagraph
+}{
+    \renewcommand{\paragraph}[1]{\par\phantomsection\addcontentsline{toc}{paragraph}{#1}}
+    \renewcommand{\subparagraph}[1]{\phantomsection\addcontentsline{toc}{subparagraph}{#1}}
+}

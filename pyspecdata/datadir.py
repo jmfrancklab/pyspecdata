@@ -3,7 +3,7 @@ even though the location of the raw spectral data might change.
 
 This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file.
 '''
-import os, sys
+import os, sys, csv
 import configparser
 import platform
 from .general_functions import process_kwargs, strm
@@ -12,6 +12,7 @@ import atexit
 from subprocess import Popen,PIPE,check_output
 from subprocess import call as subprocess_call
 logger = logging.getLogger('pyspecdata.datadir')
+unknown_exp_type_name = 'XXX--unknown--XXX'
 class MyConfig(object):
     r'''Provides an easy interface to the pyspecdata configuration file.
     Only one instance pyspec_config should be created -- this instance is used by
@@ -31,6 +32,13 @@ class MyConfig(object):
         return
     def set_setting(self,this_section,this_key,this_value):
         "set `this_key` to `this_value` inside section `this_section`, creating it if necessary"
+        if any(list(type(j) is not str for j in
+            [this_section,this_key,this_value])):
+            raise ValueError("one of section, key, "
+                "value are not a string! They are: "
+                + str(list(type(j) for j in
+                    [this_section,this_key,this_value]))
+                )
         if self._config_parser is None:
             self._config_parser = configparser.SafeConfigParser()
             read_cfg = self._config_parser.read(self.config_location)
@@ -152,6 +160,16 @@ def grab_data_directory():
             +"data directory was"
             +"\nAll the functionality of this function should now be"
             +"replaced by getDATADIR")
+def proc_data_target_dir(exp_type):
+    """A convenience function for getting a data directory you're going to write data to.
+
+    Provides the full path to the directory corresponding to exp_type.
+
+    If this is the first time you're trying to write to that exp_type, it will create the directory"""
+    data_target = os.path.normpath(getDATADIR('AG_processed_data'))
+    if not os.path.exists(data_target):
+        os.mkdir(data_target)
+    return data_target
 def getDATADIR(*args,**kwargs):
     r'''Used to find a directory containing data in a way that works
     seamlessly across different computers (and operating systems).
@@ -284,62 +302,75 @@ def getDATADIR(*args,**kwargs):
     if len(retval[-1]) != 0:
         retval = retval + ('',)
     return os.path.join(*retval)
+class cached_searcher(object):
+    def __init__(self):
+        self.has_run = False
+        self.dirlist = []
+    def grab_dirlist(self):
+        rclone_remotes = []
+        try:
+            with Popen('rclone', stdout=PIPE, stderr=PIPE) as p:
+                pass
+        except OSError as e:
+            raise RuntimeError("I can't find the rclone program in your"
+                    "path -- please install from http://rclone.org")
+        with Popen(['rclone','listremotes'],
+                stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
+            for j in proc.stdout:
+                rclone_remotes.append(j.rstrip())
+        for thisremote in rclone_remotes:
+            print("checking remote",thisremote,"... this might take a minute")
+            # do NOT quote the filename -- quotes are typically stripped off by the
+            # shell -- they would be literal here
+            cmd = ['rclone','lsf','-R','--dirs-only',thisremote]
+            logger.info("grabbing all dir info with "
+                    +strm(*cmd)+" ... this might take a minute")
+            with Popen(cmd, stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
+                for j in proc.stdout:
+                    self.dirlist.append(thisremote+j.strip())
+            logger.info("done checking that remote")
+        return
+    def search_for(self,exp_type):
+        if not self.has_run:
+            self.grab_dirlist()
+        potential_hits = [j for j in self.dirlist
+                if exp_type.lower() in j.lower()]
+        logger.debug(strm("found potential hits",potential_hits))
+        return potential_hits
+cached_searcher_instance = cached_searcher()
 def rclone_search(fname,exp_type,dirname):
     logger.debug(strm("rclone search called with fname:",fname,"exp_type:",exp_type))
     remotelocation = pyspec_config.get_setting(exp_type.lower(), section='RcloneRemotes')
-    if remotelocation is not None:
-        logger.debug("remote location previously stored")
-        cmd = strm(
-                "rclone copy -v --include '%s' %s %s"%(fname,
-                    remotelocation,
-                    # dirname below needs to be replaced with path relative to current directory
-                    os.path.normpath(os.path.join(dirname)).replace('\\','\\\\')))
-        retval = '\nBased on previous searches for this exp_type, you should be able to retrieve this file with:\n'+cmd
-        return retval
-    else:
-        logger.debug(f"remote location {exp_type.lower()} not previously stored")
-    retval = "I can't find %s in %s, so I'm going to search for t in your rclone remotes"%(fname,exp_type)
-    rclone_remotes = []
-    try:
-        with Popen('rclone', stdout=PIPE, stderr=PIPE) as p:
-            pass
-    except OSError as e:
-        raise RuntimeError("I can't find the rclone program in your"
-                "path -- please install from http://rclone.org")
-    with Popen(['rclone','listremotes'],
-            stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
-        for j in proc.stdout:
-            rclone_remotes.append(j.rstrip())
-    for thisremote in rclone_remotes:
-        retval += '\n'+strm("checking remote",thisremote)
-        # do NOT quote the filename -- quotes are typically stripped off by the
-        # shell -- they would be literal here
-        cmd = ['rclone','--include',f'**{exp_type}**/*{fname}*', 'ls',thisremote]
-        logger.info("trying to find a file, and running:\n(rclone is not great at this, so it might take a while, but if your file is there it will find it!  Also, after it finds a particular data directory, you will be instead offered a quick hint about how to find your file!)\t"+strm(*cmd))
-        with Popen(cmd, stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
-            for j in proc.stdout:
-                foundpath = j.split()
-                foundpath = [' '.join(foundpath[1:])] # leave out size, just filename
-                lastlen = 0
-                while len(foundpath) > lastlen:
-                    lastlen = len(foundpath)
-                    foundpath = [j for k in foundpath
-                            for j in os.path.split(k)
-                            if len(j) > 0]
-                    logging.debug(strm("foundpath is",foundpath))
-                remotelocation = thisremote+'/'.join(foundpath[:-1])
-                logging.debug("about to write to RcloneRemotes")
-                pyspec_config.set_setting('RcloneRemotes',exp_type,remotelocation)
-                cmd = strm(
-                        "rclone copy -v --include '%s' %s %s"%(foundpath[-1],
-                            remotelocation,
-                            # dirname below needs to be replaced with path relative to current directory
-                            os.path.normpath(os.path.join(dirname)).replace('\\','\\\\')))
-                retval += '\nYou should be able to retrieve this file with:\n'+cmd
-        logger.debug("Popen has finally terminated!")
-    return retval
-def log_fname(logname,fname,dirname,exp_type,err=False):
-    r"""logs the file name either used or missing.
+    if remotelocation is None:
+        logger.debug(f"remote location {exp_type.lower()} not previously stored, so search for it!")
+        result = cached_searcher_instance.search_for(exp_type.lower())
+        if len(result) > 1:
+            raise ValueError(
+                f"the exp_type that you've selected, {exp_type}, is ambiguous,"
+                "and could refer to the following remote locations:\n"
+                + str(result))
+        elif len(result) == 0:
+            raise ValueError(f"I can't find a remote corresponding to your exp_type {exp_type}")
+        else:
+            remotelocation = result[0]
+            logging.debug("about to write to RcloneRemotes")
+            pyspec_config.set_setting('RcloneRemotes',exp_type,remotelocation)
+    logger.debug("remote location previously stored")
+    if not fname.startswith('*'):
+        fname = '*' + fname
+    if not fname.endswith('*'):
+        fname = fname + '*'
+    cmd = strm(
+            "rclone copy -v --include '%s' %s %s"%(fname,
+                remotelocation,
+                # dirname below needs to be replaced with path relative to current directory
+                os.path.normpath(os.path.join(dirname)).replace('\\','\\\\')))
+    logger.info(f"I'm about to run\n{cmd}")
+    os.system(cmd)
+    logger.info(f"... done")
+    return
+def log_fname(logname,fname,dirname,exp_type):
+    r"""logs the file name either used or missing into a csv file.
 
     Also, by setting the `err` flag to True, you can generate an error message
     that will guide you on how to selectively copy down this data from a remote source
@@ -358,29 +389,34 @@ def log_fname(logname,fname,dirname,exp_type,err=False):
     You should be able to retrieve this file with:
     rclone copy -v --include '200110_pulse_2.h5' g_syr:exp_data/test_equip C:\\Users\\johnf\\exp_data\\test_equip``
     """
-    if err:
-        logger.debug(strm("about to call rclone search on fname:",fname,"dirname:",exp_type))
-        rclone_suggest = rclone_search(fname,exp_type,dirname)# eventually lump into the error message
-        logger.debug("rclone search done")
-    with open(logname+'.log','a+',encoding='utf-8') as fp:
-        already_listed = False
-        fp.seek(0,0)
-        for j in fp:
-            j = j.replace(r'\ ','LITERALSPACE')
-            try:
-                f, e, d = j.split()
-            except:
-                raise RuntimeError(strm("there seems to be something wrong with your",logname+'.log',"file (in the current directory).  It should consist of one line per file, with each file containing a file an experiment type and a directory name.  Instead, I find a line with the following elements",j.split(),'\n',"You might try deleting the",logname+'.log',"file"))
-            f = f.replace('LITERALSPACE',' ')
-            d = d.replace('LITERALSPACE',' ')
-            if f == fname and d == dirname:
-                already_listed = True
-                break
-        if not already_listed:
-            fp.seek(0,os.SEEK_END)# make sure at end of file
-            fp.write('%-70s%-50s%-50s\n'%(fname.replace(' ','\\ '),exp_type.replace(' ','\\ '),dirname.replace(' ','\\ ')))
-    if err:
-        return rclone_suggest
+    thefields = ["Filename","Path","exp_type"]
+    therow = [fname,dirname,exp_type]
+    # {{{ read all the info into a set
+    if os.path.exists(logname+".csv"):
+        with open(logname+".csv", 'r', encoding='utf-8') as fp:
+            reader = csv.DictReader(fp)
+            all_data = []
+            for row in reader:
+                all_data.append(tuple(row[j] for j in
+                    thefields))
+            all_data = set(all_data)
+    else:
+        all_data = set()
+    # }}}
+    # {{{ add our info to the set
+    therow = dict(zip(thefields, therow))
+    all_data |= set([tuple(therow[j] for j in
+        thefields)])
+    # }}}
+    # {{{ write the updated csv
+    with open(logname+".csv", 'w', encoding='utf-8') as fp:
+        thiscsv = csv.DictWriter(fp, fieldnames=thefields)
+        thiscsv.writeheader()
+        for thisitem in all_data:
+            thiscsv.writerow(dict(zip(thefields,
+                thisitem)))
+    # }}}
+    return
 def register_directory():
     r"""The shell command `pyspecdata_register_dir WHICHDIR` will register the
     directory WHICHDIR (substitute with the name of a directory on your
@@ -391,8 +427,8 @@ def register_directory():
     you can use the `exp_type` argument of those commands where you only give
     the lowest level subdirectory (or the final couple subdirectories) that
     contains your data.
-
-    Key to the way this mechanism works
+    If the `exp_type` that you are trying to access has a slash in it, you should register the top-most directory.
+    (For example, if you want `UV_Vis/Liam`, then register the directory that provides `UV_Vis`).
 
     .. note::
         this feature was installed on 9/24/20: you need to re-run
