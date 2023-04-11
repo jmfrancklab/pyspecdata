@@ -173,6 +173,8 @@ For reasons that we don't understand, the Fortran compiler can give odd errors, 
 This appears to be Windows' fault, rather than conda's (?).
 We highly recommend trying both the Anaconda prompt, as well as the standard dos prompt (press start: type `cmd`) if you experience errors related to compilation.
 
+If you want to build the documentation, all run: `conda install -y -c conda-forge sphinx_rtd_theme sphinx-gallery`
+
 
 Notes on compilation of compiled extensions
 -------------------------------------------
