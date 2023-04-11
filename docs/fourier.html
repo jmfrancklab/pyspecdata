@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fourier Functions &mdash; pySpecData 0.9.5.3.2 documentation</title>
@@ -20,6 +20,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
@@ -73,9 +74,6 @@
 <p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#individual-functions">Individual Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
 </ul>
 
         </div>
@@ -91,10 +89,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="notebook.html">LaTeX Notebook Functionality</a> &raquo;</li>
-          <li><a href="pyspecdata.html">N-dimensional Data (nddata)</a> &raquo;</li>
-      <li>Fourier Functions</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="notebook.html">LaTeX Notebook Functionality</a></li>
+          <li class="breadcrumb-item"><a href="pyspecdata.html">N-dimensional Data (nddata)</a></li>
+      <li class="breadcrumb-item active">Fourier Functions</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/fourier.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -105,9 +103,9 @@
            <div itemprop="articleBody">
              
   <section id="fourier-functions">
-<h1>Fourier Functions<a class="headerlink" href="#fourier-functions" title="Permalink to this headline">¶</a></h1>
+<h1>Fourier Functions<a class="headerlink" href="#fourier-functions" title="Permalink to this heading">¶</a></h1>
 <section id="conventions">
-<h2>Conventions<a class="headerlink" href="#conventions" title="Permalink to this headline">¶</a></h2>
+<h2>Conventions<a class="headerlink" href="#conventions" title="Permalink to this heading">¶</a></h2>
 <p>In the following, and in the code, <span class="math notranslate nohighlight">\(u\)</span> always refer to the axis before
 the (i)ft, while <span class="math notranslate nohighlight">\(v\)</span> always refers to the axis after the (i)ft.
 Generally, in the code/functions here, <cite>ft</cite> is said to move data from <cite>t</cite> or
@@ -117,7 +115,7 @@ units employed) – and <em>vice versa</em> for <cite>ift</cite>.</p>
 refers to the routines in this library.)</p>
 </section>
 <section id="what-s-the-point">
-<h2>What’s The Point?<a class="headerlink" href="#what-s-the-point" title="Permalink to this headline">¶</a></h2>
+<h2>What’s The Point?<a class="headerlink" href="#what-s-the-point" title="Permalink to this heading">¶</a></h2>
 <p>The algorithms of use the numpy <cite>fft</cite> routines, but include extra decoration
 that allows the user to jump seamlessly between the frequency and time domain
 as many times as needed while keeping track of the axes, and also applying any
@@ -134,7 +132,7 @@ or (<strong>3</strong>) selection of the aliased image of the stationary signal 
 time/frequency outside the range of the current axis.</p>
 </section>
 <section id="i-ft-algorithm-outline">
-<h2>(i)ft Algorithm Outline<a class="headerlink" href="#i-ft-algorithm-outline" title="Permalink to this headline">¶</a></h2>
+<h2>(i)ft Algorithm Outline<a class="headerlink" href="#i-ft-algorithm-outline" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic">
 <li><p>Use the <cite>FT</cite> property to check that I’m not trying to ft frequency-domain
 data or to ift time domain data.  To start with the data is marked as

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyspecdata.plot_funcs package &mdash; pySpecData 0.9.5.3.2 documentation</title>
@@ -20,6 +20,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -56,9 +57,6 @@
 <p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">PySpecData Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#individual-functions">Individual Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
 </ul>
 
         </div>
@@ -74,8 +72,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>pyspecdata.plot_funcs package</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">pyspecdata.plot_funcs package</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/auto_api/pyspecdata.plot_funcs.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -86,12 +84,12 @@
            <div itemprop="articleBody">
              
   <section id="pyspecdata-plot-funcs-package">
-<h1>pyspecdata.plot_funcs package<a class="headerlink" href="#pyspecdata-plot-funcs-package" title="Permalink to this headline">¶</a></h1>
+<h1>pyspecdata.plot_funcs package<a class="headerlink" href="#pyspecdata-plot-funcs-package" title="Permalink to this heading">¶</a></h1>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
 </section>
 <section id="module-pyspecdata.plot_funcs.image">
-<span id="pyspecdata-plot-funcs-image-module"></span><h2>pyspecdata.plot_funcs.image module<a class="headerlink" href="#module-pyspecdata.plot_funcs.image" title="Permalink to this headline">¶</a></h2>
+<span id="pyspecdata-plot-funcs-image-module"></span><h2>pyspecdata.plot_funcs.image module<a class="headerlink" href="#module-pyspecdata.plot_funcs.image" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.plot_funcs.image.fl_image">
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">fl_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.image.fl_image" title="Permalink to this definition">¶</a></dt>
@@ -146,7 +144,7 @@ current plot in the figurelist</p></li>
 <dt class="sig sig-object py" id="pyspecdata.plot_funcs.image.A">
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">A</span></span><a class="headerlink" href="#pyspecdata.plot_funcs.image.A" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
 </dd>
 </dl>
@@ -160,7 +158,7 @@ the x axis (columns).
 Defaults to the size of the array.
 Not used if <cite>A</cite> is <cite>nddata</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Optional[double] or Optional[scalar]</p>
 </dd>
 </dl>
@@ -174,7 +172,7 @@ the y axis (columns).
 Defaults to the size of the array.
 Not used if <cite>A</cite> is <cite>nddata</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Optional[double] or Optional[scalar]</p>
 </dd>
 </dl>
@@ -189,7 +187,7 @@ If you want the first dimension on the x-axis (<em>e.g.</em>, if
 you are plotting a contour plot on top of an image), then set
 <cite>x_first</cite> to <cite>True</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>boolean</p>
 </dd>
 </dl>
@@ -201,7 +199,7 @@ you are plotting a contour plot on top of an image), then set
 <dd><p>Determines the size of the white/black line drawn
 Defaults to 1</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>integer</p>
 </dd>
 </dl>
@@ -212,7 +210,7 @@ Defaults to 1</p>
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">ax</span></span><a class="headerlink" href="#pyspecdata.plot_funcs.image.ax" title="Permalink to this definition">¶</a></dt>
 <dd><p>the Axis object where the plot should go.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>matplotlib Axes</p>
 </dd>
 </dl>
@@ -230,7 +228,7 @@ Defaults to 1</p>
 <dd><p>upper and lower are passed to matplotlib.
 Flip is for 2D nmr, and flips the data manually.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>{‘upper’, ‘lower’, ‘flip’}</p>
 </dd>
 </dl>
@@ -272,7 +270,7 @@ fl.plot(z[‘y’:(0,0.01)])</p>
 
 </section>
 <section id="module-pyspecdata.plot_funcs">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyspecdata.plot_funcs" title="Permalink to this headline">¶</a></h2>
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyspecdata.plot_funcs" title="Permalink to this heading">¶</a></h2>
 <p>This subpackage contains plotting functions that take advantage of <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code>.  Eventually, all plotting functions should be moved to separate modules in this subpackage.</p>
 </section>
 </section>

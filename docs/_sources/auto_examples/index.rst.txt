@@ -20,7 +20,7 @@ various functions.
 .. only:: html
 
   .. image:: /auto_examples/images/thumb/sphx_glr_Cary_simple_thumb.png
-    :alt: Simple Cary UV-Vis loading
+    :alt:
 
   :ref:`sphx_glr_auto_examples_Cary_simple.py`
 
@@ -37,7 +37,7 @@ various functions.
 .. only:: html
 
   .. image:: /auto_examples/images/thumb/sphx_glr_polyfit_thumb.png
-    :alt: Polynomial Fitting
+    :alt:
 
   :ref:`sphx_glr_auto_examples_polyfit.py`
 
@@ -54,7 +54,7 @@ various functions.
 .. only:: html
 
   .. image:: /auto_examples/images/thumb/sphx_glr_esr_example_thumb.png
-    :alt: Bruker cw ESR Data
+    :alt:
 
   :ref:`sphx_glr_auto_examples_esr_example.py`
 
@@ -71,7 +71,7 @@ various functions.
 .. only:: html
 
   .. image:: /auto_examples/images/thumb/sphx_glr_convolution_thumb.png
-    :alt: Simple Convolution Example
+    :alt:
 
   :ref:`sphx_glr_auto_examples_convolution.py`
 
@@ -83,12 +83,12 @@ various functions.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="A simple demonstration of a multi-line *vs.* image plot with `domain coloring &lt;https://en.wikip...">
+    <div class="sphx-glr-thumbcontainer" tooltip="A simple demonstration of a multi-line vs. image plot with domain coloring, nested inside a fig...">
 
 .. only:: html
 
   .. image:: /auto_examples/images/thumb/sphx_glr_image_plot_thumb.png
-    :alt: Plotting Routines
+    :alt:
 
   :ref:`sphx_glr_auto_examples_image_plot.py`
 
@@ -105,7 +105,7 @@ various functions.
 .. only:: html
 
   .. image:: /auto_examples/images/thumb/sphx_glr_ppm_example_thumb.png
-    :alt: ppm Example
+    :alt:
 
   :ref:`sphx_glr_auto_examples_ppm_example.py`
 
@@ -122,7 +122,7 @@ various functions.
 .. only:: html
 
   .. image:: /auto_examples/images/thumb/sphx_glr_ellmans_thumb.png
-    :alt: Manipulation of UV-Vis data
+    :alt:
 
   :ref:`sphx_glr_auto_examples_ellmans.py`
 
@@ -139,7 +139,7 @@ various functions.
 .. only:: html
 
   .. image:: /auto_examples/images/thumb/sphx_glr_fit_with_bounds_thumb.png
-    :alt: Fit Using Bounds
+    :alt:
 
   :ref:`sphx_glr_auto_examples_fit_with_bounds.py`
 
@@ -156,7 +156,7 @@ various functions.
 .. only:: html
 
   .. image:: /auto_examples/images/thumb/sphx_glr_DCCT_function_thumb.png
-    :alt: Using the DCCT function
+    :alt:
 
   :ref:`sphx_glr_auto_examples_DCCT_function.py`
 
@@ -173,7 +173,7 @@ various functions.
 .. only:: html
 
   .. image:: /auto_examples/images/thumb/sphx_glr_basic_example_thumb.png
-    :alt: Basic Slicing/Filtering Example
+    :alt:
 
   :ref:`sphx_glr_auto_examples_basic_example.py`
 
@@ -190,7 +190,7 @@ various functions.
 .. only:: html
 
   .. image:: /auto_examples/images/thumb/sphx_glr_BSA_calibration_thumb.png
-    :alt: BSA UV-Vis Calibration
+    :alt:
 
   :ref:`sphx_glr_auto_examples_BSA_calibration.py`
 
@@ -207,7 +207,7 @@ various functions.
 .. only:: html
 
   .. image:: /auto_examples/images/thumb/sphx_glr_fit_fake_data_thumb.png
-    :alt: Fitting Data (Nonlinear + Symbolic)
+    :alt:
 
   :ref:`sphx_glr_auto_examples_fit_fake_data.py`
 
@@ -224,7 +224,7 @@ various functions.
 .. only:: html
 
   .. image:: /auto_examples/images/thumb/sphx_glr_QESR_thumb.png
-    :alt: Quantitative ESR
+    :alt:
 
   :ref:`sphx_glr_auto_examples_QESR.py`
 
@@ -257,7 +257,7 @@ various functions.
    /auto_examples/QESR
 
 Individual Functions
-====================
+--------------------
 
 These are not very important -- just tests to verify the performance of individual functions.
 
@@ -275,7 +275,7 @@ These are not very important -- just tests to verify the performance of individu
 .. only:: html
 
   .. image:: /auto_examples/indiv_funcs/images/thumb/sphx_glr_extend_thumb.png
-    :alt: Extend
+    :alt:
 
   :ref:`sphx_glr_auto_examples_indiv_funcs_extend.py`
 
@@ -292,7 +292,7 @@ These are not very important -- just tests to verify the performance of individu
 .. only:: html
 
   .. image:: /auto_examples/indiv_funcs/images/thumb/sphx_glr_convolve_thumb.png
-    :alt: Convolution
+    :alt:
 
   :ref:`sphx_glr_auto_examples_indiv_funcs_convolve.py`
 
@@ -309,7 +309,7 @@ These are not very important -- just tests to verify the performance of individu
 .. only:: html
 
   .. image:: /auto_examples/indiv_funcs/images/thumb/sphx_glr_unitary_ft_thumb.png
-    :alt: Unitary FT
+    :alt:
 
   :ref:`sphx_glr_auto_examples_indiv_funcs_unitary_ft.py`
 
@@ -323,200 +323,13 @@ These are not very important -- just tests to verify the performance of individu
 
     </div>
 
-Matplotlib Examples
-===================
-
-(Not plotted in docs).
-These are really more for development purposes and checks, and not really intended as part of the documentation.
-
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbnails">
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Test unit support with each of the Matplotlib primitive artist types.">
-
-.. only:: html
-
-  .. image:: /auto_examples/matplotlib/images/thumb/sphx_glr_artist_tests_thumb.png
-    :alt: Artist tests
-
-  :ref:`sphx_glr_auto_examples_matplotlib_artist_tests.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Artist tests</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="this is a basic example that should generate images in sphinx, but still imports pyspecdata">
-
-.. only:: html
-
-  .. image:: /auto_examples/matplotlib/images/thumb/sphx_glr_matplotlib_test_thumb.png
-    :alt: Matplotlib Example
-
-  :ref:`sphx_glr_auto_examples_matplotlib_matplotlib_test.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Matplotlib Example</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="transformation math">
-
-.. only:: html
-
-  .. image:: /auto_examples/matplotlib/images/thumb/sphx_glr_transf_math_thumb.png
-    :alt: transformation math
-
-  :ref:`sphx_glr_auto_examples_matplotlib_transf_math.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">transformation math</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="draw a span">
-
-.. only:: html
-
-  .. image:: /auto_examples/matplotlib/images/thumb/sphx_glr_draw_span_thumb.png
-    :alt: draw a span
-
-  :ref:`sphx_glr_auto_examples_matplotlib_draw_span.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">draw a span</div>
-    </div>
-
-
-.. raw:: html
-
-    </div>
-
-Text-Only Examples
-==================
-
-This directory (not plotted in docs) includes some text-only examples.
-
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbnails">
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="a demonstration of the logging functionality -- output is logged to ~/pyspecdata.log (or the sa...">
-
-.. only:: html
-
-  .. image:: /auto_examples/text_only/images/thumb/sphx_glr_log_test_thumb.png
-    :alt: Logging Functionality
-
-  :ref:`sphx_glr_auto_examples_text_only_log_test.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Logging Functionality</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="demonstrate automatic labeling of phase cycling (coherence) axes">
-
-.. only:: html
-
-  .. image:: /auto_examples/text_only/images/thumb/sphx_glr_phase_cycling_labels_thumb.png
-    :alt: phase cycling labels
-
-  :ref:`sphx_glr_auto_examples_text_only_phase_cycling_labels.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">phase cycling labels</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Trying to load an HDF5 file without an expno generates an error with a list of possible node na...">
-
-.. only:: html
-
-  .. image:: /auto_examples/text_only/images/thumb/sphx_glr_hdf5_error_thumb.png
-    :alt: HDF5 error message
-
-  :ref:`sphx_glr_auto_examples_text_only_hdf5_error.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">HDF5 error message</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="an example of saving nddata to hdf5 files, which preserves all of the nddata information flawle...">
-
-.. only:: html
-
-  .. image:: /auto_examples/text_only/images/thumb/sphx_glr_save_hdf_thumb.png
-    :alt: Saving HDF5 Files
-
-  :ref:`sphx_glr_auto_examples_text_only_save_hdf.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Saving HDF5 Files</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Basic Units">
-
-.. only:: html
-
-  .. image:: /auto_examples/text_only/images/thumb/sphx_glr_basic_units_thumb.png
-    :alt: Basic Units
-
-  :ref:`sphx_glr_auto_examples_text_only_basic_units.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Basic Units</div>
-    </div>
-
-
-.. raw:: html
-
-    </div>
-
 
 .. toctree::
    :hidden:
    :includehidden:
 
+
    /auto_examples/indiv_funcs/index.rst
-   /auto_examples/matplotlib/index.rst
-   /auto_examples/text_only/index.rst
 
 
 .. only:: html

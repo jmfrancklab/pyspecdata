@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyspecdata.core.nddata &mdash; pySpecData 0.9.5.3.2 documentation</title>
@@ -20,6 +20,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -56,9 +57,6 @@
 <p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">PySpecData Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#individual-functions">Individual Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
 </ul>
 
         </div>
@@ -74,8 +72,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>pyspecdata.core.nddata</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">pyspecdata.core.nddata</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/generated/pyspecdata.core.nddata.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -86,10 +84,10 @@
            <div itemprop="articleBody">
              
   <section id="pyspecdata-core-nddata">
-<h1>pyspecdata.core.nddata<a class="headerlink" href="#pyspecdata-core-nddata" title="Permalink to this headline">¶</a></h1>
+<h1>pyspecdata.core.nddata<a class="headerlink" href="#pyspecdata-core-nddata" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.core.nddata">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pyspecdata.core.</span></span><span class="sig-name descname"><span class="pre">nddata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.core.</span></span><span class="sig-name descname"><span class="pre">nddata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the detailed API reference.
 For an introduction on how to use ND-Data, see the <a class="reference internal" href="../nddata.html#nddata-summary-label"><span class="std std-ref">Main ND-Data Documentation</span></a>.</p>
 <dl class="py method">
@@ -100,42 +98,42 @@ Depending on the information available, one of several formats can be used.</p>
 <dl class="simple">
 <dt>3 arguments:</dt><dd><p><code class="docutils literal notranslate"><span class="pre">nddata(inputarray,</span> <span class="pre">shape,</span> <span class="pre">dimlabels)</span></code></p>
 <dl class="field-list simple">
-<dt class="field-odd">inputarray</dt>
+<dt class="field-odd">inputarray<span class="colon">:</span></dt>
 <dd class="field-odd"><p>np.ndarray storing the data – note that the size is ignored
 and the data is reshaped as needed</p>
 </dd>
-<dt class="field-even">shape</dt>
+<dt class="field-even">shape<span class="colon">:</span></dt>
 <dd class="field-even"><p>a list (or np.array, <em>etc.</em>) giving the size of each dimension, in order</p>
 </dd>
-<dt class="field-odd">dimlabels</dt>
+<dt class="field-odd">dimlabels<span class="colon">:</span></dt>
 <dd class="field-odd"><p>a list giving the names of each dimension, in order</p>
 </dd>
 </dl>
 </dd>
 <dt>2 arguments:</dt><dd><p><code class="docutils literal notranslate"><span class="pre">nddata(inputarray,</span> <span class="pre">dimlabels)</span></code></p>
 <dl class="field-list simple">
-<dt class="field-odd">inputarray</dt>
+<dt class="field-odd">inputarray<span class="colon">:</span></dt>
 <dd class="field-odd"><p>np.ndarray storing the data – the data is <em>not</em> reshaped</p>
 </dd>
-<dt class="field-even">dimlabels</dt>
+<dt class="field-even">dimlabels<span class="colon">:</span></dt>
 <dd class="field-even"><p>a list giving the names of each dimension, in order</p>
 </dd>
 </dl>
 </dd>
 <dt>2 arguments:</dt><dd><p><code class="docutils literal notranslate"><span class="pre">nddata(inputarray,</span> <span class="pre">single_dimlabel)</span></code></p>
 <dl class="field-list simple">
-<dt class="field-odd">inputarray</dt>
+<dt class="field-odd">inputarray<span class="colon">:</span></dt>
 <dd class="field-odd"><p>np.ndarray storing the data – must be 1D
 inputarray is <em>also</em> used to label the single axis</p>
 </dd>
-<dt class="field-even">single_dimlabel</dt>
+<dt class="field-even">single_dimlabel<span class="colon">:</span></dt>
 <dd class="field-even"><p>a list giving the name of the single axis</p>
 </dd>
 </dl>
 </dd>
 <dt>1 argument:</dt><dd><p><code class="docutils literal notranslate"><span class="pre">nddata(inputarray,</span> <span class="pre">shape,</span> <span class="pre">dimlabels)</span></code></p>
 <dl class="field-list simple">
-<dt class="field-odd">inputarray</dt>
+<dt class="field-odd">inputarray<span class="colon">:</span></dt>
 <dd class="field-odd"><p>np.ndarray storing the data – reduced to 1D
 A single dimension, called “INDEX” is set.
 This suppresses the printing of axis labels.
@@ -151,11 +149,7 @@ but aren’t gridded data.</p>
 </dd></dl>
 
 <p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
+<table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pyspecdata.core.nddata.__init__" title="pyspecdata.core.nddata.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*args, **kwargs)</p></td>
 <td><p>initialize nddata -- several options.</p></td>
@@ -484,11 +478,7 @@ but aren’t gridded data.</p>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
+<table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.C" title="pyspecdata.core.nddata.C"><code class="xref py py-obj docutils literal notranslate"><span class="pre">C</span></code></a></p></td>
 <td><p>shortcut for copy</p></td>

@@ -3,7 +3,7 @@
 .. _sphx_glr_auto_examples_indiv_funcs:
 
 Individual Functions
-====================
+--------------------
 
 These are not very important -- just tests to verify the performance of individual functions.
 
@@ -21,7 +21,7 @@ These are not very important -- just tests to verify the performance of individu
 .. only:: html
 
   .. image:: /auto_examples/indiv_funcs/images/thumb/sphx_glr_extend_thumb.png
-    :alt: Extend
+    :alt:
 
   :ref:`sphx_glr_auto_examples_indiv_funcs_extend.py`
 
@@ -38,7 +38,7 @@ These are not very important -- just tests to verify the performance of individu
 .. only:: html
 
   .. image:: /auto_examples/indiv_funcs/images/thumb/sphx_glr_convolve_thumb.png
-    :alt: Convolution
+    :alt:
 
   :ref:`sphx_glr_auto_examples_indiv_funcs_convolve.py`
 
@@ -55,7 +55,7 @@ These are not very important -- just tests to verify the performance of individu
 .. only:: html
 
   .. image:: /auto_examples/indiv_funcs/images/thumb/sphx_glr_unitary_ft_thumb.png
-    :alt: Unitary FT
+    :alt:
 
   :ref:`sphx_glr_auto_examples_indiv_funcs_unitary_ft.py`
 

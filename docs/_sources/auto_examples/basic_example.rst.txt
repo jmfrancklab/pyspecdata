@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_auto_examples_basic_example.py>`
+        :ref:`Go to the end <sphx_glr_download_auto_examples_basic_example.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -52,8 +52,6 @@ bandwidth and time range of the signal, the SNR of the signal improves.
     c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
     note that the new dwell time of the truncated data is 0.0024875621890547263 and the new frequency resolution is 4.962962962962963
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
-      retval = myplotfunc(*plotargs,**kwargs)
 
 
 
@@ -112,7 +110,7 @@ bandwidth and time range of the signal, the SNR of the signal improves.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.160 seconds)
+   **Total running time of the script:** ( 0 minutes  0.209 seconds)
 
 
 .. _sphx_glr_download_auto_examples_basic_example.py:
@@ -120,6 +118,8 @@ bandwidth and time range of the signal, the SNR of the signal improves.
 .. only:: html
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
+
+
 
 
     .. container:: sphx-glr-download sphx-glr-download-python
