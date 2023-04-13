@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_auto_examples_fit_with_bounds.py>`
+        :ref:`Go to the end <sphx_glr_download_auto_examples_fit_with_bounds.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -40,7 +40,7 @@ to retype them every time.
  .. code-block:: none
 
     ----------  logging output to C:\Users\jmfranck\pyspecdata.0.log  ----------
-    --> fit_with_bounds.py(25):pyspecdata.core             <module> 2023-03-06 15:30:08,174
+    --> fit_with_bounds.py(25):pyspecdata.core             <module> 2023-04-11 16:56:08,445
     INFO: Functional Form: A*exp(-decay**2*x**2)*sin(shift + x/period)
     c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "ro" (-> marker='o'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
@@ -106,7 +106,7 @@ to retype them every time.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.199 seconds)
+   **Total running time of the script:** ( 0 minutes  0.163 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fit_with_bounds.py:
@@ -114,6 +114,8 @@ to retype them every time.
 .. only:: html
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
+
+
 
 
     .. container:: sphx-glr-download sphx-glr-download-python

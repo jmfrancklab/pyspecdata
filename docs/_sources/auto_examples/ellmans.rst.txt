@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_auto_examples_ellmans.py>`
+        :ref:`Go to the end <sphx_glr_download_auto_examples_ellmans.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -58,8 +58,6 @@ manipulate UV-Vis data.
  .. code-block:: none
 
     the experiments present in this file are: dict_keys(['rxn buffer w_o', 'rxn buffer with', 'TCM w_o', 'TCMI36C w_o', 'rxn buff w_ellman', 'elution buff w_ellman', 'TCM w_ellman', 'TCMI36C_w_ellman'])
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
-      retval = myplotfunc(*plotargs,**kwargs)
     c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
     now I'm going to try a DSW file
@@ -125,7 +123,7 @@ manipulate UV-Vis data.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.931 seconds)
+   **Total running time of the script:** ( 0 minutes  0.553 seconds)
 
 
 .. _sphx_glr_download_auto_examples_ellmans.py:
@@ -133,6 +131,8 @@ manipulate UV-Vis data.
 .. only:: html
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
+
+
 
 
     .. container:: sphx-glr-download sphx-glr-download-python

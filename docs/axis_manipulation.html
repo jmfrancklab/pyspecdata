@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Axis Manipulation Functions &mdash; pySpecData 0.9.5.3.2 documentation</title>
@@ -20,6 +20,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
@@ -73,9 +74,6 @@
 <p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#individual-functions">Individual Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
 </ul>
 
         </div>
@@ -91,10 +89,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="notebook.html">LaTeX Notebook Functionality</a> &raquo;</li>
-          <li><a href="pyspecdata.html">N-dimensional Data (nddata)</a> &raquo;</li>
-      <li>Axis Manipulation Functions</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="notebook.html">LaTeX Notebook Functionality</a></li>
+          <li class="breadcrumb-item"><a href="pyspecdata.html">N-dimensional Data (nddata)</a></li>
+      <li class="breadcrumb-item active">Axis Manipulation Functions</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/axis_manipulation.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -105,12 +103,8 @@
            <div itemprop="articleBody">
              
   <section id="axis-manipulation-functions">
-<h1>Axis Manipulation Functions<a class="headerlink" href="#axis-manipulation-functions" title="Permalink to this headline">¶</a></h1>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
+<h1>Axis Manipulation Functions<a class="headerlink" href="#axis-manipulation-functions" title="Permalink to this heading">¶</a></h1>
+<table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="auto_api/pyspecdata.axis_manipulation.html#module-pyspecdata.axis_manipulation" title="pyspecdata.axis_manipulation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyspecdata.axis_manipulation</span></code></a></p></td>
 <td><p>Provides methods that change the position of the data <em>w.r.t.</em> the axis labels.</p></td>
@@ -118,11 +112,7 @@
 </tbody>
 </table>
 <p class="rubric">Member Functions</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
+<table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords.html#pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords" title="pyspecdata.axis_manipulation.inhomog_coords.inhomog_coords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inhomog_coords.inhomog_coords</span></code></a>(self, ...[, ...])</p></td>
 <td><p>Apply the &quot;inhomogeneity transform,&quot; which rotates the data by <span class="math notranslate nohighlight">\(45^{\circ}\)</span>, and then mirrors the portion with <span class="math notranslate nohighlight">\(t_2&lt;0\)</span> in order to transform from a <span class="math notranslate nohighlight">\((t_1,t_2)\)</span> coordinate system to a <span class="math notranslate nohighlight">\((t_{inh},t_{homog})\)</span> coordinate system.</p></td>

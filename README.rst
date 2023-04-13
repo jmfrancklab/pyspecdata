@@ -111,8 +111,8 @@ broaden its applicability!
 
 On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
 just run
-``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython``
-followed by ``conda install -y -c msys2 m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
+``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython ``
+followed by ``conda install -y m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
 Then follow the `installation for developers <#installation-for-developers>`_ below. We have a package on pip, but it currently lags behind the github repo.
 
 On **CentOS7**, we've tested
@@ -172,6 +172,8 @@ Make sure that this terminates with a successful message, and without any compil
 For reasons that we don't understand, the Fortran compiler can give odd errors, depending on which terminal you are using to install.
 This appears to be Windows' fault, rather than conda's (?).
 We highly recommend trying both the Anaconda prompt, as well as the standard dos prompt (press start: type `cmd`) if you experience errors related to compilation.
+
+If you want to build the documentation, all run: `conda install -y -c conda-forge sphinx_rtd_theme sphinx-gallery`
 
 
 Notes on compilation of compiled extensions

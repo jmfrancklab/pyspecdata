@@ -19,6 +19,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="#" />
@@ -54,9 +55,6 @@
 <p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#individual-functions">Individual Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
 </ul>
 
         </div>
@@ -72,8 +70,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Index</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Index</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -120,12 +118,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.interp1d.__call__">__call__() (pyspecdata.interp1d method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/pyspecdata.core.fitdata.html#pyspecdata.core.fitdata.__init__">__init__() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata.__init__">(pyspecdata.core.nddata method)</a>
-</li>
-        <li><a href="pyspecdata.html#pyspecdata.nddata.__init__">(pyspecdata.nddata method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -258,8 +256,6 @@
         <li><a href="auto_api/pyspecdata.html#pyspecdata.figlist.figlist.ax">(pyspecdata.figlist.figlist attribute)</a>
 </li>
       </ul></li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.axes">axes (pyspecdata.Line2D property)</a>
-</li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.core.nddata.axis">axis() (pyspecdata.core.nddata method)</a>
 
       <ul>
@@ -771,7 +767,7 @@
       <li><a href="auto_api/pyspecdata.html#pyspecdata.interp1d.fill_value">fill_value (pyspecdata.interp1d attribute)</a>
 
       <ul>
-        <li><a href="auto_api/pyspecdata.html#id47">(pyspecdata.interp1d property)</a>
+        <li><a href="auto_api/pyspecdata.html#id51">(pyspecdata.interp1d property)</a>
 </li>
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.filled_markers">filled_markers (pyspecdata.Line2D attribute)</a>
@@ -944,6 +940,8 @@
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.get_antialiased">get_antialiased() (pyspecdata.Line2D method)</a>
 </li>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.get_bbox">get_bbox() (pyspecdata.Line2D method)</a>
+</li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.get_c">get_c() (pyspecdata.Line2D method)</a>
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.UnivariateSpline.get_coeffs">get_coeffs() (pyspecdata.UnivariateSpline method)</a>
@@ -990,6 +988,8 @@
         <li><a href="auto_api/pyspecdata.html#pyspecdata.nddata.get_ft_prop">(pyspecdata.nddata method)</a>, <a href="pyspecdata.html#pyspecdata.nddata.get_ft_prop">[1]</a>
 </li>
       </ul></li>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.get_gapcolor">get_gapcolor() (pyspecdata.Line2D method)</a>
+</li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.UnivariateSpline.get_knots">get_knots() (pyspecdata.UnivariateSpline method)</a>
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.get_linestyle">get_linestyle() (pyspecdata.Line2D method)</a>
@@ -1016,10 +1016,10 @@
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.get_mec">get_mec() (pyspecdata.Line2D method)</a>
 </li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.get_mew">get_mew() (pyspecdata.Line2D method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.get_mew">get_mew() (pyspecdata.Line2D method)</a>
+</li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.get_mfc">get_mfc() (pyspecdata.Line2D method)</a>
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.get_mfcalt">get_mfcalt() (pyspecdata.Line2D method)</a>
@@ -1381,7 +1381,7 @@
       <li><a href="auto_api/pyspecdata.html#id0">labels() (pyspecdata.core.nddata method)</a>
 
       <ul>
-        <li><a href="auto_api/pyspecdata.html#id54">(pyspecdata.nddata method)</a>, <a href="pyspecdata.html#id2">[1]</a>
+        <li><a href="auto_api/pyspecdata.html#id58">(pyspecdata.nddata method)</a>, <a href="pyspecdata.html#id0">[1]</a>
 </li>
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.lambda_rec">lambda_rec() (in module pyspecdata)</a>
@@ -1801,7 +1801,7 @@
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.axis_class.axis_collection.names_used">names_used (pyspecdata.axis_class.axis_collection attribute)</a>, <a href="axis_object_plan.html#pyspecdata.axis_class.axis_collection.names_used">[1]</a>
 </li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.nddata">nddata (class in pyspecdata)</a>, <a href="pyspecdata.html#id0">[1]</a>, <a href="pyspecdata.html#pyspecdata.nddata">[2]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.nddata">nddata (class in pyspecdata)</a>, <a href="pyspecdata.html#pyspecdata.nddata">[1]</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.core.nddata">(class in pyspecdata.core)</a>, <a href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata">[1]</a>
@@ -2621,6 +2621,10 @@
       <li><a href="auto_api/pyspecdata.html#pyspecdata.core.subplot_dim.set">set() (pyspecdata.core.subplot_dim method)</a>
 
       <ul>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.set">(pyspecdata.Line2D method)</a>
+</li>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.PolyCollection.set">(pyspecdata.PolyCollection method)</a>
+</li>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.subplot_dim.set">(pyspecdata.subplot_dim method)</a>
 </li>
       </ul></li>
@@ -2662,6 +2666,8 @@
         <li><a href="auto_api/pyspecdata.html#pyspecdata.nddata.set_ft_prop">(pyspecdata.nddata method)</a>, <a href="pyspecdata.html#pyspecdata.nddata.set_ft_prop">[1]</a>
 </li>
       </ul></li>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.set_gapcolor">set_gapcolor() (pyspecdata.Line2D method)</a>
+</li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.set_guess">set_guess() (pyspecdata.core.fitdata method)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.set_guess">[1]</a>
 
       <ul>
@@ -2724,10 +2730,10 @@
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.datadir.MyConfig.set_setting">set_setting() (pyspecdata.datadir.MyConfig method)</a>
 </li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.UnivariateSpline.set_smoothing_factor">set_smoothing_factor() (pyspecdata.UnivariateSpline method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.UnivariateSpline.set_smoothing_factor">set_smoothing_factor() (pyspecdata.UnivariateSpline method)</a>
+</li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.set_solid_capstyle">set_solid_capstyle() (pyspecdata.Line2D method)</a>
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.set_solid_joinstyle">set_solid_joinstyle() (pyspecdata.Line2D method)</a>
@@ -2848,6 +2854,8 @@
         <li><a href="auto_api/pyspecdata.html#pyspecdata.figlist.figlist.spacing">(pyspecdata.figlist.figlist attribute)</a>
 </li>
       </ul></li>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.PolyCollection.span_where">span_where() (pyspecdata.PolyCollection class method)</a>
+</li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.spectrogram">spectrogram() (in module pyspecdata)</a>
 
       <ul>
@@ -3022,12 +3030,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.UnivariateSpline.validate_input">validate_input() (pyspecdata.UnivariateSpline static method)</a>
 </li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.validCap">validCap (pyspecdata.Line2D attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.validJoin">validJoin (pyspecdata.Line2D attribute)</a>
-</li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.Parameter.VAR_KEYWORD">VAR_KEYWORD (pyspecdata.Parameter attribute)</a>
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.Parameter.VAR_POSITIONAL">VAR_POSITIONAL (pyspecdata.Parameter attribute)</a>

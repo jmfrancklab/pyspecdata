@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Units &mdash; pySpecData 0.9.5.3.2 documentation</title>
@@ -20,6 +20,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -57,9 +58,6 @@
 <p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#individual-functions">Individual Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
 </ul>
 
         </div>
@@ -75,8 +73,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Units</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Units</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/units.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -87,11 +85,11 @@
            <div itemprop="articleBody">
              
   <section id="module-pyspecdata.units">
-<span id="units"></span><h1>Units<a class="headerlink" href="#module-pyspecdata.units" title="Permalink to this headline">¶</a></h1>
+<span id="units"></span><h1>Units<a class="headerlink" href="#module-pyspecdata.units" title="Permalink to this heading">¶</a></h1>
 <p>Not yet implemented – a preliminary idea for how to handle actual unit conversion.  (Currently, we only do s to Hz during FT and order of magnitude prefixes when plotting.)</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.units.units">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pyspecdata.units.</span></span><span class="sig-name descname"><span class="pre">units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.units.units" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.units.</span></span><span class="sig-name descname"><span class="pre">units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.units.units" title="Permalink to this definition">¶</a></dt>
 <dd><p>Each instance of this object stores a numerical representation of a single set of units, and there are routines to set units by
 (<em>i.e.</em> <code class="xref py py-func docutils literal notranslate"><span class="pre">parsing</span></code>) strings to units
 and routines to convert units to an

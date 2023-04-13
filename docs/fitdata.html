@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>the fitdata class &mdash; pySpecData 0.9.5.3.2 documentation</title>
@@ -20,6 +20,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
@@ -61,9 +62,6 @@
 <p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#individual-functions">Individual Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
 </ul>
 
         </div>
@@ -79,8 +77,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>the fitdata class</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">the fitdata class</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/fitdata.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -91,12 +89,12 @@
            <div itemprop="articleBody">
              
   <section id="the-fitdata-class">
-<h1>the fitdata class<a class="headerlink" href="#the-fitdata-class" title="Permalink to this headline">¶</a></h1>
+<h1>the fitdata class<a class="headerlink" href="#the-fitdata-class" title="Permalink to this heading">¶</a></h1>
 <p>This is a child class of nddata used for fitting.</p>
 <p>For old fitdata documentation
 (obsolete, for development reference) see <span class="xref std std-ref">fitdata_old</span></p>
 <section id="creating-new-types-of-fitdata-modules">
-<h2>creating new types of fitdata modules<a class="headerlink" href="#creating-new-types-of-fitdata-modules" title="Permalink to this headline">¶</a></h2>
+<h2>creating new types of fitdata modules<a class="headerlink" href="#creating-new-types-of-fitdata-modules" title="Permalink to this heading">¶</a></h2>
 <p>There is a base class called “fitdata” that defines the basic routines
 necessary for fitting. Currently, the fitdata class only supports
 fitting along one dimension, so before constructing a new class, one
@@ -126,7 +124,7 @@ on how to use it</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.core.fitdata">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pyspecdata.core.</span></span><span class="sig-name descname"><span class="pre">fitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.core.</span></span><span class="sig-name descname"><span class="pre">fitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
 <p>The user creates a fitdata class object from an existing nddata
 class object, and on this fitdata object can define the
@@ -159,7 +157,7 @@ function</p>
 <p>Because methods typically change the data in place, you might want to
 use this frequently.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> (<em>boolean</em>) – <p>Default to True.
 False doesn’t copy the data – this is for internal use,
 <em>e.g.</em> when you want to copy all the metadata and perform a
@@ -182,13 +180,13 @@ nddata metadata.</p>
 <span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">taxis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_what</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.eval" title="Permalink to this definition">¶</a></dt>
 <dd><p>calculate the fit function along the axis taxis.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>taxis</strong> (<em>ndarray</em><em>, </em><em>int</em>) – <dl class="field-list simple">
-<dt class="field-odd">if ndarray</dt>
+<dt class="field-odd">if ndarray<span class="colon">:</span></dt>
 <dd class="field-odd"><p>the new axis coordinates along which we want to calculate the fit.</p>
 </dd>
-<dt class="field-even">if int</dt>
+<dt class="field-even">if int<span class="colon">:</span></dt>
 <dd class="field-even"><p>number of evenly spaced points along the t-axis along the fit</p>
 </dd>
 </dl>
@@ -197,11 +195,11 @@ nddata metadata.</p>
 <li><p><strong>set_to</strong> (<em>double</em><em>, </em><em>optional</em>) – the specific value (int) you are assigning the symbol you included</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -220,7 +218,7 @@ nddata metadata.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyspecdata.core.fitdata.function_string">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">function_string</span></span><a class="headerlink" href="#pyspecdata.core.fitdata.function_string" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">function_string</span></span><a class="headerlink" href="#pyspecdata.core.fitdata.function_string" title="Permalink to this definition">¶</a></dt>
 <dd><p>A property of the fitdata class which stores a string
 output of the functional form of the desired fit expression
 provided in func:<cite>functional_form</cite> in LaTeX format</p>
@@ -228,7 +226,7 @@ provided in func:<cite>functional_form</cite> in LaTeX format</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyspecdata.core.fitdata.functional_form">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">functional_form</span></span><a class="headerlink" href="#pyspecdata.core.fitdata.functional_form" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">functional_form</span></span><a class="headerlink" href="#pyspecdata.core.fitdata.functional_form" title="Permalink to this definition">¶</a></dt>
 <dd><p>A property of the fitdata class which is set by the user,
 takes as input a sympy expression of the desired fit
 expression</p>
@@ -268,15 +266,15 @@ can take optional arguments and pass them on to eval</p>
 <span class="sig-name descname"><span class="pre">output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.output" title="Permalink to this definition">¶</a></dt>
 <dd><p>give the fit value of a particular symbol, or a dictionary of all values.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>name</strong> (<em>str</em><em> (</em><em>optional</em><em>)</em>) – name of the symbol.
 If no name is passed, then output returns a dictionary of the
 resulting values.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>retval</strong> – Either a dictionary of all the values, or the value itself.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict or float</p>
 </dd>
 </dl>
@@ -299,16 +297,16 @@ resulting values.</p>
 <span class="sig-name descname"><span class="pre">set_guess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_of_values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata.set_guess" title="Permalink to this definition">¶</a></dt>
 <dd><p>sets parameters to guess/estimated value to compare fit.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>dict_of_values</strong> (<em>dict</em>) – dictionary of values set to parameters in fit equation.
 Allows for the setting of multiple variables depending on
 what’s defined in this dictionary. The keys of the dictionary
 must be sympy symbols</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>self</strong> – The modified nddata</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
 </dd>
 </dl>

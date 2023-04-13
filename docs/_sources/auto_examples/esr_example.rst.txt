@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_auto_examples_esr_example.py>`
+        :ref:`Go to the end <sphx_glr_download_auto_examples_esr_example.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -376,14 +376,6 @@ The data is initial organized into two dimensions -- `harmonic` and `$B_0$`.
     [(2048, '$B_0$'), (29, 'Microwave Power'), (5, 'harmonic'), (2, 'phase')]
     c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1938: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
       retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1938: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
-      retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1938: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
-      retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1938: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
-      retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1938: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string ":" (-> linestyle=':'). The keyword argument will take precedence.
-      retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
 
     Text(0.5, 1.0, '1D Data with Multiple Harmonics')
 
@@ -435,7 +427,7 @@ Next, let's load some power-saturation data
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.333 seconds)
+   **Total running time of the script:** ( 0 minutes  0.377 seconds)
 
 
 .. _sphx_glr_download_auto_examples_esr_example.py:
@@ -443,6 +435,8 @@ Next, let's load some power-saturation data
 .. only:: html
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
+
+
 
 
     .. container:: sphx-glr-download sphx-glr-download-python

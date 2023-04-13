@@ -59,7 +59,7 @@ sphinx_gallery_conf = {
         'examples_dirs': ['../examples'], #path to examples scripts
         'gallery_dirs': ['auto_examples'], #path to where to save gallery generated output
         'filename_pattern': '.py', # modified to make more general
-        'ignore_pattern': r'__init__\.py|.*/text_only.*|.*/matplotlib.*',
+        'ignore_pattern': r'__init__\.py',#|.*/text_only.*|.*/matplotlib.*',
         #'image_srcset': ['2x'],
         'reference_url': {
             'pyspecdata': None,
@@ -103,7 +103,7 @@ release = __version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:

@@ -5355,7 +5355,7 @@ class nddata (object):
             for j in range(len(axes_tmp.shape)):
                 this_slicer = [0]*len(axes_tmp.shape)
                 this_slicer[j] = slice(None,None,None)
-                new_axes.append(axes_tmp[this_slicer])
+                new_axes.append(axes_tmp[tuple(this_slicer)])
         else:
             new_axes = None
         #{{{ if there is a list of axis coordinates, add in slots for the new axes

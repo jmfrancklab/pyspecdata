@@ -69,6 +69,7 @@ from .core import plot as pyspec_plot
 import matplotlib.pyplot as plt
 import time
 import logging
+from numpy import r_
 
 class figlist(object):
     r"""
