@@ -339,7 +339,7 @@ class lmfitdata(nddata):
                 )
                 + explain_error(e)
             )
-        return retval
+        return retval.view(float)
 
     def copy(self):
         namelist = []
