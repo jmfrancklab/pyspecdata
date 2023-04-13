@@ -100,39 +100,15 @@ class lmfitdata(nddata):
         )
         self.fit_axis = list(self.fit_axis)[0]
         # }}}
-        args = self.parameter_symbols + [str(*this_axis)]
-        self.fitfunc_multiarg = sp.lambdify(
-            args,
-            self.expression,
-            modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
-        )
         self.fitfunc_multiarg_v2 = sp.lambdify(
             self.variable_symbols + self.parameter_symbols,
             self.expression,
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
         )
 
-        def fn(p, x):
-            p = self.add_inactive_p(p)
-            assert len(p) == len(
-                self.parameter_names
-            ), "length of parameter passed to fitfunc doesnt match number of symbolic parameters"
-            return self.fitfunc_multiarg(*tuple(list(p) + [x]))
-
-        self.fitfunc = fn
         self.pars = Parameters()
         for this_name in self.parameter_names:
             self.pars.add(this_name)
-
-    def add_inactive_p(self, p):
-        if self.set_indices is not None:
-            # {{{uncollapse the function
-            temp = p.copy()
-            p = np.zeros(len(self.parameter_names))
-            p[self.active_mask] = temp
-            # }}}
-            p[self.set_indices] = self.set_to
-        return p
 
     def set_guess(self, *args, **kwargs):
         """set both the guess and the bounds
