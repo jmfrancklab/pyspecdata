@@ -267,9 +267,7 @@ class lmfitdata(nddata):
         # But you  should read through and see what the previous fit method is doing
         # and then copy over what you can
         x = self.getaxis(self.fit_axis)
-        if np.iscomplex(self.data.flatten()[0]):
-            logging.debug(strm("Warning, taking only real part of fitting data!"))
-        y = np.real(self.data)
+        y = self.data
         sigma = self.get_error()
         out = minimize(
             self.residual,
