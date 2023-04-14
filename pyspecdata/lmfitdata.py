@@ -246,10 +246,7 @@ class lmfitdata(nddata):
         for j in range(len(list(p))):
             case = {list(self.parameter_names)[j]:list(p)[j]}
             param_dict.update(case)
-        print(p)
-        print(param_dict)
         self.set_guess(param_dict)
-        print(self.pars)
         self.fitfunc = self.run_lambda(self.pars)
         newdata.data[:] = self.fitfunc.flatten()
         newdata.name(str(self.name()))
