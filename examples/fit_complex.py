@@ -1,10 +1,8 @@
 """
-Fit Using Bounds
+Fit complex data
 ================
 
-Adapt one of the examples from lmfit to use sympy and pyspecdata.
-Eventually, we want to use parts of this in the base library, so we don't have
-to retype them every time.
+Using lmfitdata, fit a complex data set.
 
 """
 import matplotlib.pyplot as plt
