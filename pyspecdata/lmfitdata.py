@@ -242,8 +242,12 @@ class lmfitdata(nddata):
             newdata.set_error(self.fit_axis,
                     self.get_error(self.fit_axis))
         # }}}
-        newdata
-        newdata.data[:] = self.fitfunc(p, taxis).flatten()
+        param_dict = {}
+        for j in range(len(list(p))):
+            case = {list(self.parameter_names)[j]:list(p)[j]}
+            param_dict.update(case)
+        self.fitfunc = self.run_lambda(self.pars)
+        newdata.data[:] = self.fitfunc.flatten()
         newdata.name(str(self.name()))
         return newdata
 
