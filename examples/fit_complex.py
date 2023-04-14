@@ -43,6 +43,7 @@ newfit.set_guess(
     nu=dict(value=20),
 )
 newfit.settoguess()
+print("FIRS CALL TO EVAL")
 guess = newfit.eval()
 # }}}
 # {{{ run the fit and generate nddata
@@ -51,11 +52,13 @@ newfit.fit()
 # {{{plot the data with fits and guesses
 plt.subplot(211)
 plot(mydata, "r", label="data")
+print("SECOND CALL TO EVAL")
 plot(newfit.eval(), "b", alpha=0.5, label="fit")
 plot(guess, "g--", label="guess")
 plt.ylabel('real components')
 plt.subplot(212)
 plot(mydata.imag, "r", label="data")
+print("THIRD CALL TO EVAL")
 plot(newfit.eval().imag, "b", alpha=0.5, label="fit")
 plot(guess.imag, "g--", label="guess")
 plt.ylabel('imag components')
