@@ -283,9 +283,16 @@ class lmfitdata(nddata):
         return self
 
     def run_lambda(self, pars):
-        """actually run the lambda function we separate this in case we want
-        our function to involve something else, as well (e.g. taking a Fourier
-        transform)"""
+        """actually run the lambda function that calculates the model data.
+        Note that the name of the variable along which the model data is calculated
+        (as opposed to "parameter" is set by variable_names parameter).
+
+        .. note::
+            we had separates this in case we want
+            our function to involve something else, as well (e.g. taking a Fourier
+            transform).  Unknown if there are still two steps in this way.
+
+        """
         logging.debug(strm(self.getaxis(j) for j in self.variable_names))
         return self.fitfunc_multiarg_v2(
             *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
