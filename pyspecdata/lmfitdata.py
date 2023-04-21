@@ -248,7 +248,7 @@ class lmfitdata(nddata):
             param_dict.update(case)
         self.set_guess(param_dict)
         self.fitfunc = self.run_lambda(self.pars)
-        newdata.data[:] = self.fitfunc.flatten()
+        newdata.data[:] = self.fitfunc(p,taxis).flatten()
         newdata.name(str(self.name()))
         return newdata
 

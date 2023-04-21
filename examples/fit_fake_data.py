@@ -30,7 +30,7 @@ def list_symbs(f):
 # }}}
 fl = figlist_var()
 # {{{creating a fake data recovery curve
-tau = nddata(r_[0:2:100j], "tau")
+tau = nddata(r_[0:2:256j], "tau")
 fake_data = 102 * (1 - 2 * exp(-tau * 6.0))
 fake_data.add_noise(5.0)
 # }}}
