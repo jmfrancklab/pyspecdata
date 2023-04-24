@@ -179,9 +179,10 @@ class lmfitdata(nddata):
             )
         elif not np.isscalar(taxis) and len(taxis) == 2:
             taxis = np.linspace(taxis[0], taxis[1], 300)
+        self.taxis = taxis    
         return taxis
 
-    def eval(self, taxis=None, set_what=None, set_to=None):
+    def eval(self, thistaxis=None, set_what=None, set_to=None):
         """Calculate the fit function along the axis taxis.
 
         Parameters
@@ -202,10 +203,10 @@ class lmfitdata(nddata):
         if isinstance(set_what, dict):
             set_to = list(set_what.values())
             set_what = list(set_what.keys())
-        if taxis is None:
+        if thistaxis is None:
             taxis = self.getaxis(self.fit_axis)
         else:
-            taxis = self._taxis(taxis)
+            taxis = self._taxis(thistaxis)
         if hasattr(self, "fit_coeff") and self.fit_coeff is not None:
             p = self.fit_coeff.copy()
         else:
@@ -247,8 +248,11 @@ class lmfitdata(nddata):
             case = {list(self.parameter_names)[j]:list(p)[j]}
             param_dict.update(case)
         self.set_guess(param_dict)
-        self.fitfunc = self.run_lambda(self.pars)
-        newdata.data[:] = self.fitfunc(p,taxis).flatten()
+        #self.fitfunc = self.run_lambda(self.pars)
+        if thistaxis == None:
+            newdata.data[:] = self.run_lambda(self.pars).flatten()
+        else:
+            newdata.data[:] = self.run_lambda(p,taxis,the_taxis = taxis,this_taxis=True).flatten()
         newdata.name(str(self.name()))
         return newdata
 
@@ -282,9 +286,10 @@ class lmfitdata(nddata):
         # }}}
         return self
 
-    def run_lambda(self, pars):
+    def run_lambda(self, pars, the_taxis = None, this_taxis = False):
         """actually run the lambda function that calculates the model data.
-        Note that the name of the variable along which the model data is calculated
+        Note that the name of the variable along which the model data :w
+        is calculated
         (as opposed to "parameter" is set by variable_names parameter).
 
         .. note::
@@ -293,11 +298,19 @@ class lmfitdata(nddata):
             transform).  Unknown if there are still two steps in this way.
 
         """
-        logging.debug(strm(self.getaxis(j) for j in self.variable_names))
-        return self.fitfunc_multiarg_v2(
-            *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
-        )
-
+        if this_taxis:
+           args = (*tuple(list(p)+[taxis])) 
+           print("taxis is generated")
+           return sp.lambdify(
+                    self.parameter_symbols + [self.taxis],
+                    self.expression,
+                    modules=[{"ImmutableMatrix":np.ndarray},"numpy","scipy"],
+                    )
+        else:
+            logging.debug(strm(self.getaxis(j) for j in self.variable_names))
+            return self.fitfunc_multiarg_v2(
+                *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
+            )
     def residual(self, pars, x, y, sigma=None):
         "calculate the residual OR if data is None, return fake data"
         fit = self.run_lambda(pars)
