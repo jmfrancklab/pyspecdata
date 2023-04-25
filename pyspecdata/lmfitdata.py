@@ -248,11 +248,13 @@ class lmfitdata(nddata):
             case = {list(self.parameter_names)[j]:list(p)[j]}
             param_dict.update(case)
         self.set_guess(param_dict)
+        print(p)
         #self.fitfunc = self.run_lambda(self.pars)
         if thistaxis == None:
             newdata.data[:] = self.run_lambda(self.pars).flatten()
         else:
-            newdata.data[:] = self.run_lambda(p,taxis,the_taxis = taxis,this_taxis=True).flatten()
+            this_taxis = True
+            newdata.data[:] = self.run_lambda(p,the_taxis = taxis,this_taxis=this_taxis).flatten()
         newdata.name(str(self.name()))
         return newdata
 
@@ -299,10 +301,10 @@ class lmfitdata(nddata):
 
         """
         if this_taxis:
-           args = (*tuple(list(p)+[taxis])) 
+           args = (*tuple(list(pars)+[this_taxis])) 
            print("taxis is generated")
            return sp.lambdify(
-                    self.parameter_symbols + [self.taxis],
+                    args,
                     self.expression,
                     modules=[{"ImmutableMatrix":np.ndarray},"numpy","scipy"],
                     )
