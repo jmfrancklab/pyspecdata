@@ -301,7 +301,11 @@ class lmfitdata(nddata):
 
         """
         if this_taxis:
-           args = (*tuple(list(pars)+[this_taxis])) 
+           print(pars)
+           print(list(pars))
+           print([the_taxis])
+           print(tuple(list(pars)+[the_taxis]))
+           args = (tuple(list(pars)+[the_taxis])) 
            print("taxis is generated")
            return sp.lambdify(
                     args,
