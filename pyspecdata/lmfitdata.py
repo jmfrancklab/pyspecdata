@@ -77,7 +77,6 @@ class lmfitdata(nddata):
         axis_names = set(self.dimlabels)
         variable_symbol_names = axis_names & all_symbol_names
         parameter_symbol_names = all_symbol_names - variable_symbol_names
-        this_axis = variable_symbol_names
         self.variable_names = tuple(variable_symbol_names)
         self.variable_symbols = [j for j in all_symbols if str(j) in
                 variable_symbol_names]
@@ -100,12 +99,6 @@ class lmfitdata(nddata):
         )
         self.fit_axis = list(self.fit_axis)[0]
         # }}}
-        args = self.parameter_symbols + [str(*this_axis)]
-        self.fitfunc_multiarg = sp.lambdify(
-            args,
-            self.expression,
-            modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
-        )
         self.fitfunc_multiarg_v2 = sp.lambdify(
             self.variable_symbols + self.parameter_symbols,
             self.expression,
