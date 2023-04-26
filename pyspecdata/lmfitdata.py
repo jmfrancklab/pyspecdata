@@ -112,27 +112,9 @@ class lmfitdata(nddata):
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
         )
 
-        def fn(p, x):
-            p = self.add_inactive_p(p)
-            assert len(p) == len(
-                self.parameter_names
-            ), "length of parameter passed to fitfunc doesnt match number of symbolic parameters"
-            return self.fitfunc_multiarg(*tuple(list(p) + [x]))
-
-        self.fitfunc = fn
         self.pars = Parameters()
         for this_name in self.parameter_names:
             self.pars.add(this_name)
-
-    def add_inactive_p(self, p):
-        if self.set_indices is not None:
-            # {{{uncollapse the function
-            temp = p.copy()
-            p = np.zeros(len(self.parameter_names))
-            p[self.active_mask] = temp
-            # }}}
-            p[self.set_indices] = self.set_to
-        return p
 
     def set_guess(self, *args, **kwargs):
         """set both the guess and the bounds
@@ -203,7 +185,6 @@ class lmfitdata(nddata):
             )
         elif not np.isscalar(taxis) and len(taxis) == 2:
             taxis = np.linspace(taxis[0], taxis[1], 300)
-        self.taxis = taxis    
         return taxis
 
     def eval(self, taxis=None, set_what=None, set_to=None):
@@ -273,7 +254,7 @@ class lmfitdata(nddata):
         #    param_dict.update(case)
         #self.set_guess(param_dict)
         newdata
-        newdata.data[:] = self.fitfunc(p,taxis).flatten()
+        newdata.data[:] = self.fitfunc_multiarg(*tuple(list(p) + [taxis])).flatten()
         newdata.name(str(self.name()))
         return newdata
 
@@ -319,7 +300,6 @@ class lmfitdata(nddata):
 
         """
         logging.debug(strm(self.getaxis(j) for j in self.variable_names))
-        print(self.variable_names)
         return self.fitfunc_multiarg_v2(
             *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
         )
