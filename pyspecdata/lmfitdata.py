@@ -100,15 +100,39 @@ class lmfitdata(nddata):
         )
         self.fit_axis = list(self.fit_axis)[0]
         # }}}
+        args = self.parameter_symbols + [str(*this_axis)]
+        self.fitfunc_multiarg = sp.lambdify(
+            args,
+            self.expression,
+            modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
+        )
         self.fitfunc_multiarg_v2 = sp.lambdify(
             self.variable_symbols + self.parameter_symbols,
             self.expression,
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
         )
 
+        def fn(p, x):
+            p = self.add_inactive_p(p)
+            assert len(p) == len(
+                self.parameter_names
+            ), "length of parameter passed to fitfunc doesnt match number of symbolic parameters"
+            return self.fitfunc_multiarg(*tuple(list(p) + [x]))
+
+        self.fitfunc = fn
         self.pars = Parameters()
         for this_name in self.parameter_names:
             self.pars.add(this_name)
+
+    def add_inactive_p(self, p):
+        if self.set_indices is not None:
+            # {{{uncollapse the function
+            temp = p.copy()
+            p = np.zeros(len(self.parameter_names))
+            p[self.active_mask] = temp
+            # }}}
+            p[self.set_indices] = self.set_to
+        return p
 
     def set_guess(self, *args, **kwargs):
         """set both the guess and the bounds
@@ -182,7 +206,7 @@ class lmfitdata(nddata):
         self.taxis = taxis    
         return taxis
 
-    def eval(self, thistaxis=None, set_what=None, set_to=None):
+    def eval(self, taxis=None, set_what=None, set_to=None):
         """Calculate the fit function along the axis taxis.
 
         Parameters
@@ -203,10 +227,10 @@ class lmfitdata(nddata):
         if isinstance(set_what, dict):
             set_to = list(set_what.values())
             set_what = list(set_what.keys())
-        if thistaxis is None:
+        if taxis is None:
             taxis = self.getaxis(self.fit_axis)
         else:
-            taxis = self._taxis(thistaxis)
+            taxis = self._taxis(taxis)
         if hasattr(self, "fit_coeff") and self.fit_coeff is not None:
             p = self.fit_coeff.copy()
         else:
@@ -243,18 +267,13 @@ class lmfitdata(nddata):
             newdata.set_error(self.fit_axis,
                     self.get_error(self.fit_axis))
         # }}}
-        param_dict = {}
-        for j in range(len(list(p))):
-            case = {list(self.parameter_names)[j]:list(p)[j]}
-            param_dict.update(case)
-        self.set_guess(param_dict)
-        print(p)
-        #self.fitfunc = self.run_lambda(self.pars)
-        if thistaxis == None:
-            newdata.data[:] = self.run_lambda(self.pars).flatten()
-        else:
-            this_taxis = True
-            newdata.data[:] = self.run_lambda(p,the_taxis = taxis,this_taxis=this_taxis).flatten()
+        #param_dict = {}
+        #for j in range(len(list(p))):
+        #    case = {list(self.parameter_names)[j]:list(p)[j]}
+        #    param_dict.update(case)
+        #self.set_guess(param_dict)
+        newdata
+        newdata.data[:] = self.fitfunc(p,taxis).flatten()
         newdata.name(str(self.name()))
         return newdata
 
@@ -288,10 +307,9 @@ class lmfitdata(nddata):
         # }}}
         return self
 
-    def run_lambda(self, pars, the_taxis = None, this_taxis = False):
+    def run_lambda(self, pars):
         """actually run the lambda function that calculates the model data.
-        Note that the name of the variable along which the model data :w
-        is calculated
+        Note that the name of the variable along which the model data is calculated
         (as opposed to "parameter" is set by variable_names parameter).
 
         .. note::
@@ -300,23 +318,12 @@ class lmfitdata(nddata):
             transform).  Unknown if there are still two steps in this way.
 
         """
-        if this_taxis:
-           print(pars)
-           print(list(pars))
-           print([the_taxis])
-           print(tuple(list(pars)+[the_taxis]))
-           args = (tuple(list(pars)+[the_taxis])) 
-           print("taxis is generated")
-           return sp.lambdify(
-                    args,
-                    self.expression,
-                    modules=[{"ImmutableMatrix":np.ndarray},"numpy","scipy"],
-                    )
-        else:
-            logging.debug(strm(self.getaxis(j) for j in self.variable_names))
-            return self.fitfunc_multiarg_v2(
-                *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
-            )
+        logging.debug(strm(self.getaxis(j) for j in self.variable_names))
+        print(self.variable_names)
+        return self.fitfunc_multiarg_v2(
+            *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
+        )
+
     def residual(self, pars, x, y, sigma=None):
         "calculate the residual OR if data is None, return fake data"
         fit = self.run_lambda(pars)
