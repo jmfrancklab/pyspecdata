@@ -14,10 +14,8 @@ with figlist_var() as fl:
              ]):
         #{{{ load data in and rescale and center about 0
         d = find_file(thisfile,exp_type = exp_type)
-        d -= d[fieldaxis, -100:].data.mean()
         if "harmonic" in d.dimlabels:
             d = d['harmonic',0]
-        color = d.get_plot_color()
         d /= QESR_scalefactor(d, calibration_name = calibration,
                 diameter_name = diameter)
         center_field = d.getaxis(fieldaxis)[r_[0,-1]].mean()
