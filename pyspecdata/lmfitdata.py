@@ -241,13 +241,12 @@ class lmfitdata(nddata):
             newdata.set_error(self.fit_axis,
                     self.get_error(self.fit_axis))
         # }}}
-        #param_dict = {}
-        #for j in range(len(list(p))):
-        #    case = {list(self.parameter_names)[j]:list(p)[j]}
-        #    param_dict.update(case)
-        #self.set_guess(param_dict)
-        newdata
-        newdata.data[:] = self.fitfunc_multiarg(*tuple(list(p) + [taxis])).flatten()
+        param_dict = {}
+        for j in range(len(list(p))):
+            case = {list(self.parameter_names)[j]:list(p)[j]}
+            param_dict.update(case)
+        self.set_guess(param_dict)
+        newdata.data[:] = self.run_lambda(self.pars,thistaxis = taxis).flatten()
         newdata.name(str(self.name()))
         return newdata
 
@@ -281,7 +280,7 @@ class lmfitdata(nddata):
         # }}}
         return self
 
-    def run_lambda(self, pars):
+    def run_lambda(self, pars, thistaxis = None):
         """actually run the lambda function that calculates the model data.
         Note that the name of the variable along which the model data is calculated
         (as opposed to "parameter" is set by variable_names parameter).
@@ -292,14 +291,20 @@ class lmfitdata(nddata):
             transform).  Unknown if there are still two steps in this way.
 
         """
-        logging.debug(strm(self.getaxis(j) for j in self.variable_names))
-        return self.fitfunc_multiarg_v2(
-            *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
-        )
+        if len(self.variable_names) > 1:
+            print("We are only allowing for one variable for now")
+        elif thistaxis is None:
+            return self.fitfunc_multiarg_v2(
+                    *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict())
+        else:    
+            logging.debug(strm(self.getaxis(j) for j in self.variable_names))
+            return self.fitfunc_multiarg_v2(
+                    thistaxis, **pars.valuesdict()
+            )
 
     def residual(self, pars, x, y, sigma=None):
         "calculate the residual OR if data is None, return fake data"
-        fit = self.run_lambda(pars)
+        fit = self.run_lambda(pars,thistaxis = None)
         if sigma is not None:
             normalization = np.sum(1.0 / sigma[np.logical_and(sigma != 0.0, np.isfinite(sigma))])
             sigma[sigma == 0.0] = 1
