@@ -180,7 +180,7 @@ class lmfitdata(nddata):
             taxis = np.linspace(taxis[0], taxis[1], 300)
         return taxis
 
-    def eval(self, taxis=None, set_what=None, set_to=None):
+    def eval(self, taxis=None):
         """Calculate the fit function along the axis taxis.
 
         Parameters
@@ -188,19 +188,12 @@ class lmfitdata(nddata):
         taxis: ndarray, int
             :if ndarray: the new axis coordinates along which we want to calculate the fit.
             :if int: number of evenly spaced points along the t-axis along the fit
-        set_what: 'str', optional
-            forcibly sets a specific symbol
-        set_to: double, optional
-            the specific value(int) you are assigning the symbol you included
 
         Returns
         -------
         self: nddata
             the fit function evaluated along the axis coordinates that were passed
         """
-        if isinstance(set_what, dict):
-            set_to = list(set_what.values())
-            set_what = list(set_what.keys())
         if taxis is None:
             taxis = self.getaxis(self.fit_axis)
         else:
@@ -209,17 +202,6 @@ class lmfitdata(nddata):
             p = self.fit_coeff.copy()
         else:
             p = np.array([NaN] * len(self.variable_names))
-        # {{{LOCALLY apply any forced values
-        if set_what is not None:
-            if self.set_indices is not None:
-                raise ValueError(
-                    "You're trying to set indices in an eval"
-                    " function for a function that was fit constrained; this"
-                    " is not currently supported"
-                )
-            set_indices, set_to, active_mask = self.gen_indices(set_what, set_to)
-            p[set_indices] = set_to
-        # }}}
         # JF notes this is a copy of older code -- we should be able to
         # clean this up by using the newer copy functions -- currently I
         # see  the copy_props and copyaxes functions, but thought there
