@@ -223,11 +223,8 @@ class lmfitdata(nddata):
             newdata.set_error(self.fit_axis,
                     self.get_error(self.fit_axis))
         # }}}
-        param_dict = {}
-        for j in range(len(list(p))):
-            case = {list(self.parameter_names)[j]:list(p)[j]}
-            param_dict.update(case)
-        self.set_guess(param_dict)
+        for j,this_name in enumerate(self.pars.keys()):
+            self.pars[this_name].value = p[j]
         newdata.data[:] = self.run_lambda(self.pars,**{self.fit_axis:taxis}).flatten()
         newdata.name(str(self.name()))
         return newdata
