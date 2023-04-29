@@ -105,9 +105,9 @@ class lmfitdata(nddata):
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
         )
 
-        self.pars = Parameters()
+        self.guess_coeff = Parameters()
         for this_name in self.parameter_names:
-            self.pars.add(this_name)
+            self.guess_coeff.add(this_name)
 
     def set_guess(self, *args, **kwargs):
         """set both the guess and the bounds
@@ -130,24 +130,24 @@ class lmfitdata(nddata):
             guesses = kwargs
         self.guess_dict = {}
         logging.debug(strm("guesses",guesses))
-        logging.debug(strm("pars",self.pars.keys()))
-        for this_name in self.pars.keys():
+        logging.debug(strm("guess_coeff",self.guess_coeff.keys()))
+        for this_name in self.guess_coeff.keys():
             if this_name in guesses.keys():
                 logging.debug(strm("adding",this_name))
                 if type(guesses[this_name]) is dict:
                     self.guess_dict[this_name] = {}
                     for k, v in guesses[this_name].items():
-                        setattr(self.pars[this_name], k, v)
+                        setattr(self.guess_coeff[this_name], k, v)
                         self.guess_dict[this_name][k] = v
                 elif np.isscalar(guesses[this_name]):
-                    self.pars[this_name].value = guesses[this_name]
+                    self.guess_coeff[this_name].value = guesses[this_name]
                     self.guess_dict[this_name] = {"value":guesses[this_name]}
                 else:
                     raise ValueError("what are the keys to your guesses???")
                 logging.debug(strm("now dict is",self.guess_dict))
-        for j in self.pars:
+        for j in self.guess_coeff:
             logging.debug(strm("fit param ---", j))
-        logging.debug(strm(self.pars))
+        logging.debug(strm(self.guess_coeff))
         logging.debug(strm(self.guess_dict))
         return self
     def guess(self):
@@ -200,6 +200,8 @@ class lmfitdata(nddata):
             taxis = self._taxis(taxis)
         if hasattr(self, "fit_coeff") and self.fit_coeff is not None:
             p = self.fit_coeff.copy()
+            # here you see that fit_coeff stores the coefficients that
+            # were previously fit, and these are stored in p, here
         else:
             p = np.array([NaN] * len(self.variable_names))
         # JF notes this is a copy of older code -- we should be able to
@@ -223,9 +225,11 @@ class lmfitdata(nddata):
             newdata.set_error(self.fit_axis,
                     self.get_error(self.fit_axis))
         # }}}
-        for j,this_name in enumerate(self.pars.keys()):
-            self.pars[this_name].value = p[j]
-        newdata.data[:] = self.run_lambda(self.pars,**{self.fit_axis:taxis}).flatten()
+        for j,this_name in enumerate(self.guess_coeff.keys()):
+            # as discussed, guess_coeff are *not* the fit_coeff.  
+            # (I changed the name from "pars" to "guess_coeff" to clarify that, since "pars" was arguably a bad name!).
+            self.guess_coeff[this_name].value = p[j]
+        newdata.data[:] = self.run_lambda(self.guess_coeff,**{self.fit_axis:taxis}).flatten()
         newdata.name(str(self.name()))
         return newdata
 
@@ -248,7 +252,7 @@ class lmfitdata(nddata):
         sigma = self.get_error()
         out = minimize(
             self.residual,
-            self.pars,
+            self.guess_coeff,
             args=(x, y, sigma),
         )
         # {{{ capture the result for ouput, etc
@@ -283,7 +287,7 @@ class lmfitdata(nddata):
 
     def residual(self, pars, x, y, sigma=None):
         "calculate the residual OR if data is None, return fake data"
-        fit = self.run_lambda(pars,thistaxis = None)
+        fit = self.run_lambda(pars)
         if sigma is not None:
             normalization = np.sum(1.0 / sigma[np.logical_and(sigma != 0.0, np.isfinite(sigma))])
             sigma[sigma == 0.0] = 1
