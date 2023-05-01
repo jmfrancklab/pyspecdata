@@ -225,11 +225,13 @@ class lmfitdata(nddata):
             newdata.set_error(self.fit_axis,
                     self.get_error(self.fit_axis))
         # }}}
-        for j,this_name in enumerate(self.guess_coeff.keys()):
+        #for j,this_name in enumerate(self.guess_coeff.keys()):
             # as discussed, guess_coeff are *not* the fit_coeff.  
             # (I changed the name from "pars" to "guess_coeff" to clarify that, since "pars" was arguably a bad name!).
-            self.guess_coeff[this_name].value = p[j]
-        newdata.data[:] = self.run_lambda(self.guess_coeff,**{self.fit_axis:taxis}).flatten()
+        #    self.guess_coeff[this_name].value = p[j]
+        print("RUNNING THIS SHIT")
+        newdata
+        newdata.data[:] = self.run_lambda(self.fit_coeff,**{self.fit_axis:taxis}).flatten()
         newdata.name(str(self.name()))
         return newdata
 
