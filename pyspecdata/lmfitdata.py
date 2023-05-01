@@ -105,9 +105,9 @@ class lmfitdata(nddata):
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
         )
 
-        self.guess_coeff = Parameters()
+        self.guess_parameters = Parameters()
         for this_name in self.parameter_names:
-            self.guess_coeff.add(this_name)
+            self.guess_parameters.add(this_name)
 
     def set_guess(self, *args, **kwargs):
         """set both the guess and the bounds
@@ -130,24 +130,24 @@ class lmfitdata(nddata):
             guesses = kwargs
         self.guess_dict = {}
         logging.debug(strm("guesses",guesses))
-        logging.debug(strm("guess_coeff",self.guess_coeff.keys()))
-        for this_name in self.guess_coeff.keys():
+        logging.debug(strm("guess_parameters",self.guess_parameters.keys()))
+        for this_name in self.guess_parameters.keys():
             if this_name in guesses.keys():
                 logging.debug(strm("adding",this_name))
                 if type(guesses[this_name]) is dict:
                     self.guess_dict[this_name] = {}
                     for k, v in guesses[this_name].items():
-                        setattr(self.guess_coeff[this_name], k, v)
+                        setattr(self.guess_parameters[this_name], k, v)
                         self.guess_dict[this_name][k] = v
                 elif np.isscalar(guesses[this_name]):
-                    self.guess_coeff[this_name].value = guesses[this_name]
+                    self.guess_parameters[this_name].value = guesses[this_name]
                     self.guess_dict[this_name] = {"value":guesses[this_name]}
                 else:
                     raise ValueError("what are the keys to your guesses???")
                 logging.debug(strm("now dict is",self.guess_dict))
-        for j in self.guess_coeff:
+        for j in self.guess_parameters:
             logging.debug(strm("fit param ---", j))
-        logging.debug(strm(self.guess_coeff))
+        logging.debug(strm(self.guess_parameters))
         logging.debug(strm(self.guess_dict))
         return self
     def guess(self):
@@ -225,13 +225,27 @@ class lmfitdata(nddata):
             newdata.set_error(self.fit_axis,
                     self.get_error(self.fit_axis))
         # }}}
-        #for j,this_name in enumerate(self.guess_coeff.keys()):
-            # as discussed, guess_coeff are *not* the fit_coeff.  
-            # (I changed the name from "pars" to "guess_coeff" to clarify that, since "pars" was arguably a bad name!).
-        #    self.guess_coeff[this_name].value = p[j]
-        print("RUNNING THIS SHIT")
-        newdata
-        newdata.data[:] = self.run_lambda(self.fit_coeff,**{self.fit_axis:taxis}).flatten()
+        for j,this_name in enumerate(self.guess_parameters.keys()):
+            # as discussed, guess_parameters are *not* the fit_coeff.  
+            # (I changed the name from "pars" to "guess_parameters" to clarify that, since "pars" was arguably a bad name!).
+            self.guess_parameters[this_name].value = p[j]
+        variable_coords = {self.fit_axis:taxis} # even though it's possible to
+        #                                         combine this and the next line
+        #                                         to make it more
+        #                                         compact/efficient for one
+        #                                         variable, we want to leave
+        #                                         open the posisbility that we
+        #                                         will be using more than one
+        #                                         variable
+        newdata.data[:] = self.fitfunc_multiarg_v2(
+                *(tuple(variable_coords[j] if j in
+                    variable_coords.keys()
+                    else
+                    self.getaxis(j)
+                    for j in
+                    self.variable_names)+
+                    tuple(self.fit_coeff))
+                ).flatten()
         newdata.name(str(self.name()))
         return newdata
 
@@ -254,7 +268,7 @@ class lmfitdata(nddata):
         sigma = self.get_error()
         out = minimize(
             self.residual,
-            self.guess_coeff,
+            self.guess_parameters,
             args=(x, y, sigma),
         )
         # {{{ capture the result for ouput, etc
@@ -265,31 +279,14 @@ class lmfitdata(nddata):
         # }}}
         return self
 
-    def run_lambda(self, pars, **kwargs):
-        """actually run the lambda function that calculates the model data.
-        Note that the name of the variable along which the model data is calculated
-        (as opposed to "parameter" is set by variable_names parameter).
-
-        .. note::
-            we had separates this in case we want
-            our function to involve something else, as well (e.g. taking a Fourier
-            transform).  Unknown if there are still two steps in this way.
-
-        """
-        if len(self.variable_names) > 1:
-            print("We are only allowing for one variable for now")
-        elif len(kwargs) == 0:
-            return self.fitfunc_multiarg_v2(
-                    *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict())
-        else:    
-            logging.debug(strm(self.getaxis(j) for j in self.variable_names))
-            return self.fitfunc_multiarg_v2(
-                    *(kwargs[j] if j in kwargs.keys() else self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
-            )
 
     def residual(self, pars, x, y, sigma=None):
         "calculate the residual OR if data is None, return fake data"
-        fit = self.run_lambda(pars)
+        fit = self.fitfunc_multiarg_v2(
+                *(self.getaxis(j)
+                    for j in
+                    self.variable_names),
+                **pars.valuesdict())
         if sigma is not None:
             normalization = np.sum(1.0 / sigma[np.logical_and(sigma != 0.0, np.isfinite(sigma))])
             sigma[sigma == 0.0] = 1
