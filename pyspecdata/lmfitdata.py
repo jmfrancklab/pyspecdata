@@ -229,15 +229,22 @@ class lmfitdata(nddata):
             # as discussed, guess_parameters are *not* the fit_coeff.  
             # (I changed the name from "pars" to "guess_parameters" to clarify that, since "pars" was arguably a bad name!).
             self.guess_parameters[this_name].value = p[j]
-        variable_coords = {self.fit_axis:taxis}
+        variable_coords = {self.fit_axis:taxis} # even though it's possible to
+        #                                         combine this and the next line
+        #                                         to make it more
+        #                                         compact/efficient for one
+        #                                         variable, we want to leave
+        #                                         open the posisbility that we
+        #                                         will be using more than one
+        #                                         variable
         newdata.data[:] = self.fitfunc_multiarg_v2(
-                *(variable_coords[j] if j in
+                *(tuple(variable_coords[j] if j in
                     variable_coords.keys()
                     else
                     self.getaxis(j)
                     for j in
-                    self.variable_names),
-                **self.guess_parameters.valuesdict()
+                    self.variable_names)+
+                    tuple(self.fit_coeff))
                 ).flatten()
         newdata.name(str(self.name()))
         return newdata
