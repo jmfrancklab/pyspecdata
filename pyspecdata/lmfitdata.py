@@ -225,10 +225,6 @@ class lmfitdata(nddata):
             newdata.set_error(self.fit_axis,
                     self.get_error(self.fit_axis))
         # }}}
-        for j,this_name in enumerate(self.guess_parameters.keys()):
-            # as discussed, guess_parameters are *not* the fit_coeff.  
-            # (I changed the name from "pars" to "guess_parameters" to clarify that, since "pars" was arguably a bad name!).
-            self.guess_parameters[this_name].value = p[j]
         variable_coords = {self.fit_axis:taxis} # even though it's possible to
         #                                         combine this and the next line
         #                                         to make it more
@@ -278,7 +274,6 @@ class lmfitdata(nddata):
             self.covariance = out.covar
         # }}}
         return self
-
 
     def residual(self, pars, x, y, sigma=None):
         "calculate the residual OR if data is None, return fake data"
