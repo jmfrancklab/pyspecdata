@@ -53,11 +53,12 @@ plot(mydata, "r", label="data")
 plot(newfit.eval(), "b", alpha=0.5, label="fit")
 plot(guess, "g--", label="guess")
 plt.ylabel('real components')
+plt.legend()
 plt.subplot(212)
 plot(mydata.imag, "r", label="data")
 plot(newfit.eval().imag, "b", alpha=0.5, label="fit")
 plot(guess.imag, "g--", label="guess")
 plt.ylabel('imag components')
-# }}}
 plt.legend()
+# }}}
 plt.show()
