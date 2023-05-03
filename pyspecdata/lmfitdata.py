@@ -77,7 +77,6 @@ class lmfitdata(nddata):
         axis_names = set(self.dimlabels)
         variable_symbol_names = axis_names & all_symbol_names
         parameter_symbol_names = all_symbol_names - variable_symbol_names
-        this_axis = variable_symbol_names
         self.variable_names = tuple(variable_symbol_names)
         self.variable_symbols = [j for j in all_symbols if str(j) in
                 variable_symbol_names]
@@ -100,39 +99,15 @@ class lmfitdata(nddata):
         )
         self.fit_axis = list(self.fit_axis)[0]
         # }}}
-        args = self.parameter_symbols + [str(*this_axis)]
-        self.fitfunc_multiarg = sp.lambdify(
-            args,
-            self.expression,
-            modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
-        )
         self.fitfunc_multiarg_v2 = sp.lambdify(
             self.variable_symbols + self.parameter_symbols,
             self.expression,
             modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
         )
 
-        def fn(p, x):
-            p = self.add_inactive_p(p)
-            assert len(p) == len(
-                self.parameter_names
-            ), "length of parameter passed to fitfunc doesnt match number of symbolic parameters"
-            return self.fitfunc_multiarg(*tuple(list(p) + [x]))
-
-        self.fitfunc = fn
-        self.pars = Parameters()
+        self.guess_parameters = Parameters()
         for this_name in self.parameter_names:
-            self.pars.add(this_name)
-
-    def add_inactive_p(self, p):
-        if self.set_indices is not None:
-            # {{{uncollapse the function
-            temp = p.copy()
-            p = np.zeros(len(self.parameter_names))
-            p[self.active_mask] = temp
-            # }}}
-            p[self.set_indices] = self.set_to
-        return p
+            self.guess_parameters.add(this_name)
 
     def set_guess(self, *args, **kwargs):
         """set both the guess and the bounds
@@ -155,24 +130,24 @@ class lmfitdata(nddata):
             guesses = kwargs
         self.guess_dict = {}
         logging.debug(strm("guesses",guesses))
-        logging.debug(strm("pars",self.pars.keys()))
-        for this_name in self.pars.keys():
+        logging.debug(strm("guess_parameters",self.guess_parameters.keys()))
+        for this_name in self.guess_parameters.keys():
             if this_name in guesses.keys():
                 logging.debug(strm("adding",this_name))
                 if type(guesses[this_name]) is dict:
                     self.guess_dict[this_name] = {}
                     for k, v in guesses[this_name].items():
-                        setattr(self.pars[this_name], k, v)
+                        setattr(self.guess_parameters[this_name], k, v)
                         self.guess_dict[this_name][k] = v
                 elif np.isscalar(guesses[this_name]):
-                    self.pars[this_name].value = guesses[this_name]
+                    self.guess_parameters[this_name].value = guesses[this_name]
                     self.guess_dict[this_name] = {"value":guesses[this_name]}
                 else:
                     raise ValueError("what are the keys to your guesses???")
                 logging.debug(strm("now dict is",self.guess_dict))
-        for j in self.pars:
+        for j in self.guess_parameters:
             logging.debug(strm("fit param ---", j))
-        logging.debug(strm(self.pars))
+        logging.debug(strm(self.guess_parameters))
         logging.debug(strm(self.guess_dict))
         return self
     def guess(self):
@@ -205,7 +180,7 @@ class lmfitdata(nddata):
             taxis = np.linspace(taxis[0], taxis[1], 300)
         return taxis
 
-    def eval(self, taxis=None, set_what=None, set_to=None):
+    def eval(self, taxis=None):
         """Calculate the fit function along the axis taxis.
 
         Parameters
@@ -213,38 +188,22 @@ class lmfitdata(nddata):
         taxis: ndarray, int
             :if ndarray: the new axis coordinates along which we want to calculate the fit.
             :if int: number of evenly spaced points along the t-axis along the fit
-        set_what: 'str', optional
-            forcibly sets a specific symbol
-        set_to: double, optional
-            the specific value(int) you are assigning the symbol you included
 
         Returns
         -------
         self: nddata
             the fit function evaluated along the axis coordinates that were passed
         """
-        if isinstance(set_what, dict):
-            set_to = list(set_what.values())
-            set_what = list(set_what.keys())
         if taxis is None:
             taxis = self.getaxis(self.fit_axis)
         else:
             taxis = self._taxis(taxis)
         if hasattr(self, "fit_coeff") and self.fit_coeff is not None:
             p = self.fit_coeff.copy()
+            # here you see that fit_coeff stores the coefficients that
+            # were previously fit, and these are stored in p, here
         else:
             p = np.array([NaN] * len(self.variable_names))
-        # {{{LOCALLY apply any forced values
-        if set_what is not None:
-            if self.set_indices is not None:
-                raise ValueError(
-                    "You're trying to set indices in an eval"
-                    " function for a function that was fit constrained; this"
-                    " is not currently supported"
-                )
-            set_indices, set_to, active_mask = self.gen_indices(set_what, set_to)
-            p[set_indices] = set_to
-        # }}}
         # JF notes this is a copy of older code -- we should be able to
         # clean this up by using the newer copy functions -- currently I
         # see  the copy_props and copyaxes functions, but thought there
@@ -266,8 +225,23 @@ class lmfitdata(nddata):
             newdata.set_error(self.fit_axis,
                     self.get_error(self.fit_axis))
         # }}}
-        newdata
-        newdata.data[:] = self.fitfunc(p, taxis).flatten()
+        variable_coords = {self.fit_axis:taxis} # even though it's possible to
+        #                                         combine this and the next line
+        #                                         to make it more
+        #                                         compact/efficient for one
+        #                                         variable, we want to leave
+        #                                         open the posisbility that we
+        #                                         will be using more than one
+        #                                         variable
+        newdata.data[:] = self.fitfunc_multiarg_v2(
+                *(tuple(variable_coords[j] if j in
+                    variable_coords.keys()
+                    else
+                    self.getaxis(j)
+                    for j in
+                    self.variable_names)+
+                    tuple(self.fit_coeff))
+                ).flatten()
         newdata.name(str(self.name()))
         return newdata
 
@@ -286,13 +260,11 @@ class lmfitdata(nddata):
         # But you  should read through and see what the previous fit method is doing
         # and then copy over what you can
         x = self.getaxis(self.fit_axis)
-        if np.iscomplex(self.data.flatten()[0]):
-            logging.debug(strm("Warning, taking only real part of fitting data!"))
-        y = np.real(self.data)
+        y = self.data
         sigma = self.get_error()
         out = minimize(
             self.residual,
-            self.pars,
+            self.guess_parameters,
             args=(x, y, sigma),
         )
         # {{{ capture the result for ouput, etc
@@ -303,18 +275,13 @@ class lmfitdata(nddata):
         # }}}
         return self
 
-    def run_lambda(self, pars):
-        """actually run the lambda function we separate this in case we want
-        our function to involve something else, as well (e.g. taking a Fourier
-        transform)"""
-        logging.debug(strm(self.getaxis(j) for j in self.variable_names))
-        return self.fitfunc_multiarg_v2(
-            *(self.getaxis(j) for j in self.variable_names), **pars.valuesdict()
-        )
-
     def residual(self, pars, x, y, sigma=None):
         "calculate the residual OR if data is None, return fake data"
-        fit = self.run_lambda(pars)
+        fit = self.fitfunc_multiarg_v2(
+                *(self.getaxis(j)
+                    for j in
+                    self.variable_names),
+                **pars.valuesdict())
         if sigma is not None:
             normalization = np.sum(1.0 / sigma[np.logical_and(sigma != 0.0, np.isfinite(sigma))])
             sigma[sigma == 0.0] = 1
@@ -339,7 +306,7 @@ class lmfitdata(nddata):
                 )
                 + explain_error(e)
             )
-        return retval
+        return retval.view(float)
 
     def copy(self):
         namelist = []
