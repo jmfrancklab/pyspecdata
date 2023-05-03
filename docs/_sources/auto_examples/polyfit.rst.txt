@@ -39,7 +39,7 @@ A quick demonstration of polynomial fitting.
 
     c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "o" (-> marker='o'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
-    I found the minimum here at 1.6578634458262322
+    I found the minimum here at 1.688282491103677
 
 
 
@@ -81,7 +81,7 @@ A quick demonstration of polynomial fitting.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.067 seconds)
+   **Total running time of the script:** ( 0 minutes  0.080 seconds)
 
 
 .. _sphx_glr_download_auto_examples_polyfit.py:

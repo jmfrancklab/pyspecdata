@@ -50,7 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the lmfitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
 </ul>
@@ -667,13 +667,13 @@ and not return a figure list in the output</p>
 <p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
 <p>The user creates a fitdata class object from an existing nddata
 class object, and on this fitdata object can define the
-<a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.functional_form" title="pyspecdata.core.fitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
+<a class="reference internal" href="#pyspecdata.core.fitdata.functional_form" title="pyspecdata.core.fitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
 data of the original nddata.
 This functional form must be provided as a sympy expression, with
 one of its variables matching the name of the dimension that the
 user would like to fit to.
 The user provides fit coefficients using <code class="xref py py-func docutils literal notranslate"><span class="pre">fit_coeff()</span></code> and
-obtains output using <a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.fit" title="pyspecdata.core.fitdata.fit"><code class="xref py py-func docutils literal notranslate"><span class="pre">fit()</span></code></a> and <a class="reference internal" href="../fitdata.html#pyspecdata.core.fitdata.eval" title="pyspecdata.core.fitdata.eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.</p>
+obtains output using <a class="reference internal" href="#pyspecdata.core.fitdata.fit" title="pyspecdata.core.fitdata.fit"><code class="xref py py-func docutils literal notranslate"><span class="pre">fit()</span></code></a> and <a class="reference internal" href="#pyspecdata.core.fitdata.eval" title="pyspecdata.core.fitdata.eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.</p>
 <p>If you haven’t done this before,
 create a jupyter notebook (not checked in, just for your own playing around) with:
 <code class="docutils literal notranslate"><span class="pre">`</span>
@@ -4078,11 +4078,6 @@ This functional form must be provided as a sympy expression, with
 one of its variables matching the name of the dimension that the
 user would like to fit to.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.add_inactive_p">
-<span class="sig-name descname"><span class="pre">add_inactive_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.add_inactive_p" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.copy">
 <span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a full copy of this instance.</p>
@@ -4103,12 +4098,11 @@ nddata metadata.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.eval">
-<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">taxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_what</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.eval" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">taxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.eval" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the fit function along the axis taxis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>taxis</strong> (<em>ndarray</em><em>, </em><em>int</em>) – <dl class="field-list simple">
+<dd class="field-odd"><p><strong>taxis</strong> (<em>ndarray</em><em>, </em><em>int</em>) – <dl class="field-list simple">
 <dt class="field-odd">if ndarray<span class="colon">:</span></dt>
 <dd class="field-odd"><p>the new axis coordinates along which we want to calculate the fit.</p>
 </dd>
@@ -4116,10 +4110,7 @@ nddata metadata.</p>
 <dd class="field-even"><p>number of evenly spaced points along the t-axis along the fit</p>
 </dd>
 </dl>
-</p></li>
-<li><p><strong>set_what</strong> (<em>'str'</em><em>, </em><em>optional</em>) – forcibly sets a specific symbol</p></li>
-<li><p><strong>set_to</strong> (<em>double</em><em>, </em><em>optional</em>) – the specific value(int) you are assigning the symbol you included</p></li>
-</ul>
+</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
@@ -4198,14 +4189,6 @@ resulting values.</p>
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.residual">
 <span class="sig-name descname"><span class="pre">residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.residual" title="Permalink to this definition">¶</a></dt>
 <dd><p>calculate the residual OR if data is None, return fake data</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.run_lambda">
-<span class="sig-name descname"><span class="pre">run_lambda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.run_lambda" title="Permalink to this definition">¶</a></dt>
-<dd><p>actually run the lambda function we separate this in case we want
-our function to involve something else, as well (e.g. taking a Fourier
-transform)</p>
 </dd></dl>
 
 <dl class="py method">
@@ -8854,11 +8837,6 @@ This functional form must be provided as a sympy expression, with
 one of its variables matching the name of the dimension that the
 user would like to fit to.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="pyspecdata.lmfitdata.add_inactive_p">
-<span class="sig-name descname"><span class="pre">add_inactive_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.add_inactive_p" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.copy">
 <span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a full copy of this instance.</p>
@@ -8879,12 +8857,11 @@ nddata metadata.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.eval">
-<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">taxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_what</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.eval" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">taxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.eval" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the fit function along the axis taxis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>taxis</strong> (<em>ndarray</em><em>, </em><em>int</em>) – <dl class="field-list simple">
+<dd class="field-odd"><p><strong>taxis</strong> (<em>ndarray</em><em>, </em><em>int</em>) – <dl class="field-list simple">
 <dt class="field-odd">if ndarray<span class="colon">:</span></dt>
 <dd class="field-odd"><p>the new axis coordinates along which we want to calculate the fit.</p>
 </dd>
@@ -8892,10 +8869,7 @@ nddata metadata.</p>
 <dd class="field-even"><p>number of evenly spaced points along the t-axis along the fit</p>
 </dd>
 </dl>
-</p></li>
-<li><p><strong>set_what</strong> (<em>'str'</em><em>, </em><em>optional</em>) – forcibly sets a specific symbol</p></li>
-<li><p><strong>set_to</strong> (<em>double</em><em>, </em><em>optional</em>) – the specific value(int) you are assigning the symbol you included</p></li>
-</ul>
+</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
@@ -8974,14 +8948,6 @@ resulting values.</p>
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.residual">
 <span class="sig-name descname"><span class="pre">residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.residual" title="Permalink to this definition">¶</a></dt>
 <dd><p>calculate the residual OR if data is None, return fake data</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pyspecdata.lmfitdata.run_lambda">
-<span class="sig-name descname"><span class="pre">run_lambda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.run_lambda" title="Permalink to this definition">¶</a></dt>
-<dd><p>actually run the lambda function we separate this in case we want
-our function to involve something else, as well (e.g. taking a Fourier
-transform)</p>
 </dd></dl>
 
 <dl class="py method">
