@@ -1,16 +1,16 @@
-the fitdata class
-=================
+the lmfitdata class
+===================
 
 This is a child class of nddata used for fitting.
 
 For old fitdata documentation
 (obsolete, for development reference) see :ref:`fitdata_old`
 
-creating new types of fitdata modules
--------------------------------------
+creating new types of lmfitdata modules
+----------------------------------------
 
-There is a base class called “fitdata” that defines the basic routines
-necessary for fitting. Currently, the fitdata class only supports
+There is a base class called “lmfitdata” that defines the basic routines
+necessary for fitting. Currently, the lmfitdata class only supports
 fitting along one dimension, so before constructing a new class, one
 must first choose what dimension they will be fitting along.
 
@@ -21,7 +21,7 @@ must first choose what dimension they will be fitting along.
     allow more than one dimension
 
 To fit a new type of function, one simply creates a new type of class
-that *inherits* from the fitdata class. We override all the methods that
+that *inherits* from the lmfitdata class. We override all the methods that
 have to do with the definition of the functional format. These are
 defined in the first section, where we build up an example for fitting a
 general :math:`T_1` recovery curve. This example should be used as a
@@ -35,15 +35,14 @@ section) next.
     -- see https://stackoverflow.com/questions/28147432/how-to-customize-sphinx-ext-autosummary-rst-template
     on how to use it
 
-    then, I need to link to or include generated/pyspecdata.core.fitdata.rst
+    then, I need to link to or include generated/pyspecdata.lmfitdata.rst
 
-.. comment
-    .. autosummary::
-        :toctree: generated
-        ~fitdata
+.. currentmodule:: pyspecdata.lmfitdata
 
-.. currentmodule:: pyspecdata.core
+.. autosummary::
+    :toctree: generated
+    ~lmfitdata
 
-.. autoclass:: fitdata
+.. autoclass:: lmfitdata
     :members:
 

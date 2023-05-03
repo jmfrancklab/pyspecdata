@@ -29,8 +29,8 @@ d.chunk_auto('harmonic','phase')
 print(ndshape(d))
 
 figure(1)
-plot(d['phase',0]['Microwave Power',3], alpha=0.5)
-plot(d['phase',1]['Microwave Power',3], ':', alpha=0.5)
+plot(d['phase',0], alpha=0.5)
+plot(d['phase',1], ':', alpha=0.5)
 title("1D Data with Multiple Harmonics")
 
 # %%

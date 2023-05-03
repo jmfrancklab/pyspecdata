@@ -48,7 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fitdata.html">the lmfitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
 </ul>
@@ -118,12 +118,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.interp1d.__call__">__call__() (pyspecdata.interp1d method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/pyspecdata.core.fitdata.html#pyspecdata.core.fitdata.__init__">__init__() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata.__init__">(pyspecdata.core.nddata method)</a>
+</li>
+        <li><a href="generated/pyspecdata.lmfitdata.lmfitdata.html#pyspecdata.lmfitdata.lmfitdata.__init__">(pyspecdata.lmfitdata.lmfitdata method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -144,10 +144,6 @@
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.add_inactive_p">(pyspecdata.fitdata method)</a>
-</li>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.add_inactive_p">(pyspecdata.lmfitdata method)</a>
-</li>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.add_inactive_p">(pyspecdata.lmfitdata.lmfitdata method)</a>
 </li>
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.core.nddata.add_noise">add_noise() (pyspecdata.core.nddata method)</a>
@@ -186,7 +182,7 @@
         <li><a href="auto_api/pyspecdata.html#pyspecdata.nddata.along">(pyspecdata.nddata method)</a>, <a href="pyspecdata.html#pyspecdata.nddata.along">[1]</a>
 </li>
       </ul></li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.analytical_covariance">analytical_covariance() (pyspecdata.core.fitdata method)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.analytical_covariance">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.analytical_covariance">analytical_covariance() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.analytical_covariance">(pyspecdata.fitdata method)</a>
@@ -462,7 +458,7 @@
         <li><a href="auto_api/pyspecdata.html#pyspecdata.nddata.convolve">(pyspecdata.nddata method)</a>, <a href="pyspecdata.html#pyspecdata.nddata.convolve">[1]</a>
 </li>
       </ul></li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.copy">copy() (pyspecdata.core.fitdata method)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.copy">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.copy">copy() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.core.nddata.copy">(pyspecdata.core.nddata method)</a>
@@ -471,7 +467,7 @@
 </li>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.copy">(pyspecdata.lmfitdata method)</a>
 </li>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.copy">(pyspecdata.lmfitdata.lmfitdata method)</a>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.copy">(pyspecdata.lmfitdata.lmfitdata method)</a>, <a href="fitdata.html#pyspecdata.lmfitdata.lmfitdata.copy">[1]</a>
 </li>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.nddata.copy">(pyspecdata.nddata method)</a>, <a href="pyspecdata.html#pyspecdata.nddata.copy">[1]</a>
 </li>
@@ -504,7 +500,7 @@
         <li><a href="auto_api/pyspecdata.html#pyspecdata.nddata.copyaxes">(pyspecdata.nddata method)</a>
 </li>
       </ul></li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.covar">covar() (pyspecdata.core.fitdata method)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.covar">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.covar">covar() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.covar">(pyspecdata.fitdata method)</a>
@@ -644,14 +640,14 @@
 </li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.fornotebook.esr_saturation">esr_saturation() (in module pyspecdata.fornotebook)</a>
 </li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.eval">eval() (pyspecdata.core.fitdata method)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.eval">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.eval">eval() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.eval">(pyspecdata.fitdata method)</a>
 </li>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.eval">(pyspecdata.lmfitdata method)</a>
 </li>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.eval">(pyspecdata.lmfitdata.lmfitdata method)</a>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.eval">(pyspecdata.lmfitdata.lmfitdata method)</a>, <a href="fitdata.html#pyspecdata.lmfitdata.lmfitdata.eval">[1]</a>
 </li>
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.core.nddata.eval_poly">eval_poly() (pyspecdata.core.nddata method)</a>
@@ -780,23 +776,23 @@
         <li><a href="auto_api/pyspecdata.load_files.html#id0">(in module pyspecdata.load_files)</a>, <a href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.find_file">[1]</a>, <a href="modules.html#pyspecdata.load_files.find_file">[2]</a>, <a href="temp_stubs.html#pyspecdata.load_files.find_file">[3]</a>
 </li>
       </ul></li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.fit">fit() (pyspecdata.core.fitdata method)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.fit">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.fit">fit() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.fit">(pyspecdata.fitdata method)</a>
 </li>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.fit">(pyspecdata.lmfitdata method)</a>
 </li>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.fit">(pyspecdata.lmfitdata.lmfitdata method)</a>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.fit">(pyspecdata.lmfitdata.lmfitdata method)</a>, <a href="fitdata.html#pyspecdata.lmfitdata.lmfitdata.fit">[1]</a>
 </li>
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata">fitdata (class in pyspecdata)</a>
 
       <ul>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata">(class in pyspecdata.core)</a>, <a href="fitdata.html#pyspecdata.core.fitdata">[1]</a>, <a href="generated/pyspecdata.core.fitdata.html#pyspecdata.core.fitdata">[2]</a>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata">(class in pyspecdata.core)</a>, <a href="generated/pyspecdata.core.fitdata.html#pyspecdata.core.fitdata">[1]</a>
 </li>
       </ul></li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.fitfunc">fitfunc() (pyspecdata.core.fitdata method)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.fitfunc">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.fitfunc">fitfunc() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.fitfunc">(pyspecdata.fitdata method)</a>
@@ -884,24 +880,24 @@
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.function">function (class in pyspecdata)</a>
 </li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.function_string">function_string (pyspecdata.core.fitdata property)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.function_string">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.function_string">function_string (pyspecdata.core.fitdata property)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.function_string">(pyspecdata.fitdata property)</a>
 </li>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.function_string">(pyspecdata.lmfitdata property)</a>
 </li>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.function_string">(pyspecdata.lmfitdata.lmfitdata property)</a>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.function_string">(pyspecdata.lmfitdata.lmfitdata property)</a>, <a href="fitdata.html#pyspecdata.lmfitdata.lmfitdata.function_string">[1]</a>
 </li>
       </ul></li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.functional_form">functional_form (pyspecdata.core.fitdata property)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.functional_form">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.functional_form">functional_form (pyspecdata.core.fitdata property)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.functional_form">(pyspecdata.fitdata property)</a>
 </li>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.functional_form">(pyspecdata.lmfitdata property)</a>
 </li>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.functional_form">(pyspecdata.lmfitdata.lmfitdata property)</a>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.functional_form">(pyspecdata.lmfitdata.lmfitdata property)</a>, <a href="fitdata.html#pyspecdata.lmfitdata.lmfitdata.functional_form">[1]</a>
 </li>
       </ul></li>
   </ul></td>
@@ -912,14 +908,14 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.gci">gci() (in module pyspecdata)</a>
 </li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.gen_indices">gen_indices() (pyspecdata.core.fitdata method)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.gen_indices">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.gen_indices">gen_indices() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.gen_indices">(pyspecdata.fitdata method)</a>
 </li>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.gen_indices">(pyspecdata.lmfitdata method)</a>
 </li>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.gen_indices">(pyspecdata.lmfitdata.lmfitdata method)</a>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.gen_indices">(pyspecdata.lmfitdata.lmfitdata method)</a>, <a href="fitdata.html#pyspecdata.lmfitdata.lmfitdata.gen_indices">[1]</a>
 </li>
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.latexscripts.genconfig">genconfig() (in module pyspecdata.latexscripts)</a>, <a href="latexscripts.html#pyspecdata.latexscripts.genconfig">[1]</a>
@@ -1128,14 +1124,14 @@
         <li><a href="auto_api/pyspecdata.html#pyspecdata.core.gridon">(in module pyspecdata.core)</a>
 </li>
       </ul></li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.guess">guess() (pyspecdata.core.fitdata method)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.guess">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.guess">guess() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.guess">(pyspecdata.fitdata method)</a>
 </li>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.guess">(pyspecdata.lmfitdata method)</a>
 </li>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.guess">(pyspecdata.lmfitdata.lmfitdata method)</a>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.guess">(pyspecdata.lmfitdata.lmfitdata method)</a>, <a href="fitdata.html#pyspecdata.lmfitdata.lmfitdata.guess">[1]</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1392,14 +1388,14 @@
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.lambdify">lambdify() (in module pyspecdata)</a>
 </li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.latex">latex() (pyspecdata.core.fitdata method)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.latex">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.latex">latex() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.latex">(pyspecdata.fitdata method)</a>
 </li>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.latex">(pyspecdata.lmfitdata method)</a>
 </li>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.latex">(pyspecdata.lmfitdata.lmfitdata method)</a>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.latex">(pyspecdata.lmfitdata.lmfitdata method)</a>, <a href="fitdata.html#pyspecdata.lmfitdata.lmfitdata.latex">[1]</a>
 </li>
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.leastsq">leastsq() (in module pyspecdata)</a>
@@ -1420,7 +1416,7 @@
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D">Line2D (class in pyspecdata)</a>
 </li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.linear">linear() (pyspecdata.core.fitdata method)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.linear">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.linear">linear() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.linear">(pyspecdata.fitdata method)</a>
@@ -1443,7 +1439,7 @@
       <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata">lmfitdata (class in pyspecdata)</a>
 
       <ul>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata">(class in pyspecdata.lmfitdata)</a>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata">(class in pyspecdata.lmfitdata)</a>, <a href="fitdata.html#pyspecdata.lmfitdata.lmfitdata">[1]</a>, <a href="generated/pyspecdata.lmfitdata.lmfitdata.html#pyspecdata.lmfitdata.lmfitdata">[2]</a>
 </li>
       </ul></li>
       <li><a href="auto_api/pyspecdata.load_files.html#pyspecdata.load_files.bruker_nmr.load_1D">load_1D() (in module pyspecdata.load_files.bruker_nmr)</a>
@@ -1939,14 +1935,14 @@
         <li><a href="auto_api/pyspecdata.html#pyspecdata.core.othergridandtick">(in module pyspecdata.core)</a>
 </li>
       </ul></li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.output">output() (pyspecdata.core.fitdata method)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.output">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.output">output() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.output">(pyspecdata.fitdata method)</a>
 </li>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.output">(pyspecdata.lmfitdata method)</a>
 </li>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.output">(pyspecdata.lmfitdata.lmfitdata method)</a>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.output">(pyspecdata.lmfitdata.lmfitdata method)</a>, <a href="fitdata.html#pyspecdata.lmfitdata.lmfitdata.output">[1]</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1965,7 +1961,7 @@
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.Parameter">Parameter (class in pyspecdata)</a>
 </li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.parameter_derivatives">parameter_derivatives() (pyspecdata.core.fitdata method)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.parameter_derivatives">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.parameter_derivatives">parameter_derivatives() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.parameter_derivatives">(pyspecdata.fitdata method)</a>
@@ -2516,14 +2512,14 @@
         <li><a href="auto_api/pyspecdata.html#pyspecdata.nddata.repwlabels">(pyspecdata.nddata method)</a>
 </li>
       </ul></li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.residual">residual() (pyspecdata.core.fitdata method)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.residual">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.residual">residual() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.residual">(pyspecdata.fitdata method)</a>
 </li>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.residual">(pyspecdata.lmfitdata method)</a>
 </li>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.residual">(pyspecdata.lmfitdata.lmfitdata method)</a>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.residual">(pyspecdata.lmfitdata.lmfitdata method)</a>, <a href="fitdata.html#pyspecdata.lmfitdata.lmfitdata.residual">[1]</a>
 </li>
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.core.nddata.retaxis">retaxis() (pyspecdata.core.nddata method)</a>
@@ -2544,12 +2540,6 @@
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.nddata.run_avg">(pyspecdata.nddata method)</a>, <a href="pyspecdata.html#pyspecdata.nddata.run_avg">[1]</a>
-</li>
-      </ul></li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.run_lambda">run_lambda() (pyspecdata.lmfitdata method)</a>
-
-      <ul>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.run_lambda">(pyspecdata.lmfitdata.lmfitdata method)</a>
 </li>
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.core.nddata.run_nopop">run_nopop() (pyspecdata.core.nddata method)</a>
@@ -2668,14 +2658,14 @@
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.set_gapcolor">set_gapcolor() (pyspecdata.Line2D method)</a>
 </li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.set_guess">set_guess() (pyspecdata.core.fitdata method)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.set_guess">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.set_guess">set_guess() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.set_guess">(pyspecdata.fitdata method)</a>
 </li>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.set_guess">(pyspecdata.lmfitdata method)</a>
 </li>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.set_guess">(pyspecdata.lmfitdata.lmfitdata method)</a>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.set_guess">(pyspecdata.lmfitdata.lmfitdata method)</a>, <a href="fitdata.html#pyspecdata.lmfitdata.lmfitdata.set_guess">[1]</a>
 </li>
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.Line2D.set_linestyle">set_linestyle() (pyspecdata.Line2D method)</a>
@@ -2772,14 +2762,14 @@
         <li><a href="auto_api/pyspecdata.html#pyspecdata.figlist.figlist.setprops">(pyspecdata.figlist.figlist method)</a>
 </li>
       </ul></li>
-      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.settoguess">settoguess() (pyspecdata.core.fitdata method)</a>, <a href="fitdata.html#pyspecdata.core.fitdata.settoguess">[1]</a>
+      <li><a href="auto_api/pyspecdata.html#pyspecdata.core.fitdata.settoguess">settoguess() (pyspecdata.core.fitdata method)</a>
 
       <ul>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.fitdata.settoguess">(pyspecdata.fitdata method)</a>
 </li>
         <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.settoguess">(pyspecdata.lmfitdata method)</a>
 </li>
-        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.settoguess">(pyspecdata.lmfitdata.lmfitdata method)</a>
+        <li><a href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.lmfitdata.settoguess">(pyspecdata.lmfitdata.lmfitdata method)</a>, <a href="fitdata.html#pyspecdata.lmfitdata.lmfitdata.settoguess">[1]</a>
 </li>
       </ul></li>
       <li><a href="auto_api/pyspecdata.html#pyspecdata.latexscripts.sha_string">sha_string() (in module pyspecdata.latexscripts)</a>, <a href="latexscripts.html#pyspecdata.latexscripts.sha_string">[1]</a>

@@ -1,0 +1,150 @@
+﻿pyspecdata.lmfitdata.lmfitdata
+==============================
+
+.. currentmodule:: pyspecdata.lmfitdata
+
+.. autoclass:: lmfitdata
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~lmfitdata.__init__
+      ~lmfitdata.add_noise
+      ~lmfitdata.aligndata
+      ~lmfitdata.along
+      ~lmfitdata.argmax
+      ~lmfitdata.argmin
+      ~lmfitdata.axis
+      ~lmfitdata.axlen
+      ~lmfitdata.axn
+      ~lmfitdata.cdf
+      ~lmfitdata.check_axis_coords_errors
+      ~lmfitdata.chunk
+      ~lmfitdata.chunk_auto
+      ~lmfitdata.circshift
+      ~lmfitdata.contiguous
+      ~lmfitdata.contour
+      ~lmfitdata.convolve
+      ~lmfitdata.copy
+      ~lmfitdata.copy_axes
+      ~lmfitdata.copy_props
+      ~lmfitdata.copyaxes
+      ~lmfitdata.cropped_log
+      ~lmfitdata.diff
+      ~lmfitdata.dot
+      ~lmfitdata.eval
+      ~lmfitdata.eval_poly
+      ~lmfitdata.extend
+      ~lmfitdata.extend_for_shear
+      ~lmfitdata.fit
+      ~lmfitdata.fld
+      ~lmfitdata.fourier_shear
+      ~lmfitdata.fromaxis
+      ~lmfitdata.ft
+      ~lmfitdata.ft_clear_startpoints
+      ~lmfitdata.ft_state_to_str
+      ~lmfitdata.ftshift
+      ~lmfitdata.gen_indices
+      ~lmfitdata.get_covariance
+      ~lmfitdata.get_error
+      ~lmfitdata.get_ft_prop
+      ~lmfitdata.get_plot_color
+      ~lmfitdata.get_prop
+      ~lmfitdata.get_range
+      ~lmfitdata.get_units
+      ~lmfitdata.getaxis
+      ~lmfitdata.getaxisshape
+      ~lmfitdata.gnuplot_save
+      ~lmfitdata.guess
+      ~lmfitdata.hdf5_write
+      ~lmfitdata.histogram
+      ~lmfitdata.human_units
+      ~lmfitdata.ift
+      ~lmfitdata.indices
+      ~lmfitdata.inhomog_coords
+      ~lmfitdata.integrate
+      ~lmfitdata.interp
+      ~lmfitdata.invinterp
+      ~lmfitdata.item
+      ~lmfitdata.labels
+      ~lmfitdata.latex
+      ~lmfitdata.like
+      ~lmfitdata.linear_shear
+      ~lmfitdata.matchdims
+      ~lmfitdata.matrices_3d
+      ~lmfitdata.max
+      ~lmfitdata.mayavi_surf
+      ~lmfitdata.mean
+      ~lmfitdata.mean_all_but
+      ~lmfitdata.mean_nopop
+      ~lmfitdata.mean_weighted
+      ~lmfitdata.meshplot
+      ~lmfitdata.min
+      ~lmfitdata.mkd
+      ~lmfitdata.multimin
+      ~lmfitdata.name
+      ~lmfitdata.nnls
+      ~lmfitdata.normalize
+      ~lmfitdata.oldtimey
+      ~lmfitdata.output
+      ~lmfitdata.plot_labels
+      ~lmfitdata.polyfit
+      ~lmfitdata.popdim
+      ~lmfitdata.random_mask
+      ~lmfitdata.register_axis
+      ~lmfitdata.rename
+      ~lmfitdata.reorder
+      ~lmfitdata.replicate_units
+      ~lmfitdata.repwlabels
+      ~lmfitdata.residual
+      ~lmfitdata.retaxis
+      ~lmfitdata.run
+      ~lmfitdata.run_avg
+      ~lmfitdata.run_nopop
+      ~lmfitdata.runcopy
+      ~lmfitdata.secsy_transform
+      ~lmfitdata.secsy_transform_manual
+      ~lmfitdata.set_error
+      ~lmfitdata.set_ft_prop
+      ~lmfitdata.set_guess
+      ~lmfitdata.set_plot_color
+      ~lmfitdata.set_prop
+      ~lmfitdata.set_to
+      ~lmfitdata.set_units
+      ~lmfitdata.setaxis
+      ~lmfitdata.settoguess
+      ~lmfitdata.shear
+      ~lmfitdata.smoosh
+      ~lmfitdata.sort
+      ~lmfitdata.sort_and_xy
+      ~lmfitdata.squeeze
+      ~lmfitdata.sum
+      ~lmfitdata.sum_nopop
+      ~lmfitdata.to_ppm
+      ~lmfitdata.unitify_axis
+      ~lmfitdata.units_texsafe
+      ~lmfitdata.unset_prop
+      ~lmfitdata.waterfall
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~lmfitdata.C
+      ~lmfitdata.angle
+      ~lmfitdata.function_string
+      ~lmfitdata.functional_form
+      ~lmfitdata.imag
+      ~lmfitdata.real
+      ~lmfitdata.want_to_prospa_decim_correct
+   
+   

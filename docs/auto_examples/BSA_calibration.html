@@ -51,7 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the lmfitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
 </ul>
@@ -66,6 +66,7 @@
 <li class="toctree-l2"><a class="reference internal" href="ppm_example.html">ppm Example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ellmans.html">Manipulation of UV-Vis data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fit_with_bounds.html">Fit Using Bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_complex.html">Fit complex data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="DCCT_function.html">Using the DCCT function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basic_example.html">Basic Slicing/Filtering Example</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">BSA UV-Vis Calibration</a></li>
@@ -133,7 +134,7 @@ baseline.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>the experiments present in this file are: dict_keys([&#39;UP_H2O&#39;, &#39;K-PBSbuffer&#39;, &#39;J-0p0078%BSA&#39;, &#39;H-0p0156%BSA&#39;, &#39;G-0p0234%BSA1&#39;, &#39;F-0p0311%BSA&#39;, &#39;G-0p0234%BSA_actual&#39;, &#39;E-0p0389%BSA&#39;, &#39;D-0p0466%BSA&#39;, &#39;C-0p0544%BSA&#39;, &#39;B-0p0622%BSA&#39;, &#39;A-0p0700%BSA&#39;])
 c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: marker is redundantly defined by the &#39;marker&#39; keyword argument and the fmt string &quot;o&quot; (-&gt; marker=&#39;o&#39;). The keyword argument will take precedence.
   retval = myplotfunc(*plotargs,**kwargs)
-c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\figlist.py:491: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\figlist.py:492: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
   plt.gcf().tight_layout()
 </pre></div>
 </div>
@@ -154,7 +155,7 @@ c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\figlist.py:491: UserWarning: T
 
 <span class="c1"># HERE we get dictionaries of nddata</span>
 <span class="n">dataWKBSA</span> <span class="o">=</span> <span class="n">find_file</span><span class="p">(</span>
-    <span class="s2">&quot;221110_BSAexerciseWK_0p07-0percentBSAcalibration.BSW&quot;</span><span class="p">,</span> <span class="n">exp_type</span><span class="o">=</span><span class="s2">&quot;UV_Vis/BSA_calib&quot;</span>
+    <span class="s2">&quot;221110_BSAexerciseWK_0p07-0percentBSAcalibration.BSW&quot;</span><span class="p">,</span> <span class="n">exp_type</span><span class="o">=</span><span class="s2">&quot;UV_Vis/BSA_Exercise&quot;</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;the experiments present in this file are:&quot;</span><span class="p">,</span> <span class="n">dataWKBSA</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 <span class="c1"># from our notebook, we get the following info</span>
@@ -229,7 +230,7 @@ c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\figlist.py:491: UserWarning: T
     <span class="c1"># }}}</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.526 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.925 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-bsa-calibration-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/5bccb887d1ba81fc20838defff001af1/BSA_calibration.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">BSA_calibration.py</span></code></a></p>
