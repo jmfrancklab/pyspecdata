@@ -120,7 +120,13 @@ class lmfitdata(nddata):
             (min/max)
 
             Can be passed either as the only argument, or a kwarg called
-            guesses, or as the kwargs themselves.
+            guesses, or as the kwargs themselves (i.e. `.set_guesses(**guesses)`)
+    
+            For example (the last case:)
+
+            >>> d.set_guess(
+            >>>     param1=dict(value=1.0, min=0, max=10),
+            >>>     param2=dict(value=2.0, min=0, max=10))
         """
         if len(args) == 1 and type(args[0]) == dict:
             guesses = args[0]

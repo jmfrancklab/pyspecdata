@@ -3743,6 +3743,17 @@ class nddata (object):
                     raise IndexError(strm('trying to pop',
                         thisindex, 'from', self.axis_coords_units))
         return self
+    def cov_mat(self, obs_axis = 'observations'):
+        assert len(self.dimlabels) == 2, "we are only calculating covariance matrices for datasets with one variable and on observation axis"
+        var_axis = str(self.dimlabels[self.axn(obs_axis)+1])
+        if self.axn(obs_axis) == 0:
+            trans = False
+        else:
+            trans = True
+        self.data = np.cov(self.data, rowvar = trans)
+        self.rename(obs_axis, var_axis+'_i')
+        self.rename(var_axis, var_axis+'_j')
+        return self
     def popdim(self,dimname):
         thisindex = self.axn(dimname)
         thisshape = list(self.data.shape)
