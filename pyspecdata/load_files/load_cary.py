@@ -6,9 +6,10 @@ taken from `here <https://github.com/Yohko/importtool/blob/master/Igor%20Procedu
 from numpy import *
 from ..general_functions import strm
 from ..core import nddata
+from ..placeholder import nddata_placeholder
 import os, logging
 
-def load_bindata(fp,param):
+def load_bindata(fp,param,filename):
     x_mode_rep = "nm;Å;cm-1;°".split(';')
     y_mode_rep = "Abs;%T;Absorptivity;%R;4?;5?;Log(Abs);Absolute %R;F(R);Log(F(R));Log(1/R)".split(';')
     factoreV_list = [1239.8424,1239.8424,12398.424,8065.54429,0]
@@ -20,15 +21,18 @@ def load_bindata(fp,param):
     logging.debug(strm("about to read",param['points'],"double points, with x units",x_unit,"and y unit",y_unit))
     current_pos = fp.tell()
     logging.debug(strm("inside bindata, position is",fp.tell()))
-    #for j in range(500):
-    #    fp.seek(current_pos+j,0)
-    #    result = fromfile(fp, dtype='<f4', count=1)
-    #    if result>1 and result<1000:
-    #        logging.debug(strm("try",j,"offset",result))
-    retval = fromfile(fp, dtype=[('x','<f4'),('y','<f4')], count=param['points'])
+    num_points = param['points']
     #logging.debug(retval)
-    retval = nddata(retval['y'],'$\lambda$' ).setaxis('$\lambda$',retval['x']
-            ).set_units('$\lambda$',x_unit)#.set_units(y_unit)
+    def retrieve_data():
+        with open(filename,'rb') as innerfp: # b/c file will be closed by the time we try to access the data
+            innerfp.seek(current_pos,0)
+            data_struct_array = fromfile(innerfp, dtype=[('x','<f4'),('y','<f4')], count=num_points)
+        def followup(self):
+            self.setaxis('wavelength', data_struct_array['x'])
+        return followup,data_struct_array['y']
+    retval = nddata_placeholder(retrieve_data)
+    retval.dimlabels = ['wavelength']
+    retval.set_units('wavelength',x_unit).set_units(y_unit)
     return retval
 def load_header(fp, param):
     retval = fromfile(fp, dtype=[
@@ -76,17 +80,12 @@ def load_cary(filename):
         file_end = fp.tell()
         fp.seek(marker,0)
         alldata = []
-        names = []
         while fp.tell() < file_end-4:
             param['blockoffset'] = fp.tell()
             logging.debug(strm("blockoffset",param['blockoffset']))
             # line 100
             thislen = fromfile(fp,dtype='<u4', count=1).item()
-            temp = fromfile(fp,dtype=f'a{thislen}', count=1).item()
-            try:
-                param['Tstore_type'] = temp.decode('ascii')
-            except:
-                raise IOError(strm("problem decoding or assigning Tstore type",repr(temp)))
+            param['Tstore_type'] = fromfile(fp,dtype=f'a{thislen}', count=1).item().decode('ascii')
             logging.debug("Tstore_type \"%s\""%param['Tstore_type'])
             # line 102
             param['blocklen'] = fromfile(fp,dtype='<u4', count=1).item()
@@ -94,37 +93,18 @@ def load_cary(filename):
                 # line 106
                 param = load_header(fp, param)
                 logging.debug(strm("param:",param))
-                data = load_bindata(fp, param)
-                #data.name(param['spectrum_name'])
-                names.append(param['spectrum_name'])
-                alldata.append(data)
-
+                data = load_bindata(fp, param, filename)
+                data.name(param['spectrum_name'])
                 logging.debug(strm("at this point, we are at",
                         fp.tell(),"relative to end of block",
                         param['blockoffset']+param['blocklen'],
                         "and end of file",file_end))
                 fp.seek(param['blockoffset']+param['blocklen'], 0)
-            else:
-                logging.info(strm("skipping block of type",param['Tstore_type']))
-                fp.seek(param['blockoffset']+param['blocklen'], 0)
-                #raise ValueError(strm("not yet set up for Tstore_type",param['Tstore_type']))
-            #alldata.append(data)
+            alldata.append(data)
     retval = {}
-    for n,j in enumerate(alldata):
-        repcounter = 0
-        #orig_name = j.name()
-        if n < len(names):
-            orig_name = names[n]
-        else:
-            orig_name = names[len(names)-1]
-
-        logging.debug("orig name for %d is %s"%(n,orig_name))
-        new_name = orig_name
-        while new_name in retval.keys():
-            repcounter += 1
-            new_name = orig_name + '_rep%03d'%repcounter
-        #if repcounter > 0:
-            #logging.warn("You have a duplicate spectrum name!!! -- renamed it from %s to %s"%(orig_name,new_name))
-        retval[new_name] = j
-        #retval[new_name].name(new_name) # this messes with the keys -- not sure why?
+    for j in alldata:
+        while j.name() in retval.keys():
+            logging.warn("You have a duplicate spectrum name!!! -- renaming it from %s to %s_rep"%(j.name(),j.name()))
+            j.name(j.name()+'_rep')
+        retval[j.name()] = j
     return retval
