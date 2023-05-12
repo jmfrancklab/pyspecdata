@@ -3751,6 +3751,7 @@ class nddata (object):
         else:
             trans = True
         self.data = np.cov(self.data, rowvar = trans)
+        self.setaxis(obs_axis,self.getaxis(var_axis))
         self.rename(obs_axis, var_axis+'_i')
         self.rename(var_axis, var_axis+'_j')
         return self
