@@ -3744,7 +3744,13 @@ class nddata (object):
                         thisindex, 'from', self.axis_coords_units))
         return self
     def cov_mat(self, along_dim):
-        # need a docstring!
+        '''
+        calculate covariance matrix for a 2D experiment
+        Parameters
+        ==========
+        along_dim:  str
+                    the "observations" dimension of the data set (as opposed to the variable)
+        '''            
         assert len(self.dimlabels) == 2, "we are only calculating covariance matrices for datasets with one variable and on observation axis"
         assert along_dim in self.dimlabels
         var_dim = str(self.dimlabels[self.axn(along_dim)+1])
