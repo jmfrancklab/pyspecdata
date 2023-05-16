@@ -3743,17 +3743,23 @@ class nddata (object):
                     raise IndexError(strm('trying to pop',
                         thisindex, 'from', self.axis_coords_units))
         return self
-    def cov_mat(self, obs_axis = 'observations'):
+    def cov_mat(self, along_dim):
+        # need a docstring!
         assert len(self.dimlabels) == 2, "we are only calculating covariance matrices for datasets with one variable and on observation axis"
-        var_axis = str(self.dimlabels[self.axn(obs_axis)+1])
-        if self.axn(obs_axis) == 0:
+        assert along_dim in self.dimlabels
+        var_dim = str(self.dimlabels[self.axn(along_dim)+1])
+        var_dim = list(set(self.dimlabels) - set([along_dim]))[0]
+        var_dim_coords = self.getaxis(var_dim)
+        var_dim_units = self.get_units(var_dim)
+        if self.axn(along_dim) == 0:
             trans = False
         else:
             trans = True
-        self.data = np.cov(self.data, rowvar = trans)
-        self.setaxis(obs_axis,self.getaxis(var_axis))
-        self.rename(obs_axis, var_axis+'_i')
-        self.rename(var_axis, var_axis+'_j')
+        self.data = np.cov(self.data, rowvar=trans)
+        self.setaxis(along_dim, self.getaxis(var_dim).copy())
+        self.rename(along_dim, var_dim+'_i')
+        self.rename(var_dim, var_dim+'_j')
+        self.set_units(var_dim+'_i',var_dim_units)
         return self
     def popdim(self,dimname):
         thisindex = self.axn(dimname)
