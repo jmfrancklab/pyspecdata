@@ -3658,8 +3658,8 @@ class nddata (object):
         weight_matrix = self.copy().set_error(None)
         weight_matrix.data = 1. / self.get_error().copy()
         #{{{ find out where anything is nan, and set both error and weight to 0
-        nan_mask = isnan(self.data)
-        nan_mask |= isnan(weight_matrix.data)
+        nan_mask = np.isnan(self.data)
+        nan_mask |= np.isnan(weight_matrix.data)
         weight_matrix.data[nan_mask] = 0
         self.data[nan_mask] = 0
         #}}}
