@@ -144,7 +144,6 @@ def xepr(filename, exp_type=None, dimname='', verbose=False):
                     if y_dim_name[0] == "'": y_dim_name = y_dim_name.replace("'","")
                 if y_dim_name.startswith("'") and y_dim_name.endswith("'"):
                     y_dim_name = y_dim_name[1:-1]
-
                 assert 'YUNI' in list(v.keys()), ("No parameter YUNI -- how do you expect me to know the units of the second dimension??")
                 dim_units.update({y_dim_name:interpret_units('YUNI')})
                 filename_ygf = filename_par[:-4] + '.YGF'
