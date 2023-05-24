@@ -16,11 +16,13 @@ with figlist_var() as fl:
         [("230504_3p8mM_TEMPOL_stb_wt_4x.DSC")]
     ):
         d = find_file(thisfile, exp_type=exp_type)["harmonic", 0]
-        d.rename("'Time'", "observations")
+        d.set_units(fieldaxis, 'T').setaxis(fieldaxis, lambda x: x*1e-4)
+        d.rename("Time", "observations")
         d.reorder(["observations", fieldaxis])
+        fl.next("covariance in B domain")
+        # we do this first, because if we were to ift to go to u domain and
+        # then ft back, we would introduce a complex component to our data
+        fl.image(d.C.cov_mat("observations"))
         d.ift(fieldaxis, shift=True)
         fl.next("Covariance in U domain")
-        fl.image(d.C.cov_mat("observations"))
-        d.ft(fieldaxis)
-        fl.next("covariance in B domain")
-        fl.image(d.C.cov_mat("observations"))
+        fl.image(d.cov_mat("observations")) # this time, do not spin up an extra copy of the data
