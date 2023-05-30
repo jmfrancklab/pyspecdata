@@ -143,26 +143,11 @@ def wrapviewer():
         which_command = 'b'
         full_pdf_name = new_pdf_basename+'.pdf'
         full_tex_name = orig_tex_basename+'.tex'
-        if which_command == 'f':#forward
-            # no longer used, but make this functional, in case I want it later
-            #3/29/14 -- replaced '+sys.argv[2]+' w/ default
-            cmdstring = 'evince_vim_dbus.py EVINCE '+full_pdf_name+' 1 '+full_tex_name 
-            print(cmdstring)
-            os.system(cmdstring)
-        elif which_command == 'i':#inverse
-            cmdstring = 'evince_vim_dbus.py GVIM default '+full_pdf_name+' '+full_tex_name
-            print(cmdstring)
-            os.system(cmdstring)
-        elif which_command == 'b':#both
-            cmdstring = '~/silentfork.sh evince_vim_dbus.py EVINCE '+full_pdf_name+' 1 '+full_tex_name 
-            print(cmdstring)
-            os.system(cmdstring)
-            time.sleep(0.75)
-            cmdstring = '~/silentfork.sh evince_vim_dbus.py GVIM default '+full_pdf_name+' '+full_tex_name
-            print(cmdstring)
-            os.system(cmdstring)
+        cmd = ['zathura --synctex-forward']
+        cmd.append(f"1:0:{full_tex_name} {full_pdf_name}")
+        print(' '.join(cmd))
+        os.system(' '.join(cmd))
         # }}}
-
     else:
         os.system('start sumatrapdf -reuse-instance '+new_pdf_basename+'.pdf')
     if new_pdf_basename == 'lists':
