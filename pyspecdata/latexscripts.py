@@ -135,12 +135,12 @@ def wraplatex():
     return
 def wrapviewer():
     'see :func:`wraplatex <pyspecdata.latexscripts.wraplatex>`'
+    print("started wrapviewer!")
     pdf_basename = list(filter(lambda x: x[0] != '-',
             sys.argv))[-1]
     orig_tex_basename,new_pdf_basename = det_new_pdf_name(sys.argv)
     if os.name == 'posix':
         # {{{ this plays the role of the function that I used to call "new_evince" with argument "b"
-        which_command = 'b'
         full_pdf_name = new_pdf_basename+'.pdf'
         full_tex_name = orig_tex_basename+'.tex'
         cmd = ['zathura --synctex-forward']
@@ -305,6 +305,7 @@ def main():
                 exit()
             else:
                 raise RuntimeError("What did you pass me???")
+    if not os.path.exists(get_scripts_dir()): return
     fp = open(get_scripts_dir() + 'scriptsUsed.csv')
     for line in fp.readlines():
         scriptnum_as_str = line.strip()
