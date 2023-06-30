@@ -32,7 +32,7 @@ def convolve(self,axisname,filterwidth,convfunc='gaussian',
         *i.e.*
         :math:`\frac{-1}{-i 2 \pi f - R}`
         then ``convfunc = lambda f,R: -1./(-1j*2*pi*f-R)``
-    enforce_causality: boolean
+    enforce_causality: boolean (default true)
         make sure that the ift of the filter doesn't get aliased to high
         time values.
 
