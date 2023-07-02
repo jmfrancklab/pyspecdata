@@ -3414,6 +3414,29 @@ class nddata (object):
             self.run(np.sum,thisaxis)
         self.data *= dt
         return self
+    def phdiff(self, axis):
+        """calculate the phase gradient (units: cyc/Δx) along axis,
+        setting the error appropriately"""
+        if self.get_ft_prop(axis):
+            dt = self.get_ft_prop(axis,'df')
+        else:
+            dt = self.get_ft_prop(axis,'dt')
+        A = self[axis,1:]
+        B = self[axis,:-1]
+        A_sigma = A.get_error()
+        A_sigma = 1 if A_sigma is None else A_sigma
+        B_sigma = B.get_error()
+        B_sigma = 1 if B_sigma is None else B_sigma
+        self.data = np.angle(A.data/B.data)/2/pi/dt
+        self.setaxis(axis, A.getaxis(axis))
+        self.set_error(
+                sqrt(
+                    A_sigma**2*abs(0.5/A.data)**2
+                    +
+                    B_sigma**2*abs(0.5/B.data)**2
+                    ) / 2 / pi/dt
+                )
+        return self
     def diff(self,thisaxis,backwards = False):
         if backwards is True:
             self.data = self[thisaxis,::-1].data
@@ -3426,6 +3449,7 @@ class nddata (object):
             self.data /= dt
         return self
     def sum(self,axes):
+        "calculate the sum along axes, also transforming error as needed"
         if (isinstance(axes, str)):
             axes = [axes]
         for j in range(0,len(axes)):
@@ -3439,6 +3463,14 @@ class nddata (object):
                 raise
             self.data = np.sum(self.data,
                     axis=thisindex)
+            if self.get_error() is not None:
+                self.set_error(
+                        np.sqrt(
+                            np.mean(self.get_error()**2,
+                                axis=thisindex
+                                )
+                            )
+                        )
             self._pop_axis_info(thisindex)
         return self
     def sum_nopop(self,axes):
@@ -3580,9 +3612,9 @@ class nddata (object):
             self._pop_axis_info(thisindex)
         return self
     def argmin(self,*axes,**kwargs):
-        r"""If `np.argmin('axisname')` find the min along a particular axis, and get rid of that
+        r"""If `.argmin('axisname')` find the min along a particular axis, and get rid of that
         axis, replacing it with the index number of the max value.
-        If `np.argmin()`: return a dictionary giving the coordinates of the overall minimum point.
+        If `.argmin()`: return a dictionary giving the coordinates of the overall minimum point.
         
         Parameters
         ==========
@@ -5697,9 +5729,24 @@ class nddata (object):
         raise ValueError("You can't set the C property -- it's used to generate a copy")
     @property
     def angle(self):
-        "Return the angle component of the data"
+        """Return the angle component of the data.
+
+        This has error, which is calculated even if there is no error in
+        the original data -- in the latter case, a uniform error of 1 is
+        assumed. (This is desirable since phase is a tricky beast!)
+        """
         retval = self.copy(data=False)
         retval.data = np.angle(self.data)
+        # from ∂φ/∂A=-i n/2A
+        # when ρe(iφ)=xAⁿ
+        dangle_dA = 1/(2*self.data)
+        A_sigma = self.get_error()
+        A_sigma = 1 if A_sigma is None else A_sigma
+        retval.set_error(
+                abs(
+                    dangle_dA * A_sigma
+                    )
+                )
         return retval
     @angle.setter
     def angle(self):
