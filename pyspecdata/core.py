@@ -2933,12 +2933,12 @@ class nddata (object):
         >>> a = nddata(r_[0:27],[3,3,3],['a','b','c'])
         >>> b = nddata(r_[0:9],[3,3],['a','b'])
         >>> print a.C.dot(b)
-        >>> print tensordot(a.data,b.data,axes=((0,1),(0,1)))
+        >>> print np.tensordot(a.data,b.data,axes=((0,1),(0,1)))
 
         >>> a = nddata(r_[0:27],[3,3,3],['a','b','c'])
         >>> b = nddata(r_[0:9],[3,3],['a','d'])
         >>> print a.C.dot(b)
-        >>> print tensordot(a.data,b.data,axes=((0),(0)))
+        >>> print np.tensordot(a.data,b.data,axes=((0),(0)))
         """
         A,B = self.aligndata(arg)
         matching_dims = list(set(self.dimlabels) & set(arg.dimlabels))
@@ -2953,7 +2953,7 @@ class nddata (object):
         match_idx = [A.axn(j) for j in matching_dims]
         if (self.get_error() is not None) or (arg.get_error() is not None):
             raise ValueError("we plan to include error propagation here, but not yet provided")
-        self.data = tensordot(A.data,B.data,axes=(match_idx,match_idx))
+        self.data = np.tensordot(A.data,B.data,axes=(match_idx,match_idx))
         logger.debug(strm("shape of A is",ndshape(A)))
         logger.debug(strm("shape of B is",ndshape(B)))
         logger.debug(strm("matching_dims are",matching_dims))
