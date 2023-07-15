@@ -1,75 +1,43 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyspecdata.fourier package &mdash; pySpecData 0.9.5.3.2 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/gallery_custom.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/gallery-binder.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/gallery-dataframe.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/gallery_custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
-            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> pySpecData
-          
-
-          
+            <a href="../index.html" class="icon icon-home"> pySpecData
           </a>
-
-          
-            
-            
               <div class="version">
                 0.9.5.3.2
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -77,144 +45,110 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the lmfitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Example Gallery</span></p>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">PySpecData Examples</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">pySpecData</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>pyspecdata.fourier package</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">pyspecdata.fourier package</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="../_sources/auto_api/pyspecdata.fourier.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="pyspecdata-fourier-package">
-<h1>pyspecdata.fourier package<a class="headerlink" href="#pyspecdata-fourier-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-pyspecdata.fourier.convolve">
-<span id="pyspecdata-fourier-convolve-module"></span><h2>pyspecdata.fourier.convolve module<a class="headerlink" href="#module-pyspecdata.fourier.convolve" title="Permalink to this headline">¶</a></h2>
+             
+  <section id="pyspecdata-fourier-package">
+<h1>pyspecdata.fourier package<a class="headerlink" href="#pyspecdata-fourier-package" title="Permalink to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="module-pyspecdata.fourier.convolve">
+<span id="pyspecdata-fourier-convolve-module"></span><h2>pyspecdata.fourier.convolve module<a class="headerlink" href="#module-pyspecdata.fourier.convolve" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
-<dt id="pyspecdata.fourier.convolve.convolve">
-<code class="sig-prename descclassname">pyspecdata.fourier.convolve.</code><code class="sig-name descname">convolve</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">axisname</em>, <em class="sig-param">filterwidth</em>, <em class="sig-param">convfunc=&lt;function &lt;lambda&gt;&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.convolve.convolve" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.convolve.convolve">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.convolve.</span></span><span class="sig-name descname"><span class="pre">convolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axisname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterwidth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convfunc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gaussian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_causality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.convolve.convolve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform a convolution.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>axisname</strong> (<em>str</em>) – apply the convolution along <cite>axisname</cite></p></li>
-<li><p><strong>filterwidth</strong> (<em>double</em>) – width of the convolution function.</p></li>
-<li><p><strong>convfunc</strong> (<em>function</em>) – A function that takes two arguments – the first are the axis coordinates and the second is <cite>filterwidth</cite>.
-Default is a normalized Gaussian of width (<span class="math notranslate nohighlight">\(\sigma\)</span>)
-<cite>filterwidth</cite>
-<span class="math notranslate nohighlight">\(\frac{1}{2 \sigma^2}\exp\left( - \frac{x^2}{2 \sigma^2} \right)\)</span>
+<li><p><strong>filterwidth</strong> (<em>double</em>) – width of the convolution function
+(the units of this value are specified in the
+same domain as that in which the data exists
+when you call this function on said data)</p></li>
+<li><p><strong>convfunc</strong> (<a class="reference internal" href="pyspecdata.html#pyspecdata.function" title="pyspecdata.function"><em>function</em></a>) – A function that takes two
+arguments – the first are the axis
+coordinates and the second is
+<cite>filterwidth</cite> (see <cite>filterwidth</cite>).
+Default is a normalized Gaussian of FWHM
+(<span class="math notranslate nohighlight">\(\lambda\)</span>) <cite>filterwidth</cite>
 For example if you want a complex Lorentzian with <cite>filterwidth</cite> controlled by the rate <span class="math notranslate nohighlight">\(R\)</span>,
 <em>i.e.</em>
 <span class="math notranslate nohighlight">\(\frac{-1}{-i 2 \pi f - R}\)</span>
 then <code class="docutils literal notranslate"><span class="pre">convfunc</span> <span class="pre">=</span> <span class="pre">lambda</span> <span class="pre">f,R:</span> <span class="pre">-1./(-1j*2*pi*f-R)</span></code></p></li>
+<li><p><strong>enforce_causality</strong> (<em>boolean</em>) – <p>make sure that the ift of the filter doesn’t get aliased to high
+time values.</p>
+<p>”Causal” data here means data derived as the FT of time-domain
+data that starts at time zero – like an FID – for which real
+and abs parts are Hermite transform pairs.</p>
+<p><cite>enforce_causality</cite> should be <cite>True</cite> for frequency-domain data
+whose corresponding time-domain data has a startpoint at or near
+zero, with no negative time values – like data derived from the
+FT of an IFT.
+In contrast, for example, if you have frequency-domain data that
+is entirely real (like a power spectral density) then you want to
+set enforce_causality to False.</p>
+<p>It is ignored if you call a convolution on time-domain data.</p>
+</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyspecdata.fourier.ft">
-<span id="pyspecdata-fourier-ft-module"></span><h2>pyspecdata.fourier.ft module<a class="headerlink" href="#module-pyspecdata.fourier.ft" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-pyspecdata.fourier.ft">
+<span id="pyspecdata-fourier-ft-module"></span><h2>pyspecdata.fourier.ft module<a class="headerlink" href="#module-pyspecdata.fourier.ft" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
-<dt id="pyspecdata.fourier.ft.ft">
-<code class="sig-prename descclassname">pyspecdata.fourier.ft.</code><code class="sig-name descname">ft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">cosine</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft.ft" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.ft.ft">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.ft.</span></span><span class="sig-name descname"><span class="pre">ft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unitary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft.ft" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs a Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
 <dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt\)</span></p>
 </dd>
 </dl>
-<p>Note that, as noted in the <a class="reference internal" href="#pyspecdata.fourier.ift.ift" title="pyspecdata.fourier.ift.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> documentation,
-the inverse transform doesn’t correspond to the equivalent
-expression for the IFT.</p>
 <p><strong>pre-FT</strong>, we use the axis to cyclically permute <span class="math notranslate nohighlight">\(t=0\)</span> to the first index</p>
 <p><strong>post-FT</strong>, we assume that the data has previously been IFT’d
 If this is the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> will cause an error
 If this is not the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> generates a standard fftshift
 <code class="docutils literal notranslate"><span class="pre">shift=None</span></code> will choose True, if and only if this is not the case</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>pad</strong> (<em>int</em><em> or </em><em>boolean</em>) – <cite>pad</cite> specifies a zero-filling.  If it’s a number, then it gives
 the length of the zero-filled dimension.  If it is just <cite>True</cite>,
@@ -224,23 +158,24 @@ dimension size up to the nearest integral power of 2.</p></li>
 useful for the specific case where the data has been captured on a
 sampling scope, and it’s severely aliased over.</p></li>
 <li><p><strong>cosine</strong> (<em>boolean</em>) – yields a sum of the fft and ifft, for a cosine transform</p></li>
+<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>None</em><em>)</em>) – return a result that is vector-unitary</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyspecdata.fourier.ft_shift">
-<span id="pyspecdata-fourier-ft-shift-module"></span><h2>pyspecdata.fourier.ft_shift module<a class="headerlink" href="#module-pyspecdata.fourier.ft_shift" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-pyspecdata.fourier.ft_shift">
+<span id="pyspecdata-fourier-ft-shift-module"></span><h2>pyspecdata.fourier.ft_shift module<a class="headerlink" href="#module-pyspecdata.fourier.ft_shift" title="Permalink to this heading">¶</a></h2>
 <p>shift-related helper functions</p>
 <dl class="py function">
-<dt id="pyspecdata.fourier.ft_shift.ft_clear_startpoints">
-<code class="sig-prename descclassname">pyspecdata.fourier.ft_shift.</code><code class="sig-name descname">ft_clear_startpoints</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">t</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">f</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nearest</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft_shift.ft_clear_startpoints" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.ft_shift.ft_clear_startpoints">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.ft_shift.</span></span><span class="sig-name descname"><span class="pre">ft_clear_startpoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft_shift.ft_clear_startpoints" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clears memory of where the origins in the time and frequency domain are.
 This is useful, <em>e.g.</em> when you want to ift and center about time=0.
 By setting shift=True you can also manually set the points.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>t</strong> (<em>float</em><em>, </em><em>'current'</em><em>, </em><em>'reset'</em><em>, or </em><em>None</em>) – keyword arguments <cite>t</cite> and <cite>f</cite> can be set by (1) manually setting
 the start point (2) using the string ‘current’ to leave the
@@ -284,61 +219,56 @@ deal with the consequences.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.fourier.ft_shift.ft_state_to_str">
-<code class="sig-prename descclassname">pyspecdata.fourier.ft_shift.</code><code class="sig-name descname">ft_state_to_str</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">axes</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft_shift.ft_state_to_str" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.ft_shift.ft_state_to_str">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.ft_shift.</span></span><span class="sig-name descname"><span class="pre">ft_state_to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">axes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft_shift.ft_state_to_str" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a string that lists the FT domain for the given axes.</p>
 <p><span class="math notranslate nohighlight">\(u\)</span> refers to the original domain (typically time) and <span class="math notranslate nohighlight">\(v\)</span> refers to the FT’d domain (typically frequency)
 If no axes are passed as arguments, it does this for all axes.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.fourier.ft_shift.get_ft_prop">
-<code class="sig-prename descclassname">pyspecdata.fourier.ft_shift.</code><code class="sig-name descname">get_ft_prop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">propname</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft_shift.get_ft_prop" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.ft_shift.get_ft_prop">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.ft_shift.</span></span><span class="sig-name descname"><span class="pre">get_ft_prop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft_shift.get_ft_prop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the FT property given by <cite>propname</cite>.  For both setting and getting, <cite>None</cite> is equivalent to an unset value if no <cite>propname</cite> is given, this just sets the <cite>FT</cite> property, which tells if a dimension is frequency or time domain</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.fourier.ft_shift.set_ft_prop">
-<code class="sig-prename descclassname">pyspecdata.fourier.ft_shift.</code><code class="sig-name descname">set_ft_prop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">propname</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft_shift.set_ft_prop" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.ft_shift.set_ft_prop">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.ft_shift.</span></span><span class="sig-name descname"><span class="pre">set_ft_prop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft_shift.set_ft_prop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the FT property given by <cite>propname</cite>.  For both setting and getting, <cite>None</cite> is equivalent to an unset value if <cite>propname</cite> is a boolean, and <cite>value</cite> is True (the default), it’s assumed that propname is actually None, and that <cite>value</cite> is set to the <cite>propname</cite> argument (this allows us to set the <cite>FT</cite> property more easily)</p>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyspecdata.fourier.ftshift">
-<span id="pyspecdata-fourier-ftshift-module"></span><h2>pyspecdata.fourier.ftshift module<a class="headerlink" href="#module-pyspecdata.fourier.ftshift" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-pyspecdata.fourier.ftshift">
+<span id="pyspecdata-fourier-ftshift-module"></span><h2>pyspecdata.fourier.ftshift module<a class="headerlink" href="#module-pyspecdata.fourier.ftshift" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
-<dt id="pyspecdata.fourier.ftshift.ftshift">
-<code class="sig-prename descclassname">pyspecdata.fourier.ftshift.</code><code class="sig-name descname">ftshift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ftshift.ftshift" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.ftshift.ftshift">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.ftshift.</span></span><span class="sig-name descname"><span class="pre">ftshift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ftshift.ftshift" title="Permalink to this definition">¶</a></dt>
 <dd><p>FT-based shift.  Currently only works in time domain.</p>
 <p>This was previously made obsolete, but is now a demo of how to use the ft properties.
 It is not the most efficient way to do this.</p>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyspecdata.fourier.ift">
-<span id="pyspecdata-fourier-ift-module"></span><h2>pyspecdata.fourier.ift module<a class="headerlink" href="#module-pyspecdata.fourier.ift" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-pyspecdata.fourier.ift">
+<span id="pyspecdata-fourier-ift-module"></span><h2>pyspecdata.fourier.ift module<a class="headerlink" href="#module-pyspecdata.fourier.ift" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
-<dt id="pyspecdata.fourier.ift.ift">
-<code class="sig-prename descclassname">pyspecdata.fourier.ift.</code><code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ift.ift" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.ift.ift">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.ift.</span></span><span class="sig-name descname"><span class="pre">ift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unitary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ift.ift" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs an inverse Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
-<dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=t_{dw} \int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
+<dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=\int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
 </dd>
 </dl>
-<p>Where <span class="math notranslate nohighlight">\(t_{dw}=\frac{1}{\Delta f}\)</span>, is the dwell time (with <span class="math notranslate nohighlight">\(\Delta f\)</span> the spectral width).</p>
-<p><em>Why do we do this?</em> Note that while the analytical integral this corresponds to is normalized, performing
-<a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code></a> followed by <a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> on a discrete sequence is NOT completely invertible
-(due to integration of the implied comb function??),
-and would require division by a factor of <span class="math notranslate nohighlight">\(\Delta f\)</span> (the spectral width) in order
-to retrieve the original function</p>
 <p><strong>pre-IFT</strong>, we use the axis to cyclically permute <span class="math notranslate nohighlight">\(f=0\)</span> to the first index</p>
 <p><strong>post-IFT</strong>, we assume that the data has previously been FT’d
 If this is the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> will cause an error
 If this is not the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> generates a standard ifftshift
 <code class="docutils literal notranslate"><span class="pre">shift=None</span></code> will choose True, if and only if this is not the case</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>pad</strong> (<em>int</em><em> or </em><em>boolean</em>) – <p><cite>pad</cite> specifies a zero-filling.  If it’s a number, then it gives
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pad</strong> (<em>int</em><em> or </em><em>boolean</em>) – <p><cite>pad</cite> specifies a zero-filling.  If it’s a number, then it gives
 the length of the zero-filled dimension.  If it is just <cite>True</cite>,
 then the size of the dimension is determined by rounding the
 dimension size up to the nearest integral power of 2.   It uses the
@@ -353,76 +283,94 @@ do this.</p>
 <span class="math notranslate nohighlight">\(\Delta t\)</span> and <cite>p2_post_discrepancy</cite> – the non-integral.</p>
 </dd>
 </dl>
-</p>
+</p></li>
+<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>None</em><em>)</em>) – return a result that is vector-unitary</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyspecdata.fourier.shear">
-<span id="pyspecdata-fourier-shear-module"></span><h2>pyspecdata.fourier.shear module<a class="headerlink" href="#module-pyspecdata.fourier.shear" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-pyspecdata.fourier.shear">
+<span id="pyspecdata-fourier-shear-module"></span><h2>pyspecdata.fourier.shear module<a class="headerlink" href="#module-pyspecdata.fourier.shear" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
-<dt id="pyspecdata.fourier.shear.extend_for_shear">
-<code class="sig-prename descclassname">pyspecdata.fourier.shear.</code><code class="sig-name descname">extend_for_shear</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">altered_axis</span></em>, <em class="sig-param"><span class="n">propto_axis</span></em>, <em class="sig-param"><span class="n">skew_amount</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.shear.extend_for_shear" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.shear.extend_for_shear">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.shear.</span></span><span class="sig-name descname"><span class="pre">extend_for_shear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">altered_axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propto_axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skew_amount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.shear.extend_for_shear" title="Permalink to this definition">¶</a></dt>
 <dd><p>this is propto_axis helper function for <cite>.fourier.shear</cite></p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.fourier.shear.shear">
-<code class="sig-prename descclassname">pyspecdata.fourier.shear.</code><code class="sig-name descname">shear</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">altered_axis</span></em>, <em class="sig-param"><span class="n">propto_axis</span></em>, <em class="sig-param"><span class="n">by_amount</span></em>, <em class="sig-param"><span class="n">zero_fill</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">start_in_conj</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.shear.shear" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.shear.shear">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.shear.</span></span><span class="sig-name descname"><span class="pre">shear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">altered_axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propto_axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_amount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_in_conj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.shear.shear" title="Permalink to this definition">¶</a></dt>
 <dd><p>the fourier shear method – see .shear() documentation</p>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pyspecdata.fourier">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyspecdata.fourier" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-pyspecdata.fourier">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyspecdata.fourier" title="Permalink to this heading">¶</a></h2>
 <p>This package contains the Fourier transformation methods belonging to <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></p>
 <dl class="py function">
-<dt id="pyspecdata.fourier.convolve">
-<code class="sig-prename descclassname">pyspecdata.fourier.</code><code class="sig-name descname">convolve</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">axisname</em>, <em class="sig-param">filterwidth</em>, <em class="sig-param">convfunc=&lt;function &lt;lambda&gt;&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.convolve" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.convolve">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.</span></span><span class="sig-name descname"><span class="pre">convolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axisname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterwidth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convfunc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gaussian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_causality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.convolve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform a convolution.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>axisname</strong> (<em>str</em>) – apply the convolution along <cite>axisname</cite></p></li>
-<li><p><strong>filterwidth</strong> (<em>double</em>) – width of the convolution function.</p></li>
-<li><p><strong>convfunc</strong> (<em>function</em>) – A function that takes two arguments – the first are the axis coordinates and the second is <cite>filterwidth</cite>.
-Default is a normalized Gaussian of width (<span class="math notranslate nohighlight">\(\sigma\)</span>)
-<cite>filterwidth</cite>
-<span class="math notranslate nohighlight">\(\frac{1}{2 \sigma^2}\exp\left( - \frac{x^2}{2 \sigma^2} \right)\)</span>
+<li><p><strong>filterwidth</strong> (<em>double</em>) – width of the convolution function
+(the units of this value are specified in the
+same domain as that in which the data exists
+when you call this function on said data)</p></li>
+<li><p><strong>convfunc</strong> (<a class="reference internal" href="pyspecdata.html#pyspecdata.function" title="pyspecdata.function"><em>function</em></a>) – A function that takes two
+arguments – the first are the axis
+coordinates and the second is
+<cite>filterwidth</cite> (see <cite>filterwidth</cite>).
+Default is a normalized Gaussian of FWHM
+(<span class="math notranslate nohighlight">\(\lambda\)</span>) <cite>filterwidth</cite>
 For example if you want a complex Lorentzian with <cite>filterwidth</cite> controlled by the rate <span class="math notranslate nohighlight">\(R\)</span>,
 <em>i.e.</em>
 <span class="math notranslate nohighlight">\(\frac{-1}{-i 2 \pi f - R}\)</span>
 then <code class="docutils literal notranslate"><span class="pre">convfunc</span> <span class="pre">=</span> <span class="pre">lambda</span> <span class="pre">f,R:</span> <span class="pre">-1./(-1j*2*pi*f-R)</span></code></p></li>
+<li><p><strong>enforce_causality</strong> (<em>boolean</em>) – <p>make sure that the ift of the filter doesn’t get aliased to high
+time values.</p>
+<p>”Causal” data here means data derived as the FT of time-domain
+data that starts at time zero – like an FID – for which real
+and abs parts are Hermite transform pairs.</p>
+<p><cite>enforce_causality</cite> should be <cite>True</cite> for frequency-domain data
+whose corresponding time-domain data has a startpoint at or near
+zero, with no negative time values – like data derived from the
+FT of an IFT.
+In contrast, for example, if you have frequency-domain data that
+is entirely real (like a power spectral density) then you want to
+set enforce_causality to False.</p>
+<p>It is ignored if you call a convolution on time-domain data.</p>
+</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.fourier.extend_for_shear">
-<code class="sig-prename descclassname">pyspecdata.fourier.</code><code class="sig-name descname">extend_for_shear</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">altered_axis</span></em>, <em class="sig-param"><span class="n">propto_axis</span></em>, <em class="sig-param"><span class="n">skew_amount</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.extend_for_shear" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.extend_for_shear">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.</span></span><span class="sig-name descname"><span class="pre">extend_for_shear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">altered_axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propto_axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skew_amount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.extend_for_shear" title="Permalink to this definition">¶</a></dt>
 <dd><p>this is propto_axis helper function for <cite>.fourier.shear</cite></p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.fourier.ft">
-<code class="sig-prename descclassname">pyspecdata.fourier.</code><code class="sig-name descname">ft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">cosine</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.ft">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.</span></span><span class="sig-name descname"><span class="pre">ft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unitary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs a Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
 <dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt\)</span></p>
 </dd>
 </dl>
-<p>Note that, as noted in the <a class="reference internal" href="#pyspecdata.fourier.ift.ift" title="pyspecdata.fourier.ift.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> documentation,
-the inverse transform doesn’t correspond to the equivalent
-expression for the IFT.</p>
 <p><strong>pre-FT</strong>, we use the axis to cyclically permute <span class="math notranslate nohighlight">\(t=0\)</span> to the first index</p>
 <p><strong>post-FT</strong>, we assume that the data has previously been IFT’d
 If this is the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> will cause an error
 If this is not the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> generates a standard fftshift
 <code class="docutils literal notranslate"><span class="pre">shift=None</span></code> will choose True, if and only if this is not the case</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>pad</strong> (<em>int</em><em> or </em><em>boolean</em>) – <cite>pad</cite> specifies a zero-filling.  If it’s a number, then it gives
 the length of the zero-filled dimension.  If it is just <cite>True</cite>,
@@ -432,19 +380,20 @@ dimension size up to the nearest integral power of 2.</p></li>
 useful for the specific case where the data has been captured on a
 sampling scope, and it’s severely aliased over.</p></li>
 <li><p><strong>cosine</strong> (<em>boolean</em>) – yields a sum of the fft and ifft, for a cosine transform</p></li>
+<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>None</em><em>)</em>) – return a result that is vector-unitary</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.fourier.ft_clear_startpoints">
-<code class="sig-prename descclassname">pyspecdata.fourier.</code><code class="sig-name descname">ft_clear_startpoints</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">t</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">f</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nearest</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft_clear_startpoints" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.ft_clear_startpoints">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.</span></span><span class="sig-name descname"><span class="pre">ft_clear_startpoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft_clear_startpoints" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clears memory of where the origins in the time and frequency domain are.
 This is useful, <em>e.g.</em> when you want to ift and center about time=0.
 By setting shift=True you can also manually set the points.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>t</strong> (<em>float</em><em>, </em><em>'current'</em><em>, </em><em>'reset'</em><em>, or </em><em>None</em>) – keyword arguments <cite>t</cite> and <cite>f</cite> can be set by (1) manually setting
 the start point (2) using the string ‘current’ to leave the
@@ -488,49 +437,44 @@ deal with the consequences.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.fourier.ft_state_to_str">
-<code class="sig-prename descclassname">pyspecdata.fourier.</code><code class="sig-name descname">ft_state_to_str</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">axes</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft_state_to_str" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.ft_state_to_str">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.</span></span><span class="sig-name descname"><span class="pre">ft_state_to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">axes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ft_state_to_str" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a string that lists the FT domain for the given axes.</p>
 <p><span class="math notranslate nohighlight">\(u\)</span> refers to the original domain (typically time) and <span class="math notranslate nohighlight">\(v\)</span> refers to the FT’d domain (typically frequency)
 If no axes are passed as arguments, it does this for all axes.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.fourier.ftshift">
-<code class="sig-prename descclassname">pyspecdata.fourier.</code><code class="sig-name descname">ftshift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ftshift" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.ftshift">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.</span></span><span class="sig-name descname"><span class="pre">ftshift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ftshift" title="Permalink to this definition">¶</a></dt>
 <dd><p>FT-based shift.  Currently only works in time domain.</p>
 <p>This was previously made obsolete, but is now a demo of how to use the ft properties.
 It is not the most efficient way to do this.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.fourier.get_ft_prop">
-<code class="sig-prename descclassname">pyspecdata.fourier.</code><code class="sig-name descname">get_ft_prop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">propname</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.get_ft_prop" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.get_ft_prop">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.</span></span><span class="sig-name descname"><span class="pre">get_ft_prop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.get_ft_prop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the FT property given by <cite>propname</cite>.  For both setting and getting, <cite>None</cite> is equivalent to an unset value if no <cite>propname</cite> is given, this just sets the <cite>FT</cite> property, which tells if a dimension is frequency or time domain</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.fourier.ift">
-<code class="sig-prename descclassname">pyspecdata.fourier.</code><code class="sig-name descname">ift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tolerance</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ift" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.ift">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.</span></span><span class="sig-name descname"><span class="pre">ift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unitary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.ift" title="Permalink to this definition">¶</a></dt>
 <dd><p>This performs an inverse Fourier transform along the axes identified by the string or list of strings <cite>axes</cite>.</p>
 <dl class="simple">
-<dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=t_{dw} \int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
+<dt>It adjusts normalization and units so that the result conforms to</dt><dd><p><span class="math notranslate nohighlight">\(s(t)=\int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df\)</span></p>
 </dd>
 </dl>
-<p>Where <span class="math notranslate nohighlight">\(t_{dw}=\frac{1}{\Delta f}\)</span>, is the dwell time (with <span class="math notranslate nohighlight">\(\Delta f\)</span> the spectral width).</p>
-<p><em>Why do we do this?</em> Note that while the analytical integral this corresponds to is normalized, performing
-<a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ft()</span></code></a> followed by <a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.ift" title="pyspecdata.nddata.ift"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ift()</span></code></a> on a discrete sequence is NOT completely invertible
-(due to integration of the implied comb function??),
-and would require division by a factor of <span class="math notranslate nohighlight">\(\Delta f\)</span> (the spectral width) in order
-to retrieve the original function</p>
 <p><strong>pre-IFT</strong>, we use the axis to cyclically permute <span class="math notranslate nohighlight">\(f=0\)</span> to the first index</p>
 <p><strong>post-IFT</strong>, we assume that the data has previously been FT’d
 If this is the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> will cause an error
 If this is not the case, passing <code class="docutils literal notranslate"><span class="pre">shift=True</span></code> generates a standard ifftshift
 <code class="docutils literal notranslate"><span class="pre">shift=None</span></code> will choose True, if and only if this is not the case</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>pad</strong> (<em>int</em><em> or </em><em>boolean</em>) – <p><cite>pad</cite> specifies a zero-filling.  If it’s a number, then it gives
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pad</strong> (<em>int</em><em> or </em><em>boolean</em>) – <p><cite>pad</cite> specifies a zero-filling.  If it’s a number, then it gives
 the length of the zero-filled dimension.  If it is just <cite>True</cite>,
 then the size of the dimension is determined by rounding the
 dimension size up to the nearest integral power of 2.   It uses the
@@ -545,71 +489,54 @@ do this.</p>
 <span class="math notranslate nohighlight">\(\Delta t\)</span> and <cite>p2_post_discrepancy</cite> – the non-integral.</p>
 </dd>
 </dl>
-</p>
+</p></li>
+<li><p><strong>unitary</strong> (<em>boolean</em><em> (</em><em>None</em><em>)</em>) – return a result that is vector-unitary</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.fourier.set_ft_prop">
-<code class="sig-prename descclassname">pyspecdata.fourier.</code><code class="sig-name descname">set_ft_prop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">propname</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.set_ft_prop" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.set_ft_prop">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.</span></span><span class="sig-name descname"><span class="pre">set_ft_prop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.set_ft_prop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the FT property given by <cite>propname</cite>.  For both setting and getting, <cite>None</cite> is equivalent to an unset value if <cite>propname</cite> is a boolean, and <cite>value</cite> is True (the default), it’s assumed that propname is actually None, and that <cite>value</cite> is set to the <cite>propname</cite> argument (this allows us to set the <cite>FT</cite> property more easily)</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.fourier.shear">
-<code class="sig-prename descclassname">pyspecdata.fourier.</code><code class="sig-name descname">shear</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">altered_axis</span></em>, <em class="sig-param"><span class="n">propto_axis</span></em>, <em class="sig-param"><span class="n">by_amount</span></em>, <em class="sig-param"><span class="n">zero_fill</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">start_in_conj</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.shear" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.fourier.shear">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fourier.</span></span><span class="sig-name descname"><span class="pre">shear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">altered_axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propto_axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_amount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_in_conj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fourier.shear" title="Permalink to this definition">¶</a></dt>
 <dd><p>the fourier shear method – see .shear() documentation</p>
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2016, John M. Franck
-
-    </p>
+    <p>&#169; Copyright 2016, John M. Franck.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

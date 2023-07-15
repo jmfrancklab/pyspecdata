@@ -101,13 +101,12 @@ def check_ascending_axis(u,tolerance = 1e-7,additional_message = [], allow_desce
     if isinstance(additional_message, str):
         additional_message = [additional_message]
     du = (u[-1]-u[0])/(len(u)-1.) # the dwell gives the bandwidth, whether or not it has been zero padded -- I calculate this way for better accuracy
-    thismsg = ', '.join(additional_message + ["the axis must be ascending (and equally spaced)"])
-    assert du > 0, thismsg
-    thismsg = ', '.join(additional_message + ["the axis must be equally spaced (and ascending)"])
+    thismsg = ', '.join(additional_message + ["the axis must be equally spaced"])
     assert all(abs(np.diff(u) - du)/du < tolerance), thismsg# absolute
     #   tolerance can be large relative to a du of ns -- don't use
     #   allclose/isclose, since they are more recent numpy additions
     if not allow_descending:
+        thismsg = ', '.join(additional_message + ["the axis must be equally spaced (and ascending)"])
         assert du > 0, thismsg
     return du
 
@@ -120,6 +119,10 @@ def level_str_to_int(level):
         else:
             raise ValueError("if you give me level as a string, give me 'info' or 'debug'")
     return level
+if 'pyspecdata_figures' in os.environ and os.environ['pyspecdata_figures'] == 'latex':
+    print_log_info = False
+else:
+    print_log_info = True
 def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspecdata.%d.log', fileno=0):
     r"""Initialize a decent logging setup to log to `~/pyspecdata.log` (and `~/pyspecdata.XX.log` if that's taken).
 
@@ -136,6 +139,7 @@ def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspe
     min_level = min([level,stdout_level])
     formatter = logging.Formatter(FORMAT)
     log_filename = os.path.join(os.path.expanduser('~'),filename%fileno)
+    local_print = True
     if os.path.exists(log_filename):
         # manually remove, and then use append -- otherwise, it won't write to
         # file immediately
@@ -143,15 +147,18 @@ def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspe
             os.remove(log_filename)
         except:
             if fileno == 0:
-                print(f"{log_filename} appears to be locked or otherwise inaccessible: I'm going to explore other options for fileno")
+                if print_log_info:
+                    print(f"{log_filename} appears to be locked or otherwise inaccessible: I'm going to explore other options for fileno")
             if fileno > 20:
                 raise ValueError("I'm not going to increase fileno above 20 -- that's crazy time!")
+            local_print = False
             return init_logging(level=level, filename=filename, fileno=fileno+1)
-    print(f"logging output to {log_filename}")
+    if print_log_info and local_print:
+        print("-"*10+"  "+f"logging output to {log_filename}"+"  "+"-"*10)
     logger = logging.getLogger()
     logger.setLevel(min_level) # even if I set the handler level, it won't
     #                        print w/out this
-    file_handler = logging.FileHandler(log_filename, mode='a')
+    file_handler = logging.FileHandler(log_filename, mode='a', encoding='utf-8')
     stdout_handler = logging.StreamHandler(sys.stdout)
     # can set levels independently with:
     stdout_handler.setLevel(stdout_level)
@@ -211,3 +218,93 @@ def redim_F_to_C(a):
 def redim_C_to_F(a):
     "see redim_F_to_C"
     return a.ravel(order='C').reshape(a.shape[::-1], order='F')
+def fname_makenice(fname):
+    fname = fname.replace(' ','_')
+    fname = fname.replace('-','m')
+    fname = fname.replace('+','p')
+    fname = fname.replace(',','_')
+    fname = fname.replace('\\','_')
+    fname = fname.replace('$','')
+    fname = fname.replace('(','')
+    fname = fname.replace(')','')
+    fname = fname.replace('"','')
+    fname = fname.replace('=','_')
+    fname = fname.replace('\n','_')
+    fname = fname.replace('*','_star_')
+    fname = fname.replace(':','')
+    fname = fname.replace('^','')
+    fname = fname.replace('}','')
+    fname = fname.replace('{','')
+    return fname
+def explain_error(e):
+    '''Allows you to wrap existing errors with more explanation
+
+    For example:
+
+    >    except BaseException  as e:
+    >        raise IndexError("I can't find the node "+pathstring+explain_error(e))
+    >                + '\n'.join(['>\t'+j for j in str(e).split('\n')]))# this indents
+    '''
+    exc_type,exc_obj,exc_tb = exc_info()
+    #code_loc = strm(os.path.relpath(exc_tb.tb_frame.f_code.co_filename,os.getcwd()), 'line', exc_tb.tb_lineno)
+    code_loc = strm(exc_tb.tb_frame.f_code.co_filename, 'line', exc_tb.tb_lineno)
+    return ('\n> Original error (%s -- %s):\n'%(exc_type,code_loc)
+            + '\n'.join(['>\t'+j
+                for j in str(e).split('\n')]))# this indents
+def lsafen(*string,**kwargs):
+    "see lsafe, but with an added double newline"
+    string = list(string)
+    string += ['\n\n']
+    return lsafe(*tuple(string),**kwargs)
+def lsafe(*string,**kwargs):
+    "Output properly escaped for latex"
+    if len(string) > 1:
+        lsafewkargs = lambda x: lsafe(x,**kwargs)
+        return ' '.join(list(map(lsafewkargs,string)))
+    else:
+        string = string[0]
+    #{{{ kwargs
+    spaces = False
+    if 'spaces' in list(kwargs.keys()):
+        spaces = kwargs.pop('spaces')
+    if 'wrap' in list(kwargs.keys()):
+        wrap = kwargs.pop('wrap')
+    else:
+        wrap = None
+    #}}}
+    if not isinstance(string, str):
+        string = str(string)
+    if wrap is True:
+        wrap = 60
+    if wrap is not None:
+        string = '\n'.join(textwrap.wrap(string,wrap))
+    string = string.replace('\\','\\textbackslash ')
+    if spaces:
+        string = string.replace(' ','\\ ')
+    string = string.replace('\n\t','\n\n\\quad ')
+    string = string.replace('\t','\\quad ')
+    string = string.replace('_',r'\_')
+    string = string.replace('{',r'\{')
+    string = string.replace('}',r'\}')
+    string = string.replace('$$',r'ACTUALDOUBLEDOLLAR')
+    string = string.replace(']',r'$]$')
+    string = string.replace('[',r'$[$')
+    string = string.replace('<',r'$<$')
+    string = string.replace('>',r'$>$')
+    string = string.replace('$$',r'')
+    string = string.replace('ACTUALDOUBLEDOLLAR',r'$$')
+    string = string.replace('^',r'\^')
+    string = string.replace('#',r'\#')
+    string = string.replace('%',r'\%')
+    string = string.replace('&',r'\&')
+    string = string.replace('+/-',r'\ensuremath{\pm}')
+    string = string.replace('|',r'$|$')
+    return string
+def copy_maybe_none(input):
+    if input is None:
+        return None
+    else:
+        if isinstance(input, list):
+            return list(map(copy,input))
+        else:
+            return input.copy()

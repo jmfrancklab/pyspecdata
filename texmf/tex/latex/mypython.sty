@@ -1,0 +1,112 @@
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+\ProvidesPackage{mypython}
+\ProcessOptions
+\RequirePackage{currfile}
+\RequirePackage{alphalph}
+%\RequirePackage{datetime}
+%\protected@xdef\thiscompiletime{\today \currenttime}
+\RequirePackage{multirow}%needed for automatic tex tables
+\RequirePackage{array}% needed for automatic tex tables
+\newcommand{\mypycolor}{brown}
+
+%first define some catcode garbage to turn special characters on and off
+\newcommand\makeunderscoreletter{\catcode`\#=11 }
+%\newcommand\makeunderscoresubscript{\catcode`\#=8 }
+\newcommand\makehashletter{\catcode`\#=11 }
+\newcommand\makehashparameter{\catcode`\#=6 }
+\makehashletter
+\def\triplehash{###}
+\makehashparameter
+
+\begingroup\makeunderscoreletter
+\gdef\globalPythonHeader{import os;
+os.environ['pyspecdata_figures']='latex';}% this ignores the newline, so just use semicolons to avoid the trouble
+\endgroup
+%\newcommand\pythonHeader{import mayavi.mlab;from pyspecdata.acert_hdf5 import *}% this ignores the newline, so just use semicolons to avoid the trouble
+\newcommand\pythonHeader{from pylab import *;from pyspecdata import *}% this ignores the newline, so just use semicolons to avoid the trouble
+%\makeunderscoresubscript
+\@ifundefined{autofiguredir}{%needed because it's used by python
+\newcommand{\autofiguredir}{auto_figures}
+}{}
+\renewcommand{\o}[2][]{ {\color{mygreen}{\it #1}} {\color{blue} #2}}
+\newcommand{\fn}[1]{{\color{red} \url{#1} }}
+%{{{Rather than including python.sty, copy and paste it here
+%% derived from code by: Martin R. Ehmsen, ehmsen@imada.sdu.dk.
+
+\newwrite\@out
+\newwrite\@pythonoutput
+\newwrite\@scriptsUsed
+\immediate\openout\@scriptsUsed=./scripts/scriptsUsed.csv
+\newread\myinput % do this only once
+
+%{{{ define \@xpython, which is ended by \end{python}, and it writes out the file up to the end
+%for the following, catcodes are given in https://en.wikibooks.org/wiki/TeX/catcode
+%we make | into \ and [] into {}, and make those into leters
+\begingroup \catcode `|=0 \catcode `[=1
+\catcode`]=2 \catcode `\{=12 \catcode `\}=12
+\catcode`\\=12 |gdef|@xpython#1\end{python}[|immediate|write|@out[|triplehash |space |my@firstline ]|immediate|write|@out[|triplehash |space python code extracted during job |jobname |space from |currfiledir|currfilename |space |triplehash]|immediate|write|@out[|globalPythonHeader]|immediate|write|@out[|triplehash |space start checksum |triplehash]|immediate|write|@out[|pythonHeader]|immediate|write|@out[#1]|end[python]]
+|endgroup % changed by franck to add include file --> very important with the way that latexscript.pyo is written that this is one and only one line!
+%}}}
+
+%{{{ define the \begin{python} commands such that they can have an optional argument or not -- this  is \@python
+\def\python{\kernel@ifnextchar [{\@python}{\@python[]}}
+% I need to make a pythonNOerr for each python argument
+% or, actually, set a NOerr argument below
+%}}}
+
+%{{{ based on fauske hack
+\newcounter{py@codenum}
+\def\@python[#1]{%the one with an argument
+\color{\mypycolor}%
+\stepcounter{py@codenum}%increment the code counter
+\gdef\@pythonargument{#1}% this sets the argument to @pythonargument
+%{{{if it's ``off,'' just print
+\def\mytestargument{off}%for some reason, just using off doesn't work
+\ifx\@pythonargument\mytestargument%
+\def\my@startcommand{\begingroup\color{dbluecolor}\begingroup\tiny\verbatim}%
+\def\my@endcommand{\endverbatim\endgroup\endgroup}%
+%}}}
+%{{{if it's not ``off,'' send to \@xpython
+\else%
+\def\my@startcommand{\@xpython}%
+\def\my@endcommand{}%
+\def\my@firstline{standard run}%
+% {{{ if it's NOerr, add #NOerr to first line of script
+\def\mytestargument{noerr}%
+\ifx\@pythonargument\mytestargument%
+\def\my@firstline{NOerr}%
+\fi%
+% }}}
+\fi%}}}
+\immediate\openout\@out=./scripts/\thepy@codenum.py %opens the output stream -- see TeXbyTopic, chapter 30
+\newlinechar='15 %newline is now 15 -- carriage return, ^M
+\begingroup \catcode`\^^M=12 %I think this reassigns a newline to a letter
+\let\do\@makeother\dospecials\obeyspaces%
+\my@startcommand}% this just writes the header and the contents to the file and may be redefining the whole \@xpython{stuff}\end{python} string with the thing it gives
+
+\def\endpython{% the end of the python environment -- this is where everything is run
+\normalcolor%
+\my@endcommand
+\endgroup
+\immediate\closeout\@out
+%\typeout{about to call python for python latexscript.pyo notebook_script...}%
+\immediate\openin\myinput=scriptname.txt
+\@ifundefined{showscriptnumber}{}{
+{\it the script number is ``\py@num''} %read the filename stored in scriptname.txt
+}
+\def\currentpythonscriptname{pythoncode\alphalph{\value{py@codenum}}}
+\immediate\write\@auxout{\noexpand\gdef\@backslashchar\currentpythonscriptname{\@backslashchar input{scripts/\thepy@codenum.tex}}}%
+%\edef\scriptsUsedresult{\alphalph{\value{py@codenum}},\expandafter\empty\expandafter\empty\thiscompiletime}
+\immediate\write\@scriptsUsed{\thepy@codenum}% I would like to include the date, but can't figure out how to expand it
+\@ifundefined{\currentpythonscriptname}{??PY??%
+\immediate\openout\@pythonoutput=./scripts/\thepy@codenum.tex %opens the output stream -- see TeXbyTopic, chapter 30
+\immediate\write\@pythonoutput{You need to run the python processor}%
+\immediate\closeout\@pythonoutput
+}{%
+%Py output should appear here for \thepy@codenum:
+\csname\currentpythonscriptname\endcsname%
+}
+}
+
+%}}}
+%}}}

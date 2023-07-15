@@ -90,119 +90,49 @@ we are happy to work with you to make it work for your purposes.)
 A public-use version 1.0.0, to be accompanied by useful demonstrations, is planned within a year.
 *(Note that the email currently linked to the PyPI account is infrequently checked --if you have interest in this software, please find J. Franck's website and contact by that email.)*
 
-History/Roadmap
----------------
+`Roadmap`_.
 
-(Current version in bold) 
-
-0.9.5
-    First version distributed on pypi.python.org.
-
-0.9.5.1
-    - 0.9.5.1.1
-      Some important debugging, and also added `pyspecdata.ipy` → executing the following at the top of a jupyter notebook:
-
-        .. code-block:: python
-
-            %pylab inline
-            %load_ext pyspecdata.ipy
-
-      will cause nddata to "display" as labeled plots.
-
-    - 0.9.5.1.2
-      added ability to load power saturation 2D data from Bruker
-
-    - 0.9.5.1.3
-      XEpr data loaded with dBm units rather than W units
-
-      added ``to_ppm`` function for Bruker files
-
-    - 0.9.5.1.4
-      Improved internal logging, and started to remove gratuitous dependencies,
-      ``%load_ext pyspecdata.ipy`` includes
-      ``%pylab inline``, so that only
-
-        .. code-block:: python
-
-            %load_ext pyspecdata.ipy
-
-        is required for jupyter.
-  
-    - 0.9.5.1.6
-
-        - Removed several legacy modules, and added docstrings for the remaining modules.
-
-        - Begin phasing out earlier `CustomError` class.
-
-        - Make `numpy` pretty printing available from the `general_functions` module.
-
-        - Add xelatex support to the notebook wrapper.
-
-        - Start to move file search routines away from demanding a single "data directory."
-
-        - Improved support for 2D Bruker XEPR
-
-        - Made it possible to call standard trig functions with `nddata` as an argument.
-    - 0.9.5.1.7
-        - ILT (Tikhonov regularization) with SVD Kernel compression
-          (1 and 2 dimensions)
-        - ``smoosh`` and ``chunk`` deal with axes properly
-
-0.9.5.3 **Current Version**
-    upgrade to Python 3 and begin to flesh out documentation
-
-0.9.5.4
-    - 0.9.5.4.1
-      - ``to_ppm`` should only be a method of inherited class
-      - 1.5 and 2.5 D ILT
-1.0
-    We are working on four major upgrades relative to the 0.9 sequence:
-
-    - Axes as objects rather than a set of separate attributes of nddata.
-    - Remove dependence on pytables in favor of h5py.
-    - Replace figure lists with “plotting contexts,” which will still
-      enable PDF vs. GUI plotting, but will better integrated with Qt and
-      more object-oriented in nature
-    - Comma-separated indexing to work correctly with all indexing types.
-      (0.9.5 requires sequential brackets rather than comma-separated
-      indexing for some combined range selections.)
-
-1.0.2
-    GUI for setting configuration directories.
-
-    Means for dealing with non-linearly spaced data in image plots
-    (0.9.5 auto-detects log spacing in 1D plots,
-    but pretends that image plots are linear -- we will implement linear spline
-    interpolation algorithm)
-
-1.0.3
-    Bruker DSP phase correction for raw data from newer versions of Topspin that is in sync with the code from nmrglue.
-
-1.0.4
-    Package a make-less copy of lapack to allow a cross-platform build of density matrix propagation routines.
-
-1.1.0
-    Integrate with ACERT NLSL Python package for simulation and fitting of ESR spectra.
-
-1.2.0
-    Implement a version of figure list that can be interfaced with Qt.
+.. _Roadmap: changelog.rst
 
 Installation
 ============
 
-On Windows with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
+**Important note:**
+the package ships Fortran-based extensions that are used to provide fast ILT methods.
+We believe this is a useful feature.
+Unfortunately,
+while the instructions below work for most cases,
+not everyone's system is set up equally well for Fortran compilation.
+If you experience difficulties, please don't hesitate to reach out to us at jmfranck [at] syr.edu;
+we would be happy for the opportunity to test distribution on new platforms!
+In all situations, note that this is a development library that works very well
+in our hands -- we are happy to hear from you and work with you to try to
+broaden its applicability!
+
+On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
 just run
-``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython``
-followed by ``conda install -c msys2 m2w64-toolchain`` (the libpython and m2w64-toolchain are only required if you are a developer).
-Then (if not a developer) install either via pip (`pip install pyspecdata`) or (if you want to be able to develop or modify the code) follow the `installation for developers <#installation-for-developers>`_ below.
+``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython ``
+followed by ``conda install -y m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
+Then follow the `installation for developers <#installation-for-developers>`_ below. We have a package on pip, but it currently lags behind the github repo.
 
-On CentOS7, we've tested
+On **CentOS7**, we've tested
 ``yum install python-matplotlib python-matplotlib-qt4 python-devel sympy h5py python-tables scipy``
-(after running ``yum install epel-release`` to install the EPEL distribution)
+(after running ``yum install epel-release`` to install the EPEL distribution).  Then follow the `installation for developers <#installation-for-developers>`_ below. 
 
-On Mac, your python distribution needs to have a working Fortran compiler, since some of the modules use Fortran.
+On **Debian** (should also work for **Ubuntu**),
+we've tested
+``sudo apt-get install -y python3 python3-matplotlib libpython3.7 python3-dev python3-sympy python3-h5py python3-tables python3-scipy python3-setuptools gfortran pip``.  Then follow the `installation for developers <#installation-for-developers>`_ below. 
 
-More generally,
+On **MacOS**, if you want to install as a developer your python distribution needs to have a working Fortran compiler, since some of the modules use Fortran.
+We have tested ``conda install -c conda-forge fortran-compiler``, followed by
+``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py``.
+However *due to a problem with more recent versions of MacOS/xcode*, you need to modify ``setup.py`` to tell it where to find the system libraries.
+At about line 27, you need to add something like following as a keyword arg for the `Extension` function:
+``library_dirs = ["/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"],``
+(we recommmend just using keyword completion to find a similar directory that exists).
+(Feel free to contact us if you have issues with this or would like to test deployment on pip for a Mac).
+
+**More generally,**
 these instructions are based on the fact that it's *Highly Recommended* 
 that you install the following packages using a good package-management system (conda or linux package manager), rather than relying on `pip` or `setuptools` to install them:
 
@@ -242,6 +172,8 @@ Make sure that this terminates with a successful message, and without any compil
 For reasons that we don't understand, the Fortran compiler can give odd errors, depending on which terminal you are using to install.
 This appears to be Windows' fault, rather than conda's (?).
 We highly recommend trying both the Anaconda prompt, as well as the standard dos prompt (press start: type `cmd`) if you experience errors related to compilation.
+
+If you want to build the documentation, all run: `conda install -y -c conda-forge sphinx_rtd_theme sphinx-gallery`
 
 
 Notes on compilation of compiled extensions

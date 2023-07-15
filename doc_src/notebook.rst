@@ -37,12 +37,24 @@ Requirements
 
 1.  latex packages
 
-    You need to put the texmf tree in a location where it can be found by your latex installation.
+    In order to be able to build a latex notebook where ``\begin{python}...\end{python}`` environments are replaced with the code output,
+    we first need some helper latex style files.
 
-    * Under Windows, add the texmf tree to "miktex settings" under the "roots" tab.
-    * (To do) We should use `this guide
-      <http://ctan.math.washington.edu/tex-archive/info/dtxtut/dtxtut.pdf>`_ or
-      or `this package <https://ctan.org/pkg/makedtx>`_ to package the code and include it here.
+    To make latex files accessible anywhere on your computer, you place them
+    inside a "texmf" directory tree, and then register them with your latex
+    compiler.
+
+    * Note that, similar to a python package, there are strange requirements
+      on the structure and directory names of a texmf directory tree.  You
+      can't just rename the directories as you would like.
+
+    The pyspecdata repo itself now has a subdirectory called ``texmf`` that is a ready-to-go texmf tree for this purpose.
+    So, the ``[LOCATION OF YOUR PYSPECDATA REPO]/texmf``
+
+    How do I register the texmf directory?
+
+    *   Under Windows, you can add the texmf tree graphically by opening "miktex console" from the start menu → "setting" → "directories" and click the plus symbol → navigate to the location of the texmf directory inside your pyspecdata repository
+    *   In general (windows or otherwise) you should be able to use the command ``initexmf --register-root=[LOCATION OF YOUR PYSPECDATA REPO]/texmf``
 
     Once you've done this, the shell command ``kpsewhich mypython.sty``
     should return a result
@@ -56,7 +68,19 @@ Requirements
 
     Also provies the command `pdflatex_notebook_view_wrapper`, which is used to
     determine the output PDF and call an appropriate viewer.
-3.  A standard latex compilation system:
+3.  If pyspecdata is installed, and the texmf directory is registered with your
+    latex compiles (e.g. miktex), you should be able to clone and compile the
+    example notebooks repo from the franck lab.
+
+    You can compile the tex file by typing:
+    ``pdflatex_notebook_wrapper notebook.tex``
+
+    * The first time you do this, miktex might need to install many packages,
+      so that you need to keep hitting enter and then reattempting.
+4.  On Windows, you will want to install `Sumatrapdf <https://www.sumatrapdfreader.org/free-pdf-reader.html>`_
+    (use the installer version, not the portable version)
+    to view your PDFs, since it automatically updates when the PDF is recompiled.
+3.  Get set up with standard latex compilation system:
 
     You can use latexmk (shipped with miktex) with `Sumatrapdf <https://www.sumatrapdfreader.org/free-pdf-reader.html>`_
     (Sumatrapdf allows you to edit the PDF while it's open in Sumatrapdf, while Adobe Acrobat *does not*).

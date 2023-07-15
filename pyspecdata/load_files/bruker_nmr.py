@@ -11,6 +11,8 @@ bruker_data = nddata # should work by inheritance but doesn't
 
 def det_phcorr(v):
     if v['DIGMOD']==1:
+        logger.debug('DIGMOD is 1')
+        # table from Matlab program from C. Hilty
         gdparray=np.array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[179,201,533,709,1097,1449,2225,2929,4481,5889,8993,11809,18017,23649,36065,47329,72161,94689,144353,189409,288737],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[184,219,384,602,852,1668,2292,3368,4616,6768,9264,13568,18560,27392,36992,55040,73856,110336,147584,220928,295040]])
         decimarray=np.array([2,3,4,6,8,12,16,24,32,48,64,96,128,192,256,384,512,768,1024]) # the -1 is because this is an index, and copied from matlab code!!!
         dspfvs = v['DSPFVS']
@@ -30,6 +32,10 @@ def det_phcorr(v):
         else:
             return grpdly
     else:
+        logger.debug('DIGMOD is %d'%v['DIGMOD'])
+        if v['DIGMOD']==3 and 'GRPDLY' in list(v.keys()):
+            logger.debug('GRPDLY is %f'%v['GRPDLY'])
+            return v['GRPDLY']
         return np.array([0])
 def det_rg(a):
     '''determine the actual voltage correction from the value of rg for a bruker NMR file'''
@@ -99,7 +105,6 @@ def series(file_reference, *subpath, **kwargs):
         else:
             new_guess = len(data)/(td2_zf//2)
             print(lsafen("WARNING!, chopping the length of the data to fit the specified td1 of ",td1,"points!\n(specified ",list(zip(mydimnames,mydimsizes)),' td2_zf=%d)'%td2_zf))
-            logger.debug(strm("maybe this works:",size_it_might_be == len(data)))
             data = data[0:size_it_should_be]
             data = bruker_data(data,mydimsizes,mydimnames)
     logger.debug(strm('data straight from nddata =',data))

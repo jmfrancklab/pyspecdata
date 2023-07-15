@@ -1,0 +1,28 @@
+\ProvidesPackage{mybasiccomments}
+\RequirePackage{xcolor}
+\RequirePackage{soul}
+\RequirePackage{pdfcomment}
+
+%\newcommand{\johnmark}[1]{\sethlcolor{green}\hl{#1}\sethlcolor{yellow}}
+\newcommand{\basiccommentuser}[3]{%pass shorthand, full name, color
+\expandafter\newcommand\csname #1mark\endcsname[1]{\hl{##1}}
+\expandafter\newcommand\csname #1scolor\endcsname{#3}
+\expandafter\newcommand\csname #1bubble\endcsname[2][]{\pdfcomment[author={#2},subject={},color=\csname #1scolor\endcsname,hspace=10pt]{##2}{\color{\csname #1scolor\endcsname}\protect\footnote{\color{\csname #1scolor\endcsname}##2}}}
+\expandafter\newcommand\csname #1box\endcsname[2][]{\pdfcomment[author={#2},subject={},color=\csname #1scolor\endcsname,hspace=10pt]{##2}{\color{\csname #1scolor\endcsname}\protect\footnote{\color{\csname #1scolor\endcsname}##2}}}
+\expandafter\newcommand\csname #1\endcsname[2][]{\csname #1mark\endcsname{##1}\csname #1bubble\endcsname{##2}}
+\expandafter\newcommand\csname #1resp\endcsname[1]{{\color{\csname #1scolor\endcsname}##1}}
+}
+\basiccommentuser{john}{John Franck}{blue}
+\basiccommentuser{peter}{Peter Qin}{green}
+\basiccommentuser{yuan}{Yuan Ding}{orange}
+\basiccommentuser{songi}{Songi Han}{red}
+\basiccommentuser{adlin}{J. Adlin Scott}{red}
+
+\newcommand{\ntd}[2][]{\nts{#1}\johnbubble{Need to do: #2}}
+
+% need to show
+\newcommand{\nts}[1]{\xspace{\bf{\color{orange}#1}}}
+% need to do
+\newcommand{\add}[1]{\textit{#1}}
+\newcommand{\command}[1]{{\tt #1}}
+\newcommand{\na}[1]{\begin{tiny}{\it{\color{mygray}#1}}\end{tiny}}

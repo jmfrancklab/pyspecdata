@@ -3,18 +3,11 @@ from numpy import r_
 import numpy as np
 from .ft_shift import _find_index,thinkaboutit_message
 
-def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
+def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,unitary=None,**kwargs):
     r"""This performs an inverse Fourier transform along the axes identified by the string or list of strings `axes`.
 
     It adjusts normalization and units so that the result conforms to
-            :math:`s(t)=t_{dw} \int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df`
-    Where :math:`t_{dw}=\frac{1}{\Delta f}`, is the dwell time (with :math:`\Delta f` the spectral width).
-
-    *Why do we do this?* Note that while the analytical integral this corresponds to is normalized, performing
-    :meth:`~pyspecdata.nddata.ft` followed by :meth:`~pyspecdata.nddata.ift` on a discrete sequence is NOT completely invertible
-    (due to integration of the implied comb function??),
-    and would require division by a factor of :math:`\Delta f` (the spectral width) in order
-    to retrieve the original function
+            :math:`s(t)=\int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df`
 
     **pre-IFT**, we use the axis to cyclically permute :math:`f=0` to the first index
 
@@ -40,8 +33,12 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
         ..note ::
             In the code, this is controlled by `p2_post` (the integral
             :math:`\Delta t` and `p2_post_discrepancy` -- the non-integral.
+    unitary : boolean (None)
+        return a result that is vector-unitary
     """
     if verbose: print("check 1",self.data.dtype)
+    if self.data.dtype == np.float64:
+        self.data = np.complex128(self.data) # everything is done assuming complex data
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
     if (isinstance(axes, str)):
@@ -60,10 +57,26 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
         raise ValueError("shiftornot is obsolete --> use shift instead")
     shift,pad = process_kwargs([
         ('shift',False),
-        ('pad',False)],
+        ('pad',False),
+        ],
         kwargs)
     if not (isinstance(shift, list)):
         shift = [shift]*len(axes)
+    if not (isinstance(unitary, list)):
+        unitary = [unitary]*len(axes)
+    for j in range(0,len(axes)):
+        #print("called IFT on",axes[j],", unitary",unitary[j],"and property",
+        #        self.get_ft_prop(axes[j],"unitary"))
+        if self.get_ft_prop(axes[j],"unitary") is None: # has not been called
+            if unitary[j] is None:
+                unitary[j]=False
+            self.set_ft_prop(axes[j],"unitary",unitary[j])
+        else:
+            if unitary[j] is None:
+                unitary[j] = self.get_ft_prop(axes[j],"unitary")
+            else:
+                raise ValueError("Call ft or ift with unitary only the first time, and it will be set thereafter.\nOR if you really want to override mid-way use self.set_ft_prop(axisname,\"unitary\",True/False) before calling ft or ift")
+        #print("for",axes[j],"set to",unitary[j])
     #}}}
     for j in range(0,len(axes)):
         do_post_shift = False
@@ -95,7 +108,7 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
                 "dimlabels is: ",self.dimlabels))
         padded_length = self.data.shape[thisaxis]
         if pad is True:
-            padded_length = int(2**(ceil(log2(padded_length))))
+            padded_length = int(2**(np.ceil(np.log2(padded_length))))
         elif pad:
             padded_length = pad
         u = self.getaxis(axes[j]) # here, u is frequency
@@ -108,8 +121,10 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
         #       I calculate the post-discrepancy here
         #{{{ need to calculate du and all checks here so I can calculate new u
         du = check_ascending_axis(u,tolerance,"In order to perform FT or IFT")
+        self.set_ft_prop(axes[j],['df'],du)
         #}}}
         dv = np.double(1) / du / np.double(padded_length) # so padded length gives the SW
+        self.set_ft_prop(axes[j],['dt'],dv)
         v = r_[0:padded_length] * dv # v is the name of the *new* axis.  Note
         #   that we stop one index before the SW, which is what we want
         desired_startpoint = self.get_ft_prop(axes[j],['start','time'])
@@ -169,6 +184,7 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
             newdata[thisaxis] = padded_length
             targetslice = [slice(None,None,None)] * len(newdata)
             targetslice[thisaxis] = slice(None,self.data.shape[thisaxis])
+            targetslice = tuple(targetslice)
             newdata = np.zeros(newdata,dtype = self.data.dtype)
             newdata[targetslice] = self.data
             self.data = newdata
@@ -200,8 +216,11 @@ def ift(self,axes,n=False,tolerance = 1e-5,verbose = False,**kwargs):
             #   phase-shift above
         #}}}
         #{{{ adjust the normalization appropriately
-        self.data *= padded_length * du # here, the algorithm divides by
-        #       padded_length, so for integration, we need to not do that
+        if unitary[j]:
+            self.data *= np.sqrt(padded_length)
+        else:
+            self.data *= padded_length * du # here, the algorithm divides by
+            #       padded_length, so for integration, we need to not do that
         #}}}
         #{{{ finally, if "p2_pre" for the pre-shift didn't correspond exactly to
         #       zero, then the pre-ift data was shifted, and I must reflect

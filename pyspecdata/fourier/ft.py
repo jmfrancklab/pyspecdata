@@ -3,15 +3,11 @@ from numpy import r_
 import numpy as np
 from .ft_shift import _find_index,thinkaboutit_message
 
-def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
+def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,unitary=None,**kwargs):
     r"""This performs a Fourier transform along the axes identified by the string or list of strings `axes`.
 
     It adjusts normalization and units so that the result conforms to
             :math:`\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt`
-
-    Note that, as noted in the :meth:`~pyspecdata.fourier.ift.ift` documentation,
-    the inverse transform doesn't correspond to the equivalent
-    expression for the IFT.
 
     **pre-FT**, we use the axis to cyclically permute :math:`t=0` to the first index
 
@@ -33,7 +29,11 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
         sampling scope, and it's severely aliased over.
     cosine : boolean
         yields a sum of the fft and ifft, for a cosine transform
+    unitary : boolean (None)
+        return a result that is vector-unitary
     """
+    if self.data.dtype == np.float64:
+        self.data = np.complex128(self.data) # everything is done assuming complex data
     #{{{ process arguments
     axes = self._possibly_one_axis(axes)
     if (isinstance(axes, str)):
@@ -59,6 +59,21 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
         kwargs)
     if not (isinstance(shift, list)):
         shift = [shift]*len(axes)
+    if not (isinstance(unitary, list)):
+        unitary = [unitary]*len(axes)
+    for j in range(0,len(axes)):
+        #print("called FT on",axes[j],", unitary",unitary[j],"and property",
+        #        self.get_ft_prop(axes[j],"unitary"))
+        if self.get_ft_prop(axes[j],"unitary") is None: # has not been called
+            if unitary[j] is None:
+                unitary[j]=False
+            self.set_ft_prop(axes[j],"unitary",unitary[j])
+        else:
+            if unitary[j] is None:
+                unitary[j] = self.get_ft_prop(axes[j],"unitary")
+            else:
+                raise ValueError("Call ft or ift with unitary only the first time, and it will be set thereafter.\nOR if you really want to override mid-way use self.set_ft_prop(axisname,\"unitary\",True/False) before calling ft or ift")
+        #print("for",axes[j],"set to",unitary[j])
     #}}}
     for j in range(0,len(axes)):
         do_post_shift = False
@@ -90,7 +105,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
                 "dimlabels is: ",self.dimlabels))
         padded_length = self.data.shape[thisaxis]
         if pad is True:
-            padded_length = int(2**(np.ceil(log2(padded_length))))
+            padded_length = int(2**(np.ceil(np.log2(padded_length))))
         elif pad:
             padded_length = pad
         u = self.getaxis(axes[j]) # here, u is time
@@ -103,8 +118,10 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
         #       I calculate the post-discrepancy here
         #{{{ need to calculate du and all checks here so I can calculate new u
         du = check_ascending_axis(u,tolerance,"In order to perform FT or IFT")
+        self.set_ft_prop(axes[j],['dt'],du)
         #}}}
         dv = np.double(1) / du / np.double(padded_length) # so padded length gives the SW
+        self.set_ft_prop(axes[j],['df'],dv)
         v = r_[0:padded_length] * dv # v is the name of the *new* axis.  Note
         #   that we stop one index before the SW, which is what we want
         desired_startpoint = self.get_ft_prop(axes[j],['start','freq'])
@@ -168,6 +185,7 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
             newdata[thisaxis] = padded_length
             targetslice = [slice(None,None,None)] * len(newdata)
             targetslice[thisaxis] = slice(None,self.data.shape[thisaxis])
+            targetslice = tuple(targetslice)
             newdata = np.zeros(newdata,dtype = self.data.dtype)
             newdata[targetslice] = self.data
             self.data = newdata
@@ -205,14 +223,18 @@ def ft(self,axes,tolerance = 1e-5,cosine=False,verbose = False,**kwargs):
             #   phase-shift above
         #}}}
         #{{{ adjust the normalization appropriately
-        self.data *= du # this gives the units in the integral noted in the docstring
+        if unitary[j]:
+            self.data /= np.sqrt(padded_length)
+        else:
+            self.data *= du # this gives the units in the integral noted in the docstring
         #}}}
         #{{{ finally, if "p2_pre" for the pre-shift didn't correspond exactly to
         #       zero, then the pre-ft data was shifted, and I must reflect
         #       that by performing a post-ft phase shift
         if p2_pre_discrepancy is not None:
-            assert abs(p2_pre_discrepancy)<abs(du),("I expect the discrepancy to be"
-                    " smaller than du ({:0.2f}), but it's {:0.2f} -- what's going"
+            assert abs(p2_pre_discrepancy)<abs(du) or np.isclose(
+                    abs(p2_pre_discrepancy),abs(du)),("I expect the discrepancy to be"
+                    " smaller than du ({:0.5g}), but it's {:0.5g} -- what's going"
                     " on??").format(du,p2_pre_discrepancy)
             result = self * self.fromaxis(axes[j],
                     lambda f: np.exp(1j*2*pi*f*p2_pre_discrepancy))

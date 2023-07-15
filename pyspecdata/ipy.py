@@ -30,11 +30,11 @@ from sympy.interactive import printing
 printing.init_printing(use_latex=True,
                        wrap_line=False,
                        num_columns=10000)
+import matplotlib.pyplot as plt
 if not inside_sphinx():
     from .core import image as pyspec_image
     from .core import plot as pyspec_plot
     from .core import nddata as pyspec_nddata
-    from .core import gca
 
 import re
 from IPython.display import Math
@@ -146,7 +146,7 @@ def load_ipython_extension(ip):
         else:
             pyspec_image(arg_copy)
             if arg_copy.name() is not None:
-                gca().set_title(arg_copy.name())
+                plt.gca().set_title(arg_copy.name())
     plain_formatters.for_type(numpy.ndarray,_print_plain_override_for_ndarray)
     plain_formatters.for_type(pyspec_nddata,_print_plain_override_for_nddata)
     ip.ex("fancy_legend = lambda: legend(**dict(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.))")

@@ -1,0 +1,115 @@
+
+
+.. _sphx_glr_auto_examples_text_only:
+
+Text-Only Examples
+==================
+
+This directory (not plotted in docs) includes some text-only examples.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="a demonstration of the logging functionality -- output is logged to ~/pyspecdata.log (or the sa...">
+
+.. only:: html
+
+  .. image:: /auto_examples/text_only/images/thumb/sphx_glr_log_test_thumb.png
+    :alt: Logging Functionality
+
+  :ref:`sphx_glr_auto_examples_text_only_log_test.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Logging Functionality</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="demonstrate automatic labeling of phase cycling (coherence) axes">
+
+.. only:: html
+
+  .. image:: /auto_examples/text_only/images/thumb/sphx_glr_phase_cycling_labels_thumb.png
+    :alt: phase cycling labels
+
+  :ref:`sphx_glr_auto_examples_text_only_phase_cycling_labels.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">phase cycling labels</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Trying to load an HDF5 file without an expno generates an error with a list of possible node na...">
+
+.. only:: html
+
+  .. image:: /auto_examples/text_only/images/thumb/sphx_glr_hdf5_error_thumb.png
+    :alt: HDF5 error message
+
+  :ref:`sphx_glr_auto_examples_text_only_hdf5_error.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">HDF5 error message</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="an example of saving nddata to hdf5 files, which preserves all of the nddata information flawle...">
+
+.. only:: html
+
+  .. image:: /auto_examples/text_only/images/thumb/sphx_glr_save_hdf_thumb.png
+    :alt: Saving HDF5 Files
+
+  :ref:`sphx_glr_auto_examples_text_only_save_hdf.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Saving HDF5 Files</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Basic Units">
+
+.. only:: html
+
+  .. image:: /auto_examples/text_only/images/thumb/sphx_glr_basic_units_thumb.png
+    :alt: Basic Units
+
+  :ref:`sphx_glr_auto_examples_text_only_basic_units.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Basic Units</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/text_only/log_test
+   /auto_examples/text_only/phase_cycling_labels
+   /auto_examples/text_only/hdf5_error
+   /auto_examples/text_only/save_hdf
+   /auto_examples/text_only/basic_units
+

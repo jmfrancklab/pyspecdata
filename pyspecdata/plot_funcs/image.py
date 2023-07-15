@@ -3,14 +3,15 @@ from numpy import r_,c_,ix_,nan
 import numpy as np
 from ..ndshape import ndshape_base as ndshape
 from pylab import gca,sca,imshow,xlabel,ylabel,title,colorbar,setp
-def image(A,x=[],y=[],**kwargs):
+import logging
+def image(A,x=[],y=[],allow_nonuniform=True,**kwargs):
     r"Please don't call image directly anymore -- use the image method of figurelist"
     x_inverted = False
     A.squeeze()# drop any singleton dimensions, which cause problems
     #{{{ pull out kwargs for imagehsv
     imagehsvkwargs = {}
     for k,v in list(kwargs.items()):
-        if k in ['black','logscale']:
+        if k in ['black','logscale','scaling']:
             imagehsvkwargs[k] = kwargs.pop(k)
     #}}}
     spacing,ax,x_first,origin,renumber = process_kwargs([('spacing',1),
@@ -40,13 +41,17 @@ def image(A,x=[],y=[],**kwargs):
             try:
                 check_ascending_axis(A.getaxis(thisaxis), allow_descending=True)
             except:
-                raise ValueError("You are not allowed to use image on data that"
-                " doesn't have a uniformly spaced axis -- it is likely a"
-                " misrepresentation of the data you are looking at."
-                " For example, if you are looking at NMR data with a set of"
-                " variable delays that are unevenly spaced, relabel this axis"
-                " by index number --> .C.setaxis('%s','#').set_units('%s','scan"
-                " #').\nThen you have an accurate representation of your data"%(2*(thisaxis,)))
+                if allow_nonuniform:
+                    logging.debug("Automatically changed to numbered axis along %s"%thisaxis)
+                    A.setaxis(thisaxis,'#').set_units(thisaxis,"#")
+                else:
+                    raise ValueError("You are not allowed to use image on data that"
+                    " doesn't have a uniformly spaced axis -- it is likely a"
+                    " misrepresentation of the data you are looking at."
+                    " For example, if you are looking at NMR data with a set of"
+                    " variable delays that are unevenly spaced, relabel this axis"
+                    " by index number --> .C.setaxis('%s','#').set_units('%s','scan"
+                    " #').\nThen you have an accurate representation of your data"%(2*(thisaxis,)))
         setlabels = True
         templabels = list(A.dimlabels)
         if A.get_prop('x_inverted'):
@@ -150,15 +155,21 @@ def image(A,x=[],y=[],**kwargs):
         ax.set_xlim((max(these_xlims),min(these_xlims)))
     return retval
 
-def imagehsv(A,logscale = False,black = False):
+def imagehsv(A, logscale=False, black=False, scaling=None):
     "This provides the HSV mapping used to plot complex number"
     # compare to http://www.rapidtables.com/convert/color/hsv-to-rgb.htm
+    A = A.copy()
     n = 256
     mask = np.isnan(A)
     A[mask] = 0
+    if scaling is None:
+        A /= abs(A).max()
+    else:
+        A /= scaling
+        mask |= abs(A) > 1.0 + 1e-7
+        A[mask] = 0
     mask = mask.reshape(-1,1)
     intensity = abs(A).reshape(-1,1)
-    intensity /= abs(A).max()
     if logscale:
         raise ValueError("logscale is deprecated, use the cropped_log function instead")
     #theta = (n-1.)*np.mod(np.angle(A)/pi/2.0,1)# angle in 255*cycles
