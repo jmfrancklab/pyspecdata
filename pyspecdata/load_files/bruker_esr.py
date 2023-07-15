@@ -3,6 +3,7 @@ from ..general_functions import strm
 from ..datadir import rclone_search
 import numpy as np
 import re
+import os
 from io import StringIO
 logger = logging.getLogger('pyspecdata.load_files.bruker_esr')
 b0_texstr = r'$B_0$'

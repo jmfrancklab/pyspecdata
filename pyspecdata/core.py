@@ -32,6 +32,7 @@ from sys import exc_info
 from os import listdir,environ
 from os.path import sep as path_sep
 import time
+import logging
 # {{{ determine the figure style, and load the appropriate modules
 _figure_mode_setting = pyspec_config.get_setting('figures', section='mode', environ='pyspecdata_figures')
 if _figure_mode_setting is None:
