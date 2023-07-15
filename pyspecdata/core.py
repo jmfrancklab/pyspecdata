@@ -104,6 +104,7 @@ from . import plot_funcs as this_plotting
 from .general_functions import *
 from .ndshape import ndshape_base
 from .fourier import nddata_ft
+from .error_utils import CustomError, emptytest, explain_error, maprep
 #rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
 rc('image',aspect='auto',interpolation='nearest')
 #rcParams['text.usetex'] = True
@@ -778,21 +779,6 @@ def unmake_ndarray(array_to_conv,name_forprint = 'unknown'):
         else:
             logger.debug(strm(name_forprint,"=",typeofall,"are not all numpy string"))
             retval = array_to_conv
-def explain_error(e):
-    '''Allows you to wrap existing errors with more explanation
-
-    For example:
-
-    >    except BaseException  as e:
-    >        raise IndexError("I can't find the node "+pathstring+explain_error(e))
-    >                + '\n'.join(['>\t'+j for j in str(e).split('\n')]))# this indents
-    '''
-    exc_type,exc_obj,exc_tb = exc_info()
-    #code_loc = strm(os.path.relpath(exc_tb.tb_frame.f_code.co_filename,os.getcwd()), 'line', exc_tb.tb_lineno)
-    code_loc = strm(exc_tb.tb_frame.f_code.co_filename, 'line', exc_tb.tb_lineno)
-    return ('\n> Original error (%s -- %s):\n'%(exc_type,code_loc)
-            + '\n'.join(['>\t'+j
-                for j in str(e).split('\n')]))# this indents
         #}}}
     else:
         logger.debug(strm(name_forprint,"=",type(array_to_conv),"is not a numpy string or record np.array"))
@@ -800,22 +786,7 @@ def explain_error(e):
     return retval
 #}}}
 #}}}
-def emptytest(x): # test is it is one of various forms of empty
-    if x is None: return True
-    if np.size(x) == 0: return True
-    if np.size(x) == 1 and x == None: return True
-    return False
 #{{{ errors
-class CustomError(Exception):
-    def __init__(self, *value, **kwargs):
-        raise NotImplementedError("You should get rid of CustomError and use explain_error instead")
-        return
-def maprep(*mylist):
-    mylist = list(mylist)
-    for j in range(0,len(mylist)):
-        if not isinstance(mylist[j], str):
-            mylist[j] = mylist[j].__repr__()
-    return ' '.join(mylist)
 #{{{ HDF5 functions
 #{{{ helper function for HDF5 search
 def gensearch(labelname,format = '%0.3f',value = None,precision = None):
