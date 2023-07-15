@@ -103,7 +103,7 @@ from . import nnls as this_nnls
 from . import plot_funcs as this_plotting
 from .general_functions import CustomError, emptytest, balance_clims, process_kwargs, autostringconvert, check_ascending_axis, level_str_to_int, init_logging, strm, reformat_exp, complex_str, render_matrix, redim_F_to_C, redim_C_to_F, fname_makenice, explain_error, lsafen, lsafe, copy_maybe_none, whereblocks, box_muller, dp, fa, ndgrid, pinvr, sech, myfilter
 from .hdf_utils import gensearch, h5searchstring, h5loaddict, h5child, h5remrows, h5addrow, h5table, h5nodebypath, h5attachattributes, h5inlist, h5join
-from .mpl_utils import gridandtick, gridon, othergridandtick, autolegend, autopad_figure, expand_x, expand_y, plot_label_points, addlabels, plot_color_counter, contour_plot, plot_updown, nextfigure, figlistret, figlistini, figlistini_old, text_on_plot, spectrogram, colormap
+from .mpl_utils import gridandtick, gridon, othergridandtick, autolegend, autopad_figure, expand_x, expand_y, plot_label_points, addlabels, plot_color_counter, contour_plot, plot_updown, nextfigure, figlistret, figlistini, figlistini_old, text_on_plot, spectrogram, colormap, subplot_dim
 from .ndshape import ndshape_base
 from .fourier import nddata_ft
 #rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
@@ -5785,39 +5785,6 @@ class ndshape (ndshape_base):
             retval.labels(self.dimlabels,[np.double(r_[0:x]) for x in self.shape])
         return retval
 
-#{{{subplot_dim
-class subplot_dim():
-    def __init__(self,firstdim,seconddim):
-        self.num = r_[firstdim,seconddim,0]
-    def set(self,args,x='',g=True,y='',t='',a=''):
-        if isinstance(args, int):
-            number = args
-            ax = subplot(*tuple(self.num+r_[0,0,number]))
-            xlabel(x)
-            ylabel(y)
-            plt.title(t)
-            plt.grid(g)
-        elif (isinstance(args, tuple)) and (len(args) == 3):
-            # the second value passed is 
-            whichsmall = args[2]
-            break_into = args[1]
-            number = args[0]
-            mydims = self.num*r_[1,break_into,1]+r_[
-                    0,0,break_into*(number-1)+whichsmall]
-            try:
-                ax = subplot(*tuple(mydims))
-            except:
-                print('failed trying subplots: ', mydims)
-                raise
-            xlabel(x)
-            ylabel(y)
-            plt.title(t)
-            plt.grid(g)
-        else:
-            print("problem, need to pass either 1 or 3 arguments to set")
-            print('type of args: ',type(args))
-        return ax
-#}}}
 image = this_plotting.image.image
 
 #{{{ fitdata
