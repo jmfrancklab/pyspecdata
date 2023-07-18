@@ -3686,6 +3686,7 @@ class nddata (object):
 
         .. literalinclude:: ../examples/matrix_mult.py
         """
+        time_dotstart = time.time()
         if hasattr(self,'_matmul_along'):
             dot_dim_self = self._matmul_along
             if hasattr(arg,'_matmul_along'):
@@ -3809,7 +3810,7 @@ class nddata (object):
         # }}}
         logger.debug(strm("raw nddata about to be multiplied are",
             self_formult_data.shape,arg_formult_data.shape))
-        time_matmul = time.time()
+        time_matmulstart = time.time()
         self.data = matmul(self_formult_data,arg_formult_data)
         # {{{ remove singleton dimensions that we added
         if 'XXX_ADDED_XXX' in output_shape:
@@ -3818,7 +3819,7 @@ class nddata (object):
             self.data = self.data[tuple(this_slice)]
             output_shape = [j for j in output_shape if j!= 'XXX_ADDED_XXX']
         # }}}
-        logger.debug(strm("matmul took",time.time()-time_matmul))
+        time_matmulfinish = time.time()
         self.dimlabels = output_shape
         # {{{ use the dictionaries to reconstruct the metadata
         self.axis_coords = []
@@ -3833,6 +3834,8 @@ class nddata (object):
         # }}}
         logger.debug(strm("self.data.shape",self.data.shape))
         logger.debug(strm("ndshape",ndshape(self)))
+        time_dotfinish = time.time()
+        logger.debug(f"initial took {(time_matmulstart-time_dotstart)*1e6:0.2f} μs, matmul {(time_matmulfinish-time_matmulstart)*1e6:0.2f} μs, finish {(time_dotfinish-time_matmulfinish)*1e6:0.2f} μs ")
         return self
     def __add__(self,arg):
         if isscalar(arg):
@@ -3925,6 +3928,7 @@ class nddata (object):
     #@profile
     def __matmul__(self,arg):
         assert type(arg) is nddata, "currently matrix multiplication only allowed if both are nddata"
+        logger.debug("about to call dot")
         return self.C.dot(arg)
     def __mul__(self,arg):
         #{{{ do scalar multiplication
