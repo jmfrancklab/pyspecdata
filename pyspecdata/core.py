@@ -95,6 +95,7 @@ from .general_functions import CustomError, emptytest, balance_clims, process_kw
 from .hdf_utils import gensearch, h5searchstring, h5loaddict, h5child, h5remrows, h5addrow, h5table, h5nodebypath, h5attachattributes, h5inlist, h5join
 from .mpl_utils import gridandtick, gridon, othergridandtick, autolegend, autopad_figure, expand_x, expand_y, plot_label_points, addlabels, plot_color_counter, contour_plot, plot_updown, nextfigure, figlistret, figlistini, figlistini_old, text_on_plot, spectrogram, colormap
 from .ndshape import ndshape_base
+import logging
 #rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
 rc('image',aspect='auto',interpolation='nearest')
 #rcParams['text.usetex'] = True

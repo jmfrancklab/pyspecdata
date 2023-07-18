@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import r_, pi
 import matplotlib.pylab as plt
 #{{{ old grid and tick
 def gridandtick(ax,rotation=(0,0),precision=(2,2),
