@@ -155,7 +155,7 @@ def init_logging(level=logging.DEBUG, stdout_level=logging.INFO, filename='pyspe
     logger = logging.getLogger()
     logger.setLevel(min_level) # even if I set the handler level, it won't
     #                        print w/out this
-    file_handler = logging.FileHandler(log_filename, mode='a')
+    file_handler = logging.FileHandler(log_filename, mode='a', encoding='utf-8')
     stdout_handler = logging.StreamHandler(sys.stdout)
     # can set levels independently with:
     stdout_handler.setLevel(stdout_level)
