@@ -23,6 +23,7 @@ from time import mktime
 from PIL import Image
 import numpy as np
 import re
+import sys
 
 golden_ratio = (1.0 + np.sqrt(5))/2.0
 

@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import r_, pi
 import matplotlib.pylab as plt
+import matplotlib.transforms as mtransforms
 #{{{ old grid and tick
 def gridandtick(ax,rotation=(0,0),precision=(2,2),
         labelstring=('',''),gridcolor=r_[0,0,0],
@@ -203,7 +204,7 @@ def autopad_figure(pad = 0.2,centered = False,figname = 'unknown'):
             labellist = [x[1] for x in labelsets if x[0] is axisn]
             for labels in labellist:
                 for label in labels:
-                    if isinstance(label, Line2D):
+                    if isinstance(label, plt.Line2D):
                         pass # just rely on the pad
                         #if np.any(map(lambda x: x == label.get_transform(),[ax.transData,ax.transAxes,fig.transFigure,None])):
                         #    print 'found it'
