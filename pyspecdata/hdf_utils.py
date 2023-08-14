@@ -1,5 +1,7 @@
 import tables
 import numpy as np
+import logging
+logger = logging.getLogger('pyspecdata.hdf_utils')
 
 #{{{ HDF5 functions
 #{{{ helper function for HDF5 search
