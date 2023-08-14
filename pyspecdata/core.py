@@ -1692,6 +1692,15 @@ class nddata (object):
             raise TypeError(".set_units() takes data units or 'axis' and axis units")
         return self
     def human_units(self):
+        """This function attempts to choose "human-readable" units for axes or
+        *y*-values of the data.
+        (Terminology stolen from "human readable" file
+        sizes when running shell commands.)
+        This means that it looks at the axis or at the
+        *y*-values and converts *e.g.* seconds to milliseconds where
+        appropriate, also multiplying or dividing the data in an appropriate
+        way.
+        """
         prev_label = self.get_units()
         # -- rescaling for y axis seems screwed up, so
         # just skip it

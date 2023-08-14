@@ -4,6 +4,7 @@ from ..datadir import rclone_search
 import numpy as np
 import re
 from io import StringIO
+import os
 logger = logging.getLogger('pyspecdata.load_files.bruker_esr')
 b0_texstr = r'$B_0$'
 def xepr(filename, exp_type=None, dimname='', verbose=False):
