@@ -110,9 +110,7 @@ in our hands -- we are happy to hear from you and work with you to try to
 broaden its applicability!
 
 On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
-just run
-``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython``
-followed by ``conda install -y m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
+just run ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython`` followed by ``conda install -y m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
 Then follow the `installation for developers <#installation-for-developers>`_ below. We have a package on pip, but it currently lags behind the github repo.
 
 On **CentOS7**, we've tested
