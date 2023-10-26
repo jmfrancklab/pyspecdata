@@ -1,6 +1,11 @@
 import tables
 import numpy as np
+from os import listdir
+import os
 import logging
+from .general_functions import strm, lsafen
+from .datadir import log_fname, unknown_exp_type_name
+from .dict_utils import make_ndarray, unmake_ndarray
 logger = logging.getLogger('pyspecdata.hdf_utils')
 
 #{{{ HDF5 functions

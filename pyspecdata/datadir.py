@@ -173,6 +173,12 @@ def proc_data_target_dir(exp_type):
 def getDATADIR(*args,**kwargs):
     r'''Used to find a directory containing data in a way that works
     seamlessly across different computers (and operating systems).
+
+    **This is not intended as a user-level function** use 
+    :func:`~pyspecdata.find_file`
+    or
+    :func:`~pyspecdata.search_filename` (especially with the `unique` parameter set to true) instead!
+
     Supports the case where data is processed both on a laboratory
     computer and (*e.g.* after transferring via ssh or a syncing client) on a
     user's laptop.
