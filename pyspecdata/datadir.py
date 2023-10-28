@@ -371,6 +371,7 @@ def rclone_search(fname,exp_type,dirname):
                 remotelocation,
                 # dirname below needs to be replaced with path relative to current directory
                 os.path.normpath(os.path.join(dirname)).replace('\\','\\\\')))
+    cmd = cmd.replace("'",'"')
     logger.info(f"I'm about to run\n{cmd}")
     os.system(cmd)
     logger.info(f"... done")
