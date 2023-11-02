@@ -22,7 +22,7 @@ from .general_functions import inside_sphinx
 if inside_sphinx():
     pass # called from sphinx
 else:
-    get_ipython().magic('pylab inline')
+    get_ipython().magic('matplotlib inline')
 # }}}
 import numpy
 import sympy
@@ -38,6 +38,55 @@ if not inside_sphinx():
 
 import re
 from IPython.display import Math
+class mat_formatter (object):
+    zeros_re = re.compile('(?<![.0-9])0(?![.0-9])')
+    def __init__(self, stuff):
+        self.mathmode = True
+        if type(stuff) is str:
+            self.markdown_content = stuff
+        elif type(stuff) is numpy.ndarray:
+            self.markdown_content = self.mat_formatter(stuff)
+    def complex_to_polar(self,a):
+        if sympy.nsimplify(a)==0:
+            return 0
+        else:
+            def custom_simplify(expr, int_thresh=300):
+                simplified_expr = sympy.nsimplify(expr, tolerance=1e-5)
+                if any([(node.p > int_thresh or node.q > int_thresh) if isinstance(node,sympy.Rational) else node > int_thresh for node in simplified_expr.atoms() if isinstance(node, sympy.Rational) or isinstance(node,sympy.Integer)]):
+                    return expr.evalf(n=4)
+                else:
+                    return simplified_expr
+            a_r = custom_simplify(sympy.Abs(a))
+            a_ph = custom_simplify(sympy.arg(a)/numpy.pi)
+            return custom_simplify(a_r)*sympy.exp(sympy.I*a_ph*sympy.pi)
+    def mat_formatter(self,a):
+        "This accepts an array, and outputs the sympy.latex representation of the matrix"
+        retval = sympy.latex(sympy.Matrix(a).applyfunc(self.complex_to_polar))
+        #return self.zeros_re.sub('\\\\quad\\\\quad',retval)
+        return self.zeros_re.sub(r'\\textcolor{lightgrey}{0}',retval)
+    def __add__(self,arg):
+        if type(arg) is str:
+            if ' ' in arg and '\\' not in arg:
+                self.markdown_content += '$'
+                self.mathmode = False
+                self.markdown_content += ' '+arg
+            else:
+                self.markdown_content += arg
+        else:
+            if not self.mathmode:
+                self.markdown_content += ' $'
+                self.mathmode = True
+            if (type(arg) is float) or (type(arg) is complex):
+                self.markdown_content += str(arg.markdown_content)
+            elif (type(arg) is numpy.ndarray):
+                self.markdown_content += self.mat_formatter(arg)
+            elif isinstance(arg,type(self)):
+                self.markdown_content += arg.markdown_content
+            else:
+                raise ValueError("can't figure out sensible type of argument")
+        return self
+    def _repr_markdown_(self):
+        return '$'+self.markdown_content+'$'
 def load_ipython_extension(ip):
     list(ip.display_formatter.formatters.keys())
 
@@ -68,26 +117,6 @@ def load_ipython_extension(ip):
         if len(retval)>1 and retval[1][0] not in '+-':
             retval[1] = '+'+retval[1]
         return ''.join(retval)
-    def render_matrix(arg):
-        "return latex string representing 2D matrix"
-        import IPython.display as d
-        try:
-            math_str = r'\begin{bmatrix}'
-            math_str += '\n'
-            if hasattr(arg.dtype,'fields') and arg.dtype.fields is not None:
-                math_str += '\\\\\n'.join([' & '.join([', '.join([r'\text{'+f[0]+r'}\!=\!\text{"'+elem[f[0]]+'"}'
-                                                                  if isinstance(elem[f[0]],str)
-                                                                  else r'\text{%s}\!=\!%g'%(f[0],elem[f[0]])
-                                                                  for f in arg.dtype.descr])# f[0] is the name (vs. size)
-                                                       for elem in arg[k,:]]) for k in range(arg.shape[0])])
-            else:
-                math_str += '\\\\\n'.join([' & '.join([complex_str(j) for j in arg[k,:]]) for k in range(arg.shape[0])])
-            math_str += '\n'
-            math_str += r'\end{bmatrix}'
-        except:
-            math_str = "\\text{(unavailable pretty print)}"
-            print(repr(arg))
-        return math_str
     def _print_plain_override_for_ndarray(arg,p,cycle):
         """caller for pretty, for use in IPython 0.11"""
         import IPython.display as d
@@ -100,22 +129,21 @@ def load_ipython_extension(ip):
                 print("Matrix is too large ("+'x'.join([str(j) for j in arg.shape])+") -- using text numpy print")
                 print(arg)
             elif len(arg.shape) == 2:
-                math_str = render_matrix(arg)
                 d.display(d.Markdown("**numpy 2D "+mkd+"** represented as a matrix:"))
-                d.display(d.Math(math_str))
+                d.display(mat_formatter(arg))
             elif len(arg.shape) == 1:
                 d.display(d.Markdown("**numpy 1D "+mkd+"** represented as a row vector:"))
-                d.display(d.Math(render_matrix(arg.reshape(1,-1))))
+                d.display(mat_formatter(arg.reshape(1,-1)))
             elif len(arg.shape) == 3:
                 d.display(d.Markdown("***numpy 3D "+mkd+",*** represented as a series of matrices:"))
-                math_str = r'\begin{bmatrix}'+'\n'
+                mat_inst = mat_formatter(r'\begin{bmatrix}')+'\n'
                 for j in range(arg.shape[0]):
-                    math_str += '\\text{Select slice with outermost dimension set to %d}'%j
-                    math_str += r'\\' + '\n'
-                    math_str += render_matrix(arg[j,:,:])
-                    math_str += r'\\' + '\n'
-                math_str += r'\end{bmatrix}'+'\n'
-                d.display(d.Math(math_str))
+                    mat_inst += '\\text{Select slice with outermost dimension set to %d}'%j
+                    mat_inst += r'\\' + '\n'
+                    mat_inst += arg[j,:,:]
+                    mat_inst += r'\\' + '\n'
+                mat_inst += r'\end{bmatrix}'+'\n'
+                d.display(mat_inst)
             elif len(arg.shape) > 3:
                 d.display(d.Markdown("***numpy ND array*** $N>3$ dimensions ($"+r'\times'.join(map(str,arg.shape))+"$), so I'm just giving the text representation:"))
                 d.display(str(arg))
@@ -150,6 +178,9 @@ def load_ipython_extension(ip):
     plain_formatters.for_type(numpy.ndarray,_print_plain_override_for_ndarray)
     plain_formatters.for_type(pyspec_nddata,_print_plain_override_for_nddata)
     ip.ex("fancy_legend = lambda: legend(**dict(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.))")
+    ip.ex("from pylab import *")
     ip.ex("from pyspecdata import *")
+    ip.ex("from pyspecdata.ipy import mat_formatter")
 def unload_ipython_extension(ip):
     print("I will not not go gentle into that good night!!!")
+
