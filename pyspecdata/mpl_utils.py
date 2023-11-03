@@ -1,5 +1,6 @@
 import numpy as np
 from numpy import r_, pi
+from matplotlib import ticker
 import matplotlib.pylab as plt
 import matplotlib.transforms as mtransforms
 #{{{ old grid and tick
@@ -8,8 +9,8 @@ def gridandtick(ax,rotation=(0,0),precision=(2,2),
         formatonly = False,fixed_y_locator = None,
         use_grid = True,
         spines = None,y = True):
-    defaultMajorLocator = lambda: mticker.MaxNLocator(min_n_ticks=4, steps=[1,2,5,10])
-    defaultMinorLocator = lambda: mticker.AutoMinorLocator(n=5)
+    defaultMajorLocator = lambda: ticker.MaxNLocator(min_n_ticks=4, steps=[1,2,5,10])
+    defaultMinorLocator = lambda: ticker.AutoMinorLocator(n=5)
     #{{{ taken from matplotlib examples
     def adjust_spines(ax,spines):
         xlabel = ax.get_xlabel()
