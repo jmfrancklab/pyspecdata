@@ -159,12 +159,11 @@ Rather, you can just import ``mayavi.mlab`` and pass it to any figure list that 
 
 Installation for developers
 ---------------------------
-Typically, we create a folder on the hard drive called ``git`` or ``git_repos``, where you will put all of your code and the pyspecdata folder that you are about to clone. After installing the packages via the anaconda prompt, move into your ``git`` folder and install pySpecData.  
-To install from github, just ``git clone https://github.com/jmfranck/pyspecdata.git`` then move to the directory where setup.py lives (``pyspecdata/``),
-and do
+Typically, we create a folder on the hard drive called ``git`` or ``git_repos``, where you will put all of your code and the pyspecdata folder that you are about to clone. After installing the packages via the anaconda prompt, move into your ``git`` folder.  
+To install from github, just ``git clone https://github.com/jmfranck/pyspecdata.git`` in your git bash terminal. Then switch over to the anaconda prompt and move to the directory where setup.py lives (ex. ``git/pyspecdata/``),
+and type
 ``python setup.py develop``.
 Make sure that this terminates with a successful message, and without any compilation errors.
-Note ``git clone https://github.com/jmfranck/pyspecdata.git`` is a git bash command and must be performed via the git bash terminal. Once the repo is cloned, return to the Anaconda prompt to run ``python setup.py develop``
 
 *Important note for conda on Windows 10:*
 For reasons that we don't understand, the Fortran compiler can give odd errors, depending on which terminal you are using to install.
