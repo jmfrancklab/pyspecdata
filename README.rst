@@ -110,7 +110,7 @@ in our hands -- we are happy to hear from you and work with you to try to
 broaden its applicability!
 
 On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
-just run ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython pylab itertools collections lmfit`` followed by ``conda install -y m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
+just run ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython pylab lmfit`` followed by ``conda install -y m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
 Then follow the `installation for developers <#installation-for-developers>`_ below. We have a package on pip, but it currently lags behind the github repo.
 
 On **CentOS7**, we've tested
@@ -159,7 +159,6 @@ Rather, you can just import ``mayavi.mlab`` and pass it to any figure list that 
 
 Installation for developers
 ---------------------------
-Typically, we create a folder on the hard drive called ``git`` or ``git_repos``, where you will put all of your code and the pyspecdata folder that you are about to clone. After installing the packages via the anaconda prompt, switch to your git bash terminal and move into your ``git`` folder.  
 To install from github, just ``git clone https://github.com/jmfranck/pyspecdata.git``. Then switch over to the anaconda prompt and move to the directory where setup.py lives (ex. ``git/pyspecdata/``),
 and type
 ``python setup.py develop``.
