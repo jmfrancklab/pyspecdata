@@ -58,11 +58,19 @@ class mat_formatter (object):
                     return simplified_expr
             a_r = custom_simplify(sympy.Abs(a))
             a_ph = custom_simplify(sympy.arg(a)/numpy.pi)
-            return custom_simplify(a_r)*sympy.exp(sympy.I*a_ph*sympy.pi)
+            if a_ph == 0:
+                return custom_simplify(a_r)
+            elif a_ph == -1:
+                return -1*custom_simplify(a_r)
+            elif a_ph == 0.5:
+                return 1j*custom_simplify(a_r)
+            elif a_ph == -0.5:
+                return -1j*custom_simplify(a_r)
+            else:
+                return custom_simplify(a_r)*sympy.exp(sympy.I*a_ph*sympy.pi)
     def mat_formatter(self,a):
         "This accepts an array, and outputs the sympy.latex representation of the matrix"
         retval = sympy.latex(sympy.Matrix(a).applyfunc(self.complex_to_polar))
-        #return self.zeros_re.sub('\\\\quad\\\\quad',retval)
         return self.zeros_re.sub(r'\\textcolor{lightgrey}{0}',retval)
     def __add__(self,arg):
         if type(arg) is str:
