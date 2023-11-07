@@ -190,6 +190,12 @@ pySpecData is designed to run the same script on different computers,
 where the required data files might be stored in different paths
 on the different computers.
 
+The basic strategy is that you enter information on how to find your
+files in the `_pyspecdata` config file (typically this is only required once,
+at setup),
+then the `find_file` and `search_filename` functions can use this info
+to find your files.
+
 Setting up your _pyspecdata configuration file
 ----------------------------------------------
 
