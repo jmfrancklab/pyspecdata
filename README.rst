@@ -148,8 +148,6 @@ that you install the following packages using a good package-management system (
 
 * h5py
 
-* pylab
-
 * lmfit  
 
 * The python libraries, and a Fortran compiler.  Under anaconda, these are supplied by `libpython` and `mingw`, respectively.
@@ -163,9 +161,9 @@ Rather, you can just import ``mayavi.mlab`` and pass it to any figure list that 
 
 Installation for developers
 ---------------------------
-**Warning** Before running the installation for developers, you must first check that the output of ``conda info`` on your git bash terminal matches the output of your anaconda prompt. If these do not match you will have to make the conda environment accessible to all users. 
+**Warning** Before running the installation for developers, you must first check that the output of ``conda info`` on your git bash terminal matches the output of your anaconda prompt.
 
-Once this is checked, to install pySpecData from github, just ``git clone https://github.com/jmfranck/pyspecdata.git``. Then switch over to the anaconda prompt and move to the directory where setup.py lives (ex. ``git/pyspecdata/``),
+Once this is checked, to install pySpecData from github, just ``git clone https://github.com/jmfranck/pyspecdata.git``. Then switch over to the anaconda prompt and move to the directory where setup.py lives (root directory of repository),
 and type
 ``python setup.py develop``.
 Make sure that this terminates with a successful message, and without any compilation errors.
@@ -177,14 +175,8 @@ We highly recommend trying both the Anaconda prompt, as well as the standard dos
 
 If you want to build the documentation, run: `conda install -y -c conda-forge sphinx_rtd_theme sphinx-gallery`
 
-Setting up your _pyspecdata configuration file
-----------------------------------------------
-Part of the pySpecData package is the datadir module, allowing the user to run the same code on 
-different machines - even thought he location of the raw spectral data might change. 
-This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file. 
-in the key ``[General]`` there should be a value pair for ``data_directory = ``.
-The value should correspond either to your Rclone remote or you can simply copy and
-paste the location of your data on the machine.
+Setting up Rclone
+-----------------
 
 Rclone is a useful tool to get files off of the team's drive or whatever cloud storage you may use. 
 This enables you to store datafiles locally allowing the user to work offline if needed.
@@ -195,9 +187,50 @@ to the name of the folder on the cloud (e.g. 'exp_data').
 To get set up with Rclone, download Rclone and follow the documentation which should include
 running the command ``rclone config`` enabling you to set up the location and name of the cloud
 drive you wish to pull from. The documentation of rclone is pretty straightforward and can walk
-you through this.
-Once your Rclone config file is set up open your ``~/_pyspecdata`` or ``~/.pyspecdata`` config file
-and edit the data_directory value pair to point to your RcloneRemotes.
+you through this. 
+
+Setting up your _pyspecdata configuration file
+----------------------------------------------
+Part of the pySpecData package is the datadir module, allowing the user to run the same code on 
+different machines - even thought he location of the raw spectral data might change. 
+This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file. 
+On top should be the ``[General]`` section, e.g.
+
+::
+
+    [General]
+    data_directory = /home/jmfranck/exp_data
+    qesr conversion = 162.66
+    qesr diameter = 0.704
+    qesr q = 4700
+
+This section points to the directory with the datasets of interest whether that is the
+direct path to the drive with the datasets or if you prefer Rclone, this ``data_directory``
+points to your local folder of datasets.
+
+Following the ``General`` section is ``ExpTypes`` which gives the various locations to 
+folders containing the appropriate data sets. For example,
+
+::
+
+    [ExpTypes]
+    odnp_nmr_comp/odnp = /home/jmfranck/exp_data/NMR_comp/ODNP
+
+gives the location of the ODNP datasets. So when you call ``odnp_nmr_comp/odnp`` this will point
+to the actual location, ``/home/jmfranck/exp_data/NMR_comp/ODNP``
+
+Finally add in the ``RcloneRemote`` key to your config file:
+
+::
+
+    [RcloneRemotes]
+    nmr_comp/odnp = jmf_teams:General/exp_data/NMR_comp/ODNP/
+
+where ``jmf_teams`` is a properly configures (rclone)[https://rclone.org/] remote that shows up
+in response to the shell command ``rclone config``.
+Note: as you require datasets from other folders you will need to make new folders locally to match
+for Rclone. For example, if you required a dataset from ``exp_data/francklab_esr/alex`` you
+will need to go into your local ``exp_data`` folder and add a new folder called ``francklab_esr/alex``
 
 Notes on compilation of compiled extensions
 -------------------------------------------
