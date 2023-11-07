@@ -196,7 +196,6 @@ Setting up your _pyspecdata configuration file
 Part of the pySpecData package is the datadir module, allowing the user to run the same code on 
 different machines - even thought he location of the raw spectral data might change. 
 This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file. 
-On top should be the ``[General]`` section, e.g.
 
 ::
 
@@ -206,29 +205,28 @@ On top should be the ``[General]`` section, e.g.
     qesr diameter = 0.704
     qesr q = 4700
 
-This section points to the directory with the datasets of interest whether that is the
-direct path to the drive with the datasets or if you prefer Rclone, this ``data_directory``
-points to your local folder of datasets.
-
-Following the ``General`` section is ``ExpTypes`` which gives the various locations to 
-folders containing the appropriate data sets. For example,
-
-::
-
     [ExpTypes]
     odnp_nmr_comp/odnp = /home/jmfranck/exp_data/NMR_comp/ODNP
 
-gives the location of the ODNP datasets. So when you call ``odnp_nmr_comp/odnp`` this will point
-to the actual location, ``/home/jmfranck/exp_data/NMR_comp/ODNP``
-
-Finally add in the ``RcloneRemote`` key to your config file:
-
-::
+    [mode]
+    figures = standard
 
     [RcloneRemotes]
     nmr_comp/odnp = jmf_teams:General/exp_data/NMR_comp/ODNP/
 
-where ``jmf_teams`` is a properly configures (rclone)[https://rclone.org/] remote that shows up
+The ``General`` section points to the directory with the datasets of interest whether that is the
+direct path to the drive with the datasets or if you prefer Rclone, this ``data_directory``
+points to your local folder of datasets.
+
+The ``ExpTypes`` section gives the various locations to 
+folders containing the appropriate data sets - either pointing to the
+cloud storage or pointing to the local directory your rclone adds files to.
+So when you call ``odnp_nmr_comp/odnp`` this will point
+to the actual location, ``/home/jmfranck/exp_data/NMR_comp/ODNP``
+
+The ``RcloneRemote`` key points to the properly configured remote that
+was set up with Rclone
+e.g., ``jmf_teams`` is a properly configures (rclone)[https://rclone.org/] remote that shows up
 in response to the shell command ``rclone config``.
 Note: as you require datasets from other folders you will need to make new folders locally to match
 for Rclone. For example, if you required a dataset from ``exp_data/francklab_esr/alex`` you
