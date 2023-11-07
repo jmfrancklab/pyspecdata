@@ -109,7 +109,7 @@ In all situations, note that this is a development library that works very well
 in our hands -- we are happy to hear from you and work with you to try to
 broaden its applicability!
 
-On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
+On **Windows**, you must first check that the output of ``conda info`` on your git bash matches the output of your anaconda prompt. If these do not match you will have to make the conda environment accessible to all users. Once this is checked, with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
 just run ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython pylab lmfit`` followed by ``conda install -y m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
 Then follow the `installation for developers <#installation-for-developers>`_ below. We have a package on pip, but it currently lags behind the github repo.
 
@@ -148,6 +148,10 @@ that you install the following packages using a good package-management system (
 
 * h5py
 
+* pylab
+
+* lmfit  
+
 * The python libraries, and a Fortran compiler.  Under anaconda, these are supplied by `libpython` and `mingw`, respectively.
 
 (If you don't install these packages with your system `pip` will try to install them, and there is a good chance it will fail -- it's known not to work great with several of these; `setuptools` should error out and tell you to install the packages.)
@@ -171,6 +175,27 @@ We highly recommend trying both the Anaconda prompt, as well as the standard dos
 
 If you want to build the documentation, run: `conda install -y -c conda-forge sphinx_rtd_theme sphinx-gallery`
 
+Setting up your _pyspecdata configuration file
+----------------------------------------------
+Part of the pySpecData package is the datadir module, allowing the user to run the same code on 
+different machines - even thought he location of the raw spectral data might change. 
+This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file. 
+in the key ``[General]`` there should be a value pair for ``data_directory = ``.
+The value should correspond either to your Rclone remote or you can simply copy and
+paste the location of your data on the machine.
+
+Rclone is a useful tool to get files off of the team's drive or whatever cloud storage you may use. 
+This enables you to store datafiles locally allowing the user to work offline if needed.
+Prior to setting up Rclone you will need to make a local file (in your home directory) 
+where your data files will be added to as called. Typically, the name of this folder corresponds
+to the name of the folder on the cloud (e.g. 'exp_data').
+
+To get set up with Rclone, download Rclone and follow the documentation which should include
+running the command ``rclone config`` enabling you to set up the location and name of the cloud
+drive you wish to pull from. The documentation of rclone is pretty straightforward and can walk
+you through this.
+Once your Rclone config file is set up open your ``~/_pyspecdata`` or ``~/.pyspecdata`` config file
+and edit the data_directory value pair to point to your RcloneRemotes.
 
 Notes on compilation of compiled extensions
 -------------------------------------------
