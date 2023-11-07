@@ -109,7 +109,7 @@ In all situations, note that this is a development library that works very well
 in our hands -- we are happy to hear from you and work with you to try to
 broaden its applicability!
 
-On **Windows**, you must first check that the output of ``conda info`` on your git bash matches the output of your anaconda prompt. If these do not match you will have to make the conda environment accessible to all users. Once this is checked, with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
+On **Windows**, With `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
 just run ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython pylab lmfit`` followed by ``conda install -y m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
 Then follow the `installation for developers <#installation-for-developers>`_ below. We have a package on pip, but it currently lags behind the github repo.
 
@@ -163,7 +163,9 @@ Rather, you can just import ``mayavi.mlab`` and pass it to any figure list that 
 
 Installation for developers
 ---------------------------
-To install from github, just ``git clone https://github.com/jmfranck/pyspecdata.git``. Then switch over to the anaconda prompt and move to the directory where setup.py lives (ex. ``git/pyspecdata/``),
+**Warning** Before running the installation for developers, you must first check that the output of ``conda info`` on your git bash terminal matches the output of your anaconda prompt. If these do not match you will have to make the conda environment accessible to all users. 
+
+Once this is checked, to install pySpecData from github, just ``git clone https://github.com/jmfranck/pyspecdata.git``. Then switch over to the anaconda prompt and move to the directory where setup.py lives (ex. ``git/pyspecdata/``),
 and type
 ``python setup.py develop``.
 Make sure that this terminates with a successful message, and without any compilation errors.
