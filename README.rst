@@ -152,6 +152,8 @@ that you install the following packages using a good package-management system (
 
 * The python libraries, and a Fortran compiler.  Under anaconda, these are supplied by `libpython` and `mingw`, respectively.
 
+* If you plan on building your documentation the documentation, you also want `sphinx_rtd_theme sphinx-gallery`
+
 (If you don't install these packages with your system `pip` will try to install them, and there is a good chance it will fail -- it's known not to work great with several of these; `setuptools` should error out and tell you to install the packages.)
 
 *mayavi*: Mayavi can be used (and gives very nice graphics), but frequently lags behind common Python distros.
@@ -161,36 +163,36 @@ Rather, you can just import ``mayavi.mlab`` and pass it to any figure list that 
 
 Installation for developers
 ---------------------------
-**Warning** Before running the installation for developers, you must first check that the output of ``conda info`` on your git bash terminal matches the output of your anaconda prompt.
 
-Once this is checked, to install pySpecData from github, just ``git clone https://github.com/jmfranck/pyspecdata.git``. Then switch over to the anaconda prompt and move to the directory where setup.py lives (root directory of repository),
+To install pySpecData from github, just ``git clone https://github.com/jmfranck/pyspecdata.git``. Then switch over to the anaconda prompt and move to the directory where setup.py lives (root directory of repository),
 and type
 ``python setup.py develop``.
 Make sure that this terminates with a successful message, and without any compilation errors.
 
-*Important note for conda on Windows 10:*
-For reasons that we don't understand, the Fortran compiler can give odd errors, depending on which terminal you are using to install.
-This appears to be Windows' fault, rather than conda's (?).
-We highly recommend trying both the Anaconda prompt, as well as the standard dos prompt (press start: type `cmd`) if you experience errors related to compilation.
+**Important notes for conda on Windows 10:**
 
-If you want to build the documentation, run: `conda install -y -c conda-forge sphinx_rtd_theme sphinx-gallery`
+- **Warning** Before running the installation for developers, you must
+  first check that the output of ``conda info`` on your git bash terminal
+  matches the output of your anaconda prompt.
+- For reasons that we don't understand, the Fortran compiler can give odd
+  errors, depending on which terminal you are using to install.  This
+  appears to be Windows' fault, rather than conda's (?).  We highly
+  recommend trying both the Anaconda prompt, as well as the standard dos
+  prompt (press start: type `cmd`) if you experience errors related to
+  compilation.
+- If you want to build the documentation, run:
+  `conda install -y -c conda-forge sphinx_rtd_theme sphinx-gallery`
 
-Setting up Rclone
------------------
+Data File Management
+====================
 
-Rclone is a useful tool to get files off of the team's drive or whatever cloud storage you may use. 
-This enables you to store datafiles locally allowing the user to work offline if needed.
-Prior to setting up Rclone you will need to make a local file (in your home directory) 
-where your data files will be added to as called. Typically, the name of this folder corresponds
-to the name of the folder on the cloud (e.g. 'exp_data').
-
-To get set up with Rclone, download Rclone and follow the documentation which should include
-running the command ``rclone config`` enabling you to set up the location and name of the cloud
-drive you wish to pull from. The documentation of rclone is pretty straightforward and can walk
-you through this. 
+pySpecData is designed to run the same script on different computers,
+where the required data files might be stored in different paths
+on the different computers.
 
 Setting up your _pyspecdata configuration file
 ----------------------------------------------
+
 Part of the pySpecData package is the datadir module, allowing the user to run the same code on 
 different machines - even thought he location of the raw spectral data might change. 
 This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file. 
@@ -232,8 +234,23 @@ Note: as you require datasets from other folders you will need to make new folde
 for Rclone. For example, if you required a dataset from ``exp_data/francklab_esr/alex`` you
 will need to go into your local ``exp_data`` folder and add a new folder called ``francklab_esr/alex``
 
+Setting up Rclone
+-----------------
+
+Rclone is a useful tool to get files off of the team's drive or whatever cloud storage you may use. 
+This enables you to store datafiles locally allowing the user to work offline if needed.
+Prior to setting up Rclone you will need to make a local file (in your home directory) 
+where your data files will be added to as called. Typically, the name of this folder corresponds
+to the name of the folder on the cloud (e.g. 'exp_data').
+
+To get set up with Rclone, download Rclone and follow the documentation which should include
+running the command ``rclone config`` enabling you to set up the location and name of the cloud
+drive you wish to pull from. The documentation of rclone is pretty straightforward and can walk
+you through this. 
+
+
 Notes on compilation of compiled extensions
--------------------------------------------
+===========================================
 
 We recently added a compiled extension that performs non-negative least-squares for regularization (DOSY/Relaxometry/etc.)
 
@@ -257,7 +274,7 @@ how to deal with AppLocker permissions, and Windows permissions generally,
 if you run into any of these issues.
 
 Open an issue!
---------------
+==============
 
 If you have issues with installing or using pyspecdata, don't hesitate to open
 an issue on this page!
