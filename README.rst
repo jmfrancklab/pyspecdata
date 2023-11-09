@@ -200,8 +200,9 @@ Setting up your _pyspecdata configuration file
 ----------------------------------------------
 
 Part of the pySpecData package is the datadir module, allowing the user to run the same code on 
-different machines - even thought he location of the raw spectral data might change. 
-This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file. 
+different machines - even thought the location of the raw spectral data might change. 
+This is controlled by the ``~/.pyspecdata`` (unix-like) or ``~/_pyspecdata`` (windows) config file,
+which looks like the following.
 
 ::
 
@@ -223,6 +224,9 @@ This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file.
 The ``General`` section points to the directory with the datasets of interest whether that is the
 direct path to the drive with the datasets or if you prefer Rclone, this ``data_directory``
 points to your local folder of datasets.
+(This is also a good spot to include, *e.g.* proportionality constants for
+QESR, which we have done here, and which are utilized in the `proc_scripts`
+repo.)
 
 The ``ExpTypes`` section gives the various locations to 
 folders containing the appropriate data sets - either pointing to the
@@ -230,28 +234,34 @@ cloud storage or pointing to the local directory your rclone adds files to.
 So when you call ``odnp_nmr_comp/odnp`` this will point
 to the actual location, ``/home/jmfranck/exp_data/NMR_comp/ODNP``
 
-The ``RcloneRemote`` key points to the properly configured remote that
-was set up with Rclone
-e.g., ``jmf_teams`` is a properly configures (rclone)[https://rclone.org/] remote that shows up
+Note that it's possible to point the different `exp_type` directly to shared drives,
+pySpecData also offers a (we think superior) method that downloads local copies
+of files on-demand using (rclone)[https://rclone.org/].
+Obviously, you need to install rclone and add it to your path to do this (see next subsection).
+Rclone is an amazing tool that can be configured to talk to virtually any type of cloud storage
+(Google Drive accounts, OneDrive and SharePoint accounts, etc.)
+
+Inside the ``RcloneRemote`` section, each key/variable points to a properly configured remote that
+was set up with (rclone)[https://rclone.org/] --
+e.g., ``jmf_teams`` here is a properly configures  remote that shows up
 in response to the shell command ``rclone config``.
-Note: as you require datasets from other folders you will need to make new folders locally to match
-for Rclone. For example, if you required a dataset from ``exp_data/francklab_esr/alex`` you
+*Note:* as you require datasets from other folders you will need to make new folders locally to match
+for Rclone.
+You will receive error messages that guide you to do this, and you should follow them.
+For example, if you required a dataset from ``exp_data/francklab_esr/alex`` you
 will need to go into your local ``exp_data`` folder and add a new folder called ``francklab_esr/alex``
 
 Setting up Rclone
 -----------------
 
-Rclone is a useful tool to get files off of the team's drive or whatever cloud storage you may use. 
-This enables you to store datafiles locally allowing the user to work offline if needed.
-Prior to setting up Rclone you will need to make a local file (in your home directory) 
-where your data files will be added to as called. Typically, the name of this folder corresponds
-to the name of the folder on the cloud (e.g. 'exp_data').
-
 To get set up with Rclone, download Rclone and follow the documentation which should include
 running the command ``rclone config`` enabling you to set up the location and name of the cloud
-drive you wish to pull from. The documentation of rclone is pretty straightforward and can walk
+drive you wish to pull from.
+The documentation of rclone is pretty straightforward and can walk
 you through this. 
-
+If you are at an academic institution, we highly recommend asking your IT
+department for a protocol for connecting rclone to your cloud storage of
+choice.
 
 Notes on compilation of compiled extensions
 ===========================================
