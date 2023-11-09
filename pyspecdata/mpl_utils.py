@@ -1,5 +1,6 @@
 import numpy as np
 from numpy import r_, pi
+from matplotlib import ticker as mticker
 import matplotlib.pylab as plt
 import matplotlib.transforms as mtransforms
 import matplotlib.ticker as mticker
