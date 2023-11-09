@@ -236,13 +236,13 @@ to the actual location, ``/home/jmfranck/exp_data/NMR_comp/ODNP``
 
 Note that it's possible to point the different `exp_type` directly to shared drives,
 pySpecData also offers a (we think superior) method that downloads local copies
-of files on-demand using (rclone)[https://rclone.org/].
+of files on-demand using `rclone <https://rclone.org/>`_.
 Obviously, you need to install rclone and add it to your path to do this (see next subsection).
 Rclone is an amazing tool that can be configured to talk to virtually any type of cloud storage
 (Google Drive accounts, OneDrive and SharePoint accounts, etc.)
 
 Inside the ``RcloneRemote`` section, each key/variable points to a properly configured remote that
-was set up with (rclone)[https://rclone.org/] --
+was set up with `rclone <https://rclone.org/>`_--
 e.g., ``jmf_teams`` here is a properly configured  remote that shows up
 in response to the shell command ``rclone config``.
 *Note:* as you require datasets from other folders you will need to make new folders locally to match
