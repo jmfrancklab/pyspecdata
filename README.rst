@@ -152,7 +152,7 @@ that you install the following packages using a good package-management system (
 
 * The python libraries, and a Fortran compiler.  Under anaconda, these are supplied by `libpython` and `mingw`, respectively.
 
-* If you plan on building your documentation the documentation, you also want `sphinx_rtd_theme sphinx-gallery`
+* If you plan on building the documentation, you also want `sphinx_rtd_theme sphinx-gallery`
 
 (If you don't install these packages with your system `pip` will try to install them, and there is a good chance it will fail -- it's known not to work great with several of these; `setuptools` should error out and tell you to install the packages.)
 
@@ -243,7 +243,7 @@ Rclone is an amazing tool that can be configured to talk to virtually any type o
 
 Inside the ``RcloneRemote`` section, each key/variable points to a properly configured remote that
 was set up with (rclone)[https://rclone.org/] --
-e.g., ``jmf_teams`` here is a properly configures  remote that shows up
+e.g., ``jmf_teams`` here is a properly configured  remote that shows up
 in response to the shell command ``rclone config``.
 *Note:* as you require datasets from other folders you will need to make new folders locally to match
 for Rclone.
