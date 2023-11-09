@@ -2,6 +2,7 @@ import numpy as np
 from numpy import r_, pi
 import matplotlib.pylab as plt
 import matplotlib.transforms as mtransforms
+import matplotlib.ticker as mticker
 #{{{ old grid and tick
 def gridandtick(ax,rotation=(0,0),precision=(2,2),
         labelstring=('',''),gridcolor=r_[0,0,0],
