@@ -284,7 +284,7 @@ def h5attachattributes(node,listofattributes,myvalues):
     if node is None:
         raise IndexError('Problem!, node passed to h5attachattributes: ',node,'is None!')
     h5file = node._v_file
-    if isinstance(myvalues,nddata):
+    if hasattr(myvalues,'dimlabels'):# use as a proxy for being nddata
         attributevalues = [myvalues.__getattribute__(x) for x in listofattributes]
     elif isinstance(myvalues, list):
         attributevalues = myvalues
