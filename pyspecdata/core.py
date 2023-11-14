@@ -4733,17 +4733,21 @@ class nddata (object):
         """
         retval = self.copy(data=False)
         retval.data = np.angle(self.data)
-        # from ∂φ/∂A=-i n/2A
-        # when ρe(iφ)=xAⁿ
-        dangle_dA = 1/(2*self.data)
-        A_sigma = self.get_error()
-        A_sigma = 1 if A_sigma is None else A_sigma
-        retval.set_error(
-                abs(
-                    dangle_dA * A_sigma
+        if np.isscalar(self.data):
+            # if scalar, no error
+            return retval
+        else:
+            # from ∂φ/∂A=-i n/2A
+            # when ρe(iφ)=xAⁿ
+            dangle_dA = 1/(2*self.data)
+            A_sigma = self.get_error()
+            A_sigma = 1 if A_sigma is None else A_sigma
+            retval.set_error(
+                    abs(
+                        dangle_dA * A_sigma
+                        )
                     )
-                )
-        return retval
+            return retval
     @angle.setter
     def angle(self):
         raise ValueError("Can't independently set the angle component yet")

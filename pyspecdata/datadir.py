@@ -338,6 +338,7 @@ class cached_searcher(object):
         return
     def search_for(self,exp_type):
         if not self.has_run:
+            logger.info(strm("about to grab the directory list for",exp_type))
             self.grab_dirlist()
         potential_hits = [j for j in self.dirlist
                 if exp_type.lower() in j.lower()]
