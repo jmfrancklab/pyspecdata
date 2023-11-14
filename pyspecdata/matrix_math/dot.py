@@ -1,3 +1,7 @@
+import logging
+import numpy as np
+from ..general_functions import strm
+logger = logging.getLogger('pyspecdata.matrix_math')
 #@profile
 def dot(self,arg):
     """Tensor dot of self with arg -- dot all matching dimension labels.  This can be used to do matrix multiplication, but note that the order of doesn't matter, since the dimensions that are contracted are determined by matching the dimension names, not the order of the dimension.
@@ -30,8 +34,8 @@ def dot(self,arg):
     if (self.get_error() is not None) or (arg.get_error() is not None):
         raise ValueError("we plan to include error propagation here, but not yet provided")
     self.data = np.tensordot(A.data,B.data,axes=(match_idx,match_idx))
-    logger.debug(strm("shape of A is",ndshape(A)))
-    logger.debug(strm("shape of B is",ndshape(B)))
+    logger.debug(strm("shape of A is",A.shape))
+    logger.debug(strm("shape of B is",B.shape))
     logger.debug(strm("matching_dims are",matching_dims))
     newsize = [(A.data.shape[j] if A.data.shape[j] != 1 else B.data.shape[j])
             for j in range(len(A.data.shape)) if A.dimlabels[j] not in matching_dims]
