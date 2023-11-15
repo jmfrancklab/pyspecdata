@@ -4,6 +4,7 @@ from ..datadir import rclone_search
 import numpy as np
 import re
 from io import StringIO
+import os
 logger = logging.getLogger('pyspecdata.load_files.bruker_esr')
 b0_texstr = r'$B_0$'
 def xepr(filename, exp_type=None, dimname='', verbose=False):
@@ -142,6 +143,8 @@ def xepr(filename, exp_type=None, dimname='', verbose=False):
                 if isinstance(y_dim_name, list):
                     y_dim_name = ' '.join(y_dim_name) # it gets split into a list, which for XEpr files shouldn't be happening, but fix later
                     if y_dim_name[0] == "'": y_dim_name = y_dim_name.replace("'","")
+                if y_dim_name.startswith("'") and y_dim_name.endswith("'"):
+                    y_dim_name = y_dim_name[1:-1]
                 assert 'YUNI' in list(v.keys()), ("No parameter YUNI -- how do you expect me to know the units of the second dimension??")
                 dim_units.update({y_dim_name:interpret_units('YUNI')})
                 filename_ygf = filename_par[:-4] + '.YGF'

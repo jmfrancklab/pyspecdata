@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyspecdata.latexscripts &mdash; pySpecData 0.9.5.3.2 documentation</title>
@@ -20,6 +20,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -48,16 +49,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the lmfitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">PySpecData Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#individual-functions">Individual Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
 </ul>
 
         </div>
@@ -73,8 +71,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>pyspecdata.latexscripts</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">pyspecdata.latexscripts</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/generated/pyspecdata.latexscripts.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -85,18 +83,14 @@
            <div itemprop="articleBody">
              
   <section id="module-pyspecdata.latexscripts">
-<span id="pyspecdata-latexscripts"></span><h1>pyspecdata.latexscripts<a class="headerlink" href="#module-pyspecdata.latexscripts" title="Permalink to this headline">¶</a></h1>
+<span id="pyspecdata-latexscripts"></span><h1>pyspecdata.latexscripts<a class="headerlink" href="#module-pyspecdata.latexscripts" title="Permalink to this heading">¶</a></h1>
 <p>Provides the <code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span></code> shell/dos command, which you run
 instead of your normal Latex command to build a lab notebook.
 The results of python environments are <strong>cached</strong> and <strong>only re-run if the code changes</strong>,
 even if the python environments are moved around.
 This makes the compilation of a Latex lab notebook extremely efficient.</p>
 <p class="rubric">Functions</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
+<table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="../latexscripts.html#pyspecdata.latexscripts.cache_output_if_needed" title="pyspecdata.latexscripts.cache_output_if_needed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cache_output_if_needed</span></code></a>(scriptnum_as_str, ...)</p></td>
 <td><p>if needed, run the python script numbered by scriptnum_as_str that hashes to hashstring, and output the result to the cache ONLY</p></td>

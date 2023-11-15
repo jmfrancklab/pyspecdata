@@ -28,12 +28,13 @@ while h5 functions are helper functions for using pytables in a fashion that
 will hopefull be intuitive to those familiar with SQL, etc.
 '''
 from .datadir import pyspec_config, unknown_exp_type_name
+from .dict_utils import make_ndarray, unmake_ndarray
 from .matrix_math.dot import dot as MM_dot
 from .matrix_math.dot import matmul as MM_matmul
 from .matrix_math.dot import along as MM_along
 from .matrix_math.nnls import nnls as MM_nnls
 from sys import exc_info
-from os import listdir,environ
+from os import environ
 from os.path import sep as path_sep
 
 # {{{ determine the figure style, and load the appropriate modules
@@ -93,10 +94,12 @@ from scipy.interpolate import UnivariateSpline
 from .datadir import getDATADIR,log_fname,proc_data_target_dir
 from . import fourier as this_fourier
 from . import axis_manipulation
-from . import nnls as this_nnls
 from . import plot_funcs as this_plotting
-from .general_functions import *
+from .general_functions import CustomError, emptytest, balance_clims, process_kwargs, autostringconvert, check_ascending_axis, level_str_to_int, init_logging, strm, reformat_exp, complex_str, render_matrix, redim_F_to_C, redim_C_to_F, fname_makenice, explain_error, lsafen, lsafe, copy_maybe_none, whereblocks, box_muller, dp, fa, ndgrid, pinvr, sech, myfilter
+from .hdf_utils import gensearch, h5searchstring, h5loaddict, h5child, h5remrows, h5addrow, h5table, h5nodebypath, h5attachattributes, h5inlist, h5join
+from .mpl_utils import gridandtick, gridon, othergridandtick, autolegend, autopad_figure, expand_x, expand_y, plot_label_points, addlabels, plot_color_counter, contour_plot, plot_updown, nextfigure, figlistret, figlistini, figlistini_old, text_on_plot, spectrogram, colormap
 from .ndshape import ndshape_base
+import logging
 #rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
 rc('image',aspect='auto',interpolation='nearest')
 #rcParams['text.usetex'] = True
@@ -717,998 +720,18 @@ def make_rec(*args,**kwargs):
             raise ValueError(strm('problem trying to assign data of type',list(map(type,input)),
                 '\nvalues',input,'\nonto',mydtype,'\ndtype made from tuple:',
                 list(zip(names,types,shapes))))
-#{{{ convert back and forth between lists, etc, and np.ndarray
-def make_ndarray(array_to_conv,name_forprint = 'unknown'): 
-    if type(array_to_conv) in [int,np.int32,np.double,float,complex,np.complex128,float,bool,np.bool_]: # if it's a scalar
-        pass
-    elif isinstance(array_to_conv, str):
-        pass
-    elif type(array_to_conv) in [list,np.ndarray] and len(array_to_conv) > 0:
-        array_to_conv = rec.fromarrays([array_to_conv],names = 'LISTELEMENTS') #list(rec.fromarrays([b])['f0']) to convert back
-    elif type(array_to_conv) in [list,np.ndarray] and len(array_to_conv) == 0:
-        array_to_conv = None
-    elif array_to_conv is  None:
-        pass
-    else:
-        raise TypeError(strm('type of value (',type(array_to_conv),') for attribute name',
-            name_forprint,'passed to make_ndarray is not currently supported'))
-    return array_to_conv
-def unmake_ndarray(array_to_conv,name_forprint = 'unknown'): 
-    r'Convert this item to an np.ndarray'
-    if (isinstance(array_to_conv, np.recarray)) or (isinstance(array_to_conv, np.ndarray) and array_to_conv.dtype.names is not None and len(array_to_conv.dtype.names)>0):
-        #{{{ if it's a record/structured np.array, it should be either a list or dictionary
-        if 'LISTELEMENTS' in array_to_conv.dtype.names:
-            if array_to_conv.dtype.names == tuple(['LISTELEMENTS']):
-                retval = list(array_to_conv['LISTELEMENTS'])
-            else:
-                raise ValueError(strm('Attribute',name_forprint,
-                    'is a recordarray with a LISTELEMENTS field, but it',
-                    'also has other dimensions:',array_to_conv.dtype.names,
-                    'not',tuple(['LISTELEMENTS'])))
-        elif len(array_to_conv)==1:
-            thisval = dict(list(zip(a.dtype.names,a.tolist()[0])))
-        else: raise ValueError('You passed a structured np.array, but it has more',
-                "than one dimension, which is not yet supported\nLater, this",
-                'should be supported by returning a dictionary of arrays')
-        #}}}
-    elif isinstance(array_to_conv, np.ndarray) and len(array_to_conv)==1:
-        #{{{ if it's a length 1 np.ndarray, then return the element
-        retval = array_to_conv.tolist()
-        logger.debug(strm(name_forprint,"=",type(array_to_conv),"is a numpy np.array of length one"))
-        #}}}
-    elif type(array_to_conv) in [np.string_,np.int32,np.float64,np.bool_]:
-        #{{{ map numpy strings onto normal strings
-        retval = array_to_conv.tolist()
-        logger.debug(strm("name_forprint","=",type(array_to_conv),"is a numpy scalar"))
-        #}}}
-    elif isinstance(array_to_conv, list):
-        #{{{ deal with lists
-        logger.debug(strm(name_forprint,"is a list"))
-        typeofall = list(map(type,array_to_conv))
-        if all([x is np.string_ for x in typeofall]):
-            logger.debug(strm(name_forprint,"=",typeofall,"are all numpy strings"))
-            retval = list(map(str,array_to_conv))
-        else:
-            logger.debug(strm(name_forprint,"=",typeofall,"are not all numpy string"))
-            retval = array_to_conv
-        #}}}
-    else:
-        logger.debug(strm(name_forprint,"=",type(array_to_conv),"is not a numpy string or record np.array"))
-        retval = array_to_conv
-    return retval
 #}}}
-#}}}
-def emptytest(x): # test is it is one of various forms of np.empty
-   if type(x) in [list,np.array]:
-       if len(x) == 0:
-           return True
-       elif x is np.array(None):
-           return True
-       elif len(x) > 0:
-           return False
-       #don't want the following, because then I may need to pop, etc
-       #if type(x) is list and all(map(lambda x: x is None,x)): return True
-   if np.size(x) == 1 and x is None: return True
-   if np.size(x) == 0: return True
-   return False
-class CustomError(Exception):
-    def __init__(self, *value, **kwargs):
-        raise NotImplementedError("You should get rid of CustomError and use explain_error instead")
-        return
 def maprep(*mylist):
     mylist = list(mylist)
     for j in range(0,len(mylist)):
         if not isinstance(mylist[j], str):
             mylist[j] = mylist[j].__repr__()
     return ' '.join(mylist)
-#{{{ HDF5 functions
-#{{{ helper function for HDF5 search
-def gensearch(labelname,format = '%0.3f',value = None,precision = None):
-    'obsolete -- use h5gensearch'
-    if value is None:
-        raise ValueError('You must pass a value to gensearch')
-    if precision is None:
-        precision = value*0.01 # the precision is 1% of the value, if we don't give an argument
-    searchstring_high = '(%s < %s + (%s))'%tuple([labelname]+[format]*2)
-    #print "\n\nDEBUG check format:\\begin{verbatim}",searchstring_high,r'\end{verbatim}'
-    searchstring_high = searchstring_high%(value,precision)
-    #print "\n\nDEBUG after substitution with",value,precision,":\\begin{verbatim}",searchstring_high,r'\end{verbatim}'
-    searchstring_low = '(%s > %s - (%s))'%tuple([labelname]+[format]*2)
-    searchstring_low = searchstring_low%(value,precision)
-    return searchstring_low + ' & ' + searchstring_high
-def h5searchstring(*args,**kwargs):
-    '''generate robust search strings
-    :parameter fieldname,value:
-    search AROUND a certain value (overcomes some type conversion issues) optional arguments are the format specifier and the fractional precision:
-    **OR**
-    :parameter field_and_value_dictionary:
-    generate a search string that matches one or more criteria'''
-    format,precision = process_kwargs([('format','%g'),
-        ('precision',0.01)],
-        kwargs)
-    if len(args) == 2:
-        fieldname,value = args
-    elif len(args) == 1 and isinstance(args[0], dict):
-        dict_arg = args[0]
-        condlist = []
-        for k,v in dict_arg.items():
-            condlist.append(h5searchstring(k,v,format = format,precision = precision))
-        return ' & '.join(condlist)
-    else:
-        raise ValueError("pass either field,value pair or a dictionary!")
-    if isinstance(value, str):
-        raise ValueError("string matching in pytables is broken -- search by hand and then use the index")
-    precision *= value
-    searchstring_high = '(%s < %s + (%s))'%tuple([fieldname]+[format]*2)
-    #print "\n\nDEBUG check format:\\begin{verbatim}",searchstring_high,r'\end{verbatim}'
-    searchstring_high = searchstring_high%(value,precision)
-    #print "\n\nDEBUG after substitution with",value,precision,":\\begin{verbatim}",searchstring_high,r'\end{verbatim}'
-    searchstring_low = '(%s > %s - (%s))'%tuple([fieldname]+[format]*2)
-    searchstring_low = searchstring_low%(value,precision)
-    return '(' + searchstring_low + ' & ' + searchstring_high + ')'
-#}}}
-def h5loaddict(thisnode):
-    #{{{ load all attributes of the node
-    retval = dict([(x,thisnode._v_attrs.__getattribute__(x))
-        for x in thisnode._v_attrs._f_list('user')])
-    #}}}
-    for k,v in retval.items():#{{{ search for record arrays that represent normal lists
-        retval[k]  = unmake_ndarray(v,name_forprint = k)
-    if isinstance(thisnode, tables.table.Table):#{{{ load any table data
-        logger.debug(strm("It's a table\n\n"))
-        if 'data' in list(retval.keys()):
-            raise AttributeError('There\'s an attribute called data --> this should not happen!')
-        retval.update({'data':thisnode.read()})
-    elif isinstance(thisnode, tables.group.Group):
-        #{{{ load any sub-nodes as dictionaries
-        mychildren = thisnode._v_children
-        for thischild in list(mychildren.keys()):
-            if thischild in list(retval.keys()):
-                raise AttributeError('There\'s an attribute called ',thischild,' and also a sub-node called the',thischild,'--> this should not happen!')
-            retval.update({thischild:h5loaddict(mychildren[thischild])})
-        #}}}
-    else:
-        raise AttributeError(strm("I don't know what to do with this node:",thisnode))
-    #}}}
-    return retval
-def h5child(thisnode,childname,clear = False,create = None):
-    r'''grab the child, optionally clearing it and/or (by default) creating it'''
-    #{{{ I can't create and clear at the same time
-    if create and clear:
-        raise ValueError("You can't call clear and create at the same time!\nJust call h5child twice, once with clear, once with create")
-    if create is None:
-        if clear == True:
-            create = False
-        else:
-            create = True
-    #}}}
-    h5file = thisnode._v_file
-    try:
-        childnode = h5file.get_node(thisnode,childname)
-        logger.debug(strm('found',childname))
-        if clear:
-            childnode._f_remove(recursive = True)
-            childnode = None
-    except tables.NoSuchNodeError as e:
-        if create is False and not clear:
-            raise RuntimeError('Trying to grab a node that does not exist with create = False')
-        elif clear:
-            childnode = None
-        else:
-            childnode = h5file.create_group(thisnode,childname)
-            logger.debug(strm('created',childname))
-    return childnode
-def h5remrows(bottomnode,tablename,searchstring):
-    if isinstance(searchstring, dict):
-        searchstring = h5searchstring(searchstring)
-    try:
-        thistable = bottomnode.__getattr__(tablename)
-        counter = 0
-        try:
-            data = thistable.read_where(searchstring).copy()
-        except Exception as e:
-            raise RuntimeError(strm('Problem trying to remove rows using search string',
-                searchstring, 'in', thistable))
-        for row in thistable.where(searchstring):
-            if len(thistable) == 1:
-                thistable.remove()
-                counter += 1
-            else:
-                try:
-                    thistable.remove_rows(row.nrow - counter,row.nrow - counter + 1) # counter accounts for rows I have already removed.
-                except:
-                    print("you passed searchstring",searchstring)
-                    print("trying to remove row",row)
-                    print("trying to remove row with number",row.nrow)
-                    print(help(thistable.remove_rows))
-                    raise RuntimeError("length of thistable is "+repr(len(thistable))+" calling remove_rows with "+repr(row.nrow-counter))
-                counter += 1
-        return counter,data
-    except tables.NoSuchNodeError:
-        return False,None
-def h5addrow(bottomnode,tablename,*args,**kwargs):
-    '''add a row to a table, creating it if necessary, but don\'t add if the data matches the search condition indicated by `match_row`
-    `match_row` can be either text or a dictionary -- in the latter case it's passed to h5searchstring
-    '''
-    match_row,only_last = process_kwargs([('match_row',None),('only_last',True)],kwargs)
-    try: # see if the table exists
-        mytable = h5table(bottomnode,tablename,None)
-        tableexists = True
-    except RuntimeError: # if table doesn't exist, create it
-        newindex = 1
-        tableexists = False
-    if tableexists:
-        #{{{ auto-increment "index"
-        newindex = mytable.read()['index'].max() + 1
-        #}}}
-        # here is where I would search for the existing data
-        if match_row is not None:
-            if isinstance(match_row, dict):
-                match_row = h5searchstring(match_row)
-            logger.debug(strm("trying to match row according to",lsafen(match_row)))
-            mytable.flush()
-            try:
-                matches = mytable.read_where(match_row)
-            except NameError as e:
-                raise NameError(' '.join(map(str,
-                    [e,'\nYou passed',match_row,'\nThe columns available are',mytable.colnames,"condvars are",condvars])))
-            except ValueError as e:
-                raise NameError(' '.join(map(str,
-                    [e,'\nYou passed',match_row,'\nThe columns available are',mytable.colnames])))
-            if len(matches) > 0:
-                if only_last:
-                    logger.debug(strm(r'\o{',lsafen(len(matches),"rows match your search criterion, returning the last row"),'}'))
-                    return mytable,matches['index'][-1]
-                else:
-                    return mytable,matches['index'][:]
-            else:
-                logger.debug("I found no matches")
-    if len(args) == 1 and (isinstance(args[0], dict)):
-        listofnames,listofdata = list(map(list,list(zip(*tuple(args[0].items())))))
-    elif len(args) == 2 and isinstance(args[0], list) and isinstance(args[1], list):
-        listofdata = args[0]
-        listofnames = args[1]
-    else:
-        raise TypeError('h5addrow takes either a dictionary for the third argument or a list for the third and fourth arguments')
-    try:
-        listofdata = [newindex] + listofdata
-    except:
-        raise TypeError('newindex is'+repr(newindex)+'listofdata is'+repr(listofdata))
-    listofnames = ['index'] + listofnames
-    myrowdata = make_rec(listofdata,listofnames)
-    if tableexists:
-        try:
-            mytable.append(myrowdata)
-        except ValueError as e:
-            print(lsafen("I'm about to flag an error, but it looks like there was an issue appending",myrowdata))
-            tabledforerr = mytable.read()
-            raise AttributeError(strm('Compare names and values table data vs. the row you are trying to add\n',
-                '\n'.join(map(repr,list(zip(list(mytable.read().dtype.fields.keys()),
-                list(mytable.read().dtype.fields.values()),
-                list(myrowdata.dtype.fields.keys()),
-                list(myrowdata.dtype.fields.values())))))))
-        mytable.flush()
-    else:
-        recorddata = myrowdata
-        try:
-            mytable = h5table(bottomnode,
-                    tablename,
-                    recorddata)
-        except Exception as e:
-            raise RuntimeError(strm('Error trying to write record np.array:',
-                repr(recorddata),'from listofdata',listofdata,'and names',listofnames
-                ))
-        mytable.flush()
-    return mytable,newindex
-def h5table(bottomnode,tablename,tabledata):
-    'create the table, or if tabledata is None, just check if it exists'
-    #{{{ save but don't overwrite the table
-    h5file = bottomnode._v_file
-    if tablename not in list(bottomnode._v_children.keys()):
-        if tabledata is not None:
-            if isinstance(tabledata, dict):
-                tabledata = make_rec(tabledata)
-            datatable = h5file.create_table(bottomnode,tablename,tabledata) # actually write the data to the table
-        else:
-            raise RuntimeError(' '.join(map(str,['You passed no data, so I can\'t create table',tablename,'but it doesn\'t exist in',bottomnode,'which has children',list(bottomnode._v_children.keys())])))
-    else:
-        if tabledata is not None:
-            raise ValueError(strm('You\'re passing data to create the table,',tablename,' but the table already exists!'))
-        else:
-            pass
-    return bottomnode._v_children[tablename]
-    #}}}
-def h5nodebypath(h5path,force = False,only_lowest = False,check_only = False,directory='.'):
-    r'''return the node based on an absolute path, including the filename'''
-    logger.debug(strm("DEBUG: called h5nodebypath on",h5path))
-    h5path = h5path.split('/')
-    #{{{ open the file / check if it exists
-    logger.debug(strm(lsafen('h5path=',h5path)))
-    logger.debug(strm('the h5path is',h5path))
-    if h5path[0] in listdir(directory):
-        logger.debug(strm('DEBUG: file exists\n\n'))
-        log_fname('data_files',h5path[0],directory,unknown_exp_type_name)
-    else:
-        if check_only:
-            errmsg = log_fname('missing_data_files',h5path[0],directory,unknown_exp_type_name)
-            raise AttributeError("You're checking for a node in a file (%s) that does not exist"%(h5path[0])
-                    +'\n'
-                    +errmsg)
-        logger.debug(strm('DEBUG: file does not exist\n\n'))
-    mode = 'a'
-    #if check_only: mode = 'r'
-    logger.debug(strm('so I look for the file',h5path[0],'in directory',directory))
-    try:
-        h5file = tables.open_file(os.path.join(directory,h5path[0]),mode = mode,title = 'test file')
-    except IOError as e:
-        raise IOError('I think the HDF5 file has not been created yet, and there is a bug pytables that makes it freak out, but you can just run again.'+explain_error(e))
-    #}}}
-    currentnode = h5file.get_node('/') # open the root node
-    logger.debug(strm("I have grabbe node",currentnode,"of file",h5file,'ready to step down search path'))
-    for pathlevel in range(1,len(h5path)):#{{{ step down the path
-            clear = False
-            create = True
-            if only_lowest or check_only:
-                create = False
-            if pathlevel == len(h5path)-1: # the lowest level
-                if only_lowest:
-                    create = True
-                if force:
-                    clear = True
-            safetoleaveopen = False
-            try:
-                currentnode = h5child(currentnode, # current node
-                        h5path[pathlevel], # the child
-                        create = create,
-                        clear = clear)
-                logger.debug(strm(lsafen("searching for node path: descended to node",currentnode)))
-                logger.debug(strm("searching for node path: descended to node",currentnode))
-            except BaseException as e:
-                logger.debug(strm(lsafen("searching for node path: got caught searching for node",h5path[pathlevel])))
-                logger.debug(strm("searching for node path: got caught searching for node",h5path[pathlevel]))
-                h5file.close()
-                #print lsafen("DEBUG: Yes, I closed the file")
-                raise IndexError(strm('Problem trying to load node ',h5path,explain_error(e)))
-            #}}}
-    return h5file,currentnode
-def h5attachattributes(node,listofattributes,myvalues):
-    listofattributes = [j for j in listofattributes # need to exclude the properties
-            if j not in ['angle','real','imag']]
-    if node is None:
-        raise IndexError('Problem!, node passed to h5attachattributes: ',node,'is None!')
-    h5file = node._v_file
-    if isinstance(myvalues,nddata):
-        attributevalues = [myvalues.__getattribute__(x) for x in listofattributes]
-    elif isinstance(myvalues, list):
-        attributevalues = myvalues
-    else:
-        raise TypeError("I don't understand the type of myvalues, which much be a list or a nddata object, from which the attribute values are retrieved")
-    listout = list(listofattributes)
-    for j,thisattr in enumerate(listofattributes):
-        thisval = attributevalues[j]
-        if type(thisval) in [dict]:
-            dictnode = h5child(node,
-                    thisattr,
-                    clear = True)
-            dictnode = h5child(node,
-                    thisattr,
-                    create = True)
-            h5attachattributes(dictnode,
-                    list(thisval.keys()),
-                    list(thisval.values()))
-            thisval = None
-            listout.remove(thisattr)
-        else:
-            # {{{ pytables hates <U24 which is created from unicode
-            if type(thisval) in [list,tuple]:
-                if np.any([isinstance(x,str) for x in thisval]):
-                    logger.debug(strm("going to convert",thisval,"to strings"))
-                    thisval = [str(x) if isinstance(x,str) else x for x in thisval]
-                    logger.debug(strm("now it looks like this:",thisval))
-            thisval = make_ndarray(thisval,name_forprint = thisattr)
-            # }}}
-        if thisval is not None:
-            try:
-                node._v_attrs.__setattr__(thisattr,thisval)
-            except Exception as e:
-                raise RuntimeError("PyTables freaks out when trying to attach attribute "+repr(thisattr)+" with value "+repr(thisval)+"\nOriginal error was:\n"+str(e))
-            listout.remove(thisattr)
-    listofattributes[:] = listout # pointer
-def h5inlist(columnname,mylist):
-    'returns rows where the column named columnname is in the value of mylist'
-    if isinstance(mylist, slice):
-        if mylist.start is not None and mylist.stop is not None:
-            return "(%s >= %g) & (%s < %g)"%(columnname,mylist.start,columnname,mylist.stop)
-        elif mylist.stop is not None:
-            return "(%s < %g)"%(columnname,mylist.stop)
-        elif mylist.start is not None:
-            return "(%s > %g)"%(columnname,mylist.start)
-        else:
-            raise ValueError()
-    if isinstance(mylist, np.ndarray):
-        mylist = mylist.tolist()
-    if not isinstance(mylist, list):
-        raise TypeError("the second argument to h5inlist must be a list!!!")
-    if np.any([type(x) in [np.double,np.float64] for x in mylist]):
-        if all([type(x) in [np.double,np.float64,int,np.int32,np.int64] for x in mylist]):
-            return '('+'|'.join(["(%s == %g)"%(columnname,x) for x in mylist])+')'
-    elif all([type(x) in [int,int,np.int32,np.int64] for x in mylist]):
-        return '('+'|'.join(["(%s == %g)"%(columnname,x) for x in mylist])+')'
-    elif all([isinstance(x, str) for x in mylist]):
-        return '('+'|'.join(["(%s == '%s')"%(columnname,x) for x in mylist])+')'
-    else:
-        raise TypeError("I can't figure out what to do with this list --> I know what to do with a list of numbers or a list of strings, but not a list of type"+repr(list(map(type,mylist))))
-def h5join(firsttuple,secondtuple,
-    additional_search = '',
-    select_fields = None,
-    pop_fields = None):
-    #{{{ process the first argument as the hdf5 table and indices, and process the second one as the structured np.array to join onto
-    if not ((isinstance(firsttuple, tuple)) and (isinstance(secondtuple, tuple))):
-        raise ValueError('both the first and second arguments must be tuples!')
-    if not ((len(firsttuple) == 2) and (len(secondtuple) == 2)):
-        raise ValueError('The length of the first and second arguments must be two!')
-    tablenode = firsttuple[0]
-    tableindices = firsttuple[1]
-    logger.debug(strm('h5join tableindices looks like this:',tableindices))
-    if not isinstance(tableindices, list):
-        tableindices = [tableindices]
-    logger.debug(strm('h5join tableindices looks like this:',tableindices))
-    mystructarray = secondtuple[0].copy()
-    mystructarrayindices = secondtuple[1]
-    if not isinstance(mystructarrayindices, list):
-        mystructarrayindices = [mystructarrayindices]
-    #}}}
-    #{{{ generate a search string to match potentially more than one key
-    search_string = []
-    if len(tableindices) != len(mystructarrayindices):
-        raise ValueError('You must pass either a string or a list for the second element of each tuple!\nIf you pass a list, they must be of the same length, since the field names need to line up!')
-    # this can't use h5inlist, because the and needs to be on the inside
-    #{{{ this loop creates a list of lists, where the inner lists are a set of conditions that need to be satisfied
-    # this is actually not causing  any trouble right now, but needs to be fixed, because of the way that it's doing the type conversion
-    for thistableindex,thisstructarrayindex in zip(tableindices,mystructarrayindices):
-        if thisstructarrayindex not in mystructarray.dtype.names:
-            raise ValueError(repr(thisstructarrayindex)+" is not in "+repr(mystructarray.dtype.names))
-        if isinstance(mystructarray[thisstructarrayindex][0],str):
-            search_string.append(["(%s == '%s')"%(thistableindex,x) for x in mystructarray[thisstructarrayindex]])
-        elif type(mystructarray[thisstructarrayindex][0]) in [int,np.double,float,np.float64,np.float32,np.int32,np.int64]:
-            search_string.append(["(%s == %s)"%(thistableindex,str(x)) for x in mystructarray[thisstructarrayindex]])
-            #print 'a g mapping for',[x for x in mystructarray[thisstructarrayindex]],'gives',search_string[-1],'\n\n'
-        else:
-            raise TypeError("I don't know what to do with a structured np.array that has a row of type"+repr(type(mystructarray[thisstructarrayindex][0])))
-    #}}}
-    search_string = [' & '.join(x) for x in zip(*tuple(search_string))] # this "and"s together the inner lists, since all conditions must be matched
-    search_string = '('+'|'.join(search_string)+')' # then, it "or"s the outer lists, since I want to collect data for all rows of the table
-    #}}}
-    if len(additional_search) > 0:
-        additional_search = " & (%s)"%additional_search
-        search_string = search_string + additional_search
-    logger.debug(strm('\n\nh5join generated the search string:',lsafen(search_string)))
-    retval = tablenode.read_where(search_string)
-    #{{{ then join the data together
-    # here I'm debugging the join function, again, and again, and agin
-    try:
-        retval = decorate_rec((retval,tableindices),(mystructarray,mystructarrayindices)) # this must be the problem, since the above looks fine
-    except Exception as e:
-        raise Exception(strm('Some problems trying to decorate the table',
-            retval, 'of dtype', retval.dtype, 'with the structured np.array',
-            mystructarray, 'of dtype', mystructarray.dtype, explain_error(e)))
-    if pop_fields is not None:
-        if select_fields is not None:
-            raise ValueError("It doesn't make sense to specify pop_fields and select_fields at the same time!!")
-        select_fields = list(set(retval.dtype.names) ^ set(pop_fields))
-    if select_fields is not None:
-        logger.debug(strm('\n\nh5join original indices',lsafen(retval.dtype.names)))
-        try:
-            retval = retval[select_fields]
-        except ValueError as e:
-            raise ValueError(strm('One of the fields', select_fields, 'is not in',
-                retval.dtype.names, explain_error(e)))
-    #}}}
-    return retval
-#}}}
-#{{{ indices to slice
-#}}}
-#{{{ old grid and tick
-def gridandtick(ax,rotation=(0,0),precision=(2,2),
-        labelstring=('',''),gridcolor=r_[0,0,0],
-        formatonly = False,fixed_y_locator = None,
-        use_grid = True,
-        spines = None,y = True):
-    defaultMajorLocator = lambda: mticker.MaxNLocator(min_n_ticks=4, steps=[1,2,5,10])
-    defaultMinorLocator = lambda: mticker.AutoMinorLocator(n=5)
-    #{{{ taken from matplotlib examples
-    def adjust_spines(ax,spines):
-        xlabel = ax.get_xlabel()
-        ylabel = ax.get_ylabel()
-        for loc, spine in list(ax.spines.items()):
-            if loc in spines:
-                spine.set_position(('outward',5)) # outward by 5 points
-                spine.set_smart_bounds(True)
-            else:
-                spine.set_color('none') # don't draw spine
-        # turn off ticks where there is no spine
-        if 'left' in spines:
-            ax.yaxis.set_ticks_position('left')
-        else:
-            # no yaxis ticks
-            ax.yaxis.set_ticks([],minor = False)
-        if 'bottom' in spines:
-            ax.xaxis.set_ticks_position('bottom')
-        else:
-            # no xaxis ticks
-            ax.xaxis.set_ticks([],minor = False)
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(ylabel)
-    #}}}
-    if spines is not None:
-        adjust_spines(ax,spines = spines)
-    if not formatonly:
-        #{{{x ticks
-        # determine the size
-        width = abs(np.diff(ax.get_xlim()))
-        if width==0:
-            raise ValueError('x axis width is zero')
-        widthexp = np.floor(np.log(width)/np.log(10.))-1
-        scalefactor = 10**widthexp
-        width /= scalefactor
-        majorLocator = defaultMajorLocator()
-        #majorFormatter = FormatStrFormatter('%0.'+'%d'%precision[0]+'f'+labelstring[0])# labelstring can be used, for instance, for pi
-        #ax.xaxis.set_major_formatter(majorFormatter)
-        minorLocator = defaultMinorLocator()
-        ax.xaxis.set_major_locator(majorLocator)
-        #for the minor ticks, use no labels; default NullFormatter
-        ax.xaxis.set_minor_locator(minorLocator)
-        #}}}
-        if y:
-            logarithmic = True if ax.get_yaxis().get_scale() == 'log' else False
-            #{{{ y ticks
-            width = abs(np.diff(ax.get_ylim()))
-            if width==0:
-                raise ValueError('y axis width is zero')
-            widthexp = np.floor(np.log(width)/np.log(10.))-1
-            scalefactor = 10**widthexp
-            width /= scalefactor
-            if fixed_y_locator is None:
-                if logarithmic:
-                    print("logarithmic")
-                    majorLocator = mticker.LogLocator(10)
-                    minorLocator = mticker.LogLocator(10,subs=r_[0:11])
-                else:
-                    majorLocator = defaultMajorLocator()
-                    minorLocator = defaultMinorLocator()
-            else:
-                majorLocator = mticker.MultipleLocator(fixed_y_locator[4::5])
-                minorLocator = mticker.FixedLocator(fixed_y_locator)
-            #majorFormatter = FormatStrFormatter('%0.'+'%d'%precision[1]+'f'+labelstring[1])# labelstring can be used, for instance, for pi
-            #ax.yaxis.set_major_formatter(majorFormatter)
-            ax.yaxis.set_major_locator(majorLocator)
-            #for the minor ticks, use no labels; default NullFormatter
-            ax.yaxis.set_minor_locator(minorLocator)
-            #}}}
-    if use_grid:
-        ax.yaxis.grid(use_grid,which='major',color=gridcolor,alpha=0.15,linestyle='-')
-        ax.xaxis.grid(use_grid,which='major',color=gridcolor,alpha=0.15,linestyle='-')
-        ax.yaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.075,linestyle='-')
-        ax.xaxis.grid(use_grid,which='minor',color=gridcolor,alpha=0.075,linestyle='-')
-    labels = ax.get_xticklabels()
-    plt.setp(labels,rotation=rotation[0])
-    if y:
-        labels = ax.get_yticklabels()
-        plt.setp(labels,rotation=rotation[1])
-    fig = plt.gcf()
-    fig.autofmt_xdate()
-    return
-def gridon(gridcolor=r_[0,0,0]):
-    plt.grid(True,which='major',color=gridcolor,alpha=0.1,linestyle='-')
-    plt.grid(True,which='minor',color=gridcolor,alpha=0.05,linestyle='-')
-#}}}
-#{{{ a better version?
-def othergridandtick(ax,rotation=(0,0),precision=(2,2),labelstring=('',''),gridcolor=r_[0,0,0],y = True,x = True,spines = None):
-    #{{{ taken from matplotlib examples
-    def adjust_spines(ax,spines):
-        xlabel = ax.get_xlabel()
-        ylabel = ax.get_ylabel()
-        for loc, spine in list(ax.spines.items()):
-            if loc in spines:
-                spine.set_position(('outward',5)) # outward by 5 points
-                spine.set_smart_bounds(True)
-            else:
-                spine.set_color('none') # don't draw spine
-        # turn off ticks where there is no spine
-        if 'left' in spines:
-            ax.yaxis.set_ticks_position('left')
-        else:
-            # no yaxis ticks
-            ax.yaxis.set_ticks([],minor = False)
-        if 'bottom' in spines:
-            ax.xaxis.set_ticks_position('bottom')
-        else:
-            # no xaxis ticks
-            ax.xaxis.set_ticks([],minor = False)
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(ylabel)
-    #}}}
-    if spines is not None:
-        adjust_spines(plt.gca(),spines = spines)
-    if x:
-        #{{{x ticks
-        # determine the size
-        ax.xaxis.set_major_locator(mticker.MaxNLocator(10)) # could use multiplelocator if it keeps try to do multiples of 2
-        ax.xaxis.set_minor_locator(mticker.MaxNLocator(50))
-        #}}}
-    if y:
-        #{{{ y ticks
-        ax.yaxis.set_major_locator(mticker.MaxNLocator(10))
-        ax.yaxis.set_minor_locator(mticker.MaxNLocator(50))
-        #}}}
-    plt.grid(True,which='major',color=gridcolor,alpha=0.2,linestyle='-')
-    plt.grid(True,which='minor',color=gridcolor,alpha=0.1,linestyle='-')
-    if x:
-        labels = ax.get_xticklabels()
-        plt.setp(labels,rotation=rotation[0])
-    if y:
-        labels = ax.get_yticklabels()
-        plt.setp(labels,rotation=rotation[1])
-    return
-#}}}
 #{{{ plot wrapper
 global OLDplot
 OLDplot = plot
 global myplotfunc
 myplotfunc = OLDplot
-def whereblocks(a):
-    """returns contiguous chunks where the condition is true
-    but, see the "contiguous" method, which is more OO"""
-    parselist = np.where(a)[0]
-    jumps_at = np.where(np.diff(parselist)>1)[0]+1
-    retlist = []
-    lastjump = 0
-    for jump in jumps_at:
-        retlist += [parselist[lastjump:jump]]
-        lastjump = jump
-    retlist += [parselist[lastjump:]]
-    return retlist
-def autolegend(*args,**kwargs):
-    #lg = legend(legendstr,'best'),loc = 2, borderaxespad = 0.)
-    match_colors = False
-    if 'match_colors' in list(kwargs.keys()):
-        match_colors = kwargs.pop('match_colors')
-    alpha = 0.45
-    if 'alpha' in list(kwargs.keys()):
-        alpha = kwargs.pop('alpha')
-    if 'ax' in list(kwargs.keys()):
-        ax_list = [kwargs.pop('ax')]
-    else:
-        ax_list = [plt.gca()]
-    if 'ax2' in list(kwargs.keys()):
-        ax_list.append(kwargs.pop('ax2'))
-    for ax in ax_list:
-        if len(args)==0:
-            lg = ax.legend(**kwargs)
-        elif len(args)==1:
-            lg = ax.legend(args[0],**kwargs)
-        else:
-            lg = ax.legend(args[0],args[1],**kwargs)
-        if lg is None:
-            raise ValueError("Warning! you called autolegend, but you don't seem to have anything labeled!!")
-        else:
-            lg.get_frame().set_alpha(alpha)
-    if match_colors:
-        for line, txt in zip(lg.get_lines(), lg.get_texts()): # from http://stackoverflow.com/questions/13828246/matplotlib-text-color-code-in-the-legend-instead-of-a-line 
-                    txt.set_color(line.get_color())  
-                    txt.set_alpha(line.get_alpha())  
-    return lg
-def autopad_figure(pad = 0.2,centered = False,figname = 'unknown'):
-    #{{{ solve the axis issue --> this does just the left
-    fig = plt.gcf()
-    ax = plt.gca()
-    labelsets = [] 
-    #labelsets.append(('left',ax.get_yticklabels()))
-    #labelsets.append(('left',ax.get_yticklines()))
-    #labelsets.append(('right',ax.get_yticklines()))
-    labelsets.append(('left',[plt.ylabel(ax.get_ylabel())]))
-    #labelsets.append(('bottom',ax.get_xticklabels()))
-    #labelsets.append(('bottom',ax.get_xticklines()))
-    if len(ax.get_xlabel()) > 0:
-        labelsets.append(('bottom',[plt.xlabel(ax.get_xlabel())]))
-    #labelsets.append(('top',ax.get_xticklines()))
-    if len(ax.get_title()) > 0:
-        pass #labelsets.append(('top',[plt.title(ax.get_title())]))
-    compto = {}
-    def on_draw(event):
-        # find the sum of the widths of all things labeled with a 'y'
-        spkwargs = {}
-        compto['bottom'] = fig.subplotpars.bottom
-        compto['left'] = fig.subplotpars.left
-        compto['right'] = fig.subplotpars.right
-        compto['top'] = fig.subplotpars.top
-        for axisn in ['left','bottom','top','right']:
-            bboxes = []
-            labellist = [x[1] for x in labelsets if x[0] is axisn]
-            for labels in labellist:
-                for label in labels:
-                    if isinstance(label, Line2D):
-                        pass # just rely on the pad
-                        #if np.any(map(lambda x: x == label.get_transform(),[ax.transData,ax.transAxes,fig.transFigure,None])):
-                        #    print 'found it'
-                        #else:
-                        #    print 'didn not find it'
-                        #bbox = label.get_window_extent(fig.canvas).inverse_transformed(ax.transData).inverse_transformed(fig.transFigure)
-                    else:
-                        try:
-                            bbox = label.get_window_extent()
-                        except Exception as e:
-                            warnings.warn("I wasn't able to run autopad on figure"+figname+"\nGetting window extent throws error"+str(e))
-                    # the figure transform goes from relative coords->pixels and we
-                    # want the inverse of that
-                    bboxes.append(bbox)
-                # this is the bbox that bounds all the bboxes, again in relative
-                # figure coords
-            l = 0 
-            if len(labellist):
-                bbox = mtransforms.Bbox.union(bboxes)
-                bboxi = bbox.transformed(fig.transFigure.inverted())
-                if axisn in ['left','right']:
-                    l = bboxi.width
-                if axisn in ['top','bottom']:
-                    l = bboxi.height
-            l += pad
-            if axisn in ['top','right']:
-                l = 1-l
-                if compto[axisn] > l:
-                    spkwargs.update({axisn:l})
-            else:
-                if compto[axisn] < l:
-                    spkwargs.update({axisn:l})
-        if len(spkwargs) > 0:
-            if centered and 'left' in list(spkwargs.keys()) and 'right' in list(spkwargs.keys()):
-                big = max(r_[spkwargs['left'],1-spkwargs['right']])
-                spkwargs.update({'left':big,'right':1-big})
-            try:
-                fig.subplots_adjust(**spkwargs) # pad a little
-            except:
-                raise RuntimeError('failed to adjust subplots spwargs = ',spkwargs)
-            #print "adjusted to",spkwargs
-            fig.canvas.draw()# recurse
-        return False
-    fig.canvas.mpl_connect('draw_event', on_draw)
-    fig.subplots_adjust(left = 0, right = 1, top = 1, bottom =0)
-    fig.canvas.draw()# it needs this to generate the 'renderers'
-    fig.canvas.mpl_connect('draw_event', on_draw)
-    fig.canvas.draw()
-    return
-    #}}}
-def expand_x(*args):
-    r'''expand the axes.  If an argument is passed, then it refers to the position relative to the current coordinates.  Values can be:
-        :0: set this side of the axis to 0
-        :None: leave this side of the axis alone
-        :a double: rescale the distance from the center of the axis to this side by this number'''
-    # this is matplotlib code to expand the x axis
-    ax = plt.gca()
-    xlims = np.array(ax.get_xlim())
-    width = abs(np.diff(xlims))
-    thismean = np.mean(xlims)
-    if len(args) > 0:
-        if len(args) == 1 and isinstance(args, tuple):
-            args = args[0]
-        for j in range(2):
-            if args[j] is None:
-                pass
-            elif args[j] == 0:
-                xlims[j] = 0
-            else:
-                xlims[j] = args[j]*(xlims[j]-thismean) + thismean
-    else:
-        xlims[0] -= width/10
-        xlims[1] += width/10
-    ax.set_xlim(xlims)
-def expand_y(*args):
-    r'''expand the axes.  If an argument is passed, then it refers to the position relative to the current coordinates.  Values can be:
-        :0: set this side of the axis to 0
-        :None: leave this side of the axis alone
-        :a double: rescale the distance from the center of the axis to this side by this number'''
-    # this is matplotlib code to expand the x axis
-    ax = plt.gca()
-    ylims = np.array(ax.get_ylim())
-    width = abs(np.diff(ylims))
-    thismean = np.mean(ylims)
-    if len(args) > 0:
-        if len(args) == 1 and isinstance(args, tuple):
-            args = args[0]
-        for j in range(2):
-            if args[j] is None:
-                pass
-            elif args[j] == 0:
-                ylims[j] = 0
-            else:
-                ylims[j] = args[j]*(ylims[j]-thismean) + thismean
-    else:
-        ylims[0] -= width/10
-        ylims[1] += width/10
-    ax.set_ylim(ylims)
-def plot_label_points(x,y,labels,**kwargs_passed):
-    kwargs = {'alpha':0.5,'color':'g','ha':'left','va':'center','rotation':0,'size':14}
-    kwargs.update(kwargs_passed)
-    for j in range(0,len(labels)):
-        text(x[j],y[j],labels[j],**kwargs)
-def addlabels(labelstring,x,y,labels):
-    r'obsolete -- use plot_label_points'
-    for j in range(0,len(labels)):
-        text(x[j],y[j],labelstring%labels[j],alpha=0.5,color='g',ha='left',va='top',rotation=0)
-def plot_color_counter(*args,**kwargs):
-    """Try not to use this function any more -- the version-to-version support for capturing and setting color cycles in matplotlib is very very bad.  (And, the cycler object in newer versions of matplolib is confusing.) So, just import `cycle` from `itertools`, and use it to build a cycle that you directly call to set your properties.
-
-    .. note::
-        previous description:
-
-        if passed an argument: make it so that the next line will have the properties given by the argument
-
-        if not passed an argument: just return the current plot properties,so that I can cycle back to it"""
-    ax = process_kwargs([('ax',plt.gca())],kwargs)
-    if len(args)>0:
-        if LooseVersion(matplotlib.__version__) >= LooseVersion("1.5"):
-            # {{{ find the element before the one we want
-            retval = args[0]
-            penultimate = next(ax._get_lines.prop_cycler)
-            j = next(ax._get_lines.prop_cycler)
-            not_in_list_counter = 1000.
-            while j != args[0]:
-                penultimate = j
-                j = next(ax._get_lines.prop_cycler)
-                not_in_list_counter -= 1
-                if not_in_list_counter == 0:
-                    raise ValueError("the value isn't in the cycler!")
-            # }}}
-            # {{{ now, set to the element before
-            not_in_list_counter = 1000.
-            while j != penultimate:
-                j = next(ax._get_lines.prop_cycler)
-                not_in_list_counter -= 1
-                if not_in_list_counter == 0:
-                    raise ValueError("the value isn't in the cycler!")
-            # }}}
-        else:
-            try:
-                ax._get_lines.count = args[0] # set the value of the color counter
-            except:
-                ax._get_lines.color_cycle = args[0] # set the value of the color counter
-            retval = args[0]
-    else:
-        if LooseVersion(matplotlib.__version__) >= LooseVersion("1.5"):
-            # {{{ I want to return the current element of the cycle
-            one_too_far = next(ax._get_lines.prop_cycler)
-            j = next(ax._get_lines.prop_cycler)
-            not_in_list_counter = 1000.
-            while j != one_too_far:
-                penultimate = j
-                j = next(ax._get_lines.prop_cycler)
-                not_in_list_counter -= 1
-                if not_in_list_counter == 0:
-                    raise ValueError("the value isn't in the cycler!")
-            retval = penultimate
-            # }}}
-        else:
-            try: # this is different depending on the version of.core
-                retval = ax._get_lines.count
-            except:
-                retval = ax._get_lines.color_cycle
-    return retval
-def contour_plot(xvals,yvals,zvals,color = 'k',alpha = 1.0,npts = 300,**kwargs):
-    if 'inline_spacing' in list(kwargs.keys()):
-        inline_spacing = kwargs.pop('inline_spacing')
-    else:
-        inline_spacing = 20
-    xi = np.linspace(xvals.min(),xvals.max(),npts)
-    yi = np.linspace(yvals.min(),yvals.max(),npts)
-    #{{{ show the diffusivity
-    #plot(np.array(xvals),np.array(yvals),'k')# to show where everything is
-    zi = scipy_griddata((xvals,yvals),
-        zvals,
-        (xi[None,:],yi[:,None]))
-    zi_min = zi[np.isfinite(zi)].min()
-    zi_max = zi[np.isfinite(zi)].max()
-    levels = r_[zi_min:zi_max:40j]
-    CS = plt.contour(xi,yi,zi,levels,colors = color,
-            alpha = 0.25*alpha)
-    oldspacing = levels[1]-levels[0]
-    levels = r_[zi_min:zi_max:oldspacing*5]
-    try:
-        CS = plt.contour(xi,yi,zi,levels,colors = color,
-            alpha = alpha,**kwargs)
-    except Exception as e:
-        raise Exception(strm("Is there something wrong with your levels?:",levels,"min z",zi_min,"max z",zi_max,explain_error(e)))
-    plt.clabel(CS,inline = 1,
-        #fmt = r'$k_\sigma/k_{\sigma,bulk} = %0.2f$',
-        fmt = r'%0.2f',
-        use_clabeltext = True,
-        inline_spacing = inline_spacing,
-        )
-    #}}}
-def plot_updown(data,axis,color1,color2,symbol = '',**kwargs):
-    if symbol == '':
-        symbol = 'o'
-    change = r_[1,np.diff(data.getaxis(axis))]
-    changemask = change > 0
-    if 'force_color' in list(kwargs.keys()) and kwargs['force_color'] == True:
-        if hasattr(data,'other_info'):
-            if 'plot_color' in data.get_prop():
-                data.other_info.pop('plot_color')
-    plot(data[axis,changemask],color1+symbol,**kwargs)
-    if len(kwargs) > 0 and 'label' in list(kwargs.keys()): kwargs.pop('label') # if I'm doing a legend, I want it on the first
-    plot(data[axis,~changemask],color2+symbol,**kwargs)
-    return
-def nextfigure(figurelist,name):
-    'obsolete -- now use class'
-    if isinstance(figurelist,figlist_var):
-        figurelist.next(name)
-        return figurelist
-    else:
-        print('Boo! not a new style name!')
-    logger.debug(strm(lsafe('DEBUG figurelist, called with',name)))
-    if name in figurelist:
-        fig = figure(figurelist.index(name)+1)
-        logger.debug(strm(lsafen('in',figurelist,'at figure',figurelist.index(name)+1,'switched figures')))
-    else:
-        fig = figure(len(figurelist)+1)
-        fig.add_subplot(111)
-        logger.debug(strm(lsafen('added, figure',len(figurelist)+1,'because not in figurelist',figurelist)))
-        figurelist.append(name)
-    return figurelist
-def figlistret(first_figure,figure_list,*args,**kwargs):
-    if 'basename' in list(kwargs.keys()):
-        basename = kwargs['basename']
-    else:
-        basename = thisjobname()
-    if first_figure is None:
-        figure_list.show(basename+'.pdf')
-        return args
-    else:
-        args += (figure_list,)
-        if len(args) == 1:
-            return args[0]
-        else:
-            return args
-def figlistini(first_figure):
-    r"""processes a figure list argument:
-    typically, you want to have a figure_list keyword argument for every function, which is by default set to None, then call this on the argument -- it always returns a figure list, creating a new one if required
-    similarly, somewhere I have another guy that processes the output, so that if it's set to None, it will by default dump and show the figure list,
-    and not return a figure list in the output"""
-    if first_figure is None:
-        return figlist_var() 
-    else:
-        return first_figure
-def figlistini_old(first_figure):
-    if isinstance(first_figure,figlist_var):
-        return first_figure
-    else:
-        print("Boo, not a new style name! (initialize)")
-    logger.debug(strm(lsafe('DEBUG: initialize figlist')))
-    if first_figure is None:
-        logger.debug(strm(lsafen('empty')))
-        return []
-    else:
-        logger.debug(strm(lsafen(first_figure.figurelist)))
-        return first_figure
-def text_on_plot(x,y,thistext,coord = 'axes',**kwargs):
-    ax = plt.gca()
-    if coord == 'axes':
-        newkwargs = {'transform':ax.transAxes,'size':'x-large',"horizontalalignment":'center'}
-    elif coord == 'data':
-        print("Yes, I am using data transform")
-        newkwargs = {'transform':ax.transData,'size':'small',"horizontalalignment":'right'}
-    color = None
-    if 'match_data' in list(kwargs.keys()):
-        if isinstance(kwargs['match_data'], list):
-            color = kwargs['match_data'][-1].get_color() # get the color of the last line
-        elif kwargs['match_data'].get_plot_color() is not None:
-            color = kwargs['match_data'].get_plot_color() # don't know when this works, but apparently, it does!
-        if color is not None:
-            newkwargs.update({'color':color})
-        else:
-            raise ValueError('You passed match_data to text_on_plot, but I can\'t find a color in the object')
-        kwargs.pop('match_data')
-    newkwargs.update(kwargs)
-    return text(x,y,thistext,**newkwargs)
 def plot(*args,**kwargs):
     """The base plotting function that wraps around matplotlib to do a couple convenient things.
 
@@ -1988,44 +1011,7 @@ def plot(*args,**kwargs):
     #}}}
     return retval
 #}}}
-#{{{general functions
-def box_muller(length, return_complex=True):
-    r'''algorithm to generate normally distributed noise'''
-    s1 = np.random.rand(length)
-    s2 = np.random.rand(length)
-    n1 = np.sqrt(-2*np.log(s1))*np.cos(2*pi*s2)
-    if return_complex:
-        n2 = np.sqrt(-2*np.log(s1))*np.sin(2*pi*s2)
-        return (n1 + 1j * n2)*0.5
-    else:
-        return (n1)*0.5
-#}}}
 
-#{{{nddata
-def dp(number,decimalplaces=2,scientific=False,max_front=3):
-    """format out to a certain decimal places, potentially in scientific notation
-
-    Parameters
-    ----------
-    decimalplaces: int (optional, default 3)
-        number of decimal places
-    scientific: boolean (optional, default False)
-        use scientific notation
-    max_front: int (optional, default 3)
-        at most this many places in front of the decimal before switching
-        automatically to scientific notation.
-    """
-    if scientific:
-        logger.debug(strm("trying to convert",number,"to scientific notation"))
-        tenlog = int(np.floor(np.log10(abs(number))))
-        number /= 10**tenlog
-        fstring = '%0.'+'%d'%decimalplaces+r'f\times 10^{%d}'%tenlog
-    else:
-        fstring = '%0.'+'%d'%decimalplaces+'f'
-        if len(fstring%number) > 1+decimalplaces+max_front:
-            return dp(number, decimalplaces=decimalplaces, scientific=True)
-    return fstring%number
-#}}}
 #{{{ concatenate datalist along dimname
 def concat(datalist,dimname,chop = False):
     """concatenate multiple datasets together along a new dimension.
@@ -2651,6 +1637,15 @@ class nddata (object):
             raise TypeError(".set_units() takes data units or 'axis' and axis units")
         return self
     def human_units(self):
+        """This function attempts to choose "human-readable" units for axes or
+        *y*-values of the data.
+        (Terminology stolen from "human readable" file
+        sizes when running shell commands.)
+        This means that it looks at the axis or at the
+        *y*-values and converts *e.g.* seconds to milliseconds where
+        appropriate, also multiplying or dividing the data in an appropriate
+        way.
+        """
         prev_label = self.get_units()
         # -- rescaling for y axis seems screwed up, so
         # just skip it
@@ -3370,6 +2365,29 @@ class nddata (object):
             self.run(np.sum,thisaxis)
         self.data *= dt
         return self
+    def phdiff(self, axis):
+        """calculate the phase gradient (units: cyc/Δx) along axis,
+        setting the error appropriately"""
+        if self.get_ft_prop(axis):
+            dt = self.get_ft_prop(axis,'df')
+        else:
+            dt = self.get_ft_prop(axis,'dt')
+        A = self[axis,1:]
+        B = self[axis,:-1]
+        A_sigma = A.get_error()
+        A_sigma = 1 if A_sigma is None else A_sigma
+        B_sigma = B.get_error()
+        B_sigma = 1 if B_sigma is None else B_sigma
+        self.data = np.angle(A.data/B.data)/2/pi/dt
+        self.setaxis(axis, A.getaxis(axis))
+        self.set_error(
+                sqrt(
+                    A_sigma**2*abs(0.5/A.data)**2
+                    +
+                    B_sigma**2*abs(0.5/B.data)**2
+                    ) / 2 / pi/dt
+                )
+        return self
     def diff(self,thisaxis,backwards = False):
         if backwards is True:
             self.data = self[thisaxis,::-1].data
@@ -3382,6 +2400,7 @@ class nddata (object):
             self.data /= dt
         return self
     def sum(self,axes):
+        "calculate the sum along axes, also transforming error as needed"
         if (isinstance(axes, str)):
             axes = [axes]
         for j in range(0,len(axes)):
@@ -3395,6 +2414,14 @@ class nddata (object):
                 raise
             self.data = np.sum(self.data,
                     axis=thisindex)
+            if self.get_error() is not None:
+                self.set_error(
+                        np.sqrt(
+                            np.mean(self.get_error()**2,
+                                axis=thisindex
+                                )
+                            )
+                        )
             self._pop_axis_info(thisindex)
         return self
     def sum_nopop(self,axes):
@@ -3536,9 +2563,9 @@ class nddata (object):
             self._pop_axis_info(thisindex)
         return self
     def argmin(self,*axes,**kwargs):
-        r"""If `np.argmin('axisname')` find the min along a particular axis, and get rid of that
+        r"""If `.argmin('axisname')` find the min along a particular axis, and get rid of that
         axis, replacing it with the index number of the max value.
-        If `np.argmin()`: return a dictionary giving the coordinates of the overall minimum point.
+        If `.argmin()`: return a dictionary giving the coordinates of the overall minimum point.
         
         Parameters
         ==========
@@ -3614,8 +2641,8 @@ class nddata (object):
         weight_matrix = self.copy().set_error(None)
         weight_matrix.data = 1. / self.get_error().copy()
         #{{{ find out where anything is nan, and set both error and weight to 0
-        nan_mask = isnan(self.data)
-        nan_mask |= isnan(weight_matrix.data)
+        nan_mask = np.isnan(self.data)
+        nan_mask |= np.isnan(weight_matrix.data)
         weight_matrix.data[nan_mask] = 0
         self.data[nan_mask] = 0
         #}}}
@@ -3698,6 +2725,46 @@ class nddata (object):
                 except:
                     raise IndexError(strm('trying to pop',
                         thisindex, 'from', self.axis_coords_units))
+        return self
+    def cov_mat(self, along_dim):
+        '''
+        calculate covariance matrix for a 2D experiment
+        Parameters
+        ==========
+        along_dim:  str
+                    the "observations" dimension of the data set (as opposed to the variable)
+        '''            
+        assert len(self.dimlabels) == 2, "we are only calculating covariance matrices for datasets with one variable and on observation axis"
+        assert along_dim in self.dimlabels
+        var_dim = list(set(self.dimlabels) - set([along_dim]))[0]
+        var_dim_coords = self.getaxis(var_dim)
+        var_dim_units = self.get_units(var_dim)
+        if self.axn(along_dim) == 0:
+            trans = False
+        else:
+            trans = True
+        self.data = np.cov(self.data, rowvar=trans)
+        self.setaxis(along_dim, self.getaxis(var_dim).copy())
+        def add_subscript(start,sub):
+            ismath = re.compile('\$(.*)\$')
+            m = ismath.match(start)
+            if m:
+                start, = m.groups()
+            # look for existing subscripts
+            firsttry = re.compile('(.*)_{(.*)}')
+            m = firsttry.match(start)
+            if m:
+                a,b = m.groups()
+                return f'${a}_{{{b},{sub}}}$'
+            secondtry = re.compile('(.*)_(.*)')
+            m = secondtry.match(start)
+            if m:
+                a,b = m.groups()
+                return f'${a}_{{{b},{sub}}}$'
+        firstdim = add_subscript(var_dim,'i')
+        self.rename(along_dim, firstdim)
+        self.rename(var_dim, add_subscript(var_dim,'j'))
+        self.set_units(firstdim,var_dim_units)
         return self
     def popdim(self,dimname):
         thisindex = self.axn(dimname)
@@ -4968,7 +4035,7 @@ class nddata (object):
             for j in range(len(axes_tmp.shape)):
                 this_slicer = [0]*len(axes_tmp.shape)
                 this_slicer[j] = slice(None,None,None)
-                new_axes.append(axes_tmp[this_slicer])
+                new_axes.append(axes_tmp[tuple(this_slicer)])
         else:
             new_axes = None
         #{{{ if there is a list of axis coordinates, add in slots for the new axes
@@ -5277,10 +4344,29 @@ class nddata (object):
         raise ValueError("You can't set the C property -- it's used to generate a copy")
     @property
     def angle(self):
-        "Return the angle component of the data"
+        """Return the angle component of the data.
+
+        This has error, which is calculated even if there is no error in
+        the original data -- in the latter case, a uniform error of 1 is
+        assumed. (This is desirable since phase is a tricky beast!)
+        """
         retval = self.copy(data=False)
         retval.data = np.angle(self.data)
-        return retval
+        if np.isscalar(self.data):
+            # if scalar, no error
+            return retval
+        else:
+            # from ∂φ/∂A=-i n/2A
+            # when ρe(iφ)=xAⁿ
+            dangle_dA = 1/(2*self.data)
+            A_sigma = self.get_error()
+            A_sigma = 1 if A_sigma is None else A_sigma
+            retval.set_error(
+                    abs(
+                        dangle_dA * A_sigma
+                        )
+                    )
+            return retval
     @angle.setter
     def angle(self):
         raise ValueError("Can't independently set the angle component yet")
@@ -6073,103 +5159,7 @@ class ndshape (ndshape_base):
             retval.labels(self.dimlabels,[np.double(r_[0:x]) for x in self.shape])
         return retval
 
-#{{{subplot_dim
-class subplot_dim():
-    def __init__(self,firstdim,seconddim):
-        self.num = r_[firstdim,seconddim,0]
-    def set(self,args,x='',g=True,y='',t='',a=''):
-        if isinstance(args, int):
-            number = args
-            ax = subplot(*tuple(self.num+r_[0,0,number]))
-            xlabel(x)
-            ylabel(y)
-            plt.title(t)
-            plt.grid(g)
-        elif (isinstance(args, tuple)) and (len(args) == 3):
-            # the second value passed is 
-            whichsmall = args[2]
-            break_into = args[1]
-            number = args[0]
-            mydims = self.num*r_[1,break_into,1]+r_[
-                    0,0,break_into*(number-1)+whichsmall]
-            try:
-                ax = subplot(*tuple(mydims))
-            except:
-                print('failed trying subplots: ', mydims)
-                raise
-            xlabel(x)
-            ylabel(y)
-            plt.title(t)
-            plt.grid(g)
-        else:
-            print("problem, need to pass either 1 or 3 arguments to set")
-            print('type of args: ',type(args))
-        return ax
-#}}}
-def fa(input,dtype='complex128'):# make a fortran array
-    return np.array(input,order='F',dtype=dtype) # will need transpose reverses the dimensions, since the bracketing still works in C order (inner is last index), but F tells it to store it appropriately in memory
-def ndgrid(*input):
-    thissize = list([1])
-    thissize = thissize * len(input)
-    output = list()
-    for j in range(0,len(input)):
-        tempsize = copy(thissize)
-        tempsize[j] = input[j].size
-        output.append(input[j].reshape(tempsize))
-    return output
-def pinvr(C,alpha):
-    U,S,V = svd(C,full_matrices=0)
-    #print 'U S V shapes:'
-    #print U.shape
-    #print S.shape
-    #print V.shape
-    if np.any(~np.isfinite(U)):
-        raise ValueError('pinvr error, U is not finite')
-    if np.any(~np.isfinite(V)):
-        raise ValueError('pinvr error, V is not finite')
-    if np.any(~np.isfinite(S)):
-        raise ValueError('pinvr error, S is not finite')
-    S = diag(S / (S**2 + alpha**2))
-    if np.any(~np.isfinite(S)):
-        raise ValueError('pinvr error, problem with S/(S^2+alpha^2) --> set your regularization higher')
-    return np.dot(np.conj(transpose(V)),
-            np.dot(S,np.conj(transpose(U))))
-def sech(x):
-    return 1./cosh(x)
-def spectrogram(waveform,f_start,f_stop,npoints_fdom=40,tdom_div=2):
-    npoints_tdom = waveform.len/tdom_div # this seems to be more legible than above 
-    resolution = np.diff(waveform.x[0:2])
-
-    sigma = abs(f_start-f_stop)/np.double(npoints_fdom)
-    #print "sigma = %f resolution = %f"%(sigma,resolution)
-    if sigma<4*resolution:
-        sigma = 4*resolution
-
-    waveform.def_filter(sigma,npoints_tdom)# define the filter and number of points for the spectrogram windowing (define the filter such that the points are spaced sigma apart)
-
-    # go through and apply the filter for some range of points
-
-    f_axis = np.linspace(f_start,f_stop,npoints_fdom)
-
-    specgram = np.zeros((npoints_fdom,npoints_tdom),dtype="complex128")
-
-    for j in range(0,npoints_fdom):
-
-        t_axis, specgram[j,:] = waveform.do_filter(f_axis[j])
-        #plot(t_axis,abs(specgram[j,:])) # leave this in for testing what it does in the fdom
-    #image(specgram,y=f_axis/1e6,x=t_axis*1e6) # now do an imagehsv (see if we can make imagerybw) plot of the resulting spectrogram
-    imshow(abs(specgram),extent=(t_axis[0]*1e6,t_axis[-1]*1e6,f_axis[-1]/1e6,f_axis[0]/1e6)) # now do an imagehsv (see if we can make imagerybw) plot of the resulting spectrogram
-    return plt.gca()
 image = this_plotting.image.image
-def colormap(points,colors,n=256):
-    r = np.interp(np.linspace(0,1,n),points,colors[:,0].flatten())
-    g = np.interp(np.linspace(0,1,n),points,colors[:,1].flatten())
-    b = np.interp(np.linspace(0,1,n),points,colors[:,2].flatten())
-    return np.reshape(r_[r,g,b],(3,n)).T
-def myfilter(x,center = 250e3,sigma = 100e3):
-    x = (x-center)**2
-    x /= sigma**2
-    return np.exp(-x)
 #}}}
 
 #{{{ fitdata

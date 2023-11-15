@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_auto_examples_BSA_calibration.py>`
+        :ref:`Go to the end <sphx_glr_download_auto_examples_BSA_calibration.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -66,7 +66,7 @@ To run the curve for your data:
     the experiments present in this file are: dict_keys(['UP_H2O', 'K-PBSbuffer', 'J-0p0078%BSA', 'H-0p0156%BSA', 'G-0p0234%BSA1', 'F-0p0311%BSA', 'G-0p0234%BSA_actual', 'E-0p0389%BSA', 'D-0p0466%BSA', 'C-0p0544%BSA', 'B-0p0622%BSA', 'A-0p0700%BSA'])
     c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1959: UserWarning: marker is redundantly defined by the 'marker' keyword argument and the fmt string "o" (-> marker='o'). The keyword argument will take precedence.
       retval = myplotfunc(*plotargs,**kwargs)
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\figlist.py:491: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\figlist.py:492: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       plt.gcf().tight_layout()
 
 
@@ -92,7 +92,7 @@ To run the curve for your data:
 
     # HERE we get dictionaries of nddata
     dataWKBSA = find_file(
-        "221110_BSAexerciseWK_0p07-0percentBSAcalibration.BSW", exp_type="UV_Vis/BSA_calib"
+        "221110_BSAexerciseWK_0p07-0percentBSAcalibration.BSW", exp_type="UV_Vis/BSA_Exercise"
     )
     print("the experiments present in this file are:", dataWKBSA.keys())
     # from our notebook, we get the following info
@@ -169,7 +169,7 @@ To run the curve for your data:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.433 seconds)
+   **Total running time of the script:** ( 0 minutes  0.925 seconds)
 
 
 .. _sphx_glr_download_auto_examples_BSA_calibration.py:
@@ -177,6 +177,8 @@ To run the curve for your data:
 .. only:: html
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
+
+
 
 
     .. container:: sphx-glr-download sphx-glr-download-python

@@ -23,6 +23,7 @@ from time import mktime
 from PIL import Image
 import numpy as np
 import re
+import sys
 
 golden_ratio = (1.0 + np.sqrt(5))/2.0
 
@@ -49,6 +50,7 @@ class figlistl (figlist):
     def __init__(self,*args,**kwargs):
         super(figlistl,self).__init__(*args,**kwargs)
         self.black = False
+        self._print_at_end = False
         return
     def par_break(self):
         self.text("\\par")

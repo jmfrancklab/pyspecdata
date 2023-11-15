@@ -32,7 +32,7 @@ wv_range = (276, 281)  # range of wavelengths we consider to be our peak
 
 # HERE we get dictionaries of nddata
 dataWKBSA = find_file(
-    "221110_BSAexerciseWK_0p07-0percentBSAcalibration.BSW", exp_type="UV_Vis/BSA_calib"
+    "221110_BSAexerciseWK_0p07-0percentBSAcalibration.BSW", exp_type="UV_Vis/BSA_Exercise"
 )
 print("the experiments present in this file are:", dataWKBSA.keys())
 # from our notebook, we get the following info

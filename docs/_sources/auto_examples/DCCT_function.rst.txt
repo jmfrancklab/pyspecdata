@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_auto_examples_DCCT_function.py>`
+        :ref:`Go to the end <sphx_glr_download_auto_examples_DCCT_function.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -63,8 +63,8 @@ using the domain colored plotting style.
  .. code-block:: none
 
     C:\Users\jmfranck\pyspecdata.0.log appears to be locked or otherwise inaccessible: I'm going to explore other options for fileno
-    ----------  logging output to C:\Users\jmfranck\pyspecdata.1.log  ----------
-    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\figlist.py:491: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    ----------  logging output to C:\Users\jmfranck\pyspecdata.2.log  ----------
+    c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\figlist.py:492: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       plt.gcf().tight_layout()
 
 
@@ -140,7 +140,7 @@ using the domain colored plotting style.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.270 seconds)
+   **Total running time of the script:** ( 0 minutes  2.175 seconds)
 
 
 .. _sphx_glr_download_auto_examples_DCCT_function.py:
@@ -148,6 +148,8 @@ using the domain colored plotting style.
 .. only:: html
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
+
+
 
 
     .. container:: sphx-glr-download sphx-glr-download-python

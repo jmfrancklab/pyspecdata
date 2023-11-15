@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LaTeX Notebook Functionality &mdash; pySpecData 0.9.5.3.2 documentation</title>
@@ -20,6 +20,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -65,16 +66,13 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fitdata.html">the lmfitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#individual-functions">Individual Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
 </ul>
 
         </div>
@@ -90,8 +88,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>LaTeX Notebook Functionality</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">LaTeX Notebook Functionality</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/notebook.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -102,7 +100,7 @@
            <div itemprop="articleBody">
              
   <section id="latex-notebook-functionality">
-<h1>LaTeX Notebook Functionality<a class="headerlink" href="#latex-notebook-functionality" title="Permalink to this headline">¶</a></h1>
+<h1>LaTeX Notebook Functionality<a class="headerlink" href="#latex-notebook-functionality" title="Permalink to this heading">¶</a></h1>
 <p>This package contains tools for running a LaTeX notebook with
 embedded python code.  One can then, for instance, keep an
 electronic lab notebook where the plots and data are generated
@@ -131,10 +129,10 @@ chronological document (or <em>vice versa</em>) with the
 <code class="docutils literal notranslate"><span class="pre">\\ref{...}</span></code> command.</p></li>
 </ul>
 <section id="setting-up-the-notebook">
-<h2>Setting up the notebook<a class="headerlink" href="#setting-up-the-notebook" title="Permalink to this headline">¶</a></h2>
+<h2>Setting up the notebook<a class="headerlink" href="#setting-up-the-notebook" title="Permalink to this heading">¶</a></h2>
 </section>
 <section id="requirements">
-<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic">
 <li><p>latex packages</p>
 <p>In order to be able to build a latex notebook where <code class="docutils literal notranslate"><span class="pre">\begin{python}...\end{python}</span></code> environments are replaced with the code output,
@@ -201,7 +199,7 @@ In some cases, during the first run, an explanatory error will appear – just f
 </ol>
 </section>
 <section id="running-the-notebook">
-<h2>Running the notebook<a class="headerlink" href="#running-the-notebook" title="Permalink to this headline">¶</a></h2>
+<h2>Running the notebook<a class="headerlink" href="#running-the-notebook" title="Permalink to this heading">¶</a></h2>
 <p>If you create figures with the <cite>figlist_var</cite> class,
 you should simply be able to write a latex file with embedded
 <code class="docutils literal notranslate"><span class="pre">python</span></code> environments (<code class="docutils literal notranslate"><span class="pre">\\begin{python}</span></code> … <code class="docutils literal notranslate"><span class="pre">\\end{python}</span></code>)
@@ -237,7 +235,7 @@ This would entail changing the paths of the various files</p>
 </div>
 </section>
 <section id="how-it-works">
-<h2>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this headline">¶</a></h2>
+<h2>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Note that the code works a bit differently than in previous
 versions – while it previously required LaTeX to be run with shell-escape enabled,
@@ -247,7 +245,7 @@ by <code class="docutils literal notranslate"><span class="pre">update_notebook_
 <li><p>To compile, use <code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span> <span class="pre">--xelatex</span></code></p></li>
 </ul>
 <section id="the-latex-end">
-<h3>The LaTeX end<a class="headerlink" href="#the-latex-end" title="Permalink to this headline">¶</a></h3>
+<h3>The LaTeX end<a class="headerlink" href="#the-latex-end" title="Permalink to this heading">¶</a></h3>
 <p>The file <cite>mypython.sty</cite> looks for the <cite>python</cite> environment, it pulls the relevant
 code, outputs it to <code class="docutils literal notranslate"><span class="pre">scripts/*.py</span></code> and then writes a command to
 the <code class="docutils literal notranslate"><span class="pre">.aux</span></code> file that tells LaTeX where to find the
@@ -256,7 +254,7 @@ The <code class="docutils literal notranslate"><span class="pre">scripts/*.tex</
 <code class="docutils literal notranslate"><span class="pre">update_notebook_pythonscripts</span></code> (without arguments) is run.</p>
 </section>
 <section id="the-python-end">
-<h3>The python end<a class="headerlink" href="#the-python-end" title="Permalink to this headline">¶</a></h3>
+<h3>The python end<a class="headerlink" href="#the-python-end" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">update_notebook_pythonscripts</span></code> runs through the various
 <code class="docutils literal notranslate"><span class="pre">scripts/*.py</span></code> files, checks and checks whether or not they
 have been previously cached (under the same or a different script

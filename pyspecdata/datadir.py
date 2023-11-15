@@ -9,6 +9,7 @@ import platform
 from .general_functions import process_kwargs, strm
 import logging
 import atexit
+import collections
 from subprocess import Popen,PIPE,check_output
 from subprocess import call as subprocess_call
 logger = logging.getLogger('pyspecdata.datadir')
@@ -26,7 +27,7 @@ class MyConfig(object):
         else:
             self.hide_start = '.'
         self.config_location = os.path.join(os.path.expanduser('~'),self.hide_start+'pyspecdata')
-        self.config_vars = {}
+        self.config_vars = collections.defaultdict(dict)
         "The dictionary that stores the current settings -- keep these in a dictionary, which should be faster than reading from environ, or from a file."
         atexit.register(self.__exit__,None,None,None)
         return
@@ -92,9 +93,9 @@ class MyConfig(object):
         -------
         The value corresponding to `this_key`.
         """
-        if this_key in self.config_vars.keys():
-            logger.debug(strm("I pulled",this_key,"from the config_vars"))
-            return self.config_vars[this_key]
+        if this_key in self.config_vars[section].keys():
+            logger.debug(strm("I pulled",this_key,"in",section,"from the config_vars"))
+            return self.config_vars[section][this_key]
         if environ is not None and environ in os.environ.keys():
             logger.debug(strm("about to look for environment variable",environ))
             retval = os.environ[environ]
@@ -133,7 +134,7 @@ class MyConfig(object):
             if environ is not None:
                 os.environ[environ] = retval
             logger.debug(strm("I pulled",this_key,"from the configuration file -- it is",retval))
-        self.config_vars[this_key] = retval
+        self.config_vars[section][this_key] = retval
         return retval
 pyspec_config = MyConfig()
 def get_notebook_dir(*args):
@@ -173,6 +174,12 @@ def proc_data_target_dir(exp_type):
 def getDATADIR(*args,**kwargs):
     r'''Used to find a directory containing data in a way that works
     seamlessly across different computers (and operating systems).
+
+    **This is not intended as a user-level function** use 
+    :func:`~pyspecdata.find_file`
+    or
+    :func:`~pyspecdata.search_filename` (especially with the `unique` parameter set to true) instead!
+
     Supports the case where data is processed both on a laboratory
     computer and (*e.g.* after transferring via ssh or a syncing client) on a
     user's laptop.
@@ -332,6 +339,8 @@ class cached_searcher(object):
         return
     def search_for(self,exp_type):
         if not self.has_run:
+            print(strm("about to grab the directory list for",exp_type))
+            logger.info(strm("about to grab the directory list for",exp_type))
             self.grab_dirlist()
         potential_hits = [j for j in self.dirlist
                 if exp_type.lower() in j.lower()]
@@ -355,7 +364,7 @@ def rclone_search(fname,exp_type,dirname):
             remotelocation = result[0]
             logging.debug("about to write to RcloneRemotes")
             pyspec_config.set_setting('RcloneRemotes',exp_type,remotelocation)
-    logger.debug("remote location previously stored")
+    logger.debug(f"remote location previously stored {remotelocation} for {exp_type} going to be put in {dirname}")
     if not fname.startswith('*'):
         fname = '*' + fname
     if not fname.endswith('*'):
@@ -365,6 +374,7 @@ def rclone_search(fname,exp_type,dirname):
                 remotelocation,
                 # dirname below needs to be replaced with path relative to current directory
                 os.path.normpath(os.path.join(dirname)).replace('\\','\\\\')))
+    cmd = cmd.replace("'",'"')
     logger.info(f"I'm about to run\n{cmd}")
     os.system(cmd)
     logger.info(f"... done")

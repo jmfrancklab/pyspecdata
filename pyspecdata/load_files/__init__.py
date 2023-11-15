@@ -43,6 +43,24 @@ def search_filename(searchstring,exp_type,
     r"""Use regular expression `searchstring` to find a file inside the directory indicated by `exp_type`
     (For information on how to set up the file searching mechanism, see :func:`~pyspecdata.datadir.register_directory`).
 
+    Used to find data in a way that works seamlessly across different computers (and operating systems).
+    The basic scheme we assume is that:
+
+    *   Laboratory data is stored on the cloud (on something like Microsoft Teams or Google Drive, etc.)
+    *   The user wants to seamlessly access the data on their laptop.
+
+    The ``.pyspecdata`` config file stores all the info about where the data lives + is stored locally.  You have basically two options:
+
+    *   Point the source directories for the different data folders (``exp_type``) to a synced folder on your laptop.
+    *   **Recommended** Point the source directories to a local directory on your computer, where local copies of files are stored, and then also set up one or more remotes using rclone (which is an open source cloud access tool).
+        *   pyspecdata can automatically search all your rclone remotes when you try to load a file.  This is obviously slow.
+        *   After the auto-search, it adds a line to ``.pyspecdata`` so that it knows how to find that directory in the future.
+        *   It will tell you when it's searching the remotes.  If you know what you're doing, we highly recommend pressing ctrl-C and then manually adding the appropriate line to RcloneRemotes.  (Once you allow it to auto-search and add a line once, the format should be obvious.)
+
+    Supports the case where data is processed both on a laboratory computer and (*e.g.* after transferring via ssh or a syncing client) on a user's laptop.
+    While it will return a default directory without any arguments, it is
+    typically used with the keyword argument `exp_type`, described below.
+
     Parameters
     ----------
     searchstring : str
@@ -134,6 +152,24 @@ def find_file(searchstring,
             return_list=False,
             **kwargs):
     r'''Find the file  given by the regular expression `searchstring` inside the directory identified by `exp_type`, load the nddata object, and postprocess with the function `postproc`.
+
+    Used to find data in a way that works seamlessly across different computers (and operating systems).
+    The basic scheme we assume is that:
+
+    *   Laboratory data is stored on the cloud (on something like Microsoft Teams or Google Drive, etc.)
+    *   The user wants to seamlessly access the data on their laptop.
+
+    The ``.pyspecdata`` config file stores all the info about where the data lives + is stored locally.  You have basically two options:
+
+    *   Point the source directories for the different data folders (``exp_type``) to a synced folder on your laptop.
+    *   **Recommended** Point the source directories to a local directory on your computer, where local copies of files are stored, and then also set up one or more remotes using rclone (which is an open source cloud access tool).
+        *   pyspecdata can automatically search all your rclone remotes when you try to load a file.  This is obviously slow.
+        *   After the auto-search, it adds a line to ``.pyspecdata`` so that it knows how to find that directory in the future.
+        *   It will tell you when it's searching the remotes.  If you know what you're doing, we highly recommend pressing ctrl-C and then manually adding the appropriate line to RcloneRemotes.  (Once you allow it to auto-search and add a line once, the format should be obvious.)
+
+    Supports the case where data is processed both on a laboratory computer and (*e.g.* after transferring via ssh or a syncing client) on a user's laptop.
+    While it will return a default directory without any arguments, it is
+    typically used with the keyword argument `exp_type`, described below.
 
     It looks at the top level of the directory first, and if that fails, starts to look recursively.
     Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.

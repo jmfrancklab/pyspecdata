@@ -64,11 +64,12 @@ The figure list gives us three things:
 from .plot_funcs import image as this_image
 from .general_functions import *
 from . import plot_funcs as this_plotting
-from .core import nddata, autolegend
+from .core import nddata, autolegend, gridandtick
 from .core import plot as pyspec_plot
 import matplotlib.pyplot as plt
 import time
 import logging
+from numpy import r_
 
 class figlist(object):
     r"""
@@ -128,6 +129,7 @@ class figlist(object):
         self.autolegend_list = {}
         self.twinx_list = {}
         self.basename = None
+        self._print_at_end = True
         return
     def par_break(self):
         """This is for adding a paragraph break between
@@ -309,6 +311,15 @@ class figlist(object):
                 raise ValueError('If you pass twinx, pass 0 for the original or 1 for the right side')
             self.figdict.update({self.current:fig})
         return fig
+    def plot_weighted(self,phdiff, arb_scaling=3):
+        "plot weighted data as a scatter plot"
+        assert len(phdiff.dimlabels) == 1, "only one dimension supported right now -- loop as needed"
+        dimname = phdiff.dimlabels[0]
+        alphapoints = 1/phdiff.get_error() # to show what a weighted sum looks like
+        alphapoints[~np.isfinite(alphapoints)] = 0
+        alphapoints /= max(alphapoints) # scaling relative to max point, because sometimes there are more points that are mostly error, and sometimes less
+        sc = plt.scatter(phdiff.getaxis(dimname),phdiff.data, alpha=np.clip(alphapoints.ravel()*arb_scaling,0,1), s=10)
+        return sc
     def plot(self,*args,**kwargs):
         r"""
         Parameters
@@ -397,7 +408,7 @@ class figlist(object):
         for loc, spine in list(ax.spines.items()):
             if loc in spines:
                 spine.set_position(('outward',10)) # outward by 10 points
-                spine.set_smart_bounds(True)
+                #spine.set_smart_bounds(True)
             else:
                 spine.set_color('none') # don't draw spine
 
@@ -702,6 +713,7 @@ class figlist(object):
         Because this is executed before raising any errors, we want to avoid showing any plots if there are errors.
         Otherwise, it gets very confusing.
         '''
+        if self._print_at_end: print(self)
         if exception_type is None:
             if hasattr(self,'file_name'):
                 if hasattr(self,'line_spacing'):

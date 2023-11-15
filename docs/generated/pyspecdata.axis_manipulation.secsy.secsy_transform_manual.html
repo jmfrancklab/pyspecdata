@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pyspecdata.axis_manipulation.secsy.secsy_transform_manual &mdash; pySpecData 0.9.5.3.2 documentation</title>
@@ -20,6 +20,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -66,16 +67,13 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the lmfitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">PySpecData Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#individual-functions">Individual Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#matplotlib-examples">Matplotlib Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html#text-only-examples">Text-Only Examples</a></li>
 </ul>
 
         </div>
@@ -91,11 +89,11 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../notebook.html">LaTeX Notebook Functionality</a> &raquo;</li>
-          <li><a href="../pyspecdata.html">N-dimensional Data (nddata)</a> &raquo;</li>
-          <li><a href="../axis_manipulation.html">Axis Manipulation Functions</a> &raquo;</li>
-      <li>pyspecdata.axis_manipulation.secsy.secsy_transform_manual</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../notebook.html">LaTeX Notebook Functionality</a></li>
+          <li class="breadcrumb-item"><a href="../pyspecdata.html">N-dimensional Data (nddata)</a></li>
+          <li class="breadcrumb-item"><a href="../axis_manipulation.html">Axis Manipulation Functions</a></li>
+      <li class="breadcrumb-item active">pyspecdata.axis_manipulation.secsy.secsy_transform_manual</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/generated/pyspecdata.axis_manipulation.secsy.secsy_transform_manual.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -106,14 +104,14 @@
            <div itemprop="articleBody">
              
   <section id="pyspecdata-axis-manipulation-secsy-secsy-transform-manual">
-<h1>pyspecdata.axis_manipulation.secsy.secsy_transform_manual<a class="headerlink" href="#pyspecdata-axis-manipulation-secsy-secsy-transform-manual" title="Permalink to this headline">¶</a></h1>
+<h1>pyspecdata.axis_manipulation.secsy.secsy_transform_manual<a class="headerlink" href="#pyspecdata-axis-manipulation-secsy-secsy-transform-manual" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.axis_manipulation.secsy.secsy_transform_manual">
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.axis_manipulation.secsy.</span></span><span class="sig-name descname"><span class="pre">secsy_transform_manual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direct_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indirect_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_indirect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.secsy.secsy_transform_manual" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shift the time-domain data backwards by the echo time.
 As opposed to <a class="reference internal" href="../auto_api/pyspecdata.axis_manipulation.html#pyspecdata.axis_manipulation.secsy_transform" title="pyspecdata.axis_manipulation.secsy_transform"><code class="xref py py-func docutils literal notranslate"><span class="pre">secsy_transform</span></code></a>, this directlly manipulates the phase of the function, rather than calling on <code class="xref py py-func docutils literal notranslate"><span class="pre">skew</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>has_indirect</strong> (<em>bool</em>) – <p>(This option is largely specific to data loaded by <code class="xref py py-func docutils literal notranslate"><span class="pre">acert_hdf5</span></code>)</p>
 <p>Does the data actually have an indirect dimension?

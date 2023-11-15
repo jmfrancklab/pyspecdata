@@ -5,6 +5,11 @@ import subprocess
 import sys
 import os
 
+if os.name == 'nt' and not os.path.exists('setup.cfg'):
+    os.rename('setup.cfg.windows','setup.cfg')
+    input("I have renamed setup.cfg.windows to setup.cfg, in order to enable the mingw compiler.  When creating pull requests, please don't include this change -- thanks!\n\nAfter hitting enter, simply re-run setup.cfg.")
+
+
 #if find_executable("gcc") is None:
 #    raise RuntimeError("Please do not give up, but read the following message carefully!\nThis isn't going to work because distutils can't find gcc!\nIf you are on windows, this is probably happening due a problem with Anaconda.  In that case, you need to make sure that the folder that contains mingw gcc is in your path"
 #            +r"(something like: C:\ProgramData\Anaconda3\MinGW\bin\)"+'\n'

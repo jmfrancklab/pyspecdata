@@ -16,6 +16,23 @@ import numpy as np
 import logging
 import re
 
+class CustomError(Exception):
+    def __init__(self, *value, **kwargs):
+        raise NotImplementedError("You should get rid of CustomError and use explain_error instead")
+        return
+def emptytest(x): # test is it is one of various forms of np.empty
+   if type(x) in [list,np.array]:
+       if len(x) == 0:
+           return True
+       elif x is np.array(None):
+           return True
+       elif len(x) > 0:
+           return False
+       #don't want the following, because then I may need to pop, etc
+       #if type(x) is list and all(map(lambda x: x is None,x)): return True
+   if np.size(x) == 1 and x is None: return True
+   if np.size(x) == 0: return True
+   return False
 def balance_clims():
     """works with matplotlib to generate a plot
     appropriate for positive and negative
@@ -308,3 +325,83 @@ def copy_maybe_none(input):
             return list(map(copy,input))
         else:
             return input.copy()
+
+def whereblocks(a):
+    """returns contiguous chunks where the condition is true
+    but, see the "contiguous" method, which is more OO"""
+    parselist = np.where(a)[0]
+    jumps_at = np.where(np.diff(parselist)>1)[0]+1
+    retlist = []
+    lastjump = 0
+    for jump in jumps_at:
+        retlist += [parselist[lastjump:jump]]
+        lastjump = jump
+    retlist += [parselist[lastjump:]]
+    return retlist
+def box_muller(length, return_complex=True):
+    r'''algorithm to generate normally distributed noise'''
+    s1 = np.random.rand(length)
+    s2 = np.random.rand(length)
+    n1 = np.sqrt(-2*np.log(s1))*np.cos(2*pi*s2)
+    if return_complex:
+        n2 = np.sqrt(-2*np.log(s1))*np.sin(2*pi*s2)
+        return (n1 + 1j * n2)*0.5
+    else:
+        return (n1)*0.5
+def dp(number,decimalplaces=2,scientific=False,max_front=3):
+    """format out to a certain decimal places, potentially in scientific notation
+
+    Parameters
+    ----------
+    decimalplaces: int (optional, default 3)
+        number of decimal places
+    scientific: boolean (optional, default False)
+        use scientific notation
+    max_front: int (optional, default 3)
+        at most this many places in front of the decimal before switching
+        automatically to scientific notation.
+    """
+    if scientific:
+        logging.debug(strm("trying to convert",number,"to scientific notation"))
+        tenlog = int(np.floor(np.log10(abs(number))))
+        number /= 10**tenlog
+        fstring = '%0.'+'%d'%decimalplaces+r'f\times 10^{%d}'%tenlog
+    else:
+        fstring = '%0.'+'%d'%decimalplaces+'f'
+        if len(fstring%number) > 1+decimalplaces+max_front:
+            return dp(number, decimalplaces=decimalplaces, scientific=True)
+    return fstring%number
+def fa(input,dtype='complex128'):# make a fortran array
+    return np.array(input,order='F',dtype=dtype) # will need transpose reverses the dimensions, since the bracketing still works in C order (inner is last index), but F tells it to store it appropriately in memory
+def ndgrid(*input):
+    thissize = list([1])
+    thissize = thissize * len(input)
+    output = list()
+    for j in range(0,len(input)):
+        tempsize = copy(thissize)
+        tempsize[j] = input[j].size
+        output.append(input[j].reshape(tempsize))
+    return output
+def pinvr(C,alpha):
+    U,S,V = np.linalg.svd(C,full_matrices=0)
+    #print 'U S V shapes:'
+    #print U.shape
+    #print S.shape
+    #print V.shape
+    if np.any(~np.isfinite(U)):
+        raise ValueError('pinvr error, U is not finite')
+    if np.any(~np.isfinite(V)):
+        raise ValueError('pinvr error, V is not finite')
+    if np.any(~np.isfinite(S)):
+        raise ValueError('pinvr error, S is not finite')
+    S = diag(S / (S**2 + alpha**2))
+    if np.any(~np.isfinite(S)):
+        raise ValueError('pinvr error, problem with S/(S^2+alpha^2) --> set your regularization higher')
+    return np.dot(np.conj(transpose(V)),
+            np.dot(S,np.conj(transpose(U))))
+def sech(x):
+    return 1./cosh(x)
+def myfilter(x,center = 250e3,sigma = 100e3):
+    x = (x-center)**2
+    x /= sigma**2
+    return np.exp(-x)
