@@ -29,6 +29,7 @@ will hopefull be intuitive to those familiar with SQL, etc.
 '''
 from .datadir import pyspec_config, unknown_exp_type_name
 from .dict_utils import make_ndarray, unmake_ndarray
+from .matrix_math.dot import dot as MM_dot
 from sys import exc_info
 from os import environ
 from os.path import sep as path_sep
@@ -1803,6 +1804,12 @@ class nddata (object):
         self.dimlabels[self.dimlabels.index(previous)] = new
         return self
     #}}}
+    @property
+    def shape(self):
+        return ndshape(self)
+    @shape.setter
+    def shape(self):
+        raise ValueError("You can't set the shape property -- right now, it's just used to read the shape")
     #{{{ display and other properties
     #{{{ set and get prop
     def unset_prop(self,arg):
@@ -1918,50 +1925,7 @@ class nddata (object):
         multiplication (represents the rows/columns)."""
         self._matmul_along = dimname
         return self
-    #@profile
-    def dot(self,arg):
-        """Tensor dot of self with arg -- dot all matching dimension labels.  This can be used to do matrix multiplication, but note that the order of doesn't matter, since the dimensions that are contracted are determined by matching the dimension names, not the order of the dimension.
-
-        >>> a = nddata(r_[0:9],[3,3],['a','b'])
-        >>> b = nddata(r_[0:3],'b')
-        >>> print a.C.dot(b)
-        >>> print a.data.dot(b.data)
-        >>> a = nddata(r_[0:27],[3,3,3],['a','b','c'])
-        >>> b = nddata(r_[0:9],[3,3],['a','b'])
-        >>> print a.C.dot(b)
-        >>> print np.tensordot(a.data,b.data,axes=((0,1),(0,1)))
-
-        >>> a = nddata(r_[0:27],[3,3,3],['a','b','c'])
-        >>> b = nddata(r_[0:9],[3,3],['a','d'])
-        >>> print a.C.dot(b)
-        >>> print np.tensordot(a.data,b.data,axes=((0),(0)))
-        """
-        A,B = self.aligndata(arg)
-        matching_dims = list(set(self.dimlabels) & set(arg.dimlabels))
-        assert len(matching_dims) > 0, "no matching dimensions!"
-        # {{{ store the dictionaries for later use
-        axis_coords_dict = A.mkd(A.axis_coords)
-        axis_units_dict = A.mkd(A.axis_coords_units)
-        axis_coords_error_dict = A.mkd(A.axis_coords_error)
-        # }}}
-        # manipulate "self" directly
-        self.dimlabels = [j for j in A.dimlabels if j not in matching_dims]
-        match_idx = [A.axn(j) for j in matching_dims]
-        if (self.get_error() is not None) or (arg.get_error() is not None):
-            raise ValueError("we plan to include error propagation here, but not yet provided")
-        self.data = np.tensordot(A.data,B.data,axes=(match_idx,match_idx))
-        logger.debug(strm("shape of A is",ndshape(A)))
-        logger.debug(strm("shape of B is",ndshape(B)))
-        logger.debug(strm("matching_dims are",matching_dims))
-        newsize = [(A.data.shape[j] if A.data.shape[j] != 1 else B.data.shape[j])
-                for j in range(len(A.data.shape)) if A.dimlabels[j] not in matching_dims]
-        self.data = self.data.reshape(newsize)
-        # {{{ use the dictionaries to reconstruct the metadata
-        self.axis_coords = self.fld(axis_coords_dict)
-        self.axis_coords_units = self.fld(axis_units_dict)
-        self.axis_coords_error = self.fld(axis_coords_error_dict)
-        # }}}
-        return self
+    self.dot = MM_dot
     def __add__(self,arg):
         if np.isscalar(arg):
             A = self.copy()
@@ -4733,17 +4697,21 @@ class nddata (object):
         """
         retval = self.copy(data=False)
         retval.data = np.angle(self.data)
-        # from ∂φ/∂A=-i n/2A
-        # when ρe(iφ)=xAⁿ
-        dangle_dA = 1/(2*self.data)
-        A_sigma = self.get_error()
-        A_sigma = 1 if A_sigma is None else A_sigma
-        retval.set_error(
-                abs(
-                    dangle_dA * A_sigma
+        if np.isscalar(self.data):
+            # if scalar, no error
+            return retval
+        else:
+            # from ∂φ/∂A=-i n/2A
+            # when ρe(iφ)=xAⁿ
+            dangle_dA = 1/(2*self.data)
+            A_sigma = self.get_error()
+            A_sigma = 1 if A_sigma is None else A_sigma
+            retval.set_error(
+                    abs(
+                        dangle_dA * A_sigma
+                        )
                     )
-                )
-        return retval
+            return retval
     @angle.setter
     def angle(self):
         raise ValueError("Can't independently set the angle component yet")
