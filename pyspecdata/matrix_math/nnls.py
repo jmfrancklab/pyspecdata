@@ -1,5 +1,6 @@
 import logging
 import numpy as np
+from numpy import newaxis
 from ..general_functions import strm
 from .. import nnls as this_nnls
 logger = logging.getLogger('pyspecdata.matrix_math')
@@ -74,11 +75,11 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
         assert isinstance(dimname, str), "first argument is dimension name or tuple of two dimension names"
     if isinstance(newaxis_dict, tuple):
         assert len(newaxis_dict) == 2, "tuple of two nddatas only"
-        if isinstance(newaxis_dict[0],nddata) and isinstance(newaxis_dict[1],nddata):
+        if isinstance(newaxis_dict[0],type(self)) and isinstance(newaxis_dict[1],type(self)):
             assert len(newaxis_dict[0].dimlabels) and len(newaxis_dict[1].dimlabels) == 1, "currently only set up for 1D"
     elif isinstance(newaxis_dict, dict):
         assert len(newaxis_dict) == 1, "currently only set up for 1D"
-    elif isinstance(newaxis_dict,nddata):
+    elif isinstance(newaxis_dict,type(self)):
         assert len(newaxis_dict.dimlabels) == 1, "currently only set up for 1D"
     else:
         raise ValueError("second argument is dictionary or nddata with new axis, or tuple of nddatas with new axes")
@@ -90,7 +91,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
     # the kernel transforms from (columns) the "fit" dimension to (rows)
     # the "data" dimension
     if tuple_syntax:
-        if isinstance(newaxis_dict[0],nddata):
+        if isinstance(newaxis_dict[0],type(self)):
             assert len(newaxis_dict[0].dimlabels) and len(newaxis_dict[1].dimlabels) == 1, "must be 1 dimensional!!"
             fitdim_name1 = newaxis_dict[0].dimlabels[0]
             fitdim_name2 = newaxis_dict[1].dimlabels[0]
@@ -100,7 +101,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
                 fit_axis1 = newaxis_dict[0].data
             if fit_axis2 is None:
                 fit_axis2 = newaxis_dict[1].data
-    elif isinstance(newaxis_dict,nddata):
+    elif isinstance(newaxis_dict,type(self)):
         assert len(newaxis_dict.dimlabels) == 1, "must be 1 dimensional!!"
         fitdim_name = newaxis_dict.dimlabels[0]
         fit_axis = newaxis_dict.getaxis(fitdim_name)
@@ -111,8 +112,8 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
         logger.debug(strm('shape of fit dimension is',newaxis_dict[fitdim_name].shape))
         fit_axis = newaxis_dict[fitdim_name]
     if tuple_syntax:
-        fit_axis1 = nddata(fit_axis1,fitdim_name1)
-        fit_axis2 = nddata(fit_axis2,fitdim_name2)
+        fit_axis1 = self.__class__(fit_axis1,fitdim_name1)
+        fit_axis2 = self.__class__(fit_axis2,fitdim_name2)
         data_axis1 = self.fromaxis(dimname[0])
         data_axis2 = self.fromaxis(dimname[1])
         data_axis1.squeeze()
@@ -153,7 +154,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
 
         data_compressed = U1.T.dot(self.data.dot(U2))
         logger.debug(strm('Compressed data:',data_compressed.shape))
-        # data_for_nnls = nddata(data_compressed,[dimname[0],dimname[1]])
+        # data_for_nnls = self.__class__(data_compressed,[dimname[0],dimname[1]])
         # data_for_nnls.smoosh([dimname[0],dimname[1]],dimname=dimname[0])
         data_fornnls = np.empty(s1*s2)
         for s1_index in range(s1):
@@ -191,7 +192,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
                 return square_heavi
             def optimize_alpha(input_vec,val):
                 alpha_converged = False
-                factor = sqrt(s1*s2)
+                factor = np.sqrt(s1*s2)
                 T = np.linalg.inv(dd_chi(G(input_vec),val**2))
                 dot_product = np.dot(input_vec.T,np.dot(T,input_vec))
                 ans = dot_product*factor
@@ -219,7 +220,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
                     c_vec /= -1*alpha
                     c_update = newton_min(c_vec,smoothing_param)
                     alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
-                    lambda_update = sqrt(alpha_update[0,0])
+                    lambda_update = np.sqrt(alpha_update[0,0])
                     if alpha_converged:
                         logger.debug(strm('*** OPTIMIZED LAMBDA',lambda_update,'***'))
                         break
@@ -287,7 +288,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
         self.axis_coords_error = self.fld(axis_coords_error_dict)
         return self
     else:
-        fit_axis = nddata(fit_axis, fitdim_name)
+        fit_axis = self.__class__(fit_axis, fitdim_name)
         data_axis = self.fromaxis(dimname)
         data_axis.squeeze()
         data_axis, fit_axis = data_axis.aligndata(fit_axis)
