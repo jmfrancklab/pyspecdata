@@ -2812,6 +2812,12 @@ class nddata (object):
         self.dimlabels[self.dimlabels.index(previous)] = new
         return self
     #}}}
+    @property
+    def shape(self):
+        return ndshape(self)
+    @shape.setter
+    def shape(self):
+        raise ValueError("You can't set the shape property -- right now, it's just used to read the shape")
     #{{{ display and other properties
     #{{{ set and get prop
     def unset_prop(self,arg):

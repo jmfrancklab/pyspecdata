@@ -75,8 +75,8 @@ def dot(self,arg):
     if (self.get_error() is not None) or (arg.get_error() is not None):
         raise ValueError("we plan to include error propagation here, but not yet provided")
     ax_idx = A.axn(dot_dim_A) # should be the same for both, since they are aligned
-    logger.debug(strm("shape of A is",ndshape(A)))
-    logger.debug(strm("shape of B is",ndshape(B)))
+    logger.debug(strm("shape of A is",A.shape))
+    logger.debug(strm("shape of B is",B.shape))
     A.data = A.data[...,newaxis]
     B.data = B.data[...,newaxis]
     logger.debug(strm("add a new axis",A.data.shape))
@@ -95,7 +95,7 @@ def dot(self,arg):
     self.axis_coords_error = self.fld(axis_coords_error_dict)
     # }}}
     print("self.data.shape",self.data.shape)
-    print("ndshape",ndshape(self))
+    print("ndshape",self.shape)
     return self
 #@profile
 def matmul(self,arg):
