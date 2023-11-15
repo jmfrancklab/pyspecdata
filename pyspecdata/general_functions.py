@@ -362,7 +362,7 @@ def dp(number,decimalplaces=2,scientific=False,max_front=3):
         automatically to scientific notation.
     """
     if scientific:
-        logger.debug(strm("trying to convert",number,"to scientific notation"))
+        logging.debug(strm("trying to convert",number,"to scientific notation"))
         tenlog = int(np.floor(np.log10(abs(number))))
         number /= 10**tenlog
         fstring = '%0.'+'%d'%decimalplaces+r'f\times 10^{%d}'%tenlog
