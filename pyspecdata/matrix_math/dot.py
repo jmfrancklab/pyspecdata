@@ -1,5 +1,6 @@
 import logging
 import numpy as np
+from numpy import newaxis
 from ..general_functions import strm
 logger = logging.getLogger('pyspecdata.matrix_math')
 #@profile
@@ -99,5 +100,5 @@ def dot(self,arg):
     return self
 #@profile
 def matmul(self,arg):
-    assert type(arg) is nddata, "currently matrix multiplication only allowed if both are nddata"
+    assert type(arg) is type(self), "currently matrix multiplication only allowed if both are nddata"
     return self.C.dot(arg)

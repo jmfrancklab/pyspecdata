@@ -91,7 +91,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
                 raise ValueError("I expect double-precision floating point (float64), but you passed me data of dtype "+str(x.dtype)+'\n'+addtxt)
     #demand_real(self.data)
     # establish variables as lists
-    if type(dimname) is str and type(newaxis_dict) is nddata:
+    if type(dimname) is str and type(newaxis_dict) is type(self):
         dimname = [dimname]
         newaxis_dict = [newaxis_dict]
     elif type(dimname) is tuple and type(newaxis_dict) is tuple :
@@ -115,7 +115,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
     kernel_nddata = False
     if isinstance(kernel_func, tuple):
         assert callable(kernel_func[0]) and callable(kernel_func[1]), "third argument is tuple of kernel functions"
-    elif type(kernel_func) == nddata:
+    elif type(kernel_func) == type(self):
         kernel_nddata = True
     else:
         assert callable(kernel_func), "third argument is kernel function"
@@ -226,9 +226,9 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
         def optimize_alpha(input_vec,val):
             alpha_converged = False
             if twoD:
-                factor = sqrt(s1*s2)
+                factor = np.sqrt(s1*s2)
             if not twoD:
-                factor = sqrt(input_vec.shape[0])
+                factor = np.sqrt(input_vec.shape[0])
             T = np.linalg.inv(dd_chi(G(input_vec),val**2))
             dot_product = np.dot(input_vec.T,np.dot(T,input_vec))
             ans = dot_product*factor
@@ -256,7 +256,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
                 c_vec /= -1*alpha
                 c_update = newton_min(c_vec,smoothing_param)
                 alpha_update,alpha_converged = optimize_alpha(c_update,smoothing_param)
-                lambda_update = sqrt(alpha_update[0,0])
+                lambda_update = np.sqrt(alpha_update[0,0])
                 if alpha_converged:
                     logger.debug(strm('*** OPTIMIZED LAMBDA',lambda_update,'***'))
                     break
