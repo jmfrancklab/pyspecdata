@@ -51,3 +51,7 @@ def dot(self,arg):
     self.axis_coords_error = self.fld(axis_coords_error_dict)
     # }}}
     return self
+#@profile
+def matmul(self,arg):
+    assert type(arg) is type(self), "currently matrix multiplication only allowed if both are nddata"
+    return self.C.dot(arg)

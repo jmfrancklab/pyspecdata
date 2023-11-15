@@ -30,6 +30,7 @@ will hopefull be intuitive to those familiar with SQL, etc.
 from .datadir import pyspec_config, unknown_exp_type_name
 from .dict_utils import make_ndarray, unmake_ndarray
 from .matrix_math.dot import dot as MM_dot
+from .matrix_math.dot import matmul as MM_matmul
 from .matrix_math.dot import along as MM_along
 from .matrix_math.nnls import nnls as MM_nnls
 from sys import exc_info
@@ -93,7 +94,6 @@ from scipy.interpolate import UnivariateSpline
 from .datadir import getDATADIR,log_fname,proc_data_target_dir
 from . import fourier as this_fourier
 from . import axis_manipulation
-from . import nnls as this_nnls
 from . import plot_funcs as this_plotting
 from .general_functions import CustomError, emptytest, balance_clims, process_kwargs, autostringconvert, check_ascending_axis, level_str_to_int, init_logging, strm, reformat_exp, complex_str, render_matrix, redim_F_to_C, redim_C_to_F, fname_makenice, explain_error, lsafen, lsafe, copy_maybe_none, whereblocks, box_muller, dp, fa, ndgrid, pinvr, sech, myfilter
 from .hdf_utils import gensearch, h5searchstring, h5loaddict, h5child, h5remrows, h5addrow, h5table, h5nodebypath, h5attachattributes, h5inlist, h5join
@@ -2007,10 +2007,7 @@ class nddata (object):
             return retval
         else:
             raise ValueError("I don't know what to do with an argument of type"+repr(type(arg)))
-    #@profile
-    def __matmul__(self,arg):
-        assert type(arg) is nddata, "currently matrix multiplication only allowed if both are nddata"
-        return self.C.dot(arg)
+    __matmul__ = MM_matmul
     def __mul__(self,arg):
         #{{{ do scalar multiplication
         if np.isscalar(arg):
