@@ -3,6 +3,11 @@ import numpy as np
 from ..general_functions import strm
 logger = logging.getLogger('pyspecdata.matrix_math')
 #@profile
+def along(self,dimname):
+    """Specifies the dimension for the next matrix
+    multiplication (represents the rows/columns)."""
+    self._matmul_along = dimname
+    return self
 def dot(self,arg):
     """Tensor dot of self with arg -- dot all matching dimension labels.  This can be used to do matrix multiplication, but note that the order of doesn't matter, since the dimensions that are contracted are determined by matching the dimension names, not the order of the dimension.
 
