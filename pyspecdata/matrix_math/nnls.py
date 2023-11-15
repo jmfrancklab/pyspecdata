@@ -1,3 +1,8 @@
+import logging
+import numpy as np
+from ..general_functions import strm
+from .. import nnls as this_nnls
+logger = logging.getLogger('pyspecdata.matrix_math')
 def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
     r"""Perform regularized non-negative least-squares "fit" on self.
 
@@ -59,7 +64,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
         (innermost).
         If :str:`BRD` is specified, then the individual, uncompressed kernels :math:`K_{1}` and :math:`K_{2}` are returned as properties of the nddata "K1" and "K2" respectively. The number of singular values used to compressed each kernel is returned in properties of the nddata called, respectively, "s1" and "s2". 
     """
-    logger.debug(strm('on first calling nnls, shape of the data is',ndshape(self),'is it fortran ordered?',np.isfortran(self.data)))
+    logger.debug(strm('on first calling nnls, shape of the data is',self.shape,'is it fortran ordered?',np.isfortran(self.data)))
     tuple_syntax = False
     if isinstance(dimname, tuple):
         tuple_syntax = True
@@ -233,9 +238,9 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
             newshape.append(len(l))
         logger.debug(strm('test***',list(self.data.shape)[:-1]))
         #newshape += list(self.data.shape)[:-1] # this would return parametric axis
-        newshape.append(ndshape(fit_axis1)[fitdim_name1])
-        newshape.append(ndshape(fit_axis2)[fitdim_name2])
-        logger.debug(strm('before mkd, shape of the data is',ndshape(self),'len of axis_coords_error',len(self.axis_coords_error)))
+        newshape.append(fit_axis1.shape[fitdim_name1])
+        newshape.append(fit_axis2.shape[fitdim_name2])
+        logger.debug(strm('before mkd, shape of the data is',self.shape,'len of axis_coords_error',len(self.axis_coords_error)))
         # {{{ store the dictionaries for later use
         axis_coords_dict = self.mkd(self.axis_coords)
         axis_units_dict = self.mkd(self.axis_coords_units)
@@ -265,7 +270,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
         self.data = retval
         if not np.isscalar(residual):
             # make the residual nddata as well
-            residual_nddata = ndshape(self).pop(fitdim_name2).pop(fitdim_name1).alloc(dtype=residual.dtype)
+            residual_nddata = self.shape.pop(fitdim_name2).pop(fitdim_name1).alloc(dtype=residual.dtype)
             residual_nddata.data[:] = residual[:]
         else:
             residual_nddata = residual
@@ -289,20 +294,20 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
         K = kernel_func(data_axis, fit_axis).squeeze()
         logger.debug(strm('K dimlabels',K.dimlabels,'and raw shape',K.data.shape))
         self.reorder(dimname, first=False) # make the dimension we will be regularizing innermost
-        logger.debug(strm('shape of the data is',ndshape(self),'is it fortran ordered?',np.isfortran(self.data)))
+        logger.debug(strm('shape of the data is',self.shape,'is it fortran ordered?',np.isfortran(self.data)))
         data_fornnls = self.data
         if len(data_fornnls.shape) > 2:
             data_fornnls = data_fornnls.reshape((np.prod(
                 data_fornnls.shape[:-1]),data_fornnls.shape[-1]))
-        logger.debug(strm('shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
+        logger.debug(strm('shape of the data is',self.shape,"len of axis_coords_error",len(self.axis_coords_error)))
         retval, residual = this_nnls.nnls_regularized(K.data, data_fornnls, l=l)
         logger.debug(strm("coming back from fortran, residual type is",type(residual))+ strm(residual.dtype if isinstance(residual, np.ndarray) else ''))
         newshape = []
         if not np.isscalar(l):
             newshape.append(len(l))
         newshape += list(self.data.shape)[:-1] # exclude data dimension
-        newshape.append(ndshape(fit_axis)[fitdim_name])
-        logger.debug(strm('before mkd, shape of the data is',ndshape(self),"len of axis_coords_error",len(self.axis_coords_error)))
+        newshape.append(fit_axis.shape[fitdim_name])
+        logger.debug(strm('before mkd, shape of the data is',self.shape,"len of axis_coords_error",len(self.axis_coords_error)))
         # {{{ store the dictionaries for later use
         axis_coords_dict = self.mkd(self.axis_coords)
         axis_units_dict = self.mkd(self.axis_coords_units)
@@ -330,7 +335,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
         self.data = retval
         if not np.isscalar(residual):
             # make the residual nddata as well
-            residual_nddata = ndshape(self).pop(fitdim_name).alloc(dtype=residual.dtype)
+            residual_nddata = self.shape.pop(fitdim_name).alloc(dtype=residual.dtype)
             residual_nddata.data[:] = residual[:]
         else:
             residual_nddata = residual
