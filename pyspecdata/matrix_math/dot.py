@@ -231,7 +231,7 @@ def dot(self, arg):
         )
     )
     time_matmulstart = time.time()
-    self.data = matmul(self_formult_data, arg_formult_data)
+    self.data = np.matmul(self_formult_data, arg_formult_data)
     # {{{ remove singleton dimensions that we added
     if "XXX_ADDED_XXX" in output_shape:
         this_slice = tuple(
