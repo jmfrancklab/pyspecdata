@@ -1,14 +1,19 @@
 import logging
 import numpy as np
 from ..general_functions import strm
-logger = logging.getLogger('pyspecdata.matrix_math')
-#@profile
-def along(self,dimname):
+
+logger = logging.getLogger("pyspecdata.matrix_math")
+
+
+# @profile
+def along(self, dimname):
     """Specifies the dimension for the next matrix
     multiplication (represents the rows/columns)."""
     self._matmul_along = dimname
     return self
-def dot(self,arg):
+
+
+def dot(self, arg):
     """Tensor dot of self with arg -- dot all matching dimension labels.  This can be used to do matrix multiplication, but note that the order of doesn't matter, since the dimensions that are contracted are determined by matching the dimension names, not the order of the dimension.
 
     >>> a = nddata(r_[0:9],[3,3],['a','b'])
@@ -25,7 +30,7 @@ def dot(self,arg):
     >>> print a.C.dot(b)
     >>> print np.tensordot(a.data,b.data,axes=((0),(0)))
     """
-    A,B = self.aligndata(arg)
+    A, B = self.aligndata(arg)
     matching_dims = list(set(self.dimlabels) & set(arg.dimlabels))
     assert len(matching_dims) > 0, "no matching dimensions!"
     # {{{ store the dictionaries for later use
@@ -37,13 +42,18 @@ def dot(self,arg):
     self.dimlabels = [j for j in A.dimlabels if j not in matching_dims]
     match_idx = [A.axn(j) for j in matching_dims]
     if (self.get_error() is not None) or (arg.get_error() is not None):
-        raise ValueError("we plan to include error propagation here, but not yet provided")
-    self.data = np.tensordot(A.data,B.data,axes=(match_idx,match_idx))
-    logger.debug(strm("shape of A is",A.shape))
-    logger.debug(strm("shape of B is",B.shape))
-    logger.debug(strm("matching_dims are",matching_dims))
-    newsize = [(A.data.shape[j] if A.data.shape[j] != 1 else B.data.shape[j])
-            for j in range(len(A.data.shape)) if A.dimlabels[j] not in matching_dims]
+        raise ValueError(
+            "we plan to include error propagation here, but not yet provided"
+        )
+    self.data = np.tensordot(A.data, B.data, axes=(match_idx, match_idx))
+    logger.debug(strm("shape of A is", A.shape))
+    logger.debug(strm("shape of B is", B.shape))
+    logger.debug(strm("matching_dims are", matching_dims))
+    newsize = [
+        (A.data.shape[j] if A.data.shape[j] != 1 else B.data.shape[j])
+        for j in range(len(A.data.shape))
+        if A.dimlabels[j] not in matching_dims
+    ]
     self.data = self.data.reshape(newsize)
     # {{{ use the dictionaries to reconstruct the metadata
     self.axis_coords = self.fld(axis_coords_dict)
@@ -51,7 +61,11 @@ def dot(self,arg):
     self.axis_coords_error = self.fld(axis_coords_error_dict)
     # }}}
     return self
-#@profile
-def matmul(self,arg):
-    assert type(arg) is type(self), "currently matrix multiplication only allowed if both are nddata"
+
+
+# @profile
+def matmul(self, arg):
+    assert type(arg) is type(
+        self
+    ), "currently matrix multiplication only allowed if both are nddata"
     return self.C.dot(arg)
