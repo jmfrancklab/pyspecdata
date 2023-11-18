@@ -4,7 +4,7 @@ from .general_functions import redim_F_to_C, redim_C_to_F, strm, inside_sphinx
 if not inside_sphinx():
     from . import _nnls
 from numpy import asarray_chkfinite, zeros, double, isscalar, isfortran
-from numpy import array as np_array
+from numpy import np.ndarray as np_array
 import multiprocessing.dummy as mpd
 from multiprocessing import cpu_count
 import logging
