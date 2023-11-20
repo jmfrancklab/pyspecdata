@@ -7,19 +7,20 @@ from .. import nnls as this_nnls
 logger = logging.getLogger("pyspecdata.matrix_math")
 
 # {{{ local functions
-def chi(x_vec, val):
+def chi(x_vec, val, data_fornnls, K):
+    # appears to not be used?
     return 0.5 * np.dot(
-        x_vec.T, np.dot(dd_chi(G(x_vec), val**2), x_vec)
+        x_vec.T, np.dot(dd_chi(G(x_vec,K), val**2), x_vec)
     ) - np.dot(x_vec.T, data_fornnls[:, newaxis])
 
-def d_chi(x_vec, val):
-    return np.dot(dd_chi(G(x_vec), val**2), x_vec) - data_fornnls[:, newaxis]
+def d_chi(x_vec, val, data_fornnls, K):
+    return np.dot(dd_chi(G(x_vec,K), val**2), x_vec) - data_fornnls[:, newaxis]
 
 def dd_chi(G, val):
     return G + (val**2) * np.eye(np.shape(G)[0])
 
-def G(x_vec):
-    return np.dot(K, np.dot(square_heaviside(x_vec), K.T))
+def G(x_vec, K):
+    return np.dot(K, np.dot(square_heaviside(x_vec, K), K.T))
 
 def H(product):
     if product <= 0:
@@ -27,7 +28,7 @@ def H(product):
     if product > 0:
         return 1
 
-def square_heaviside(x_vec):
+def square_heaviside(x_vec, K):
     diag_heavi = []
     for q in range(np.shape(K.T)[0]):
         pull_val = np.dot(K.T[q, :], x_vec)
@@ -38,13 +39,13 @@ def square_heaviside(x_vec):
     square_heavi = diag_heavi * np.eye(np.shape(diag_heavi)[0])
     return square_heavi
 
-def optimize_alpha(input_vec, val, twoD, s1, s2, tol=1e-6):
+def optimize_alpha(input_vec, val, twoD, s1, s2, K, tol=1e-6):
     alpha_converged = False
     if twoD:
         factor = np.sqrt(s1 * s2)
     if not twoD:
         factor = np.sqrt(input_vec.shape[0])
-    T = np.linalg.inv(dd_chi(G(input_vec), val**2))
+    T = np.linalg.inv(dd_chi(G(input_vec,K), val**2))
     dot_product = np.dot(input_vec.T, np.dot(T, input_vec))
     ans = dot_product * factor
     ans = ans / np.linalg.norm(input_vec) / dot_product
@@ -54,12 +55,12 @@ def optimize_alpha(input_vec, val, twoD, s1, s2, tol=1e-6):
         return ans, alpha_converged
     return ans, alpha_converged
 
-def newton_min(input_vec, val):
-    fder = dd_chi(G(input_vec), val)
-    fval = d_chi(input_vec, val)
+def newton_min(input_vec, val, data_fornnls, K):
+    fder = dd_chi(G(input_vec,K), val)
+    fval = d_chi(input_vec, val, data_fornnls, K)
     return input_vec + np.dot(np.linalg.inv(fder), fval)
 
-def mod_BRD(guess, maxiter=20):
+def mod_BRD(guess, K, twoD, s1, s2, data_fornnls, maxiter=20):
     smoothing_param = guess
     alpha_converged = False
     for iter in range(maxiter):
@@ -72,9 +73,9 @@ def mod_BRD(guess, maxiter=20):
         alpha = smoothing_param**2
         c_vec = np.dot(K, f_vec) - data_fornnls[:, newaxis]
         c_vec /= -1 * alpha
-        c_update = newton_min(c_vec, smoothing_param)
+        c_update = newton_min(c_vec, smoothing_param, data_fornnls, K)
         alpha_update, alpha_converged = optimize_alpha(
-            c_update, smoothing_param, twoD, s1, s2
+            c_update, smoothing_param, twoD, s1, s2, K
         )
         lambda_update = np.sqrt(alpha_update[0, 0])
         if alpha_converged:
@@ -216,7 +217,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-2):
             # here I'm expecting 2D
             assert len(newaxis_dict) == 2
             assert len(dimname) == 2
-            newaxisdict = [newaxisdict[j] for j in dimname]
+            newaxis_dict = [newaxis_dict[j] for j in dimname]
     else:
         raise ValueError(
             strm(
@@ -305,23 +306,24 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-2):
         )
         for j in range(len(dimname))
     )
-    U, S, V = [[[]] * len(dimlabels) for j in range(3)]
+    U, S, V = [[[]] * len(dimname) for j in range(3)]
+    s = [[]] * len(dimname)
     for j in range(len(dimname)):
         U[j], S[j], V[j] = np.linalg.svd(kernels[j].data, full_matrices=False)
-    s1 = np.where(S[0] > default_cut)[0][-1]
-    for j in range(len(dimlabels)):
-        U[j] = U[j][:, 0:s1]
-        S[j] = S[j][0:s1]
-        V[j] = V[j][0:s1, :]
-        S[j] = S[j] * np.eye(s1)
+        s[j] = np.where(S[j] > default_cut)[j][-1]
+    for j in range(len(dimname)):
+        U[j] = U[j][:, 0:s[j]]
+        S[j] = S[j][0:s[j]]
+        V[j] = V[j][0:s[j], :]
+        S[j] = S[j] * np.eye(s[j])
         logger.debug(
             strm(
                 f"Compressed SVD of K{j}:",
                 [x.shape for x in (U[j], S[j], V[j])],
             )
         )
-    K = [[]] * len(dimlabels)
-    for j in range(len(dimlabels)):
+    K = [[]] * len(dimname)
+    for j in range(len(dimname)):
         K[j] = S[0].dot(V[0])
     if twoD:
         # {{{ prepping 2D
@@ -368,7 +370,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-2):
     )
     if l == "BRD":
         retval, residual = this_nnls.nnls_regularized(
-            K, data_fornnls, l=mod_BRD(guess=1.0)
+            K, data_fornnls, l=mod_BRD(1.0, K, twoD, s1, s2, data_fornnls)
         )
     else:
         retval, residual = this_nnls.nnls_regularized(K, data_fornnls, l=l)
@@ -430,7 +432,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-2):
     self.set_prop("nnls_kernel", K)
     self.set_prop("s1", s1)
     self.set_prop("nnls_residual", residual_nddata)
-    for j in range(len(dimlabels)):
+    for j in range(len(dimname)):
         self.set_prop(f"K{j+1}", K[j])
     if twoD:
         self.set_prop("s2", s2)

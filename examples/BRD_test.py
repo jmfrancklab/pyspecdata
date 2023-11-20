@@ -1,5 +1,6 @@
 # for 1D BRD, adapted mainly from Venkataramanan 2002
 # but checked against BRD 1981
+from pylab import *
 from pyspecdata import *
 from scipy.optimize import nnls
 init_logging('debug')

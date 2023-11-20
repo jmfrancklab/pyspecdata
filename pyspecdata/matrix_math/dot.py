@@ -146,9 +146,12 @@ def dot(self, arg):
     arg_axis_coords_error_dict = arg.mkd(arg.axis_coords_error)
     shared_info = set(self.dimlabels) & set(arg.dimlabels)
     for j in shared_info:
-        assert axis_coords_dict[j] == arg_axis_coords_dict[j]
+        assert all(axis_coords_dict[j] == arg_axis_coords_dict[j])
         assert axis_units_dict[j] == arg_axis_units_dict[j]
-        assert axis_coords_error_dict[j] == arg_axis_coords_error_dict[j]
+        if axis_coords_error_dict[j] is None:
+            assert arg_axis_coords_error_dict[j] is None
+        else:
+            assert all(axis_coords_error_dict[j] == arg_axis_coords_error_dict[j])
     info_needed_from_arg = (
         (
             set(uninvolved_dims[0])
