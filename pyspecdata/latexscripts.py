@@ -4,7 +4,7 @@ The results of python environments are **cached** and **only re-run if the code 
 even if the python environments are moved around.
 This makes the compilation of a Latex lab notebook extremely efficient.
 '''
-from .datadir import getDATADIR, _my_config
+from .datadir import getDATADIR, pyspec_config
 #from .datadir import get_notebook_dir
 from distutils.spawn import find_executable
 import os.path
@@ -66,11 +66,11 @@ def det_new_pdf_name(thisargv):
     if (len(tex_basename) > 1) and (tex_basename[-1] in ['basic','fancy','georgia']):
         new_pdf_basename = '_'.join(tex_basename[:-1])
     else:
-        new_pdf_basename = '_'.join(tex_basename + ['copy'])
+        new_pdf_basename = '_'.join(tex_basename)
     return orig_tex_basename,new_pdf_basename
 def genconfig():
     '''creates a template configuration directory'''
-    _my_config._config_parser = None # this supresses the output
+    pyspec_config._config_parser = None # this supresses the output
     if platform.platform().startswith('Windows'):
         hide_start = '_' # the default hidden/config starter for vim, mingw applications, etc
     else:
@@ -135,34 +135,19 @@ def wraplatex():
     return
 def wrapviewer():
     'see :func:`wraplatex <pyspecdata.latexscripts.wraplatex>`'
+    print("started wrapviewer!")
     pdf_basename = list(filter(lambda x: x[0] != '-',
             sys.argv))[-1]
     orig_tex_basename,new_pdf_basename = det_new_pdf_name(sys.argv)
     if os.name == 'posix':
         # {{{ this plays the role of the function that I used to call "new_evince" with argument "b"
-        which_command = 'b'
         full_pdf_name = new_pdf_basename+'.pdf'
         full_tex_name = orig_tex_basename+'.tex'
-        if which_command is 'f':#forward
-            # no longer used, but make this functional, in case I want it later
-            #3/29/14 -- replaced '+sys.argv[2]+' w/ default
-            cmdstring = 'evince_vim_dbus.py EVINCE '+full_pdf_name+' 1 '+full_tex_name 
-            print(cmdstring)
-            os.system(cmdstring)
-        elif which_command is 'i':#inverse
-            cmdstring = 'evince_vim_dbus.py GVIM default '+full_pdf_name+' '+full_tex_name
-            print(cmdstring)
-            os.system(cmdstring)
-        elif which_command is 'b':#both
-            cmdstring = '~/silentfork.sh evince_vim_dbus.py EVINCE '+full_pdf_name+' 1 '+full_tex_name 
-            print(cmdstring)
-            os.system(cmdstring)
-            time.sleep(0.75)
-            cmdstring = '~/silentfork.sh evince_vim_dbus.py GVIM default '+full_pdf_name+' '+full_tex_name
-            print(cmdstring)
-            os.system(cmdstring)
+        cmd = ['zathura --synctex-forward']
+        cmd.append(f"1:0:{full_tex_name} {full_pdf_name}")
+        print(' '.join(cmd))
+        os.system(' '.join(cmd))
         # }}}
-
     else:
         os.system('start sumatrapdf -reuse-instance '+new_pdf_basename+'.pdf')
     if new_pdf_basename == 'lists':
@@ -320,6 +305,7 @@ def main():
                 exit()
             else:
                 raise RuntimeError("What did you pass me???")
+    if not os.path.exists(get_scripts_dir()): return
     fp = open(get_scripts_dir() + 'scriptsUsed.csv')
     for line in fp.readlines():
         scriptnum_as_str = line.strip()

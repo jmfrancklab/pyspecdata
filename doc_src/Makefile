@@ -34,6 +34,7 @@ help:
 clean:
 	-rm -rf $(BUILDDIR)/*
 	-rm -rf auto_api/*
+	-rm -rf auto_examples/*
 
 html: api
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html

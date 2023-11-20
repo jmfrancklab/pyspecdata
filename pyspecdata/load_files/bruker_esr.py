@@ -1,11 +1,13 @@
 from ..core import *
 from ..general_functions import strm
-from numpy import fromstring
+from ..datadir import rclone_search
+import numpy as np
 import re
 from io import StringIO
+import os
 logger = logging.getLogger('pyspecdata.load_files.bruker_esr')
 b0_texstr = r'$B_0$'
-def xepr(filename, dimname='', verbose=False):
+def xepr(filename, exp_type=None, dimname='', verbose=False):
     """For opening Xepr files.
     
     Parameters
@@ -27,9 +29,18 @@ def xepr(filename, dimname='', verbose=False):
                 " .PAR\n"
                 "This one is called",repr(filename)))
     # {{{ check if the extension is upper or lowercase
+    orig_spc = filename_spc
     if not os.path.exists(filename_spc):
+        logging.debug(f"{filename_spc} doesn't exist -- trying lowercase")
         filename_spc = filename_spc[:-4] + filename_spc[-4:].lower()
+    if not os.path.exists(filename_spc):
+        filename_spc = orig_spc
+    orig_par = filename_par
+    if not os.path.exists(filename_par):
+        logging.debug(f"{filename_par} doesn't exist -- trying lowercase")
         filename_par = filename_par[:-4] + filename_par[-4:].lower()
+    if not os.path.exists(filename_par):
+        filename_par = orig_par
     # }}}
     # }}}
     # {{{ load the parameters
@@ -42,13 +53,26 @@ def xepr(filename, dimname='', verbose=False):
     v = new_v
     # }}}
     ikkf = v['IKKF']
+    if type(ikkf) == str: ikkf = [ikkf]
+        
     # }}}
     # {{{ load the data
+    if not os.path.exists(filename_spc):
+        # because the spc isn't part of the original search, we
+        # need to log the fact that it's missing manually
+        if exp_type is None:
+            raise ValueError("I could probably find "
+            "your file remotely, but you called with "
+            "exp_type None!")
+        rclone_search(
+                os.path.split(filename_spc)[-1],
+                exp_type,
+                os.path.split(filename_spc)[0])
     with open(filename_spc,'rb') as fp:
         if all([j == 'REAL' for j in ikkf]):
-            data = frombuffer(fp.read(),'>f8')
+            data = np.frombuffer(fp.read(),'>f8')
         elif all([j == 'CPLX' for j in ikkf]):
-            data = frombuffer(fp.read(),'>c16')
+            data = np.frombuffer(fp.read(),'>c16')
         else:
             raise ValueError('the data type (IKKF) is givn as '
                     +' '.join(ikkf)
@@ -64,13 +88,13 @@ def xepr(filename, dimname='', verbose=False):
     #         difference, but I'm not sure if this is correct
     #         (I think so)
     x_axis += v.pop('XMIN') # actually using pop is better than calling these, so that we don't have redundant information
-    harmonics = array([[False] * 2]*5) # inner dimension for the 90 degree phase
+    harmonics = np.array([[False] * 2]*5) # inner dimension for the 90 degree phase
     for j,jval in enumerate(['1st','2nd','3rd','4th','5th']):
         for k,kval in enumerate(['','90']):
             thiskey = 'Enable'+jval+'Harm'+kval
             if thiskey in v.keys() and v[thiskey]:
                 harmonics[j,k] = True
-    n_harmonics = sum(harmonics)
+    n_harmonics = np.sum(harmonics)
     logger.debug('there are %d harmonics'%n_harmonics)
     logger.debug('there are %d harmonics, first is of type %s'%(n_harmonics,ikkf[0]))
     # }}}
@@ -92,10 +116,10 @@ def xepr(filename, dimname='', verbose=False):
         dimname_list = dimname_list + ['harmonic']
         dimsize_list = dimsize_list + [n_harmonics]
         # {{{ generate a grid of labels and mask out the ones we want
-        #harmonic_axes = array([[(1,0),(2,0),(3,0),(4,0),(5,0)],
+        #harmonic_axes = np.array([[(1,0),(2,0),(3,0),(4,0),(5,0)],
         #    [(1,90),(2,90),(3,90),(4,90),(5,90)]],
         #    dtype=[('harmonic','int'),('phase','int')])
-        harmonic_axes = array([(1,0),(2,0),(3,0),(4,0),
+        harmonic_axes = np.array([(1,0),(2,0),(3,0),(4,0),
             (5,0),(1,90),(2,90),(3,90),(4,90),(5,90)],
             dtype=[('harmonic','int'),('phase','int')])
         harmonic_axes = harmonic_axes.reshape(2,5).T
@@ -119,6 +143,8 @@ def xepr(filename, dimname='', verbose=False):
                 if isinstance(y_dim_name, list):
                     y_dim_name = ' '.join(y_dim_name) # it gets split into a list, which for XEpr files shouldn't be happening, but fix later
                     if y_dim_name[0] == "'": y_dim_name = y_dim_name.replace("'","")
+                if y_dim_name.startswith("'") and y_dim_name.endswith("'"):
+                    y_dim_name = y_dim_name[1:-1]
                 assert 'YUNI' in list(v.keys()), ("No parameter YUNI -- how do you expect me to know the units of the second dimension??")
                 dim_units.update({y_dim_name:interpret_units('YUNI')})
                 filename_ygf = filename_par[:-4] + '.YGF'
@@ -127,7 +153,7 @@ def xepr(filename, dimname='', verbose=False):
                 assert os.path.exists(filename_ygf), "I can't find the YGF file ("+filename_ygf+") that stores the powers"
                 with open(filename_ygf,'rb') as fp:
                     y_axis = fp.read()
-                y_axis = fromstring(y_axis,'>f8')
+                y_axis = np.fromstring(y_axis,'>f8')
                 assert len(y_axis)==y_points_calcd, "Length of the power axis doesn't seem to match!"
             else:
                 raise ValueError(strm("found YTYP=",v['YTYP']," which is not currently programmed"))
@@ -157,26 +183,14 @@ def xepr(filename, dimname='', verbose=False):
     for k,val in dim_units.items():
         data.set_units(k,val)
     # }}}
-    # {{{ use the parameters to rescale the data
-    logger.debug("There is a parameter called DModGain as well as"
-            " Gain -- not sure what that is")
-    rg = v.pop('Gain')
-    if isscalar(rg) or rg[1] != 'dB':
-        raise ValueError(strm("The gain from the file is not given in"
-                " dB -- not sure what's up.  I get",rg,"for gain"))
-    #data /= 10**(rg[0]/10.0)
-    #data /= modulation
-    # here, for winepr, I divided by the number of scans, but I'm
-    # fairly sure I don't wan to do that
-    # }}}
     data.other_info.update(v)
     data.reorder(b0_texstr)
     if 'Microwave Power' in data.dimlabels:
         # convert from W to dBm
-        data.setaxis('Microwave Power',lambda x: 10*log10(x)).set_units('Microwave Power','dBm')
+        data.setaxis('Microwave Power',lambda x: 10*np.log10(x)).set_units('Microwave Power','dBm')
     if data.get_units(b0_texstr) == 's': data.rename(b0_texstr,'t')
     return data
-def winepr(filename, dimname=''):
+def winepr(filename, dimname='', exp_type=None):
     """For opening WinEPR files.
     
     Parameters
@@ -202,9 +216,18 @@ def winepr(filename, dimname=''):
     # }}}
     # }}}
     # {{{ load the data
+    if not os.path.exists(filename_spc):
+        if exp_type is None:
+            raise ValueError("I could probably find "
+            "your file remotely, but you called with "
+            "exp_type None!")
+        rclone_search(
+                os.path.split(filename_spc)[0],
+                exp_type,
+                os.path.split(filename_spc)[-1])
     with open(filename_spc,'rb') as fp:
         data = fp.read()
-    data = fromstring(data,'<f4')
+    data = np.fromstring(data,'<f4')
     # }}}
     # load the parameters
     v = winepr_load_acqu(filename_par)
@@ -302,7 +325,7 @@ def xepr_load_acqu(filename):
         converts the record array to a list.'''
         if len(x):
             try:
-                return genfromtxt(StringIO(x),dtype=None,encoding='utf-8').tolist()
+                return np.genfromtxt(StringIO(x),dtype=None,encoding='utf-8').tolist()
             except:
                 raise ValueError("genfromtxt chokes on "+repr(x))
         else:

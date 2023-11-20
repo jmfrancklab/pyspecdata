@@ -62,6 +62,14 @@ The figure list gives us three things:
     *   The "plottype" (currently an argument to the plot function) should be an attribute of the axis object
 """
 from .plot_funcs import image as this_image
+from .general_functions import *
+from . import plot_funcs as this_plotting
+from .core import nddata, autolegend, gridandtick
+from .core import plot as pyspec_plot
+import matplotlib.pyplot as plt
+import time
+import logging
+from numpy import r_
 
 class figlist(object):
     r"""
@@ -97,12 +105,11 @@ class figlist(object):
             This is the argument passed to :func:`self.show`, and used to
             construct the file names.
         """
-        self.verbose, self.black, self.env, self.mlab, self.file_name, self.line_spacing = process_kwargs([
-            ('verbose',False),
+        self.black, self.env, self.mlab, self.file_name, self.line_spacing = process_kwargs([
             ('black',0.9),
             ('env',''),
             ('mlab','BLANK'),
-            ('file_name','BLANK'),
+            ('file_name',f'randgen{int(time.time()*10):d}.pdf'),
             ('line_spacing','BLANK'),
             ],
                 kwargs, pass_through=True)
@@ -111,7 +118,7 @@ class figlist(object):
         if self.mlab == 'BLANK': del self.mlab
         if self.file_name == 'BLANK': del self.file_name
         if self.line_spacing == 'BLANK': del self.line_spacing
-        if self.verbose: print(lsafe('DEBUG: initialize figlist'))
+        logging.debug('DEBUG: initialize figlist')
         if len(arg) == 0:
             self.figurelist = []
         else:
@@ -122,9 +129,15 @@ class figlist(object):
         self.autolegend_list = {}
         self.twinx_list = {}
         self.basename = None
+        self._print_at_end = True
+        return
+    def par_break(self):
+        """This is for adding a paragraph break between
+        figures when generating latex
+        (or html?).  By design, it does nothing when
+        note in tex"""
         return
     def twinx(self,autopad = False,orig = False,color = None):
-        #self.figurelist.insert(self.get_fig_number(self.current)-1,{'autopad':False}) #doesn't work because it changes the figure number; I can get the number with fig = gcf(); fig.number, but I can't set it; it would be best to switch to using a list that contains all the figure numbers to match all their names -- or alternatively, note that matplotlib allows you to give them names, though I don't know how that works
         if self.current in list(self.twinx_list.keys()):
             ax1,ax2 = self.twinx_list[self.current]
             if color is not None:
@@ -138,9 +151,9 @@ class figlist(object):
                         raise ValueError("conflicting values for the twinx color have been given!!")
         else:
             if autopad: autopad_figure()
-            ax1 = gca()
-            twinx()
-            ax2 = gca()
+            ax1 = plt.gca()
+            plt.twinx()
+            ax2 = plt.gca()
             self.twinx_list[self.current] = (ax1,ax2)
             if color is not None:
                 ax2.tick_params(axis = 'y',colors = color)
@@ -148,10 +161,10 @@ class figlist(object):
                 ax2.spines['right'].set_color(color)
                 self.propdict[self.current]['twinx_color'] = color
         if orig:
-            sca(ax1)
+            plt.sca(ax1)
             return ax1
         else:
-            sca(ax2)
+            plt.sca(ax2)
             return ax2
     def use_autolegend(self,value = None):
         'No argument sets to true if it\'s not already set'
@@ -164,17 +177,25 @@ class figlist(object):
             self.autolegend_list.update({self.current:value})
             return
     def push_marker(self):
-        if not hasattr(self,'pushlist'):
-            self.pushlist = []
-        if not hasattr(self,'pushbasenamelist'):
-            self.pushbasenamelist = []
-        self.pushlist.append(self.current)
-        self.pushbasenamelist.append(self.basename)
+        """save the current plot to a "stack" so we can return to it with "pop_marker" """
+        if hasattr(self,'current'): # if not, this is the first plot
+            if not hasattr(self,'pushlist'):
+                self.pushlist = []
+            logging.debug(strm("about to push marker, basename'",self.basename,"' and name '",self.current,"'"))
+            self.pushlist.append(
+                    (self.basename,self.current))
         return
     def pop_marker(self):
-        self.basename = self.pushbasenamelist.pop()
-        self.next(self.pushlist.pop())
+        """use the plot on the top of the "stack" (see push_marker) as the current plot"""
+        if hasattr(self,'pushlist') and len(self.pushlist) > 0: # otherwise, we called push with no current plot
+            bn,fn = self.pushlist.pop()
+            self.basename = None # because basename is already in "current"
+            self.next(fn)
+            self.basename = bn
         return
+    def get_num_figures(self):
+        cleanlist = [x for x in self.figurelist if isinstance(x, str)]
+        return len(cleanlist)
     def get_fig_number(self,name):
         cleanlist = [x for x in self.figurelist if isinstance(x, str)]
         try:
@@ -182,7 +203,9 @@ class figlist(object):
         except ValueError:
             raise ValueError(strm("You are looking for",name,
                 "which isn't in the list of figures",cleanlist))
-    def next(self,input_name, legend=False, boundaries=None, twinx=None, **kwargs):
+    def next(self,input_name, legend=False,
+            boundaries=None, twinx=None, fig=None,
+            **kwargs):
         r"""Switch to the figure given by input_name, which is used not only as
         a string-based name for the figure, but also as a default title and as
         a base name for resulting figure files.
@@ -205,21 +228,23 @@ class figlist(object):
             Any other keyword arguments are passed to the matplotlib (mayavi)
             figure() function that's used to switch (create) figures.
         """
+        # {{{ basic setup
         if not hasattr(self,'figdict'):
             self.figdict = {} # the dictionary of the various figures
         if not hasattr(self,'propdict'):
             self.propdict = {} # the properties belonging to those same figures
-        logger.debug(strm("for plot",input_name,"basename is",self.basename))
+        logging.debug(strm("for plot",input_name,"basename is",self.basename))
         if (self.basename is not None #basename for groups of figures
                 # I need to check that the basename hasn't already been added
                 and not input_name.startswith(self.basename)):
             name = self.basename + ' ' + input_name
         else:
-            logger.debug(strm("not using a basename",self.basename is not None))
+            logging.debug(strm("not using a basename",self.basename is not None))
             name = input_name
+        # }}}
         if name.find('/') > 0:
             raise ValueError("don't include slashes in the figure name, that's just too confusing")
-        logger.debug(strm('called with',name))
+        logging.debug(strm('with basename appended, this is',name))
         if name in self.figurelist:# figure already exists
             if hasattr(self,'mlab'):
                 # with this commit, I removed the kwargs and bgcolor, not sure why
@@ -227,9 +252,11 @@ class figlist(object):
                 fig.scene.render_window.aa_frames = 20
                 fig.scene.anti_aliasing_frames = 20
             else:
-                fig = figure(self.get_fig_number(name))
+                logging.debug(strm("I'm changing to figure",self.get_fig_number(name),"for",name))
+                fig = self.figdict[name]
+                plt.figure(self.figdict[name].number)
             self.current = name
-            if self.verbose: print(lsafen('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures'))
+            #logging.debug(strm('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures'))
             if boundaries is not None:
                 if 'boundaries' not in list(self.propdict[self.current].keys()) or self.propdict[self.current]['boundaries'] != boundaries:
                     raise ValueError("You're giving conflicting values for boundaries")
@@ -237,10 +264,7 @@ class figlist(object):
                 if 'legend' not in list(self.propdict[self.current].keys()) or self.propdict[self.current]['legend'] != legend:
                     raise ValueError("You're giving conflicting values for legend")
         else:# figure doesn't exist yet
-            if hasattr(self,'current'):
-                last_figure_number = self.get_fig_number(self.current)
-            else:
-                last_figure_number = 0
+            num_figs_before_add = self.get_num_figures()
             self.current = name
             if self.current not in list(self.propdict.keys()):
                 self.propdict[self.current] = {}
@@ -252,25 +276,25 @@ class figlist(object):
                 if 'figsize' not in list(kwargs.keys()):
                     kwargs.update({'figsize':(12,6)})
                 if hasattr(self,'mlab'):
-                    fig = self.mlab.figure(last_figure_number+1,bgcolor = (1,1,1),**kwargs)
+                    fig = self.mlab.figure(num_figs_before_add+1,bgcolor = (1,1,1),**kwargs)
                     fig.scene.render_window.aa_frames = 20
                     fig.scene.anti_aliasing_frames = 20
                 else:
-                    fig = figure(last_figure_number+1,**kwargs)
+                    fig = plt.figure(num_figs_before_add+1,**kwargs)
                 fig.add_axes([0.075,0.2,0.6,0.7]) # l b w h
                 self.use_autolegend('outside')
             else:
                 self.propdict[self.current]['legend'] = False
-                fig = figure(last_figure_number+1,**kwargs)
-                if hasattr(self,'mlab'):
-                    fig = self.mlab.figure(last_figure_number+1,bgcolor = (1,1,1),**kwargs)
-                    fig.scene.render_window.aa_frames = 20
-                    fig.scene.anti_aliasing_frames = 20
-                else:
-                    fig = figure(last_figure_number+1,**kwargs)
+                if fig is None:
+                    if hasattr(self,'mlab'):
+                        fig = self.mlab.figure(num_figs_before_add+1,bgcolor = (1,1,1),**kwargs)
+                        fig.scene.render_window.aa_frames = 20
+                        fig.scene.anti_aliasing_frames = 20
+                    else:
+                        fig = plt.figure(num_figs_before_add+1,**kwargs)
                 if twinx is not None:
                     fig.add_subplot(111)
-            logger.debug(strm('added, figure',len(self.figurelist)+1,'because not in figurelist',self.figurelist))
+            logging.debug(strm('added figure',len(self.figurelist)+1,'because not in figurelist',self.figurelist))
             self.figurelist.append(name)
             self.figdict.update({self.current:fig})
             if boundaries == False:
@@ -279,14 +303,23 @@ class figlist(object):
             self.propdict[self.current]['twinx'] = True
             if twinx == 0:
                 self.twinx(orig = True)
-                fig = gcf()
+                fig = plt.gcf()
             elif twinx == 1:
                 self.twinx()
-                fig = gcf()
+                fig = plt.gcf()
             else:
                 raise ValueError('If you pass twinx, pass 0 for the original or 1 for the right side')
             self.figdict.update({self.current:fig})
         return fig
+    def plot_weighted(self,phdiff, arb_scaling=3):
+        "plot weighted data as a scatter plot"
+        assert len(phdiff.dimlabels) == 1, "only one dimension supported right now -- loop as needed"
+        dimname = phdiff.dimlabels[0]
+        alphapoints = 1/phdiff.get_error() # to show what a weighted sum looks like
+        alphapoints[~np.isfinite(alphapoints)] = 0
+        alphapoints /= max(alphapoints) # scaling relative to max point, because sometimes there are more points that are mostly error, and sometimes less
+        sc = plt.scatter(phdiff.getaxis(dimname),phdiff.data, alpha=np.clip(alphapoints.ravel()*arb_scaling,0,1), s=10)
+        return sc
     def plot(self,*args,**kwargs):
         r"""
         Parameters
@@ -301,8 +334,10 @@ class figlist(object):
             This overrides that behavior.
             Defaults to False.
         """
-        if 'label' in list(kwargs.keys()):
+        if 'label' in kwargs.keys() or 'label_format_string' in kwargs.keys():
             self.use_autolegend()
+        if 'alpha' not in kwargs.keys():
+            kwargs['alpha'] = 0.5
         human_units = True
         if 'human_units' in list(kwargs.keys()):
             human_units = kwargs.pop('human_units')
@@ -314,19 +349,19 @@ class figlist(object):
             thisname = args[0].name()
             if thisname is not None:
                 kwargs['label'] = thisname
-        retval = plot(*tuple((firstarg,)+args[1:]),**kwargs)#just a placeholder for now, will later keep units + such
-        ax = gca()
+        retval = pyspec_plot(*tuple((firstarg,)+args[1:]),**kwargs)#just a placeholder for now, will later keep units + such
+        ax = plt.gca()
         if ax.get_title() is None or len(ax.get_title()) == 0:
             try:
-                title(self.current)
+                plt.title(self.current)
             except:
-                title('untitled')
+                plt.title('untitled')
         return retval
     def phaseplot_finalize(self):
         ("Performs plot decorations that are typically desired for a manual phasing"
         " plot.  This assumes that the ``y``-axis is given in units of half-cycles"
         " ($\pi$ radians).")
-        ax = gca()
+        ax = plt.gca()
         ylim(-1,1)
         gridandtick(ax)
         ylabel(r'$\phi / \pi$')
@@ -334,26 +369,25 @@ class figlist(object):
         axhline(y = 0.5,color = 'r',alpha = 0.5,linewidth = 2)
         axhline(y = -0.5,color = 'r',alpha = 0.5,linewidth = 2)
         return
-    def check_units(self, testdata, x_index, y_index,
-            verbose=False):
-        if verbose: print("-"*30)
-        if verbose: print("called check_units for figure",self.current)
+    def check_units(self, testdata, x_index, y_index):
+        logging.debug(strm("-"*30))
+        logging.debug(strm("called check_units for figure",self.current))
         if isinstance(testdata,nddata):
-            if verbose: print("(check_units) it's nddata")
+            logging.debug(strm("(check_units) it's nddata"))
             testdata = testdata.copy().human_units()
             if len(testdata.dimlabels) > 1:
-                if verbose: print("(check_units) more than one dimension")
+                logging.debug(strm("(check_units) more than one dimension"))
                 if not hasattr(self,'current'):
                     raise ValueError("give your plot a name (using .next()) first! (this is used for naming the PDF's etc)")
                 if self.current in list(self.units.keys()):
                         theseunits = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
                         if theseunits != self.units[self.current] and theseunits[0] != self.units[self.current]:
-                                raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(theseunits,self.units[self.current]))
+                                raise ValueError("for '%s' the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(self.current,theseunits,self.units[self.current]))
                 else:
                     if isinstance(testdata,nddata):
                         self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]),testdata.get_units(testdata.dimlabels[y_index]))
             else:
-                if verbose: print("(check_units) only one dimension")
+                logging.debug(strm("(check_units) only one dimension"))
                 if not hasattr(self,'current'):
                     self.next('default')
                 if self.current in list(self.units.keys()):
@@ -363,18 +397,18 @@ class figlist(object):
                         if isinstance(testunits, tuple) and testunits[1] is None:
                             pass
                         else:
-                            raise ValueError("the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(theseunits,self.units[self.current]))
+                            raise ValueError("for figure '%s' the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"%(self.current,self.units[self.current],theseunits))
                 else:
                     self.units[self.current] = (testdata.get_units(testdata.dimlabels[x_index]))
-        if verbose: print("-"*30)
+        logging.debug(strm("-"*30))
         return testdata
     def adjust_spines(self,spines):
-        ax = gca()
+        ax = plt.gca()
         #{{{ taken from matplotlib examples
         for loc, spine in list(ax.spines.items()):
             if loc in spines:
                 spine.set_position(('outward',10)) # outward by 10 points
-                spine.set_smart_bounds(True)
+                #spine.set_smart_bounds(True)
             else:
                 spine.set_color('none') # don't draw spine
 
@@ -392,13 +426,13 @@ class figlist(object):
             ax.xaxis.set_ticks([])
         #}}}
     def grid(self):
-        ax = gca()
+        ax = plt.gca()
         if self.black:
             gridandtick(ax,gridcolor = r_[0.5,0.5,0.5])
         else:
             gridandtick(ax,gridcolor = r_[0,0,0])
         return
-    image = this_image.fl_image
+    image = this_plotting.image.fl_image
     def marked_text(self,marker,input_text="",sep='\n'):
         """Creates a named `marker` where we can place text.   If `marker`
         has been used, goes back and places text there."""
@@ -430,8 +464,8 @@ class figlist(object):
                     if v == 'outside':
                         kwargs.update(dict(bbox_to_anchor=(1.05,1),loc = 2,borderaxespad=0.))
                 self.next(k)
-                logger.debug(strm("I am about to assign a legend for ",k,". Is it in the figurelist?:",k in self.figurelist))
-                logger.debug(strm("print out the legend object:",gca().legend()))
+                logging.debug(strm("I am about to assign a legend for ",k,". Is it in the figurelist?:",k in self.figurelist))
+                logging.debug(strm("print out the legend object:",plt.gca().legend()))
                 try:
                     autolegend(**kwargs)
                 except:
@@ -445,22 +479,27 @@ class figlist(object):
                         raise Exception(strm('error while trying to run autolegend function for',k,'\n\tfiglist is',self.figurelist,explain_error(e)))
     def show(self,*args,**kwargs):
         self.basename = None # must be turned off, so it can cycle through lists, etc, on its own
-        if 'line_spacing' in list(kwargs.keys()): kwargs.pop('line_spacing')# for latex only
+        line_spacing,block = process_kwargs([('line_spacing',''),
+                                              ('block',None)
+                                              ],kwargs)
         if len(kwargs) > 0:
             raise ValueError("didn't understand kwargs "+repr(kwargs))
-        logger.debug(strm("before show_prep, figlist is",self.figurelist))
-        logger.debug(strm("before show_prep, autolegend list is",self.autolegend_list))
+        logging.debug(strm("before show_prep, figlist is",self.figurelist))
+        logging.debug(strm("before show_prep, autolegend list is",self.autolegend_list))
         self.show_prep()
         #{{{ just copy from fornnotebook to get the print string functionality
         kwargs = {}
         for figname in self.figurelist:
-            logger.debug(strm("showing figure"+lsafen(figname)))
+            logging.debug(strm("showing figure \"%s\""%lsafen(figname)))
             if isinstance(figname, dict):
                 kwargs.update(figname)
                 if 'print_string' in kwargs:
                     print('\n\n')
                     print(kwargs.pop('print_string'))
                     print('\n\n')
+            else:
+                self.next(figname)
+                plt.gcf().tight_layout()
         #}}}
         if len(args) == 1:
             if (args[0][:-4] == '.pdf') or (args[0][:-4] == '.png') or (args[0][:-4] == '.jpg'):
@@ -470,7 +509,7 @@ class figlist(object):
             self.mlab.show()
         else:
             #print "not running mlab show!"
-            show()
+            plt.show(block=block)
     def label_point(self, data, axis, value, thislabel,
             show_point=True, xscale=1, **new_kwargs):
         """only works for 1D data: assume you've passed a single-point nddata, and label it
@@ -492,12 +531,12 @@ class figlist(object):
         """
         kwargs = {'alpha':0.5,'color':'k','ha':'left','va':'bottom','rotation':45,'size':14}
         kwargs.update(new_kwargs)
-        y = double(data[axis:value].data)
-        x_ind = argmin(abs(data.getaxis(axis)-value))
+        y = np.double(data[axis:value].data)
+        x_ind = np.argmin(abs(data.getaxis(axis)-value))
         x = data.getaxis(axis)[x_ind]
-        text(x/xscale, y, thislabel, **kwargs)
+        plt.text(x/xscale, y, thislabel, **kwargs)
         if show_point:
-            plot(x/xscale, y, 'o', color=kwargs["color"],
+            plt.plot(x/xscale, y, 'o', color=kwargs["color"],
                     alpha=kwargs["alpha"])
         return
     def header(self,number_above,input_string):
@@ -537,15 +576,15 @@ class figlist(object):
                 contour_kwargs.update(opacity = 0.1)
                 self.mlab.contour_surf(X,Y,Z+lensoffset,contours = r_[-1:1:46j].tolist(),**contour_kwargs)# for some reason, 46 gives alignment (I think 9+1 and 9*5+1)
             if equal_scale:
-                self.generate_ticks(plotdata,(x_axis,y_axis),X_normalization,Z_normalization,verbose = True)
+                self.generate_ticks(plotdata,(x_axis,y_axis),X_normalization,Z_normalization)
             else:
-                self.generate_ticks(plotdata,(x_axis,y_axis),X_normalization,Z_normalization,y_rescale = Y_normalization/X_normalization,verbose = True)
+                self.generate_ticks(plotdata,(x_axis,y_axis),X_normalization,Z_normalization,y_rescale = Y_normalization/X_normalization)
             fig.scene.disable_render = False
         else:
             # this should be upgraded, or rather moved to here
             plotdata.meshplot(alpha=1.0, cmap=cm.jet, **kwargs)
         return Z_normalization
-    def generate_ticks(self,plotdata,axes,rescale,z_norm = None,y_rescale = 1,text_scale = 0.05,verbose = False,follow_surface = False,
+    def generate_ticks(self,plotdata,axes,rescale,z_norm = None,y_rescale = 1,text_scale = 0.05,follow_surface = False,
             lensoffset = 0.5e-2,
             line_width = 1e-3,
             tube_radius = 1e-3,
@@ -561,21 +600,21 @@ class figlist(object):
             #{{{ out of the following list, choose the one that gives as close as possible to the desired ticks
             axis_span = thisaxis.max() - thisaxis.min()
             possible_iterators = r_[0.1,0.5,1,5,10,20,30,50,100,200,500,1000]
-            iterator = possible_iterators[argmin(abs(axis_span/desired_ticks -
+            iterator = possible_iterators[np.argmin(abs(axis_span/desired_ticks -
                 possible_iterators))]
             #}}}
-            if verbose: print('iterator is',iterator)
-            return iterator,r_[ceil(thisaxis.min()/iterator):
-                floor(thisaxis.max()/iterator)+1]*iterator
+            logging.debug(strm('iterator is',iterator))
+            return iterator,r_[np.ceil(thisaxis.min()/iterator):
+                np.floor(thisaxis.max()/iterator)+1]*iterator
         #{{{ now, I need to get the list of multiples that falls inside the axis span
         xiterator,xlist = gen_list(x_axis)
         yiterator,ylist = gen_list(y_axis)
-        if verbose: print('range of x ',x_axis.min(),x_axis.max())
-        if verbose: print('xlist',xlist)
-        if verbose: print(plotdata.unitify_axis(0))
-        if verbose: print('range of y ',y_axis.min(),y_axis.max())
-        if verbose: print('ylist',ylist)
-        if verbose: print(plotdata.unitify_axis(1))
+        logging.debug(strm('range of x ',x_axis.min(),x_axis.max()))
+        logging.debug(strm('xlist',xlist))
+        logging.debug(strm(plotdata.unitify_axis(0)))
+        logging.debug(strm('range of y ',y_axis.min(),y_axis.max()))
+        logging.debug(strm('ylist',ylist))
+        logging.debug(strm(plotdata.unitify_axis(1)))
         #}}}
         if xiterator < 1:
             x_ticklabels = ['{:0.1f}'.format(j) for j in xlist]
@@ -606,13 +645,13 @@ class figlist(object):
             for j,y in enumerate(finer_ylist):
                 x_linedata = plotdata.getaxis(x_dim)/rescale
                 z_linedata = plotdata[y_dim:(y*rescale)].data.flatten()/z_norm
-                self.mlab.plot3d(x_linedata,y*ones_like(x_linedata),
+                self.mlab.plot3d(x_linedata,y*np.ones_like(x_linedata),
                         z_linedata+lensoffset,
                         color = (0,0,0), line_width = line_width,
                         tube_radius = tube_radius)
         for j,y in enumerate(ylist):
             self.mlab.plot3d(x_range+extension_factor*r_[-1,1],
-                    y*ones(2),zeros(2),
+                    y*np.ones(2),np.zeros(2),
                     color = (0,0,0), line_width = line_width,
                     tube_radius = tube_radius)
             self.mlab.text3d(x_range[0]-2*extension_factor, y, 0,
@@ -641,13 +680,13 @@ class figlist(object):
             for j,x in enumerate(finer_xlist):
                 y_linedata = plotdata.getaxis(y_dim)/(rescale*y_rescale)
                 z_linedata = plotdata[x_dim:(x*rescale)].data.flatten()/z_norm
-                self.mlab.plot3d(x*ones_like(y_linedata),y_linedata,
+                self.mlab.plot3d(x*np.ones_like(y_linedata),y_linedata,
                         z_linedata+lensoffset,
                         color = (0,0,0), line_width = line_width,
                         tube_radius = tube_radius)
         for j,x in enumerate(xlist):
-            self.mlab.plot3d(x*ones(2),y_range+extension_factor*r_[-1,1],
-                    zeros(2),
+            self.mlab.plot3d(x*np.ones(2),y_range+extension_factor*r_[-1,1],
+                    np.zeros(2),
                     color = (0,0,0), line_width = line_width,
                     tube_radius = tube_radius)
             self.mlab.text3d(x, y_range[0]-2*extension_factor, 0,
@@ -674,6 +713,7 @@ class figlist(object):
         Because this is executed before raising any errors, we want to avoid showing any plots if there are errors.
         Otherwise, it gets very confusing.
         '''
+        if self._print_at_end: print(self)
         if exception_type is None:
             if hasattr(self,'file_name'):
                 if hasattr(self,'line_spacing'):
@@ -683,3 +723,18 @@ class figlist(object):
             else:
                 self.show()
             return
+    def __repr__(self):
+        result = ""
+        counter=0
+        for j in self.figurelist:
+            if type(j) == dict:
+                result = result+str(j)+"\n"
+            else:
+                counter += 1
+                result = result+"%d: "%counter+str(j)+ (
+                        ' '+'|'*3+str(self.units[j])
+                        if j in self.units.keys()
+                        else
+                        ''
+                        ) +"\n"
+        return result

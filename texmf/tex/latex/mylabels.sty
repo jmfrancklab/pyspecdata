@@ -1,0 +1,11 @@
+\AtBeginDocument{
+\let\oldlabel=\label
+\let\oldlabel = \label
+}
+%%{{{ the following shows the labels for equations
+\RequirePackage[right]{showlabels}
+\RequirePackage{rotating}
+%\renewcommand{\showlabelsetlabel}[1]{$\!\!\!\!\!\!\!\hookleftarrow$\begin{rotate}{90}\begin{tiny}\showlabelfont \ #1\end{tiny}\end{rotate}}
+\newcommand{\newshowlabelsetlabelx}[1]{{\color{gray}$\!\!\!\!\!\!\!\hookleftarrow$\begin{rotate}{60}\showlabelfont \ \begingroup\tiny\begingroup\catcode`_=13 #1\endgroup\endgroup\end{rotate}}}
+\def\showlabelsetlabel{\newshowlabelsetlabelx}
+%%}}}

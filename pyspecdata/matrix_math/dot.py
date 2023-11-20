@@ -52,14 +52,21 @@ def dot(self, arg):
     """This will perform a dot product or a matrix multiplication.
     If one dimension in ``arg`` matches that in ``self``,
     it will dot along that dimension
-    (take a matrix multiplication where that dimension represents the columns of ``self`` and the rows of ``arg``)
+    (take a matrix multiplication where that
+    dimension represents the columns of
+    ``self`` and the rows of ``arg``)
 
-    Note that if you have your dimensions named "rows" and "columns", this
-    will be very confusing, but if you have your dimensions named in terms
-    of the vector basis they are defined/live in, this makes sense.
+    Note that if you have your dimensions
+    named "rows" and "columns", this will be
+    very confusing, but if you have your
+    dimensions named in terms of the vector
+    basis they are defined/live in, this
+    makes sense.
 
-    If there are zero or no matching dimensions, then use
-    :func:`~pyspecdata.nddata.along` to specify the dimensions for matrix
+    If there are zero or no matching
+    dimensions, then use
+    :func:`~pyspecdata.nddata.along` to
+    specify the dimensions for matrix
     multiplication / dot product.
 
     .. literalinclude:: ../examples/matrix_mult.py

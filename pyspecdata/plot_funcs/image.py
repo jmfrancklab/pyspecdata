@@ -1,21 +1,26 @@
 from ..general_functions import *
+from numpy import r_,c_,ix_,nan
+import numpy as np
 from ..ndshape import ndshape_base as ndshape
 from pylab import gca,sca,imshow,xlabel,ylabel,title,colorbar,setp
-def image(A,x=[],y=[],**kwargs):
+import logging
+def image(A,x=[],y=[],allow_nonuniform=True,**kwargs):
     r"Please don't call image directly anymore -- use the image method of figurelist"
     x_inverted = False
     A.squeeze()# drop any singleton dimensions, which cause problems
     #{{{ pull out kwargs for imagehsv
     imagehsvkwargs = {}
     for k,v in list(kwargs.items()):
-        if k in ['black','logscale']:
+        if k in ['black','logscale','scaling']:
             imagehsvkwargs[k] = kwargs.pop(k)
     #}}}
-    spacing,ax,x_first,origin = process_kwargs([('spacing',1),
+    spacing,ax,x_first,origin,renumber = process_kwargs([('spacing',1),
         ('ax',gca()),
         ('x_first',False),
-        ('origin','lower')],kwargs,
+        ('origin','lower'),
+        ('renumber',None)],kwargs,
         pass_through = True)
+    sca(ax)
     if x_first: # then the first dimension should be the column
         # dimesion (i.e. last)
         if hasattr(A,'dimlabels'):# if I try to use isinstance, I get a circular import
@@ -27,6 +32,26 @@ def image(A,x=[],y=[],**kwargs):
     sca(ax)
     setlabels = False
     if hasattr(A,'dimlabels'):
+        if renumber is not None:
+            if type(renumber) is str:
+                renumber = [renumber]
+        for thisaxis in A.dimlabels:
+            if renumber is not None and thisaxis in renumber:
+                A.setaxis(thisaxis,'#')
+            try:
+                check_ascending_axis(A.getaxis(thisaxis), allow_descending=True)
+            except:
+                if allow_nonuniform:
+                    logging.debug("Automatically changed to numbered axis along %s"%thisaxis)
+                    A.setaxis(thisaxis,'#').set_units(thisaxis,"#")
+                else:
+                    raise ValueError("You are not allowed to use image on data that"
+                    " doesn't have a uniformly spaced axis -- it is likely a"
+                    " misrepresentation of the data you are looking at."
+                    " For example, if you are looking at NMR data with a set of"
+                    " variable delays that are unevenly spaced, relabel this axis"
+                    " by index number --> .C.setaxis('%s','#').set_units('%s','scan"
+                    " #').\nThen you have an accurate representation of your data"%(2*(thisaxis,)))
         setlabels = True
         templabels = list(A.dimlabels)
         if A.get_prop('x_inverted'):
@@ -62,9 +87,9 @@ def image(A,x=[],y=[],**kwargs):
             y_label = '$'+y_label+'$'# whole expression is in math mode
         A = A.data
     if isinstance(x, list):
-        x = array(x)
+        x = np.array(x)
     if isinstance(y, list):
-        y = array(y)
+        y = np.array(y)
     if len(x)==0:
         x = [1,A.shape[1]]
     else:
@@ -94,17 +119,17 @@ def image(A,x=[],y=[],**kwargs):
     while A.ndim > 2:# to substitude for imagehsvm, etc., so that we just need a ersion of ft
         # order according to how it's ordered in the memory
         # the innermost two will form the image -- first add a line to the end of the images we're going to join up
-        tempsize = array(A.shape) # make a tuple the right shape
+        tempsize = np.array(A.shape) # make a tuple the right shape
         if linecounter == 0 and spacing < 1.0:
             spacing = round(prod(tempsize[0:-1])) # find the length of the thing not counting the columns
         tempsize[-2] = 2*linecounter + spacing # all dims are the same except the image row, to which I add an increasing number of rows
         #print "iterate (A.ndim=%d) -- now linecounter is "%A.ndim,linecounter
         linecounter += tempsize[-2] # keep track of the extra lines at the end
-        A = concatenate((A,nan*zeros(tempsize)),axis=(A.ndim-2)) # concatenate along the rows
+        A = np.concatenate((A,nan*np.zeros(tempsize)),axis=(A.ndim-2)) # concatenate along the rows
         tempsize = r_[A.shape[0:-3],A.shape[-2:]]
         tempsize[-2] *= A.shape[-3]
         try:
-            A = A.reshape(int64(tempsize)) # now join them up
+            A = A.reshape(np.int64(tempsize)) # now join them up
         except:
             raise IndexError(strm("problem with tempsize",tempsize,
                 "of type",type(tempsize),"dtype",tempsize.dtype))
@@ -115,7 +140,7 @@ def image(A,x=[],y=[],**kwargs):
         A = A[:,::-1]
         kwargs['origin'] = 'lower'
         # }}}
-    if iscomplexobj(A):# this just tests the datatype
+    if np.iscomplexobj(A):# this just tests the datatype
         A = imagehsv(A,**imagehsvkwargs)
         retval = imshow(A,extent=myext,**kwargs)
     else:
@@ -130,18 +155,24 @@ def image(A,x=[],y=[],**kwargs):
         ax.set_xlim((max(these_xlims),min(these_xlims)))
     return retval
 
-def imagehsv(A,logscale = False,black = False):
+def imagehsv(A, logscale=False, black=False, scaling=None):
     "This provides the HSV mapping used to plot complex number"
     # compare to http://www.rapidtables.com/convert/color/hsv-to-rgb.htm
+    A = A.copy()
     n = 256
-    mask = isnan(A)
+    mask = np.isnan(A)
     A[mask] = 0
+    if scaling is None:
+        A /= abs(A).max()
+    else:
+        A /= scaling
+        mask |= abs(A) > 1.0 + 1e-7
+        A[mask] = 0
     mask = mask.reshape(-1,1)
     intensity = abs(A).reshape(-1,1)
-    intensity /= abs(A).max()
     if logscale:
         raise ValueError("logscale is deprecated, use the cropped_log function instead")
-    #theta = (n-1.)*mod(angle(A)/pi/2.0,1)# angle in 255*cycles
+    #theta = (n-1.)*np.mod(np.angle(A)/pi/2.0,1)# angle in 255*cycles
     if black:
         if black is True:
             V = intensity
@@ -152,35 +183,35 @@ def imagehsv(A,logscale = False,black = False):
         S = intensity
         V = 1.0 # always
     C = V*S
-    H = (angle(-1*A).reshape(-1,1)+pi)/2./pi*6. # divide into 60 degree chunks -- the -1 is to rotate so red is at origin
-    X = C * (1-abs(mod(H,2)-1))
+    H = (np.angle(-1*A).reshape(-1,1)+pi)/2./pi*6. # divide into 60 degree chunks -- the -1 is to rotate so red is at origin
+    X = C * (1-abs(np.mod(H,2)-1))
     m = V-C
-    colors = ones(list(A.shape) + [3])
+    colors = np.ones(list(A.shape) + [3])
     origshape = colors.shape
     colors = colors.reshape(-1,3)
-    rightarray = c_[C, X, zeros_like(X)]
+    rightarray = c_[C, X, np.zeros_like(X)]
     # http://en.wikipedia.org/wiki/HSL_and_HSV#From_HSV,
     # except that the order was messed up
-    thismask = where(H<1)[0]
+    thismask = np.where(H<1)[0]
     # C X 0
     colors[ix_(thismask,[0,1,2])] = rightarray[ix_(thismask,[0,1,2])]
-    thismask = where(logical_and(H>=1,
+    thismask = np.where(np.logical_and(H>=1,
         H<2))[0]
     # X C 0
     colors[ix_(thismask,[1,0,2])] = rightarray[ix_(thismask,[0,1,2])]
-    thismask = where(logical_and(H>=2,
+    thismask = np.where(np.logical_and(H>=2,
         H<3))[0]
     # X 0 C
     colors[ix_(thismask,[1,2,0])] = rightarray[ix_(thismask,[0,1,2])]
-    thismask = where(logical_and(H>=3,
+    thismask = np.where(np.logical_and(H>=3,
         H<4))[0]
     # 0 X C
     colors[ix_(thismask,[2,1,0])] = rightarray[thismask,:]
-    thismask = where(logical_and(H>=4,
+    thismask = np.where(np.logical_and(H>=4,
         H<5))[0]
     # 0 C X
     colors[ix_(thismask,[2,0,1])] = rightarray[thismask,:]
-    thismask = where(H>5)[0]
+    thismask = np.where(H>5)[0]
     # C 0 X
     colors[ix_(thismask,[0,2,1])] = rightarray[thismask,:]
     colors += m
@@ -193,7 +224,7 @@ def imagehsv(A,logscale = False,black = False):
         # if the background is white, make the separators black
         colors[mask * r_[True,True,True]] = 0.0
     colors = colors.reshape(origshape)
-    return uint8(colors.round())
+    return np.uint8(colors.round())
 
 def fl_image(self,A,**kwargs):
     r"""Called as `fl.image()` where `fl` is the `figlist_var`
@@ -290,6 +321,7 @@ def fl_image(self,A,**kwargs):
         ('ax',gca()),
         ('human_units',True),
         ],kwargs,pass_through = True)
+    sca(ax)
     if human_units:
         firstarg = self.check_units(A,-1,0) # check units, and if need be convert to human units, where x is the last dimension and y is the first
     else:

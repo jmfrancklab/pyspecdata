@@ -14,14 +14,23 @@ Please note this package is heavily utilized by three other packages that our la
 *   `Classes for communicating with instruments <https://github.com/jmfrancklab/inst_notebooks/>`_.
 *   `Convenient SpinCore NMR Extension <https://github.com/jmfrancklab/spincore_apps/>`_.
 
-In practice, this means that it makes the code for processing spectral data shorter and more quickly legible.
-It *automatically* handles the following issues, without any additional code:
+
+:ref:`See pySpecData examples here <sphx_glr_auto_examples>`,
+and for a simple example applied to 1D data, see
+:ref:`here <sphx_glr_auto_examples_basic_example.py>`.
+
+
+The Basics
+==========
+
+Our goal is that after you put in a little effort to learn the new way of manipulating data with pySpecData, you can then make the code for processing spectral data that is shorter and also more quickly legible.
+PySpecData *automatically* handles the following issues, without any additional code:
 
 *   relabeling axes after a Fourier transformation
 *   propagation of errors
 *   adding units to plots
 
-To do this, you work with a pySpecData `nddata` object
+To enable this, you work with a pySpecData `nddata` object
 (which includes information about dimension names, axis values, errors, and the units)
 rather than
 working directly with traditional numpy `ndarray` objects.
@@ -32,12 +41,17 @@ familiar with the additional code needed to convert between index numbers
 and axis values.
 Using the funny notation of pySpecData, you can do this automatically.
 
-For example, say you have loaded an `nddata` object called `d` wanted to take time-domain data, Fourier transform,
-select out the central 20 kHz in the frequency domain, and then inverse Fourier transform, while preserving the correct axes throughout.
+For example, say you have loaded an `nddata` object called `d` and you want to take the time-domain data and:
+
+#.  Fourier transform,
+#.  Select out the central 20 kHz in the frequency domain, and finally
+#.  Inverse Fourier transform
+
+... all while preserving the correct axes throughout.
 That looks like this:
 
 >>> d.ft('t2', shift=True)
->>> d['t2':(-10e3,10e-3)]
+>>> d = d['t2':(-10e3,10e-3)]
 >>> d.ift('t2')
 
 Note that most pySpecData methods operate *in-place* on the data;
@@ -99,6 +113,13 @@ These and further details are covered in the various sections of the documentati
     fitdata.rst
     figlist.rst
     units.rst
+    examples.rst 
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Example Gallery
+
+    auto_examples/index
 
 
 Indices and tables

@@ -1,70 +1,42 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>load_file &mdash; pySpecData 0.9.5.3.1 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>load_file &mdash; pySpecData 0.9.5.3.2 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="_static/gallery_custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="index.html" class="icon icon-home"> pySpecData
-          
-
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                0.9.5.3.1
+                0.9.5.3.2
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -72,104 +44,60 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fitdata.html">the lmfitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
+</ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">pySpecData</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-      <li>load_file</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">load_file</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/temp_stubs.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <p>This page holds stubs for functions that will be included in the api documentation</p>
-<div class="section" id="load-file">
-<h1>load_file<a class="headerlink" href="#load-file" title="Permalink to this headline">¶</a></h1>
+<section id="load-file">
+<h1>load_file<a class="headerlink" href="#load-file" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
-<dt id="pyspecdata.load_files.find_file">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">find_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">searchstring</span></em>, <em class="sig-param"><span class="n">exp_type</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">postproc</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">print_result</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">prefilter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expno</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dimname</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">return_acq</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">add_sizes</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">add_dims</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">use_sweep</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">indirect_dimlabels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lookup</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.find_file" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.load_files.find_file">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.load_files.</span></span><span class="sig-name descname"><span class="pre">find_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">searchstring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">postproc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefilter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expno</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_acq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_sizes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sweep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indirect_dimlabels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.find_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the file  given by the regular expression <cite>searchstring</cite> inside the directory identified by <cite>exp_type</cite>, load the nddata object, and postprocess with the function <cite>postproc</cite>.</p>
 <p>It looks at the top level of the directory first, and if that fails, starts to look recursively.
 Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
-(For information on how to set up the file searching mechanism, see <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.datadir.register_directory" title="pyspecdata.datadir.register_directory"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_directory()</span></code></a>).</p>
+(For a more thorough description, see <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a>).</p>
 <p>Note that all loaded files will be logged in the data_files.log file in the directory that you run your python scripts from
 (so that you can make sure they are properly synced to the cloud, etc.).</p>
 <p>It calls <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a>, which finds the specific routine from inside one of the modules (sub-packages) associated with a particular file-type.</p>
 <p>If it can’t find any files matching the criterion, it logs the missing file and throws an exception.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>searchstring</strong> (<em>str</em>) – Most commonly, this is just a fragment of the file name,
 with any literal <code class="docutils literal notranslate"><span class="pre">*</span></code>, <code class="docutils literal notranslate"><span class="pre">.</span></code>, or <code class="docutils literal notranslate"><span class="pre">?</span></code> characters preceded by
@@ -177,16 +105,17 @@ a backslash.
 More generally, it is a regular expression,
 where <code class="docutils literal notranslate"><span class="pre">.*searchstring.*</span></code> matches a filename inside the
 directory appropriate for <cite>exp_type</cite>.</p></li>
+<li><p><strong>exp_type</strong> (<em>str</em>) – Gives the name of a directory, known to be pyspecdata, that contains
+the file of interest.
+For a directory to be known to pyspecdata, it must be registered with
+the (terminal/shell/command prompt) command <cite>pyspecdata_register_dir</cite>
+<strong>or</strong> in a directory contained inside (underneath) such a directory.</p></li>
 <li><p><strong>expno</strong> (<em>int</em>) – For Bruker NMR and Prospa files, where the files are stored in numbered
 subdirectories,
 give the number of the subdirectory that you want.
 Currently, this parameter is needed to load Bruker and Kea files.
 If it finds multiple files that match the regular expression,
 it will try to load this experiment number from all the directories.</p></li>
-<li><p><strong>exp_type</strong> (<em>str</em>) – Since the function assumes that you have different types of
-experiments sorted into different directories, this argument
-specifies the type of experiment see <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a> for
-more info.</p></li>
 <li><p><strong>postproc</strong> (<a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.function" title="pyspecdata.function"><em>function</em></a><em>, </em><em>str</em><em>, or </em><em>None</em>) – <p>This function is fed the nddata data and the remaining keyword
 arguments (<cite>kwargs</cite>) as arguments.
 It’s assumed that each module for each different file type
@@ -210,22 +139,22 @@ it sets <cite>postproc_type</cite> to the value of
 <code class="docutils literal notranslate"><span class="pre">(h5</span> <span class="pre">root).experiment.description['class']</span></code>.
 This, in turn, is used to choose the type of post-processing.</p>
 <dl class="field-list simple">
-<dt class="field-odd">dimname</dt>
+<dt class="field-odd">dimname<span class="colon">:</span></dt>
 <dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
-<dt class="field-even">return_acq</dt>
+<dt class="field-even">return_acq<span class="colon">:</span></dt>
 <dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
-<dt class="field-odd">add_sizes</dt>
+<dt class="field-odd">add_sizes<span class="colon">:</span></dt>
 <dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
-<dt class="field-even">add_dims</dt>
+<dt class="field-even">add_dims<span class="colon">:</span></dt>
 <dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
-<dt class="field-odd">use_sweep</dt>
+<dt class="field-odd">use_sweep<span class="colon">:</span></dt>
 <dd class="field-odd"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
-<dt class="field-even">indirect_dimlabels</dt>
+<dt class="field-even">indirect_dimlabels<span class="colon">:</span></dt>
 <dd class="field-even"><p>passed to <a class="reference internal" href="#pyspecdata.load_files.load_indiv_file" title="pyspecdata.load_files.load_indiv_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_indiv_file()</span></code></a></p>
 </dd>
 </dl>
@@ -237,13 +166,13 @@ This, in turn, is used to choose the type of post-processing.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyspecdata.load_files.load_indiv_file">
-<code class="sig-prename descclassname">pyspecdata.load_files.</code><code class="sig-name descname">load_indiv_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">dimname</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">return_acq</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">add_sizes</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">add_dims</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">use_sweep</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">indirect_dimlabels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expno</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.load_indiv_file" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyspecdata.load_files.load_indiv_file">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.load_files.</span></span><span class="sig-name descname"><span class="pre">load_indiv_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_acq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_sizes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sweep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indirect_dimlabels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expno</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.load_indiv_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open the file given by <cite>filename</cite>, use file signature magic and/or
 filename extension(s) to identify the file type, and call the appropriate
 function to open it.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dimname</strong> (<em>str</em>) – When there is a single indirect dimension composed of several scans,
 call the indirect dimension <cite>dimname</cite>.</p></li>
@@ -260,26 +189,22 @@ retain it as the “outermost” (leftmost) dimension.
 <li><p><strong>indirect_dimlabels</strong> (<em>str</em><em> or </em><em>None</em>) – passed through to <cite>acert.load_pulse</cite> (names an indirect dimension when dimlabels isn’t provided)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>the nddata containing the data,
 or else, <cite>None</cite>, indicating that this is part of a pair of
 files that should be skipped</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or None</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="safe-modules">
-<h1>safe modules<a class="headerlink" href="#safe-modules" title="Permalink to this headline">¶</a></h1>
+</section>
+<section id="safe-modules">
+<h1>safe modules<a class="headerlink" href="#safe-modules" title="Permalink to this heading">¶</a></h1>
 <p>Here, include modules that are safe – that is, modules that don’t import a lot of junk, and for which we can just call autosummary.</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
+<table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="modules.html#module-pyspecdata.datadir" title="pyspecdata.datadir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datadir</span></code></a></p></td>
 <td><p>Allows the user to run the same code on different machines, even though the location of the raw spectral data might change.</p></td>
@@ -289,46 +214,34 @@ files that should be skipped</p>
 </tr>
 </tbody>
 </table>
-</div>
+</section>
 
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2016, John M. Franck
-
-    </p>
+    <p>&#169; Copyright 2016, John M. Franck.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

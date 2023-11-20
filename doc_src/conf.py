@@ -17,6 +17,8 @@ import os
 import shlex
 import sphinx_rtd_theme
 import mock
+from matplotlib import rcParams, get_data_path
+print("datapath is",get_data_path())
  
 autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_toolkits', 'get_ipython', 'matplotlib', 'tables']
 
@@ -26,6 +28,8 @@ autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_too
 #sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../..'))
 sys.path.append(os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../pyspecdata'))
+print("sys.path is",sys.path)
 from pyspecdata.version import __version__
 
 # -- General configuration ------------------------------------------------
@@ -43,12 +47,27 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',# should allow numpydoc
     'sphinx.ext.autosummary',# should allow numpydoc
+    'sphinx.ext.intersphinx',
     #'matplotlib.sphinxext.only_directives',
-    #'matplotlib.sphinxext.plot_directive',
+    'matplotlib.sphinxext.plot_directive',
     #'IPython.sphinxext.ipython_console_highlighting',
     #'IPython.sphinxext.ipython_directive',
+    'sphinx_gallery.gen_gallery',
 ]
 
+sphinx_gallery_conf = {
+        'examples_dirs': ['../examples'], #path to examples scripts
+        'gallery_dirs': ['auto_examples'], #path to where to save gallery generated output
+        'filename_pattern': '.py', # modified to make more general
+        'ignore_pattern': r'__init__\.py',#|.*/text_only.*|.*/matplotlib.*',
+        #'image_srcset': ['2x'],
+        'reference_url': {
+            'pyspecdata': None,
+            },
+        "doc_module": ("pyspecdata",),
+        ## directory where function/class granular galleries are stored
+        'backreferences_dir'  : 'gen_modules/backreferences',
+        }
 autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
@@ -84,7 +103,7 @@ release = __version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -165,6 +184,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+html_css_files = ['gallery_custom.css']
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied

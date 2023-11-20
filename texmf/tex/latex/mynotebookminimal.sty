@@ -1,0 +1,43 @@
+\ProvidesPackage{mynotebookminimal}
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+%{{{Rather than including python.sty, copy and paste it here
+%% Author: Martin R. Ehmsen, ehmsen@imada.sdu.dk.
+
+\newwrite\@out
+\newwrite\@module
+
+\begingroup \catcode `|=0 \catcode `[=1
+\catcode`]=2 \catcode `\{=12 \catcode `\}=12
+\catcode`\\=12 |gdef|@xpython#1\end{python}[|immediate|write|@out[from pyspecdata.h5nmr import *]|immediate|write|@out[#1]|end[python]]
+|endgroup % changed by franck to add include file
+
+\def\python{\kernel@ifnextchar [{\@python}{\@python[]}}
+%{{{ fauske hack
+\newcounter{py@codenum}
+\def\@python[#1]{%
+\stepcounter{py@codenum}
+\gdef\@pythoninclude{#1}
+\immediate\openout\@out=\jobname.\thepy@codenum.py
+%\immediate\openout\@out=\jobname.py
+\newlinechar='15
+\begingroup \catcode`\^^M=12 %
+\let\do\@makeother\dospecials\obeyspaces%
+\@xpython}
+
+\def\endpython{%
+\endgroup
+\immediate\closeout\@out
+\@writemodule
+\immediate\write18{bash\space pythonout.sh\space\jobname.\thepy@codenum.py\space pythonout.out\space\thepy@codenum}
+\immediate\input pythonout.out
+}
+\def\dontsavepython{\immediate\write18{rm\space\jobname.\thepy@codenum.py.old}\jobname.\thepy@codenum.py.old}
+%}}}
+\def\@writemodule{%
+\immediate\openout\@module=latex.py
+\immediate\write\@module{jobname="\jobname"}
+\immediate\closeout\@module}
+%}}}
+\newcommand{\cwdnp}{cw-DNP}
+\usepackage{amsfonts}
+\newcommand\textsubscript[1]{\ensuremath{{}_{\text{#1}}}}
