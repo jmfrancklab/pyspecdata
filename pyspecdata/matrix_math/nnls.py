@@ -341,11 +341,11 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-2):
         logger.debug(strm("Compressed data:", data_compressed.shape))
         # data_for_nnls = self.__class__(data_compressed,[dimname[0],dimname[1]])
         # data_for_nnls.smoosh([dimname[0],dimname[1]],dimname=dimname[0])
-        data_fornnls = np.empty(s1 * s2)
-        for s1_index in range(s1):
-            for s2_index in range(s2):
-                temp = data_compressed[s1_index][s2_index]
-                data_fornnls[s1_index * s2 + s2_index] = temp
+        data_fornnls = np.empty(np.prod(s))
+        for s0_index in range(s[0]):
+            for s1_index in range(s[1]):
+                temp = data_compressed[s0_index][s1_index]
+                data_fornnls[s0_index * s[1] + s1_index] = temp
         logger.debug(
             strm("Lexicographically ordered data:", data_fornnls.shape)
         )
@@ -370,7 +370,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-2):
     )
     if l == "BRD":
         retval, residual = this_nnls.nnls_regularized(
-            K, data_fornnls, l=mod_BRD(1.0, K, twoD, s1, s2, data_fornnls)
+            K, data_fornnls, l=mod_BRD(1.0, K, twoD, s[0], s[1], data_fornnls)
         )
     else:
         retval, residual = this_nnls.nnls_regularized(K, data_fornnls, l=l)
@@ -430,12 +430,12 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-2):
         residual_nddata = residual
     # store the kernel and the residual as properties
     self.set_prop("nnls_kernel", K)
-    self.set_prop("s1", s1)
+    self.set_prop("s1", s[0])
     self.set_prop("nnls_residual", residual_nddata)
     for j in range(len(dimname)):
         self.set_prop(f"K{j+1}", K[j])
     if twoD:
-        self.set_prop("s2", s2)
+        self.set_prop("s2", s[1])
     self.axis_coords = self.fld(axis_coords_dict)
     self.axis_coords_units = self.fld(axis_units_dict)
     self.axis_coords_error = self.fld(axis_coords_error_dict)
