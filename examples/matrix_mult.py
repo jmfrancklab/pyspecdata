@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pylab import *
 from pyspecdata import *
 from numpy.random import random
 import time
