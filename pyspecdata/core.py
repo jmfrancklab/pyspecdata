@@ -3273,7 +3273,7 @@ class nddata (object):
             #}}}
     def repwlabels(self,axis):
         return None
-    def add_noise(self,intensity,seed=None):
+    def add_noise(self,intensity):
         '''Add Gaussian (box-muller) noise to the data.
 
         Parameters
@@ -5767,9 +5767,8 @@ class fitdata(nddata):
                     "type(dof)",type(dof)))
         logger.debug(strm("at end of fit covariance is shape",np.shape(self.covariance),"fit coeff shape",np.shape(self.fit_coeff)))
         return
-    def bootstrap(self,points,swap_out = np.exp(-1.0),seedval = 10347,minbounds = {},maxbounds = {}):
+    def bootstrap(self,points,swap_out = np.exp(-1.0),minbounds = {},maxbounds = {}):
         print(r'\begin{verbatim}')
-        seed(seedval)
         fitparameters = list(self.symbol_list)
         recordlist = np.array([tuple([0]*len(fitparameters))]*points,
                 {'names':tuple(fitparameters),'formats':tuple(['double']*len(fitparameters))}) # make an instance of the recordlist

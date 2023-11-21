@@ -3,6 +3,8 @@
 from pylab import *
 from pyspecdata import *
 from scipy.optimize import nnls
+from numpy.random import seed
+seed(1234)
 init_logging('debug')
 vd_list = nddata(linspace(5e-4,10,25),'vd')
 t1_name = r'$\log(T_1)$'
@@ -21,7 +23,7 @@ print(shape(true_F))
 M = K @ true_F # the fake data
 print(shape(M))
 #M.setaxis('vd',y_axis)
-M.add_noise(0.2, seed=937162211)
+M.add_noise(0.2)
 
 # this is here to test the integrated 1D-BRD (for pyspecdata)
 print("*** *** ***")
