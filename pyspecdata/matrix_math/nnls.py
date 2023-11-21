@@ -29,21 +29,17 @@ def H(product):
         return 1
 
 def square_heaviside(x_vec, K):
-    diag_heavi = []
-    for q in range(np.shape(K.T)[0]):
+    K_dim = np.shape(K.T)[0]
+    diag_heavi = np.empty(K_dim)
+    for q in range(K_dim):
         pull_val = np.dot(K.T[q, :], x_vec)
         temp = pull_val[0]
-        temp = H(temp)
-        diag_heavi.append(temp)
-    diag_heavi = np.ndarray(diag_heavi)
-    square_heavi = diag_heavi * np.eye(np.shape(diag_heavi)[0])
-    return square_heavi
+        diag_heavi[q] = H(temp)
+    return np.diag(diag_heavi)
 
-def optimize_alpha(input_vec, val, twoD, s1, s2, K, tol=1e-6):
+def optimize_alpha(input_vec, val, factor, K, tol=1e-6):
     alpha_converged = False
-    if twoD:
-        factor = np.sqrt(s1 * s2)
-    if not twoD:
+    if factor is None:
         factor = np.sqrt(input_vec.shape[0])
     T = np.linalg.inv(dd_chi(G(input_vec,K), val**2))
     dot_product = np.dot(input_vec.T, np.dot(T, input_vec))
@@ -60,7 +56,7 @@ def newton_min(input_vec, val, data_fornnls, K):
     fval = d_chi(input_vec, val, data_fornnls, K)
     return input_vec + np.dot(np.linalg.inv(fder), fval)
 
-def mod_BRD(guess, K, twoD, s1, s2, data_fornnls, maxiter=20):
+def mod_BRD(guess, K, factor, data_fornnls, maxiter=20):
     smoothing_param = guess
     alpha_converged = False
     for iter in range(maxiter):
@@ -75,7 +71,7 @@ def mod_BRD(guess, K, twoD, s1, s2, data_fornnls, maxiter=20):
         c_vec /= -1 * alpha
         c_update = newton_min(c_vec, smoothing_param, data_fornnls, K)
         alpha_update, alpha_converged = optimize_alpha(
-            c_update, smoothing_param, twoD, s1, s2, K
+            c_update, smoothing_param, factor, K
         )
         lambda_update = np.sqrt(alpha_update[0, 0])
         if alpha_converged:
@@ -369,8 +365,12 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-2):
         )
     )
     if l == "BRD":
+        if twoD:
+            factor = np.sqrt(s[0]*s[1])
+        else:
+            factor = None
         retval, residual = this_nnls.nnls_regularized(
-            K, data_fornnls, l=mod_BRD(1.0, K, twoD, s[0], s[1], data_fornnls)
+            K, data_fornnls, l=mod_BRD(1.0, K, factor, data_fornnls)
         )
     else:
         retval, residual = this_nnls.nnls_regularized(K, data_fornnls, l=l)
