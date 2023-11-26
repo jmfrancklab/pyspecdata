@@ -313,18 +313,21 @@ class cached_searcher(object):
     def __init__(self):
         self.has_run = False
         self.dirlist = []
-    def grab_dirlist(self):
-        rclone_remotes = []
-        try:
-            with Popen('rclone', stdout=PIPE, stderr=PIPE) as p:
-                pass
-        except OSError as e:
-            raise RuntimeError("I can't find the rclone program in your"
-                    "path -- please install from http://rclone.org")
-        with Popen(['rclone','listremotes'],
-                stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
-            for j in proc.stdout:
-                rclone_remotes.append(j.rstrip())
+    def grab_dirlist(self, specific_remote=None):
+        if specific_remote is None:
+            rclone_remotes = []
+            try:
+                with Popen('rclone', stdout=PIPE, stderr=PIPE) as p:
+                    pass
+            except OSError as e:
+                raise RuntimeError("I can't find the rclone program in your"
+                        "path -- please install from http://rclone.org")
+            with Popen(['rclone','listremotes'],
+                    stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
+                for j in proc.stdout:
+                    rclone_remotes.append(j.rstrip())
+        else:
+            rclone_remotes = [specific_remote]
         for thisremote in rclone_remotes:
             print("checking remote",thisremote,"... this might take a minute")
             # do NOT quote the filename -- quotes are typically stripped off by the
@@ -334,14 +337,21 @@ class cached_searcher(object):
                     +strm(*cmd)+" ... this might take a minute")
             with Popen(cmd, stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
                 for j in proc.stdout:
-                    self.dirlist.append(thisremote+j.strip())
+                    self.dirlist.append(thisremote+'/'+j.strip())
             logger.info("done checking that remote")
         return
-    def search_for(self,exp_type):
+    def search_for(self,exp_type,specific_remote=None):
         if not self.has_run:
             print(strm("about to grab the directory list for",exp_type))
             logger.info(strm("about to grab the directory list for",exp_type))
-            self.grab_dirlist()
+            self.grab_dirlist(specific_remote=specific_remote)
+        # {{{ if we found exactly the exp_type inside the specific_remote,
+        #     that's what we want!
+        if specific_remote is not None:
+            if specific_remote+'/'+exp_type+'/' in self.dirlist:
+                logger.debug("found exactly the right exp_type inside the specific_remote")
+                return [specific_remote+'/'+exp_type+'/']
+        # }}}
         potential_hits = [j for j in self.dirlist
                 if exp_type.lower() in j.lower()]
         logger.debug(strm("found potential hits",potential_hits))
@@ -350,9 +360,21 @@ cached_searcher_instance = cached_searcher()
 def rclone_search(fname,exp_type,dirname):
     logger.debug(strm("rclone search called with fname:",fname,"exp_type:",exp_type))
     remotelocation = pyspec_config.get_setting(exp_type.lower(), section='RcloneRemotes')
+    # {{{ first see the exp_type is contained inside something else
     if remotelocation is None:
-        logger.debug(f"remote location {exp_type.lower()} not previously stored, so search for it!")
-        result = cached_searcher_instance.search_for(exp_type.lower())
+        exp_dir_list = exp_type.split('/')
+        for specificity in range(len(exp_dir_list)-1):
+            remotelocation = pyspec_config.get_setting('/'.join(exp_dir_list[:-(specificity+1)]).lower(), section='RcloneRemotes')
+            if remotelocation is not None:
+                logger.debug(f"did find one level up {remotelocation}")
+                result = cached_searcher_instance.search_for(
+                        '/'.join(exp_dir_list[-(specificity+1):]),
+                        specific_remote=remotelocation
+                        )
+    # }}}
+        if remotelocation is None:
+            logger.debug(f"remote location {exp_type.lower()} not previously stored, so search for it!")
+            result = cached_searcher_instance.search_for(exp_type.lower())
         if len(result) > 1:
             raise ValueError(
                 f"the exp_type that you've selected, {exp_type}, is ambiguous,"
