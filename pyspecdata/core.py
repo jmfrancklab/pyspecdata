@@ -1406,11 +1406,11 @@ class nddata (object):
         y = self.getaxis(y_axis)[None,:]
         if 'levels' not in list(kwargs.keys()):
             levels = r_[self.data.min():self.data.max():30j]
-        cs = contour(x*np.ones_like(y),np.ones_like(x)*y,self.data,**kwargs)
+        cs = plt.contour(x*np.ones_like(y),np.ones_like(x)*y,self.data,**kwargs)
         if labels:
             plt.clabel(cs,inline = 1)
-        xlabel(self.unitify_axis(x_axis))
-        ylabel(self.unitify_axis(y_axis))
+        plt.xlabel(self.unitify_axis(x_axis))
+        plt.ylabel(self.unitify_axis(y_axis))
         return cs
     def waterfall(self,alpha = 0.3,ax = None,rotation = None,color = 'b',edgecolor = 'k'):
         if ax is None: 
