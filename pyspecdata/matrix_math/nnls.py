@@ -306,7 +306,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-2):
     s = [[]] * len(dimname)
     for j in range(len(dimname)):
         U[j], S[j], V[j] = np.linalg.svd(kernels[j].data, full_matrices=False)
-        s[j] = np.where(S[j] > default_cut)[j][-1]
+        s[j] = np.where(S[j] > default_cut)[0][-1]
     for j in range(len(dimname)):
         U[j] = U[j][:, 0:s[j]]
         S[j] = S[j][0:s[j]]
