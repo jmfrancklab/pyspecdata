@@ -95,21 +95,27 @@ def xepr(filename, exp_type=None, dimname='', verbose=False):
             if thiskey in v.keys() and v[thiskey]:
                 harmonics[j,k] = True
     n_harmonics = np.sum(harmonics)
+    if n_harmonics == 0: n_harmonics = 1
     logger.debug('there are %d harmonics'%n_harmonics)
-    logger.debug('there are %d harmonics, first is of type %s'%(n_harmonics,ikkf[0]))
+    if n_harmonics > 1:
+        logger.debug('there are %d harmonics, first is of type %s'%(n_harmonics,ikkf[0]))
     # }}}
     # {{{ check that calculated axes match dimensions
     y_points_calcd = len(data)//x_points//n_harmonics
-    dimname_list = [b0_texstr]
+    if 'XNAM' in list(v.keys()):
+        x_dimname = v['XNAM']
+    else:
+        x_dimname = b0_texstr
+    dimname_list = [x_dimname]
     dimsize_list = [x_points]
-    dims_accounted_for = {b0_texstr}
-    dims_to_label = {b0_texstr:x_axis}
+    dims_accounted_for = {x_dimname}
+    dims_to_label = {x_dimname:x_axis}
     def interpret_units(un_key):
         retval = v.pop(un_key)
         if retval[0] == "'": retval = retval.replace("'","")
         return retval
     if 'XUNI' in list(v.keys()):
-        dim_units = {b0_texstr:interpret_units('XUNI')}
+        dim_units = {x_dimname:interpret_units('XUNI')}
     else:
         dim_units = {}
     if n_harmonics > 1:
@@ -184,11 +190,20 @@ def xepr(filename, exp_type=None, dimname='', verbose=False):
         data.set_units(k,val)
     # }}}
     data.other_info.update(v)
-    data.reorder(b0_texstr)
+    data.reorder(x_dimname)
     if 'Microwave Power' in data.dimlabels:
         # convert from W to dBm
         data.setaxis('Microwave Power',lambda x: 10*np.log10(x)).set_units('Microwave Power','dBm')
-    if data.get_units(b0_texstr) == 's': data.rename(b0_texstr,'t')
+    if data.get_units(x_dimname) == 's': data.rename(x_dimname,'t')
+    # {{{ this is a hack -- should be replaced with pint, etc, but needs
+    # more thought for a general solution!
+    for thisdim in data.dimlabels:
+        if data.get_units(thisdim) == 'ns':
+            data[thisdim] /= 1e9
+            data.set_units(thisdim,'s')
+    if 'Field' in data.dimlabels:
+        data.rename('Field',b0_texstr)
+    # }}}
     return data
 def winepr(filename, dimname='', exp_type=None):
     """For opening WinEPR files.
@@ -325,9 +340,12 @@ def xepr_load_acqu(filename):
         converts the record array to a list.'''
         if len(x):
             try:
-                return np.genfromtxt(StringIO(x),dtype=None,encoding='utf-8').tolist()
+                result = np.genfromtxt(StringIO(x),dtype=None,encoding='utf-8').tolist()
             except:
                 raise ValueError("genfromtxt chokes on "+repr(x))
+            if type(result) is str and result[0] == "'" and result[-1] == "'":
+                result = result[1:-1]
+            return result
         else:
             return None
     which_block = None
