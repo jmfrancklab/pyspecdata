@@ -360,8 +360,8 @@ cached_searcher_instance = cached_searcher()
 def rclone_search(fname,exp_type,dirname):
     logger.debug(strm("rclone search called with fname:",fname,"exp_type:",exp_type))
     remotelocation = pyspec_config.get_setting(exp_type.lower(), section='RcloneRemotes')
-    # {{{ first see the exp_type is contained inside something else
     if remotelocation is None:
+        # {{{ first see the exp_type is contained inside something else
         exp_dir_list = exp_type.split('/')
         for specificity in range(len(exp_dir_list)-1):
             remotelocation = pyspec_config.get_setting('/'.join(exp_dir_list[:-(specificity+1)]).lower(), section='RcloneRemotes')
@@ -371,10 +371,12 @@ def rclone_search(fname,exp_type,dirname):
                         '/'.join(exp_dir_list[-(specificity+1):]),
                         specific_remote=remotelocation
                         )
-    # }}}
+        # }}}
+        # {{{ only do a general search if the previous failed
         if remotelocation is None:
             logger.debug(f"remote location {exp_type.lower()} not previously stored, so search for it!")
             result = cached_searcher_instance.search_for(exp_type.lower())
+        # }}}
         if len(result) > 1:
             raise ValueError(
                 f"the exp_type that you've selected, {exp_type}, is ambiguous,"
