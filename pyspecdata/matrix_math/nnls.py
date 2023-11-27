@@ -150,6 +150,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
         V1 = (svd_return[0])[2]
         default_cut = 1e-2
         s1 = np.where(S1 > default_cut)[0][-1]
+        logger.debug(strm('S1 is',S1,"so I'm going to",s1,"based on default_cut of",default_cut))
         U1 = U1[:,0:s1]
         S1 = S1[0:s1]
         V1 = V1[0:s1,:]
