@@ -7,6 +7,7 @@ import logging
 def image(A,x=[],y=[],allow_nonuniform=True,**kwargs):
     r"Please don't call image directly anymore -- use the image method of figurelist"
     x_inverted = False
+    A = A.copy()
     A.squeeze()# drop any singleton dimensions, which cause problems
     #{{{ pull out kwargs for imagehsv
     imagehsvkwargs = {}
@@ -26,7 +27,7 @@ def image(A,x=[],y=[],allow_nonuniform=True,**kwargs):
         if hasattr(A,'dimlabels'):# if I try to use isinstance, I get a circular import
             new_dimlabels = list(A.dimlabels)
             temp = new_dimlabels.pop(0)
-            A = A.copy().reorder(new_dimlabels + [temp])
+            A = A.reorder(new_dimlabels + [temp])
         else:
             A = A.T
     sca(ax)
