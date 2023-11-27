@@ -139,17 +139,19 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
     for j in range(len(dimname)):
         data_axes[j],fit_axes[j] = data_axes[j].aligndata(fit_axes[j])
     # note I specified K1_ret and K2_ret for returning kernels as properties of the nddata
+    logger.debug(strm("kernel_nddata",kernel_nddata))
+    self.reorder(dimname) # needed for 1.5D problem, so that kernel multiplies the data domain
     if not kernel_nddata:
         kernels = [kernel_func[j](data_axes[j],fit_axes[j]).squeeze() for j in range(len(dimname))]
-        logger.debug(strm('K%d dimlabels'%j,kernels[j].dimlabels,'and raw np.shape',kernels[j].data.shape) for j in range(len(dimname)))
+        logger.debug(strm(list(strm('K%d dimlabels'%j,kernels[j].dimlabels,'and raw np.shape',kernels[j].data.shape) for j in range(len(dimname)))))
         svd_return = []
         for j in range(len(dimname)):
             svd_return.append(np.linalg.svd(kernels[j].data,full_matrices=False))
         U1 = (svd_return[0])[0]
         S1 = (svd_return[0])[1]
         V1 = (svd_return[0])[2]
-        default_cut = 1e-2
-        s1 = np.where(S1 > default_cut)[0][-1]
+        default_cut = 1e-3 # JF changed this and following -- should be relative
+        s1 = np.where(S1 > default_cut*S1[0])[0][-1]
         logger.debug(strm('S1 is',S1,"so I'm going to",s1,"based on default_cut of",default_cut))
         U1 = U1[:,0:s1]
         S1 = S1[0:s1]
@@ -161,7 +163,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
         U2 = (svd_return[1])[0]
         S2 = (svd_return[1])[1]
         V2 = (svd_return[1])[2]
-        s2 = np.where(S2 > default_cut)[0][-1]
+        s2 = np.where(S2 > default_cut*S2[0])[0][-1]
         U2 = U2[:,0:s2]
         S2 = S2[0:s2]
         V2 = V2[0:s2,:]
@@ -188,9 +190,10 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0):
             #}}}
     if not twoD:
         if not kernel_nddata:
+            logger.debug(strm(U1.shape,S1.shape,V1.shape))
+            logger.debug(strm(self.data.shape))
             K = S1 @ V1
             data_fornnls = U1.T @ self.data
-            logger.debug(strm(np.shape(K)))
             logger.debug(strm(np.shape(data_fornnls)))
             if len(data_fornnls.shape) > 2:
                 data_fornnls = data_fornnls.reshape((np.prod(
