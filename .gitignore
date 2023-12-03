@@ -26,3 +26,7 @@ lapack-3.4.0/SRC/rem_objs.a
 lapack-3.4.0/SRC/xobjs.a
 nnls/_nnlsmodule.c
 demos/.ipynb_checkpoints/
+demos/ILT_demo_231121.ipynb
+demos/NNLS_Tikhonov_190104.ipynb
+demos/aab_simulation_2DILT.ipynb
+demos/yerdon_170420.png
