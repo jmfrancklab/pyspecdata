@@ -49,23 +49,23 @@ log_Ny_ax = linspace(log10(3e-3),log10(2),Ny)
 log_x = nddata(log_Nx_ax.copy(), r'log$(T_{1})$')
 log_y = nddata(log_Ny_ax.copy(), r'log$(T_{2})$') # log scale -- coincides with log(T1),log(T2) axes of plot
 
-x_mu = -1.8
-y_mu = -0.5
-sigma_x = 0.1
-sigma_y = 0.15
+x_mu = -1.0
+y_mu = -0.4
+sigma_x = 0.05
+sigma_y = 0.5
 
 if ridge:
-    theta = -115*pi/180
-    log_rho = corr_Gaussian_2D(theta,log_x,log_y,x_mu,y_mu,sigma_x,sigma_y)
+    theta = -45*pi/180
+    log_rho = corr_Gaussian_2D(theta,log_x,log_y,x_mu,y_mu,sigma_x,sigma_y)/2
 if not ridge:
-    log_rho = Gaussian_2D(log_x,log_y,x_mu,y_mu,sigma_x,sigma_y)
+    log_rho = Gaussian_2D(log_x,log_y,x_mu,y_mu,sigma_x,sigma_y)/2
 
     
 if multi_feature:
-    x_mu2 = -1.0
-    y_mu2 = -2.0
-    sigma_x = 0.3
-    sigma_y = 0.2
+    x_mu2 = -1.25
+    y_mu2 = -1.75
+    sigma_x = 0.1
+    sigma_y = 0.1
     log_rho += Gaussian_2D(log_x,log_y,x_mu2,y_mu2,sigma_x,sigma_y)
 
 figure('density')

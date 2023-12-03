@@ -7,14 +7,21 @@ get_ipython().magic(u'load_ext pyspecdata.ipy')
 # 
 # pySpecData makes it easy to construct fake data like this: let's see how!
 
+NT1 = 50 # Number of T1 values
+NT2 = 50 # Number of T2 values
 LT1_name = r'$\log(T_1)$'
-LT1 = nddata(r_[-2.5:0.25:40j], LT1_name)
+LT1 = nddata(linspace(-2.5,0.5,NT1), LT1_name)
 LT2_name = r'$\log(T_2)$'
-LT2 = nddata(r_[-2.5:0.25:40j], LT2_name)
-exact_data = exp(-(LT1+1.25)**2/2/0.1**2-(LT2+1.25)**2/2/0.1**2)
-slanted_coord1 = LT1+LT2
-slanted_coord2 = LT1-LT2
-exact_data += exp(-(slanted_coord1+1)**2/2/0.1**2-(slanted_coord2)**2/2/0.5**2)
+LT2 = nddata(linspace(-2.5,0.3,NT2), LT2_name)
+exact_data = exp(-(LT1-mu[0])**2/2/sigma[0]**2-(LT2-mu[1])**2/2/sigma[1]**2)
+slanted_coord1 = (LT1+LT2)/sqrt(2)
+slanted_coord2 = (LT1-LT2)/sqrt(2)
+mu = [-1.8,-0.5]
+mu = [ # convert to slanted coords
+        sum(mu)/sqrt(2),
+        diff(mu)/sqrt(2)]
+sigma = [0.1,0.15] # in slanted
+exact_data = exp(-(slanted_coord1-mu[0])**2/2/sigma[0]**2-(slanted_coord2-mu[1])**2/2/sigma[1]**2)
 exact_data
 
 # In[2]:
