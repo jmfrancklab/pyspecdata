@@ -309,101 +309,88 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
         )
     )
     # }}}
-    svd_return = []
+    U, S, V = [[None] * len(dimname) for j in range(3)]
+    s = [None] * len(dimname)
     for j in range(len(dimname)):
-        svd_return.append(
-            np.linalg.svd(kernels[j].data, full_matrices=False)
+        U[j], S[j], V[j] = np.linalg.svd(kernels[j].data, full_matrices=False)
+        s[j] = np.where(S[j] > default_cut * S[j][0])[0][-1] # JF changed this and following -- should be relative
+        logger.debug(
+            strm(
+                f"S{j+1} is",
+                S[j],
+                "so I'm going to",
+                s[j],
+                "based on default_cut of",
+                default_cut,
+            )
         )
-    U1 = (svd_return[0])[0]
-    S1 = (svd_return[0])[1]
-    V1 = (svd_return[0])[2]
-    default_cut = (
-        1e-3  # JF changed this and following -- should be relative
-    )
-    s1 = np.where(S1 > default_cut * S1[0])[0][-1]
-    logger.debug(
-        strm(
-            "S1 is",
-            S1,
-            "so I'm going to",
-            s1,
-            "based on default_cut of",
-            default_cut,
+    for j in range(len(dimname)):
+        U[j] = U[j][:, 0:s[j]]
+        S[j] = S[j][0:s[j]]
+        V[j] = V[j][0:s[j], :]
+        S[j] = S[j] * np.eye(s[j])
+        logger.debug(
+            strm("Compressed SVD of K[j]:", [x.shape for x in (U[j], S[j], V[j])])
         )
-    )
-    U1 = U1[:, 0:s1]
-    S1 = S1[0:s1]
-    V1 = V1[0:s1, :]
-    S1 = S1 * np.eye(s1)
-    logger.debug(
-        strm("Compressed SVD of K1:", [x.shape for x in (U1, S1, V1)])
-    )
-    # {{{ prepping 2D
+    # {{{ compressing -- K are the compressed kernels (ΣV)
+    K = [None] * len(dimname)
+    for j in range(len(dimname)):
+        K[j] = S[j].dot(V[j])
+    # }}}
     if twoD:
-        U2 = (svd_return[1])[0]
-        S2 = (svd_return[1])[1]
-        V2 = (svd_return[1])[2]
-        s2 = np.where(S2 > default_cut * S2[0])[0][-1]
-        U2 = U2[:, 0:s2]
-        S2 = S2[0:s2]
-        V2 = V2[0:s2, :]
-        S2 = S2 * np.eye(s2)
-        logger.debug(
-            strm("Compressed SVD K2:", [x.shape for x in (U2, S2, V2)])
+        # {{{ direct product and lex ordering
+        K_alldims = K[0][:, newaxis, :, newaxis] * K[1][newaxis, :, newaxis, :]
+        K_alldims = K_alldims.reshape(
+            K[0].shape[0] * K[1].shape[0], K[0].shape[1] * K[1].shape[1]
         )
-        K1 = S1.dot(V1)
-        K1_ret = K1
-        K2 = S2.dot(V2)
-        K2_ret = K2
-        K = K1[:, newaxis, :, newaxis] * K2[newaxis, :, newaxis, :]
-        K = K.reshape(K1.shape[0] * K2.shape[0], K1.shape[1] * K2.shape[1])
         logger.debug(
-            strm("Compressed K0, K1, and K2:", [x.shape for x in (K, K1, K2)])
+            strm(
+                "Compressed K, K1, and K2:",
+                [x.shape for x in (K_alldims, K[0], K[1])],
+            )
         )
-        data_compressed = U1.T.dot(self.data.dot(U2))
+        data_compressed = U[0].T.dot(self.data.dot(U[1]))
         logger.debug(strm("Compressed data:", data_compressed.shape))
-        data_fornnls = np.empty(s1 * s2)
-        for s1_index in range(s1):
-            for s2_index in range(s2):
-                temp = data_compressed[s1_index][s2_index]
-                data_fornnls[s1_index * s2 + s2_index] = temp
+        data_fornnls = np.empty(np.prod(s))
+        for s0_index in range(s[0]):
+            for s1_index in range(s[1]):
+                temp = data_compressed[s0_index][s1_index]
+                data_fornnls[s0_index * s[1] + s1_index] = temp
         logger.debug(
             strm("Lexicographically ordered data:", data_fornnls.shape)
         )
-        if len(data_fornnls.shape) > 2:
-            logger.debug(strm("Reshpaing data.."))
-            data_fornnls = data_fornnls.reshape(
-                (np.prod(data_fornnls.shape[:-1]), data_fornnls.shape[-1])
-            )
-            # }}}
-    if not twoD:
-        logger.debug(strm(U1.shape, S1.shape, V1.shape))
+        # }}}
+    else:
+        logger.debug(strm(U[0].shape, S[0].shape, V[0].shape))
         logger.debug(strm(self.data.shape))
-        K = S1 @ V1
-        data_fornnls = U1.T @ self.data
+        K_alldims = S[0] @ V[0]
+        data_fornnls = U[0].T @ self.data
+        logger.debug(strm(np.shape(K_alldims)))
         logger.debug(strm(np.shape(data_fornnls)))
-        if len(data_fornnls.shape) > 2:
-            data_fornnls = data_fornnls.reshape(
-                (np.prod(data_fornnls.shape[:-1]), data_fornnls.shape[-1])
-            )
-        logger.debug(
-            strm(
-                "shape of the data is",
-                self.shape,
-                "len of axis_coords_error",
-                len(self.axis_coords_error),
-            )
+    if len(data_fornnls.shape) > 2:
+        logger.debug(strm("Reshaping data.."))
+        data_fornnls = data_fornnls.reshape(
+            (np.prod(data_fornnls.shape[:-1]),
+                data_fornnls.shape[-1])
         )
+    logger.debug(
+        strm(
+            "shape of the data is",
+            self.shape,
+            "len of axis_coords_error",
+            len(self.axis_coords_error),
+        )
+    )
     if l == "BRD":
         if twoD:
-            factor = np.sqrt(s1*s2)
+            factor = np.sqrt(np.prod(s))
         else:
             factor = None
         retval, residual = this_nnls.nnls_regularized(
-            K, data_fornnls, l=mod_BRD(1.0, K, factor, data_fornnls)
+            K_alldims, data_fornnls, l=mod_BRD(1.0, K_alldims, factor, data_fornnls)
         )
     else:
-        retval, residual = this_nnls.nnls_regularized(K, data_fornnls, l=l)
+        retval, residual = this_nnls.nnls_regularized(K_alldims, data_fornnls, l=l)
     logger.debug(
         strm("coming back from fortran, residual type is", type(residual))
         + strm(residual.dtype if isinstance(residual, np.ndarray) else "")
@@ -464,13 +451,11 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
     else:
         residual_nddata = residual
     # store the kernel and the residual as properties
-    self.set_prop("nnls_kernel", K)
-    self.set_prop("s1", s1)
+    self.set_prop("nnls_kernel", K_alldims)
+    for j in range(len(dimname)):
+        self.set_prop(f"s{j+1}", s[j])
+        self.set_prop(f"K{j+1}", K[j])
     self.set_prop("nnls_residual", residual_nddata)
-    if twoD:
-        self.set_prop("s2", s2)
-        self.set_prop("K1", K1_ret)
-        self.set_prop("K2", K2_ret)
     self.axis_coords = self.fld(axis_coords_dict)
     self.axis_coords_units = self.fld(axis_units_dict)
     self.axis_coords_error = self.fld(axis_coords_error_dict)
