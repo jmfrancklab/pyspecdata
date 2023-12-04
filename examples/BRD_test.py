@@ -26,8 +26,6 @@ print(shape(M))
 #M.setaxis('vd',y_axis)
 M.add_noise(0.2)
 
-solution_nd_kernel = M.C.nnls('vd',logT1, K, l='BRD')
-
 # this is here to test the integrated 1D-BRD (for pyspecdata)
 print("*** *** ***")
 print(ndshape(M))
@@ -97,8 +95,6 @@ plot(L_opt_vec,label='L-Curve')
 print("opt. λ mean:",L_opt_vec.C.mean(t1_name).item(),"±",L_opt_vec.run(std,t1_name).item())
 plot(solution,':',label='pyspecdata-BRD')
 print("BRD mean:",solution.C.mean(t1_name).item(),"±",solution.run(std,t1_name).item())
-plot(solution_nd_kernel,':',label='pyspecdata-BRD (nddata kernel)')
-print("BRD mean:",solution_nd_kernel.C.mean(t1_name).item(),"±",solution_nd_kernel.run(std,t1_name).item())
 legend()
 show()
 

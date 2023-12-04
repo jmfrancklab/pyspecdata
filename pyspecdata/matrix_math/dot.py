@@ -176,8 +176,7 @@ def dot(self, arg):
             "we plan to include error propagation here, but not yet provided"
         )
     # we need to get into the shape:
-     dot_dim_self = self._matmul_along
-        # uninvolved_dims+mult_dims
+    # uninvolved_dims+mult_dims
     output_shape = [mult_dims[0][0], mult_dims[1][1]]
     # {{{ pull alternately from the end of arg and self, matching
     # where possible

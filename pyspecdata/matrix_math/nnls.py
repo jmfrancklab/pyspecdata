@@ -19,7 +19,7 @@ def d_chi(x_vec, val, data_fornnls, K):
 def dd_chi(G, val):
     return G + (val**2) * np.eye(np.shape(G)[0])
 
-def G(x_vec, K)
+def G(x_vec, K):
     return np.dot(K, np.dot(square_heaviside(x_vec, K), K.T))
 
 def H(product):
@@ -129,8 +129,8 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
     described in Venkataramanan et al. 2002 is performed which determines
     optimal :math:`\lambda` for the data (DOI:10.1109/78.995059).
     Note that setting `l` to a :double: for a regularization
-    parameter is supported in this 2 dimensional
-    should an appropriate parameter be known.
+    parameter is supported in this 2 dimensional should an
+    appropriate parameter be known.
 
     See: `Wikipedia page on NNLS <https://en.wikipedia.org/wiki/Non-negative_least_squares>`_,
     `Wikipedia page on Tikhonov regularization <https://en.wikipedia.org/wiki/Tikhonov_regularization>`_
@@ -151,19 +151,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
         and whose value is an np.array with the new axis labels.
 
         OR
-=======
-        :math:`\exp(-\tau*R_1)`, then this is :math:`\tau`
 
-        If you are performing 2D regularization, then this
-        is a tuple (pair) of 2 names
-    newaxis_dict: dict or (tuple of) nddata
-        a dictionary whose key is the name of the "fit" dimension
-        (:math:`R_1` in the example above)
-        and whose value is an np.array with the new axis labels.
-
-        OR
-
->>>>>>> add_mult_debug
         this can be a 1D nddata
         -- if it has an axis, the axis will be used to create the
         fit axis; if it has no axis, the data will be used
@@ -182,12 +170,12 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
         For 2D, this must be a tuple or dictionary of functions -- the kernel is
         the product of the two.
     l : double (default 0) or str
-        the regularization parameter :math:`lambda` -- if this is set to 0,
-        the algorithm reverts to standard nnls.  If this is set to
-        :str:`BRD`, then automatic parameter selection is executed
+        the regularization parameter :math:`lambda` -- if this is
+        set to 0, the algorithm reverts to standard nnls.  If this
+        is set to :str:`BRD`, then automatic parameter selection is executed
         according to the BRD algorithm, either in 1-dimension or
-        2-dimensions depending on presence of tuple synax (i.e., specifying
-        more than 1 dimension).
+        2-dimensions depending on presence of tuple synax
+        (i.e., specifying more than 1 dimension).
 
     Returns
     =======
@@ -266,7 +254,6 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
         assert callable(kernel_func), "third argument is kernel function"
         kernel_func = [kernel_func]
     assert len(kernel_func) == len(dimname)
-    # }}}
     logger.debug(
         strm(
             "on first calling nnls, shape of the data is",
@@ -278,9 +265,6 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
     # at this point kernel_func and newaxis_dict are both lists with length
     # equal to dimnames (length 1 for 1D and 2 for 2D)
     twoD = len(dimname) > 1
-    # construct the kernel
-    # the kernel transforms from (columns) the "fit" dimension to (rows)
-    # the "data" dimension
     fit_dimnames = [j.dimlabels[0] for j in newaxis_dict]
     fit_axis_coords = [
         j.getaxis(fit_dimnames[j_idx])
@@ -299,27 +283,120 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
     for j in range(len(dimname)):
         data_axes[j].squeeze()
         data_axes[j], fit_axes[j] = data_axes[j].aligndata(fit_axes[j])
-    else:
-        K = S[0] @ V[0]
-        data_fornnls = U[0].T @ self.data
-        logger.debug(strm(np.shape(K)))
-        logger.debug(strm(np.shape(data_fornnls)))
-    if len(data_fornnls.shape) > 2:
-        logger.debug(strm("Reshaping data.."))
-        data_fornnls = data_fornnls.reshape(
-            (np.prod(data_fornnls.shape[:-1]), data_fornnls.shape[-1])
-        )
+    # note I specified K1_ret and K2_ret for returning kernels as properties of the nddata
+    self.reorder(
+        dimname
+    )  # needed for 1.5D problem, so that kernel multiplies the data domain
+    # }}}
+    # {{{ construct the kernel
+    # the kernel transforms from (columns) the "fit" dimension to (rows)
+    # the "data" dimension
+    kernels = [
+        kernel_func[j](data_axes[j], fit_axes[j]).squeeze()
+        for j in range(len(dimname))
+    ]
     logger.debug(
         strm(
-            "np.shape of the data is",
-            self.shape,
-            "len of axis_coords_error",
-            len(self.axis_coords_error),
+            list(
+                strm(
+                    "K%d dimlabels" % j,
+                    kernels[j].dimlabels,
+                    "and raw np.shape",
+                    kernels[j].data.shape,
+                )
+                for j in range(len(dimname))
+            )
         )
     )
+    # }}}
+    svd_return = []
+    for j in range(len(dimname)):
+        svd_return.append(
+            np.linalg.svd(kernels[j].data, full_matrices=False)
+        )
+    U1 = (svd_return[0])[0]
+    S1 = (svd_return[0])[1]
+    V1 = (svd_return[0])[2]
+    default_cut = (
+        1e-3  # JF changed this and following -- should be relative
+    )
+    s1 = np.where(S1 > default_cut * S1[0])[0][-1]
+    logger.debug(
+        strm(
+            "S1 is",
+            S1,
+            "so I'm going to",
+            s1,
+            "based on default_cut of",
+            default_cut,
+        )
+    )
+    U1 = U1[:, 0:s1]
+    S1 = S1[0:s1]
+    V1 = V1[0:s1, :]
+    S1 = S1 * np.eye(s1)
+    logger.debug(
+        strm("Compressed SVD of K1:", [x.shape for x in (U1, S1, V1)])
+    )
+    # {{{ prepping 2D
+    if twoD:
+        U2 = (svd_return[1])[0]
+        S2 = (svd_return[1])[1]
+        V2 = (svd_return[1])[2]
+        s2 = np.where(S2 > default_cut * S2[0])[0][-1]
+        U2 = U2[:, 0:s2]
+        S2 = S2[0:s2]
+        V2 = V2[0:s2, :]
+        S2 = S2 * np.eye(s2)
+        logger.debug(
+            strm("Compressed SVD K2:", [x.shape for x in (U2, S2, V2)])
+        )
+        K1 = S1.dot(V1)
+        K1_ret = K1
+        K2 = S2.dot(V2)
+        K2_ret = K2
+        K = K1[:, newaxis, :, newaxis] * K2[newaxis, :, newaxis, :]
+        K = K.reshape(K1.shape[0] * K2.shape[0], K1.shape[1] * K2.shape[1])
+        logger.debug(
+            strm("Compressed K0, K1, and K2:", [x.shape for x in (K, K1, K2)])
+        )
+        data_compressed = U1.T.dot(self.data.dot(U2))
+        logger.debug(strm("Compressed data:", data_compressed.shape))
+        data_fornnls = np.empty(s1 * s2)
+        for s1_index in range(s1):
+            for s2_index in range(s2):
+                temp = data_compressed[s1_index][s2_index]
+                data_fornnls[s1_index * s2 + s2_index] = temp
+        logger.debug(
+            strm("Lexicographically ordered data:", data_fornnls.shape)
+        )
+        if len(data_fornnls.shape) > 2:
+            logger.debug(strm("Reshpaing data.."))
+            data_fornnls = data_fornnls.reshape(
+                (np.prod(data_fornnls.shape[:-1]), data_fornnls.shape[-1])
+            )
+            # }}}
+    if not twoD:
+        logger.debug(strm(U1.shape, S1.shape, V1.shape))
+        logger.debug(strm(self.data.shape))
+        K = S1 @ V1
+        data_fornnls = U1.T @ self.data
+        logger.debug(strm(np.shape(data_fornnls)))
+        if len(data_fornnls.shape) > 2:
+            data_fornnls = data_fornnls.reshape(
+                (np.prod(data_fornnls.shape[:-1]), data_fornnls.shape[-1])
+            )
+        logger.debug(
+            strm(
+                "shape of the data is",
+                self.shape,
+                "len of axis_coords_error",
+                len(self.axis_coords_error),
+            )
+        )
     if l == "BRD":
         if twoD:
-            factor = np.sqrt(s[0]*s[1])
+            factor = np.sqrt(s1*s2)
         else:
             factor = None
         retval, residual = this_nnls.nnls_regularized(
@@ -374,21 +451,26 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
     self.data = retval
     if not np.isscalar(residual):
         # make the residual nddata as well
-        residual_nddata = self.shape.pop(fit_dimnames[0])
+        residual_nddata = self.shape.pop(fit_dimnames[0]).alloc(
+            dtype=residual.dtype
+        )
         if twoD:
-            residual_nddata.pop(fit_dimnames[1])
-        residual_nddata = residual_nddata.alloc(dtype=residual.dtype)
+            residual_nddata = (
+                self.shape.pop(fit_dimnames[1])
+                .pop(fit_dimnames[0])
+                .alloc(dtype=residual.dtype)
+            )
         residual_nddata.data[:] = residual[:]
     else:
         residual_nddata = residual
     # store the kernel and the residual as properties
     self.set_prop("nnls_kernel", K)
-    self.set_prop("s1", s[0])
+    self.set_prop("s1", s1)
     self.set_prop("nnls_residual", residual_nddata)
-    for j in range(len(dimname)):
-        self.set_prop(f"K{j+1}", K[j])
     if twoD:
-        self.set_prop("s2", s[1])
+        self.set_prop("s2", s2)
+        self.set_prop("K1", K1_ret)
+        self.set_prop("K2", K2_ret)
     self.axis_coords = self.fld(axis_coords_dict)
     self.axis_coords_units = self.fld(axis_units_dict)
     self.axis_coords_error = self.fld(axis_coords_error_dict)

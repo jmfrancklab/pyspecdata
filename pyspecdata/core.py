@@ -3284,7 +3284,6 @@ class nddata (object):
             *e.g.* ``lambda x: max(abs(x))/10.``
             
         '''
-        if seed is not None: np.random.seed(seed)
         if isinstance(intensity, type(emptyfunction)):
             intensity = intensity(lambda x: self.data)
         return_complex = np.iscomplexobj(self.data)
