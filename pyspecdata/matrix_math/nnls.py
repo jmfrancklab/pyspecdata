@@ -438,15 +438,10 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
     self.data = retval
     if not np.isscalar(residual):
         # make the residual nddata as well
-        residual_nddata = self.shape.pop(fit_dimnames[0]).alloc(
-            dtype=residual.dtype
-        )
+        residual_nddata = self.shape.pop(fit_dimnames[0])
         if twoD:
-            residual_nddata = (
-                self.shape.pop(fit_dimnames[1])
-                .pop(fit_dimnames[0])
-                .alloc(dtype=residual.dtype)
-            )
+            residual_nddata.pop(fit_dimnames[1])
+        residual_nddata = residual_nddata.alloc(dtype=residual.dtype)
         residual_nddata.data[:] = residual[:]
     else:
         residual_nddata = residual
