@@ -29,6 +29,7 @@ will hopefull be intuitive to those familiar with SQL, etc.
 '''
 from .datadir import pyspec_config, unknown_exp_type_name
 from .dict_utils import make_ndarray, unmake_ndarray
+from .matrix_math.svd import svd as MM_svd
 from .matrix_math.dot import dot as MM_dot
 from .matrix_math.dot import matmul as MM_matmul
 from .matrix_math.dot import along as MM_along
@@ -36,7 +37,7 @@ from .matrix_math.nnls import nnls as MM_nnls
 from sys import exc_info
 from os import environ
 from os.path import sep as path_sep
-
+import time
 # {{{ determine the figure style, and load the appropriate modules
 _figure_mode_setting = pyspec_config.get_setting('figures', section='mode', environ='pyspecdata_figures')
 if _figure_mode_setting is None:
@@ -1804,6 +1805,8 @@ class nddata (object):
     #}}}
     #{{{ rename
     def rename(self,previous,new):
+        self.dimlabels = list(self.dimlabels) # otherwise, it weirdly
+        # changes the names of copies/sources
         self.dimlabels[self.dimlabels.index(previous)] = new
         return self
     #}}}
@@ -1917,6 +1920,7 @@ class nddata (object):
             return None
     #}}}
     #}}}
+    svd = MM_svd
     #{{{ arithmetic
     along = MM_along
     dot = MM_dot
@@ -3269,7 +3273,7 @@ class nddata (object):
             #}}}
     def repwlabels(self,axis):
         return None
-    def add_noise(self,intensity,seed=None):
+    def add_noise(self,intensity):
         '''Add Gaussian (box-muller) noise to the data.
 
         Parameters
@@ -5764,9 +5768,8 @@ class fitdata(nddata):
                     "type(dof)",type(dof)))
         logger.debug(strm("at end of fit covariance is shape",np.shape(self.covariance),"fit coeff shape",np.shape(self.fit_coeff)))
         return
-    def bootstrap(self,points,swap_out = np.exp(-1.0),seedval = 10347,minbounds = {},maxbounds = {}):
+    def bootstrap(self,points,swap_out = np.exp(-1.0),minbounds = {},maxbounds = {}):
         print(r'\begin{verbatim}')
-        seed(seedval)
         fitparameters = list(self.symbol_list)
         recordlist = np.array([tuple([0]*len(fitparameters))]*points,
                 {'names':tuple(fitparameters),'formats':tuple(['double']*len(fitparameters))}) # make an instance of the recordlist

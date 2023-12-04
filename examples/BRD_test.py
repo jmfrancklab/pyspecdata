@@ -1,9 +1,10 @@
 # for 1D BRD, adapted mainly from Venkataramanan 2002
 # but checked against BRD 1981
+from pylab import *
 from pyspecdata import *
-from numpy import *
 from scipy.optimize import nnls
-import matplotlib.pyplot as plt
+from numpy.random import seed
+seed(1234)
 init_logging('debug')
 vd_list = nddata(linspace(5e-4,10,25),'vd')
 t1_name = r'$\log(T_1)$'
@@ -23,7 +24,7 @@ print(shape(true_F))
 M = K @ true_F # the fake data
 print(shape(M))
 #M.setaxis('vd',y_axis)
-M.add_noise(0.2, seed=937162211)
+M.add_noise(0.2)
 
 solution_nd_kernel = M.C.nnls('vd',logT1, K, l='BRD')
 
@@ -75,11 +76,11 @@ if plot_Lcurve:
     if annotate_plot:
         if show_lambda:
             for j,this_l in enumerate(l):
-                plt.annotate('%0.4f'%this_l, (log10(r_norm[j]),log10(x_norm[j])),
+                annotate('%0.4f'%this_l, (log10(r_norm[j]),log10(x_norm[j])),
                          ha='left',va='bottom',rotation=45)
         else:
             for j,this_l in enumerate(l):
-                plt.annotate('%d'%j, (log10(r_norm[j]),log10(x_norm[j])),
+                annotate('%d'%j, (log10(r_norm[j]),log10(x_norm[j])),
                          ha='left',va='bottom',rotation=45)
 #}}}
 
@@ -98,6 +99,6 @@ plot(solution,':',label='pyspecdata-BRD')
 print("BRD mean:",solution.C.mean(t1_name).item(),"±",solution.run(std,t1_name).item())
 plot(solution_nd_kernel,':',label='pyspecdata-BRD (nddata kernel)')
 print("BRD mean:",solution_nd_kernel.C.mean(t1_name).item(),"±",solution_nd_kernel.run(std,t1_name).item())
-plt.legend()
+legend()
 show()
 
