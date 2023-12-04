@@ -101,7 +101,7 @@ def demand_real(x, addtxt=""):
                 + addtxt
             )
 # }}}
-def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
+def nnls(self, dimname_list, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
     r"""Perform regularized non-negative least-squares "fit" on self.
 
     Capable of solving for solution in 1 or 2 dimensions.
@@ -116,7 +116,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
     according to Tikhonov regularization.
 
     To perform regularized minimization in 1 dimension, provide
-    :str:`dimname`, :nddata:`newaxis_dict`, :function:`kernel_func`, and
+    :str:`dimname_list`, :nddata:`newaxis_dict`, :function:`kernel_func`, and
     regularization parameter `l`. One may set `l` to a :double: of the regularization
     parameter of choice (found, for instance, through L-curve analysis) or
     set `l` to :str:`BRD` to enable automatic selection of a regularization
@@ -124,7 +124,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
     but adapted for 1D case (DOI:10.1109/78.995059).
 
     To perform regularized minimization in 2 dimensions, set `l` to
-    :str:`BRD` and provide a tuple of parameters :str:`dimname`,
+    :str:`BRD` and provide a tuple of parameters :str:`dimname_list`,
     :nddata:`newaxis_dict`, and :function:`kernel_func`.  Algorithm
     described in Venkataramanan et al. 2002 is performed which determines
     optimal :math:`\lambda` for the data (DOI:10.1109/78.995059).
@@ -137,7 +137,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
 
     Parameters
     ==========
-    dimname: str or tuple
+    dimname_list: str or tuple
         Name of the "data" dimension that is to be replaced by a
         distribution (the "fit" dimension);
         *e.g.* if you are regularizing a set of functions
@@ -158,7 +158,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
 
         OR
 
-        if dimname is a tuple of 2 dimensions indicating a 2D ILT, this
+        if dimname_list is a tuple of 2 dimensions indicating a 2D ILT, this
         should also be a tuple of 2 nddata, representing the two axes
     kernel_func: function or tuple of functions
         a function giving the kernel for the regularization.
@@ -197,34 +197,34 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
     """
     # {{{ type checking
     demand_real(self.data)
-    if type(dimname) is str and type(newaxis_dict) is type(self):
+    if type(dimname_list) is str and type(newaxis_dict) is type(self):
         # one dimensional with axis given as nddata
-        dimname = [dimname]
+        dimname_list = [dimname_list]
         newaxis_dict = [newaxis_dict]
-    elif type(dimname) is tuple and type(newaxis_dict) is tuple:
+    elif type(dimname_list) is tuple and type(newaxis_dict) is tuple:
         # 2D as tuples
-        assert len(dimname) == len(newaxis_dict)
-        assert len(dimname) in [1, 2]
+        assert len(dimname_list) == len(newaxis_dict)
+        assert len(dimname_list) in [1, 2]
     elif type(newaxis_dict) is dict:
         # as a dictionary
-        if len(newaxis_dict) == 1 and type(dimname) is str:
-            newaxis_dict = [newaxis_dict[dimname]]
+        if len(newaxis_dict) == 1 and type(dimname_list) is str:
+            newaxis_dict = [newaxis_dict[dimname_list]]
         else:
             # here I'm expecting 2D
             assert len(newaxis_dict) == 2
-            assert len(dimname) == 2
-            newaxis_dict = [newaxis_dict[j] for j in dimname]
+            assert len(dimname_list) == 2
+            newaxis_dict = [newaxis_dict[j] for j in dimname_list]
     else:
         raise ValueError(
             strm(
                 "I didn't understand what you specified for the new axes (dimension:",
-                dimname,
+                dimname_list,
                 "and new axes",
                 newaxis_dict,
             )
         )
     # make sure axes are real
-    for j in dimname:
+    for j in dimname_list:
         demand_real(
             self.getaxis(j), "(this message pertains to the %s axis)" % j
         )
@@ -248,12 +248,12 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
             kernel_func[1]
         ), "third argument is tuple of kernel functions"
     elif isinstance(kernel_func, dict):
-        kernel_func = [kernel_func[j] for j in dimname]
+        kernel_func = [kernel_func[j] for j in dimname_list]
         assert all([callable(j) for j in kernel_func])
     else:
         assert callable(kernel_func), "third argument is kernel function"
         kernel_func = [kernel_func]
-    assert len(kernel_func) == len(dimname)
+    assert len(kernel_func) == len(dimname_list)
     logger.debug(
         strm(
             "on first calling nnls, shape of the data is",
@@ -264,7 +264,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
     )
     # at this point kernel_func and newaxis_dict are both lists with length
     # equal to dimnames (length 1 for 1D and 2 for 2D)
-    twoD = len(dimname) > 1
+    twoD = len(dimname_list) > 1
     fit_dimnames = [j.dimlabels[0] for j in newaxis_dict]
     fit_axis_coords = [
         j.getaxis(fit_dimnames[j_idx])
@@ -273,27 +273,30 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
     ]
     fit_axes = [
         self.__class__(fit_axis_coords[j], fit_dimnames[j])
-        for j in range(len(dimname))
+        for j in range(len(dimname_list))
     ]
-    data_axes = [self.fromaxis(dimname[j]) for j in range(len(dimname))]
+    data_axes = [self.fromaxis(dimname_list[j]) for j in range(len(dimname_list))]
     # at this point, fit_axes and data_axes
     # are nddata objects that give the axis
     # coordinates in the fit and data
     # domains, respectively
-    for j in range(len(dimname)):
+    for j in range(len(dimname_list)):
         data_axes[j].squeeze()
         data_axes[j], fit_axes[j] = data_axes[j].aligndata(fit_axes[j])
     # note I specified K1_ret and K2_ret for returning kernels as properties of the nddata
     self.reorder(
-        dimname
-    )  # needed for 1.5D problem, so that kernel multiplies the data domain
+        dimname_list,
+        first=False
+    )  # numpy dot is geared towards doing matrix operations with the
+    #    inner dimensions, so we put out active dimensions on the inside
+    #    (last)
     # }}}
     # {{{ construct the kernel
     # the kernel transforms from (columns) the "fit" dimension to (rows)
     # the "data" dimension
     kernels = [
         kernel_func[j](data_axes[j], fit_axes[j]).squeeze()
-        for j in range(len(dimname))
+        for j in range(len(dimname_list))
     ]
     logger.debug(
         strm(
@@ -304,14 +307,14 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
                     "and raw np.shape",
                     kernels[j].data.shape,
                 )
-                for j in range(len(dimname))
+                for j in range(len(dimname_list))
             )
         )
     )
     # }}}
-    U, S, V = [[None] * len(dimname) for j in range(3)]
-    s = [None] * len(dimname)
-    for j in range(len(dimname)):
+    U, S, V = [[None] * len(dimname_list) for j in range(3)]
+    s = [None] * len(dimname_list)
+    for j in range(len(dimname_list)):
         U[j], S[j], V[j] = np.linalg.svd(kernels[j].data, full_matrices=False)
         s[j] = np.where(S[j] > default_cut * S[j][0])[0][-1] # JF changed this and following -- should be relative
         logger.debug(
@@ -324,7 +327,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
                 default_cut,
             )
         )
-    for j in range(len(dimname)):
+    for j in range(len(dimname_list)):
         U[j] = U[j][:, 0:s[j]]
         S[j] = S[j][0:s[j]]
         V[j] = V[j][0:s[j], :]
@@ -333,8 +336,8 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
             strm("Compressed SVD of K[j]:", [x.shape for x in (U[j], S[j], V[j])])
         )
     # {{{ compressing -- K are the compressed kernels (ΣV)
-    K = [None] * len(dimname)
-    for j in range(len(dimname)):
+    K = [None] * len(dimname_list)
+    for j in range(len(dimname_list)):
         K[j] = S[j].dot(V[j])
     # }}}
     if twoD:
@@ -349,30 +352,26 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
                 [x.shape for x in (K_alldims, K[0], K[1])],
             )
         )
-        data_compressed = U[0].T.dot(self.data.dot(U[1]))
-        logger.debug(strm("Compressed data:", data_compressed.shape))
-        data_fornnls = np.empty(np.prod(s))
-        for s0_index in range(s[0]):
-            for s1_index in range(s[1]):
-                temp = data_compressed[s0_index][s1_index]
-                data_fornnls[s0_index * s[1] + s1_index] = temp
-        logger.debug(
-            strm("Lexicographically ordered data:", data_fornnls.shape)
-        )
+        # from dot documentation:
+        # sum across last and second from last and second to last
+        # dimensions:
+        # dot(a, b)[i,j,k,m] = sum(a[i,j,:] * b[k,:,m])
+        data_fornnls = U[0].T.dot(
+                self.data.dot(U[1])
+                )
+        # we want to smoosh the last two dimensions to get lex ordering
+        # (here, if data has outer (earlier) dimensions, they are not
+        # affected)
+        data_fornnls = data_fornnls.reshape(
+                data_fornnls.shape[:-2] + (np.prod(data_fornnls.shape[-2:]),)
+                )
         # }}}
     else:
-        logger.debug(strm(U[0].shape, S[0].shape, V[0].shape))
-        logger.debug(strm(self.data.shape))
         K_alldims = S[0] @ V[0]
-        data_fornnls = U[0].T @ self.data
-        logger.debug(strm(np.shape(K_alldims)))
-        logger.debug(strm(np.shape(data_fornnls)))
-    if len(data_fornnls.shape) > 2:
-        logger.debug(strm("Reshaping data.."))
-        data_fornnls = data_fornnls.reshape(
-            (np.prod(data_fornnls.shape[:-1]),
-                data_fornnls.shape[-1])
-        )
+        temp = self.data
+        data_fornnls = U[0].T.dot(temp)
+    # we are now ready to perform the regularization
+    # along the innermost dimension, which is lex ordered where relevant!
     logger.debug(
         strm(
             "shape of the data is",
@@ -399,9 +398,8 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
     if not np.isscalar(l):
         newshape.append(len(l))
     logger.debug(strm("test***", list(self.data.shape)[:-1]))
-    newshape.append(fit_axes[0].shape[fit_dimnames[0]])
-    if twoD:
-        newshape.append(fit_axes[1].shape[fit_dimnames[1]])
+    newshape += [self.shape[j] for j in self.dimlabels if j not in dimname_list] # any outer dimensions
+    newshape += [fit_axes[j].data.size for j in range(len(fit_dimnames))]
     logger.debug(
         strm(
             "before mkd, shape of the data is",
@@ -423,8 +421,8 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
     self.axis_coords_error_dict = None
     # }}}
     # change the dimnesion names and data
-    for j in range(len(dimname)):
-        self.rename(dimname[j], fit_dimnames[j])
+    for j in range(len(dimname_list)):
+        self.rename(dimname_list[j], fit_dimnames[j])
         axis_coords_dict[fit_dimnames[j]] = fit_axes[j].getaxis(
             fit_dimnames[j]
         )
@@ -447,7 +445,7 @@ def nnls(self, dimname, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
         residual_nddata = residual
     # store the kernel and the residual as properties
     self.set_prop("nnls_kernel", K_alldims)
-    for j in range(len(dimname)):
+    for j in range(len(dimname_list)):
         self.set_prop(f"s{j+1}", s[j])
         self.set_prop(f"K{j+1}", K[j])
     self.set_prop("nnls_residual", residual_nddata)
