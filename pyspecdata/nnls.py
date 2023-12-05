@@ -62,7 +62,7 @@ def nnls_regularized(A, b, l=0, maxiter=None):
     if len(A.shape) != 2:
         raise ValueError("expected matrix")
     if len(b.shape) > 2:
-        raise ValueError("expected vector")
+        raise ValueError("Expected vector! It's allowed to have indirect, but you gave me, "+str(b.shape))
 
     m, n = A.shape
 

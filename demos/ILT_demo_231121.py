@@ -50,6 +50,19 @@ simulated_data.nnls(('tau1','tau2'),(LT1,LT2),
                     (lambda tau1,LT1: 1-2*exp(-tau1*10**-LT1),
                      lambda tau2,LT2: exp(-tau2*10**-LT2)), l='BRD')
 
-# In[5]:
+# ## 1.5D test
+# Now, we use the same shape, but we pretend like one of these
+# dimensions comes directly from the spectroscopy (i.e., it's a
+# direct FT dimension, as in the x axis of DOSY), while the other
+# requires regularization
 
+basis = (1-2*exp(-tau1/10**LT1))
+simulated_data = basis*exact_data
+simulated_data.sum(LT1_name)
+
+# now perform the regularization
+
+simulated_data.nnls('tau1', LT1,
+                    lambda tau1,LT1: 1-2*exp(-tau1*10**-LT1),
+                    l='BRD')
 

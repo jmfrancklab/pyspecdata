@@ -283,13 +283,19 @@ def nnls(self, dimname_list, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
     for j in range(len(dimname_list)):
         data_axes[j].squeeze()
         data_axes[j], fit_axes[j] = data_axes[j].aligndata(fit_axes[j])
-    # note I specified K1_ret and K2_ret for returning kernels as properties of the nddata
+    # {{{ numpy dot is geared towards doing matrix operations with the
+    # inner dimensions, so we put out active dimensions on the inside
+    # (last), so we want that order, but we want to save the final order
+    # that we're going to want at the end
+    new_order = [fit_dimnames[dimname_list.index(j)]
+            if j in dimname_list else j
+            for j in self.dimlabels]
     self.reorder(
         dimname_list,
         first=False
-    )  # numpy dot is geared towards doing matrix operations with the
-    #    inner dimensions, so we put out active dimensions on the inside
-    #    (last)
+    )
+    # }}}
+    logger.debug(strm("here is the order of the data",self.shape))
     # }}}
     # {{{ construct the kernel
     # the kernel transforms from (columns) the "fit" dimension to (rows)
@@ -368,8 +374,11 @@ def nnls(self, dimname_list, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
         # }}}
     else:
         K_alldims = S[0] @ V[0]
-        temp = self.data
-        data_fornnls = U[0].T.dot(temp)
+        # was U₀ᵀ [temp], but that puts indirect on inside
+        # [indirect × data] [data × SV] = [indirect × SV]
+        # which is what we want
+        data_fornnls = self.data.dot(U[0])
+        logger.debug(strm("data has shape",self.data.shape,"compressed to",data_fornnls.shape,"by U^T of",U[0].T.shape))
     # we are now ready to perform the regularization
     # along the innermost dimension, which is lex ordered where relevant!
     logger.debug(
@@ -452,4 +461,5 @@ def nnls(self, dimname_list, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
     self.axis_coords = self.fld(axis_coords_dict)
     self.axis_coords_units = self.fld(axis_units_dict)
     self.axis_coords_error = self.fld(axis_coords_error_dict)
+    self.reorder(new_order)
     return self
