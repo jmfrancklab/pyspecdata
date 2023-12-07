@@ -4718,7 +4718,7 @@ class nddata (object):
         def pprint(a):
             b = {hash(j):j for j in ['idx','range','np','func']}
             return (b[a[0]],)+a[1:]
-        logger.debug(strm('Here is the sensible list:',[print(j) for j in sensible_list]))
+        logger.debug(strm('Here is the sensible list:',[str(j) for j in sensible_list]))
         # }}}
         if type(args) in [float,np.int32,int,np.double]:
             raise ValueError(strm('You tried to pass just a nddata[',type(args),']'))
@@ -4998,10 +4998,10 @@ class nddata (object):
     #}}}
 class testclass:
     def __getitem__(self,*args,**kwargs):
-        print("you called __getitem__ with args",args,"and kwargs",kwargs)
+        logger.debug(strm("you called __getitem__ with args",args,"and kwargs",kwargs))
         return
     def __getattribute__(self,*args,**kwargs):
-        print("you called __getattribute__ with args",args,"and kwargs",kwargs)
+        logger.debug(strm("you called __getattribute__ with args",args,"and kwargs",kwargs))
         return
 class nddata_hdf5 (nddata):
     def __repr__(self):
@@ -5279,7 +5279,7 @@ class fitdata(nddata):
         r'''A property of the fitdata class which is set by the user,
         takes as input a sympy expression of the desired fit
         expression'''
-        print("Getting symbolic function")
+        logger.debug("Getting symbolic function")
         return self.symbolic_expr
     @functional_form.setter
     def functional_form(self,sym_expr):
@@ -5361,7 +5361,6 @@ class fitdata(nddata):
             #G = matrix(diag(1./sigma))
             #G = S**(-1/2) # analog of the above
             #covarmatrix = ((J.T * W * J)**-1) * J.T * W
-            print('a')
             minimizer = inv(J.T * Omegainv * J) * J.T * Omegainv
             covarmatrix = minimizer * S * minimizer.T
             #covarmatrix = np.array(covarmatrix * S * covarmatrix.T)
@@ -5831,7 +5830,7 @@ class fitdata(nddata):
         """
 
         input_guesses = set(dict_of_values.keys())
-        print(input_guesses)
+        logger.debug(str(input_guesses))
         symbols_not_present = input_guesses-set(self.symbolic_vars)
         if len(symbols_not_present) > 0:
             raise ValueError(strm("You specified the symbol(s)",symbols_not_present,"but I can't find this in the symbols for the fitting function, which are",self.symbolic_vars))
@@ -5909,14 +5908,14 @@ class fitdata(nddata):
                             lastresidual = thisresidual
                             fprime = self.parameter_derivatives(self.getaxis(self.fit_axis),set = guess_dict)
                     if alpha > alpha_max:
-                        print("\n\n.core.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max)
+                        logger.debug("\n\n.core.guess) I can't find a new guess without increasing the alpha beyond %d\n\n"%alpha_max)
                         if which_starting_guess >= len(self.starting_guesses)-1:
-                            print("\n\n.core.guess) {\\color{red} Warning!!!} ran out of guesses!!!%d\n\n"%alpha_max)
+                            logger.debug("\n\n.core.guess) {\\color{red} Warning!!!} ran out of guesses!!!%d\n\n"%alpha_max)
                             return thisguess
                         else:
                             which_starting_guess += 1
                             thisguess = self.starting_guesses[which_starting_guess]
-                            print("\n\n.core.guess) try a new starting guess:",lsafen(thisguess))
+                            logger.debug(strm("\n\n.core.guess) try a new starting guess:",lsafen(thisguess)))
                             j = 0 # restart the loop
                             #{{{ evaluate f, fprime and residuals for the new starting guess
                             guess_dict = dict(list(zip(self.symbol_list,list(thisguess))))
