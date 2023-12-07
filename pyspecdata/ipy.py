@@ -71,7 +71,7 @@ class mat_formatter (object):
     def mat_formatter(self,a):
         "This accepts an array, and outputs the sympy.latex representation of the matrix"
         retval = sympy.latex(sympy.Matrix(a).applyfunc(self.complex_to_polar))
-        return self.zeros_re.sub(r'\\textcolor{lightgrey}{0}',retval)
+        return self.zeros_re.sub(r'\\textcolor{lightgray}{0}',retval)
     def __add__(self,arg):
         if type(arg) is str:
             if ' ' in arg and '\\' not in arg:
