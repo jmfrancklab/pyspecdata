@@ -1411,6 +1411,7 @@ class nddata (object):
         xlabel(self.unitify_axis(x_axis))
         ylabel(self.unitify_axis(y_axis))
         return cs
+    pcolor = this_plotting.pcolormesh.pcolormesh
     def waterfall(self,alpha = 0.3,ax = None,rotation = None,color = 'b',edgecolor = 'k'):
         if ax is None: 
             ax = self._init_3d_axis(ax,rotation = rotation)
