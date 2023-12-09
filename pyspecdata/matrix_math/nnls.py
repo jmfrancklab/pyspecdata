@@ -312,6 +312,8 @@ def nnls(self, dimname_list, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
                     kernels[j].dimlabels,
                     "and raw np.shape",
                     kernels[j].data.shape,
+                    "and data type",
+                    kernels[j].data.dtype,
                 )
                 for j in range(len(dimname_list))
             )
