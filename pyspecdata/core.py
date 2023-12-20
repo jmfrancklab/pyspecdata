@@ -29,6 +29,7 @@ will hopefull be intuitive to those familiar with SQL, etc.
 '''
 from .datadir import pyspec_config, unknown_exp_type_name
 from .dict_utils import make_ndarray, unmake_ndarray
+from .matrix_math.svd import svd as MM_svd
 from .matrix_math.dot import dot as MM_dot
 from .matrix_math.dot import matmul as MM_matmul
 from .matrix_math.dot import along as MM_along
@@ -36,7 +37,7 @@ from .matrix_math.nnls import nnls as MM_nnls
 from sys import exc_info
 from os import environ
 from os.path import sep as path_sep
-
+import time
 # {{{ determine the figure style, and load the appropriate modules
 _figure_mode_setting = pyspec_config.get_setting('figures', section='mode', environ='pyspecdata_figures')
 if _figure_mode_setting is None:
@@ -1155,7 +1156,8 @@ class nddata (object):
         """
         logger.debug('called init')
         if len(args) > 1:
-            logger.debug('more than one argument')
+            logger.debug('more than one argument -- args: '+strm(args))
+            if isinstance(args[0],nddata): raise ValueError("you can't initialize an nddata from another nddata!!!")
             if len(args) == 2:
                 if len(args[0].shape) == 1 and isinstance(args[1], str):
                     logger.debug('constructing 1D np.array')
@@ -1405,11 +1407,11 @@ class nddata (object):
         y = self.getaxis(y_axis)[None,:]
         if 'levels' not in list(kwargs.keys()):
             levels = r_[self.data.min():self.data.max():30j]
-        cs = contour(x*np.ones_like(y),np.ones_like(x)*y,self.data,**kwargs)
+        cs = plt.contour(x*np.ones_like(y),np.ones_like(x)*y,self.data,**kwargs)
         if labels:
             plt.clabel(cs,inline = 1)
-        xlabel(self.unitify_axis(x_axis))
-        ylabel(self.unitify_axis(y_axis))
+        plt.xlabel(self.unitify_axis(x_axis))
+        plt.ylabel(self.unitify_axis(y_axis))
         return cs
     pcolor = this_plotting.pcolormesh.pcolormesh
     def waterfall(self,alpha = 0.3,ax = None,rotation = None,color = 'b',edgecolor = 'k'):
@@ -1804,6 +1806,8 @@ class nddata (object):
     #}}}
     #{{{ rename
     def rename(self,previous,new):
+        self.dimlabels = list(self.dimlabels) # otherwise, it weirdly
+        # changes the names of copies/sources
         self.dimlabels[self.dimlabels.index(previous)] = new
         return self
     #}}}
@@ -1917,6 +1921,7 @@ class nddata (object):
             return None
     #}}}
     #}}}
+    svd = MM_svd
     #{{{ arithmetic
     along = MM_along
     dot = MM_dot
@@ -4301,6 +4306,13 @@ class nddata (object):
                 retval.data = argf(retval.data)
                 return retval
             return retfun
+        elif arg == 'shape':
+            return ndshape(self)
+        elif arg == 'isfortran':
+            raise ValueError("you tried to call isfortran on an nddata object --"
+            " this probably means you're doing something wrong -- possibly that"
+            " you are passing an nddata object when you should be passing a"
+            " standard numpy ndarray")
         else:
             return super().__getattribute__(arg)
     @property
@@ -4707,7 +4719,7 @@ class nddata (object):
         def pprint(a):
             b = {hash(j):j for j in ['idx','range','np','func']}
             return (b[a[0]],)+a[1:]
-        logger.debug(strm('Here is the sensible list:',[pprint(j) for j in sensible_list]))
+        logger.debug(strm('Here is the sensible list:',[print(j) for j in sensible_list]))
         # }}}
         if type(args) in [float,np.int32,int,np.double]:
             raise ValueError(strm('You tried to pass just a nddata[',type(args),']'))
@@ -5756,9 +5768,8 @@ class fitdata(nddata):
                     "type(dof)",type(dof)))
         logger.debug(strm("at end of fit covariance is shape",np.shape(self.covariance),"fit coeff shape",np.shape(self.fit_coeff)))
         return
-    def bootstrap(self,points,swap_out = np.exp(-1.0),seedval = 10347,minbounds = {},maxbounds = {}):
+    def bootstrap(self,points,swap_out = np.exp(-1.0),minbounds = {},maxbounds = {}):
         print(r'\begin{verbatim}')
-        seed(seedval)
         fitparameters = list(self.symbol_list)
         recordlist = np.array([tuple([0]*len(fitparameters))]*points,
                 {'names':tuple(fitparameters),'formats':tuple(['double']*len(fitparameters))}) # make an instance of the recordlist
