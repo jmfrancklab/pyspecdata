@@ -4719,7 +4719,7 @@ class nddata (object):
         def pprint(a):
             b = {hash(j):j for j in ['idx','range','np','func']}
             return (b[a[0]],)+a[1:]
-        logger.debug(strm('Here is the sensible list:',[print(j) for j in sensible_list]))
+        logger.debug(strm('Here is the sensible list:',[str(j) for j in sensible_list]))
         # }}}
         if type(args) in [float,np.int32,int,np.double]:
             raise ValueError(strm('You tried to pass just a nddata[',type(args),']'))

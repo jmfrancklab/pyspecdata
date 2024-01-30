@@ -1,4 +1,9 @@
-# coding: utf-8
+"""
+2D ILT test
+===========
+
+2D regularization test
+"""
 try:
     get_ipython().magic('load_ext pyspecdata.ipy')
     in_notebook = True
