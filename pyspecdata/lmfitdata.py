@@ -265,6 +265,7 @@ class lmfitdata(nddata):
         #
         # But you  should read through and see what the previous fit method is doing
         # and then copy over what you can
+        logging.debug(strm("I am attempting to actually run the fit",minimize.__module__,"here are the guess parameters",self.guess_parameters))
         x = self.getaxis(self.fit_axis)
         y = self.data
         sigma = self.get_error()
@@ -273,6 +274,7 @@ class lmfitdata(nddata):
             self.guess_parameters,
             args=(x, y, sigma),
         )
+        logging.debug(strm("here is the output success",out.success,"and parameters",out.params))
         # {{{ capture the result for ouput, etc
         self.fit_coeff = [out.params[j].value for j in self.parameter_names]
         assert out.success
