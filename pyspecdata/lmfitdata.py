@@ -314,7 +314,7 @@ class lmfitdata(nddata):
             )
         return retval.view(float)
 
-    def copy(self):
+    def copy(self, **kwargs):
         namelist = []
         vallist = []
         for j in dir(self):
@@ -322,7 +322,7 @@ class lmfitdata(nddata):
                 namelist.append(j)
                 vallist.append(self.__getattribute__(j))
                 self.__delattr__(j)
-        new = deepcopy(self)
+        new = super().copy(**kwargs)
         for j in range(0, len(namelist)):
             new.__setattr__(namelist[j], vallist[j])
         for j in range(0, len(namelist)):

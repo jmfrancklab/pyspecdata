@@ -68,7 +68,7 @@ from mpl_toolkits.mplot3d import axes3d
 from matplotlib.collections import PolyCollection
 from matplotlib.colors import LightSource
 from matplotlib.lines import Line2D
-from scipy.interpolate import griddata as scipy_griddata
+import scipy.interpolate as sci_interp
 import tables
 import warnings
 import re
@@ -3040,6 +3040,46 @@ class nddata (object):
                 raise ValueError("I don't know what funny business you're up to passing me a"+repr(type(args[0])))
         else:
             raise ValueError("should eventually support np.array, label pair, but doesn't yet")
+    def spline_lambda(self, s_multiplier=None):
+        """For 1D data, returns a lambda function to generate a Cubic Spline.
+
+        Parameters
+        ==========
+        s_multiplier: float
+            If this is specified, then use a
+            smoothing BSpline, and set "s" in
+            scipy to the
+            `len(data)*s_multiplier`
+        Returns
+        =======
+        nddata_lambda: lambda function
+            Takes one argument, which is an
+            array corresponding to the axis
+            coordinates, and returns an
+            nddata.
+        """
+        assert len(self.dimlabels) == 1, "currently only supports 1D data"
+        if s_multiplier is not None:
+            thefunc = lambda x,y,s=0: sci_interp.BSpline(*sci_interp.splrep(x,y,s=s))
+            kwargs = dict(
+                    s = len(self.dimlabels[0])*s_multiplier
+                    )
+        else:
+            thefunc = sci_interp.CubicSpline
+            kwargs = {}
+        myspline_re = thefunc(self.getaxis(self.dimlabels[0]),
+                self.data.real, **kwargs)
+        if self.data.dtype in [np.csingle,
+                               np.cdouble]:
+            myspline_im = thefunc(self.getaxis(self.dimlabels[0]),
+                    self.data.imag, **kwargs)
+            nddata_lambda = lambda x: nddata(myspline_re(x)+1j*myspline_im(x), self.dimlabels[0]).setaxis(self.dimlabels[0], x).set_units(self.dimlabels[0],
+                    self.get_units(self.dimlabels[0]))
+        elif self.data.dtype in [np.single,
+                                 np.double]:
+            nddata_lambda = lambda x: nddata(myspline_re(x), self.dimlabels[0]).setaxis(self.dimlabels[0], x).set_units(self.dimlabels[0],
+                    self.get_units(self.dimlabels[0]))
+        return nddata_lambda
     def interp(self,axis,axisvalues, past_bounds=None, return_func=False, **kwargs):
         '''interpolate data values given axis values
         

@@ -1,17 +1,22 @@
 from ..general_functions import *
 import matplotlib.pylab as plt
 import logging
-def pcolormesh(self, fig=None, shading='nearest'):
+def pcolormesh(self, fig=None, shading='nearest',ax1=None,ax2=None,ax=None):
     "generate a pcolormesh"
     assert len(self.dimlabels) == 2, "currently, this only supports 2D data"
     is_complex = False
-    fig = plt.gcf()
+    if ax is not None:
+        ax1 = ax
     if self.data.dtype == plt.complex128:
-        ax1 = fig.add_subplot(1,2,1)
-        ax2 = fig.add_subplot(1,2,2)
+        if ax1 is None:
+            fig = plt.gcf()
+            ax1 = fig.add_subplot(1,2,1)
+            ax2 = fig.add_subplot(1,2,2)
         ax_list = [(ax1,lambda x: x.real,'real'),(ax2,lambda x: x.imag,'imag')]
     else:
-        ax1 = fig.add_subplot(1,1,1)
+        if ax1 is None:
+            fig = plt.gcf()
+            ax1 = fig.add_subplot(1,1,1)
         ax_list = [(ax1,lambda x: x.real,'real')]
     X,Y = np.meshgrid(
             self.getaxis(self.dimlabels[1]),
