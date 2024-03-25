@@ -168,6 +168,7 @@ To install pySpecData from github, just ``git clone https://github.com/jmfranck/
 and type
 ``python setup.py develop``.
 Make sure that this terminates with a successful message, and without any compilation errors.
+If it gives an error about permissions (will happen for a system-wide anaconda install), you need to load the anaconda prompt as admin (right click and run as administrator).
 
 **Important notes for conda on Windows 10:**
 
