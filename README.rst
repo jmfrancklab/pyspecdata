@@ -172,7 +172,7 @@ Make sure that this terminates with a successful message, and without any compil
 - If it gives an error about permissions (will happen for a system-wide anaconda install), you need to load the anaconda prompt as admin (right click and run as administrator).
 - Near the end (above EXT compiler optimization) it should tell you that you can run `pyspecdata_dataconfig`.  You should do this, unless you've installed pyspecdata before on the computer you are working at.
 
-**Important notes for conda on Windows 10:**
+Important notes for conda on Windows:
 
 - **Warning** Before running the installation for developers, you must
   first check that the output of ``conda info`` on your git bash terminal
