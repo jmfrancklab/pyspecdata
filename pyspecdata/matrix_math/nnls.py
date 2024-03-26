@@ -391,7 +391,7 @@ def nnls(self, dimname_list, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
             len(self.axis_coords_error),
         )
     )
-    if l == "BRD":
+    if type(l) is str and l == "BRD":
         if twoD:
             factor = np.sqrt(np.prod(s))
         else:
