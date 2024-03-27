@@ -2370,7 +2370,7 @@ class nddata (object):
             self.run(np.sum,thisaxis)
         self.data *= dt
         return self
-    def phdiff(self, axis):
+    def phdiff(self, axis, return_error=True):
         """calculate the phase gradient (units: cyc/Δx) along axis,
         setting the error appropriately"""
         if self.get_ft_prop(axis):
@@ -2379,19 +2379,23 @@ class nddata (object):
             dt = self.get_ft_prop(axis,'dt')
         A = self[axis,1:]
         B = self[axis,:-1]
-        A_sigma = A.get_error()
-        A_sigma = 1 if A_sigma is None else A_sigma
-        B_sigma = B.get_error()
-        B_sigma = 1 if B_sigma is None else B_sigma
+        if return_error:
+            A_sigma = A.get_error()
+            A_sigma = 1 if A_sigma is None else A_sigma
+            B_sigma = B.get_error()
+            B_sigma = 1 if B_sigma is None else B_sigma
         self.data = np.angle(A.data/B.data)/2/pi/dt
         self.setaxis(axis, A.getaxis(axis))
-        self.set_error(
-                sqrt(
-                    A_sigma**2*abs(0.5/A.data)**2
-                    +
-                    B_sigma**2*abs(0.5/B.data)**2
-                    ) / 2 / pi/dt
-                )
+        if return_error:
+            self.set_error(
+                    sqrt(
+                        A_sigma**2*abs(0.5/A.data)**2
+                        +
+                        B_sigma**2*abs(0.5/B.data)**2
+                        ) / 2 / pi/dt
+                    )
+        else:
+            self.set_error(None)
         return self
     def diff(self,thisaxis,backwards = False):
         if backwards is True:
