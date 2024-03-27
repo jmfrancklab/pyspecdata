@@ -2372,7 +2372,12 @@ class nddata (object):
         return self
     def phdiff(self, axis, return_error=True):
         """calculate the phase gradient (units: cyc/Δx) along axis,
-        setting the error appropriately"""
+        setting the error appropriately
+
+        For example, if `axis` corresponds to a time
+        axis, the result will have units of frequency
+        (cyc/s=Hz).
+        """
         if self.get_ft_prop(axis):
             dt = self.get_ft_prop(axis,'df')
         else:
