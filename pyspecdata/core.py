@@ -216,10 +216,10 @@ def issympy(x):
 #{{{ function trickery
 def mydiff(data,axis = -1):
     '''this will replace np.diff with a version that has the same number of indices, with the last being the copy of the first'''
-    newdata = np.zeros(np.shape(data),dtype = data.dtype)
+    newdata = np.empty(np.shape(data),dtype = data.dtype)
     indices = [slice(None,None,None)]*len(data.shape)
     indices[axis] = slice(None,-1,None)
-    newdata[indices] = np.diff(data,axis = axis)
+    newdata[tuple(indices)] = np.diff(data,axis = axis)
     #setfrom = list(indices)
     #indices[axis] = -1
     #setfrom[axis] = 0
@@ -2359,16 +2359,31 @@ class nddata (object):
         t = None
         if len(self.axis_coords)>0:
             t = self.getaxis(thisaxis)
-            dt = t[1]-t[0]
+            dt_array = np.diff(t)
+            dt = dt_array[0]
+            if np.allclose(dt,dt_array):
+                simple_integral = True
+            else:
+                print('not a simple integral')
+                simple_integral = False
+                dt_array = (
+                        0.5*r_[dt_array,dt_array[-1]] # diff interval after current point
+                        + 0.5*r_[dt_array[0],dt_array]) # diff interval before current point
+                time_slices = self.fromaxis(thisaxis)
+                time_slices.data[:] = dt_array
         if t is None:
             raise ValueError("You can't call integrate on an unlabeled axis")
+        if not simple_integral:
+            result = self * time_slices
+            self.data = result.data
         if cumulative:
             self.run_nopop(np.cumsum,thisaxis)
             if backwards is True:
                 self.data = self[thisaxis,::-1].data
         else:
             self.run(np.sum,thisaxis)
-        self.data *= dt
+        if simple_integral:
+            self.data *= dt
         return self
     def phdiff(self, axis, return_error=True):
         """calculate the phase gradient (units: cyc/Δx) along axis,
