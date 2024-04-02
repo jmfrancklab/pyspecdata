@@ -3093,14 +3093,12 @@ class nddata (object):
             kwargs = {}
         myspline_re = thefunc(self.getaxis(self.dimlabels[0]),
                 self.data.real, **kwargs)
-        if self.data.dtype in [np.csingle,
-                               np.cdouble]:
+        if np.iscomplexobj(self.data.dtype):
             myspline_im = thefunc(self.getaxis(self.dimlabels[0]),
                     self.data.imag, **kwargs)
             nddata_lambda = lambda x: nddata(myspline_re(x)+1j*myspline_im(x), self.dimlabels[0]).setaxis(self.dimlabels[0], x).set_units(self.dimlabels[0],
                     self.get_units(self.dimlabels[0]))
-        elif self.data.dtype in [np.single,
-                                 np.double]:
+        else:
             nddata_lambda = lambda x: nddata(myspline_re(x), self.dimlabels[0]).setaxis(self.dimlabels[0], x).set_units(self.dimlabels[0],
                     self.get_units(self.dimlabels[0]))
         return nddata_lambda
