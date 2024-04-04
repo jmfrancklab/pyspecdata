@@ -101,7 +101,8 @@ def demand_real(x, addtxt=""):
                 + addtxt
             )
 # }}}
-def nnls(self, dimname_list, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
+def nnls(self, dimname_list, newaxis_dict, kernel_func, l=0, default_cut=1e-3,
+         store_uncompressed_kernel=False):
     r"""Perform regularized non-negative least-squares "fit" on self.
 
     Capable of solving for solution in 1 or 2 dimensions.
@@ -318,6 +319,8 @@ def nnls(self, dimname_list, newaxis_dict, kernel_func, l=0, default_cut=1e-3):
         )
     )
     # }}}
+    if store_uncompressed_kernel:
+        self.set_prop('nnls_kernels_uncompressed',kernels)
     U, S, V = [[None] * len(dimname_list) for j in range(3)]
     s = [None] * len(dimname_list)
     for j in range(len(dimname_list)):
