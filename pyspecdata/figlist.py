@@ -728,15 +728,16 @@ class figlist(object):
         Otherwise, it gets very confusing.
         '''
         if self._print_at_end: print(self)
-        if exception_type is None:
-            if hasattr(self,'file_name'):
-                if hasattr(self,'line_spacing'):
-                    self.show(self.file_name,line_spacing = self.line_spacing)
-                else:
-                    self.show(self.file_name)
+        if exception_type is not None:
+            print("I caught an error but am plotting anyways")
+        if hasattr(self,'file_name'):
+            if hasattr(self,'line_spacing'):
+                self.show(self.file_name,line_spacing = self.line_spacing)
             else:
-                self.show()
-            return
+                self.show(self.file_name)
+        else:
+            self.show()
+        return
     def __repr__(self):
         result = ""
         counter=0
