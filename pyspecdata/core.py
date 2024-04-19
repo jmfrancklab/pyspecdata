@@ -3029,7 +3029,8 @@ class nddata (object):
     fourier_shear = this_fourier.shear
     #}}}
     #}}}
-    nnls = MM_nnls
+    def nnls(self, *args, **kwargs):
+        return MM_nnls(self, nddata, *args, **kwargs)
     #{{{ interpolation and binning
     def run_avg(self,thisaxisname,decimation = 20,centered = False):
         'a simple running average'

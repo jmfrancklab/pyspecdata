@@ -729,6 +729,7 @@ class figlist(object):
         '''
         if self._print_at_end: print(self)
         if exception_type is not None:
+            raise ValueError("quitting")
             print("I caught an error but am plotting anyways")
             print('-'*30)
         if hasattr(self,'file_name'):

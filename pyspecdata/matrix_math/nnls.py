@@ -101,7 +101,7 @@ def demand_real(x, addtxt=""):
                 + addtxt
             )
 # }}}
-def nnls(self, dimname_list, newaxis_dict, kernel_func, l=0, default_cut=1e-3,
+def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default_cut=1e-3,
          store_uncompressed_kernel=False):
     r"""Perform regularized non-negative least-squares "fit" on self.
 
@@ -198,7 +198,7 @@ def nnls(self, dimname_list, newaxis_dict, kernel_func, l=0, default_cut=1e-3,
     """
     # {{{ type checking
     demand_real(self.data)
-    if type(dimname_list) is str and type(newaxis_dict) is type(self):
+    if type(dimname_list) is str and isinstance(newaxis_dict, nddata_cls):
         # one dimensional with axis given as nddata
         dimname_list = [dimname_list]
         newaxis_dict = [newaxis_dict]
@@ -218,10 +218,12 @@ def nnls(self, dimname_list, newaxis_dict, kernel_func, l=0, default_cut=1e-3,
     else:
         raise ValueError(
             strm(
-                "I didn't understand what you specified for the new axes (dimension:",
-                dimname_list,
-                "and new axes",
-                newaxis_dict,
+                "I didn't understand what you specified for the new axes (dimension of type:",
+                type(dimname_list),
+                "and new axes type",
+                type(newaxis_dict),
+                "type of self is",
+                type(self),
             )
         )
     # make sure axes are real
@@ -273,7 +275,7 @@ def nnls(self, dimname_list, newaxis_dict, kernel_func, l=0, default_cut=1e-3,
         if j.getaxis(fit_dimnames[j_idx]) is not None
     ]
     fit_axes = [
-        self.__class__(fit_axis_coords[j], fit_dimnames[j])
+        nddata_cls(fit_axis_coords[j], fit_dimnames[j])
         for j in range(len(dimname_list))
     ]
     data_axes = [self.fromaxis(dimname_list[j]) for j in range(len(dimname_list))]
