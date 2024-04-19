@@ -204,7 +204,7 @@ class figlist(object):
             raise ValueError(strm("You are looking for",name,
                 "which isn't in the list of figures",cleanlist))
     def next(self,input_name, legend=False,
-            boundaries=None, twinx=None, fig=None,
+            boundaries=None, twinx=None, fig=None, ax=None,
             **kwargs):
         r"""Switch to the figure given by input_name, which is used not only as
         a string-based name for the figure, but also as a default title and as
@@ -255,6 +255,9 @@ class figlist(object):
                 logging.debug(strm("I'm changing to figure",self.get_fig_number(name),"for",name))
                 fig = self.figdict[name]
                 plt.figure(self.figdict[name].number)
+                if 'axes' in self.propdict[name].keys():
+                    plt.sca(self.propdict[name]['axes']) # set to the stored axes object
+                    logging.debug(strm("id of figure is",id(self.propdict[name]['axes'])))
             self.current = name
             #logging.debug(strm('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures'))
             if boundaries is not None:
@@ -268,6 +271,8 @@ class figlist(object):
             self.current = name
             if self.current not in list(self.propdict.keys()):
                 self.propdict[self.current] = {}
+            if ax is not None: # passed axes as keyword argument
+                self.propdict[name]['axes'] = ax
             if boundaries == False:
                 self.propdict[self.current]['boundaries'] = False
                 self.setprops(boundaries = False)
@@ -280,12 +285,21 @@ class figlist(object):
                     fig.scene.render_window.aa_frames = 20
                     fig.scene.anti_aliasing_frames = 20
                 else:
-                    fig = plt.figure(num_figs_before_add+1,**kwargs)
-                fig.add_axes([0.075,0.2,0.6,0.7]) # l b w h
+                    if fig is None:
+                        fig = plt.figure(num_figs_before_add+1,**kwargs)
+                if 'axes' in self.propdict[self.current].keys():
+                    plt.sca(self.propdict[self.current]['axes'])
+                else:
+                    logging.debug("I need to generate an axes for this")
+                    fig.add_axes([0.075,0.2,0.6,0.7]) # l b w h
                 self.use_autolegend('outside')
             else:
                 self.propdict[self.current]['legend'] = False
-                if fig is None:
+                if 'axes' in self.propdict[self.current].keys():
+                    plt.sca(self.propdict[self.current]['axes'])
+                    logging.debug(strm("set to figure with id",id(self.propdict[name]['axes'])))
+                    fig = plt.gcf()
+                elif fig is None:
                     if hasattr(self,'mlab'):
                         fig = self.mlab.figure(num_figs_before_add+1,bgcolor = (1,1,1),**kwargs)
                         fig.scene.render_window.aa_frames = 20
@@ -714,15 +728,17 @@ class figlist(object):
         Otherwise, it gets very confusing.
         '''
         if self._print_at_end: print(self)
-        if exception_type is None:
-            if hasattr(self,'file_name'):
-                if hasattr(self,'line_spacing'):
-                    self.show(self.file_name,line_spacing = self.line_spacing)
-                else:
-                    self.show(self.file_name)
+        if exception_type is not None:
+            print("I caught an error but am plotting anyways")
+            print('-'*30)
+        if hasattr(self,'file_name'):
+            if hasattr(self,'line_spacing'):
+                self.show(self.file_name,line_spacing = self.line_spacing)
             else:
-                self.show()
-            return
+                self.show(self.file_name)
+        else:
+            self.show()
+        return
     def __repr__(self):
         result = ""
         counter=0

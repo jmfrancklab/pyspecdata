@@ -68,7 +68,7 @@ from mpl_toolkits.mplot3d import axes3d
 from matplotlib.collections import PolyCollection
 from matplotlib.colors import LightSource
 from matplotlib.lines import Line2D
-from scipy.interpolate import griddata as scipy_griddata
+import scipy.interpolate as sci_interp
 import tables
 import warnings
 import re
@@ -216,10 +216,10 @@ def issympy(x):
 #{{{ function trickery
 def mydiff(data,axis = -1):
     '''this will replace np.diff with a version that has the same number of indices, with the last being the copy of the first'''
-    newdata = np.zeros(np.shape(data),dtype = data.dtype)
+    newdata = np.empty(np.shape(data),dtype = data.dtype)
     indices = [slice(None,None,None)]*len(data.shape)
     indices[axis] = slice(None,-1,None)
-    newdata[indices] = np.diff(data,axis = axis)
+    newdata[tuple(indices)] = np.diff(data,axis = axis)
     #setfrom = list(indices)
     #indices[axis] = -1
     #setfrom[axis] = 0
@@ -2359,39 +2359,63 @@ class nddata (object):
         t = None
         if len(self.axis_coords)>0:
             t = self.getaxis(thisaxis)
-            dt = t[1]-t[0]
+            dt_array = np.diff(t)
+            dt = dt_array[0]
+            if np.allclose(dt,dt_array):
+                simple_integral = True
+            else:
+                print('not a simple integral')
+                simple_integral = False
+                dt_array = (
+                        0.5*r_[dt_array,dt_array[-1]] # diff interval after current point
+                        + 0.5*r_[dt_array[0],dt_array]) # diff interval before current point
+                time_slices = self.fromaxis(thisaxis)
+                time_slices.data[:] = dt_array
         if t is None:
             raise ValueError("You can't call integrate on an unlabeled axis")
+        if not simple_integral:
+            result = self * time_slices
+            self.data = result.data
         if cumulative:
             self.run_nopop(np.cumsum,thisaxis)
             if backwards is True:
                 self.data = self[thisaxis,::-1].data
         else:
             self.run(np.sum,thisaxis)
-        self.data *= dt
+        if simple_integral:
+            self.data *= dt
         return self
-    def phdiff(self, axis):
+    def phdiff(self, axis, return_error=True):
         """calculate the phase gradient (units: cyc/Δx) along axis,
-        setting the error appropriately"""
+        setting the error appropriately
+
+        For example, if `axis` corresponds to a time
+        axis, the result will have units of frequency
+        (cyc/s=Hz).
+        """
         if self.get_ft_prop(axis):
             dt = self.get_ft_prop(axis,'df')
         else:
             dt = self.get_ft_prop(axis,'dt')
         A = self[axis,1:]
         B = self[axis,:-1]
-        A_sigma = A.get_error()
-        A_sigma = 1 if A_sigma is None else A_sigma
-        B_sigma = B.get_error()
-        B_sigma = 1 if B_sigma is None else B_sigma
+        if return_error:
+            A_sigma = A.get_error()
+            A_sigma = 1 if A_sigma is None else A_sigma
+            B_sigma = B.get_error()
+            B_sigma = 1 if B_sigma is None else B_sigma
         self.data = np.angle(A.data/B.data)/2/pi/dt
         self.setaxis(axis, A.getaxis(axis))
-        self.set_error(
-                sqrt(
-                    A_sigma**2*abs(0.5/A.data)**2
-                    +
-                    B_sigma**2*abs(0.5/B.data)**2
-                    ) / 2 / pi/dt
-                )
+        if return_error:
+            self.set_error(
+                    sqrt(
+                        A_sigma**2*abs(0.5/A.data)**2
+                        +
+                        B_sigma**2*abs(0.5/B.data)**2
+                        ) / 2 / pi/dt
+                    )
+        else:
+            self.set_error(None)
         return self
     def diff(self,thisaxis,backwards = False):
         if backwards is True:
@@ -3040,6 +3064,44 @@ class nddata (object):
                 raise ValueError("I don't know what funny business you're up to passing me a"+repr(type(args[0])))
         else:
             raise ValueError("should eventually support np.array, label pair, but doesn't yet")
+    def spline_lambda(self, s_multiplier=None):
+        """For 1D data, returns a lambda function to generate a Cubic Spline.
+
+        Parameters
+        ==========
+        s_multiplier: float
+            If this is specified, then use a
+            smoothing BSpline, and set "s" in
+            scipy to the
+            `len(data)*s_multiplier`
+        Returns
+        =======
+        nddata_lambda: lambda function
+            Takes one argument, which is an
+            array corresponding to the axis
+            coordinates, and returns an
+            nddata.
+        """
+        assert len(self.dimlabels) == 1, "currently only supports 1D data"
+        if s_multiplier is not None:
+            thefunc = lambda x,y,s=0: sci_interp.BSpline(*sci_interp.splrep(x,y,s=s))
+            kwargs = dict(
+                    s = len(self.dimlabels[0])*s_multiplier
+                    )
+        else:
+            thefunc = sci_interp.CubicSpline
+            kwargs = {}
+        myspline_re = thefunc(self.getaxis(self.dimlabels[0]),
+                self.data.real, **kwargs)
+        if np.iscomplexobj(self.data.dtype):
+            myspline_im = thefunc(self.getaxis(self.dimlabels[0]),
+                    self.data.imag, **kwargs)
+            nddata_lambda = lambda x: nddata(myspline_re(x)+1j*myspline_im(x), self.dimlabels[0]).setaxis(self.dimlabels[0], x).set_units(self.dimlabels[0],
+                    self.get_units(self.dimlabels[0]))
+        else:
+            nddata_lambda = lambda x: nddata(myspline_re(x), self.dimlabels[0]).setaxis(self.dimlabels[0], x).set_units(self.dimlabels[0],
+                    self.get_units(self.dimlabels[0]))
+        return nddata_lambda
     def interp(self,axis,axisvalues, past_bounds=None, return_func=False, **kwargs):
         '''interpolate data values given axis values
         

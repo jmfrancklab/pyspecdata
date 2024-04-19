@@ -167,9 +167,12 @@ Installation for developers
 To install pySpecData from github, just ``git clone https://github.com/jmfranck/pyspecdata.git``. Then switch over to the anaconda prompt and move to the directory where setup.py lives (root directory of repository),
 and type
 ``python setup.py develop``.
-Make sure that this terminates with a successful message, and without any compilation errors.
+Make sure that this terminates with a successful message, and without any compilation errors.  In particular:
 
-**Important notes for conda on Windows 10:**
+- If it gives an error about permissions (will happen for a system-wide anaconda install), you need to load the anaconda prompt as admin (right click and run as administrator).
+- Near the end (above EXT compiler optimization) it should tell you that you can run `pyspecdata_dataconfig`.  You should do this, unless you've installed pyspecdata before on the computer you are working at.
+
+Important notes for conda on Windows:
 
 - **Warning** Before running the installation for developers, you must
   first check that the output of ``conda info`` on your git bash terminal

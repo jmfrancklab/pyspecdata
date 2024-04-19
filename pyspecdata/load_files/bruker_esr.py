@@ -154,9 +154,20 @@ def xepr(filename, exp_type=None, dimname='', verbose=False):
                 assert 'YUNI' in list(v.keys()), ("No parameter YUNI -- how do you expect me to know the units of the second dimension??")
                 dim_units.update({y_dim_name:interpret_units('YUNI')})
                 filename_ygf = filename_par[:-4] + '.YGF'
-                if not os.path.exists(filename_ygf):
-                    filename_ygf = filename_ygf[:-4] + filename_ygf[-4:].lower()
-                assert os.path.exists(filename_ygf), "I can't find the YGF file ("+filename_ygf+") that stores the powers"
+                for j in range(2):
+                    if not os.path.exists(filename_ygf) and j>0:
+                        filename_ygf = filename_ygf[:-4] + filename_ygf[-4:].lower()
+                    if not os.path.exists(filename_ygf):
+                        # because the spc isn't part of the original search, we
+                        # need to log the fact that it's missing manually
+                        if exp_type is None:
+                            raise ValueError("I could probably find "
+                            "your file remotely, but you called with "
+                            "exp_type None!")
+                        rclone_search(
+                                os.path.split(filename_ygf)[-1],
+                                exp_type,
+                                os.path.split(filename_ygf)[0])
                 with open(filename_ygf,'rb') as fp:
                     y_axis = fp.read()
                 y_axis = np.fromstring(y_axis,'>f8')
