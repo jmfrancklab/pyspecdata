@@ -228,6 +228,8 @@ class figlist(object):
             Any other keyword arguments are passed to the matplotlib (mayavi)
             figure() function that's used to switch (create) figures.
         """
+        if len(input_name) == 0:
+            raise ValueError("You have tried to name a figure with an empty string (\"\").\nThis is so confusing that it's no longer allowed.\n\nYou are probably doing this because you don't want a title:\nJust use the title("") or gca().set_title("") command to remove the default title.")
         # {{{ basic setup
         if not hasattr(self,'figdict'):
             self.figdict = {} # the dictionary of the various figures

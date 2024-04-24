@@ -451,7 +451,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             data.set_prop('postproc_type',data.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
             #}}}
         else:
-            logger.debug('Identified a potential prospa file')
+            logger.debug("Identified a potential prospa file, because I didn't find ser or acqus in "+strm(file_reference, expno_as_str))
             # the rest are for prospa
             # even though I've made steps towards supporting zipped prospa (by
             # using open_subpath), that's not yet done -- diff against this commit
