@@ -44,7 +44,13 @@ basis.shape
 simulated_data = basis*exact_data
 simulated_data.sum(LT1_name).sum(LT2_name)
 
-# In[4]:
+# First, I cheat and run with the value of $\lambda$ that I know BRD chooses on the next step (I can figure this out by looking at the log file)
+
+simulated_data.C.nnls(('tau1','tau2'),(LT1,LT2),
+                    (lambda tau1,LT1: 1-2*exp(-tau1*10**-LT1),
+                     lambda tau2,LT2: exp(-tau2*10**-LT2)), l=2.08)
+
+# Then, I have it actually use BRD to find the value of $\lambda$ 
 
 simulated_data.nnls(('tau1','tau2'),(LT1,LT2),
                     (lambda tau1,LT1: 1-2*exp(-tau1*10**-LT1),
@@ -64,5 +70,5 @@ simulated_data.sum(LT1_name)
 
 simulated_data.nnls('tau1', LT1,
                     lambda tau1,LT1: 1-2*exp(-tau1*10**-LT1),
-                    l='BRD')
+                    l=1)
 

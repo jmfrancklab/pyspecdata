@@ -417,6 +417,14 @@ def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default
             K_alldims, data_fornnls, l=mod_BRD(1.0, K_alldims, factor, data_fornnls)
         )
     else:
+        logger.debug(strm("I'm preparing to call nnls_regularized with kernel dtype",
+                          K_alldims.dtype,
+                          "and shape",
+                          K_alldims.shape,
+                          "data dtype",
+                          data_fornnls.dtype,
+                          "and shape",
+                          data_fornnls.shape))
         retval, residual = this_nnls.nnls_regularized(K_alldims, data_fornnls, l=l)
     logger.debug(
         strm("coming back from fortran, residual type is", type(residual))
