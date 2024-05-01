@@ -1,6 +1,6 @@
 # just put this in the package
 import sympy as sp
-from lmfit import Parameters, minimize
+from lmfit import Parameters, Minimizer
 from lmfit.printfuncs import report_fit
 import numpy as np
 from .core import nddata, normal_attrs, issympy, ndshape, sympy_latex, sympy_symbol, dp
@@ -268,11 +268,12 @@ class lmfitdata(nddata):
         x = self.getaxis(self.fit_axis)
         y = self.data
         sigma = self.get_error()
-        out = minimize(
+        themin = Minimizer(
             self.residual,
             self.guess_parameters,
-            args=(x, y, sigma),
+            fcn_args=(x, y, sigma),
         )
+        out = themin.leastsq(Dfun=self.jacobian, col_deriv=False)
         # {{{ capture the result for ouput, etc
         self.fit_parameters = out.params
         self.fit_coeff = [out.params[j].value for j in self.parameter_names]
@@ -281,7 +282,7 @@ class lmfitdata(nddata):
             self.covariance = out.covar
         # }}}
         return self
-    def jacobian(self,pars): 
+    def jacobian(self,pars,x,y,sigma=None): 
         "cache the symbolic jacobian and/or use it to compute the numeric result"
         if not hasattr(self,"jacobian_symbolic"):
             self.jacobian_symbolic = [sp.diff(self.expression,j,1) for j in self.parameter_symbols]
