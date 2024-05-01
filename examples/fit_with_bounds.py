@@ -50,9 +50,19 @@ newfit.fit()
 plot(mydata, "ro", label="data")
 plot(newfit.eval(100), "b", alpha=0.5, label="fit")
 plot(guess, "g--", label="guess")
+plt.gca().text(0.5, 0.75, '$'+sp.latex(newfit.functional_form)+'$',
+               transform=plt.gca().transAxes)
 # }}}
 plt.legend()
-plt.show()
+plt.figure()
 jac = newfit.jacobian(newfit.fit_parameters)
+thisline = newfit.eval()
+thisline /= thisline.data.max()
+plot(thisline, "k", alpha=0.5, label="fit")
 for j,thisparam in enumerate(newfit.fit_parameters.keys()):
-    plot(jac[:,j],label=f'{thisparam} derivative')
+    thisline = jac[:,j]
+    thisline /= thisline.max()
+    plot(newfit.getaxis(newfit.dimlabels[0]),thisline,label=f'{thisparam} derivative',
+         alpha=0.5)
+plt.legend()
+plt.show()

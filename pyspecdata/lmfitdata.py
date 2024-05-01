@@ -283,7 +283,7 @@ class lmfitdata(nddata):
         return self
     def jacobian(self,pars): 
         "cache the symbolic jacobian and/or use it to compute the numeric result"
-        if not hasattr(self.jacobian_symbolic):
+        if not hasattr(self,"jacobian_symbolic"):
             self.jacobian_symbolic = [sp.diff(self.expression,j,1) for j in self.parameter_symbols]
             self.jacobian_lambda = [ sp.lambdify( # equivalent of fitfunc_multiarg_v2
                 self.variable_symbols + self.parameter_symbols,
@@ -294,7 +294,7 @@ class lmfitdata(nddata):
             j(
                 *(self.getaxis(k)
                   for k in self.variable_names),
-                **pars.valuesdict())[:,newaxis] # function elements on the outside, so parameters can go on the inside
+                **pars.valuesdict())[:,np.newaxis] # function elements on the outside, so parameters can go on the inside
             for j in self.jacobian_lambda])
         return jacobian_array
 
