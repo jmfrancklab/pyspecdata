@@ -75,6 +75,7 @@ def nnls_regularized(A, b, l=0, maxiter=None):
             w = zeros((n,), dtype=double)
             zz = zeros((m,), dtype=double)
             index = zeros((n,), dtype=int)
+            logger.debug("about to execute a non-regularized (least squares) fit")
             x, rnorm, mode = _nnls.nnls(A, b, w, zz, index, maxiter)
         else:
             w = zeros((n,), dtype=double)
@@ -82,11 +83,14 @@ def nnls_regularized(A, b, l=0, maxiter=None):
             index = zeros((n,), dtype=int)
             # choose the correct subroutine based on the dimension
             if len(b.shape) == 1:
+                logger.debug("about to execute a regularized fit using the compiled nnls_regularized routine")
                 x, rnorm, mode = _nnls.nnls_regularized(A, b, w, zz, index, maxiter, l)
             if len(b.shape) == 2:
+                logger.debug("about to execute a regularized fit in a loop using the nnls_regularized_loop routine")
                 x, rnorm, mode = _nnls.nnls_regularized_loop(A, redim_C_to_F(b), w, zz, index, maxiter, l)
                 x = redim_F_to_C(x)
     else:
+            logger.debug("about to run a parallelized loop over different values of l")
             nCPU = cpu_count() 
             #print("I found",nCPU,"CPU's")
             p = mpd.Pool(nCPU)
