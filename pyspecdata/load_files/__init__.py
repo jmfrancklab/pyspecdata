@@ -19,7 +19,7 @@ from . import bruker_esr
 from . import acert
 from . import load_cary
 from .open_subpath import open_subpath
-from ..datadir import getDATADIR
+from ..datadir import getDATADIR, rclone_search
 from ..datadir import pyspec_config,log_fname
 from ..general_functions import process_kwargs,strm
 from ..core import *
@@ -42,6 +42,24 @@ def search_filename(searchstring,exp_type,
         unique=False):
     r"""Use regular expression `searchstring` to find a file inside the directory indicated by `exp_type`
     (For information on how to set up the file searching mechanism, see :func:`~pyspecdata.datadir.register_directory`).
+
+    Used to find data in a way that works seamlessly across different computers (and operating systems).
+    The basic scheme we assume is that:
+
+    *   Laboratory data is stored on the cloud (on something like Microsoft Teams or Google Drive, etc.)
+    *   The user wants to seamlessly access the data on their laptop.
+
+    The ``.pyspecdata`` config file stores all the info about where the data lives + is stored locally.  You have basically two options:
+
+    *   Point the source directories for the different data folders (``exp_type``) to a synced folder on your laptop.
+    *   **Recommended** Point the source directories to a local directory on your computer, where local copies of files are stored, and then also set up one or more remotes using rclone (which is an open source cloud access tool).
+        *   pyspecdata can automatically search all your rclone remotes when you try to load a file.  This is obviously slow.
+        *   After the auto-search, it adds a line to ``.pyspecdata`` so that it knows how to find that directory in the future.
+        *   It will tell you when it's searching the remotes.  If you know what you're doing, we highly recommend pressing ctrl-C and then manually adding the appropriate line to RcloneRemotes.  (Once you allow it to auto-search and add a line once, the format should be obvious.)
+
+    Supports the case where data is processed both on a laboratory computer and (*e.g.* after transferring via ssh or a syncing client) on a user's laptop.
+    While it will return a default directory without any arguments, it is
+    typically used with the keyword argument `exp_type`, described below.
 
     Parameters
     ----------
@@ -87,11 +105,16 @@ def search_filename(searchstring,exp_type,
         exptype_msg = ""
         if exp_type is None:
             exptype_msg = "\nYou probably need to set exp_type so I know where inside {1:s} to find the file."
-        err = log_fname('missing_data_files',
+        rclone_search(
                 searchstring.replace('.*','*').replace('(','{').replace(')','}').replace('|',','),
-                directory,
-                err=True)
-        raise IOError("Can't find file specified by search string %s"%searchstring+'\n'+err)
+                exp_type,
+                directory)
+    files = look_inside(directory)
+    if files is None or len(files) == 0:
+        raise RuntimeError("even after rclone_search, I "
+                "can't find this file!\n"
+                f"file search string: {searchstring}\n"
+                f"exp type: {exp_type}\n")
     else:
         if len(files) > 1:
             basenames,exts = list(map(set,list(zip(*[j.rsplit('.',1) for j in files if len(j.rsplit('.',1))>1]))))
@@ -110,6 +133,9 @@ def search_filename(searchstring,exp_type,
             raise ValueError("found more than on file in", directory,
                     "matching", searchstring, "(", retval, ")")
         else:
+            log_fname('data_files',
+                    *tuple(os.path.split(os.path.normpath(retval[0]))[::-1]+(exp_type,))
+                    )
             return retval[0]
     return retval
 def find_file(searchstring,
@@ -123,8 +149,27 @@ def find_file(searchstring,
             add_sizes=[], add_dims=[], use_sweep=None,
             indirect_dimlabels=None,
             lookup={},
+            return_list=False,
             **kwargs):
     r'''Find the file  given by the regular expression `searchstring` inside the directory identified by `exp_type`, load the nddata object, and postprocess with the function `postproc`.
+
+    Used to find data in a way that works seamlessly across different computers (and operating systems).
+    The basic scheme we assume is that:
+
+    *   Laboratory data is stored on the cloud (on something like Microsoft Teams or Google Drive, etc.)
+    *   The user wants to seamlessly access the data on their laptop.
+
+    The ``.pyspecdata`` config file stores all the info about where the data lives + is stored locally.  You have basically two options:
+
+    *   Point the source directories for the different data folders (``exp_type``) to a synced folder on your laptop.
+    *   **Recommended** Point the source directories to a local directory on your computer, where local copies of files are stored, and then also set up one or more remotes using rclone (which is an open source cloud access tool).
+        *   pyspecdata can automatically search all your rclone remotes when you try to load a file.  This is obviously slow.
+        *   After the auto-search, it adds a line to ``.pyspecdata`` so that it knows how to find that directory in the future.
+        *   It will tell you when it's searching the remotes.  If you know what you're doing, we highly recommend pressing ctrl-C and then manually adding the appropriate line to RcloneRemotes.  (Once you allow it to auto-search and add a line once, the format should be obvious.)
+
+    Supports the case where data is processed both on a laboratory computer and (*e.g.* after transferring via ssh or a syncing client) on a user's laptop.
+    While it will return a default directory without any arguments, it is
+    typically used with the keyword argument `exp_type`, described below.
 
     It looks at the top level of the directory first, and if that fails, starts to look recursively.
     Whenever it finds a file in the current directory, it will not return data from files in the directories underneath.
@@ -208,13 +253,7 @@ def find_file(searchstring,
     # }}}
     logger.debug(strm("preparing to call search_filename with arguments",(searchstring, exp_type, print_result)))
     files = search_filename(searchstring, exp_type, print_result=print_result)
-    if len(files) == 0:
-        # naive replacement to match rclone-like rules
-        err = log_fname('missing_data_files',
-                searchstring.replace('.*','*').replace('(','{').replace(')','}').replace('|',','),
-                directory,
-                err=True)
-        raise ValueError("Can't find file specified by search string %s"%searchstring+'\n'+err)
+    # search_filename will raise an error if it can't find anything even after checking remotely
     data = None
     while data is None and len(files) > 0:
         filename = files.pop(-1)
@@ -224,11 +263,14 @@ def find_file(searchstring,
             dimname=dimname, return_acq=return_acq,
             add_sizes=add_sizes, add_dims=add_dims, use_sweep=use_sweep,
             indirect_dimlabels=indirect_dimlabels,
-            expno=expno)
+            expno=expno, exp_type=exp_type,
+            return_list=return_list)
+        if return_list:
+            return data
         # }}}
-        for_logging = os.path.normpath(filename).split(os.path.sep)
-        log_fname('data_files',for_logging[-1],os.path.join(*for_logging[:-1]))
-        del for_logging
+        log_fname('data_files',
+                *tuple(os.path.split(os.path.normpath(filename))[::-1]+(exp_type,))
+                )
     if data is None:
         raise ValueError(strm(
             "I found no data matching the regexp", searchstring))
@@ -331,7 +373,9 @@ def _check_signature(filename):
                 return None
 def load_indiv_file(filename, dimname='', return_acq=False,
         add_sizes=[], add_dims=[], use_sweep=None,
-        indirect_dimlabels=None, expno=None):
+        indirect_dimlabels=None, expno=None,
+        exp_type=None,
+        return_list=False):
     """Open the file given by `filename`, use file signature magic and/or
     filename extension(s) to identify the file type, and call the appropriate
     function to open it.
@@ -407,7 +451,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             data.set_prop('postproc_type',data.get_prop('acq')['PULPROG']) # so it chooses postproc_type based on the pulse sequence
             #}}}
         else:
-            logger.debug('Identified a potential prospa file')
+            logger.debug("Identified a potential prospa file, because I didn't find ser or acqus in "+strm(file_reference, expno_as_str))
             # the rest are for prospa
             # even though I've made steps towards supporting zipped prospa (by
             # using open_subpath), that's not yet done -- diff against this commit
@@ -458,6 +502,10 @@ def load_indiv_file(filename, dimname='', return_acq=False,
                             for j in f.keys():
                                 if 'dimlabels' in f[j].attrs and 'data' in f[j].keys():
                                     attrlist.append(j)
+                        logger.debug("return_list is ",return_list)
+                        if return_list:
+                            print("using return-list -- this should be deprecated in favor of stub loading soon!")
+                            return attrlist
                         raise ValueError("please select a node from the list and set to expno:\n\t"+'\n\t'.join(attrlist))
                     # assume this is a normal pySpecData HDF5 file
                     dirname, filename = os.path.split(filename)
@@ -473,7 +521,7 @@ def load_indiv_file(filename, dimname='', return_acq=False,
             elif type_by_signature == 'TXT':
                 if type_by_extension == 'DSC':
                     # DSC identifies the new-format XEpr parameter file, and DTA the binary spectrum
-                    data = bruker_esr.xepr(filename, dimname=dimname)
+                    data = bruker_esr.xepr(filename, dimname=dimname, exp_type=exp_type)
                 else:
                     raise RuntimeError("I'm not able to figure out what file type %s this is!"%filename)
             elif type_by_signature == 'Cary UV':

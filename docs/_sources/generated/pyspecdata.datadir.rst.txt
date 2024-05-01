@@ -1,0 +1,43 @@
+﻿pyspecdata.datadir
+==================
+
+.. automodule:: pyspecdata.datadir
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      dirformat
+      getDATADIR
+      get_notebook_dir
+      grab_data_directory
+      log_fname
+      proc_data_target_dir
+      rclone_search
+      register_directory
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      MyConfig
+      cached_searcher
+   
+   
+
+   
+   
+   
+
+
+

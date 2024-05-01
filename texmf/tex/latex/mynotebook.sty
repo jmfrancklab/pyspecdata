@@ -1,0 +1,649 @@
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+\DeclareOption{supressmulticols}{\newcommand{\supressmulticols}{test}}
+\DeclareOption{nomulticols}{\newcommand{\supressmulticols}{test}}
+\DeclareOption{showscriptnumber}{\newcommand{\showscriptnumber}{test}}
+\DeclareOption{nolabels}{\newcommand{\nolabels}{test}}
+\DeclareOption{noparagraph}{\newcommand{\noparagraph}{test}}
+\DeclareOption{nopageformat}{\newcommand{\nopageformat}{test}}
+\DeclareOption{noheader}{\newcommand{\noheader}{test}}
+\ProcessOptions
+\RequirePackage{mathrsfs}% for mathscr
+\RequirePackage{myhyperref}
+\RequirePackage{mypython}
+\RequirePackage{mycolors}
+\RequirePackage{paralist}
+\RequirePackage{pgfplots}
+\RequirePackage{booktabs}% for \toprule, etc, used by pandas
+\RequirePackage{alphalph}
+\setdefaultenum{(1)}{(a)}{}{}
+\RequirePackage{mydefs}
+\RequirePackage{myquantum}
+\RequirePackage{mybasiccomments}
+%{{{ symbols
+\RequirePackage{bbold} %for mathbb
+%\RequirePackage{subfigure} %for mathbb
+\RequirePackage{pifont}
+\RequirePackage{cancel}
+\RequirePackage{xspace}
+\RequirePackage[electronic]{ifsym}
+%}}}
+\RequirePackage{fancyhdr}
+\RequirePackage{wrapfig}
+\RequirePackage[procnames]{listings}
+\RequirePackage{setspace}
+\RequirePackage[justification=centerlast,font=small]{caption}% this provides the \newline command within captions
+%\RequirePackage{minted}
+\RequirePackage{amsfonts}
+\RequirePackage{url}
+\RequirePackage{array}
+\RequirePackage{lettrine} % large initial caps
+%\RequirePackage{cleveref} % cref -- which does references like citations
+%{{{ original listings code -- not great
+%\lstset{frame=none,
+%  showtabs=False,
+%  showspaces=False,
+%  showstringspaces=False,
+%  commentstyle={\ttfamily\color{dgraycolor}},
+%  keywordstyle={\ttfamily\color{blue}\bfseries},
+%  stringstyle={\ttfamily\color{dgreencolor}\bfseries},
+%  language=Python,
+%  basicstyle={\fontsize{7pt}{7pt}\ttfamily},
+%  aboveskip=0.3em,
+%  belowskip=0.1em,
+%  numbers=left,
+%  numberstyle={\fontsize{5pt}{5pt}\ttfamily}}
+%}}}
+%{{{ new listings code
+\lstset{
+language=python,
+basicstyle=\footnotesize\ttfamily\renewcommand{\baselinestretch}{0.7},
+stringstyle=\color{dgreencolor},
+showstringspaces=false,
+alsoletter={1234567890},
+otherkeywords={\ , \}, \{},
+keywordstyle=\color{blue},
+emph={access,and,as,break,class,continue,def,del,elif,else,%
+except,exec,finally,for,from,global,if,import,in,is,%
+lambda,not,or,pass,print,raise,return,try,while,assert},
+emphstyle=\color{dbluecolor}\bfseries,
+emph={[2]self},
+emphstyle=[2]\color{gray},
+emph={[4]ArithmeticError,AssertionError,AttributeError,BaseException,%
+DeprecationWarning,EOFError,Ellipsis,EnvironmentError,Exception,%
+False,FloatingPointError,FutureWarning,GeneratorExit,IOError,%
+ImportError,ImportWarning,IndentationError,IndexError,KeyError,%
+KeyboardInterrupt,LookupError,MemoryError,NameError,None,%
+NotImplemented,NotImplementedError,OSError,OverflowError,%
+PendingDeprecationWarning,ReferenceError,RuntimeError,RuntimeWarning,%
+StandardError,StopIteration,SyntaxError,SyntaxWarning,SystemError,%
+SystemExit,TabError,True,TypeError,UnboundLocalError,UnicodeDecodeError,%
+UnicodeEncodeError,UnicodeError,UnicodeTranslateError,UnicodeWarning,%
+UserWarning,ValueError,Warning,ZeroDivisionError,abs,all,any,apply,%
+basestring,bool,buffer,callable,chr,classmethod,cmp,coerce,compile,%
+complex,copyright,credits,delattr,dict,dir,divmod,enumerate,eval,%
+execfile,exit,file,filter,float,frozenset,getattr,globals,hasattr,%
+hash,help,hex,id,input,int,intern,isinstance,issubclass,iter,len,%
+license,list,locals,long,map,max,min,object,oct,open,ord,pow,property,%
+quit,range,raw_input,reduce,reload,repr,reversed,round,set,setattr,%
+slice,sorted,staticmethod,str,sum,super,tuple,type,unichr,unicode,%
+vars,xrange,zip},
+emphstyle=[4]\color{purple},
+upquote=true,
+morecomment=[s][\color{dgraycolor}]{"""}{"""},
+commentstyle=\color{dgraycolor}\slshape,
+%literate={>>>}{\textbf{\textcolor{darkred}{>{>}>}}}3%
+literate={>>>}{\textbf{\textcolor{red}{>{>}>}}}3%
+         {...}{{\textcolor{gray}{...}}}3,
+procnamekeys={def,class},
+procnamestyle=\color{dredcolor},
+%framexleftmargin=1mm, framextopmargin=1mm, frame=shadowbox,
+xleftmargin=\parindent,frame=shadowbox,
+numbers=left,
+numberstyle={\fontsize{5pt}{5pt}\ttfamily\noncopynumber},
+rulesepcolor=\color{dgraycolor},
+mathescape=true
+columns=flexible,
+}
+% {{{ supposed to prevent copying of line numbers -- from
+% http://tex.stackexchange.com/questions/122256/only-select-code-without-line-numbers
+\usepackage{accsupp}    
+\newcommand{\noncopynumber}[1]{%
+    \BeginAccSupp{method=escape,ActualText={}}%
+    #1%
+    \EndAccSupp{}%
+}
+% }}}
+%}}}
+\pdfpagewidth 8.5in
+\pdfpageheight 11in
+
+\@ifundefined{nopageformat}{
+\oddsidemargin -0.5in % add 1in to get margin
+\evensidemargin -0.5in % add 1in to get margin
+\voffset -0.5in
+\topmargin 0in
+%\textwidth 7.5in%decreased to make room for labels
+\textwidth 7.0in
+\textheight 9.25in
+\headheight 15pt 
+%\headheight 0in
+\headsep 15pt
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+}{}
+%\renewcommand{\sectionmark}[1]{\markright{#1}{}}
+%\markright{\sectionmark{}}
+\RequirePackage{amsmath}
+\RequirePackage{hycolor}
+% BEGIN part for commenting
+\RequirePackage{makeidx}
+\makeindex
+\RequirePackage{verbatim}
+\RequirePackage{graphicx}
+\@ifundefined{supressmulticols}{
+\RequirePackage{multicol}
+}{}
+\setcounter{tocdepth}{9}
+\setcounter{secnumdepth}{6}
+%\renewcommand\theparagraph{\roman{paragraph}}
+\providecommand{\DIFadd}[1]{{\protect\color{blue}\uwave{#1}}} %DIF PREAMBLE
+\providecommand{\DIFdel}[1]{{\protect\color{red}\xout{#1}}}                      %DIF PREAMBLE
+\pdfstringdefDisableCommands{\renewcommand{\DIFdel}{}}
+\pdfstringdefDisableCommands{\renewcommand{\DIFadd}{}}
+\immediate\write18{bash\space datenow.sh\space datenow.out} % to save into the file
+\newcommand{\Now}{\immediate\input datenow.out}
+%{{{ filenames with fancy underscore escape
+%\begingroup
+%\gdef\tempunderscore{_}
+%\catcode`_=\active
+%\gdef\makeunderscoreliteral{
+%    \catcode`_=\active
+%    \def_{\textunderscore\-}
+%}
+%\gdef\changeunderscoreback{
+%    \catcode`_=\active
+%    \def_{\tempunderscore}
+%}
+%\endgroup
+%\newcommand{\verblike}[1]{\makeunderscoreliteral#1\changeunderscoreback}
+%\begingroup\catcode`_=\active
+%\gdef\mysmallverb{%    note the global \gdef
+%  \catcode`_=\active
+%  \def_{blah}%
+%}
+%\endgroup
+
+%\newcommand{\fn}[1]{{\color{red}
+%\begingroup\catcode`_=13
+%#1
+%\endgroup
+%}}
+\begingroup
+  \catcode`\_=\active
+  \gdef_#1{\ensuremath{\sb{\mathrm{#1}}}}
+\endgroup
+%\mathcode`\_=\string"8000
+\catcode`\_=12
+
+%\def\fn{\begingroup\catcode`\_=12 \newfnx}
+%\newcommand{\newfnx}[1]{\oldfn{#1}\endgroup}
+%}}}
+%{{{ example for comma separated list, taken from http://stackoverflow.com/questions/2402354/split-comma-separated-parameters-in-latex
+
+% Functional foreach construct 
+% #1 - Function to call on each comma-separated item in #3
+% #2 - Parameter to pass to function in #1 as first parameter
+% #3 - Comma-separated list of items to pass as second parameter to function #1
+\def\foreach#1#2#3{%
+  \@test@foreach{#1}{#2}#3,\@end@token%
+}
+
+% Internal helper function - Eats one input
+\def\@swallow#1{}
+
+% Internal helper function - Checks the next character after #1 and #2 and 
+% continues loop iteration if \@end@token is not found 
+\def\@test@foreach#1#2{%
+  \@ifnextchar\@end@token%
+    {\@swallow}%
+    {\@foreach{#1}{#2}}%
+}
+
+% Internal helper function - Calls #1{#2}{#3} and recurses
+% The magic of splitting the third parameter occurs in the pattern matching of the \def
+\def\@foreach#1#2#3,#4\@end@token{%
+  #1{#2}{#3}%
+  \@test@foreach{#1}{#2}#4\@end@token%
+}
+
+%}}}
+
+%\newenvironment{err}{\vspace{-4ex}\begin{quotation}\begin{footnotesize}\hspace{-0.5in}\begin{tiny}\textsc{(Debug:)}\end{tiny}\mysmallline
+%    
+%    \vspace{-0.5ex}}{
+%    
+%    \vspace{-2ex}\hspace{-0.5in}\myarbline{1.3in}\end{footnotesize}\end{quotation}\vspace{-1.5ex}}
+\newenvironment{err}{\ \\ \textit{\footnotesize{\color{gray}Debug}}$\color{gray}\left\{\normalcolor\begin{minipage}{0.95\linewidth}\begin{footnotesize}}{\end{footnotesize}\end{minipage}\right.$}
+
+\newcommand\mysmallline{\rule{1in}{0.01mm}}
+\newcommand\myarbline[1]{\rule{#1}{0.01mm}}
+\let\oldsection = \section
+\let\oldsubsection = \subsection
+%\renewcommand{\subsection}[1]{\oldsubsection{{\tiny #1}}}
+\@ifundefined{noparagraph}{
+\RequirePackage{myparagraphformatting}
+}{
+\RequirePackage[noparagraph]{myparagraphformatting}
+}
+\newcommand{\blacktext}[1]{\texorpdfstring{{\color{black}#1}}{#1}}
+
+\renewcommand{\o}[2][]{ {\color{mygreen}{\it #1}} {\color{blue} #2}}
+\gdef\taskListOrTimeBlockTotal{0}
+\gdef\thistimeblock{0.001}
+\gdef\obstimecounter{0}
+\gdef\obstimecounterflag{0}
+\gdef\mytempval{0}
+\gdef\TimeToHereAtLastMark{0}
+\gdef\timeusedontask{0}
+
+\def\zeroPadTwo#1%
+{% Left zero pad of the argument to 2 digits.  The argument
+%  should be a number between 1 and 99.  This macro outputs
+%  a `0' if the argument is less than ten, then it outputs
+%  the argument.
+%
+  \ifnum #1<10 0\fi    % Conditionally output a zero
+  #1%    Then output the argument
+}% --- \zeroPadTwo ---
+
+
+%{{{ finished time using tex optional arguments (allows colon/no colon)!
+\newcommand{\finishedtime}{}%just to check
+\DeclareRobustCommand\finishedtime{\@ifnextchar[{\@@finishedtime}{\@finishedtime}}
+\def\@finishedtime#1{%
+\pgfmathparse{#1*60}%
+\global\let\mytempval=\pgfmathresult%
+\o[\obstb\obstmINV{\mytempval}\obstd]{}%
+}
+\def\@@finishedtime[#1]#2{%
+\pgfmathparse{#2*60}%
+\global\let\mytempval=\pgfmathresult%
+\o[#1: \obstb\obstmINV{\mytempval}\obstd]{}%
+}
+
+\DeclareRobustCommand\donetime{\@ifnextchar[{\@@donetime}{\@donetime}}
+\def\@donetime#1{\maxtime{#1}\finishedtime{#1}}
+\def\@@donetime[#1]#2{%
+\maxtime{#2}\finishedtime[#1]{#2}%
+}
+
+\gdef\timeperday{8}
+\gdef\timeAllotedForTimeBlock{9}
+
+
+\newcommand{\maxtime}[1]{%
+\pgfmathparse{#1+\taskListOrTimeBlockTotal}%
+\global\let\taskListOrTimeBlockTotal=\pgfmathresult% ttotal is the total time for a week
+\pgfmathparse{safepercentage(#1,\timeAllotedForTimeBlock)}%
+\global\let\poftotal=\pgfmathresult%poftotal is temporary
+\pgfmathparse{safedivide(#1,\timeperday)}%
+\global\let\numberdays=\pgfmathresult%
+\pgfmathparse{#1}%
+\global\let\thistimeblock=\pgfmathresult%
+({\it \myprinttime{#1}, +\numberdays\ days, \pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\poftotal}\% of total})%
+\gdef\timeusedontask{0.0}%
+}
+
+\def\IsPositive#1{%
+  TT\fi%
+  \ifcat_\ifnum0<#1 _\else A\fi%
+}
+\newcommand{\marktime}{
+\pgfmathparse{\taskListOrTimeBlockTotal-\runningTimeCounter}%
+\global\let\tempTimeToHere=\pgfmathresult% tempTimeToHere is just a local variable
+\pgfmathparse{safedivide(\tempTimeToHere,\timeperday)}%
+\global\let\numbertotaldays=\pgfmathresult%
+%http://en.wikibooks.org/wiki/LaTeX/Plain_TeX
+\pgfmathparse{ifthenelse((\tempTimeToHere-\TimeToHereAtLastMark)>=0,"TT","FT")}% character codes match (true) or don't (false)
+\if\pgfmathresult%(
+    \pgfmathparse{int(floor(\tempTimeToHere))}%
+    \let\localresulthours = \pgfmathresult%
+    \pgfmathparse{int(round((\tempTimeToHere-\localresulthours)*60))}%
+    \let\localresultminutes = \pgfmathresult
+    {{\it =\localresulthours:\zeroPadTwo\localresultminutes\ (\numbertotaldays\ days) to get here}}%
+    \global\let\TimeToHereAtLastMark=\tempTimeToHere%
+\else%)(
+    \pgfmathparse{\TimeToHereAtLastMark-\tempTimeToHere}%
+    \let\localresulthours = \pgfmathresult%
+    {\color{red}{over:\maxtime{\localresulthours}}}% and \TimeToHereAtLastMark remains unchanged (because it has zero added time)
+\fi%)
+}
+
+
+\gdef\weektotaltime{0}
+\newcommand\resetweektotaltime{%
+\pgfmathparse{0}%
+\global\let\weektotaltime=\pgfmathresult%
+}%
+\newcommand{\showweektotaltime}{%
+\myprinttime{\weektotaltime}}%
+
+\newcommand\timeblocktotal[1]{{\it Time block total: \myprinttime{#1}}\gdef\timeAllotedForTimeBlock{#1}}
+\newcommand\timeblocktotaldays[1]{ {\it
+{\tiny$\timeperday\times#1\;day$}%
+Time block total:%
+\pgfmathparse{#1*\timeperday}%
+\global\let\timeAllotedForTimeBlock=\pgfmathresult%
+\gdef\TimeToHereAtLastMark{0}% reset this, since the marks start over
+\pgfmathparse{\weektotaltime+\timeAllotedForTimeBlock}%
+\global\let\weektotaltime=\pgfmathresult%
+\myprinttime{\timeAllotedForTimeBlock}}%
+}
+
+\newcommand{\myprinttime}[1]{{\tiny MYPRINTTIME USED FP PACKAGE -- NO LONGER SUPPORTED}}
+\newcommand{\maxtwenty}[1]{{\tiny MAXTWENTY USED FP PACKAGE -- NO LONGER SUPPORTED}}
+\newcommand{\maxminutes}[1]{{\tiny MAXMINUTES  USED FP PACKAGE -- NO LONGER SUPPORTED}}
+\newcommand{\maxdays}[1]{{\tiny MAXDAYS  USED FP PACKAGE -- NO LONGER SUPPORTED}}
+\newcommand{\obstb}{{\tiny OBSTB  USED FP PACKAGE -- NO LONGER SUPPORTED}}
+\newcommand{\obsts}{{\tiny OBSTS  USED FP PACKAGE -- NO LONGER SUPPORTED}}
+\newcommand{\obsta}[1]{{\tiny OBSTA  USED FP PACKAGE -- NO LONGER SUPPORTED}}
+\newcommand{\obstm}[1]{{\tiny OBSTM  USED FP PACKAGE -- NO LONGER SUPPORTED}}
+\newcommand{\obstmINV}[1]{{\tiny OBSTMinv  USED FP PACKAGE -- NO LONGER SUPPORTED}}
+
+\pgfmathdeclarefunction{safedivide}{2}{%
+\pgfmathparse{ifthenelse(#1<160,#1,160)/ifthenelse(#2>0.01,#2,0.01)}
+}
+\pgfmathdeclarefunction{safepercentage}{2}{%
+\pgfmathparse{ifthenelse(safedivide(#1,#2)>160,160,safedivide(#1,#2))*100}
+}
+\newcommand{\obstd}{% dump the runningTimeCounter
+\pgfmathparse{\obstimecounter+\timeusedontask}%
+\global\let\timeusedontask=\pgfmathresult%
+%``time used on task \timeusedontask''
+\pgfmathparse{safepercentage(\obstimecounter,\thistimeblock)}%so it doesn't exceed tex limit of 16,300
+\let\poftotal=\pgfmathresult%
+%``percent of total \poftotal''
+({\bf%
+\myprinttime\obstimecounter%
+% nest note that we don't schedule anything for only 6min
+\pgfmathparse{ifthenelse(\thistimeblock>=0.1,"TT","FT")}% character codes match (true) or don't (false)
+\if\pgfmathresult%(
+, {\tiny \pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\poftotal}\%},%
+\pgfmathparse{\obstimecounter+\runningTimeCounter}%
+\global\let\runningTimeCounter=\pgfmathresult%
+\pgfmathparse{safepercentage(\timeusedontask,\thistimeblock)}
+\pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\pgfmathresult}\%%
+\pgfmathparse{\thistimeblock-\timeusedontask}
+{\tiny$\rightarrow$\pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\pgfmathresult}hr}%
+\fi%)
+})%
+}
+
+\newcommand{\obstdump}{%
+\o{({\bf \pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\runningTimeCounter} hr})}%
+}
+
+\newenvironment{tasklist}{\begin{tiny}
+\gdef\taskListOrTimeBlockTotal{0}%
+\begin{multicols}{2}
+\begin{itemize}
+}{
+\end{itemize}
+\end{multicols}
+\end{tiny}}
+
+\newenvironment{pcomments}{\begin{minipage}{4.5in}}{\end{minipage}}
+\newcommand{\pstandard}[1]{\begin{minipage}{3in}\includegraphics[width=3in]{#1}\end{minipage}}
+\newcommand{\timeblockstart}{\gdef\taskListOrTimeBlockTotal{0}\gdef\runningTimeCounter{0}%
+\gdef\taskListOrTimeBlockTotal{0}%
+\dotfill}
+
+\newcommand{\timeblockend}{%
+{\tiny{\it = \pgfmathprintnumber[assume math mode=true,fixed,precision=2]{\taskListOrTimeBlockTotal} hr total\ %
+\pgfmathparse{ifthenelse((\taskListOrTimeBlockTotal-\timeAllotedForTimeBlock)==0,"TT","FT")}%
+\if\pgfmathresult%(
+(breaks even)
+\else%)(
+\pgfmathparse{ifthenelse((\taskListOrTimeBlockTotal-\timeAllotedForTimeBlock)>0,"red","blue")}%
+{\color{\pgfmathresult}
+\pgfmathparse{ifthenelse((\taskListOrTimeBlockTotal-\timeAllotedForTimeBlock)>0,", over ",", under ")}\pgfmathresult%
+\pgfmathparse{abs(\taskListOrTimeBlockTotal-\timeAllotedForTimeBlock)}\pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\pgfmathresult}%
+}%
+\fi%)
+}%
+\o{{\bf %
+\pgfmathparse{\taskListOrTimeBlockTotal-\runningTimeCounter}%
+{\footnotesize \pgfmathprintnumber[assume math mode=true,fixed,precision=2]{\pgfmathresult} hr left}}
+}%
+}\dotfill}
+
+\newenvironment{timeblock}[2]{%
+\timeblockstart\gdef\timeperday{#1}\timeblocktotaldays{#2}%
+}{%
+\timeblockend
+}
+
+\newenvironment{tasks}{\timeblockstart\phantomsection\addcontentsline{toc}{subsubsection}{tasks}
+\begin{small}
+\begin{multicols}{2}
+\gdef\timeAllotedForTimeBlock{9}
+}{
+\end{multicols}
+\timeblockend
+\myline
+\end{small}}
+
+\newcommand{\breaklist}{\end{itemize}
+\end{multicols}
+{\tiny{\it = \pgfmathprintnumber[assume math mode=true,fixed,precision=1]{\taskListOrTimeBlockTotal} hr total}}
+\myline
+\begin{multicols}{2}
+\begin{itemize}
+}
+\newcommand{\breako}[1]{
+\o{\item #1}
+\end{itemize}
+\myline
+\begin{itemize}
+}
+\newcommand{\tasko}[1]{
+\o{#1}
+
+\myline
+}
+\newcommand{\breakk}[1]{
+\item #1
+\end{itemize}
+\myline
+\begin{itemize}
+}
+\newcommand{\taskk}[1]{
+#1
+\myline
+}
+
+% Remember chapter title
+%\renewcommand{\chaptermark}[1]{\markboth{Chap. \thechapter:\ #1}{}}
+% section number and title
+%\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+%\renewcommand{\sectionmark}[1]{\markright{\thesection\ }}
+\lhead[\fancyplain{}{\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad J. Franck Notebook p \thepage}] %
+    {\fancyplain{}{\bfseries\rightmark}}
+%\rhead[\fancyplain{}{\scshape Sec.\arabic{section}}] %
+%    {\fancyplain{}{J. Franck Notebook p \thepage}}
+%\lhead{ \Roman{chapter}$\Rightarrow$\arabic{section}.\Alph{subsection} \leftmark}
+%%%\lhead{ \Roman{chapter}$\Rightarrow$\arabic{section} \leftmark}
+%%%%\lhead{\leftmark}
+%%%\rhead[\fancyplain{}{}] %
+%%%    {\fancyplain{}{ / J. Franck Notebook, compiled \today}}
+%%%\lfoot{p \thepage}
+%%%%\rfoot{p \thepage}
+%%%\renewcommand{\sectionmark}[1]{\markboth{#1}{#1}}
+%
+%% from http://www.kronto.org/thesis/tips/custom-headers.html
+%\@ifundefined{chaptermark}{}{
+%\renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{#1}}{}}
+%}
+%\renewcommand{\sectionmark}[1]{\markright{#1}{}}
+%
+%\@ifundefined{noheader}{
+%\@ifundefined{thechapter}{}{
+%\fancyhead[LO]{\thechapter.\thesection:}
+%\fancyhead[RE]{\thechapter.\thesection}
+%\fancyhead[RO]{{\footnotesize\rightmark}\hspace{2em}p{\bf\thepage}}
+%\fancyhead[LE]{p{\bf\thepage}\hspace{2em}\footnotesize{\leftmark}}
+%}
+%}{}
+%
+%%\rhead{Notebook \today}
+%%\chead{\sectionname}
+%%\lhead{John Franck}
+%%\rfoot{Right bottom}
+%%\cfoot{\thepage}
+%%\rfoot{\thepage}
+%%\lfoot{Left bottom}
+%
+\@ifundefined{nolabels}{
+\RequirePackage{mylabels}
+}{}
+%%\bibliographystyle{abbrvnat}
+%%\RequirePackage[sort&compress]{natbib}
+%%\bibliographystyle{unsrt}
+\gdef\runningTimeCounter{0}\gdef\taskListOrTimeBlockTotal{0} % initialize, whether or not I start the timeblock
+
+\newcommand{\refhyp}[1]{{\it hyp:}\ref{hyp:#1}}
+\newcommand{\mainhyp}[1]{{\bf #1}}
+\newcommand{\subhyp}[2][]{{\it \textbf{#1} }{\it #2}}
+%\def\thechapter{\Roman{chapter}}
+%\def\thesection{\arabic{section}}
+%\def\thesubsection{\Alph{subsection}}
+\def\thesubsubsection{\thesubsection(\alphalph{\value{subsubsection}})}
+\newcommand{\notyet}[1]{{\color{red}#1}}
+\newcommand{\needtocheck}[1]{{\color{yellow}#1}}
+\newcommand{\putref}{\begin{tiny}[ref]\end{tiny}}
+\newenvironment{DIFnomarkup}{}{}
+
+\newcommand\precaution[1]{\begin{scriptsize}\textit{#1}\end{scriptsize}}
+\newcommand\twooptions[2]{
+
+\begin{tabular}{c|c}
+    Option 1 & Option 2\\
+\begin{minipage}{3.5in}
+#1
+\end{minipage}
+&
+\begin{minipage}{3.5in}
+#2
+\end{minipage}
+\\
+\end{tabular}
+
+}
+
+%\newcommand\textsubscript[1]{\ensuremath{{}_{\text{#1}}}}
+\let\myolditemi=\labelitemi
+\let\myolditemii=\labelitemii
+\RequirePackage{multirow}
+
+% start date formatting
+\RequirePackage{datetime}
+\RequirePackage{datenumber}% Date formatting
+\RequirePackage{pgf}% For math
+\RequirePackage{xstring}% Needed for \IfStrEqCase and \IfEq 
+\newcounter{randomstartdate}
+\newcounter{mynewdate}
+\newcounter{mytodaysdate}
+\newcounter{numberofdaysago}
+\newcounter{numberofdaysuntil}
+\newcounter{numberofweeksuntil}
+\newcounter{mytemporary}
+\newdateformat{mydate}{\shortmonthname[\THEMONTH] \ordinaldate{\THEDAY}}
+\newcommand{\formatdatenumber}{\mydate\formatdate{\the\value{dateday}}{\the\value{datemonth}}{\the\value{dateyear}}}
+\newcommand{\saydate}[3]{%
+    \setdatenumber{2010}{1}{1}%
+    \setcounter{randomstartdate}{\value{datenumber}}% use to make numbers manageable%
+    \setdatenumber{#1}{#2}{#3}%
+    \setcounter{mynewdate}{\value{datenumber}}%
+    \addtocounter{mynewdate}{-\value{randomstartdate}}%
+    \setdatetoday % sets the counters back to today%
+    \setcounter{mytodaysdate}{\value{datenumber}}%
+    \addtocounter{mytodaysdate}{-\value{randomstartdate}}%
+    \pgfmathsetcounter{numberofdaysuntil}{int(\value{mynewdate})-int(\value{mytodaysdate})}%
+    \pgfmathsetcounter{numberofdaysago}{ifthenelse(int(\value{numberofdaysuntil})<0,int(-int(\value{numberofdaysuntil})),0)}%
+    \pgfmathsetcounter{numberofdaysuntil}{ifthenelse(int(\value{numberofdaysuntil})<0,-1,int(\value{numberofdaysuntil}))}%
+    \pgfmathsetcounter{numberofweeksuntil}{(int(\value{numberofdaysuntil}) + int(\value{datedayname}) - 1)/7}% give weeks until, but add an offset, so next monday is ``next'' monday, not ``this'' monday -- monday starts the week%
+    \addtocounter{mynewdate}{\value{randomstartdate}}%
+    \addtocounter{mytodaysdate}{\value{randomstartdate}}%
+    \setdatebynumber{\value{mynewdate}}%
+    \setcounter{mytemporary}{\value{numberofdaysago}}%don't know why I need to do this, but apparently I do
+    \IfEq{\the\value{numberofdaysuntil}}{-1}{\textbf{already!!} %
+            \IfEq{\the\value{mytemporary}}{1}{(yesterday)}{%
+                (\the\value{mytemporary} days ago)%
+            }%
+        }{%
+        \IfEq{\the\value{numberofdaysuntil}}{0}{\textbf{today}}{%
+            \IfEq{\the\value{numberofdaysuntil}}{1}{\textbf{tomorrow}}{%
+                \IfEq{\the\value{numberofweeksuntil}}{0}{\datedayname, this week (\formatdatenumber)}{%
+                    \IfEq{\the\value{numberofweeksuntil}}{1}{\datedayname, next week (\formatdatenumber)}{%
+                        later: \formatdatenumber%
+                    }%
+                }%
+            }%
+        }%
+    }%
+    \setdatetoday%
+}%
+\newcommand{\detcolor}[3]{%
+    \setdatenumber{2010}{1}{1}%
+    \setcounter{randomstartdate}{\value{datenumber}}% use to make numbers manageable%
+    \setdatenumber{#1}{#2}{#3}%
+    \setcounter{mynewdate}{\value{datenumber}}%
+    \addtocounter{mynewdate}{-\value{randomstartdate}}%
+    \setdatetoday % sets the counters back to today%
+    \setcounter{mytodaysdate}{\value{datenumber}}%
+    \addtocounter{mytodaysdate}{-\value{randomstartdate}}%
+    \pgfmathsetcounter{numberofdaysuntil}{int(\value{mynewdate})-int(\value{mytodaysdate})}%
+    \pgfmathsetcounter{numberofdaysago}{ifthenelse(int(\value{numberofdaysuntil})<0,int(-int(\value{numberofdaysuntil})),0)}%
+    \pgfmathsetcounter{numberofdaysuntil}{ifthenelse(int(\value{numberofdaysuntil})<0,-1,int(\value{numberofdaysuntil}))}%
+    \pgfmathsetcounter{numberofweeksuntil}{(int(\value{numberofdaysuntil}) + int(\value{datedayname}) - 1)/7}% give weeks until, but add an offset, so next monday is ``next'' monday, not ``this'' monday -- monday starts the week%
+    \pgfmathparse{ifthenelse(int(\value{numberofdaysuntil}) < 1,"white",%
+        ifthenelse(int(\value{numberofdaysuntil}) < 4,"red",%
+            ifthenelse(int(\value{numberofdaysuntil}) < 7,"dredcolor",%
+                "dgreencolor")))}\color{\pgfmathresult}%
+    \pgfmathparse{ifthenelse(int(\value{numberofdaysuntil}) < 1,"dredcolor","white")%
+        }\def\myboxcolor{\pgfmathresult}%
+    \setdatetoday%
+    %
+}%
+\newcommand\due[4][]{{\detcolor{#2}{#3}{#4}\colorbox{\myboxcolor}{Due:\,\saydate{#2}{#3}{#4} {\detcolor{#2}{#3}{#4}#1}}}}
+
+\makeatletter\newenvironment{inplacenotebox}{%
+
+\def\myboxwidth{\linewidth-0.5in}\begin{lrbox}{\@tempboxa}\begin{minipage}{\myboxwidth}\textbf{\color{darkgreen}Note:}\begin{scriptsize}}{\end{scriptsize}\end{minipage}\end{lrbox}%
+       \colorbox{lightgreen}{\usebox{\@tempboxa}}
+\quad\\ 
+}\makeatother
+% end date formatting
+\newcommand{\startsquarepar}{%
+    \par\begingroup \parfillskip 0pt \relax}
+\newcommand{\stopsquarepar}{%
+    \par\endgroup}
+
+\newcommand{\executeiffilenewer}[3]{%
+ \ifnum\pdfstrcmp{\pdffilemoddate{#1}}%
+ {\pdffilemoddate{#2}}>0%
+ {%
+ \immediate\write18{#3}%
+ }\fi%
+}
+\newcommand{\svgtopdf}[2][width=linewidth]{%
+\executeiffilenewer{#2.svg}{#2.pdf}%
+{inkscape -f #2.svg -A #2.pdf}%
+\includegraphics[#1]{#2}%
+}
+\newcommand{\svgtopng}[2][width=linewidth]{%
+\executeiffilenewer{#2.svg}{#2.png}%
+{inkscape -f #2.svg -e #2.png}%
+\includegraphics[#1]{#2.png}%
+}

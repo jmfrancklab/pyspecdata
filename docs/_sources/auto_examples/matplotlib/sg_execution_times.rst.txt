@@ -1,0 +1,18 @@
+
+:orphan:
+
+.. _sphx_glr_auto_examples_matplotlib_sg_execution_times:
+
+Computation times
+=================
+**00:00.277** total execution time for **auto_examples_matplotlib** files:
+
++--------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_matplotlib_matplotlib_test.py` (``matplotlib_test.py``) | 00:00.093 | 0.0 MB |
++--------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_matplotlib_draw_span.py` (``draw_span.py``)             | 00:00.085 | 0.0 MB |
++--------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_matplotlib_transf_math.py` (``transf_math.py``)         | 00:00.058 | 0.0 MB |
++--------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_matplotlib_artist_tests.py` (``artist_tests.py``)       | 00:00.040 | 0.0 MB |
++--------------------------------------------------------------------------------------+-----------+--------+

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>the lmfitdata class &mdash; pySpecData 0.9.5.3.2 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="_static/gallery_custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The Figure List" href="figlist.html" />
+    <link rel="prev" title="Documentation of Notebook Helper Functions" href="latexscripts.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> pySpecData
+          </a>
+              <div class="version">
+                0.9.5.3.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">the lmfitdata class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#creating-new-types-of-lmfitdata-modules">creating new types of lmfitdata modules</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pySpecData</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">the lmfitdata class</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/fitdata.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="the-lmfitdata-class">
+<h1>the lmfitdata class<a class="headerlink" href="#the-lmfitdata-class" title="Permalink to this heading">¶</a></h1>
+<p>This is a child class of nddata used for fitting.</p>
+<p>For old fitdata documentation
+(obsolete, for development reference) see <span class="xref std std-ref">fitdata_old</span></p>
+<section id="creating-new-types-of-lmfitdata-modules">
+<h2>creating new types of lmfitdata modules<a class="headerlink" href="#creating-new-types-of-lmfitdata-modules" title="Permalink to this heading">¶</a></h2>
+<p>There is a base class called “lmfitdata” that defines the basic routines
+necessary for fitting. Currently, the lmfitdata class only supports
+fitting along one dimension, so before constructing a new class, one
+must first choose what dimension they will be fitting along.</p>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>Of
+course, for multidimensional data, the fit will be repeated along the
+dimensions that are not the fit dimension. see how easy it would be to
+allow more than one dimension</p>
+</div>
+<p>To fit a new type of function, one simply creates a new type of class
+that <em>inherits</em> from the lmfitdata class. We override all the methods that
+have to do with the definition of the functional format. These are
+defined in the first section, where we build up an example for fitting a
+general <span class="math notranslate nohighlight">\(T_1\)</span> recovery curve. This example should be used as a
+starting point for making new fit classes. Then, we can make instances
+of the new class, and use their methods (described in the subsequent
+section) next.</p>
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<p>the option block :no-inherited-members: doesn’t work – not sure how to modify class.rst
+I put a template from stackexchange inside _templates
+– see <a class="reference external" href="https://stackoverflow.com/questions/28147432/how-to-customize-sphinx-ext-autosummary-rst-template">https://stackoverflow.com/questions/28147432/how-to-customize-sphinx-ext-autosummary-rst-template</a>
+on how to use it</p>
+<p>then, I need to link to or include generated/pyspecdata.lmfitdata.rst</p>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.lmfitdata.</span></span><span class="sig-name descname"><span class="pre">lmfitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
+<p>The user creates a lmfitdata class object from an existing nddata
+class object, and on this lmfitdata object can define the
+<a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.functional_form" title="pyspecdata.lmfitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
+data of the original nddata.
+This functional form must be provided as a sympy expression, with
+one of its variables matching the name of the dimension that the
+user would like to fit to.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a full copy of this instance.</p>
+<p>Because methods typically change the data in place, you might want to
+use this frequently.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>boolean</em>) – <p>Default to True.
+False doesn’t copy the data – this is for internal use,
+<em>e.g.</em> when you want to copy all the metadata and perform a
+calculation on the data.</p>
+<p>The code for this also provides the definitive list of the
+nddata metadata.</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.eval">
+<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">taxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.eval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the fit function along the axis taxis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>taxis</strong> (<em>ndarray</em><em>, </em><em>int</em>) – <dl class="field-list simple">
+<dt class="field-odd">if ndarray<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the new axis coordinates along which we want to calculate the fit.</p>
+</dd>
+<dt class="field-even">if int<span class="colon">:</span></dt>
+<dd class="field-even"><p>number of evenly spaced points along the t-axis along the fit</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>actually run the fit</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.function_string">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">function_string</span></span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.function_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property of the myfitclass class which stores a string
+output of the functional form of the desired fit expression
+provided in func:<cite>functional_form</cite> in LaTeX format</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.functional_form">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">functional_form</span></span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.functional_form" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property of the myfitclass class which is set by the user,
+takes as input a sympy expression of the desired fit
+expression</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.gen_indices">
+<span class="sig-name descname"><span class="pre">gen_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">this_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_to</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.gen_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>pass this this_set and this_set_to parameters, and it will return:
+indices,values,mask
+indices –&gt; gives the indices that are forced
+values –&gt; the values they are forced to
+mask –&gt; p[mask] are actually active in the fit</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.guess">
+<span class="sig-name descname"><span class="pre">guess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Old code that we are preserving here – provide the guess for our
+parameters; by default, based on pseudoinverse</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.latex">
+<span class="sig-name descname"><span class="pre">latex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.latex" title="Permalink to this definition">¶</a></dt>
+<dd><p>show the latex string for the function, with all the symbols substituted by their values</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.output">
+<span class="sig-name descname"><span class="pre">output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.output" title="Permalink to this definition">¶</a></dt>
+<dd><p>give the fit value of a particular symbol, or a dictionary of all values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em><em> (</em><em>optional</em><em>)</em>) – name of the symbol.
+If no name is passed, then output returns a dictionary of the
+resulting values.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>retval</strong> – Either a dictionary of all the values, or the value itself</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict or float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.residual">
+<span class="sig-name descname"><span class="pre">residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.residual" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate the residual OR if data is None, return fake data</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.set_guess">
+<span class="sig-name descname"><span class="pre">set_guess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.set_guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>set both the guess and the bounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>guesses</strong> (<em>dict of dicts</em>) – <p>each dict has a keyword giving the parameter and a value
+that comprises a dict with guesses (value) and/or constraints
+(min/max)</p>
+<p>Can be passed either as the only argument, or a kwarg called
+guesses, or as the kwargs themselves.</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.settoguess">
+<span class="sig-name descname"><span class="pre">settoguess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.settoguess" title="Permalink to this definition">¶</a></dt>
+<dd><p>a debugging function, to easily plot the initial guess</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="latexscripts.html" class="btn btn-neutral float-left" title="Documentation of Notebook Helper Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="figlist.html" class="btn btn-neutral float-right" title="The Figure List" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2016, John M. Franck.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
