@@ -274,6 +274,7 @@ class lmfitdata(nddata):
             args=(x, y, sigma),
         )
         # {{{ capture the result for ouput, etc
+        self.fit_parameters = out.params
         self.fit_coeff = [out.params[j].value for j in self.parameter_names]
         assert out.success
         if hasattr(out,'covar'):
@@ -284,15 +285,16 @@ class lmfitdata(nddata):
         "cache the symbolic jacobian and/or use it to compute the numeric result"
         if not hasattr(self.jacobian_symbolic):
             self.jacobian_symbolic = [sp.diff(self.expression,j,1) for j in self.parameter_symbols]
-            self.jacobian_lambda = [ sp.lambdify(
+            self.jacobian_lambda = [ sp.lambdify( # equivalent of fitfunc_multiarg_v2
                 self.variable_symbols + self.parameter_symbols,
                 j,
                 modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
-                ) for j in jacobian_symbolic ]
-        jacobian_array = array([
+                ) for j in self.jacobian_symbolic ]
+        jacobian_array = np.hstack([
             j(
-                *(self.getaxis(k) for k in self.variable_names), **pars.valuesdict()
-                )
+                *(self.getaxis(k)
+                  for k in self.variable_names),
+                **pars.valuesdict())[:,newaxis] # function elements on the outside, so parameters can go on the inside
             for j in self.jacobian_lambda])
         return jacobian_array
 

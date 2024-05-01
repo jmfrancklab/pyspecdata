@@ -53,3 +53,6 @@ plot(guess, "g--", label="guess")
 # }}}
 plt.legend()
 plt.show()
+jac = newfit.jacobian(newfit.fit_parameters)
+for j,thisparam in enumerate(newfit.fit_parameters.keys()):
+    plot(jac[:,j],label=f'{thisparam} derivative')
