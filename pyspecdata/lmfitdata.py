@@ -273,7 +273,7 @@ class lmfitdata(nddata):
             self.guess_parameters,
             fcn_args=(x, y, sigma),
         )
-        out = themin.leastsq(Dfun=self.jacobian, col_deriv=False)
+        out = themin.leastsq(Dfun=self.jacobian, col_deriv=True)
         # {{{ capture the result for ouput, etc
         self.fit_parameters = out.params
         self.fit_coeff = [out.params[j].value for j in self.parameter_names]
@@ -291,11 +291,11 @@ class lmfitdata(nddata):
                 j,
                 modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
                 ) for j in self.jacobian_symbolic ]
-        jacobian_array = np.hstack([
+        jacobian_array = np.array([
             j(
                 *(self.getaxis(k)
                   for k in self.variable_names),
-                **pars.valuesdict())[:,np.newaxis] # function elements on the outside, so parameters can go on the inside
+                **pars.valuesdict()) # function elements on the outside, so parameters can go on the inside
             for j in self.jacobian_lambda])
         return jacobian_array
 

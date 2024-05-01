@@ -61,7 +61,7 @@ thisline = newfit.eval()
 thisline /= thisline.data.max()
 plot(thisline, "k", alpha=0.5, label="fit")
 for j,thisparam in enumerate(newfit.fit_parameters.keys()):
-    thisline = jac[:,j]
+    thisline = jac[j,:]
     thisline /= thisline.max()
     plot(newfit.getaxis(newfit.dimlabels[0]),thisline,label=f'{thisparam} derivative',
          alpha=0.5)
