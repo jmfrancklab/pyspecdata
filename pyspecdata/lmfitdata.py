@@ -161,9 +161,9 @@ class lmfitdata(nddata):
         parameters; by default, based on pseudoinverse"""
         if hasattr(self, "guess_dict"):
             self.guess_dictionary = {
-                k: self.guess_dict[k]["value"] for k in self.guess_dict.keys()
+                k: self.guess_parameters[k].value for k in self.guess_parameters.keys()
             }
-            return [self.guess_dictionary[k] for k in self.parameter_names]
+            return [self.guess_parameters[k].value for k in self.parameter_names]
         else:
             return [1.0] * len(self.variable_names)
 
@@ -289,7 +289,7 @@ class lmfitdata(nddata):
         assert self.fit_output.success
         # }}}
         return self
-    def pinvr_step(self,alpha=10,sigma=None):
+    def pinvr_step(self,sigma=None):
         r"""Use regularized Pseudo-inverse to (partly) solve:
         :math:`-residual = f(\mathbf{p}+\Delta \mathbf{p})-f(\mathbf{p}) \approx \nabla f(\mathbf{p}) \cdot \Delta \mathbf{p}`
         """
@@ -298,17 +298,29 @@ class lmfitdata(nddata):
               "shape of residual",self.residual(self.guess_parameters,sigma=sigma).shape)
         # use regularized pseudo-inverse to solve
         # -resid = f(p+Δp) - f(p) ≅ ∇f(p) · Δp
-        new_guess = (np.array([self.guess_parameters[j].value for j in
+        alpha = 1
+        print('*'*20+"here is the old guess", self.guess_parameters)
+        theresid = self.residual(self.guess_parameters,sigma=sigma)
+        orig_guess = np.array([self.guess_parameters[j].value for j in
                                self.guess_parameters])
-                     - pinvr(thejac.T,alpha) @
-                     self.residual(self.guess_parameters,sigma=sigma))
-        print('*'*20+"here is the new guess",new_guess)
-        for j,k in enumerate(self.guess_parameters.keys()):
-            if new_guess[j] < self.guess_parameters[k].max:
-                new_guess[j] = self.guess_parameters[k].max
-            if new_guess[j] > self.guess_parameters[k].min:
-                new_guess[j] = self.guess_parameters[k].min
-            self.guess_parameters[k].value = new_guess[j]
+        def set_new_guess(new_guess):
+            for j,k in enumerate(self.guess_parameters.keys()):
+                if new_guess[j] > self.guess_parameters[k].max:
+                    new_guess[j] = self.guess_parameters[k].max
+                if new_guess[j] < self.guess_parameters[k].min:
+                    new_guess[j] = self.guess_parameters[k].min
+                self.guess_parameters[k].value = new_guess[j]
+        set_new_guess(orig_guess - pinvr(thejac.T,alpha) @ theresid)
+        print('*'*20+"here is the new guess", self.guess_parameters)
+        newresid = self.residual(self.guess_parameters,sigma=sigma)
+        delta_norm = ((newresid-theresid)**2).sum()
+        print(30*'*','delta norm',delta_norm)
+        alpha *= delta_norm
+        set_new_guess(orig_guess - pinvr(thejac.T,alpha) @ theresid)
+        print('*'*20+"here is the second new guess", self.guess_parameters)
+        newresid = self.residual(self.guess_parameters,sigma=sigma)
+        delta_norm = ((newresid-theresid)**2).sum()
+        print(30*'*','second delta norm',delta_norm)
         return
     def jacobian(self,pars,sigma=None): 
         """cache the symbolic jacobian and/or use it to compute the numeric result
