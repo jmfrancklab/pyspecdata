@@ -279,7 +279,7 @@ class lmfitdata(nddata):
                 fcn_args=(sigma,),
             )
         if use_jacobian:
-            out = themin.leastsq(Dfun=self.jacobian, col_deriv=True, gtol=True)
+            out = themin.leastsq(Dfun=self.jacobian, col_deriv=True)
         else:
             out = themin.leastsq()
         # {{{ capture the result for ouput, etc
