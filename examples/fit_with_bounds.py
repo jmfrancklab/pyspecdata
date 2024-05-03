@@ -33,7 +33,6 @@ mydata.add_noise(2.8)
 # }}}
 # {{{Making guess data
 newfit = lmfitdata(mydata)
-newfit.data = newfit.data.real
 newfit.functional_form = thisfit.functional_form
 newfit.set_guess(
     A=dict(value=13.0, max=20, min=0.0),
@@ -58,7 +57,7 @@ plt.gca().text(0.5, 0.75, '$'+sp.latex(newfit.functional_form)+'$',
 # }}}
 plt.legend()
 plt.figure()
-jac = newfit.jacobian(newfit.fit_parameters)
+jac = newfit.jacobian(newfit.fit_parameters).view(newfit.data.dtype)
 thisline = newfit.eval()
 thisline /= thisline.data.max()
 plot(thisline, "k", alpha=0.5, label="fit")

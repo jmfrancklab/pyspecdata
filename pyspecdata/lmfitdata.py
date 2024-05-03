@@ -290,7 +290,14 @@ class lmfitdata(nddata):
         # }}}
         return self
     def jacobian(self,pars,sigma=None): 
-        "cache the symbolic jacobian and/or use it to compute the numeric result"
+        """cache the symbolic jacobian and/or use it to compute the numeric result
+
+        Note that, like residual, this is designed for use by lmfit, so that if you want to actually *see* the Jacobian, you need to pass something a bit more complicated, like this:
+
+        >>> jac = newfit.jacobian(newfit.fit_parameters).view(newfit.data.dtype)
+
+        which assumes that I have run the fit, and so have access to the fit parameters, and gives the complex view for complex data (since in a complex fit, we use view to treat real an imaginary parts the same)
+        """
         if sigma is not None:
             raise ValueError("Jacobian with generalized leastsq not yet supported (you have error set, so I want to do generalized)")
         if not hasattr(self,"jacobian_symbolic"):
@@ -306,7 +313,14 @@ class lmfitdata(nddata):
                   for k in self.variable_names),
                 **pars.valuesdict()) # function elements on the outside, so parameters can go on the inside
             for j in self.jacobian_lambda])
-        return jacobian_array
+        if np.issubdtype(self.data.dtype, np.complexfloating) and not np.issubdtype(jacobian_array.dtype, np.complexfloating):
+            if self.data.dtype == np.complex64:
+                jacobian_array = np.complex64(jacobian_array)
+            elif self.data.dtype == np.complex128:
+                jacobian_array = np.complex128(jacobian_array)
+            else:
+                raise ValueError("I don't understand the dtype",self.data.dtype)
+        return jacobian_array.view(float)
 
     def residual(self, pars, sigma=None):
         "calculate the residual OR if data is None, return fake data"
