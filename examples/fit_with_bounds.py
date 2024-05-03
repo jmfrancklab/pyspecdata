@@ -68,4 +68,5 @@ for j,thisparam in enumerate(newfit.fit_parameters.keys()):
     plot(newfit.getaxis(newfit.dimlabels[0]),thisline,label=f'{thisparam} derivative',
          alpha=0.5)
 plt.legend()
+logger.info(strm("output:",newfit.output()))
 plt.show()
