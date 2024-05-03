@@ -42,6 +42,11 @@ newfit.set_guess(
 )
 newfit.settoguess()
 guess = newfit.eval(100)
+use_pinvr = False
+if use_pinvr:
+    newfit.pinvr_step()
+    newfit.settoguess()
+    newguess = newfit.eval(100)
 # }}}
 # {{{ run the fit and generate nddata
 # again, now that this is a class, why is this not handled by the fit method?
@@ -51,7 +56,9 @@ logger.info(strm("number of function evaluations:",newfit.fit_output.nfev,
 # {{{plot the data with fits and guesses
 plot(mydata, "ro", label="data")
 plot(newfit.eval(100), "b", alpha=0.5, label="fit")
-plot(guess, "g--", label="guess")
+plot(guess, "--", label="guess")
+if use_pinvr:
+    plot(newguess, "--", label="new guess")
 plt.gca().text(0.5, 0.75, '$'+sp.latex(newfit.functional_form)+'$',
                transform=plt.gca().transAxes)
 # }}}

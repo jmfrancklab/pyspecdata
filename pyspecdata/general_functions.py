@@ -394,11 +394,11 @@ def pinvr(C,alpha):
         raise ValueError('pinvr error, V is not finite')
     if np.any(~np.isfinite(S)):
         raise ValueError('pinvr error, S is not finite')
-    S = diag(S / (S**2 + alpha**2))
+    S = np.diag(S / (S**2 + alpha**2))
     if np.any(~np.isfinite(S)):
         raise ValueError('pinvr error, problem with S/(S^2+alpha^2) --> set your regularization higher')
-    return np.dot(np.conj(transpose(V)),
-            np.dot(S,np.conj(transpose(U))))
+    return np.dot(np.conj(np.transpose(V)),
+            np.dot(S,np.conj(np.transpose(U))))
 def sech(x):
     return 1./cosh(x)
 def myfilter(x,center = 250e3,sigma = 100e3):

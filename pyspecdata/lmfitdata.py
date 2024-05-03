@@ -4,7 +4,7 @@ from lmfit import Parameters, Minimizer
 from lmfit.printfuncs import report_fit
 import numpy as np
 from .core import nddata, normal_attrs, issympy, ndshape, sympy_latex, sympy_symbol, dp
-from .general_functions import strm
+from .general_functions import strm, pinvr
 import logging, warnings
 from copy import deepcopy
 
@@ -289,6 +289,27 @@ class lmfitdata(nddata):
         assert self.fit_output.success
         # }}}
         return self
+    def pinvr_step(self,alpha=10,sigma=None):
+        r"""Use regularized Pseudo-inverse to (partly) solve:
+        :math:`-residual = f(\mathbf{p}+\Delta \mathbf{p})-f(\mathbf{p}) \approx \nabla f(\mathbf{p}) \cdot \Delta \mathbf{p}`
+        """
+        thejac = self.jacobian(self.guess_parameters,sigma=sigma)
+        print(30*'*'+"shape of thejac",thejac.shape,
+              "shape of residual",self.residual(self.guess_parameters,sigma=sigma).shape)
+        # use regularized pseudo-inverse to solve
+        # -resid = f(p+Δp) - f(p) ≅ ∇f(p) · Δp
+        new_guess = (np.array([self.guess_parameters[j].value for j in
+                               self.guess_parameters])
+                     - pinvr(thejac.T,alpha) @
+                     self.residual(self.guess_parameters,sigma=sigma))
+        print('*'*20+"here is the new guess",new_guess)
+        for j,k in enumerate(self.guess_parameters.keys()):
+            if new_guess[j] < self.guess_parameters[k].max:
+                new_guess[j] = self.guess_parameters[k].max
+            if new_guess[j] > self.guess_parameters[k].min:
+                new_guess[j] = self.guess_parameters[k].min
+            self.guess_parameters[k].value = new_guess[j]
+        return
     def jacobian(self,pars,sigma=None): 
         """cache the symbolic jacobian and/or use it to compute the numeric result
 
