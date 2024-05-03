@@ -10,7 +10,7 @@ to retype them every time.
 import matplotlib.pyplot as plt
 from numpy import exp, linspace, pi, random, sign, sin
 import sympy as sp
-from lmfit import Parameters, minimize
+from lmfit import Parameters, fit_report
 from lmfit.printfuncs import report_fit
 import numpy as np
 from pyspecdata import *
