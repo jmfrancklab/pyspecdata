@@ -56,7 +56,7 @@ plt.gca().text(0.5, 0.75, '$'+sp.latex(newfit.functional_form)+'$',
 # }}}
 plt.legend()
 plt.figure()
-jac = newfit.jacobian(newfit.fit_parameters, None, None)
+jac = newfit.jacobian(newfit.fit_parameters)
 thisline = newfit.eval()
 thisline /= thisline.data.max()
 plot(thisline, "k", alpha=0.5, label="fit")

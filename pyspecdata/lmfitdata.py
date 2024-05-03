@@ -251,7 +251,7 @@ class lmfitdata(nddata):
         newdata.name(str(self.name()))
         return newdata
 
-    def fit(self):
+    def fit(self, use_jacobian=True):
         r"""actually run the fit"""
         # we can ignore set_what, since I think there's a mechanism in
         # lmfit to take care of that (it's for fixing parameters)
@@ -266,14 +266,22 @@ class lmfitdata(nddata):
         # But you  should read through and see what the previous fit method is doing
         # and then copy over what you can
         x = self.getaxis(self.fit_axis)
-        y = self.data
         sigma = self.get_error()
-        themin = Minimizer(
-            self.residual,
-            self.guess_parameters,
-            fcn_args=(x, y, sigma),
-        )
-        out = themin.leastsq(Dfun=self.jacobian, col_deriv=True)
+        if sigma is not None:
+            themin = Minimizer(
+                self.residual,
+                self.guess_parameters,
+            )
+        else:
+            themin = Minimizer(
+                self.residual,
+                self.guess_parameters,
+                fcn_args=(sigma,),
+            )
+        if use_jacobian:
+            out = themin.leastsq(Dfun=self.jacobian, col_deriv=True)
+        else:
+            out = themin.leastsq()
         # {{{ capture the result for ouput, etc
         self.fit_parameters = out.params
         self.fit_coeff = [out.params[j].value for j in self.parameter_names]
@@ -282,8 +290,10 @@ class lmfitdata(nddata):
             self.covariance = out.covar
         # }}}
         return self
-    def jacobian(self,pars,x,y,sigma=None): 
+    def jacobian(self,pars,sigma=None): 
         "cache the symbolic jacobian and/or use it to compute the numeric result"
+        if sigma is not None:
+            raise ValueError("Jacobian with generalized leastsq not yet supported (you have error set, so I want to do generalized)")
         if not hasattr(self,"jacobian_symbolic"):
             self.jacobian_symbolic = [sp.diff(self.expression,j,1) for j in self.parameter_symbols]
             self.jacobian_lambda = [ sp.lambdify( # equivalent of fitfunc_multiarg_v2
@@ -299,7 +309,7 @@ class lmfitdata(nddata):
             for j in self.jacobian_lambda])
         return jacobian_array
 
-    def residual(self, pars, x, y, sigma=None):
+    def residual(self, pars, sigma=None):
         "calculate the residual OR if data is None, return fake data"
         fit = self.fitfunc_multiarg_v2(
                 *(self.getaxis(j)
@@ -312,11 +322,11 @@ class lmfitdata(nddata):
             sigma[~np.isfinite(sigma)] = 1
         try:
             # as noted here: https://stackoverflow.com/questions/6949370/scipy-leastsq-dfun-usage
-            # this needs to be fit - y, not vice versa
+            # this needs to be fit - self.data, not vice versa
             if sigma is not None:
-                retval = (fit - y) / sigma * normalization
+                retval = (fit - self.data) / sigma * normalization
             else:
-                retval = fit - y
+                retval = fit - self.data
         except ValueError as e:
             raise ValueError(
                 strm(
@@ -330,7 +340,7 @@ class lmfitdata(nddata):
                 )
                 + explain_error(e)
             )
-        return retval.view(float)
+        return retval.view(float) # to deal with complex data
 
     def copy(self, **kwargs):
         namelist = []
