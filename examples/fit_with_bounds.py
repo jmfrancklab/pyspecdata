@@ -46,7 +46,9 @@ guess = newfit.eval(100)
 # }}}
 # {{{ run the fit and generate nddata
 # again, now that this is a class, why is this not handled by the fit method?
-newfit.fit()
+newfit.fit(use_jacobian=True) # True is the default -- set False to test following
+logger.info(strm("number of function evaluations:",newfit.fit_output.nfev,
+                 "(currently gives 90 when use_jacobian is False and 22 when True)"))
 # {{{plot the data with fits and guesses
 plot(mydata, "ro", label="data")
 plot(newfit.eval(100), "b", alpha=0.5, label="fit")

@@ -285,9 +285,8 @@ class lmfitdata(nddata):
         # {{{ capture the result for ouput, etc
         self.fit_parameters = out.params
         self.fit_coeff = [out.params[j].value for j in self.parameter_names]
-        assert out.success
-        if hasattr(out,'covar'):
-            self.covariance = out.covar
+        self.fit_output = out
+        assert self.fit_output.success
         # }}}
         return self
     def jacobian(self,pars,sigma=None): 
