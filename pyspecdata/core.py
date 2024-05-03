@@ -916,14 +916,14 @@ def plot(*args,**kwargs):
         ##kwargs.update({'fmt':myformat})
         linematched = False
         for linestyle in ['-','--','-.',':','None','  ']:
-            if myformat.find(linestyle) > -1:
+            if linestyle in myformat:
                 linematched = True
-                myformat.replace(linestyle,'')
+                myformat = myformat.replace(linestyle,'')
                 kwargs.update({'linestyle':linestyle})
         for markerlabel in ['o','.','d']:
-            if myformat.find(markerlabel) > -1:
+            if markerlabel in myformat:
                 if not linematched: kwargs.update({'linestyle':''})
-                myformat.replace(markerlabel,'')
+                myformat  = myformat.replace(markerlabel,'')
                 kwargs.update({'marker':markerlabel})
         if len(myformat) == 0:
             myformat = None
@@ -983,7 +983,7 @@ def plot(*args,**kwargs):
             kwargs['yerr'] = myyerror
         plotargs = [j for j in [myx,np.real(myy),myformat] if j is not None]
         try:
-            #print 'DEBUG plotting with args',plotargs,'and kwargs',kwargs,'\n\n'
+            logger.debug(strm('plotting with args',plotargs,'(myformat is',myformat,') and kwargs',kwargs))
             retval = myplotfunc(*plotargs,**kwargs)
         except Exception as e:
             raise RuntimeError(strm('error trying to plot',type(myplotfunc),'with value',myplotfunc,
@@ -4424,7 +4424,10 @@ class nddata (object):
         else:
             # from ∂φ/∂A=-i n/2A
             # when ρe(iφ)=xAⁿ
-            dangle_dA = 1/(2*self.data)
+            dangle_dA = np.empty_like(self.data)
+            mask = self.data != 0
+            dangle_dA[mask] = 1/(2*self.data[mask])
+            dangle_dA[~mask] = np.nan
             A_sigma = self.get_error()
             A_sigma = 1 if A_sigma is None else A_sigma
             retval.set_error(
