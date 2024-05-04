@@ -293,14 +293,16 @@ class lmfitdata(nddata):
         r"""Use regularized Pseudo-inverse to (partly) solve:
         :math:`-residual = f(\mathbf{p}+\Delta \mathbf{p})-f(\mathbf{p}) \approx \nabla f(\mathbf{p}) \cdot \Delta \mathbf{p}`
         """
+        print(10*'*','orig guess',self.guess_parameters)
         thejac = self.jacobian(self.guess_parameters,sigma=sigma)
         print(30*'*'+"shape of thejac",thejac.shape,
               "shape of residual",self.residual(self.guess_parameters,sigma=sigma).shape)
         # use regularized pseudo-inverse to solve
         # -resid = f(p+Δp) - f(p) ≅ ∇f(p) · Δp
-        alpha = 1
-        print('*'*20+"here is the old guess", self.guess_parameters)
         theresid = self.residual(self.guess_parameters,sigma=sigma)
+        resid_norm = np.sqrt(((theresid)**2).sum())
+        alpha = resid_norm / 1000
+        print(5*'*','alpha is',alpha)
         orig_guess = np.array([self.guess_parameters[j].value for j in
                                self.guess_parameters])
         def set_new_guess(new_guess):
@@ -311,16 +313,10 @@ class lmfitdata(nddata):
                     new_guess[j] = self.guess_parameters[k].min
                 self.guess_parameters[k].value = new_guess[j]
         set_new_guess(orig_guess - pinvr(thejac.T,alpha) @ theresid)
-        print('*'*20+"here is the new guess", self.guess_parameters)
         newresid = self.residual(self.guess_parameters,sigma=sigma)
-        delta_norm = ((newresid-theresid)**2).sum()
+        delta_norm = np.sqrt(((newresid-theresid)**2).sum())
         print(30*'*','delta norm',delta_norm)
-        alpha *= delta_norm
-        set_new_guess(orig_guess - pinvr(thejac.T,alpha) @ theresid)
-        print('*'*20+"here is the second new guess", self.guess_parameters)
-        newresid = self.residual(self.guess_parameters,sigma=sigma)
-        delta_norm = ((newresid-theresid)**2).sum()
-        print(30*'*','second delta norm',delta_norm)
+        print(10*'*','new guess',self.guess_parameters)
         return
     def jacobian(self,pars,sigma=None): 
         """cache the symbolic jacobian and/or use it to compute the numeric result

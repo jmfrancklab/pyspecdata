@@ -56,10 +56,10 @@ logger.info(strm("number of function evaluations:",newfit.fit_output.nfev,
                  "(currently gives 90 when use_jacobian is False and 22 when True)"))
 # {{{plot the data with fits and guesses
 plot(mydata, "ro", label="data")
-plot(newfit.eval(100), "b", alpha=0.5, label="fit")
-plot(guess, "--", label="guess")
+plot(newfit.eval(100), "b", alpha=0.5, lw=3, label="fit")
+plot(guess, "--", alpha=0.5, label="guess")
 if use_pinvr:
-    plot(newguess, "--", label="new guess")
+    plot(newguess, "--", alpha=0.5, lw=2, label="new guess")
 plt.gca().text(0.5, 0.75, '$'+sp.latex(newfit.functional_form)+'$',
                transform=plt.gca().transAxes)
 # }}}
