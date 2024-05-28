@@ -18,6 +18,8 @@ from pyspecdata import *
 init_logging(level="debug")
 np.random.seed(15816)
 fl = figlist_var()
+use_pinvr = False
+use_jacobian = True
 A, shift, freq, decay, x = sp.symbols("A shift freq decay x", real=True)
 # create an empty dataset that we will drop the fake data into
 thisfit = lmfitdata(nddata(r_[0:250:1500j], "x"))
@@ -35,14 +37,13 @@ mydata.add_noise(2.8)
 newfit = lmfitdata(mydata)
 newfit.functional_form = thisfit.functional_form
 newfit.set_guess(
-    A=dict(value=13.0, max=20, min=0.0),
+    A=dict(value=1.0, max=20, min=0.0),
     shift=dict(value=0.0, max=pi / 2.0, min=-pi / 2.0),
-    freq=dict(value=1/5, min=0, max=10),
+    freq=dict(value=0.5, min=0, max=10),
     decay=dict(value=0.02, max=0.10, min=0.00),
 )
 newfit.settoguess()
 guess = newfit.eval(100)
-use_pinvr = True
 if use_pinvr:
     for j in range(10):
         newfit.pinvr_step()
@@ -51,9 +52,9 @@ if use_pinvr:
 # }}}
 # {{{ run the fit and generate nddata
 # again, now that this is a class, why is this not handled by the fit method?
-newfit.fit(use_jacobian=True) # True is the default -- set False to test following
+newfit.fit(use_jacobian=use_jacobian) # True is the default -- set False to test following
 logger.info(strm("number of function evaluations:",newfit.fit_output.nfev,
-                 "(currently gives 90 when use_jacobian is False and 22 when True)"))
+                 "(currently gives 78 when use_jacobian is False and 18 when True)"))
 # {{{plot the data with fits and guesses
 plot(mydata, "ro", label="data")
 plot(newfit.eval(100), "b", alpha=0.5, lw=3, label="fit")

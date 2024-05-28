@@ -301,7 +301,7 @@ class lmfitdata(nddata):
         # -resid = f(p+Δp) - f(p) ≅ ∇f(p) · Δp
         theresid = self.residual(self.guess_parameters,sigma=sigma)
         resid_norm = np.sqrt(((theresid)**2).sum())
-        alpha = resid_norm / 1000
+        alpha = resid_norm 
         print(5*'*','alpha is',alpha)
         orig_guess = np.array([self.guess_parameters[j].value for j in
                                self.guess_parameters])

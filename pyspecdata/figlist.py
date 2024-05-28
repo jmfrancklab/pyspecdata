@@ -104,13 +104,16 @@ class figlist(object):
         file_name : str
             This is the argument passed to :func:`self.show`, and used to
             construct the file names.
+        plot_despite_error: boolean
+            Plot whether or not there is an error
         """
-        self.black, self.env, self.mlab, self.file_name, self.line_spacing = process_kwargs([
+        self.black, self.env, self.mlab, self.file_name, self.line_spacing, self._plot_despite_error = process_kwargs([
             ('black',0.9),
             ('env',''),
             ('mlab','BLANK'),
             ('file_name',f'randgen{int(time.time()*10):d}.pdf'),
             ('line_spacing','BLANK'),
+            ('plot_despite_error',False),
             ],
                 kwargs, pass_through=True)
         if len(kwargs) > 0:
@@ -731,8 +734,11 @@ class figlist(object):
         '''
         if self._print_at_end: print(self)
         if exception_type is not None:
-            print("I caught an error but am plotting anyways")
-            print('-'*30)
+            if self._plot_despite_error:
+                print("I caught an error but am plotting anyways")
+                print('-'*30)
+            else:
+                return
         if hasattr(self,'file_name'):
             if hasattr(self,'line_spacing'):
                 self.show(self.file_name,line_spacing = self.line_spacing)
