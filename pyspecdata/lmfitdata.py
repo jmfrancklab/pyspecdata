@@ -9,6 +9,14 @@ import logging, warnings
 from copy import deepcopy
 
 
+# Define a numpy-compatible DiracDelta approximation
+def dirac_delta_approx(x, epsilon=1e-6):
+    return np.exp(-x**2 / (2 * epsilon**2)) / (epsilon * np.sqrt(2 * np.pi))
+sympy_module_arg = [{"ImmutableMatrix": np.ndarray,
+                      "DiracDelta": dirac_delta_approx,
+                      "Heaviside": np.heaviside,
+                      }, "numpy", "scipy"]
+
 class lmfitdata(nddata):
     r"""Inherits from an nddata and enables curve fitting through use of a sympy expression.
 
@@ -102,7 +110,7 @@ class lmfitdata(nddata):
         self.fitfunc_multiarg_v2 = sp.lambdify(
             self.variable_symbols + self.parameter_symbols,
             self.expression,
-            modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
+            modules=sympy_module_arg,
         )
 
         self.guess_parameters = Parameters()
@@ -334,7 +342,7 @@ class lmfitdata(nddata):
             self.jacobian_lambda = [ sp.lambdify( # equivalent of fitfunc_multiarg_v2
                 self.variable_symbols + self.parameter_symbols,
                 j,
-                modules=[{"ImmutableMatrix": np.ndarray}, "numpy", "scipy"],
+                modules=sympy_module_arg,
                 ) for j in self.jacobian_symbolic ]
         jacobian_array = np.array([
             j(
