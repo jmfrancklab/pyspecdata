@@ -9,13 +9,37 @@ import logging, warnings
 from copy import deepcopy
 
 
+# {{{ functions and modules
 # Define a numpy-compatible DiracDelta approximation
 def dirac_delta_approx(x, epsilon=1e-6):
     return np.exp(-x**2 / (2 * epsilon**2)) / (epsilon * np.sqrt(2 * np.pi))
+# Define the Heaviside function with Heaviside(0) = 0.5
+def heaviside(x):
+    return np.where(x > 0, 1.0, np.where(x < 0, 0.0, 0.5))
+# Define the finite difference derivative of the Heaviside function
+def finite_difference_heaviside_derivative(x):
+    if not np.allclose(np.diff(x), np.diff(x)[0]):
+        raise ValueError("x should be uniformly spaced")
+    mid_idx = np.searchsorted(x, 0)  # Find index where x crosses zero
+    dx = x[1] - x[0]  # Spacing between points
+    # Calculate weights
+    if x[mid_idx - 1] < 0 and x[mid_idx] > 0:
+        d1 = -x[mid_idx - 1] / dx
+        d2 = x[mid_idx] / dx
+        weights = np.zeros_like(x)
+        weights[mid_idx - 1] = d2
+        weights[mid_idx] = d1
+    elif x[mid_idx] == 0:
+        weights = np.zeros_like(x)
+        weights[mid_idx] = 1.0
+    else:
+        weights = np.zeros_like(x)
+    return weights
 sympy_module_arg = [{"ImmutableMatrix": np.ndarray,
-                      "DiracDelta": dirac_delta_approx,
+                      "DiracDelta": finite_difference_heaviside_derivative,
                       "Heaviside": np.heaviside,
                       }, "numpy", "scipy"]
+# }}}
 
 class lmfitdata(nddata):
     r"""Inherits from an nddata and enables curve fitting through use of a sympy expression.
