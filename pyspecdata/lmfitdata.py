@@ -55,6 +55,7 @@ class lmfitdata(nddata):
 
     def __init__(self, *args, **kwargs):
         # copied from fitdata
+        self.residual_transform = None # if this is not set to None, we transform before taking the residual or eval
         fit_axis = None
         if "fit_axis" in list(kwargs.keys()):
             fit_axis = kwargs.pop("fit_axis")
@@ -209,6 +210,7 @@ class lmfitdata(nddata):
         if taxis is None:
             taxis = self.getaxis(self.fit_axis).copy()
         elif isinstance(taxis, int):
+            print("taxis is",taxis,"fit axis is",self.fit_axis,"out of",self.dimlabels,self.axis_coords)
             taxis = np.linspace(
                 self.getaxis(self.fit_axis).min(),
                 self.getaxis(self.fit_axis).max(),
@@ -232,10 +234,11 @@ class lmfitdata(nddata):
         self: nddata
             the fit function evaluated along the axis coordinates that were passed
         """
-        if taxis is None:
-            taxis = self.getaxis(self.fit_axis)
-        else:
-            taxis = self._taxis(taxis)
+        logging.info(str(self.getaxis(self.fit_axis)))
+        fit_axn = self.axn(self.fit_axis)
+        logging.info(str(self.getaxis(self.fit_axis)))
+        taxis = self._taxis(taxis)
+        logging.info(str(self.getaxis(self.fit_axis)))
         if hasattr(self, "fit_coeff") and self.fit_coeff is not None:
             p = self.fit_coeff.copy()
             # here you see that fit_coeff stores the coefficients that
@@ -254,8 +257,8 @@ class lmfitdata(nddata):
         newdata.set_plot_color(self.get_plot_color())
         # }}}
         # {{{keep all axis labels the same, except the expanded one
-        newdata.axis_coords = list(newdata.axis_coords)
-        newdata.labels([self.fit_axis], list([taxis]))
+        newdata.axis_coords = [taxis if j == fit_axn else c.copy()
+                               for j,c in enumerate(newdata.axis_coords)]
         if self.get_units(self.fit_axis) is not None:
             newdata.set_units(self.fit_axis,
                     self.get_units(self.fit_axis))
@@ -281,8 +284,8 @@ class lmfitdata(nddata):
                     tuple(self.fit_coeff))
                 ).flatten()
         newdata.name(str(self.name()))
-        return newdata
-
+        return (newdata if self.residual_transform is None
+                else self.residual_transform(newdata))
     def fit(self, use_jacobian=True):
         r"""actually run the fit"""
         # we can ignore set_what, since I think there's a mechanism in
@@ -369,10 +372,10 @@ class lmfitdata(nddata):
                 modules=sympy_module_arg,
                 ) for j in self.jacobian_symbolic ]
         jacobian_array = np.array([
-            j(
+            self._apply_residual_transform(j(
                 *(self.getaxis(k)
                   for k in self.variable_names),
-                **pars.valuesdict()) # function elements on the outside, so parameters can go on the inside
+                **pars.valuesdict())) # function elements on the outside, so parameters can go on the inside
             for j in self.jacobian_lambda])
         if np.issubdtype(self.data.dtype, np.complexfloating) and not np.issubdtype(jacobian_array.dtype, np.complexfloating):
             if self.data.dtype == np.complex64:
@@ -382,7 +385,47 @@ class lmfitdata(nddata):
             else:
                 raise ValueError("I don't understand the dtype",self.data.dtype)
         return jacobian_array.view(float)
+    @property
+    def transformed_data(self):
+        """If we do something like fit a lorentzian or voigt lineshape,
+        it makes more sense to define our fit function in the time domain,
+        but to calculate the residuals and to evaluate in the frequency
+        domain.
+        Therefore, we define a function `self.residual_transform` that
+        accepts an nddata, and defines how the data is manipulated to move
+        into the (e.g. frequency) residual domain.
 
+        Returns
+        =======
+        retval: ndarray
+            just return the ndarray
+        """
+        if (self.residual_transform is not None):
+            if not hasattr(self,'_transformed_data'):
+                self._transformed_data = self.residual_transform(self.C)
+            return self._transformed_data.data
+        else:
+            return self.data
+    def _apply_residual_transform(self,fit):
+        """if relevant, apply the residual transform
+
+        Parameters
+        ==========
+        fit: ndarray
+            an ndarray of the right shape for the fit data
+
+        Returns
+        =======
+        retval: ndarray
+            just return the ndarray that has been transformed (using full
+            nddata ft rules)
+        """
+        if self.residual_transform is not None:
+            temp = self.copy(data=False)
+            temp.data = fit
+            temp = self.residual_transform(temp)
+            fit = temp.data
+        return fit
     def residual(self, pars, sigma=None):
         "calculate the residual OR if data is None, return fake data"
         fit = self.fitfunc_multiarg_v2(
@@ -390,6 +433,7 @@ class lmfitdata(nddata):
                     for j in
                     self.variable_names),
                 **pars.valuesdict())
+        fit = self._apply_residual_transform(fit)
         if sigma is not None:
             normalization = np.sum(1.0 / sigma[np.logical_and(sigma != 0.0, np.isfinite(sigma))])
             sigma[sigma == 0.0] = 1
@@ -398,9 +442,9 @@ class lmfitdata(nddata):
             # as noted here: https://stackoverflow.com/questions/6949370/scipy-leastsq-dfun-usage
             # this needs to be fit - self.data, not vice versa
             if sigma is not None:
-                retval = (fit - self.data) / sigma * normalization
+                retval = (fit - self.transformed_data) / sigma * normalization
             else:
-                retval = fit - self.data
+                retval = fit - self.transformed_data
         except ValueError as e:
             raise ValueError(
                 strm(
@@ -415,7 +459,6 @@ class lmfitdata(nddata):
                 + explain_error(e)
             )
         return retval.view(float) # to deal with complex data
-
     def copy(self, **kwargs):
         namelist = []
         vallist = []

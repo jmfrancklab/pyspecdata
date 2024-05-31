@@ -35,7 +35,9 @@ mydata.add_noise(2.8)
 # }}}
 # {{{Making guess data
 newfit = lmfitdata(mydata)
+logger.info(str(newfit.getaxis(newfit.fit_axis)))
 newfit.functional_form = thisfit.functional_form
+logger.info(str(newfit.getaxis(newfit.fit_axis)))
 newfit.set_guess(
     A=dict(value=1.0, max=20, min=0.0),
     shift=dict(value=0.0, max=pi / 2.0, min=-pi / 2.0),
@@ -43,6 +45,7 @@ newfit.set_guess(
     decay=dict(value=0.02, max=0.10, min=0.00),
 )
 newfit.settoguess()
+logger.info(str(newfit.getaxis(newfit.fit_axis)))
 guess = newfit.eval(100)
 if use_pinvr:
     for j in range(10):

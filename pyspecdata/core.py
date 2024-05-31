@@ -4480,7 +4480,9 @@ class nddata (object):
             nddata metadata.
         '''
         if data:
-            return deepcopy(self)
+            retval = deepcopy(self)
+            retval.other_info = deepcopy(self.other_info)
+            return retval
         else:
             retval =  nddata(0) # np.empty
             # {{{ data info
