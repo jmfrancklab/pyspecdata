@@ -257,8 +257,9 @@ class lmfitdata(nddata):
         newdata.set_plot_color(self.get_plot_color())
         # }}}
         # {{{keep all axis labels the same, except the expanded one
-        newdata.axis_coords = [taxis if j == fit_axn else c.copy()
-                               for j,c in enumerate(newdata.axis_coords)]
+        newdata.axis_coords = [taxis if j == fit_axn else
+                               self.getaxis(c).copy()
+                               for j,c in enumerate(newdata.dimlabels)]
         if self.get_units(self.fit_axis) is not None:
             newdata.set_units(self.fit_axis,
                     self.get_units(self.fit_axis))

@@ -35,9 +35,8 @@ mydata.add_noise(2.8)
 # }}}
 # {{{Making guess data
 newfit = lmfitdata(mydata)
-logger.info(str(newfit.getaxis(newfit.fit_axis)))
 newfit.functional_form = thisfit.functional_form
-logger.info(str(newfit.getaxis(newfit.fit_axis)))
+logger.info(strm(newfit.fit_axis,newfit.getaxis(newfit.fit_axis)))
 newfit.set_guess(
     A=dict(value=1.0, max=20, min=0.0),
     shift=dict(value=0.0, max=pi / 2.0, min=-pi / 2.0),
