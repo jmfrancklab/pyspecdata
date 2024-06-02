@@ -210,7 +210,6 @@ class lmfitdata(nddata):
         if taxis is None:
             taxis = self.getaxis(self.fit_axis).copy()
         elif isinstance(taxis, int):
-            print("taxis is",taxis,"fit axis is",self.fit_axis,"out of",self.dimlabels,self.axis_coords)
             taxis = np.linspace(
                 self.getaxis(self.fit_axis).min(),
                 self.getaxis(self.fit_axis).max(),
@@ -234,11 +233,8 @@ class lmfitdata(nddata):
         self: nddata
             the fit function evaluated along the axis coordinates that were passed
         """
-        logging.info(str(self.getaxis(self.fit_axis)))
         fit_axn = self.axn(self.fit_axis)
-        logging.info(str(self.getaxis(self.fit_axis)))
         taxis = self._taxis(taxis)
-        logging.info(str(self.getaxis(self.fit_axis)))
         if hasattr(self, "fit_coeff") and self.fit_coeff is not None:
             p = self.fit_coeff.copy()
             # here you see that fit_coeff stores the coefficients that
