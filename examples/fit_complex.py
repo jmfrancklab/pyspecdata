@@ -18,8 +18,10 @@ np.random.seed(15816)
 A, R, nu, t = sp.symbols("A R nu t", real=True)
 # create an empty dataset that we will drop the fake data into
 thisfit = lmfitdata(nddata(r_[-1:1:1001j], "t"))
-thisfit.functional_form = A * sp.exp(-1j*2*pi*nu*t) * sp.exp(-R*sp.pi*abs(t))
-only_real = False # if you set this to True, it previously worked -- this
+thisfit.functional_form = (
+    A * sp.exp(-1j * 2 * pi * nu * t) * sp.exp(-R * sp.pi * abs(t))
+)
+only_real = False  # if you set this to True, it previously worked -- this
 #                   example demonstrates that this also works when set to False
 if only_real:
     thisfit.functional_form = sp.re(thisfit.functional_form)
@@ -51,13 +53,13 @@ plt.subplot(211)
 plot(mydata, "r", label="data")
 plot(newfit.eval(), "b", alpha=0.5, label="fit")
 plot(guess, "g--", label="guess")
-plt.ylabel('real components')
+plt.ylabel("real components")
 plt.legend()
 plt.subplot(212)
 plot(mydata.imag, "r", label="data")
 plot(newfit.eval().imag, "b", alpha=0.5, label="fit")
 plot(guess.imag, "g--", label="guess")
-plt.ylabel('imag components')
+plt.ylabel("imag components")
 plt.legend()
 # }}}
 plt.show()
