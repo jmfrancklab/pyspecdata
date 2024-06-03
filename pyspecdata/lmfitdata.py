@@ -251,6 +251,7 @@ class lmfitdata(nddata):
         newdata[self.fit_axis] = np.size(taxis)
         newdata = newdata.alloc()
         newdata.set_plot_color(self.get_plot_color())
+        newdata.copy_props(self)
         # }}}
         # {{{keep all axis labels the same, except the expanded one
         newdata.axis_coords = [taxis if j == fit_axn else
@@ -281,6 +282,7 @@ class lmfitdata(nddata):
                     tuple(self.fit_coeff))
                 ).flatten()
         newdata.name(str(self.name()))
+        logging.info(strm("Is residual transform none?",self.residual_transform is None))
         return (newdata if self.residual_transform is None
                 else self.residual_transform(newdata))
     def fit(self, use_jacobian=True):

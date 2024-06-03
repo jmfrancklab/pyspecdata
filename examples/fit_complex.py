@@ -15,7 +15,6 @@ from pyspecdata import *
 
 init_logging(level="debug")
 np.random.seed(15816)
-fl = figlist_var()
 A, R, nu, t = sp.symbols("A R nu t", real=True)
 # create an empty dataset that we will drop the fake data into
 thisfit = lmfitdata(nddata(r_[-1:1:1001j], "t"))
