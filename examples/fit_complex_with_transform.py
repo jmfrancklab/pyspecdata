@@ -20,6 +20,7 @@ from pyspecdata import *
 # initialize logging and set a seed so this runs the same every time
 init_logging(level="debug")
 np.random.seed(15816)
+A, R, nu, t = sp.symbols("A R nu t", real=True)
 # {{{ create an empty dataset and drop the fake data into it
 thisfit = lmfitdata(nddata(r_[-1:1:1001j], "t"))
 
@@ -30,7 +31,6 @@ def my_residual_transform(d):
 
 
 # thisfit.residual_transform = my_residual_transform
-A, R, nu, t = sp.symbols("A R nu t", real=True)
 thisfit.functional_form = (
     A * sp.exp(-1j * 2 * pi * nu * t) * sp.exp(-R * sp.pi * abs(t))
 )

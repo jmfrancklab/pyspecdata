@@ -21,11 +21,11 @@ thisfit = lmfitdata(nddata(r_[-1:1:1001j], "t"))
 thisfit.functional_form = (
     A * sp.exp(-1j * 2 * pi * nu * t) * sp.exp(-R * sp.pi * abs(t))
 )
+logger.info(strm("Functional Form:", thisfit.functional_form))
 only_real = False  # if you set this to True, it previously worked -- this
 #                   example demonstrates that this also works when set to False
 if only_real:
     thisfit.functional_form = sp.re(thisfit.functional_form)
-logger.info(strm("Functional Form:", thisfit.functional_form))
 # {{{ create the "true" parameters for the fake data by pretending like
 #     the true values are a guess, and then outputting the guess data
 true_values = {"A": 14.0, "R": 10, "nu": 25}
