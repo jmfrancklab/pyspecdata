@@ -30,7 +30,7 @@ def my_residual_transform(d):
     return d
 
 
-# thisfit.residual_transform = my_residual_transform
+thisfit.residual_transform = my_residual_transform
 thisfit.functional_form = (
     A * sp.exp(-1j * 2 * pi * nu * t) * sp.exp(-R * sp.pi * abs(t))
 )
@@ -57,16 +57,19 @@ fig, (ax1, ax2) = plt.subplots(2, 1)
 plot(mydata, "r", label="data", ax=ax1)
 plot(mydata.imag, "r", label="data", ax=ax2)
 # }}}
-# {{{ Making guess data
-newfit = lmfitdata(nddata(r_[-1:1:1001j], "t"))
+# {{{ set up the fit object using the "simulated" data
+#     here we need to IFT, since "eval" above generates
+#     in the frequency domain
+newfit = lmfitdata(mydata.C.ift('t'))
 newfit.functional_form = thisfit.functional_form
 newfit.set_guess(
     A=dict(value=13.0, max=20, min=0.0),
     R=dict(value=3, max=1000, min=0),
     nu=dict(value=20),
 )
-# newfit.residual_transform = my_residual_transform
-newfit.ft("t", shift=True).ift("t")
+newfit.residual_transform = my_residual_transform
+# }}}
+# {{{ show the guess
 guess = newfit.settoguess().eval()
 plot(guess, "g--", label="guess", ax=ax1)
 plot(guess.imag, "g--", label="guess", ax=ax2)
