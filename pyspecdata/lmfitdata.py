@@ -282,7 +282,7 @@ class lmfitdata(nddata):
                     tuple(self.fit_coeff))
                 ).flatten()
         newdata.name(str(self.name()))
-        logging.info(strm("Is residual transform none?",self.residual_transform is None))
+        logging.debug(strm("Is residual transform none?",self.residual_transform is None))
         return (newdata if self.residual_transform is None
                 else self.residual_transform(newdata))
     def fit(self, use_jacobian=True):
