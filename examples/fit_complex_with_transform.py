@@ -53,14 +53,17 @@ thisfit.ft("t", shift=True).ift("t")
 # }}}
 mydata = thisfit.settoguess().eval()
 mydata.add_noise(0.01)
-fig, (ax1, ax2) = plt.subplots(2, 1)
+fig, ((ax3, ax1), (ax4, ax2)) = plt.subplots(2, 2)
 plot(mydata, "r", label="data", ax=ax1)
 plot(mydata.imag, "r", label="data", ax=ax2)
+mydata.ift('t')
+plot(mydata, "r", label="data", ax=ax3)
+plot(mydata.imag, "r", label="data", ax=ax4)
 # }}}
 # {{{ set up the fit object using the "simulated" data
-#     here we need to IFT, since "eval" above generates
-#     in the frequency domain
-newfit = lmfitdata(mydata.C.ift('t'))
+#     here we need to IFT above, since "eval" above
+#     generates in the frequency domain
+newfit = lmfitdata(mydata.C)
 newfit.functional_form = thisfit.functional_form
 newfit.set_guess(
     A=dict(value=13.0, max=20, min=0.0),
@@ -73,12 +76,18 @@ newfit.residual_transform = my_residual_transform
 guess = newfit.settoguess().eval()
 plot(guess, "g--", label="guess", ax=ax1)
 plot(guess.imag, "g--", label="guess", ax=ax2)
+guess.ift('t')
+plot(guess, "g--", label="guess", ax=ax3)
+plot(guess.imag, "g--", label="guess", ax=ax4)
 # }}}
 # {{{ run the fit and generate nddata
 newfit.fit()
 plotdata = newfit.eval()
 plot(plotdata, "b", alpha=0.5, label="fit", ax=ax1)
 plot(plotdata.imag, "b", alpha=0.5, label="fit", ax=ax2)
+plotdata.ift('t')
+plot(plotdata, "b", alpha=0.5, label="fit", ax=ax3)
+plot(plotdata.imag, "b", alpha=0.5, label="fit", ax=ax4)
 # }}}
 ax1.set_ylabel("real components")
 ax2.set_ylabel("imag components")
