@@ -17,24 +17,43 @@ def dirac_delta_approx(x, epsilon=1e-6):
 def heaviside(x):
     return np.where(x > 0, 1.0, np.where(x < 0, 0.0, 0.5))
 # Define the finite difference derivative of the Heaviside function
-def finite_difference_heaviside_derivative(x):
+def finite_difference_heaviside_derivative(x, k=0):
     if not np.allclose(np.diff(x), np.diff(x)[0]):
         raise ValueError("x should be uniformly spaced")
-    mid_idx = np.searchsorted(x, 0)  # Find index where x crosses zero
     dx = x[1] - x[0]  # Spacing between points
-    # Calculate weights
-    if x[mid_idx - 1] < 0 and x[mid_idx] > 0:
-        d1 = -x[mid_idx - 1] / dx
-        d2 = x[mid_idx] / dx
-        weights = np.zeros_like(x)
-        weights[mid_idx - 1] = d2
-        weights[mid_idx] = d1
-    elif x[mid_idx] == 0:
-        weights = np.zeros_like(x)
-        weights[mid_idx] = 1.0
+    crossing_idx = np.searchsorted(x, 0)  # Find index where x crosses zero
+    # {{{ find the index closest to zero
+    if abs(x[crossing_idx]) > abs(x[crossing_idx-1]):
+        idx = crossing_idx-1
     else:
+        idx = crossing_idx
+    # }}}
+    if k == 0:
         weights = np.zeros_like(x)
-    return weights
+        weights[idx] = 1.0
+        return weights
+        #mid_idx = np.searchsorted(x, 0)  # Find index where x crosses zero
+        ## Calculate weights
+        #if x[mid_idx - 1] < 0 and x[mid_idx] > 0:
+        #    d1 = -x[mid_idx - 1] / dx
+        #    d2 = x[mid_idx] / dx
+        #    weights = np.zeros_like(x)
+        #    weights[mid_idx - 1] = d2
+        #    weights[mid_idx] = d1
+        #elif x[mid_idx] == 0:
+        #    weights = np.zeros_like(x)
+        #    weights[mid_idx] = 1.0
+        #else:
+        #    weights = np.zeros_like(x)
+        #return weights
+    elif k == 1:
+        # this is a derivative
+        weights = np.zeros_like(x)
+        weights[idx-1] = 1/dx # go up by 1 when integrated
+        weights[idx+1] = -1/dx # go back down by 1 when integrated
+        return weights
+    if k > 1:
+        raise ValueError("second derivatives not supported")
 sympy_module_arg = [{"ImmutableMatrix": np.ndarray,
                       "DiracDelta": finite_difference_heaviside_derivative,
                       "Heaviside": np.heaviside,
