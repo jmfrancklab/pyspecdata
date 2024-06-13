@@ -58,5 +58,6 @@ def pcolormesh(self, fig=None, shading='nearest',ax1=None,ax2=None,ax=None, scal
     for j,(thisax, thisfun, thislabel) in enumerate(ax_list):
         if not scale_independently:
             mappable_list[j].set_clim(np.min(vmin_list),np.max(vmax_list))
-        cbar = plt.colorbar(mappable=mappable_list[j], ax=thisax)
+        if scale_independently or j>0:
+            cbar = plt.colorbar(mappable=mappable_list[j], ax=thisax)
     return
