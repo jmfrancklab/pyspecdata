@@ -13,9 +13,9 @@ class CachedAttribute(object):
         self.name = name or method.__name__
         self.__doc__ = method.__doc__
     def __get__(self, inst, cls):
-        # self: <__main__.cache object at 0xb781340c>
-        # inst: <__main__.Foo object at 0xb781348c>
-        # cls: <class '__main__.Foo'>       
+        # self: CachedAttribute instance
+        # inst: the instance of the "owner" class -- here nddata_placeholder
+        # cls: the "owner" class definition
         if inst is None:
             # instance attribute accessed on class, return self
             # You get here if you write `Foo.bar`
@@ -24,6 +24,8 @@ class CachedAttribute(object):
         result = self.method(inst)
         # setattr redefines the instance's attribute so this doesn't get called again
         setattr(inst, self.name, result)
+        inst._followup(inst)
+        del inst._followup
         return result
 
 class nddata_placeholder(nddata):
@@ -37,6 +39,15 @@ class nddata_placeholder(nddata):
     """
     def __init__(self,_data_hook):
         self._data_hook = _data_hook
+        # generate the following list from .copy(
+        self.dimlabels = []
+        self.axis_coords = []
+        self.axis_coords_error = []
+        self.axis_coords_units = []
+        self.data_units = None
+        self.data_error = None
+        self.other_info = {}
     @CachedAttribute
     def data(self):
-        return self._data_hook()
+        self._followup,retval = self._data_hook()
+        return retval
