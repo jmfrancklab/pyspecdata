@@ -2961,13 +2961,16 @@ class nddata (object):
             isft = False
         if is_axis:
             yunits = self.units_texsafe(axis_name)
-            ph_re = re.compile('^ph([0-9])')
+            ph_re = re.compile('^ph([0-9]|_.*)')
             m = ph_re.match(axis_name)
             if m:
+                first_group = m.groups()[0]
+                if first_group.startswith('_'):
+                    first_group = first_group[1:]
                 if isft:
-                    axis_name = '$\\Delta p_%s$'%m.groups()[0]
+                    axis_name = '$\\Delta p_%s$'%first_group
                 else:
-                    axis_name = '$\\varphi_%s$'%m.groups()[0]
+                    axis_name = '$\\varphi_%s$'%first_group
             else:
                 auto_underscore = re.compile('^([a-z]+)([0-9])')
                 m = auto_underscore.match(axis_name)

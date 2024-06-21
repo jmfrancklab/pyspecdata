@@ -120,6 +120,22 @@ class ndshape_base ():
         return self
     def __repr__(self): #how it responds to print
         return list(zip(self.shape,self.dimlabels)).__repr__()
+    def __iter__(self):
+        self._index = 0
+        return self
+    def max(self):
+        idx = np.argmax(self.shape)
+        return self.dimlabels[idx]
+    def min(self):
+        idx = np.argmin(self.shape)
+        return self.dimlabels[idx]
+    def __next__(self):
+        if self._index < len(self.shape):
+            k,v = self.dimlabels[self._index],self.shape[self._index]
+            self._index += 1
+            return k,v
+        else:
+            raise StopIteration
     def __getitem__(self,args):
         try:
             mydict = dict(list(zip(self.dimlabels,self.shape)))

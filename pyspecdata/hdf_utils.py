@@ -275,7 +275,7 @@ def h5nodebypath(h5path,force = False,only_lowest = False,check_only = False,dir
                 logger.debug(strm("searching for node path: got caught searching for node",h5path[pathlevel]))
                 h5file.close()
                 #print lsafen("DEBUG: Yes, I closed the file")
-                raise IndexError(strm('Problem trying to load node ',h5path,explain_error(e)))
+                raise IndexError(strm('Problem trying to load node ',h5path))
             #}}}
     return h5file,currentnode
 def h5attachattributes(node,listofattributes,myvalues):
