@@ -298,6 +298,8 @@ def find_file(searchstring,
                 logger.debug('this file was postprocessed successfully')
             else:
                 logger.debug('postprocessing not defined for file with postproc_type %s --> it should be defined in the postproc_type dictionary in load_files.__init__.py'+postproc_type)
+                if len(lookup) > 0:
+                    raise ValueError("You passed me a lookup argument, which implies that you think there is a defined postprocessing function for this data, which has postproc_type="+postproc_type+", but I'm not finding a postproc function for that in the lookup dictionary that you provided me with")
             assert len(kwargs) == 0, ("there must be no keyword arguments left, "
                     "because you're done postprocessing (you have %s) "%str(kwargs)
                     +"-- the postproc function should pop the keys from the dictionary after use")
