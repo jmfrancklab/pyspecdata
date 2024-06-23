@@ -288,6 +288,8 @@ def find_file(searchstring,
         else:
             postproc_type = postproc
         if postproc_type is None:
+            if len(lookup) > 0:
+                raise ValueError("You passed me a lookup argument, which implies that you think there is a defined postprocessing function for this data, but it seems that your pulse sequence script is broken and doesn't set postproc_type!!!")
             logger.debug("got a postproc_type value of None")
             assert len(kwargs) == 0, "there must be no keyword arguments left, because you're done postprocessing (you have %s)"%str(kwargs)
             return data
