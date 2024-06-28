@@ -1,7 +1,7 @@
 from ..general_functions import *
 import matplotlib.pylab as plt
 import logging
-def pcolormesh(self, fig=None, shading='nearest',ax1=None,ax2=None,ax=None, scale_independently=False):
+def pcolormesh(self, fig=None, shading='nearest',ax1=None,ax2=None,ax=None, scale_independently=False, human_units=True):
     """generate a pcolormesh and label it with the axis coordinate available from the nddata
 
     Parameters
@@ -23,9 +23,13 @@ def pcolormesh(self, fig=None, shading='nearest',ax1=None,ax2=None,ax=None, scal
     """
     assert len(self.dimlabels) == 2, "currently, this only supports 2D data"
     is_complex = False
+    if human_units:
+        forplot = self.C.human_units()
+    else:
+        forplot = self.C
     if ax is not None:
         ax1 = ax
-    if self.data.dtype == plt.complex128:
+    if forplot.data.dtype == plt.complex128:
         if ax1 is None:
             fig = plt.gcf()
             ax1 = fig.add_subplot(1,2,1)
@@ -37,9 +41,9 @@ def pcolormesh(self, fig=None, shading='nearest',ax1=None,ax2=None,ax=None, scal
             ax1 = fig.add_subplot(1,1,1)
         ax_list = [(ax1,lambda x: x.real,'real')]
     X,Y = np.meshgrid(
-            self.getaxis(self.dimlabels[1]),
-            self.getaxis(self.dimlabels[0]))
-    Z = self.data
+            forplot.getaxis(forplot.dimlabels[1]),
+            forplot.getaxis(forplot.dimlabels[0]))
+    Z = forplot.data
     # {{{ store these so that I can set the color scale for the plots together,
     #     at the end
     vmin_list = []
@@ -52,8 +56,8 @@ def pcolormesh(self, fig=None, shading='nearest',ax1=None,ax2=None,ax=None, scal
         vmax_list.append(Zdata.max())
         mappable = thisax.pcolormesh(X,Y,Zdata,shading=shading)
         mappable_list.append(mappable)
-        thisax.set_ylabel(self.unitify_axis(self.dimlabels[0]))
-        thisax.set_xlabel(self.unitify_axis(self.dimlabels[1]))
+        thisax.set_ylabel(forplot.unitify_axis(forplot.dimlabels[0]))
+        thisax.set_xlabel(forplot.unitify_axis(forplot.dimlabels[1]))
         thisax.set_title(f"({thislabel})")
     for j,(thisax, thisfun, thislabel) in enumerate(ax_list):
         if not scale_independently:
