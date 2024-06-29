@@ -98,7 +98,8 @@ def h5child(thisnode,childname,clear = False,create = None):
             childnode = None
     except tables.NoSuchNodeError as e:
         if create is False and not clear:
-            raise RuntimeError('Trying to grab a node that does not exist with create = False')
+            top_level_node_names = [node._v_name for node in h5file.list_nodes('/')]
+            raise RuntimeError('Trying to grab a node that does not exist with create = False.\nHere are the nodes available:'+str(top_level_node_names))
         elif clear:
             childnode = None
         else:
