@@ -2397,6 +2397,8 @@ class nddata (object):
             dt = self.get_ft_prop(axis,'df')
         else:
             dt = self.get_ft_prop(axis,'dt')
+        if dt is None:
+            dt = np.diff(self[axis][r_[0,-1]]).item()/len(self[axis])
         A = self[axis,1:]
         B = self[axis,:-1]
         if return_error:

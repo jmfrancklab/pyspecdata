@@ -14,11 +14,16 @@ Basic demonstration of pcolor, which can deal with unevenly spaced data
 
 import pyspecdata as psp
 import matplotlib.pylab as plt
-from numpy import r_, newaxis
+from numpy import r_
 
 x = psp.nddata(r_[-5, -2, -1, -0.5, 0, 0.5, 5], "x")
 y = psp.nddata(3 * r_[-5, -2, -1, -0.5, 0, 0.5, 5], "y")
 z = plt.exp(-((y - 2) ** 2) - (x - 0) ** 2 / 2) + 1j * x
+plt.figure()
+plt.suptitle("colorscales dependent")
 z.dimlabels
 z.pcolor()
+plt.figure()
+plt.suptitle("colorscales independent")
+z.pcolor(scale_independently=True)
 plt.show()

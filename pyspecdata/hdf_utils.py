@@ -252,6 +252,7 @@ def h5nodebypath(h5path,force = False,only_lowest = False,check_only = False,dir
         raise IOError('I think the HDF5 file has not been created yet, and there is a bug pytables that makes it freak out, but you can just run again.'+explain_error(e))
     #}}}
     currentnode = h5file.get_node('/') # open the root node
+    toplevel_children = ' '.join(currentnode._v_children)
     logger.debug(strm("I have grabbe node",currentnode,"of file",h5file,'ready to step down search path'))
     for pathlevel in range(1,len(h5path)):#{{{ step down the path
             clear = False
@@ -276,7 +277,7 @@ def h5nodebypath(h5path,force = False,only_lowest = False,check_only = False,dir
                 logger.debug(strm("searching for node path: got caught searching for node",h5path[pathlevel]))
                 h5file.close()
                 #print lsafen("DEBUG: Yes, I closed the file")
-                raise IndexError(strm('Problem trying to load node ',h5path))
+                raise IndexError(strm('Problem trying to load node ',h5path,' these are the top level nodes ',toplevel_children))
             #}}}
     return h5file,currentnode
 def h5attachattributes(node,listofattributes,myvalues):
