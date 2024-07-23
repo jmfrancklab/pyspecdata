@@ -7538,9 +7538,7 @@ class nddata_hdf5(nddata):
                     )
                 recordarrayofaxis = datadict["axes"][axisname]["data"]
                 if "axis_coords_units" in datadict["axes"][axisname].keys():
-                    myaxis_units[axisnumber] = datadict["axes"][axisname].__getitem__("axis_coords_units")
-                else:
-                    myaxis_units[axisnumber] = None
+                    myaxis_units[axisnumber] = datadict["axes"][axisname]["axis_coords_units"]
                 myaxiscoords[axisnumber] = recordarrayofaxis["data"]
                 if "error" in recordarrayofaxis.dtype.names:
                     myaxiscoordserror[axisnumber] = recordarrayofaxis["error"]
