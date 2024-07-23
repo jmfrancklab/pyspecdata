@@ -4387,7 +4387,10 @@ class nddata (object):
             # for now, just hack this -- later we should also have a dictionary
             # of functions that gives the derivatives, so that we can use that
             # for error propagation
-            return psd_sqrt(self)
+            def retfun():
+                retval = self.copy()
+                return psd_sqrt(retval)
+            return retfun
         elif arg == 'isfortran':
             raise ValueError("you tried to call isfortran on an nddata object --"
             " this probably means you're doing something wrong -- possibly that"
