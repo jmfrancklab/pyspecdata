@@ -69,7 +69,6 @@ import atexit
 import matplotlib
 import matplotlib.transforms as mtransforms
 from distutils.version import LooseVersion
-from numpy import sqrt as np_sqrt
 from numpy.lib.recfunctions import rename_fields, drop_fields
 from mpl_toolkits.mplot3d import axes3d
 from matplotlib.collections import PolyCollection
@@ -319,7 +318,7 @@ def psd_sqrt(arg):
     elif isinstance(arg, sympy_symbol):
         return sympy_sqrt(arg)
     else:
-        return np_sqrt(arg)
+        return np.sqrt(arg)
 
 
 # {{{ function trickery
