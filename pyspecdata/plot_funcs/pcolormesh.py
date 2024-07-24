@@ -1,4 +1,5 @@
 import matplotlib.pylab as plt
+<<<<<<< HEAD
 import numpy as np
 
 
@@ -13,6 +14,24 @@ def pcolormesh(
     human_units=True,
     force_balanced_cmap=False,
 ):
+||||||| b2b39436
+import logging
+def pcolormesh(self, fig=None, shading='nearest',ax1=None,ax2=None,ax=None, scale_independently=False, human_units=True):
+=======
+import logging
+
+
+def pcolormesh(
+    self,
+    fig=None,
+    shading="nearest",
+    ax1=None,
+    ax2=None,
+    ax=None,
+    scale_independently=False,
+    human_units=True,
+):
+>>>>>>> master
     """generate a pcolormesh and label it with the axis coordinate available from the nddata
 
     Parameters
