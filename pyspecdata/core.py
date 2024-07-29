@@ -38,27 +38,10 @@ from sys import exc_info
 from os import environ
 from os.path import sep as path_sep
 import time
-
-# {{{ determine the figure style, and load the appropriate modules
-_figure_mode_setting = pyspec_config.get_setting(
-    "figures", section="mode", environ="pyspecdata_figures"
-)
-if _figure_mode_setting is None:
-    print(
-        "Warning!  Figure mode is not set, so I'm going to set it to standard by default!!!"
-    )
-    _figure_mode_setting = "standard"
-    pyspec_config.set_setting("mode", "figures", "standard")
-if _figure_mode_setting == "latex":
-    environ["ETS_TOOLKIT"] = "qt4"
-    import matplotlib
-
-    matplotlib.use("Agg")
-# }}} -- continued below
 from .general_functions import inside_sphinx
 import numpy as np
 import time
-from numpy import r_, c_, nan, inf, newaxis
+from numpy import r_, c_, nan, inf, newaxis, shape
 from numpy import pi
 from matplotlib.pyplot import rc, rcParams, plot, figure, title, text, show
 import matplotlib.pyplot as plt
@@ -66,7 +49,6 @@ import matplotlib.ticker as mticker
 from types import FunctionType as function
 import textwrap
 import atexit
-import matplotlib
 import matplotlib.transforms as mtransforms
 from distutils.version import LooseVersion
 from numpy.lib.recfunctions import rename_fields, drop_fields
@@ -83,6 +65,7 @@ from numpy.core import rec
 from matplotlib.pyplot import cm
 from copy import deepcopy
 import traceback
+import copy
 
 # {{{ have to do this, or sympy spews meaningless warnings
 from sympy.core import (
@@ -167,12 +150,32 @@ from .mpl_utils import (
     figlistret,
     figlistini,
     figlistini_old,
+    figurelist,
+    other,
     text_on_plot,
     spectrogram,
     colormap,
 )
 from .ndshape import ndshape_base
 import logging
+
+# {{{ determine the figure style, and load the appropriate modules
+_figure_mode_setting = pyspec_config.get_setting(
+    "figures", section="mode", environ="pyspecdata_figures"
+)
+if _figure_mode_setting is None:
+    print(
+        "Warning!  Figure mode is not set, so I'm going to set it to standard by default!!!"
+    )
+    _figure_mode_setting = "standard"
+    pyspec_config.set_setting("mode", "figures", "standard")
+if _figure_mode_setting == "latex":
+    environ["ETS_TOOLKIT"] = "qt4"
+    import matplotlib
+
+    matplotlib.use("Agg")
+# }}} -- continued below
+
 
 # rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
 rc("image", aspect="auto", interpolation="nearest")
@@ -220,7 +223,7 @@ def det_oom(data_to_test):
     """
     try:
         data_to_test = data_to_test[np.isfinite(data_to_test)]
-    except:
+    except Exception:
         raise ValueError(
             strm(
                 "data_to_test is",
@@ -493,7 +496,7 @@ def textlabel_bargraph(
         try:
             ax.tick_params(axis="both", which="major", labelsize=tickfontsize)
             ax.tick_params(axis="both", which="minor", labelsize=tickfontsize)
-        except:
+        except Exception:
             print(
                 "Warning, in this version I can't set the tick params method for the axis"
             )
@@ -1039,7 +1042,7 @@ def meanstd_rec(myarray, mylist, standard_error=False):
                     ) / np.sqrt(len(myarray_subset[thisfield]))
                 else:
                     newrow[thisfield + "_ERROR"] = np.std(myarray_subset[thisfield])
-            except:
+            except Exception:
                 raise RuntimeError(
                     "error in meanstd_rec:  You usually get this",
                     "when one of the fields that you have NOT passed in the",
@@ -1152,7 +1155,7 @@ def make_rec(*args, **kwargs):
         for j, thisname in enumerate(names):
             try:
                 retval[thisname][:] = input[j][:]
-            except Exception as e:
+            except Exception:
                 raise RuntimeError(
                     "error trying to load input for '"
                     + thisname
@@ -1165,7 +1168,7 @@ def make_rec(*args, **kwargs):
     else:
         try:
             return np.array([tuple(input)], dtype=mydtype)
-        except:
+        except Exception:
             raise ValueError(
                 strm(
                     "problem trying to assign data of type",
@@ -1305,7 +1308,7 @@ def plot(*args, **kwargs):
         if myx is None:
             try:
                 myx = myy.getaxis(myy.dimlabels[longest_dim])
-            except:
+            except Exception:
                 if len(myy.data.shape) == 0:
                     raise ValueError(
                         "I can't plot zero-dimensional data (typically arises when you have a dataset with one point)"
@@ -1347,7 +1350,7 @@ def plot(*args, **kwargs):
         # {{{ deal with axis labels along y
         try:
             yaxislabels = myy.getaxis(myy.dimlabels[last_not_longest])
-        except:
+        except Exception:
             yaxislabels = None
         # at this point, if there is no axis label, it will break and go to pass
         if yaxislabels is not None:
@@ -1389,7 +1392,7 @@ def plot(*args, **kwargs):
         try:
             b = np.diff(np.log10(myx))
         except Exception as e:
-            raise Exception(
+            raise e(
                 strm(
                     "likely a problem with the type of the x label, which is",
                     myx,
@@ -1486,7 +1489,7 @@ def plot(*args, **kwargs):
                     )
                 )
             if np.any(np.isinf(myy)):
-                myy[np.isinf(myy)] = NaN  # added this to prevent an overflow error
+                myy[np.isinf(myy)] = np.NaN  # added this to prevent an overflow error
             try:
                 retval += [myplotfunc(*tuple(plotargs), **newkwargs)]
             except Exception as e:
