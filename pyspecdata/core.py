@@ -27,17 +27,81 @@ For example, :func:`box_muller` is a helper function (based on numerical recipes
 while h5 functions are helper functions for using pytables in a fashion that
 will hopefull be intuitive to those familiar with SQL, etc.
 """
-from .datadir import pyspec_config, unknown_exp_type_name
-from .dict_utils import make_ndarray, unmake_ndarray
+from .datadir import pyspec_config
 from .matrix_math.svd import svd as MM_svd
 from .matrix_math.dot import dot as MM_dot
 from .matrix_math.dot import matmul as MM_matmul
 from .matrix_math.dot import along as MM_along
 from .matrix_math.nnls import nnls as MM_nnls
-from sys import exc_info
 from os import environ
-from os.path import sep as path_sep
-import time
+import numpy as np
+from numpy import r_, c_, nan, inf, NaN
+from numpy import pi
+from matplotlib.pyplot import rc, rcParams, plot
+import matplotlib.pyplot as plt
+import textwrap
+import atexit
+from numpy import sqrt as np_sqrt
+from mpl_toolkits.mplot3d import axes3d
+from matplotlib.collections import PolyCollection
+from matplotlib.colors import LightSource
+import scipy.interpolate as sci_interp
+import warnings
+import re
+from inspect import ismethod, signature, Parameter
+from numpy.core import rec
+from matplotlib.pyplot import cm
+from copy import deepcopy
+
+# {{{ have to do this, or sympy spews meaningless warnings
+from sympy.core import (
+    Symbol as sympy_symbol,
+)  # doesn't like to be imported from fornotebook as part of a *
+from sympy.core import (
+    Expr as sympy_expr,
+)  # doesn't like to be imported from fornotebook as part of a *
+from sympy.utilities import lambdify
+from sympy.core import var as sympy_var
+from sympy.core import diff as sympy_diff
+from sympy.printing import latex as sympy_latex
+from sympy.functions.elementary.miscellaneous import sqrt as sympy_sqrt
+
+# }}}
+from scipy.optimize import leastsq
+import scipy.sparse as sparse
+import numpy.lib.recfunctions as recf
+from scipy.interpolate import interp1d
+from . import fourier as this_fourier
+from . import axis_manipulation
+from . import plot_funcs as this_plotting
+from .general_functions import (
+    emptytest,
+    process_kwargs,
+    autostringconvert,
+    strm,
+    explain_error,
+    lsafen,
+    lsafe,
+    copy,
+    dp,
+    pinvr,
+)
+from .hdf_utils import (
+    h5loaddict,
+    h5child,
+    h5table,
+    h5nodebypath,
+    h5attachattributes,
+)
+from .mpl_utils import (
+    plot_label_points,
+    figurelist,
+    figlistret,
+    figlistini_old,
+    other,
+)
+from .ndshape import ndshape_base
+import logging
 
 # {{{ determine the figure style, and load the appropriate modules
 _figure_mode_setting = pyspec_config.get_setting(
@@ -55,125 +119,6 @@ if _figure_mode_setting == "latex":
 
     matplotlib.use("Agg")
 # }}} -- continued below
-from .general_functions import inside_sphinx
-import numpy as np
-import time
-from numpy import r_, c_, nan, inf, newaxis
-from numpy import pi
-from matplotlib.pyplot import rc, rcParams, plot, figure, title, text, show
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
-from types import FunctionType as function
-import textwrap
-import atexit
-import matplotlib
-import matplotlib.transforms as mtransforms
-from distutils.version import LooseVersion
-from numpy import sqrt as np_sqrt
-from numpy.lib.recfunctions import rename_fields, drop_fields
-from mpl_toolkits.mplot3d import axes3d
-from matplotlib.collections import PolyCollection
-from matplotlib.colors import LightSource
-from matplotlib.lines import Line2D
-import scipy.interpolate as sci_interp
-import tables
-import warnings
-import re
-from inspect import ismethod, signature, Parameter
-from numpy.core import rec
-from matplotlib.pyplot import cm
-from copy import deepcopy
-import traceback
-
-# {{{ have to do this, or sympy spews meaningless warnings
-from sympy.core import (
-    Symbol as sympy_symbol,
-)  # doesn't like to be imported from fornotebook as part of a *
-from sympy.core import (
-    Expr as sympy_expr,
-)  # doesn't like to be imported from fornotebook as part of a *
-from sympy.utilities import lambdify
-from sympy.core import var as sympy_var
-from sympy.core import diff as sympy_diff
-from sympy.printing import latex as sympy_latex
-from sympy.functions.elementary.miscellaneous import sqrt as sympy_sqrt
-
-# }}}
-from scipy.optimize import leastsq
-from scipy.signal import fftconvolve
-import scipy.sparse as sparse
-import numpy.lib.recfunctions as recf
-from scipy.interpolate import interp1d
-from scipy.interpolate import UnivariateSpline
-from .datadir import getDATADIR, log_fname, proc_data_target_dir
-from . import fourier as this_fourier
-from . import axis_manipulation
-from . import plot_funcs as this_plotting
-from .general_functions import (
-    CustomError,
-    emptytest,
-    balance_clims,
-    process_kwargs,
-    autostringconvert,
-    check_ascending_axis,
-    level_str_to_int,
-    init_logging,
-    strm,
-    reformat_exp,
-    complex_str,
-    render_matrix,
-    redim_F_to_C,
-    redim_C_to_F,
-    fname_makenice,
-    explain_error,
-    lsafen,
-    lsafe,
-    copy_maybe_none,
-    whereblocks,
-    box_muller,
-    dp,
-    fa,
-    ndgrid,
-    pinvr,
-    sech,
-    myfilter,
-)
-from .hdf_utils import (
-    gensearch,
-    h5searchstring,
-    h5loaddict,
-    h5child,
-    h5remrows,
-    h5addrow,
-    h5table,
-    h5nodebypath,
-    h5attachattributes,
-    h5inlist,
-    h5join,
-)
-from .mpl_utils import (
-    gridandtick,
-    gridon,
-    othergridandtick,
-    autolegend,
-    autopad_figure,
-    expand_x,
-    expand_y,
-    plot_label_points,
-    addlabels,
-    plot_color_counter,
-    contour_plot,
-    plot_updown,
-    nextfigure,
-    figlistret,
-    figlistini,
-    figlistini_old,
-    text_on_plot,
-    spectrogram,
-    colormap,
-)
-from .ndshape import ndshape_base
-import logging
 
 # rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
 rc("image", aspect="auto", interpolation="nearest")
@@ -221,7 +166,7 @@ def det_oom(data_to_test):
     """
     try:
         data_to_test = data_to_test[np.isfinite(data_to_test)]
-    except:
+    except Exception:
         raise ValueError(
             strm(
                 "data_to_test is",
@@ -493,7 +438,7 @@ def textlabel_bargraph(
         try:
             ax.tick_params(axis="both", which="major", labelsize=tickfontsize)
             ax.tick_params(axis="both", which="minor", labelsize=tickfontsize)
-        except:
+        except Exception:
             print(
                 "Warning, in this version I can't set the tick params method for the axis"
             )
@@ -607,7 +552,6 @@ def lookup_rec(A, B, indexpair):
     raise RuntimeError("You should now use decorate_rec!!")
     if type(indexpair) not in [tuple, list]:
         indexpair = (indexpair, indexpair)
-    Bini = copy(B)
     B = recf.drop_fields(
         B, (set(B.dtype.names) & set(A.dtype.names)) - {indexpair[1]}
     )  # indexpair for B gets dropped later anyways
@@ -1079,7 +1023,7 @@ def meanstd_rec(myarray, mylist, standard_error=False):
                     newrow[thisfield + "_ERROR"] = np.std(
                         myarray_subset[thisfield]
                     )
-            except:
+            except Exception:
                 raise RuntimeError(
                     "error in meanstd_rec:  You usually get this",
                     "when one of the fields that you have NOT passed in the",
@@ -1154,7 +1098,7 @@ def make_rec(*args, **kwargs):
     if not (isinstance(input, list) and isinstance(names, list)):
         raise TypeError("you must enter a list for both")
     types = list(map(type, input))
-    shapes = list(map(shape, input))
+    shapes = list(map(np.shape, input))
     if all([j == shapes[0] for j in shapes]):
         if shapes[0] == ():  # if it's one dimensional
             equal_shapes = False
@@ -1196,7 +1140,8 @@ def make_rec(*args, **kwargs):
                 retval[thisname][:] = input[j][:]
             except Exception as e:
                 raise RuntimeError(
-                    "error trying to load input for '"
+                    e    
+                    + "error trying to load input for '"
                     + thisname
                     + "' of shape "
                     + repr(np.shape(input[j]))
@@ -1207,7 +1152,7 @@ def make_rec(*args, **kwargs):
     else:
         try:
             return np.array([tuple(input)], dtype=mydtype)
-        except:
+        except Exception:
             raise ValueError(
                 strm(
                     "problem trying to assign data of type",
@@ -1355,10 +1300,11 @@ def plot(*args, **kwargs):
         if myx is None:
             try:
                 myx = myy.getaxis(myy.dimlabels[longest_dim])
-            except:
+            except Exception as e:
                 if len(myy.data.shape) == 0:
                     raise ValueError(
                         "I can't plot zero-dimensional data (typically arises when you have a dataset with one point)"
+                        + explain_error(e)
                     )
                 myx = r_[0 : myy.data.shape[longest_dim]]
         if (
@@ -1397,7 +1343,7 @@ def plot(*args, **kwargs):
         # {{{ deal with axis labels along y
         try:
             yaxislabels = myy.getaxis(myy.dimlabels[last_not_longest])
-        except:
+        except Exception:
             yaxislabels = None
         # at this point, if there is no axis label, it will break and go to pass
         if yaxislabels is not None:
@@ -1450,6 +1396,7 @@ def plot(*args, **kwargs):
                     "likely a problem with the type of the x label, which is",
                     myx,
                 )
+                + explain_error(e)
             )
         if (
             (np.size(b) > 3)
@@ -1555,7 +1502,7 @@ def plot(*args, **kwargs):
                 ] = NaN  # added this to prevent an overflow error
             try:
                 retval += [myplotfunc(*tuple(plotargs), **newkwargs)]
-            except Exception as e:
+            except Exception:
                 raise RuntimeError(
                     strm(
                         "Error trying to plot using function",
@@ -1629,9 +1576,9 @@ def plot(*args, **kwargs):
             these_xlims = ax.get_xlim()
             ax.set_xlim((max(these_xlims), min(these_xlims)))
     # {{{ attach labels and such
-    if myxlabel != None:
+    if myxlabel is not None:
         ax.set_xlabel(myxlabel)
-    if myylabel != None:
+    if myylabel is not None:
         ax.set_ylabel(myylabel)
     try:
         ax.axis("tight")
@@ -1655,6 +1602,7 @@ def plot(*args, **kwargs):
                     ]
                 ),
             )
+            + explain_error(e)
         )
     # plt.grid(True)
     # }}}
@@ -1750,7 +1698,7 @@ def concat(datalist, dimname, chop=False):
     # print "DEBUG newdatalist is shaped like",newdatalist
     try:
         newdatalist = newdatalist.alloc()
-    except:
+    except Exception as e:
         raise ValueError(
             strm(
                 "trying to alloc the newdatalist",
@@ -1930,7 +1878,7 @@ class nddata(object):
             )
         try:
             self.data = np.reshape(data, sizes)
-        except:
+        except Exception:
             try:
                 error_string = strm(
                     "While initializing nddata, you are trying trying to reshape a",
@@ -2056,7 +2004,7 @@ class nddata(object):
         data[1:, 0] = x.flatten()
         print("data", data)
         fp = open("auto_figures/" + filename + ".dat", "w")
-        fp.write(float32(data).tostring())
+        fp.write(np.float32(data).tostring())
         fp.write("\n")
         fp.close()
         return
@@ -2155,7 +2103,7 @@ class nddata(object):
         only use the light kwarg to generate a black and white shading display
         """
         X, Y, Z = self.matrices_3d()
-        if light == True:
+        if light is True:
             light = [
                 0,
                 0,
@@ -2190,7 +2138,7 @@ class nddata(object):
             if cmap is not None:
                 rgb = cmap(for_rgb)
         if onlycolor:
-            imshow(rgb)
+            plt.imshow(rgb)
         else:
             if light is None:
                 if cmap is not None:
@@ -2243,7 +2191,7 @@ class nddata(object):
         x_axis, y_axis = self.dimlabels
         x = self.getaxis(x_axis)[:, None]
         y = self.getaxis(y_axis)[None, :]
-        if "levels" not in list(kwargs.keys()):
+        if levels not in list(kwargs.keys()):
             levels = r_[self.data.min() : self.data.max() : 30j]
         cs = plt.contour(
             x * np.ones_like(y), np.ones_like(x) * y, self.data, **kwargs
@@ -2302,7 +2250,7 @@ class nddata(object):
             verts, facecolors=[color] * len(verts), edgecolors=edgecolor
         )  # the individual facecolors would go here
         poly.set_alpha(alpha)
-        fig = plt.gcf()
+        #fig = plt.gcf()
         # ax = fig.add_subplot(111,projection = '3d')
         ax.add_collection3d(poly, zs=ys, zdir="y")
         ax.set_zlim3d(self.data.min(), self.data.max())
@@ -2362,7 +2310,7 @@ class nddata(object):
         x_axis = sortedself.retaxis(x_dim).data
         y_axis = sortedself.retaxis(y_dim).data
         # }}}
-        verts = []
+        #verts = []
         xs = x_axis.flatten()
         ys = y_axis.flatten()  # this is the depth dimension
         if invert:
@@ -2374,7 +2322,7 @@ class nddata(object):
             if invert:
                 zs = zs[::-1]
             ax.plot(xs, np.ones(len(xs)) * ys[j], zs, "k", linewidth=linewidth)
-        fig = plt.gcf()
+        #fig = plt.gcf()
         ax.set_zlim3d(sortedself.data.min(), sortedself.data.max())
         ax.set_xlim3d(xs.min(), xs.max())
         # if invert:
@@ -2463,7 +2411,7 @@ class nddata(object):
         """
         try:
             return self.dimlabels.index(axis)
-        except:
+        except Exception:
             raise ValueError(
                 " ".join(
                     map(
@@ -2647,7 +2595,7 @@ class nddata(object):
                 return None
             try:
                 return self.axis_coords_units[self.axn(args[0])]
-            except:
+            except Exception:
                 raise RuntimeError(
                     strm(
                         "problem getting units for",
@@ -2934,7 +2882,7 @@ class nddata(object):
             }
             try:
                 thiscolor = colordict[thiscolor]
-            except:
+            except Exception:
                 raise ValueError(strm("Color", thiscolor, "not in dictionary"))
         self.other_info.update({"plot_color": thiscolor})
         return
@@ -3180,7 +3128,7 @@ class nddata(object):
             else:
                 try:
                     Rerr += (A.data * Berr / (B.data**2)) ** 2
-                except:
+                except Exception as e:
                     raise ValueError(
                         strm(
                             "self was",
@@ -3337,8 +3285,9 @@ class nddata(object):
         # {{{ now create argshape for the reshaped argument
         new_arg_labels = [
             x for x in newdims if x in arg.dimlabels
-        ]  #  only the labels valid for arg, ordered
-        #                         as they are in newdims
+        ]
+        # only the labels valid for arg, ordered
+        # as they are in newdims
         argshape = list(
             np.ones(len(newdims), dtype=np.int64)
         )  # should be a better solution
@@ -3371,7 +3320,7 @@ class nddata(object):
             if k in argout.dimlabels:
                 try:
                     argshape[j] = argout.data.shape[argout.axn(k)]
-                except:
+                except Exception:
                     raise ValueError(
                         "There seems to be a problem because the"
                         + "shape of argout is now len:%d"
@@ -3627,7 +3576,7 @@ class nddata(object):
         for j in range(0, len(axes)):
             try:
                 thisindex = self.dimlabels.index(axes[j])
-            except:
+            except Exception:
                 print("|-ERROR FINDING DIMENSION-----")
                 print("| dimlabels is: ", self.dimlabels)
                 print("| doesn't contain: ", axes[j])
@@ -3647,7 +3596,7 @@ class nddata(object):
         for j in range(0, len(axes)):
             try:
                 thisindex = self.dimlabels.index(axes[j])
-            except:
+            except Exception:
                 print("error, dimlabels is: ", self.dimlabels)
                 print("doesn't contain: ", axes[j])
                 raise
@@ -3770,7 +3719,7 @@ class nddata(object):
         for j in range(0, len(axes)):
             try:
                 thisindex = self.axn(axes[j])
-            except:
+            except Exception:
                 print("error, dimlabels is: ", self.dimlabels)
                 print("doesn't contain: ", axes[j])
                 raise
@@ -3821,7 +3770,7 @@ class nddata(object):
         for j in range(0, len(axes)):
             try:
                 thisindex = self.axn(axes[j])
-            except:
+            except Exception:
                 print("error, dimlabels is: ", self.dimlabels)
                 print("doesn't contain: ", axes[j])
                 raise
@@ -3854,7 +3803,7 @@ class nddata(object):
         n_bins = self.data.shape[thisaxis]
         if n_bins > max_bins:
             n_bins = max_bins  # otherwise this takes a while
-        bins, vals = histogram(self.data, bins=n_bins)
+        bins, vals = np.histogram(self.data, bins=n_bins)
         retval = nddata(np.double(bins), [-1], ["values"]).labels(
             "values", vals[:-1] + (vals[1] - vals[0]) * 0.5
         )
@@ -3869,7 +3818,7 @@ class nddata(object):
         for dimname in list(
             self.dimlabels
         ):  # I can't be popping from the list as I iterate over it
-            if not dimname in listofdims:
+            if dimname not in listofdims:
                 self.mean(dimname)
         return self
 
@@ -3927,7 +3876,7 @@ class nddata(object):
         for j in range(0, len(axes)):
             try:
                 thisindex = self.dimlabels.index(axes[j])
-            except:
+            except Exception:
                 logger.debug(strm("error, dimlabels is: ", self.dimlabels))
                 logger.debug(strm("doesn't contain: ", axes[j]))
                 raise
@@ -3940,7 +3889,7 @@ class nddata(object):
                         )
                         / (this_axis_length**2)
                     )
-                except:
+                except Exception:
                     raise ValueError(
                         strm(
                             "shape of data",
@@ -3992,7 +3941,7 @@ class nddata(object):
             if len(self.axis_coords_units) > 0:
                 try:
                     self.axis_coords_units.pop(thisindex)
-                except:
+                except Exception:
                     raise IndexError(
                         strm(
                             "trying to pop",
@@ -4016,7 +3965,7 @@ class nddata(object):
         ), "we are only calculating covariance matrices for datasets with one variable and on observation axis"
         assert along_dim in self.dimlabels
         var_dim = list(set(self.dimlabels) - set([along_dim]))[0]
-        var_dim_coords = self.getaxis(var_dim)
+        #var_dim_coords = self.getaxis(var_dim)
         var_dim_units = self.get_units(var_dim)
         if self.axn(along_dim) == 0:
             trans = False
@@ -4026,7 +3975,7 @@ class nddata(object):
         self.setaxis(along_dim, self.getaxis(var_dim).copy())
 
         def add_subscript(start, sub):
-            ismath = re.compile("\$(.*)\$")
+            ismath = re.compile("$(.*)\$")
             m = ismath.match(start)
             if m:
                 (start,) = m.groups()
@@ -4175,7 +4124,7 @@ class nddata(object):
         func = self._wrapaxisfuncs(func)
         try:
             thisaxis = self.axn(axis)
-        except Exception as e:
+        except Exception:
             raise IndexError(
                 strm(
                     "I couldn't find the dimension",
@@ -4218,7 +4167,7 @@ class nddata(object):
                     ):
                         try:
                             self.data = func(self.data, axis=thisaxis)
-                        except:
+                        except Exception:
                             self.data = func(self.data, axes=thisaxis)
                 if "axis" in kwargnames:
                     self.data = func(self.data, axis=thisaxis)
@@ -4245,7 +4194,7 @@ class nddata(object):
         r"like numpy item -- returns a number when zero-dimensional"
         try:
             return self.data.item()
-        except:
+        except Exception:
             raise ValueError(
                 "your data has shape: "
                 + str(ndshape(self))
@@ -4387,7 +4336,7 @@ class nddata(object):
                 "I don't understand the arguments:" + repr(kwargs)
             )
         if len(args) == 1:
-            if isinstance(args[0], np.ndarray):
+            if isinstance(self, args[0], np.ndarray):
                 if args[0].shape[2] != len(self.dimlabels):
                     raise ValueError(
                         "You must pass an N x M np.array, where M is the number of dimensions in this np.array!"
@@ -4426,7 +4375,7 @@ class nddata(object):
         """
         assert len(self.dimlabels) == 1, "currently only supports 1D data"
         if s_multiplier is not None:
-            thefunc = lambda x, y, s=0: sci_interp.BSpline(
+            def thefunc(x,y,s=0): return sci_interp.BSspine(
                 *sci_interp.splrep(x, y, s=s)
             )
             kwargs = dict(s=len(self.dimlabels[0]) * s_multiplier)
@@ -4529,7 +4478,7 @@ class nddata(object):
             )
             try:
                 retval = interpfunc(axisvalues)
-            except:
+            except Exception:
                 raise TypeError("dtype of axis is" + repr(axisvalues.dtype))
             return retval
 
@@ -4564,7 +4513,7 @@ class nddata(object):
                 self.set_error(sqrt(rerrvar) + 1j * sqrt(ierrvar))
             else:
                 self.set_error(sqrt(rerrvar))
-            err_nanmask = isnan(self.get_error())
+            err_nanmask = np.isnan(self.get_error())
             self.data[err_nanmask] = nan
         return self
 
@@ -4739,7 +4688,7 @@ class nddata(object):
         """
         if self.get_units("t2") == "ppm":
             return
-        offset = self.get_prop("proc")["OFFSET"]
+        #offset = self.get_prop("proc")["OFFSET"]
         SF = self.get_prop("proc")["SF"]
         sfo1 = self.get_prop("acq")["SFO1"]
         tms_hz = (SF - sfo1) * 1e6
@@ -4820,7 +4769,7 @@ class nddata(object):
                 axes = oldorder + axes
         try:
             neworder = list(map(self.dimlabels.index, axes))
-        except ValueError as e:
+        except ValueError:
             raise ValueError(strm("one of", axes, "not in", self.dimlabels))
         self.dimlabels = list(map(self.dimlabels.__getitem__, neworder))
         if len(self.axis_coords) > 0:
@@ -4843,7 +4792,7 @@ class nddata(object):
                     self.axis_coords_units = list(
                         map(self.axis_coords_units.__getitem__, neworder)
                     )
-                except:
+                except Exception as e:
                     raise IndexError(
                         strm(
                             "problem mapping",
@@ -5228,8 +5177,8 @@ class nddata(object):
         du = (u[-1] - u[0]) / (len(u) - 1.0)
         assert all(abs(np.diff(u) - du) / du < tolerance), thismsg  # absolute
         # figure out how many points I need to add, and on which side of the axis
-        thismsg = "In order to expand, the axis must be ascending (and equally spaced)"
-        assert du > 0, thismsg  # ascending
+        this_msg = "In order to expand, the axis must be ascending (and equally spaced)"
+        assert du > 0, this_msg  # ascending
         start_index = 0
         stop_index = len(u)  # this is the index at which the data
         #                     stops.  To start with, we assume the
@@ -6250,7 +6199,7 @@ class nddata(object):
                 self.data[leftindex] = rightdata.reshape(
                     left_shape
                 )  # assign the data
-            except:
+            except Exception:
                 raise IndexError(
                     strm(
                         "ERROR ASSIGNING NDDATA:\n",
@@ -6566,7 +6515,7 @@ class nddata(object):
         if self.data_error is not None:
             try:
                 newerror = self.data_error[indexlist]
-            except:
+            except Exception:
                 raise ValueError(
                     "Problem trying to index data_error"
                     + repr(self.data_error)
@@ -6599,6 +6548,7 @@ class nddata(object):
                         indexlist,
                         "likely, one of the slice indeces is out of bounds for the size of the data",
                     )
+                    + explain_error(e)
                 )
             try:
                 retval = nddata(
@@ -6620,6 +6570,7 @@ class nddata(object):
                         "indexlist",
                         indexlist,
                     )
+                    + explain_error(e)
                 )
             retval.axis_coords_units = axis_coords_units
             retval.data_units = self.data_units
@@ -6798,7 +6749,7 @@ class nddata(object):
             args = [args]
         # {{{ make a sensible list of tuples that's easier to understand
         sensible_list = []  # type, dimension, arguments
-        testf = lambda x: x + 1
+        def testf(x): return x+1
         j = 0
         while j < len(args):
             if isinstance(args[j], str):  # works for str and np.str_
@@ -7070,7 +7021,7 @@ class nddata(object):
                         else:
                             try:
                                 errordict[x] = errordict[x][y]  # default
-                            except:
+                            except Exception:
                                 raise IndexError(
                                     strm(
                                         "Trying to index",
@@ -7168,7 +7119,7 @@ class nddata(object):
             h5path += "/"  # make sure it ends in a slash first
         try:
             thisname = self.get_prop("name")
-        except:
+        except Exception:
             raise ValueError(
                 strm(
                     "You're trying to save an nddata object which",
@@ -7487,11 +7438,11 @@ class nddata_hdf5(nddata):
                 "data"
             ]  # the table is called data, and the data of the table is called data
             mydata = datarecordarray["data"]
-        except:
+        except Exception:
             raise ValueError("I can't find the nddata.data")
         try:
             kwargs.update({"data_error": datarecordarray["error"]})
-        except:
+        except Exception:
             logger.debug(strm("No error found\n\n"))
         datadict.pop("data")
         # }}}
@@ -7579,14 +7530,14 @@ class nddata_hdf5(nddata):
             for thisdimlabel in mydimlabels:
                 try:
                     temp = self.getaxis(thisdimlabel)
-                except:
+                except Exception:
                     temp = -1  # no axis is given
                 if isinstance(temp, np.ndarray):
                     temp = len(temp)
                 det_shape.append(temp)
             try:
                 self.data = self.data.reshape(det_shape)
-            except:
+            except Exception:
                 raise RuntimeError(
                     strm(
                         "The data is of shape",
@@ -7672,6 +7623,7 @@ class ndshape(ndshape_base):
                     self.shape,
                     "should be numbers, not names",
                 )
+                + explain_error(e)
             )
         retval = nddata(emptyar, self.shape, self.dimlabels)
         if labels:
@@ -7811,6 +7763,7 @@ class fitdata(nddata):
                             for k in range(0, len(xvals))
                         ],
                     )
+                    + explain_error(e)
                 )
             except Exception as e:
                 raise ValueError(
@@ -7955,19 +7908,19 @@ class fitdata(nddata):
             sigma = self.get_error()
             # covarmatrix = np.dot(pinv(f),
             #        np.dot(diag(sigma**2),pinv(f.T)))
-            J = matrix(fprime.T)
+            J = np.matrix(fprime.T)
             # W = matrix(diag(1./sigma**2))
             # S = matrix(diag(sigma**2))
             # if hasattr(self,'data_covariance'):
             #    print "covariance data is present"
-            S = matrix(self.get_covariance())
+            S = np.matrix(self.get_covariance())
             Omegainv = S**-1
             # S = matrix(diag(sigma**2))
             # G = matrix(diag(1./sigma))
             # G = S**(-1/2) # analog of the above
             # covarmatrix = ((J.T * W * J)**-1) * J.T * W
             print("a")
-            minimizer = inv(J.T * Omegainv * J) * J.T * Omegainv
+            minimizer = np.inv(J.T * Omegainv * J) * J.T * Omegainv
             covarmatrix = minimizer * S * minimizer.T
             # covarmatrix = np.array(covarmatrix * S * covarmatrix.T)
             # covarmatrix = np.array((J.T * G.T * G * J)**-1 * J.T * G.T * G * S * G.T * G * J * (J.T * G.T * G * J)**-1)
@@ -8098,7 +8051,7 @@ class fitdata(nddata):
         x_axis = retval.dimlabels[0]
         x = retval.getaxis(x_axis)
         nopowerindex = np.argmax(x)
-        mask = logical_not(r_[0 : len(x)] == nopowerindex)
+        mask = np.logical_not(r_[0 : len(x)] == nopowerindex)
         y = y[mask]
         yerr = yerr[mask]
         x = x[mask]
@@ -8173,7 +8126,7 @@ class fitdata(nddata):
         if len(name) == 1:
             try:
                 return p[self.symbol_list.index(name[0])]
-            except:
+            except Exception:
                 raise ValueError(
                     strm(
                         "While running output: couldn't find",
@@ -8254,7 +8207,7 @@ class fitdata(nddata):
         else:
             try:
                 return self.covariance.copy()
-            except:
+            except Exception:
                 return np.zeros([len(self.fit_coeff)] * 2, dtype="double")
 
     def latex(self):
@@ -8448,6 +8401,7 @@ class fitdata(nddata):
                         "type(y):",
                         type(y),
                     )
+                    + explain_error(err)
                 )
             else:
                 if np.any(np.shape(x) != np.shape(y)):
@@ -8492,6 +8446,7 @@ class fitdata(nddata):
             )
         except Exception as e:
             raise ValueError("leastsq failed; I don't know why")
+            + explain_error(e)
         # }}}
         if success not in [1, 2, 3, 4]:
             # {{{ up maximum number of evals
@@ -8606,6 +8561,7 @@ class fitdata(nddata):
                         "type(dof)",
                         type(dof),
                     )
+                    + explain_error(e)
                 )
         logger.debug(
             strm(
@@ -8672,7 +8628,7 @@ class fitdata(nddata):
                         for k, v in maxbounds.items():
                             if thiscopy.output(k) > v:
                                 success = False
-                except:
+                except Exception:
                     # print 'WARNING, didn\'t fit'
                     success = False
                 # here, use the internal routines, in case there are constraints, etc
@@ -8748,7 +8704,7 @@ class fitdata(nddata):
             f_at_guess = np.real(self.eval(None, set=guess_dict).data)
             try:
                 f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
-            except:
+            except Exception:
                 raise ValueError(
                     strm(
                         "trying to reshape f_at_ini_guess from",
@@ -8804,7 +8760,7 @@ class fitdata(nddata):
                     newguess[mask] = self.guess_lb[mask]
                     mask = newguess > self.guess_ub
                     newguess[mask] = self.guess_ub[mask]
-                    if np.any(isnan(newguess)):
+                    if np.any(np.isnan(newguess)):
                         logger.debug(
                             strm(
                                 "\n\n.core.guess) Regularization blows up $\\rightarrow$ increasing $\\alpha$ to %0.1f\n\n"
@@ -8823,7 +8779,7 @@ class fitdata(nddata):
                         )
                         try:
                             f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
-                        except:
+                        except Exception:
                             raise IndexError(
                                 strm(
                                     "trying to reshape f_at_ini_guess from",
@@ -8887,7 +8843,7 @@ class fitdata(nddata):
                                 f_at_guess = f_at_guess.reshape(
                                     tuple(new_y_shape)
                                 )
-                            except:
+                            except Exception:
                                 raise RuntimeError(
                                     strm(
                                         "trying to reshape f_at_ini_guess from",
