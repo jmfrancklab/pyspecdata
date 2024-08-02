@@ -82,7 +82,6 @@ from .general_functions import (
     explain_error,
     lsafen,
     lsafe,
-    copy,
     dp,
     pinvr,
 )
@@ -95,10 +94,8 @@ from .hdf_utils import (
 )
 from .mpl_utils import (
     plot_label_points,
-    figurelist,
     figlistret,
     figlistini_old,
-    other,
 )
 from .ndshape import ndshape_base
 import logging

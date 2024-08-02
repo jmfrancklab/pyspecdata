@@ -64,7 +64,7 @@ The figure list gives us three things:
 from .plot_funcs import image as this_image
 from .general_functions import *
 from . import plot_funcs as this_plotting
-from .core import nddata, autolegend, gridandtick
+from .core import *
 from .core import plot as pyspec_plot
 import matplotlib.pyplot as plt
 import time
