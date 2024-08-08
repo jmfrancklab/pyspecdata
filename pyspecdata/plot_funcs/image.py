@@ -1,19 +1,21 @@
-from ..general_functions import *
-from numpy import r_, c_, ix_, nan
+from ..general_functions import strm, process_kwargs, check_ascending_axis
+from numpy import r_, c_, ix_, nan, pi
 import numpy as np
 from ..ndshape import ndshape_base as ndshape
 from pylab import gca, sca, imshow, xlabel, ylabel, title, colorbar, setp
+import logging
 
 
-def image(A, x=[], y=[], **kwargs):
+def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
     r"Please don't call image directly anymore -- use the image method of figurelist"
     x_inverted = False
     y_inverted = False
+    A = A.copy()
     A.squeeze()  # drop any singleton dimensions, which cause problems
     # {{{ pull out kwargs for imagehsv
     imagehsvkwargs = {}
     for k, v in list(kwargs.items()):
-        if k in ["black", "logscale"]:
+        if k in ["black", "logscale", "scaling"]:
             imagehsvkwargs[k] = kwargs.pop(k)
     # }}}
     spacing, ax, x_first, origin, renumber = process_kwargs(
@@ -35,7 +37,7 @@ def image(A, x=[], y=[], **kwargs):
         ):  # if I try to use isinstance, I get a circular import
             new_dimlabels = list(A.dimlabels)
             temp = new_dimlabels.pop(0)
-            A = A.copy().reorder(new_dimlabels + [temp])
+            A = A.reorder(new_dimlabels + [temp])
         else:
             A = A.T
     sca(ax)
@@ -51,17 +53,24 @@ def image(A, x=[], y=[], **kwargs):
                 check_ascending_axis(
                     A.getaxis(thisaxis), allow_descending=True
                 )
-            except:
-                raise ValueError(
-                    "You are not allowed to use image on data that"
-                    " doesn't have a uniformly spaced axis -- it is likely a"
-                    " misrepresentation of the data you are looking at."
-                    " For example, if you are looking at NMR data with a set of"
-                    " variable delays that are unevenly spaced, relabel this axis"
-                    " by index number --> .C.setaxis('%s','#').set_units('%s','scan"
-                    " #').\nThen you have an accurate representation of your data"
-                    % (2 * (thisaxis,))
-                )
+            except Exception:
+                if allow_nonuniform:
+                    logging.debug(
+                        "Automatically changed to numbered axis along %s"
+                        % thisaxis
+                    )
+                    A.setaxis(thisaxis, "#").set_units(thisaxis, "#")
+                else:
+                    raise ValueError(
+                        "You are not allowed to use image on data that"
+                        " doesn't have a uniformly spaced axis -- it is likely a"
+                        " misrepresentation of the data you are looking at."
+                        " For example, if you are looking at NMR data with a set of"
+                        " variable delays that are unevenly spaced, relabel this axis"
+                        " by index number --> .C.setaxis('%s','#').set_units('%s','scan"
+                        " #').\nThen you have an accurate representation of your data"
+                        % (2 * (thisaxis,))
+                    )
         setlabels = True
         templabels = list(A.dimlabels)
         if A.get_prop("x_inverted"):
@@ -80,7 +89,7 @@ def image(A, x=[], y=[], **kwargs):
             y_label = templabels[0]
             try:
                 y = list(A.getaxis(y_label))
-            except:
+            except Exception:
                 y = r_[0 : A.data.shape[A.axn(y_label)]]
             y_label = A.unitify_axis(y_label)
         else:
@@ -152,7 +161,6 @@ def image(A, x=[], y=[], **kwargs):
         "origin"
     ] = origin  # required so that imshow now displays the image correctly
     linecounter = 0
-    origAndim = A.ndim
     if A.ndim > 2:
         setp(ax.get_yticklabels(), visible=False)
         ax.yaxis.set_ticks_position("none")
@@ -164,7 +172,7 @@ def image(A, x=[], y=[], **kwargs):
         tempsize = np.array(A.shape)  # make a tuple the right shape
         if linecounter == 0 and spacing < 1.0:
             spacing = round(
-                prod(tempsize[0:-1])
+                np.prod(tempsize[0:-1])
             )  # find the length of the thing not counting the columns
         tempsize[-2] = (
             2 * linecounter + spacing
@@ -178,7 +186,7 @@ def image(A, x=[], y=[], **kwargs):
         tempsize[-2] *= A.shape[-3]
         try:
             A = A.reshape(np.int64(tempsize))  # now join them up
-        except:
+        except Exception:
             raise IndexError(
                 strm(
                     "problem with tempsize",
@@ -217,15 +225,21 @@ def image(A, x=[], y=[], **kwargs):
     return retval
 
 
-def imagehsv(A, logscale=False, black=False):
+def imagehsv(A, logscale=False, black=False, scaling=None):
     "This provides the HSV mapping used to plot complex number"
     # compare to http://www.rapidtables.com/convert/color/hsv-to-rgb.htm
+    A = A.copy()
     n = 256
     mask = np.isnan(A)
     A[mask] = 0
+    if scaling is None:
+        A /= abs(A).max()
+    else:
+        A /= scaling
+        mask |= abs(A) > 1.0 + 1e-7
+        A[mask] = 0
     mask = mask.reshape(-1, 1)
     intensity = abs(A).reshape(-1, 1)
-    intensity /= abs(A).max()
     if logscale:
         raise ValueError(
             "logscale is deprecated, use the cropped_log function instead"
@@ -374,11 +388,12 @@ def fl_image(self, A, **kwargs):
 
         fl.show('compare_image_contour_150911.pdf')
     """
-    interpolation, ax, human_units = process_kwargs(
+    interpolation, ax, human_units, row_threshold = process_kwargs(
         [
             ("interpolation", None),
             ("ax", gca()),
             ("human_units", True),
+            ("row_threshold", 500),
         ],
         kwargs,
         pass_through=True,
@@ -398,5 +413,13 @@ def fl_image(self, A, **kwargs):
     if ax.get_title() is None or len(ax.get_title()) == 0:
         title(self.current)
     if interpolation is not None:
+        if interpolation == "auto":
+            if (
+                np.prod([firstarg.shape[j] for j in firstarg.dimlabels[:-1]])
+                > row_threshold
+            ):
+                interpolation = "bilinear"
+            else:
+                interpolation = "nearest"
         retval.set_interpolation(interpolation)
     return retval

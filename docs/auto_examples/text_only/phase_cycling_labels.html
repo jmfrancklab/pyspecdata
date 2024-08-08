@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>phase cycling labels &mdash; pySpecData 0.9.5.3.2 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/gallery_custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="HDF5 error message" href="hdf5_error.html" />
+    <link rel="prev" title="Logging Functionality" href="log_test.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> pySpecData
+          </a>
+              <div class="version">
+                0.9.5.3.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">PySpecData Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html#individual-functions">Individual Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html#matplotlib-examples">Matplotlib Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html#text-only-examples">Text-Only Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../indiv_funcs/index.html">Individual Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../matplotlib/index.html">Matplotlib Examples</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Text-Only Examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="log_test.html">Logging Functionality</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">phase cycling labels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hdf5_error.html">HDF5 error message</a></li>
+<li class="toctree-l3"><a class="reference internal" href="save_hdf.html">Saving HDF5 Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="basic_units.html">Basic Units</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pySpecData</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">PySpecData Examples</a> &raquo;</li>
+          <li><a href="index.html">Text-Only Examples</a> &raquo;</li>
+      <li>phase cycling labels</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/auto_examples/text_only/phase_cycling_labels.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-text-only-phase-cycling-labels-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="phase-cycling-labels">
+<span id="sphx-glr-auto-examples-text-only-phase-cycling-labels-py"></span><h1>phase cycling labels<a class="headerlink" href="#phase-cycling-labels" title="Permalink to this headline">¶</a></h1>
+<p>demonstrate automatic labeling of phase cycling (coherence) axes</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>$\Delta p_1$
+$\Delta p_2$
+$\nu $ / Hz
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
+<a href="../../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">a</span></a></a></a> <span class="o">=</span> <a href="../../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><a href="../../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><a href="../../pyspecdata.html#id0" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">nddata</span></a></a></a><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">90</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">10</span><span class="p">],[</span><span class="s1">&#39;ph1&#39;</span><span class="p">,</span><span class="s1">&#39;ph2&#39;</span><span class="p">,</span><span class="s1">&#39;t&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">setaxis</span><span class="p">(</span><span class="s1">&#39;ph1&#39;</span><span class="p">,</span><span class="s1">&#39;#&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setaxis</span><span class="p">(</span><span class="s1">&#39;ph2&#39;</span><span class="p">,</span><span class="s1">&#39;#&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setaxis</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="s1">&#39;#&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">set_units</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+<a href="../../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">a</span><span class="o">.</span><span class="n">ft</span></a></a></a><span class="p">([</span><span class="s1">&#39;ph1&#39;</span><span class="p">,</span><span class="s1">&#39;ph2&#39;</span><span class="p">,</span><span class="s1">&#39;t&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata.unitify_axis" title="pyspecdata.nddata.unitify_axis" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../../pyspecdata.html#pyspecdata.nddata.unitify_axis" title="pyspecdata.nddata.unitify_axis" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../../pyspecdata.html#pyspecdata.nddata.unitify_axis" title="pyspecdata.nddata.unitify_axis" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">a</span><span class="o">.</span><span class="n">unitify_axis</span></a></a></a><span class="p">(</span><span class="s1">&#39;ph1&#39;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata.unitify_axis" title="pyspecdata.nddata.unitify_axis" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../../pyspecdata.html#pyspecdata.nddata.unitify_axis" title="pyspecdata.nddata.unitify_axis" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../../pyspecdata.html#pyspecdata.nddata.unitify_axis" title="pyspecdata.nddata.unitify_axis" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">a</span><span class="o">.</span><span class="n">unitify_axis</span></a></a></a><span class="p">(</span><span class="s1">&#39;ph2&#39;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata.unitify_axis" title="pyspecdata.nddata.unitify_axis" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../../pyspecdata.html#pyspecdata.nddata.unitify_axis" title="pyspecdata.nddata.unitify_axis" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../../pyspecdata.html#pyspecdata.nddata.unitify_axis" title="pyspecdata.nddata.unitify_axis" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">a</span><span class="o">.</span><span class="n">unitify_axis</span></a></a></a><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.001 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-text-only-phase-cycling-labels-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/58a2c2a468417afddc1ff03f02d62b99/phase_cycling_labels.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">phase_cycling_labels.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/e98066ff29c62dbfb78efb7c758982ff/phase_cycling_labels.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">phase_cycling_labels.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="log_test.html" class="btn btn-neutral float-left" title="Logging Functionality" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hdf5_error.html" class="btn btn-neutral float-right" title="HDF5 error message" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2016, John M. Franck.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

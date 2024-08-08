@@ -32,49 +32,96 @@ figures.
 Setting up the notebook
 -----------------------
 
-Requirements
-------------
+Install the Latex Packages
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.  latex packages
+In order to be able to build a latex notebook where ``\begin{python}...\end{python}`` environments are replaced with the code output,
+we first need some helper latex style files.
 
-    You need to put the texmf tree in a location where it can be found by your latex installation.
+To make latex files accessible anywhere on your computer, you place them
+inside a "texmf" directory tree, and then register them with your latex
+compiler.
 
-    * Under Windows, add the texmf tree to "miktex settings" under the "roots" tab.
-    * (To do) We should use `this guide
-      <http://ctan.math.washington.edu/tex-archive/info/dtxtut/dtxtut.pdf>`_ or
-      or `this package <https://ctan.org/pkg/makedtx>`_ to package the code and include it here.
+* Note that, similar to a python package, there are strange requirements
+  on the structure and directory names of a texmf directory tree.  You
+  can't just rename the directories as you would like.
 
-    Once you've done this, the shell command ``kpsewhich mypython.sty``
-    should return a result
-    (if you have miktex installed on windows, this should work from either the git
-    bash prompt or the dos or powershell prompt).
-2.  The pyspecdata package.
-    
-    Proves the commands `pdflatex_notebook_wrapper` and
-    `update_notebook_pythonscripts`, described below under "Running the
-    notebook."
+The pyspecdata repo itself now has a subdirectory called ``texmf`` that is a ready-to-go texmf tree for this purpose.
 
-    Also provies the command `pdflatex_notebook_view_wrapper`, which is used to
-    determine the output PDF and call an appropriate viewer.
-3.  A standard latex compilation system:
+How do I register the texmf directory?
 
-    You can use latexmk (shipped with miktex) with `Sumatrapdf <https://www.sumatrapdfreader.org/free-pdf-reader.html>`_
-    (Sumatrapdf allows you to edit the PDF while it's open in Sumatrapdf, while Adobe Acrobat *does not*).
-    Here is a ``~/.latexmkrc`` file that works on windows:
+* Under Windows, you can add the texmf tree graphically by opening
+  "miktex console" from the start menu.
+* If the menu options are greyed out, you need to activate administrator mode.
+* Inside miktex, go to "settings" →
+  "directories" and click the plus symbol → select the
+  texmf directory inside your pyspecdata repository
+  (``[DIRECTORY ONE UP FROM PYSPECDATA FOLDER]/pyspecdata/texmf``)
+  So that the "Folder" box says "texmf"
+  → click select folder.
+  If this works for you, you don't need to do the next bullet
+* In general (windows or otherwise) you should be able to use the command
+  ``initexmf --register-root=[DIRECTORY ONE UP FROM PYSPECDATA FOLDER]/pyspecdata/texmf``
 
-    .. code-block:: perl
+Once you've done this, the shell command ``kpsewhich mypython.sty``
+should return a result
+(if you have miktex installed on windows, this should work from either the git
+bash prompt or the dos or powershell prompt).
 
-        $pdflatex=q/pdflatex_notebook_wrapper %O -synctex=1 --xelatex %S/;
-        $pdf_previewer=q/pdflatex_notebook_view_wrapper/;#calls the wrapviewer function
+Use the pySpecData latex wrapper
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    **It should also be possible to use TeXworks** by adding pdflatex_notebook_wrapper to
-    preferences → typesetting → processing tools.
+The pyspecdata package proves the commands `pdflatex_notebook_wrapper` and
+`update_notebook_pythonscripts`, described below under "Running the
+notebook."
 
-    .. todo::
+It also provies the command `pdflatex_notebook_view_wrapper`, which is used to
+determine the output PDF and call an appropriate viewer.
 
-        Alec, can you check this out and update documentation??
-4.  It's assumed that your latex files are stored in a "notebook directory."
-    In some cases, during the first run, an explanatory error will appear -- just follow the instructions.
+If pyspecdata is installed, and the texmf directory is registered with your
+latex compiler (e.g. miktex), you should be able to clone and compile the
+`example notebooks repo from the franck lab <https://github.com/jmfrancklab/notebook_example>`_
+
+You can compile the tex file by typing:
+``pdflatex_notebook_wrapper -synctex=-1 notebook.tex``
+inside the root directory of the ``notebook_example`` repo.
+To get the results of the code to appear, you need to run this command *twice* the first time.
+
+It might take a few passes, but you should able to run this command without have latex complain about missing packages!
+* If this happens in miktex, you need to
+ * go to miktex settings → general, and set it to automatically download new pages. Be sure to click "for all users"!
+ * delete `notebook.aux` (`rm notebook.aux`) and the scripts directory, and run again
+
+* The first time you do this, miktex might need to install many packages,
+  so that you need to keep hitting enter and then reattempting.
+* It's assumed that your latex files are stored in a "notebook directory."
+  In some cases, during the first run, an explanatory error will appear -- just follow the instructions.
+
+Install a PDF viewer that plays nice with latex
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+On Windows, you will want to install `Sumatrapdf <https://www.sumatrapdfreader.org/free-pdf-reader.html>`_
+(use the installer version, not the portable version)
+to view your PDFs, since it automatically updates when the PDF is recompiled.
+
+On Linux, Zathura is very nice.
+
+(Optional/Recommended) set up latexmk
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Get set up with standard latex compilation system:
+
+You can use latexmk (shipped with miktex) with `Sumatrapdf <https://www.sumatrapdfreader.org/free-pdf-reader.html>`_
+(Sumatrapdf allows you to edit the PDF while it's open in Sumatrapdf, while Adobe Acrobat *does not*).
+Here is a ``~/.latexmkrc`` file that works on windows:
+
+.. code-block:: perl
+
+    $pdflatex=q/pdflatex_notebook_wrapper %O -synctex=1 --xelatex %S/;
+    $pdf_previewer=q/pdflatex_notebook_view_wrapper/;#calls the wrapviewer function
+
+**It should also be possible to use TeXworks** by adding pdflatex_notebook_wrapper to
+preferences → typesetting → processing tools.
 
 Running the notebook
 --------------------

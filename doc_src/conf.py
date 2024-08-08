@@ -17,8 +17,8 @@ import os
 import shlex
 import sphinx_rtd_theme
 import mock
-from matplotlib import rcParams
-print("datapath is",rcParams['datapath'])
+from matplotlib import rcParams, get_data_path
+print("datapath is",get_data_path())
  
 autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_toolkits', 'get_ipython', 'matplotlib', 'tables']
 
@@ -47,6 +47,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',# should allow numpydoc
     'sphinx.ext.autosummary',# should allow numpydoc
+    'sphinx.ext.intersphinx',
     #'matplotlib.sphinxext.only_directives',
     'matplotlib.sphinxext.plot_directive',
     #'IPython.sphinxext.ipython_console_highlighting',
@@ -55,9 +56,17 @@ extensions = [
 ]
 
 sphinx_gallery_conf = {
-        'examples_dirs': '../examples', #path to examples scripts
-        'gallery_dirs': 'auto_examples', #path to where to save gallery generated output
+        'examples_dirs': ['../examples'], #path to examples scripts
+        'gallery_dirs': ['auto_examples'], #path to where to save gallery generated output
         'filename_pattern': '.py', # modified to make more general
+        'ignore_pattern': r'__init__\.py',#|.*/text_only.*|.*/matplotlib.*',
+        #'image_srcset': ['2x'],
+        'reference_url': {
+            'pyspecdata': None,
+            },
+        "doc_module": ("pyspecdata",),
+        ## directory where function/class granular galleries are stored
+        'backreferences_dir'  : 'gen_modules/backreferences',
         }
 autosummary_generate = True
 
@@ -94,7 +103,7 @@ release = __version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:

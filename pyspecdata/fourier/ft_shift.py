@@ -1,6 +1,7 @@
 "shift-related helper functions"
 from numpy import r_
 import numpy as np
+import logging
 from ..general_functions import *
 thinkaboutit_message = ("If you think about it, you"
                         " probably don't want to do this.  You either want to fill with"
@@ -183,6 +184,8 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
                         " for ft_clear_startpoints!!"))
                 elif nearest:
                     f = round((f-orig_f)/df)*df + orig_f
+            else:
+                f = orig_f - round(n_df)*df
         self.set_ft_prop(axis,['start_freq'],f)
         self.set_ft_prop(axis,['freq','not','aliased'],None)
         if nearest is False:
@@ -198,9 +201,10 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
             orig_t = self.getaxis(axis)[0]
         if t is not None:
             n_dt = (orig_t-t)/dt # number of dt's shifted by
-            if abs((n_dt - round(n_dt))/n_dt) > 1e-3:
+            logging.debug(strm("trying to shift by",n_dt))
+            if n_dt != 0 and abs((n_dt - round(n_dt))/n_dt) > 1e-3:
                 if nearest is None:
-                    print("discrepancy",abs(orig_t-t) % dt)
+                    logging.debug(strm("discrepancy",abs(orig_t-t) % dt))
                     raise ValueError(strm("You need to explicitly"
                         " set `nearest`, since you are trying to shift"
                         " the start point from",orig_t,"to",t,
@@ -211,6 +215,10 @@ def ft_clear_startpoints(self,axis,t=None,f=None,nearest=None):
                         " for ft_clear_startpoints!!"))
                 elif nearest:
                     t = round((t-orig_t)/dt)*dt + orig_t
+                    logging.debug(strm("nearest t is",t))
+            else:
+                t = orig_t - round(n_dt)*dt
+                logging.debug(strm("setting t to",t))
         self.set_ft_prop(axis,['start_time'],t)
         self.set_ft_prop(axis,['time','not','aliased'],None)
         if nearest is False:
@@ -248,11 +256,11 @@ def _find_index(u,origin = 0.0,tolerance = 1e-4,verbose = False):
     if not u[0] < origin < u[-1]:
         alias_number = (origin - u[0]) // SW # subtracting this many SW's from origin
         #                                     will land me back inside the range of u
-        if verbose: print("(_find_index) range of axis:",u[0],u[-1])
-        if verbose: print("(_find_index) alias number is",alias_number)
-        if verbose: print("(_find_index) set origin from",origin, end=' ')
+        if verbose: logging.debug(strm("(_find_index) range of axis:",u[0],u[-1]))
+        if verbose: logging.debug(strm("(_find_index) alias number is",alias_number))
+        if verbose: logging.debug(strm("(_find_index) set origin from",origin, end=' '))
         origin -= alias_number * SW
-        if verbose: print("to",origin)
+        if verbose: logging.debug(strm("to",origin))
     p2 = np.argmin(abs(u-origin))
     assert np.count_nonzero(u[p2] == u) == 1, ("there seem to be"
             " "+repr(np.count_nonzero(u[p2] == u))+" values equal"
@@ -261,6 +269,6 @@ def _find_index(u,origin = 0.0,tolerance = 1e-4,verbose = False):
         p2_discrepancy = origin - u[p2]
     else:
         p2_discrepancy = None
-    if verbose: print("(_find_index) for origin",origin,"I am returning p2",p2,"out of",N,"and discrepancy",p2_discrepancy)
+    if verbose: logging.debug(strm("(_find_index) for origin",origin,"I am returning p2",p2,"out of",N,"and discrepancy",p2_discrepancy))
     alias_number += 1 # because the way that _ft_shift works essentially entails one aliasing
     return p2,p2_discrepancy,alias_number*SW

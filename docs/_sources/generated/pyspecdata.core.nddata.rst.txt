@@ -37,6 +37,7 @@
       ~nddata.cropped_log
       ~nddata.diff
       ~nddata.dot
+      ~nddata.eval_poly
       ~nddata.extend
       ~nddata.extend_for_shear
       ~nddata.fld
@@ -51,6 +52,7 @@
       ~nddata.get_ft_prop
       ~nddata.get_plot_color
       ~nddata.get_prop
+      ~nddata.get_range
       ~nddata.get_units
       ~nddata.getaxis
       ~nddata.getaxisshape

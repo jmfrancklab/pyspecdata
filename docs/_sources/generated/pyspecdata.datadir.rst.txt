@@ -18,6 +18,7 @@
       get_notebook_dir
       grab_data_directory
       log_fname
+      proc_data_target_dir
       rclone_search
       register_directory
    
@@ -30,6 +31,7 @@
    .. autosummary::
    
       MyConfig
+      cached_searcher
    
    
 

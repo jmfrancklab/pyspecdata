@@ -1,0 +1,27 @@
+\usepackage{ifxetex}
+\usepackage[utf8]{inputenc}
+% go into the bbl, remove entries in bbl (not citations, run manually) to narrow down, then /[^\x00-\x7F] and ga to find the code
+% see this awesome page: ftp://ftp.fau.de/ctan/biblio/biber/documentation/utf8-macro-map.html
+\ifxetex\else
+\DeclareUnicodeCharacter{00A0}{~}
+\DeclareUnicodeCharacter{00A9}{\textcopyright}
+\DeclareUnicodeCharacter{00B0}{\ensuremath{^{\circ}}}
+\DeclareUnicodeCharacter{00BD}{\ensuremath{\frac{1}{2}}}
+\DeclareUnicodeCharacter{03BC}{\textmu{}}
+\DeclareUnicodeCharacter{03BD}{\ensuremath{\nu}}
+\DeclareUnicodeCharacter{03C0}{\ensuremath{\pi}}
+\DeclareUnicodeCharacter{2010}{-}
+\DeclareUnicodeCharacter{2013}{--}
+\DeclareUnicodeCharacter{2018}{`}
+\DeclareUnicodeCharacter{2019}{'}
+\DeclareUnicodeCharacter{2192}{\ensuremath{\rightarrow}}
+\DeclareUnicodeCharacter{2212}{-}
+\DeclareUnicodeCharacter{223C}{\ensuremath{\sim}}
+\DeclareUnicodeCharacter{2264}{\ensuremath{\le}}
+\DeclareUnicodeCharacter{2272}{\ensuremath{\lesssim}}
+\DeclareUnicodeCharacter{2606}{{\v i}}
+\DeclareUnicodeCharacter{2606}{}
+\DeclareUnicodeCharacter{8764}{}
+%\DeclareUnicodeCharacter{2611}{\makebox[0pt][l]{$\square$}\raisebox{.15ex}{\hspace{0.1em}$\checkmark$}}
+%\DeclareUnicodeCharacter{00e9}{\ensuremath{\downarrow}}
+\fi

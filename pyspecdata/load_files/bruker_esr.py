@@ -1,11 +1,13 @@
 from ..core import *
 from ..general_functions import strm
+from ..datadir import rclone_search
 import numpy as np
 import re
 from io import StringIO
+import os
 logger = logging.getLogger('pyspecdata.load_files.bruker_esr')
 b0_texstr = r'$B_0$'
-def xepr(filename, dimname='', verbose=False):
+def xepr(filename, exp_type=None, dimname='', verbose=False):
     """For opening Xepr files.
     
     Parameters
@@ -27,9 +29,18 @@ def xepr(filename, dimname='', verbose=False):
                 " .PAR\n"
                 "This one is called",repr(filename)))
     # {{{ check if the extension is upper or lowercase
+    orig_spc = filename_spc
     if not os.path.exists(filename_spc):
+        logging.debug(f"{filename_spc} doesn't exist -- trying lowercase")
         filename_spc = filename_spc[:-4] + filename_spc[-4:].lower()
+    if not os.path.exists(filename_spc):
+        filename_spc = orig_spc
+    orig_par = filename_par
+    if not os.path.exists(filename_par):
+        logging.debug(f"{filename_par} doesn't exist -- trying lowercase")
         filename_par = filename_par[:-4] + filename_par[-4:].lower()
+    if not os.path.exists(filename_par):
+        filename_par = orig_par
     # }}}
     # }}}
     # {{{ load the parameters
@@ -46,6 +57,17 @@ def xepr(filename, dimname='', verbose=False):
         
     # }}}
     # {{{ load the data
+    if not os.path.exists(filename_spc):
+        # because the spc isn't part of the original search, we
+        # need to log the fact that it's missing manually
+        if exp_type is None:
+            raise ValueError("I could probably find "
+            "your file remotely, but you called with "
+            "exp_type None!")
+        rclone_search(
+                os.path.split(filename_spc)[-1],
+                exp_type,
+                os.path.split(filename_spc)[0])
     with open(filename_spc,'rb') as fp:
         if all([j == 'REAL' for j in ikkf]):
             data = np.frombuffer(fp.read(),'>f8')
@@ -73,21 +95,27 @@ def xepr(filename, dimname='', verbose=False):
             if thiskey in v.keys() and v[thiskey]:
                 harmonics[j,k] = True
     n_harmonics = np.sum(harmonics)
+    if n_harmonics == 0: n_harmonics = 1
     logger.debug('there are %d harmonics'%n_harmonics)
-    logger.debug('there are %d harmonics, first is of type %s'%(n_harmonics,ikkf[0]))
+    if n_harmonics > 1:
+        logger.debug('there are %d harmonics, first is of type %s'%(n_harmonics,ikkf[0]))
     # }}}
     # {{{ check that calculated axes match dimensions
     y_points_calcd = len(data)//x_points//n_harmonics
-    dimname_list = [b0_texstr]
+    if 'XNAM' in list(v.keys()):
+        x_dimname = v['XNAM']
+    else:
+        x_dimname = b0_texstr
+    dimname_list = [x_dimname]
     dimsize_list = [x_points]
-    dims_accounted_for = {b0_texstr}
-    dims_to_label = {b0_texstr:x_axis}
+    dims_accounted_for = {x_dimname}
+    dims_to_label = {x_dimname:x_axis}
     def interpret_units(un_key):
         retval = v.pop(un_key)
         if retval[0] == "'": retval = retval.replace("'","")
         return retval
     if 'XUNI' in list(v.keys()):
-        dim_units = {b0_texstr:interpret_units('XUNI')}
+        dim_units = {x_dimname:interpret_units('XUNI')}
     else:
         dim_units = {}
     if n_harmonics > 1:
@@ -121,12 +149,25 @@ def xepr(filename, dimname='', verbose=False):
                 if isinstance(y_dim_name, list):
                     y_dim_name = ' '.join(y_dim_name) # it gets split into a list, which for XEpr files shouldn't be happening, but fix later
                     if y_dim_name[0] == "'": y_dim_name = y_dim_name.replace("'","")
+                if y_dim_name.startswith("'") and y_dim_name.endswith("'"):
+                    y_dim_name = y_dim_name[1:-1]
                 assert 'YUNI' in list(v.keys()), ("No parameter YUNI -- how do you expect me to know the units of the second dimension??")
                 dim_units.update({y_dim_name:interpret_units('YUNI')})
                 filename_ygf = filename_par[:-4] + '.YGF'
-                if not os.path.exists(filename_ygf):
-                    filename_ygf = filename_ygf[:-4] + filename_ygf[-4:].lower()
-                assert os.path.exists(filename_ygf), "I can't find the YGF file ("+filename_ygf+") that stores the powers"
+                for j in range(2):
+                    if not os.path.exists(filename_ygf) and j>0:
+                        filename_ygf = filename_ygf[:-4] + filename_ygf[-4:].lower()
+                    if not os.path.exists(filename_ygf):
+                        # because the spc isn't part of the original search, we
+                        # need to log the fact that it's missing manually
+                        if exp_type is None:
+                            raise ValueError("I could probably find "
+                            "your file remotely, but you called with "
+                            "exp_type None!")
+                        rclone_search(
+                                os.path.split(filename_ygf)[-1],
+                                exp_type,
+                                os.path.split(filename_ygf)[0])
                 with open(filename_ygf,'rb') as fp:
                     y_axis = fp.read()
                 y_axis = np.fromstring(y_axis,'>f8')
@@ -159,26 +200,23 @@ def xepr(filename, dimname='', verbose=False):
     for k,val in dim_units.items():
         data.set_units(k,val)
     # }}}
-    # {{{ use the parameters to rescale the data
-    logger.debug("There is a parameter called DModGain as well as"
-            " Gain -- not sure what that is")
-    rg = v.pop('Gain')
-    if np.isscalar(rg) or rg[1] != 'dB':
-        raise ValueError(strm("The gain from the file is not given in"
-                " dB -- not sure what's up.  I get",rg,"for gain"))
-    #data /= 10**(rg[0]/10.0)
-    #data /= modulation
-    # here, for winepr, I divided by the number of scans, but I'm
-    # fairly sure I don't wan to do that
-    # }}}
     data.other_info.update(v)
-    data.reorder(b0_texstr)
+    data.reorder(x_dimname)
     if 'Microwave Power' in data.dimlabels:
         # convert from W to dBm
         data.setaxis('Microwave Power',lambda x: 10*np.log10(x)).set_units('Microwave Power','dBm')
-    if data.get_units(b0_texstr) == 's': data.rename(b0_texstr,'t')
+    if data.get_units(x_dimname) == 's': data.rename(x_dimname,'t')
+    # {{{ this is a hack -- should be replaced with pint, etc, but needs
+    # more thought for a general solution!
+    for thisdim in data.dimlabels:
+        if data.get_units(thisdim) == 'ns':
+            data[thisdim] /= 1e9
+            data.set_units(thisdim,'s')
+    if 'Field' in data.dimlabels:
+        data.rename('Field',b0_texstr)
+    # }}}
     return data
-def winepr(filename, dimname=''):
+def winepr(filename, dimname='', exp_type=None):
     """For opening WinEPR files.
     
     Parameters
@@ -204,6 +242,15 @@ def winepr(filename, dimname=''):
     # }}}
     # }}}
     # {{{ load the data
+    if not os.path.exists(filename_spc):
+        if exp_type is None:
+            raise ValueError("I could probably find "
+            "your file remotely, but you called with "
+            "exp_type None!")
+        rclone_search(
+                os.path.split(filename_spc)[0],
+                exp_type,
+                os.path.split(filename_spc)[-1])
     with open(filename_spc,'rb') as fp:
         data = fp.read()
     data = np.fromstring(data,'<f4')
@@ -304,9 +351,12 @@ def xepr_load_acqu(filename):
         converts the record array to a list.'''
         if len(x):
             try:
-                return np.genfromtxt(StringIO(x),dtype=None,encoding='utf-8').tolist()
+                result = np.genfromtxt(StringIO(x),dtype=None,encoding='utf-8').tolist()
             except:
                 raise ValueError("genfromtxt chokes on "+repr(x))
+            if type(result) is str and result[0] == "'" and result[-1] == "'":
+                result = result[1:-1]
+            return result
         else:
             return None
     which_block = None

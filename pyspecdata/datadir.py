@@ -3,18 +3,20 @@ even though the location of the raw spectral data might change.
 
 This is controlled by the ``~/.pyspecdata`` or ``~/_pyspecdata`` config file.
 '''
-import os, sys
+import os, sys, csv
 import configparser
 import platform
 from .general_functions import process_kwargs, strm
 import logging
 import atexit
+import collections
 from subprocess import Popen,PIPE,check_output
 from subprocess import call as subprocess_call
 logger = logging.getLogger('pyspecdata.datadir')
+unknown_exp_type_name = 'XXX--unknown--XXX'
 class MyConfig(object):
     r'''Provides an easy interface to the pyspecdata configuration file.
-    Only one instance _my_config should be created -- this instance is used by
+    Only one instance pyspec_config should be created -- this instance is used by
     the other functions in this module.
     '''
     def __init__(self):
@@ -25,12 +27,19 @@ class MyConfig(object):
         else:
             self.hide_start = '.'
         self.config_location = os.path.join(os.path.expanduser('~'),self.hide_start+'pyspecdata')
-        self.config_vars = {}
+        self.config_vars = collections.defaultdict(dict)
         "The dictionary that stores the current settings -- keep these in a dictionary, which should be faster than reading from environ, or from a file."
         atexit.register(self.__exit__,None,None,None)
         return
     def set_setting(self,this_section,this_key,this_value):
         "set `this_key` to `this_value` inside section `this_section`, creating it if necessary"
+        if any(list(type(j) is not str for j in
+            [this_section,this_key,this_value])):
+            raise ValueError("one of section, key, "
+                "value are not a string! They are: "
+                + str(list(type(j) for j in
+                    [this_section,this_key,this_value]))
+                )
         if self._config_parser is None:
             self._config_parser = configparser.SafeConfigParser()
             read_cfg = self._config_parser.read(self.config_location)
@@ -84,9 +93,9 @@ class MyConfig(object):
         -------
         The value corresponding to `this_key`.
         """
-        if this_key in self.config_vars.keys():
-            logger.debug(strm("I pulled",this_key,"from the config_vars"))
-            return self.config_vars[this_key]
+        if this_key in self.config_vars[section].keys():
+            logger.debug(strm("I pulled",this_key,"in",section,"from the config_vars"))
+            return self.config_vars[section][this_key]
         if environ is not None and environ in os.environ.keys():
             logger.debug(strm("about to look for environment variable",environ))
             retval = os.environ[environ]
@@ -108,31 +117,36 @@ class MyConfig(object):
             if retval in [None,'']:# it wasn't found from the config file
                 if default is None:
                     return None
-                default = default.split('/')
-                for j in range(len(default)):
-                    if default[j][0] == '.':
-                        default[j] = self.hide_start + default[j][1:]
-                default = os.path.sep.join(default)
-                raise RuntimeError("\nI didn't find the value corresponding to "+this_key
-                        +" in the environment variable "+repr(environ)+'\n'+
-                        "--> You probably want to run the command-line tool pyspecdata_dataconfig to set up a configuration file")
+                if type(default) is str and '/' in default:
+                    default = default.split('/')
+                    for j in range(len(default)):
+                        if default[j][0] == '.':
+                            default[j] = self.hide_start + default[j][1:]
+                    default = os.path.sep.join(default)
+                retval = default
+                if retval is None:
+                    raise RuntimeError("\nI didn't find the value corresponding to "+this_key
+                            +" in the environment variable "+repr(environ)+'\n'+
+                            "--> You probably want to run the command-line tool pyspecdata_dataconfig to set up a configuration file")
+                if type(retval) in [int,float]:
+                    retval = str(retval)
                 self._config_parser.set(section,this_key,retval)
             if environ is not None:
                 os.environ[environ] = retval
             logger.debug(strm("I pulled",this_key,"from the configuration file -- it is",retval))
-        self.config_vars[this_key] = retval
+        self.config_vars[section][this_key] = retval
         return retval
-_my_config = MyConfig()
+pyspec_config = MyConfig()
 def get_notebook_dir(*args):
     r'''Returns the notebook directory.  If arguments are passed, it returns the directory underneath the notebook directory, ending in a trailing (back)slash
     
     It is determined by a call to `MyConfig.get_setting` with the environment variable set to ``PYTHON_NOTEBOOK_DIR`` and default ``~/notebook``.
     '''
-    base_notebook_dir = _my_config.get_setting('notebook_directory',environ = 'PYTHON_NOTEBOOK_DIR',default = '~/notebook')
+    base_notebook_dir = pyspec_config.get_setting('notebook_directory',environ = 'PYTHON_NOTEBOOK_DIR',default = '~/notebook')
     if not os.path.exists(base_notebook_dir):
         base_notebook_dir = os.path.expanduser(base_notebook_dir)
         if not os.path.exists(base_notebook_dir):
-            raise ValueError("It seems that your notebook directory (the main directory containing your latex files) isn't either (1) called \"notebook\" and immediately underneath your home directory or (2) registered in the [General] block of your "+_my_config.config_location+"file.\nThis probably means that you want to add a line like\nnotebook_directory = [path to your main notebook directory here]\nTo the [General] block of "+_my_config.config_location)
+            raise ValueError("It seems that your notebook directory (the main directory containing your latex files) isn't either (1) called \"notebook\" and immediately underneath your home directory or (2) registered in the [General] block of your "+pyspec_config.config_location+"file.\nThis probably means that you want to add a line like\nnotebook_directory = [path to your main notebook directory here]\nTo the [General] block of "+pyspec_config.config_location)
     retval = (base_notebook_dir,) + args
     if len(retval[-1]) != 0:
         retval = retval + ('',)
@@ -147,9 +161,25 @@ def grab_data_directory():
             +"data directory was"
             +"\nAll the functionality of this function should now be"
             +"replaced by getDATADIR")
+def proc_data_target_dir(exp_type):
+    """A convenience function for getting a data directory you're going to write data to.
+
+    Provides the full path to the directory corresponding to exp_type.
+
+    If this is the first time you're trying to write to that exp_type, it will create the directory"""
+    data_target = os.path.normpath(getDATADIR('AG_processed_data'))
+    if not os.path.exists(data_target):
+        os.mkdir(data_target)
+    return data_target
 def getDATADIR(*args,**kwargs):
     r'''Used to find a directory containing data in a way that works
     seamlessly across different computers (and operating systems).
+
+    **This is not intended as a user-level function** use 
+    :func:`~pyspecdata.find_file`
+    or
+    :func:`~pyspecdata.search_filename` (especially with the `unique` parameter set to true) instead!
+
     Supports the case where data is processed both on a laboratory
     computer and (*e.g.* after transferring via ssh or a syncing client) on a
     user's laptop.
@@ -205,7 +235,7 @@ def getDATADIR(*args,**kwargs):
             can be rather complex, and otherwise it would take forever).
     '''
     exp_type = process_kwargs([('exp_type',None)],kwargs)
-    base_data_dir = _my_config.get_setting('data_directory',environ = 'PYTHON_DATA_DIR',default = '~/experimental_data')
+    base_data_dir = pyspec_config.get_setting('data_directory',environ = 'PYTHON_DATA_DIR',default = '~/experimental_data')
     if exp_type is not None and '/' in exp_type:
         exp_type = os.path.normpath(exp_type)
     # the following is from https://stackoverflow.com/questions/229186/os-walk-without-digging-into-directories-below
@@ -248,25 +278,30 @@ def getDATADIR(*args,**kwargs):
         else:
             return None
         # {{{ I would like to do something like the following, but it's not allowed in either ConfigParser or SafeConfigParser
-        #base_dir = _my_config.get_setting('ExpTypes','base')
-        #if base_dir is None: _my_config.set_setting('ExpTypes','base',base_dir)
+        #base_dir = pyspec_config.get_setting('ExpTypes','base')
+        #if base_dir is None: pyspec_config.set_setting('ExpTypes','base',base_dir)
         #if base_dir in exp_directory: exp_directory = [exp_directory.replace(base_dir,'%(base)s')]
         # }}}
-        _my_config.set_setting('ExpTypes',exp_type,exp_directory)
+        pyspec_config.set_setting('ExpTypes',exp_type,exp_directory)
         return exp_directory
     if exp_type is not None:
         # {{{ determine the experiment subdirectory
-        exp_directory = _my_config.get_setting(exp_type, section='ExpTypes')
+        exp_directory = pyspec_config.get_setting(exp_type, section='ExpTypes')
         if exp_directory is None:
-            exp_directory = walk_and_grab_best_match(base_data_dir)
+            logger.debug(strm("I found no directory matches for exp_type "+exp_type+", so now I want to look inside all the known exptypes"))
+            for t,d in dict(pyspec_config._config_parser.items('ExpTypes')).items():
+                exp_directory = walk_and_grab_best_match(d)
+                if exp_directory is not None:
+                    break
             if exp_directory is None:
-                logger.debug(strm("I found no directory matches for exp_type "+exp_type+", so now I want to look inside all the known exptypes"))
-                for t,d in dict(_my_config._config_parser.items('ExpTypes')).items():
-                    exp_directory = walk_and_grab_best_match(d)
-                    if exp_directory is not None:
-                        break
+                logger.debug(strm("I found no directory matches for exp_type "+exp_type+", even after searching inside all the known exptypes"))
+                d = dict(pyspec_config._config_parser.items('General'))['data_directory']
+                exp_directory = walk_and_grab_best_match(d)
                 if exp_directory is None:
-                    raise ValueError(strm("I found no directory matches for exp_type "+exp_type+", even after searching inside all the known exptypes"))
+                    raise ValueError("even after walking the whole data directory, I can't find a match for "+exp_type+".  If that's really a directory that exists on a remote server, etc, then you should add the empty directory to your local file structure, somewhere where it's findable by pyspecdata (listed in your pyspecdata config file) -- i.e. mkdir -p "+exp_type+" in the right place")
+        if exp_directory is None:
+            logger.debug(strm("I found no directory matches for exp_type "+exp_type+", after walking the known exptypes, so I'm going to walk data_directory"))
+            exp_directory = walk_and_grab_best_match(base_data_dir)
         retval = (exp_directory,) + args
         # }}}
     else:
@@ -274,45 +309,102 @@ def getDATADIR(*args,**kwargs):
     if len(retval[-1]) != 0:
         retval = retval + ('',)
     return os.path.join(*retval)
-def rclone_search(fname,dirname):
-    retval = "I can't find %s in %s, so I'm going to search for t in your rclone remotes"%(fname,dirname)
-    rclone_remotes = []
-    try:
-        with Popen('rclone', stdout=PIPE, stderr=PIPE) as p:
-            pass
-    except OSError as e:
-        raise RuntimeError("I can't find the rclone program in your"
-                "path -- please install from http://rclone.org")
-    with Popen(['rclone','listremotes'],
-            stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
-        for j in proc.stdout:
-            rclone_remotes.append(j.rstrip())
-    for thisremote in rclone_remotes:
-        retval += '\n'+strm("checking remote",thisremote)
-        # do NOT quote the filename -- quotes are typically stripped off by the
-        # shell -- they would be literal here
-        cmd = ['rclone','--include','*'+fname+'*', 'ls',thisremote]
-        logger.debug("running "+strm(*cmd))
-        with Popen(cmd, stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
-            for j in proc.stdout:
-                foundpath = j.split()
-                foundpath = [' '.join(foundpath[1:])] # leave out size, just filename
-                lastlen = 0
-                while len(foundpath) > lastlen:
-                    lastlen = len(foundpath)
-                    foundpath = [j for k in foundpath
-                            for j in os.path.split(k)
-                            if len(j) > 0]
-                    logging.debug(strm("foundpath is",foundpath))
-                retval += '\nYou should be able to retrieve this file with:\n'+strm(
-                        "rclone copy -v --include '%s' %s%s %s"%(foundpath[-1],
-                    thisremote,
-                    '/'.join(foundpath[:-1]),
-                    # dirname below needs to be replaced with path relative to current directory
-                    os.path.normpath(os.path.join(dirname)).replace('\\','\\\\')))
-    return retval
-def log_fname(logname,fname,dirname,err=False):
-    r"""logs the file name either used or missing.
+class cached_searcher(object):
+    def __init__(self):
+        self.has_run = False
+        self.dirlist = []
+    def grab_dirlist(self, specific_remote=None):
+        if specific_remote is None:
+            rclone_remotes = []
+            try:
+                with Popen('rclone', stdout=PIPE, stderr=PIPE) as p:
+                    pass
+            except OSError as e:
+                raise RuntimeError("I can't find the rclone program in your"
+                        "path -- please install from http://rclone.org")
+            with Popen(['rclone','listremotes'],
+                    stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
+                for j in proc.stdout:
+                    rclone_remotes.append(j.rstrip())
+        else:
+            rclone_remotes = [specific_remote]
+        for thisremote in rclone_remotes:
+            print("checking remote",thisremote,"... this might take a minute")
+            # do NOT quote the filename -- quotes are typically stripped off by the
+            # shell -- they would be literal here
+            cmd = ['rclone','lsf','-R','--dirs-only',thisremote]
+            logger.info("grabbing all dir info with "
+                    +strm(*cmd)+" ... this might take a minute")
+            with Popen(cmd, stdout=PIPE, stderr=PIPE, encoding='utf-8') as proc:
+                for j in proc.stdout:
+                    self.dirlist.append(thisremote+'/'+j.strip())
+            logger.info("done checking that remote")
+        return
+    def search_for(self,exp_type,specific_remote=None):
+        if not self.has_run:
+            print(strm("about to grab the directory list for",exp_type))
+            logger.info(strm("about to grab the directory list for",exp_type))
+            self.grab_dirlist(specific_remote=specific_remote)
+        # {{{ if we found exactly the exp_type inside the specific_remote,
+        #     that's what we want!
+        if specific_remote is not None:
+            if specific_remote+'/'+exp_type+'/' in self.dirlist:
+                logger.debug("found exactly the right exp_type inside the specific_remote")
+                return [specific_remote+'/'+exp_type+'/']
+        # }}}
+        potential_hits = [j for j in self.dirlist
+                if exp_type.lower() in j.lower()]
+        logger.debug(strm("found potential hits",potential_hits))
+        return potential_hits
+cached_searcher_instance = cached_searcher()
+def rclone_search(fname,exp_type,dirname):
+    logger.debug(strm("rclone search called with fname:",fname,"exp_type:",exp_type))
+    remotelocation = pyspec_config.get_setting(exp_type.lower(), section='RcloneRemotes')
+    if remotelocation is None:
+        # {{{ first see the exp_type is contained inside something else
+        exp_dir_list = exp_type.split('/')
+        for specificity in range(len(exp_dir_list)-1):
+            remotelocation = pyspec_config.get_setting('/'.join(exp_dir_list[:-(specificity+1)]).lower(), section='RcloneRemotes')
+            if remotelocation is not None:
+                logger.debug(f"did find one level up {remotelocation}")
+                result = cached_searcher_instance.search_for(
+                        '/'.join(exp_dir_list[-(specificity+1):]),
+                        specific_remote=remotelocation
+                        )
+        # }}}
+        # {{{ only do a general search if the previous failed
+        if remotelocation is None:
+            logger.debug(f"remote location {exp_type.lower()} not previously stored, so search for it!")
+            result = cached_searcher_instance.search_for(exp_type.lower())
+        # }}}
+        if len(result) > 1:
+            raise ValueError(
+                f"the exp_type that you've selected, {exp_type}, is ambiguous,"
+                "and could refer to the following remote locations:\n"
+                + str(result))
+        elif len(result) == 0:
+            raise ValueError(f"I can't find a remote corresponding to your exp_type {exp_type}")
+        else:
+            remotelocation = result[0]
+            logging.debug("about to write to RcloneRemotes")
+            pyspec_config.set_setting('RcloneRemotes',exp_type,remotelocation)
+    logger.debug(f"remote location previously stored {remotelocation} for {exp_type} going to be put in {dirname}")
+    if not fname.startswith('*'):
+        fname = '*' + fname
+    if not fname.endswith('*'):
+        fname = fname + '*'
+    cmd = strm(
+            "rclone copy -v --include '%s' %s %s"%(fname,
+                remotelocation,
+                # dirname below needs to be replaced with path relative to current directory
+                os.path.normpath(os.path.join(dirname)).replace('\\','\\\\')))
+    cmd = cmd.replace("'",'"')
+    logger.info(f"I'm about to run\n{cmd}")
+    os.system(cmd)
+    logger.info(f"... done")
+    return
+def log_fname(logname,fname,dirname,exp_type):
+    r"""logs the file name either used or missing into a csv file.
 
     Also, by setting the `err` flag to True, you can generate an error message
     that will guide you on how to selectively copy down this data from a remote source
@@ -331,27 +423,34 @@ def log_fname(logname,fname,dirname,err=False):
     You should be able to retrieve this file with:
     rclone copy -v --include '200110_pulse_2.h5' g_syr:exp_data/test_equip C:\\Users\\johnf\\exp_data\\test_equip``
     """
-    if err:
-        rclone_suggest = rclone_search(fname,dirname)# eventually lump into the error message
-    with open(logname+'.log','a+',encoding='utf-8') as fp:
-        already_listed = False
-        fp.seek(0,0)
-        for j in fp:
-            j = j.replace(r'\ ','LITERALSPACE')
-            try:
-                f, d = j.split()
-            except:
-                raise RuntimeError(strm("there seems to be something wrong with your",logname+'.log',"file (in the current directory).  It should consist of one line per file, with each file containing a file and directory name.  Instead, I find a line with the following elements",j.split(),'\n',"You might try deleting the",logname+'.log',"file"))
-            f = f.replace('LITERALSPACE',' ')
-            d = d.replace('LITERALSPACE',' ')
-            if f == fname and d == dirname:
-                already_listed = True
-                break
-        if not already_listed:
-            fp.seek(0,os.SEEK_END)# make sure at end of file
-            fp.write('%-70s%-50s\n'%(fname.replace(' ','\\ '),dirname.replace(' ','\\ ')))
-    if err:
-        return rclone_suggest
+    thefields = ["Filename","Path","exp_type"]
+    therow = [fname,dirname,exp_type]
+    # {{{ read all the info into a set
+    if os.path.exists(logname+".csv"):
+        with open(logname+".csv", 'r', encoding='utf-8') as fp:
+            reader = csv.DictReader(fp)
+            all_data = []
+            for row in reader:
+                all_data.append(tuple(row[j] for j in
+                    thefields))
+            all_data = set(all_data)
+    else:
+        all_data = set()
+    # }}}
+    # {{{ add our info to the set
+    therow = dict(zip(thefields, therow))
+    all_data |= set([tuple(therow[j] for j in
+        thefields)])
+    # }}}
+    # {{{ write the updated csv
+    with open(logname+".csv", 'w', encoding='utf-8') as fp:
+        thiscsv = csv.DictWriter(fp, fieldnames=thefields)
+        thiscsv.writeheader()
+        for thisitem in all_data:
+            thiscsv.writerow(dict(zip(thefields,
+                thisitem)))
+    # }}}
+    return
 def register_directory():
     r"""The shell command `pyspecdata_register_dir WHICHDIR` will register the
     directory WHICHDIR (substitute with the name of a directory on your
@@ -362,8 +461,8 @@ def register_directory():
     you can use the `exp_type` argument of those commands where you only give
     the lowest level subdirectory (or the final couple subdirectories) that
     contains your data.
-
-    Key to the way this mechanism works
+    If the `exp_type` that you are trying to access has a slash in it, you should register the top-most directory.
+    (For example, if you want `UV_Vis/Liam`, then register the directory that provides `UV_Vis`).
 
     .. note::
         this feature was installed on 9/24/20: you need to re-run
@@ -375,5 +474,5 @@ def register_directory():
     exp_directory = os.path.normpath(os.path.expanduser(exp_directory))
     _,exp_type = os.path.split(exp_directory)
     logger.debug(strm("trying to register directory",exp_directory,"as",exp_type))
-    _my_config.set_setting('ExpTypes',exp_type,exp_directory)
+    pyspec_config.set_setting('ExpTypes',exp_type,exp_directory)
     return

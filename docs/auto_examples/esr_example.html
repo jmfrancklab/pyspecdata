@@ -1,77 +1,44 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bruker cw ESR Data &mdash; pySpecData 0.9.5.3.2 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/gallery_custom.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/gallery-binder.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/gallery-dataframe.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/gallery_custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Plotting Routines" href="image_plot.html" />
-    <link rel="prev" title="Saving HDF5 Files" href="save_hdf.html" /> 
+    <link rel="next" title="Simple Convolution Example" href="convolution.html" />
+    <link rel="prev" title="Polynomial Fitting" href="polyfit.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
-            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> pySpecData
-          
-
-          
+            <a href="../index.html" class="icon icon-home"> pySpecData
           </a>
-
-          
-            
-            
               <div class="version">
                 0.9.5.3.2
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -79,121 +46,89 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the fitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the lmfitdata class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Example Gallery</span></p>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">PySpecData Examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="log_test.html">Logging Functionality</a></li>
-<li class="toctree-l2"><a class="reference internal" href="matplotlib_test.html">Matplotlib Example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="extend.html">Extend</a></li>
-<li class="toctree-l2"><a class="reference internal" href="save_hdf.html">Saving HDF5 Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Cary_simple.html">Simple Cary UV-Vis loading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polyfit.html">Polynomial Fitting</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Bruker cw ESR Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convolution.html">Simple Convolution Example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="image_plot.html">Plotting Routines</a></li>
-<li class="toctree-l2"><a class="reference internal" href="fit_fake_data.html">Fitting Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_container.html">Plot Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppm_example.html">ppm Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ellmans.html">Manipulation of UV-Vis data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_with_bounds.html">Fit Using Bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_complex.html">Fit complex data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DCCT_function.html">Using the DCCT function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_example.html">Basic Slicing/Filtering Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BSA_calibration.html">BSA UV-Vis Calibration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_fake_data.html">Fitting Data (Nonlinear + Symbolic)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QESR.html">Quantitative ESR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#individual-functions">Individual Functions</a></li>
 </ul>
 </li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">pySpecData</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="index.html">PySpecData Examples</a> &raquo;</li>
-        
-      <li>Bruker cw ESR Data</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">PySpecData Examples</a></li>
+      <li class="breadcrumb-item active">Bruker cw ESR Data</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="../_sources/auto_examples/esr_example.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
-<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-esr-example-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-esr-example-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
 </div>
-<div class="sphx-glr-example-title section" id="bruker-cw-esr-data">
-<span id="sphx-glr-auto-examples-esr-example-py"></span><h1>Bruker cw ESR Data<a class="headerlink" href="#bruker-cw-esr-data" title="Permalink to this headline">¶</a></h1>
+<section class="sphx-glr-example-title" id="bruker-cw-esr-data">
+<span id="sphx-glr-auto-examples-esr-example-py"></span><h1>Bruker cw ESR Data<a class="headerlink" href="#bruker-cw-esr-data" title="Permalink to this heading">¶</a></h1>
 <p>Load cw Bruker ESR data, both 1D and 2D.</p>
-<ul class="sphx-glr-horizontal">
-<li><img alt="esr example" class="sphx-glr-multi-img" src="../_images/sphx_glr_esr_example_001.png" />
-</li>
-<li><img alt="esr example" class="sphx-glr-multi-img" src="../_images/sphx_glr_esr_example_002.png" />
-</li>
-</ul>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>c:\users\johnf\notebook\pyspecdata\pyspecdata\load_files\__init__.py:101: UserWarning: found multiple files:
+<p>Check out the
+<a class="reference external" href="Cary_simple.html">Simple UV</a>
+example to understand how
+pySpecData locates the file here.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>Load some 1D ESR data with harmonic + phase info.
+The data is initial organized into two dimensions – <cite>harmonic</cite> and <cite>$B_0$</cite>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a></a> <span class="o">=</span> <span class="n">find_file</span><span class="p">(</span><span class="s2">&quot;S175R1a.*DHPC.*200304&quot;</span><span class="p">,</span>
+        <span class="n">exp_type</span><span class="o">=</span><span class="s1">&#39;francklab_esr/Sam&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><a href="../modules.html#module-pyspecdata.ndshape" title="pyspecdata.ndshape" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><a href="../modules.html#module-pyspecdata.ndshape" title="pyspecdata.ndshape" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">ndshape</span></a></a><span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a></a><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;here, we see the harmonic axis contains both harmonic and phase info&quot;</span><span class="p">,</span><span class="nb">repr</span><span class="p">(</span><a href="../auto_api/pyspecdata.html#pyspecdata.nddata.getaxis" title="pyspecdata.nddata.getaxis" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../auto_api/pyspecdata.html#pyspecdata.nddata.getaxis" title="pyspecdata.nddata.getaxis" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">d</span><span class="o">.</span><span class="n">getaxis</span></a></a><span class="p">(</span><span class="s1">&#39;harmonic&#39;</span><span class="p">)))</span>
+<a href="../pyspecdata.html#pyspecdata.nddata.chunk_auto" title="pyspecdata.nddata.chunk_auto" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.chunk_auto" title="pyspecdata.nddata.chunk_auto" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">d</span><span class="o">.</span><span class="n">chunk_auto</span></a></a><span class="p">(</span><span class="s1">&#39;harmonic&#39;</span><span class="p">,</span><span class="s1">&#39;phase&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\load_files\__init__.py:106: UserWarning: found multiple files:
 15N_S175R1a_pR_DHPC_6om2_200304.DSC
         15N_S175R1a_pR_DHPC_6om2_200304.DTA
         15N_S175R1a_pR_DHPC_Power_Sat_PROBE_200304.DSC
@@ -208,9 +143,87 @@
         15N_S175R1a_pR_DHPC_yesterday_200304.DTA
 and opening last
   warnings.warn(&#39;found multiple files:\n&#39;+&#39;\n\t&#39;.join(files)+&#39;\nand opening last&#39;)
-here, we see the harmonic axis contains both harmonic and phase info [(1,  0) (1, 90) (2,  0) (2, 90) (3,  0) (3, 90) (4,  0) (4, 90) (5,  0)
- (5, 90)]
-c:\users\johnf\notebook\pyspecdata\pyspecdata\load_files\__init__.py:101: UserWarning: found multiple files:
+[(2048, &#39;$B_0$&#39;), (10, &#39;harmonic&#39;)]
+here, we see the harmonic axis contains both harmonic and phase info array([(1,  0), (1, 90), (2,  0), (2, 90), (3,  0), (3, 90), (4,  0),
+       (4, 90), (5,  0), (5, 90)],
+      dtype=[(&#39;harmonic&#39;, &#39;&lt;i4&#39;), (&#39;phase&#39;, &#39;&lt;i4&#39;)])
+
+array([[[-1.74777802e-01, -3.12149731e-02],
+        [ 2.31172540e-03,  3.94249559e-03],
+        [-2.96137642e-03,  1.54404789e-03],
+        [ 2.01337868e-04,  3.88339114e-04],
+        [-3.79917862e-03, -8.57519009e-04]],
+
+       [[-1.74706301e-01, -3.16225529e-02],
+        [ 1.39211183e-03,  3.63174536e-03],
+        [-3.09987560e-03,  1.48434346e-03],
+        [ 1.98254579e-04,  4.57096227e-04],
+        [-3.53011488e-03, -9.25430109e-04]],
+
+       [[-1.75028913e-01, -3.18694006e-02],
+        [ 1.44275155e-03,  2.87215920e-03],
+        [-3.03759066e-03,  1.09527322e-03],
+        [ 8.11361703e-05, -2.17521582e-04],
+        [-3.20586049e-03, -6.10788000e-04]],
+
+       ...,
+
+       [[-1.53429200e-01, -2.90628237e-02],
+        [ 2.73208188e-03,  3.30172995e-03],
+        [-3.63605316e-03, -1.54930485e-03],
+        [ 1.12101146e-03, -1.12557069e-03],
+        [-2.01486317e-03,  3.00148736e-03]],
+
+       [[-1.53631032e-01, -2.96697166e-02],
+        [ 2.70229064e-03,  2.91259320e-03],
+        [-3.91993895e-03, -1.31535151e-03],
+        [ 1.73715670e-03, -8.11813794e-04],
+        [-2.27576827e-03,  3.03310531e-03]],
+
+       [[-1.54038852e-01, -3.03279367e-02],
+        [ 2.59896701e-03,  2.30024916e-03],
+        [-4.00726015e-03, -1.32381894e-03],
+        [ 1.86459080e-03, -2.36037235e-05],
+        [-2.71221583e-03,  3.05808080e-03]]])
+            +/-None
+    dimlabels=[&#39;$B_0$&#39;, &#39;harmonic&#39;, &#39;phase&#39;]
+    axes={`$B_0$&#39;:array([3436.        , 3436.07324219, 3436.14648438, ..., 3585.78027362,
+       3585.85351581, 3585.926758  ])
+                    +/-None,
+            `harmonic&#39;:array([1, 2, 3, 4, 5])
+                    +/-None,
+            `phase&#39;:array([ 0, 90])
+                    +/-None}
+</pre></div>
+</div>
+<p><cite>chunk_auto</cite> breaks the <cite>harmonic</cite> dimensions since it was labeled with an axis that had 2 fields.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><a href="../modules.html#module-pyspecdata.ndshape" title="pyspecdata.ndshape" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><a href="../modules.html#module-pyspecdata.ndshape" title="pyspecdata.ndshape" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">ndshape</span></a></a><span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a></a><span class="p">))</span>
+
+<span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a></a><span class="p">[</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a></a><span class="p">[</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">title</span><span class="p">(</span><span class="s2">&quot;1D Data with Multiple Harmonics&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_esr_example_001.png" srcset="../_images/sphx_glr_esr_example_001.png" alt="1D Data with Multiple Harmonics" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(2048, &#39;$B_0$&#39;), (5, &#39;harmonic&#39;), (2, &#39;phase&#39;)]
+c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\core.py:1938: UserWarning: linestyle is redundantly defined by the &#39;linestyle&#39; keyword argument and the fmt string &quot;:&quot; (-&gt; linestyle=&#39;:&#39;). The keyword argument will take precedence.
+  retval += [myplotfunc(*tuple(plotargs),**newkwargs)]
+
+Text(0.5, 1.0, &#39;1D Data with Multiple Harmonics&#39;)
+</pre></div>
+</div>
+<p>Next, let’s load some power-saturation data</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a></a> <span class="o">=</span> <span class="n">find_file</span><span class="p">(</span><span class="s2">&quot;Power.*Sat.*200303&quot;</span><span class="p">,</span>
+        <span class="n">exp_type</span><span class="o">=</span><span class="s1">&#39;francklab_esr/Sam&#39;</span><span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata.chunk_auto" title="pyspecdata.nddata.chunk_auto" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><a href="../pyspecdata.html#pyspecdata.nddata.chunk_auto" title="pyspecdata.nddata.chunk_auto" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">d</span><span class="o">.</span><span class="n">chunk_auto</span></a></a><span class="p">(</span><span class="s1">&#39;harmonic&#39;</span><span class="p">,</span><span class="s1">&#39;phase&#39;</span><span class="p">)</span>
+<span class="n">figure</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">image</span><span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a></a><span class="p">[</span><span class="s1">&#39;harmonic&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">C</span><span class="o">.</span><span class="n">setaxis</span><span class="p">(</span><span class="s1">&#39;Microwave Power&#39;</span><span class="p">,</span><span class="s1">&#39;#&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">set_units</span><span class="p">(</span><span class="s1">&#39;Microwave Power&#39;</span><span class="p">,</span><span class="s1">&#39;scan #&#39;</span><span class="p">))</span>
+<span class="n">title</span><span class="p">(</span><span class="s2">&quot;2D Power Saturation&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_esr_example_002.png" srcset="../_images/sphx_glr_esr_example_002.png" alt="2D Power Saturation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>c:\users\jmfranck\git_repos\pyspecdata\pyspecdata\load_files\__init__.py:106: UserWarning: found multiple files:
 15N_S175R1a_pR_DHPC_Power_Sat_200303.DSC
         15N_S175R1a_pR_DHPC_Power_Sat_200303.DTA
         15N_S175R1a_pR_DHPC_Power_Sat_200303.YGF
@@ -221,99 +234,47 @@ and opening last
   warnings.warn(&#39;found multiple files:\n&#39;+&#39;\n\t&#39;.join(files)+&#39;\nand opening last&#39;)
 </pre></div>
 </div>
-<div class="line-block">
-<div class="line"><br /></div>
-</div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">import</span> <span class="nn">pylab</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="c1"># %</span>
-<span class="c1"># load some 1D ESR data with harmonic + phase info</span>
-
-<span class="n">d</span> <span class="o">=</span> <span class="n">find_file</span><span class="p">(</span><span class="s2">&quot;S175R1a.*DHPC.*200304&quot;</span><span class="p">,</span>
-        <span class="n">exp_type</span><span class="o">=</span><span class="s1">&#39;francklab_esr/Sam&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;here, we see the harmonic axis contains both harmonic and phase info&quot;</span><span class="p">,</span><span class="n">d</span><span class="o">.</span><span class="n">getaxis</span><span class="p">(</span><span class="s1">&#39;harmonic&#39;</span><span class="p">))</span>
-<span class="n">d</span><span class="o">.</span><span class="n">chunk_auto</span><span class="p">(</span><span class="s1">&#39;harmonic&#39;</span><span class="p">,</span><span class="s1">&#39;phase&#39;</span><span class="p">)</span>
-<span class="n">plot</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-
-<span class="c1"># %</span>
-<span class="c1"># Next, let&#39;s load some power-saturation data</span>
-
-<span class="n">d</span> <span class="o">=</span> <span class="n">find_file</span><span class="p">(</span><span class="s2">&quot;Power.*Sat.*200303&quot;</span><span class="p">,</span>
-        <span class="n">exp_type</span><span class="o">=</span><span class="s1">&#39;francklab_esr/Sam&#39;</span><span class="p">)</span>
-<span class="n">d</span><span class="o">.</span><span class="n">chunk_auto</span><span class="p">(</span><span class="s1">&#39;harmonic&#39;</span><span class="p">,</span><span class="s1">&#39;phase&#39;</span><span class="p">)</span>
-<span class="n">figure</span><span class="p">()</span>
-<span class="n">image</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;harmonic&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">C</span><span class="o">.</span><span class="n">setaxis</span><span class="p">(</span><span class="s1">&#39;Microwave Power&#39;</span><span class="p">,</span><span class="s1">&#39;#&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">set_units</span><span class="p">(</span><span class="s1">&#39;Microwave Power&#39;</span><span class="p">,</span><span class="s1">&#39;scan #&#39;</span><span class="p">))</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.666 seconds)</p>
-<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-esr-example-py">
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.465 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-esr-example-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../_downloads/1727ce8b1676769a168f56fc57acec3c/esr_example.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">esr_example.py</span></code></a></p>
+<p><a class="reference download internal" download="" href="../_downloads/10ec6d5d2fc68566d76234af4dc47981/esr_example.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">esr_example.py</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
-<p><a class="reference download internal" download="" href="../_downloads/1d7f99c1a1ec6ccfbf374fbd47440c72/esr_example.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">esr_example.ipynb</span></code></a></p>
+<p><a class="reference download internal" download="" href="../_downloads/1716df40710e6957cc0e3052a6a06d4f/esr_example.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">esr_example.ipynb</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="image_plot.html" class="btn btn-neutral float-right" title="Plotting Routines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="save_hdf.html" class="btn btn-neutral float-left" title="Saving HDF5 Files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="polyfit.html" class="btn btn-neutral float-left" title="Polynomial Fitting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="convolution.html" class="btn btn-neutral float-right" title="Simple Convolution Example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2016, John M. Franck
-
-    </p>
+    <p>&#169; Copyright 2016, John M. Franck.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

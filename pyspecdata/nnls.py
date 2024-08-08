@@ -1,10 +1,9 @@
 # again, this is copied liberally from scipy nnls -- see scipy licensing
 
 from .general_functions import redim_F_to_C, redim_C_to_F, strm, inside_sphinx
-if not inside_sphinx():
-    from . import _nnls
+from . import _nnls
+import numpy as np
 from numpy import asarray_chkfinite, zeros, double, isscalar, isfortran
-from numpy import array as np_array
 import multiprocessing.dummy as mpd
 from multiprocessing import cpu_count
 import logging
@@ -62,7 +61,7 @@ def nnls_regularized(A, b, l=0, maxiter=None):
     if len(A.shape) != 2:
         raise ValueError("expected matrix")
     if len(b.shape) > 2:
-        raise ValueError("expected vector")
+        raise ValueError("Expected vector! It's allowed to have indirect, but you gave me, "+str(b.shape))
 
     m, n = A.shape
 
@@ -105,7 +104,7 @@ def nnls_regularized(A, b, l=0, maxiter=None):
                     x, rnorm, mode = _nnls.nnls_regularized_loop(A, redim_C_to_F(b), w, zz, index, maxiter, l)
                     return redim_F_to_C(x), rnorm, mode
             retval = p.map(nnls_func,l)
-            x,rnorm,mode = list(map(np_array,list(zip(*retval))))
+            x,rnorm,mode = list(map(np.array,list(zip(*retval))))
     if (isscalar(mode) and mode != 1):
         # need something for the multiple lambda
         raise RuntimeError("too many iterations")
