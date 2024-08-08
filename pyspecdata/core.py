@@ -35,53 +35,27 @@ from .matrix_math.dot import along as MM_along
 from .matrix_math.nnls import nnls as MM_nnls
 from os import environ
 import numpy as np
-from numpy import r_, c_, nan, inf, NaN
-from numpy import pi
-from matplotlib.pyplot import rc, rcParams, plot
-import matplotlib.pyplot as plt
-import textwrap
-import atexit
-from numpy import sqrt as np_sqrt
+import sympy as sp
+from numpy import r_, c_, nan, inf, pi
 from mpl_toolkits.mplot3d import axes3d
-from matplotlib.collections import PolyCollection
-from matplotlib.colors import LightSource
-import scipy.interpolate as sci_interp
-import warnings
-import re
-from inspect import ismethod, signature, Parameter
-from numpy.core import rec
-from matplotlib.pyplot import cm
+import textwrap, atexit, scipy, warnings, inspect, re
 from copy import deepcopy
-
-# {{{ have to do this, or sympy spews meaningless warnings
-from sympy.core import (
-    Symbol as sympy_symbol,
-)  # doesn't like to be imported from fornotebook as part of a *
-from sympy.core import (
-    Expr as sympy_expr,
-)  # doesn't like to be imported from fornotebook as part of a *
-from sympy.utilities import lambdify
-from sympy.core import var as sympy_var
-from sympy.core import diff as sympy_diff
-from sympy.printing import latex as sympy_latex
 from sympy.functions.elementary.miscellaneous import sqrt as sympy_sqrt
-
-# }}}
-from scipy.optimize import leastsq
 import scipy.sparse as sparse
 import numpy.lib.recfunctions as recf
 from scipy.interpolate import interp1d
+import logging
+from .ndshape import ndshape_base
 from . import fourier as this_fourier
 from . import axis_manipulation
 from . import plot_funcs as this_plotting
+from .general_functions import lsafe as orig_lsafe
 from .general_functions import (
     emptytest,
     process_kwargs,
     autostringconvert,
     strm,
-    explain_error,
     lsafen,
-    lsafe,
     dp,
     pinvr,
 )
@@ -94,13 +68,7 @@ from .hdf_utils import (
 )
 from .mpl_utils import (
     plot_label_points,
-    figlistret,
-    figlistini_old,
-    figurelist,
-    other,
 )
-from .ndshape import ndshape_base
-import logging
 
 # {{{ determine the figure style, and load the appropriate modules
 _figure_mode_setting = pyspec_config.get_setting(
@@ -112,27 +80,76 @@ if _figure_mode_setting is None:
     )
     _figure_mode_setting = "standard"
     pyspec_config.set_setting("mode", "figures", "standard")
-if _figure_mode_setting == "latex":
+    import matplotlib.pyplot as plt
+elif _figure_mode_setting == "latex":
     environ["ETS_TOOLKIT"] = "qt4"
-    import matplotlib
+    import matplotlib as mpl
 
-    matplotlib.use("Agg")
+    mpl.use("Agg")
+    import matplotlib.pyplot as plt
 # }}} -- continued below
+# {{{ determine the figure style, and load the appropriate modules
+if _figure_mode_setting == "latex":
+    from .fornotebook import figlistl, obs
+
+    figlist_var = figlistl
+    lsafe = orig_lsafe
+elif _figure_mode_setting == "standard":
+    from .figlist import figlist
+
+    def obsn(*x):  # because this is used in fornotebook, and I want it defined
+        print("".join(x), "\n")
+
+    def obs(*x):  # because this is used in fornotebook, and I want it defined
+        print("".join(map(repr, x)))
+
+    def lrecordarray(*x, **kwargs):
+        return repr(
+            x
+        )  # if I'm not using tex, it's easier to not use the formatting
+
+    def lsafe(*string, **kwargs):
+        "replacement for normal lsafe -- no escaping"
+        if len(string) > 1:
+            lsafewkargs = lambda x: lsafe(x, **kwargs)
+            return " ".join(list(map(lsafewkargs, string)))
+        else:
+            string = string[0]
+        # {{{ kwargs
+        if "wrap" in list(kwargs.keys()):
+            wrap = kwargs.pop("wrap")
+        else:
+            wrap = None
+        # }}}
+        if not isinstance(string, str):
+            string = repr(string)
+        if wrap is True:
+            wrap = 60
+        if wrap is not None:
+            string = "\n".join(textwrap.wrap(string, wrap))
+        return string
+
+    figlist_var = figlist
+else:
+    raise ValueError(
+        "I don't understand the figures mode " + _figure_mode_setting
+    )
+# }}}
 
 # rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
-rc("image", aspect="auto", interpolation="nearest")
+plt.rc("image", aspect="auto", interpolation="nearest")
 # rcParams['text.usetex'] = True
-rc("font", family="Arial")  # I need this to render unicode
-rcParams["xtick.direction"] = "out"
-rcParams["ytick.direction"] = "out"
+plt.rc("font", family="Arial")  # I need this to render unicode
+plt.rcParams["xtick.direction"] = "out"
+plt.rcParams["ytick.direction"] = "out"
 # rcParams['ytick.major.size'] = 12
 # rcParams['ytick.minor.size'] = 6
 # rcParams['lines.linewidth'] = 3.0
 # rcParams['legend.fontsize'] = 12
 # rcParams['font.size'] = 6
-rcParams["axes.grid"] = False
-rcParams["image.cmap"] = "jet"
-rcParams["figure.figsize"] = (7 * (1 + np.sqrt(5)) / 2, 7)
+plt.rcParams["axes.grid"] = False
+plt.rcParams["image.cmap"] = "jet"
+plt.rcParams["figure.figsize"] = (7 * (1 + np.sqrt(5)) / 2, 7)
 mat2array = [
     {"ImmutableMatrix": np.array},
     "numpy",
@@ -241,19 +258,9 @@ def apply_oom(average_oom, numbers, prev_label=""):
     return oom_names[oom_index] + prev_label
 
 
-def mybasicfunction(first_figure=None):
-    r"""this gives the format for doing the image thing
-    note also
-    nextfigure(fl,'name')
-    and
-    nextfigure({'lplotproperty':value})"""
-    figlistini_old(first_figure)
-    return figlistret(first_figure, figurelist, other)
-
-
 def issympy(x):
     "tests if something is sympy (based on the module name)"
-    return isinstance(x, sympy_expr)
+    return isinstance(x, sp.core.expr)
 
 
 # {{{ function trickery
@@ -272,7 +279,9 @@ def mydiff(data, axis=-1):
 
 # }}}
 def normal_attrs(obj):
-    myattrs = [x for x in dir(obj) if not ismethod(obj.__getattribute__(x))]
+    myattrs = [
+        x for x in dir(obj) if not inspect.ismethod(obj.__getattribute__(x))
+    ]
     myattrs = [x for x in myattrs if not x[0:2] == "__"]
     # next line filters out properties
     myattrs = [x for x in myattrs if x not in ["C", "angle", "imag", "real", "shape"]]
@@ -502,7 +511,7 @@ def textlabel_bargraph(
                     label="$%s$" % thisfield,
                 )
             )
-        except Exception as e:
+        except Exception:
             raise RuntimeError(
                 strm(
                     "Problem with bar graph: there are %d indices, but %d pieces of data"
@@ -512,7 +521,6 @@ def textlabel_bargraph(
                     "data",
                     mystructarray[thisfield],
                 )
-                + explain_error(e)
             )
     ax.set_xticks(indices + indiv_width / 2)
     ax.set_xticklabels(labels)
@@ -574,8 +582,10 @@ def lookup_rec(A, B, indexpair):
 def reorder_rec(myarray, listofnames, first=True):
     try:
         indices_to_move = [myarray.dtype.names.index(j) for j in listofnames]
-    except Exception as e:
-        stuff_not_found = [j for j in listofnames if j not in myarray.dtype.names]
+    except Exception:
+        stuff_not_found = [
+            j for j in listofnames if j not in myarray.dtype.names
+        ]
         if len(stuff_not_found) > 0:
             raise IndexError(
                 strm(
@@ -586,13 +596,13 @@ def reorder_rec(myarray, listofnames, first=True):
                 )
             )
         else:
-            raise RuntimeError("unknown problem" + explain_error(e))
+            raise RuntimeError("unknown problem")
     old_type = list(myarray.dtype.descr)
     new_type = [old_type[j] for j in indices_to_move] + [
         old_type[j] for j in range(0, len(old_type)) if j not in indices_to_move
     ]
     new_list_of_data = [myarray[j[0]] for j in new_type]
-    return rec.fromarrays(new_list_of_data, dtype=new_type)
+    return np.core.rec.fromarrays(new_list_of_data, dtype=new_type)
 
 
 def lambda_rec(myarray, myname, myfunction, *varargs):
@@ -628,7 +638,7 @@ def lambda_rec(myarray, myname, myfunction, *varargs):
         newrow = np.array(newrow, dtype="|S100")
     try:
         new_field_type = list(newrow.dtype.descr[0])
-    except AttributeError as e:
+    except AttributeError:
         raise IndexError(
             strm(
                 "evaluated function on",
@@ -637,7 +647,6 @@ def lambda_rec(myarray, myname, myfunction, *varargs):
                 newrow,
                 "which appears not to be a numpy np.array",
             )
-            + explain_error(e)
         )
     new_field_type[0] = myname
     starting_names = myarray.dtype.names
@@ -666,7 +675,7 @@ def lambda_rec(myarray, myname, myfunction, *varargs):
         ending_names = starting_names[insert_before + 1 :]
         starting_names = starting_names[:insert_before]
     # }}}
-    return rec.fromarrays(
+    return np.core.rec.fromarrays(
         [myarray[x] for x in starting_names if x != eliminate]
         + [newrow]
         + [myarray[x] for x in ending_names if x != eliminate],
@@ -746,7 +755,7 @@ def decorate_rec(xxx_todo_changeme2, xxx_todo_changeme3, drop_rows=False):
         )
     try:
         list_of_matching = [np.nonzero(B_reduced == j)[0] for j in A_reduced]
-    except Exception as e:
+    except Exception:
         raise RuntimeError(
             strm(
                 "When trying to decorate,  A_reduced=",
@@ -756,7 +765,6 @@ def decorate_rec(xxx_todo_changeme2, xxx_todo_changeme3, drop_rows=False):
                 "one or more of the following is an np.empty tuple,  which is wrong!:",
                 [np.nonzero(B_reduced == j) for j in A_reduced],
             )
-            + explain_error(e)
         )
     logger.debug(strm("(decorate\\_rec):: original list of matching", list_of_matching))
     length_of_matching = np.array([len(j) for j in list_of_matching])
@@ -823,10 +831,11 @@ def decorate_rec(xxx_todo_changeme2, xxx_todo_changeme3, drop_rows=False):
     logger.debug(strm("(decorate\\_rec):: new dtypes:", repr(new_dtypes)))
     try:
         retval = newcol_rec(retval, new_dtypes)
-    except Exception as e:
+    except Exception:
         raise ValueError(
-            strm("Problem trying to add new columns with the dtypes", new_dtypes)
-            + explain_error(e)
+            strm(
+                "Problem trying to add new columns with the dtypes", new_dtypes
+            )
         )
     # }}}
     logger.debug(strm("(decorate\\_rec):: add data:", repr(add_data)))
@@ -886,15 +895,29 @@ def applyto_rec(myfunc, myarray, mylist):
             mask &= myarray[mylist[k]] == thisitem[mylist[k]]
             newrow[mylist[k]] = thisitem[mylist[k]]
         # }}}
-        logger.debug(strm(lsafen("(applyto rec): for row %d, I select these:" % j)))
+        logger.debug(
+            strm(
+                lsafen(
+                    "(applyto np.core.rec): for row %d, I select these:" % j
+                )
+            )
+        )
         myarray_subset = myarray[mask]
-        logger.debug(strm(lsafen("(applyto rec): ", repr(myarray_subset))))
+        logger.debug(
+            strm(lsafen("(applyto np.core.rec): ", repr(myarray_subset)))
+        )
         other_fields = set(mylist) ^ set(thisitem.dtype.names)
-        logger.debug(strm(lsafen("(applyto rec): other fields are:", other_fields)))
+        logger.debug(
+            strm(
+                lsafen(
+                    "(applyto np.core.rec): other fields are:", other_fields
+                )
+            )
+        )
         for thisfield in list(other_fields):
             try:
                 newrow[thisfield] = myfunc(myarray_subset[thisfield])
-            except Exception as e:
+            except Exception:
                 raise ValueError(
                     strm(
                         "error in applyto_rec:  You usually get this",
@@ -903,12 +926,12 @@ def applyto_rec(myfunc, myarray, mylist):
                         "are:",
                         repr(myarray_subset.dtype.descr),
                     )
-                    + explain_error(e)
                 )
         logger.debug(
             strm(
                 lsafen(
-                    "(applyto rec): for row %d, I get this as a result:" % j,
+                    "(applyto np.core.rec): for row %d, I get this as a result:"
+                    % j,
                     newrow,
                 )
             )
@@ -917,14 +940,20 @@ def applyto_rec(myfunc, myarray, mylist):
         myarray = myarray[
             ~mask
         ]  # mask out everything I have used from the original matrix
-        logger.debug(strm(lsafen("(applyto rec): the np.array is now", repr(myarray))))
+        logger.debug(
+            strm(
+                lsafen(
+                    "(applyto np.core.rec): the np.array is now", repr(myarray)
+                )
+            )
+        )
         j += 1
     # }}}
     combined = np.concatenate(combined)
     logger.debug(
         strm(
             lsafen(
-                "(applyto rec): final result",
+                "(applyto np.core.rec): final result",
                 repr(combined),
                 "has length",
                 len(combined),
@@ -946,7 +975,9 @@ def meanstd_rec(myarray, mylist, standard_error=False):
         for j in myarray.dtype.descr
     ]
     newrow_dtype = [k for j in newrow_dtype for k in j]
-    logger.debug(strm(lsafen("(meanstd rec): other fields are:", other_fields)))
+    logger.debug(
+        strm(lsafen("(meanstd np.core.rec): other fields are:", other_fields))
+    )
     # {{{ make the list "combined", which I later concatenate
     j = 0
     while len(myarray) > 0:
@@ -962,9 +993,17 @@ def meanstd_rec(myarray, mylist, standard_error=False):
             mask &= myarray[mylist[k]] == thisitem[mylist[k]]
             newrow[mylist[k]] = thisitem[mylist[k]]
         # }}}
-        logger.debug(strm(lsafen("(meanstd rec): for row %d, I select these:" % j)))
+        logger.debug(
+            strm(
+                lsafen(
+                    "(meanstd np.core.rec): for row %d, I select these:" % j
+                )
+            )
+        )
         myarray_subset = myarray[mask]
-        logger.debug(strm(lsafen("(meanstd rec): ", repr(myarray_subset))))
+        logger.debug(
+            strm(lsafen("(meanstd np.core.rec): ", repr(myarray_subset)))
+        )
         for thisfield in list(other_fields):
             try:
                 newrow[thisfield] = np.mean(myarray_subset[thisfield])
@@ -973,7 +1012,9 @@ def meanstd_rec(myarray, mylist, standard_error=False):
                         myarray_subset[thisfield]
                     ) / sqrt(len(myarray_subset[thisfield]))
                 else:
-                    newrow[thisfield + "_ERROR"] = np.std(myarray_subset[thisfield])
+                    newrow[thisfield + "_ERROR"] = np.std(
+                        myarray_subset[thisfield]
+                    )
             except Exception:
                 raise RuntimeError(
                     "error in meanstd_rec:  You usually get this",
@@ -986,7 +1027,8 @@ def meanstd_rec(myarray, mylist, standard_error=False):
         logger.debug(
             strm(
                 lsafen(
-                    "(meanstd rec): for row %d, I get this as a result:" % j,
+                    "(meanstd np.core.rec): for row %d, I get this as a result:"
+                    % j,
                     newrow,
                 )
             )
@@ -995,14 +1037,20 @@ def meanstd_rec(myarray, mylist, standard_error=False):
         myarray = myarray[
             ~mask
         ]  # mask out everything I have used from the original matrix
-        logger.debug(strm(lsafen("(meanstd rec): the np.array is now", repr(myarray))))
+        logger.debug(
+            strm(
+                lsafen(
+                    "(meanstd np.core.rec): the np.array is now", repr(myarray)
+                )
+            )
+        )
         j += 1
     # }}}
     combined = np.concatenate(combined)
     logger.debug(
         strm(
             lsafen(
-                "(meanstd rec): final result",
+                "(meanstd np.core.rec): final result",
                 repr(combined),
                 "has length",
                 len(combined),
@@ -1067,7 +1115,7 @@ def make_rec(*args, **kwargs):
             types[j] = k.dtype
     try:
         mydtype = np.dtype(list(zip(names, types, shapes)))
-    except Exception as e:
+    except Exception:
         raise ValueError(
             strm(
                 "problem trying to make names",
@@ -1077,7 +1125,6 @@ def make_rec(*args, **kwargs):
                 "shapes",
                 shapes,
             )
-            + explain_error(e)
         )
     if np.zeros_like:
         retval = np.zeros(np.zeros_like, dtype=mydtype)
@@ -1087,7 +1134,7 @@ def make_rec(*args, **kwargs):
         for j, thisname in enumerate(names):
             try:
                 retval[thisname][:] = input[j][:]
-            except Exception as e:
+            except Exception:
                 raise RuntimeError(
                     e
                     + "error trying to load input for '"
@@ -1126,10 +1173,8 @@ def maprep(*mylist):
 
 
 # {{{ plot wrapper
-global OLDplot
-OLDplot = plot
 global myplotfunc
-myplotfunc = OLDplot
+myplotfunc = plt.plot
 
 
 def plot(*args, **kwargs):
@@ -1241,7 +1286,7 @@ def plot(*args, **kwargs):
         if myx is None:
             try:
                 myx = myy.getaxis(myy.dimlabels[longest_dim])
-            except Exception as e:
+            except Exception:
                 if len(myy.data.shape) == 0:
                     raise ValueError(
                         "I can't plot zero-dimensional data (typically arises when you have a dataset with one point)"
@@ -1325,7 +1370,7 @@ def plot(*args, **kwargs):
     ):  # by doing this and making myplotfunc global, we preserve the plot style if we want to tack on one point
         try:
             b = np.diff(np.log10(myx))
-        except Exception as e:
+        except Exception:
             raise Exception(
                 strm(
                     "likely a problem with the type of the x label, which is",
@@ -1398,7 +1443,9 @@ def plot(*args, **kwargs):
                 kwargs["yerr"] = myyerror[:, j]
             # {{{ here, i update the kwargs to include the specific color for this line
             newkwargs = kwargs.copy()  # kwargs is a dict
-            newkwargs.update({"color": cm.hsv(np.double(j) / np.double(myy.shape[1]))})
+            newkwargs.update(
+                {"color": plt.cm.hsv(np.double(j) / np.double(myy.shape[1]))}
+            )
             # }}}
             # {{{ here, I update to use the labels
             if has_labels:
@@ -1424,7 +1471,9 @@ def plot(*args, **kwargs):
                     )
                 )
             if np.any(np.isinf(myy)):
-                myy[np.isinf(myy)] = NaN  # added this to prevent an overflow error
+                myy[
+                    np.isinf(myy)
+                ] = np.nan  # added this to prevent an overflow error
             try:
                 retval += [myplotfunc(*tuple(plotargs), **newkwargs)]
             except Exception:
@@ -1467,7 +1516,7 @@ def plot(*args, **kwargs):
         try:
             # print 'DEBUG plotting with args',plotargs,'and kwargs',kwargs,'\n\n'
             retval = myplotfunc(*plotargs, **kwargs)
-        except Exception as e:
+        except Exception:
             raise RuntimeError(
                 strm(
                     "error trying to plot",
@@ -1493,7 +1542,6 @@ def plot(*args, **kwargs):
                     "\nkwargs =",
                     kwargs,
                 )
-                + explain_error(e)
             )
         if x_inverted:
             these_xlims = ax.get_xlim()
@@ -1505,7 +1553,7 @@ def plot(*args, **kwargs):
         ax.set_ylabel(myylabel)
     try:
         ax.axis("tight")
-    except Exception as e:
+    except Exception:
         raise Exception(
             strm(
                 "error trying to set axis tight after plot",
@@ -1551,7 +1599,7 @@ def concat(datalist, dimname, chop=False):
     # print 'DEBUG: type(datalist)',type(datalist)
     try:
         shapes = list(map(ndshape, datalist))
-    except Exception as e:
+    except Exception:
         if not isinstance(datalist, list):
             raise TypeError(
                 strm("You didn't pass a list, you passed a", type(datalist))
@@ -1561,7 +1609,6 @@ def concat(datalist, dimname, chop=False):
                 "Problem with what you passed to concat, list of types,",
                 list(map(type, datalist)),
             )
-            + explain_error(e)
         )
     other_info_out = datalist[0].other_info
     for j in range(0, len(datalist)):
@@ -1619,14 +1666,13 @@ def concat(datalist, dimname, chop=False):
     # print "DEBUG newdatalist is shaped like",newdatalist
     try:
         newdatalist = newdatalist.alloc()
-    except Exception as e:
+    except Exception:
         raise ValueError(
             strm(
                 "trying to alloc the newdatalist",
                 newdatalist,
                 "created a problem",
             )
-            + explain_error(e)
         )
     if datalist[0].get_error() is not None:
         newdatalist.set_error(np.zeros(np.shape(newdatalist.data)))
@@ -1656,7 +1702,7 @@ def concat(datalist, dimname, chop=False):
         axis_coords += [r_[0:newdimsize]]
         try:
             newdatalist.labels(dimlabels, axis_coords)
-        except Exception as e:
+        except Exception:
             raise ValueError(
                 strm(
                     "trying to attach axes of lengths",
@@ -1664,7 +1710,6 @@ def concat(datalist, dimname, chop=False):
                     "to",
                     dimlabels,
                 )
-                + explain_error(e)
             )
     # }}}
     newdatalist.other_info = other_info_out
@@ -2013,7 +2058,7 @@ class nddata(object):
         onlycolor=False,
         light=None,
         rotation=None,
-        cmap=cm.gray,
+        cmap=plt.cm.gray,
         ax=None,
         invert=False,
         **kwargs,
@@ -2047,7 +2092,7 @@ class nddata(object):
             if y_dim in list(stride.keys()):
                 cstride = stride[y_dim]
         if light is not None:
-            ls = LightSource(azdeg=light[1], altdeg=light[0])
+            ls = mpl.colors.LightSource(azdeg=light[1], altdeg=light[0])
             if cmap is not None:
                 rgb = ls.shade(Z, cmap)
         else:
@@ -2110,9 +2155,13 @@ class nddata(object):
         x_axis, y_axis = self.dimlabels
         x = self.getaxis(x_axis)[:, None]
         y = self.getaxis(y_axis)[None, :]
-        if levels not in list(kwargs.keys()):
-            levels = r_[self.data.min() : self.data.max() : 30j]
-        cs = plt.contour(x * np.ones_like(y), np.ones_like(x) * y, self.data, **kwargs)
+        if "levels" not in list(kwargs.keys()):
+            kwargs.update(
+                {"levels": r_[self.data.min() : self.data.max() : 30j]}
+            )
+        cs = plt.contour(
+            x * np.ones_like(y), np.ones_like(x) * y, self.data, **kwargs
+        )
         if labels:
             plt.clabel(cs, inline=1)
         plt.xlabel(self.unitify_axis(x_axis))
@@ -2136,7 +2185,7 @@ class nddata(object):
         y_dim = self.dimlabels[1]
         try:
             x_axis = self.retaxis(x_dim).data
-        except Exception as e:
+        except Exception:
             raise ValueError(
                 strm(
                     "trying to get the info on axis",
@@ -2144,7 +2193,6 @@ class nddata(object):
                     "which is",
                     self.getaxis(x_dim),
                 )
-                + explain_error(e)
             )
         y_axis = self.retaxis(y_dim).data
         # }}}
@@ -2159,12 +2207,10 @@ class nddata(object):
             zs = self[y_dim, j].data.flatten()
             zs = r_[0, zs, 0]
             verts.append(list(zip(xs, zs)))  # one of the faces
-        poly = PolyCollection(
+        poly = mpl.collections.PolyCollection(
             verts, facecolors=[color] * len(verts), edgecolors=edgecolor
         )  # the individual facecolors would go here
         poly.set_alpha(alpha)
-        # fig = plt.gcf()
-        # ax = fig.add_subplot(111,projection = '3d')
         ax.add_collection3d(poly, zs=ys, zdir="y")
         ax.set_zlim3d(self.data.min(), self.data.max())
         ax.set_xlim3d(xs.min(), xs.max())
@@ -2221,7 +2267,6 @@ class nddata(object):
         x_axis = sortedself.retaxis(x_dim).data
         y_axis = sortedself.retaxis(y_dim).data
         # }}}
-        # verts = []
         xs = x_axis.flatten()
         ys = y_axis.flatten()  # this is the depth dimension
         if invert:
@@ -2233,7 +2278,6 @@ class nddata(object):
             if invert:
                 zs = zs[::-1]
             ax.plot(xs, np.ones(len(xs)) * ys[j], zs, "k", linewidth=linewidth)
-        # fig = plt.gcf()
         ax.set_zlim3d(sortedself.data.min(), sortedself.data.max())
         ax.set_xlim3d(xs.min(), xs.max())
         # if invert:
@@ -2281,13 +2325,12 @@ class nddata(object):
             E = sparse.lil_matrix((n, n))
         try:
             E.setdiag(self.get_error() ** 2)
-        except Exception as e:
+        except Exception:
             raise ValueError(
                 strm(
                     "Problem getting covariance because error is",
                     self.get_error(),
                 )
-                + explain_error(e)
             )
         return E.toarray()
 
@@ -2590,7 +2633,7 @@ class nddata(object):
                     )  # is we have an np.empty axis_coords_error, need to fill with None's
                 try:
                     errorforthisaxis = self.axis_coords_error[self.axn(thearg)]
-                except Exception as e:
+                except Exception:
                     raise RuntimeError(
                         strm(
                             "Problem trying to load error",
@@ -2600,7 +2643,6 @@ class nddata(object):
                             "out of",
                             self.axis_coords_error,
                         )
-                        + explain_error(e)
                     )
                 if errorforthisaxis is None:
                     return None
@@ -3010,7 +3052,7 @@ class nddata(object):
             else:
                 try:
                     Rerr += (A.data * Berr / (B.data**2)) ** 2
-                except Exception as e:
+                except Exception:
                     raise ValueError(
                         strm(
                             "self was",
@@ -3024,16 +3066,14 @@ class nddata(object):
                             "dtype of B.data",
                             Berr,
                         )
-                        + explain_error(e)
                     )
         try:
             Rerr = sqrt(
                 np.real(Rerr)
             )  # convert back to stdev --> note that this has problems with complex numbers, hence the "abs" above
-        except AttributeError as e:
+        except AttributeError:
             raise AttributeError(
                 strm("Rerr gave an attribute error when you passed", Rerr)
-                + explain_error(e)
             )
         if Aerr is None and Berr is None:
             Rerr = None
@@ -3161,12 +3201,11 @@ class nddata(object):
         # }}}
         argout = arg.copy()
         # {{{ now create argshape for the reshaped argument
+        #
+        #  only the labels valid for arg, ordered as they are in newdims
         new_arg_labels = [x for x in newdims if x in arg.dimlabels]
-        # only the labels valid for arg, ordered
-        # as they are in newdims
-        argshape = list(
-            np.ones(len(newdims), dtype=np.int64)
-        )  # should be a better solution
+        # following should be a better solution
+        argshape = list(np.ones(len(newdims), dtype=np.int64))
         logger.debug(
             strm(
                 "DEBUG 2: shape of self",
@@ -3775,7 +3814,7 @@ class nddata(object):
             if self.axis_coords_error is not None and len(self.axis_coords_error) > 0:
                 try:
                     self.axis_coords_error.pop(thisindex)
-                except Exception as e:
+                except Exception:
                     raise RuntimeError(
                         strm(
                             "trying to pop",
@@ -3783,7 +3822,6 @@ class nddata(object):
                             "from",
                             self.axis_coords_error,
                         )
-                        + explain_error(e)
                     )
             if len(self.axis_coords_units) > 0:
                 try:
@@ -3812,7 +3850,6 @@ class nddata(object):
         ), "we are only calculating covariance matrices for datasets with one variable and on observation axis"
         assert along_dim in self.dimlabels
         var_dim = list(set(self.dimlabels) - set([along_dim]))[0]
-        # var_dim_coords = self.getaxis(var_dim)
         var_dim_units = self.get_units(var_dim)
         if self.axn(along_dim) == 0:
             trans = False
@@ -3822,7 +3859,7 @@ class nddata(object):
         self.setaxis(along_dim, self.getaxis(var_dim).copy())
 
         def add_subscript(start, sub):
-            ismath = re.compile(r"$(.*)$")
+            ismath = re.compile(r"\$(.*)\$")
             m = ismath.match(start)
             if m:
                 (start,) = m.groups()
@@ -3912,7 +3949,7 @@ class nddata(object):
             axis = args[1]
             try:
                 thisindex = self.dimlabels.index(axis)
-            except Exception as e:
+            except Exception:
                 if not isinstance(axis, str):
                     raise ValueError(
                         'The format of run is run(func,"axisname"), but you didn\'t give a string as the second argument -- maybe you fed the arguments backwards?'
@@ -3926,7 +3963,7 @@ class nddata(object):
                         + ")"
                     )
                 else:
-                    raise e
+                    raise Exception()
             logger.debug(
                 strm(
                     "called function",
@@ -3980,16 +4017,18 @@ class nddata(object):
             )
         temp = list(self.data.shape)
         temp[thisaxis] = 1
-        func_sig = signature(func)
+        func_sig = inspect.signature(func)
         numnonoptargs = len(
             [
                 v.default
                 for v in func_sig.parameters.values()
-                if v.default == Parameter.empty
+                if v.default == inspect.Parameter.empty
             ]
         )
         kwargnames = [
-            k for k, v in func_sig.parameters.items() if v.default != Parameter.empty
+            k
+            for k, v in func_sig.parameters.items()
+            if v.default != inspect.Parameter.empty
         ]
         if numnonoptargs == 2:
             if "axis" in kwargnames:
@@ -4006,7 +4045,7 @@ class nddata(object):
                 if len(paramnames) == 1:
                     if (
                         func_sig.parameters[paramnames[0]].kind
-                        == Parameter.VAR_POSITIONAL
+                        == inspect.Parameter.VAR_POSITIONAL
                     ):
                         try:
                             self.data = func(self.data, axis=thisaxis)
@@ -4162,32 +4201,6 @@ class nddata(object):
         self.setaxis(thisaxisname, thisaxis.data)
         return self
 
-    def histogram(self, *args, **kwargs):
-        per_hit = 1e-3
-        if "per_hit" in list(kwargs.keys()):
-            per_hit = kwargs.pop("per_hit")
-        if len(kwargs) > 0:
-            raise ValueError("I don't understand the arguments:" + repr(kwargs))
-        if len(args) == 1:
-            if isinstance(self, args[0], np.ndarray):
-                if args[0].shape[2] != len(self.dimlabels):
-                    raise ValueError(
-                        "You must pass an N x M np.array, where M is the number of dimensions in this np.array!"
-                    )
-            elif isinstance(args[0], dict):
-                raise ValueError(
-                    "should eventually support dictionaries (via fld), but doesn't yet"
-                )
-            else:
-                raise ValueError(
-                    "I don't know what funny business you're up to passing me a"
-                    + repr(type(args[0]))
-                )
-        else:
-            raise ValueError(
-                "should eventually support np.array, label pair, but doesn't yet"
-            )
-
     def spline_lambda(self, s_multiplier=None):
         """For 1D data, returns a lambda function to generate a Cubic Spline.
 
@@ -4208,13 +4221,12 @@ class nddata(object):
         """
         assert len(self.dimlabels) == 1, "currently only supports 1D data"
         if s_multiplier is not None:
-
-            def thefunc(x, y, s=0):
-                return sci_interp.BSspine(*sci_interp.splrep(x, y, s=s))
-
+            thefunc = lambda x, y, s=0: scipy.interpolate.BSpline(
+                *scipy.interpolate.splrep(x, y, s=s)
+            )
             kwargs = dict(s=len(self.dimlabels[0]) * s_multiplier)
         else:
-            thefunc = sci_interp.CubicSpline
+            thefunc = scipy.interpolate.CubicSpline
             kwargs = {}
         myspline_re = thefunc(self.getaxis(self.dimlabels[0]), self.data.real, **kwargs)
         if np.iscomplexobj(self.data.dtype):
@@ -4376,7 +4388,7 @@ class nddata(object):
         interpfunc = interp1d(origdata, rdata, kind=thiskind, **kwargs)
         try:
             rdata = interpfunc(values)
-        except Exception as e:
+        except Exception:
             raise ValueError(
                 strm(
                     "You passed",
@@ -4386,17 +4398,16 @@ class nddata(object):
                     "to",
                     origdata.max(),
                 )
-                + explain_error(e)
             )
         interpfunc = interp1d(origdata, idata, kind=thiskind, **kwargs)
         idata = interpfunc(values)
         cdata = rdata + 1j * idata
         if copy:
-            newaxis = "name data before interpolation"
+            mynewaxis = "name data before interpolation"
             if self.name() is not None:
-                newaxis = self.name()
-            retval = nddata(cdata, [-1], [newaxis])
-            retval.labels(newaxis, values)
+                mynewaxis = self.name()
+            retval = nddata(cdata, [-1], [mynewaxis])
+            retval.labels(mynewaxis, values)
             return retval
         else:
             self.data = values
@@ -4508,7 +4519,8 @@ class nddata(object):
         """
         if self.get_units("t2") == "ppm":
             return
-        # offset = self.get_prop("proc")["OFFSET"]
+        offset = self.get_prop("proc")["OFFSET"]
+        logger.debug(strm("offset", offset, "not used"))
         SF = self.get_prop("proc")["SF"]
         sfo1 = self.get_prop("acq")["SFO1"]
         tms_hz = (SF - sfo1) * 1e6
@@ -4522,13 +4534,6 @@ class nddata(object):
         return self
 
     # }}}
-    def multimin(self, minfunc, axisname, filterwidth, numberofmins):
-        cost = self.copy().convolve(axisname, filterwidth).run_nopop(minfunc)
-        for j in range(0, numberofmins):
-            # {{{ find the x value at which the minimum occurs
-            xvalues = cost.copy().argmin(axisname, raw_index=True)
-            xvalues[j]
-            # }}}
 
     def repwlabels(self, axis):
         return None
@@ -4595,8 +4600,10 @@ class nddata(object):
         self.dimlabels = list(map(self.dimlabels.__getitem__, neworder))
         if len(self.axis_coords) > 0:
             try:
-                self.axis_coords = list(map(self.axis_coords.__getitem__, neworder))
-            except Exception as e:
+                self.axis_coords = list(
+                    map(self.axis_coords.__getitem__, neworder)
+                )
+            except Exception:
                 raise IndexError(
                     strm(
                         "problem mapping",
@@ -4604,14 +4611,13 @@ class nddata(object):
                         "onto",
                         neworder,
                     )
-                    + explain_error(e)
                 )
             if len(self.axis_coords_units) > 0:
                 try:
                     self.axis_coords_units = list(
                         map(self.axis_coords_units.__getitem__, neworder)
                     )
-                except Exception as e:
+                except Exception:
                     raise IndexError(
                         strm(
                             "problem mapping",
@@ -4619,14 +4625,12 @@ class nddata(object):
                             "onto",
                             neworder,
                         )
-                        + explain_error(e)
                     )
         try:
             self.data = self.data.transpose(neworder)
-        except ValueError as e:
+        except ValueError:
             raise ValueError(
                 strm("you can't reorder", self.dimlabels, "as", neworder)
-                + explain_error(e)
             )
         if self.data_error is not None:
             self.data_error = self.data_error.transpose(neworder)
@@ -4752,7 +4756,6 @@ class nddata(object):
 
     def axis(self, axisname):
         "returns a 1-D axis for further manipulation"
-        thisaxis = self.axn(axisname)
         return nddata(self.getaxis(axisname).copy(), [-1], [axisname]).labels(
             axisname, self.getaxis(axisname).copy()
         )
@@ -4767,7 +4770,7 @@ class nddata(object):
             raise AttributeError(axisname + " does not have axis labels!")
         try:
             return retval.copy().reshape(newshape)
-        except ValueError as e:
+        except ValueError:
             raise ValueError(
                 strm(
                     "Trying to reshape axis from",
@@ -4845,7 +4848,7 @@ class nddata(object):
             else:
                 if issympy(args[0]):
                     func = args[0]
-                    symbols_in_func = func.atoms(sympy_symbol)
+                    symbols_in_func = func.atoms(sp.core.Symbol)
                     logger.debug(
                         strm(
                             "identified this as a sympy expression (",
@@ -4881,24 +4884,23 @@ class nddata(object):
         if issympy(func):
             logging.debug(
                 strm(
-                    "about to run sympy lambdify, symbols_in_func is",
+                    "about to run sympy sp.utilities.lambdify, symbols_in_func is",
                     symbols_in_func,
                 )
             )
             try:
-                lambdified_func = lambdify(
+                lambdified_func = sp.utilities.lambdify(
                     list(symbols_in_func), func, modules=mat2array
                 )
-            except Exception as e:
+            except Exception:
                 raise ValueError(
                     strm(
                         "Error parsing axis variables",
-                        list(map(sympy_var, axisnames)),
+                        list(map(sp.core.var, axisnames)),
                         "that you passed and function",
                         func,
                         "that you passed",
                     )
-                    + explain_error(e)
                 )
             func = lambdified_func
             axisnames = list(map(str, symbols_in_func))
@@ -4991,10 +4993,10 @@ class nddata(object):
         # check for uniformly ascending
         u = self.getaxis(axis)
         du = (u[-1] - u[0]) / (len(u) - 1.0)
-        this_msg = "In order to expand, the axis must be ascending (and equally spaced)"
-        assert all(abs(np.diff(u) - du) / du < tolerance), this_msg  # absolute
+        thismsg = "In order to expand, the axis must be ascending (and equally spaced)"
+        assert all(abs(np.diff(u) - du) / du < tolerance), thismsg  # absolute
         # figure out how many points I need to add, and on which side of the axis
-        assert du > 0, this_msg  # ascending
+        assert du > 0, thismsg  # ascending
         start_index = 0
         stop_index = len(u)  # this is the index at which the data
         #                     stops.  To start with, we assume the
@@ -5079,7 +5081,7 @@ class nddata(object):
                 return self
         elif len(args) == 1 and issympy(args[0]):
             func = args[0]
-            symbols_in_func = func.atoms(sympy_symbol)
+            symbols_in_func = func.atoms(sp.core.Symbol)
             logger.debug(
                 strm(
                     "identified this as a sympy expression (",
@@ -5099,24 +5101,23 @@ class nddata(object):
                 )
             logging.debug(
                 strm(
-                    "about to run sympy lambdify, symbols_in_func is",
+                    "about to run sympy sp.utilities.lambdify, symbols_in_func is",
                     symbols_in_func,
                 )
             )
             try:
-                lambdified_func = lambdify(
+                lambdified_func = sp.utilities.lambdify(
                     list(symbols_in_func), func, modules=mat2array
                 )
-            except Exception as e:
+            except Exception:
                 raise ValueError(
                     strm(
                         "Error parsing axis variables",
-                        list(map(sympy_var, axisnames)),
+                        list(symbols_in_func),
                         "that you passed and function",
                         func,
                         "that you passed",
                     )
-                    + explain_error(e)
                 )
             value = lambdified_func
             axis = list(map(str, symbols_in_func))
@@ -5970,7 +5971,9 @@ class nddata(object):
         if len(rightdata.shape) > 0:
             left_shape = np.shape(self.data[leftindex])
             try:
-                self.data[leftindex] = rightdata.reshape(left_shape)  # assign the data
+                self.data[leftindex] = rightdata.reshape(
+                    left_shape
+                )  # assign the data
             except Exception:
                 raise IndexError(
                     strm(
@@ -6299,7 +6302,7 @@ class nddata(object):
                 axis_coords_units = None
             try:
                 sliced_data = self.data[indexlist]
-            except Exception as e:
+            except Exception:
                 raise ValueError(
                     strm(
                         "the slice values that you've passed",
@@ -6323,7 +6326,7 @@ class nddata(object):
                     data_error=newerror,
                     other_info=self.other_info,
                 )
-            except Exception as e:
+            except Exception:
                 raise ValueError(
                     strm(
                         "likely some problem recasting the data when"
@@ -6455,9 +6458,7 @@ class nddata(object):
         elif stop == -inf:
             raise ValueError(
                 strm(
-                    "this is not going to work -- I interpret range",
-                    thisargs,
-                    "I get to",
+                    "this is not going to work -- I I get to",
                     start,
                     ",",
                     stop,
@@ -6835,7 +6836,7 @@ class nddata(object):
             a.name('test_data')
             try:
                 a.hdf5_write('example.h5',getDATADIR(exp_type='Sam'))
-            except:
+            except Exception:
                 print("file already exists, not creating again -- delete the file or node if wanted")
             # read the file by the "raw method"
             b = nddata_hdf5('example.h5/test_data',
@@ -6956,12 +6957,14 @@ class nddata(object):
                     and self.get_error() is not None
                     and len(self.get_error()) > 0
                 ):
-                    thistable = rec.fromarrays(
+                    thistable = np.core.rec.fromarrays(
                         [self.data, self.get_error()], names="data,error"
                     )
                     mydataattrs.remove("data_error")
                 else:
-                    thistable = rec.fromarrays([self.data], names="data")
+                    thistable = np.core.rec.fromarrays(
+                        [self.data], names="data"
+                    )
                 mydataattrs.remove("data")
                 datatable = h5table(bottomnode, "data", thistable)
                 # print 'DEBUG 2: bottomnode is',bottomnode
@@ -7015,7 +7018,7 @@ class nddata(object):
                                 is not None
                                 and len(myaxisattrsforthisdim["axis_coords_error"]) > 0
                             ):  # this is needed to avoid all errors, though I guess I could use try/except
-                                thistable = rec.fromarrays(
+                                thistable = np.core.rec.fromarrays(
                                     [
                                         myaxisattrsforthisdim["axis_coords"],
                                         myaxisattrsforthisdim["axis_coords_error"],
@@ -7024,7 +7027,7 @@ class nddata(object):
                                 )
                                 myaxisattrsforthisdim.pop("axis_coords_error")
                             else:
-                                thistable = rec.fromarrays(
+                                thistable = np.core.rec.fromarrays(
                                     [myaxisattrsforthisdim["axis_coords"]],
                                     names="data",
                                 )
@@ -7066,6 +7069,7 @@ class nddata(object):
                 test = repr(
                     bottomnode
                 )  # somehow, this prevents it from claiming that the bottomnode is None --> some type of bug?
+                logger.debug(strm("bottomnode", test))
                 h5attachattributes(
                     bottomnode,
                     [j for j in myotherattrs if not self._contains_symbolic(j)],
@@ -7144,8 +7148,6 @@ class nddata_hdf5(nddata):
         self.h5file, self.datanode = h5nodebypath(
             pathstring, check_only=True, directory=directory
         )
-        # except BaseException  as e:
-        #    raise IndexError("I can't find the node "+pathstring+explain_error(e))
         logger.debug("about to call _init_datanode")
         self._init_datanode(self.datanode)
         atexit.register(self._cleanup)
@@ -7188,23 +7190,21 @@ class nddata_hdf5(nddata):
             for axisname in list(datadict["axes"].keys()):
                 try:
                     axisnumber = mydimlabels.index(axisname)
-                except AttributeError as e:
+                except AttributeError:
                     raise AttributeError(
                         strm(
                             "mydimlabels is not in the right format!\nit looks like this:\n",
                             mydimlabels,
                             type(mydimlabels),
                         )
-                        + explain_error(e)
                     )
-                except ValueError as e:
+                except ValueError:
                     raise ValueError(
                         strm(
                             "mydimlabels is not in the right format!\nit looks like this:\n",
                             mydimlabels,
                             type(mydimlabels),
                         )
-                        + explain_error(e)
                     )
                 recordarrayofaxis = datadict["axes"][axisname]["data"]
                 myaxiscoords[axisnumber] = recordarrayofaxis["data"]
@@ -7334,7 +7334,7 @@ class ndshape(ndshape_base):
                 emptyar = np.empty(tuple(self.shape), dtype=dtype)
             else:
                 emptyar = format * np.ones(tuple(self.shape), dtype=dtype)
-        except TypeError as e:
+        except TypeError:
             raise TypeError(
                 strm(
                     "Wrong type for self.shape",
@@ -7442,11 +7442,11 @@ class fitdata(nddata):
         fprime = np.zeros([len(parameters), number_of_i])
         for j in range(0, len(parameters)):
             thisvar = self.symbolic_dict[parameters[j]]
-            mydiff_sym[j] = sympy_diff(self.symbolic_func, thisvar)
+            mydiff_sym[j] = sp.core.diff(self.symbolic_func, thisvar)
             # print r'$\frac{\partial %s}{\partial %s}=%s$'%(self.function_name,repr(thisvar),sympy.latex(mydiff).replace('$','')),'\n\n'
             try:
                 mydiff = mydiff_sym[j].subs(solution_list)
-            except Exception as e:
+            except Exception:
                 raise ValueError(
                     strm(
                         "error trying to substitute",
@@ -7454,13 +7454,12 @@ class fitdata(nddata):
                         "with",
                         solution_list,
                     )
-                    + explain_error(e)
                 )
             try:
                 fprime[j, :] = np.array(
                     [complex(mydiff.subs(x, xvals[k])) for k in range(0, len(xvals))]
                 )
-            except ValueError as e:
+            except ValueError:
                 raise ValueError(
                     strm(
                         "Trying to set index",
@@ -7475,7 +7474,7 @@ class fitdata(nddata):
                     )
                     + explain_error(e)
                 )
-            except Exception as e:
+            except Exception:
                 raise ValueError(
                     strm(
                         "Trying to set index",
@@ -7485,7 +7484,6 @@ class fitdata(nddata):
                         "np.shape(xvals)",
                         np.shape(xvals),
                     )
-                    + explain_error(e)
                 )
         return fprime
 
@@ -7494,8 +7492,12 @@ class fitdata(nddata):
         r"""A property of the fitdata class which stores a string
         output of the functional form of the desired fit expression
         provided in func:`functional_form` in LaTeX format"""
-        retval = sympy_latex(self.symbolic_expr).replace("$", "")
-        return r"$f(%s)=" % (sympy_latex(sympy_symbol(self.fit_axis))) + retval + r"$"
+        retval = sp.printing.latex(self.symbolic_expr).replace("$", "")
+        return (
+            r"$f(%s)=" % (sp.printing.latex(sp.core.Symbol(self.fit_axis)))
+            + retval
+            + r"$"
+        )
 
     @function_string.setter
     def function_string(self):
@@ -7520,7 +7522,7 @@ class fitdata(nddata):
         ), "for now, the functional form must be a sympy expression!"
         self.symbolic_expr = sym_expr
         # {{{ adapted from fromaxis, trying to adapt the variable
-        symbols_in_expr = self.symbolic_expr.atoms(sympy_symbol)
+        symbols_in_expr = self.symbolic_expr.atoms(sp.core.Symbol)
         # logger.debug(strm('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr))
         logger.debug(
             strm(
@@ -7553,13 +7555,15 @@ class fitdata(nddata):
         # }}}
         self.fit_axis = list(self.fit_axis)[0]
         # redefine as real to avoid weird piecewise derivatives
-        self.fit_axis_sym = sympy_var(self.fit_axis, real=True)
+        self.fit_axis_sym = sp.core.var(self.fit_axis, real=True)
         self.symbolic_vars = list(self.symbolic_vars)
         self.symbolic_vars.sort()  # so I get consistent behavior
-        self.symbolic_vars = [sympy_var(j, real=True) for j in self.symbolic_vars]
+        self.symbolic_vars = [
+            sp.core.var(j, real=True) for j in self.symbolic_vars
+        ]
         self.symbol_list = [str(j) for j in self.symbolic_vars]
         args = self.symbolic_vars + [self.fit_axis]
-        self.fitfunc_multiarg = lambdify(
+        self.fitfunc_multiarg = sp.utilities.lambdify(
             tuple(args), self.symbolic_expr, modules=mat2array
         )
 
@@ -7591,7 +7595,7 @@ class fitdata(nddata):
                 covarmat = np.dot(
                     np.linalg.pinv(fprime_prod), (sigma**2).reshape(-1, 1)
                 )
-            except ValueError as e:
+            except ValueError:
                 raise ValueError(
                     strm(
                         "shape of fprime_prod",
@@ -7601,7 +7605,6 @@ class fitdata(nddata):
                         "shape of sigma",
                         np.shape(sigma),
                     )
-                    + explain_error(e)
                 )
             covarmatrix = covarmat.reshape(f1, f1)
             for l in range(0, f1):
@@ -7624,13 +7627,13 @@ class fitdata(nddata):
             # G = S**(-1/2) # analog of the above
             # covarmatrix = ((J.T * W * J)**-1) * J.T * W
             print("a")
-            minimizer = np.inv(J.T * Omegainv * J) * J.T * Omegainv
+            minimizer = scipy.linalg.inv(J.T * Omegainv * J) * J.T * Omegainv
             covarmatrix = minimizer * S * minimizer.T
             # covarmatrix = np.array(covarmatrix * S * covarmatrix.T)
             # covarmatrix = np.array((J.T * G.T * G * J)**-1 * J.T * G.T * G * S * G.T * G * J * (J.T * G.T * G * J)**-1)
             # try:
             #    betapremult = (J.T * Omegainv * J)**-1 * J.T * Omegainv
-            # except:
+            # except Exception:
             #    print 'from sigma','\n\n',diag(sigma**2),'\n\n','from covarmatrix','\n\n',S,'\n\n'
             #    raise RuntimeError('problem generating estimator (word?)')
             # covarmatrix = np.array( betapremult * S * betapremult.T)
@@ -7639,13 +7642,13 @@ class fitdata(nddata):
         # note for this code, that it depends on above code I later moved to  parameter_derivatives
         # for j in range(0,np.shape(covarmatrix)[0]):
         #    for k in range(0,np.shape(covarmatrix)[0]):
-        #        #mydiff_second = sympy_diff(mydiff_sym[j],self.symbolic_vars[k]).subs(solution_list)
+        #        #mydiff_second = sp.core.diff(mydiff_sym[j],self.symbolic_vars[k]).subs(solution_list)
         #        #fdprime = np.array([mydiff_second.subs(x,xvals[l])/sigma[l] for l in range(0,len(xvals))]) # only divide by sigma once, since there is only one f
         #        #try:
         #        temp = 1.0/(fprime[j,:] * fprime[k,:])
         #        mask = np.isinf(temp)
         #        covarmatrix[j,k] = np.mean(sigma[~mask]**2 * temp[~mask])# + 2. * np.mean(fminusE * fdprime)
-        #        #except:
+        #        #except Exception:
         #        #    raise RuntimeError(strm('Problem multiplying covarmatrix', 'np.shape(fprime[j,:])',np.shape(fprime[j,:]), 'np.shape(fminusE)',np.shape(fminusE), 'np.shape(fdprime)',np.shape(fdprime)))
         #        #if j != k:
         #        #    covarmatrix[j,k] *= 2
@@ -7727,10 +7730,10 @@ class fitdata(nddata):
         # print 'DEBUG: y=',y,'\nfit=',fit,'\nsigma=',sigma,'\n\n'
         sigma[sigma == 0.0] = 1
         try:
-            # as noted here: https://stackoverflow.com/questions/6949370/scipy-leastsq-dfun-usage
+            # as noted here: https://stackoverflow.com/questions/6949370/scipy-scipy.optimize.leastsq-dfun-usage
             # this needs to be fit - y, not vice versa
-            retval = (fit - y) / sigma  # * normalization
-        except ValueError as e:
+            retval = (fit - y) / sigma * normalization
+        except ValueError:
             raise ValueError(
                 strm(
                     "your error (",
@@ -7741,7 +7744,6 @@ class fitdata(nddata):
                     np.shape(fit),
                     ")",
                 )
-                + explain_error(e)
             )
         return retval
 
@@ -7920,7 +7922,7 @@ class fitdata(nddata):
         #     way the function looks.  Though this is a pain, it's
         #     better.
         for j in range(0, len(self.symbol_list)):
-            symbol = sympy_latex(self.symbolic_vars[j]).replace("$", "")
+            symbol = sp.printing.latex(self.symbolic_vars[j]).replace("$", "")
             logger.debug(strm('DEBUG: replacing symbol "', symbol, '"'))
             location = retval.find(symbol)
             while location != -1:
@@ -8003,7 +8005,7 @@ class fitdata(nddata):
         if hasattr(self, "fit_coeff") and self.fit_coeff is not None:
             p = self.fit_coeff.copy()
         else:
-            p = np.array([NaN] * len(self.symbol_list))
+            p = np.array([np.nan] * len(self.symbol_list))
         # {{{ LOCALLY apply any forced values
         # changed line below from set to set_what, and now it works
         if set_what is not None:
@@ -8070,19 +8072,19 @@ class fitdata(nddata):
             "args": (x, y, sigma),
             "full_output": True,
         }  # 'maxfev':1000*(len(p_ini)+1)}
-        p_out, this_cov, infodict, mesg, success = leastsq(
+        p_out, this_cov, infodict, mesg, success = scipy.optimize.leastsq(
             *leastsq_args, **leastsq_kwargs
         )
         try:
-            p_out, this_cov, infodict, mesg, success = leastsq(
+            p_out, this_cov, infodict, mesg, success = scipy.optimize.leastsq(
                 *leastsq_args, **leastsq_kwargs
             )
         # {{{ just give various explicit errors
-        except TypeError as err:
+        except TypeError:
             if not isinstance(x, np.ndarray) and not isinstance(y, np.ndarray):
                 raise TypeError(
                     strm(
-                        "leastsq failed because the two arrays",
+                        "scipy.optimize.leastsq failed because the two arrays",
                         "aren't of the right",
                         "type",
                         "type(x):",
@@ -8096,7 +8098,7 @@ class fitdata(nddata):
                 if np.any(np.shape(x) != np.shape(y)):
                     raise RuntimeError(
                         strm(
-                            "leastsq failed because the two arrays do"
+                            "scipy.optimize.leastsq failed because the two arrays do"
                             "not match in size size",
                             "np.shape(x):",
                             np.shape(x),
@@ -8106,7 +8108,7 @@ class fitdata(nddata):
                     )
             raise TypeError(
                 strm(
-                    "leastsq failed because of a type error!",
+                    "scipy.optimize.leastsq failed because of a type error!",
                     "type(x):",
                     showtype(x),
                     "type(y):",
@@ -8127,23 +8129,26 @@ class fitdata(nddata):
         except ValueError as err:
             raise ValueError(
                 strm(
-                    'leastsq failed with "',
+                    'scipy.optimize.leastsq failed with "',
                     err,
                     '", maybe there is something wrong with the input:',
                     self,
                 )
             )
-        except Exception as e:
-            raise ValueError("leastsq failed; I don't know why")
-            +explain_error(e)
+        except Exception:
+            raise ValueError("scipy.optimize.leastsq failed; I don't know why")
         # }}}
         if success not in [1, 2, 3, 4]:
             # {{{ up maximum number of evals
             if mesg.find("maxfev"):
                 leastsq_kwargs.update({"maxfev": 50000})
-                p_out, this_cov, infodict, mesg, success = leastsq(
-                    *leastsq_args, **leastsq_kwargs
-                )
+                (
+                    p_out,
+                    this_cov,
+                    infodict,
+                    mesg,
+                    success,
+                ) = scipy.optimize.leastsq(*leastsq_args, **leastsq_kwargs)
                 if success != 1:
                     if mesg.find("two consecutive iterates"):
                         print(
@@ -8185,12 +8190,18 @@ class fitdata(nddata):
                         # return
                     else:
                         raise RuntimeError(
-                            strm("leastsq finished with an error message:", mesg)
+                            strm(
+                                "scipy.optimize.leastsq finished with an error message:",
+                                mesg,
+                            )
                         )
                     # }}}
             else:
                 raise RuntimeError(
-                    strm("leastsq finished with an error message:", mesg)
+                    strm(
+                        "scipy.optimize.leastsq finished with an error message:",
+                        mesg,
+                    )
                 )
         else:
             logger.debug(
@@ -8238,7 +8249,7 @@ class fitdata(nddata):
                 self.covariance *= (
                     np.sum(infodict["fvec"] ** 2) / dof
                 )  # scale by chi_v "RMS of residuals"
-            except TypeError as e:
+            except TypeError:
                 raise TypeError(
                     strm(
                         "type(self.covariance)",
@@ -8501,7 +8512,9 @@ class fitdata(nddata):
                             )
                             f_at_guess = np.real(self.eval(None, set=guess_dict).data)
                             try:
-                                f_at_guess = f_at_guess.reshape(tuple(new_y_shape))
+                                f_at_guess = f_at_guess.reshape(
+                                    tuple(new_y_shape)
+                                )
                             except Exception:
                                 raise RuntimeError(
                                     strm(
@@ -8538,55 +8551,7 @@ class fitdata(nddata):
 def sqrt(arg):
     if isinstance(arg, nddata):
         return arg**0.5
-    elif isinstance(arg, sympy_symbol):
+    elif isinstance(arg, sp.core.Symbol):
         return sympy_sqrt(arg)
     else:
-        return np_sqrt(arg)
-
-
-# {{{ determine the figure style, and load the appropriate modules
-if _figure_mode_setting == "latex":
-    from . import fornotebook
-
-    figlist_var = figlistl
-elif _figure_mode_setting == "standard":
-    from .figlist import figlist
-
-    def obsn(*x):  # because this is used in fornotebook, and I want it defined
-        print("".join(x), "\n")
-
-    def obs(*x):  # because this is used in fornotebook, and I want it defined
-        print("".join(map(repr, x)))
-
-    def lrecordarray(*x, **kwargs):
-        return repr(x)  # if I'm not using tex, it's easier to not use the formatting
-
-    def lsafe(*string, **kwargs):
-        "replacement for normal lsafe -- no escaping"
-        if len(string) > 1:
-            def lsafewkargs(x):
-                return lsafe(x, **kwargs)
-            return " ".join(list(map(lsafewkargs, string)))
-        else:
-            string = string[0]
-        # {{{ kwargs
-        spaces = False
-        if "spaces" in list(kwargs.keys()):
-            spaces = kwargs.pop("spaces")
-        if "wrap" in list(kwargs.keys()):
-            wrap = kwargs.pop("wrap")
-        else:
-            wrap = None
-        # }}}
-        if not isinstance(string, str):
-            string = repr(string)
-        if wrap is True:
-            wrap = 60
-        if wrap is not None:
-            string = "\n".join(textwrap.wrap(string, wrap))
-        return string
-
-    figlist_var = figlist
-else:
-    raise ValueError("I don't understand the figures mode " + _figure_mode_setting)
-# }}}
+        return np.sqrt(arg)
