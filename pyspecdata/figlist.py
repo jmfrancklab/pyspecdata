@@ -62,9 +62,9 @@ The figure list gives us three things:
     *   The "plottype" (currently an argument to the plot function) should be an attribute of the axis object
 """
 from .general_functions import process_kwargs, strm, lsafen 
-from .mpl_utils import autopad_figure
+from .mpl_utils import autopad_figure, autolegend, gridandtick
 from . import plot_funcs as this_plotting
-from .core import nddata, autolegend, gridandtick
+from .core import nddata
 from .core import plot as pyspec_plot
 import numpy as np
 import matplotlib.pyplot as plt

@@ -87,6 +87,8 @@ elif _figure_mode_setting == "latex":
 
     mpl.use("Agg")
     import matplotlib.pyplot as plt
+else:
+    import matplotlib.pyplot as plt
 # }}} -- continued below
 
 # rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf

@@ -3,7 +3,7 @@ import sympy as sp
 from lmfit import Parameters, minimize
 from lmfit.printfuncs import report_fit
 import numpy as np
-from .core import nddata, normal_attrs, issympy, ndshape, sympy_latex, sympy_symbol, dp
+from .core import nddata, normal_attrs, issympy, ndshape, dp
 from .general_functions import strm
 import logging, warnings
 from copy import deepcopy
@@ -416,7 +416,7 @@ class lmfitdata(nddata):
         #     way the function looks.  Though this is a pain, it's
         #     better.
         for j in range(0, len(self.parameter_names)):
-            symbol = sympy_latex(self.parameter_symbols[j]).replace("$", "")
+            symbol = sp.printing.latex(self.parameter_symbols[j]).replace("$", "")
             logging.debug(strm('DEBUG: replacing symbol "', symbol, '"'))
             location = retval.find(symbol)
             while location != -1:
@@ -459,8 +459,8 @@ class lmfitdata(nddata):
         r"""A property of the myfitclass class which stores a string
         output of the functional form of the desired fit expression
         provided in func:`functional_form` in LaTeX format"""
-        retval = sympy_latex(self.expression).replace("$", "")
-        return r"$f(%s)=" % (sympy_latex(sympy_symbol(self.fit_axis))) + retval + r"$"
+        retval = sp.printing.latex(self.expression).replace("$", "")
+        return r"$f(%s)=" % (sp.printing.latex(sp.core.Symbol(self.fit_axis))) + retval + r"$"
 
     @function_string.setter
     def function_string(self):
