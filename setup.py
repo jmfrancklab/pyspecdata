@@ -79,7 +79,7 @@ else:
             "h5py",
             "matplotlib",
             "pillow",
-            "lmfit",
+            "lmfit>=1.1", # we recently found that at least 1.0.3 generates output parameters that are unchanged, but still returns a "success" condition
             ],
         ext_modules = ext_modules,
         entry_points=dict(console_scripts=
