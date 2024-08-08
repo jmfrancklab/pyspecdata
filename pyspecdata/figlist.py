@@ -63,7 +63,7 @@ The figure list gives us three things:
 """
 from . import general_functions as gen_func
 from . import plot_funcs as this_plotting
-from . import core as core 
+from . import core as core
 from .core import plot as pyspec_plot
 import matplotlib.pyplot as plt
 import matplotlib.colormaps as cm
@@ -71,6 +71,7 @@ import time
 import logging
 from numpy import r_
 import numpy as np
+
 
 class figlist(object):
     r"""
@@ -161,7 +162,9 @@ class figlist(object):
         if self.current in list(self.twinx_list.keys()):
             ax1, ax2 = self.twinx_list[self.current]
             if color is not None:
-                if "twinx_color" not in list(self.propdict[self.current].keys()):
+                if "twinx_color" not in list(
+                    self.propdict[self.current].keys()
+                ):
                     ax2.tick_params(axis="y", colors=color)
                     ax2.yaxis.label.set_color(color)
                     ax2.spines["right"].set_color(color)
@@ -289,8 +292,12 @@ class figlist(object):
         if not hasattr(self, "figdict"):
             self.figdict = {}  # the dictionary of the various figures
         if not hasattr(self, "propdict"):
-            self.propdict = {}  # the properties belonging to those same figures
-        logging.debug(core.strm("for plot", input_name, "basename is", self.basename))
+            self.propdict = (
+                {}
+            )  # the properties belonging to those same figures
+        logging.debug(
+            core.strm("for plot", input_name, "basename is", self.basename)
+        )
         if (
             self.basename is not None  # basename for groups of figures
             # I need to check that the basename hasn't already been added
@@ -298,7 +305,9 @@ class figlist(object):
         ):
             name = self.basename + " " + input_name
         else:
-            logging.debug(core.strm("not using a basename", self.basename is not None))
+            logging.debug(
+                core.strm("not using a basename", self.basename is not None)
+            )
             name = input_name
         # }}}
         if name.find("/") > 0:
@@ -315,7 +324,10 @@ class figlist(object):
             else:
                 logging.debug(
                     core.strm(
-                        "I'm changing to figure", self.get_fig_number(name), "for", name
+                        "I'm changing to figure",
+                        self.get_fig_number(name),
+                        "for",
+                        name,
                     )
                 )
                 fig = self.figdict[name]
@@ -325,22 +337,29 @@ class figlist(object):
                         self.propdict[name]["axes"]
                     )  # set to the stored axes object
                     logging.debug(
-                        core.strm("id of figure is", id(self.propdict[name]["axes"]))
+                        core.strm(
+                            "id of figure is", id(self.propdict[name]["axes"])
+                        )
                     )
             self.current = name
             # logging.debug(core.strm('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures'))
             if boundaries is not None:
                 if (
-                    "boundaries" not in list(self.propdict[self.current].keys())
+                    "boundaries"
+                    not in list(self.propdict[self.current].keys())
                     or self.propdict[self.current]["boundaries"] != boundaries
                 ):
-                    raise ValueError("You're giving conflicting values for boundaries")
+                    raise ValueError(
+                        "You're giving conflicting values for boundaries"
+                    )
             if legend:
                 if (
                     "legend" not in list(self.propdict[self.current].keys())
                     or self.propdict[self.current]["legend"] != legend
                 ):
-                    raise ValueError("You're giving conflicting values for legend")
+                    raise ValueError(
+                        "You're giving conflicting values for legend"
+                    )
         else:  # figure doesn't exist yet
             num_figs_before_add = self.get_num_figures()
             self.current = name
@@ -375,13 +394,18 @@ class figlist(object):
                 if "axes" in self.propdict[self.current].keys():
                     plt.sca(self.propdict[self.current]["axes"])
                     logging.debug(
-                        core.strm("set to figure with id", id(self.propdict[name]["axes"]))
+                        core.strm(
+                            "set to figure with id",
+                            id(self.propdict[name]["axes"]),
+                        )
                     )
                     fig = plt.gcf()
                 elif fig is None:
                     if hasattr(self, "mlab"):
                         fig = self.mlab.figure(
-                            num_figs_before_add + 1, bgcolor=(1, 1, 1), **kwargs
+                            num_figs_before_add + 1,
+                            bgcolor=(1, 1, 1),
+                            **kwargs,
                         )
                         fig.scene.render_window.aa_frames = 20
                         fig.scene.anti_aliasing_frames = 20
@@ -422,7 +446,9 @@ class figlist(object):
             len(phdiff.dimlabels) == 1
         ), "only one dimension supported right now -- loop as needed"
         dimname = phdiff.dimlabels[0]
-        alphapoints = 1 / phdiff.get_error()  # to show what a weighted sum looks like
+        alphapoints = (
+            1 / phdiff.get_error()
+        )  # to show what a weighted sum looks like
         alphapoints[~np.isfinite(alphapoints)] = 0
         alphapoints /= max(
             alphapoints
@@ -462,7 +488,9 @@ class figlist(object):
             )  # check units, and if need be convert to human units, where x is the first dimension and y is the last
         else:
             firstarg = args[0]
-        if "label" not in list(kwargs.keys()) and isinstance(args[0], core.nddata):
+        if "label" not in list(kwargs.keys()) and isinstance(
+            args[0], core.nddata
+        ):
             thisname = args[0].name()
             if thisname is not None:
                 kwargs["label"] = thisname
@@ -499,7 +527,9 @@ class figlist(object):
             logging.debug(core.strm("(check_units) it's nddata"))
             testdata = testdata.copy().human_units()
             if len(testdata.dimlabels) > 1:
-                logging.debug(core.strm("(check_units) more than one dimension"))
+                logging.debug(
+                    core.strm("(check_units) more than one dimension")
+                )
                 if not hasattr(self, "current"):
                     raise ValueError(
                         "give your plot a name (using .next()) first! (this is used for naming the PDF's etc)"
@@ -515,7 +545,11 @@ class figlist(object):
                     ):
                         raise ValueError(
                             "for '%s' the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"
-                            % (self.current, theseunits, self.units[self.current])
+                            % (
+                                self.current,
+                                theseunits,
+                                self.units[self.current],
+                            )
                         )
                 else:
                     if isinstance(testdata, core.nddata):
@@ -528,15 +562,24 @@ class figlist(object):
                 if not hasattr(self, "current"):
                     self.next("default")
                 if self.current in list(self.units.keys()):
-                    theseunits = testdata.get_units(testdata.dimlabels[x_index])
+                    theseunits = testdata.get_units(
+                        testdata.dimlabels[x_index]
+                    )
                     testunits = self.units[self.current]
                     if theseunits != testunits:
-                        if isinstance(testunits, tuple) and testunits[1] is None:
+                        if (
+                            isinstance(testunits, tuple)
+                            and testunits[1] is None
+                        ):
                             pass
                         else:
                             raise ValueError(
                                 "for figure '%s' the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"
-                                % (self.current, self.units[self.current], theseunits)
+                                % (
+                                    self.current,
+                                    self.units[self.current],
+                                    theseunits,
+                                )
                             )
                 else:
                     self.units[self.current] = testdata.get_units(
@@ -612,7 +655,11 @@ class figlist(object):
                             v = True
                     if v == "outside":
                         kwargs.update(
-                            dict(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.0)
+                            dict(
+                                bbox_to_anchor=(1.05, 1),
+                                loc=2,
+                                borderaxespad=0.0,
+                            )
                         )
                 self.next(k)
                 logging.debug(
@@ -623,7 +670,11 @@ class figlist(object):
                         k in self.figurelist,
                     )
                 )
-                logging.debug(core.strm("print out the legend object:", plt.gca().legend()))
+                logging.debug(
+                    core.strm(
+                        "print out the legend object:", plt.gca().legend()
+                    )
+                )
                 try:
                     plt.autolegend(**kwargs)
                 except Exception:
@@ -653,23 +704,27 @@ class figlist(object):
                         )
 
     def show(self, *args, **kwargs):
-        self.basename = (
-            None  # must be turned off, so it can cycle through lists, etc, on its own
-        )
+        self.basename = None  # must be turned off, so it can cycle through lists, etc, on its own
         line_spacing, block = gen_func.process_kwargs(
             [("line_spacing", ""), ("block", None)], kwargs
         )
         if len(kwargs) > 0:
             raise ValueError("didn't understand kwargs " + repr(kwargs))
-        logging.debug(core.strm("before show_prep, figlist is", self.figurelist))
         logging.debug(
-            core.strm("before show_prep, autolegend list is", self.autolegend_list)
+            core.strm("before show_prep, figlist is", self.figurelist)
+        )
+        logging.debug(
+            core.strm(
+                "before show_prep, autolegend list is", self.autolegend_list
+            )
         )
         self.show_prep()
         # {{{ just copy from fornnotebook to get the print string functionality
         kwargs = {}
         for figname in self.figurelist:
-            logging.debug(core.strm('showing figure "%s"' % gen_func.lsafen(figname)))
+            logging.debug(
+                core.strm('showing figure "%s"' % gen_func.lsafen(figname))
+            )
             if isinstance(figname, dict):
                 kwargs.update(figname)
                 if "print_string" in kwargs:
@@ -695,7 +750,14 @@ class figlist(object):
             plt.show(block=block)
 
     def label_point(
-        self, data, axis, value, thislabel, show_point=True, xscale=1, **new_kwargs
+        self,
+        data,
+        axis,
+        value,
+        thislabel,
+        show_point=True,
+        xscale=1,
+        **new_kwargs,
     ):
         """only works for 1D data: assume you've passed a single-point nddata, and label it
 
@@ -728,7 +790,13 @@ class figlist(object):
         x = data.getaxis(axis)[x_ind]
         plt.text(x / xscale, y, thislabel, **kwargs)
         if show_point:
-            plt.plot(x / xscale, y, "o", color=kwargs["color"], alpha=kwargs["alpha"])
+            plt.plot(
+                x / xscale,
+                y,
+                "o",
+                color=kwargs["color"],
+                alpha=kwargs["alpha"],
+            )
         return
 
     def header(self, number_above, input_string):
@@ -797,7 +865,10 @@ class figlist(object):
                 )  # for some reason, 46 gives alignment (I think 9+1 and 9*5+1)
             if equal_scale:
                 self.generate_ticks(
-                    plotdata, (x_axis, y_axis), X_normalization, Z_normalization
+                    plotdata,
+                    (x_axis, y_axis),
+                    X_normalization,
+                    Z_normalization,
                 )
             else:
                 self.generate_ticks(
@@ -839,7 +910,9 @@ class figlist(object):
         def gen_list(thisaxis, desired_ticks=7.0):
             # {{{ out of the following list, choose the one that gives as close as possible to the desired ticks
             axis_span = thisaxis.max() - thisaxis.min()
-            possible_iterators = r_[0.1, 0.5, 1, 5, 10, 20, 30, 50, 100, 200, 500, 1000]
+            possible_iterators = r_[
+                0.1, 0.5, 1, 5, 10, 20, 30, 50, 100, 200, 500, 1000
+            ]
             iterator = possible_iterators[
                 np.argmin(abs(axis_span / desired_ticks - possible_iterators))
             ]
@@ -888,7 +961,9 @@ class figlist(object):
             if fine_grid:
                 dy = ylist[1] - ylist[0]
                 finer_ylist = r_[
-                    ylist[0] - dy : ylist[-1] + dy : 1j * ((len(ylist) + 2 - 1) * 5 + 1)
+                    ylist[0]
+                    - dy : ylist[-1]
+                    + dy : 1j * ((len(ylist) + 2 - 1) * 5 + 1)
                 ]
                 finer_ylist = finer_ylist[finer_ylist >= y_axis.min()]
                 finer_ylist = finer_ylist[finer_ylist <= y_axis.max()]
@@ -896,7 +971,9 @@ class figlist(object):
                 finer_ylist = ylist
             for j, y in enumerate(finer_ylist):
                 x_linedata = plotdata.getaxis(x_dim) / rescale
-                z_linedata = plotdata[y_dim : (y * rescale)].data.flatten() / z_norm
+                z_linedata = (
+                    plotdata[y_dim : (y * rescale)].data.flatten() / z_norm
+                )
                 self.mlab.plot3d(
                     x_linedata,
                     y * np.ones_like(x_linedata),
@@ -946,7 +1023,9 @@ class figlist(object):
             if fine_grid:
                 dx = xlist[1] - xlist[0]
                 finer_xlist = r_[
-                    xlist[0] - dx : xlist[-1] + dx : 1j * ((len(xlist) + 2 - 1) * 5 + 1)
+                    xlist[0]
+                    - dx : xlist[-1]
+                    + dx : 1j * ((len(xlist) + 2 - 1) * 5 + 1)
                 ]
                 finer_xlist = finer_xlist[finer_xlist >= x_axis.min()]
                 finer_xlist = finer_xlist[finer_xlist <= x_axis.max()]
@@ -954,7 +1033,9 @@ class figlist(object):
                 finer_xlist = xlist
             for j, x in enumerate(finer_xlist):
                 y_linedata = plotdata.getaxis(y_dim) / (rescale * y_rescale)
-                z_linedata = plotdata[x_dim : (x * rescale)].data.flatten() / z_norm
+                z_linedata = (
+                    plotdata[x_dim : (x * rescale)].data.flatten() / z_norm
+                )
                 self.mlab.plot3d(
                     x * np.ones_like(y_linedata),
                     y_linedata,
