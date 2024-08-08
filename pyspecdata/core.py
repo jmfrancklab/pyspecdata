@@ -7422,6 +7422,7 @@ class nddata_hdf5(nddata):
         if "axes" in list(datadict.keys()):
             myaxiscoords = [None] * len(mydimlabels)
             myaxiscoordserror = [None] * len(mydimlabels)
+            myaxis_units = [None] * len(mydimlabels)
             logger.debug(
                 strm(
                     "about to read out the various axes:",
@@ -7448,6 +7449,8 @@ class nddata_hdf5(nddata):
                         )
                     )
                 recordarrayofaxis = datadict["axes"][axisname]["data"]
+                if "axis_coords_units" in datadict["axes"][axisname].keys():
+                    myaxis_units[axisnumber] = datadict["axes"][axisname]["axis_coords_units"]
                 myaxiscoords[axisnumber] = recordarrayofaxis["data"]
                 if "error" in recordarrayofaxis.dtype.names:
                     myaxiscoordserror[axisnumber] = recordarrayofaxis["error"]
@@ -7464,6 +7467,7 @@ class nddata_hdf5(nddata):
                     )
                 datadict["axes"].pop(axisname)
             kwargs.update({"axis_coords": myaxiscoords})
+            kwargs.update({"axis_coords_units": myaxis_units})
             kwargs.update({"axis_coords_error": myaxiscoordserror})
         elif len(mydimlabels) > 1:
             raise ValueError(
