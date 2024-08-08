@@ -578,10 +578,9 @@ def lookup_rec(A, B, indexpair):
             )
         )
     whichisindex = joined[0][1].dtype.names.index(indexpair[1])
-
-    def allbutindex(x):
-        return list(x)[0:whichisindex] + list(x)[whichisindex + 1 :]
-
+    allbutindex = (
+        lambda x: list(x)[0:whichisindex] + list(x)[whichisindex + 1 :]
+    )
     joined = np.concatenate(
         [
             np.array(
@@ -1169,8 +1168,7 @@ def make_rec(*args, **kwargs):
                 retval[thisname][:] = input[j][:]
             except Exception:
                 raise RuntimeError(
-                    e
-                    + "error trying to load input for '"
+                    "error trying to load input for '"
                     + thisname
                     + "' of shape "
                     + repr(np.shape(input[j]))
@@ -1331,7 +1329,6 @@ def plot(*args, **kwargs):
                 if len(myy.data.shape) == 0:
                     raise ValueError(
                         "I can't plot zero-dimensional data (typically arises when you have a dataset with one point)"
-                        + explain_error(e)
                     )
                 myx = r_[0 : myy.data.shape[longest_dim]]
         if (
@@ -1423,7 +1420,6 @@ def plot(*args, **kwargs):
                     "likely a problem with the type of the x label, which is",
                     myx,
                 )
-                + explain_error(e)
             )
         if (
             (np.size(b) > 3)
@@ -1628,7 +1624,6 @@ def plot(*args, **kwargs):
                     ]
                 ),
             )
-            + explain_error(e)
         )
     # plt.grid(True)
     # }}}
@@ -4929,7 +4924,6 @@ class nddata(object):
                     "to",
                     newshape,
                     "so I can manipulate it like data",
-                    explain_error(e),
                 )
             )
 
@@ -6520,7 +6514,6 @@ class nddata(object):
                         indexlist,
                         "likely, one of the slice indeces is out of bounds for the size of the data",
                     )
-                    + explain_error(e)
                 )
             try:
                 retval = nddata(
@@ -6542,7 +6535,6 @@ class nddata(object):
                         "indexlist",
                         indexlist,
                     )
-                    + explain_error(e)
                 )
             retval.axis_coords_units = axis_coords_units
             retval.data_units = self.data_units
@@ -6719,10 +6711,7 @@ class nddata(object):
             args = [args]
         # {{{ make a sensible list of tuples that's easier to understand
         sensible_list = []  # type, dimension, arguments
-
-        def testf(x):
-            return x + 1
-
+        testf = lambda x: x + 1
         j = 0
         while j < len(args):
             if isinstance(args[j], str):  # works for str and np.str_
@@ -7595,7 +7584,6 @@ class ndshape(ndshape_base):
                     self.shape,
                     "should be numbers, not names",
                 )
-                + explain_error(e)
             )
         retval = nddata(emptyar, self.shape, self.dimlabels)
         if labels:
@@ -7734,7 +7722,6 @@ class fitdata(nddata):
                             for k in range(0, len(xvals))
                         ],
                     )
-                    + explain_error(e)
                 )
             except Exception:
                 raise ValueError(
@@ -7991,6 +7978,7 @@ class fitdata(nddata):
     def residual(self, p, x, y, sigma):
         """just the residual (error) function"""
         fit = self.fitfunc(p, x)
+        normalization = np.sum(1.0 / sigma)
         # print 'DEBUG: y=',y,'\nfit=',fit,'\nsigma=',sigma,'\n\n'
         sigma[sigma == 0.0] = 1
         try:
@@ -8368,7 +8356,6 @@ class fitdata(nddata):
                         "type(y):",
                         type(y),
                     )
-                    + explain_error(err)
                 )
             else:
                 if np.any(np.shape(x) != np.shape(y)):
@@ -8535,7 +8522,6 @@ class fitdata(nddata):
                         "type(dof)",
                         type(dof),
                     )
-                    + explain_error(e)
                 )
         logger.debug(
             strm(
