@@ -218,6 +218,16 @@ def issympy(x):
     return isinstance(x, sp.core.expr)
 
 
+def psd_sqrt(arg):
+    "pyspecdata square root -- this is the easiest way to get good error propagation"
+    if isinstance(arg, nddata):
+        return arg**0.5
+    elif isinstance(arg, sp.core.Symbol):
+        return sympy_sqrt(arg)
+    else:
+        return np.sqrt(arg)
+
+
 # {{{ function trickery
 def mydiff(data, axis=-1):
     """this will replace np.diff with a version that has the same number of indices, with the last being the copy of the first"""
@@ -533,9 +543,10 @@ def lookup_rec(A, B, indexpair):
             )
         )
     whichisindex = joined[0][1].dtype.names.index(indexpair[1])
-    allbutindex = (
-        lambda x: list(x)[0:whichisindex] + list(x)[whichisindex + 1 :]
-    )
+
+    def allbutindex(x):
+        return list(x)[0:whichisindex] + list(x)[whichisindex + 1 :]
+
     joined = np.concatenate(
         [
             np.array(
@@ -997,7 +1008,7 @@ def meanstd_rec(myarray, mylist, standard_error=False):
                 if standard_error:
                     newrow[thisfield + "_ERROR"] = np.std(
                         myarray_subset[thisfield]
-                    ) / sqrt(len(myarray_subset[thisfield]))
+                    ) / np.sqrt(len(myarray_subset[thisfield]))
                 else:
                     newrow[thisfield + "_ERROR"] = np.std(
                         myarray_subset[thisfield]
@@ -2328,7 +2339,7 @@ class nddata(object):
         self = self[axis, 1:]
         E = E[1:, 1:]
         # }}}
-        self.set_error(sqrt(E.diagonal()))
+        self.set_error(np.sqrt(E.diagonal()))
         E.setdiag(np.zeros(n - 1))
         self.data_covariance = E
         return self
@@ -2894,7 +2905,7 @@ class nddata(object):
             Rerr += (Aerr) ** 2
         if Berr is not None:
             Rerr += (Berr) ** 2
-        Rerr = sqrt(np.real(Rerr))  # convert back to stdev
+        Rerr = np.sqrt(np.real(Rerr))  # convert back to stdev
         if Aerr is None and Berr is None:
             Rerr = None
         retval.set_error(Rerr)
@@ -3010,7 +3021,7 @@ class nddata(object):
             Rerr += (Aerr * B.data) ** 2
         if Berr is not None:
             Rerr += (Berr * A.data) ** 2
-        Rerr = sqrt(np.real(Rerr))  # convert back to stdev
+        Rerr = np.sqrt(np.real(Rerr))  # convert back to stdev
         if Aerr is None and Berr is None:
             Rerr = None
         # }}}
@@ -3112,7 +3123,7 @@ class nddata(object):
                         )
                     )
         try:
-            Rerr = sqrt(
+            Rerr = np.sqrt(
                 np.real(Rerr)
             )  # convert back to stdev --> note that this has problems with complex numbers, hence the "abs" above
         except AttributeError:
@@ -3508,7 +3519,7 @@ class nddata(object):
         self.setaxis(axis, A.getaxis(axis))
         if return_error:
             self.set_error(
-                sqrt(
+                np.sqrt(
                     A_sigma**2 * abs(0.5 / A.data) ** 2
                     + B_sigma**2 * abs(0.5 / B.data) ** 2
                 )
@@ -3846,7 +3857,7 @@ class nddata(object):
             if self.data_error is not None:
                 this_axis_length = self.data.shape[thisindex]
                 try:
-                    self.data_error = sqrt(
+                    self.data_error = np.sqrt(
                         np.sum(
                             (self.data * self.data_error) ** 2, axis=thisindex
                         )
@@ -4443,7 +4454,7 @@ class nddata(object):
             )  # calculate the error variance of the real part, use linear to avoid nan problems
             if thiserror[0].dtype == "complex128":
                 ierrvar = local_interp_func(ierrvar, kind="linear")
-                self.set_error(sqrt(rerrvar) + 1j * sqrt(ierrvar))
+                self.set_error(np.sqrt(rerrvar) + 1j * np.sqrt(ierrvar))
             else:
                 self.set_error(sqrt(rerrvar))
             err_nanmask = np.isnan(self.get_error())
@@ -6166,6 +6177,15 @@ class nddata(object):
             return retfun
         elif arg == "shape":
             return ndshape(self)
+        elif arg == "sqrt":
+            # for now, just hack this -- later we should also have a dictionary
+            # of functions that gives the derivatives, so that we can use that
+            # for error propagation
+            def retfun():
+                retval = self.copy()
+                return psd_sqrt(retval)
+
+            return retfun
         elif arg == "isfortran":
             raise ValueError(
                 "you tried to call isfortran on an nddata object --"
@@ -6666,7 +6686,10 @@ class nddata(object):
             args = [args]
         # {{{ make a sensible list of tuples that's easier to understand
         sensible_list = []  # type, dimension, arguments
-        testf = lambda x: x + 1
+
+        def testf(x):
+            return x + 1
+
         j = 0
         while j < len(args):
             if isinstance(args[j], str):  # works for str and np.str_
@@ -8628,7 +8651,7 @@ class fitdata(nddata):
                         new_y_shape,
                     )
                 )
-            thisresidual = sqrt((y - f_at_guess) ** 2).sum()
+            thisresidual = np.sqrt((y - f_at_guess) ** 2).sum()
             # }}}
             lastresidual = thisresidual
             for j in range(0, numguesssteps):
@@ -8703,7 +8726,7 @@ class fitdata(nddata):
                                     new_y_shape,
                                 )
                             )
-                        thisresidual = sqrt((y - f_at_guess) ** 2).sum()
+                        thisresidual = np.sqrt((y - f_at_guess) ** 2).sum()
                         # }}}
                         if (thisresidual - lastresidual) / lastresidual > 0.10:
                             alpha *= alpha_mult
@@ -8767,7 +8790,7 @@ class fitdata(nddata):
                                         new_y_shape,
                                     )
                                 )
-                            thisresidual = sqrt((y - f_at_guess) ** 2).sum()
+                            thisresidual = np.sqrt((y - f_at_guess) ** 2).sum()
                             # }}}
                             regularization_bad = False  # jump out of this loop
                 logger.debug(
