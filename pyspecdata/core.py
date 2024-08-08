@@ -87,54 +87,9 @@ elif _figure_mode_setting == "latex":
 
     mpl.use("Agg")
     import matplotlib.pyplot as plt
-# }}} -- continued below
-# {{{ determine the figure style, and load the appropriate modules
-if _figure_mode_setting == "latex":
-    from .fornotebook import figlistl, obs
-
-    figlist_var = figlistl
-    lsafe = orig_lsafe
-elif _figure_mode_setting == "standard":
-    from .figlist import figlist
-
-    def obsn(*x):  # because this is used in fornotebook, and I want it defined
-        print("".join(x), "\n")
-
-    def obs(*x):  # because this is used in fornotebook, and I want it defined
-        print("".join(map(repr, x)))
-
-    def lrecordarray(*x, **kwargs):
-        return repr(
-            x
-        )  # if I'm not using tex, it's easier to not use the formatting
-
-    def lsafe(*string, **kwargs):
-        "replacement for normal lsafe -- no escaping"
-        if len(string) > 1:
-            lsafewkargs = lambda x: lsafe(x, **kwargs)
-            return " ".join(list(map(lsafewkargs, string)))
-        else:
-            string = string[0]
-        # {{{ kwargs
-        if "wrap" in list(kwargs.keys()):
-            wrap = kwargs.pop("wrap")
-        else:
-            wrap = None
-        # }}}
-        if not isinstance(string, str):
-            string = repr(string)
-        if wrap is True:
-            wrap = 60
-        if wrap is not None:
-            string = "\n".join(textwrap.wrap(string, wrap))
-        return string
-
-    figlist_var = figlist
 else:
-    raise ValueError(
-        "I don't understand the figures mode " + _figure_mode_setting
-    )
-# }}}
+    import matplotlib.pyplot as plt
+# }}} -- continued below
 
 # rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
 plt.rc("image", aspect="auto", interpolation="nearest")
@@ -8843,3 +8798,52 @@ def sqrt(arg):
         return sympy_sqrt(arg)
     else:
         return np.sqrt(arg)
+
+# {{{ determine the figure style, and load the appropriate modules
+# this must come at end to prevent circular imports
+if _figure_mode_setting == "latex":
+    from .fornotebook import figlistl, obs
+
+    figlist_var = figlistl
+    lsafe = orig_lsafe
+elif _figure_mode_setting == "standard":
+    from .figlist import figlist
+
+    def obsn(*x):  # because this is used in fornotebook, and I want it defined
+        print("".join(x), "\n")
+
+    def obs(*x):  # because this is used in fornotebook, and I want it defined
+        print("".join(map(repr, x)))
+
+    def lrecordarray(*x, **kwargs):
+        return repr(
+            x
+        )  # if I'm not using tex, it's easier to not use the formatting
+
+    def lsafe(*string, **kwargs):
+        "replacement for normal lsafe -- no escaping"
+        if len(string) > 1:
+            lsafewkargs = lambda x: lsafe(x, **kwargs)
+            return " ".join(list(map(lsafewkargs, string)))
+        else:
+            string = string[0]
+        # {{{ kwargs
+        if "wrap" in list(kwargs.keys()):
+            wrap = kwargs.pop("wrap")
+        else:
+            wrap = None
+        # }}}
+        if not isinstance(string, str):
+            string = repr(string)
+        if wrap is True:
+            wrap = 60
+        if wrap is not None:
+            string = "\n".join(textwrap.wrap(string, wrap))
+        return string
+
+    figlist_var = figlist
+else:
+    raise ValueError(
+        "I don't understand the figures mode " + _figure_mode_setting
+    )
+# }}}
