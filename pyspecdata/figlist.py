@@ -64,7 +64,6 @@ The figure list gives us three things:
 from .general_functions import process_kwargs, strm, lsafen 
 from .mpl_utils import autopad_figure
 from . import plot_funcs as this_plotting
-from . import core as core
 from .core import plot as pyspec_plot
 import numpy as np
 import matplotlib.pyplot as plt
