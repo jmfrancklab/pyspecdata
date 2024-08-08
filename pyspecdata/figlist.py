@@ -65,15 +65,13 @@ from .general_functions import process_kwargs, strm, lsafen
 from .mpl_utils import autopad_figure
 from . import plot_funcs as this_plotting
 from .core import plot as pyspec_plot
+from .core import nddata, autolegend, gridandtick
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import time
 import logging
 from numpy import r_
-import numpy as np
-
-
 
 class figlist(object):
     r"""
