@@ -267,7 +267,7 @@ def psd_sqrt(arg):
     "pyspecdata square root -- this is the easiest way to get good error propagation"
     if isinstance(arg, nddata):
         return arg**0.5
-    elif isinstance(arg, sympy_symbol):
+    elif isinstance(arg, sp.core.Symbol):
         return sympy_sqrt(arg)
     else:
         return np.sqrt(arg)
