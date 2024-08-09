@@ -1,6 +1,5 @@
-from ..general_functions import *
 import matplotlib.pylab as plt
-import logging
+import numpy as np
 
 
 def pcolormesh(
@@ -12,6 +11,7 @@ def pcolormesh(
     ax=None,
     scale_independently=False,
     human_units=True,
+    force_balanced_cmap=False,
 ):
     """generate a pcolormesh and label it with the axis coordinate available from the nddata
 
@@ -33,7 +33,6 @@ def pcolormesh(
     nothing for now
     """
     assert len(self.dimlabels) == 2, "currently, this only supports 2D data"
-    is_complex = False
     if human_units:
         forplot = self.C.human_units()
     else:
@@ -67,16 +66,29 @@ def pcolormesh(
     # }}}
     for thisax, thisfun, thislabel in ax_list:
         Zdata = thisfun(Z)
-        vmin_list.append(Zdata.min())
-        vmax_list.append(Zdata.max())
         mappable = thisax.pcolormesh(X, Y, Zdata, shading=shading)
+        if thisax != ax_list[0][0]:
+            thisax.sharex(ax_list[0][0])
+            thisax.sharey(ax_list[0][0])
         mappable_list.append(mappable)
         thisax.set_ylabel(forplot.unitify_axis(forplot.dimlabels[0]))
         thisax.set_xlabel(forplot.unitify_axis(forplot.dimlabels[1]))
         thisax.set_title(f"({thislabel})")
+    for this_mappable in mappable_list:
+        thismin, thismax = this_mappable.get_clim()
+        vmin_list.append(thismin)
+        vmax_list.append(thismax)
+    if not scale_independently:
+        overall_min = np.min(vmin_list)
+        overall_max = np.max(vmax_list)
+        if force_balanced_cmap:
+            if overall_max > -overall_min:
+                overall_min = -overall_max
+            else:
+                overall_max = -overall_min
     for j, (thisax, thisfun, thislabel) in enumerate(ax_list):
         if not scale_independently:
-            mappable_list[j].set_clim(np.min(vmin_list), np.max(vmax_list))
+            mappable_list[j].set_clim(overall_min, overall_max)
         if scale_independently or j > 0:
-            cbar = plt.colorbar(mappable=mappable_list[j], ax=thisax)
+            plt.colorbar(mappable=mappable_list[j], ax=thisax)
     return
