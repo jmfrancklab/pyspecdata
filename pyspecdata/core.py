@@ -215,8 +215,7 @@ def apply_oom(average_oom, numbers, prev_label=""):
 
 def issympy(x):
     "tests if something is sympy (based on the module name)"
-    return isinstance(x, sp.core.expr)
-
+    return isinstance(x, sp.core.Expr)
 
 # {{{ function trickery
 def mydiff(data, axis=-1):
