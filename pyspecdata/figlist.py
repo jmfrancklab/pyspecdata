@@ -64,8 +64,8 @@ The figure list gives us three things:
 from .general_functions import process_kwargs, strm, lsafen 
 from .mpl_utils import autopad_figure, autolegend, gridandtick
 from . import plot_funcs as this_plotting
-from .core import plot as pyspec_plot
 from .core import nddata
+from .core import plot as pyspec_plot
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
