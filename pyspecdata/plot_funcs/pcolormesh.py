@@ -53,7 +53,7 @@ def pcolormesh(
             fig = plt.gcf()
             ax1 = fig.add_subplot(1, 1, 1)
         ax_list = [(ax1, lambda x: x.real, "real")]
-    X, Y = plt.meshgrid(
+    X, Y = np.meshgrid(
         forplot.getaxis(forplot.dimlabels[1]),
         forplot.getaxis(forplot.dimlabels[0]),
     )
