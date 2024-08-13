@@ -1,5 +1,5 @@
-from ..general_functions import *
-from numpy import r_, c_, ix_, nan
+from ..general_functions import strm, process_kwargs, check_ascending_axis
+from numpy import r_, c_, ix_, nan, pi
 import numpy as np
 from ..ndshape import ndshape_base as ndshape
 from pylab import gca, sca, imshow, xlabel, ylabel, title, colorbar, setp
@@ -9,6 +9,7 @@ import logging
 def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
     r"Please don't call image directly anymore -- use the image method of figurelist"
     x_inverted = False
+    y_inverted = False
     A = A.copy()
     A.squeeze()  # drop any singleton dimensions, which cause problems
     # {{{ pull out kwargs for imagehsv
@@ -52,7 +53,7 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
                 check_ascending_axis(
                     A.getaxis(thisaxis), allow_descending=True
                 )
-            except:
+            except Exception:
                 if allow_nonuniform:
                     logging.debug(
                         "Automatically changed to numbered axis along %s"
@@ -74,6 +75,8 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
         templabels = list(A.dimlabels)
         if A.get_prop("x_inverted"):
             x_inverted = True
+        if A.get_prop("y_inverted"):
+            y_inverted = True
         x_label = templabels[-1]
         if A.getaxis(x_label) is None:
             x = r_[0, ndshape(A)[x_label]]
@@ -86,7 +89,7 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
             y_label = templabels[0]
             try:
                 y = list(A.getaxis(y_label))
-            except:
+            except Exception:
                 y = r_[0 : A.data.shape[A.axn(y_label)]]
             y_label = A.unitify_axis(y_label)
         else:
@@ -158,7 +161,6 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
         "origin"
     ] = origin  # required so that imshow now displays the image correctly
     linecounter = 0
-    origAndim = A.ndim
     if A.ndim > 2:
         setp(ax.get_yticklabels(), visible=False)
         ax.yaxis.set_ticks_position("none")
@@ -170,7 +172,7 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
         tempsize = np.array(A.shape)  # make a tuple the right shape
         if linecounter == 0 and spacing < 1.0:
             spacing = round(
-                prod(tempsize[0:-1])
+                np.prod(tempsize[0:-1])
             )  # find the length of the thing not counting the columns
         tempsize[-2] = (
             2 * linecounter + spacing
@@ -184,7 +186,7 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
         tempsize[-2] *= A.shape[-3]
         try:
             A = A.reshape(np.int64(tempsize))  # now join them up
-        except:
+        except Exception:
             raise IndexError(
                 strm(
                     "problem with tempsize",
@@ -217,6 +219,9 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
     if x_inverted:
         these_xlims = ax.get_xlim()
         ax.set_xlim((max(these_xlims), min(these_xlims)))
+    if y_inverted:
+        these_ylims = ax.get_ylim()
+        ax.set_ylim((max(these_ylims), min(these_ylims)))
     return retval
 
 
