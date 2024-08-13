@@ -7425,7 +7425,17 @@ class nddata_hdf5(nddata):
                     )
                 recordarrayofaxis = datadict["axes"][axisname]["data"]
                 if "axis_coords_units" in datadict["axes"][axisname].keys():
-                    myaxis_units[axisnumber] = datadict["axes"][axisname]["axis_coords_units"]
+                    myaxis_units[axisnumber] = datadict["axes"][axisname][
+                        "axis_coords_units"
+                    ]
+                else:
+                    if ("Scans" in axisname) or ("ph" in axisname):
+                        pass
+                    else:
+                        print(
+                            "You didn't set units for %s before saving the data!!!"
+                            % axisname
+                        )
                 myaxiscoords[axisnumber] = recordarrayofaxis["data"]
                 if "error" in recordarrayofaxis.dtype.names:
                     myaxiscoordserror[axisnumber] = recordarrayofaxis["error"]
@@ -8822,6 +8832,7 @@ def sqrt(arg):
         return sympy_sqrt(arg)
     else:
         return np.sqrt(arg)
+
 
 # {{{ determine the figure style, and load the appropriate modules
 # this must come at end to prevent circular imports
