@@ -68,6 +68,7 @@ from .hdf_utils import (
 )
 from .mpl_utils import (
     plot_label_points,
+    default_cycler,
 )
 
 # {{{ determine the figure style, and load the appropriate modules
@@ -2855,6 +2856,8 @@ class nddata(object):
                 raise ValueError(strm("Color", thiscolor, "not in dictionary"))
         self.other_info.update({"plot_color": thiscolor})
         return
+    def set_plot_color_next(self):
+        self.set_plot_color(next(default_cycler))
 
     def get_plot_color(self):
         if "plot_color" in self.get_prop():
