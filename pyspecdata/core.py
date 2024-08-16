@@ -4971,7 +4971,7 @@ class nddata(object):
             else:
                 if issympy(args[0]):
                     func = args[0]
-                    symbols_in_func = func.atoms(sp.core.Symbol)
+                    symbols_in_func = func.atoms(sp.Symbol)
                     logger.debug(
                         strm(
                             "identified this as a sympy expression (",
@@ -5210,7 +5210,7 @@ class nddata(object):
                 return self
         elif len(args) == 1 and issympy(args[0]):
             func = args[0]
-            symbols_in_func = func.atoms(sp.core.Symbol)
+            symbols_in_func = func.atoms(sp.Symbol)
             logger.debug(
                 strm(
                     "identified this as a sympy expression (",
@@ -7735,7 +7735,7 @@ class fitdata(nddata):
         provided in func:`functional_form` in LaTeX format"""
         retval = sp.printing.latex(self.symbolic_expr).replace("$", "")
         return (
-            r"$f(%s)=" % (sp.printing.latex(sp.core.Symbol(self.fit_axis)))
+            r"$f(%s)=" % (sp.printing.latex(sp.Symbol(self.fit_axis)))
             + retval
             + r"$"
         )
@@ -7763,7 +7763,7 @@ class fitdata(nddata):
         ), "for now, the functional form must be a sympy expression!"
         self.symbolic_expr = sym_expr
         # {{{ adapted from fromaxis, trying to adapt the variable
-        symbols_in_expr = self.symbolic_expr.atoms(sp.core.Symbol)
+        symbols_in_expr = self.symbolic_expr.atoms(sp.Symbol)
         # logger.debug(strm('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr))
         logger.debug(
             strm(
@@ -8831,7 +8831,7 @@ class fitdata(nddata):
 def sqrt(arg):
     if isinstance(arg, nddata):
         return arg**0.5
-    elif isinstance(arg, sp.core.Symbol):
+    elif isinstance(arg, sp.Symbol):
         return sympy_sqrt(arg)
     else:
         return np.sqrt(arg)
