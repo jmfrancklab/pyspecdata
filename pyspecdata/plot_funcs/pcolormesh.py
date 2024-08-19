@@ -67,9 +67,6 @@ def pcolormesh(
     for thisax, thisfun, thislabel in ax_list:
         Zdata = thisfun(Z)
         mappable = thisax.pcolormesh(X, Y, Zdata, shading=shading)
-        if thisax != ax_list[0][0]:
-            thisax.sharex(ax_list[0][0])
-            thisax.sharey(ax_list[0][0])
         mappable_list.append(mappable)
         thisax.set_ylabel(forplot.unitify_axis(forplot.dimlabels[0]))
         thisax.set_xlabel(forplot.unitify_axis(forplot.dimlabels[1]))
