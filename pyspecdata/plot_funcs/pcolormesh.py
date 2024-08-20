@@ -12,6 +12,7 @@ def pcolormesh(
     scale_independently=False,
     human_units=True,
     force_balanced_cmap=False,
+    handle_axis_sharing=True,
 ):
     """generate a pcolormesh and label it with the axis coordinate available from the nddata
 
@@ -27,6 +28,14 @@ def pcolormesh(
     scale_independently: boolean (default False)
         Do you want each plot to be scaled independently?
         (If false, the colorbar will have the same limits for all plots)
+    handle_axis_sharing: boolean (default True)
+        Typically, you want the axes to scale together when you zoom
+        -- *e.g.* especially when you are plotting a real and imaginary together.
+        So, this defaults to true to do that.
+        But sometimes, you want to get fancy and, *e.g.* bind the sharing of many plots together
+        because matplotlib doesn't let you call sharex/sharey more than once,
+        you need then to tell it not to handle the axis sharing, and to it yourself
+        outside this routine.
 
     Returns
     =======
@@ -67,7 +76,7 @@ def pcolormesh(
     for thisax, thisfun, thislabel in ax_list:
         Zdata = thisfun(Z)
         mappable = thisax.pcolormesh(X, Y, Zdata, shading=shading)
-        if thisax != ax_list[0][0]:
+        if handle_axis_sharing and thisax != ax_list[0][0]:
             thisax.sharex(ax_list[0][0])
             thisax.sharey(ax_list[0][0])
         mappable_list.append(mappable)
