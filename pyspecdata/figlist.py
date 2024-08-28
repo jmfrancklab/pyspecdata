@@ -519,9 +519,17 @@ class figlist(object):
         plt.axhline(y=-0.5, color="r", alpha=0.5, linewidth=2)
         return
 
+    def skip_units_check(self):
+        if not hasattr(self,"skip_check"):
+            self.skip_check = []
+        self.skip_check.append(self.current)
+
     def check_units(self, testdata, x_index, y_index):
         logging.debug(strm("-" * 30))
         logging.debug(strm("called check_units for figure", self.current))
+        if hasattr(self,'skip_check') and self.current in self.skip_check:
+            testdata = testdata.copy().human_units()
+            return testdata
         if isinstance(testdata, nddata):
             logging.debug(strm("(check_units) it's nddata"))
             testdata = testdata.copy().human_units()
