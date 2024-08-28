@@ -13,7 +13,7 @@ def pcolormesh(
     human_units=True,
     force_balanced_cmap=False,
     handle_axis_sharing=True,
-    mappable_list = [],
+    mappable_list=[],
 ):
     """generate a pcolormesh and label it with the axis coordinate available from the nddata
 
@@ -37,7 +37,7 @@ def pcolormesh(
         because matplotlib doesn't let you call sharex/sharey more than once,
         you need then to tell it not to handle the axis sharing, and to it yourself
         outside this routine.
-    mappable_list: list of     
+    mappable_list: list of
 
     Returns
     =======
