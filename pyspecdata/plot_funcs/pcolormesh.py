@@ -19,12 +19,12 @@ def pcolormesh(
 
     Parameters
     ==========
-    fig: matplotlib figure object
+    fig : matplotlib figure object
     shading: str (default 'nearest')
         the type of shading to pass to matplotlib pcolormesh
-    ax1: matplotlib axes object
+    ax1 : matplotlib axes object
         where do you want the left plot to go?
-    ax2: matplotlib axes object
+    ax2 : matplotlib axes object
         where do you want the right plot to go?
     scale_independently: boolean (default False)
         Do you want each plot to be scaled independently?
@@ -37,13 +37,16 @@ def pcolormesh(
         because matplotlib doesn't let you call sharex/sharey more than once,
         you need then to tell it not to handle the axis sharing, and to it yourself
         outside this routine.
-    mappable_list: list (default [])
-        empty list which fills with field values from color axis used for initial subplot, used to scale multiple plots along the same color axis. Used to make all 3x2 plots under a uniform color scale
+    mappable_list : list, default []
+        empty list which fills with field values from color axis used for
+        initial subplot, used to scale multiple plots along the same color
+        axis. Used to make all 3x2 plots under a uniform color scale
 
     Returns
     =======
-    mappable_list: list
-        list of field values for scaling color axis, used to make all 3x2 plots under a uniform color scale
+    mappable_list : list
+        list of field values for scaling color axis, used to make all 3x2 plots
+        under a uniform color scale
     """
     assert len(self.dimlabels) == 2, "currently, this only supports 2D data"
     if human_units:
