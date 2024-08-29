@@ -13,7 +13,7 @@ def pcolormesh(
     human_units=True,
     force_balanced_cmap=False,
     handle_axis_sharing=True,
-    mappable_list=[],
+    mappable_list = [],
 ):
     """generate a pcolormesh and label it with the axis coordinate available from the nddata
 
@@ -37,12 +37,13 @@ def pcolormesh(
         because matplotlib doesn't let you call sharex/sharey more than once,
         you need then to tell it not to handle the axis sharing, and to it yourself
         outside this routine.
-    mappable_list: list of
+    mappable_list: list (default [])
+        empty list which fills with field values from color axis used for initial subplot, used to scale multiple plots along the same color axis. Used to make all 3x2 plots under a uniform color scale  
 
     Returns
     =======
-    nothing for now
-    mappable_list
+    mappable_list: list
+        list of field values for scaling color axis, used to make all 3x2 plots under a uniform color scale 
     """
     assert len(self.dimlabels) == 2, "currently, this only supports 2D data"
     if human_units:
