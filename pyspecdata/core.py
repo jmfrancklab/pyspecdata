@@ -38,12 +38,12 @@ import numpy as np
 import sympy as sp
 from numpy import r_, c_, nan, inf, pi
 from mpl_toolkits.mplot3d import axes3d
-import textwrap
-import warnings
-import scipy
 import atexit
 import inspect
 import re
+import scipy
+import textwrap
+import warnings
 from copy import deepcopy
 from sympy.functions.elementary.miscellaneous import sqrt as sympy_sqrt
 import scipy.sparse as sparse
@@ -1707,7 +1707,6 @@ def concat(datalist, dimname, chop=False):
                         )
         newdatalist = ndshape(datalist[-1])
         newdatalist += ([newdimsize], [dimname])
-        # print "DEBUG newdatalist is shaped like",newdatalist
         try:
             newdatalist = newdatalist.alloc()
         except Exception:
