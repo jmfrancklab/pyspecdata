@@ -1628,9 +1628,7 @@ def concat(datalist, dimname, chop=False):
         )
         # {{{ make list of the data axes and dimname axes for datasets
         ndarrays = []  # will contain numpy array of data for each dataset
-        conc_axis = (
-            []
-        )  # will contain numpy array of the dimname axis for each dataset
+        conc_axis = [] # will contain numpy array of the dimname axis for each dataset
         for j in range(len(datalist)):
             ndarrays.append(datalist[j].data)
             conc_axis.append(datalist[j][dimname])
