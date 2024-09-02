@@ -1640,10 +1640,23 @@ def concat(datalist, dimname, chop=False):
         new_direct = np.concatenate(tuple(conc_axis))
         # }}}
         extra_dims = False
+        # {{{ Account for extra dimensions that were not involved in concatenating
+        if len(datalist[-1].axis_coords) > 1:
+            extra_dims = True
+            extra_dimlabels = list(datalist[-1].dimlabels)
+            extra_axis_coords = list(datalist[-1].axis_coords)
+            dimname_idx = extra_dimlabels.index(dimname)
+            extra_dimlabels.pop(dimname_idx)
+            extra_axis_coords.pop(dimname_idx)
+        # }}}
         newdatalist = nddata(newdata, datalist[0].dimlabels)
-        print(ndshape(newdatalist))
-        newdatalist.setaxis(dimname, new_direct)
+        newdatalist.setaxis(dimname, new_direct).set_units(
+            dimname, datalist[0].get_units(dimname)
+        )
         newdatalist.sort(dimname)
+        if extra_dims:
+            # make sure we still have the indirect axes we started with
+            newdatalist.labels(extra_dimlabels[0], extra_axis_coords[0])
     else:
         for j in range(0, len(datalist)):
             # {{{ make list for the shape to check, which contains the dimensions we are NOT concatting along
