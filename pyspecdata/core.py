@@ -1626,21 +1626,26 @@ def concat(datalist, dimname, chop=False):
         print(
             "The dimname you specified exists already in one of the datasets so I am assuming it also exists in the other"
         )
-        # {{{ make ndarray of the data and dimname that we want to concatenate
-        ndarrays = []  # numpy array of data for each dataset
-        conc_axis = []  # numpy array of the dimname axis for each dataset
+        # {{{ make list of the data axes and dimname axes for datasets
+        ndarrays = []  # will contain numpy array of data for each dataset
+        conc_axis = (
+            []
+        )  # will contain numpy array of the dimname axis for each dataset
         for j in range(len(datalist)):
             ndarrays.append(datalist[j].data)
             conc_axis.append(datalist[j][dimname])
         # }}}
-        # {{{ concatenate the data and dimname axis
+        # {{{ concatenate the data ndarrays and dimname axis ndarrays
         newdata = np.concatenate(
             tuple(ndarrays), axis=datalist[-1].dimlabels.index(dimname)
         )
-        new_direct = np.concatenate(tuple(conc_axis))
+        new_dimname = np.concatenate(tuple(conc_axis))
         # }}}
+        # {{{ Pull axis labels from the last item in the list
+        #     note this is similar to what is done below if the dimname
+        #     is not preexisting however here there is no newdimsize or
+        #     dimname so there is a slight difference
         extra_dims = False
-        # {{{ Account for extra dimensions that were not involved in concatenating
         if len(datalist[-1].axis_coords) > 1:
             extra_dims = True
             extra_dimlabels = list(datalist[-1].dimlabels)
@@ -1650,7 +1655,7 @@ def concat(datalist, dimname, chop=False):
             extra_axis_coords.pop(dimname_idx)
         # }}}
         newdatalist = nddata(newdata, datalist[0].dimlabels)
-        newdatalist.setaxis(dimname, new_direct).set_units(
+        newdatalist.setaxis(dimname, new_dimname).set_units(
             dimname, datalist[0].get_units(dimname)
         )
         newdatalist.sort(dimname)
