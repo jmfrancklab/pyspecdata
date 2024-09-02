@@ -38,7 +38,12 @@ import numpy as np
 import sympy as sp
 from numpy import r_, c_, nan, inf, pi
 from mpl_toolkits.mplot3d import axes3d
-import textwrap, atexit, scipy, warnings, inspect, re
+import textwrap
+import warnings
+import scipy
+import atexit
+import inspect
+import re
 from copy import deepcopy
 from sympy.functions.elementary.miscellaneous import sqrt as sympy_sqrt
 import scipy.sparse as sparse
@@ -217,6 +222,7 @@ def apply_oom(average_oom, numbers, prev_label=""):
 def issympy(x):
     "tests if something is sympy (based on the module name)"
     return isinstance(x, sp.core.Expr)
+
 
 # {{{ function trickery
 def mydiff(data, axis=-1):
@@ -1616,109 +1622,118 @@ def concat(datalist, dimname, chop=False):
             )
         )
     other_info_out = datalist[0].other_info
-    for j in range(0, len(datalist)):
-        # {{{ make list for the shape to check, which contains the dimensions we are NOT concatting along
-        if dimname in shapes[j].dimlabels:
-            newdimsize += shapes[j][dimname]
-            shapetocheck = list(shapes[j].shape)
-            shapetocheck.pop(shapes[j].axn(dimname))
-        else:
-            newdimsize += 1
-            shapetocheck = list(shapes[j].shape)
-        # }}}
-        if j == 0:
-            shapetocheckagainst = shapetocheck
-        else:
-            if np.any(
-                ~(np.array(shapetocheck) == np.array(shapetocheckagainst))
-            ):
-                if chop:
-                    logger.debug(
-                        strm(
-                            repr(shapetocheck),
-                            lsafen(repr(shapetocheckagainst)),
-                        )
-                    )
-                    raise ValueError(
-                        strm(
-                            "For item ",
-                            j,
-                            "in concat, ",
-                            shapetocheck,
-                            "!=",
-                            shapetocheckagainst,
-                            "where all the shapes of the things",
-                            "you're trying to concat are:",
-                            shapes,
-                        )
-                    )
-                else:
-                    raise ValueError(
-                        strm(
-                            "For item ",
-                            j,
-                            "in concat, ",
-                            shapetocheck,
-                            "!=",
-                            shapetocheckagainst,
-                            "where all the shapes of the things you're trying to concat are:",
-                            shapes,
-                        )
-                    )
-    newdatalist = ndshape(datalist[-1])
-    if dimname in newdatalist.dimlabels:
-        newdatalist[dimname] = newdimsize
-    else:
-        newdatalist += ([newdimsize], [dimname])
-    # print "DEBUG newdatalist is shaped like",newdatalist
-    try:
-        newdatalist = newdatalist.alloc()
-    except Exception:
-        raise ValueError(
-            strm(
-                "trying to alloc the newdatalist",
-                newdatalist,
-                "created a problem",
-            )
+    if dimname in datalist[0].dimlabels:
+        print(
+            "The dimname you specified exists already in one of the datasets so I am assuming it also exists in the other"
         )
-    if datalist[0].get_error() is not None:
-        newdatalist.set_error(np.zeros(np.shape(newdatalist.data)))
-    # }}}
-    # {{{ actually contract the datalist
-    newdimsize = 0  # now use it to track to position
-    for j in range(0, len(datalist)):
-        if dimname in shapes[j].dimlabels:
-            newdatalist[
-                dimname, newdimsize : newdimsize + shapes[j][dimname]
-            ] = datalist[j]
-            newdimsize += shapes[j][dimname]
-        else:
-            newdatalist[dimname, newdimsize : newdimsize + 1] = datalist[j]
+        # {{{ make ndarray of the data and dimname that we want to concatenate
+        ndarrays = []  # numpy array of data for each dataset
+        conc_axis = []  # numpy array of the dimname axis for each dataset
+        for j in range(len(datalist)):
+            ndarrays.append(datalist[j].data)
+            conc_axis.append(datalist[j][dimname])
+        # }}}
+        # {{{ concatenate the data and dimname axis
+        newdata = np.concatenate(
+            tuple(ndarrays), axis=datalist[-1].dimlabels.index(dimname)
+        )
+        new_direct = np.concatenate(tuple(conc_axis))
+        # }}}
+        extra_dims = False
+        newdatalist = nddata(newdata, datalist[0].dimlabels)
+        print(ndshape(newdatalist))
+        newdatalist.setaxis(dimname, new_direct)
+        newdatalist.sort(dimname)
+    else:
+        for j in range(0, len(datalist)):
+            # {{{ make list for the shape to check, which contains the dimensions we are NOT concatting along
             newdimsize += 1
-    # }}}
-    # {{{ pull the axis labels from the last item in the list
-    if len(datalist[-1].axis_coords) > 0:
-        dimlabels = list(datalist[-1].dimlabels)
-        axis_coords = list(datalist[-1].axis_coords)
-        # print "axis_coords are",axis_coords,"for",dimlabels
-        if dimname in dimlabels:
-            thisindex = dimlabels.index(dimname)
-            dimlabels.pop(thisindex)
-            axis_coords.pop(thisindex)
-        dimlabels += [dimname]
-        axis_coords += [r_[0:newdimsize]]
+            shapetocheck = list(shapes[j].shape)
+            # }}}
+            if j == 0:
+                shapetocheckagainst = shapetocheck
+            else:
+                if np.any(
+                    ~(np.array(shapetocheck) == np.array(shapetocheckagainst))
+                ):
+                    if chop:
+                        logger.debug(
+                            strm(
+                                repr(shapetocheck),
+                                lsafen(repr(shapetocheckagainst)),
+                            )
+                        )
+                        raise ValueError(
+                            strm(
+                                "For item ",
+                                j,
+                                "in concat, ",
+                                shapetocheck,
+                                "!=",
+                                shapetocheckagainst,
+                                "where all the shapes of the things",
+                                "you're trying to concat are:",
+                                shapes,
+                            )
+                        )
+                    else:
+                        raise ValueError(
+                            strm(
+                                "For item ",
+                                j,
+                                "in concat, ",
+                                shapetocheck,
+                                "!=",
+                                shapetocheckagainst,
+                                "where all the shapes of the things you're trying to concat are:",
+                                shapes,
+                            )
+                        )
+        newdatalist = ndshape(datalist[-1])
+        newdatalist += ([newdimsize], [dimname])
+        # print "DEBUG newdatalist is shaped like",newdatalist
         try:
-            newdatalist.labels(dimlabels, axis_coords)
+            newdatalist = newdatalist.alloc()
         except Exception:
             raise ValueError(
                 strm(
-                    "trying to attach axes of lengths",
-                    list(map(len, axis_coords)),
-                    "to",
-                    dimlabels,
+                    "trying to alloc the newdatalist",
+                    newdatalist,
+                    "created a problem",
                 )
             )
-    # }}}
+        if datalist[0].get_error() is not None:
+            newdatalist.set_error(np.zeros(np.shape(newdatalist.data)))
+        # }}}
+        # {{{ actually contract the datalist
+        newdimsize = 0  # now use it to track to position
+        for j in range(0, len(datalist)):
+            newdatalist[dimname, newdimsize : newdimsize + 1] = datalist[j]
+            newdimsize += 1
+        # }}}
+        # {{{ pull the axis labels from the last item in the list
+        if len(datalist[-1].axis_coords) > 0:
+            dimlabels = list(datalist[-1].dimlabels)
+            axis_coords = list(datalist[-1].axis_coords)
+            # print "axis_coords are",axis_coords,"for",dimlabels
+            if dimname in dimlabels:
+                thisindex = dimlabels.index(dimname)
+                dimlabels.pop(thisindex)
+                axis_coords.pop(thisindex)
+            dimlabels += [dimname]
+            axis_coords += [r_[0:newdimsize]]
+            try:
+                newdatalist.labels(dimlabels, axis_coords)
+            except Exception:
+                raise ValueError(
+                    strm(
+                        "trying to attach axes of lengths",
+                        list(map(len, axis_coords)),
+                        "to",
+                        dimlabels,
+                    )
+                )
+        # }}}
     newdatalist.other_info = other_info_out
     return newdatalist
 
@@ -2856,6 +2871,7 @@ class nddata(object):
                 raise ValueError(strm("Color", thiscolor, "not in dictionary"))
         self.other_info.update({"plot_color": thiscolor})
         return
+
     def set_plot_color_next(self):
         self.set_plot_color(next(default_cycler))
 
