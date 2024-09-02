@@ -9,10 +9,10 @@ fine = psd.nddata(r_[2:3:5j], ["t"])
 fine += 0.1
 fine.setaxis("t", r_[2:3:5j])
 combined = psd.concat([coarse, fine], dimname="t")  # not sure if it does --
-#                                                thiskwargs should match the
-#                                                existing kwarg! (dimname, dimlabel,
-#                                                etc -- may also not be a kwarg, but
-#                                                positional)
+#                                                     thiskwargs should match the
+#                                                     existing kwarg! (dimname, dimlabel,
+#                                                     etc -- may also not be a kwarg, but
+#                                                     positional)
 combined.sort(
     "t"
 )  # sort is already applied in function but included here for clarity
