@@ -1624,12 +1624,6 @@ def concat(datalist, dimname, chop=False):
             + dimname
             + "' exists in the first datset, but not the second!"
         )
-        # {{{ make list of the data axes and dimname axes for datasets
-        ndarrays = []  # will contain numpy array of data for each dataset
-        conc_axis = (
-            []
-        )  # will contain numpy array of the dimname axis for each dataset
-        # }}}
         # {{{ concatenate the data ndarrays and dimname axis ndarrays
         concated_data = np.concatenate(
             tuple(datalist[j].data for j in range(len(datalist))), axis=datalist[-1].dimlabels.index(dimname)
