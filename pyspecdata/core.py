@@ -1602,6 +1602,7 @@ def concat(datalist, dimname, chop=False):
     """
     # {{{ allocate a new datalist structure
     newdimsize = 0
+    logging.debug("type(datalist) " + str(type(datalist)))
     try:
         shapes = list(map(ndshape, datalist))
     except Exception:
@@ -1617,21 +1618,34 @@ def concat(datalist, dimname, chop=False):
         )
     other_info_out = datalist[0].other_info
     if dimname in datalist[0].dimlabels:
+        dim_idx = datalist[0].axn(dimname)
         assert all(
-            [dimname in datalist[j].dimlabels for j in range(len(datalist))]
-        ), (
-            "the dimension '"
-            + dimname
-            + "' exists in the first datset, but not the second!"
-        )
+            [
+                datalist[j].dimlabels == datalist[0].dimlabels
+                for j in range(len(datalist))
+            ]
+        ), "the dimlabels for all your datasets do no match and/or are not ordered the same way"
+        # {{{ check that all the shapes match, too, aside from the dim we concat along
+        shape_check = [
+            list(datalist[j].data.shape) for j in range(len(datalist))
+        ]
+        for j in shape_check:
+            j.pop(dim_idx)
+        assert all(
+            [shape_check[j] == shape_check[0] for j in range(len(shape_check))]
+        ), ("shapes " + str(shape_check) + " are not all equal")
+        # }}}
         # {{{ concatenate the data ndarrays and dimname axis ndarrays
         concated_data = np.concatenate(
-            tuple(datalist[j].data for j in range(len(datalist))), axis=datalist[-1].dimlabels.index(dimname)
+            tuple(datalist[j].data for j in range(len(datalist))),
+            axis=dim_idx,
         )
-        concated_ax_coords = np.concatenate(tuple(datalist[j][dimname] for j in range(len(datalist))))
+        concated_ax_coords = np.concatenate(
+            tuple(datalist[j][dimname] for j in range(len(datalist)))
+        )
         # }}}
-        retval = datalist[-1].copy(data=False)
-        retval.axis_coords[datalist[-1].axn(dimname)] = concated_ax_coords
+        retval = datalist[0].copy(data=False)
+        retval.axis_coords[dim_idx] = concated_ax_coords
         retval.data = concated_data
     else:
         for j in range(0, len(datalist)):

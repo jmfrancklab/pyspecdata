@@ -22,8 +22,8 @@ print("concatenate after sort:")
 print(combined)
 # }}}
 # {{{ when we make a new dimension - demos the existing functionality -- see above about kwarg
-data1 = psd.nddata(r_[0:4:4j], ["t"])
-data2 = psd.nddata(r_[0:4:4j], ["t"]) * 1.3
+data1 = psd.nddata(r_[0:4:4j], "t")
+data2 = psd.nddata(r_[0:4:4j], "t") * 1.3
 combined = psd.concat([data1, data2], dimname="indirect")
 print("concatenate along new dimension:")
 print(combined)  # should be 2D with an indirect dimension
