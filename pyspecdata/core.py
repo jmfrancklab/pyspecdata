@@ -1602,7 +1602,6 @@ def concat(datalist, dimname, chop=False):
     """
     # {{{ allocate a new datalist structure
     newdimsize = 0
-    # print 'DEBUG: type(datalist)',type(datalist)
     try:
         shapes = list(map(ndshape, datalist))
     except Exception:
@@ -1630,16 +1629,12 @@ def concat(datalist, dimname, chop=False):
         conc_axis = (
             []
         )  # will contain numpy array of the dimname axis for each dataset
-        for j in range(len(datalist)):
-            ndarrays.append(datalist[j].data)
-            conc_axis.append(datalist[j][dimname])
-        # PR: much more compact to just do this with a list comprehension in place, below
         # }}}
         # {{{ concatenate the data ndarrays and dimname axis ndarrays
         concated_data = np.concatenate(
-            tuple(ndarrays), axis=datalist[-1].dimlabels.index(dimname)
+            tuple(datalist[j].data for j in range(len(datalist))), axis=datalist[-1].dimlabels.index(dimname)
         )
-        concated_ax_coords = np.concatenate(tuple(conc_axis))
+        concated_ax_coords = np.concatenate(tuple(datalist[j][dimname] for j in range(len(datalist))))
         # }}}
         retval = datalist[-1].copy(data=False)
         retval.axis_coords[datalist[-1].axn(dimname)] = concated_ax_coords
