@@ -38,12 +38,7 @@ import numpy as np
 import sympy as sp
 from numpy import r_, c_, nan, inf, pi
 from mpl_toolkits.mplot3d import axes3d
-import atexit
-import inspect
-import re
-import scipy
-import textwrap
-import warnings
+import textwrap, atexit, scipy, warnings, inspect, re
 from copy import deepcopy
 from sympy.functions.elementary.miscellaneous import sqrt as sympy_sqrt
 import scipy.sparse as sparse
@@ -1623,43 +1618,32 @@ def concat(datalist, dimname, chop=False):
         )
     other_info_out = datalist[0].other_info
     if dimname in datalist[0].dimlabels:
-        print(
-            "The dimname you specified exists already in one of the datasets so I am assuming it also exists in the other"
+        assert all(
+            [dimname in datalist[j].dimlabels for j in range(len(datalist))]
+        ), (
+            "the dimension '"
+            + dimname
+            + "' exists in the first datset, but not the second!"
         )
         # {{{ make list of the data axes and dimname axes for datasets
         ndarrays = []  # will contain numpy array of data for each dataset
-        conc_axis = [] # will contain numpy array of the dimname axis for each dataset
+        conc_axis = (
+            []
+        )  # will contain numpy array of the dimname axis for each dataset
         for j in range(len(datalist)):
             ndarrays.append(datalist[j].data)
             conc_axis.append(datalist[j][dimname])
+        # PR: much more compact to just do this with a list comprehension in place, below
         # }}}
         # {{{ concatenate the data ndarrays and dimname axis ndarrays
-        newdata = np.concatenate(
+        concated_data = np.concatenate(
             tuple(ndarrays), axis=datalist[-1].dimlabels.index(dimname)
         )
-        new_dimname = np.concatenate(tuple(conc_axis))
+        concated_ax_coords = np.concatenate(tuple(conc_axis))
         # }}}
-        # {{{ Pull axis labels from the last item in the list
-        #     note this is similar to what is done below if the dimname
-        #     is not preexisting however here there is no newdimsize or
-        #     dimname so there is a slight difference
-        extra_dims = False
-        if len(datalist[-1].axis_coords) > 1:
-            extra_dims = True
-            extra_dimlabels = list(datalist[-1].dimlabels)
-            extra_axis_coords = list(datalist[-1].axis_coords)
-            dimname_idx = extra_dimlabels.index(dimname)
-            extra_dimlabels.pop(dimname_idx)
-            extra_axis_coords.pop(dimname_idx)
-        # }}}
-        newdatalist = nddata(newdata, datalist[0].dimlabels)
-        newdatalist.setaxis(dimname, new_dimname).set_units(
-            dimname, datalist[0].get_units(dimname)
-        )
-        newdatalist.sort(dimname)
-        if extra_dims:
-            # make sure we still have the indirect axes we started with
-            newdatalist.labels(extra_dimlabels[0], extra_axis_coords[0])
+        retval = datalist[-1].copy(data=False)
+        retval.axis_coords[datalist[-1].axn(dimname)] = concated_ax_coords
+        retval.data = concated_data
     else:
         for j in range(0, len(datalist)):
             # {{{ make list for the shape to check, which contains the dimensions we are NOT concatting along
@@ -1705,25 +1689,25 @@ def concat(datalist, dimname, chop=False):
                                 shapes,
                             )
                         )
-        newdatalist = ndshape(datalist[-1])
-        newdatalist += ([newdimsize], [dimname])
+        retval = ndshape(datalist[-1])
+        retval += ([newdimsize], [dimname])
         try:
-            newdatalist = newdatalist.alloc()
+            retval = retval.alloc()
         except Exception:
             raise ValueError(
                 strm(
-                    "trying to alloc the newdatalist",
-                    newdatalist,
+                    "trying to alloc the retval",
+                    retval,
                     "created a problem",
                 )
             )
         if datalist[0].get_error() is not None:
-            newdatalist.set_error(np.zeros(np.shape(newdatalist.data)))
+            retval.set_error(np.zeros(np.shape(retval.data)))
         # }}}
         # {{{ actually contract the datalist
         newdimsize = 0  # now use it to track to position
         for j in range(0, len(datalist)):
-            newdatalist[dimname, newdimsize : newdimsize + 1] = datalist[j]
+            retval[dimname, newdimsize : newdimsize + 1] = datalist[j]
             newdimsize += 1
         # }}}
         # {{{ pull the axis labels from the last item in the list
@@ -1731,14 +1715,10 @@ def concat(datalist, dimname, chop=False):
             dimlabels = list(datalist[-1].dimlabels)
             axis_coords = list(datalist[-1].axis_coords)
             # print "axis_coords are",axis_coords,"for",dimlabels
-            if dimname in dimlabels:
-                thisindex = dimlabels.index(dimname)
-                dimlabels.pop(thisindex)
-                axis_coords.pop(thisindex)
             dimlabels += [dimname]
             axis_coords += [r_[0:newdimsize]]
             try:
-                newdatalist.labels(dimlabels, axis_coords)
+                retval.labels(dimlabels, axis_coords)
             except Exception:
                 raise ValueError(
                     strm(
@@ -1749,8 +1729,8 @@ def concat(datalist, dimname, chop=False):
                     )
                 )
         # }}}
-    newdatalist.other_info = other_info_out
-    return newdatalist
+    retval.other_info = other_info_out
+    return retval
 
 
 # }}}
