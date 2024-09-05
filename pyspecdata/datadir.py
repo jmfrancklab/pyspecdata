@@ -383,7 +383,12 @@ def rclone_search(fname,exp_type,dirname):
                 "and could refer to the following remote locations:\n"
                 + str(result))
         elif len(result) == 0:
-            raise ValueError(f"I can't find a remote corresponding to your exp_type {exp_type}")
+            raise ValueError("I can't find a remote corresponding to your"
+                             f" exp_type {exp_type}.  Note that I only search"
+                             "  for a remote if I can't find a file in the"
+                             "  local directory, so this might be due to the"
+                             "  fact that I can't find the file in the local"
+                             "  directory.")
         else:
             remotelocation = result[0]
             logging.debug("about to write to RcloneRemotes")
