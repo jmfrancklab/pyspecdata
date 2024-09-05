@@ -64,12 +64,14 @@ def search_filename(searchstring,exp_type,
     Parameters
     ----------
     searchstring : str
-        Most commonly, this is just a fragment of the file name,
-        with any literal ``*``, ``.``, or ``?`` characters preceded by
-        a backslash.
-        More generally, it is a regular expression,
-        where ``.*searchstring.*`` matches a filename inside the
-        directory appropriate for `exp_type`.
+        *If you don't know what a regular expression is*,
+        you probably want to wrap your filename with `re.escape(`,
+        like this: `re.escape(filename)`,
+        and use that for your searchstring.
+        (Where you have to import the `re` module.)
+
+        If you know what a regular expression is, pass one here, and it will
+        find any filenames that match.
     exp_type : str
         Since the function assumes that you have different types of
         experiments sorted into different directories, this argument
@@ -185,12 +187,14 @@ def find_file(searchstring,
     Parameters
     ----------
     searchstring : str
-        Most commonly, this is just a fragment of the file name,
-        with any literal ``*``, ``.``, or ``?`` characters preceded by
-        a backslash.
-        More generally, it is a regular expression,
-        where ``.*searchstring.*`` matches a filename inside the
-        directory appropriate for `exp_type`.
+        *If you don't know what a regular expression is*,
+        you probably want to wrap your filename with `re.escape(`,
+        like this: `re.escape(filename)`,
+        and use that for your searchstring.
+        (Where you have to import the `re` module.)
+
+        If you know what a regular expression is, pass one here, and it will
+        find any filenames that match.
     exp_type : str
         Gives the name of a directory, known to be pyspecdata, that contains
         the file of interest.
