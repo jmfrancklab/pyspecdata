@@ -3971,6 +3971,7 @@ class nddata(object):
                 return f"${a}_{{{b},{sub}}}$"
             else:
                 return f"${start}_{sub}$"
+            lame
         firstdim = add_subscript(var_dim, "i")
         self.rename(along_dim, firstdim)
         self.rename(var_dim, add_subscript(var_dim, "j"))
