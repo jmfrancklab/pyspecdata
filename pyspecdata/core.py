@@ -3969,7 +3969,8 @@ class nddata(object):
             if m:
                 a, b = m.groups()
                 return f"${a}_{{{b},{sub}}}$"
-
+            else:
+                return f"${start}_{sub}$"
         firstdim = add_subscript(var_dim, "i")
         self.rename(along_dim, firstdim)
         self.rename(var_dim, add_subscript(var_dim, "j"))
