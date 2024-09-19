@@ -31,7 +31,9 @@ jobs:
           fi
           git fetch origin ${{ github.event.before }}
           git fetch origin ${{ github.event.after }}
-          echo "$(git branch)" # show the branch names
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "$(git branch)" # show the branch names
+          fi
 
       - name: Get changed files
         id: get_changed_files
@@ -55,7 +57,7 @@ jobs:
         run: |
           if [ -n "$CHANGED_FILES" ]; then
             echo "Running Flake8 on changed files: $CHANGED_FILES"
-            flake8 --inline-quotes='"' --max-line-length=79 --ignore=E203,E225,E226,E231,E261,E265,E293,E302,E305,E306,E401,E501,E731,E741,Q002,W291,W293,W503 $CHANGED_FILES
+            flake8 --inline-quotes='"' --max-line-length=79 --ignore=E203,E225,E226,E231,E261,E265,E293,E302,E305,E306,E401,E731,E741,Q002,W291,W293,W503 $CHANGED_FILES
           else
             echo "No Python files were changed."
           fi
