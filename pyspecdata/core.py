@@ -89,8 +89,6 @@ else:
     import matplotlib.pyplot as plt
 # }}} -- continued below
 
-# rc('image',aspect='auto',interpolation='bilinear') # don't use this, because
-# it gives weird figures in the pdf
 plt.rc("image", aspect="auto", interpolation="nearest")
 # rcParams['text.usetex'] = True
 plt.rc("font", family="Arial")  # I need this to render unicode
@@ -261,9 +259,9 @@ def emptyfunction():
 def make_bar_graph_indices(
     mystructarray, list_of_text_fields, recursion_depth=0, spacing=0.1
 ):
-    r"This is a recursive function that is used as part of textlabel_bargraph;"
-    "it does NOT work without the sorting given at the beginning of that"
-    "function"
+    r"""This is a recursive function that is used as part of
+    textlabel_bargraph; it does NOT work without the sorting given at the
+    beginning of that function"""
     # {{{ if there are still text fields left, then break down the np.array
     #     further, otherwise, just return the indices for this subarray
     if len(list_of_text_fields) > 0:
@@ -339,7 +337,7 @@ def make_bar_graph_indices(
             strm(
                 "recursion depth is",
                 recursion_depth,
-                "and I just COMPLETED THE LOOP, which gives a list of index"
+                "and I just COMPLETED THE LOOP, which gives a list of index",
                 "values like this",
                 index_values,
             )
@@ -368,7 +366,7 @@ def make_bar_graph_indices(
             strm(
                 "recursion depth is",
                 recursion_depth,
-                "and I scaled down so each runs zero to one*(1-spacing)"
+                "and I scaled down so each runs zero to one*(1-spacing)",
                 "(centered) like this",
                 index_values,
             )
@@ -417,7 +415,7 @@ def textlabel_bargraph(
             ax.tick_params(axis="both", which="minor", labelsize=tickfontsize)
         except Exception:
             print(
-                "Warning, in this version I can't set the"
+                "Warning, in this version I can't set the "
                 "tick params method for the axis"
             )
     # {{{ find the text fields, put them first, and sort by them
@@ -497,7 +495,7 @@ def textlabel_bargraph(
         except Exception:
             raise RuntimeError(
                 strm(
-                    "Problem with bar graph: there are"
+                    "Problem with bar graph: there are",
                     "%d indices, but %d pieces of data"
                     % (len(indices), len(mystructarray[thisfield])),
                     "indices:",
@@ -699,7 +697,7 @@ def decorate_rec(xxx_todo_changeme2, xxx_todo_changeme3, drop_rows=False):
         pass
     else:
         raise ValueError(
-            "If you call a list for b_ind and/or a_ind"
+            "If you call a list for b_ind and/or a_ind "
             ", they must match in length!!!"
         )
     if np.any([x not in B.dtype.names for x in b_ind]):
@@ -781,7 +779,7 @@ def decorate_rec(xxx_todo_changeme2, xxx_todo_changeme3, drop_rows=False):
             else:
                 dropped_rows = A_reduced[length_of_matching == 0]
                 print(
-                    r"{\color{red}Warning! decorate\_rec dropped fields in"
+                    r"{\color{red}Warning! decorate\_rec dropped fields in",
                     "the first argument",
                     lsafen(
                         repr(
@@ -884,8 +882,8 @@ def newcol_rec(A, new_dtypes):
 
 
 def applyto_rec(myfunc, myarray, mylist):
-    r"apply myfunc to myarray with the intention of collapsing it to a smaller"
-    "number of values"
+    r"""apply myfunc to myarray with the intention of collapsing it to a
+    smaller number of values"""
     if not isinstance(mylist, list) and isinstance(mylist, str):
         mylist = [mylist]
     combined = []
@@ -941,8 +939,8 @@ def applyto_rec(myfunc, myarray, mylist):
         logger.debug(
             strm(
                 lsafen(
-                    "(applyto np.core.rec): for row"
-                    "%d, I get this as a result:" % j,
+                    ("(applyto np.core.rec): for row "
+                    "%d, I get this as a result:") % j,
                     newrow,
                 )
             )
@@ -975,9 +973,8 @@ def applyto_rec(myfunc, myarray, mylist):
 
 
 def meanstd_rec(myarray, mylist, standard_error=False):
-    r"this is something like applyto_rec, except that it applies the mean"
-    'and creates new rows for the "error," where it puts the standard'
-    "deviation"
+    r'''this is something like applyto_rec, except that it applies the mean and
+    creates new rows for the "error," where it puts the standard deviation'''
     if not isinstance(mylist, list) and isinstance(mylist, str):
         mylist = [mylist]
     combined = []
@@ -1075,12 +1072,13 @@ def meanstd_rec(myarray, mylist, standard_error=False):
 
 
 def make_rec(*args, **kwargs):
-    r"input,names or a single argument, which is a dictionary\nstrlen"
-    "= 100 gives length of the strings (which need to be specified in"
-    "record arrays)\nyou can also specify (especially useful with the"
-    "dictionary format) the list order = [str1,str2,...] which orders"
-    "the output records with the field containing str1 first, then the"
-    "field containing str2, then any remaining fields"
+    r"""input,names or a single argument, which is a dictionary\nstrlen = 100
+    gives length of the strings (which need to be specified in record
+    arrays)\nyou can also specify (especially useful with the dictionary
+    format) the list order = [str1,str2,...] which orders the output records
+    with the field containing str1 first, then the field containing str2, then
+    any remaining fields"""
+    # PR: JF to here
     strlen, order, zeros_like = process_kwargs(
         [("strlen", 100), ("order", None), ("zeros_like", False)], kwargs
     )
