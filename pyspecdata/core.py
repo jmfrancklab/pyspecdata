@@ -3642,7 +3642,7 @@ class nddata(object):
 
     # }}}
     # {{{ poly. fit
-    def eval_poly(self, c, axis, inplace=False):
+    def eval_poly(self, c, axis, inplace=False, npts=None):
         """Take `c` output (array of polynomial coefficents in ascending order)
         from :func:`~pyspecdata.nddata.polyfit`, and apply it along axis `axis`
 
@@ -3652,7 +3652,11 @@ class nddata(object):
             polynomial coefficients in ascending polynomial order
 
         """
-        thisaxis = self.fromaxis(axis)
+        if npts:
+            temp = np.linspace(self[axis][0], self[axis][-1], npts)
+            thisaxis = nddata(temp.copy(), [-1], [axis]).setaxis(axis, temp)
+        else:
+            thisaxis = self.fromaxis(axis)
         result = 0
         for j in range(len(c)):
             result += c[j] * thisaxis**j
@@ -5985,7 +5989,7 @@ class nddata(object):
                 self.set_units(axesout[j], orig_axis_units)
         return self
 
-    def chunk_auto(self, axis_name, which_field, dimname=None):
+    def chunk_auto(self, axis_name, which_field=None, dimname=None):
         r"""assuming that axis "axis_name" is currently labeled with a
         structured np.array, choose one field ("which_field") of that
         structured np.array to generate a new dimension
@@ -6004,6 +6008,8 @@ class nddata(object):
                 ]
             return a
 
+        if which_field is None:
+            which_field = self[axis_name].dtype.names[0]
         axis_number = self.axn(axis_name)
         new_axis, indices = np.unique(
             self.getaxis(axis_name)[which_field], return_inverse=True
