@@ -1,5 +1,6 @@
 r"""Provides the core components of pyspecdata.
-Currently, this is a very large file that we will slowly break down into separate modules or packages.
+Currently, this is a very large file that we will slowly break down into
+separate modules or packages.
 
 The classes :class:`nddata`, :class:`nddata_hdf`, :class:`ndshape`, the
 function :func:`plot`, and the class :class:`fitdata`
@@ -20,10 +21,12 @@ there is a snippet of code that sets
 ``figlist_var`` to choice that's appropriate for the working environment
 (*i.e.*, python, latex environment, *etc.)
 
-There are many helper and utility functions that need to be sorted an documented by JMF,
+There are many helper and utility functions that need to be sorted an
+documented by JMF,
 and can be ignored.
 These are somewhat wide-ranging in nature.
-For example, :func:`box_muller` is a helper function (based on numerical recipes) used by :func:`nddata.add_noise`,
+For example, :func:`box_muller` is a helper function (based on numerical
+recipes) used by :func:`nddata.add_noise`,
 while h5 functions are helper functions for using pytables in a fashion that
 will hopefull be intuitive to those familiar with SQL, etc.
 """
@@ -93,7 +96,8 @@ else:
     import matplotlib.pyplot as plt
 # }}} -- continued below
 
-# rc('image',aspect='auto',interpolation='bilinear') # don't use this, because it gives weird figures in the pdf
+# rc('image',aspect='auto',interpolation='bilinear') # don't use this, because
+# it gives weird figures in the pdf
 plt.rc("image", aspect="auto", interpolation="nearest")
 # rcParams['text.usetex'] = True
 plt.rc("font", family="Arial")  # I need this to render unicode
@@ -150,7 +154,8 @@ def det_oom(data_to_test):
         )
     if len(data_to_test) == 0:
         raise ValueError("this axis doesn't seem to have any sensible values!")
-    # {{{ find the average order of magnitude, rounded down to the nearest power of 3
+    # {{{ find the average order of magnitude, rounded down to the nearest
+    #     power of 3
     average_oom = abs(data_to_test)
     average_oom = average_oom[average_oom != 0]
     average_oom = np.log10(average_oom) / 3.0
@@ -183,7 +188,7 @@ def apply_oom(average_oom, numbers, prev_label=""):
     new_label: str
         prev_label is prefixed by the appropriate SI prefix
     """
-    oom_names = ["T", "G", "M", "k", "", "m", "\\mu ", "n", "p"]
+    oom_names = ["T", "G", "M", "k", "", "m", "μ", "n", "p"]
     oom_values = r_[12, 9, 6, 3, 0, -3, -6, -9, -12]
     eq = oom_values == average_oom
     if not np.any(eq):
@@ -222,7 +227,8 @@ def issympy(x):
 
 # {{{ function trickery
 def mydiff(data, axis=-1):
-    """this will replace np.diff with a version that has the same number of indices, with the last being the copy of the first"""
+    """this will replace np.diff with a version that has the same number of
+    indices, with the last being the copy of the first"""
     newdata = np.empty(np.shape(data), dtype=data.dtype)
     indices = [slice(None, None, None)] * len(data.shape)
     indices[axis] = slice(None, -1, None)
@@ -262,12 +268,17 @@ def emptyfunction():
 def make_bar_graph_indices(
     mystructarray, list_of_text_fields, recursion_depth=0, spacing=0.1
 ):
-    r"This is a recursive function that is used as part of textlabel_bargraph; it does NOT work without the sorting given at the beginning of that function"
-    # {{{ if there are still text fields left, then break down the np.array further, otherwise, just return the indices for this subarray
+    """This is a recursive function that is used as part of textlabel_bargraph;
+    it does NOT work without the sorting given at the beginning of that
+    function"""
+    # {{{ if there are still text fields left, then break down the np.array
+    #     further, otherwise, just return the indices for this subarray
     if len(list_of_text_fields) > 0:
         unique_values = np.unique(
             mystructarray[list_of_text_fields[0]]
-        )  # the return_index argument doesn't do what it's supposed to all the time, so I have to manually find the start indices, as given in the following line
+        )  # the return_index argument doesn't do what it's supposed to all the
+        #    time, so I have to manually find the start indices, as given in
+        #    the following line
         start_indices = [
             np.nonzero(mystructarray[list_of_text_fields[0]] == val)[0][0]
             for val in unique_values
@@ -328,7 +339,9 @@ def make_bar_graph_indices(
             label_values.append(
                 [str(unique_values[k]) + "," + j for j in these_labels]
             )
-        # {{{ scale the result of each call down to the equal size (regardless of number of elements), shift by the position in this np.array, and return
+        # {{{ scale the result of each call down to the equal size (regardless
+        #     of number of elements), shift by the position in this np.array,
+        #     and return
         logger.debug(
             strm(
                 "recursion depth is",
@@ -343,7 +356,8 @@ def make_bar_graph_indices(
         )  # the maximum width of the np.array inside
         index_values = [
             x + (max_indices - len(x)) / 2.0 for x in index_values
-        ]  # if the bar is less than max indices, shift it over, so it's still in the center
+        ]  # if the bar is less than max indices, shift it over, so it's still
+        #    in the center
         logger.debug(
             strm(
                 "recursion depth is",
@@ -355,7 +369,8 @@ def make_bar_graph_indices(
         index_values = [
             x / max_indices * (1 - spacing) + (1 - spacing) / 2
             for x in index_values
-        ]  # scale down, so the width from left edge of bar to right edge of largest bar runs 0--> 1
+        ]  # scale down, so the width from left edge of bar to right edge of
+        #    largest bar runs 0--> 1
         logger.debug(
             strm(
                 "recursion depth is",
@@ -365,7 +380,8 @@ def make_bar_graph_indices(
                 index_values,
             )
         )
-        # this adds an index value, and also collapses down to a single dimension list
+        # this adds an index value, and also collapses down to a single
+        # dimension list
         retval_indices = [
             x + num for num, val in enumerate(index_values) for x in val
         ]
@@ -516,7 +532,8 @@ def lookup_rec(A, B, indexpair):
     This will just drop any fields in B that are also in A,
     and the output uses the first indexname
 
-    note that it it seems like the join_rec function above may be more efficient!!
+    note that it it seems like the join_rec function above may be more
+    efficient!!
     """
     raise RuntimeError("You should now use decorate_rec!!")
     if type(indexpair) not in [tuple, list]:
@@ -586,7 +603,8 @@ def reorder_rec(myarray, listofnames, first=True):
 
 
 def lambda_rec(myarray, myname, myfunction, *varargs):
-    r"""make a new field "myname" which consists of "myfunction" evaluated with the fields given by "myargs" as arguments
+    r"""make a new field "myname" which consists of "myfunction" evaluated with
+    the fields given by "myargs" as arguments
     the new field is always placed after the last argument name
     if myname is in myargs, the original row is popped"""
     if len(varargs) == 1:
@@ -632,7 +650,8 @@ def lambda_rec(myarray, myname, myfunction, *varargs):
     starting_names = myarray.dtype.names
     # {{{ make the dtype
     new_dtype = list(myarray.dtype.descr)
-    # {{{ determine if I need to pop one of the existing rows due to a name conflict
+    # {{{ determine if I need to pop one of the existing rows due to a name
+    #     conflict
     eliminate = None
     if myname in myargs:
         eliminate = myname
@@ -770,8 +789,8 @@ def decorate_rec(xxx_todo_changeme2, xxx_todo_changeme3, drop_rows=False):
             else:
                 dropped_rows = A_reduced[length_of_matching == 0]
                 print(
-                    r"{\color{red}Warning! decorate\_rec dropped fields in the"
-                    r" first argument",
+                    r"{\color{red}Warning! decorate\_rec dropped fields"
+                    r" in the first argument",
                     lsafen(
                         repr(
                             list(
@@ -854,8 +873,10 @@ def decorate_rec(xxx_todo_changeme2, xxx_todo_changeme3, drop_rows=False):
 
 
 def newcol_rec(A, new_dtypes):
-    r"""add new, np.empty (i.e. random numbers) fields to A, as given by new_dtypes
-    --> note that there are deeply nested numpy functions to do this, but the options are confusing, and I think the way these work is efficient
+    r"""add new, np.empty (i.e. random numbers) fields to A, as given by
+    new_dtypes --> note that there are deeply nested numpy functions to do
+    this, but the options are confusing, and I think the way these work is
+    efficient
     """
     if isinstance(new_dtypes, np.dtype):
         new_dtypes = new_dtypes.descr
@@ -871,7 +892,8 @@ def newcol_rec(A, new_dtypes):
 
 
 def applyto_rec(myfunc, myarray, mylist):
-    r"apply myfunc to myarray with the intention of collapsing it to a smaller number of values"
+    r"""apply myfunc to myarray with the intention of collapsing it to a
+    smaller number of values"""
     if not isinstance(mylist, list) and isinstance(mylist, str):
         mylist = [mylist]
     combined = []
@@ -962,7 +984,8 @@ def applyto_rec(myfunc, myarray, mylist):
 
 
 def meanstd_rec(myarray, mylist, standard_error=False):
-    r'this is something like applyto_rec, except that it applies the mean and creates new rows for the "error," where it puts the standard deviation'
+    r"""this is something like applyto_rec, except that it applies the mean and
+    creates new rows for the "error," where it puts the standard deviation"""
     if not isinstance(mylist, list) and isinstance(mylist, str):
         mylist = [mylist]
     combined = []
@@ -1021,7 +1044,6 @@ def meanstd_rec(myarray, mylist, standard_error=False):
                     "are:",
                     repr(myarray_subset.dtype.descr),
                 )
-            # print 'for field',lsafe(thisfield),'I find',lsafen(newrow[thisfield])
         logger.debug(
             strm(
                 lsafen(
@@ -1059,7 +1081,12 @@ def meanstd_rec(myarray, mylist, standard_error=False):
 
 
 def make_rec(*args, **kwargs):
-    r"input,names or a single argument, which is a dictionary\nstrlen = 100 gives length of the strings (which need to be specified in record arrays)\nyou can also specify (especially useful with the dictionary format) the list order = [str1,str2,...] which orders the output records with the field containing str1 first, then the field containing str2, then any remaining fields"
+    r"""input,names or a single argument, which is a dictionary
+    strlen = 100 gives length of the strings (which need to be specified in
+    record arrays) you can also specify (especially useful with the dictionary
+    format) the list order = [str1,str2,...] which orders the output records
+    with the field containing str1 first, then the field containing str2, then
+    any remaining fields"""
     strlen, order, zeros_like = process_kwargs(
         [("strlen", 100), ("order", None), ("zeros_like", False)], kwargs
     )
@@ -2829,7 +2856,8 @@ class nddata(object):
         r"""return arbitrary ND-data properties (typically acquisition
         parameters *etc.*) by name (`propname`)
 
-        In order to allow ND-data to store acquisition parameters and other info that accompanies the data,
+        In order to allow ND-data to store acquisition parameters and other
+        info that accompanies the data,
         but might not be structured in a gridded format, nddata instances
         always have a `other_info` dictionary attribute,
         which stores these properties by name.
@@ -3133,10 +3161,12 @@ class nddata(object):
         A, B = self.aligndata(arg)
         retval = A.copy()
         retval.data = A.data / B.data
-        # {{{ if we have error for both the sets of data, I should propagate that error
+        # {{{ if we have error for both the sets of data, I should propagate
+        #     that error
         Aerr = A.get_error()
         Berr = B.get_error()
-        Rerr = 0.0  # we can have error on one or both, so we're going to need to add up the variances
+        Rerr = 0.0  # we can have error on one or both, so we're going to need
+        #             to add up the variances
         dt128 = np.dtype("complex128")
         if Aerr is not None:
             if (A.data.dtype is dt128) or (
@@ -3177,7 +3207,8 @@ class nddata(object):
         try:
             Rerr = sqrt(
                 np.real(Rerr)
-            )  # convert back to stdev --> note that this has problems with complex numbers, hence the "abs" above
+            )  # convert back to stdev --> note that this has problems with
+            #    complex numbers, hence the "abs" above
         except AttributeError:
             raise AttributeError(
                 strm("Rerr gave an attribute error when you passed", Rerr)
@@ -3875,10 +3906,10 @@ class nddata(object):
         return self
 
     def mean_weighted(self, axisname):
-        r"""perform  the weighted mean along `axisname` (use :math:`\sigma` from
-        :math:`\sigma = `self.get_error() do generate :math:`1/\sigma` weights)
-        for now, it clears the error of `self`, though it would be easy to
-        calculate the new error, since everything is linear
+        r"""perform  the weighted mean along `axisname` (use :math:`\sigma`
+        from :math:`\sigma = `self.get_error() do generate :math:`1/\sigma`
+        weights) for now, it clears the error of `self`, though it would be
+        easy to calculate the new error, since everything is linear
 
         unlike other functions, this creates working objects that are
         themselves nddata objects this strategy is easier than coding out the
@@ -3887,13 +3918,15 @@ class nddata(object):
         # {{{ the weighted mean, pyspecdata style
         weight_matrix = self.copy().set_error(None)
         weight_matrix.data = 1.0 / self.get_error().copy()
-        # {{{ find out where anything is nan, and set both error and weight to 0
+        # {{{ find out where anything is nan, and set both error and weight to
+        #     0
         nan_mask = np.isnan(self.data)
         nan_mask |= np.isnan(weight_matrix.data)
         weight_matrix.data[nan_mask] = 0
         self.data[nan_mask] = 0
         # }}}
-        # {{{ make sure there are no infinite values, because I wouldn't be sure how to deal with this
+        # {{{ make sure there are no infinite values, because I wouldn't be
+        #     sure how to deal with this
         inf_mask = np.isinf(self.data)
         inf_mask |= np.isinf(weight_matrix.data)
         assert not np.any(inf_mask)
@@ -3907,7 +3940,8 @@ class nddata(object):
         return self
 
     def mean(self, *args, **kwargs):
-        r"""Take the mean and (optionally) set the error to the standard deviation
+        r"""Take the mean and (optionally) set the error to the standard
+        deviation
 
         Parameters
         ----------
@@ -4010,10 +4044,12 @@ class nddata(object):
     def cov_mat(self, along_dim):
         """
         calculate covariance matrix for a 2D experiment
+
         Parameters
         ==========
         along_dim:  str
-                    the "observations" dimension of the data set (as opposed to the variable)
+            the "observations" dimension of the data set (as opposed to
+            the variable)
         """
         assert len(self.dimlabels) == 2, (
             "we are only calculating covariance matrices for datasets with one"
@@ -4631,7 +4667,8 @@ class nddata(object):
         **Currently only supported for 1D data**
 
         .. note::
-            adapted from stackexchange post http://stackoverflow.com/questions/\
+            adapted from \
+                    stackexchange post http://stackoverflow.com/questions/\
                     4494404/find-large-number-of-consecutive-values-fulfilling\
                     -condition-in-a-numpy-array
 
@@ -5869,7 +5906,8 @@ class nddata(object):
         dimensions.  This function chunks axisin into multiple new axes
         arguments.:
             axesout -- gives the names of the output axes
-            shapesout -- optional -- if not given, it assumes equal length -- if given, one of the values can be -1, which is assumed length
+            shapesout -- optional -- if not given, it assumes equal length --
+            if given, one of the values can be -1, which is assumed length
 
         When there are axes, it assumes that the axes of the new dimensions
         are nested -- *e.g.*, it will chunk a dimension with axis:
@@ -6080,10 +6118,12 @@ class nddata(object):
             # {{{ initialize the slices
             copy_to_slice = len(new_shape) * [
                 slice(None, None, None)
-            ]  # this is the memory address inside the new data (where stuff goes)
+            ]  # this is the memory address inside the new data (where stuff
+            #    goes)
             copy_from_slice = len(current_shape) * [
                 slice(None, None, None)
-            ]  # this is the memory address inside the old data (where stuff comes from)
+            ]  # this is the memory address inside the old data (where stuff
+            #    comes from)
             # }}}
             if has_data_error:
                 data_error_location = self.get_error()
@@ -6115,10 +6155,12 @@ class nddata(object):
                 )
             )
             logger.debug(strm("(chunk auto) new shape -- ", self.data.shape))
-            # {{{ housekeeping for the various axes + data properties -- should perhaps be possible to do this first, then use .getaxis()
+            # {{{ housekeeping for the various axes + data properties -- should
+            #     perhaps be possible to do this first, then use .getaxis()
             self.dimlabels.insert(axis_number + 1, which_field)
             self.axis_coords.insert(axis_number + 1, new_axis)
-            # {{{ by definition, axis can have neither errors nor units associated, for now.
+            # {{{ by definition, axis can have neither errors nor units
+            #     associated, for now.
             self.axis_coords_error.insert(axis_number + 1, None)
             self.axis_coords_units.insert(axis_number + 1, None)
             # }}}
@@ -6164,21 +6206,27 @@ class nddata(object):
             # }}}
             if (
                 self.axis_coords[axis_number].shape[0] == 1
-            ):  # then this is a "valid" axis -- because, for each position of the new axis, there is only one value of the remainder axis
+            ):  # then this is a "valid" axis -- because, for each position of
+                # the new axis, there is only one value of the remainder axis
                 self.axis_coords[axis_number] = self.axis_coords[
                     axis_number
                 ].reshape(-1)
                 self.dimlabels[axis_number] = remainder_axis_name
                 if (
                     len(self.axis_coords[axis_number].dtype) == 1
-                ):  # only one field, which by the previous line will be named appropriately, so drop the structured np.array name
+                ):  # only one field, which by the previous line will be named
+                    # appropriately, so drop the structured np.array name
                     new_dtype = self.axis_coords[axis_number].dtype.descr[0][1]
                     self.axis_coords[axis_number] = np.array(
                         self.axis_coords[axis_number], dtype=new_dtype
-                    )  # probably more efficiently done with a view, but leave alone for now
+                    )  # probably more efficiently done with a view, but leave
+                    #    alone for now
                 return check_data(self)
             else:
-                # {{{ generate an index list to label the remainder axis, and generate a new nddata with the actual values (which are not copied across the new dimension that matches which_field)
+                # {{{ generate an index list to label the remainder axis, and
+                #     generate a new nddata with the actual values (which are
+                #     not copied across the new dimension that matches
+                #     which_field)
                 remainder_axis_index_list = r_[
                     0 : self.axis_coords[axis_number].shape[0]
                 ]
@@ -6218,7 +6266,8 @@ class nddata(object):
         Parameters
         ==========
         return_dropped: bool (default False)
-           return a list of the dimensions that were dropped as a second argument
+           return a list of the dimensions that were dropped as a second
+           argument
         Returns
         =======
         self
@@ -6321,7 +6370,8 @@ class nddata(object):
                 "rightdata appears to be np.ndarray after initial treatment"
             )
             rightdata = val
-            # {{{ if I just passed a function, assume that I'm applying some type of data-based mask
+            # {{{ if I just passed a function, assume that I'm applying some
+            #     type of data-based mask
             if isinstance(key, type(emptyfunction)):
                 thisfunc = key
                 self.data[thisfunc(self.data)] = rightdata
@@ -6409,11 +6459,14 @@ class nddata(object):
 
         ..todo::
             (new idea)
-            This should just set a flag that says "Do not allow this data to be substituted in place,"
+            This should just set a flag that says "Do not allow this data to be
+            substituted in place,"
             so that if something goes to edit the data in place,
             it instead first makes a copy.
 
-            also here, see `Definition of shallow and deep copy <https://docs.python.org/2/library/copy.html>`_
+            also here, see
+            `Definition of shallow and deep copy <https://docs.python.org/2/li\
+                    brary/copy.html>`_
 
             (older idea)
             We should offer "N", which generates something like a copy,
@@ -6533,8 +6586,10 @@ class nddata(object):
 
         This is to be used:
 
-        *   for constructing classes that inherit nddata with additional methods.
-        *   for overwriting the current data with the result of a slicing operation
+        *   for constructing classes that inherit nddata with additional
+            methods.
+        *   for overwriting the current data with the result of a slicing
+            operation
         """
         self.data = otherinst.data
         self.dimlabels = otherinst.dimlabels
@@ -6664,7 +6719,8 @@ class nddata(object):
             indexlist = tuple(self.fld(slicedict))
             newlabels = [
                 x for x in self.dimlabels if not np.isscalar(slicedict[x])
-            ]  # generate the new list of labels, in order, for all dimensions that are not indexed by a scalar
+            ]  # generate the new list of labels, in order, for all dimensions
+            #    that are not indexed by a scalar
         # {{{ properly index the data error
         if self.data_error is not None:
             try:
@@ -6760,9 +6816,11 @@ class nddata(object):
         return axes
 
     def get_range(self, dimname, start, stop):
-        """get raw indices that can be used to generate a slice for the start and (non-inclusive) stop
+        """get raw indices that can be used to generate a slice for the start
+        and (non-inclusive) stop
 
-        Uses the same code as the standard slicing format (the 'range' option of parseslices)
+        Uses the same code as the standard slicing format (the 'range' option
+        of parseslices)
 
         Parameters
         ==========
@@ -6814,7 +6872,8 @@ class nddata(object):
             stop = inf
         if start > stop:
             start, stop = stop, start
-        # at this point, start is indeed the lower value, and stop indeed the higher
+        # at this point, start is indeed the lower value, and stop indeed the
+        # higher
         if start == inf:
             raise ValueError(
                 strm(
@@ -6849,7 +6908,8 @@ class nddata(object):
         if stop == inf:
             stop = len(
                 thisaxis
-            )  # not an exact match (inf doesn't match the index), so needs to be inclusive already
+            )  # not an exact match (inf doesn't match the index), so needs to
+            #    be inclusive already
         elif stop == -inf:
             raise ValueError(
                 strm(
@@ -6884,7 +6944,8 @@ class nddata(object):
         \'axisname\':value
         and
         \'axisname\':(value1,value2)
-        pairs, where the values give either a single value or an inclusive range on the axis, respectively
+        pairs, where the values give either a single value or an inclusive
+        range on the axis, respectively
         """
         logger.debug(
             strm(
@@ -6914,7 +6975,8 @@ class nddata(object):
                 if isinstance(dimname, np.str_):
                     dimname = str(
                         dimname
-                    )  # on upgrading + using on windows, this became necessary, for some reason I don't understand
+                    )  # on upgrading + using on windows, this became
+                    #    necessary, for some reason I don't understand
                 if isinstance(args[j + 1], type(testf)):
                     sensible_list.append((hash("func"), dimname, args[j + 1]))
                 else:
@@ -7074,7 +7136,8 @@ class nddata(object):
                             temp_high = inf
                         if temp_low > temp_high:
                             temp_low, temp_high = temp_high, temp_low
-                    # at this point, temp_low is indeed the lower value, and temp_high indeed the higher
+                    # at this point, temp_low is indeed the lower value, and
+                    # temp_high indeed the higher
                     logger.debug(
                         strm(
                             "after initial processing, range is",
@@ -7125,7 +7188,8 @@ class nddata(object):
                     if temp_high == inf:
                         temp_high = len(
                             thisaxis
-                        )  # not an exact match (inf doesn't match the index), so needs to be inclusive already
+                        )  # not an exact match (inf doesn't match the index),
+                        #    so needs to be inclusive already
                     elif temp_high == -inf:
                         raise ValueError(
                             strm(
@@ -7244,7 +7308,8 @@ class nddata(object):
 
         You can use either :func:`~pyspecdata.find_file` or
         :func:`~pyspecdata.nddata_hdf5` to read the data, as shown below.
-        When reading this, please note that HDF5 files store *multiple* datasets,
+        When reading this, please note that HDF5 files store *multiple*
+        datasets,
         and each is named (here, the name is `test_data`).
 
         .. code-block:: python
@@ -7256,7 +7321,8 @@ class nddata(object):
             try:
                 a.hdf5_write('example.h5',getDATADIR(exp_type='Sam'))
             except Exception:
-                print("file already exists, not creating again -- delete the file or node if wanted")
+                print("file already exists, not creating again -- delete the
+                file or node if wanted")
             # read the file by the "raw method"
             b = nddata_hdf5('example.h5/test_data',
                     getDATADIR(exp_type='Sam'))
@@ -7287,7 +7353,8 @@ class nddata(object):
                         " to HDF5 if you do not label all your axes!!",
                     )
                 )
-        # {{{ add the final node based on the name stored in the nddata structure
+        # {{{ add the final node based on the name stored in the nddata
+        #     structure
         if h5path[-1] != "/":
             h5path += "/"  # make sure it ends in a slash first
         try:
@@ -7433,7 +7500,8 @@ class nddata(object):
                                 for x in list(myaxisattrs)
                                 if len(self.__getattribute__(x)) > 0
                             ]
-                        )  # collect the attributes for this dimension and their values
+                        )  # collect the attributes for this dimension and
+                        #    their values
                         logger.debug(
                             strm(
                                 lsafe(
@@ -7458,7 +7526,8 @@ class nddata(object):
                                     myaxisattrsforthisdim["axis_coords_error"]
                                 )
                                 > 0
-                            ):  # this is needed to avoid all errors, though I guess I could use try/except
+                            ):  # this is needed to avoid all errors, though I
+                                # guess I could use try/except
                                 thistable = np.core.rec.fromarrays(
                                     [
                                         myaxisattrsforthisdim["axis_coords"],
@@ -7514,7 +7583,8 @@ class nddata(object):
                 # print 'DEBUG 4: bottomnode is',bottomnode
                 test = repr(
                     bottomnode
-                )  # somehow, this prevents it from claiming that the bottomnode is None --> some type of bug?
+                )  # somehow, this prevents it from claiming that the
+                #    bottomnode is None --> some type of bug?
                 logger.debug(strm("bottomnode", test))
                 h5attachattributes(
                     bottomnode,
@@ -7531,7 +7601,8 @@ class nddata(object):
                     if (not self._contains_symbolic(j))
                     and isinstance(self.__getattribute__(j), dict)
                 ]
-                # {{{ to avoid pickling, test that none of the attributes I'm trying to write are dictionaries or lists
+                # {{{ to avoid pickling, test that none of the attributes I'm
+                #     trying to write are dictionaries or lists
                 if len(warnlist) > 0:
                     print(
                         "WARNING!!, attributes", warnlist, "are dictionaries!"
@@ -7612,7 +7683,8 @@ class nddata_hdf5(nddata):
         try:
             datarecordarray = datadict["data"][
                 "data"
-            ]  # the table is called data, and the data of the table is called data
+            ]  # the table is called data, and the data of the table is called
+            #    data
             mydata = datarecordarray["data"]
         except Exception:
             raise ValueError("I can't find the nddata.data")
@@ -7774,7 +7846,8 @@ class ndshape(ndshape_base):
         Example
         -------
 
-        If you want to create new empty array that's 10x3 with dimensions "x" and "y":
+        If you want to create new empty array that's 10x3 with dimensions "x"
+        and "y":
 
         >>> result = ndshape([10,3],['x','y']).alloc(format=None)
 
@@ -7831,7 +7904,8 @@ image = this_plotting.image.image
 
 # {{{ fitdata
 class fitdata(nddata):
-    r"""Inherits from an nddata and enables curve fitting through use of a sympy expression.
+    r"""Inherits from an nddata and enables curve fitting through use of a
+    sympy expression.
 
     The user creates a fitdata class object from an existing nddata
     class object, and on this fitdata object can define the
@@ -7844,7 +7918,8 @@ class fitdata(nddata):
     obtains output using :func:`fit` and :func:`eval`.
 
     If you haven't done this before,
-    create a jupyter notebook (not checked in, just for your own playing around) with:
+    create a jupyter notebook (not checked in, just for your own playing
+    around) with:
     ```
     import sympy as s
     s.init_printing()
@@ -7889,7 +7964,8 @@ class fitdata(nddata):
                     " there is a single axis"
                 )
         self.fit_axis = fit_axis
-        # {{{ in the class, only store the forced values and indices they are set to
+        # {{{ in the class, only store the forced values and indices they are
+        #     set to
         self.set_to = None
         self.set_indices = None
         self.active_indices = None
@@ -7897,7 +7973,8 @@ class fitdata(nddata):
         return
 
     def parameter_derivatives(self, xvals, set=None, set_to=None):
-        r"return a matrix containing derivatives of the parameters, can set dict set, or keys set, vals set_to"
+        r"""return a matrix containing derivatives of the parameters, can set
+        dict set, or keys set, vals set_to"""
         logger.debug(strm("parameter derivatives is called!"))
         if np.iscomplex(self.data.flatten()[0]):
             print(lsafen("Warning, taking only real part of fitting data!"))
@@ -7920,7 +7997,6 @@ class fitdata(nddata):
         for j in range(0, len(parameters)):
             thisvar = self.symbolic_dict[parameters[j]]
             mydiff_sym[j] = sp.core.diff(self.symbolic_func, thisvar)
-            # print r'$\frac{\partial %s}{\partial %s}=%s$'%(self.function_name,repr(thisvar),sympy.latex(mydiff).replace('$','')),'\n\n'
             try:
                 mydiff = mydiff_sym[j].subs(solution_list)
             except Exception:
@@ -8006,7 +8082,6 @@ class fitdata(nddata):
         self.symbolic_expr = sym_expr
         # {{{ adapted from fromaxis, trying to adapt the variable
         symbols_in_expr = self.symbolic_expr.atoms(sp.Symbol)
-        # logger.debug(strm('identified this as a sympy expression (',self.symbolic_expr,') with symbols',symbols_in_expr))
         logger.debug(
             strm(
                 "identified this as a sympy expression (",
@@ -8097,51 +8172,22 @@ class fitdata(nddata):
                     if l != m:
                         covarmatrix[l, m] /= 2
         else:
+            # Note that lots of commented out code was deleted when this
+            # comment was added
             sigma = self.get_error()
-            # covarmatrix = np.dot(pinv(f),
-            #        np.dot(diag(sigma**2),pinv(f.T)))
             J = np.matrix(fprime.T)
-            # W = matrix(diag(1./sigma**2))
-            # S = matrix(diag(sigma**2))
-            # if hasattr(self,'data_covariance'):
-            #    print "covariance data is present"
             S = np.matrix(self.get_covariance())
             Omegainv = S**-1
-            # S = matrix(diag(sigma**2))
-            # G = matrix(diag(1./sigma))
-            # G = S**(-1/2) # analog of the above
-            # covarmatrix = ((J.T * W * J)**-1) * J.T * W
             print("a")
             minimizer = scipy.linalg.inv(J.T * Omegainv * J) * J.T * Omegainv
             covarmatrix = minimizer * S * minimizer.T
-            # covarmatrix = np.array(covarmatrix * S * covarmatrix.T)
-            # covarmatrix = np.array((J.T * G.T * G * J)**-1 * J.T * G.T * G * S * G.T * G * J * (J.T * G.T * G * J)**-1)
-            # try:
-            #    betapremult = (J.T * Omegainv * J)**-1 * J.T * Omegainv
-            # except Exception:
-            #    print 'from sigma','\n\n',diag(sigma**2),'\n\n','from covarmatrix','\n\n',S,'\n\n'
-            #    raise RuntimeError('problem generating estimator (word?)')
-            # covarmatrix = np.array( betapremult * S * betapremult.T)
-        # print "shape of fprime",np.shape(fprime),"shape of fprime_prod",np.shape(fprime_prod),'sigma = ',sigma,'covarmat=',covarmatrix,'\n'
         # }}}
-        # note for this code, that it depends on above code I later moved to  parameter_derivatives
-        # for j in range(0,np.shape(covarmatrix)[0]):
-        #    for k in range(0,np.shape(covarmatrix)[0]):
-        #        #mydiff_second = sp.core.diff(mydiff_sym[j],self.symbolic_vars[k]).subs(solution_list)
-        #        #fdprime = np.array([mydiff_second.subs(x,xvals[l])/sigma[l] for l in range(0,len(xvals))]) # only divide by sigma once, since there is only one f
-        #        #try:
-        #        temp = 1.0/(fprime[j,:] * fprime[k,:])
-        #        mask = np.isinf(temp)
-        #        covarmatrix[j,k] = np.mean(sigma[~mask]**2 * temp[~mask])# + 2. * np.mean(fminusE * fdprime)
-        #        #except Exception:
-        #        #    raise RuntimeError(strm('Problem multiplying covarmatrix', 'np.shape(fprime[j,:])',np.shape(fprime[j,:]), 'np.shape(fminusE)',np.shape(fminusE), 'np.shape(fdprime)',np.shape(fdprime)))
-        #        #if j != k:
-        #        #    covarmatrix[j,k] *= 2
         return covarmatrix
 
     def copy(
         self,
-    ):  # for some reason, if I don't override this with the same thing, it doesn't override
+    ):  # for some reason, if I don't override this with the same thing, it
+        # doesn't override
         namelist = []
         vallist = []
         for j in dir(self):
@@ -8206,7 +8252,9 @@ class fitdata(nddata):
         return p
 
     def fitfunc(self, p, x):
-        r"This is the function that does the actual fitting, and takes a properly ordered list of parameters as well as an np.ndarray for the x axis."
+        r"""This is the function that does the actual fitting, and takes a
+        properly ordered list of parameters as well as an np.ndarray for the x
+        axis."""
         raise ValueError(
             "this should have been overwritten when you set functional_form!"
         )
@@ -8218,7 +8266,8 @@ class fitdata(nddata):
         # print 'DEBUG: y=',y,'\nfit=',fit,'\nsigma=',sigma,'\n\n'
         sigma[sigma == 0.0] = 1
         try:
-            # as noted here: https://stackoverflow.com/questions/6949370/scipy-scipy.optimize.leastsq-dfun-usage
+            # as noted here: https://stackoverflow.com/questions/6949370/sc\
+            #                ipy-scipy.optimize.leastsq-dfun-usage
             # this needs to be fit - y, not vice versa
             retval = (fit - y) / sigma * normalization
         except ValueError:
@@ -8267,14 +8316,17 @@ class fitdata(nddata):
         return retval
 
     def linear(self, *args, **kwargs):
-        r"""return the linear-form function, either smoothly along the fit function, or on the raw data, depending on whether or not the taxis argument is given
+        r"""return the linear-form function, either smoothly along the fit
+        function, or on the raw data, depending on whether or not the taxis
+        argument is given
         can take optional arguments and pass them on to eval"""
         # print "DEBUG called linear"
         if len(args) == 1:
             taxis = self._taxis(args[0])  # handle integer as well
             return self.linfunc(
                 taxis, self.eval(taxis, **kwargs).data
-            )  # if we pass an argument, return the function across the entire time axis passed
+            )  # if we pass an argument, return the function across the entire
+            #    time axis passed
         else:
             return self.linfunc(
                 self.getaxis(self.fit_axis),
@@ -8284,7 +8336,8 @@ class fitdata(nddata):
             )  # otherwise, return the raw data
 
     def output(self, *name):
-        r"""give the fit value of a particular symbol, or a dictionary of all values.
+        r"""give the fit value of a particular symbol, or a dictionary of all
+        values.
 
         Parameters
         ----------
@@ -8312,7 +8365,6 @@ class fitdata(nddata):
             ] = (
                 self.set_to
             )  # then just set the forced values to their given values
-            # print "DEBUG trying to uncollapse in fitfunc w/ ",self.symbol_list,"; from",temp,"to",p
         # this should also be generic
         if len(name) == 1:
             try:
@@ -8402,7 +8454,8 @@ class fitdata(nddata):
                 return np.zeros([len(self.fit_coeff)] * 2, dtype="double")
 
     def latex(self):
-        r"""show the latex string for the function, with all the symbols substituted by their values"""
+        r"""show the latex string for the function, with all the symbols
+        substituted by their values"""
         # this should actually be generic to fitdata
         p = self.fit_coeff
         retval = self.function_string
@@ -8425,13 +8478,15 @@ class fitdata(nddata):
                         retval[: location - 1]
                         + dp(-1 * p[j])
                         + retval[location + len(symbol) :]
-                    )  # replace the symbol in the written function with the appropriate number
+                    )  # replace the symbol in the written function with the
+                    #    appropriate number
                 else:
                     newstring = (
                         retval[:location]
                         + dp(p[j])
                         + retval[location + len(symbol) :]
-                    )  # replace the symbol in the written function with the appropriate number
+                    )  # replace the symbol in the written function with the
+                    #    appropriate number
                 logger.debug(
                     strm(
                         r"trying to replace",
@@ -8463,7 +8518,9 @@ class fitdata(nddata):
         return self
 
     def _taxis(self, taxis):
-        r"You can enter None, to get the fit along the same range as the data, an integer to give the number of points, or a range of data, which will return with 300 points"
+        r"""You can enter None, to get the fit along the same range as the
+        data, an integer to give the number of points, or a range of data,
+        which will return with 300 points"""
         if taxis is None:
             taxis = self.getaxis(self.fit_axis).copy()
         elif isinstance(taxis, int):
@@ -8482,8 +8539,10 @@ class fitdata(nddata):
         Parameters
         ----------
         taxis: ndarray, int
-            :if ndarray: the new axis coordinates along which we want to calculate the fit.
-            :if int: number of evenly spaced points along the t-axis along the fit
+            :if ndarray: the new axis coordinates along which we want to
+                calculate the fit.
+            :if int: number of evenly spaced points along the t-axis along the
+                fit
         set_what: 'str', optional
             forcibly sets a specific symbol
         set_to: double, optional
@@ -8492,7 +8551,8 @@ class fitdata(nddata):
         Returns
         -------
         self: nddata
-            the fit function evaluated along the axis coordinates that were passed
+            the fit function evaluated along the axis coordinates that were
+            passed
         """
         if isinstance(set_what, dict):
             set_to = list(set_what.values())
@@ -8516,7 +8576,8 @@ class fitdata(nddata):
             )
             p[set_indices] = set_to
         # }}}
-        # {{{ make a new, blank np.array with the fit axis expanded to fit taxis
+        # {{{ make a new, blank np.array with the fit axis expanded to fit
+        #     taxis
         newdata = ndshape(self)
         newdata[self.fit_axis] = np.size(taxis)
         newdata = newdata.alloc()
@@ -8841,7 +8902,8 @@ class fitdata(nddata):
                 except Exception:
                     # print 'WARNING, didn\'t fit'
                     success = False
-                # here, use the internal routines, in case there are constraints, etc
+                # here, use the internal routines, in case there are
+                # constraints, etc
                 if success is True:
                     for (
                         name
@@ -8886,7 +8948,8 @@ class fitdata(nddata):
         return self
 
     def guess(self, use_pseudoinverse=False):
-        r"""old code that I am preserving here -- provide the guess for our parameters; by default, based on pseudoinverse"""
+        r"""old code that I am preserving here -- provide the guess for our
+        parameters; by default, based on pseudoinverse"""
         if use_pseudoinverse:
             self.has_grad = False
             if np.iscomplex(self.data.flatten()[0]):
@@ -8952,7 +9015,8 @@ class fitdata(nddata):
                 regularization_bad = True
                 alpha_max = 100.0
                 alpha_mult = 2.0
-                alpha = 0.1  # maybe I can rather estimate this based on the change in the residual, similar to in L-M?
+                alpha = 0.1  # maybe I can rather estimate this based on the
+                #              change in the residual, similar to in L-M?
                 logger.debug(
                     strm(
                         "\n\n.core.guess) value of residual before"
@@ -9042,7 +9106,8 @@ class fitdata(nddata):
                                 lsafen(thisguess),
                             )
                             j = 0  # restart the loop
-                            # {{{ evaluate f, fprime and residuals for the new starting guess
+                            # {{{ evaluate f, fprime and residuals for the new
+                            #     starting guess
                             guess_dict = dict(
                                 list(zip(self.symbol_list, list(thisguess)))
                             )

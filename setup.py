@@ -116,6 +116,7 @@ else:
             "h5py",
             "matplotlib>=3.8.0",  # sharex is a problem in 3.5-6
             "pillow",
+            "pint",
             "lmfit>=1.1",  # we recently found that at least 1.0.3 generates
             #                output parameters that are unchanged, but still
             #                returns a "success" condition
