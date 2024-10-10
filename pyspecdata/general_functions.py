@@ -14,6 +14,21 @@ import pint
 import textwrap
 
 ureg = pint.UnitRegistry()
+Q_ = ureg.Quantity
+if '√' in str(Q_('√W')):
+    pass
+else:
+    print("**Warning!** I'm hacking the sqrt behavior of pint.  Consider using the jmfranck/pint fork")
+    def Q_(*args):
+        if len(args)==1:
+            b = a
+            a = 1
+        m = re.match(r'(.*)√(\w+)(.*)',b)
+        if m:
+            g1,g2,g3 = m.groups()
+            b = g1 + f' {g2}'+'^{0.5} ' + g3
+            print(b)
+        return ureg.Quantity(a,b)
 
 
 def inside_sphinx():
