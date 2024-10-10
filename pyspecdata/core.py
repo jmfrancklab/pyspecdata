@@ -222,7 +222,7 @@ def apply_oom(average_oom, numbers, prev_label=""):
 
 def issympy(x):
     "tests if something is sympy (based on the module name)"
-    return isinstance(x, sp.core.Expr)
+    return isinstance(x, type(sp.expr))
 
 
 # {{{ function trickery
@@ -525,9 +525,8 @@ def textlabel_bargraph(
 
 def lookup_rec(A, B, indexpair):
     r"""look up information about A in table B (i.e. chemical by index, etc)
-    indexpair is either the name of the index
-    or -- if it's differently named -- the pair of indices
-    given in (A,B) respectively
+    indexpair is either the name of the index or -- if it's differently named
+    -- the pair of indices given in (A,B) respectively
 
     This will just drop any fields in B that are also in A,
     and the output uses the first indexname
@@ -1017,7 +1016,7 @@ def meanstd_rec(myarray, mylist, standard_error=False):
         logger.debug(
             strm(
                 lsafen(
-                    "(meanstd np.core.rec): for row %d, I select these:" % j
+                    "(meanstd np.core.rec): for row" "%d, I select these:" % j
                 )
             )
         )
@@ -1292,9 +1291,8 @@ def plot(*args, **kwargs):
                 last_not_longest = max(all_but_longest)
             else:
                 last_not_longest = -1
-            all_but_longest = list(
-                all_but_longest
-            )  # seems to be sorted by default
+            all_but_longest = list(all_but_longest)
+            # seems to be sorted by default
         else:
             longest_dim = 0  # treat first as x, like before
             last_not_longest = -1
@@ -1418,7 +1416,8 @@ def plot(*args, **kwargs):
         except Exception:
             raise Exception(
                 strm(
-                    "likely a problem with the type of the x label, which is",
+                    "likely a problem with the type of the x label,"
+                    "which is",
                     myx,
                 )
             )
@@ -1522,9 +1521,8 @@ def plot(*args, **kwargs):
                     )
                 )
             if np.any(np.isinf(myy)):
-                myy[
-                    np.isinf(myy)
-                ] = np.nan  # added this to prevent an overflow error
+                myy[np.isinf(myy)] = np.nan
+                # added this to prevent an overflow error
             try:
                 retval += [myplotfunc(*tuple(plotargs), **newkwargs)]
             except Exception:
@@ -2289,9 +2287,8 @@ class nddata(object):
         ax.set_zlabel(self.unitify_axis(self.name(), is_axis=False))
         verts = []
         xs = x_axis.flatten()
-        xs = r_[
-            xs[0], xs, xs[-1]
-        ]  # add points for the bottoms of the vertices
+        xs = r_[xs[0], xs, xs[-1]]
+        # add points for the bottoms of the vertices
         ys = y_axis.flatten()
         for j in range(0, len(ys)):
             zs = self[y_dim, j].data.flatten()
@@ -2383,9 +2380,8 @@ class nddata(object):
     # }}}
     # }}}
     # {{{ error-related functions
-    def normalize(
-        self, axis, first_figure=None
-    ):  # ,whichpoint = slice(0,1,None)):
+    def normalize(self, axis, first_figure=None):
+        # ,whichpoint = slice(0,1,None)):
         x = self.data
         n = len(x)
         S = sparse.lil_matrix((n, n))
@@ -2576,19 +2572,17 @@ class nddata(object):
             self.data_units = unitval
         else:
             raise TypeError(
-                ".set_units() takes data units or 'axis' and axis units"
+                ".set_units() takes data units or " "'axis' and axis units"
             )
         return self
 
     def human_units(self):
         """This function attempts to choose "human-readable" units for axes or
         *y*-values of the data.
-        (Terminology stolen from "human readable" file
-        sizes when running shell commands.)
-        This means that it looks at the axis or at the
-        *y*-values and converts *e.g.* seconds to milliseconds where
-        appropriate, also multiplying or dividing the data in an appropriate
-        way.
+        (Terminology stolen from "human readable" file sizes when running shell
+        commands.) This means that it looks at the axis or at the *y*-values
+        and converts *e.g.* seconds to milliseconds where appropriate, also
+        multiplying or dividing the data in an appropriate way.
         """
         prev_label = self.get_units()
         for thisaxis in self.dimlabels:
@@ -2680,7 +2674,7 @@ class nddata(object):
         ):
             self.axis_coords_error[self.axn(args[0])] = args[1]
         elif (
-            (len(args) == 2)
+            len(args) == 2
             and (isinstance(args[0], str))
             and (np.isscalar(args[1]))
         ):
@@ -3005,8 +2999,8 @@ class nddata(object):
             return retval
         else:
             raise ValueError(
-                "I don't know what to do with an argument of type"
-                + repr(type(arg))
+                "I don't know what to do with an argument of"
+                "type" + repr(type(arg))
             )
 
     def __gt__(self, arg):
@@ -3024,8 +3018,8 @@ class nddata(object):
             return retval
         else:
             raise ValueError(
-                "I don't know what to do with an argument of type"
-                + repr(type(arg))
+                "I don't know what to do with an argument"
+                "of type" + repr(type(arg))
             )
 
     def __le__(self, arg):
@@ -3043,8 +3037,8 @@ class nddata(object):
             return retval
         else:
             raise ValueError(
-                "I don't know what to do with an argument of type"
-                + repr(type(arg))
+                "I don't know what to do with an argument"
+                "of type" + repr(type(arg))
             )
 
     def __ge__(self, arg):
@@ -3062,8 +3056,8 @@ class nddata(object):
             return retval
         else:
             raise ValueError(
-                "I don't know what to do with an argument of type"
-                + repr(type(arg))
+                "I don't know what to do with an argument"
+                "of type" + repr(type(arg))
             )
 
     __matmul__ = MM_matmul
@@ -3386,11 +3380,11 @@ class nddata(object):
                 except Exception:
                     raise ValueError(
                         "There seems to be a problem because the"
-                        + "shape of argout is now len:%d"
-                        % len(argout.data.shape),
+                        + "shape of argout is now"
+                        + "len:%d" % len(argout.data.shape),
                         argout.data.shape,
-                        "while the dimlabels is len:%d"
-                        % len(argout.dimlabels),
+                        "while the dimlabels is"
+                        + "len:%d" % len(argout.dimlabels),
                         argout.dimlabels,
                     )
         # }}}
@@ -3444,10 +3438,9 @@ class nddata(object):
                     .reshape(argshape)
                 )
             except ValueError as Argument:
-                if (
-                    argout.data.shape == (1,)
-                    and argout.get_error().shape == ()
-                ):
+                datashape_check = argout.data.shape == (1,)
+                errorshape_check = argout.get_error().shape == ()
+                if datashape_check and errorshape_check:
                     temp = (
                         np.array(argout.get_error())
                         .reshape((1,))
@@ -3562,10 +3555,8 @@ class nddata(object):
                 print("not a simple integral")
                 simple_integral = False
                 dt_array = (
-                    0.5
-                    * r_[
-                        dt_array, dt_array[-1]
-                    ]  # diff interval after current point
+                    0.5 * r_[dt_array, dt_array[-1]]
+                    # diff interval after current point
                     + 0.5 * r_[dt_array[0], dt_array]
                 )  # diff interval before current point
                 time_slices = self.fromaxis(thisaxis)
@@ -3712,9 +3703,9 @@ class nddata(object):
         Parameters
         ----------
         axis: str
-            name of the axis that you want to fit along
-            (not sure if this is currently tested for multi-dimensional data,
-            but the idea should be that multiple fits would be returned.)
+            name of the axis that you want to fit along (not sure if this is
+            currently tested for multi-dimensional data, but the idea should be
+            that multiple fits would be returned.)
         order: int
             the order of the polynomial to be fit
         force_y_intercept: double or None
@@ -3751,9 +3742,8 @@ class nddata(object):
             c = np.dot(np.linalg.pinv(L), y)
             c = r_[force_y_intercept, c.ravel()]
         else:
-            c = np.polyfit(
-                x.ravel(), y, deg=order
-            )  # better -- uses Hermite polys
+            c = np.polyfit(x.ravel(), y, deg=order)
+            # better -- uses Hermite polys
             c = c[::-1]  # give in ascending order, as is sensible
         # }}}
         return c
@@ -3994,9 +3984,8 @@ class nddata(object):
                     thiserror = r_[thiserror]
             self.data = np.mean(self.data, axis=thisindex)
             if return_error:  # this needs to go after the data setting
-                self.set_error(
-                    thiserror
-                )  # set the error to the standard deviation
+                self.set_error(thiserror)
+                # set the error to the standard deviation
             self._pop_axis_info(thisindex)
             logger.debug(strm("return error is", return_error))
         return self
@@ -4345,26 +4334,23 @@ class nddata(object):
                         followword = followword[:k]
                     k = followword.find("_")
                     if len(followword) > 0:
-                        if not (k > -1) and (
-                            len(prevword) < 2 or len(followword) < 2
-                        ):
+                        not_k_valid = not (k > -1)
+                        prev_short = len(prevword) < 2
+                        follow_short = len(followword) < 2
+                        if not_k_valid and (prev_short or follow_short):
                             if len(followword) > 1:
                                 axis_name = (
                                     axis_name[: j + 1 + len(followword)]
                                     + "}$"
                                     + axis_name[j + 1 + len(followword) :]
                                 )
-                                axis_name = (
-                                    axis_name[: j + 1]
-                                    + "{"
-                                    + axis_name[j + 1 :]
-                                )
+                                part1 = axis_name[: j + 1]
+                                part2 = axis_name[j + 1 :]
+                                axis_name = part1 + "{" + part2
                             else:
-                                axis_name = (
-                                    axis_name[0 : j + 2]
-                                    + "$"
-                                    + axis_name[j + 2 :]
-                                )
+                                part1 = axis_name[0 : j + 2]
+                                part2 = axis_name[j + 2 :]
+                                axis_name = part1 + "$" + part2
                             axis_name = "$" + axis_name
                 if isft:
                     t_idx = axis_name.find("t")
@@ -5159,13 +5145,14 @@ class nddata(object):
                     ) - set(self.dimlabels)
                     if len(symbols_not_in_dimlabels) > 0:
                         raise ValueError(
-                            "You passed a symbolic function, but the symbols"
+                            "You passed a symbolic function,"
+                            + "but the symbols"
                             + str(symbols_not_in_dimlabels)
                             + " are not axes"
                         )
                 else:
                     raise ValueError(
-                        "I don't know what to do with this type of argument!"
+                        "I don't know what to do with this" "type of argument!"
                     )
         elif len(args) == 2:
             axisnames = args[0]
@@ -5251,9 +5238,8 @@ class nddata(object):
                 retval.axis_coords_units = list(self.axis_coords_units)
                 retval.data_units = self.data_units
                 retval.name(self.name())
-                retval.copy_props(
-                    self
-                )  # be sure to include info about ft startpoint
+                retval.copy_props(self)
+                # be sure to include info about ft startpoint
                 return retval
 
     def getaxis(self, axisname):
@@ -5444,7 +5430,8 @@ class nddata(object):
             axis = axis[0]
         else:
             raise ValueError(
-                "not a valid argument to setaxis -- look at the documentation!"
+                "not a valid argument to setaxis --"
+                "look at the documentation!"
             )
         if axis == "INDEX":
             raise ValueError(
@@ -5851,8 +5838,8 @@ class nddata(object):
         )
         logger.debug(
             strm(
-                "end up with axis_coords_error_dict (%d)"
-                % len(axis_coords_error_dict),
+                "end up with axis_coords_error_dict",
+                "(%d)" % len(axis_coords_error_dict),
                 axis_coords_error_dict,
             )
         )
@@ -6390,9 +6377,8 @@ class nddata(object):
         if len(rightdata.shape) > 0:
             left_shape = np.shape(self.data[leftindex])
             try:
-                self.data[leftindex] = rightdata.reshape(
-                    left_shape
-                )  # assign the data
+                self.data[leftindex] = rightdata.reshape(left_shape)
+                # assign the data
             except Exception:
                 raise IndexError(
                     strm(
@@ -6484,7 +6470,7 @@ class nddata(object):
     @C.setter
     def C(self):
         raise ValueError(
-            "You can't set the C property -- it's used to generate a copy"
+            "You can't set the C property" + "-- it's used to generate a copy"
         )
 
     @property
@@ -6663,10 +6649,9 @@ class nddata(object):
                     )
                 if A.shape != self.data.shape:
                     temp = np.array(A.shape) == 1
-                    if all(
-                        np.array(A.shape)[temp]
-                        == np.array(self.data.shape)[temp]
-                    ):
+                    this = np.array(A.shape)[temp]
+                    that = np.array(self.data.shape)[temp]
+                    if all(this == that):
                         pass
                     else:
                         raise ValueError(
@@ -6680,9 +6665,8 @@ class nddata(object):
                 self.data = self.data[A]
                 return self
             else:
-                errmsg = "you passed a single argument of type " + repr(
-                    type(A)
-                )
+                errmsg = "you passed a single argument of "
+                "type " + repr(type(A))
                 if isinstance(A, nddata):
                     errmsg += " with dtype " + repr(A.data.dtype)
                 errmsg += " -- I don't know what to do with this"
@@ -6902,7 +6886,7 @@ class nddata(object):
                             dimname,
                         )
                         + tuple(self.getaxis(dimname)[r_[0, -1]])
-                    )
+                    ),
                 )
         stop_float = stop
         if stop == inf:
@@ -7049,7 +7033,8 @@ class nddata(object):
             if len(self.axis_coords) > 0:
                 logger.debug(
                     strm(
-                        "trying to make dictionaries from axis coords of len",
+                        "trying to make dictionaries",
+                        "from axis coords of len",
                         len(self.axis_coords),
                         "and axis_coords_error of len",
                         len(self.axis_coords_error),
@@ -7079,9 +7064,8 @@ class nddata(object):
                 if thisop == hash("np"):
                     slicedict[thisdim] = thisargs[0]
                     if np.isscalar(thisargs[0]):
-                        axesdict.pop(
-                            thisdim
-                        )  # pop the axes for all scalar dimensions
+                        axesdict.pop(thisdim)  # pop the axes for all scalar
+                        #                        dimensions
                     else:
                         if axesdict[thisdim] is not None:
                             axesdict[thisdim] = axesdict[thisdim][
@@ -7174,7 +7158,7 @@ class nddata(object):
                                         thisdim,
                                     )
                                     + tuple(self.getaxis(thisdim)[r_[0, -1]])
-                                )
+                                ),
                             )
                         logger.debug(
                             strm(
@@ -7227,9 +7211,8 @@ class nddata(object):
                     del temp
                     if temp_low == temp_high:
                         temp_high += 1
-                    slicedict[thisdim] = slice(
-                        temp_low, temp_high, None
-                    )  # inclusive
+                    slicedict[thisdim] = slice(temp_low, temp_high, None)
+                    # inclusive
                     axesdict[thisdim] = axesdict[thisdim][slicedict[thisdim]]
                 elif thisop == hash("idx"):
                     if thisdim not in axesdict.keys():
@@ -8051,11 +8034,8 @@ class fitdata(nddata):
         output of the functional form of the desired fit expression
         provided in func:`functional_form` in LaTeX format"""
         retval = sp.printing.latex(self.symbolic_expr).replace("$", "")
-        return (
-            r"$f(%s)=" % (sp.printing.latex(sp.Symbol(self.fit_axis)))
-            + retval
-            + r"$"
-        )
+        latex_str = r"$f(%s)=" % (sp.printing.latex(sp.Symbol(self.fit_axis)))
+        return latex_str + retval + r"$"
 
     @function_string.setter
     def function_string(self):
@@ -8246,9 +8226,8 @@ class fitdata(nddata):
             # }}}
             p[
                 self.set_indices
-            ] = (
-                self.set_to
-            )  # then just set the forced values to their given values
+            ] = self.set_to  # then just set the forced values to their given
+            #                  values
         return p
 
     def fitfunc(self, p, x):
@@ -8647,7 +8626,8 @@ class fitdata(nddata):
             if not isinstance(x, np.ndarray) and not isinstance(y, np.ndarray):
                 raise TypeError(
                     strm(
-                        "scipy.optimize.leastsq failed because the two arrays",
+                        "scipy.optimize.leastsq failed because"
+                        "the two arrays",
                         "aren't of the right",
                         "type",
                         "type(x):",
@@ -8875,11 +8855,9 @@ class fitdata(nddata):
                 number_to_replace = origsizecheck - thiscopy.data.size
                 # print 'DEBUG: number_to_replace',number_to_replace
                 random_indices = np.int32(
-                    (
-                        np.random.rand(number_to_replace)
-                        * (thiscopy.data.size - 1.0)
-                    ).round()
-                )
+                    np.random.rand(number_to_replace)
+                    * (thiscopy.data.size - 1.0)
+                ).round()
                 thiscopy.data = r_[
                     thiscopy.data, thiscopy.data.copy()[random_indices]
                 ]
@@ -8905,9 +8883,8 @@ class fitdata(nddata):
                 # here, use the internal routines, in case there are
                 # constraints, etc
                 if success is True:
-                    for (
-                        name
-                    ) in thiscopy.symbol_list:  # loop over all fit coeff
+                    for name in thiscopy.symbol_list:  # loop over all fit
+                        #                                coeff
                         recordlist[runno][name] = thiscopy.output(name)
         print(r"\end{verbatim}")
         return recordlist  # collect into a single recordlist np.array
@@ -9087,9 +9064,8 @@ class fitdata(nddata):
                             "\n\n.core.guess) I can't find a new guess without"
                             " increasing the alpha beyond %d\n\n" % alpha_max
                         )
-                        if (
-                            which_starting_guess
-                            >= len(self.starting_guesses) - 1
+                        if which_starting_guess >= (
+                            len(self.starting_guesses) - 1
                         ):
                             print(
                                 "\n\n.core.guess) {\\color{red} Warning!!!}"
@@ -9183,9 +9159,9 @@ elif _figure_mode_setting == "standard":
         print("".join(map(repr, x)))
 
     def lrecordarray(*x, **kwargs):
-        return repr(
-            x
-        )  # if I'm not using tex, it's easier to not use the formatting
+        return repr(x)  # if I'm not using tex, it's easier to not use the
+
+    #                     formatting
 
     def lsafe(*string, **kwargs):
         "replacement for normal lsafe -- no escaping"
@@ -9211,6 +9187,8 @@ elif _figure_mode_setting == "standard":
     figlist_var = figlist
 else:
     raise ValueError(
-        "I don't understand the figures mode " + _figure_mode_setting
+        "I don't understand the figures mode \
+            "
+        + _figure_mode_setting
     )
 # }}}
