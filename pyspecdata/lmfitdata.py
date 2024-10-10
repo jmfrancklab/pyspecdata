@@ -30,7 +30,9 @@ class lmfitdata(nddata):
             # move nddata attributes into the current instance
             myattrs = normal_attrs(args[0])
             for j in range(0, len(myattrs)):
-                self.__setattr__(myattrs[j], args[0].__getattribute__(myattrs[j]))
+                self.__setattr__(
+                    myattrs[j], args[0].__getattribute__(myattrs[j])
+                )
         else:
             nddata.__init__(self, *args, **kwargs)
         if fit_axis is None:
@@ -38,7 +40,8 @@ class lmfitdata(nddata):
                 fit_axis = self.dimlabels[0]
             else:
                 raise IndexError(
-                    "Right now, we can only auto-determine the fit axis if there is a single axis"
+                    "Right now, we can only auto-determine the fit axis if"
+                    " there is a single axis"
                 )
 
         self.fit_axis = fit_axis
@@ -78,12 +81,13 @@ class lmfitdata(nddata):
         variable_symbol_names = axis_names & all_symbol_names
         parameter_symbol_names = all_symbol_names - variable_symbol_names
         self.variable_names = tuple(variable_symbol_names)
-        self.variable_symbols = [j for j in all_symbols if str(j) in
-                variable_symbol_names]
-        self.parameter_symbols = [j for j in all_symbols if str(j) in
-                parameter_symbol_names]
-        self.parameter_names = tuple([str(j) for j in
-            self.parameter_symbols])
+        self.variable_symbols = [
+            j for j in all_symbols if str(j) in variable_symbol_names
+        ]
+        self.parameter_symbols = [
+            j for j in all_symbols if str(j) in parameter_symbol_names
+        ]
+        self.parameter_names = tuple([str(j) for j in self.parameter_symbols])
         self.fit_axis = set(self.dimlabels)
         logging.debug(
             strm(
@@ -121,7 +125,7 @@ class lmfitdata(nddata):
 
             Can be passed either as the only argument, or a kwarg called
             guesses, or as the kwargs themselves (i.e. `.set_guesses(**guesses)`)
-    
+
             For example (the last case:)
 
             >>> d.set_guess(
@@ -135,11 +139,11 @@ class lmfitdata(nddata):
         else:
             guesses = kwargs
         self.guess_dict = {}
-        logging.debug(strm("guesses",guesses))
-        logging.debug(strm("guess_parameters",self.guess_parameters.keys()))
+        logging.debug(strm("guesses", guesses))
+        logging.debug(strm("guess_parameters", self.guess_parameters.keys()))
         for this_name in self.guess_parameters.keys():
             if this_name in guesses.keys():
-                logging.debug(strm("adding",this_name))
+                logging.debug(strm("adding", this_name))
                 if type(guesses[this_name]) is dict:
                     self.guess_dict[this_name] = {}
                     for k, v in guesses[this_name].items():
@@ -147,15 +151,16 @@ class lmfitdata(nddata):
                         self.guess_dict[this_name][k] = v
                 elif np.isscalar(guesses[this_name]):
                     self.guess_parameters[this_name].value = guesses[this_name]
-                    self.guess_dict[this_name] = {"value":guesses[this_name]}
+                    self.guess_dict[this_name] = {"value": guesses[this_name]}
                 else:
                     raise ValueError("what are the keys to your guesses???")
-                logging.debug(strm("now dict is",self.guess_dict))
+                logging.debug(strm("now dict is", self.guess_dict))
         for j in self.guess_parameters:
             logging.debug(strm("fit param ---", j))
         logging.debug(strm(self.guess_parameters))
         logging.debug(strm(self.guess_dict))
         return self
+
     def guess(self):
         r"""Old code that we are preserving here -- provide the guess for our
         parameters; by default, based on pseudoinverse"""
@@ -225,13 +230,13 @@ class lmfitdata(nddata):
         newdata.axis_coords = list(newdata.axis_coords)
         newdata.labels([self.fit_axis], list([taxis]))
         if self.get_units(self.fit_axis) is not None:
-            newdata.set_units(self.fit_axis,
-                    self.get_units(self.fit_axis))
+            newdata.set_units(self.fit_axis, self.get_units(self.fit_axis))
         if self.get_error(self.fit_axis) is not None:
-            newdata.set_error(self.fit_axis,
-                    self.get_error(self.fit_axis))
+            newdata.set_error(self.fit_axis, self.get_error(self.fit_axis))
         # }}}
-        variable_coords = {self.fit_axis:taxis} # even though it's possible to
+        variable_coords = {
+            self.fit_axis: taxis
+        }  # even though it's possible to
         #                                         combine this and the next line
         #                                         to make it more
         #                                         compact/efficient for one
@@ -239,15 +244,17 @@ class lmfitdata(nddata):
         #                                         open the posisbility that we
         #                                         will be using more than one
         #                                         variable
-        newdata.data[:] = self.fitfunc_multiarg_v2(
-                *(tuple(variable_coords[j] if j in
-                    variable_coords.keys()
-                    else
-                    self.getaxis(j)
-                    for j in
-                    self.variable_names)+
-                    tuple(self.fit_coeff))
-                ).flatten()
+        newdata.data[:] = self.fitfunc_multiarg_v2(*(
+            tuple(
+                (
+                    variable_coords[j]
+                    if j in variable_coords.keys()
+                    else self.getaxis(j)
+                )
+                for j in self.variable_names
+            )
+            + tuple(self.fit_coeff)
+        )).flatten()
         newdata.name(str(self.name()))
         return newdata
 
@@ -265,7 +272,14 @@ class lmfitdata(nddata):
         #
         # But you  should read through and see what the previous fit method is doing
         # and then copy over what you can
-        logging.debug(strm("I am attempting to actually run the fit",minimize.__module__,"here are the guess parameters",self.guess_parameters))
+        logging.debug(
+            strm(
+                "I am attempting to actually run the fit",
+                minimize.__module__,
+                "here are the guess parameters",
+                self.guess_parameters,
+            )
+        )
         x = self.getaxis(self.fit_axis)
         y = self.data
         sigma = self.get_error()
@@ -274,11 +288,18 @@ class lmfitdata(nddata):
             self.guess_parameters,
             args=(x, y, sigma),
         )
-        logging.debug(strm("here is the output success",out.success,"and parameters",out.params))
+        logging.debug(
+            strm(
+                "here is the output success",
+                out.success,
+                "and parameters",
+                out.params,
+            )
+        )
         # {{{ capture the result for ouput, etc
         self.fit_coeff = [out.params[j].value for j in self.parameter_names]
         assert out.success
-        if hasattr(out,'covar'):
+        if hasattr(out, "covar"):
             self.covariance = out.covar
         # }}}
         return self
@@ -286,12 +307,13 @@ class lmfitdata(nddata):
     def residual(self, pars, x, y, sigma=None):
         "calculate the residual OR if data is None, return fake data"
         fit = self.fitfunc_multiarg_v2(
-                *(self.getaxis(j)
-                    for j in
-                    self.variable_names),
-                **pars.valuesdict())
+            *(self.getaxis(j) for j in self.variable_names),
+            **pars.valuesdict(),
+        )
         if sigma is not None:
-            normalization = np.sum(1.0 / sigma[np.logical_and(sigma != 0.0, np.isfinite(sigma))])
+            normalization = np.sum(
+                1.0 / sigma[np.logical_and(sigma != 0.0, np.isfinite(sigma))]
+            )
             sigma[sigma == 0.0] = 1
             sigma[~np.isfinite(sigma)] = 1
         try:
@@ -404,6 +426,7 @@ class lmfitdata(nddata):
     def latex(self):
         r"""show the latex string for the function, with all the symbols substituted by their values"""
         # this should actually be generic to fitdata
+        thisdp = lambda x: "(" + dp(x) + ")"
         p = self.fit_coeff
         retval = self.function_string
         printfargs = []
@@ -416,23 +439,28 @@ class lmfitdata(nddata):
         #     way the function looks.  Though this is a pain, it's
         #     better.
         for j in range(0, len(self.parameter_names)):
-            symbol = sp.printing.latex(self.parameter_symbols[j]).replace("$", "")
+            symbol = sp.printing.latex(self.parameter_symbols[j]).replace(
+                "$", ""
+            )
             logging.debug(strm('DEBUG: replacing symbol "', symbol, '"'))
             location = retval.find(symbol)
             while location != -1:
                 if retval[location - 1] == "-":
                     newstring = (
                         retval[: location - 1]
-                        + dp(-1 * p[j])
+                        + thisdp(-1 * p[j])
                         + retval[location + len(symbol) :]
                     )  # replace the symbol in the written function with the appropriate number
                 else:
                     newstring = (
-                        retval[:location] + dp(p[j]) + retval[location + len(symbol) :]
+                        retval[:location]
+                        + thisdp(p[j])
+                        + retval[location + len(symbol) :]
                     )  # replace the symbol in the written function with the appropriate number
                 logging.debug(
                     strm(
-                        r"trying to replace", retval[location : location + len(symbol)]
+                        r"trying to replace",
+                        retval[location : location + len(symbol)],
                     )
                 )
                 retval = newstring
@@ -460,10 +488,15 @@ class lmfitdata(nddata):
         output of the functional form of the desired fit expression
         provided in func:`functional_form` in LaTeX format"""
         retval = sp.printing.latex(self.expression).replace("$", "")
-        return r"$f(%s)=" % (sp.printing.latex(sp.core.Symbol(self.fit_axis))) + retval + r"$"
+        return (
+            r"$f(%s)=" % (sp.printing.latex(sp.core.Symbol(self.fit_axis)))
+            + retval
+            + r"$"
+        )
 
     @function_string.setter
     def function_string(self):
         raise ValueError(
-            "You cannot set the string directly -- change the functional_form property instead!"
+            "You cannot set the string directly -- change the functional_form"
+            " property instead!"
         )
