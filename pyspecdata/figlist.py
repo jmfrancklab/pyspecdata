@@ -251,38 +251,8 @@ class figlist(object):
                 )
             )
 
-    def next(
-        self,
-        input_name,
-        legend=False,
-        boundaries=None,
-        twinx=None,
-        fig=None,
-        ax=None,
-        **kwargs,
-    ):
-        r"""Switch to the figure given by input_name, which is used not only as
-        a string-based name for the figure, but also as a default title and as
-        a base name for resulting figure files.
-
-        **In the future, we actually want this to track the appropriate axis object!**
-
-        Parameters
-        ----------
-        legend : bool
-            If this is set, a legend is created *outside* the figure.
-        twinx : {0,1}
-            :1: plots on an overlayed axis (the matplotlib twinx) whose y axis
-                is labeled on the right when you set this for the first time, you
-                can also set a `color` kwarg that controls the coloring of the
-                right axis.
-            :0: used to switch back to the left (default) axis
-        boundaries :
-            **need to add description**
-        kwargs : dict
-            Any other keyword arguments are passed to the matplotlib (mayavi)
-            figure() function that's used to switch (create) figures.
-        """
+    def _clean_name(self, input_name):
+        "just perform various checks on the name and incorporate the basename"
         if len(input_name) == 0:
             raise ValueError(
                 "You have tried to name a figure with an empty string (\"\").\nThis is so confusing that it's no longer allowed.\n\nYou are probably doing this because you don't want a title:\nJust use the title("
@@ -316,6 +286,40 @@ class figlist(object):
                 "don't include slashes in the figure name, that's just too confusing"
             )
         logging.debug(strm("with basename appended, this is", name))
+        return name
+    def next(
+        self,
+        input_name,
+        legend=False,
+        boundaries=None,
+        twinx=None,
+        fig=None,
+        ax=None,
+        **kwargs,
+    ):
+        r"""Switch to the figure given by input_name, which is used not only as
+        a string-based name for the figure, but also as a default title and as
+        a base name for resulting figure files.
+
+        **In the future, we actually want this to track the appropriate axis object!**
+
+        Parameters
+        ----------
+        legend : bool
+            If this is set, a legend is created *outside* the figure.
+        twinx : {0,1}
+            :1: plots on an overlayed axis (the matplotlib twinx) whose y axis
+                is labeled on the right when you set this for the first time, you
+                can also set a `color` kwarg that controls the coloring of the
+                right axis.
+            :0: used to switch back to the left (default) axis
+        boundaries :
+            **need to add description**
+        kwargs : dict
+            Any other keyword arguments are passed to the matplotlib (mayavi)
+            figure() function that's used to switch (create) figures.
+        """
+        name = self._clean_name(input_name)
         if name in self.figurelist:  # figure already exists
             if hasattr(self, "mlab"):
                 # with this commit, I removed the kwargs and bgcolor, not sure why
@@ -1103,6 +1107,9 @@ class figlist(object):
             self.show()
         return
 
+    def __contains__(self, input_name):
+        name = self._clean_name
+        return name in self.figurelist
     def __repr__(self):
         result = ""
         counter = 0
