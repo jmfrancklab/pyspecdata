@@ -14,9 +14,8 @@ We also show how the equivalent of the color limits can be chosen by setting
 the scaling of the image -- notice how data that exceeds the "scaling"
 parameter is masked out as white here.
 """
-from pylab import subplots
+from pylab import *
 from pyspecdata import *
-from numpy import *
 rcParams['image.aspect'] = 'auto' # needed for sphinx gallery
 # sphinx_gallery_thumbnail_number = 3
 

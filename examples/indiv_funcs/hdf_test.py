@@ -1,3 +1,8 @@
+"""Save data to HDF5
+=================
+
+Save nddata to standard HDF5 format.
+"""
 from pyspecdata import nddata, nddata_hdf5
 from numpy import r_
 import os

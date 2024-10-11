@@ -4,6 +4,7 @@
 This example creates fake data with noise
 then fits the exponential with the fitdata
 function."""
+from pylab import *
 from pyspecdata import *
 import sympy as sp
 

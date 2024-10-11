@@ -1,3 +1,8 @@
+"""PPM in 2D
+=========
+
+Show how :func:`to_ppm()` can apply to two dimensions!
+"""
 from numpy import pi, r_, exp
 from pyspecdata import nddata, figlist_var
 

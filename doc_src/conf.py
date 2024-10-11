@@ -19,8 +19,31 @@ import sphinx_rtd_theme
 import mock
 from matplotlib import rcParams, get_data_path
 print("datapath is",get_data_path())
- 
+# {{{ mock unit registry, which belongs to pint
+#if not os.getenv('SPHINX_GALLERY_RUNNING', False):
+#    class MockObject:
+#        def __init__(self, *args, **kwargs):
+#            pass
+#        
+#        # Add any mock methods you may want, for example:
+#        def __mul__(self, *args, **kwargs):
+#            return self
+#        def __sqrt__(self, *args, **kwargs):
+#            return self
+#        def __call__(self, *args, **kwargs):
+#            return self
+#        def Quantity(self, *args, **kwargs):
+#            return self
+#        
+#    import sys
+#    from unittest.mock import MagicMock
+#
+#    # Mock the 'pint' module and its UnitRegistry class
+#    sys.modules['pint'] = MagicMock()
+#    sys.modules['pint'].UnitRegistry = MockObject
 autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_toolkits', 'get_ipython', 'matplotlib', 'tables']
+# }}}
+ 
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -29,7 +52,11 @@ autodoc_mock_imports = ['numpy', 'scipy', 'scipy.interpolate', 'pylab', 'mpl_too
 sys.path.insert(0, os.path.abspath('../..'))
 sys.path.append(os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('../pyspecdata'))
+sys.path.append(os.path.abspath('../../pint'))
 print("sys.path is",sys.path)
+import pint
+print(f"Using pint from: {pint.__file__}")
+pint.UnitRegistry()
 from pyspecdata.version import __version__
 
 # -- General configuration ------------------------------------------------
