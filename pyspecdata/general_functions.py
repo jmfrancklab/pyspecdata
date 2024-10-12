@@ -14,6 +14,9 @@ import pint
 import textwrap
 
 ureg = pint.UnitRegistry()
+ureg.define("cyc = [cycle]") # 'cycle' is a new dimension
+ureg.define("Hz = cyc / s") # Redefine 'Hz' to be cycles per second
+ureg.define("rad = 2*pi*cyc") # Redefine 'rad' in terms of cycles
 Q_ = ureg.Quantity
 if '√' in str(Q_('√W')):
     pass
