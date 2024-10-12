@@ -106,6 +106,7 @@ sphinx_gallery_conf = {
     "doc_module": ("pyspecdata",),
     ## directory where function/class granular galleries are stored
     "backreferences_dir": "gen_modules/backreferences",
+    "image_srcset":["2x"],
 }
 autosummary_generate = True
 
@@ -184,15 +185,14 @@ todo_include_todos = True
 
 # -- Options for HTML output ----------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-html_theme = "alabaster"
-
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
+#
+# for 0.7.16 alabaster bug, set logo here, and don't include any logo name option
 html_theme_options = {
-    'logo_name': False, # don't show the name with the logo
+    "logo": "pyspec_path_equaltip.png",
+    #'logo_name': None, # don't show the name with the logo
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -205,10 +205,6 @@ html_theme_options = {
 # A shorter title for the navigation bar.  Default is the same as html_title.
 # html_short_title = None
 
-# The name of an image file (relative to this directory) to place at the top
-# of the sidebar.
-html_logo = "pyspec_path_equaltip.png"
-
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
@@ -218,6 +214,7 @@ html_logo = "pyspec_path_equaltip.png"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+html_css_files = ["custom.css"]
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -370,3 +367,7 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 # texinfo_no_detailmenu = False
 
+
+# The theme to use for HTML and HTML Help pages.  See the documentation for
+# a list of builtin themes.
+html_theme = "alabaster"

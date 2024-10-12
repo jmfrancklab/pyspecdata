@@ -8,12 +8,15 @@ Welcome to pySpecData's documentation!
 
 pySpecData allows you to deal with multi-dimensional spectroscopy data in an object-oriented fashion.
 
-Please note this package is heavily utilized by three other packages that our lab manages on github:
+Please note this package is heavily utilized by two other packages that our lab manages on github:
+
+*   `Classes for communicating with instruments <https://github.com/jmfrancklab/FLInst/>`_.
+
+    *   Controls USB instrumentation like oscilloscopes and power meters connected via a USB/GPIB converter.
+    *   Includes our Custom SpinCore NMR extension
+    *   (Note that the previous two used be separate repositories -- they have been combined to improve maintenance).
 
 *   `ODNP processing scripts <https://github.com/jmfrancklab/proc_scripts/>`_.
-*   `Classes for communicating with instruments <https://github.com/jmfrancklab/inst_notebooks/>`_.
-*   `Convenient SpinCore NMR Extension <https://github.com/jmfrancklab/spincore_apps/>`_.
-
 
 :ref:`See pySpecData examples here <sphx_glr_auto_examples>`,
 and for a simple example applied to 1D data, see
@@ -29,6 +32,7 @@ PySpecData *automatically* handles the following issues, without any additional 
 *   relabeling axes after a Fourier transformation
 *   propagation of errors
 *   adding units to plots
+*   calculating analytical Jacobians used during least-squares fitting  
 
 To enable this, you work with a pySpecData `nddata` object
 (which includes information about dimension names, axis values, errors, and the units)
