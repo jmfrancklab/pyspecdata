@@ -19,15 +19,16 @@ from numpy import r_
 x = psp.nddata(r_[-5, -2, -1, -0.5, 0, 0.5, 5], "x")
 y = psp.nddata(3 * r_[-5, -2, -1, -0.5, 0, 0.5, 5], "y")
 z1 = plt.exp(-((y - 2) ** 2) - (x - 0) ** 2 / 2) + 1j * x
-z2 = 10 * z1
+z2 = -500000 * z1
 # {{{ plot the smaller data
 plt.figure()
 z1.C.pcolor(scale_independently=True)
+
 # }}}
 # {{{ plot the larger data
 plt.figure()
 z2.pcolor(scale_independently=True)
-
+#plt.show();quit()
 
 # }}}
 def new_figure_and_grid():
@@ -38,6 +39,7 @@ def new_figure_and_grid():
         for k in range(2):
             ax_list.append(fig.add_subplot(gs[j, k]))
     return ax_list
+
 
 
 # {{{ independent

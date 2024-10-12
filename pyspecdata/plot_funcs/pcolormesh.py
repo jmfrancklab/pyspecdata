@@ -10,6 +10,8 @@ def pcolormesh(
     ax2=None,
     ax=None,
     scale_independently=False,
+    vmin = None,
+    vmax = None,
     human_units=True,
     force_balanced_cmap=False,
     handle_axis_sharing=True,
@@ -26,6 +28,7 @@ def pcolormesh(
         where do you want the left plot to go?
     ax2 : matplotlib axes object
         where do you want the right plot to go?
+    ax : initial matplotlib axes object
     scale_independently: boolean (default False)
         Do you want each plot to be scaled independently?
         (If false, the colorbar will have the same limits for all plots)
@@ -101,9 +104,27 @@ def pcolormesh(
                 overall_min = -overall_max
             else:
                 overall_max = -overall_min
+        vmin = overall_min
+        vmax = overall_max
+        print("dependently scaled vmin is ", vmin, "and vmax is ", vmax)
+    if scale_independently:
+        vmin, vmax = mappable.get_clim()
+        print("independently scaled vmin is ", vmin, "and vmax is ", vmax)
     for j, (thisax, thisfun, thislabel) in enumerate(ax_list):
         if not scale_independently:
             mappable_list[j].set_clim(overall_min, overall_max)
-        if scale_independently or j > 0:
-            plt.colorbar(mappable=mappable_list[j], ax=thisax)
+            cbar = plt.colorbar(mappable=mappable_list[j], ax=thisax)
+        elif scale_independently or j > 0:
+            mappable_list[j].set_clim(vmin, vmax)
+            cbar = plt.colorbar(mappable=mappable_list[j], ax=thisax)
+        else: 
+            cbar = plt.colorbar(mappable)
+            print("this section is being called")
+        mappable.colorbar = cbar    
+    def modify_colorbar_boundaries(mappable, vmin, vmax):
+        mappable.norm.vmin = vmin
+        mappable.norm.vmax = vmax
+        mappable.set_norm(mappable.norm)
+        cbar.update_normal(mappable)
+    modify_colorbar_boundaries(mappable, vmin=vmin, vmax=vmax)
     return mappable_list
