@@ -12,6 +12,14 @@ pyspecdata.plot\_funcs.image module
    :undoc-members:
    :show-inheritance:
 
+pyspecdata.plot\_funcs.pcolormesh module
+----------------------------------------
+
+.. automodule:: pyspecdata.plot_funcs.pcolormesh
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

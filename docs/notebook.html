@@ -1,106 +1,45 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LaTeX Notebook Functionality &mdash; pySpecData 0.9.5.3.2 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/sg_gallery.css" type="text/css" />
-      <link rel="stylesheet" href="_static/sg_gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="_static/sg_gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="_static/sg_gallery-rendered-html.css" type="text/css" />
-      <link rel="stylesheet" href="_static/gallery_custom.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-    <script src="_static/js/theme.js"></script>
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>LaTeX Notebook Functionality &#8212; pySpecData 0.9.5.3.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=832af5b0" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css?v=7f9a90b1" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=2b30a6e6" />
+    <script src="_static/documentation_options.js?v=5b73e601"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="N-dimensional Data (nddata)" href="pyspecdata.html" />
-    <link rel="prev" title="List of Modules and Sub-Packages" href="modules.html" /> 
-</head>
+    <link rel="prev" title="List of Modules and Sub-Packages" href="modules.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> pySpecData
-          </a>
-              <div class="version">
-                0.9.5.3.2
-              </div>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">LaTeX Notebook Functionality</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#setting-up-the-notebook">Setting up the notebook</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#running-the-notebook">Running the notebook</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#the-latex-end">The LaTeX end</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#the-python-end">The python end</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pyspecdata.html">N-dimensional Data (nddata)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyspecdata.html#full-list-of-nddata-methods">Full list of <cite>nddata</cite> methods</a></li>
-<li class="toctree-l4"><a class="reference internal" href="latexscripts.html">Documentation of Notebook Helper Functions</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fitdata.html">the lmfitdata class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
-<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
-</ul>
+  
+  
 
-        </div>
-      </div>
-    </nav>
+  </head><body>
+  
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">pySpecData</a>
-      </nav>
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
 
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">LaTeX Notebook Functionality</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="_sources/notebook.rst.txt" rel="nofollow"> View page source</a>
-      </li>
-  </ul>
-  <hr/>
-</div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
+          <div class="body" role="main">
+            
   <section id="latex-notebook-functionality">
-<h1>LaTeX Notebook Functionality<a class="headerlink" href="#latex-notebook-functionality" title="Permalink to this heading">¶</a></h1>
+<h1>LaTeX Notebook Functionality<a class="headerlink" href="#latex-notebook-functionality" title="Link to this heading">¶</a></h1>
 <p>This package contains tools for running a LaTeX notebook with
 embedded python code.  One can then, for instance, keep an
 electronic lab notebook where the plots and data are generated
@@ -129,12 +68,9 @@ chronological document (or <em>vice versa</em>) with the
 <code class="docutils literal notranslate"><span class="pre">\\ref{...}</span></code> command.</p></li>
 </ul>
 <section id="setting-up-the-notebook">
-<h2>Setting up the notebook<a class="headerlink" href="#setting-up-the-notebook" title="Permalink to this heading">¶</a></h2>
-</section>
-<section id="requirements">
-<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading">¶</a></h2>
-<ol class="arabic">
-<li><p>latex packages</p>
+<h2>Setting up the notebook<a class="headerlink" href="#setting-up-the-notebook" title="Link to this heading">¶</a></h2>
+<section id="install-the-latex-packages">
+<h3>Install the Latex Packages<a class="headerlink" href="#install-the-latex-packages" title="Link to this heading">¶</a></h3>
 <p>In order to be able to build a latex notebook where <code class="docutils literal notranslate"><span class="pre">\begin{python}...\end{python}</span></code> environments are replaced with the code output,
 we first need some helper latex style files.</p>
 <p>To make latex files accessible anywhere on your computer, you place them
@@ -145,41 +81,66 @@ compiler.</p>
 on the structure and directory names of a texmf directory tree.  You
 can’t just rename the directories as you would like.</p></li>
 </ul>
-<p>The pyspecdata repo itself now has a subdirectory called <code class="docutils literal notranslate"><span class="pre">texmf</span></code> that is a ready-to-go texmf tree for this purpose.
-So, the <code class="docutils literal notranslate"><span class="pre">[LOCATION</span> <span class="pre">OF</span> <span class="pre">YOUR</span> <span class="pre">PYSPECDATA</span> <span class="pre">REPO]/texmf</span></code></p>
+<p>The pyspecdata repo itself now has a subdirectory called <code class="docutils literal notranslate"><span class="pre">texmf</span></code> that is a ready-to-go texmf tree for this purpose.</p>
 <p>How do I register the texmf directory?</p>
 <ul class="simple">
-<li><p>Under Windows, you can add the texmf tree graphically by opening “miktex console” from the start menu → “setting” → “directories” and click the plus symbol → navigate to the location of the texmf directory inside your pyspecdata repository</p></li>
-<li><p>In general (windows or otherwise) you should be able to use the command <code class="docutils literal notranslate"><span class="pre">initexmf</span> <span class="pre">--register-root=[LOCATION</span> <span class="pre">OF</span> <span class="pre">YOUR</span> <span class="pre">PYSPECDATA</span> <span class="pre">REPO]/texmf</span></code></p></li>
+<li><p>Under Windows, you can add the texmf tree graphically by opening
+“miktex console” from the start menu.</p></li>
+<li><p>If the menu options are greyed out, you need to activate administrator mode.</p></li>
+<li><p>Inside miktex, go to “settings” →
+“directories” and click the plus symbol → select the
+texmf directory inside your pyspecdata repository
+(<code class="docutils literal notranslate"><span class="pre">[DIRECTORY</span> <span class="pre">ONE</span> <span class="pre">UP</span> <span class="pre">FROM</span> <span class="pre">PYSPECDATA</span> <span class="pre">FOLDER]/pyspecdata/texmf</span></code>)
+So that the “Folder” box says “texmf”
+→ click select folder.
+If this works for you, you don’t need to do the next bullet</p></li>
+<li><p>In general (windows or otherwise) you should be able to use the command
+<code class="docutils literal notranslate"><span class="pre">initexmf</span> <span class="pre">--register-root=[DIRECTORY</span> <span class="pre">ONE</span> <span class="pre">UP</span> <span class="pre">FROM</span> <span class="pre">PYSPECDATA</span> <span class="pre">FOLDER]/pyspecdata/texmf</span></code></p></li>
 </ul>
 <p>Once you’ve done this, the shell command <code class="docutils literal notranslate"><span class="pre">kpsewhich</span> <span class="pre">mypython.sty</span></code>
 should return a result
 (if you have miktex installed on windows, this should work from either the git
 bash prompt or the dos or powershell prompt).</p>
-</li>
-<li><p>The pyspecdata package.</p>
-<p>Proves the commands <cite>pdflatex_notebook_wrapper</cite> and
+</section>
+<section id="use-the-pyspecdata-latex-wrapper">
+<h3>Use the pySpecData latex wrapper<a class="headerlink" href="#use-the-pyspecdata-latex-wrapper" title="Link to this heading">¶</a></h3>
+<p>The pyspecdata package proves the commands <cite>pdflatex_notebook_wrapper</cite> and
 <cite>update_notebook_pythonscripts</cite>, described below under “Running the
 notebook.”</p>
-<p>Also provies the command <cite>pdflatex_notebook_view_wrapper</cite>, which is used to
+<p>It also provies the command <cite>pdflatex_notebook_view_wrapper</cite>, which is used to
 determine the output PDF and call an appropriate viewer.</p>
-</li>
-<li><p>If pyspecdata is installed, and the texmf directory is registered with your
-latex compiles (e.g. miktex), you should be able to clone and compile the
-example notebooks repo from the franck lab.</p>
+<p>If pyspecdata is installed, and the texmf directory is registered with your
+latex compiler (e.g. miktex), you should be able to clone and compile the
+<a class="reference external" href="https://github.com/jmfrancklab/notebook_example">example notebooks repo from the franck lab</a></p>
 <p>You can compile the tex file by typing:
-<code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span> <span class="pre">notebook.tex</span></code></p>
+<code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span> <span class="pre">-synctex=-1</span> <span class="pre">notebook.tex</span></code>
+inside the root directory of the <code class="docutils literal notranslate"><span class="pre">notebook_example</span></code> repo.
+To get the results of the code to appear, you need to run this command <em>twice</em> the first time.</p>
+<p>It might take a few passes, but you should able to run this command without have latex complain about missing packages!
+* If this happens in miktex, you need to</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>go to miktex settings → general, and set it to automatically download new pages. Be sure to click “for all users”!</p></li>
+<li><p>delete <cite>notebook.aux</cite> (<cite>rm notebook.aux</cite>) and the scripts directory, and run again</p></li>
+</ul>
+</div></blockquote>
 <ul class="simple">
 <li><p>The first time you do this, miktex might need to install many packages,
 so that you need to keep hitting enter and then reattempting.</p></li>
+<li><p>It’s assumed that your latex files are stored in a “notebook directory.”
+In some cases, during the first run, an explanatory error will appear – just follow the instructions.</p></li>
 </ul>
-</li>
-<li><p>On Windows, you will want to install <a class="reference external" href="https://www.sumatrapdfreader.org/free-pdf-reader.html">Sumatrapdf</a>
+</section>
+<section id="install-a-pdf-viewer-that-plays-nice-with-latex">
+<h3>Install a PDF viewer that plays nice with latex<a class="headerlink" href="#install-a-pdf-viewer-that-plays-nice-with-latex" title="Link to this heading">¶</a></h3>
+<p>On Windows, you will want to install <a class="reference external" href="https://www.sumatrapdfreader.org/free-pdf-reader.html">Sumatrapdf</a>
 (use the installer version, not the portable version)
-to view your PDFs, since it automatically updates when the PDF is recompiled.</p></li>
-</ol>
-<ol class="arabic" start="3">
-<li><p>Get set up with standard latex compilation system:</p>
+to view your PDFs, since it automatically updates when the PDF is recompiled.</p>
+<p>On Linux, Zathura is very nice.</p>
+</section>
+<section id="optional-recommended-set-up-latexmk">
+<h3>(Optional/Recommended) set up latexmk<a class="headerlink" href="#optional-recommended-set-up-latexmk" title="Link to this heading">¶</a></h3>
+<p>Get set up with standard latex compilation system:</p>
 <p>You can use latexmk (shipped with miktex) with <a class="reference external" href="https://www.sumatrapdfreader.org/free-pdf-reader.html">Sumatrapdf</a>
 (Sumatrapdf allows you to edit the PDF while it’s open in Sumatrapdf, while Adobe Acrobat <em>does not</em>).
 Here is a <code class="docutils literal notranslate"><span class="pre">~/.latexmkrc</span></code> file that works on windows:</p>
@@ -189,17 +150,10 @@ Here is a <code class="docutils literal notranslate"><span class="pre">~/.latexm
 </div>
 <p><strong>It should also be possible to use TeXworks</strong> by adding pdflatex_notebook_wrapper to
 preferences → typesetting → processing tools.</p>
-<div class="admonition-todo admonition" id="id2">
-<p class="admonition-title">Todo</p>
-<p>Alec, can you check this out and update documentation??</p>
-</div>
-</li>
-<li><p>It’s assumed that your latex files are stored in a “notebook directory.”
-In some cases, during the first run, an explanatory error will appear – just follow the instructions.</p></li>
-</ol>
+</section>
 </section>
 <section id="running-the-notebook">
-<h2>Running the notebook<a class="headerlink" href="#running-the-notebook" title="Permalink to this heading">¶</a></h2>
+<h2>Running the notebook<a class="headerlink" href="#running-the-notebook" title="Link to this heading">¶</a></h2>
 <p>If you create figures with the <cite>figlist_var</cite> class,
 you should simply be able to write a latex file with embedded
 <code class="docutils literal notranslate"><span class="pre">python</span></code> environments (<code class="docutils literal notranslate"><span class="pre">\\begin{python}</span></code> … <code class="docutils literal notranslate"><span class="pre">\\end{python}</span></code>)
@@ -223,7 +177,7 @@ be re-run.  You use it like this: <code class="docutils literal notranslate"><sp
 <span class="pre">flush</span> <span class="pre">10</span> <span class="pre">21</span></code>  – which will flush script numbers 10 to 21.
 Manually deleting the <code class="docutils literal notranslate"><span class="pre">.py</span></code> files inside the scripts directory
 will <strong>not</strong> have the same effect.</p>
-<div class="admonition-todo admonition" id="id3">
+<div class="admonition-todo admonition" id="id2">
 <p class="admonition-title">Todo</p>
 <p>To limit downtime for the PDF, pdflatex_notebook_wrapper currently copies
 the final pdf to a truncated filename (assuming that the filename consists
@@ -235,7 +189,7 @@ This would entail changing the paths of the various files</p>
 </div>
 </section>
 <section id="how-it-works">
-<h2>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this heading">¶</a></h2>
+<h2>How it works<a class="headerlink" href="#how-it-works" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Note that the code works a bit differently than in previous
 versions – while it previously required LaTeX to be run with shell-escape enabled,
@@ -244,17 +198,12 @@ versions – while it previously required LaTeX to be run with shell-escape enab
 by <code class="docutils literal notranslate"><span class="pre">update_notebook_pythonscripts</span></code></p></li>
 <li><p>To compile, use <code class="docutils literal notranslate"><span class="pre">pdflatex_notebook_wrapper</span> <span class="pre">--xelatex</span></code></p></li>
 </ul>
-<section id="the-latex-end">
-<h3>The LaTeX end<a class="headerlink" href="#the-latex-end" title="Permalink to this heading">¶</a></h3>
 <p>The file <cite>mypython.sty</cite> looks for the <cite>python</cite> environment, it pulls the relevant
 code, outputs it to <code class="docutils literal notranslate"><span class="pre">scripts/*.py</span></code> and then writes a command to
 the <code class="docutils literal notranslate"><span class="pre">.aux</span></code> file that tells LaTeX where to find the
 <code class="docutils literal notranslate"><span class="pre">scripts/*.tex</span></code> output.
 The <code class="docutils literal notranslate"><span class="pre">scripts/*.tex</span></code> output is only updated once
 <code class="docutils literal notranslate"><span class="pre">update_notebook_pythonscripts</span></code> (without arguments) is run.</p>
-</section>
-<section id="the-python-end">
-<h3>The python end<a class="headerlink" href="#the-python-end" title="Permalink to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">update_notebook_pythonscripts</span></code> runs through the various
 <code class="docutils literal notranslate"><span class="pre">scripts/*.py</span></code> files, checks and checks whether or not they
 have been previously cached (under the same or a different script
@@ -267,43 +216,111 @@ in the cache.</p>
 <li class="toctree-l2"><a class="reference internal" href="pyspecdata.html#by-topic">By Topic</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="pyspecdata.html#full-list-of-nddata-methods">Full list of <cite>nddata</cite> methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="latexscripts.html">Documentation of Notebook Helper Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyspecdata.html#full-list-of-nddata-methods">Full list of <cite>nddata</cite> methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyspecdata.html#pyspecdata.nddata"><code class="docutils literal notranslate"><span class="pre">nddata</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="latexscripts.html">Documentation of Notebook Helper Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="latexscripts.html#pyspecdata.latexscripts.cache_output_if_needed"><code class="docutils literal notranslate"><span class="pre">cache_output_if_needed()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="latexscripts.html#pyspecdata.latexscripts.cached_filename"><code class="docutils literal notranslate"><span class="pre">cached_filename()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="latexscripts.html#pyspecdata.latexscripts.det_new_pdf_name"><code class="docutils literal notranslate"><span class="pre">det_new_pdf_name()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="latexscripts.html#pyspecdata.latexscripts.genconfig"><code class="docutils literal notranslate"><span class="pre">genconfig()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="latexscripts.html#pyspecdata.latexscripts.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="latexscripts.html#pyspecdata.latexscripts.sha_string"><code class="docutils literal notranslate"><span class="pre">sha_string()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="latexscripts.html#pyspecdata.latexscripts.wraplatex"><code class="docutils literal notranslate"><span class="pre">wraplatex()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="latexscripts.html#pyspecdata.latexscripts.wrapviewer"><code class="docutils literal notranslate"><span class="pre">wrapviewer()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
 </section>
-</section>
 
 
-           </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="modules.html" class="btn btn-neutral float-left" title="List of Modules and Sub-Packages" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="pyspecdata.html" class="btn btn-neutral float-right" title="N-dimensional Data (nddata)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2016, John M. Franck.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
+          
         </div>
       </div>
-    </section>
-  </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/pyspec_path_equaltip.png" alt="Logo" />
+    
+  </a>
+</p>
 
-</body>
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">LaTeX Notebook Functionality</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-the-notebook">Setting up the notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-the-notebook">Running the notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fitdata.html">the lmfitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="modules.html" title="previous chapter">List of Modules and Sub-Packages</a></li>
+      <li>Next: <a href="pyspecdata.html" title="next chapter">N-dimensional Data (nddata)</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2016, John M. Franck.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/notebook.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
 </html>

@@ -32,18 +32,18 @@ various functions.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="A quick demonstration of polynomial fitting.">
+    <div class="sphx-glr-thumbcontainer" tooltip="Basic demonstration of pcolor, which can deal with unevenly spaced data">
 
 .. only:: html
 
-  .. image:: /auto_examples/images/thumb/sphx_glr_polyfit_thumb.png
+  .. image:: /auto_examples/images/thumb/sphx_glr_pcolor_example_thumb.png
     :alt:
 
-  :ref:`sphx_glr_auto_examples_polyfit.py`
+  :ref:`sphx_glr_auto_examples_pcolor_example.py`
 
 .. raw:: html
 
-      <div class="sphx-glr-thumbnail-title">Polynomial Fitting</div>
+      <div class="sphx-glr-thumbnail-title">Unevenly spaced data</div>
     </div>
 
 
@@ -61,6 +61,57 @@ various functions.
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Bruker cw ESR Data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A quick demonstration of polynomial fitting.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_polyfit_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_polyfit.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Polynomial Fitting</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Show how to_ppm() can apply to two dimensions!">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_ppm_2D_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_ppm_2D.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">PPM in 2D</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Calculation of the Covariance Matrix">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_calculate_covariance_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_calculate_covariance.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Calculation of the Covariance Matrix</div>
     </div>
 
 
@@ -202,6 +253,23 @@ various functions.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="for 1D BRD, adapted mainly from Venkataramanan 2002 but checked against BRD 1981">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_BRD_test_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_BRD_test.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">1D BRD regularization</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="This example is specifically designed to process data from a BSA calibration curve lab exercise...">
 
 .. only:: html
@@ -253,6 +321,23 @@ various functions.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="2D regularization test">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_nddata_NNLS_Tikhonov_190104_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_nddata_NNLS_Tikhonov_190104.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">2D ILT test</div>
+    </div>
+
+
+.. raw:: html
+
     </div>
 
 
@@ -260,8 +345,11 @@ various functions.
    :hidden:
 
    /auto_examples/Cary_simple
-   /auto_examples/polyfit
+   /auto_examples/pcolor_example
    /auto_examples/esr_example
+   /auto_examples/polyfit
+   /auto_examples/ppm_2D
+   /auto_examples/calculate_covariance
    /auto_examples/convolution
    /auto_examples/image_plot
    /auto_examples/ppm_example
@@ -270,9 +358,11 @@ various functions.
    /auto_examples/fit_complex
    /auto_examples/DCCT_function
    /auto_examples/basic_example
+   /auto_examples/BRD_test
    /auto_examples/BSA_calibration
    /auto_examples/fit_fake_data
    /auto_examples/QESR
+   /auto_examples/nddata_NNLS_Tikhonov_190104
 
 Individual Functions
 --------------------
@@ -284,6 +374,23 @@ These are not very important -- just tests to verify the performance of individu
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Save nddata to standard HDF5 format.">
+
+.. only:: html
+
+  .. image:: /auto_examples/indiv_funcs/images/thumb/sphx_glr_hdf_test_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_indiv_funcs_hdf_test.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Save data to HDF5</div>
+    </div>
 
 
 .. raw:: html
@@ -317,6 +424,23 @@ These are not very important -- just tests to verify the performance of individu
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Convolution</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="show an easy method for matching colors using pyspecdata">
+
+.. only:: html
+
+  .. image:: /auto_examples/indiv_funcs/images/thumb/sphx_glr_test_colormatch_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_indiv_funcs_test_colormatch.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">show an easy method for matching colors using pyspecdata</div>
     </div>
 
 
