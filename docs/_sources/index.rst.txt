@@ -64,7 +64,7 @@ This is because we assume that we are progressively optimizing/filtering
 our spectral data with each new line of code.
 This allows us to quickly work through many operations (like the ft here)
 without keeping many copies of a large dataset and with less typing for each operation.
-(If you every truly want to create a copy a dataset, just attach a `.C`)
+(If you ever truly want to create a copy a dataset, just attach a `.C`)
 
 .. todo::
     describe updates allowing aliasing (nu2 vs. t2, etc.)
