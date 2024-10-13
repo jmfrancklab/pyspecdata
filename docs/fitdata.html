@@ -17,11 +17,10 @@
     <script src="_static/documentation_options.js?v=5b73e601"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="The Figure List" href="figlist.html" />
-    <link rel="prev" title="Documentation of Notebook Helper Functions" href="latexscripts.html" />
+    <link rel="next" title="List of Modules and Sub-Packages" href="modules.html" />
+    <link rel="prev" title="Fourier Functions" href="fourier.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -42,37 +41,20 @@
   <section id="the-lmfitdata-class">
 <h1>the lmfitdata class<a class="headerlink" href="#the-lmfitdata-class" title="Link to this heading">¶</a></h1>
 <p>This is a child class of nddata used for fitting.</p>
-<p>For old fitdata documentation
-(obsolete, for development reference) see <span class="xref std std-ref">fitdata_old</span></p>
-<section id="creating-new-types-of-lmfitdata-modules">
-<h2>creating new types of lmfitdata modules<a class="headerlink" href="#creating-new-types-of-lmfitdata-modules" title="Link to this heading">¶</a></h2>
-<p>There is a base class called “lmfitdata” that defines the basic routines
-necessary for fitting. Currently, the lmfitdata class only supports
-fitting along one dimension, so before constructing a new class, one
-must first choose what dimension they will be fitting along.</p>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>Of
-course, for multidimensional data, the fit will be repeated along the
-dimensions that are not the fit dimension. see how easy it would be to
-allow more than one dimension</p>
-</div>
-<p>To fit a new type of function, one simply creates a new type of class
-that <em>inherits</em> from the lmfitdata class. We override all the methods that
-have to do with the definition of the functional format. These are
-defined in the first section, where we build up an example for fitting a
-general <span class="math notranslate nohighlight">\(T_1\)</span> recovery curve. This example should be used as a
-starting point for making new fit classes. Then, we can make instances
-of the new class, and use their methods (described in the subsequent
-section) next.</p>
-<div class="admonition-todo admonition" id="id2">
-<p class="admonition-title">Todo</p>
-<p>the option block :no-inherited-members: doesn’t work – not sure how to modify class.rst
-I put a template from stackexchange inside _templates
-– see <a class="reference external" href="https://stackoverflow.com/questions/28147432/how-to-customize-sphinx-ext-autosummary-rst-template">https://stackoverflow.com/questions/28147432/how-to-customize-sphinx-ext-autosummary-rst-template</a>
-on how to use it</p>
-<p>then, I need to link to or include generated/pyspecdata.lmfitdata.rst</p>
-</div>
+<p>It works with two other very useful packages
+lmfit – which does a very good job of setting
+up bounded fits – and sympy – which we can use
+to represent the function that we are fitting.</p>
+<p>Bounds improve the likelihood that our fit will converge,
+while the symbolic representation both helps us to
+generate latex representations of the function that we are fitting
+and to <em>improve performance and error estimates</em> by automatically
+calculating the jacobian.</p>
+<p>You simply wrap your existing nddata with <cite>lmfitdata</cite>, set the
+<cite>functional_form</cite> property to the equation you want to fit,
+and provide guesses and bounds with <cite>set_guess</cite>.
+The easiest way to get started is to just see the fitting examples in
+the example gallery.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.lmfitdata.</span></span><span class="sig-name descname"><span class="pre">lmfitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata" title="Link to this definition">¶</a></dt>
@@ -229,7 +211,6 @@ guesses, or as the kwargs themselves (i.e. <cite>.set_guesses(**guesses)</cite>)
 </dd></dl>
 
 </section>
-</section>
 
 
           </div>
@@ -254,13 +235,13 @@ guesses, or as the kwargs themselves (i.e. <cite>.set_guesses(**guesses)</cite>)
 
 <h3>Navigation</h3>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nddata.html">ND-Data</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">the lmfitdata class</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#creating-new-types-of-lmfitdata-modules">creating new types of lmfitdata modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pyspecdata.lmfitdata.lmfitdata"><code class="docutils literal notranslate"><span class="pre">lmfitdata</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
 </ul>
@@ -273,8 +254,8 @@ guesses, or as the kwargs themselves (i.e. <cite>.set_guesses(**guesses)</cite>)
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="latexscripts.html" title="previous chapter">Documentation of Notebook Helper Functions</a></li>
-      <li>Next: <a href="figlist.html" title="next chapter">The Figure List</a></li>
+      <li>Previous: <a href="fourier.html" title="previous chapter">Fourier Functions</a></li>
+      <li>Next: <a href="modules.html" title="next chapter">List of Modules and Sub-Packages</a></li>
   </ul></li>
 </ul>
 </div>

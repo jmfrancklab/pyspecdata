@@ -20,27 +20,31 @@ from matplotlib import rcParams, get_data_path
 
 print("datapath is", get_data_path())
 # {{{ mock unit registry, which belongs to pint
-# if not os.getenv('SPHINX_GALLERY_RUNNING', False):
-#    class MockObject:
-#        def __init__(self, *args, **kwargs):
-#            pass
-#
-#        # Add any mock methods you may want, for example:
-#        def __mul__(self, *args, **kwargs):
-#            return self
-#        def __sqrt__(self, *args, **kwargs):
-#            return self
-#        def __call__(self, *args, **kwargs):
-#            return self
-#        def Quantity(self, *args, **kwargs):
-#            return self
-#
-#    import sys
-#    from unittest.mock import MagicMock
-#
-#    # Mock the 'pint' module and its UnitRegistry class
-#    sys.modules['pint'] = MagicMock()
-#    sys.modules['pint'].UnitRegistry = MockObject
+if not os.getenv("SPHINX_GALLERY_RUNNING", False):
+
+    class MockObject:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        # Add any mock methods you may want, for example:
+        def __mul__(self, *args, **kwargs):
+            return self
+
+        def __sqrt__(self, *args, **kwargs):
+            return self
+
+        def __call__(self, *args, **kwargs):
+            return self
+
+        def Quantity(self, *args, **kwargs):
+            return self
+
+    import sys
+    from unittest.mock import MagicMock
+
+    # Mock the 'pint' module and its UnitRegistry class
+    sys.modules["pint"] = MagicMock()
+    sys.modules["pint"].UnitRegistry = MockObject
 autodoc_mock_imports = [
     "numpy",
     "scipy",
@@ -53,7 +57,6 @@ autodoc_mock_imports = [
 ]
 # }}}
 
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -65,8 +68,6 @@ sys.path.append(os.path.abspath("../../pint"))
 print("sys.path is", sys.path)
 import pint
 
-print(f"Using pint from: {pint.__file__}")
-pint.UnitRegistry()
 from pyspecdata.version import __version__
 
 # -- General configuration ------------------------------------------------
@@ -106,7 +107,7 @@ sphinx_gallery_conf = {
     "doc_module": ("pyspecdata",),
     ## directory where function/class granular galleries are stored
     "backreferences_dir": "gen_modules/backreferences",
-    "image_srcset":["2x"],
+    "image_srcset": ["2x"],
 }
 autosummary_generate = True
 

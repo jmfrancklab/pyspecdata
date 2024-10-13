@@ -3,10 +3,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to pySpecData's documentation!
-======================================
+pySpecData: compact spectral data processing!
+=============================================
 
 pySpecData allows you to deal with multi-dimensional spectroscopy data in an object-oriented fashion.
+:ref:`See pySpecData examples here <sphx_glr_auto_examples>`,
+and for a simple example applied to 1D data, see
+:ref:`here <sphx_glr_auto_examples_basic_example.py>`.
 
 Please note this package is heavily utilized by two other packages that our lab manages on github:
 
@@ -17,11 +20,6 @@ Please note this package is heavily utilized by two other packages that our lab 
     *   (Note that the previous two used be separate repositories -- they have been combined to improve maintenance).
 
 *   `ODNP processing scripts <https://github.com/jmfrancklab/proc_scripts/>`_.
-
-:ref:`See pySpecData examples here <sphx_glr_auto_examples>`,
-and for a simple example applied to 1D data, see
-:ref:`here <sphx_glr_auto_examples_basic_example.py>`.
-
 
 The Basics
 ==========
@@ -66,8 +64,7 @@ This allows us to quickly work through many operations (like the ft here)
 without keeping many copies of a large dataset and with less typing for each operation.
 (If you ever truly want to create a copy a dataset, just attach a `.C`)
 
-.. todo::
-    describe updates allowing aliasing (nu2 vs. t2, etc.)
+..  describe updates allowing aliasing (nu2 vs. t2, etc.)
 
 Note that
 
@@ -111,10 +108,10 @@ These and further details are covered in the various sections of the documentati
     :maxdepth: 2
 
     
-    modules.rst
-    notebook.rst
     nddata.rst
     fitdata.rst
+    modules.rst
+    notebook.rst
     figlist.rst
     units.rst
     examples.rst 
