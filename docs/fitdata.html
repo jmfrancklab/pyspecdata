@@ -17,6 +17,7 @@
     <script src="_static/documentation_options.js?v=5b73e601"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="List of Modules and Sub-Packages" href="modules.html" />
@@ -112,7 +113,7 @@ nddata metadata.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.fit" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_jacobian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.fit" title="Link to this definition">¶</a></dt>
 <dd><p>actually run the fit</p>
 </dd></dl>
 
@@ -150,6 +151,17 @@ parameters; by default, based on pseudoinverse</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.jacobian">
+<span class="sig-name descname"><span class="pre">jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.jacobian" title="Link to this definition">¶</a></dt>
+<dd><p>cache the symbolic jacobian and/or use it to compute the numeric result</p>
+<p>Note that, like residual, this is designed for use by lmfit, so that if you want to actually <em>see</em> the Jacobian, you need to pass something a bit more complicated, like this:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">jac</span> <span class="o">=</span> <span class="n">newfit</span><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which assumes that I have run the fit, and so have access to the fit parameters, and gives the complex view for complex data (since in a complex fit, we use view to treat real an imaginary parts the same)</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.latex">
 <span class="sig-name descname"><span class="pre">latex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.latex" title="Link to this definition">¶</a></dt>
 <dd><p>show the latex string for the function, with all the symbols substituted by their values</p>
@@ -175,8 +187,15 @@ resulting values.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.pinvr_step">
+<span class="sig-name descname"><span class="pre">pinvr_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.pinvr_step" title="Link to this definition">¶</a></dt>
+<dd><p>Use regularized Pseudo-inverse to (partly) solve:
+<span class="math notranslate nohighlight">\(-residual = f(\mathbf{p}+\Delta \mathbf{p})-f(\mathbf{p}) \approx \nabla f(\mathbf{p}) \cdot \Delta \mathbf{p}\)</span></p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.residual">
-<span class="sig-name descname"><span class="pre">residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.residual" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.residual" title="Link to this definition">¶</a></dt>
 <dd><p>calculate the residual OR if data is None, return fake data</p>
 </dd></dl>
 
@@ -206,6 +225,26 @@ guesses, or as the kwargs themselves (i.e. <cite>.set_guesses(**guesses)</cite>)
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.settoguess">
 <span class="sig-name descname"><span class="pre">settoguess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.settoguess" title="Link to this definition">¶</a></dt>
 <dd><p>a debugging function, to easily plot the initial guess</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.transformed_data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transformed_data</span></span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.transformed_data" title="Link to this definition">¶</a></dt>
+<dd><p>If we do something like fit a lorentzian or voigt lineshape,
+it makes more sense to define our fit function in the time domain,
+but to calculate the residuals and to evaluate in the frequency
+domain.
+Therefore, we define a function <cite>self.residual_transform</cite> that
+accepts an nddata, and defines how the data is manipulated to move
+into the (e.g. frequency) residual domain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>retval</strong> – just return the ndarray</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

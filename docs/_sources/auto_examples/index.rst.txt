@@ -253,6 +253,23 @@ various functions.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Using lmfitdata, fit a complex data set.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_fit_complex_with_transform_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_fit_complex_with_transform.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fit complex data with transform</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="for 1D BRD, adapted mainly from Venkataramanan 2002 but checked against BRD 1981">
 
 .. only:: html
@@ -358,6 +375,7 @@ various functions.
    /auto_examples/fit_complex
    /auto_examples/DCCT_function
    /auto_examples/basic_example
+   /auto_examples/fit_complex_with_transform
    /auto_examples/BRD_test
    /auto_examples/BSA_calibration
    /auto_examples/fit_fake_data

@@ -71,6 +71,7 @@
       ~lmfitdata.interp
       ~lmfitdata.invinterp
       ~lmfitdata.item
+      ~lmfitdata.jacobian
       ~lmfitdata.labels
       ~lmfitdata.latex
       ~lmfitdata.like
@@ -93,6 +94,7 @@
       ~lmfitdata.output
       ~lmfitdata.pcolor
       ~lmfitdata.phdiff
+      ~lmfitdata.pinvr_step
       ~lmfitdata.plot_labels
       ~lmfitdata.polyfit
       ~lmfitdata.popdim
@@ -150,6 +152,7 @@
       ~lmfitdata.imag
       ~lmfitdata.real
       ~lmfitdata.shape
+      ~lmfitdata.transformed_data
       ~lmfitdata.want_to_prospa_decim_correct
    
    

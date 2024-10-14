@@ -547,7 +547,7 @@ and determines the axis values as follows:
 <p>Provides the core components of pyspecdata.
 Currently, this is a very large file that we will slowly break down into
 separate modules or packages.</p>
-<p>The classes <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata_hdf</span></code>, <a class="reference internal" href="#pyspecdata.core.ndshape" title="pyspecdata.core.ndshape"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code></a>, the
+<p>The classes <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata_hdf</span></code>, <a class="reference internal" href="#pyspecdata.core.ndshape" title="pyspecdata.core.ndshape"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code></a>, the
 function <a class="reference internal" href="#pyspecdata.core.plot" title="pyspecdata.core.plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot()</span></code></a>, and the class <a class="reference internal" href="#pyspecdata.core.fitdata" title="pyspecdata.core.fitdata"><code class="xref py py-class docutils literal notranslate"><span class="pre">fitdata</span></code></a>
 are the core components of the N-Dimensional processing routines.
 Start by familiarizing yourself with those.</p>
@@ -609,7 +609,7 @@ smaller number of values</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>datalist</strong> (<em>list</em><em> of </em><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – the data you want to concatenate – they must have the same ndshape!</p></li>
+<li><p><strong>datalist</strong> (<em>list</em><em> of </em><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – the data you want to concatenate – they must have the same ndshape!</p></li>
 <li><p><strong>dimname</strong> (<em>str</em>) – name of the new dimension</p></li>
 </ul>
 </dd>
@@ -650,7 +650,7 @@ if more than one element in B matches that in A, include both options!!</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.core.fitdata">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.core.</span></span><span class="sig-name descname"><span class="pre">fitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
 <p>Inherits from an nddata and enables curve fitting through use of a
 sympy expression.</p>
 <p>The user creates a fitdata class object from an existing nddata
@@ -745,7 +745,7 @@ fit</p>
 passed</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -881,7 +881,7 @@ must be sympy symbols</p>
 <dd class="field-even"><p><strong>self</strong> – The modified nddata</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1047,7 +1047,7 @@ you’re going to do math with them, and that the singleton dimensions
 will be expanded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a><em> or </em><em>np.ndarray</em>) – The nddata that you want to align to <cite>self</cite>.
+<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a><em> or </em><em>np.ndarray</em>) – The nddata that you want to align to <cite>self</cite>.
 If arg is an np.ndarray, it will try to match dimensions to self
 based
 on the length of the dimension.
@@ -1534,7 +1534,7 @@ dimensioned numpy ndarray rather than an nddata.</p></li>
 inferred from <cite>inputsymbolic</cite>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> | ndarray</p>
+<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> | ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2075,7 +2075,7 @@ distribution (the “fit” dimension);
 <p>If you are performing 2D regularization, then this
 is a tuple (pair) of 2 names</p>
 </p></li>
-<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><em>(</em><em>tuple of</em><em>) </em><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – <p>a dictionary whose key is the name of the “fit” dimension
+<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><em>(</em><em>tuple of</em><em>) </em><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – <p>a dictionary whose key is the name of the “fit” dimension
 (<span class="math notranslate nohighlight">\(R_1\)</span> in the example above)
 and whose value is an np.array with the new axis labels.</p>
 <p>OR</p>
@@ -2725,7 +2725,7 @@ reference (TMS, DSS, etc.)</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.core.nddata_hdf5">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.core.</span></span><span class="sig-name descname"><span class="pre">nddata_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathstring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata_hdf5" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
 </dd></dl>
 
 <dl class="py class">
@@ -4416,16 +4416,31 @@ This can be used in combination with wrapviewer() and latexmk by using a <code c
 <dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.latexscripts.wrapviewer">
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.latexscripts.</span></span><span class="sig-name descname"><span class="pre">wrapviewer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.latexscripts.wrapviewer" title="Link to this definition">¶</a></dt>
-<dd><p>see <a class="reference internal" href="#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p>
+<dd><p>see <a class="reference internal" href="../latexscripts.html#pyspecdata.latexscripts.wraplatex" title="pyspecdata.latexscripts.wraplatex"><code class="xref py py-func docutils literal notranslate"><span class="pre">wraplatex</span></code></a></p>
 </dd></dl>
 
 </section>
 <section id="module-pyspecdata.lmfitdata">
 <span id="pyspecdata-lmfitdata-module"></span><h2>pyspecdata.lmfitdata module<a class="headerlink" href="#module-pyspecdata.lmfitdata" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.dirac_delta_approx">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.lmfitdata.</span></span><span class="sig-name descname"><span class="pre">dirac_delta_approx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.dirac_delta_approx" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.finite_difference_heaviside_derivative">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.lmfitdata.</span></span><span class="sig-name descname"><span class="pre">finite_difference_heaviside_derivative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.finite_difference_heaviside_derivative" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.heaviside">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.lmfitdata.</span></span><span class="sig-name descname"><span class="pre">heaviside</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.heaviside" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.lmfitdata.</span></span><span class="sig-name descname"><span class="pre">lmfitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
 <p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
 <p>The user creates a lmfitdata class object from an existing nddata
 class object, and on this lmfitdata object can define the
@@ -4480,7 +4495,7 @@ nddata metadata.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.fit" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_jacobian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.fit" title="Link to this definition">¶</a></dt>
 <dd><p>actually run the fit</p>
 </dd></dl>
 
@@ -4518,6 +4533,17 @@ parameters; by default, based on pseudoinverse</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.jacobian">
+<span class="sig-name descname"><span class="pre">jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.jacobian" title="Link to this definition">¶</a></dt>
+<dd><p>cache the symbolic jacobian and/or use it to compute the numeric result</p>
+<p>Note that, like residual, this is designed for use by lmfit, so that if you want to actually <em>see</em> the Jacobian, you need to pass something a bit more complicated, like this:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">jac</span> <span class="o">=</span> <span class="n">newfit</span><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which assumes that I have run the fit, and so have access to the fit parameters, and gives the complex view for complex data (since in a complex fit, we use view to treat real an imaginary parts the same)</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.latex">
 <span class="sig-name descname"><span class="pre">latex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.latex" title="Link to this definition">¶</a></dt>
 <dd><p>show the latex string for the function, with all the symbols substituted by their values</p>
@@ -4543,8 +4569,15 @@ resulting values.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.pinvr_step">
+<span class="sig-name descname"><span class="pre">pinvr_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.pinvr_step" title="Link to this definition">¶</a></dt>
+<dd><p>Use regularized Pseudo-inverse to (partly) solve:
+<span class="math notranslate nohighlight">\(-residual = f(\mathbf{p}+\Delta \mathbf{p})-f(\mathbf{p}) \approx \nabla f(\mathbf{p}) \cdot \Delta \mathbf{p}\)</span></p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.residual">
-<span class="sig-name descname"><span class="pre">residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.residual" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.residual" title="Link to this definition">¶</a></dt>
 <dd><p>calculate the residual OR if data is None, return fake data</p>
 </dd></dl>
 
@@ -4574,6 +4607,26 @@ guesses, or as the kwargs themselves (i.e. <cite>.set_guesses(**guesses)</cite>)
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.settoguess">
 <span class="sig-name descname"><span class="pre">settoguess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.settoguess" title="Link to this definition">¶</a></dt>
 <dd><p>a debugging function, to easily plot the initial guess</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.transformed_data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transformed_data</span></span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.transformed_data" title="Link to this definition">¶</a></dt>
+<dd><p>If we do something like fit a lorentzian or voigt lineshape,
+it makes more sense to define our fit function in the time domain,
+but to calculate the residuals and to evaluate in the frequency
+domain.
+Therefore, we define a function <cite>self.residual_transform</cite> that
+accepts an nddata, and defines how the data is manipulated to move
+into the (e.g. frequency) residual domain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>retval</strong> – just return the ndarray</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -4814,7 +4867,7 @@ accessed many times. Sort of like memoization.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.placeholder.nddata_placeholder">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.placeholder.</span></span><span class="sig-name descname"><span class="pre">nddata_placeholder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_data_hook</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.placeholder.nddata_placeholder" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
 <p>When you open a file with many datasets, and only want to load one, this is used to store a placeholder to the different datasets.
 Rather than passing the initialization any type of data, you simply pass it one argument: the “data hook”:
 a function that accepts a single argument (self), alters the dimlabels and axes as needed, and returns an ndarray containing the data.</p>
@@ -5938,7 +5991,7 @@ lookup : dictionary with str:function pairs</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.fitdata">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">fitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fitdata" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
 <p>Inherits from an nddata and enables curve fitting through use of a
 sympy expression.</p>
 <p>The user creates a fitdata class object from an existing nddata
@@ -6519,7 +6572,7 @@ if myname is in myargs, the original row is popped</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">lmfitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
 <p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
 <p>The user creates a lmfitdata class object from an existing nddata
 class object, and on this lmfitdata object can define the
@@ -6574,7 +6627,7 @@ nddata metadata.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.fit" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_jacobian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.fit" title="Link to this definition">¶</a></dt>
 <dd><p>actually run the fit</p>
 </dd></dl>
 
@@ -6612,6 +6665,17 @@ parameters; by default, based on pseudoinverse</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.jacobian">
+<span class="sig-name descname"><span class="pre">jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.jacobian" title="Link to this definition">¶</a></dt>
+<dd><p>cache the symbolic jacobian and/or use it to compute the numeric result</p>
+<p>Note that, like residual, this is designed for use by lmfit, so that if you want to actually <em>see</em> the Jacobian, you need to pass something a bit more complicated, like this:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">jac</span> <span class="o">=</span> <span class="n">newfit</span><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which assumes that I have run the fit, and so have access to the fit parameters, and gives the complex view for complex data (since in a complex fit, we use view to treat real an imaginary parts the same)</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.latex">
 <span class="sig-name descname"><span class="pre">latex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.latex" title="Link to this definition">¶</a></dt>
 <dd><p>show the latex string for the function, with all the symbols substituted by their values</p>
@@ -6637,8 +6701,15 @@ resulting values.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.pinvr_step">
+<span class="sig-name descname"><span class="pre">pinvr_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.pinvr_step" title="Link to this definition">¶</a></dt>
+<dd><p>Use regularized Pseudo-inverse to (partly) solve:
+<span class="math notranslate nohighlight">\(-residual = f(\mathbf{p}+\Delta \mathbf{p})-f(\mathbf{p}) \approx \nabla f(\mathbf{p}) \cdot \Delta \mathbf{p}\)</span></p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.residual">
-<span class="sig-name descname"><span class="pre">residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.residual" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.residual" title="Link to this definition">¶</a></dt>
 <dd><p>calculate the residual OR if data is None, return fake data</p>
 </dd></dl>
 
@@ -6668,6 +6739,26 @@ guesses, or as the kwargs themselves (i.e. <cite>.set_guesses(**guesses)</cite>)
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.settoguess">
 <span class="sig-name descname"><span class="pre">settoguess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.settoguess" title="Link to this definition">¶</a></dt>
 <dd><p>a debugging function, to easily plot the initial guess</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyspecdata.lmfitdata.transformed_data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transformed_data</span></span><a class="headerlink" href="#pyspecdata.lmfitdata.transformed_data" title="Link to this definition">¶</a></dt>
+<dd><p>If we do something like fit a lorentzian or voigt lineshape,
+it makes more sense to define our fit function in the time domain,
+but to calculate the residuals and to evaluate in the frequency
+domain.
+Therefore, we define a function <cite>self.residual_transform</cite> that
+accepts an nddata, and defines how the data is manipulated to move
+into the (e.g. frequency) residual domain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>retval</strong> – just return the ndarray</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -8929,7 +9020,7 @@ reference (TMS, DSS, etc.)</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.nddata_hdf5">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">nddata_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathstring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata_hdf5" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
 </dd></dl>
 
 <dl class="py function">

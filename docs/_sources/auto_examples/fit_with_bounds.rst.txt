@@ -25,13 +25,13 @@ Adapt one of the examples from lmfit to use sympy and pyspecdata.
 Eventually, we want to use parts of this in the base library, so we don't have
 to retype them every time.
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-56
+.. GENERATED FROM PYTHON SOURCE LINES 10-59
 
 
 
 .. image-sg:: /auto_examples/images/sphx_glr_fit_with_bounds_001.png
    :alt: fit with bounds
-   :srcset: /auto_examples/images/sphx_glr_fit_with_bounds_001.png
+   :srcset: /auto_examples/images/sphx_glr_fit_with_bounds_001.png, /auto_examples/images/sphx_glr_fit_with_bounds_001_2_00x.png 2.00x
    :class: sphx-glr-single-img
 
 
@@ -40,7 +40,7 @@ to retype them every time.
  .. code-block:: none
 
     ----------  logging output to /home/jmfranck/pyspecdata.0.log  ----------
-    --> fit_with_bounds.py(25):pyspecdata.core             <module> 2024-10-11 13:59:58,443
+    --> fit_with_bounds.py(28):pyspecdata.core             <module> 2024-10-13 21:55:39,881
     INFO: Functional Form: A*exp(-decay**2*x**2)*sin(shift + x/period)
 
 
@@ -51,6 +51,7 @@ to retype them every time.
 |
 
 .. code-block:: Python
+
 
     import matplotlib.pyplot as plt
     from numpy import exp, linspace, pi, random, sign, sin
@@ -66,7 +67,9 @@ to retype them every time.
     A, shift, period, decay, x = sp.symbols("A shift period decay x", real=True)
     # create an empty dataset that we will drop the fake data into
     thisfit = lmfitdata(nddata(r_[0:250:1500j], "x"))
-    thisfit.functional_form = A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2))
+    thisfit.functional_form = (
+        A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2))
+    )
     logger.info(strm("Functional Form:", thisfit.functional_form))
     # {{{ create the "true" parameters for the fake data by pretending like
     #     the true values are a guess, and then outputting the guess data
@@ -102,7 +105,7 @@ to retype them every time.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.307 seconds)
+   **Total running time of the script:** (0 minutes 0.694 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fit_with_bounds.py:
