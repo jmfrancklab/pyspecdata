@@ -30,6 +30,7 @@ recipes) used by :func:`nddata.add_noise`,
 while h5 functions are helper functions for using pytables in a fashion that
 will hopefull be intuitive to those familiar with SQL, etc.
 """
+
 from .datadir import pyspec_config
 from .matrix_math.svd import svd as MM_svd
 from .matrix_math.dot import dot as MM_dot
@@ -560,17 +561,13 @@ def lookup_rec(A, B, indexpair):
     allbutindex = (
         lambda x: list(x)[0:whichisindex] + list(x)[whichisindex + 1 :]
     )
-    joined = np.concatenate(
-        [
-            np.array(
-                tuple(list(j[0]) + allbutindex(j[1])),
-                dtype=np.dtype(
-                    j[0].dtype.descr + allbutindex(j[1].dtype.descr)
-                ),
-            ).reshape(1)
-            for j in joined
-        ]
-    )
+    joined = np.concatenate([
+        np.array(
+            tuple(list(j[0]) + allbutindex(j[1])),
+            dtype=np.dtype(j[0].dtype.descr + allbutindex(j[1].dtype.descr)),
+        ).reshape(1)
+        for j in joined
+    ])
     return joined
 
 
@@ -626,12 +623,10 @@ def lambda_rec(myarray, myname, myfunction, *varargs):
     try:
         newrow = myfunction(*tuple(argdata))
     except TypeError:
-        newrow = np.array(
-            [
-                myfunction(*tuple([x[rownumber] for x in argdata]))
-                for rownumber in range(0, len(argdata[0]))
-            ]
-        )
+        newrow = np.array([
+            myfunction(*tuple([x[rownumber] for x in argdata]))
+            for rownumber in range(0, len(argdata[0]))
+        ])
     if isinstance(newrow, list) and isinstance(newrow[0], str):
         newrow = np.array(newrow, dtype="|S100")
     try:
@@ -1285,9 +1280,9 @@ def plot(*args, **kwargs):
         # }}}
         if len(myy.data.shape) > 1 and longest_is_x:
             longest_dim = np.argmax(myy.data.shape)
-            all_but_longest = set(range(len(myy.data.shape))) ^ set(
-                (longest_dim,)
-            )
+            all_but_longest = set(range(len(myy.data.shape))) ^ set((
+                longest_dim,
+            ))
             if len(all_but_longest) > 0:
                 last_not_longest = max(all_but_longest)
             else:
@@ -1299,9 +1294,9 @@ def plot(*args, **kwargs):
             longest_dim = 0  # treat first as x, like before
             last_not_longest = -1
             if len(myy.data.shape) > 1:
-                all_but_longest = set(range(len(myy.data.shape))) ^ set(
-                    (longest_dim,)
-                )
+                all_but_longest = set(range(len(myy.data.shape))) ^ set((
+                    longest_dim,
+                ))
                 all_but_longest = list(all_but_longest)
             else:
                 all_but_longest = []
@@ -1460,15 +1455,15 @@ def plot(*args, **kwargs):
         ##kwargs.update({'fmt':myformat})
         linematched = False
         for linestyle in ["-", "--", "-.", ":", "None", "  "]:
-            if myformat.find(linestyle) > -1:
+            if linestyle in myformat:
                 linematched = True
-                myformat.replace(linestyle, "")
+                myformat = myformat.replace(linestyle, "")
                 kwargs.update({"linestyle": linestyle})
         for markerlabel in ["o", ".", "d"]:
-            if myformat.find(markerlabel) > -1:
+            if markerlabel in myformat:
                 if not linematched:
                     kwargs.update({"linestyle": ""})
-                myformat.replace(markerlabel, "")
+                myformat = myformat.replace(markerlabel, "")
                 kwargs.update({"marker": markerlabel})
         if len(myformat) == 0:
             myformat = None
@@ -1522,9 +1517,9 @@ def plot(*args, **kwargs):
                     )
                 )
             if np.any(np.isinf(myy)):
-                myy[
-                    np.isinf(myy)
-                ] = np.nan  # added this to prevent an overflow error
+                myy[np.isinf(myy)] = (
+                    np.nan
+                )  # added this to prevent an overflow error
             try:
                 retval += [myplotfunc(*tuple(plotargs), **newkwargs)]
             except Exception:
@@ -1544,14 +1539,14 @@ def plot(*args, **kwargs):
                         "\noptions",
                         newkwargs,
                         "of len",
-                        ", ".join(
-                            [
+                        ", ".join([
+                            (
                                 str(type(j)) + " " + str(j)
                                 if np.isscalar(j)
                                 else str(len(j))
-                                for j in list(newkwargs.values())
-                            ]
-                        ),
+                            )
+                            for j in list(newkwargs.values())
+                        ]),
                     )
                 )
             if x_inverted:
@@ -1565,6 +1560,16 @@ def plot(*args, **kwargs):
             kwargs["yerr"] = myyerror
         plotargs = [j for j in [myx, np.real(myy), myformat] if j is not None]
         try:
+            logger.debug(
+                strm(
+                    "plotting with args",
+                    plotargs,
+                    "(myformat is",
+                    myformat,
+                    ") and kwargs",
+                    kwargs,
+                )
+            )
             retval = myplotfunc(*plotargs, **kwargs)
         except Exception:
             raise RuntimeError(
@@ -1575,20 +1580,22 @@ def plot(*args, **kwargs):
                     myplotfunc,
                     "\nlength of the np.ndarray arguments:",
                     [
-                        "shape:" + str(np.shape(j))
-                        if isinstance(j, np.ndarray)
-                        else j
+                        (
+                            "shape:" + str(np.shape(j))
+                            if isinstance(j, np.ndarray)
+                            else j
+                        )
                         for j in plotargs
                     ],
                     "\nsizes of np.ndarray kwargs",
-                    dict(
-                        [
+                    dict([
+                        (
                             (j, np.shape(kwargs[j]))
                             if isinstance(kwargs[j], np.ndarray)
                             else (j, kwargs[j])
-                            for j in list(kwargs.keys())
-                        ]
-                    ),
+                        )
+                        for j in list(kwargs.keys())
+                    ]),
                     "\narguments = ",
                     plotargs,
                     "\nkwargs =",
@@ -1617,13 +1624,11 @@ def plot(*args, **kwargs):
                 "\nsizes of arguments:",
                 [np.shape(j) for j in plotargs],
                 "\nsizes of np.ndarray kwargs:",
-                dict(
-                    [
-                        (j, np.shape(kwargs[j]))
-                        for j in list(kwargs.keys())
-                        if isinstance(kwargs[j], np.ndarray)
-                    ]
-                ),
+                dict([
+                    (j, np.shape(kwargs[j]))
+                    for j in list(kwargs.keys())
+                    if isinstance(kwargs[j], np.ndarray)
+                ]),
             )
         )
     # plt.grid(True)
@@ -1664,12 +1669,10 @@ def concat(datalist, dimname, chop=False):
     other_info_out = datalist[0].other_info
     if dimname in datalist[0].dimlabels:
         dim_idx = datalist[0].axn(dimname)
-        assert all(
-            [
-                datalist[j].dimlabels == datalist[0].dimlabels
-                for j in range(len(datalist))
-            ]
-        ), (
+        assert all([
+            datalist[j].dimlabels == datalist[0].dimlabels
+            for j in range(len(datalist))
+        ]), (
             "the dimlabels for all your datasets do no match and/or are not"
             " ordered the same way"
         )
@@ -4233,13 +4236,11 @@ class nddata(object):
         temp = list(self.data.shape)
         temp[thisaxis] = 1
         func_sig = inspect.signature(func)
-        numnonoptargs = len(
-            [
-                v.default
-                for v in func_sig.parameters.values()
-                if v.default == inspect.Parameter.empty
-            ]
-        )
+        numnonoptargs = len([
+            v.default
+            for v in func_sig.parameters.values()
+            if v.default == inspect.Parameter.empty
+        ])
         kwargnames = [
             k
             for k, v in func_sig.parameters.items()
@@ -5796,13 +5797,13 @@ class nddata(object):
                     for j in range(axes_with_labels_size[this_index]):
                         this_slice = list(full_slice)
                         this_slice[this_index] = j  # set this element
-                        multidim_axis_label[thisdim][
-                            tuple(this_slice)
-                        ] = axis_for_thisdim[j]
+                        multidim_axis_label[thisdim][tuple(this_slice)] = (
+                            axis_for_thisdim[j]
+                        )
                         if axes_with_labels_haserror[this_index]:
-                            multidim_axis_error[thisdim][
-                                tuple(this_slice)
-                            ] = axis_error_for_thisdim[j]
+                            multidim_axis_error[thisdim][tuple(this_slice)] = (
+                                axis_error_for_thisdim[j]
+                            )
                 logger.debug(
                     strm(
                         "shape of multidim_axis_label is now",
@@ -6093,13 +6094,11 @@ class nddata(object):
             #     (i.e.  chunking off a new dimension based on) -- because I am
             #     independently manipulating the data, I don't use
             #     self.getaxis()
-            x_strip_current_field = self.axis_coords[axis_number][
-                [
-                    j
-                    for j in self.axis_coords[axis_number].dtype.names
-                    if j != which_field
-                ]
-            ]
+            x_strip_current_field = self.axis_coords[axis_number][[
+                j
+                for j in self.axis_coords[axis_number].dtype.names
+                if j != which_field
+            ]]
             # }}}
             # {{{ reshape the axis coordinate so that it becomes a 2D np.array
             #     with the new dimension chunked off
@@ -6354,12 +6353,10 @@ class nddata(object):
                 j for j in shared_indices if j not in unshared_indices
             ]
             if len(val.dimlabels) != len(shared_indices) or (
-                not all(
-                    [
-                        val.dimlabels[j] == shared_indices[j]
-                        for j in range(0, len(shared_indices))
-                    ]
-                )
+                not all([
+                    val.dimlabels[j] == shared_indices[j]
+                    for j in range(0, len(shared_indices))
+                ])
             ):
                 val.reorder(shared_indices)
             # }}}
@@ -6503,7 +6500,10 @@ class nddata(object):
         else:
             # from ∂φ/∂A=-i n/2A
             # when ρe(iφ)=xAⁿ
-            dangle_dA = 1 / (2 * self.data)
+            dangle_dA = np.empty_like(self.data)
+            mask = self.data != 0
+            dangle_dA[mask] = 1 / (2 * self.data[mask])
+            dangle_dA[~mask] = np.nan
             A_sigma = self.get_error()
             A_sigma = 1 if A_sigma is None else A_sigma
             retval.set_error(abs(dangle_dA * A_sigma))
@@ -6558,7 +6558,9 @@ class nddata(object):
             nddata metadata.
         """
         if data:
-            return deepcopy(self)
+            retval = deepcopy(self)
+            retval.other_info = deepcopy(self.other_info)
+            return retval
         else:
             retval = nddata(0)  # np.empty
             # {{{ data info
@@ -7494,13 +7496,11 @@ class nddata(object):
                     for j, axisname in enumerate(
                         self.dimlabels
                     ):  # make a table for each different dimension
-                        myaxisattrsforthisdim = dict(
-                            [
-                                (x, self.__getattribute__(x)[j])
-                                for x in list(myaxisattrs)
-                                if len(self.__getattribute__(x)) > 0
-                            ]
-                        )  # collect the attributes for this dimension and
+                        myaxisattrsforthisdim = dict([
+                            (x, self.__getattribute__(x)[j])
+                            for x in list(myaxisattrs)
+                            if len(self.__getattribute__(x)) > 0
+                        ])  # collect the attributes for this dimension and
                         #    their values
                         logger.debug(
                             strm(
@@ -7981,14 +7981,14 @@ class fitdata(nddata):
         if isinstance(set, dict):
             set_to = list(set.values())
             set = list(set.keys())
-        solution_list = dict(
-            [
+        solution_list = dict([
+            (
                 (self.symbolic_dict[k], set_to[j])
                 if k in set
                 else (self.symbolic_dict[k], self.output(k))
-                for j, k in enumerate(self.symbol_list)
-            ]
-        )  # load into the solution list
+            )
+            for j, k in enumerate(self.symbol_list)
+        ])  # load into the solution list
         number_of_i = len(xvals)
         parameters = self._active_symbols()
         mydiff_sym = [[]] * len(self.symbolic_vars)
@@ -8009,12 +8009,10 @@ class fitdata(nddata):
                     )
                 )
             try:
-                fprime[j, :] = np.array(
-                    [
-                        complex(mydiff.subs(x, xvals[k]))
-                        for k in range(0, len(xvals))
-                    ]
-                )
+                fprime[j, :] = np.array([
+                    complex(mydiff.subs(x, xvals[k]))
+                    for k in range(0, len(xvals))
+                ])
             except ValueError:
                 raise ValueError(
                     strm(
@@ -8229,9 +8227,9 @@ class fitdata(nddata):
             map(self.symbol_list.index, this_set)
         )  # calculate indices once for efficiency
         active_mask = np.ones(len(self.symbol_list), dtype=bool)
-        active_mask[
-            set_indices
-        ] = False  # generate the mask of indices that are actively fit
+        active_mask[set_indices] = (
+            False  # generate the mask of indices that are actively fit
+        )
         return set_indices, set_to, active_mask
 
     def remove_inactive_p(self, p):
@@ -8244,9 +8242,7 @@ class fitdata(nddata):
             p = np.zeros(len(self.symbol_list))
             p[self.active_mask] = temp
             # }}}
-            p[
-                self.set_indices
-            ] = (
+            p[self.set_indices] = (
                 self.set_to
             )  # then just set the forced values to their given values
         return p
@@ -8360,9 +8356,7 @@ class fitdata(nddata):
             p = np.zeros(len(self.symbol_list))
             p[self.active_mask] = temp
             # }}}
-            p[
-                self.set_indices
-            ] = (
+            p[self.set_indices] = (
                 self.set_to
             )  # then just set the forced values to their given values
         # this should also be generic
@@ -8727,13 +8721,13 @@ class fitdata(nddata):
                         infodict_keys = list(infodict.keys())
                         infodict_vals = list(infodict.values())
                         if "nfev" in infodict_keys:
-                            infodict_keys[
-                                infodict_keys.index("nfev")
-                            ] = "nfev, number of function calls"
+                            infodict_keys[infodict_keys.index("nfev")] = (
+                                "nfev, number of function calls"
+                            )
                         if "fvec" in infodict_keys:
-                            infodict_keys[
-                                infodict_keys.index("fvec")
-                            ] = "fvec, the function evaluated at the output"
+                            infodict_keys[infodict_keys.index("fvec")] = (
+                                "fvec, the function evaluated at the output"
+                            )
                         if "fjac" in infodict_keys:
                             infodict_keys[infodict_keys.index("fjac")] = (
                                 "fjac, A permutation of the R matrix of a QR"
@@ -8752,9 +8746,9 @@ class fitdata(nddata):
                                 " of the identity matrix"
                             )
                         if "qtf" in infodict_keys:
-                            infodict_keys[
-                                infodict_keys.index("qtf")
-                            ] = "qtf, the vector (transpose(q)*fvec)"
+                            infodict_keys[infodict_keys.index("qtf")] = (
+                                "qtf, the vector (transpose(q)*fvec)"
+                            )
                         for k, v in zip(infodict_keys, infodict_vals):
                             print(r"{\color{red}{\bf %s:}%s}" % (k, v), "\n\n")
                         # self.fit_coeff = None
