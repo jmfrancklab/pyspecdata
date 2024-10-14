@@ -349,14 +349,6 @@ class lmfitdata(nddata):
         #
         # But you  should read through and see what the previous fit method is doing
         # and then copy over what you can
-        logging.debug(
-            strm(
-                "I am attempting to actually run the fit",
-                minimize.__module__,
-                "here are the guess parameters",
-                self.guess_parameters,
-            )
-        )
         x = self.getaxis(self.fit_axis)
         sigma = self.get_error()
         if sigma is not None:

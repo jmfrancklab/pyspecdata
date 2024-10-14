@@ -8,6 +8,14 @@ Use a transform to allow us to fit a peak in the
 frequency domain while leaving the definition of the
 peak in the time domain.
 
+Why is this useful?
+Remember that for noiseless spectra, the norm
+of the residual might not be the same, but
+when we consider noisy spectra, it's better
+to use the domain where the peak rises
+clearly above the noise.
+Also, in the "transform" we can do other
+things, such as masking, etc.
 """
 import matplotlib.pyplot as plt
 from numpy import pi
