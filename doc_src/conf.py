@@ -195,6 +195,7 @@ html_theme_options = {
     "logo": "pyspec_path_equaltip.png",
     #'logo_name': None, # don't show the name with the logo
 }
+html_favicon = "_static/favicon.ico"
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
