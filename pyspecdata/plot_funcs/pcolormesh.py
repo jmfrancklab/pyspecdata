@@ -1,4 +1,5 @@
 import matplotlib.pylab as plt
+import matplotlib as mpl
 import numpy as np
 
 
@@ -15,7 +16,7 @@ def pcolormesh(
     human_units=True,
     force_balanced_cmap=False,
     handle_axis_sharing=True,
-    mappable_list=[],
+    mappable_list=None,
 ):
     """generate a pcolormesh and label it with the axis coordinate available from the nddata
 
@@ -54,6 +55,8 @@ def pcolormesh(
         under a uniform color scale
     """
     assert len(self.dimlabels) == 2, "currently, this only supports 2D data"
+    if mappable_list is None:
+        mappable_list = list([])
     if human_units:
         forplot = self.C.human_units()
     else:
@@ -81,8 +84,8 @@ def pcolormesh(
     Z = forplot.data
     for j,(thisax, thisfun, thislabel) in enumerate(ax_list):
         Zdata = thisfun(Z)
+        # motivated by this https://chatgpt.com/share/670e7415-414c-800b-88dd-b9976a17b162
         mappable = thisax.pcolormesh(X, Y, Zdata, shading=shading)
-        print("mappable id",id(mappable))
         if handle_axis_sharing and thisax != ax_list[0][0]:
             thisax.sharex(ax_list[0][0])
             thisax.sharey(ax_list[0][0])
@@ -117,6 +120,11 @@ def pcolormesh(
         # delete when read: I modified following to include axis
         # I changed the name of modify_colorbar_boundaries
         for thismappable in mappable_list:
-            thismappable.set_clim(overall_min, overall_max)
+            norm = mpl.colors.Normalize(vmin=overall_min,vmax=overall_max)
+            thismappable.norm = norm
+            #print("created norm",id(norm))
+            #thismappable.set_clim(vmin=overall_min, vmax=overall_max)
+            if thismappable.colorbar:
+                thismappable.colorbar.update_normal(thismappable)
     # }}}
     return mappable_list

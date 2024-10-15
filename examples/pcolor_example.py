@@ -14,12 +14,10 @@ Basic demonstration of pcolor, which can deal with unevenly spaced data
 
 import pyspecdata as psp
 import matplotlib.pylab as plt
+import numpy as np
 from numpy import r_
 
-# TODO ☐: currently this runs fine up to checkpoint 3.  Once I go to
-#         checkpoint 4, it adjusts the scaling not only of the plots that
-#         I'm interested in, but of all previous ones, as well.
-run_to_checkpoint = 3 # allows us to run to different checkpoints.  If
+run_to_checkpoint = 5 # allows us to run to different checkpoints.  If
 #                       everything is working correctly, this should go up to 5
 
 x = psp.nddata(r_[-5, -2, -1, -0.5, 0, 0.5, 5], "x")
@@ -29,7 +27,12 @@ z2 = 10 * z1
 # {{{ plot the smaller data
 plt.figure()
 plt.suptitle("colorscales independent -- small data")
-z1.C.pcolor(scale_independently=True)
+mpb = z1.pcolor(scale_independently=True)
+# TODO ☐: I can see the problem, but don't know how to fix it.
+#         the norm (Normalization object, which appears to control the
+#         color scale) is repeated here for the subsequent figures.
+print("first figure, norm objects:",[id(j.norm) for j in mpb])
+#print("first figure, quad objects:",[id(j) for j in mpb])
 # }}}
 if run_to_checkpoint > 1:
     # {{{ plot the larger data
@@ -39,7 +42,9 @@ if run_to_checkpoint > 1:
     #         incorrectly labeled (b/c z2 is larger than z1)
     plt.figure()
     plt.suptitle("colorscales independent -- large data")
-    z2.pcolor(scale_independently=True)
+    mpb = z2.pcolor(scale_independently=True, mappable_list=[])
+    print("second figure:",[id(j.norm) for j in mpb])
+    #print("second figure quad objects:",[id(j) for j in mpb])
     # }}}
 if run_to_checkpoint > 2:
     def new_figure_and_grid():
@@ -54,14 +59,17 @@ if run_to_checkpoint > 2:
     ax_list = new_figure_and_grid()
     plt.suptitle("colorscales independent")
     z1.pcolor(scale_independently=True, ax1=ax_list[0], ax2=ax_list[1])
-    z2.pcolor(scale_independently=True, ax1=ax_list[2], ax2=ax_list[3])
+    mpb = z2.pcolor(scale_independently=True, ax1=ax_list[2], ax2=ax_list[3])
+    print("third figure:",[id(j.norm) for j in mpb])
     # }}}
 if run_to_checkpoint > 3:
     # {{{ small first, then large
     ax_list = new_figure_and_grid()
     plt.suptitle("colorscales dependent -- large second")
     mpb = z1.C.pcolor(ax1=ax_list[0], ax2=ax_list[1])
-    z2.C.pcolor(mappable_list=mpb, ax1=ax_list[2], ax2=ax_list[3])
+    mpb = z2.C.pcolor(mappable_list=mpb, ax1=ax_list[2], ax2=ax_list[3])
+    print("penultimate figure:",[id(j.norm) for j in mpb])
+    #print("penultimate figure quad objects:",[id(j) for j in mpb])
     # }}}
 if run_to_checkpoint > 4:
     # {{{ large in first row, then small in second row
@@ -69,5 +77,7 @@ if run_to_checkpoint > 4:
     plt.suptitle("colorscales dependent -- large first")
     mpb = z2.C.pcolor(ax1=ax_list[0], ax2=ax_list[1])
     z1.C.pcolor(mappable_list=mpb, ax1=ax_list[2], ax2=ax_list[3])
+    print("last figure:",[id(j.norm) for j in mpb])
+    #print("last figure quad objects:",[id(j) for j in mpb])
     # }}}
 plt.show()
