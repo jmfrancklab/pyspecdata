@@ -24,13 +24,18 @@ y = psp.nddata(3 * r_[-5, -2, -1, -0.5, 0, 0.5, 5], "y")
 z1 = plt.exp(-((y - 2) ** 2) - (x - 0) ** 2 / 2) + 1j * x
 z2 = 10 * z1
 # {{{ plot the smaller data
-# TODO ☐: note that this is currently NOT scaling independently.  two colorbars are generated that are both the same
+# TODO ☐: note that this is currently NOT scaling independently.  two
+#         colorbars are generated that are both the same.  However, when I run this
+#         script on the master branch, this step runs fine!
 plt.figure()
 z1.C.pcolor(scale_independently=True)
 # }}}
 if run_to_checkpoint > 1:
     # {{{ plot the larger data
-    # TODO ☐: for reasons that are not clear, the previous call messes up this call
+    # TODO ☐: for reasons that are not clear, the previous call messes
+    #         up this call.  On the current version of the master
+    #         branch, the colors look OK, but the color bars are
+    #         incorrectly labeled (b/c z2 is larger than z1)
     plt.figure()
     z2.pcolor(scale_independently=True)
     # }}}
