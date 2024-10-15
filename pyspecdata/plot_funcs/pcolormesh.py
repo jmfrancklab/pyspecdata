@@ -56,6 +56,8 @@ def pcolormesh(
     """
     assert len(self.dimlabels) == 2, "currently, this only supports 2D data"
     if mappable_list is None:
+        # settings the default value to just [] above does NOT create a
+        # new object.  This does
         mappable_list = list([])
     if human_units:
         forplot = self.C.human_units()
@@ -117,14 +119,7 @@ def pcolormesh(
                 overall_min = -overall_max
             else:
                 overall_max = -overall_min
-        # delete when read: I modified following to include axis
-        # I changed the name of modify_colorbar_boundaries
         for thismappable in mappable_list:
-            norm = mpl.colors.Normalize(vmin=overall_min,vmax=overall_max)
-            thismappable.norm = norm
-            #print("created norm",id(norm))
-            #thismappable.set_clim(vmin=overall_min, vmax=overall_max)
-            if thismappable.colorbar:
-                thismappable.colorbar.update_normal(thismappable)
+            thismappable.set_clim(vmin=overall_min, vmax=overall_max)
     # }}}
     return mappable_list

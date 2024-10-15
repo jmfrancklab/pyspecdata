@@ -28,11 +28,6 @@ z2 = 10 * z1
 plt.figure()
 plt.suptitle("colorscales independent -- small data")
 mpb = z1.pcolor(scale_independently=True)
-# TODO ☐: I can see the problem, but don't know how to fix it.
-#         the norm (Normalization object, which appears to control the
-#         color scale) is repeated here for the subsequent figures.
-print("first figure, norm objects:",[id(j.norm) for j in mpb])
-#print("first figure, quad objects:",[id(j) for j in mpb])
 # }}}
 if run_to_checkpoint > 1:
     # {{{ plot the larger data
@@ -43,8 +38,6 @@ if run_to_checkpoint > 1:
     plt.figure()
     plt.suptitle("colorscales independent -- large data")
     mpb = z2.pcolor(scale_independently=True, mappable_list=[])
-    print("second figure:",[id(j.norm) for j in mpb])
-    #print("second figure quad objects:",[id(j) for j in mpb])
     # }}}
 if run_to_checkpoint > 2:
     def new_figure_and_grid():
@@ -60,7 +53,6 @@ if run_to_checkpoint > 2:
     plt.suptitle("colorscales independent")
     z1.pcolor(scale_independently=True, ax1=ax_list[0], ax2=ax_list[1])
     mpb = z2.pcolor(scale_independently=True, ax1=ax_list[2], ax2=ax_list[3])
-    print("third figure:",[id(j.norm) for j in mpb])
     # }}}
 if run_to_checkpoint > 3:
     # {{{ small first, then large
@@ -68,8 +60,6 @@ if run_to_checkpoint > 3:
     plt.suptitle("colorscales dependent -- large second")
     mpb = z1.C.pcolor(ax1=ax_list[0], ax2=ax_list[1])
     mpb = z2.C.pcolor(mappable_list=mpb, ax1=ax_list[2], ax2=ax_list[3])
-    print("penultimate figure:",[id(j.norm) for j in mpb])
-    #print("penultimate figure quad objects:",[id(j) for j in mpb])
     # }}}
 if run_to_checkpoint > 4:
     # {{{ large in first row, then small in second row
@@ -77,7 +67,5 @@ if run_to_checkpoint > 4:
     plt.suptitle("colorscales dependent -- large first")
     mpb = z2.C.pcolor(ax1=ax_list[0], ax2=ax_list[1])
     z1.C.pcolor(mappable_list=mpb, ax1=ax_list[2], ax2=ax_list[3])
-    print("last figure:",[id(j.norm) for j in mpb])
-    #print("last figure quad objects:",[id(j) for j in mpb])
     # }}}
 plt.show()
