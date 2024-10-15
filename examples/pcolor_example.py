@@ -16,18 +16,19 @@ import pyspecdata as psp
 import matplotlib.pylab as plt
 from numpy import r_
 
-run_to_checkpoint = 1 # allows us to run to different checkpoints.  If
-#                       everything is working correctly, this should go up to 4
+# TODO ☐: currently this runs fine up to checkpoint 3.  Once I go to
+#         checkpoint 4, it adjusts the scaling not only of the plots that
+#         I'm interested in, but of all previous ones, as well.
+run_to_checkpoint = 3 # allows us to run to different checkpoints.  If
+#                       everything is working correctly, this should go up to 5
 
 x = psp.nddata(r_[-5, -2, -1, -0.5, 0, 0.5, 5], "x")
 y = psp.nddata(3 * r_[-5, -2, -1, -0.5, 0, 0.5, 5], "y")
 z1 = plt.exp(-((y - 2) ** 2) - (x - 0) ** 2 / 2) + 1j * x
 z2 = 10 * z1
 # {{{ plot the smaller data
-# TODO ☐: note that this is currently NOT scaling independently.  two
-#         colorbars are generated that are both the same.  However, when I run this
-#         script on the master branch, this step runs fine!
 plt.figure()
+plt.suptitle("colorscales independent -- small data")
 z1.C.pcolor(scale_independently=True)
 # }}}
 if run_to_checkpoint > 1:
@@ -37,6 +38,7 @@ if run_to_checkpoint > 1:
     #         branch, the colors look OK, but the color bars are
     #         incorrectly labeled (b/c z2 is larger than z1)
     plt.figure()
+    plt.suptitle("colorscales independent -- large data")
     z2.pcolor(scale_independently=True)
     # }}}
 if run_to_checkpoint > 2:
@@ -57,14 +59,14 @@ if run_to_checkpoint > 2:
 if run_to_checkpoint > 3:
     # {{{ small first, then large
     ax_list = new_figure_and_grid()
-    plt.suptitle("colorscales dependent")
+    plt.suptitle("colorscales dependent -- large second")
     mpb = z1.C.pcolor(ax1=ax_list[0], ax2=ax_list[1])
     z2.C.pcolor(mappable_list=mpb, ax1=ax_list[2], ax2=ax_list[3])
     # }}}
 if run_to_checkpoint > 4:
     # {{{ large in first row, then small in second row
     ax_list = new_figure_and_grid()
-    plt.suptitle("colorscales dependent")
+    plt.suptitle("colorscales dependent -- large first")
     mpb = z2.C.pcolor(ax1=ax_list[0], ax2=ax_list[1])
     z1.C.pcolor(mappable_list=mpb, ax1=ax_list[2], ax2=ax_list[3])
     # }}}

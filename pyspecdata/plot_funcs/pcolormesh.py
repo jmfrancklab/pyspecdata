@@ -42,9 +42,10 @@ def pcolormesh(
         you need then to tell it not to handle the axis sharing, and to it yourself
         outside this routine.
     mappable_list : list, default []
-        empty list which fills with field values from color axis used for
-        initial subplot, used to scale multiple plots along the same color
-        axis. Used to make all 3x2 plots under a uniform color scale
+        used to scale multiple plots along the same color
+        axis. Used to make all 3x2 plots under a uniform color scale.
+
+        List of QuadMesh objects returned by this function.
 
     Returns
     =======
@@ -78,14 +79,10 @@ def pcolormesh(
         forplot.getaxis(forplot.dimlabels[0]),
     )
     Z = forplot.data
-    # {{{ store these so that I can set the color scale for the plots together,
-    #     at the end
-    vmin_list = []
-    vmax_list = []
-    # }}}
-    for thisax, thisfun, thislabel in ax_list:
+    for j,(thisax, thisfun, thislabel) in enumerate(ax_list):
         Zdata = thisfun(Z)
         mappable = thisax.pcolormesh(X, Y, Zdata, shading=shading)
+        print("mappable id",id(mappable))
         if handle_axis_sharing and thisax != ax_list[0][0]:
             thisax.sharex(ax_list[0][0])
             thisax.sharey(ax_list[0][0])
@@ -93,11 +90,23 @@ def pcolormesh(
         thisax.set_ylabel(forplot.unitify_axis(forplot.dimlabels[0]))
         thisax.set_xlabel(forplot.unitify_axis(forplot.dimlabels[1]))
         thisax.set_title(f"({thislabel})")
-    for this_mappable in mappable_list:
-        thismin, thismax = this_mappable.get_clim()
-        vmin_list.append(thismin)
-        vmax_list.append(thismax)
+        # handle the creation of colorbars here, since adjusting the mappable
+        # clim later changes the colorbars just fine
+        if j == 0:
+            if scale_independently:
+                plt.colorbar(mappable=mappable, ax=thisax)
+            else:
+                pass # b/c no use for extra colorbar if locked together
+        elif j == 1:
+            plt.colorbar(mappable=mappable, ax=thisax)
+    # {{{ overall scaling
     if not scale_independently:
+        vmin_list = []
+        vmax_list = []
+        for this_mappable in mappable_list:
+            thismin, thismax = this_mappable.get_clim()
+            vmin_list.append(thismin)
+            vmax_list.append(thismax)
         overall_min = np.min(vmin_list)
         overall_max = np.max(vmax_list)
         if force_balanced_cmap:
@@ -105,74 +114,9 @@ def pcolormesh(
                 overall_min = -overall_max
             else:
                 overall_max = -overall_min
-        # TODO ☐: I don't understand what these are for
-        vmin = overall_min
-        vmax = overall_max
-    if scale_independently:
-        vmin, vmax = mappable.get_clim()
-        print("independently scaled vmin is ", vmin, "and vmax is ", vmax)
-    # delete when read: I modified following to include axis
-    # I changed the name of modify_colorbar_boundaries
-    def adjust_colorbar(mappable, vmin, vmax, ax):
-        mappable.norm.vmin = vmin
-        mappable.norm.vmax = vmax
-        mappable.set_norm(mappable.norm)
-        # (delete when read) note that I get the following from chatGPT
-        # -- we need to get the colorbar corresponding to the mappable of
-        # interest
-        cbar = mappable.colorbar
-        if cbar is None:
-            # delete when read -- I tested as follows:
-            # 
-            # In [53]: m = pcolormesh(r_[1,2,3],r_[1,2,3],r_[0:9].reshape(3,3))
-            # 
-            # In [54]: m.colorbar
-            # 
-            # In [55]: print(m.colorbar)
-            # None
-            # 
-            # In [56]: colorbar()
-            # Out[56]: <matplotlib.colorbar.Colorbar at 0x7f96751108d0>
-            # 
-            # In [57]: print(m.colorbar)
-            # <matplotlib.colorbar.Colorbar object at 0x7f96751108d0>
-            cbar = plt.colorbar(mappable=mappable, ax=ax)
-        cbar.update_normal(mappable)
-    for j, (thisax, thisfun, thislabel) in enumerate(ax_list):
-        if not scale_independently:
-            # if we are not scaling our plots independently,
-            # then we want to set the color limits for each mappable to
-            # the *overall* max z value and the *overall* min z value
-            # (where z value means the value of the plot at x and y
-            # (regardless of what our axis names are) that determines the
-            # color
-            mappable_list[j].set_clim(overall_min, overall_max)
-            # TODO ☐: spinning up new color bars is exactly how we git
-            #         into this trouble  -- I'm not modifying, but the
-            #         following is likely going in the wrong direction
-            #         so, you want to delete the following
-            cbar = plt.colorbar(mappable=mappable_list[j], ax=thisax)
-        elif scale_independently or j > 0:
-            # if we are scaling independently, or if we are on the right
-            # plot, we want to show a colorbar
-            # TODO ☐: not changing, but I don't see how renaming
-            #         overall_min and overall_max to vmin and vmax helps
-            #         anything
-            mappable_list[j].set_clim(vmin, vmax)
-            # TODO ☐: I would guess that the solution is in the
-            #         following.  If this is our first time touching this
-            #         element of the mappable list, then you want to call
-            #         plt.colorbar.  But, if the colorbar already exists,
-            #         we want to adjust it.  I achieve this by modifying
-            #         your existing function to grab the colorbar.  I
-            #         think this should do what we want to please read +
-            #         understand what I'm doing here.
-            adjust_colorbar(mappable=mappable_list[j], vmin=vmin, vmax=vmax, ax=thisax)
-        else: 
-            # TODO ☐: this section is when you are not scaling
-            #         independently, and you are in the left plot just
-            #         for the sake of space/style, we don't want to
-            #         generate a plot there, so this section should just not exist
-            cbar = plt.colorbar(mappable)
-            print("this section is being called")
+        # delete when read: I modified following to include axis
+        # I changed the name of modify_colorbar_boundaries
+        for thismappable in mappable_list:
+            thismappable.set_clim(overall_min, overall_max)
+    # }}}
     return mappable_list
