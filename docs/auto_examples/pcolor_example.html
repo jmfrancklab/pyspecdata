@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Unevenly spaced data &#8212; pySpecData 0.9.5.3.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=832af5b0" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css?v=7f9a90b1" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=2b30a6e6" />
+    <script src="../_static/documentation_options.js?v=5b73e601"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Bruker cw ESR Data" href="esr_example.html" />
+    <link rel="prev" title="Simple Cary UV-Vis loading" href="Cary_simple.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-pcolor-example-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="unevenly-spaced-data">
+<span id="sphx-glr-auto-examples-pcolor-example-py"></span><h1>Unevenly spaced data<a class="headerlink" href="#unevenly-spaced-data" title="Link to this heading">¶</a></h1>
+<p>Basic demonstration of pcolor, which can deal with unevenly spaced data</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Right now, we just do this with real/imaginary,
+but in principal, it should be easily
+possible to extend this to use domain
+coloring (and to use it in the main DCCT
+method)</p>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../_images/sphx_glr_pcolor_example_001.png" srcset="../_images/sphx_glr_pcolor_example_001.png" alt="colorscales dependent, (real), (imag)" class = "sphx-glr-multi-img"/></li>
+<li><img src="../_images/sphx_glr_pcolor_example_002.png" srcset="../_images/sphx_glr_pcolor_example_002.png" alt="colorscales independent, (real), (imag)" class = "sphx-glr-multi-img"/></li>
+</ul>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyspecdata</span> <span class="k">as</span> <span class="nn">psp</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">r_</span>
+
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">x</span></a> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">psp</span><span class="o">.</span><span class="n">nddata</span></a><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="s2">&quot;x&quot;</span><span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">y</span></a> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">psp</span><span class="o">.</span><span class="n">nddata</span></a><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">r_</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="s2">&quot;y&quot;</span><span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">z</span></a> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">y</span></a> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">x</span></a> <span class="o">-</span> <span class="mi">0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">x</span></a>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;colorscales dependent&quot;</span><span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">z</span></a><span class="o">.</span><span class="n">dimlabels</span>
+<a href="../pyspecdata.html#pyspecdata.nddata.pcolor" title="pyspecdata.nddata.pcolor" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">z</span><span class="o">.</span><span class="n">pcolor</span></a><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;colorscales independent&quot;</span><span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata.pcolor" title="pyspecdata.nddata.pcolor" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">z</span><span class="o">.</span><span class="n">pcolor</span></a><span class="p">(</span><span class="n">scale_independently</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.431 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-pcolor-example-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/6daa94457c6963dec7c534ea887a922b/pcolor_example.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">pcolor_example.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/9fba4f5c9f798ba2d94e14a25397cbc0/pcolor_example.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">pcolor_example.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/pyspec_path_equaltip.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the lmfitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">PySpecData Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Cary_simple.html">Simple Cary UV-Vis loading</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Unevenly spaced data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="esr_example.html">Bruker cw ESR Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polyfit.html">Polynomial Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppm_2D.html">PPM in 2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="calculate_covariance.html">Calculation of the Covariance Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convolution.html">Simple Convolution Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="image_plot.html">Plotting Routines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppm_example.html">ppm Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ellmans.html">Manipulation of UV-Vis data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_with_bounds.html">Fit Using Bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_complex.html">Fit complex data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DCCT_function.html">Using the DCCT function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_example.html">Basic Slicing/Filtering Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_complex_with_transform.html">Fit complex data with transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BRD_test.html">1D BRD regularization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BSA_calibration.html">BSA UV-Vis Calibration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_fake_data.html">Fitting Data (Nonlinear + Symbolic)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QESR.html">Quantitative ESR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nddata_NNLS_Tikhonov_190104.html">2D ILT test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#individual-functions">Individual Functions</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">PySpecData Examples</a><ul>
+      <li>Previous: <a href="Cary_simple.html" title="previous chapter">Simple Cary UV-Vis loading</a></li>
+      <li>Next: <a href="esr_example.html" title="next chapter">Bruker cw ESR Data</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2016, John M. Franck.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/auto_examples/pcolor_example.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

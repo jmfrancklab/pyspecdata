@@ -7,6 +7,7 @@ Eventually, we want to use parts of this in the base library, so we don't have
 to retype them every time.
 
 """
+
 import matplotlib.pyplot as plt
 from numpy import exp, linspace, pi, random, sign, sin
 import sympy as sp
@@ -21,7 +22,9 @@ fl = figlist_var()
 A, shift, period, decay, x = sp.symbols("A shift period decay x", real=True)
 # create an empty dataset that we will drop the fake data into
 thisfit = lmfitdata(nddata(r_[0:250:1500j], "x"))
-thisfit.functional_form = A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2))
+thisfit.functional_form = (
+    A * sp.sin(shift + x / period) * sp.exp(-((x * decay) ** 2))
+)
 logger.info(strm("Functional Form:", thisfit.functional_form))
 # {{{ create the "true" parameters for the fake data by pretending like
 #     the true values are a guess, and then outputting the guess data

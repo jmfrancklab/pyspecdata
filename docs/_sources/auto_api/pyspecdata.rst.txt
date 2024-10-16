@@ -47,6 +47,14 @@ pyspecdata.datadir module
    :undoc-members:
    :show-inheritance:
 
+pyspecdata.dict\_utils module
+-----------------------------
+
+.. automodule:: pyspecdata.dict_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pyspecdata.figlist module
 -------------------------
 
@@ -87,6 +95,14 @@ pyspecdata.generate\_fake\_data module
    :undoc-members:
    :show-inheritance:
 
+pyspecdata.hdf\_utils module
+----------------------------
+
+.. automodule:: pyspecdata.hdf_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pyspecdata.ipy module
 ---------------------
 
@@ -107,6 +123,14 @@ pyspecdata.lmfitdata module
 ---------------------------
 
 .. automodule:: pyspecdata.lmfitdata
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pyspecdata.mpl\_utils module
+----------------------------
+
+.. automodule:: pyspecdata.mpl_utils
    :members:
    :undoc-members:
    :show-inheritance:

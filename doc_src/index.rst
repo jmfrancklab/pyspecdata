@@ -3,22 +3,23 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to pySpecData's documentation!
-======================================
+pySpecData: compact spectral data processing!
+=============================================
 
 pySpecData allows you to deal with multi-dimensional spectroscopy data in an object-oriented fashion.
-
-Please note this package is heavily utilized by three other packages that our lab manages on github:
-
-*   `ODNP processing scripts <https://github.com/jmfrancklab/proc_scripts/>`_.
-*   `Classes for communicating with instruments <https://github.com/jmfrancklab/inst_notebooks/>`_.
-*   `Convenient SpinCore NMR Extension <https://github.com/jmfrancklab/spincore_apps/>`_.
-
-
 :ref:`See pySpecData examples here <sphx_glr_auto_examples>`,
 and for a simple example applied to 1D data, see
 :ref:`here <sphx_glr_auto_examples_basic_example.py>`.
 
+Please note this package is heavily utilized by two other packages that our lab manages on github:
+
+*   `Classes for communicating with instruments <https://github.com/jmfrancklab/FLInst/>`_.
+
+    *   Controls USB instrumentation like oscilloscopes and power meters connected via a USB/GPIB converter.
+    *   Includes our Custom SpinCore NMR extension
+    *   (Note that the previous two used be separate repositories -- they have been combined to improve maintenance).
+
+*   `ODNP processing scripts <https://github.com/jmfrancklab/proc_scripts/>`_.
 
 The Basics
 ==========
@@ -29,6 +30,7 @@ PySpecData *automatically* handles the following issues, without any additional 
 *   relabeling axes after a Fourier transformation
 *   propagation of errors
 *   adding units to plots
+*   calculating analytical Jacobians used during least-squares fitting  
 
 To enable this, you work with a pySpecData `nddata` object
 (which includes information about dimension names, axis values, errors, and the units)
@@ -60,10 +62,9 @@ This is because we assume that we are progressively optimizing/filtering
 our spectral data with each new line of code.
 This allows us to quickly work through many operations (like the ft here)
 without keeping many copies of a large dataset and with less typing for each operation.
-(If you every truly want to create a copy a dataset, just attach a `.C`)
+(If you ever truly want to create a copy a dataset, just attach a `.C`)
 
-.. todo::
-    describe updates allowing aliasing (nu2 vs. t2, etc.)
+..  describe updates allowing aliasing (nu2 vs. t2, etc.)
 
 Note that
 
@@ -107,10 +108,10 @@ These and further details are covered in the various sections of the documentati
     :maxdepth: 2
 
     
-    modules.rst
-    notebook.rst
     nddata.rst
     fitdata.rst
+    modules.rst
+    notebook.rst
     figlist.rst
     units.rst
     examples.rst 

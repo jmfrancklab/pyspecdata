@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>&lt;no title&gt; &#8212; pySpecData 0.9.5.3.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=832af5b0" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css?v=7f9a90b1" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=2b30a6e6" />
+    <script src="../../_static/documentation_options.js?v=5b73e601"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Unitary FT" href="unitary_ft.html" />
+    <link rel="prev" title="Convolution" href="convolve.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-indiv-funcs-test-colormatch-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<p class="sphx-glr-example-title" id="sphx-glr-auto-examples-indiv-funcs-test-colormatch-py">show an easy method for matching colors using pyspecdata</p>
+<img src="../../_images/sphx_glr_test_colormatch_001.png" srcset="../../_images/sphx_glr_test_colormatch_001.png" alt="test colormatch" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyspecdata</span> <span class="k">as</span> <span class="nn">psd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">r_</span>
+
+<span class="c1"># when we set the plot color, it overrides any defaults</span>
+<a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">a</span></a> <span class="o">=</span> <a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">psd</span><span class="o">.</span><span class="n">nddata</span></a><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">9</span><span class="p">],</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="c1"># after we do this, we no longer need to specify the color argument to plot --</span>
+<span class="c1"># it&#39;s a property of the data.  It chooses the next color in the default matplotlib cycle</span>
+<a href="../../auto_api/pyspecdata.html#pyspecdata.nddata.set_plot_color_next" title="pyspecdata.nddata.set_plot_color_next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">a</span><span class="o">.</span><span class="n">set_plot_color_next</span></a><span class="p">()</span>
+<span class="c1"># If you want to give a specific color, note that the above is equivalent to</span>
+<span class="c1"># a.set_plot_color(psd.mpl_utils.default_cycler)</span>
+<a href="../../auto_api/pyspecdata.html#pyspecdata.plot" title="pyspecdata.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-function"><span class="n">psd</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">a</span></a><span class="p">)</span>
+<span class="c1"># as long as we don&#39;t override that property,</span>
+<span class="c1"># it will continue to be used</span>
+<a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">b</span></a> <span class="o">=</span> <a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">a</span></a> <span class="o">+</span> <span class="mi">10</span>
+<a href="../../auto_api/pyspecdata.html#pyspecdata.plot" title="pyspecdata.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-function"><span class="n">psd</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">b</span></a><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="c1"># and if we copy our properties, this gets copied as one of them</span>
+<a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c</span></a> <span class="o">=</span> <a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">psd</span><span class="o">.</span><span class="n">nddata</span></a><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">9</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<a href="../../pyspecdata.html#pyspecdata.nddata.copy_props" title="pyspecdata.nddata.copy_props" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">c</span><span class="o">.</span><span class="n">copy_props</span></a><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">a</span></a><span class="p">)</span>
+<a href="../../auto_api/pyspecdata.html#pyspecdata.plot" title="pyspecdata.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-function"><span class="n">psd</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c</span></a><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+<a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a> <span class="o">=</span> <a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">psd</span><span class="o">.</span><span class="n">nddata</span></a><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">9</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.2</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a> <span class="o">+=</span> <span class="mf">0.1</span>
+<span class="c1"># but wait! what if I have an unrelated set of data, but still want to move to</span>
+<span class="c1"># the next color in the default matplotlib cycle? just do this:</span>
+<a href="../../auto_api/pyspecdata.html#pyspecdata.nddata.set_plot_color_next" title="pyspecdata.nddata.set_plot_color_next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">d</span><span class="o">.</span><span class="n">set_plot_color_next</span></a><span class="p">()</span>
+<a href="../../auto_api/pyspecdata.html#pyspecdata.plot" title="pyspecdata.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-function"><span class="n">psd</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.132 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-indiv-funcs-test-colormatch-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/8ca93a18e4454a060b8aab7e108599a1/test_colormatch.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">test_colormatch.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/94354a65e0cfdf7dbe403ab2b03bb641/test_colormatch.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">test_colormatch.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/pyspec_path_equaltip.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../fitdata.html">the lmfitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">PySpecData Examples</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">PySpecData Examples</a><ul>
+  <li><a href="index.html">Individual Functions</a><ul>
+      <li>Previous: <a href="convolve.html" title="previous chapter">Convolution</a></li>
+      <li>Next: <a href="unitary_ft.html" title="next chapter">Unitary FT</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2016, John M. Franck.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/auto_examples/indiv_funcs/test_colormatch.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

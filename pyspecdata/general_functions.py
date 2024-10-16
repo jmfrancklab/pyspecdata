@@ -14,21 +14,28 @@ import pint
 import textwrap
 
 ureg = pint.UnitRegistry()
+ureg.define("cyc = [cycle]")  # 'cycle' is a new dimension
+ureg.define("Hz = cyc / s")  # Redefine 'Hz' to be cycles per second
+ureg.define("rad = 2*pi*cyc")  # Redefine 'rad' in terms of cycles
 Q_ = ureg.Quantity
-if '√' in str(Q_('√W')):
+if "√" in str(Q_("√W")):
     pass
 else:
-    print("**Warning!** I'm hacking the sqrt behavior of pint.  Consider using the jmfranck/pint fork")
+    print(
+        "**Warning!** I'm hacking the sqrt behavior of pint.  Consider using"
+        " the jmfranck/pint fork"
+    )
+
     def Q_(*args):
-        if len(args)==1:
+        if len(args) == 1:
             b = a
             a = 1
-        m = re.match(r'(.*)√(\w+)(.*)',b)
+        m = re.match(r"(.*)√(\w+)(.*)", b)
         if m:
-            g1,g2,g3 = m.groups()
-            b = g1 + f' {g2}'+'^{0.5} ' + g3
+            g1, g2, g3 = m.groups()
+            b = g1 + f" {g2}" + "^{0.5} " + g3
             print(b)
-        return ureg.Quantity(a,b)
+        return ureg.Quantity(a, b)
 
 
 def inside_sphinx():
@@ -325,40 +332,27 @@ def render_matrix(arg, format_code="%.4g"):
     math_str = r"\begin{bmatrix}"
     math_str += "\n"
     if hasattr(arg.dtype, "fields") and arg.dtype.fields is not None:
-        math_str += "\\\\\n".join(
-            [
-                " & ".join(
-                    [
-                        ", ".join(
-                            [
-                                r"\text{"
-                                + f[0]
-                                + r'}\!=\!\text{"'
-                                + elem[f[0]]
-                                + '"}'
-                                if isinstance(elem[f[0]], str)
-                                else r"\text{%s}\!=\!%g" % (f[0], elem[f[0]])
-                                for f in arg.dtype.descr
-                            ]
-                        )  # f[0] is the name (vs. size)
-                        for elem in arg[k, :]
-                    ]
-                )
-                for k in range(arg.shape[0])
-            ]
-        )
+        math_str += "\\\\\n".join([
+            " & ".join([
+                ", ".join([
+                    (
+                        r"\text{" + f[0] + r'}\!=\!\text{"' + elem[f[0]] + '"}'
+                        if isinstance(elem[f[0]], str)
+                        else r"\text{%s}\!=\!%g" % (f[0], elem[f[0]])
+                    )
+                    for f in arg.dtype.descr
+                ])  # f[0] is the name (vs. size)
+                for elem in arg[k, :]
+            ])
+            for k in range(arg.shape[0])
+        ])
     else:
-        math_str += "\\\\\n".join(
-            [
-                " & ".join(
-                    [
-                        complex_str(j, format_code=format_code)
-                        for j in arg[k, :]
-                    ]
-                )
-                for k in range(arg.shape[0])
-            ]
-        )
+        math_str += "\\\\\n".join([
+            " & ".join(
+                [complex_str(j, format_code=format_code) for j in arg[k, :]]
+            )
+            for k in range(arg.shape[0])
+        ])
     math_str += "\n"
     math_str += r"\end{bmatrix}"
     return math_str
