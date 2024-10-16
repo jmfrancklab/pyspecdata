@@ -109,21 +109,28 @@ def pcolormesh(
         elif j == 1:
             plt.colorbar(mappable=mappable, ax=thisax)
     # {{{ overall scaling
-    if not scale_independently:
-        vmin_list = []
-        vmax_list = []
-        for this_mappable in mappable_list:
-            thismin, thismax = this_mappable.get_clim()
-            vmin_list.append(thismin)
-            vmax_list.append(thismax)
-        overall_min = np.min(vmin_list)
-        overall_max = np.max(vmax_list)
-        if force_balanced_cmap:
-            if overall_max > -overall_min:
-                overall_min = -overall_max
-            else:
-                overall_max = -overall_min
-        for thismappable in mappable_list:
-            thismappable.set_clim(vmin=overall_min, vmax=overall_max)
+    print(" vmin = ", vmin, " vmax = ", vmax)
+    if vmin is not None and vmax is not None:
+        print("vmin and vmax are manually set, we don't want them to be determined below!")
+        assert scale_independently == True, "scale_independently is False but you've manually set vmin and vmax, this doesn't make sense!"
+        assert force_balanced_cmap == False, "you're trying to force the colormap to have a balanced scale while also manually setting its limits, this doesn't make sense!"
+        print("manually set vmin and vmax are ", vmin, ", ", vmax)
+    else:
+        if not scale_independently:
+            vmin_list = []
+            vmax_list = []
+            for this_mappable in mappable_list:
+                thismin, thismax = this_mappable.get_clim()
+                vmin_list.append(thismin)
+                vmax_list.append(thismax)
+            overall_min = np.min(vmin_list)
+            overall_max = np.max(vmax_list)
+            if force_balanced_cmap:
+                if overall_max > -overall_min:
+                    overall_min = -overall_max
+                else:
+                    overall_max = -overall_min
+            for thismappable in mappable_list:
+                thismappable.set_clim(vmin=overall_min, vmax=overall_max)
     # }}}
     return mappable_list

@@ -64,5 +64,11 @@ if run_to_checkpoint > 4:
     plt.suptitle("colorscales dependent -- large first")
     mpb = z2.C.pcolor(ax1=ax_list[0], ax2=ax_list[1])
     z1.C.pcolor(mappable_list=mpb, ax1=ax_list[2], ax2=ax_list[3])
+# {{{ manually set vmin and vmax
+ax_list = new_figure_and_grid()
+plt.suptitle("manually set vmin/vmax -- large second")
+mpb = z1.C.pcolor(ax1=ax_list[0], ax2=ax_list[1], scale_independently=True, vmin=-10, vmax=10)
+z2.C.pcolor(mappable_list=mpb, ax1=ax_list[2], ax2=ax_list[3], scale_independently=True, vmin=-100, vmax=100)
+# }}}
     # }}}
 plt.show()
