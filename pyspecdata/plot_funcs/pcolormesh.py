@@ -111,9 +111,18 @@ def pcolormesh(
     # {{{ overall scaling
     print(" vmin = ", vmin, " vmax = ", vmax)
     if vmin is not None and vmax is not None:
-        print("vmin and vmax are manually set, we don't want them to be determined below!")
-        assert scale_independently == True, "scale_independently is False but you've manually set vmin and vmax, this doesn't make sense!"
-        assert force_balanced_cmap == False, "you're trying to force the colormap to have a balanced scale while also manually setting its limits, this doesn't make sense!"
+        print(
+            "vmin and vmax are manually set, we don't want them to be"
+            " determined below!"
+        )
+        assert scale_independently == True, (
+            "scale_independently is False but you've manually set vmin and"
+            " vmax, this doesn't make sense!"
+        )
+        assert force_balanced_cmap == False, (
+            "you're trying to force the colormap to have a balanced scale"
+            " while also manually setting its limits, this doesn't make sense!"
+        )
         print("manually set vmin and vmax are ", vmin, ", ", vmax)
     else:
         if not scale_independently:
