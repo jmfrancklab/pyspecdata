@@ -1,5 +1,4 @@
 import matplotlib.pylab as plt
-import matplotlib as mpl
 import numpy as np
 
 
@@ -11,14 +10,15 @@ def pcolormesh(
     ax2=None,
     ax=None,
     scale_independently=False,
-    vmin = None,
-    vmax = None,
+    vmin=None,
+    vmax=None,
     human_units=True,
     force_balanced_cmap=False,
     handle_axis_sharing=True,
     mappable_list=None,
 ):
-    """generate a pcolormesh and label it with the axis coordinate available from the nddata
+    """generate a pcolormesh and label it with the axis coordinate available
+    from the nddata
 
     Parameters
     ==========
@@ -36,11 +36,14 @@ def pcolormesh(
         (If false, the colorbar will have the same limits for all plots)
     handle_axis_sharing: boolean (default True)
         Typically, you want the axes to scale together when you zoom
-        -- *e.g.* especially when you are plotting a real and imaginary together.
+        -- *e.g.* especially when you are plotting a real and imaginary
+        together.
         So, this defaults to true to do that.
-        But sometimes, you want to get fancy and, *e.g.* bind the sharing of many plots together
+        But sometimes, you want to get fancy and, *e.g.* bind the sharing of
+        many plots together
         because matplotlib doesn't let you call sharex/sharey more than once,
-        you need then to tell it not to handle the axis sharing, and to it yourself
+        you need then to tell it not to handle the axis sharing, and to it
+        yourself
         outside this routine.
     mappable_list : list, default []
         used to scale multiple plots along the same color
@@ -84,9 +87,10 @@ def pcolormesh(
         forplot.getaxis(forplot.dimlabels[0]),
     )
     Z = forplot.data
-    for j,(thisax, thisfun, thislabel) in enumerate(ax_list):
+    for j, (thisax, thisfun, thislabel) in enumerate(ax_list):
         Zdata = thisfun(Z)
-        # motivated by this https://chatgpt.com/share/670e7415-414c-800b-88dd-b9976a17b162
+        # motivated by this
+        # https://chatgpt.com/share/670e7415-414c-800b-88dd-b9976a17b162
         mappable = thisax.pcolormesh(X, Y, Zdata, shading=shading)
         if handle_axis_sharing and thisax != ax_list[0][0]:
             thisax.sharex(ax_list[0][0])
@@ -101,7 +105,7 @@ def pcolormesh(
             if scale_independently:
                 plt.colorbar(mappable=mappable, ax=thisax)
             else:
-                pass # b/c no use for extra colorbar if locked together
+                pass  # b/c no use for extra colorbar if locked together
         elif j == 1:
             plt.colorbar(mappable=mappable, ax=thisax)
     # {{{ overall scaling
