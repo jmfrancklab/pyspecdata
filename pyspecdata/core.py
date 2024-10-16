@@ -3698,6 +3698,8 @@ class nddata(object):
             self.data = result.data
             return self
         else:
+            result.copy_props(self)
+            result.set_units(axis,self.get_units(axis))
             return result
 
     def polyfit(self, axis, order=1, force_y_intercept=None):
