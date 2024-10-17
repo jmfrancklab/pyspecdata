@@ -89,8 +89,6 @@ def pcolormesh(
     Z = forplot.data
     for j, (thisax, thisfun, thislabel) in enumerate(ax_list):
         Zdata = thisfun(Z)
-        # motivated by this
-        # https://chatgpt.com/share/670e7415-414c-800b-88dd-b9976a17b162
         mappable = thisax.pcolormesh(X, Y, Zdata, shading=shading)
         if handle_axis_sharing and thisax != ax_list[0][0]:
             thisax.sharex(ax_list[0][0])
@@ -99,8 +97,8 @@ def pcolormesh(
         thisax.set_ylabel(forplot.unitify_axis(forplot.dimlabels[0]))
         thisax.set_xlabel(forplot.unitify_axis(forplot.dimlabels[1]))
         thisax.set_title(f"({thislabel})")
-        # handle the creation of colorbars here, since adjusting the mappable
-        # clim later changes the colorbars just fine
+        # {{{ handle the creation of colorbars here, since adjusting the
+        #     mappable clim later changes the colorbars just fine
         if j == 0:
             if scale_independently:
                 plt.colorbar(mappable=mappable, ax=thisax)
@@ -108,24 +106,32 @@ def pcolormesh(
                 pass  # b/c no use for extra colorbar if locked together
         elif j == 1:
             plt.colorbar(mappable=mappable, ax=thisax)
+        # }}}
+    # TODO ☐: don't do print statements.  if you want, you can replace them with logging.debug(psd.strm(...))
     # {{{ overall scaling
     print(" vmin = ", vmin, " vmax = ", vmax)
-    if vmin is not None and vmax is not None:
+    # is manually specified:
+    if vmin is not None:
+        assert vmax is not None, "if vmin is specified, vmax must be too"
         print(
             "vmin and vmax are manually set, we don't want them to be"
             " determined below!"
         )
-        assert scale_independently == True, (
-            "scale_independently is False but you've manually set vmin and"
-            " vmax, this doesn't make sense!"
+        assert scale_independently == False, (
+            "scale_independently is True but you've manually set vmin and"
+            " vmax, this doesn't make sense! If they share vmax and vmin, then they are scaled together!!"
         )
         assert force_balanced_cmap == False, (
             "you're trying to force the colormap to have a balanced scale"
             " while also manually setting its limits, this doesn't make sense!"
         )
         print("manually set vmin and vmax are ", vmin, ", ", vmax)
-    else:
-        if not scale_independently:
+        overall_min = vmin
+        overall_max = vmax
+    if not scale_independently:
+        if vmin is None:
+            # {{{ we only need to determine the overall min and max if we
+            #    haven't explicitly set them
             vmin_list = []
             vmax_list = []
             for this_mappable in mappable_list:
@@ -139,7 +145,8 @@ def pcolormesh(
                     overall_min = -overall_max
                 else:
                     overall_max = -overall_min
-            for thismappable in mappable_list:
-                thismappable.set_clim(vmin=overall_min, vmax=overall_max)
+            # }}}
+        for thismappable in mappable_list:
+            thismappable.set_clim(vmin=overall_min, vmax=overall_max)
     # }}}
     return mappable_list
