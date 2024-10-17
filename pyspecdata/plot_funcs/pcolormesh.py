@@ -107,16 +107,10 @@ def pcolormesh(
         elif j == 1:
             plt.colorbar(mappable=mappable, ax=thisax)
         # }}}
-    # TODO ☐: don't do print statements.  if you want, you can replace them with logging.debug(psd.strm(...))
     # {{{ overall scaling
-    print(" vmin = ", vmin, " vmax = ", vmax)
     # is manually specified:
     if vmin is not None:
-        assert vmax is not None, "if vmin is specified, vmax must be too"
-        print(
-            "vmin and vmax are manually set, we don't want them to be"
-            " determined below!"
-        )
+        assert vmax is not None, "if vmin is specified, vmax must be too!"
         assert scale_independently == False, (
             "scale_independently is True but you've manually set vmin and"
             " vmax, this doesn't make sense! If they share vmax and vmin, then they are scaled together!!"
@@ -125,15 +119,14 @@ def pcolormesh(
             "you're trying to force the colormap to have a balanced scale"
             " while also manually setting its limits, this doesn't make sense!"
         )
-        print("manually set vmin and vmax are ", vmin, ", ", vmax)
         overall_min = vmin
         overall_max = vmax
     if not scale_independently:
         if vmin is None:
             # {{{ we only need to determine the overall min and max if we
             #    haven't explicitly set them
-            vmin_list = []
-            vmax_list = []
+            vmin_list = list([])
+            vmax_list = list([])
             for this_mappable in mappable_list:
                 thismin, thismax = this_mappable.get_clim()
                 vmin_list.append(thismin)

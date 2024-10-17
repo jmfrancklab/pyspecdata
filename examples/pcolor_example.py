@@ -86,8 +86,8 @@ if run_to_checkpoint > 6:
     z2.pcolor(
         ax1=ax_list[2],
         ax2=ax_list[3],
-        vmin=-100,
-        vmax=100,
+        vmin=-150,
+        vmax=150,
     )
     # }}}
 plt.show()
