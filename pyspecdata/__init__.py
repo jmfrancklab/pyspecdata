@@ -30,7 +30,6 @@ from .general_functions import (
     redim_F_to_C,
     redim_C_to_F,
     fname_makenice,
-    explain_error,
     lsafen,
     lsafe,
     copy_maybe_none,

@@ -25,8 +25,7 @@ These attributes
 or Fourier transforms,
 and are used to automatically format plots.
 
-.. todo::
-    also implement with blocks for working in the Fourier domain
+..  also implement with blocks for working in the Fourier domain
 
 Very importantly, most pyspecdata functions are designed to operate on the data *in place*, meaning that
 rather than doing something like:
@@ -57,16 +56,13 @@ need to process the same data in parallel in two different ways to generate two 
 and then perform math that uses both results).
 For these cases, you can use an easy shortcut for the copy method: `C` (as in `data.C`).
 
-.. todo::
-    say something about slicing and copies here
+..  say something about slicing and copies here
 
 Note that, if all else fails,
 you can always use numpy directly:
 *The `data` attribute of an nddata object is just a standard numpy array.*
 For example, if you have an nddata object called ``mydata``,
 then ``mydata.data`` is just a **standard numpy array**.
-For beginning users,
-this can be a very helpful fall back.
 But, note that -- in most cases -- it should be more beneficial if you don't
 directly access the `data` attribute.
 
@@ -108,9 +104,8 @@ multi-dimensional data.
     but follows a distinctly different philosophy.
     Here, we place a strong an emphasis on benefits that can be derived from
     object-oriented programming.
-    For example, error propagation and Fourier transformation are not handled in the same way,
-    and the slicing notation is less compact.
-
+    For example, we emphasize effort-free error propagation and Fourier transformation,
+    as well as a compact and meaningful slicing notation.
 
 Dimension labels
 ----------------
@@ -165,9 +160,8 @@ You can refer to a time dimension, such as `t1`, `t_1`, `t_direct`, *etc.*
 as `f1`, `f_1`, *etc.* in order to retrieve the Fourier transform.
 You can set the pairs ...
 
-.. warning::
-    error propagation for trig functions doesn't yet work;
-    automatic t *vs.* f naming not yet implemented.
+..  error propagation for trig functions doesn't yet work; automatic t *vs.* f
+   naming not yet implemented.
 
 Item selection and slicing
 --------------------------
@@ -175,12 +169,19 @@ Item selection and slicing
 Pyspecdata offers several different synataxes 
 for item selection and slicing.
 These fall into two main categories:
-*numbered indexing and slicing* (which will be familiar to most users of python)
-and *axis-based indexing*a.
-These can be combined in a single square bracket, separated by commas.
 
-Axis-based Indexing
-``````````````````
+- *numbered* indexing and slicing. These will be familiar to most users of python, but require the addition of the dimension name.
+
+and
+
+- *axis-coordinate-based*.  These use the natural axis coordinates.  For example, you can specify a range of frequencies, *etc.*, directly, and with a *very compact* syntax.
+
+.. contents::
+   :local:
+   :depth: 4
+
+Axis-coordinate-based Indexing
+```````````````````````````````
 
 To pull a single point along a particular dimension,
 you can just use the value of the axis.
@@ -190,8 +191,8 @@ The point nearest to the axis will be returned.
 
 Will return the point (or slice of data) where the t2 axis is closest to 1.1 s.
 
-Axis Ranges
-``````````````````
+Ranges that use Axis Coordinates
+`````````````````````````````````
 
 You can specify an inclusive range of numbers along an axis.
 For example, to select from 0 to 100 μs along `t2`, you use:
@@ -211,8 +212,8 @@ you do this by placing a comma after your dimension name, rather than a colon:
 >>> d['t2',5::-2] # select from index 5 up to 2 elements before the end
 
 
-Logical
-``````````````````
+Selection Based on Logic
+`````````````````````````
 
 You can use functions that return logical values to select
 
@@ -227,56 +228,84 @@ If they are, the dataset will be trimmed to remove them.
 
 When the deselected data are scattered throughout, a mask is used instead.
 
-.. todo::
-    include examples/tests here
+.. include examples/tests here
 
-Axis-Based Indexing and Slicing in the Fourier Domain
------------------------------------------------------
+The `.contiguous(` method
+`````````````````````````
 
-Data can be manipulated not only in the direct domain,
-but also in the Fourier conjugate domain.
-This is achieved in one of two ways → by changing the name
-of the axis,
-and by explicitly specifying the domain.
+.. currentmodule:: pyspecdata.core
 
+The :meth:`~nddata.contiguous` method deserves special mention,
+since it can be used to generate a series of ranges based on logic.
+For example, peak selection frequently uses the
+:meth:`~nddata.contiguous` method.
 
-Changing the name of the axis
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Selecting and manipulating the axis coordinates
+```````````````````````````````````````````````
 
-.. warning::
-    this feature is planned, not yet implemented.
+Sometimes, rather than manipulating the data, you want to manipulate the axis
+coordinates.
+This is achieve by using square brackets with only the name of the relevant
+dimension.
 
-The property ``FT_regexp`` is a dictionary that controls
-By default, it is initially set to ``{'\<t':'\<f','\<T':'\<F'}``,
-meaning that t and f at the beginning of word will be converted into each other.
-This means that the following command:
+For example:
 
->>> d['f2':(-1e6,1e6)]
+>>> print(data['t2'][1] - data['t2'][0])
 
-would switch something with a dimension named `t2` to the frequency dimension
-(shift by default -- shift should be a property).
+tells you the spacing between the first two points along the :math:`t_2` axis.
 
+Also,
 
-Explicitly Changing the Domain
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>>> data['t2'] += 2e-3
 
-Alternatively, a slice of the form
-``dimname:'t/f':(range)``
-or
-``dimname:'u/v':(range)``
-can be used.
-Here, 't' and 'f' always correspond to the "original" and "conjugate" domains, respectively.
-Since, sometimes this might lead to confusion, 'u' and 'v' serve the same respective functions.
+adds an offset of 3 ms (assuming your units are seconds) to the :math:`t_2` axis.
 
-Therefore this command performs the same function as the last line of code:
-
->>> d['t2':'f':(-1e6,1e6)]
-
-Frequency Slices Outside Original Range
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. todo::
-    show how this works with aliases
+.. Axis-Based Indexing and Slicing in the Fourier Domain
+.. -----------------------------------------------------
+.. 
+.. Data can be manipulated not only in the direct domain,
+.. but also in the Fourier conjugate domain.
+.. This is achieved in one of two ways → by changing the name
+.. of the axis,
+.. and by explicitly specifying the domain.
+.. 
+.. 
+.. Changing the name of the axis
+.. ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. 
+.. .. warning::
+..     this feature is planned, not yet implemented.
+.. 
+.. The property ``FT_regexp`` is a dictionary that controls
+.. By default, it is initially set to ``{'\<t':'\<f','\<T':'\<F'}``,
+.. meaning that t and f at the beginning of word will be converted into each other.
+.. This means that the following command:
+.. 
+.. >>> d['f2':(-1e6,1e6)]
+.. 
+.. would switch something with a dimension named `t2` to the frequency dimension
+.. (shift by default -- shift should be a property).
+.. 
+.. Explicitly Changing the Domain
+.. ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. 
+.. Alternatively, a slice of the form
+.. ``dimname:'t/f':(range)``
+.. or
+.. ``dimname:'u/v':(range)``
+.. can be used.
+.. Here, 't' and 'f' always correspond to the "original" and "conjugate" domains, respectively.
+.. Since, sometimes this might lead to confusion, 'u' and 'v' serve the same respective functions.
+.. 
+.. Therefore this command performs the same function as the last line of code:
+.. 
+.. >>> d['t2':'f':(-1e6,1e6)]
+.. 
+.. Frequency Slices Outside Original Range
+.. ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. 
+.. .. todo::
+..     show how this works with aliases
 
 Error propagation
 -----------------
@@ -300,29 +329,31 @@ called ``a``.
 
 This encourages a style where methods are chained together, *e.g.* ``d.ft('t2').mean('t1')``.
 
-In order to encourage this style, we provide the method :meth:`pyspecdata.nddata.run`, which allows you to run a standard numpy function on the data:
+In order to encourage this style, we provide the method :meth:`~nddata.run`, which allows you to run a standard numpy function on the data:
 ``d.run(abs)`` will take the absolute value of the data in-place, while
 ``d.run(std,'t2')`` will run a standard deviation along the 't2' axis
-(this removes the 't2' dimension once you're done, since it would have a length of only 1 -- :meth:`pyspecdata.nddata.run_nopop` would not remove the dimension).
+(this removes the 't2' dimension once you're done, since it would have a length of only 1 -- :meth:`~nddata.run_nopop` would not remove the dimension).
 
-*For a full list of methods*, see the API documentation: :class:`pyspecdata.nddata`.
+*For a full list of methods*, see the API documentation: :class:`nddata`.
 
-Basic Examples
---------------
-
-.. todo::
-    Give good examples/plots here
-
-* Apply a filter (fromaxis).
-* Slicing.
-* Aliasing of FT.
+.. Basic Examples
+.. --------------
+.. 
+.. .. todo::
+..     Give good examples/plots here
+.. 
+.. * Apply a filter (fromaxis).
+.. * Slicing.
+.. * Aliasing of FT.
   
 
 Methods by Sub-Topic
 --------------------
 
 .. todo::
-    we are in the process of organizing most methods into categories.
+   We are in the process of organizing most methods into categories.
+   For now, we encourage you to look through the gallery examples and to click
+   on or search different methods.
 
 A selection of the methods noted below are broken down by sub-topic.
 

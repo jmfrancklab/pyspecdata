@@ -21,13 +21,16 @@ assert len(c)==3
 # c₀ = ab²
 # b = -c₁/(c₂2)
 print("I found the minimum here at",-c[1]/c[2]/2)
-# generate a polynomial that's more finely spaced
-x = nddata(r_[0:10:100j], 'x')
-plot(x.eval_poly(c,'x'))
+# generate a polynomial that's more finely spaced by setting the
+# `npts` parameter.  This is a shortcut for:
+# x = nddata(r_[0:10:300j], 'x')
+# followed by
+# plot(x.eval_poly(c,'x'))
+plot(y.eval_poly(c,'x', npts=300))
 # {{{ not a good idea, but force the y intercept to 0
 #     to show the code works
 c = y.polyfit('x', order=3, force_y_intercept=0)
 x = nddata(r_[0:10:100j], 'x')
-plot(x.eval_poly(c,'x'))
+plot(y.eval_poly(c,'x', npts=300))
 # }}}
 show()

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>PPM in 2D &#8212; pySpecData 0.9.5.3.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=832af5b0" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css?v=7f9a90b1" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=2b30a6e6" />
+    <script src="../_static/documentation_options.js?v=5b73e601"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Calculation of the Covariance Matrix" href="calculate_covariance.html" />
+    <link rel="prev" title="Polynomial Fitting" href="polyfit.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-ppm-2d-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="ppm-in-2d">
+<span id="sphx-glr-auto-examples-ppm-2d-py"></span><h1>PPM in 2D<a class="headerlink" href="#ppm-in-2d" title="Link to this heading">¶</a></h1>
+<p>Show how <code class="xref py py-func docutils literal notranslate"><span class="pre">to_ppm()</span></code> can apply to two dimensions!</p>
+<ul class="sphx-glr-horizontal">
+<li><img src="../_images/sphx_glr_ppm_2D_001.png" srcset="../_images/sphx_glr_ppm_2D_001.png" alt="the spectrum" class = "sphx-glr-multi-img"/></li>
+<li><img src="../_images/sphx_glr_ppm_2D_002.png" srcset="../_images/sphx_glr_ppm_2D_002.png" alt="after converting to ppm" class = "sphx-glr-multi-img"/></li>
+</ul>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>1: the spectrum |||(None, None)
+2: after converting to ppm |||(&#39;ppm&#39;, &#39;ppm&#39;)
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">pi</span><span class="p">,</span> <span class="n">r_</span><span class="p">,</span> <span class="n">exp</span>
+<span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">nddata</span></a><span class="p">,</span> <a href="../modules.html#module-pyspecdata.figlist" title="pyspecdata.figlist" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">figlist_var</span></a>
+
+<span class="c1"># make peaks on a frequency axis</span>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">x</span></a> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">nddata</span></a><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">:</span><span class="mi">1024</span><span class="n">j</span><span class="p">],</span> <span class="s2">&quot;t2&quot;</span><span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">y</span></a> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">nddata</span></a><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">:</span><span class="mi">1024</span><span class="n">j</span><span class="p">],</span> <span class="s2">&quot;t1&quot;</span><span class="p">)</span>
+
+<span class="c1"># generate time-domain signal</span>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">signal</span></a> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">x</span></a> <span class="o">*</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">y</span></a>  <span class="c1"># create an array of zeros that&#39;s the right shape</span>
+<span class="k">for</span> <span class="n">nu1</span><span class="p">,</span> <span class="n">nu2</span> <span class="ow">in</span> <span class="p">[(</span><span class="mi">25</span><span class="p">,</span> <span class="o">-</span><span class="mi">50</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">50</span><span class="p">,</span> <span class="o">-</span><span class="mi">50</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">75</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">75</span><span class="p">,</span> <span class="mi">25</span><span class="p">),</span> <span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">72</span><span class="p">)]:</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">signal</span></a> <span class="o">+=</span> <span class="n">exp</span><span class="p">(</span>
+        <span class="o">+</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">nu2</span> <span class="o">*</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">x</span></a> <span class="o">-</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">x</span></a> <span class="o">/</span> <span class="mf">0.2</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">nu1</span> <span class="o">*</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">y</span></a> <span class="o">-</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">y</span></a> <span class="o">/</span> <span class="mf">0.05</span>
+    <span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">signal</span><span class="o">.</span><span class="n">ft</span></a><span class="p">(</span><span class="s2">&quot;t2&quot;</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata.ft" title="pyspecdata.nddata.ft" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">signal</span><span class="o">.</span><span class="n">ft</span></a><span class="p">(</span><span class="s2">&quot;t1&quot;</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<a href="../pyspecdata.html#pyspecdata.nddata.set_prop" title="pyspecdata.nddata.set_prop" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">signal</span><span class="o">.</span><span class="n">set_prop</span></a><span class="p">(</span><span class="s2">&quot;acq&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;SFO1&quot;</span><span class="p">:</span> <span class="mf">300.196194352191</span><span class="p">})</span>
+<a href="../pyspecdata.html#pyspecdata.nddata.set_prop" title="pyspecdata.nddata.set_prop" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">signal</span><span class="o">.</span><span class="n">set_prop</span></a><span class="p">(</span><span class="s2">&quot;proc&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;OFFSET&quot;</span><span class="p">:</span> <span class="mf">7.408084</span><span class="p">,</span> <span class="s2">&quot;SF&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">})</span>
+
+<span class="k">with</span> <a href="../modules.html#module-pyspecdata.figlist" title="pyspecdata.figlist" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">figlist_var</span></a><span class="p">()</span> <span class="k">as</span> <a href="../modules.html#module-pyspecdata.figlist" title="pyspecdata.figlist" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">fl</span></a><span class="p">:</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.figlist.next" title="pyspecdata.figlist.next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">next</span></a><span class="p">(</span><span class="s2">&quot;the spectrum&quot;</span><span class="p">)</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.figlist.image" title="pyspecdata.figlist.image" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">image</span></a><span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">signal</span></a><span class="p">)</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata.to_ppm" title="pyspecdata.nddata.to_ppm" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">signal</span><span class="o">.</span><span class="n">to_ppm</span></a><span class="p">(</span><span class="s2">&quot;t2&quot;</span><span class="p">)</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata.to_ppm" title="pyspecdata.nddata.to_ppm" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">signal</span><span class="o">.</span><span class="n">to_ppm</span></a><span class="p">(</span><span class="s2">&quot;t1&quot;</span><span class="p">)</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.figlist.next" title="pyspecdata.figlist.next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">next</span></a><span class="p">(</span><span class="s2">&quot;after converting to ppm&quot;</span><span class="p">)</span>
+    <a href="../auto_api/pyspecdata.html#pyspecdata.figlist.image" title="pyspecdata.figlist.image" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">image</span></a><span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">signal</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.254 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-ppm-2d-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/fecd0d72badb4002643bb2e1863977d5/ppm_2D.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">ppm_2D.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/18fb32ba5578d48dac80da867febe0ac/ppm_2D.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">ppm_2D.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/pyspec_path_equaltip.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the lmfitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">PySpecData Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Cary_simple.html">Simple Cary UV-Vis loading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pcolor_example.html">Unevenly spaced data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="esr_example.html">Bruker cw ESR Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polyfit.html">Polynomial Fitting</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">PPM in 2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="calculate_covariance.html">Calculation of the Covariance Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convolution.html">Simple Convolution Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="image_plot.html">Plotting Routines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppm_example.html">ppm Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ellmans.html">Manipulation of UV-Vis data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_with_bounds.html">Fit Using Bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_complex.html">Fit complex data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DCCT_function.html">Using the DCCT function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_example.html">Basic Slicing/Filtering Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_complex_with_transform.html">Fit complex data with transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BRD_test.html">1D BRD regularization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BSA_calibration.html">BSA UV-Vis Calibration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_fake_data.html">Fitting Data (Nonlinear + Symbolic)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QESR.html">Quantitative ESR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nddata_NNLS_Tikhonov_190104.html">2D ILT test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#individual-functions">Individual Functions</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">PySpecData Examples</a><ul>
+      <li>Previous: <a href="polyfit.html" title="previous chapter">Polynomial Fitting</a></li>
+      <li>Next: <a href="calculate_covariance.html" title="next chapter">Calculation of the Covariance Matrix</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2016, John M. Franck.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/auto_examples/ppm_2D.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

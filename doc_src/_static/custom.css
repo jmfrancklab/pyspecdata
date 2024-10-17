@@ -1,0 +1,18 @@
+.sphx-glr-multi-img {
+    float: none !important;
+    display: block !important;
+    width: 100% !important;  /* Ensures it takes up the full width */
+    max-width: 100% !important;  /* Ensures it takes up the full width */
+}
+.sphx-glr-backref-type-py-method{
+    text-decoration: none;
+}
+.sphx-glr-backref-type-py-module{
+    text-decoration: none;
+}
+.sphx-glr-backref-type-py-instance{
+    text-decoration: none;
+}
+.sphx-glr-backref-type-py-property{
+    text-decoration: none;
+}
