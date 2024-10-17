@@ -574,5 +574,6 @@ def det_unit_prefactor(thisstr):
     =======
     float:
         The prefactor of the fed units floored to a multiple of 3    
+        some change
     "
     return 3 * int(np.log10(ureg(thisstr).to_base_units().magnitude) // 3)
