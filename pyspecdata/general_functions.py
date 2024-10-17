@@ -28,7 +28,7 @@ else:
 
     def Q_(*args):
         if len(args) == 1:
-            b = a
+            b = args[0]
             a = 1
         elif len(args) == 2:
             a, b = args
