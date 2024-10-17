@@ -28,8 +28,9 @@ jobs:
           git fetch origin master
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             git fetch origin ${{ github.event.pull_request.head.ref }}
+          else
+            git fetch origin ${{ github.event.before }}
           fi
-          git fetch origin ${{ github.event.before }}
           git fetch origin ${{ github.event.after }}
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             echo "$(git branch)" # show the branch names
