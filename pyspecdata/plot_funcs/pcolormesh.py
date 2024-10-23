@@ -111,12 +111,12 @@ def pcolormesh(
     # is manually specified:
     if vmin is not None:
         assert vmax is not None, "if vmin is specified, vmax must be too!"
-        assert scale_independently is False, (
+        assert not scale_independently, (
             "scale_independently is True but you've manually set vmin and"
             " vmax, this doesn't make sense! If they share vmax and vmin, then"
             " they are scaled together!!"
         )
-        assert force_balanced_cmap is False, (
+        assert not force_balanced_cmap, (
             "you're trying to force the colormap to have a balanced scale"
             " while also manually setting its limits, this doesn't make sense!"
         )
