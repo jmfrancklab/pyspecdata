@@ -79,7 +79,6 @@ def pcolormesh(
         ax_list = [
             (ax1, lambda x: x.real, "real"),
             (ax2, lambda x: x.imag, "imag"),
-            print("hi")
         ]
     else:
         if ax1 is None:
