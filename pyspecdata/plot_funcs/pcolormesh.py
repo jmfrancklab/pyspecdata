@@ -5,7 +5,7 @@ import numpy as np
 def pcolormesh(
     self,
     fig=None,
-    cmap = 'viridis',
+    cmap="viridis",
     shading="nearest",
     ax1=None,
     ax2=None,
@@ -92,7 +92,7 @@ def pcolormesh(
     Z = forplot.data
     for j, (thisax, thisfun, thislabel) in enumerate(ax_list):
         Zdata = thisfun(Z)
-        mappable = thisax.pcolormesh(X, Y, Zdata, cmap = cmap, shading=shading)
+        mappable = thisax.pcolormesh(X, Y, Zdata, cmap=cmap, shading=shading)
         if handle_axis_sharing and thisax != ax_list[0][0]:
             thisax.sharex(ax_list[0][0])
             thisax.sharey(ax_list[0][0])
