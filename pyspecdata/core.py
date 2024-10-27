@@ -4355,6 +4355,8 @@ class nddata(object):
                 first_group = m.groups()[0]
                 if first_group.startswith("_"):
                     first_group = first_group[1:]
+                if len(first_group) > 1:
+                    first_group = "{%s}" % first_group
                 if isft:
                     axis_name = "$\\Delta p_%s$" % first_group
                 else:
