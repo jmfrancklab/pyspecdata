@@ -59,8 +59,11 @@ with figlist_var() as fl:
     # keyword arguments to use throughout
     dcct_kwargs = dict(
         total_spacing=0.2,
-        label_spacing_multiplier=65,
-        LHS_pad=0.05,
+        allow_for_ticks_default = 40,
+        allow_for_text_default = 5,
+        label_spacing_multiplier=38,
+        text_height = 25,
+        LHS_pad=0.01,
         )
     fig = fl.next("raw data")
     DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
