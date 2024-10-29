@@ -169,10 +169,6 @@ def DCCT(
         (label_spacing_multiplier * num_dims + allow_for_ticks_default, 0)
     )
     width = 1.0 - (LHS_pad + RHS_pad + LHS_labels)
-    dx = LHS_labels + LHS_pad
-    dy = axes_bottom[0]
-    total_scale_transform = IdentityTransform() + ScaledTranslation(dx,dy,fig.transFigure)
-    total_trans = blended_transform_factory(total_scale_transform,fig.transFigure)
     for j, b in enumerate(axes_bottom):
         if j != 0 and shareaxis:
             ax_list.append(
@@ -184,6 +180,11 @@ def DCCT(
             )  # lbwh
         else:
             ax_list.append(plt.axes([LHS_labels + LHS_pad, b, width, axes_height]))  # lbwh
+    dx = LHS_labels + LHS_pad #Fig coord
+    axis_to_figure = ax_list[0].transAxes + fig.transFigure.inverted()
+    _, dy = axis_to_figure.transform(r_[0, 0])
+    total_scale_transform = IdentityTransform() + ScaledTranslation(dx,dy,fig.transFigure)
+    total_trans = blended_transform_factory(total_scale_transform,fig.transFigure)
     # {{{ adjust tick settings -- AFTER extents are set
     # {{{ bottom subplot
     ax_list[0].xaxis.set_major_locator(majorLocator())
@@ -254,7 +255,7 @@ def DCCT(
             [y1, y2],
             linewidth=1,
             color="k",
-            transform=fig.transFigure,
+            transform=total_trans,#fig.transFigure,
             clip_on=False,
         )
         plt.text(
@@ -524,7 +525,10 @@ def DCCT(
         check_for_label_num=False,
         allow_for_text=-50,
     )
-    rect = Rectangle((0.5,0.5), width = 0.5, height = 0.4, transform = fig.transFigure, color = "red", alpha = 0.8)
+    axis_to_figure = ax_list[0].transAxes + fig.transFigure.inverted()
+    x1, y1 = axis_to_figure.transform(r_[0, 0]) #axes to fig
+    x2,y2 = axis_to_figure.transform(r_[0,1]) #display to figure
+    rect = Rectangle((x1,y1), width = 100, height = y2-y1, transform = total_trans, color = "red", alpha = 0.8)
     fig.add_artist(rect)
     plt.title(plot_title)
     if just_2D:
