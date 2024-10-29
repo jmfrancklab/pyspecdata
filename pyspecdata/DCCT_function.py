@@ -8,9 +8,9 @@ from .core import ndshape, nddata
 from .general_functions import strm, process_kwargs
 import matplotlib.pyplot as plt
 import matplotlib.lines as lines
-from matplotlib.patches import FancyArrow, FancyArrowPatch, Circle
+from matplotlib.patches import FancyArrow, FancyArrowPatch, Circle, Rectangle
 from matplotlib.lines import Line2D
-from matplotlib.transforms import ScaledTranslation, IdentityTransform
+from matplotlib.transforms import ScaledTranslation, IdentityTransform, blended_transform_factory
 from pyspecdata.plot_funcs.image import imagehsv
 import matplotlib.ticker as mticker
 import logging
@@ -169,6 +169,10 @@ def DCCT(
         (label_spacing_multiplier * num_dims + allow_for_ticks_default, 0)
     )
     width = 1.0 - (LHS_pad + RHS_pad + LHS_labels)
+    dx = LHS_labels + LHS_pad
+    dy = axes_bottom[0]
+    total_scale_transform = IdentityTransform() + ScaledTranslation(dx,dy,fig.transFigure)
+    total_trans = blended_transform_factory(total_scale_transform,fig.transFigure)
     for j, b in enumerate(axes_bottom):
         if j != 0 and shareaxis:
             ax_list.append(
@@ -245,20 +249,13 @@ def DCCT(
         x1, y1 = fig.transFigure.inverted().transform(r_[x1 - label_spacing, y1])
         x_text, _ = fig.transFigure.inverted().transform(r_[x_text - label_spacing, 0])
         x2, y2 = fig.transFigure.inverted().transform(r_[x2 - label_spacing, y2])
-        t_xaxis = ax2.get_yaxis_transform()
-        #axis_to_figure = ax2.transAxes + fig.transFigure.inverted()
-        #ax_x, ax_y = axis_to_figure.transform(r_[0, 0])
-        #dx = (x2 - ax_x)/2
-        #dy = (y2 - ax_y)/2
-        #print(x1)
-        #print(dx)
         lineA = lines.Line2D(
             [x1, x1],
             [y1, y2],
             linewidth=1,
             color="k",
+            transform=fig.transFigure,
             clip_on=False,
-            transform=(IdentityTransform() + t_xaxis + ScaledTranslation(dx,0, fig.transFigure)),
         )
         plt.text(
             x_text,
@@ -380,6 +377,7 @@ def DCCT(
             )
             if check_for_label_num:
                 label_placed[this_label_num] = 1
+
     imagehsvkwargs = {}
     for k, v in list(kwargs.items()):
         if k in ["black", "logscale"]:
@@ -493,16 +491,24 @@ def DCCT(
             logging.debug(strm("For", thisdim, "element", j, idx_slice.data.ravel()))
             first_axes = ax_list[idx_slice.data.ravel()[0]]
             last_axes = ax_list[idx_slice.data.ravel()[-1]]
+            if j == 0:
+                draw_span(
+                    last_axes,
+                    first_axes,
+                    ("%s") % ordered_labels[thisdim][0],
+                    this_label_num=depth,
+                )
+            else:
+                draw_span(
+                    last_axes,
+                    first_axes,
+                    ("%s") % ordered_labels[thisdim][j],
+                    this_label_num=depth,
+                )
             place_labels(
                 ax_list[0],
                 "%s" % my_data.unitify_axis("%s" % thisdim),
                 label_placed,
-                this_label_num=depth,
-            )
-            draw_span(
-                last_axes,
-                first_axes,
-                ("%s") % ordered_labels[thisdim][j],
                 this_label_num=depth,
             )
             new_remaining_dim = remaining_dim[1:]
@@ -518,6 +524,8 @@ def DCCT(
         check_for_label_num=False,
         allow_for_text=-50,
     )
+    rect = Rectangle((0.5,0.5), width = 0.5, height = 0.4, transform = fig.transFigure, color = "red", alpha = 0.8)
+    fig.add_artist(rect)
     plt.title(plot_title)
     if just_2D:
         return LHS_pad + LHS_labels, axes_bottom[0], width, axes_bottom[-1] - top_pad
