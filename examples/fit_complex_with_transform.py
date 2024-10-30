@@ -31,13 +31,11 @@ A, R, nu, t, t_origin = sp.symbols("A R nu t t_origin", real=True)
 # {{{ create an empty dataset and drop the fake data into it
 thisfit = psd.lmfitdata(psd.nddata(r_[-0.05:1:1001j], "t"))
 
-
-def my_residual_transform(d):
+@thisfit.define_residual_transform
+def my_transform(d):
     d.ft("t")
     return d
 
-
-thisfit.residual_transform = my_residual_transform
 thisfit.functional_form = (
     A
     * sp.exp(-1j * 2 * pi * nu * (t - t_origin))
@@ -80,7 +78,8 @@ newfit.set_guess(
     nu=dict(value=20),
     t_origin=dict(value=0.0, min=-0.1, max=0.1),
 )
-newfit.residual_transform = my_residual_transform
+newfit.residual_transform = thisfit.residual_transform # use the same
+#                                                        transform
 # }}}
 # {{{ show the guess
 guess = newfit.settoguess().eval()

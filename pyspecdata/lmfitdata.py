@@ -459,6 +459,20 @@ class lmfitdata(nddata):
                 )
         return jacobian_array.view(float)
 
+    def define_residual_transform(self,thefunc):
+        """If we do something like fit a lorentzian or voigt lineshape,
+        it makes more sense to define our fit function in the time domain,
+        but to calculate the residuals and to evaluate in the frequency
+        domain.
+        Therefore, we define a function that
+        accepts an nddata, and defines how the data is manipulated to move
+        into the (e.g. frequency) residual domain.u
+
+        Use this as a decorator to identify that function.
+        """
+
+        self.residual_transform = thefunc
+        return thefunc
     @property
     def transformed_data(self):
         """If we do something like fit a lorentzian or voigt lineshape,
@@ -468,6 +482,7 @@ class lmfitdata(nddata):
         Therefore, we define a function `self.residual_transform` that
         accepts an nddata, and defines how the data is manipulated to move
         into the (e.g. frequency) residual domain.
+        (It's easiest to do this by using the `self.define_residual_transform` decorator)
 
         Returns
         =======
