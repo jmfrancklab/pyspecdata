@@ -1,6 +1,7 @@
 """Domain Colored Coherence Transfer (DCCT) function allows us to 
 visualize the complex-valued data, as well as the formalization of the 
 coherence transfer dimensions using domain coloring plotting. 
+write
 """
 from numpy import r_,nan
 import numpy as np
