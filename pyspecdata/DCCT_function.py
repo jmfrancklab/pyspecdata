@@ -2,6 +2,7 @@
 visualize the complex-valued data, as well as the formalization of the 
 coherence transfer dimensions using domain coloring plotting. 
 """
+
 from numpy import r_, nan
 import numpy as np
 from .core import ndshape, nddata
@@ -330,9 +331,8 @@ def DCCT(
                 # same as above, but determine text
                 # position based on tick labels
                 label = my_data.unitify_axis(my_data.dimlabels[-2])
-                # from here
-                # https://stackoverflow.com/questions/44012436/python-matplotlib
-                # -get-position-of-xtick-labels
+                # from here https://stackoverflow.com/questions/44012436/pytho\
+                #n-matplotlib-get-position-of-xtick-labels
                 # then searching for BBox docs
                 logging.debug(
                     strm(
@@ -475,9 +475,9 @@ def DCCT(
                 "I don't understand the value you've set for the origin"
                 " keyword argument"
             )
-        kwargs[
-            "origin"
-        ] = origin  # required so that imshow now displays the image correctly
+        kwargs["origin"] = (
+            origin  # required so that imshow now displays the image correctly
+        )
 
         if real_data:
             kwargs["cmap"] = cmap
