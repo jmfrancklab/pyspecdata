@@ -147,6 +147,7 @@ def pcolormesh(
                     overall_max = -overall_min
             # }}}
         for thismappable in mappable_list:
+            print("okay")
             thismappable.set_clim(vmin=overall_min, vmax=overall_max)
     # }}}
     return mappable_list
