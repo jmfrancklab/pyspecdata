@@ -240,16 +240,12 @@ def DCCT(
         allow_for_text=allow_for_text_default,
         allow_for_ticks=allow_for_ticks_default,
     ):
-        x1, y1 = ax1.transAxes.transform(r_[0, 0.95])
-        x2, y2 = ax2.transAxes.transform(r_[0, 0.05])
-        x1 -= allow_for_ticks
-        x_text = x1 - allow_for_text
-        x2 -= allow_for_ticks
         # following line to create an offset for different dimension labels
         label_spacing = this_label_num * label_spacing_multiplier
-        x1, y1 = fig.transFigure.inverted().transform(r_[x1 - label_spacing, y1])
-        x_text, _ = fig.transFigure.inverted().transform(r_[x_text - label_spacing, 0])
-        x2, y2 = fig.transFigure.inverted().transform(r_[x2 - label_spacing, y2])
+        ax1_to_figure = ax1.transAxes + fig.transFigure.inverted()
+        ax2_to_figure = ax2.transAxes + fig.transFigure.inverted()
+        x1,y1 = ax1_to_figure.transform(r_[0-allow_for_ticks - label_spacing,0.95])
+        x2, y2 = ax2_to_figure.transform(r_[0-allow_for_ticks-label_spacing,0.05])
         lineA = lines.Line2D(
             [x1, x1],
             [y1, y2],
@@ -259,13 +255,13 @@ def DCCT(
             clip_on=False,
         )
         plt.text(
-            x_text,
+            x1,
             (y2 + y1) / 2,
             label,
             va="center",
             ha="right",
             rotation=90,
-            transform=fig.transFigure,
+            transform=total_trans,
             color="k",
         )
         fig.add_artist(lineA)
