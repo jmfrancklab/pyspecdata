@@ -283,18 +283,16 @@ def DCCT(
         arrow_head_vs_width=3,
     ):
         if not check_for_label_num or not label_placed[this_label_num]:
-            label_spacing = this_label_num * label_spacing_multiplier
             x_axorigindisp, y_axorigindisp = ax1.transAxes.transform(r_[0, 0])
-            ax1_to_figure = ax1.transAxes + fig.transFigure.inverted()
             # {{{ determine the x and y position of the label in display coords
             if check_for_label_num:
                 # the labels of the outer dimensions
+                label_spacing = this_label_num * label_spacing_multiplier
                 Dx_textdisp = (
                     -(allow_for_text + allow_for_ticks)
                     - label_spacing
                     - text_height / 2
                 )
-                thisx,thisy = ax1_to_figure.transform(r_[Dx_textdisp,0])
                 x_textdisp = x_axorigindisp + Dx_textdisp
             else:
                 # same as above, but determine text
@@ -311,9 +309,8 @@ def DCCT(
                 x_textdisp = [
                     j.get_window_extent().bounds for j in ax1.get_yticklabels()
                 ][0][0]
-                thisx,thisy = ax1_to_figure.transform(r_[0,0])
             x_textdisp -= 6.0 * text_height - arrow_width_px
-            y_textdisp = 0.1
+            y_textdisp = -25.0
             if diagnostic:
                 a = Circle(
                     (x_textdisp, y_axorigindisp - y_textdisp),
@@ -327,13 +324,15 @@ def DCCT(
             axis_to_figure = ax1.transAxes + fig.transFigure.inverted()
             ax_x, ax_y = axis_to_figure.transform(r_[0, 0])
             AnArrow = FancyArrow(
-                x = x_textdisp,
-                y = y_textdisp,
-                dx = 20,
-                dy = 0.035,
-                width=0.01,
+                x_textdisp,
+                y_textdisp,
+                2,
+                5,
+                width=arrow_width_px,
                 clip_on=False,
-                transform=total_trans,
+                transform=(
+                    IdentityTransform() + ScaledTranslation(ax_x, ax_y, fig.transFigure)
+                ),
                 alpha=0.1,
                 color="k",
             )
@@ -360,7 +359,7 @@ def DCCT(
                 )
                 fig.add_artist(a)
             x_textfig = x_textdisp + arrow_width_px
-            y_textfig = y_textdisp - 0.005
+            y_textfig = y_textdisp - 5.0
             plt.text(
                 x_textfig,
                 y_textfig,
@@ -369,7 +368,9 @@ def DCCT(
                 ha="right",
                 rotation=45,
                 clip_on=False,
-                transform=total_trans,
+                transform=(
+                    IdentityTransform() + ScaledTranslation(ax_x, ax_y, fig.transFigure)
+                ),
                 color="k",
             )
             if check_for_label_num:
