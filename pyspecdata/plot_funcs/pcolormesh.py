@@ -107,7 +107,7 @@ def pcolormesh(
             if scale_independently:
                 plt.colorbar(mappable=mappable, ax=thisax)
             elif one_plot:
-                plt.colorbar(mappable=mappable,ax = thisax)
+                plt.colorbar(mappable=mappable, ax=thisax)
             else:
                 pass  # b/c no use for extra colorbar if locked together
         elif j == 1:
