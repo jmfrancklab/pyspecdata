@@ -153,7 +153,7 @@ def DCCT(
         assert all(
             np.isclose(my_data.data.imag, 0)
         ), "In order to use a color map, you must pass real data"
-        if type(cmap) == str:
+        if type(cmap) is str:
             cmap = plt.get_cmap(cmap)
             my_data.data = my_data.data.real
             real_data = True
