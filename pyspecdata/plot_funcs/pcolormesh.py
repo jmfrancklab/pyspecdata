@@ -84,6 +84,7 @@ def pcolormesh(
         if ax1 is None:
             fig = plt.gcf()
             ax1 = fig.add_subplot(1, 1, 1)
+            one_plot = True
         ax_list = [(ax1, lambda x: x.real, "real")]
     X, Y = np.meshgrid(
         forplot.getaxis(forplot.dimlabels[1]),
@@ -105,6 +106,8 @@ def pcolormesh(
         if j == 0:
             if scale_independently:
                 plt.colorbar(mappable=mappable, ax=thisax)
+            elif one_plot:
+                plt.colorbar(mappable=mappable,ax = thisax)
             else:
                 pass  # b/c no use for extra colorbar if locked together
         elif j == 1:
