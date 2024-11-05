@@ -32,7 +32,7 @@ def DCCT(
     label_spacing_multiplier=50,
     allow_for_text_default=10,
     allow_for_ticks_default=70,
-    line_x_extend = 275,
+    line_x_extend = 200,
     text_height=40,
     LHS_pad=0.01,
     RHS_pad=0.05,
@@ -282,7 +282,7 @@ def DCCT(
         _, y2_fig = (ax2.transAxes+ fig.transFigure.inverted()).transform(
             r_[0, 0.05]
         ) 
-        x1_disp -= label_spacing + line_x_extend #shifts labels to left a good amount
+        x1_disp -= label_spacing + allow_for_ticks_default + line_x_extend #shifts labels to left a good amount
         lineA = lines.Line2D(
             [x1_disp, x1_disp],
             [y1_fig, y2_fig],
@@ -322,7 +322,7 @@ def DCCT(
                 # the labels of the outer dimensions
                 label_spacing = this_label_num * label_spacing_multiplier
                 Dx_textdisp = (
-                    -(allow_for_text_default + allow_for_ticks_default)
+                    -allow_for_ticks_default
                     - label_spacing
                     - text_height / 2
                 )
