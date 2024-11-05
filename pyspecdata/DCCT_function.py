@@ -32,6 +32,7 @@ def DCCT(
     label_spacing_multiplier=50,
     allow_for_text_default=10,
     allow_for_ticks_default=70,
+    line_x_extend = 275,
     text_height=40,
     LHS_pad=0.01,
     RHS_pad=0.05,
@@ -202,9 +203,9 @@ def DCCT(
                 plt.axes([LHS_labels + LHS_pad, b, width, axes_height])
             )  # lbwh
     # {{{ make blended transform for plotting coherence transfer labels        
-    dx = LHS_labels + LHS_pad  # Fig coord
+    dx = LHS_labels + LHS_pad  # x coord in display coord
     axis_to_figure = ax_list[0].transAxes + fig.transFigure.inverted()
-    _, dy = axis_to_figure.transform(r_[0, 0])
+    _, dy = axis_to_figure.transform(r_[0, 0]) # bottom left corner of first ax in fig coord
     total_scale_transform = IdentityTransform() + ScaledTranslation(
         dx, dy, fig.transFigure
     )
@@ -267,34 +268,32 @@ def DCCT(
         ax2,
         label,
         this_label_num,
-        allow_for_text=allow_for_text_default,
-        allow_for_ticks=allow_for_ticks_default,
     ):
-        label_spacing = this_label_num * label_spacing_multiplier
-        # It's easiest to just take the axes coord of each axes object to find
-        # the bottom left corner so just keep how we were doing it before
-        # {{ transform from axes coords to figure coords for respective axes
-        ax1_to_figure = ax1.transAxes + fig.transFigure.inverted()
-        ax2_to_figure = ax2.transAxes + fig.transFigure.inverted()
-        # }}}
-        # following line to create an offset for different dimension labels
-        x1, y1 = ax1_to_figure.transform(
-            r_[0 - allow_for_ticks - label_spacing, 0.95]
+        label_spacing = this_label_num * label_spacing_multiplier # depending on number 
+        #                                                           of dims this will
+        #                                                           space the lines
+        #                                                           along x approp.
+        x1_disp, _ = ax1.transAxes.transform(
+            r_[0, 0.95]
         )
-        x2, y2 = ax2_to_figure.transform(
-            r_[0 - allow_for_ticks - label_spacing, 0.05]
-        )
+        _, y1_fig = (ax1.transAxes+ fig.transFigure.inverted()).transform(
+            r_[0, 0.95]
+        ) 
+        _, y2_fig = (ax2.transAxes+ fig.transFigure.inverted()).transform(
+            r_[0, 0.05]
+        ) 
+        x1_disp -= label_spacing + line_x_extend #shifts labels to left a good amount
         lineA = lines.Line2D(
-            [x1, x2],
-            [y1, y2],
+            [x1_disp, x1_disp],
+            [y1_fig, y2_fig],
             linewidth=1,
             color="k",
             transform=total_trans,
             clip_on=False,
         )
         plt.text(
-            x1, # same x coord as the line to keep simple
-            (y2 + y1) / 2,
+            x1_disp, # same x coord as the line to keep simple
+            (y2_fig + y1_fig) / 2,
             label,
             va="center",
             ha="right",
@@ -312,8 +311,6 @@ def DCCT(
         label_placed,
         this_label_num,
         check_for_label_num=True,
-        allow_for_text=allow_for_text_default,
-        allow_for_ticks=allow_for_ticks_default,
         y_space_px=30,
         arrow_width_px=4.0,
         arrow_head_vs_width=3,
@@ -325,7 +322,7 @@ def DCCT(
                 # the labels of the outer dimensions
                 label_spacing = this_label_num * label_spacing_multiplier
                 Dx_textdisp = (
-                    -(allow_for_text + allow_for_ticks)
+                    -(allow_for_text_default + allow_for_ticks_default)
                     - label_spacing
                     - text_height / 2
                 )
@@ -570,7 +567,6 @@ def DCCT(
         label_placed,
         this_label_num=depth - 1,
         check_for_label_num=False,
-        allow_for_text=-50,
     )
     plt.title(plot_title)
     if just_2D:
