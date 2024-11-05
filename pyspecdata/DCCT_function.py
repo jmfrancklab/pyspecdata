@@ -19,7 +19,6 @@ from pyspecdata.plot_funcs.image import imagehsv
 import matplotlib.ticker as mticker
 import logging
 
-
 def DCCT(
     this_nddata,
     this_fig_obj,
@@ -201,6 +200,7 @@ def DCCT(
             ax_list.append(
                 plt.axes([LHS_labels + LHS_pad, b, width, axes_height])
             )  # lbwh
+    # {{{ make blended transform for plotting coherence transfer labels        
     dx = LHS_labels + LHS_pad  # Fig coord
     axis_to_figure = ax_list[0].transAxes + fig.transFigure.inverted()
     _, dy = axis_to_figure.transform(r_[0, 0])
@@ -210,6 +210,7 @@ def DCCT(
     total_trans = blended_transform_factory(
         total_scale_transform, fig.transFigure
     )
+    # }}}
     # {{{ adjust tick settings -- AFTER extents are set
     # {{{ bottom subplot
     ax_list[0].xaxis.set_major_locator(majorLocator())
@@ -269,6 +270,8 @@ def DCCT(
         allow_for_ticks=allow_for_ticks_default,
     ):
         label_spacing = this_label_num * label_spacing_multiplier
+        # It's easiest to just take the axes coord of each axes object to find
+        # the bottom left corner so just keep how we were doing it before
         # {{ transform from axes coords to figure coords for respective axes
         ax1_to_figure = ax1.transAxes + fig.transFigure.inverted()
         ax2_to_figure = ax2.transAxes + fig.transFigure.inverted()
@@ -289,7 +292,7 @@ def DCCT(
             clip_on=False,
         )
         plt.text(
-            x1,
+            x1, # same x coord as the line to keep simple
             (y2 + y1) / 2,
             label,
             va="center",
