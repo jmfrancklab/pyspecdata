@@ -20,6 +20,7 @@ from pyspecdata.plot_funcs.image import imagehsv
 import matplotlib.ticker as mticker
 import logging
 
+
 def DCCT(
     this_nddata,
     this_fig_obj,
@@ -32,8 +33,8 @@ def DCCT(
     label_spacing_multiplier=50,
     allow_for_text_default=10,
     allow_for_ticks_default=70,
-    line_x_extend = 200,
-    text_height=40,
+    line_x_extend=150,
+    arrow_shift=10,
     LHS_pad=0.01,
     RHS_pad=0.05,
     shareaxis=False,
@@ -202,10 +203,12 @@ def DCCT(
             ax_list.append(
                 plt.axes([LHS_labels + LHS_pad, b, width, axes_height])
             )  # lbwh
-    # {{{ make blended transform for plotting coherence transfer labels        
-    dx = LHS_labels + LHS_pad  # x coord in display coord
+    # {{{ make blended transform for plotting coherence transfer labels
+    dx = LHS_labels + LHS_pad  # x coord in figure coord
     axis_to_figure = ax_list[0].transAxes + fig.transFigure.inverted()
-    _, dy = axis_to_figure.transform(r_[0, 0]) # bottom left corner of first ax in fig coord
+    _, dy = axis_to_figure.transform(
+        r_[0, 0]
+    )  # bottom left corner of first ax in fig coord
     total_scale_transform = IdentityTransform() + ScaledTranslation(
         dx, dy, fig.transFigure
     )
@@ -269,20 +272,24 @@ def DCCT(
         label,
         this_label_num,
     ):
-        label_spacing = this_label_num * label_spacing_multiplier # depending on number 
-        #                                                           of dims this will
-        #                                                           space the lines
-        #                                                           along x approp.
-        x1_disp, _ = ax1.transAxes.transform(
+        label_spacing = (
+            this_label_num * label_spacing_multiplier
+        )  # depending on number of dims this will space the lines along x
+        #    approp.
+        x1_disp, _ = ax1.transAxes.transform(r_[0, 0.95])
+        _, y1_fig = (ax1.transAxes + fig.transFigure.inverted()).transform(
             r_[0, 0.95]
         )
-        _, y1_fig = (ax1.transAxes+ fig.transFigure.inverted()).transform(
-            r_[0, 0.95]
-        ) 
-        _, y2_fig = (ax2.transAxes+ fig.transFigure.inverted()).transform(
+        _, y2_fig = (ax2.transAxes + fig.transFigure.inverted()).transform(
             r_[0, 0.05]
-        ) 
-        x1_disp -= label_spacing + allow_for_ticks_default + line_x_extend #shifts labels to left a good amount
+        )
+        print(label_spacing)
+        x1_disp -= (
+            label_spacing
+            + allow_for_ticks_default
+            + allow_for_text_default
+            + line_x_extend
+        )  # shifts labels to left a good amount
         lineA = lines.Line2D(
             [x1_disp, x1_disp],
             [y1_fig, y2_fig],
@@ -292,7 +299,7 @@ def DCCT(
             clip_on=False,
         )
         plt.text(
-            x1_disp, # same x coord as the line to keep simple
+            x1_disp,  # same x coord as the line to keep simple
             (y2_fig + y1_fig) / 2,
             label,
             va="center",
@@ -315,24 +322,28 @@ def DCCT(
         arrow_width_px=4.0,
         arrow_head_vs_width=3,
     ):
+        ax_x, ax_y = axis_to_figure.transform(r_[0, 0])
+        x_axorigindisp,y_axorigindisp = ax1.transAxes.transform(r_[0,0])
         if not check_for_label_num or not label_placed[this_label_num]:
-            x_axorigindisp, y_axorigindisp = ax1.transAxes.transform(r_[0, 0])
             # {{{ determine the x and y position of the label in display coords
             if check_for_label_num:
                 # the labels of the outer dimensions
                 label_spacing = this_label_num * label_spacing_multiplier
-                Dx_textdisp = (
-                    -allow_for_ticks_default
-                    - label_spacing
-                    - text_height / 2
+                x_textdisp, _ = axis_to_figure.transform(
+                    r_[
+                        0
+                        - label_spacing
+                        - allow_for_text_default
+                        - allow_for_ticks_default,
+                        0,
+                    ]
                 )
-                x_textdisp = x_axorigindisp + Dx_textdisp
             else:
                 # same as above, but determine text
                 # position based on tick labels
                 label = my_data.unitify_axis(my_data.dimlabels[-2])
                 # from here https://stackoverflow.com/questions/44012436/pytho\
-                #n-matplotlib-get-position-of-xtick-labels
+                # n-matplotlib-get-position-of-xtick-labels
                 # then searching for BBox docs
                 logging.debug(
                     strm(
@@ -343,10 +354,11 @@ def DCCT(
                         ],
                     )
                 )
-                x_textdisp = [
-                    j.get_window_extent().bounds for j in ax1.get_yticklabels()
-                ][0][0]
-            x_textdisp -= 6.0 * text_height - arrow_width_px
+                x_textdisp = (
+                    LHS_labels + LHS_pad
+                )  # bottom left corner of bottom axes in fig
+                x_textdisp -= arrow_shift  # scoot it over a little
+            x_textdisp -= arrow_width_px
             y_textdisp = -25.0
             if diagnostic:
                 a = Circle(
@@ -358,8 +370,6 @@ def DCCT(
                 )
                 fig.add_artist(a)
             # }}}
-            axis_to_figure = ax1.transAxes + fig.transFigure.inverted()
-            ax_x, ax_y = axis_to_figure.transform(r_[0, 0])
             AnArrow = FancyArrow(
                 x_textdisp,
                 y_textdisp,
@@ -475,9 +485,9 @@ def DCCT(
                 "I don't understand the value you've set for the origin"
                 " keyword argument"
             )
-        kwargs["origin"] = (
-            origin  # required so that imshow now displays the image correctly
-        )
+        kwargs[
+            "origin"
+        ] = origin  # required so that imshow now displays the image correctly
 
         if real_data:
             kwargs["cmap"] = cmap
