@@ -32,7 +32,7 @@ def DCCT(
     total_spacing=0.055,
     label_spacing_multiplier=50,
     allow_for_text_default=10,
-    allow_for_ticks_default=70,
+    allow_for_ticks_default=50,
     line_x_extend=150,
     arrow_shift=10,
     LHS_pad=0.01,
@@ -54,31 +54,43 @@ def DCCT(
     ==========
     this_nddata:    nddata
                     data being plotted
-    thi_fig_obj:    figure
+    this_fig_obj:    figure
                     size/type of figure to be plotted on
     custom_scaling: boolean
                     allows user to scale the intensity of data presented
     grid_bottom:    float
-                    coordinate for bottom of DCCT plot
+                    Figure coordinates
+                    y-coordinate for bottom of DCCT plot.
     bottom_pad:     float
+                    Figure coordinates
                     distance between bottom of grid and bottom of figure
     grid_top:       float
-                    coordinate top of grid in figure
+                    Figure coordinates
+                    y-coordinate top of grid in figure
     top_pad:        float
+                    Figure coordinates
                     distance between top of figure and top of grid
     total_spacing:  float
+                    Figure coordinates
                     affects spacing between phase cycle dimensions
     label_spacing_multiplier:   int
-                                spacing between axes labels
+                                Display coordinates
+                                spacing between axes labels and coherence labels
     allow_for_text_default:     int
-                                adjusts distance between tick labels and ticks
+                                Display coordinates
+                                Accounts for the height of text labeling
+                                the coherence pathway labels. This is taken 
+                                into consideration when spacing the labels.
     allow_for_ticks_default:    int
-                                adjusts distance between ticks
-    text_height:    int
-                    adjusts sizing of axis labels and tick labels
+                                Display coordinates
+                                Accounts for horizontal distance of ticks which
+                                is taken into consideration when calculating 
+                                placement of labels.
     LHS_pad:        float
+                    Figure coordinates
                     adjusts padding on left hand side of DCCT plot
     RHS_pad:        float
+                    Figure coordinates
                     adjusts padding on right hand side of DCCT plot
     shareaxis:      boolean
                     subplots scale together, but currently, this means there
@@ -276,20 +288,13 @@ def DCCT(
             this_label_num * label_spacing_multiplier
         )  # depending on number of dims this will space the lines along x
         #    approp.
-        x1_disp, _ = ax1.transAxes.transform(r_[0, 0.95])
+        x1_disp = LHS_labels+LHS_pad-label_spacing-allow_for_ticks_default
         _, y1_fig = (ax1.transAxes + fig.transFigure.inverted()).transform(
             r_[0, 0.95]
         )
         _, y2_fig = (ax2.transAxes + fig.transFigure.inverted()).transform(
             r_[0, 0.05]
         )
-        print(label_spacing)
-        x1_disp -= (
-            label_spacing
-            + allow_for_ticks_default
-            + allow_for_text_default
-            + line_x_extend
-        )  # shifts labels to left a good amount
         lineA = lines.Line2D(
             [x1_disp, x1_disp],
             [y1_fig, y2_fig],
@@ -329,15 +334,7 @@ def DCCT(
             if check_for_label_num:
                 # the labels of the outer dimensions
                 label_spacing = this_label_num * label_spacing_multiplier
-                x_textdisp, _ = axis_to_figure.transform(
-                    r_[
-                        0
-                        - label_spacing
-                        - allow_for_text_default
-                        - allow_for_ticks_default,
-                        0,
-                    ]
-                )
+                x_textdisp = LHS_labels+LHS_pad-label_spacing-allow_for_ticks_default-arrow_width_px
             else:
                 # same as above, but determine text
                 # position based on tick labels

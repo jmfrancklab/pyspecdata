@@ -59,7 +59,7 @@ with figlist_var() as fl:
     # keyword arguments to use throughout
     dcct_kwargs = dict(
         total_spacing=0.2,
-        label_spacing_multiplier=50,
+        label_spacing_multiplier=40,
         LHS_pad=0.02,
         )
     fig = fl.next("raw data")
