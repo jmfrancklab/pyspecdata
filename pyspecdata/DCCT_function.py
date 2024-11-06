@@ -75,16 +75,17 @@ def DCCT(
                     affects spacing between phase cycle dimensions
     label_spacing_multiplier:   int
                                 Display coordinates
-                                spacing between axes labels and coherence labels
+                                spacing between axes labels and coherence
+                                labels
     allow_for_text_default:     int
                                 Display coordinates
                                 Accounts for the height of text labeling
-                                the coherence pathway labels. This is taken 
+                                the coherence pathway labels. This is taken
                                 into consideration when spacing the labels.
     allow_for_ticks_default:    int
                                 Display coordinates
                                 Accounts for horizontal distance of ticks which
-                                is taken into consideration when calculating 
+                                is taken into consideration when calculating
                                 placement of labels.
     LHS_pad:        float
                     Figure coordinates
@@ -288,7 +289,9 @@ def DCCT(
             this_label_num * label_spacing_multiplier
         )  # depending on number of dims this will space the lines along x
         #    approp.
-        x1_disp = LHS_labels+LHS_pad-label_spacing-allow_for_ticks_default
+        x1_disp = (
+            LHS_labels + LHS_pad - label_spacing - allow_for_ticks_default
+        )
         _, y1_fig = (ax1.transAxes + fig.transFigure.inverted()).transform(
             r_[0, 0.95]
         )
@@ -328,13 +331,19 @@ def DCCT(
         arrow_head_vs_width=3,
     ):
         ax_x, ax_y = axis_to_figure.transform(r_[0, 0])
-        x_axorigindisp,y_axorigindisp = ax1.transAxes.transform(r_[0,0])
+        x_axorigindisp, y_axorigindisp = ax1.transAxes.transform(r_[0, 0])
         if not check_for_label_num or not label_placed[this_label_num]:
             # {{{ determine the x and y position of the label in display coords
             if check_for_label_num:
                 # the labels of the outer dimensions
                 label_spacing = this_label_num * label_spacing_multiplier
-                x_textdisp = LHS_labels+LHS_pad-label_spacing-allow_for_ticks_default-arrow_width_px
+                x_textdisp = (
+                    LHS_labels
+                    + LHS_pad
+                    - label_spacing
+                    - allow_for_ticks_default
+                    - arrow_width_px
+                )
             else:
                 # same as above, but determine text
                 # position based on tick labels
