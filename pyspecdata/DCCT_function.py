@@ -67,9 +67,6 @@ def DCCT(
         :bbox[2]: int
             Distance between the right most side of the axes objects and the
             left most side of the decorations (in Figure coordinates)
-        :bbox[3]: int
-            Vertical distance between the bottom of the lowest axes and the
-            top of the top axes (in Figure coordinates)
     grid_bottom:    float
                     Figure coordinates
                     y-coordinate for bottom of DCCT plot.
