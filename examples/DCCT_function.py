@@ -11,10 +11,11 @@ domain as well as visualizing the inversion of phase
 using the domain colored plotting style.
 """
 
-from pylab import *
-from pyspecdata import *
-from numpy.random import normal, seed
-from numpy.linalg import norm
+from pylab import rcParams
+import init_logging
+import pyspecdata as psd
+from pyspecdata import r_
+from numpy.random import seed
 import sympy as s
 from collections import OrderedDict
 
@@ -23,11 +24,11 @@ rcParams["image.aspect"] = "auto"  # needed for sphinx gallery
 # sphinx_gallery_thumbnail_number = 2
 init_logging(level="debug")
 
-with figlist_var() as fl:
+with psd.figlist_var() as fl:
     # provide the symbols that we use for the fake data:
     t2, td, vd, ph1, ph2 = s.symbols("t2 td vd ph1 ph2")
     echo_time = 5e-3
-    data = fake_data(
+    data = psd.fake_data(
         # Give the functional form of the fake data.
         # This is an inversion recovery with
         # T₁ of 0.2
@@ -44,10 +45,10 @@ with figlist_var() as fl:
         # time-dependent resonance variation -- see fake_data doc.)
         OrderedDict(
             [
-                ("vd", nddata(r_[0:1:40j], "vd")),
-                ("ph1", nddata(r_[0, 2] / 4.0, "ph1")),
-                ("ph2", nddata(r_[0:4] / 4.0, "ph2")),
-                ("t2", nddata(r_[0:0.2:256j] - echo_time, "t2")),
+                ("vd", psd.nddata(r_[0:1:40j], "vd")),
+                ("ph1", psd.nddata(r_[0, 2] / 4.0, "ph1")),
+                ("ph2", psd.nddata(r_[0:4] / 4.0, "ph2")),
+                ("t2", psd.nddata(r_[0:0.2:256j] - echo_time, "t2")),
             ]
         ),
         {"ph1": 0, "ph2": 1},
@@ -60,12 +61,12 @@ with figlist_var() as fl:
     dcct_kwargs = dict(
         total_spacing=0.2,
         label_spacing_multiplier=40,
-        )
+    )
     fig = fl.next("raw data")
-    DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
+    psd.DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
     fig = fl.next("DCCT -- time domain")
     data.ft(["ph1", "ph2"])
-    DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
+    psd.DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
     fig = fl.next("DCCT -- frequency domain")
     data.ft("t2")
-    DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
+    psd.DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
