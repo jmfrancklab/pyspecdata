@@ -12,7 +12,6 @@ using the domain colored plotting style.
 """
 
 from pylab import rcParams
-import init_logging
 import pyspecdata as psd
 from pyspecdata import r_
 from numpy.random import seed
@@ -22,7 +21,7 @@ from collections import OrderedDict
 seed(2021)
 rcParams["image.aspect"] = "auto"  # needed for sphinx gallery
 # sphinx_gallery_thumbnail_number = 2
-init_logging(level="debug")
+psd.init_logging(level="debug")
 
 with psd.figlist_var() as fl:
     # provide the symbols that we use for the fake data:

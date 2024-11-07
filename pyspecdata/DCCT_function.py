@@ -33,8 +33,6 @@ def DCCT(
     label_spacing_multiplier=50,
     allow_for_text_default=10,
     allow_for_ticks_default=50,
-    arrow_shift=10,
-    RHS_pad=0.05,
     shareaxis=False,
     diagnostic=False,
     cmap=None,
@@ -70,9 +68,6 @@ def DCCT(
     grid_bottom:    float
                     Figure coordinates
                     y-coordinate for bottom of DCCT plot.
-    bottom_pad:     float
-                    Figure coordinates
-                    distance between bottom of grid and bottom of figure
     grid_top:       float
                     Figure coordinates
                     y-coordinate top of grid in figure
@@ -96,12 +91,6 @@ def DCCT(
                                 Accounts for horizontal distance of ticks which
                                 is taken into consideration when calculating
                                 placement of labels.
-    LHS_pad:        float
-                    Figure coordinates
-                    adjusts padding on left hand side of DCCT plot
-    RHS_pad:        float
-                    Figure coordinates
-                    adjusts padding on right hand side of DCCT plot
     shareaxis:      boolean
                     subplots scale together, but currently, this means there
                     must be tick labels on both top and bottom
@@ -372,7 +361,7 @@ def DCCT(
                 x_textdisp = (
                     LHS_labels + bbox[0]
                 )  # bottom left corner of bottom axes in fig
-                x_textdisp -= arrow_shift  # scoot it over a little
+                x_textdisp -= allow_for_text_default  # scoot it over a little
             x_textdisp -= arrow_width_px
             y_textdisp = -25.0
             if diagnostic:
@@ -607,5 +596,5 @@ def DCCT(
             bbox[0] + LHS_labels,
             axes_bottom[-1] + axes_height,
             width,
-            top_pad - RHS_pad,
+            top_pad - (1-bbox[2]-bbox[0]),
         )
