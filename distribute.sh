@@ -10,6 +10,8 @@ MESON_BIN=$PYTHON_BIN/meson
 
 # Run the Docker container and build inside it
 docker run --rm -v $(pwd):/io quay.io/pypa/manylinux2014_x86_64 /bin/bash -c "
+    # Configure git to recognize the directory as safe
+    git config --global safe.directory '*' && \
     # Upgrade pip and install necessary build tools and numpy
     $PYTHON_BIN/python -m pip install --upgrade pip && \
     $PYTHON_BIN/python -m pip install meson meson-python ninja numpy lmfit sympy && \
