@@ -1,4 +1,4 @@
-project('pyspecdata', ['fortran', 'c'], version: '0.9.5.5.1', meson_version: '>=0.63.0')
+project('pyspecdata', ['fortran', 'c'], version: '0.9.5.5.2', meson_version: '>=0.63.0')
 
 py = import('python').find_installation('python3')
 
