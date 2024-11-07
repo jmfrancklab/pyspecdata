@@ -1,5 +1,5 @@
 
-project('pyspecdata', 'fortran', version: '0.9.5.4', meson_version: '>=0.63.0')
+project('pyspecdata', ['fortran', 'c'], version: '0.9.5.4', meson_version: '>=0.63.0')
 
 py = import('python').find_installation('python3')
 
@@ -28,7 +28,6 @@ nnls_extension = py.extension_module(
   ],
   include_directories: include_directories(numpy_include_dir),
   install: true,
+  cpp_args: ['-DADD_UNDERSCORE'],  # Equivalent to define_macros=[("ADD_UNDERSCORE", None)]
+  fortran_args: ['-fallow-argument-mismatch'],  # Equivalent to extra_f77_compile_args
 )
-
-# Install the Python sources
-py.install_sources('pyspecdata')

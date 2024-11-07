@@ -5,7 +5,10 @@ build-backend = "mesonpy"
 [project]
 name = "pyspecdata"
 version = "0.9.5.4"
-description = "Your project description here"
+description = "Object-Oriented, Multi-dimensional Spectroscopic Data Processing"
+readme = "README.rst"  # Ensure this matches the README file's name
+readme-content-type = "text/x-rst"  # Change if using Markdown
 authors = [
-    { name = "Your Name", email = "your.email@example.com" }
+    { name = "John Franck", email = "john.franck@outlook.com" }
 ]
+

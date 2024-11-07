@@ -7,7 +7,7 @@ set -e
 source ~/base/bin/activate
 
 # Ensure meson, meson-python, and twine are installed
-pip install meson meson-python ninja twine
+pip install meson meson-python ninja twine auditwheel
 
 # Create a build directory and configure the project
 echo "Configuring the build..."
@@ -23,6 +23,9 @@ meson compile -C builddir
 # Create a wheel for distribution without isolation
 echo "Building the wheel..."
 python -m build --wheel --no-isolation
+
+echo "auditwheel..."
+auditwheel repair dist/pyspecdata-0.9.5.4-cp311-cp311-linux_x86_64.whl
 
 # Check the distribution files
 echo "Checking the distribution files..."
