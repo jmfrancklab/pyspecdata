@@ -4,7 +4,7 @@
 set -e
 
 # Define the Python version and corresponding paths
-PYTHON_VERSION=cp311-cp311
+PYTHON_VERSION=cp310-cp310
 PYTHON_BIN=/opt/python/$PYTHON_VERSION/bin
 MESON_BIN=$PYTHON_BIN/meson
 
@@ -21,11 +21,14 @@ docker run --rm -v $(pwd):/io quay.io/pypa/manylinux2014_x86_64 /bin/bash -c "
     rm -rf builddir && \
     $MESON_BIN setup builddir && \
     $MESON_BIN compile -C builddir && \
-    # Build the wheel
-    $PYTHON_BIN/python -m build --wheel --no-isolation && \
+    # Build the wheel and source tar.gz
+    $PYTHON_BIN/python -m build --wheel --sdist --no-isolation && \
     # Repair the wheel to ensure manylinux2014 compliance
     auditwheel repair dist/*.whl -w /io/wheelhouse
 "
+
+# Copy the source tar.gz to the wheelhouse directory
+cp dist/*.tar.gz wheelhouse/
 
 # Check the distribution files
 echo "Checking the distribution files..."
