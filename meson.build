@@ -10,11 +10,11 @@ numpy_include_dir = run_command(
 
 # Define custom target to generate _nnlsmodule.c from .pyf file
 f2py_wrapper = custom_target(
-  '_nnlsmodule.c',
-  input: 'nnls/nnls.pyf',
-  output: '_nnlsmodule.c',
-  command: [py, '-m', 'numpy.f2py', '@INPUT@', '-m', 'pyspecdata._nnls', '--quiet'],
-  capture: true,
+    '_nnlsmodule.c',
+    input: 'nnls/nnls.pyf',
+    output: '_nnlsmodule.c',
+    command: [py, '-m', 'numpy.f2py', '@INPUT@'],
+    capture: false,
 )
 
 # Define the Fortran extension module

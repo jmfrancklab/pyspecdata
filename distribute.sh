@@ -10,9 +10,9 @@ MESON_BIN=$PYTHON_BIN/meson
 
 # Run the Docker container and build inside it
 docker run --rm -v $(pwd):/io quay.io/pypa/manylinux2014_x86_64 /bin/bash -c "
-    # Upgrade pip and install necessary build tools
+    # Upgrade pip and install necessary build tools and numpy
     $PYTHON_BIN/python -m pip install --upgrade pip && \
-    $PYTHON_BIN/python -m pip install meson meson-python ninja && \
+    $PYTHON_BIN/python -m pip install meson meson-python ninja numpy lmfit sympy && \
     # Add the Python bin directory to PATH
     export PATH=\$PATH:$PYTHON_BIN && \
     # Navigate to the mounted directory
