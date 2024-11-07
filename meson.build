@@ -27,7 +27,7 @@ fortranobject_o = custom_target(
   'fortranobject.o',
   input: join_paths(f2py_include, 'fortranobject.c'),
   output: 'fortranobject.o',
-  command: ['gcc', '-fPIC', '-c', '@INPUT@', '-o', '@OUTPUT@', '-I' + f2py_include, '-I'+python_inc_dir],
+  command: ['gcc', '-fPIC', '-c', '@INPUT@', '-o', '@OUTPUT@', '-I' + f2py_include, '-I'+python_inc_dir, '-I'+numpy_include_dir],
   build_by_default: true
 )
 

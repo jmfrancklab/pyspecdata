@@ -4,7 +4,7 @@ build-backend = "mesonpy"
 
 [project]
 name = "pyspecdata"
-requires=[
+dependencies = [
     "sympy",
     "numpy",
     "scipy",
