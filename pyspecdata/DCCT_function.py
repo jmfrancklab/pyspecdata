@@ -26,7 +26,7 @@ def DCCT(
     this_fig_obj,
     custom_scaling=False,
     grid_bottom=0.0,
-    bbox=[0.01,0.15,0.94],
+    bbox=[0.05,0.15,0.94],
     grid_top=1.0,
     top_pad=0.1,
     total_spacing=0.055,
@@ -198,7 +198,7 @@ def DCCT(
     )
     minorLocator = lambda: mticker.AutoMinorLocator(n=5)
     LHS_labels, _ = fig.transFigure.inverted().transform(
-        (label_spacing_multiplier * (num_dims+1),0) # add 1 to num_dims to push in a little 
+        (label_spacing_multiplier * num_dims,0) 
     )
     width = bbox[2]-LHS_labels
     for j, b in enumerate(axes_bottom):
@@ -286,7 +286,8 @@ def DCCT(
         label_spacing = (
             (this_label_num+1) * label_spacing_multiplier
         )  # depending on number of dims this will space the lines along x
-        #    approp.
+        #    approp. Need to add one so for label_num 0 it's not on the axes
+        #    with ticks
         x1_disp = (
             LHS_labels + bbox[0] - label_spacing
         )
