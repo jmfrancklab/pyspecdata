@@ -201,9 +201,9 @@ class lmfitdata(nddata):
             >>>     param1=dict(value=1.0, min=0, max=10),
             >>>     param2=dict(value=2.0, min=0, max=10))
         """
-        if len(args) is 1 and type(args[0]) is dict:
+        if len(args) == 1 and type(args[0]) is dict:
             guesses = args[0]
-        elif len(kwargs) is 1 and "guesses" in kwargs.keys():
+        elif len(kwargs) == 1 and "guesses" in kwargs.keys():
             guesses = kwargs["guesses"]
         else:
             guesses = kwargs
