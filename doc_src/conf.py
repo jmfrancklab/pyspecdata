@@ -100,7 +100,6 @@ sphinx_gallery_conf = {
     ],  # path to where to save gallery generated output
     "filename_pattern": ".py",  # modified to make more general
     "ignore_pattern": r"__init__\.py",  # |.*/text_only.*|.*/matplotlib.*',
-    #'image_srcset': ['2x'],
     "reference_url": {
         "pyspecdata": None,
     },

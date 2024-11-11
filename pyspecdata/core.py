@@ -62,6 +62,7 @@ from .general_functions import (
     lsafen,
     dp,
     pinvr,
+    Q_,
 )
 from .hdf_utils import (
     h5loaddict,
@@ -2629,6 +2630,33 @@ class nddata(object):
             self.set_units(other.get_units(thisaxis))
         return self
 
+    def div_units(self, arg1, arg2=None):
+        """divide units of the data (or axis)
+        by the units that are given, and
+        return the multiplier as a number.
+
+        If the result is not dimensionless,
+        an error will be generated.
+
+        e.g. call as `d.divide_by("axisname","s")`
+        to divide the axis units by seconds
+
+        or `d.divide_by("s")` to divide the
+        data units by seconds.
+        """
+        if arg2 is not None:
+            denom_units = Q_(arg2)
+            numer_units = Q_(self.get_units(arg1))
+        else:
+            denom_units = Q_(arg1)
+            numer_units = Q_(self.get_units())
+        retval = (numer_units / denom_units).to_base_units()
+        assert retval.check(""), (
+            "the quotient you're asking for is not unitless -- it has units"
+            f" of {retval.dimensionality}"
+        )
+        return retval.magnitude
+
     def get_units(self, *args):
         if len(args) == 1:
             if self.axis_coords_units is None:
@@ -3698,6 +3726,8 @@ class nddata(object):
             self.data = result.data
             return self
         else:
+            result.copy_props(self)
+            result.set_units(axis, self.get_units(axis))
             return result
 
     def polyfit(self, axis, order=1, force_y_intercept=None):
@@ -4325,6 +4355,8 @@ class nddata(object):
                 first_group = m.groups()[0]
                 if first_group.startswith("_"):
                     first_group = first_group[1:]
+                if len(first_group) > 1:
+                    first_group = "{%s}" % first_group
                 if isft:
                     axis_name = "$\\Delta p_%s$" % first_group
                 else:

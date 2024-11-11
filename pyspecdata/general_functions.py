@@ -28,8 +28,12 @@ else:
 
     def Q_(*args):
         if len(args) == 1:
-            b = a
+            b = args[0]
             a = 1
+        elif len(args) == 2:
+            a, b = args
+        else:
+            raise ValueError("I don't know what to do with more than 2 args!")
         m = re.match(r"(.*)√(\w+)(.*)", b)
         if m:
             g1, g2, g3 = m.groups()
