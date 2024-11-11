@@ -32,7 +32,6 @@ def DCCT(
     total_spacing=0.055,
     label_spacing_multiplier=50,
     allow_for_text_default=20,
-    label_pad=50,
     shareaxis=False,
     diagnostic=False,
     cmap=None,
@@ -86,11 +85,6 @@ def DCCT(
                                 Accounts for the height of text labeling
                                 the coherence pathway labels. This is taken
                                 into consideration when spacing the labels.
-    label_pad:    int
-                                Display coordinates
-                                Accounts for horizontal distance of ticks which
-                                is taken into consideration when calculating
-                                placement of labels.
     shareaxis:      boolean
                     subplots scale together, but currently, this means there
                     must be tick labels on both top and bottom
