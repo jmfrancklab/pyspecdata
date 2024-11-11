@@ -5,42 +5,54 @@ import numpy as np
 def pcolormesh(
     self,
     fig=None,
+    cmap="viridis",
     shading="nearest",
     ax1=None,
     ax2=None,
     ax=None,
     scale_independently=False,
+    vmin=None,
+    vmax=None,
     human_units=True,
     force_balanced_cmap=False,
     handle_axis_sharing=True,
-    mappable_list=[],
+    mappable_list=None,
 ):
-    """generate a pcolormesh and label it with the axis coordinate available from the nddata
+    """generate a pcolormesh and label it with the axis coordinate available
+    from the nddata
 
     Parameters
     ==========
     fig : matplotlib figure object
+    cmap: str (default 'viridis')
+        cmap to pass to matplotlib pcolormesh
     shading: str (default 'nearest')
         the type of shading to pass to matplotlib pcolormesh
     ax1 : matplotlib axes object
         where do you want the left plot to go?
     ax2 : matplotlib axes object
         where do you want the right plot to go?
+    ax : matplotlib axes object
+        if passed, this is just used for ax1
     scale_independently: boolean (default False)
         Do you want each plot to be scaled independently?
         (If false, the colorbar will have the same limits for all plots)
     handle_axis_sharing: boolean (default True)
         Typically, you want the axes to scale together when you zoom
-        -- *e.g.* especially when you are plotting a real and imaginary together.
+        -- *e.g.* especially when you are plotting a real and imaginary
+        together.
         So, this defaults to true to do that.
-        But sometimes, you want to get fancy and, *e.g.* bind the sharing of many plots together
+        But sometimes, you want to get fancy and, *e.g.* bind the sharing of
+        many plots together
         because matplotlib doesn't let you call sharex/sharey more than once,
-        you need then to tell it not to handle the axis sharing, and to it yourself
+        you need then to tell it not to handle the axis sharing, and to it
+        yourself
         outside this routine.
     mappable_list : list, default []
-        empty list which fills with field values from color axis used for
-        initial subplot, used to scale multiple plots along the same color
-        axis. Used to make all 3x2 plots under a uniform color scale
+        used to scale multiple plots along the same color
+        axis. Used to make all 3x2 plots under a uniform color scale.
+
+        List of QuadMesh objects returned by this function.
 
     Returns
     =======
@@ -49,6 +61,10 @@ def pcolormesh(
         under a uniform color scale
     """
     assert len(self.dimlabels) == 2, "currently, this only supports 2D data"
+    if mappable_list is None:
+        # settings the default value to just [] above does NOT create a
+        # new object.  This does
+        mappable_list = list([])
     if human_units:
         forplot = self.C.human_units()
     else:
@@ -74,14 +90,9 @@ def pcolormesh(
         forplot.getaxis(forplot.dimlabels[0]),
     )
     Z = forplot.data
-    # {{{ store these so that I can set the color scale for the plots together,
-    #     at the end
-    vmin_list = []
-    vmax_list = []
-    # }}}
-    for thisax, thisfun, thislabel in ax_list:
+    for j, (thisax, thisfun, thislabel) in enumerate(ax_list):
         Zdata = thisfun(Z)
-        mappable = thisax.pcolormesh(X, Y, Zdata, shading=shading)
+        mappable = thisax.pcolormesh(X, Y, Zdata, cmap=cmap, shading=shading)
         if handle_axis_sharing and thisax != ax_list[0][0]:
             thisax.sharex(ax_list[0][0])
             thisax.sharey(ax_list[0][0])
@@ -89,21 +100,50 @@ def pcolormesh(
         thisax.set_ylabel(forplot.unitify_axis(forplot.dimlabels[0]))
         thisax.set_xlabel(forplot.unitify_axis(forplot.dimlabels[1]))
         thisax.set_title(f"({thislabel})")
-    for this_mappable in mappable_list:
-        thismin, thismax = this_mappable.get_clim()
-        vmin_list.append(thismin)
-        vmax_list.append(thismax)
-    if not scale_independently:
-        overall_min = np.min(vmin_list)
-        overall_max = np.max(vmax_list)
-        if force_balanced_cmap:
-            if overall_max > -overall_min:
-                overall_min = -overall_max
+        # {{{ handle the creation of colorbars here, since adjusting the
+        #     mappable clim later changes the colorbars just fine
+        if j == 0:
+            if scale_independently:
+                plt.colorbar(mappable=mappable, ax=thisax)
             else:
-                overall_max = -overall_min
-    for j, (thisax, thisfun, thislabel) in enumerate(ax_list):
-        if not scale_independently:
-            mappable_list[j].set_clim(overall_min, overall_max)
-        if scale_independently or j > 0:
-            plt.colorbar(mappable=mappable_list[j], ax=thisax)
+                pass  # b/c no use for extra colorbar if locked together
+        elif j == 1:
+            plt.colorbar(mappable=mappable, ax=thisax)
+        # }}}
+    # {{{ overall scaling
+    # is manually specified:
+    if vmin is not None:
+        assert vmax is not None, "if vmin is specified, vmax must be too!"
+        assert not scale_independently, (
+            "scale_independently is True but you've manually set vmin and"
+            " vmax, this doesn't make sense! If they share vmax and vmin, then"
+            " they are scaled together!!"
+        )
+        assert not force_balanced_cmap, (
+            "you're trying to force the colormap to have a balanced scale"
+            " while also manually setting its limits, this doesn't make sense!"
+        )
+        overall_min = vmin
+        overall_max = vmax
+    if not scale_independently:
+        if vmin is None:
+            # {{{ we only need to determine the overall min and max if we
+            #    haven't explicitly set them
+            vmin_list = []
+            vmax_list = []
+            for this_mappable in mappable_list:
+                thismin, thismax = this_mappable.get_clim()
+                vmin_list.append(thismin)
+                vmax_list.append(thismax)
+            overall_min = np.min(vmin_list)
+            overall_max = np.max(vmax_list)
+            if force_balanced_cmap:
+                if overall_max > -overall_min:
+                    overall_min = -overall_max
+                else:
+                    overall_max = -overall_min
+            # }}}
+        for thismappable in mappable_list:
+            thismappable.set_clim(vmin=overall_min, vmax=overall_max)
+    # }}}
     return mappable_list
