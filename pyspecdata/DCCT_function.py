@@ -26,12 +26,11 @@ def DCCT(
     this_fig_obj,
     custom_scaling=False,
     grid_bottom=0.0,
-    bbox=[0.05,0.15,0.94],
+    bbox=[0.02, 0.1, 0.94],
     grid_top=1.0,
-    top_pad=0.1,
+    top_pad=0.05,
     total_spacing=0.055,
-    label_spacing_multiplier=50,
-    allow_for_text_default=20,
+    vert_label_spacer=50,
     shareaxis=False,
     diagnostic=False,
     cmap=None,
@@ -76,15 +75,10 @@ def DCCT(
     total_spacing:  float
                     Figure coordinates
                     affects spacing between phase cycle dimensions
-    label_spacing_multiplier:   int
-                                Display coordinates
-                                spacing between axes labels and coherence
-                                labels
-    allow_for_text_default:     int
-                                Display coordinates
-                                Accounts for the height of text labeling
-                                the coherence pathway labels. This is taken
-                                into consideration when spacing the labels.
+    vert_label_spacer:   int
+                         Display coordinates
+                         spacing between axes labels and coherence
+                         labels
     shareaxis:      boolean
                     subplots scale together, but currently, this means there
                     must be tick labels on both top and bottom
@@ -192,9 +186,9 @@ def DCCT(
     )
     minorLocator = lambda: mticker.AutoMinorLocator(n=5)
     LHS_labels, _ = fig.transFigure.inverted().transform(
-        (label_spacing_multiplier * num_dims,0) 
+        (vert_label_spacer * num_dims, 0)
     )
-    width = bbox[2]-LHS_labels
+    width = bbox[2] - LHS_labels
     for j, b in enumerate(axes_bottom):
         if j != 0 and shareaxis:
             ax_list.append(
@@ -278,13 +272,12 @@ def DCCT(
         this_label_num,
     ):
         label_spacing = (
-            (this_label_num+1) * label_spacing_multiplier
-        )  # depending on number of dims this will space the lines along x
-        #    approp. Need to add one so for label_num 0 it's not on the axes
-        #    with ticks
-        x1_disp = (
-            LHS_labels + bbox[0] - label_spacing
-        )
+            this_label_num + 1
+        ) * vert_label_spacer  # depending on number of dims this will space
+        #                        the lines along x approp. Need to add one so
+        #                        for label_num 0 it's not on the axes with
+        #                        ticks
+        x1_disp = LHS_labels + bbox[0] - label_spacing
         _, y1_fig = (ax1.transAxes + fig.transFigure.inverted()).transform(
             r_[0, 0.95]
         )
@@ -319,9 +312,7 @@ def DCCT(
         label_placed,
         this_label_num,
         check_for_label_num=True,
-        y_space_px=30,
         arrow_width_px=4.0,
-        arrow_head_vs_width=3,
     ):
         ax_x, ax_y = axis_to_figure.transform(r_[0, 0])
         x_axorigindisp, y_axorigindisp = ax1.transAxes.transform(r_[0, 0])
@@ -329,20 +320,12 @@ def DCCT(
             # {{{ determine the x and y position of the label in display coords
             if check_for_label_num:
                 # the labels of the outer dimensions
-                label_spacing = (this_label_num+1) * label_spacing_multiplier
-                x_textdisp = (
-                    LHS_labels
-                    + bbox[0]
-                    - label_spacing
-                    - arrow_width_px
-                )
+                label_spacing = (this_label_num + 1) * vert_label_spacer
+                x_textdisp = LHS_labels + bbox[0] - label_spacing
             else:
                 # same as above, but determine text
                 # position based on tick labels
                 label = my_data.unitify_axis(my_data.dimlabels[-2])
-                x_axorigindisp, y_axorigindisp = ax1.transAxes.transform(
-                    r_[0, 0]
-                )
                 # from here https://stackoverflow.com/questions/44012436/pytho\
                 # n-matplotlib-get-position-of-xtick-labels
                 # then searching for BBox docs
@@ -358,7 +341,16 @@ def DCCT(
                 x_textdisp = (
                     LHS_labels + bbox[0]
                 )  # bottom left corner of bottom axes in fig
-            x_textdisp -= allow_for_text_default - arrow_width_px  # scoot it over a little
+            # tick length is a nice consistent distance to push the arrows out
+            # slightly to avoid confusion
+            tick_length = [
+                j.get_window_extent().bounds for j in ax1.get_yticklabels()
+            ][-1][-1]
+            x_textdisp -= tick_length
+            x_textdisp -= (
+                arrow_width_px  # x_textdisp is base of arrow so subtract
+            )
+            #                               arrow width
             y_textdisp = -25.0
             if diagnostic:
                 a = Circle(
@@ -592,5 +584,5 @@ def DCCT(
             bbox[0] + LHS_labels,
             axes_bottom[-1] + axes_height,
             width,
-            top_pad - (1-bbox[2]-bbox[0]),
+            top_pad - (1 - bbox[2] - bbox[0]),
         )
