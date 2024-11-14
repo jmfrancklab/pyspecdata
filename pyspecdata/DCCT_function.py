@@ -601,6 +601,4 @@ def DCCT(
             width,
             top_pad - (1 - bbox[2] - bbox[0]),
         )
-
-
 # }}}
