@@ -56,15 +56,24 @@ with psd.figlist_var() as fl:
     data.reorder(["ph1", "ph2", "vd", "t2"])
     # fake_data gives us data already in the coherence domain, so:
     data.ift(["ph1", "ph2"])
-    # keyword arguments to use throughout
-    dcct_kwargs = dict(
+    LHS_pad_1 = 0.02  # left hand side padding for first DCCT
+    LHS_pad_2 = 0.52  # left hand side padding for second DCCT
+    R_to_L = 0.46  # width from left of decorations to right of
+    #               plots should be the same for both DCCT
+    bbox_bottom = 0.1  # bottom padding should be equal for both
+    #                   DCCT
+    # keyword arguments to use for the first DCCT
+    dcct_kwargs_1 = dict(
+        bbox=[LHS_pad_1, bbox_bottom, R_to_L],
         total_spacing=0.2,
     )
-    fig = fl.next("raw data")
-    psd.DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
-    fig = fl.next("DCCT -- time domain")
+    fig = fl.next("Data")  # Make figure object to place the DCCT
     data.ft(["ph1", "ph2"])
-    psd.DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
-    fig = fl.next("DCCT -- frequency domain")
+    psd.DCCT(data, fig, plot_title="Time Domain", **dcct_kwargs_1)
     data.ft("t2")
-    psd.DCCT(data, fig, plot_title=fl.current, **dcct_kwargs)
+    # keyword arguments to use for second DCCT
+    dcct_kwargs_2 = dict(
+        bbox=[LHS_pad_2, bbox_bottom, R_to_L],
+        total_spacing=0.2,
+    )
+    psd.DCCT(data, fig, plot_title="Frequency Domain", **dcct_kwargs_2)
