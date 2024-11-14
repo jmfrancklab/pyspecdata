@@ -284,7 +284,7 @@ def DCCT(
         label_spacing = (
             this_label_num
             + 1  # plus one so the first horizontal doesn't
-            #                    overlap with the indirect axis
+            #      overlap with the indirect axis
         ) * vert_label_spacer  # depending on number of dims this will space
         #                        the lines along x approp.
         x1_disp = LHS_labels + bbox[0] - label_spacing  # x coord is the left
