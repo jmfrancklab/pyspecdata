@@ -148,7 +148,7 @@ with psd.figlist_var() as fl:
     plt.text(
         0.06,
         0.49,
-        "# dim * kwarg(vert_label_space)",
+        "kwarg(vert_label_space)",
         color="r",
         clip_on=False,
         transform=fig.transFigure,
