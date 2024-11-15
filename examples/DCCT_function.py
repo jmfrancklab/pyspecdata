@@ -15,6 +15,7 @@ from pylab import rcParams
 import pyspecdata as psd
 from pyspecdata import r_
 from numpy.random import seed
+import matplotlib.pyplot as plt
 import sympy as s
 from collections import OrderedDict
 
@@ -56,16 +57,15 @@ with psd.figlist_var() as fl:
     data.reorder(["ph1", "ph2", "vd", "t2"])
     # fake_data gives us data already in the coherence domain, so:
     data.ift(["ph1", "ph2"])
-    LHS_pad_1 = 0.02  # left hand side padding for first DCCT
-    LHS_pad_2 = 0.52  # left hand side padding for second DCCT
-    R_to_L = 0.46  # width from left of decorations to right of
+    LHS_pad_1 = 0.1  # left hand side padding for first DCCT
+    LHS_pad_2 = 0.55  # left hand side padding for second DCCT
+    R_to_L = 0.42  # width from left of decorations to right of
     #               plots should be the same for both DCCT
     bbox_bottom = 0.1  # bottom padding should be equal for both
     #                   DCCT
     # keyword arguments to use for the first DCCT
     dcct_kwargs_1 = dict(
-        bbox=[LHS_pad_1, bbox_bottom, R_to_L],
-        total_spacing=0.2,
+        bbox=[LHS_pad_1, bbox_bottom, R_to_L], total_spacing=0.2, top_pad=0.1
     )
     fig = fl.next("Data")  # Make figure object to place the DCCT
     data.ft(["ph1", "ph2"])
@@ -73,7 +73,83 @@ with psd.figlist_var() as fl:
     data.ft("t2")
     # keyword arguments to use for second DCCT
     dcct_kwargs_2 = dict(
-        bbox=[LHS_pad_2, bbox_bottom, R_to_L],
-        total_spacing=0.2,
+        bbox=[LHS_pad_2, bbox_bottom, R_to_L], total_spacing=0.2, top_pad=0.1
     )
     psd.DCCT(data, fig, plot_title="Frequency Domain", **dcct_kwargs_2)
+    # {{{ add lines indicating kwargs
+    plt.plot(
+        [0.06, 0.06],
+        [0.0, 0.09],
+        "b",
+        marker="_",
+        linewidth=1,
+        clip_on=False,
+        transform=fig.transFigure,
+    )
+    plt.text(
+        0.01,
+        0.03,
+        "bbox[1]",
+        color="b",
+        clip_on=False,
+        transform=fig.transFigure,
+    )
+    plt.plot(
+        [0, 0.1],
+        [0.9, 0.9],
+        "b",
+        marker="|",
+        linewidth=1,
+        clip_on=False,
+        transform=fig.transFigure,
+    )
+    plt.text(
+        0.025,
+        0.92,
+        "bbox[0]",
+        color="b",
+        clip_on=False,
+        transform=fig.transFigure,
+    )
+    plt.plot(
+        [0.1, 0.52],
+        [0.95, 0.95],
+        "b",
+        marker="|",
+        linewidth=1,
+        clip_on=False,
+        transform=fig.transFigure,
+    )
+    plt.text(
+        0.35,
+        0.97,
+        "bbox[2]",
+        color="b",
+        clip_on=False,
+        transform=fig.transFigure,
+    )
+    plt.text(
+        0.35,
+        0.97,
+        "bbox[2]",
+        color="b",
+        clip_on=False,
+        transform=fig.transFigure,
+    )
+    plt.plot(
+        [0.12, 0.15],
+        [0.47, 0.47],
+        "r",
+        marker="|",
+        linewidth=1,
+        clip_on=False,
+        transform=fig.transFigure,
+    )
+    plt.text(
+        0.06,
+        0.49,
+        "# dim * kwarg(vert_label_space)",
+        color="r",
+        clip_on=False,
+        transform=fig.transFigure,
+    )
