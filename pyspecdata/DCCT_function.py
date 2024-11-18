@@ -26,7 +26,7 @@ def DCCT(
     this_fig_obj,
     custom_scaling=False,
     grid_bottom=0.0,
-    DCCT_bbox=[0.02, 0.1, 0.94],
+    bbox=[0.02, 0.1, 0.94],
     grid_top=1.0,
     top_pad=0.05,
     total_spacing=0.055,
@@ -52,15 +52,15 @@ def DCCT(
         size/type of figure to be plotted on
     custom_scaling : boolean
         allows user to scale the intensity of data presented
-    DCCT_bbox : list
+    bbox : list
         contains the following:
-        :DCCT_bbox[0]: int
+        :bbox[0]: int
             Left hand side padding between the left side of the figure
             and the left side of the decorations.
-        :DCCT_bbox[1]: int
+        :bbox[1]: int
             Distance between the bottom of the figure and the bottom of the
             lowest axes object (in Figure coordinates)
-        :DCCT_bbox[2]: int
+        :bbox[2]: int
             Distance between the right most side of the axes objects and the
             left most side of the decorations (in Figure coordinates)
     grid_bottom : float
@@ -158,7 +158,7 @@ def DCCT(
             my_data.data = my_data.data.real
             real_data = True
     my_data.human_units()
-    grid_bottom += DCCT_bbox[1]  # define y coord in figure coords for bottom axes
+    grid_bottom += bbox[1]  # define y coord in figure coords for bottom axes
     #                        of bottom axis
     grid_top -= top_pad  # define y coord in figure coords for top of top axis
     a_shape = ndshape(this_nddata)
@@ -188,22 +188,22 @@ def DCCT(
     LHS_labels, _ = fig.transFigure.inverted().transform(
         (vert_label_spacer * num_dims, 0)
     )
-    width = DCCT_bbox[2] - LHS_labels
+    width = bbox[2] - LHS_labels
     for j, b in enumerate(axes_bottom):
         if j != 0 and shareaxis:
             ax_list.append(
                 plt.axes(
-                    [LHS_labels + DCCT_bbox[0], b, width, axes_height],
+                    [LHS_labels + bbox[0], b, width, axes_height],
                     sharex=ax_list[0],
                     sharey=ax_list[0],
                 )
             )  # in figure coords: x, y, width, height
         else:
             ax_list.append(
-                plt.axes([LHS_labels + DCCT_bbox[0], b, width, axes_height])
+                plt.axes([LHS_labels + bbox[0], b, width, axes_height])
             )  # lbwh
     # {{{ make blended transform for plotting coherence transfer labels
-    dx = LHS_labels + DCCT_bbox[0]  # x coord in figure coord
+    dx = LHS_labels + bbox[0]  # x coord in figure coord
     axis_to_figure = ax_list[0].transAxes + fig.transFigure.inverted()
     _, dy = axis_to_figure.transform(
         r_[0, 0]
@@ -287,7 +287,7 @@ def DCCT(
             #      overlap with the indirect axis
         ) * vert_label_spacer  # depending on number of dims this will space
         #                        the lines along x approp.
-        x1_disp = LHS_labels + DCCT_bbox[0] - label_spacing  # x coord is the left
+        x1_disp = LHS_labels + bbox[0] - label_spacing  # x coord is the left
         #                                                 side of the axis
         #                                                 minus the spacing for
         #                                                 text/ticks
@@ -337,7 +337,7 @@ def DCCT(
             if check_for_label_num:
                 # the labels of the outer dimensions
                 label_spacing = (this_label_num + 1) * vert_label_spacer
-                x_textdisp = LHS_labels + DCCT_bbox[0] - label_spacing
+                x_textdisp = LHS_labels + bbox[0] - label_spacing
             else:
                 # same as above, but determine text
                 # position based on tick labels
@@ -355,7 +355,7 @@ def DCCT(
                     )
                 )
                 x_textdisp = (
-                    LHS_labels + DCCT_bbox[0]
+                    LHS_labels + bbox[0]
                 )  # bottom left corner of bottom axes in fig
             # tick length is a nice consistent distance to push the arrows out
             # slightly to avoid confusion
@@ -588,7 +588,7 @@ def DCCT(
     plt.title(plot_title)
     if just_2D:
         return (
-            DCCT_bbox[0] + LHS_labels,
+            bbox[0] + LHS_labels,
             axes_bottom[0],
             width,
             axes_bottom[-1] - top_pad,
@@ -596,9 +596,9 @@ def DCCT(
     else:
         return (
             ax_list,
-            DCCT_bbox[0] + LHS_labels,
+            bbox[0] + LHS_labels,
             axes_bottom[-1] + axes_height,
             width,
-            top_pad - (1 - DCCT_bbox[2] - DCCT_bbox[0]),
+            top_pad - (1 - bbox[2] - bbox[0]),
         )
 # }}}
