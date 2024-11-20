@@ -229,10 +229,8 @@ def DCCT(
         inner_dim = str(inner_dim)
         if inner_dim == "ph2":
             logging.debug("Inner dimension is phase cycling dimension")
-            ax_list[j].yaxis.set_major_formatter("ph2")
-            ax_list[j].yaxis.set_major_locator(
-                mticker.MaxNLocator(integer=True)
-            )
+            ax_list[j].yaxis.set_major_formatter(ph2)
+            ax_list[j].yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
         else:
             ax_list[j].yaxis.set_minor_locator(minorLocator())
             ax_list[j].yaxis.set_ticks_position("both")
@@ -329,7 +327,7 @@ def DCCT(
                     r_[0, 0]
                 )
                 # from here https://stackoverflow.com/questions/44012436/pytho\
-                # n-matplotlib-get-position-of-xtick-labels
+                #n-matplotlib-get-position-of-xtick-labels
                 # then searching for BBox docs
                 logging.debug(
                     strm(
@@ -378,12 +376,10 @@ def DCCT(
             #        arrowstyle='|-|',
             #        alpha=0.1,  color='k')
             fig.add_artist(AnArrow)
-            x_textfig = x_textdisp + arrow_width_px
-            y_textfig = y_textdisp - 5.0
             if diagnostic:
                 a = Line2D(
-                    [0, 0 + dx],
-                    [0, 0 + dy],
+                    [x_arrowbase_fig, x_arrowbase_fig + dx],
+                    [y_arrowbase_fig, y_arrowbase_fig + dy],
                     transform=fig.transFigure,
                     color="r",
                 )
@@ -396,6 +392,8 @@ def DCCT(
                     color="r",
                 )
                 fig.add_artist(a)
+            x_textfig = x_textdisp + arrow_width_px
+            y_textfig = y_textdisp - 5.0
             plt.text(
                 x_textfig,
                 y_textfig,
@@ -472,9 +470,9 @@ def DCCT(
                 "I don't understand the value you've set for the origin"
                 " keyword argument"
             )
-        kwargs[
-            "origin"
-        ] = origin  # required so that imshow now displays the image correctly
+        kwargs["origin"] = (
+            origin  # required so that imshow now displays the image correctly
+        )
 
         if real_data:
             kwargs["cmap"] = cmap
