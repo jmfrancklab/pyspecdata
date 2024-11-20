@@ -14,8 +14,9 @@
 
 import sys
 import os
-from matplotlib import get_data_path
-from pyspecdata.version import __version__
+import shlex
+import mock
+from matplotlib import rcParams, get_data_path
 
 print("datapath is", get_data_path())
 # {{{ mock unit registry, which belongs to pint
@@ -38,6 +39,7 @@ if not os.getenv("SPHINX_GALLERY_RUNNING", False):
         def Quantity(self, *args, **kwargs):
             return self
 
+    import sys
     from unittest.mock import MagicMock
 
     # Mock the 'pint' module and its UnitRegistry class
@@ -64,7 +66,9 @@ sys.path.append(os.path.abspath(".."))
 sys.path.insert(0, os.path.abspath("../pyspecdata"))
 sys.path.append(os.path.abspath("../../pint"))
 print("sys.path is", sys.path)
+import pint
 
+from pyspecdata.version import __version__
 
 # -- General configuration ------------------------------------------------
 
@@ -100,7 +104,7 @@ sphinx_gallery_conf = {
         "pyspecdata": None,
     },
     "doc_module": ("pyspecdata",),
-    # directory where function/class granular galleries are stored
+    ## directory where function/class granular galleries are stored
     "backreferences_dir": "gen_modules/backreferences",
     "image_srcset": ["2x"],
 }
@@ -185,8 +189,7 @@ todo_include_todos = True
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# for 0.7.16 alabaster bug, set logo here, and don't include any logo name
-# option
+# for 0.7.16 alabaster bug, set logo here, and don't include any logo name option
 html_theme_options = {
     "logo": "pyspec_path_equaltip.png",
     #'logo_name': None, # don't show the name with the logo
