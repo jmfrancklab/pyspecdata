@@ -565,5 +565,15 @@ def myfilter(x, center=250e3, sigma=100e3):
 
 
 def det_unit_prefactor(thisstr):
-    "use pint to determine the prefactor of the string-formatted unit thisstr"
+    """
+    use pint to determine the prefactor of the string-formatted unit thisstr
+    Parameters
+    ==========
+    thisstr: str
+        units that the prefactor is being determined for
+    Returns
+    =======
+    float:
+        The prefactor of the fed units floored to a multiple of 3    
+    """
     return 3 * int(np.log10(ureg(thisstr).to_base_units().magnitude) // 3)
