@@ -11,7 +11,11 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as lines
 from matplotlib.patches import FancyArrow, Circle
 from matplotlib.lines import Line2D
-from matplotlib.transforms import ScaledTranslation, IdentityTransform
+from matplotlib.transforms import (
+    ScaledTranslation,
+    IdentityTransform,
+    blended_transform_factory,
+)
 from pyspecdata.plot_funcs.image import imagehsv
 import matplotlib.ticker as mticker
 import logging
@@ -22,16 +26,11 @@ def DCCT(
     this_fig_obj,
     custom_scaling=False,
     grid_bottom=0.0,
-    bottom_pad=0.15,
+    bbox=[0.02, 0.1, 0.94],
     grid_top=1.0,
-    top_pad=0.1,
+    top_pad=0.05,
     total_spacing=0.055,
-    label_spacing_multiplier=50,
-    allow_for_text_default=10,
-    allow_for_ticks_default=70,
-    text_height=40,
-    LHS_pad=0.01,
-    RHS_pad=0.05,
+    vert_label_spacer=50,
     shareaxis=False,
     diagnostic=False,
     cmap=None,
@@ -47,56 +46,59 @@ def DCCT(
 
     Parameters
     ==========
-    this_nddata:    nddata
-                    data being plotted
-    thi_fig_obj:    figure
-                    size/type of figure to be plotted on
-    custom_scaling: boolean
-                    allows user to scale the intensity of data presented
-    grid_bottom:    float
-                    coordinate for bottom of DCCT plot
-    bottom_pad:     float
-                    distance between bottom of grid and bottom of figure
-    grid_top:       float
-                    coordinate top of grid in figure
-    top_pad:        float
-                    distance between top of figure and top of grid
-    total_spacing:  float
-                    affects spacing between phase cycle dimensions
-    label_spacing_multiplier:   int
-                                spacing between axes labels
-    allow_for_text_default:     int
-                                adjusts distance between tick labels and ticks
-    allow_for_ticks_default:    int
-                                adjusts distance between ticks
-    text_height:    int
-                    adjusts sizing of axis labels and tick labels
-    LHS_pad:        float
-                    adjusts padding on left hand side of DCCT plot
-    RHS_pad:        float
-                    adjusts padding on right hand side of DCCT plot
-    shareaxis:      boolean
-                    subplots scale together, but currently, this means there
-                    must be tick
-                    labels on both top and bottom
-    cmap:           str
-                    string for color mapping if specified
-    pass_frq_slice: boolean
-                    if true will show the frequency sliced out with hatching
-    just_2D:        boolean
-                    If true will only return axis coordinates/shape NOT ax_list
-    scaling_factor: float
-                    If using custom scaling this allows user to set the scaling
-                    factor
-    max_coh_jump:   dict
-                    maximum allowed transitions for each phase cycle
-    direct:         str
-                    name of direct axis
-    plot_title:     str
-                    title for DCCT plot
+    this_nddata : nddata
+        data being plotted
+    this_fig_obj : figure
+        size/type of figure to be plotted on
+    custom_scaling : boolean
+        allows user to scale the intensity of data presented
+    bbox : list
+        contains the following:
+        :bbox[0]: int
+            Left hand side padding between the left side of the figure
+            and the left side of the decorations.
+        :bbox[1]: int
+            Distance between the bottom of the figure and the bottom of the
+            lowest axes object (in Figure coordinates)
+        :bbox[2]: int
+            Distance between the right most side of the axes objects and the
+            left most side of the decorations (in Figure coordinates)
+    grid_bottom : float
+        Figure coordinates
+        y-coordinate for bottom of DCCT plot.
+    grid_top : float
+        Figure coordinates
+        y-coordinate top of grid in figure
+    top_pad : float
+        Figure coordinates
+        Distance between top of figure and top of grid
+    total_spacing : float
+        Figure coordinates
+        Spacing between phase cycle dimensions
+    vert_label_spacer : int
+        Display coordinates
+        Spacing between vertical lines that label the coherence pathways
+    shareaxis : boolean
+        Subplots scale together, but currently, this means there
+        must be tick labels on both top and bottom
+    cmap : str
+        Color mapping if specified
+    pass_frq_slice : boolean
+        If true will show the frequency sliced out with hatching
+    just_2D : boolean
+        If true will only return axis coordinates/shape NOT ax_list
+    scaling_factor : float
+        If using custom scaling this allows user to set the scaling
+        factor
+    max_coh_jump : dict
+        Maximum allowed transitions for each phase cycle
+    direct : str
+        Name of direct axis
+    plot_title : str
+        Title for DCCT plot
     """
-    x = []
-    y = []
+    x = []  # List to put direct dim into
+    y = []  # List to put indirect dims into
     my_data = this_nddata.C
     ordered_labels = {}
     # {{{ Generate alias labels - goes to scientific fn
@@ -156,8 +158,9 @@ def DCCT(
             my_data.data = my_data.data.real
             real_data = True
     my_data.human_units()
-    grid_bottom += bottom_pad
-    grid_top -= top_pad
+    grid_bottom += bbox[1]  # define y coord in figure coords for bottom axes
+    #                        of bottom axis
+    grid_top -= top_pad  # define y coord in figure coords for top of top axis
     a_shape = ndshape(this_nddata)
     num_dims = len(a_shape.dimlabels[:-2])
     divisions = []
@@ -183,22 +186,41 @@ def DCCT(
     )
     minorLocator = lambda: mticker.AutoMinorLocator(n=5)
     LHS_labels, _ = fig.transFigure.inverted().transform(
-        (label_spacing_multiplier * num_dims + allow_for_ticks_default, 0)
+        (vert_label_spacer * num_dims, 0)
     )
-    width = 1.0 - (LHS_pad + RHS_pad + LHS_labels)
+    width = bbox[2] - LHS_labels
     for j, b in enumerate(axes_bottom):
         if j != 0 and shareaxis:
             ax_list.append(
                 plt.axes(
-                    [LHS_labels + LHS_pad, b, width, axes_height],
+                    [LHS_labels + bbox[0], b, width, axes_height],
                     sharex=ax_list[0],
                     sharey=ax_list[0],
                 )
-            )  # lbwh
+            )  # in figure coords: x, y, width, height
         else:
             ax_list.append(
-                plt.axes([LHS_labels + LHS_pad, b, width, axes_height])
+                plt.axes([LHS_labels + bbox[0], b, width, axes_height])
             )  # lbwh
+    # {{{ make blended transform for plotting coherence transfer labels
+    dx = LHS_labels + bbox[0]  # x coord in figure coord
+    axis_to_figure = ax_list[0].transAxes + fig.transFigure.inverted()
+    _, dy = axis_to_figure.transform(
+        r_[0, 0]
+    )  # bottom left corner of first ax in fig coord
+    total_scale_transform = IdentityTransform() + ScaledTranslation(
+        dx, dy, fig.transFigure
+    )
+    total_trans = blended_transform_factory(
+        total_scale_transform, fig.transFigure
+    )
+    # }}}
+    # {{{ transform for arrows
+    ax_x, ax_y = axis_to_figure.transform(r_[0, 0])
+    arrow_trans = IdentityTransform() + ScaledTranslation(
+        ax_x, ax_y, fig.transFigure
+    )
+    # }}}
     # {{{ adjust tick settings -- AFTER extents are set
     # {{{ bottom subplot
     ax_list[0].xaxis.set_major_locator(majorLocator())
@@ -229,8 +251,8 @@ def DCCT(
         inner_dim = str(inner_dim)
         if inner_dim == "ph2":
             logging.debug("Inner dimension is phase cycling dimension")
-            ax_list[j].yaxis.set_major_formatter(ph2)
-            ax_list[j].yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+            ax_list[j].yaxis.set_major_formatter("ph2")
+            ax_list[j].yaxis.set_major_locator(plt.MaxNLocator(integer=True))
         else:
             ax_list[j].yaxis.set_minor_locator(minorLocator())
             ax_list[j].yaxis.set_ticks_position("both")
@@ -239,7 +261,7 @@ def DCCT(
             tick.set_va("center")
     # }}}
     # }}}
-
+    # {{{ smoosh dataset if needed
     if len(a_shape.dimlabels) > 3:
         A = this_nddata.C.smoosh(
             a_shape.dimlabels[:-2], "smooshed", noaxis=True
@@ -249,85 +271,79 @@ def DCCT(
         A = this_nddata.C
         A.rename(a_shape.dimlabels[:-2][0], "smooshed")
 
+    # }}}
+    # {{{ vertical lines for coh paths
     def draw_span(
         ax1,
         ax2,
         label,
         this_label_num,
-        allow_for_text=allow_for_text_default,
-        allow_for_ticks=allow_for_ticks_default,
     ):
-        x1, y1 = ax1.transAxes.transform(r_[0, 0.95])
-        x2, y2 = ax2.transAxes.transform(r_[0, 0.05])
-        x1 -= allow_for_ticks
-        x_text = x1 - allow_for_text
-        x2 -= allow_for_ticks
-        # following line to create an offset for different dimension labels
-        label_spacing = this_label_num * label_spacing_multiplier
-        x1, y1 = fig.transFigure.inverted().transform(
-            r_[x1 - label_spacing, y1]
+        """Place the vertical lines and labels of the coherence transfer
+        pathways"""
+        label_spacing = (
+            this_label_num
+            + 1  # plus one so the first horizontal doesn't
+            #      overlap with the indirect axis
+        ) * vert_label_spacer  # depending on number of dims this will space
+        #                        the lines along x approp.
+        x1_disp = LHS_labels + bbox[0] - label_spacing  # x coord is the left
+        #                                                 side of the axis
+        #                                                 minus the spacing for
+        #                                                 text/ticks
+        # {{{ Take y coordinate of top and bottom of axes objects to get the 2
+        # points for drawing the lines. To be exact I pull this from the axes
+        # objects themselves.
+        _, y1_fig = (ax1.transAxes + fig.transFigure.inverted()).transform(
+            r_[0, 0.95]
         )
-        x_text, _ = fig.transFigure.inverted().transform(
-            r_[x_text - label_spacing, 0]
+        _, y2_fig = (ax2.transAxes + fig.transFigure.inverted()).transform(
+            r_[0, 0.05]
         )
-        x2, y2 = fig.transFigure.inverted().transform(
-            r_[x2 - label_spacing, y2]
-        )
+        # }}}
         lineA = lines.Line2D(
-            [x1, x2],
-            [y1, y2],
+            [x1_disp, x1_disp],
+            [y1_fig, y2_fig],
             linewidth=1,
             color="k",
-            transform=fig.transFigure,
+            transform=total_trans,
             clip_on=False,
         )
         plt.text(
-            x_text,
-            (y2 + y1) / 2,
+            x1_disp,  # same x coord as the line to keep simple
+            (y2_fig + y1_fig) / 2,  # put in middle of line
             label,
             va="center",
             ha="right",
             rotation=90,
-            transform=fig.transFigure,
+            transform=total_trans,
             color="k",
         )
         fig.add_artist(lineA)
 
-    label_placed = np.zeros(num_dims)
-
+    # }}}
+    # {{{ place arrows and dimname labels
     def place_labels(
         ax1,
         label,
         label_placed,
         this_label_num,
         check_for_label_num=True,
-        allow_for_text=allow_for_text_default,
-        allow_for_ticks=allow_for_ticks_default,
-        y_space_px=30,
         arrow_width_px=4.0,
-        arrow_head_vs_width=3,
     ):
+        x_axorigindisp, y_axorigindisp = ax1.transAxes.transform(r_[0, 0])
         if not check_for_label_num or not label_placed[this_label_num]:
-            x_axorigindisp, y_axorigindisp = ax1.transAxes.transform(r_[0, 0])
             # {{{ determine the x and y position of the label in display coords
             if check_for_label_num:
                 # the labels of the outer dimensions
-                label_spacing = this_label_num * label_spacing_multiplier
-                Dx_textdisp = (
-                    -(allow_for_text + allow_for_ticks)
-                    - label_spacing
-                    - text_height / 2
-                )
-                x_textdisp = x_axorigindisp + Dx_textdisp
+                label_spacing = (this_label_num + 1) * vert_label_spacer
+                x_textdisp = LHS_labels + bbox[0] - label_spacing
             else:
                 # same as above, but determine text
                 # position based on tick labels
                 label = my_data.unitify_axis(my_data.dimlabels[-2])
-                x_axorigindisp, y_axorigindisp = ax1.transAxes.transform(
-                    r_[0, 0]
-                )
                 # from here https://stackoverflow.com/questions/44012436/pytho\
-                #n-matplotlib-get-position-of-xtick-labels
+                # n-matplotlib-get-position-of-xtick-labels
                 # then searching for BBox docs
                 logging.debug(
                     strm(
@@ -338,10 +354,19 @@ def DCCT(
                         ],
                     )
                 )
-                x_textdisp = [
-                    j.get_window_extent().bounds for j in ax1.get_yticklabels()
-                ][0][0]
-            x_textdisp -= 6.0 * text_height - arrow_width_px
+                x_textdisp = (
+                    LHS_labels + bbox[0]
+                )  # bottom left corner of bottom axes in fig
+            # tick length is a nice consistent distance to push the arrows out
+            # slightly to avoid confusion
+            tick_length = [
+                j.get_window_extent().bounds for j in ax1.get_yticklabels()
+            ][-1][-1]
+            x_textdisp -= tick_length
+            x_textdisp -= (
+                arrow_width_px  # x_textdisp is base of arrow so subtract
+            )
+            #                               arrow width
             y_textdisp = -25.0
             if diagnostic:
                 a = Circle(
@@ -353,8 +378,6 @@ def DCCT(
                 )
                 fig.add_artist(a)
             # }}}
-            axis_to_figure = ax1.transAxes + fig.transFigure.inverted()
-            ax_x, ax_y = axis_to_figure.transform(r_[0, 0])
             AnArrow = FancyArrow(
                 x_textdisp,
                 y_textdisp,
@@ -362,10 +385,7 @@ def DCCT(
                 5,
                 width=arrow_width_px,
                 clip_on=False,
-                transform=(
-                    IdentityTransform()
-                    + ScaledTranslation(ax_x, ax_y, fig.transFigure)
-                ),
+                transform=arrow_trans,
                 alpha=0.1,
                 color="k",
             )
@@ -378,14 +398,14 @@ def DCCT(
             fig.add_artist(AnArrow)
             if diagnostic:
                 a = Line2D(
-                    [x_arrowbase_fig, x_arrowbase_fig + dx],
-                    [y_arrowbase_fig, y_arrowbase_fig + dy],
+                    [x_textdisp, x_textdisp + dx],
+                    [y_textdisp, y_textdisp + dy],
                     transform=fig.transFigure,
                     color="r",
                 )
                 fig.add_artist(a)
                 a = Circle(
-                    (x_textfig, y_textfig),
+                    (x_textdisp, y_textdisp),
                     0.01,
                     clip_on=False,
                     transform=fig.transFigure,
@@ -402,20 +422,20 @@ def DCCT(
                 ha="right",
                 rotation=45,
                 clip_on=False,
-                transform=(
-                    IdentityTransform()
-                    + ScaledTranslation(ax_x, ax_y, fig.transFigure)
-                ),
+                transform=arrow_trans,
                 color="k",
             )
             if check_for_label_num:
                 label_placed[this_label_num] = 1
 
+    # }}}
+    label_placed = np.zeros(num_dims)
     imagehsvkwargs = {}
     for k, v in list(kwargs.items()):
         if k in ["black", "logscale"]:
             imagehsvkwargs[k] = kwargs.pop(k)
 
+    # {{{ Place actual data into appropriate axes
     for j in range(len(ax_list)):
         spacing, ax, x_first, origin, renumber = process_kwargs(
             [
@@ -470,9 +490,9 @@ def DCCT(
                 "I don't understand the value you've set for the origin"
                 " keyword argument"
             )
-        kwargs["origin"] = (
-            origin  # required so that imshow now displays the image correctly
-        )
+        kwargs[
+            "origin"
+        ] = origin  # required so that imshow now displays the image correctly
 
         if real_data:
             kwargs["cmap"] = cmap
@@ -511,6 +531,7 @@ def DCCT(
                 alpha=0.7,
                 hatch="//",
             )
+    # }}}
     # to drop into ax_list, just do
     # A.smoosh(a_shape.dimlabels, 'smooshed', noaxis=True)
     # in ax_list[0] put A['smooshed',0], etc
@@ -519,6 +540,7 @@ def DCCT(
     remaining_dim = a_shape.dimlabels[:-2]
     depth = num_dims
 
+    # {{{ Place decorations on figure
     def decorate_axes(idx, remaining_dim, depth):
         thisdim = remaining_dim[0]
         logging.debug(strm("This is remaining dim", remaining_dim))
@@ -562,12 +584,11 @@ def DCCT(
         label_placed,
         this_label_num=depth - 1,
         check_for_label_num=False,
-        allow_for_text=-50,
     )
     plt.title(plot_title)
     if just_2D:
         return (
-            LHS_pad + LHS_labels,
+            bbox[0] + LHS_labels,
             axes_bottom[0],
             width,
             axes_bottom[-1] - top_pad,
@@ -575,8 +596,9 @@ def DCCT(
     else:
         return (
             ax_list,
-            LHS_pad + LHS_labels,
+            bbox[0] + LHS_labels,
             axes_bottom[-1] + axes_height,
             width,
-            top_pad - RHS_pad,
+            top_pad - (1 - bbox[2] - bbox[0]),
         )
+# }}}
