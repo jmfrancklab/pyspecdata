@@ -227,6 +227,7 @@ def issympy(x):
     return isinstance(x, sp.Expr)
 
 
+
 # {{{ function trickery
 def mydiff(data, axis=-1):
     """this will replace np.diff with a version that has the same number of
