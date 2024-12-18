@@ -2,7 +2,7 @@
 from numpy import r_
 import numpy as np
 import logging
-from ..general_functions import *
+from ..general_functions import strm, check_ascending_axis
 
 thinkaboutit_message = (
     "If you think about it, you"
@@ -15,7 +15,8 @@ thinkaboutit_message = (
 def ft_state_to_str(self, *axes):
     """Return a string that lists the FT domain for the given axes.
 
-    :math:`u` refers to the original domain (typically time) and :math:`v` refers to the FT'd domain (typically frequency)
+    :math:`u` refers to the original domain (typically time) and :math:`v`
+    refers to the FT'd domain (typically frequency)
     If no axes are passed as arguments, it does this for all axes."""
     retstr = []
     if len(axes) == 0:
@@ -99,7 +100,8 @@ def _ft_shift(self, thisaxis, p2, shift_axis=None, verbose=False):
     n = self.data.shape[thisaxis]
     sourceslice = [slice(None, None, None)] * len(self.data.shape)
     targetslice = [slice(None, None, None)] * len(self.data.shape)
-    # move second half first -- the following are analogous to the numpy function, but uses slices instead
+    # move second half first -- the following are analogous to the numpy
+    # function, but uses slices instead
     sourceslice[thisaxis] = slice(p2, n)
     targetslice[thisaxis] = slice(None, n - p2)
     newdata[tuple(targetslice)] = self.data[tuple(sourceslice)]
@@ -113,13 +115,15 @@ def _ft_shift(self, thisaxis, p2, shift_axis=None, verbose=False):
         x = self.getaxis(axisname)
         newaxis = np.empty_like(x)
         n = len(x)
-        # move second half first -- the following are analogous to the numpy function, but uses slices instead
+        # move second half first -- the following are analogous to the numpy
+        # function, but uses slices instead
         sourceslice = slice(p2, n)
         targetslice = slice(None, n - p2)
         assert x[0] == 0.0
         newaxis[targetslice] = (
             x[sourceslice] - x[n - 1] - x[1]
-        )  # when I alias back over, I can't subtract x[n-1], which would give 0, so I subtract one more dx (note the assertion above)
+        )  # when I alias back over, I can't subtract x[n-1], which would give
+        #    0, so I subtract one more dx (note the assertion above)
         # move first half second (the negative frequencies)
         sourceslice = slice(None, p2)
         targetslice = slice(-p2, None)
@@ -129,7 +133,8 @@ def _ft_shift(self, thisaxis, p2, shift_axis=None, verbose=False):
 
 
 def set_ft_initial(self, axis, which_domain="t", shift=True):
-    """set the current domain as the 'initial' domain, the following three respects:
+    """set the current domain as the 'initial' domain, the following three
+    respects:
 
     - Assume that the data is not aliased, since aliasing typically only
       happens as the result of an FT
@@ -146,6 +151,7 @@ def set_ft_initial(self, axis, which_domain="t", shift=True):
     elif which_domain == "f":
         fullname = "freq"
         other = "time"
+        self.set_ft_prop(axis, [], True)
     else:
         raise ValueError("didn't understand which_domain")
     self.set_ft_prop(axis, "initial_domain", which_domain)
@@ -213,11 +219,9 @@ def ft_new_startpoint(self, axis, which_domain, value=None, nearest=False):
     """
     if which_domain == "t":
         which_domain = "time"
-        otherdomain = "freq"
         thisconditional = None
     elif which_domain == "f":
         which_domain = "freq"
-        otherdomain = "time"
         thisconditional = True
     du = _get_ft_df(self, axis)
     orig_u = self.get_ft_prop(axis, ["start", which_domain])
@@ -263,7 +267,8 @@ def ft_new_startpoint(self, axis, which_domain, value=None, nearest=False):
 
 
 def ft_clear_startpoints(self, axis, t=None, f=None, nearest=None):
-    r"""Clears memory of where the origins in the time and frequency domain are.
+    r"""Clears memory of where the origins in the time and frequency domain
+    are.
     This is useful, *e.g.* when you want to ift and center about time=0.
     By setting shift=True you can also manually set the points.
 
@@ -273,7 +278,8 @@ def ft_clear_startpoints(self, axis, t=None, f=None, nearest=None):
         keyword arguments `t` and `f` can be set by (1) manually setting
         the start point (2) using the string 'current' to leave the
         current setting a lone (3) 'reset', which clears the startpoint
-        and (4) None, which will be changed to 'current' when the other is set to a number or 'rest' if both are set to None.
+        and (4) None, which will be changed to 'current' when the other is set
+        to a number or 'rest' if both are set to None.
     t: float, 'current', 'reset', or None
         see `t`
     nearest: bool
@@ -311,7 +317,8 @@ def ft_clear_startpoints(self, axis, t=None, f=None, nearest=None):
         deal with the consequences.
     """
     print(
-        "Warning!!! FT clear startpoints is obsolete! use ft_new_startpoint" " instead"
+        "Warning!!! FT clear startpoints is obsolete! use ft_new_startpoint"
+        " instead"
     )
     if f is None and t is None:
         t = "reset"
@@ -350,8 +357,8 @@ def ft_clear_startpoints(self, axis, t=None, f=None, nearest=None):
                             "intervals (n_df ",
                             n_df,
                             ".  If you don't know why"
-                            " you're getting this error, see the documentation"
-                            " for ft_clear_startpoints!!",
+                            " you're getting this error, see the"
+                            " documentation for ft_clear_startpoints!!",
                         )
                     )
                 elif nearest:
@@ -392,8 +399,8 @@ def ft_clear_startpoints(self, axis, t=None, f=None, nearest=None):
                             "intervals (n_dt ",
                             n_dt,
                             ".  If you don't know why"
-                            " you're getting this error, see the documentation"
-                            " for ft_clear_startpoints!!",
+                            " you're getting this error, see the"
+                            " documentation for ft_clear_startpoints!!",
                         )
                     )
                 elif nearest:
@@ -431,28 +438,34 @@ def _get_ft_dt(self, axis):
 
 def _find_index(u, origin=0.0, tolerance=1e-4, verbose=False):
     (
-        "identify the index of `u` (represents either time or frequency) where"
-        " `origin` lives -- if it finds a value exactly equal to `origin`,"
-        " returns `(p2,None)` -- otherwise, `None` is replaced by u-shift"
-        " indicating how far the position marked by `p2` is ahead of"
-        " `origin`\n\tIf `origin` is outside the range of `u`, it assumes that"
-        " you want to find the appropriate index in one of the higher or"
-        " lower-frequency replicates (*i.e.*, identical to within"
+        "identify the index of `u` (represents either time or frequency)"
+        " where `origin` lives -- if it finds a value exactly equal to"
+        " `origin`, returns `(p2,None)` -- otherwise, `None` is replaced by"
+        " u-shift indicating how far the position marked by `p2` is ahead of"
+        " `origin`\n\tIf `origin` is outside the range of `u`, it assumes"
+        " that you want to find the appropriate index in one of the"
+        " higher or lower-frequency replicates (*i.e.*, identical to within"
         " $n\\timesSW$, with $n$ integer"
     )
-    du = check_ascending_axis(u, tolerance, "In order to determine the FT shift index")
+    du = check_ascending_axis(
+        u, tolerance, "In order to determine the FT shift index"
+    )
     N = len(u)
     SW = du * N  # should be u[-1]+du
     alias_number = 0
     if not u[0] < origin < u[-1]:
-        alias_number = (origin - u[0]) // SW  # subtracting this many SW's from origin
-        #                                     will land me back inside the range of u
+        alias_number = (
+            origin - u[0]
+        ) // SW  # subtracting this many SW's from origin
+        #          will land me back inside the range of u
         if verbose:
             logging.debug(strm("(_find_index) range of axis:", u[0], u[-1]))
         if verbose:
             logging.debug(strm("(_find_index) alias number is", alias_number))
         if verbose:
-            logging.debug(strm("(_find_index) set origin from", origin, end=" "))
+            logging.debug(
+                strm("(_find_index) set origin from", origin, end=" ")
+            )
         origin -= alias_number * SW
         if verbose:
             logging.debug(strm("to", origin))
@@ -481,7 +494,6 @@ def _find_index(u, origin=0.0, tolerance=1e-4, verbose=False):
                 p2_discrepancy,
             )
         )
-    alias_number += (
-        1  # because the way that _ft_shift works essentially entails one aliasing
-    )
+    alias_number += 1  # because the way that _ft_shift works essentially
+    #                    entails one aliasing
     return p2, p2_discrepancy, alias_number * SW
