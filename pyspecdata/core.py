@@ -2638,11 +2638,15 @@ class nddata(object):
         If the result is not dimensionless,
         an error will be generated.
 
-        e.g. call as `d.divide_by("axisname","s")`
+        e.g. call as `d.div_units("axisname","s")`
         to divide the axis units by seconds
 
-        or `d.divide_by("s")` to divide the
+        or `d.div_units("s")` to divide the
         data units by seconds.
+
+        e.g. to convert a variable from seconds
+        to the units of `axisname`, do
+        `var_s/d.div_units("axisname","s")`
         """
         if arg2 is not None:
             denom_units = Q_(arg2)
