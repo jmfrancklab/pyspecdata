@@ -128,9 +128,9 @@ def _ft_shift(self, thisaxis, p2, shift_axis=None, verbose=False):
     return self
 
 
-def set_ft_initial(self, axis, which_domain='t', shift=True):
+def set_ft_initial(self, axis, which_domain="t", shift=True):
     """set the current domain as the 'initial' domain, the following three respects:
-    
+
     - Assume that the data is not aliased, since aliasing typically only
       happens as the result of an FT
     - Label the FT property `initial_domain` as "time-like" or
@@ -140,23 +140,27 @@ def set_ft_initial(self, axis, which_domain='t', shift=True):
         - More generally, this is achieved by setting the FT "start points"
           used to determine the windows on the periodic functions.
     """
-    if which_domain == 't':
-        fullname = 'time'
-        other = 'freq'
-    elif which_domain == 'f':
-        fullname = 'freq'
-        other = 'time'
+    if which_domain == "t":
+        fullname = "time"
+        other = "freq"
+    elif which_domain == "f":
+        fullname = "freq"
+        other = "time"
     else:
         raise ValueError("didn't understand which_domain")
-    self.set_ft_prop(axis,'initial_domain',which_domain)
-    self.set_ft_prop(axis,[fullname,'not','aliased'],True)
+    self.set_ft_prop(axis, "initial_domain", which_domain)
+    self.set_ft_prop(axis, [fullname, "not", "aliased"], True)
     if shift:
         N = self.shape[axis]
-        du = _get_ft_df(self, axis)
-        self.set_ft_prop(axis,['start',other], -1.0/(N*du)*(N//2))
+        du = check_ascending_axis(
+            self.getaxis(axis), 1e-4, "in order to get startpoint"
+        )
+        self.set_ft_prop(axis, ["start", other], -1.0 / (N * du) * (N // 2))
     else:
-        self.set_ft_prop(axis,['start',other], 0.0)
+        self.set_ft_prop(axis, ["start", other], 0.0)
     return self
+
+
 def ft_new_startpoint(self, axis, which_domain, value=None, nearest=False):
     r"""Clears (or resets) memory of where the origins of the domain is.
     This is useful, *e.g.* when you want to ift and center about time=0.
@@ -307,8 +311,7 @@ def ft_clear_startpoints(self, axis, t=None, f=None, nearest=None):
         deal with the consequences.
     """
     print(
-        "Warning!!! FT clear startpoints is obsolete! use ft_new_startpoint"
-        " instead"
+        "Warning!!! FT clear startpoints is obsolete! use ft_new_startpoint" " instead"
     )
     if f is None and t is None:
         t = "reset"
@@ -437,25 +440,19 @@ def _find_index(u, origin=0.0, tolerance=1e-4, verbose=False):
         " lower-frequency replicates (*i.e.*, identical to within"
         " $n\\timesSW$, with $n$ integer"
     )
-    du = check_ascending_axis(
-        u, tolerance, "In order to determine the FT shift index"
-    )
+    du = check_ascending_axis(u, tolerance, "In order to determine the FT shift index")
     N = len(u)
     SW = du * N  # should be u[-1]+du
     alias_number = 0
     if not u[0] < origin < u[-1]:
-        alias_number = (
-            origin - u[0]
-        ) // SW  # subtracting this many SW's from origin
+        alias_number = (origin - u[0]) // SW  # subtracting this many SW's from origin
         #                                     will land me back inside the range of u
         if verbose:
             logging.debug(strm("(_find_index) range of axis:", u[0], u[-1]))
         if verbose:
             logging.debug(strm("(_find_index) alias number is", alias_number))
         if verbose:
-            logging.debug(
-                strm("(_find_index) set origin from", origin, end=" ")
-            )
+            logging.debug(strm("(_find_index) set origin from", origin, end=" "))
         origin -= alias_number * SW
         if verbose:
             logging.debug(strm("to", origin))
@@ -484,5 +481,7 @@ def _find_index(u, origin=0.0, tolerance=1e-4, verbose=False):
                 p2_discrepancy,
             )
         )
-    alias_number += 1  # because the way that _ft_shift works essentially entails one aliasing
+    alias_number += (
+        1  # because the way that _ft_shift works essentially entails one aliasing
+    )
     return p2, p2_discrepancy, alias_number * SW
