@@ -4190,7 +4190,6 @@ class nddata(object):
         else:
             isft = False
         inidom = self.get_ft_prop(axis_name, "initial_domain")
-        print("inidom is", inidom)
 
         def wrap_with_F(mystr):
             temp = False
@@ -4203,7 +4202,7 @@ class nddata(object):
                     temp = True
                     optinv = "^{-1}"
             if temp:
-                if mystr[0] == "$" and mystr[1] == "$":
+                if mystr[0] == "$" and mystr[-1] == "$":
                     mystr = r"$\mathcal{F}" + optinv + r"\{" + mystr[1:-1] + r"\}$"
                 else:
                     mystr = r"$\mathcal{F}" + optinv + r"\{$" + mystr + r"$\}$"
@@ -4284,6 +4283,7 @@ class nddata(object):
     _ft_conj = this_fourier._ft_conj
     ft = this_fourier.ft
     set_ft_prop = this_fourier.set_ft_prop
+    set_ft_initial = this_fourier.set_ft_initial
     get_ft_prop = this_fourier.get_ft_prop
     ft_state_to_str = this_fourier.ft_state_to_str
     ft_clear_startpoints = this_fourier.ft_clear_startpoints

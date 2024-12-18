@@ -7,6 +7,7 @@ from .ft import ft
 from .ft_shift import _ft_shift
 from .ftshift import ftshift
 from .ft_shift import set_ft_prop
+from .ft_shift import set_ft_initial
 from .ft_shift import get_ft_prop
 from .ft_shift import ft_state_to_str
 from .ft_shift import ft_clear_startpoints

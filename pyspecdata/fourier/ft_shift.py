@@ -128,14 +128,43 @@ def _ft_shift(self, thisaxis, p2, shift_axis=None, verbose=False):
     return self
 
 
-def ft_new_startpoint(self, axis, whichdomain, value=None, nearest=False):
+def set_ft_initial(self, axis, which_domain='t', shift=True):
+    """set the current domain as the 'initial' domain, the following three respects:
+    
+    - Assume that the data is not aliased, since aliasing typically only
+      happens as the result of an FT
+    - Label the FT property `initial_domain` as "time-like" or
+      "frequency-like", which is used in rendering the axes when plotting.
+    - Say whether or not we will want the FT to be shifted so that it's center
+      is at zero, or not.
+        - More generally, this is achieved by setting the FT "start points"
+          used to determine the windows on the periodic functions.
+    """
+    if which_domain == 't':
+        fullname = 'time'
+        other = 'freq'
+    elif which_domain == 'f':
+        fullname = 'freq'
+        other = 'time'
+    else:
+        raise ValueError("didn't understand which_domain")
+    self.set_ft_prop(axis,'initial_domain',which_domain)
+    self.set_ft_prop(axis,[fullname,'not','aliased'],True)
+    if shift:
+        N = self.shape[axis]
+        du = _get_ft_df(self, axis)
+        self.set_ft_prop(axis,['start',other], -1.0/(N*du)*(N//2))
+    else:
+        self.set_ft_prop(axis,['start',other], 0.0)
+    return self
+def ft_new_startpoint(self, axis, which_domain, value=None, nearest=False):
     r"""Clears (or resets) memory of where the origins of the domain is.
     This is useful, *e.g.* when you want to ift and center about time=0.
     By setting shift=True you can also manually set the points.
 
     Parameters
     ==========
-    whichdomain: "t" or "f"
+    which_domain: "t" or "f"
         time-like or frequency-like domain
         (can be either t,ν, or
         cm,cm⁻¹ or u,B₀, etc.)
@@ -178,16 +207,16 @@ def ft_new_startpoint(self, axis, whichdomain, value=None, nearest=False):
         inverse domain and/or are willing to
         deal with the consequences.
     """
-    if whichdomain == "t":
-        whichdomain = "time"
+    if which_domain == "t":
+        which_domain = "time"
         otherdomain = "freq"
         thisconditional = None
-    elif whichdomain == "f":
-        whichdomain = "freq"
+    elif which_domain == "f":
+        which_domain = "freq"
         otherdomain = "time"
         thisconditional = True
     du = _get_ft_df(self, axis)
-    orig_u = self.get_ft_prop(axis, ["start", whichdomain])
+    orig_u = self.get_ft_prop(axis, ["start", which_domain])
     if orig_u is None:
         if self.get_ft_prop(axis) is thisconditional:
             orig_u = self.getaxis(axis)[0]
@@ -225,7 +254,7 @@ def ft_new_startpoint(self, axis, whichdomain, value=None, nearest=False):
                 )
         else:
             value = orig_u - round(n_du) * du
-    self.set_ft_prop(axis, ["start", whichdomain], value)
+    self.set_ft_prop(axis, ["start", which_domain], value)
     return self
 
 
