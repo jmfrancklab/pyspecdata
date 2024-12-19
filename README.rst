@@ -110,7 +110,12 @@ in our hands -- we are happy to hear from you and work with you to try to
 broaden its applicability!
 
 On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
-just run ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython`` followed by ``conda install -y m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
+just run:
+
+-   ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython`` 
+-   ``conda install -y m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
+-   ``conda install -y meson meson-python ninja`` (the new build system to replace
+  distutils)
 Then follow the `installation for developers <#installation-for-developers>`_ below. We have a package on pip, but it currently lags behind the github repo.
 
 On **CentOS7**, we've tested
@@ -164,9 +169,10 @@ Rather, you can just import ``mayavi.mlab`` and pass it to any figure list that 
 Installation for developers
 ---------------------------
 
-To install pySpecData from github, just ``git clone https://github.com/jmfranck/pyspecdata.git``. Then switch over to the anaconda prompt and move to the directory where setup.py lives (root directory of repository),
+To install pySpecData from github, just ``git clone https://github.com/jmfranck/pyspecdata.git``. Then switch over to the anaconda *powershell* prompt and move to the directory where `pyproject.toml` lives (root directory of repository),
 and type
-``python setup.py develop``.
+``pip install --editable . --no-build-isolation``.
+(Note that the new dos prompt can't run the meson build system.)
 Make sure that this terminates with a successful message, and without any compilation errors.  In particular:
 
 - If it gives an error about permissions (will happen for a system-wide anaconda install), you need to load the anaconda prompt as admin (right click and run as administrator).
@@ -184,7 +190,7 @@ Important notes for conda on Windows:
   prompt (press start: type `cmd`) if you experience errors related to
   compilation.
 - If you want to build the documentation, run:
-  `conda install -y -c conda-forge sphinx_rtd_theme sphinx-gallery`
+  `conda install -y -c conda-forge sphinx sphinx-gallery`
 
 Data File Management
 ====================
