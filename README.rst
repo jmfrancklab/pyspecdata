@@ -112,10 +112,13 @@ broaden its applicability!
 On **Windows** with `Anaconda 3.X <https://www.anaconda.com/blog/individual-edition-2020-11>`_,
 just run:
 
--   ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython`` 
--   ``conda install -y m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
--   ``conda install -y meson meson-python ninja`` (the new build system to replace
-  distutils)
+*   ``conda install -y -c anaconda numpy scipy sympy pyqt pytables matplotlib h5py libpython`` 
+*   ``conda install -y m2w64-toolchain`` (the libpython and m2w64-toolchain are for building compiled extensions such as the ILT).
+*   ``conda install -y meson meson-python ninja`` (the new build system to replace distutils)
+*   *Note:* ``pip --version`` must be greater than 21.3 (this is what you need for an editable install using meson).
+
+    *   If it's not, run ``conda update pip``
+
 Then follow the `installation for developers <#installation-for-developers>`_ below. We have a package on pip, but it currently lags behind the github repo.
 
 On **CentOS7**, we've tested
