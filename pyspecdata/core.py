@@ -4726,7 +4726,7 @@ class nddata(object):
             self.setaxis(axis, cdata)
             return self
 
-    def contiguous(self, lambdafunc, axis=None):
+    def contiguous(self, lambdafunc, axis=None, return_idx=False):
         r"""Return contiguous blocks that satisfy the condition given by
         `lambdafunc`
 
@@ -4832,7 +4832,10 @@ class nddata(object):
                 idx[block_order, :],
             )
         )
-        return self.getaxis(axis)[idx[block_order, :]]
+        if return_idx:
+            return idx[block_order, :], self.getaxis(axis)[idx[block_order, :]]
+        else:
+            return self.getaxis(axis)[idx[block_order, :]]
 
     def to_ppm(self, axis="t2", freq_param="SFO1", offset_param="OFFSET"):
         """Function that converts from Hz to ppm using Bruker parameters

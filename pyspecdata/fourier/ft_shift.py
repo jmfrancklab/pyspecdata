@@ -144,6 +144,11 @@ def set_ft_initial(self, axis, which_domain="t", shift=True):
       is at zero, or not.
         - More generally, this is achieved by setting the FT "start points"
           used to determine the windows on the periodic functions.
+
+    Parameters
+    ==========
+    shift: True
+        When you (i)ft away from this domain, shift
     """
     if which_domain == "t":
         fullname = "time"
@@ -162,6 +167,7 @@ def set_ft_initial(self, axis, which_domain="t", shift=True):
             self.getaxis(axis), 1e-4, "in order to get startpoint"
         )
         self.set_ft_prop(axis, ["start", other], -1.0 / (N * du) * (N // 2))
+        self.set_ft_prop(axis, [other, "not", "aliased"], True)
     else:
         self.set_ft_prop(axis, ["start", other], 0.0)
     return self
