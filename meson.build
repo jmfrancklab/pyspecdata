@@ -56,7 +56,7 @@ nnls_extension = py.extension_module(
   include_directories: include_directories(numpy_include_dir),
   install: true,
   cpp_args: ['-DADD_UNDERSCORE', '-I'+numpy_include_dir],  # Equivalent to define_macros=[("ADD_UNDERSCORE", None)]
-  fortran_args: ['-fallow-argument-mismatch'],  # Equivalent to extra_f77_compile_args
+  #fortran_args: ['-fallow-argument-mismatch'],  # Equivalent to extra_f77_compile_args
 )
 
 subdir('pyspecdata')
