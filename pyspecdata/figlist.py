@@ -377,8 +377,6 @@ class figlist(object):
                 self.setprops(boundaries=False)
             if legend:
                 self.propdict[self.current]["legend"] = True
-                if "figsize" not in list(kwargs.keys()):
-                    kwargs.update({"figsize": (12, 6)})
                 if hasattr(self, "mlab"):
                     fig = self.mlab.figure(
                         num_figs_before_add + 1, bgcolor=(1, 1, 1), **kwargs
