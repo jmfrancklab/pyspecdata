@@ -1,0 +1,33 @@
+[build-system]
+requires = ["meson-python", "meson>=0.55", "ninja", "numpy>=1.21.0"]  # Specify a suitable version of numpy
+build-backend = "mesonpy"
+
+[project]
+name = "pyspecdata"
+dependencies = [
+    "sympy",
+    "numpy",
+    "scipy",
+    "h5py",
+    "matplotlib>=3.8.0",  # sharex is a problem in 3.5-6
+    "pillow",
+    "pint",
+    "lmfit>=1.1",  # we recently found that at least 1.0.3 generates
+    #                output parameters that are unchanged, but still
+    #                returns a "success" condition
+]
+version = "0.9.5.5.2"
+description = "Object-Oriented, Multi-dimensional Spectroscopic Data Processing"
+readme = "README.rst"  # Ensure this matches the README file's name
+readme-content-type = "text/x-rst"  # Change if using Markdown
+authors = [
+    { name = "John Franck", email = "john.franck@outlook.com" }
+]
+
+[tool.mesonpy]
+setup-kwargs = { native_file = "cross_file.txt" }
+
+[tool.black]
+line-length = 79
+target-version = ['py36', 'py37', 'py38', 'py39']
+preview = true

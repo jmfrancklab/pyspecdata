@@ -7,9 +7,11 @@ from .ft import ft
 from .ft_shift import _ft_shift
 from .ftshift import ftshift
 from .ft_shift import set_ft_prop
+from .ft_shift import set_ft_initial
 from .ft_shift import get_ft_prop
 from .ft_shift import ft_state_to_str
 from .ft_shift import ft_clear_startpoints
+from .ft_shift import ft_new_startpoint
 from .shear import shear
 from .shear import extend_for_shear
 from .ift import ift
@@ -22,6 +24,7 @@ __all__ = ["_ft_conj",
         "get_ft_prop",
         "ft_state_to_str",
         "ft_clear_startpoints",
+        "ft_new_startpoint",
         "shear",
         "extend_for_shear",
         "ift",

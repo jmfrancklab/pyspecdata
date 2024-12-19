@@ -34,3 +34,4 @@ doc_src/gen_modules/
 examples/data_files.csv
 examples/indiv_funcs/data_files.csv
 pyspecdata/_nnls.cpython-39-x86_64-linux-gnu.so
+wheelhouse/
