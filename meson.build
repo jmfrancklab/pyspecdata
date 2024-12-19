@@ -19,7 +19,9 @@ fortran_header = custom_target(
   'copy_fortranobject',
   input: f2py_include + '/fortranobject.h',
   output: 'fortranobject.h',
-  command: ['cp', '@INPUT@', meson.project_build_root()],
+  command: [py, '-c', # python copy b/c cp doesn't work on windows
+    'import shutil, sys; shutil.copy(sys.argv[1], sys.argv[2])',
+    '@INPUT@', meson.project_build_root()],
 )
 
 # Custom target to compile fortranobject.c into an object file
