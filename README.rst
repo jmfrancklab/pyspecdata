@@ -169,10 +169,11 @@ Rather, you can just import ``mayavi.mlab`` and pass it to any figure list that 
 Installation for developers
 ---------------------------
 
-To install pySpecData from github, just ``git clone https://github.com/jmfranck/pyspecdata.git``. Then switch over to the anaconda *powershell* prompt and move to the directory where `pyproject.toml` lives (root directory of repository),
+To install pySpecData from github, just ``git clone https://github.com/jmfranck/pyspecdata.git``.
+
+Then switch over to the anaconda prompt (as administrator, if you are installing system-wide), move to the directory where `pyproject.toml` lives (root directory of repository),
 and type
 ``pip install --editable . --no-build-isolation``.
-(Note that the new dos prompt can't run the meson build system.)
 Make sure that this terminates with a successful message, and without any compilation errors.  In particular:
 
 - If it gives an error about permissions (will happen for a system-wide anaconda install), you need to load the anaconda prompt as admin (right click and run as administrator).
