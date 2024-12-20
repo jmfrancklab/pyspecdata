@@ -42,6 +42,15 @@ f2py_wrapper = custom_target(
   capture: false,
 )
 
+fortran_args = []
+if host_machine.system() == 'windows'
+    # Windows-specific flags can go here if needed
+    # fortran_args += ['some-windows-specific-flag']
+else
+    # Assume Linux or other Unix-like systems
+    fortran_args += ['-fallow-argument-mismatch'] # Equivalent to extra_f77_compile_args
+endif
+
 # Define the Fortran extension module
 nnls_extension = py.extension_module(
   '_nnls',
@@ -56,7 +65,7 @@ nnls_extension = py.extension_module(
   include_directories: include_directories(numpy_include_dir),
   install: true,
   cpp_args: ['-DADD_UNDERSCORE', '-I'+numpy_include_dir],  # Equivalent to define_macros=[("ADD_UNDERSCORE", None)]
-  #fortran_args: ['-fallow-argument-mismatch'],  # Equivalent to extra_f77_compile_args
+  fortran_args: fortran_args,
 )
 
 subdir('pyspecdata')
