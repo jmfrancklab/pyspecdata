@@ -18,9 +18,12 @@ ureg.define("cyc = [cycle]")  # 'cycle' is a new dimension
 ureg.define("Hz = cyc / s")  # Redefine 'Hz' to be cycles per second
 ureg.define("rad = 2*pi*cyc")  # Redefine 'rad' in terms of cycles
 Q_ = ureg.Quantity
-if "√" in str(Q_("√W")):
-    pass
-else:
+try:
+    if "√" in str(Q_("√W")):
+        pass
+    else:
+        raise ValueError("not interpreting sqrt!")
+except Exception:
     print(
         "**Warning!** I'm hacking the sqrt behavior of pint.  Consider using"
         " the jmfranck/pint fork"
