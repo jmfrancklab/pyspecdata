@@ -60,7 +60,7 @@ class MyConfig(object):
                 )
             )
         if self._config_parser is None:
-            self._config_parser = configparser.SafeConfigParser()
+            self._config_parser = configparser.ConfigParser()
             read_cfg = self._config_parser.read(self.config_location)
             if not read_cfg:
                 print(
@@ -147,7 +147,7 @@ class MyConfig(object):
             )
         else:
             if self._config_parser is None:
-                self._config_parser = configparser.SafeConfigParser()
+                self._config_parser = configparser.ConfigParser()
                 read_cfg = self._config_parser.read(self.config_location)
                 if not read_cfg:
                     logger.debug(
