@@ -11,7 +11,11 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as lines
 from matplotlib.patches import FancyArrow, Circle
 from matplotlib.lines import Line2D
-from matplotlib.transforms import ScaledTranslation, IdentityTransform
+from matplotlib.transforms import (
+    ScaledTranslation,
+    IdentityTransform,
+    blended_transform_factory,
+)
 from pyspecdata.plot_funcs.image import imagehsv
 import matplotlib.ticker as mticker
 import logging
@@ -77,8 +81,7 @@ def DCCT(
                     adjusts padding on right hand side of DCCT plot
     shareaxis:      boolean
                     subplots scale together, but currently, this means there
-                    must be tick
-                    labels on both top and bottom
+                    must be tick labels on both top and bottom
     cmap:           str
                     string for color mapping if specified
     pass_frq_slice: boolean
@@ -199,6 +202,15 @@ def DCCT(
             ax_list.append(
                 plt.axes([LHS_labels + LHS_pad, b, width, axes_height])
             )  # lbwh
+    dx = LHS_labels + LHS_pad  # Fig coord
+    axis_to_figure = ax_list[0].transAxes + fig.transFigure.inverted()
+    _, dy = axis_to_figure.transform(r_[0, 0])
+    total_scale_transform = IdentityTransform() + ScaledTranslation(
+        dx, dy, fig.transFigure
+    )
+    total_trans = blended_transform_factory(
+        total_scale_transform, fig.transFigure
+    )
     # {{{ adjust tick settings -- AFTER extents are set
     # {{{ bottom subplot
     ax_list[0].xaxis.set_major_locator(majorLocator())
@@ -229,8 +241,8 @@ def DCCT(
         inner_dim = str(inner_dim)
         if inner_dim == "ph2":
             logging.debug("Inner dimension is phase cycling dimension")
-            ax_list[j].yaxis.set_major_formatter(ph2)
-            ax_list[j].yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+            ax_list[j].yaxis.set_major_formatter("ph2")
+            ax_list[j].yaxis.set_major_locator(plt.MaxNLocator(integer=True))
         else:
             ax_list[j].yaxis.set_minor_locator(minorLocator())
             ax_list[j].yaxis.set_ticks_position("both")
@@ -257,38 +269,34 @@ def DCCT(
         allow_for_text=allow_for_text_default,
         allow_for_ticks=allow_for_ticks_default,
     ):
-        x1, y1 = ax1.transAxes.transform(r_[0, 0.95])
-        x2, y2 = ax2.transAxes.transform(r_[0, 0.05])
-        x1 -= allow_for_ticks
-        x_text = x1 - allow_for_text
-        x2 -= allow_for_ticks
-        # following line to create an offset for different dimension labels
         label_spacing = this_label_num * label_spacing_multiplier
-        x1, y1 = fig.transFigure.inverted().transform(
-            r_[x1 - label_spacing, y1]
+        # {{ transform from axes coords to figure coords for respective axes
+        ax1_to_figure = ax1.transAxes + fig.transFigure.inverted()
+        ax2_to_figure = ax2.transAxes + fig.transFigure.inverted()
+        # }}}
+        # following line to create an offset for different dimension labels
+        x1, y1 = ax1_to_figure.transform(
+            r_[0 - allow_for_ticks - label_spacing, 0.95]
         )
-        x_text, _ = fig.transFigure.inverted().transform(
-            r_[x_text - label_spacing, 0]
-        )
-        x2, y2 = fig.transFigure.inverted().transform(
-            r_[x2 - label_spacing, y2]
+        x2, y2 = ax2_to_figure.transform(
+            r_[0 - allow_for_ticks - label_spacing, 0.05]
         )
         lineA = lines.Line2D(
             [x1, x2],
             [y1, y2],
             linewidth=1,
             color="k",
-            transform=fig.transFigure,
+            transform=total_trans,
             clip_on=False,
         )
         plt.text(
-            x_text,
+            x1,
             (y2 + y1) / 2,
             label,
             va="center",
             ha="right",
             rotation=90,
-            transform=fig.transFigure,
+            transform=total_trans,
             color="k",
         )
         fig.add_artist(lineA)
@@ -323,9 +331,6 @@ def DCCT(
                 # same as above, but determine text
                 # position based on tick labels
                 label = my_data.unitify_axis(my_data.dimlabels[-2])
-                x_axorigindisp, y_axorigindisp = ax1.transAxes.transform(
-                    r_[0, 0]
-                )
                 # from here https://stackoverflow.com/questions/44012436/pytho\
                 #n-matplotlib-get-position-of-xtick-labels
                 # then searching for BBox docs
@@ -378,14 +383,14 @@ def DCCT(
             fig.add_artist(AnArrow)
             if diagnostic:
                 a = Line2D(
-                    [x_arrowbase_fig, x_arrowbase_fig + dx],
-                    [y_arrowbase_fig, y_arrowbase_fig + dy],
+                    [x_textdisp, x_textdisp + dx],
+                    [y_textdisp, y_textdisp + dy],
                     transform=fig.transFigure,
                     color="r",
                 )
                 fig.add_artist(a)
                 a = Circle(
-                    (x_textfig, y_textfig),
+                    (x_textdisp, y_textdisp),
                     0.01,
                     clip_on=False,
                     transform=fig.transFigure,

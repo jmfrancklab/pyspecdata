@@ -224,7 +224,7 @@ def apply_oom(average_oom, numbers, prev_label=""):
 
 def issympy(x):
     "tests if something is sympy (based on the module name)"
-    return isinstance(x, type(sp.expr))
+    return isinstance(x, sp.Expr)
 
 
 # {{{ function trickery
@@ -2638,11 +2638,15 @@ class nddata(object):
         If the result is not dimensionless,
         an error will be generated.
 
-        e.g. call as `d.divide_by("axisname","s")`
+        e.g. call as `d.div_units("axisname","s")`
         to divide the axis units by seconds
 
-        or `d.divide_by("s")` to divide the
+        or `d.div_units("s")` to divide the
         data units by seconds.
+
+        e.g. to convert a variable from seconds
+        to the units of `axisname`, do
+        `var_s/d.div_units("axisname","s")`
         """
         if arg2 is not None:
             denom_units = Q_(arg2)
@@ -2839,6 +2843,13 @@ class nddata(object):
         self.dimlabels = list(self.dimlabels)  # otherwise, it weirdly
         # changes the names of copies/sources
         self.dimlabels[self.dimlabels.index(previous)] = new
+        all_ft_props = [
+            j for j in self.other_info.keys() if j.startswith("FT")
+        ]
+        for k in all_ft_props:
+            if previous in self.other_info[k].keys():
+                self.other_info[k][new] = self.other_info[k][previous]
+                self.other_info[k].pop(previous)
         return self
 
     # }}}
@@ -4347,6 +4358,27 @@ class nddata(object):
             isft = True
         else:
             isft = False
+        inidom = self.get_ft_prop(axis_name, "initial_domain")
+
+        def wrap_with_F(mystr):
+            temp = False
+            if isft:
+                if inidom != "f":
+                    temp = True
+                    optinv = ""
+            else:
+                if inidom == "f":
+                    temp = True
+                    optinv = "^{-1}"
+            if temp:
+                if mystr[0] == "$" and mystr[-1] == "$":
+                    mystr = (
+                        r"$\mathcal{F}" + optinv + r"\{" + mystr[1:-1] + r"\}$"
+                    )
+                else:
+                    mystr = r"$\mathcal{F}" + optinv + r"\{$" + mystr + r"$\}$"
+            return mystr
+
         if is_axis:
             yunits = self.units_texsafe(axis_name)
             ph_re = re.compile("^ph([0-9]|_.*)")
@@ -4406,14 +4438,16 @@ class nddata(object):
                             t_idx + 1 < len(axis_name)
                             and axis_name[t_idx + 1].isalpha()
                         ):
-                            axis_name = r"F{" + axis_name + r"}"
+                            axis_name = wrap_with_F(axis_name)
                         else:
                             axis_name = axis_name.replace("t", "\\nu ")
                             if axis_name[0] != "$":
                                 axis_name = "$" + axis_name + "$"
                             axis_name = axis_name.replace(" _", "_")
                     else:
-                        axis_name = r"F{" + axis_name + r"}"
+                        axis_name = wrap_with_F(axis_name)
+                else:
+                    axis_name = wrap_with_F(axis_name)
         else:
             yunits = self.units_texsafe()
         if yunits is not None:
@@ -4426,9 +4460,11 @@ class nddata(object):
     _ft_conj = this_fourier._ft_conj
     ft = this_fourier.ft
     set_ft_prop = this_fourier.set_ft_prop
+    set_ft_initial = this_fourier.set_ft_initial
     get_ft_prop = this_fourier.get_ft_prop
     ft_state_to_str = this_fourier.ft_state_to_str
     ft_clear_startpoints = this_fourier.ft_clear_startpoints
+    ft_new_startpoint = this_fourier.ft_new_startpoint
     ift = this_fourier.ift
     _ft_shift = this_fourier._ft_shift
     ftshift = this_fourier.ftshift
@@ -4690,7 +4726,7 @@ class nddata(object):
             self.setaxis(axis, cdata)
             return self
 
-    def contiguous(self, lambdafunc, axis=None):
+    def contiguous(self, lambdafunc, axis=None, return_idx=False):
         r"""Return contiguous blocks that satisfy the condition given by
         `lambdafunc`
 
@@ -4796,7 +4832,10 @@ class nddata(object):
                 idx[block_order, :],
             )
         )
-        return self.getaxis(axis)[idx[block_order, :]]
+        if return_idx:
+            return idx[block_order, :], self.getaxis(axis)[idx[block_order, :]]
+        else:
+            return self.getaxis(axis)[idx[block_order, :]]
 
     def to_ppm(self, axis="t2", freq_param="SFO1", offset_param="OFFSET"):
         """Function that converts from Hz to ppm using Bruker parameters
