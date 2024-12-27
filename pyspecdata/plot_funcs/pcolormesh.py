@@ -1,5 +1,6 @@
 import matplotlib.pylab as plt
 import numpy as np
+import matplotlib.ticker as ticker
 
 
 def pcolormesh(
@@ -103,15 +104,19 @@ def pcolormesh(
         thisax.set_title(f"({thislabel})")
         # {{{ handle the creation of colorbars here, since adjusting the
         #     mappable clim later changes the colorbars just fine
+        def fmt(x, pos):
+            a, b = '{:.1e}'.format(x).split('e')
+            b = int(b)
+            return r"${} \times 10^{{{}}}$".format(a,b)
         if j == 0:
             if scale_independently:
-                plt.colorbar(mappable=mappable, ax=thisax)
+                plt.colorbar(mappable=mappable, ax=thisax, format=ticker.FuncFormatter(fmt))
             elif one_plot:
-                plt.colorbar(mappable=mappable, ax=thisax)
+                plt.colorbar(mappable=mappable, ax=thisax, format=ticker.FuncFormatter(fmt))
             else:
                 pass  # b/c no use for extra colorbar if locked together
         elif j == 1:
-            plt.colorbar(mappable=mappable, ax=thisax)
+            plt.colorbar(mappable=mappable, ax=thisax, format=ticker.FuncFormatter(fmt))
         # }}}
     # {{{ overall scaling
     # is manually specified:
