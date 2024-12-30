@@ -569,7 +569,10 @@ def myfilter(x, center=250e3, sigma=100e3):
 
 def det_unit_prefactor(thisstr):
     """
-    use pint to determine the prefactor of the string-formatted unit thisstr
+    Use pint to determine the prefactor of the string-formatted unit thisstr.
+    See :func:`div_units` which is the preferred method of 
+    handling unit multipliers.
+
     Parameters
     ==========
     thisstr: str
