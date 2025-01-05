@@ -2584,7 +2584,7 @@ class nddata(object):
             )
         return self
 
-    def human_units(self):
+    def human_units(self, scale_data=False):
         """This function attempts to choose "human-readable" units for axes or
         *y*-values of the data.
         (Terminology stolen from "human readable" file
@@ -2610,6 +2610,20 @@ class nddata(object):
                     logger.debug(strm(thisaxis, "does not have an axis label"))
             else:
                 logger.debug(strm(thisaxis, "does not have a unit label"))
+        if scale_data:
+            # {{{ same for the data
+            prev_label = self.get_units()
+            if prev_label is not None and len(prev_label) > 0:
+                data_to_test = self.data.ravel()
+                average_oom = det_oom(data_to_test)
+                x = self.getaxis(thisaxis)
+                result_label = apply_oom(
+                    average_oom, self.data, prev_label=prev_label
+                )
+                self.set_units(result_label)
+            else:
+                logger.debug("data does not have a unit label")
+            # }}}
         return self
 
     # }}}
@@ -4541,14 +4555,18 @@ class nddata(object):
                 .set_units(
                     self.dimlabels[0], self.get_units(self.dimlabels[0])
                 )
-            ).copy_props(self)
+                .set_units(self.get_units())
+                .copy_props(self)
+            )
         else:
             nddata_lambda = (
                 lambda x: nddata(myspline_re(x), self.dimlabels[0])
                 .setaxis(self.dimlabels[0], x)
                 .set_units(
                     self.dimlabels[0], self.get_units(self.dimlabels[0])
-                ).copy_props(self)
+                )
+                .set_units(self.get_units())
+                .copy_props(self)
             )
         return nddata_lambda
 
