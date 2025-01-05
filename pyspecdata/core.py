@@ -4541,14 +4541,14 @@ class nddata(object):
                 .set_units(
                     self.dimlabels[0], self.get_units(self.dimlabels[0])
                 )
-            )
+            ).copy_props(self)
         else:
             nddata_lambda = (
                 lambda x: nddata(myspline_re(x), self.dimlabels[0])
                 .setaxis(self.dimlabels[0], x)
                 .set_units(
                     self.dimlabels[0], self.get_units(self.dimlabels[0])
-                )
+                ).copy_props(self)
             )
         return nddata_lambda
 
