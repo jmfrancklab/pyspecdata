@@ -568,5 +568,19 @@ def myfilter(x, center=250e3, sigma=100e3):
 
 
 def det_unit_prefactor(thisstr):
-    "use pint to determine the prefactor of the string-formatted unit thisstr"
+    """
+    Use pint to determine the prefactor of the string-formatted unit thisstr.
+
+    This function is **obsolete**: instead, use :func:`div_units` which is the
+    preferred method of handling unit multipliers.
+
+    Parameters
+    ==========
+    thisstr: str
+        units that the prefactor is being determined for
+    Returns
+    =======
+    float:
+        The prefactor of the fed units floored to a multiple of 3    
+    """
     return 3 * int(np.log10(ureg(thisstr).to_base_units().magnitude) // 3)
