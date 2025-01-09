@@ -159,7 +159,6 @@ def DCCT(
             real_data = True
     my_data.human_units()
     grid_bottom += bbox[1]  # define y coord in figure coords for bottom axes
-    #                        of bottom axis
     grid_top -= top_pad  # define y coord in figure coords for top of top axis
     a_shape = ndshape(this_nddata)
     num_dims = len(a_shape.dimlabels[:-2])
