@@ -3,33 +3,49 @@
 The figure list gives us three things:
 
 *   Automatically handle the display and scaling of nddata units.
-*   Refer to plots by name, rather than number (matplotlib has a mechanism for this, which we ignore)
-*   A "basename" allowing us to generate multiple sets of plots for different datasets -- *e.g.* 5 plots with 5 names plotted for 3 different datasets and labeled by 3 different basenames to give 15 plots total
-*   Ability to run the same code from the command line or from within a python environment inside latex.
-    *   this is achieved by choosing figlist (default gui) and figlistl (inherits
-        from figlist -- renders to latex -- the :func:`figlist.show` method is
-        changed)
+*   Refer to plots by name, rather than number (matplotlib has a mechanism for
+    this, which we ignore)
+*   A "basename" allowing us to generate multiple sets of plots for different
+    datasets -- *e.g.* 5 plots with 5 names plotted for 3 different datasets
+    and labeled by 3 different basenames to give 15 plots total
+*   Ability to run the same code from the command line or from within a python
+    environment inside latex.
+    *   this is achieved by choosing figlist (default gui) and figlistl
+        (inherits from figlist -- renders to latex -- the :func:`figlist.show`
+        method is changed)
     *   potential planned future ability to handle html
-*   Ability to handle mayavi plots and matplotlib plots (switch to glumpy, etc.?)
+*   Ability to handle mayavi plots and matplotlib plots (switch to glumpy,
+    etc.?)
     *   potential planned future ability to handle gnuplot
 
 .. todo:: 
 
-    Currently the "items" that the list tracks correspond to either plot formatting directives (see :func:`figlist.setprops`), text, or figures.
+    Currently the "items" that the list tracks correspond to either plot
+    formatting directives (see :func:`figlist.setprops`), text, or figures.
 
-    We should scrap most elements of the current implementation of figlist and rebuild it
+    We should scrap most elements of the current implementation of figlist and
+    rebuild it
 
-    *   currently the figlist is set up to use a context block.  We will not only keep this, but also make it so the individual axes.  Syntax (following a ``fl = figlist_var()`` should look like this: ``with fl['my plot name'] as p:`` and contents of the block would then be ``p.plot(...)``, *etc.*
+    *   currently the figlist is set up to use a context block.  We will not
+        only keep this, but also make it so the individual axes.  Syntax
+        (following a ``fl = figlist_var()`` should look like this: ``with
+        fl['my plot name'] as p:`` and contents of the block would then be
+        ``p.plot(...)``, *etc.*
     *   define an "organization" function of the figlist block.  This allows us
-        to use standard matplotlib commands to set up and organize the axes, using
-        standard matplotlib commands (twinx, subplot, etc.)
-    *   figlist will still have a "next" function, but its purpose will be to simply:
-        *   grab the current axis using matplotlib gca() (assuming the id of the axis isn't yet assigned to an existing figlist_axis -- see below)
+        to use standard matplotlib commands to set up and organize the axes,
+        using standard matplotlib commands (twinx, subplot, etc.)
+    *   figlist will still have a "next" function, but its purpose will be to
+        simply:
+        *   grab the current axis using matplotlib gca() (assuming the id of
+            the axis isn't yet assigned to an existing figlist_axis -- see
+            below)
         *   otherwise, if the name argument to "next" has not yet been called,
             call matplotlib's figure(), followed by subplot(111), then do the
             previous bullet point
-        *   the next function is only intended to be called explicitly from within the organization function
-    *   figlist will consist simply of a list of figlist_axis objects (a new object type), which have the following attributes:
+        *   the next function is only intended to be called explicitly from
+            within the organization function
+    *   figlist will consist simply of a list of figlist_axis objects (a new
+        object type), which have the following attributes:
         *   type -- indicating the type of object:
             *   axis (default)
             *   text (raw latex (or html))
@@ -38,30 +54,38 @@ The figure list gives us three things:
         *   the name of the plot
         *   a matplotlib or mayavi axes object
         *   the units associated with the axes
-        *   a collection.OrderedDict giving the nddata that are associated with the plot, by name.
-            *   If these do not have a name, they will be automatically assigned a name.
+        *   a collection.OrderedDict giving the nddata that are associated with
+            the plot, by name.
+            *   If these do not have a name, they will be automatically
+                assigned a name.
             *   The name should be used by the new "plot" method to generate
-                the "label" for the legend, and can be subsequently used to quickly
-                replace data -- e.g. in a Qt application.
-        *   a dictionary giving any arguments to the pyspecdata.core.plot (or countour, waterfall, etc) function
+                the "label" for the legend, and can be subsequently used to
+                quickly replace data -- e.g. in a Qt application.
+        *   a dictionary giving any arguments to the pyspecdata.core.plot (or
+            countour, waterfall, etc) function
         *   the title -- by default the name of the plot -- can be a setter
         *   the result of the id(...) function, called on the axes object -->
             this can be used to determine if the axes has been used yet
         *   do not use check_units -- the plot method (or contour, waterfall,
             etc.) will only add the nddata objects to the OrderedDict, add the
             arguments to the argument dictionary, then exit
-            *   In the event that more than one plot method is called, the name of the underlying nddaata should be changed
+            *   In the event that more than one plot method is called, the name
+                of the underlying nddaata should be changed
         *   a boolean legend_suppress attribute
-        *   a boolean legend_internal attribute (to place the legend internally, rather than outside the axis)
+        *   a boolean legend_internal attribute (to place the legend
+            internally, rather than outside the axis)
         *   a show method that is called by the figlistl show method.  This
             will determine the appropriate units and use them to determine the
             units and scale of the axes, and then go through and call
             pyspecdata.core.plot on each dataset
-            (in matplotlib, this should be done with a formatting statement rather than by manipulating the axes themselves)
+            (in matplotlib, this should be done with a formatting statement
+            rather than by manipulating the axes themselves)
             and finally call autolegend, unless the legend is supressed
-    *   The "plottype" (currently an argument to the plot function) should be an attribute of the axis object
+    *   The "plottype" (currently an argument to the plot function) should be
+        an attribute of the axis object
 """
-from .general_functions import process_kwargs, strm, lsafen 
+
+from .general_functions import process_kwargs, strm, lsafen
 from .mpl_utils import autopad_figure, autolegend, gridandtick
 from . import plot_funcs as this_plotting
 from .core import nddata
@@ -79,13 +103,16 @@ class figlist(object):
     Attributes
     ----------
     basename : str
-        A basename that can be changed to generate different sets of figures with different basenames.
-        For example, this is useful if you are looping over different sets of data,
-        and generating the same set of figures for each set of data (which would correspond to a basename).
+        A basename that can be changed to generate different sets of figures
+        with different basenames.
+        For example, this is useful if you are looping over different sets of
+        data, and generating the same set of figures for each set of data
+        (which would correspond to a basename).
     figurelist : list
         A list of the figure names
     figdict : dict
-        A dictionary containing the figurelist and the figure numbers or objects that they correspond to.
+        A dictionary containing the figurelist and the figure numbers or
+        objects that they correspond to.
         Keys of this dictionary must be elements of `figurelist`.
     propdict : dict
         Maintains various properties for each element in figurelist.
@@ -173,7 +200,8 @@ class figlist(object):
                 else:
                     if color != self.propdict[self.current]["twinx_color"]:
                         raise ValueError(
-                            "conflicting values for the twinx color have been given!!"
+                            "conflicting values for the twinx color have been"
+                            " given!!"
                         )
         else:
             if autopad:
@@ -206,7 +234,8 @@ class figlist(object):
             return
 
     def push_marker(self):
-        """save the current plot to a "stack" so we can return to it with "pop_marker" """
+        """save the current plot to a "stack" so we can return to it with
+        "pop_marker" """
         if hasattr(self, "current"):  # if not, this is the first plot
             if not hasattr(self, "pushlist"):
                 self.pushlist = []
@@ -223,7 +252,8 @@ class figlist(object):
         return
 
     def pop_marker(self):
-        """use the plot on the top of the "stack" (see push_marker) as the current plot"""
+        """use the plot on the top of the "stack" (see push_marker) as the
+        current plot"""
         if (
             hasattr(self, "pushlist") and len(self.pushlist) > 0
         ):  # otherwise, we called push with no current plot
@@ -255,9 +285,11 @@ class figlist(object):
         "just perform various checks on the name and incorporate the basename"
         if len(input_name) == 0:
             raise ValueError(
-                "You have tried to name a figure with an empty string (\"\").\nThis is so confusing that it's no longer allowed.\n\nYou are probably doing this because you don't want a title:\nJust use the title("
-                ") or gca().set_title("
-                ") command to remove the default title."
+                "You have tried to name a figure with an empty string"
+                ' ("").\nThis is so confusing that it\'s no longer'
+                " allowed.\n\nYou are probably doing this because you don't"
+                " want a title:\nJust use the title() or gca().set_title()"
+                " command to remove the default title."
             )
         # {{{ basic setup
         if not hasattr(self, "figdict"):
@@ -283,10 +315,12 @@ class figlist(object):
         # }}}
         if name.find("/") > 0:
             raise ValueError(
-                "don't include slashes in the figure name, that's just too confusing"
+                "don't include slashes in the figure name, that's just too"
+                " confusing"
             )
         logging.debug(strm("with basename appended, this is", name))
         return name
+
     def next(
         self,
         input_name,
@@ -301,7 +335,8 @@ class figlist(object):
         a string-based name for the figure, but also as a default title and as
         a base name for resulting figure files.
 
-        **In the future, we actually want this to track the appropriate axis object!**
+        **In the future, we actually want this to track the appropriate axis
+        object!**
 
         Parameters
         ----------
@@ -309,9 +344,9 @@ class figlist(object):
             If this is set, a legend is created *outside* the figure.
         twinx : {0,1}
             :1: plots on an overlayed axis (the matplotlib twinx) whose y axis
-                is labeled on the right when you set this for the first time, you
-                can also set a `color` kwarg that controls the coloring of the
-                right axis.
+                is labeled on the right when you set this for the first time,
+                you can also set a `color` kwarg that controls the coloring of
+                the right axis.
             :0: used to switch back to the left (default) axis
         boundaries :
             **need to add description**
@@ -322,7 +357,8 @@ class figlist(object):
         name = self._clean_name(input_name)
         if name in self.figurelist:  # figure already exists
             if hasattr(self, "mlab"):
-                # with this commit, I removed the kwargs and bgcolor, not sure why
+                # with this commit, I removed the kwargs and bgcolor, not sure
+                # why
                 fig = self.mlab.figure(self.get_fig_number(name))
                 fig.scene.render_window.aa_frames = 20
                 fig.scene.anti_aliasing_frames = 20
@@ -347,7 +383,6 @@ class figlist(object):
                         )
                     )
             self.current = name
-            # logging.debug(strm('in',self.figurelist,'at figure',self.get_fig_number(name),'switched figures'))
             if boundaries is not None:
                 if (
                     "boundaries"
@@ -377,8 +412,6 @@ class figlist(object):
                 self.setprops(boundaries=False)
             if legend:
                 self.propdict[self.current]["legend"] = True
-                if "figsize" not in list(kwargs.keys()):
-                    kwargs.update({"figsize": (12, 6)})
                 if hasattr(self, "mlab"):
                     fig = self.mlab.figure(
                         num_figs_before_add + 1, bgcolor=(1, 1, 1), **kwargs
@@ -440,7 +473,8 @@ class figlist(object):
                 fig = plt.gcf()
             else:
                 raise ValueError(
-                    "If you pass twinx, pass 0 for the original or 1 for the right side"
+                    "If you pass twinx, pass 0 for the original or 1 for the"
+                    " right side"
                 )
             self.figdict.update({self.current: fig})
         return fig
@@ -457,7 +491,8 @@ class figlist(object):
         alphapoints[~np.isfinite(alphapoints)] = 0
         alphapoints /= max(
             alphapoints
-        )  # scaling relative to max point, because sometimes there are more points that are mostly error, and sometimes less
+        )  # scaling relative to max point, because sometimes there are more
+        #    points that are mostly error, and sometimes less
         sc = plt.scatter(
             phdiff.getaxis(dimname),
             phdiff.data,
@@ -490,7 +525,8 @@ class figlist(object):
         if human_units:
             firstarg = self.check_units(
                 args[0], 0, 1
-            )  # check units, and if need be convert to human units, where x is the first dimension and y is the last
+            )  # check units, and if need be convert to human units, where x is
+            #    the first dimension and y is the last
         else:
             firstarg = args[0]
         if "label" not in list(kwargs.keys()) and isinstance(args[0], nddata):
@@ -510,8 +546,10 @@ class figlist(object):
 
     def phaseplot_finalize(self):
         (
-            "Performs plot decorations that are typically desired for a manual phasing"
-            " plot.  This assumes that the ``y``-axis is given in units of half-cycles"
+            "Performs plot decorations that are typically desired for a manual"
+            " phasing"
+            " plot.  This assumes that the ``y``-axis is given in units of"
+            " half-cycles"
             r" ($\pi$ radians)."
         )
         ax = plt.gca()
@@ -524,14 +562,14 @@ class figlist(object):
         return
 
     def skip_units_check(self):
-        if not hasattr(self,"skip_check"):
+        if not hasattr(self, "skip_check"):
             self.skip_check = []
         self.skip_check.append(self.current)
 
     def check_units(self, testdata, x_index, y_index):
         logging.debug(strm("-" * 30))
         logging.debug(strm("called check_units for figure", self.current))
-        if hasattr(self,'skip_check') and self.current in self.skip_check:
+        if hasattr(self, "skip_check") and self.current in self.skip_check:
             testdata = testdata.copy().human_units()
             return testdata
         if isinstance(testdata, nddata):
@@ -541,7 +579,8 @@ class figlist(object):
                 logging.debug(strm("(check_units) more than one dimension"))
                 if not hasattr(self, "current"):
                     raise ValueError(
-                        "give your plot a name (using .next()) first! (this is used for naming the PDF's etc)"
+                        "give your plot a name (using .next()) first! (this is"
+                        " used for naming the PDF's etc)"
                     )
                 if self.current in list(self.units.keys()):
                     theseunits = (
@@ -553,7 +592,9 @@ class figlist(object):
                         and theseunits[0] != self.units[self.current]
                     ):
                         raise ValueError(
-                            "for '%s' the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"
+                            "for '%s' the units don't match (old units %s and"
+                            " new units %s)! Figure out a way to deal with"
+                            " this!"
                             % (
                                 self.current,
                                 theseunits,
@@ -583,7 +624,9 @@ class figlist(object):
                             pass
                         else:
                             raise ValueError(
-                                "for figure '%s' the units don't match (old units %s and new units %s)! Figure out a way to deal with this!"
+                                "for figure '%s' the units don't match (old"
+                                " units %s and new units %s)! Figure out a way"
+                                " to deal with this!"
                                 % (
                                     self.current,
                                     self.units[self.current],
@@ -690,7 +733,8 @@ class figlist(object):
                     except Exception:
                         raise Exception(
                             strm(
-                                "error while trying to run twinx to place legend for",
+                                "error while trying to run twinx to place"
+                                " legend for",
                                 k,
                                 "\n\tfiglist is",
                                 self.figurelist,
@@ -701,7 +745,8 @@ class figlist(object):
                     except Exception:
                         raise Exception(
                             strm(
-                                "error while trying to run autolegend function for",
+                                "error while trying to run autolegend"
+                                " function for",
                                 k,
                                 "\n\tfiglist is",
                                 self.figurelist,
@@ -709,7 +754,8 @@ class figlist(object):
                         )
 
     def show(self, *args, **kwargs):
-        self.basename = None  # must be turned off, so it can cycle through lists, etc, on its own
+        self.basename = None  # must be turned off, so it can cycle through
+        #                       lists, etc, on its own
         line_spacing, block = process_kwargs(
             [("line_spacing", ""), ("block", None)], kwargs
         )
@@ -758,7 +804,8 @@ class figlist(object):
         xscale=1,
         **new_kwargs,
     ):
-        """only works for 1D data: assume you've passed a single-point nddata, and label it
+        """only works for 1D data: assume you've passed a single-point nddata,
+        and label it
 
         xscale gives the unit scaling
 
@@ -840,7 +887,8 @@ class figlist(object):
             if grey_surf:
                 surf_kwargs.update(
                     color=(0.5, 0.5, 0.5)
-                )  # opacity and the contour lines don't play well, otherwise I would like to make this transluscent
+                )  # opacity and the contour lines don't play well, otherwise I
+                #    would like to make this transluscent
             self.mlab.surf(X, Y, Z, **surf_kwargs)
             if show_contours:
                 contour_kwargs = {"line_width": 24}
@@ -861,7 +909,8 @@ class figlist(object):
                     Z + lensoffset,
                     contours=r_[-1:1:46j].tolist(),
                     **contour_kwargs,
-                )  # for some reason, 46 gives alignment (I think 9+1 and 9*5+1)
+                )  # for some reason, 46 gives alignment (I think 9+1 and
+                #    9*5+1)
             if equal_scale:
                 self.generate_ticks(
                     plotdata,
@@ -900,14 +949,16 @@ class figlist(object):
         "generate 3d ticks and grid for mayavi"
         if follow_surface and z_norm is None:
             raise ValueError(
-                "if you choose to generate the mesh -- i.e. follow the surface -- then you need to pass the z normalization"
+                "if you choose to generate the mesh -- i.e. follow the surface"
+                " -- then you need to pass the z normalization"
             )
         x_axis, y_axis = axes
         x_dim = plotdata.dimlabels[0]
         y_dim = plotdata.dimlabels[1]
 
         def gen_list(thisaxis, desired_ticks=7.0):
-            # {{{ out of the following list, choose the one that gives as close as possible to the desired ticks
+            # {{{ out of the following list, choose the one that gives as close
+            #     as possible to the desired ticks
             axis_span = thisaxis.max() - thisaxis.min()
             possible_iterators = r_[
                 0.1, 0.5, 1, 5, 10, 20, 30, 50, 100, 200, 500, 1000
@@ -928,7 +979,8 @@ class figlist(object):
                 * iterator,
             )
 
-        # {{{ now, I need to get the list of multiples that falls inside the axis span
+        # {{{ now, I need to get the list of multiples that falls inside the
+        #     axis span
         xiterator, xlist = gen_list(x_axis)
         yiterator, ylist = gen_list(y_axis)
         logging.debug(strm("range of x ", x_axis.min(), x_axis.max()))
@@ -1087,7 +1139,8 @@ class figlist(object):
     def __exit__(self, exception_type, exception_value, traceback):
         r"""show the plots, unless there are errors.
 
-        Because this is executed before raising any errors, we want to avoid showing any plots if there are errors.
+        Because this is executed before raising any errors, we want to avoid
+        showing any plots if there are errors.
         Otherwise, it gets very confusing.
         """
         if self._print_at_end:
@@ -1110,6 +1163,7 @@ class figlist(object):
     def __contains__(self, input_name):
         name = self._clean_name
         return name in self.figurelist
+
     def __repr__(self):
         result = ""
         counter = 0

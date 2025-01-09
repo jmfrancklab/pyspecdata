@@ -18,9 +18,12 @@ ureg.define("cyc = [cycle]")  # 'cycle' is a new dimension
 ureg.define("Hz = cyc / s")  # Redefine 'Hz' to be cycles per second
 ureg.define("rad = 2*pi*cyc")  # Redefine 'rad' in terms of cycles
 Q_ = ureg.Quantity
-if "√" in str(Q_("√W")):
-    pass
-else:
+try:
+    if "√" in str(Q_("√W")):
+        pass
+    else:
+        raise ValueError("not interpreting sqrt!")
+except Exception:
     print(
         "**Warning!** I'm hacking the sqrt behavior of pint.  Consider using"
         " the jmfranck/pint fork"
@@ -565,5 +568,19 @@ def myfilter(x, center=250e3, sigma=100e3):
 
 
 def det_unit_prefactor(thisstr):
-    "use pint to determine the prefactor of the string-formatted unit thisstr"
+    """
+    Use pint to determine the prefactor of the string-formatted unit thisstr.
+
+    This function is **obsolete**: instead, use :func:`div_units` which is the
+    preferred method of handling unit multipliers.
+
+    Parameters
+    ==========
+    thisstr: str
+        units that the prefactor is being determined for
+    Returns
+    =======
+    float:
+        The prefactor of the fed units floored to a multiple of 3    
+    """
     return 3 * int(np.log10(ureg(thisstr).to_base_units().magnitude) // 3)

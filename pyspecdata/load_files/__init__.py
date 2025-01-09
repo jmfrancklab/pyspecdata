@@ -16,6 +16,7 @@ types.
 .. autofunction:: find_file
 
 """
+
 from . import bruker_nmr
 from . import prospa
 from . import bruker_esr
@@ -173,13 +174,11 @@ def search_filename(searchstring, exp_type, print_result=True, unique=False):
                 map(
                     set,
                     list(
-                        zip(
-                            *[
-                                j.rsplit(".", 1)
-                                for j in files
-                                if len(j.rsplit(".", 1)) > 1
-                            ]
-                        )
+                        zip(*[
+                            j.rsplit(".", 1)
+                            for j in files
+                            if len(j.rsplit(".", 1)) > 1
+                        ])
                     ),
                 )
             )
@@ -430,7 +429,8 @@ def find_file(
             logger.debug("got a postproc_type value of None")
             assert len(kwargs) == 0, (
                 "there must be no keyword arguments left, because you're done"
-                " postprocessing (you have %s)" % str(kwargs)
+                " postprocessing (you have %s)"
+                % str(kwargs)
             )
             return data
         else:
@@ -443,7 +443,8 @@ def find_file(
                 logger.debug(
                     "postprocessing not defined for file with postproc_type %s"
                     " --> it should be defined in the postproc_type dictionary"
-                    " in load_files.__init__.py" + postproc_type
+                    " in load_files.__init__.py"
+                    + postproc_type
                 )
                 if len(lookup) > 0:
                     raise ValueError(
@@ -540,13 +541,11 @@ def _check_signature(filename):
             thiskey in inistring for thiskey in list(file_signatures.keys())
         ):  # this will fail without overriding the numpy any( above
             retval = file_signatures[
-                next(
-                    (
-                        thiskey
-                        for thiskey in list(file_signatures.keys())
-                        if thiskey in inistring
-                    )
-                )
+                next((
+                    thiskey
+                    for thiskey in list(file_signatures.keys())
+                    if thiskey in inistring
+                ))
             ]
             logger.debug(strm("Found magic signature, returning", retval))
             return retval
@@ -640,13 +639,10 @@ def load_indiv_file(
                 os.path.normpath(filename).split(os.path.sep)[-1].split(".")[0]
             )
             assert all([j[0] == basename for j in list_of_files]), strm(
-                (
-                    "I expected that the zip file %s contains a directory"
-                    " called %s which contains your NMR data -- this appears"
-                    " not to be the case.  (Note that with future extensions,"
-                    " other formats will be possible.)"
-                )
-                % (filename, basename)
+                "I expected that the zip file %s contains a directory"
+                " called %s which contains your NMR data -- this appears"
+                " not to be the case.  (Note that with future extensions,"
+                " other formats will be possible.)" % (filename, basename)
             )
             file_reference = (zf, filename, basename)
         else:
@@ -676,7 +672,8 @@ def load_indiv_file(
         else:
             logger.debug(
                 "Identified a potential prospa file, because I didn't find ser"
-                " or acqus in " + strm(file_reference, expno_as_str)
+                " or acqus in "
+                + strm(file_reference, expno_as_str)
             )
             # the rest are for prospa
             # even though I've made steps towards supporting zipped prospa (by
@@ -738,7 +735,7 @@ def load_indiv_file(
                                     and "data" in f[j].keys()
                                 ):
                                     attrlist.append(j)
-                        logger.debug("return_list is ", return_list)
+                        logger.debug(strm("return_list is ", return_list))
                         if return_list:
                             print(
                                 "using return-list -- this should be"
@@ -747,7 +744,8 @@ def load_indiv_file(
                             return attrlist
                         raise ValueError(
                             "please select a node from the list and set to"
-                            " expno:\n\t" + "\n\t".join(attrlist)
+                            " expno:\n\t"
+                            + "\n\t".join(attrlist)
                         )
                     # assume this is a normal pySpecData HDF5 file
                     dirname, filename = os.path.split(filename)
