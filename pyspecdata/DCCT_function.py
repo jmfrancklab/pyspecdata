@@ -292,7 +292,8 @@ def DCCT(
         x1_disp = LHS_labels + bbox[0] - label_spacing  # x coord is the left
         #                                                 side of the axis
         #                                                 minus the spacing for
-        #                                                 text/ticks (label_spacing)
+        #                                                 text/ticks
+        #                                                 (label_spacing)
         # {{{ Take y coordinate of top and bottom of axes objects to get the 2
         # points for drawing the lines. To be exact I pull this from the axes
         # objects themselves.
