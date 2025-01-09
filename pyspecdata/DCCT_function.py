@@ -101,6 +101,12 @@ def DCCT(
     y = []  # List to put indirect dims into
     my_data = this_nddata.C
     ordered_labels = {}
+
+    def ax_to_fig(thisax, thisfig):
+        """Transformation to convert axes coordinates of thisax into figure
+        coordinates of thisfig"""
+        return thisax.transAxes + thisfig.transFigure.inverted()
+
     # {{{ Generate alias labels - goes to scientific fn
     for this_dim in [j for j in my_data.dimlabels if j.startswith("ph")]:
         if my_data.get_ft_prop(this_dim):
@@ -129,13 +135,13 @@ def DCCT(
                 ]  # grab the columns, which are the labels for all aliases
                 #    that belong at this index
                 if j == 0:
-                    temp = ", ".join(
-                        ["%d" % j for j in np.sort(temp[np.isfinite(temp)])]
-                    )
+                    temp = ", ".join([
+                        "%d" % j for j in np.sort(temp[np.isfinite(temp)])
+                    ])
                 else:
-                    temp = ", ".join(
-                        ["%+d" % j for j in np.sort(temp[np.isfinite(temp)])]
-                    )
+                    temp = ", ".join([
+                        "%+d" % j for j in np.sort(temp[np.isfinite(temp)])
+                    ])
                 if len(temp) == 0:
                     temp = "X"
                 labels_in_order.append(temp)
@@ -158,8 +164,8 @@ def DCCT(
             my_data.data = my_data.data.real
             real_data = True
     my_data.human_units()
-    grid_bottom += bbox[1]  # define y coord in figure coords for bottom axes
-    grid_top -= top_pad  # define y coord in figure coords for top of top axis
+    grid_bottom += bbox[1]  # y coord for bottom of bottom axein figure coords
+    grid_top -= top_pad  # y coord for top of top ax in figure coords
     a_shape = ndshape(this_nddata)
     num_dims = len(a_shape.dimlabels[:-2])
     divisions = []
@@ -173,9 +179,9 @@ def DCCT(
     axes_height = (grid_top - grid_bottom - total_spacing) / np.prod(
         a_shape.shape[:-2]
     )
-    axes_bottom = np.cumsum(
-        [axes_height + j for j in divisions]
-    )  # becomes ndarray
+    axes_bottom = np.cumsum([
+        axes_height + j for j in divisions
+    ])  # becomes ndarray
     axes_bottom = r_[0, axes_bottom]
     axes_bottom += grid_bottom
     fig = this_fig_obj
@@ -202,22 +208,20 @@ def DCCT(
                 plt.axes([LHS_labels + bbox[0], b, width, axes_height])
             )  # lbwh
     # {{{ make blended transform for plotting coherence transfer labels
-    dx = LHS_labels + bbox[0]  # x coord in figure coord
-    axis_to_figure = ax_list[0].transAxes + fig.transFigure.inverted()
-    _, dy = axis_to_figure.transform(
+    ax_x0, ax_y0 = ax_to_fig(ax_list[0], fig).transform(
         r_[0, 0]
-    )  # bottom left corner of first ax in fig coord
+    )  # bottom left corner of bottom ax in fig coord
+    dx = LHS_labels + bbox[0]  # x coord in figure coord
     total_scale_transform = IdentityTransform() + ScaledTranslation(
-        dx, dy, fig.transFigure
+        dx, ax_y0, fig.transFigure
     )
     total_trans = blended_transform_factory(
         total_scale_transform, fig.transFigure
     )
     # }}}
     # {{{ transform for arrows
-    ax_x, ax_y = axis_to_figure.transform(r_[0, 0])
     arrow_trans = IdentityTransform() + ScaledTranslation(
-        ax_x, ax_y, fig.transFigure
+        ax_x0, ax_y0, fig.transFigure
     )
     # }}}
     # {{{ adjust tick settings -- AFTER extents are set
@@ -282,24 +286,21 @@ def DCCT(
         pathways"""
         label_spacing = (
             this_label_num
-            + 1  # plus one so the first horizontal doesn't
-            #      overlap with the indirect axis
-        ) * vert_label_spacer  # depending on number of dims this will space
-        #                        the lines along x approp.
+            + 1  # plus one so the first horizontal isn't placed at 0
+            #      (overlapping with the spine of the indirect axis)
+        ) * vert_label_spacer  # will space the vertical lines along x approp.
         x1_disp = LHS_labels + bbox[0] - label_spacing  # x coord is the left
         #                                                 side of the axis
         #                                                 minus the spacing for
-        #                                                 text/ticks
+        #                                                 text/ticks (label_spacing)
         # {{{ Take y coordinate of top and bottom of axes objects to get the 2
         # points for drawing the lines. To be exact I pull this from the axes
         # objects themselves.
-        _, y1_fig = (ax1.transAxes + fig.transFigure.inverted()).transform(
-            r_[0, 0.95]
-        )
-        _, y2_fig = (ax2.transAxes + fig.transFigure.inverted()).transform(
-            r_[0, 0.05]
-        )
+        _, y1_fig = ax_to_fig(ax1, fig).transform(r_[0, 0.95])
+        _, y2_fig = ax_to_fig(ax2, fig).transform(r_[0, 0.05])
         # }}}
+        # for scaled translation, x coords should be display and y coords
+        # should be figure
         lineA = lines.Line2D(
             [x1_disp, x1_disp],
             [y1_fig, y2_fig],
@@ -336,6 +337,7 @@ def DCCT(
             if check_for_label_num:
                 # the labels of the outer dimensions
                 label_spacing = (this_label_num + 1) * vert_label_spacer
+                # Calculate coord for base of arrow
                 x_textdisp = LHS_labels + bbox[0] - label_spacing
             else:
                 # same as above, but determine text
@@ -362,10 +364,7 @@ def DCCT(
                 j.get_window_extent().bounds for j in ax1.get_yticklabels()
             ][-1][-1]
             x_textdisp -= tick_length
-            x_textdisp -= (
-                arrow_width_px  # x_textdisp is base of arrow so subtract
-            )
-            #                               arrow width
+            x_textdisp -= arrow_width_px
             y_textdisp = -25.0
             if diagnostic:
                 a = Circle(
@@ -489,9 +488,9 @@ def DCCT(
                 "I don't understand the value you've set for the origin"
                 " keyword argument"
             )
-        kwargs[
-            "origin"
-        ] = origin  # required so that imshow now displays the image correctly
+        kwargs["origin"] = (
+            origin  # required so that imshow now displays the image correctly
+        )
 
         if real_data:
             kwargs["cmap"] = cmap
@@ -600,4 +599,3 @@ def DCCT(
             width,
             top_pad - (1 - bbox[2] - bbox[0]),
         )
-# }}}
