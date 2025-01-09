@@ -208,12 +208,12 @@ def DCCT(
                 plt.axes([LHS_labels + bbox[0], b, width, axes_height])
             )  # lbwh
     # {{{ make blended transform for plotting coherence transfer labels
-    ax_x0, ax_y0 = ax_to_fig(ax_list[0], fig).transform(
+    fig_x0, fig_y0 = ax_to_fig(ax_list[0], fig).transform(
         r_[0, 0]
     )  # bottom left corner of bottom ax in fig coord
     dx = LHS_labels + bbox[0]  # x coord in figure coord
     total_scale_transform = IdentityTransform() + ScaledTranslation(
-        dx, ax_y0, fig.transFigure
+        dx, fig_y0, fig.transFigure
     )
     total_trans = blended_transform_factory(
         total_scale_transform, fig.transFigure
@@ -221,7 +221,7 @@ def DCCT(
     # }}}
     # {{{ transform for arrows
     arrow_trans = IdentityTransform() + ScaledTranslation(
-        ax_x0, ax_y0, fig.transFigure
+        fig_x0, fig_y0, fig.transFigure
     )
     # }}}
     # {{{ adjust tick settings -- AFTER extents are set
