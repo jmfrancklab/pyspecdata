@@ -215,11 +215,13 @@ def DCCT(
     total_scale_transform = IdentityTransform() + ScaledTranslation(
         dx, fig_y0, fig.transFigure
     )
+    # Total translation takes x in display coords and y in fig coords
     total_trans = blended_transform_factory(
         total_scale_transform, fig.transFigure
     )
     # }}}
     # {{{ transform for arrows
+    # Arrow translation takes both coords in figure coordinates
     arrow_trans = IdentityTransform() + ScaledTranslation(
         fig_x0, fig_y0, fig.transFigure
     )
