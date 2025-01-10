@@ -12,7 +12,6 @@ using the domain colored plotting style.
 """
 
 from pylab import rcParams
-import matplotlib.pyplot as plt
 import pyspecdata as psd
 from numpy.random import seed
 import sympy as s
