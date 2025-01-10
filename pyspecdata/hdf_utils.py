@@ -5,7 +5,8 @@ import os
 import logging
 from .general_functions import strm, lsafen, process_kwargs
 from .datadir import log_fname, unknown_exp_type_name
-from .dict_utils import make_ndarray, unmake_ndarray, make_rec, decorate_rec
+from .dict_utils import make_ndarray, unmake_ndarray
+from .rec_utils import make_rec, decorate_rec
 
 logger = logging.getLogger("pyspecdata.hdf_utils")
 
