@@ -26,7 +26,6 @@ def DCCT(
     this_fig_obj,
     custom_scaling=False,
     bbox=[0.05, 0.1, 0.92],
-    grid_top=1.0,
     total_spacing=0.2,
     vert_label_spacer=50,
     shareaxis=False,
@@ -62,9 +61,6 @@ def DCCT(
         :bbox[2]: int
             Distance between the right most side of the axes objects and the
             left most side of the decorations (in Figure coordinates)
-    grid_top : float
-        Figure coordinates
-        y-coordinate top of grid in figure
     total_spacing : float
         Figure coordinates
         Spacing between phase cycle dimensions
@@ -152,7 +148,6 @@ def DCCT(
             my_data.data = my_data.data.real
             real_data = True
     my_data.human_units()
-    grid_top -= top_pad  # y coord for top of top ax in figure coords
     a_shape = ndshape(this_nddata)
     num_dims = len(a_shape.dimlabels[:-2])
     divisions = []
@@ -163,9 +158,9 @@ def DCCT(
         divisions = (old + [1]) * (a_shape[thisdim] - 1) + old
         logging.debug(strm("for", thisdim, "I get", divisions))
     divisions = [j * total_spacing / sum(divisions) for j in divisions]
-    axes_height = (grid_top - bbox[1] - total_spacing) / np.prod(
+    axes_height = (1-top_pad - bbox[1] - total_spacing) / np.prod(
         a_shape.shape[:-2]
-    )
+    ) # where 1 is the figure y-coordinate of the top of the figure
     axes_bottom = np.cumsum([
         axes_height + j for j in divisions
     ])  # becomes ndarray
