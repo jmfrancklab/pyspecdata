@@ -1,8 +1,9 @@
 py_sources=[
+'DCCT_function.py',
+'__init__.py',
 'axis_class.py',
 'core.py',
 'datadir.py',
-'DCCT_function.py',
 'dict_utils.py',
 'figlist.py',
 'fl_dummy.py',
@@ -10,7 +11,6 @@ py_sources=[
 'general_functions.py',
 'generate_fake_data.py',
 'hdf_utils.py',
-'__init__.py',
 'ipy.py',
 'latexscripts.py',
 'lmfitdata.py',
@@ -18,6 +18,7 @@ py_sources=[
 'ndshape.py',
 'nnls.py',
 'placeholder.py',
+'rec_utils.py',
 'units.py',
 'version.py',
 ]
