@@ -302,6 +302,7 @@ def h5addrow(bottomnode, tablename, *args, **kwargs):
                     myrowdata,
                 )
             )
+            tabledforerr = mytable.read()
             raise AttributeError(
                 strm(
                     "Compare names and values table data vs. the row you are"
@@ -344,10 +345,14 @@ def h5addrow(bottomnode, tablename, *args, **kwargs):
 def h5table(bottomnode, tablename, tabledata):
     "create the table, or if tabledata is None, just check if it exists"
     # {{{ save but don't overwrite the table
+    h5file = bottomnode._v_file
     if tablename not in list(bottomnode._v_children.keys()):
         if tabledata is not None:
             if isinstance(tabledata, dict):
                 tabledata = make_rec(tabledata)
+            datatable = h5file.create_table(
+                bottomnode, tablename, tabledata
+            )  # actually write the data to the table
         else:
             raise RuntimeError(
                 " ".join(
@@ -501,6 +506,7 @@ def h5attachattributes(node, listofattributes, myvalues):
         raise IndexError(
             "Problem!, node passed to h5attachattributes: ", node, "is None!"
         )
+    h5file = node._v_file
     if hasattr(myvalues, "dimlabels"):  # use as a proxy for being nddata
         attributevalues = [
             myvalues.__getattribute__(x) for x in listofattributes
