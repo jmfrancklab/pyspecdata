@@ -64,92 +64,12 @@ with psd.figlist_var() as fl:
     #                   DCCT
     # keyword arguments to use for the first DCCT
     dcct_kwargs_1 = dict(
-        bbox=[LHS_pad_1, bbox_bottom, R_to_L])#, total_spacing=0.2, top_pad=0.1
-    #)
+        bbox=[LHS_pad_1, bbox_bottom, R_to_L])
     fig = fl.next("Data")  # Make figure object to place the DCCT
     data.ft(["ph1", "ph2"])
     psd.DCCT(data, fig, plot_title="Time Domain", **dcct_kwargs_1)
     data.ft("t2")
     # keyword arguments to use for second DCCT
     dcct_kwargs_2 = dict(
-        bbox=[LHS_pad_2, bbox_bottom, R_to_L])#, total_spacing=0.2, top_pad=0.1
-    #)
+        bbox=[LHS_pad_2, bbox_bottom, R_to_L])
     psd.DCCT(data, fig, plot_title="Frequency Domain", **dcct_kwargs_2)
-    # {{{ add lines indicating kwargs
-    plt.plot(
-        [0.06, 0.06],
-        [0.0, 0.09],
-        "b",
-        marker="_",
-        linewidth=1,
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.text(
-        0.01,
-        0.03,
-        "bbox[1]",
-        color="b",
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.plot(
-        [0, 0.1],
-        [0.9, 0.9],
-        "b",
-        marker="|",
-        linewidth=1,
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.text(
-        0.025,
-        0.92,
-        "bbox[0]",
-        color="b",
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.plot(
-        [0.1, 0.52],
-        [0.95, 0.95],
-        "b",
-        marker="|",
-        linewidth=1,
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.text(
-        0.35,
-        0.97,
-        "bbox[2]",
-        color="b",
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.text(
-        0.35,
-        0.97,
-        "bbox[2]",
-        color="b",
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.plot(
-        [0.12, 0.15],
-        [0.47, 0.47],
-        "r",
-        marker="|",
-        linewidth=1,
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.text(
-        0.06,
-        0.49,
-        "kwarg(vert_label_space)",
-        color="r",
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    # }}}
