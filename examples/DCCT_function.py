@@ -1,15 +1,17 @@
 """Using the DCCT function
 =======================
 
-Visualize a simulated inversion recovery dataset
-utilizing the benefits of the DCCT plotting style.
+Visualize a simulated inversion recovery dataset utilizing the benefits of the
+DCCT plotting style.
 
-We can image data in both the phase cycling domain,
-as well as the coherence transfer domain. Artifacts can
-clearly be discerned from signal in the coherence transfer
-domain as well as visualizing the inversion of phase 
-using the domain colored plotting style.
-"""
+We can image data in both the phase cycling domain, or the coherence transfer
+domain. Artifacts can clearly be discerned from signal in the coherence
+transfer domain as well as visualizing the inversion of phase using the domain
+colored plotting style. 
+
+Here, kwargs plotted in red (e.g. vert_label_space) illustrate the kwargs are
+in display coordinates while kwargs that are in blue (e.g. bbox and LHS_pad)
+illustrate the kwargs are in figure coordinates """
 
 from pylab import rcParams
 import matplotlib.pyplot as plt
@@ -56,11 +58,28 @@ with psd.figlist_var() as fl:
     data.reorder(["ph1", "ph2", "vd", "t2"])
     # fake_data gives us data already in the coherence domain, so:
     fig = fl.next("Data")  # Make figure object to place the DCCT
-    top_pad = 0.1 # Give a litte space on top so I can add the manual labels below
-    psd.DCCT(data, fig, plot_title="Frequency Domain", top_pad = top_pad)
+    psd.DCCT(data, fig, plot_title="")
     # {{{ add lines indicating kwargs
+    # {{{ bbox kwargs
     plt.plot(
-        [0.06, 0.06],
+        [0, 0.05],
+        [0.1, 0.1],
+        "b",
+        marker="|",
+        linewidth=1,
+        clip_on=False,
+        transform=fig.transFigure,
+    )
+    plt.text(
+        0.008,
+        0.12,
+        "bbox[0]",
+        color="b",
+        clip_on=False,
+        transform=fig.transFigure,
+    )
+    plt.plot(
+        [0.16, 0.16],
         [0.0, 0.09],
         "b",
         marker="_",
@@ -69,7 +88,7 @@ with psd.figlist_var() as fl:
         transform=fig.transFigure,
     )
     plt.text(
-        0.01,
+        0.17,
         0.03,
         "bbox[1]",
         color="b",
@@ -77,8 +96,8 @@ with psd.figlist_var() as fl:
         transform=fig.transFigure,
     )
     plt.plot(
-        [0, 0.1],
-        [0.9, 0.9],
+        [0.05, 0.97],
+        [0.97, 0.97],
         "b",
         marker="|",
         linewidth=1,
@@ -86,41 +105,27 @@ with psd.figlist_var() as fl:
         transform=fig.transFigure,
     )
     plt.text(
-        0.025,
-        0.92,
-        "bbox[0]",
+        0.45,
+        0.98,
+        "bbox[2]",
         color="b",
         clip_on=False,
         transform=fig.transFigure,
     )
+    # }}}
+    # {{{ vert_label_space
     plt.plot(
-        [0.1, 0.52],
-        [0.95, 0.95],
-        "b",
+        [0.105, 0.125],
+        [0.5, 0.5],
+        "r",
         marker="|",
         linewidth=1,
         clip_on=False,
         transform=fig.transFigure,
     )
-    plt.text(
-        0.35,
-        0.97,
-        "bbox[2]",
-        color="b",
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.text(
-        0.35,
-        0.97,
-        "bbox[2]",
-        color="b",
-        clip_on=False,
-        transform=fig.transFigure,
-    )
     plt.plot(
-        [0.12, 0.15],
-        [0.47, 0.47],
+        [0.07, 0.09],
+        [0.5, 0.5],
         "r",
         marker="|",
         linewidth=1,
@@ -129,9 +134,45 @@ with psd.figlist_var() as fl:
     )
     plt.text(
         0.06,
-        0.49,
+        0.52,
         "kwarg(vert_label_space)",
         color="r",
+        clip_on=False,
+        transform=fig.transFigure,
+    )
+    # }}}
+    # {{{ gap
+    plt.plot(
+        [0.5, 0.5],
+        [0.5, 0.55],
+        "b",
+        marker="_",
+        linewidth=1,
+        clip_on=False,
+        transform=fig.transFigure,
+    )
+    plt.text(
+        0.51,
+        0.52,
+        "kwarg(2*gap)",
+        color="b",
+        clip_on=False,
+        transform=fig.transFigure,
+    )
+    plt.plot(
+        [0.5, 0.5],
+        [0.63, 0.655],
+        "b",
+        marker="_",
+        linewidth=1,
+        clip_on=False,
+        transform=fig.transFigure,
+    )
+    plt.text(
+        0.51,
+        0.635,
+        "kwarg(gap)",
+        color="b",
         clip_on=False,
         transform=fig.transFigure,
     )

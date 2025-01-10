@@ -26,7 +26,7 @@ def DCCT(
     this_fig_obj,
     custom_scaling=False,
     bbox=[0.05, 0.1, 0.92],
-    total_spacing=0.2,
+    gap=0.1,
     vert_label_spacer=50,
     shareaxis=False,
     diagnostic=False,
@@ -39,8 +39,7 @@ def DCCT(
     plot_title="DCCT",
     **kwargs,
 ):
-    """DCCT plot where each coherence transfer pathway is an axes object
-    plotted on the figure.
+    """DCCT plot.
 
     Parameters
     ==========
@@ -61,15 +60,17 @@ def DCCT(
         :bbox[2]: int
             Distance between the right most side of the axes objects and the
             left most side of the decorations (in Figure coordinates)
-    total_spacing : float
+    gap : float
         Figure coordinates
-        Spacing between phase cycle dimensions
+        Spacing between coherence transfer pathways
     vert_label_spacer : int
         Display coordinates
         Spacing between vertical lines that label the coherence pathways
     shareaxis : boolean
         Subplots scale together, but currently, this means there
         must be tick labels on both top and bottom
+    diagnostic : boolean
+        Option to additionally display diagnostic plots
     cmap : str
         Color mapping if specified
     pass_frq_slice : boolean
@@ -157,8 +158,8 @@ def DCCT(
         old = [j / 2.0 for j in divisions]
         divisions = (old + [1]) * (a_shape[thisdim] - 1) + old
         logging.debug(strm("for", thisdim, "I get", divisions))
-    divisions = [j * total_spacing / sum(divisions) for j in divisions]
-    axes_height = (1-top_pad - bbox[1] - total_spacing) / np.prod(
+    divisions = [j * 2 * gap / sum(divisions) for j in divisions]
+    axes_height = (1-top_pad - bbox[1] - 2 * gap) / np.prod(
         a_shape.shape[:-2]
     ) # where 1 is the figure y-coordinate of the top of the figure
     axes_bottom = np.cumsum([
