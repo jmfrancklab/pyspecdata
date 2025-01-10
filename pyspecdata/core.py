@@ -7097,11 +7097,11 @@ class nddata_hdf5(nddata):
             del self.datanode
         return
 
-    def __init__(self, pathstring, directory="."):
+    def __init__(self, pathstring, directory=".", mode="r"):
         self.pathstring = pathstring
         # try:
         self.h5file, self.datanode = h5nodebypath(
-            pathstring, check_only=True, directory=directory
+            pathstring, check_only=True, directory=directory, mode=mode
         )
         logger.debug("about to call _init_datanode")
         self._init_datanode(self.datanode)

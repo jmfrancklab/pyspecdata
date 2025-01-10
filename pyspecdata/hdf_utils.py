@@ -380,7 +380,12 @@ def h5table(bottomnode, tablename, tabledata):
 
 
 def h5nodebypath(
-    h5path, force=False, only_lowest=False, check_only=False, directory="."
+    h5path,
+    force=False,
+    only_lowest=False,
+    check_only=False,
+    directory=".",
+    mode="a",
 ):
     r"""return the node based on an absolute path, including the filename"""
     logger.debug(strm("DEBUG: called h5nodebypath on", h5path))
@@ -406,7 +411,6 @@ def h5nodebypath(
                 + errmsg
             )
         logger.debug(strm("DEBUG: file does not exist\n\n"))
-    mode = "a"
     # if check_only: mode = 'r'
     logger.debug(
         strm("so I look for the file", h5path[0], "in directory", directory)
