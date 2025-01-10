@@ -55,9 +55,26 @@ with psd.figlist_var() as fl:
     # reorder into a format more suitable for plotting
     data.reorder(["ph1", "ph2", "vd", "t2"])
     # fake_data gives us data already in the coherence domain, so:
+    data.ift(["ph1", "ph2"])
+    LHS_pad_1 = 0.1  # left hand side padding for first DCCT
+    LHS_pad_2 = 0.55  # left hand side padding for second DCCT
+    R_to_L = 0.42  # width from left of decorations to right of
+    #               plots should be the same for both DCCT
+    bbox_bottom = 0.1  # bottom padding should be equal for both
+    #                   DCCT
+    # keyword arguments to use for the first DCCT
+    dcct_kwargs_1 = dict(
+        bbox=[LHS_pad_1, bbox_bottom, R_to_L], total_spacing=0.2, top_pad=0.1
+    )
     fig = fl.next("Data")  # Make figure object to place the DCCT
-    top_pad = 0.1 # Give a litte space on top so I can add the manual labels below
-    psd.DCCT(data, fig, plot_title="Frequency Domain", top_pad = top_pad)
+    data.ft(["ph1", "ph2"])
+    psd.DCCT(data, fig, plot_title="Time Domain", **dcct_kwargs_1)
+    data.ft("t2")
+    # keyword arguments to use for second DCCT
+    dcct_kwargs_2 = dict(
+        bbox=[LHS_pad_2, bbox_bottom, R_to_L], total_spacing=0.2, top_pad=0.1
+    )
+    psd.DCCT(data, fig, plot_title="Frequency Domain", **dcct_kwargs_2)
     # {{{ add lines indicating kwargs
     plt.plot(
         [0.06, 0.06],
