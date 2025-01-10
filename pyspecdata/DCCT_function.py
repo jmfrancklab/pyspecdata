@@ -25,10 +25,8 @@ def DCCT(
     this_nddata,
     this_fig_obj,
     custom_scaling=False,
-    grid_bottom=0.0,
     bbox=[0.05, 0.1, 0.92],
     grid_top=1.0,
-    top_pad=0.05,
     total_spacing=0.2,
     vert_label_spacer=50,
     shareaxis=False,
@@ -42,7 +40,8 @@ def DCCT(
     plot_title="DCCT",
     **kwargs,
 ):
-    """DCCT plot
+    """DCCT plot where each coherence transfer pathway is an axes object
+    plotted on the figure.
 
     Parameters
     ==========
@@ -63,15 +62,9 @@ def DCCT(
         :bbox[2]: int
             Distance between the right most side of the axes objects and the
             left most side of the decorations (in Figure coordinates)
-    grid_bottom : float
-        Figure coordinates
-        y-coordinate for bottom of DCCT plot.
     grid_top : float
         Figure coordinates
         y-coordinate top of grid in figure
-    top_pad : float
-        Figure coordinates
-        Distance between top of figure and top of grid
     total_spacing : float
         Figure coordinates
         Spacing between phase cycle dimensions
@@ -99,6 +92,7 @@ def DCCT(
     """
     x = []  # List to put direct dim into
     y = []  # List to put indirect dims into
+    top_pad = 0.05 # a bit of padding on top to allow space for title
     my_data = this_nddata.C
     ordered_labels = {}
     # {{{ Generate alias labels - goes to scientific fn
@@ -158,7 +152,6 @@ def DCCT(
             my_data.data = my_data.data.real
             real_data = True
     my_data.human_units()
-    grid_bottom += bbox[1]  # y coord for bottom of bottom axein figure coords
     grid_top -= top_pad  # y coord for top of top ax in figure coords
     a_shape = ndshape(this_nddata)
     num_dims = len(a_shape.dimlabels[:-2])
@@ -170,14 +163,14 @@ def DCCT(
         divisions = (old + [1]) * (a_shape[thisdim] - 1) + old
         logging.debug(strm("for", thisdim, "I get", divisions))
     divisions = [j * total_spacing / sum(divisions) for j in divisions]
-    axes_height = (grid_top - grid_bottom - total_spacing) / np.prod(
+    axes_height = (grid_top - bbox[1] - total_spacing) / np.prod(
         a_shape.shape[:-2]
     )
     axes_bottom = np.cumsum([
         axes_height + j for j in divisions
     ])  # becomes ndarray
     axes_bottom = r_[0, axes_bottom]
-    axes_bottom += grid_bottom
+    axes_bottom += bbox[1]
     fig = this_fig_obj
     ax_list = []
     majorLocator = lambda: mticker.MaxNLocator(
