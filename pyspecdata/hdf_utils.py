@@ -302,6 +302,7 @@ def h5addrow(bottomnode, tablename, *args, **kwargs):
                     myrowdata,
                 )
             )
+            mytable.read()
             raise AttributeError(
                 strm(
                     "Compare names and values table data vs. the row you are"
@@ -344,10 +345,14 @@ def h5addrow(bottomnode, tablename, *args, **kwargs):
 def h5table(bottomnode, tablename, tabledata):
     "create the table, or if tabledata is None, just check if it exists"
     # {{{ save but don't overwrite the table
+    h5file = bottomnode._v_file
     if tablename not in list(bottomnode._v_children.keys()):
         if tabledata is not None:
             if isinstance(tabledata, dict):
                 tabledata = make_rec(tabledata)
+            h5file.create_table(
+                bottomnode, tablename, tabledata
+            )  # actually write the data to the table
         else:
             raise RuntimeError(
                 " ".join(
