@@ -101,12 +101,6 @@ def DCCT(
     y = []  # List to put indirect dims into
     my_data = this_nddata.C
     ordered_labels = {}
-
-    def ax_to_fig(thisax, thisfig):
-        """Transformation to convert axes coordinates of thisax into figure
-        coordinates of thisfig"""
-        return thisax.transAxes + thisfig.transFigure.inverted()
-
     # {{{ Generate alias labels - goes to scientific fn
     for this_dim in [j for j in my_data.dimlabels if j.startswith("ph")]:
         if my_data.get_ft_prop(this_dim):
@@ -208,7 +202,8 @@ def DCCT(
                 plt.axes([LHS_labels + bbox[0], b, width, axes_height])
             )  # lbwh
     # {{{ make blended transform for plotting coherence transfer labels
-    fig_x0, fig_y0 = ax_to_fig(ax_list[0], fig).transform(
+    axis_to_figure = ax_list[0].transAxes + fig.transFigure.inverted()
+    fig_x0, fig_y0 = axis_to_figure.transform(
         r_[0, 0]
     )  # bottom left corner of bottom ax in fig coord
     dx = LHS_labels + bbox[0]  # x coord in figure coord
@@ -299,8 +294,12 @@ def DCCT(
         # {{{ Take y coordinate of top and bottom of axes objects to get the 2
         # points for drawing the lines. To be exact I pull this from the axes
         # objects themselves.
-        _, y1_fig = ax_to_fig(ax1, fig).transform(r_[0, 0.95])
-        _, y2_fig = ax_to_fig(ax2, fig).transform(r_[0, 0.05])
+        _, y1_fig = (ax1.transAxes + fig.transFigure.inverted()).transform(
+            r_[0, 0.95]
+        )
+        _, y2_fig = (ax2.transAxes + fig.transFigure.inverted()).transform(
+            r_[0, 0.05]
+        )
         # }}}
         # for scaled translation, x coords should be display and y coords
         # should be figure
