@@ -20,10 +20,15 @@ from pyspecdata.plot_funcs.image import imagehsv
 import matplotlib.ticker as mticker
 import logging
 
+majorLocator = lambda: mticker.MaxNLocator(
+    nbins="auto", steps=[1, 2, 2.5, 5, 10]
+)
+minorLocator = lambda: mticker.AutoMinorLocator(n=5)
+
 
 def DCCT(
     this_nddata,
-    this_fig_obj,
+    fig,
     custom_scaling=False,
     bbox=[0.05, 0.1, 0.92],
     gap=0.1,
@@ -45,7 +50,7 @@ def DCCT(
     ==========
     this_nddata : nddata
         data being plotted
-    this_fig_obj : figure
+    fig : figure
         size/type of figure to be plotted on
     custom_scaling : boolean
         allows user to scale the intensity of data presented
@@ -89,9 +94,14 @@ def DCCT(
     """
     x = []  # List to put direct dim into
     y = []  # List to put indirect dims into
-    top_pad = 0.05 # a bit of padding on top to allow space for title
+    # TODO ☐: you have two choices -- get rid of top_pad,
+    #         or include it in your demo figure
+    top_pad = 0.05  # a bit of padding on top to allow space for title
     my_data = this_nddata.C
     ordered_labels = {}
+    # TODO ☐: the following is JUST a matter of generating fancy
+    # labels, so separate it as a different function -- also you
+    # have an unclosed vim fold marker.
     # {{{ Generate alias labels - goes to scientific fn
     for this_dim in [j for j in my_data.dimlabels if j.startswith("ph")]:
         if my_data.get_ft_prop(this_dim):
@@ -120,13 +130,13 @@ def DCCT(
                 ]  # grab the columns, which are the labels for all aliases
                 #    that belong at this index
                 if j == 0:
-                    temp = ", ".join([
-                        "%d" % j for j in np.sort(temp[np.isfinite(temp)])
-                    ])
+                    temp = ", ".join(
+                        ["%d" % j for j in np.sort(temp[np.isfinite(temp)])]
+                    )
                 else:
-                    temp = ", ".join([
-                        "%+d" % j for j in np.sort(temp[np.isfinite(temp)])
-                    ])
+                    temp = ", ".join(
+                        ["%+d" % j for j in np.sort(temp[np.isfinite(temp)])]
+                    )
                 if len(temp) == 0:
                     temp = "X"
                 labels_in_order.append(temp)
@@ -153,61 +163,91 @@ def DCCT(
     num_dims = len(a_shape.dimlabels[:-2])
     divisions = []
 
+    # TODO ☐: comment for the following is no good -- you want
+    # to really understand what this is doing
     # should be looping in backward order from printed shape
     for j, thisdim in enumerate(a_shape.dimlabels[::-1][2:]):
         old = [j / 2.0 for j in divisions]
         divisions = (old + [1]) * (a_shape[thisdim] - 1) + old
         logging.debug(strm("for", thisdim, "I get", divisions))
     divisions = [j * 2 * gap / sum(divisions) for j in divisions]
-    axes_height = (1-top_pad - bbox[1] - 2 * gap) / np.prod(
+    # {{{ determind the bboxes for all the Axes objects that
+    # we are generating
+    axes_height = (1 - top_pad - bbox[1] - 2 * gap) / np.prod(
         a_shape.shape[:-2]
-    ) # where 1 is the figure y-coordinate of the top of the figure
-    axes_bottom = np.cumsum([
-        axes_height + j for j in divisions
-    ])  # becomes ndarray
+    )  # where 1 is the figure y-coordinate of the top of the figure
+    axes_bottom = np.cumsum(
+        [axes_height + j for j in divisions]
+    )  # becomes ndarray
     axes_bottom = r_[0, axes_bottom]
-    axes_bottom += bbox[1]
-    fig = this_fig_obj
+    # }}}
     ax_list = []
-    majorLocator = lambda: mticker.MaxNLocator(
-        nbins="auto", steps=[1, 2, 2.5, 5, 10]
-    )
-    minorLocator = lambda: mticker.AutoMinorLocator(n=5)
+    # TODO ☐: this is a one-time transform, as opposed to a
+    # ScaledTranslation.  You need to explain why you are doing
+    # this.  Also, you need to explain what LHS_labels is.
+    # TODO ☐: note that I think the following calculation is
+    # incorrect.  In your drawing, you have allow_for_text and
+    # label_spacing_multiplier.  I think that you have renamed
+    # label_spacing_multiplier (which was a bad name) as
+    # vert_label_spacer, but you need to include allow_for_text
+    # in the calculation below, as well (and probably add it to
+    # your example figure, so it's clear that all the space between the
+    # edge of the axes and the bbox is accounted for.
+    # TODO ☐: vert_label_spacer should be called
+    # horiz_label_spacer
     LHS_labels, _ = fig.transFigure.inverted().transform(
         (vert_label_spacer * num_dims, 0)
     )
-    width = bbox[2] - LHS_labels
+    # {{{ define the origin of our stacked plots at the bottom left of
+    #     the bottom left plot.  We define these because we will use
+    #     these to define our scaled translations, etc, below
+    fig_x0 = LHS_labels + bbox[0]
+    fig_y0 = bbox[1]
+    # }}}
+    axes_bottom += bbox[1]
+    axes_width = bbox[2] - LHS_labels
+    # TODO ☐: you can tighten the following up by calling
+    # the sharex/sharey funtion (methods of the axes
+    # objects) after all the axes are created.
     for j, b in enumerate(axes_bottom):
         if j != 0 and shareaxis:
+            # NOTE: here is where you, yourself enter in the
+            # bottom of the bottom Axes object in figure
+            # coordinates!!
             ax_list.append(
                 plt.axes(
-                    [LHS_labels + bbox[0], b, width, axes_height],
+                    [fig_x0, b, axes_width, axes_height],
                     sharex=ax_list[0],
                     sharey=ax_list[0],
                 )
             )  # in figure coords: x, y, width, height
         else:
             ax_list.append(
-                plt.axes([LHS_labels + bbox[0], b, width, axes_height])
+                plt.axes([
+                    fig_x0,
+                    b,
+                    axes_width,
+                    axes_height,
+                ])
             )  # lbwh
     # {{{ make blended transform for plotting coherence transfer labels
     axis_to_figure = ax_list[0].transAxes + fig.transFigure.inverted()
+    # TODO ☐: the following manual transform should not be
+    # needed.  You know where the bottom and left of the
+    # first Axes object is, because you entered it
+    # yourself!! → see NOTE above
     fig_x0, fig_y0 = axis_to_figure.transform(
         r_[0, 0]
     )  # bottom left corner of bottom ax in fig coord
-    dx = LHS_labels + bbox[0]  # x coord in figure coord
+    # TODO ☐: explain what the following is!
     total_scale_transform = IdentityTransform() + ScaledTranslation(
-        dx, fig_y0, fig.transFigure
+        fig_x0, fig_y0, fig.transFigure
     )
+    # TODO ☐: the following should not be called "total" --
+    # that's very very confusing -- the "
     # Total translation takes x in display coords and y in fig coords
     total_trans = blended_transform_factory(
         total_scale_transform, fig.transFigure
-    )
-    # }}}
-    # {{{ transform for arrows
-    # Arrow translation takes both coords in figure coordinates
-    arrow_trans = IdentityTransform() + ScaledTranslation(
-        fig_x0, fig_y0, fig.transFigure
     )
     # }}}
     # {{{ adjust tick settings -- AFTER extents are set
@@ -262,6 +302,8 @@ def DCCT(
 
     # }}}
     # {{{ vertical lines for coh paths
+# TODO ☐: define this at the top of the file to make sure
+# that we are passing all the arguments that we need to be
     def draw_span(
         ax1,
         ax2,
@@ -275,14 +317,19 @@ def DCCT(
             + 1  # plus one so the first horizontal isn't placed at 0
             #      (overlapping with the spine of the indirect axis)
         ) * vert_label_spacer  # will space the vertical lines along x approp.
-        x1_disp = LHS_labels + bbox[0] - label_spacing  # x coord is the left
+# TODO ☐: We should not need to know fig_x0 here, since we
+# should be using a transform where the origin in in the
+# bottom left corner of our bottom Axes object.  We should
+# only need to know label_spacing and allow_for_text
+        x1_disp = fig_x0 - label_spacing  # x coord is the left
         #                                                 side of the axis
         #                                                 minus the spacing for
         #                                                 text/ticks
         #                                                 (label_spacing)
-        # {{{ Take y coordinate of top and bottom of axes objects to get the 2
-        # points for drawing the lines. To be exact I pull this from the axes
-        # objects themselves.
+        # {{{ Take y coordinate of top and bottom of axes
+        #     objects to get the 2 points for drawing the
+        #     lines. To be lazy I pull this from the axes
+        #     objects themselves.
         _, y1_fig = (ax1.transAxes + fig.transFigure.inverted()).transform(
             r_[0, 0.95]
         )
@@ -314,6 +361,8 @@ def DCCT(
 
     # }}}
     # {{{ place arrows and dimname labels
+# TODO ☐: define this at the top of the file to make sure
+# that we are passing all the arguments that we need to be
     def place_labels(
         ax1,
         label,
@@ -329,7 +378,9 @@ def DCCT(
                 # the labels of the outer dimensions
                 label_spacing = (this_label_num + 1) * vert_label_spacer
                 # Calculate coord for base of arrow
-                x_textdisp = LHS_labels + bbox[0] - label_spacing
+# TODO ☐: same comment as above -- we should not need fig_x0
+# inside this function
+                x_textdisp = fig_x0 - label_spacing
             else:
                 # same as above, but determine text
                 # position based on tick labels
@@ -346,9 +397,7 @@ def DCCT(
                         ],
                     )
                 )
-                x_textdisp = (
-                    LHS_labels + bbox[0]
-                )  # bottom left corner of bottom axes in fig
+                x_textdisp = fig_x0  # bottom left corner of bottom axes in fig
             # tick length is a nice consistent distance to push the arrows out
             # slightly to avoid confusion
             tick_length = [
@@ -357,6 +406,9 @@ def DCCT(
             x_textdisp -= tick_length
             x_textdisp -= arrow_width_px
             y_textdisp = -25.0
+# TODO ☐: unless you are using them, the diagnostics are
+# going to be obsolete b/c they were from before you new
+# strategy.
             if diagnostic:
                 a = Circle(
                     (x_textdisp, y_axorigindisp - y_textdisp),
@@ -374,7 +426,7 @@ def DCCT(
                 5,
                 width=arrow_width_px,
                 clip_on=False,
-                transform=arrow_trans,
+                transform=total_scale_transform,
                 alpha=0.1,
                 color="k",
             )
@@ -387,7 +439,7 @@ def DCCT(
             fig.add_artist(AnArrow)
             if diagnostic:
                 a = Line2D(
-                    [x_textdisp, x_textdisp + dx],
+                    [x_textdisp, x_textdisp + fig_x0],
                     [y_textdisp, y_textdisp + dy],
                     transform=fig.transFigure,
                     color="r",
@@ -411,7 +463,7 @@ def DCCT(
                 ha="right",
                 rotation=45,
                 clip_on=False,
-                transform=arrow_trans,
+                transform=total_scale_transform,
                 color="k",
             )
             if check_for_label_num:
@@ -577,16 +629,16 @@ def DCCT(
     plt.title(plot_title)
     if just_2D:
         return (
-            bbox[0] + LHS_labels,
+            fig_x0,
             axes_bottom[0],
-            width,
+            axes_width,
             axes_bottom[-1] - top_pad,
         )
     else:
         return (
             ax_list,
-            bbox[0] + LHS_labels,
+            fig_x0,
             axes_bottom[-1] + axes_height,
-            width,
+            axes_width,
             top_pad - (1 - bbox[2] - bbox[0]),
         )

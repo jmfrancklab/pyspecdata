@@ -25,6 +25,8 @@ rcParams["image.aspect"] = "auto"  # needed for sphinx gallery
 # sphinx_gallery_thumbnail_number = 2
 psd.init_logging(level="debug")
 
+# TODO ☐: bbox[3] isn't shown in this figure
+
 with psd.figlist_var() as fl:
     # provide the symbols that we use for the fake data:
     t2, td, vd, ph1, ph2 = s.symbols("t2 td vd ph1 ph2")
@@ -61,6 +63,11 @@ with psd.figlist_var() as fl:
     psd.DCCT(data, fig, plot_title="")
     # {{{ add lines indicating kwargs
     # {{{ bbox kwargs
+# TODO ☐: the following should explicitly reference a bbox
+# variable that's also passed to the DCCT function above.
+# The idea is that I should be able to use this example to
+# play around with the different dimensions that they are
+# shown, and see that it works
     plt.plot(
         [0, 0.05],
         [0.1, 0.1],
