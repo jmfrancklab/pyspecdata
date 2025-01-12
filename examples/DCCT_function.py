@@ -68,6 +68,12 @@ with psd.figlist_var() as fl:
 # The idea is that I should be able to use this example to
 # play around with the different dimensions that they are
 # shown, and see that it works
+# TODO ☐: towards this end, it probably makes sense to get
+# the DCCT function to return you:
+# * the list of Axes objects that it generates
+# * the two transforms that it generates (since you will
+#   want to generate many of these lines using those
+#   transforms)
     plt.plot(
         [0, 0.05],
         [0.1, 0.1],
