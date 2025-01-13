@@ -160,11 +160,7 @@ def DCCT(
             + 1  # plus one so the first horizontal isn't placed at 0
             #      (overlapping with the spine of the indirect axis)
         ) * horiz_label_spacer  # will space the vertical lines along x approp.
-# TODO ☐: We should not need to know fig_x0 here, since we
-# should be using a transform where the origin in in the
-# bottom left corner of our bottom Axes object.  We should
-# only need to know label_spacing and allow_for_text
-        x1_disp = fig_x0 - label_spacing  # x coord is the left
+        x1_disp = allow_for_labels + bbox[0] - label_spacing  # x coord is the left
         #                                                 side of the axis
         #                                                 minus the spacing for
         #                                                 text/ticks
@@ -217,9 +213,7 @@ def DCCT(
                 # the labels of the outer dimensions
                 label_spacing = (this_label_num + 1) * horiz_label_spacer
                 # Calculate coord for base of arrow
-# TODO ☐: same comment as above -- we should not need fig_x0
-# inside this function
-                x_textdisp = fig_x0 - label_spacing
+                x_textdisp = allow_for_labels + bbox[0] - label_spacing
             else:
                 # same as above, but determine text
                 # position based on tick labels
@@ -236,7 +230,7 @@ def DCCT(
                         ],
                     )
                 )
-                x_textdisp = fig_x0  # bottom left corner of bottom axes in fig
+                x_textdisp = allow_for_labels + bbox[0]  # bottom left corner of bottom axes in fig
             # tick length is a nice consistent distance to push the arrows out
             # slightly to avoid confusion
             tick_length = [
@@ -316,32 +310,24 @@ def DCCT(
     axes_bottom = r_[0, axes_bottom]
     # }}}
     ax_list = []
-    # TODO ☐: this is a one-time transform, as opposed to a
-    # ScaledTranslation.  You need to explain why you are doing
-    # this.  Also, you need to explain what LHS_labels is.
-    # TODO ☐: note that I think the following calculation is
-    # incorrect.  In your drawing, you have allow_for_text and
-    # label_spacing_multiplier.  I think that you have renamed
-    # label_spacing_multiplier (which was a bad name) as
-    # vert_label_spacer, but you need to include allow_for_text
-    # in the calculation below, as well (and probably add it to
-    # your example figure, so it's clear that all the space between the
-    # edge of the axes and the bbox is accounted for.
-    LHS_labels, _ = fig.transFigure.inverted().transform(
+    # Define length (in fig coords) of the distance that the labels of 
+    # dimensions will take up. This means the distance between the left
+    # most side of the figure to the left most side of the axes objects
+    # are the sum of bbox[0] and allow_for_labels
+    allow_for_labels, _ = fig.transFigure.inverted().transform(
         (horiz_label_spacer * num_dims, 0)
     )
     # {{{ define the origin of our stacked plots at the bottom left of
     #     the bottom left plot.  We define these because we will use
     #     these to define our scaled translations, etc, below
-    fig_x0 = LHS_labels + bbox[0]
     fig_y0 = bbox[1]
     # }}}
     axes_bottom += bbox[1]
-    axes_width = bbox[2] - LHS_labels
+    axes_width = bbox[2] - allow_for_labels
     for j, b in enumerate(axes_bottom):
         ax_list.append(
             plt.axes([
-                fig_x0,
+                allow_for_labels+bbox[0],
                 b,
                 axes_width,
                 axes_height,
@@ -351,16 +337,9 @@ def DCCT(
             plt.axes(sharex=ax_list[0],sharey=ax_list[0])
     # {{{ make blended transform for plotting coherence transfer labels
     axis_to_figure = ax_list[0].transAxes + fig.transFigure.inverted()
-    # TODO ☐: the following manual transform should not be
-    # needed.  You know where the bottom and left of the
-    # first Axes object is, because you entered it
-    # yourself!! → see NOTE above
-    fig_x0, fig_y0 = axis_to_figure.transform(
-        r_[0, 0]
-    )  # bottom left corner of bottom ax in fig coord
     # TODO ☐: explain what the following is!
     total_scale_transform = IdentityTransform() + ScaledTranslation(
-        fig_x0, fig_y0, fig.transFigure
+        (allow_for_labels + bbox[0]), fig_y0, fig.transFigure
     )
     # TODO ☐: the following should not be called "total" --
     # that's very very confusing -- the "
@@ -579,7 +558,7 @@ def DCCT(
     plt.title(plot_title)
     if just_2D:
         return (
-            fig_x0,
+            allow_for_labels + bbox[0],
             axes_bottom[0],
             axes_width,
             axes_bottom[-1] - top_pad,
@@ -587,7 +566,7 @@ def DCCT(
     else:
         return (
             ax_list,
-            fig_x0,
+            allow_for_labels + bbox[0],
             axes_bottom[-1] + axes_height,
             axes_width,
             top_pad - (1 - bbox[2] - bbox[0]),
