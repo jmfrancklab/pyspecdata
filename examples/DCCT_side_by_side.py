@@ -16,6 +16,7 @@ import pyspecdata as psd
 from numpy.random import seed
 import sympy as s
 from collections import OrderedDict
+from matplotlib.gridspec import GridSpec
 
 seed(2021)
 rcParams["image.aspect"] = "auto"  # needed for sphinx gallery
@@ -41,34 +42,32 @@ with psd.figlist_var() as fl:
         # would be acquired on the spectrometer
         # (ordering does matter, because fake_data applies a
         # time-dependent resonance variation -- see fake_data doc.)
-        OrderedDict(
-            [
-                ("vd", psd.nddata(psd.r_[0:1:40j], "vd")),
-                ("ph1", psd.nddata(psd.r_[0, 2] / 4.0, "ph1")),
-                ("ph2", psd.nddata(psd.r_[0:4] / 4.0, "ph2")),
-                ("t2", psd.nddata(psd.r_[0:0.2:256j] - echo_time, "t2")),
-            ]
-        ),
+        OrderedDict([
+            ("vd", psd.nddata(psd.r_[0:1:40j], "vd")),
+            ("ph1", psd.nddata(psd.r_[0, 2] / 4.0, "ph1")),
+            ("ph2", psd.nddata(psd.r_[0:4] / 4.0, "ph2")),
+            ("t2", psd.nddata(psd.r_[0:0.2:256j] - echo_time, "t2")),
+        ]),
         {"ph1": 0, "ph2": 1},
     )
     # reorder into a format more suitable for plotting
     data.reorder(["ph1", "ph2", "vd", "t2"])
-    # fake_data gives us data already in the coherence domain, so:
-    data.ift(["ph1", "ph2"])
-    LHS_pad_1 = 0.1  # left hand side padding for first DCCT
-    LHS_pad_2 = 0.55  # left hand side padding for second DCCT
-    R_to_L = 0.42  # width from left of decorations to right of
-    #               plots should be the same for both DCCT
-    bbox_bottom = 0.1  # bottom padding should be equal for both
-    #                   DCCT
-    # keyword arguments to use for the first DCCT
-    dcct_kwargs_1 = dict(
-        bbox=[LHS_pad_1, bbox_bottom, R_to_L])
     fig = fl.next("Data")  # Make figure object to place the DCCT
-    data.ft(["ph1", "ph2"])
-    psd.DCCT(data, fig, plot_title="Time Domain", **dcct_kwargs_1)
+    gs = GridSpec(1, 2, figure=fig, left=0.02, right=0.95)
+    gs1_bbox = gs[0, 0].get_position(fig)
+    gs2_bbox = gs[0, 1].get_position(fig)
+    bbox1 = [
+        gs1_bbox.x0,
+        gs1_bbox.y0,
+        gs1_bbox.x1 - gs1_bbox.x0,
+        gs1_bbox.y1 - gs1_bbox.y0,
+    ]
+    bbox2 = [
+        gs2_bbox.x0,
+        gs2_bbox.y0,
+        gs2_bbox.x1 - gs2_bbox.x0,
+        gs2_bbox.y1 - gs2_bbox.y0,
+    ]
+    psd.DCCT(data, fig, plot_title="Time Domain", bbox=bbox1)
     data.ft("t2")
-    # keyword arguments to use for second DCCT
-    dcct_kwargs_2 = dict(
-        bbox=[LHS_pad_2, bbox_bottom, R_to_L])
-    psd.DCCT(data, fig, plot_title="Frequency Domain", **dcct_kwargs_2)
+    psd.DCCT(data, fig, plot_title="Frequency Domain", bbox=bbox2)
