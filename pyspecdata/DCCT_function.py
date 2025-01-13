@@ -338,30 +338,17 @@ def DCCT(
     # }}}
     axes_bottom += bbox[1]
     axes_width = bbox[2] - LHS_labels
-    # TODO ☐: you can tighten the following up by calling
-    # the sharex/sharey funtion (methods of the axes
-    # objects) after all the axes are created.
     for j, b in enumerate(axes_bottom):
-        if j != 0 and shareaxis:
-            # NOTE: here is where you, yourself enter in the
-            # bottom of the bottom Axes object in figure
-            # coordinates!!
-            ax_list.append(
-                plt.axes(
-                    [fig_x0, b, axes_width, axes_height],
-                    sharex=ax_list[0],
-                    sharey=ax_list[0],
-                )
-            )  # in figure coords: x, y, width, height
-        else:
-            ax_list.append(
-                plt.axes([
-                    fig_x0,
-                    b,
-                    axes_width,
-                    axes_height,
-                ])
-            )  # lbwh
+        ax_list.append(
+            plt.axes([
+                fig_x0,
+                b,
+                axes_width,
+                axes_height,
+            ])
+        )  # lbwh
+        if j !=0 and shareaxis:
+            plt.axes(sharex=ax_list[0],sharey=ax_list[0])
     # {{{ make blended transform for plotting coherence transfer labels
     axis_to_figure = ax_list[0].transAxes + fig.transFigure.inverted()
     # TODO ☐: the following manual transform should not be
