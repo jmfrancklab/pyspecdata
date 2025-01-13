@@ -183,7 +183,7 @@ def DCCT(
             [y1_fig, y2_fig],
             linewidth=1,
             color="k",
-            transform=total_trans,
+            transform=ax0_origin,
             clip_on=False,
         )
         plt.text(
@@ -193,7 +193,7 @@ def DCCT(
             va="center",
             ha="right",
             rotation=90,
-            transform=total_trans,
+            transform=ax0_origin,
             color="k",
         )
         fig.add_artist(lineA)
@@ -317,11 +317,6 @@ def DCCT(
     allow_for_labels, _ = fig.transFigure.inverted().transform(
         (horiz_label_spacer * num_dims, 0)
     )
-    # {{{ define the origin of our stacked plots at the bottom left of
-    #     the bottom left plot.  We define these because we will use
-    #     these to define our scaled translations, etc, below
-    fig_y0 = bbox[1]
-    # }}}
     axes_bottom += bbox[1]
     axes_width = bbox[2] - allow_for_labels
     for j, b in enumerate(axes_bottom):
@@ -335,16 +330,17 @@ def DCCT(
         )  # lbwh
         if j !=0 and shareaxis:
             plt.axes(sharex=ax_list[0],sharey=ax_list[0])
-    # {{{ make blended transform for plotting coherence transfer labels
-    axis_to_figure = ax_list[0].transAxes + fig.transFigure.inverted()
-    # TODO ☐: explain what the following is!
+    # {{{ make blended transform for plotting decorations
+    # sets origin for the blended transform to the bottom left corner of 
+    # the bottom axes object
     total_scale_transform = IdentityTransform() + ScaledTranslation(
-        (allow_for_labels + bbox[0]), fig_y0, fig.transFigure
+        (allow_for_labels + bbox[0]), bbox[1], fig.transFigure
     )
-    # TODO ☐: the following should not be called "total" --
-    # that's very very confusing -- the "
     # Total translation takes x in display coords and y in fig coords
-    total_trans = blended_transform_factory(
+    # therefore when the display is adjusted (for example enlarging or 
+    # minimizing the window) the objects with this transform scale and
+    # move with the display.
+    ax0_origin = blended_transform_factory(
         total_scale_transform, fig.transFigure
     )
     # }}}
