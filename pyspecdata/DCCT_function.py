@@ -99,55 +99,55 @@ def DCCT(
     top_pad = 0.05  # a bit of padding on top to allow space for title
     my_data = this_nddata.C
     ordered_labels = {}
-    # TODO ☐: the following is JUST a matter of generating fancy
-    # labels, so separate it as a different function -- also you
-    # have an unclosed vim fold marker.
+    def gen_labels(data):
+        """ Takes dimlabels and shape from the data and generates a list of 
+        ordered dimlabels each assigned to the index of the dimension"""
+        # {{{ Labels for phase cycling dimensions
+        for this_dim in [j for j in data.dimlabels if j.startswith("ph")]:
+            if data.get_ft_prop(this_dim):
+                n_ph = ndshape(data)[this_dim]
+                this_max_coh_jump = max_coh_jump[this_dim]
+                all_possibilities = np.empty(
+                    (int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph
+                )  # on reviewing, I *believe* this this is designed to fit the
+                #    array from -this_max_coh_jump to +this_max_coh_jump, but it
+                #    needs to round up to the closest multiple of n_ph
+                all_possibilities[:] = nan
+                all_possibilities[: this_max_coh_jump + 1] = r_[
+                    0 : this_max_coh_jump + 1
+                ]  # label the positive jumps in order
+                all_possibilities[-this_max_coh_jump:] = r_[
+                    -this_max_coh_jump:0
+                ]  # and alias the negative ones into the correct locations
+                all_possibilities = all_possibilities.reshape(
+                    (-1, n_ph)
+                )  # now, reshape according to the number of dimensions we actually
+                #    have for discriminating
+                labels_in_order = []
+                for j in range(n_ph):
+                    temp = all_possibilities[
+                        :, j
+                    ]  # grab the columns, which are the labels for all aliases
+                    #    that belong at this index
+                    if j == 0:
+                        temp = ", ".join(
+                            ["%d" % j for j in np.sort(temp[np.isfinite(temp)])]
+                        )
+                    else:
+                        temp = ", ".join(
+                            ["%+d" % j for j in np.sort(temp[np.isfinite(temp)])]
+                        )
+                    if len(temp) == 0:
+                        temp = "X"
+                    labels_in_order.append(temp)
+                ordered_labels[this_dim] = labels_in_order
+            # }}}    
+            else:
+                ordered_labels[this_dim] = [
+                    "0" if j == 0.0 else f"{j}" for j in my_data.getaxis(this_dim)
+                ]
     # {{{ Generate alias labels - goes to scientific fn
-    for this_dim in [j for j in my_data.dimlabels if j.startswith("ph")]:
-        if my_data.get_ft_prop(this_dim):
-            n_ph = ndshape(my_data)[this_dim]
-            this_max_coh_jump = max_coh_jump[this_dim]
-            all_possibilities = np.empty(
-                (int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph
-            )  # on reviewing, I *believe* this this is designed to fit the
-            #    array from -this_max_coh_jump to +this_max_coh_jump, but it
-            #    needs to round up to the closest multiple of n_ph
-            all_possibilities[:] = nan
-            all_possibilities[: this_max_coh_jump + 1] = r_[
-                0 : this_max_coh_jump + 1
-            ]  # label the positive jumps in order
-            all_possibilities[-this_max_coh_jump:] = r_[
-                -this_max_coh_jump:0
-            ]  # and alias the negative ones into the correct locations
-            all_possibilities = all_possibilities.reshape(
-                (-1, n_ph)
-            )  # now, reshape according to the number of dimensions we actually
-            #    have for discriminating
-            labels_in_order = []
-            for j in range(n_ph):
-                temp = all_possibilities[
-                    :, j
-                ]  # grab the columns, which are the labels for all aliases
-                #    that belong at this index
-                if j == 0:
-                    temp = ", ".join(
-                        ["%d" % j for j in np.sort(temp[np.isfinite(temp)])]
-                    )
-                else:
-                    temp = ", ".join(
-                        ["%+d" % j for j in np.sort(temp[np.isfinite(temp)])]
-                    )
-                if len(temp) == 0:
-                    temp = "X"
-                labels_in_order.append(temp)
-            # }}}
-            ordered_labels[this_dim] = labels_in_order
-        else:
-            ordered_labels[this_dim] = [
-                "0" if j == 0.0 else f"{j}" for j in my_data.getaxis(this_dim)
-            ]
-        # ordered_labels now contains a list of the labels for each index
-        # of the dimension, in order
+    gen_labels(my_data)    
     # }}}
     real_data = False
     if cmap is not None:
