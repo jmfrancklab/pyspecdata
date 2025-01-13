@@ -311,7 +311,6 @@ def DCCT(
     #     we are generating
     # Height of axes object including gap above for
     # space between axes objects
-    print(np.prod(a_shape.shape[:-2]))
     axes_height = (bbox[3] - bbox[1]) / np.prod(
         a_shape.shape[:-2]
     )  # where 1 is the figure y-coordinate of the top of the figure
@@ -573,8 +572,7 @@ def DCCT(
     else:
         return (
             ax_list,
-            allow_for_labels + bbox[0],
-            axes_bottom[-1] + axes_height,
-            axes_width,
-            (bbox[3]+  2*gap + bbox[2] + bbox[0]),
+            allow_for_labels,
+            total_scale_transform,
+            ax0_origin
         )

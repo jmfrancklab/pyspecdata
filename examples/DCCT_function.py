@@ -24,8 +24,11 @@ seed(2021)
 rcParams["image.aspect"] = "auto"  # needed for sphinx gallery
 # sphinx_gallery_thumbnail_number = 2
 psd.init_logging(level="debug")
-
-# TODO ☐: bbox[3] isn't shown in this figure
+# {{{ kwargs for DCCT plot
+bbox = [0.05,0.1,0.85,0.75]
+horiz_label_spacer = 50
+gap = 0.1
+# }}}
 
 with psd.figlist_var() as fl:
     # provide the symbols that we use for the fake data:
@@ -58,33 +61,26 @@ with psd.figlist_var() as fl:
     )
     # reorder into a format more suitable for plotting
     data.reorder(["ph1", "ph2", "vd", "t2"])
-    # fake_data gives us data already in the coherence domain, so:
     fig = fl.next("Data")  # Make figure object to place the DCCT
-    psd.DCCT(data, fig, plot_title="")
+    ax_list, allow_for_labels, total_scale_transform, ax0_origin = psd.DCCT(
+            data, fig, 
+            horiz_label_spacer = horiz_label_spacer, 
+            gap = gap, 
+            bbox=bbox, 
+            plot_title="")
     # {{{ add lines indicating kwargs
     # {{{ bbox kwargs
-# TODO ☐: the following should explicitly reference a bbox
-# variable that's also passed to the DCCT function above.
-# The idea is that I should be able to use this example to
-# play around with the different dimensions that they are
-# shown, and see that it works
-# TODO ☐: towards this end, it probably makes sense to get
-# the DCCT function to return you:
-# * the list of Axes objects that it generates
-# * the two transforms that it generates (since you will
-#   want to generate many of these lines using those
-#   transforms)
     plt.plot(
-        [0, 0.05],
+        [0, bbox[0]],
         [0.1, 0.1],
         "b",
         marker="|",
         linewidth=1,
         clip_on=False,
-        transform=fig.transFigure,
+        transform=fig.transFigure
     )
     plt.text(
-        0.008,
+        bbox[0]/7,
         0.12,
         "bbox[0]",
         color="b",
@@ -93,7 +89,7 @@ with psd.figlist_var() as fl:
     )
     plt.plot(
         [0.16, 0.16],
-        [0.0, 0.09],
+        [0.0, bbox[1]],
         "b",
         marker="_",
         linewidth=1,
@@ -102,14 +98,14 @@ with psd.figlist_var() as fl:
     )
     plt.text(
         0.17,
-        0.03,
+        bbox[1]/3,
         "bbox[1]",
         color="b",
         clip_on=False,
         transform=fig.transFigure,
     )
     plt.plot(
-        [0.05, 0.97],
+        [bbox[0], bbox[2]+bbox[0]],
         [0.97, 0.97],
         "b",
         marker="|",
@@ -125,39 +121,58 @@ with psd.figlist_var() as fl:
         clip_on=False,
         transform=fig.transFigure,
     )
-    # }}}
-    # {{{ vert_label_space
     plt.plot(
-        [0.105, 0.125],
-        [0.5, 0.5],
-        "r",
-        marker="|",
-        linewidth=1,
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.plot(
-        [0.07, 0.09],
-        [0.5, 0.5],
-        "r",
-        marker="|",
+        [0.93, 0.93],
+        [bbox[1], bbox[1]+bbox[3]+gap],
+        "b",
+        marker="_",
         linewidth=1,
         clip_on=False,
         transform=fig.transFigure,
     )
     plt.text(
-        0.06,
-        0.52,
-        "kwarg(vert_label_space)",
-        color="r",
+        0.95,
+        0.5,
+        "bbox[3]",
+        color="b",
         clip_on=False,
         transform=fig.transFigure,
+    )
+    # }}}
+    # {{{ horiz_label_space
+    plt.plot(
+        [-horiz_label_spacer, -2*horiz_label_spacer],
+        [0.5, 0.5],
+        "r",
+        marker="|",
+        linewidth=1,
+        clip_on=False,
+        transform=ax0_origin,
+    )
+    plt.plot(
+        [0.0, -horiz_label_spacer],
+        [0.55, 0.55],
+        "r",
+        marker="|",
+        linewidth=1,
+        clip_on=False,
+        transform=ax0_origin,
+    )
+    plt.text(
+        -3*horiz_label_spacer,
+        0.52,
+        "kwarg(horiz_label_space)",
+        color="r",
+        clip_on=False,
+        transform=ax0_origin,
     )
     # }}}
     # {{{ gap
+    ax4_x,ax4_y = (ax_list[4].transAxes+fig.transFigure.inverted()).transform(psd.r_[0.5,1])
+    ax3_x,ax3_y = (ax_list[3].transAxes+fig.transFigure.inverted()).transform(psd.r_[0.5,1])
     plt.plot(
-        [0.5, 0.5],
-        [0.5, 0.55],
+        [ax3_x, ax3_x],
+        [ax3_y, ax3_y + gap/2],
         "b",
         marker="_",
         linewidth=1,
@@ -165,16 +180,16 @@ with psd.figlist_var() as fl:
         transform=fig.transFigure,
     )
     plt.text(
-        0.51,
-        0.52,
-        "kwarg(2*gap)",
+        ax3_x+0.01,
+        ax3_y+0.01,
+        r"kwarg(gap) / $\text{nPh}_{\text{outer}}$",
         color="b",
         clip_on=False,
         transform=fig.transFigure,
     )
     plt.plot(
-        [0.5, 0.5],
-        [0.63, 0.655],
+        [ax4_x, ax4_x],
+        [ax4_y, ax4_y + gap/4],
         "b",
         marker="_",
         linewidth=1,
@@ -182,11 +197,12 @@ with psd.figlist_var() as fl:
         transform=fig.transFigure,
     )
     plt.text(
-        0.51,
-        0.635,
-        "kwarg(gap)",
+        ax4_x+0.01,
+        ax4_y + 0.007,
+        r"kwarg(gap) / $\text{nPh}_{\text{inner}}$",
         color="b",
         clip_on=False,
         transform=fig.transFigure,
     )
+    # }}}
     # }}}
