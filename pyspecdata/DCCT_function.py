@@ -9,8 +9,7 @@ from .core import ndshape, nddata
 from .general_functions import strm, process_kwargs
 import matplotlib.pyplot as plt
 import matplotlib.lines as lines
-from matplotlib.patches import FancyArrow, Circle
-from matplotlib.lines import Line2D
+from matplotlib.patches import FancyArrow
 from matplotlib.transforms import (
     ScaledTranslation,
     IdentityTransform,
@@ -99,9 +98,10 @@ def DCCT(
     top_pad = 0.05  # a bit of padding on top to allow space for title
     my_data = this_nddata.C
     ordered_labels = {}
+
     # {{{ Functions
     def gen_labels(data):
-        """ Takes dimlabels and shape from the data and generates a list of 
+        """Takes dimlabels and shape from the data and generates a list of
         ordered dimlabels each assigned to the index of the dimension"""
         # {{{ Labels for phase cycling dimensions
         for this_dim in [j for j in data.dimlabels if j.startswith("ph")]:
@@ -111,8 +111,8 @@ def DCCT(
                 all_possibilities = np.empty(
                     (int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph
                 )  # on reviewing, I *believe* this this is designed to fit the
-                #    array from -this_max_coh_jump to +this_max_coh_jump, but it
-                #    needs to round up to the closest multiple of n_ph
+                #    array from -this_max_coh_jump to +this_max_coh_jump, but
+                #    it needs to round up to the closest multiple of n_ph
                 all_possibilities[:] = nan
                 all_possibilities[: this_max_coh_jump + 1] = r_[
                     0 : this_max_coh_jump + 1
@@ -122,8 +122,8 @@ def DCCT(
                 ]  # and alias the negative ones into the correct locations
                 all_possibilities = all_possibilities.reshape(
                     (-1, n_ph)
-                )  # now, reshape according to the number of dimensions we actually
-                #    have for discriminating
+                )  # now, reshape according to the number of dimensions we
+                #    actually have for discriminating
                 labels_in_order = []
                 for j in range(n_ph):
                     temp = all_possibilities[
@@ -131,22 +131,24 @@ def DCCT(
                     ]  # grab the columns, which are the labels for all aliases
                     #    that belong at this index
                     if j == 0:
-                        temp = ", ".join(
-                            ["%d" % j for j in np.sort(temp[np.isfinite(temp)])]
-                        )
+                        temp = ", ".join([
+                            "%d" % j for j in np.sort(temp[np.isfinite(temp)])
+                        ])
                     else:
-                        temp = ", ".join(
-                            ["%+d" % j for j in np.sort(temp[np.isfinite(temp)])]
-                        )
+                        temp = ", ".join([
+                            "%+d" % j for j in np.sort(temp[np.isfinite(temp)])
+                        ])
                     if len(temp) == 0:
                         temp = "X"
                     labels_in_order.append(temp)
                 ordered_labels[this_dim] = labels_in_order
-            # }}}    
+            # }}}
             else:
                 ordered_labels[this_dim] = [
-                    "0" if j == 0.0 else f"{j}" for j in my_data.getaxis(this_dim)
+                    "0" if j == 0.0 else f"{j}"
+                    for j in my_data.getaxis(this_dim)
                 ]
+
     def draw_span(
         ax1,
         ax2,
@@ -160,7 +162,9 @@ def DCCT(
             + 1  # plus one so the first horizontal isn't placed at 0
             #      (overlapping with the spine of the indirect axis)
         ) * horiz_label_spacer  # will space the vertical lines along x approp.
-        x1_disp = allow_for_labels + bbox[0] - label_spacing  # x coord is the left
+        x1_disp = (
+            allow_for_labels + bbox[0] - label_spacing
+        )  # x coord is the left
         #                                                 side of the axis
         #                                                 minus the spacing for
         #                                                 text/ticks
@@ -197,6 +201,7 @@ def DCCT(
             color="k",
         )
         fig.add_artist(lineA)
+
     def place_labels(
         ax1,
         label,
@@ -205,7 +210,7 @@ def DCCT(
         check_for_label_num=True,
         arrow_width_px=4.0,
     ):
-        """ Place arrows and dimname labels"""
+        """Place arrows and dimname labels"""
         x_axorigindisp, y_axorigindisp = ax1.transAxes.transform(r_[0, 0])
         if not check_for_label_num or not label_placed[this_label_num]:
             # {{{ determine the x and y position of the label in display coords
@@ -230,7 +235,9 @@ def DCCT(
                         ],
                     )
                 )
-                x_textdisp = allow_for_labels + bbox[0]  # bottom left corner of bottom axes in fig
+                x_textdisp = (
+                    allow_for_labels + bbox[0]
+                )  # bottom left corner of bottom axes in fig
             # tick length is a nice consistent distance to push the arrows out
             # slightly to avoid confusion
             tick_length = [
@@ -273,9 +280,10 @@ def DCCT(
             )
             if check_for_label_num:
                 label_placed[this_label_num] = 1
-    # }}}            
+
+    # }}}
     # {{{ Generate alias labels - goes to scientific fn
-    gen_labels(my_data)    
+    gen_labels(my_data)
     # }}}
     real_data = False
     if cmap is not None:
@@ -304,13 +312,13 @@ def DCCT(
     axes_height = (1 - top_pad - bbox[1] - 2 * gap) / np.prod(
         a_shape.shape[:-2]
     )  # where 1 is the figure y-coordinate of the top of the figure
-    axes_bottom = np.cumsum(
-        [axes_height + j for j in divisions]
-    )  # becomes ndarray
+    axes_bottom = np.cumsum([
+        axes_height + j for j in divisions
+    ])  # becomes ndarray
     axes_bottom = r_[0, axes_bottom]
     # }}}
     ax_list = []
-    # Define length (in fig coords) of the distance that the labels of 
+    # Define length (in fig coords) of the distance that the labels of
     # dimensions will take up. This means the distance between the left
     # most side of the figure to the left most side of the axes objects
     # are the sum of bbox[0] and allow_for_labels
@@ -322,22 +330,22 @@ def DCCT(
     for j, b in enumerate(axes_bottom):
         ax_list.append(
             plt.axes([
-                allow_for_labels+bbox[0],
+                allow_for_labels + bbox[0],
                 b,
                 axes_width,
                 axes_height,
             ])
         )  # lbwh
-        if j !=0 and shareaxis:
-            plt.axes(sharex=ax_list[0],sharey=ax_list[0])
+        if j != 0 and shareaxis:
+            plt.axes(sharex=ax_list[0], sharey=ax_list[0])
     # {{{ make blended transform for plotting decorations
-    # sets origin for the blended transform to the bottom left corner of 
+    # sets origin for the blended transform to the bottom left corner of
     # the bottom axes object
     total_scale_transform = IdentityTransform() + ScaledTranslation(
         (allow_for_labels + bbox[0]), bbox[1], fig.transFigure
     )
     # Total translation takes x in display coords and y in fig coords
-    # therefore when the display is adjusted (for example enlarging or 
+    # therefore when the display is adjusted (for example enlarging or
     # minimizing the window) the objects with this transform scale and
     # move with the display.
     ax0_origin = blended_transform_factory(
