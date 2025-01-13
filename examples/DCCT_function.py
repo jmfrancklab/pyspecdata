@@ -25,7 +25,7 @@ rcParams["image.aspect"] = "auto"  # needed for sphinx gallery
 # sphinx_gallery_thumbnail_number = 2
 psd.init_logging(level="debug")
 # {{{ kwargs for DCCT plot
-bbox = [0.05,0.1,0.85,0.75]
+bbox = [0.05, 0.1, 0.85, 0.75]
 horiz_label_spacer = 50
 gap = 0.1
 # }}}
@@ -49,25 +49,25 @@ with psd.figlist_var() as fl:
         # would be acquired on the spectrometer
         # (ordering does matter, because fake_data applies a
         # time-dependent resonance variation -- see fake_data doc.)
-        OrderedDict(
-            [
-                ("vd", psd.nddata(psd.r_[0:1:40j], "vd")),
-                ("ph1", psd.nddata(psd.r_[0, 2] / 4.0, "ph1")),
-                ("ph2", psd.nddata(psd.r_[0:4] / 4.0, "ph2")),
-                ("t2", psd.nddata(psd.r_[0:0.2:256j] - echo_time, "t2")),
-            ]
-        ),
+        OrderedDict([
+            ("vd", psd.nddata(psd.r_[0:1:40j], "vd")),
+            ("ph1", psd.nddata(psd.r_[0, 2] / 4.0, "ph1")),
+            ("ph2", psd.nddata(psd.r_[0:4] / 4.0, "ph2")),
+            ("t2", psd.nddata(psd.r_[0:0.2:256j] - echo_time, "t2")),
+        ]),
         {"ph1": 0, "ph2": 1},
     )
     # reorder into a format more suitable for plotting
     data.reorder(["ph1", "ph2", "vd", "t2"])
     fig = fl.next("Data")  # Make figure object to place the DCCT
     ax_list, allow_for_labels, total_scale_transform, ax0_origin = psd.DCCT(
-            data, fig, 
-            horiz_label_spacer = horiz_label_spacer, 
-            gap = gap, 
-            bbox=bbox, 
-            plot_title="")
+        data,
+        fig,
+        horiz_label_spacer=horiz_label_spacer,
+        gap=gap,
+        bbox=bbox,
+        plot_title="",
+    )
     # {{{ add lines indicating kwargs
     # {{{ bbox kwargs
     plt.plot(
@@ -77,10 +77,10 @@ with psd.figlist_var() as fl:
         marker="|",
         linewidth=1,
         clip_on=False,
-        transform=fig.transFigure
+        transform=fig.transFigure,
     )
     plt.text(
-        bbox[0]/7,
+        bbox[0] / 7,
         0.12,
         "bbox[0]",
         color="b",
@@ -98,14 +98,14 @@ with psd.figlist_var() as fl:
     )
     plt.text(
         0.17,
-        bbox[1]/3,
+        bbox[1] / 3,
         "bbox[1]",
         color="b",
         clip_on=False,
         transform=fig.transFigure,
     )
     plt.plot(
-        [bbox[0], bbox[2]+bbox[0]],
+        [bbox[0], bbox[2] + bbox[0]],
         [0.97, 0.97],
         "b",
         marker="|",
@@ -123,7 +123,7 @@ with psd.figlist_var() as fl:
     )
     plt.plot(
         [0.93, 0.93],
-        [bbox[1], bbox[1]+bbox[3]+gap],
+        [bbox[1], bbox[1] + bbox[3] + gap],
         "b",
         marker="_",
         linewidth=1,
@@ -141,7 +141,7 @@ with psd.figlist_var() as fl:
     # }}}
     # {{{ horiz_label_space
     plt.plot(
-        [-horiz_label_spacer, -2*horiz_label_spacer],
+        [-horiz_label_spacer, -2 * horiz_label_spacer],
         [0.5, 0.5],
         "r",
         marker="|",
@@ -159,7 +159,7 @@ with psd.figlist_var() as fl:
         transform=ax0_origin,
     )
     plt.text(
-        -3*horiz_label_spacer,
+        -3 * horiz_label_spacer,
         0.52,
         "kwarg(horiz_label_space)",
         color="r",
@@ -168,11 +168,15 @@ with psd.figlist_var() as fl:
     )
     # }}}
     # {{{ gap
-    ax4_x,ax4_y = (ax_list[4].transAxes+fig.transFigure.inverted()).transform(psd.r_[0.5,1])
-    ax3_x,ax3_y = (ax_list[3].transAxes+fig.transFigure.inverted()).transform(psd.r_[0.5,1])
+    ax4_x, ax4_y = (
+        ax_list[4].transAxes + fig.transFigure.inverted()
+    ).transform(psd.r_[0.5, 1])
+    ax3_x, ax3_y = (
+        ax_list[3].transAxes + fig.transFigure.inverted()
+    ).transform(psd.r_[0.5, 1])
     plt.plot(
         [ax3_x, ax3_x],
-        [ax3_y, ax3_y + gap/2],
+        [ax3_y, ax3_y + gap / 2],
         "b",
         marker="_",
         linewidth=1,
@@ -180,8 +184,8 @@ with psd.figlist_var() as fl:
         transform=fig.transFigure,
     )
     plt.text(
-        ax3_x+0.01,
-        ax3_y+0.01,
+        ax3_x + 0.01,
+        ax3_y + 0.01,
         r"kwarg(gap) / $\text{nPh}_{\text{outer}}$",
         color="b",
         clip_on=False,
@@ -189,7 +193,7 @@ with psd.figlist_var() as fl:
     )
     plt.plot(
         [ax4_x, ax4_x],
-        [ax4_y, ax4_y + gap/4],
+        [ax4_y, ax4_y + gap / 4],
         "b",
         marker="_",
         linewidth=1,
@@ -197,7 +201,7 @@ with psd.figlist_var() as fl:
         transform=fig.transFigure,
     )
     plt.text(
-        ax4_x+0.01,
+        ax4_x + 0.01,
         ax4_y + 0.007,
         r"kwarg(gap) / $\text{nPh}_{\text{inner}}$",
         color="b",

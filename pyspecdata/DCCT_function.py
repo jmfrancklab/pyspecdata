@@ -29,7 +29,7 @@ def DCCT(
     this_nddata,
     fig,
     custom_scaling=False,
-    bbox=[0.05, 0.1, 0.92,0.75],
+    bbox=[0.05, 0.1, 0.92, 0.75],
     gap=0.1,
     horiz_label_spacer=50,
     shareaxis=False,
@@ -300,7 +300,7 @@ def DCCT(
     divisions = []
 
     # {{{ Determine number of axes objects based on shape of phase
-    #     cycling dimensions 
+    #     cycling dimensions
     for j, thisdim in enumerate(a_shape.dimlabels[::-1][2:]):
         old = [j / 2.0 for j in divisions]
         divisions = (old + [1]) * (a_shape[thisdim] - 1) + old
@@ -567,12 +567,7 @@ def DCCT(
             allow_for_labels + bbox[0],
             axes_bottom[0],
             axes_width,
-            axes_bottom[-1] - (bbox[3]+2*gap+1),
+            axes_bottom[-1] - (bbox[3] + 2 * gap + 1),
         )
     else:
-        return (
-            ax_list,
-            allow_for_labels,
-            total_scale_transform,
-            ax0_origin
-        )
+        return (ax_list, allow_for_labels, total_scale_transform, ax0_origin)
