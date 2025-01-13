@@ -32,7 +32,7 @@ def DCCT(
     custom_scaling=False,
     bbox=[0.05, 0.1, 0.92],
     gap=0.1,
-    vert_label_spacer=50,
+    horiz_label_spacer=50,
     shareaxis=False,
     diagnostic=False,
     cmap=None,
@@ -68,7 +68,7 @@ def DCCT(
     gap : float
         Figure coordinates
         Spacing between coherence transfer pathways
-    vert_label_spacer : int
+    horiz_label_spacer : int
         Display coordinates
         Spacing between vertical lines that label the coherence pathways
     shareaxis : boolean
@@ -159,7 +159,7 @@ def DCCT(
             this_label_num
             + 1  # plus one so the first horizontal isn't placed at 0
             #      (overlapping with the spine of the indirect axis)
-        ) * vert_label_spacer  # will space the vertical lines along x approp.
+        ) * horiz_label_spacer  # will space the vertical lines along x approp.
 # TODO ☐: We should not need to know fig_x0 here, since we
 # should be using a transform where the origin in in the
 # bottom left corner of our bottom Axes object.  We should
@@ -215,7 +215,7 @@ def DCCT(
             # {{{ determine the x and y position of the label in display coords
             if check_for_label_num:
                 # the labels of the outer dimensions
-                label_spacing = (this_label_num + 1) * vert_label_spacer
+                label_spacing = (this_label_num + 1) * horiz_label_spacer
                 # Calculate coord for base of arrow
 # TODO ☐: same comment as above -- we should not need fig_x0
 # inside this function
@@ -327,10 +327,8 @@ def DCCT(
     # in the calculation below, as well (and probably add it to
     # your example figure, so it's clear that all the space between the
     # edge of the axes and the bbox is accounted for.
-    # TODO ☐: vert_label_spacer should be called
-    # horiz_label_spacer
     LHS_labels, _ = fig.transFigure.inverted().transform(
-        (vert_label_spacer * num_dims, 0)
+        (horiz_label_spacer * num_dims, 0)
     )
     # {{{ define the origin of our stacked plots at the bottom left of
     #     the bottom left plot.  We define these because we will use
