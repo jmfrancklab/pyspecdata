@@ -29,7 +29,7 @@ def DCCT(
     this_nddata,
     fig,
     custom_scaling=False,
-    bbox=[0.05, 0.1, 0.92],
+    bbox=[0.05, 0.1, 0.92,0.75],
     gap=0.1,
     horiz_label_spacer=50,
     shareaxis=False,
@@ -64,6 +64,9 @@ def DCCT(
         :bbox[2]: int
             Distance between the right most side of the axes objects and the
             left most side of the decorations (in Figure coordinates)
+        :bbox[3]: int
+            Distance from bottom of the bottom axes object to top of top
+            axes object
     gap : float
         Figure coordinates
         Spacing between coherence transfer pathways
@@ -93,9 +96,6 @@ def DCCT(
     """
     x = []  # List to put direct dim into
     y = []  # List to put indirect dims into
-    # TODO ☐: you have two choices -- get rid of top_pad,
-    #         or include it in your demo figure
-    top_pad = 0.05  # a bit of padding on top to allow space for title
     my_data = this_nddata.C
     ordered_labels = {}
 
@@ -299,17 +299,20 @@ def DCCT(
     num_dims = len(a_shape.dimlabels[:-2])
     divisions = []
 
-    # TODO ☐: comment for the following is no good -- you want
-    # to really understand what this is doing
-    # should be looping in backward order from printed shape
+    # {{{ Determine number of axes objects based on shape of phase
+    #     cycling dimensions 
     for j, thisdim in enumerate(a_shape.dimlabels[::-1][2:]):
         old = [j / 2.0 for j in divisions]
         divisions = (old + [1]) * (a_shape[thisdim] - 1) + old
         logging.debug(strm("for", thisdim, "I get", divisions))
     divisions = [j * 2 * gap / sum(divisions) for j in divisions]
-    # {{{ determind the bboxes for all the Axes objects that
-    # we are generating
-    axes_height = (1 - top_pad - bbox[1] - 2 * gap) / np.prod(
+    # }}}
+    # {{{ Determine the bboxes for all the Axes objects that
+    #     we are generating
+    # Height of axes object including gap above for
+    # space between axes objects
+    print(np.prod(a_shape.shape[:-2]))
+    axes_height = (bbox[3] - bbox[1]) / np.prod(
         a_shape.shape[:-2]
     )  # where 1 is the figure y-coordinate of the top of the figure
     axes_bottom = np.cumsum([
@@ -565,7 +568,7 @@ def DCCT(
             allow_for_labels + bbox[0],
             axes_bottom[0],
             axes_width,
-            axes_bottom[-1] - top_pad,
+            axes_bottom[-1] - (bbox[3]+2*gap+1),
         )
     else:
         return (
@@ -573,5 +576,5 @@ def DCCT(
             allow_for_labels + bbox[0],
             axes_bottom[-1] + axes_height,
             axes_width,
-            top_pad - (1 - bbox[2] - bbox[0]),
+            (bbox[3]+  2*gap + bbox[2] + bbox[0]),
         )
