@@ -99,6 +99,7 @@ def DCCT(
     top_pad = 0.05  # a bit of padding on top to allow space for title
     my_data = this_nddata.C
     ordered_labels = {}
+    # {{{ Functions
     def gen_labels(data):
         """ Takes dimlabels and shape from the data and generates a list of 
         ordered dimlabels each assigned to the index of the dimension"""
@@ -146,6 +147,139 @@ def DCCT(
                 ordered_labels[this_dim] = [
                     "0" if j == 0.0 else f"{j}" for j in my_data.getaxis(this_dim)
                 ]
+    def draw_span(
+        ax1,
+        ax2,
+        label,
+        this_label_num,
+    ):
+        """Place the vertical lines and labels of the coherence transfer
+        pathways"""
+        label_spacing = (
+            this_label_num
+            + 1  # plus one so the first horizontal isn't placed at 0
+            #      (overlapping with the spine of the indirect axis)
+        ) * vert_label_spacer  # will space the vertical lines along x approp.
+# TODO ☐: We should not need to know fig_x0 here, since we
+# should be using a transform where the origin in in the
+# bottom left corner of our bottom Axes object.  We should
+# only need to know label_spacing and allow_for_text
+        x1_disp = fig_x0 - label_spacing  # x coord is the left
+        #                                                 side of the axis
+        #                                                 minus the spacing for
+        #                                                 text/ticks
+        #                                                 (label_spacing)
+        # {{{ Take y coordinate of top and bottom of axes
+        #     objects to get the 2 points for drawing the
+        #     lines. To be lazy I pull this from the axes
+        #     objects themselves.
+        _, y1_fig = (ax1.transAxes + fig.transFigure.inverted()).transform(
+            r_[0, 0.95]
+        )
+        _, y2_fig = (ax2.transAxes + fig.transFigure.inverted()).transform(
+            r_[0, 0.05]
+        )
+        # }}}
+        # for scaled translation, x coords should be display and y coords
+        # should be figure
+        lineA = lines.Line2D(
+            [x1_disp, x1_disp],
+            [y1_fig, y2_fig],
+            linewidth=1,
+            color="k",
+            transform=total_trans,
+            clip_on=False,
+        )
+        plt.text(
+            x1_disp,  # same x coord as the line to keep simple
+            (y2_fig + y1_fig) / 2,  # put in middle of line
+            label,
+            va="center",
+            ha="right",
+            rotation=90,
+            transform=total_trans,
+            color="k",
+        )
+        fig.add_artist(lineA)
+    def place_labels(
+        ax1,
+        label,
+        label_placed,
+        this_label_num,
+        check_for_label_num=True,
+        arrow_width_px=4.0,
+    ):
+        """ Place arrows and dimname labels"""
+        x_axorigindisp, y_axorigindisp = ax1.transAxes.transform(r_[0, 0])
+        if not check_for_label_num or not label_placed[this_label_num]:
+            # {{{ determine the x and y position of the label in display coords
+            if check_for_label_num:
+                # the labels of the outer dimensions
+                label_spacing = (this_label_num + 1) * vert_label_spacer
+                # Calculate coord for base of arrow
+# TODO ☐: same comment as above -- we should not need fig_x0
+# inside this function
+                x_textdisp = fig_x0 - label_spacing
+            else:
+                # same as above, but determine text
+                # position based on tick labels
+                label = my_data.unitify_axis(my_data.dimlabels[-2])
+                # from here https://stackoverflow.com/questions/44012436/pytho\
+                # n-matplotlib-get-position-of-xtick-labels
+                # then searching for BBox docs
+                logging.debug(
+                    strm(
+                        "tick locations",
+                        [
+                            j.get_window_extent().bounds
+                            for j in ax1.get_yticklabels()
+                        ],
+                    )
+                )
+                x_textdisp = fig_x0  # bottom left corner of bottom axes in fig
+            # tick length is a nice consistent distance to push the arrows out
+            # slightly to avoid confusion
+            tick_length = [
+                j.get_window_extent().bounds for j in ax1.get_yticklabels()
+            ][-1][-1]
+            x_textdisp -= tick_length
+            x_textdisp -= arrow_width_px
+            y_textdisp = -25.0
+            # }}}
+            AnArrow = FancyArrow(
+                x_textdisp,
+                y_textdisp,
+                2,
+                5,
+                width=arrow_width_px,
+                clip_on=False,
+                transform=total_scale_transform,
+                alpha=0.1,
+                color="k",
+            )
+            # could do fancier w/ the following, but need to mess w/ width
+            # parameters
+            # arrow_base = r_[x_arrowbase_fig-arrow_width/2, y_arrowbase_fig]
+            # a = FancyArrowPatch(arrow_base, arrow_base+r_[dx, dy],
+            #        arrowstyle='|-|',
+            #        alpha=0.1,  color='k')
+            fig.add_artist(AnArrow)
+            x_textfig = x_textdisp + arrow_width_px
+            y_textfig = y_textdisp - 5.0
+            plt.text(
+                x_textfig,
+                y_textfig,
+                label,
+                va="top",
+                ha="right",
+                rotation=45,
+                clip_on=False,
+                transform=total_scale_transform,
+                color="k",
+            )
+            if check_for_label_num:
+                label_placed[this_label_num] = 1
+    # }}}            
     # {{{ Generate alias labels - goes to scientific fn
     gen_labels(my_data)    
     # }}}
@@ -299,175 +433,6 @@ def DCCT(
     else:
         A = this_nddata.C
         A.rename(a_shape.dimlabels[:-2][0], "smooshed")
-
-    # }}}
-    # {{{ vertical lines for coh paths
-# TODO ☐: define this at the top of the file to make sure
-# that we are passing all the arguments that we need to be
-    def draw_span(
-        ax1,
-        ax2,
-        label,
-        this_label_num,
-    ):
-        """Place the vertical lines and labels of the coherence transfer
-        pathways"""
-        label_spacing = (
-            this_label_num
-            + 1  # plus one so the first horizontal isn't placed at 0
-            #      (overlapping with the spine of the indirect axis)
-        ) * vert_label_spacer  # will space the vertical lines along x approp.
-# TODO ☐: We should not need to know fig_x0 here, since we
-# should be using a transform where the origin in in the
-# bottom left corner of our bottom Axes object.  We should
-# only need to know label_spacing and allow_for_text
-        x1_disp = fig_x0 - label_spacing  # x coord is the left
-        #                                                 side of the axis
-        #                                                 minus the spacing for
-        #                                                 text/ticks
-        #                                                 (label_spacing)
-        # {{{ Take y coordinate of top and bottom of axes
-        #     objects to get the 2 points for drawing the
-        #     lines. To be lazy I pull this from the axes
-        #     objects themselves.
-        _, y1_fig = (ax1.transAxes + fig.transFigure.inverted()).transform(
-            r_[0, 0.95]
-        )
-        _, y2_fig = (ax2.transAxes + fig.transFigure.inverted()).transform(
-            r_[0, 0.05]
-        )
-        # }}}
-        # for scaled translation, x coords should be display and y coords
-        # should be figure
-        lineA = lines.Line2D(
-            [x1_disp, x1_disp],
-            [y1_fig, y2_fig],
-            linewidth=1,
-            color="k",
-            transform=total_trans,
-            clip_on=False,
-        )
-        plt.text(
-            x1_disp,  # same x coord as the line to keep simple
-            (y2_fig + y1_fig) / 2,  # put in middle of line
-            label,
-            va="center",
-            ha="right",
-            rotation=90,
-            transform=total_trans,
-            color="k",
-        )
-        fig.add_artist(lineA)
-
-    # }}}
-    # {{{ place arrows and dimname labels
-# TODO ☐: define this at the top of the file to make sure
-# that we are passing all the arguments that we need to be
-    def place_labels(
-        ax1,
-        label,
-        label_placed,
-        this_label_num,
-        check_for_label_num=True,
-        arrow_width_px=4.0,
-    ):
-        x_axorigindisp, y_axorigindisp = ax1.transAxes.transform(r_[0, 0])
-        if not check_for_label_num or not label_placed[this_label_num]:
-            # {{{ determine the x and y position of the label in display coords
-            if check_for_label_num:
-                # the labels of the outer dimensions
-                label_spacing = (this_label_num + 1) * vert_label_spacer
-                # Calculate coord for base of arrow
-# TODO ☐: same comment as above -- we should not need fig_x0
-# inside this function
-                x_textdisp = fig_x0 - label_spacing
-            else:
-                # same as above, but determine text
-                # position based on tick labels
-                label = my_data.unitify_axis(my_data.dimlabels[-2])
-                # from here https://stackoverflow.com/questions/44012436/pytho\
-                # n-matplotlib-get-position-of-xtick-labels
-                # then searching for BBox docs
-                logging.debug(
-                    strm(
-                        "tick locations",
-                        [
-                            j.get_window_extent().bounds
-                            for j in ax1.get_yticklabels()
-                        ],
-                    )
-                )
-                x_textdisp = fig_x0  # bottom left corner of bottom axes in fig
-            # tick length is a nice consistent distance to push the arrows out
-            # slightly to avoid confusion
-            tick_length = [
-                j.get_window_extent().bounds for j in ax1.get_yticklabels()
-            ][-1][-1]
-            x_textdisp -= tick_length
-            x_textdisp -= arrow_width_px
-            y_textdisp = -25.0
-# TODO ☐: unless you are using them, the diagnostics are
-# going to be obsolete b/c they were from before you new
-# strategy.
-            if diagnostic:
-                a = Circle(
-                    (x_textdisp, y_axorigindisp - y_textdisp),
-                    3,
-                    clip_on=False,
-                    transform=None,
-                    color="b",
-                )
-                fig.add_artist(a)
-            # }}}
-            AnArrow = FancyArrow(
-                x_textdisp,
-                y_textdisp,
-                2,
-                5,
-                width=arrow_width_px,
-                clip_on=False,
-                transform=total_scale_transform,
-                alpha=0.1,
-                color="k",
-            )
-            # could do fancier w/ the following, but need to mess w/ width
-            # parameters
-            # arrow_base = r_[x_arrowbase_fig-arrow_width/2, y_arrowbase_fig]
-            # a = FancyArrowPatch(arrow_base, arrow_base+r_[dx, dy],
-            #        arrowstyle='|-|',
-            #        alpha=0.1,  color='k')
-            fig.add_artist(AnArrow)
-            if diagnostic:
-                a = Line2D(
-                    [x_textdisp, x_textdisp + fig_x0],
-                    [y_textdisp, y_textdisp + dy],
-                    transform=fig.transFigure,
-                    color="r",
-                )
-                fig.add_artist(a)
-                a = Circle(
-                    (x_textdisp, y_textdisp),
-                    0.01,
-                    clip_on=False,
-                    transform=fig.transFigure,
-                    color="r",
-                )
-                fig.add_artist(a)
-            x_textfig = x_textdisp + arrow_width_px
-            y_textfig = y_textdisp - 5.0
-            plt.text(
-                x_textfig,
-                y_textfig,
-                label,
-                va="top",
-                ha="right",
-                rotation=45,
-                clip_on=False,
-                transform=total_scale_transform,
-                color="k",
-            )
-            if check_for_label_num:
-                label_placed[this_label_num] = 1
 
     # }}}
     label_placed = np.zeros(num_dims)
