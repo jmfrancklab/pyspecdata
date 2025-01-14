@@ -1335,9 +1335,17 @@ class nddata(object):
                 return x
 
         if self.data.size < 2:
-            retval = str(self.data.item())
-            if self.get_error() is not None:
-                retval += "±" + str(self.get_error().item())
+            val = self.data.item()
+            err = self.get_error()
+            if err is not None:
+                err = err.item()
+                oom_err = int(np.floor(np.log10(err)))  # int takes floor
+                oom_val = int(np.floor(np.log10(val)))  # int takes floor
+                retval = (
+                    "%#0." + str(oom_val - oom_err + 1) + "g ± %#0.2g"
+                ) % (val, err)
+            else:
+                retval = "%#0.5g" % val
             return retval
         retval = show_array(self.data)
         if self.get_error() is not None:
