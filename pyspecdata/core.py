@@ -1346,6 +1346,9 @@ class nddata(object):
                 ) % (val, err)
             else:
                 retval = "%#0.5g" % val
+            myunits = self.get_units()
+            if myunits is not None:
+                retval += f" {Q_(myunits).units:~P}"
             return retval
         retval = show_array(self.data)
         if self.get_error() is not None:
@@ -2514,6 +2517,9 @@ class nddata(object):
             Rerr = None
         # }}}
         retval.set_error(Rerr)
+        unitA = Q_(self.get_units())
+        unitB = Q_(arg.get_units())
+        retval.set_units(f"{(unitA*unitB).units:~P}")
         return retval
 
     def __rpow__(self, arg):
@@ -2628,6 +2634,9 @@ class nddata(object):
             Rerr = None
         # }}}
         retval.set_error(Rerr)
+        unitA = Q_(self.get_units())
+        unitB = Q_(arg.get_units())
+        retval.set_units(f"{(unitA/unitB).units:~P}")
         return retval
 
     def __invert__(self):
