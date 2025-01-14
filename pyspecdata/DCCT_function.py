@@ -263,8 +263,8 @@ def DCCT(
             #        alpha=0.1,  color='k')
             fig.add_artist(AnArrow)
             x_textfig = x_textdisp + arrow_width_px
-            y_textfig = y_textdisp - 5.0 # place dim label slightly below arrow
-            #                              base
+            y_textfig = y_textdisp - 5.0 # place dim label slightly below
+            #                              arrow base
             plt.text(
                 x_textfig,
                 y_textfig,
@@ -307,10 +307,8 @@ def DCCT(
     # }}}
     # {{{ Determine the bboxes for all the Axes objects that we are generating
     # Height of axes object including gap above for space between axes objects
-    axes_height = (bbox[3] - bbox[1]) / np.prod(
-        a_shape.shape[:-2]
-    )
-    axes_bottom = np.cumsum([axes_height + j for j in divisions]) # ndarray
+    axes_height = (bbox[3] - bbox[1]) / np.prod(a_shape.shape[:-2])
+    axes_bottom = np.cumsum([axes_height + j for j in divisions])  # ndarray
     axes_bottom = r_[0, axes_bottom]
     # }}}
     ax_list = []
@@ -341,8 +339,8 @@ def DCCT(
     )
     # ax0_origin transformation takes x in display coords and y in fig coords
     ax0_origin = blended_transform_factory(
-            total_scale_transform, fig.transFigure
-            )
+        total_scale_transform, fig.transFigure
+    )
     # }}}
     # {{{ adjust tick settings -- AFTER extents are set
     # {{{ bottom subplot
