@@ -164,15 +164,11 @@ def DCCT(
         ) * horiz_label_spacer  # will space the vertical lines along x approp.
         x1_disp = (
             allow_for_labels + bbox[0] - label_spacing
-        )  # x coord is the left
-        #                                                 side of the axis
-        #                                                 minus the spacing for
-        #                                                 text/ticks
-        #                                                 (label_spacing)
-        # {{{ Take y coordinate of top and bottom of axes
-        #     objects to get the 2 points for drawing the
-        #     lines. To be lazy I pull this from the axes
-        #     objects themselves.
+        )  # x coord is the left side of the axis minus the spacing for
+        #    text/ticks (label_spacing)
+        # {{{ Take y coordinate of top and bottom of axes objects to get the 2
+        #     points for drawing the lines. To be lazy I pull this from the
+        #     axes objects themselves.
         _, y1_fig = (ax1.transAxes + fig.transFigure.inverted()).transform(
             r_[0, 0.95]
         )
@@ -211,7 +207,8 @@ def DCCT(
         arrow_width_px=4.0,
     ):
         """Place arrows and dimname labels"""
-        x_axorigindisp, y_axorigindisp = ax1.transAxes.transform(r_[0, 0])
+        # Take y of bottom axes object as this is the y we want the tip
+        # of the arrow to go to
         if not check_for_label_num or not label_placed[this_label_num]:
             # {{{ determine the x and y position of the label in display coords
             if check_for_label_num:
@@ -220,12 +217,12 @@ def DCCT(
                 # Calculate coord for base of arrow
                 x_textdisp = allow_for_labels + bbox[0] - label_spacing
             else:
-                # same as above, but determine text
-                # position based on tick labels
+                # same as above, but determine text position based on tick
+                # labels
                 label = my_data.unitify_axis(my_data.dimlabels[-2])
                 # from here https://stackoverflow.com/questions/44012436/pytho\
-                # n-matplotlib-get-position-of-xtick-labels
-                # then searching for BBox docs
+                # n-matplotlib-get-position-of-xtick-labels then searching for
+                # BBox docs
                 logging.debug(
                     strm(
                         "tick locations",
@@ -245,7 +242,7 @@ def DCCT(
             ][-1][-1]
             x_textdisp -= tick_length
             x_textdisp -= arrow_width_px
-            y_textdisp = -25.0
+            y_textdisp = -25.0 # define base of arrow y coord
             # }}}
             AnArrow = FancyArrow(
                 x_textdisp,
@@ -266,7 +263,8 @@ def DCCT(
             #        alpha=0.1,  color='k')
             fig.add_artist(AnArrow)
             x_textfig = x_textdisp + arrow_width_px
-            y_textfig = y_textdisp - 5.0
+            y_textfig = y_textdisp - 5.0 # place dim label slightly below arrow
+            #                              base
             plt.text(
                 x_textfig,
                 y_textfig,
@@ -299,31 +297,27 @@ def DCCT(
     num_dims = len(a_shape.dimlabels[:-2])
     divisions = []
 
-    # {{{ Determine number of axes objects based on shape of phase
-    #     cycling dimensions
+    # {{{ Determine number of axes objects based on shape of phase cycling
+    #     dimensions
     for j, thisdim in enumerate(a_shape.dimlabels[::-1][2:]):
         old = [j / 2.0 for j in divisions]
         divisions = (old + [1]) * (a_shape[thisdim] - 1) + old
         logging.debug(strm("for", thisdim, "I get", divisions))
     divisions = [j * 2 * gap / sum(divisions) for j in divisions]
     # }}}
-    # {{{ Determine the bboxes for all the Axes objects that
-    #     we are generating
-    # Height of axes object including gap above for
-    # space between axes objects
+    # {{{ Determine the bboxes for all the Axes objects that we are generating
+    # Height of axes object including gap above for space between axes objects
     axes_height = (bbox[3] - bbox[1]) / np.prod(
         a_shape.shape[:-2]
-    )  # where 1 is the figure y-coordinate of the top of the figure
-    axes_bottom = np.cumsum([
-        axes_height + j for j in divisions
-    ])  # becomes ndarray
+    )
+    axes_bottom = np.cumsum([axes_height + j for j in divisions]) # ndarray
     axes_bottom = r_[0, axes_bottom]
     # }}}
     ax_list = []
-    # Define length (in fig coords) of the distance that the labels of
-    # dimensions will take up. This means the distance between the left
-    # most side of the figure to the left most side of the axes objects
-    # are the sum of bbox[0] and allow_for_labels
+    # Note: Length (in fig coords) between the left most side of the figure to
+    # the left most side of the axes objects as the sum of bbox[0] and
+    # allow_for_labels which defines the length between the left side of the
+    # axes object and the left side of the decorations
     allow_for_labels, _ = fig.transFigure.inverted().transform(
         (horiz_label_spacer * num_dims, 0)
     )
@@ -340,19 +334,15 @@ def DCCT(
         )  # lbwh
         if j != 0 and shareaxis:
             plt.axes(sharex=ax_list[0], sharey=ax_list[0])
-    # {{{ make blended transform for plotting decorations
-    # sets origin for the blended transform to the bottom left corner of
-    # the bottom axes object
+    # {{{ make blended transform for plotting decorations sets origin for the
+    #     blended transform to the bottom left corner of the bottom axes object
     total_scale_transform = IdentityTransform() + ScaledTranslation(
         (allow_for_labels + bbox[0]), bbox[1], fig.transFigure
     )
-    # Total translation takes x in display coords and y in fig coords
-    # therefore when the display is adjusted (for example enlarging or
-    # minimizing the window) the objects with this transform scale and
-    # move with the display.
+    # ax0_origin transformation takes x in display coords and y in fig coords
     ax0_origin = blended_transform_factory(
-        total_scale_transform, fig.transFigure
-    )
+            total_scale_transform, fig.transFigure
+            )
     # }}}
     # {{{ adjust tick settings -- AFTER extents are set
     # {{{ bottom subplot
@@ -466,10 +456,8 @@ def DCCT(
                 "I don't understand the value you've set for the origin"
                 " keyword argument"
             )
-        kwargs["origin"] = (
-            origin  # required so that imshow now displays the image correctly
-        )
-
+        kwargs["origin"] = origin # required so that imshow now displays the
+        #                           image correctly
         if real_data:
             kwargs["cmap"] = cmap
             K = A["smooshed", j].data / abs(A).data.max()
