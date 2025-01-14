@@ -534,6 +534,7 @@ def maprep(*mylist):
             mylist[j] = mylist[j].__repr__()
     return " ".join(mylist)
 
+
 # {{{ plot wrapper
 global myplotfunc
 myplotfunc = plt.plot
@@ -1333,14 +1334,16 @@ class nddata(object):
             else:
                 return x
 
+        if self.data.size < 2:
+            retval = str(self.data.item())
+            if self.get_error() is not None:
+                retval += "±" + str(self.get_error().item())
+            return retval
         retval = show_array(self.data)
-        retval += "\n\t\t+/-"
-        retval += show_array(self.get_error())
-        if (
-            len(self.dimlabels) > 1
-            or len(self.dimlabels) == 0
-            or self.dimlabels[0] != "INDEX"
-        ):
+        if self.get_error() is not None:
+            retval += "\n\t\t±"
+            retval += show_array(self.get_error())
+        if len(self.dimlabels) > 1 or self.dimlabels[0] != "INDEX":
             retval += "\n\tdimlabels="
             retval += repr(self.dimlabels)
             retval += "\n\taxes="
@@ -1998,6 +2001,9 @@ class nddata(object):
 
         or `d.div_units("s")` to divide the
         data units by seconds.
+
+        In other words, if you pass "a" and the units of your data are
+        in "b", then this returns x, such that (x a)/(b) = 1.
 
         e.g. to convert a variable from seconds
         to the units of `axisname`, do
@@ -3344,8 +3350,10 @@ class nddata(object):
 
         Parameters
         ----------
-        std: bool
+        std : bool
             whether or not to return the standard deviation as an error
+        stderr : bool
+            whether or not to return the standard error as an error
         """
         logger.debug("entered the mean function")
         # {{{ process arguments
@@ -3357,7 +3365,10 @@ class nddata(object):
                 "return_error kwarg no longer used -- use std kwarg if you"
                 " want to set the error to the std"
             )
-        return_error = process_kwargs([("std", False)], kwargs)
+        return_error, return_stderr = process_kwargs(
+            [("std", False), ("stderr", False)], kwargs
+        )
+        return_error |= return_stderr
         logger.debug(strm("return error is", return_error))
         if isinstance(axes, str):
             axes = [axes]
@@ -3391,6 +3402,8 @@ class nddata(object):
                 thiserror = np.std(self.data, axis=thisindex)
                 if np.isscalar(thiserror):
                     thiserror = r_[thiserror]
+                if return_stderr:
+                    thiserror /= np.sqrt(self.data.shape[thisindex])
             self.data = np.mean(self.data, axis=thisindex)
             if return_error:  # this needs to go after the data setting
                 self.set_error(
