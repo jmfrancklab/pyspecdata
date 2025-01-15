@@ -1324,6 +1324,21 @@ class nddata(object):
     def __repr__(self):
         return str(self)
 
+    def __format__(self, format_spec):
+        if format_spec == "~P":
+            return str(self.C.human_units(scale_data=True))
+        elif format_spec == "":
+            return str(self.C.human_units(scale_data=True))
+        elif format_spec == "~L":
+            retval = str(self.C.human_units(scale_data=True))
+            retval.replace("±", "\\pm")
+            return re.sub("([^0-9. ]+)", "\;\\\\text{\\1}", retval)
+        else:
+            raise ValueError(
+                "Right now, pyspecdata only responds to the ~P and ~L format"
+                " specs (analogous to pint)"
+            )
+
     def __str__(self):
         def show_array(x, indent=""):
             x = repr(x)
