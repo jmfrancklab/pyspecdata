@@ -2528,9 +2528,15 @@ class nddata(object):
             Rerr = None
         # }}}
         retval.set_error(Rerr)
-        unitA = Q_(self.get_units())
-        unitB = Q_(arg.get_units())
-        retval.set_units(f"{(unitA*unitB).units:~P}")
+        unitA = Q_(
+            "dimensionless" if self.get_units() is None else self.get_units()
+        )
+        unitB = Q_(
+            "dimensionless" if arg.get_units() is None else arg.get_units()
+        )
+        unit_ret = f"{(unitA*unitB).units:~P}"
+        unit_ret = None if len(unit_ret) == 0 else unit_ret
+        retval.set_units(unit_ret)
         return retval
 
     def __rpow__(self, arg):
@@ -2645,9 +2651,15 @@ class nddata(object):
             Rerr = None
         # }}}
         retval.set_error(Rerr)
-        unitA = Q_(self.get_units())
-        unitB = Q_(arg.get_units())
-        retval.set_units(f"{(unitA/unitB).units:~P}")
+        unitA = Q_(
+            "dimensionless" if self.get_units() is None else self.get_units()
+        )
+        unitB = Q_(
+            "dimensionless" if arg.get_units() is None else arg.get_units()
+        )
+        unit_ret = f"{(unitA/unitB).units:~P}"
+        unit_ret = None if len(unit_ret) == 0 else unit_ret
+        retval.set_units(unit_ret)
         return retval
 
     def __invert__(self):

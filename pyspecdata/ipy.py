@@ -161,7 +161,9 @@ def load_ipython_extension(ip):
         import IPython.display as d
         arg_copy = arg.copy()
         arg_copy.human_units()
-        if len(arg_copy.dimlabels) == 1:
+        if arg_copy.data.size < 2:
+            print(arg_copy)
+        elif len(arg_copy.dimlabels) == 1:
             if arg_copy.data.dtype == numpy.complex128:
                 pyspec_plot(arg_copy.real,'g',alpha=0.5)
                 pyspec_plot(arg_copy.imag,'y',alpha=0.5)
