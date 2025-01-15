@@ -593,9 +593,9 @@ def plot(*args, **kwargs):
         myy = args[1]
     if len(args) == 3:
         myformat = args[2]
-    if np.isscalar(myx):
+    if np.isscalar(myx) or len(myx.shape) == 0:
         myx = np.array([myx])
-    if np.isscalar(myy):
+    if np.isscalar(myy) or len(myy.shape) == 0:
         myy = np.array([myy])
     # }}}
     x_inverted = False
@@ -1969,12 +1969,24 @@ class nddata(object):
             # {{{ same for the data
             prev_label = self.get_units()
             if prev_label is not None and len(prev_label) > 0:
+                if np.isscalar(self.data) or len(self.data.shape) == 0:
+                    self.data = r_[
+                        self.data
+                    ]  # need this so oom functions can overwrite by pointer
                 data_to_test = self.data.ravel()
                 average_oom = det_oom(data_to_test)
-                x = self.getaxis(thisaxis)
                 result_label = apply_oom(
                     average_oom, self.data, prev_label=prev_label
                 )
+                if self.get_error() is not None:
+                    if (
+                        np.isscalar(self.data_error)
+                        or len(self.data_error.shape) == 0
+                    ):
+                        self.data_error = r_[self.data_error]
+                    result_label = apply_oom(
+                        average_oom, self.data_error, prev_label=prev_label
+                    )
                 self.set_units(result_label)
             else:
                 logger.debug("data does not have a unit label")
@@ -3440,7 +3452,7 @@ class nddata(object):
                     )
             if return_error:  # since I think this is causing an error
                 thiserror = np.std(self.data, axis=thisindex)
-                if np.isscalar(thiserror):
+                if np.isscalar(thiserror) or len(thiserror.shape) == 0:
                     thiserror = r_[thiserror]
                 if return_stderr:
                     thiserror /= np.sqrt(self.data.shape[thisindex])
@@ -3981,7 +3993,7 @@ class nddata(object):
                 isinstance(axisvalues, np.int32)
             ):
                 axisvalues = np.linspace(oldaxis[0], oldaxis[-1], axisvalues)
-            elif np.isscalar(axisvalues):
+            elif np.isscalar(axisvalues) or len(axisvalues.shape) == 0:
                 axisvalues = r_[axisvalues]
             elif type(axisvalues) not in [np.ndarray, tuple]:
                 raise ValueError(
@@ -4085,7 +4097,7 @@ class nddata(object):
             pass_through=True,
         )
 
-        if np.isscalar(values):
+        if np.isscalar(values) or len(values.shape) == 0:
             values = r_[values]
         origdata = self.data.copy()
         origaxis = self.getaxis(axis).copy()
