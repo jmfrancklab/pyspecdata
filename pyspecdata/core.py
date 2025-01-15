@@ -54,14 +54,15 @@ from . import axis_manipulation
 from . import plot_funcs as this_plotting
 from .general_functions import lsafe as orig_lsafe
 from .general_functions import (
-    emptytest,
-    process_kwargs,
-    autostringconvert,
-    strm,
-    lsafen,
-    dp,
-    pinvr,
     Q_,
+    autostringconvert,
+    dp,
+    emptytest,
+    lsafen,
+    pinvr,
+    process_kwargs,
+    scalar_or_zero_order,
+    strm,
 )
 from .hdf_utils import (
     h5loaddict,
@@ -593,9 +594,9 @@ def plot(*args, **kwargs):
         myy = args[1]
     if len(args) == 3:
         myformat = args[2]
-    if np.isscalar(myx) or len(myx.shape) == 0:
+    if scalar_or_zero_order(myx):
         myx = np.array([myx])
-    if np.isscalar(myy) or len(myy.shape) == 0:
+    if scalar_or_zero_order(myy):
         myy = np.array([myy])
     # }}}
     x_inverted = False
@@ -1984,7 +1985,7 @@ class nddata(object):
             # {{{ same for the data
             prev_label = self.get_units()
             if prev_label is not None and len(prev_label) > 0:
-                if np.isscalar(self.data) or len(self.data.shape) == 0:
+                if scalar_or_zero_order(self.data):
                     self.data = r_[
                         self.data
                     ]  # need this so oom functions can overwrite by pointer
@@ -1994,10 +1995,7 @@ class nddata(object):
                     average_oom, self.data, prev_label=prev_label
                 )
                 if self.get_error() is not None:
-                    if (
-                        np.isscalar(self.data_error)
-                        or len(self.data_error.shape) == 0
-                    ):
+                    if scalar_or_zero_order(self.data_error):
                         self.data_error = r_[self.data_error]
                     result_label = apply_oom(
                         average_oom, self.data_error, prev_label=prev_label
@@ -2128,7 +2126,7 @@ class nddata(object):
             if isinstance(args[0], str):
                 if isinstance(args[1], np.ndarray):
                     self.axis_coords_error[self.axn(args[0])] = args[1]
-                elif np.isscalar(args[1]):
+                elif scalar_or_zero_order(args[1]):
                     self.axis_coords_error[self.axn(args[0])] = args[
                         1
                     ] * np.ones_like(self.getaxis(args[0]))
@@ -3467,7 +3465,7 @@ class nddata(object):
                     )
             if return_error:  # since I think this is causing an error
                 thiserror = np.std(self.data, axis=thisindex)
-                if np.isscalar(thiserror) or len(thiserror.shape) == 0:
+                if scalar_or_zero_order(thiserror):
                     thiserror = r_[thiserror]
                 if return_stderr:
                     thiserror /= np.sqrt(self.data.shape[thisindex])
@@ -4008,7 +4006,7 @@ class nddata(object):
                 isinstance(axisvalues, np.int32)
             ):
                 axisvalues = np.linspace(oldaxis[0], oldaxis[-1], axisvalues)
-            elif np.isscalar(axisvalues) or len(axisvalues.shape) == 0:
+            elif scalar_or_zero_order(axisvalues):
                 axisvalues = r_[axisvalues]
             elif type(axisvalues) not in [np.ndarray, tuple]:
                 raise ValueError(
@@ -4112,7 +4110,7 @@ class nddata(object):
             pass_through=True,
         )
 
-        if np.isscalar(values) or len(values.shape) == 0:
+        if scalar_or_zero_order(values):
             values = r_[values]
         origdata = self.data.copy()
         origaxis = self.getaxis(axis).copy()

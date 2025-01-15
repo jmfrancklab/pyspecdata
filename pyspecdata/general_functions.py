@@ -582,6 +582,16 @@ def det_unit_prefactor(thisstr):
     Returns
     =======
     float:
-        The prefactor of the fed units floored to a multiple of 3    
+        The prefactor of the fed units floored to a multiple of 3
     """
     return 3 * int(np.log10(ureg(thisstr).to_base_units().magnitude) // 3)
+
+
+def scalar_or_zero_order(x):
+    if np.isscalar(x):
+        return True
+    if x is None:
+        return False
+    if isinstance(x, np.ndarray) and len(x.shape) == 0:
+        return True
+    return False
