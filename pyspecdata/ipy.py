@@ -35,6 +35,7 @@ if not inside_sphinx():
     from .core import image as pyspec_image
     from .core import plot as pyspec_plot
     from .core import nddata as pyspec_nddata
+    from .core import nddata_hdf5 as pyspec_nddata_hdf5
 
 import re
 from IPython.display import Math
@@ -185,8 +186,10 @@ def load_ipython_extension(ip):
             pyspec_image(arg_copy)
             if arg_copy.name() is not None:
                 plt.gca().set_title(arg_copy.name())
+    print("Loaded pySpecData formatters!\n(Inspecting nddata objects should yield plots!)")
     plain_formatters.for_type(numpy.ndarray,_print_plain_override_for_ndarray)
     plain_formatters.for_type(pyspec_nddata,_print_plain_override_for_nddata)
+    plain_formatters.for_type(pyspec_nddata_hdf5,_print_plain_override_for_nddata)
     ip.ex("fancy_legend = lambda: legend(**dict(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.))")
     ip.ex("from pylab import *")
     ip.ex("from pyspecdata import *")
