@@ -17,8 +17,44 @@ from pylab import rcParams
 import matplotlib.pyplot as plt
 import pyspecdata as psd
 from numpy.random import seed
+import numpy as np
+from numpy import r_
 import sympy as s
 from collections import OrderedDict
+
+
+def plot_w_markup(x, y, thistext, thiscolor, thistransf):
+    if len(np.unique(x)) == 1:
+        endmarker = "_"
+        alignment = dict(
+            ha="left",
+            va="center",
+        )
+    else:
+        endmarker = "|"
+        alignment = dict(
+            ha="center",
+            va="top",
+        )
+    plt.plot(
+        x,
+        y,
+        thiscolor,
+        marker=endmarker,
+        linewidth=1,
+        clip_on=False,
+        transform=thistransf,
+    )
+    plt.text(
+        np.mean(x),
+        np.mean(y),
+        thistext,
+        color=thiscolor,
+        clip_on=False,
+        transform=thistransf,
+        **alignment,
+    )
+
 
 seed(2021)
 rcParams["image.aspect"] = "auto"  # needed for sphinx gallery
@@ -60,7 +96,7 @@ with psd.figlist_var() as fl:
     # reorder into a format more suitable for plotting
     data.reorder(["ph1", "ph2", "vd", "t2"])
     fig = fl.next("Data")  # Make figure object to place the DCCT
-    ax_list, allow_for_labels, total_scale_transform, ax0_origin = psd.DCCT(
+    ax_list, allow_for_labels, transDispTranslated, transXdispYfig = psd.DCCT(
         data,
         fig,
         horiz_label_spacer=horiz_label_spacer,
@@ -68,145 +104,66 @@ with psd.figlist_var() as fl:
         bbox=bbox,
         plot_title="",
     )
+
     # {{{ add lines indicating kwargs
     # {{{ bbox kwargs
-    plt.plot(
-        [0, bbox[0]],
-        [0.1, 0.1],
-        "b",
-        marker="|",
-        linewidth=1,
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.text(
-        bbox[0] / 7,
-        0.12,
-        "bbox[0]",
-        color="b",
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.plot(
+    plot_w_markup([0, bbox[0]], [0.1, 0.1], "bbox[0]", "b", fig.transFigure)
+    plot_w_markup(
         [0.16, 0.16],
         [0.0, bbox[1]],
-        "b",
-        marker="_",
-        linewidth=1,
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.text(
-        0.17,
-        bbox[1] / 3,
         "bbox[1]",
-        color="b",
-        clip_on=False,
-        transform=fig.transFigure,
+        "b",
+        fig.transFigure,
     )
-    plt.plot(
+    plot_w_markup(
         [bbox[0], bbox[2] + bbox[0]],
         [0.97, 0.97],
-        "b",
-        marker="|",
-        linewidth=1,
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.text(
-        0.45,
-        0.98,
         "bbox[2]",
-        color="b",
-        clip_on=False,
-        transform=fig.transFigure,
+        "b",
+        fig.transFigure,
     )
-    plt.plot(
+    plot_w_markup(
         [0.93, 0.93],
         [bbox[1], bbox[1] + bbox[3] + gap],
-        "b",
-        marker="_",
-        linewidth=1,
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.text(
-        0.95,
-        0.5,
         "bbox[3]",
-        color="b",
-        clip_on=False,
-        transform=fig.transFigure,
+        "b",
+        fig.transFigure,
     )
-    # }}}
-    # {{{ horiz_label_space
-    plt.plot(
+    plot_w_markup(
         [-horiz_label_spacer, -2 * horiz_label_spacer],
         [0.5, 0.5],
+        "kwarg(horiz_label_space)",
         "r",
-        marker="|",
-        linewidth=1,
-        clip_on=False,
-        transform=ax0_origin,
+        transXdispYfig,
     )
-    plt.plot(
+    plot_w_markup(
         [0.0, -horiz_label_spacer],
         [0.55, 0.55],
-        "r",
-        marker="|",
-        linewidth=1,
-        clip_on=False,
-        transform=ax0_origin,
-    )
-    plt.text(
-        -3 * horiz_label_spacer,
-        0.52,
         "kwarg(horiz_label_space)",
-        color="r",
-        clip_on=False,
-        transform=ax0_origin,
+        "r",
+        transXdispYfig,
     )
     # }}}
     # {{{ gap
-    ax4_x, ax4_y = (
-        ax_list[4].transAxes + fig.transFigure.inverted()
-    ).transform(psd.r_[0.5, 1])
-    ax3_x, ax3_y = (
-        ax_list[3].transAxes + fig.transFigure.inverted()
-    ).transform(psd.r_[0.5, 1])
-    plt.plot(
-        [ax3_x, ax3_x],
-        [ax3_y, ax3_y + gap / 2],
+    ax3_bbox = ax_list[3].get_position()
+    ax4_bbox = ax_list[4].get_position()
+    # TODO ☐: below, I use the math that you used.  But this isn't what we want.  We should have something like:
+    # mini_gap = kwarg(gap) / (N-1)
+    # where N is the product of all the sizes EXCEPT the ones we use for the x and y axes of the image plot
+    # then, the smaller gap should be mini_gap, the next largest mini_gap*2, then next largest mini_gap*4, etc.
+    plot_w_markup(
+        [(ax3_bbox.x0 + ax3_bbox.x1) / 2] * 2,
+        np.array([ax3_bbox.y1] * 2) + r_[0, gap / data.shape["ph1"]],
+        r"kwarg(gap) / $\text{nPh}_{outer}$",
         "b",
-        marker="_",
-        linewidth=1,
-        clip_on=False,
-        transform=fig.transFigure,
+        fig.transFigure,
     )
-    plt.text(
-        ax3_x + 0.01,
-        ax3_y + 0.01,
-        r"kwarg(gap) / $\text{nPh}_{\text{outer}}$",
-        color="b",
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.plot(
-        [ax4_x, ax4_x],
-        [ax4_y, ax4_y + gap / 4],
+    plot_w_markup(
+        [(ax4_bbox.x0 + ax4_bbox.x1) / 2] * 2,
+        np.array([ax4_bbox.y1] * 2) + r_[0, gap / data.shape["ph2"]],
+        r"kwarg(gap) / $\text{nPh}_{inner}$",
         "b",
-        marker="_",
-        linewidth=1,
-        clip_on=False,
-        transform=fig.transFigure,
-    )
-    plt.text(
-        ax4_x + 0.01,
-        ax4_y + 0.007,
-        r"kwarg(gap) / $\text{nPh}_{\text{inner}}$",
-        color="b",
-        clip_on=False,
-        transform=fig.transFigure,
+        fig.transFigure,
     )
     # }}}
     # }}}

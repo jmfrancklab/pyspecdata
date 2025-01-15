@@ -183,7 +183,7 @@ def DCCT(
             [y1_fig, y2_fig],
             linewidth=1,
             color="k",
-            transform=ax0_origin,
+            transform=transXdispYfig,
             clip_on=False,
         )
         plt.text(
@@ -193,7 +193,7 @@ def DCCT(
             va="center",
             ha="right",
             rotation=90,
-            transform=ax0_origin,
+            transform=transXdispYfig,
             color="k",
         )
         fig.add_artist(lineA)
@@ -251,7 +251,7 @@ def DCCT(
                 5,
                 width=arrow_width_px,
                 clip_on=False,
-                transform=total_scale_transform,
+                transform=transDispTranslated,
                 alpha=0.1,
                 color="k",
             )
@@ -273,7 +273,7 @@ def DCCT(
                 ha="right",
                 rotation=45,
                 clip_on=False,
-                transform=total_scale_transform,
+                transform=transDispTranslated,
                 color="k",
             )
             if check_for_label_num:
@@ -334,12 +334,12 @@ def DCCT(
             plt.axes(sharex=ax_list[0], sharey=ax_list[0])
     # {{{ make blended transform for plotting decorations sets origin for the
     #     blended transform to the bottom left corner of the bottom axes object
-    total_scale_transform = IdentityTransform() + ScaledTranslation(
+    transDispTranslated = IdentityTransform() + ScaledTranslation(
         (allow_for_labels + bbox[0]), bbox[1], fig.transFigure
     )
-    # ax0_origin transformation takes x in display coords and y in fig coords
-    ax0_origin = blended_transform_factory(
-        total_scale_transform, fig.transFigure
+    # transXdispYfig transformation takes x in display coords and y in fig coords
+    transXdispYfig = blended_transform_factory(
+        transDispTranslated, fig.transFigure
     )
     # }}}
     # {{{ adjust tick settings -- AFTER extents are set
@@ -548,6 +548,7 @@ def DCCT(
         check_for_label_num=False,
     )
     plt.title(plot_title)
+    # TODO ☐: I don't see what the first is useful for
     if just_2D:
         return (
             allow_for_labels + bbox[0],
@@ -556,4 +557,4 @@ def DCCT(
             axes_bottom[-1] - (bbox[3] + 2 * gap + 1),
         )
     else:
-        return (ax_list, allow_for_labels, total_scale_transform, ax0_origin)
+        return (ax_list, allow_for_labels, transDispTranslated, transXdispYfig)
