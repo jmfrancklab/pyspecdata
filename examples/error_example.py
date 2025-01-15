@@ -42,9 +42,7 @@ print(conc_indiv)
 
 # %%
 # We take the mean, allowing it to accumulate the standard error.
-# Notice how, during string conversion, we always give the standard error
-# 2 significant figures, and then base the significant figures of the
-# number on the error.
+# (See comment above about significant figures.)
 
 vol.mean(stderr=True)
 print(vol)
@@ -53,6 +51,9 @@ weight.mean(stderr=True)
 print(weight)
 
 print(weight / vol)
+
+# Because we want this to show up in sphinx gallery, we have
+# to make some type of figure
 
 fig = plt.figure()
 text = plt.Text(

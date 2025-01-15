@@ -594,10 +594,14 @@ def plot(*args, **kwargs):
         myy = args[1]
     if len(args) == 3:
         myformat = args[2]
+    # {{{ In order for the plot functions to work the way that we want, we need
+    #     to feed the data as at least 1-dimensional rather than scalar or zero
+    #     dimensional
     if scalar_or_zero_order(myx):
         myx = np.array([myx])
     if scalar_or_zero_order(myy):
         myy = np.array([myy])
+    # }}}
     # }}}
     x_inverted = False
     # {{{ parse nddata
@@ -1364,6 +1368,8 @@ class nddata(object):
                 retval = "%#0.5g" % val
             myunits = self.get_units()
             if myunits is not None:
+                # say we have m^2 -- we want this rendered as m², and pint
+                # should do this for us
                 retval += f" {Q_(myunits).units:~P}"
             return retval
         retval = show_array(self.data)
