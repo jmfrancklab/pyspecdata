@@ -44,8 +44,10 @@ if not inside_sphinx():
 class mat_formatter(object):
     zeros_re = re.compile("(?<![.0-9])0(?![.0-9])")
 
+
 class mat_formatter(object):
     zeros_re = re.compile("(?<![.0-9])0(?![.0-9])")
+
     def __init__(self, stuff):
         self.mathmode = True
         if type(stuff) is str:
