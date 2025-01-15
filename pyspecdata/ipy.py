@@ -122,7 +122,6 @@ class mat_formatter(object):
 def load_ipython_extension(ip):
     list(ip.display_formatter.formatters.keys())
 
-    tex_formatters = ip.display_formatter.formatters["text/latex"]
     plain_formatters = ip.display_formatter.formatters["text/plain"]
     exp_re = re.compile(r"(.*)e([+\-])0*([0-9]+)")
 
