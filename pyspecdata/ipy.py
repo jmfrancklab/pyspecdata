@@ -2,9 +2,9 @@ r"""Provides the jupyter extension:
 
     %load_ext pyspecdata.ipy
 
-That allows for fancy representation nddata instances -- *i.e.* you can type the name of
-an instance and hit shift-Enter, and a plot will appear rather than some text
-representation.
+That allows for fancy representation nddata instances -- *i.e.* you can type
+the name of an instance and hit shift-Enter, and a plot will appear rather than
+some text representation.
 
 Also overrides plain text representation
 of numpy arrays with latex representation that we build ourselves
@@ -12,7 +12,8 @@ or pull from sympy.
 
 Also known as "generalized jupyter awesomeness" in only ~150 lines of code!
 
-See [O'Reilly Book](https://www.safaribooksonline.com/blog/2014/02/11/altering-display-existing-classes-ipython/)
+See [O'Reilly Book](https://www.safaribooksonline.com/blog/2014/02/11/altering\
+-display-existing-classes-ipython/)
 for minimal guidance if you're interested."""
 
 # I should implement this as an extension module
@@ -37,6 +38,7 @@ if not inside_sphinx():
     from .core import image as pyspec_image
     from .core import plot as pyspec_plot
     from .core import nddata as pyspec_nddata
+    from .core import nddata_hdf5 as pyspec_nddata_hdf5
 
 
 class mat_formatter(object):
@@ -120,7 +122,6 @@ class mat_formatter(object):
 def load_ipython_extension(ip):
     list(ip.display_formatter.formatters.keys())
 
-    tex_formatters = ip.display_formatter.formatters["text/latex"]
     plain_formatters = ip.display_formatter.formatters["text/plain"]
     exp_re = re.compile(r"(.*)e([+\-])0*([0-9]+)")
 
@@ -218,7 +219,9 @@ def load_ipython_extension(ip):
 
         arg_copy = arg.copy()
         arg_copy.human_units()
-        if len(arg_copy.dimlabels) == 1:
+        if arg_copy.data.size < 2:
+            print(arg_copy)
+        elif len(arg_copy.dimlabels) == 1:
             if arg_copy.data.dtype == numpy.complex128:
                 pyspec_plot(arg_copy.real, "g", alpha=0.5)
                 pyspec_plot(arg_copy.imag, "y", alpha=0.5)
@@ -249,8 +252,15 @@ def load_ipython_extension(ip):
             if arg_copy.name() is not None:
                 plt.gca().set_title(arg_copy.name())
 
+    print(
+        "Loaded pySpecData formatters!\n(Inspecting nddata objects should"
+        " yield plots!)"
+    )
     plain_formatters.for_type(numpy.ndarray, _print_plain_override_for_ndarray)
     plain_formatters.for_type(pyspec_nddata, _print_plain_override_for_nddata)
+    plain_formatters.for_type(
+        pyspec_nddata_hdf5, _print_plain_override_for_nddata
+    )
     ip.ex(
         "fancy_legend = lambda: legend(**dict(bbox_to_anchor=(1.05,1), loc=2,"
         " borderaxespad=0.))"
