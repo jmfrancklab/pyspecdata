@@ -30,6 +30,7 @@ def plot_w_markup(x, y, thistext, thiscolor, thistransf):
             ha="left",
             va="center",
         )
+        thistext = " " + thistext # make space between vert bar and text
     else:
         endmarker = "|"
         alignment = dict(
@@ -147,21 +148,31 @@ with psd.figlist_var() as fl:
     # {{{ gap
     ax3_bbox = ax_list[3].get_position()
     ax4_bbox = ax_list[4].get_position()
-    # TODO ☐: below, I use the math that you used.  But this isn't what we want.  We should have something like:
-    # mini_gap = kwarg(gap) / (N-1)
-    # where N is the product of all the sizes EXCEPT the ones we use for the x and y axes of the image plot
-    # then, the smaller gap should be mini_gap, the next largest mini_gap*2, then next largest mini_gap*4, etc.
+    # {{{ this gives the relative size of the divisions between my plots for
+    #     the *specific* example here, where ph1 (outer) and ph2 (inner) are
+    #     the two outermost dimensions
+    divisions = (
+            [1]*(data.shape['ph2']-1)
+            +
+            [2]*(data.shape['ph1']-1)
+            +
+            [1]*(data.shape['ph2']-1)
+            )
+    divisions = np.array(divisions)/sum(divisions)
+    small_division = divisions[0]
+    big_division = divisions[data.shape['ph2']-1]
+    # }}}
     plot_w_markup(
         [(ax3_bbox.x0 + ax3_bbox.x1) / 2] * 2,
-        np.array([ax3_bbox.y1] * 2) + r_[0, gap / data.shape["ph1"]],
-        r"kwarg(gap) / $\text{nPh}_{outer}$",
+        np.array([ax3_bbox.y1] * 2) + r_[0, gap * big_division],
+        r"gap * big_division (see code) ",
         "b",
         fig.transFigure,
     )
     plot_w_markup(
         [(ax4_bbox.x0 + ax4_bbox.x1) / 2] * 2,
-        np.array([ax4_bbox.y1] * 2) + r_[0, gap / data.shape["ph2"]],
-        r"kwarg(gap) / $\text{nPh}_{inner}$",
+        np.array([ax4_bbox.y1] * 2) + r_[0, gap * small_division],
+        r"gap * small_division (see code) ",
         "b",
         fig.transFigure,
     )

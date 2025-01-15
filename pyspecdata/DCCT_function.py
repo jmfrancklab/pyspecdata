@@ -299,11 +299,22 @@ def DCCT(
 
     # {{{ Determine number of axes objects based on shape of phase cycling
     #     dimensions
+    # the procedure is to move from the innermost dimension to the outermost
+    # dimension, zooming out and replicating the division lines with each step.
     for j, thisdim in enumerate(a_shape.dimlabels[::-1][2:]):
+        # I'm going to zoom out, and the division lines I add will be twice the
+        # size of the largest I have added to date, so divide all previous
+        # sizes by 2
         old = [j / 2.0 for j in divisions]
+        # replicate the previous set of division lines, and adding a bolder
+        # division (thickness = 1 vs. the most recent which is now thickness =
+        # 1/2) between each set of replicas
         divisions = (old + [1]) * (a_shape[thisdim] - 1) + old
         logging.debug(strm("for", thisdim, "I get", divisions))
-    divisions = [j * 2 * gap / sum(divisions) for j in divisions]
+    # what I have above represents the relative widths of the divisions
+    # correctly, but I want to make sure that they all add up to "gap", which
+    # is the size that I've actually allocated overall for my divisions
+    divisions = [j * gap / sum(divisions) for j in divisions]
     # }}}
     # {{{ Determine the bboxes for all the Axes objects that we are generating
     # Height of axes object including gap above for space between axes objects
