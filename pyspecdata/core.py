@@ -2069,45 +2069,56 @@ class nddata(object):
         .. todo::
                 several options below -- enumerate them in the documentation
         """
-        if (len(args) == 1) and np.isscalar(args[0]):
-            if args[0] == 0:
-                args = (np.zeros_like(self.data),)
-            else:
-                args = (np.ones_like(self.data) * args[0],)
-        if (len(args) == 1) and (isinstance(args[0], np.ndarray)):
-            self.data_error = np.reshape(args[0], np.shape(self.data))
-        elif (len(args) == 1) and (isinstance(args[0], list)):
-            self.data_error = np.reshape(
-                np.array(args[0]), np.shape(self.data)
+        if len(args) == 1:
+            if np.isscalar(args[0]):
+                logger.debug("converting scalar")
+                if args[0] == 0:
+                    args = (np.zeros_like(self.data),)
+                else:
+                    args = (np.ones_like(self.data) * args[0],)
+            logger.debug(
+                "type is now "
+                + str(type(args[0]))
+                + "is numpy?: "
+                + str(isinstance(args[0], np.ndarray))
             )
-        elif (
-            (len(args) == 2)
-            and (isinstance(args[0], str))
-            and (isinstance(args[1], np.ndarray))
-        ):
-            self.axis_coords_error[self.axn(args[0])] = args[1]
-        elif (
-            (len(args) == 2)
-            and (isinstance(args[0], str))
-            and (np.isscalar(args[1]))
-        ):
-            self.axis_coords_error[self.axn(args[0])] = args[1] * np.ones_like(
-                self.getaxis(args[0])
-            )
-        elif (len(args) == 1) and args[0] is None:
-            self.data_error = None
-        else:
-            raise TypeError(
-                " ".join(
-                    map(
-                        repr,
-                        [
-                            "Not a valid argument to set_error:",
-                            list(map(type, args)),
-                        ],
-                    )
+            if isinstance(args[0], np.ndarray):
+                self.data_error = np.reshape(args[0], np.shape(self.data))
+            elif isinstance(args[0], list):
+                self.data_error = np.reshape(
+                    np.array(args[0]), np.shape(self.data)
                 )
-            )
+            elif args[0] is None:
+                self.data_error = None
+            elif np.isscalar(args[0]):
+                self.data_error = args[0]
+            else:
+                raise TypeError(
+                    "Passed one argument, but I don't understand its type: "
+                    + str(type(args[0]))
+                )
+        elif len(args) == 2:
+            if isinstance(args[0], str):
+                if isinstance(args[1], np.ndarray):
+                    self.axis_coords_error[self.axn(args[0])] = args[1]
+                elif np.isscalar(args[1]):
+                    self.axis_coords_error[self.axn(args[0])] = args[
+                        1
+                    ] * np.ones_like(self.getaxis(args[0]))
+                else:
+                    raise TypeError(
+                        "you passed two arguments, starting with a string."
+                        " But, this was not followed by numpy array or scalar,"
+                        " but rather "
+                        + str(type(args[1]))
+                    )
+            else:
+                raise RuntimeError(
+                    "If two arguments, first must be the dimension name! (a"
+                    " string)"
+                )
+        else:
+            raise RuntimeError("Only one or two arguments!!")
         return self
 
     # }}}
