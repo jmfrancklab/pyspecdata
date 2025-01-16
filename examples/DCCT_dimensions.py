@@ -30,7 +30,7 @@ def plot_w_markup(x, y, thistext, thiscolor, thistransf):
             ha="left",
             va="center",
         )
-        thistext = " " + thistext # make space between vert bar and text
+        thistext = " " + thistext  # make space between vert bar and text
     else:
         endmarker = "|"
         alignment = dict(
@@ -158,15 +158,13 @@ with psd.figlist_var() as fl:
     #     the *specific* example here, where ph1 (outer) and ph2 (inner) are
     #     the two outermost dimensions
     divisions = (
-            [1]*(data.shape['ph2']-1)
-            +
-            [2]*(data.shape['ph1']-1)
-            +
-            [1]*(data.shape['ph2']-1)
-            )
-    divisions = np.array(divisions)/sum(divisions)
+        [1] * (data.shape["ph2"] - 1)
+        + [2] * (data.shape["ph1"] - 1)
+        + [1] * (data.shape["ph2"] - 1)
+    )
+    divisions = np.array(divisions) / sum(divisions)
     small_division = divisions[0]
-    big_division = divisions[data.shape['ph2']-1]
+    big_division = divisions[data.shape["ph2"] - 1]
     # }}}
     plot_w_markup(
         [(ax3_bbox.x0 + ax3_bbox.x1) / 2] * 2,

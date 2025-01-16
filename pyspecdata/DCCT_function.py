@@ -96,13 +96,13 @@ def DCCT(
         Name of direct axis
     title : str
         Title for DCCT plot
-    
+
     Returns
     =======
     ax_list: list
         list of axes objects generated in DCCT plot
     transform_dict: dict
-        dictionary containing the unique transforms generated in 
+        dictionary containing the unique transforms generated in
         this function for scaled translations
     """
     x = []  # List to put direct dim into
@@ -230,9 +230,9 @@ def DCCT(
         if not check_for_label_num or not label_placed[this_label_num]:
             # {{{ determine the x and y position of the label in display coords
             if check_for_label_num:
-                # the x coordinate will be the product of the horizontal label 
-                # spacer and the index of the dimension. In this way the x position
-                # will increment with the number of the dimension
+                # the x coordinate will be the product of the horizontal label
+                # spacer and the index of the dimension. In this way the x
+                # position will increment with the number of the dimension
                 label_spacing = (this_label_num + 1) * horiz_label_spacer
                 # Calculate coord for base of arrow
                 x_textdisp = -label_spacing
@@ -372,7 +372,8 @@ def DCCT(
     transDispTranslated = IdentityTransform() + ScaledTranslation(
         (allow_for_labels + bbox[0]), bbox[1], fig.transFigure
     )
-    # transXdispYfig transformation takes x in display coords and y in fig coords
+    # transXdispYfig transformation takes x in display coords and y in fig
+    # coords
     transXdispYfig = blended_transform_factory(
         transDispTranslated, fig.transFigure
     )
@@ -578,4 +579,10 @@ def DCCT(
     )
     if title is not None:
         plt.title(title)
-    return (ax_list, {"DisplayTransform":transDispTranslated, "XdispYfigTransform":transXdispYfig})
+    return (
+        ax_list,
+        {
+            "DisplayTransform": transDispTranslated,
+            "XdispYfigTransform": transXdispYfig,
+        },
+    )
