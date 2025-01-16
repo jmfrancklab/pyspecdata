@@ -3775,14 +3775,19 @@ class nddata(object):
     def item(self):
         r"like numpy item -- returns a number when zero-dimensional"
         try:
-            return self.data.item()
+            retval = self.data.item()
         except Exception:
             raise ValueError(
                 "your data has shape: "
                 + str(ndshape(self))
                 + " so you can't call item"
             )
-
+        if self.get_units() is not None:
+            # if the data has units, return a pint quantity rather than
+            # just a floating-point number
+            return Q_(retval,self.get_units())
+        else:
+            return retval
     # }}}
     # {{{ ft-related functions
     def unitify_axis(self, axis_name, is_axis=True):
