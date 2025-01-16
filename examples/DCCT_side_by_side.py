@@ -54,7 +54,7 @@ with psd.figlist_var() as fl:
     # reorder into a format more suitable for plotting
     data.reorder(["ph1", "ph2", "vd", "t2"])
     fig = fl.next("Data")  # Make figure object to place the DCCT
-    gs = GridSpec(1, 2, figure=fig, left=0.02, right=0.95)
+    gs = GridSpec(1, 2, figure=fig, left=0.05, right=0.95)
     psd.DCCT(
         data,
         fig,

@@ -32,7 +32,7 @@ def DCCT(
     custom_scaling=False,
     bbox=[0.05, 0.1, 0.90, 0.8],
     gap=0.1,
-    horiz_label_spacer=32,
+    horiz_label_spacer=35,
     shareaxis=False,
     diagnostic=False,
     cmap=None,
@@ -219,11 +219,12 @@ def DCCT(
         """Place arrows and dimname labels"""
         # Take y of bottom axes object as this is the y we want the tip
         # of the arrow to go to
-        # TODO ☐: x_textdisp controls the x position of the arrows.  I cannot follow where it comes from below.  In particular, the arrows for all but the innermost dimensions
         if not check_for_label_num or not label_placed[this_label_num]:
             # {{{ determine the x and y position of the label in display coords
             if check_for_label_num:
-                # the labels of the outer dimensions
+                # the x coordinate will be the product of the horizontal label 
+                # spacer and the index of the dimension. In this way the x position
+                # will increment with the number of the dimension
                 label_spacing = (this_label_num + 1) * horiz_label_spacer
                 # Calculate coord for base of arrow
                 x_textdisp = -label_spacing
@@ -355,6 +356,10 @@ def DCCT(
                 axes_height,
             ])
         )  # lbwh
+    print(ax_list)    
+    for ax in ax_list[1:]:
+        ax.sharex(ax_list[1])
+        ax.sharey(ax_list[1])
     # TODO ☐: do sharex sharey the rirght way
     # {{{ make blended transform for plotting decorations sets origin for the
     #     blended transform to the bottom left corner of the bottom axes object
@@ -375,12 +380,6 @@ def DCCT(
         my_data.unitify_axis(my_data.dimlabels[-1]), labelpad=20
     )
     # }}}
-    # {{{ intermediate subplots
-    for j in range(1, len(axes_bottom) - 1):
-        ax_list[j].xaxis.set_ticks([])
-        ax_list[j].get_xaxis().set_visible(False)
-        ax_list[j].set_xlabel(None)
-    # }}}
     # {{{ top subplot
     ax_list[-1].xaxis.set_major_locator(majorLocator())
     # for the minor ticks, use no labels; default NullFormatter
@@ -390,20 +389,20 @@ def DCCT(
         ax_list[-1].set_xticklabels([])
     # }}}
     # {{{ all subplots
-    for j in range(0, len(axes_bottom)):
-        ax_list[j].set_ylabel(a_shape.dimlabels[-2])
-        inner_dim = a_shape.dimlabels[-2]
-        inner_dim = str(inner_dim)
-        if inner_dim == "ph2":
-            logging.debug("Inner dimension is phase cycling dimension")
-            ax_list[j].yaxis.set_major_formatter("ph2")
-            ax_list[j].yaxis.set_major_locator(plt.MaxNLocator(integer=True))
-        else:
-            ax_list[j].yaxis.set_minor_locator(minorLocator())
-            ax_list[j].yaxis.set_ticks_position("both")
-        for tick in ax_list[j].get_yticklabels():
-            tick.set_rotation(0)
-            tick.set_va("center")
+    #for j in range(0, len(axes_bottom)):
+    #    ax_list[j].set_ylabel(a_shape.dimlabels[-2])
+    #    inner_dim = a_shape.dimlabels[-2]
+    #    inner_dim = str(inner_dim)
+    #    if inner_dim == "ph2":
+    #        logging.debug("Inner dimension is phase cycling dimension")
+    #        ax_list[j].yaxis.set_major_formatter("ph2")
+    #        ax_list[j].yaxis.set_major_locator(plt.MaxNLocator(integer=True))
+    #    else:
+    #        ax_list[j].yaxis.set_minor_locator(minorLocator())
+    #        ax_list[j].yaxis.set_ticks_position("both")
+    #    for tick in ax_list[j].get_yticklabels():
+    #        tick.set_rotation(0)
+    #        tick.set_va("center")
     # }}}
     # }}}
     # {{{ smoosh dataset if needed
