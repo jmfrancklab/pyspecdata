@@ -1,5 +1,6 @@
-"""Using the DCCT function
-=======================
+"""
+Arranging Multiple DCCT Plots
+=============================
 
 Visualize a simulated inversion recovery dataset
 utilizing the benefits of the DCCT plotting style.
@@ -54,20 +55,16 @@ with psd.figlist_var() as fl:
     data.reorder(["ph1", "ph2", "vd", "t2"])
     fig = fl.next("Data")  # Make figure object to place the DCCT
     gs = GridSpec(1, 2, figure=fig, left=0.02, right=0.95)
-    gs1_bbox = gs[0, 0].get_position(fig)
-    gs2_bbox = gs[0, 1].get_position(fig)
-    bbox1 = [
-        gs1_bbox.x0,
-        gs1_bbox.y0,
-        gs1_bbox.x1 - gs1_bbox.x0,
-        gs1_bbox.y1 - gs1_bbox.y0,
-    ]
-    bbox2 = [
-        gs2_bbox.x0,
-        gs2_bbox.y0,
-        gs2_bbox.x1 - gs2_bbox.x0,
-        gs2_bbox.y1 - gs2_bbox.y0,
-    ]
-    psd.DCCT(data, fig, plot_title="Time Domain", bbox=bbox1)
+    psd.DCCT(
+        data,
+        fig,
+        plot_title="Time Domain",
+        bbox=gs[0, 0],
+    )
     data.ft("t2")
-    psd.DCCT(data, fig, plot_title="Frequency Domain", bbox=bbox2)
+    psd.DCCT(
+        data,
+        fig,
+        plot_title="Frequency Domain",
+        bbox=gs[0, 1],
+    )

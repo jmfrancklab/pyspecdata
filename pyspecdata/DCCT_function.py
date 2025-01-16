@@ -10,6 +10,7 @@ from .general_functions import strm, process_kwargs
 import matplotlib.pyplot as plt
 import matplotlib.lines as lines
 from matplotlib.patches import FancyArrowPatch, Circle
+from matplotlib.gridspec import SubplotSpec
 from matplotlib.transforms import (
     ScaledTranslation,
     IdentityTransform,
@@ -27,11 +28,11 @@ minorLocator = lambda: mticker.AutoMinorLocator(n=5)
 
 def DCCT(
     this_nddata,
-    fig,
+    fig=None,
     custom_scaling=False,
-    bbox=[0.05, 0.1, 0.92, 0.75],
+    bbox=[0.05, 0.1, 0.90, 0.8],
     gap=0.1,
-    horiz_label_spacer=20,
+    horiz_label_spacer=29,
     shareaxis=False,
     diagnostic=False,
     cmap=None,
@@ -68,6 +69,9 @@ def DCCT(
         :bbox[3]: int
             Distance from bottom of the bottom axes object to top of top
             axes object
+    bbox : matplotlib.girdspec.SubplotSpec
+        If you specify a gridspec element, it will use this to generate a
+        bbox, as above.
     gap : float
         Figure coordinates
         Spacing between coherence transfer pathways
@@ -95,8 +99,18 @@ def DCCT(
     """
     x = []  # List to put direct dim into
     y = []  # List to put indirect dims into
+    if fig is None:
+        fig = plt.figure()
     my_data = this_nddata.C
     ordered_labels = {}
+    if isinstance(bbox, SubplotSpec):
+        temp = bbox.get_position(fig)
+        bbox = [
+            temp.x0,
+            temp.y0,
+            temp.width,
+            temp.height,
+        ]
 
     # {{{ Functions
     def gen_labels(data):

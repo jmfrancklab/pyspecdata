@@ -62,7 +62,7 @@ rcParams["image.aspect"] = "auto"  # needed for sphinx gallery
 # sphinx_gallery_thumbnail_number = 2
 psd.init_logging(level="debug")
 # {{{ kwargs for DCCT plot
-bbox = [0.05, 0.1, 0.85, 0.75]
+bbox = [0.05, 0.2, 0.85, 0.75]
 horiz_label_spacer = 50
 gap = 0.1
 # }}}
