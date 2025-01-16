@@ -341,9 +341,9 @@ def make_bar_graph_indices(
                 recursion_depth=recursion_depth + 1,
             )
             index_values.append(these_index_values)
-            label_values.append(
-                [str(unique_values[k]) + "," + j for j in these_labels]
-            )
+            label_values.append([
+                str(unique_values[k]) + "," + j for j in these_labels
+            ])
         # {{{ scale the result of each call down to the equal size (regardless
         #     of number of elements), shift by the position in this np.array,
         #     and return
@@ -3026,7 +3026,9 @@ class nddata(object):
         if backwards is True:
             self.data = self[thisaxis, ::-1].data
         t = None
-        if (self.get_units() is not None) and (self.get_units(thisaxis) is not None):
+        if (self.get_units() is not None) and (
+            self.get_units(thisaxis) is not None
+        ):
             ret_units = Q_(self.get_units()) * Q_(self.get_units(thisaxis))
             self.set_units(f"{ret_units.units:~P}")
         if len(self.axis_coords) > 0:
@@ -3791,6 +3793,7 @@ class nddata(object):
             return Q_(retval,self.get_units())
         else:
             return retval
+
     # }}}
     # {{{ ft-related functions
     def unitify_axis(self, axis_name, is_axis=True):
