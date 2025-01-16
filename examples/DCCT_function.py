@@ -144,6 +144,13 @@ with psd.figlist_var() as fl:
         "r",
         transXdispYfig,
     )
+    plot_w_markup(
+        [0, 0],
+        [-30, +30],
+        "60 pts bracketing origin",
+        "r",
+        transDispTranslated,
+    )
     # }}}
     # {{{ gap
     ax3_bbox = ax_list[3].get_position()
