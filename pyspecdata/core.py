@@ -3026,6 +3026,9 @@ class nddata(object):
         if backwards is True:
             self.data = self[thisaxis, ::-1].data
         t = None
+        if (self.get_units() is not None) and (self.get_units(thisaxis) is not None):
+            ret_units = Q_(self.get_units()) * Q_(self.get_units(thisaxis))
+            self.set_units(f"{Q_(ret_units).units:~P}")
         if len(self.axis_coords) > 0:
             t = self.getaxis(thisaxis)
             dt_array = np.diff(t)
