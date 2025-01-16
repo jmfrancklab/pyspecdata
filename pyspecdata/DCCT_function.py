@@ -40,7 +40,7 @@ def DCCT(
     scaling_factor=1,
     max_coh_jump={"ph1": 1, "ph2": 2},
     direct="t2",
-    plot_title="DCCT",
+    title=None,
     arrow_dx=30,
     arrow_dy=30,
     **kwargs,
@@ -94,7 +94,7 @@ def DCCT(
         Maximum allowed transitions for each phase cycle
     direct : str
         Name of direct axis
-    plot_title : str
+    title : str
         Title for DCCT plot
     """
     x = []  # List to put direct dim into
@@ -571,5 +571,6 @@ def DCCT(
         this_label_num=depth - 1,
         check_for_label_num=False,
     )
-    plt.title(plot_title)
+    if title is not None:
+        plt.title(title)
     return (ax_list, allow_for_labels, transDispTranslated, transXdispYfig)

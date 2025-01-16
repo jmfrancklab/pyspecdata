@@ -35,6 +35,7 @@ if not inside_sphinx():
     from .core import image as pyspec_image
     from .core import plot as pyspec_plot
     from .core import nddata as pyspec_nddata
+    from .DCCT import DCCT as pyspec_DCCT
 
 import re
 from IPython.display import Math
@@ -180,9 +181,12 @@ def load_ipython_extension(ip):
                     first=False)
             pyspec_plot(arg_copy)
         else:
-            pyspec_image(arg_copy)
-            if arg_copy.name() is not None:
-                plt.gca().set_title(arg_copy.name())
+            if len(arg_copy.dimlabels) > 2:
+                pyspec_DCCT(arg_copy, title=arg_copy.name())
+            else:
+                pyspec_image(arg_copy)
+                if arg_copy.name() is not None:
+                    plt.gca().set_title(arg_copy.name())
     plain_formatters.for_type(numpy.ndarray,_print_plain_override_for_ndarray)
     plain_formatters.for_type(pyspec_nddata,_print_plain_override_for_nddata)
     ip.ex("fancy_legend = lambda: legend(**dict(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.))")

@@ -103,7 +103,6 @@ with psd.figlist_var() as fl:
         horiz_label_spacer=horiz_label_spacer,
         gap=gap,
         bbox=bbox,
-        plot_title="",
     )
 
     # {{{ add lines indicating kwargs

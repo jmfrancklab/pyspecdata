@@ -58,13 +58,13 @@ with psd.figlist_var() as fl:
     psd.DCCT(
         data,
         fig,
-        plot_title="Time Domain",
+        title="Time Domain",
         bbox=gs[0, 0],
     )
     data.ft("t2")
     psd.DCCT(
         data,
         fig,
-        plot_title="Frequency Domain",
+        title="Frequency Domain",
         bbox=gs[0, 1],
     )
