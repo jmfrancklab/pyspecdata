@@ -237,7 +237,7 @@ def DCCT(
                 # }}}
             y_textdisp = -2  # define base of arrow y coord
             # }}}
-            debug = True
+            debug = False
             if debug:
                 thiscirc = Circle(
                     (x_textdisp, y_textdisp),
