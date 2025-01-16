@@ -125,7 +125,7 @@ with psd.figlist_var() as fl:
     )
     plot_w_markup(
         [0.93, 0.93],
-        [bbox[1], bbox[1] + bbox[3] + gap],
+        [bbox[1], bbox[1] + bbox[3]],
         "bbox[3]",
         "b",
         fig.transFigure,

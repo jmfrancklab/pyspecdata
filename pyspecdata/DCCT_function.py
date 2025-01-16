@@ -9,7 +9,7 @@ from .core import ndshape, nddata
 from .general_functions import strm, process_kwargs
 import matplotlib.pyplot as plt
 import matplotlib.lines as lines
-from matplotlib.patches import FancyArrow
+from matplotlib.patches import FancyArrowPatch, Circle
 from matplotlib.transforms import (
     ScaledTranslation,
     IdentityTransform,
@@ -31,16 +31,17 @@ def DCCT(
     custom_scaling=False,
     bbox=[0.05, 0.1, 0.92, 0.75],
     gap=0.1,
-    horiz_label_spacer=50,
+    horiz_label_spacer=20,
     shareaxis=False,
     diagnostic=False,
     cmap=None,
     pass_frq_slice=False,
-    just_2D=False,
     scaling_factor=1,
     max_coh_jump={"ph1": 1, "ph2": 2},
     direct="t2",
     plot_title="DCCT",
+    arrow_dx=30,
+    arrow_dy=30,
     **kwargs,
 ):
     """DCCT plot.
@@ -82,8 +83,6 @@ def DCCT(
         Color mapping if specified
     pass_frq_slice : boolean
         If true will show the frequency sliced out with hatching
-    just_2D : boolean
-        If true will only return axis coordinates/shape NOT ax_list
     scaling_factor : float
         If using custom scaling this allows user to set the scaling
         factor
@@ -162,10 +161,7 @@ def DCCT(
             + 1  # plus one so the first horizontal isn't placed at 0
             #      (overlapping with the spine of the indirect axis)
         ) * horiz_label_spacer  # will space the vertical lines along x approp.
-        x1_disp = (
-            allow_for_labels + bbox[0] - label_spacing
-        )  # x coord is the left side of the axis minus the spacing for
-        #    text/ticks (label_spacing)
+        x1_disp = -label_spacing
         # {{{ Take y coordinate of top and bottom of axes objects to get the 2
         #     points for drawing the lines. To be lazy I pull this from the
         #     axes objects themselves.
@@ -209,13 +205,14 @@ def DCCT(
         """Place arrows and dimname labels"""
         # Take y of bottom axes object as this is the y we want the tip
         # of the arrow to go to
+        # TODO ☐: x_textdisp controls the x position of the arrows.  I cannot follow where it comes from below.  In particular, the arrows for all but the innermost dimensions
         if not check_for_label_num or not label_placed[this_label_num]:
             # {{{ determine the x and y position of the label in display coords
             if check_for_label_num:
                 # the labels of the outer dimensions
                 label_spacing = (this_label_num + 1) * horiz_label_spacer
                 # Calculate coord for base of arrow
-                x_textdisp = allow_for_labels + bbox[0] - label_spacing
+                x_textdisp = -label_spacing
             else:
                 # same as above, but determine text position based on tick
                 # labels
@@ -232,28 +229,32 @@ def DCCT(
                         ],
                     )
                 )
-                x_textdisp = (
-                    allow_for_labels + bbox[0]
-                )  # bottom left corner of bottom axes in fig
-            # tick length is a nice consistent distance to push the arrows out
-            # slightly to avoid confusion
-            tick_length = [
-                j.get_window_extent().bounds for j in ax1.get_yticklabels()
-            ][-1][-1]
-            x_textdisp -= tick_length
-            x_textdisp -= arrow_width_px
-            y_textdisp = -25.0 # define base of arrow y coord
+                # {{{ only for the innermost,
+                tick_length = [
+                    j.get_window_extent().bounds for j in ax1.get_yticklabels()
+                ][-1][-1]
+                x_textdisp = -tick_length
+                # }}}
+            y_textdisp = -2  # define base of arrow y coord
             # }}}
-            AnArrow = FancyArrow(
-                x_textdisp,
-                y_textdisp,
-                2,
-                5,
-                width=arrow_width_px,
+            debug = True
+            if debug:
+                thiscirc = Circle(
+                    (x_textdisp, y_textdisp),
+                    3,
+                    clip_on=False,
+                    transform=transDispTranslated,
+                    alpha=0.1,
+                    color="r",
+                )
+            AnArrow = FancyArrowPatch(
+                (x_textdisp - arrow_dx, y_textdisp - arrow_dy),
+                (x_textdisp, y_textdisp),
                 clip_on=False,
                 transform=transDispTranslated,
                 alpha=0.1,
                 color="k",
+                mutation_scale=20,
             )
             # could do fancier w/ the following, but need to mess w/ width
             # parameters
@@ -261,17 +262,15 @@ def DCCT(
             # a = FancyArrowPatch(arrow_base, arrow_base+r_[dx, dy],
             #        arrowstyle='|-|',
             #        alpha=0.1,  color='k')
+            fig.add_artist(thiscirc)
             fig.add_artist(AnArrow)
-            x_textfig = x_textdisp + arrow_width_px
-            y_textfig = y_textdisp - 5.0 # place dim label slightly below
-            #                              arrow base
             plt.text(
-                x_textfig,
-                y_textfig,
+                x_textdisp - arrow_dx,
+                y_textdisp - arrow_dy,
                 label,
                 va="top",
                 ha="right",
-                rotation=45,
+                rotation=np.arctan2(arrow_dy, arrow_dx) * 180 / np.pi,
                 clip_on=False,
                 transform=transDispTranslated,
                 color="k",
@@ -318,7 +317,7 @@ def DCCT(
     # }}}
     # {{{ Determine the bboxes for all the Axes objects that we are generating
     # Height of axes object including gap above for space between axes objects
-    axes_height = (bbox[3] - bbox[1]) / np.prod(a_shape.shape[:-2])
+    axes_height = (bbox[3] - gap) / np.prod(a_shape.shape[:-2])
     axes_bottom = np.cumsum([axes_height + j for j in divisions])  # ndarray
     axes_bottom = r_[0, axes_bottom]
     # }}}
@@ -341,8 +340,7 @@ def DCCT(
                 axes_height,
             ])
         )  # lbwh
-        if j != 0 and shareaxis:
-            plt.axes(sharex=ax_list[0], sharey=ax_list[0])
+    # TODO ☐: do sharex sharey the rirght way
     # {{{ make blended transform for plotting decorations sets origin for the
     #     blended transform to the bottom left corner of the bottom axes object
     transDispTranslated = IdentityTransform() + ScaledTranslation(
@@ -465,7 +463,7 @@ def DCCT(
                 "I don't understand the value you've set for the origin"
                 " keyword argument"
             )
-        kwargs["origin"] = origin # required so that imshow now displays the
+        kwargs["origin"] = origin  # required so that imshow now displays the
         #                           image correctly
         if real_data:
             kwargs["cmap"] = cmap
@@ -559,13 +557,4 @@ def DCCT(
         check_for_label_num=False,
     )
     plt.title(plot_title)
-    # TODO ☐: I don't see what the first is useful for
-    if just_2D:
-        return (
-            allow_for_labels + bbox[0],
-            axes_bottom[0],
-            axes_width,
-            axes_bottom[-1] - (bbox[3] + 2 * gap + 1),
-        )
-    else:
-        return (ax_list, allow_for_labels, transDispTranslated, transXdispYfig)
+    return (ax_list, allow_for_labels, transDispTranslated, transXdispYfig)
