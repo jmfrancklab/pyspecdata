@@ -96,6 +96,14 @@ def DCCT(
         Name of direct axis
     title : str
         Title for DCCT plot
+    
+    Returns
+    =======
+    ax_list: list
+        list of axes objects generated in DCCT plot
+    transform_dict: dict
+        dictionary containing the unique transforms generated in 
+        this function for scaled translations
     """
     x = []  # List to put direct dim into
     y = []  # List to put indirect dims into
@@ -356,11 +364,9 @@ def DCCT(
                 axes_height,
             ])
         )  # lbwh
-    print(ax_list)    
     for ax in ax_list[1:]:
         ax.sharex(ax_list[1])
         ax.sharey(ax_list[1])
-    # TODO ☐: do sharex sharey the rirght way
     # {{{ make blended transform for plotting decorations sets origin for the
     #     blended transform to the bottom left corner of the bottom axes object
     transDispTranslated = IdentityTransform() + ScaledTranslation(
@@ -389,20 +395,20 @@ def DCCT(
         ax_list[-1].set_xticklabels([])
     # }}}
     # {{{ all subplots
-    #for j in range(0, len(axes_bottom)):
-    #    ax_list[j].set_ylabel(a_shape.dimlabels[-2])
-    #    inner_dim = a_shape.dimlabels[-2]
-    #    inner_dim = str(inner_dim)
-    #    if inner_dim == "ph2":
-    #        logging.debug("Inner dimension is phase cycling dimension")
-    #        ax_list[j].yaxis.set_major_formatter("ph2")
-    #        ax_list[j].yaxis.set_major_locator(plt.MaxNLocator(integer=True))
-    #    else:
-    #        ax_list[j].yaxis.set_minor_locator(minorLocator())
-    #        ax_list[j].yaxis.set_ticks_position("both")
-    #    for tick in ax_list[j].get_yticklabels():
-    #        tick.set_rotation(0)
-    #        tick.set_va("center")
+    for j in range(0, len(axes_bottom)):
+        ax_list[j].set_ylabel(a_shape.dimlabels[-2])
+        inner_dim = a_shape.dimlabels[-2]
+        inner_dim = str(inner_dim)
+        if inner_dim == "ph2":
+            logging.debug("Inner dimension is phase cycling dimension")
+            ax_list[j].yaxis.set_major_formatter("ph2")
+            ax_list[j].yaxis.set_major_locator(plt.MaxNLocator(integer=True))
+        else:
+            ax_list[j].yaxis.set_minor_locator(minorLocator())
+            ax_list[j].yaxis.set_ticks_position("both")
+        for tick in ax_list[j].get_yticklabels():
+            tick.set_rotation(0)
+            tick.set_va("center")
     # }}}
     # }}}
     # {{{ smoosh dataset if needed
@@ -572,4 +578,4 @@ def DCCT(
     )
     if title is not None:
         plt.title(title)
-    return (ax_list, allow_for_labels, transDispTranslated, transXdispYfig)
+    return (ax_list, {"DisplayTransform":transDispTranslated, "XdispYfigTransform":transXdispYfig})

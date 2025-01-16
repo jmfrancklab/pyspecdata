@@ -97,7 +97,7 @@ with psd.figlist_var() as fl:
     # reorder into a format more suitable for plotting
     data.reorder(["ph1", "ph2", "vd", "t2"])
     fig = fl.next("Data")  # Make figure object to place the DCCT
-    ax_list, allow_for_labels, transDispTranslated, transXdispYfig = psd.DCCT(
+    ax_list, trans_dict = psd.DCCT(
         data,
         fig,
         horiz_label_spacer=horiz_label_spacer,
@@ -134,21 +134,21 @@ with psd.figlist_var() as fl:
         [0.5, 0.5],
         "kwarg(horiz_label_space)",
         "r",
-        transXdispYfig,
+        trans_dict["XdispYfigTransform"],
     )
     plot_w_markup(
         [0.0, -horiz_label_spacer],
         [0.55, 0.55],
         "kwarg(horiz_label_space)",
         "r",
-        transXdispYfig,
+        trans_dict["XdispYfigTransform"],
     )
     plot_w_markup(
         [0, 0],
         [-30, +30],
         "60 pts bracketing origin",
         "r",
-        transDispTranslated,
+        trans_dict["DisplayTransform"],
     )
     # }}}
     # {{{ gap
