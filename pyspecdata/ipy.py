@@ -35,7 +35,7 @@ if not inside_sphinx():
     from .core import image as pyspec_image
     from .core import plot as pyspec_plot
     from .core import nddata as pyspec_nddata
-    from .DCCT import DCCT as pyspec_DCCT
+    from .DCCT_function import DCCT as pyspec_DCCT
 
 import re
 from IPython.display import Math
