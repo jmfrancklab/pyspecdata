@@ -54,14 +54,15 @@ from . import axis_manipulation
 from . import plot_funcs as this_plotting
 from .general_functions import lsafe as orig_lsafe
 from .general_functions import (
-    emptytest,
-    process_kwargs,
-    autostringconvert,
-    strm,
-    lsafen,
-    dp,
-    pinvr,
     Q_,
+    autostringconvert,
+    dp,
+    emptytest,
+    lsafen,
+    pinvr,
+    process_kwargs,
+    scalar_or_zero_order,
+    strm,
 )
 from .hdf_utils import (
     h5loaddict,
@@ -534,6 +535,7 @@ def maprep(*mylist):
             mylist[j] = mylist[j].__repr__()
     return " ".join(mylist)
 
+
 # {{{ plot wrapper
 global myplotfunc
 myplotfunc = plt.plot
@@ -592,10 +594,14 @@ def plot(*args, **kwargs):
         myy = args[1]
     if len(args) == 3:
         myformat = args[2]
-    if np.isscalar(myx):
+    # {{{ In order for the plot functions to work the way that we want, we need
+    #     to feed the data as at least 1-dimensional rather than scalar or zero
+    #     dimensional
+    if scalar_or_zero_order(myx):
         myx = np.array([myx])
-    if np.isscalar(myy):
+    if scalar_or_zero_order(myy):
         myy = np.array([myy])
+    # }}}
     # }}}
     x_inverted = False
     # {{{ parse nddata
@@ -1323,6 +1329,21 @@ class nddata(object):
     def __repr__(self):
         return str(self)
 
+    def __format__(self, format_spec):
+        if format_spec == "~P":
+            return str(self.C.human_units(scale_data=True))
+        elif format_spec == "":
+            return str(self.C.human_units(scale_data=True))
+        elif format_spec == "~L":
+            retval = str(self.C.human_units(scale_data=True))
+            retval.replace("±", "\\pm")
+            return re.sub("([^0-9. ]+)", "\;\\\\text{\\1}", retval)
+        else:
+            raise ValueError(
+                "Right now, pyspecdata only responds to the ~P and ~L format"
+                " specs (analogous to pint)"
+            )
+
     def __str__(self):
         def show_array(x, indent=""):
             x = repr(x)
@@ -1333,14 +1354,29 @@ class nddata(object):
             else:
                 return x
 
+        if self.data.size < 2:
+            val = self.data.item()
+            err = self.get_error()
+            if err is not None:
+                err = err.item()
+                oom_err = int(np.floor(np.log10(err)))  # int takes floor
+                oom_val = int(np.floor(np.log10(val)))  # int takes floor
+                retval = (
+                    "%#0." + str(oom_val - oom_err + 1) + "g ± %#0.2g"
+                ) % (val, err)
+            else:
+                retval = "%#0.5g" % val
+            myunits = self.get_units()
+            if myunits is not None:
+                # say we have m^2 -- we want this rendered as m², and pint
+                # should do this for us
+                retval += f" {Q_(myunits).units:~P}"
+            return retval
         retval = show_array(self.data)
-        retval += "\n\t\t+/-"
-        retval += show_array(self.get_error())
-        if (
-            len(self.dimlabels) > 1
-            or len(self.dimlabels) == 0
-            or self.dimlabels[0] != "INDEX"
-        ):
+        if self.get_error() is not None:
+            retval += "\n\t\t±"
+            retval += show_array(self.get_error())
+        if len(self.dimlabels) > 1 or self.dimlabels[0] != "INDEX":
             retval += "\n\tdimlabels="
             retval += repr(self.dimlabels)
             retval += "\n\taxes="
@@ -1955,12 +1991,21 @@ class nddata(object):
             # {{{ same for the data
             prev_label = self.get_units()
             if prev_label is not None and len(prev_label) > 0:
+                if scalar_or_zero_order(self.data):
+                    self.data = r_[
+                        self.data
+                    ]  # need this so oom functions can overwrite by pointer
                 data_to_test = self.data.ravel()
                 average_oom = det_oom(data_to_test)
-                x = self.getaxis(thisaxis)
                 result_label = apply_oom(
                     average_oom, self.data, prev_label=prev_label
                 )
+                if self.get_error() is not None:
+                    if scalar_or_zero_order(self.data_error):
+                        self.data_error = r_[self.data_error]
+                    result_label = apply_oom(
+                        average_oom, self.data_error, prev_label=prev_label
+                    )
                 self.set_units(result_label)
             else:
                 logger.debug("data does not have a unit label")
@@ -1998,6 +2043,9 @@ class nddata(object):
 
         or `d.div_units("s")` to divide the
         data units by seconds.
+
+        In other words, if you pass "a" and the units of your data are
+        in "b", then this returns x, such that (x a)/(b) = 1.
 
         e.g. to convert a variable from seconds
         to the units of `axisname`, do
@@ -2052,45 +2100,56 @@ class nddata(object):
         .. todo::
                 several options below -- enumerate them in the documentation
         """
-        if (len(args) == 1) and np.isscalar(args[0]):
-            if args[0] == 0:
-                args = (np.zeros_like(self.data),)
-            else:
-                args = (np.ones_like(self.data) * args[0],)
-        if (len(args) == 1) and (isinstance(args[0], np.ndarray)):
-            self.data_error = np.reshape(args[0], np.shape(self.data))
-        elif (len(args) == 1) and (isinstance(args[0], list)):
-            self.data_error = np.reshape(
-                np.array(args[0]), np.shape(self.data)
+        if len(args) == 1:
+            if np.isscalar(args[0]):
+                logger.debug("converting scalar")
+                if args[0] == 0:
+                    args = (np.zeros_like(self.data),)
+                else:
+                    args = (np.ones_like(self.data) * args[0],)
+            logger.debug(
+                "type is now "
+                + str(type(args[0]))
+                + "is numpy?: "
+                + str(isinstance(args[0], np.ndarray))
             )
-        elif (
-            (len(args) == 2)
-            and (isinstance(args[0], str))
-            and (isinstance(args[1], np.ndarray))
-        ):
-            self.axis_coords_error[self.axn(args[0])] = args[1]
-        elif (
-            (len(args) == 2)
-            and (isinstance(args[0], str))
-            and (np.isscalar(args[1]))
-        ):
-            self.axis_coords_error[self.axn(args[0])] = args[1] * np.ones_like(
-                self.getaxis(args[0])
-            )
-        elif (len(args) == 1) and args[0] is None:
-            self.data_error = None
-        else:
-            raise TypeError(
-                " ".join(
-                    map(
-                        repr,
-                        [
-                            "Not a valid argument to set_error:",
-                            list(map(type, args)),
-                        ],
-                    )
+            if isinstance(args[0], np.ndarray):
+                self.data_error = np.reshape(args[0], np.shape(self.data))
+            elif isinstance(args[0], list):
+                self.data_error = np.reshape(
+                    np.array(args[0]), np.shape(self.data)
                 )
-            )
+            elif args[0] is None:
+                self.data_error = None
+            elif np.isscalar(args[0]):
+                self.data_error = args[0]
+            else:
+                raise TypeError(
+                    "Passed one argument, but I don't understand its type: "
+                    + str(type(args[0]))
+                )
+        elif len(args) == 2:
+            if isinstance(args[0], str):
+                if isinstance(args[1], np.ndarray):
+                    self.axis_coords_error[self.axn(args[0])] = args[1]
+                elif scalar_or_zero_order(args[1]):
+                    self.axis_coords_error[self.axn(args[0])] = args[
+                        1
+                    ] * np.ones_like(self.getaxis(args[0]))
+                else:
+                    raise TypeError(
+                        "you passed two arguments, starting with a string."
+                        " But, this was not followed by numpy array or scalar,"
+                        " but rather "
+                        + str(type(args[1]))
+                    )
+            else:
+                raise RuntimeError(
+                    "If two arguments, first must be the dimension name! (a"
+                    " string)"
+                )
+        else:
+            raise RuntimeError("Only one or two arguments!!")
         return self
 
     # }}}
@@ -2500,6 +2559,15 @@ class nddata(object):
             Rerr = None
         # }}}
         retval.set_error(Rerr)
+        unitA = Q_(
+            "dimensionless" if self.get_units() is None else self.get_units()
+        )
+        unitB = Q_(
+            "dimensionless" if arg.get_units() is None else arg.get_units()
+        )
+        unit_ret = f"{(unitA*unitB).units:~P}"
+        unit_ret = None if len(unit_ret) == 0 else unit_ret
+        retval.set_units(unit_ret)
         return retval
 
     def __rpow__(self, arg):
@@ -2614,6 +2682,15 @@ class nddata(object):
             Rerr = None
         # }}}
         retval.set_error(Rerr)
+        unitA = Q_(
+            "dimensionless" if self.get_units() is None else self.get_units()
+        )
+        unitB = Q_(
+            "dimensionless" if arg.get_units() is None else arg.get_units()
+        )
+        unit_ret = f"{(unitA/unitB).units:~P}"
+        unit_ret = None if len(unit_ret) == 0 else unit_ret
+        retval.set_units(unit_ret)
         return retval
 
     def __invert__(self):
@@ -3344,8 +3421,10 @@ class nddata(object):
 
         Parameters
         ----------
-        std: bool
+        std : bool
             whether or not to return the standard deviation as an error
+        stderr : bool
+            whether or not to return the standard error as an error
         """
         logger.debug("entered the mean function")
         # {{{ process arguments
@@ -3357,7 +3436,10 @@ class nddata(object):
                 "return_error kwarg no longer used -- use std kwarg if you"
                 " want to set the error to the std"
             )
-        return_error = process_kwargs([("std", False)], kwargs)
+        return_error, return_stderr = process_kwargs(
+            [("std", False), ("stderr", False)], kwargs
+        )
+        return_error |= return_stderr
         logger.debug(strm("return error is", return_error))
         if isinstance(axes, str):
             axes = [axes]
@@ -3389,8 +3471,10 @@ class nddata(object):
                     )
             if return_error:  # since I think this is causing an error
                 thiserror = np.std(self.data, axis=thisindex)
-                if np.isscalar(thiserror):
+                if scalar_or_zero_order(thiserror):
                     thiserror = r_[thiserror]
+                if return_stderr:
+                    thiserror /= np.sqrt(self.data.shape[thisindex])
             self.data = np.mean(self.data, axis=thisindex)
             if return_error:  # this needs to go after the data setting
                 self.set_error(
@@ -3928,7 +4012,7 @@ class nddata(object):
                 isinstance(axisvalues, np.int32)
             ):
                 axisvalues = np.linspace(oldaxis[0], oldaxis[-1], axisvalues)
-            elif np.isscalar(axisvalues):
+            elif scalar_or_zero_order(axisvalues):
                 axisvalues = r_[axisvalues]
             elif type(axisvalues) not in [np.ndarray, tuple]:
                 raise ValueError(
@@ -4032,7 +4116,7 @@ class nddata(object):
             pass_through=True,
         )
 
-        if np.isscalar(values):
+        if scalar_or_zero_order(values):
             values = r_[values]
         origdata = self.data.copy()
         origaxis = self.getaxis(axis).copy()
