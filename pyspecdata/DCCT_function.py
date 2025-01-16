@@ -32,7 +32,7 @@ def DCCT(
     custom_scaling=False,
     bbox=[0.05, 0.1, 0.90, 0.8],
     gap=0.1,
-    horiz_label_spacer=29,
+    horiz_label_spacer=32,
     shareaxis=False,
     diagnostic=False,
     cmap=None,
