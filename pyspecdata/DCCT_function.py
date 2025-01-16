@@ -262,7 +262,8 @@ def DCCT(
             # a = FancyArrowPatch(arrow_base, arrow_base+r_[dx, dy],
             #        arrowstyle='|-|',
             #        alpha=0.1,  color='k')
-            fig.add_artist(thiscirc)
+            if debug:
+                fig.add_artist(thiscirc)
             fig.add_artist(AnArrow)
             plt.text(
                 x_textdisp - arrow_dx,
