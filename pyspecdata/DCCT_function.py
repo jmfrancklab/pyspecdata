@@ -54,19 +54,47 @@ def decorate_axes(
         )
         first_axes = ax_list[idx_slice.data.ravel()[0]]
         last_axes = ax_list[idx_slice.data.ravel()[-1]]
-        if j == 0:
-            thislabel = "%s" % ordered_labels[thisdim][0]
-        else:
-            thislabel = "%s" % ordered_labels[thisdim][j]
-        draw_span(
-            last_axes,
-            first_axes,
-            thislabel,
-            depth,
-            horiz_label_spacer,
-            fig,
-            transXdispYfig,
+        # {{{ Draw span:
+        # Place the vertical lines and labels of the coherence transfer
+        # pathways
+        label_spacing = (
+            depth
+            + 1  # plus one so the first horizontal isn't placed at 0
+            #      (overlapping with the spine of the indirect axis)
+        ) * horiz_label_spacer  # will space the vertical lines along x approp.
+        x1_disp = -label_spacing
+        # {{{ Take y coordinate of top and bottom of axes objects to get the 2
+        #     points for drawing the lines. To be lazy I pull this from the
+        #     axes objects themselves.
+        _, y1_fig = (
+            last_axes.transAxes + fig.transFigure.inverted()
+        ).transform(r_[0, 0.95])
+        _, y2_fig = (
+            first_axes.transAxes + fig.transFigure.inverted()
+        ).transform(r_[0, 0.05])
+        # }}}
+        # for scaled translation, x coords should be display and y coords
+        # should be figure
+        lineA = lines.Line2D(
+            [x1_disp, x1_disp],
+            [y1_fig, y2_fig],
+            linewidth=1,
+            color="k",
+            transform=transXdispYfig,
+            clip_on=False,
         )
+        plt.text(
+            x1_disp,  # same x coord as the line to keep simple
+            (y2_fig + y1_fig) / 2,  # put in middle of line
+            "%s" % ordered_labels[thisdim][j],
+            va="center",
+            ha="right",
+            rotation=90,
+            transform=transXdispYfig,
+            color="k",
+        )
+        fig.add_artist(lineA)
+        # }}}
         place_labels(
             my_data,
             ax_list[0],
@@ -97,50 +125,6 @@ def decorate_axes(
                 transDispTranslated,
                 transXdispYfig,
             )
-
-
-def draw_span(
-    ax1, ax2, label, this_label_num, horiz_label_spacer, fig, transXdispYfig
-):
-    """Place the vertical lines and labels of the coherence transfer
-    pathways"""
-    label_spacing = (
-        this_label_num
-        + 1  # plus one so the first horizontal isn't placed at 0
-        #      (overlapping with the spine of the indirect axis)
-    ) * horiz_label_spacer  # will space the vertical lines along x approp.
-    x1_disp = -label_spacing
-    # {{{ Take y coordinate of top and bottom of axes objects to get the 2
-    #     points for drawing the lines. To be lazy I pull this from the
-    #     axes objects themselves.
-    _, y1_fig = (ax1.transAxes + fig.transFigure.inverted()).transform(
-        r_[0, 0.95]
-    )
-    _, y2_fig = (ax2.transAxes + fig.transFigure.inverted()).transform(
-        r_[0, 0.05]
-    )
-    # }}}
-    # for scaled translation, x coords should be display and y coords
-    # should be figure
-    lineA = lines.Line2D(
-        [x1_disp, x1_disp],
-        [y1_fig, y2_fig],
-        linewidth=1,
-        color="k",
-        transform=transXdispYfig,
-        clip_on=False,
-    )
-    plt.text(
-        x1_disp,  # same x coord as the line to keep simple
-        (y2_fig + y1_fig) / 2,  # put in middle of line
-        label,
-        va="center",
-        ha="right",
-        rotation=90,
-        transform=transXdispYfig,
-        color="k",
-    )
-    fig.add_artist(lineA)
 
 
 def place_labels(
