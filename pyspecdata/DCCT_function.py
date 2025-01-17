@@ -42,6 +42,7 @@ def decorate_axes(
     transDispTranslated,
     transXdispYfig,
 ):
+    "This function is called recursively to decorate the axes"
     thisdim = remaining_dim[0]
     logging.debug(strm("This is remaining dim", remaining_dim))
     logging.debug(strm("This dim is", thisdim))
@@ -54,25 +55,18 @@ def decorate_axes(
         first_axes = ax_list[idx_slice.data.ravel()[0]]
         last_axes = ax_list[idx_slice.data.ravel()[-1]]
         if j == 0:
-            draw_span(
-                last_axes,
-                first_axes,
-                "%s" % ordered_labels[thisdim][0],
-                depth,
-                horiz_label_spacer,
-                fig,
-                transXdispYfig,
-            )
+            thislabel = "%s" % ordered_labels[thisdim][0]
         else:
-            draw_span(
-                last_axes,
-                first_axes,
-                "%s" % ordered_labels[thisdim][j],
-                depth,
-                horiz_label_spacer,
-                fig,
-                transXdispYfig,
-            )
+            thislabel = "%s" % ordered_labels[thisdim][j]
+        draw_span(
+            last_axes,
+            first_axes,
+            thislabel,
+            depth,
+            horiz_label_spacer,
+            fig,
+            transXdispYfig,
+        )
         place_labels(
             my_data,
             ax_list[0],
@@ -103,57 +97,6 @@ def decorate_axes(
                 transDispTranslated,
                 transXdispYfig,
             )
-
-
-def gen_labels(data, max_coh_jump):
-    """Takes dimlabels and shape from the data and generates a list of
-    ordered dimlabels each assigned to the index of the dimension"""
-    ordered_labels = {}
-    # {{{ Labels for phase cycling dimensions
-    for this_dim in [j for j in data.dimlabels if j.startswith("ph")]:
-        if data.get_ft_prop(this_dim):
-            n_ph = ndshape(data)[this_dim]
-            this_max_coh_jump = max_coh_jump[this_dim]
-            all_possibilities = np.empty(
-                (int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph
-            )  # on reviewing, I *believe* this this is designed to fit the
-            #    array from -this_max_coh_jump to +this_max_coh_jump, but
-            #    it needs to round up to the closest multiple of n_ph
-            all_possibilities[:] = nan
-            all_possibilities[: this_max_coh_jump + 1] = r_[
-                0 : this_max_coh_jump + 1
-            ]  # label the positive jumps in order
-            all_possibilities[-this_max_coh_jump:] = r_[
-                -this_max_coh_jump:0
-            ]  # and alias the negative ones into the correct locations
-            all_possibilities = all_possibilities.reshape(
-                (-1, n_ph)
-            )  # now, reshape according to the number of dimensions we
-            #    actually have for discriminating
-            labels_in_order = []
-            for j in range(n_ph):
-                temp = all_possibilities[
-                    :, j
-                ]  # grab the columns, which are the labels for all aliases
-                #    that belong at this index
-                if j == 0:
-                    temp = ", ".join(
-                        ["%d" % j for j in np.sort(temp[np.isfinite(temp)])]
-                    )
-                else:
-                    temp = ", ".join(
-                        ["%+d" % j for j in np.sort(temp[np.isfinite(temp)])]
-                    )
-                if len(temp) == 0:
-                    temp = "X"
-                labels_in_order.append(temp)
-            ordered_labels[this_dim] = labels_in_order
-        # }}}
-    else:
-        ordered_labels[this_dim] = [
-            "0" if j == 0.0 else f"{j}" for j in data.getaxis(this_dim)
-        ]
-    return ordered_labels
 
 
 def draw_span(
@@ -386,8 +329,52 @@ def DCCT(
             temp.height,
         ]
 
-    # {{{ Generate alias labels - goes to scientific fn
-    ordered_labels = gen_labels(my_data, max_coh_jump)
+    # {{{ Generate alias labels
+    ordered_labels = {}
+    # {{{ Labels for phase cycling dimensions
+    for this_dim in [j for j in my_data.dimlabels if j.startswith("ph")]:
+        if my_data.get_ft_prop(this_dim):
+            n_ph = ndshape(my_data)[this_dim]
+            this_max_coh_jump = max_coh_jump[this_dim]
+            all_possibilities = np.empty(
+                (int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph
+            )  # on reviewing, I *believe* this this is designed to fit the
+            #    array from -this_max_coh_jump to +this_max_coh_jump, but
+            #    it needs to round up to the closest multiple of n_ph
+            all_possibilities[:] = nan
+            all_possibilities[: this_max_coh_jump + 1] = r_[
+                0 : this_max_coh_jump + 1
+            ]  # label the positive jumps in order
+            all_possibilities[-this_max_coh_jump:] = r_[
+                -this_max_coh_jump:0
+            ]  # and alias the negative ones into the correct locations
+            all_possibilities = all_possibilities.reshape(
+                (-1, n_ph)
+            )  # now, reshape according to the number of dimensions we
+            #    actually have for discriminating
+            labels_in_order = []
+            for j in range(n_ph):
+                temp = all_possibilities[
+                    :, j
+                ]  # grab the columns, which are the labels for all aliases
+                #    that belong at this index
+                if j == 0:
+                    temp = ", ".join(
+                        ["%d" % j for j in np.sort(temp[np.isfinite(temp)])]
+                    )
+                else:
+                    temp = ", ".join(
+                        ["%+d" % j for j in np.sort(temp[np.isfinite(temp)])]
+                    )
+                if len(temp) == 0:
+                    temp = "X"
+                labels_in_order.append(temp)
+            ordered_labels[this_dim] = labels_in_order
+        # }}}
+    else:
+        ordered_labels[this_dim] = [
+            "0" if j == 0.0 else f"{j}" for j in my_data.getaxis(this_dim)
+        ]
     # }}}
     real_data = False
     if cmap is not None:
