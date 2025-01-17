@@ -9,7 +9,7 @@ from .core import ndshape, nddata
 from .general_functions import strm, process_kwargs
 import matplotlib.pyplot as plt
 import matplotlib.lines as lines
-from matplotlib.patches import FancyArrowPatch, Circle
+from matplotlib.patches import FancyArrowPatch
 from matplotlib.gridspec import SubplotSpec
 from matplotlib.transforms import (
     ScaledTranslation,
