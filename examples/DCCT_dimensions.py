@@ -134,21 +134,21 @@ with psd.figlist_var() as fl:
         [0.5, 0.5],
         "kwarg(horiz_label_space)",
         "r",
-        trans_dict["XdispYfigTransform"],
+        trans_dict["transXdispYfig"],
     )
     plot_w_markup(
         [0.0, -horiz_label_spacer],
         [0.55, 0.55],
         "kwarg(horiz_label_space)",
         "r",
-        trans_dict["XdispYfigTransform"],
+        trans_dict["transXdispYfig"],
     )
     plot_w_markup(
         [0, 0],
         [-30, +30],
         "60 pts bracketing origin",
         "r",
-        trans_dict["DisplayTransform"],
+        trans_dict["transDispTranslated"],
     )
     # }}}
     # {{{ gap

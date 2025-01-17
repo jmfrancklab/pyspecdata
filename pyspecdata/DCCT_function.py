@@ -364,9 +364,9 @@ def DCCT(
                 axes_height,
             ])
         )  # lbwh
-    for ax in ax_list[1:]:
-        ax.sharex(ax_list[1])
-        ax.sharey(ax_list[1])
+    for ax in ax_list:
+        ax.sharex(ax_list[0])
+        ax.sharey(ax_list[0])
     # {{{ make blended transform for plotting decorations sets origin for the
     #     blended transform to the bottom left corner of the bottom axes object
     transDispTranslated = IdentityTransform() + ScaledTranslation(
@@ -386,6 +386,12 @@ def DCCT(
     ax_list[0].set_xlabel(
         my_data.unitify_axis(my_data.dimlabels[-1]), labelpad=20
     )
+    # }}}
+    # {{{ intermediate subplots
+    for j in range(1, len(axes_bottom) - 1):
+        ax_list[j].xaxis.set_ticks([])
+        ax_list[j].get_xaxis().set_visible(False)
+        ax_list[j].set_xlabel(None)
     # }}}
     # {{{ top subplot
     ax_list[-1].xaxis.set_major_locator(majorLocator())
@@ -582,7 +588,7 @@ def DCCT(
     return (
         ax_list,
         {
-            "DisplayTransform": transDispTranslated,
-            "XdispYfigTransform": transXdispYfig,
+            "transDispTranslated": transDispTranslated,
+            "transXdispYfig": transXdispYfig,
         },
     )
