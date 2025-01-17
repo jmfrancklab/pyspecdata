@@ -144,37 +144,37 @@ def place_labels(
     """Place arrows and dimname labels"""
     # Take y of bottom axes object as this is the y we want the tip
     # of the arrow to go to
-    if not check_for_label_num or not label_placed[this_label_num]:
-        # {{{ determine the x and y position of the label in display coords
-        if check_for_label_num:
-            # the x coordinate will be the product of the horizontal label
-            # spacer and the index of the dimension. In this way the x
-            # position will increment with the number of the dimension
-            label_spacing = (this_label_num + 1) * horiz_label_spacer
-            # Calculate coord for base of arrow
-            x_textdisp = -label_spacing
-        else:
-            # same as above, but determine text position based on tick
-            # labels
-            label = my_data.unitify_axis(my_data.dimlabels[-2])
-            # from here https://stackoverflow.com/questions/44012436/pytho\
-            # n-matplotlib-get-position-of-xtick-labels then searching for
-            # BBox docs
-            logging.debug(
-                strm(
-                    "tick locations",
-                    [
-                        j.get_window_extent().bounds
-                        for j in ax1.get_yticklabels()
-                    ],
-                )
+    # {{{ determine the x and y position of the label in display coords
+    if not label_placed[this_label_num]:
+        # the x coordinate will be the product of the horizontal label
+        # spacer and the index of the dimension. In this way the x
+        # position will increment with the number of the dimension
+        label_spacing = (this_label_num + 1) * horiz_label_spacer
+        # Calculate coord for base of arrow
+        x_textdisp = -label_spacing
+    if not check_for_label_num:
+        # same as above, but determine text position based on tick
+        # labels
+        label = my_data.unitify_axis(my_data.dimlabels[-2])
+        # from here https://stackoverflow.com/questions/44012436/pytho\
+        # n-matplotlib-get-position-of-xtick-labels then searching for
+        # BBox docs
+        logging.debug(
+            strm(
+                "tick locations",
+                [
+                    j.get_window_extent().bounds
+                    for j in ax1.get_yticklabels()
+                ],
             )
-            # {{{ only for the innermost,
-            tick_length = [
-                j.get_window_extent().bounds for j in ax1.get_yticklabels()
-            ][-1][-1]
-            x_textdisp = -tick_length
-            # }}}
+        )
+        # {{{ only for the innermost,
+        tick_length = [
+            j.get_window_extent().bounds for j in ax1.get_yticklabels()
+        ][-1][-1]
+        x_textdisp = -tick_length
+        # }}}
+    if not check_for_label_num or not label_placed[this_label_num]:
         y_textdisp = -2  # define base of arrow y coord
         # }}}
         AnArrow = FancyArrowPatch(
