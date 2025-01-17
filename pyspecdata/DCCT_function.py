@@ -177,16 +177,6 @@ def place_labels(
             # }}}
         y_textdisp = -2  # define base of arrow y coord
         # }}}
-        debug = False
-        if debug:
-            thiscirc = Circle(
-                (x_textdisp, y_textdisp),
-                3,
-                clip_on=False,
-                transform=transDispTranslated,
-                alpha=0.1,
-                color="r",
-            )
         AnArrow = FancyArrowPatch(
             (x_textdisp - arrow_dx, y_textdisp - arrow_dy),
             (x_textdisp, y_textdisp),
@@ -202,8 +192,6 @@ def place_labels(
         # a = FancyArrowPatch(arrow_base, arrow_base+r_[dx, dy],
         #        arrowstyle='|-|',
         #        alpha=0.1,  color='k')
-        if debug:
-            fig.add_artist(thiscirc)
         fig.add_artist(AnArrow)
         plt.text(
             x_textdisp - arrow_dx,
