@@ -26,6 +26,273 @@ majorLocator = lambda: mticker.MaxNLocator(
 minorLocator = lambda: mticker.AutoMinorLocator(n=5)
 
 
+def decorate_axes(
+    my_data,
+    idx,
+    remaining_dim,
+    depth,
+    a_shape,
+    ax_list,
+    ordered_labels,
+    label_placed,
+    horiz_label_spacer,
+    arrow_dx,
+    arrow_dy,
+    fig,
+    transDispTranslated,
+    transXdispYfig,
+):
+    thisdim = remaining_dim[0]
+    logging.debug(strm("This is remaining dim", remaining_dim))
+    logging.debug(strm("This dim is", thisdim))
+    depth -= 1
+    for j in range(a_shape[thisdim]):
+        idx_slice = idx[thisdim, j]
+        logging.debug(
+            strm("For", thisdim, "element", j, idx_slice.data.ravel())
+        )
+        first_axes = ax_list[idx_slice.data.ravel()[0]]
+        last_axes = ax_list[idx_slice.data.ravel()[-1]]
+        if j == 0:
+            draw_span(
+                last_axes,
+                first_axes,
+                "%s" % ordered_labels[thisdim][0],
+                depth,
+                horiz_label_spacer,
+                fig,
+                transXdispYfig,
+            )
+        else:
+            draw_span(
+                last_axes,
+                first_axes,
+                "%s" % ordered_labels[thisdim][j],
+                depth,
+                horiz_label_spacer,
+                fig,
+                transXdispYfig,
+            )
+        place_labels(
+            my_data,
+            ax_list[0],
+            "%s" % my_data.unitify_axis("%s" % thisdim),
+            label_placed,
+            depth,
+            horiz_label_spacer,
+            arrow_dx,
+            arrow_dy,
+            fig,
+            transDispTranslated,
+        )
+        new_remaining_dim = remaining_dim[1:]
+        if len(remaining_dim) > 1:
+            decorate_axes(
+                my_data,
+                idx_slice,
+                new_remaining_dim,
+                depth,
+                a_shape,
+                ax_list,
+                ordered_labels,
+                label_placed,
+                horiz_label_spacer,
+                arrow_dx,
+                arrow_dy,
+                fig,
+                transDispTranslated,
+                transXdispYfig,
+            )
+
+
+def gen_labels(data, max_coh_jump):
+    """Takes dimlabels and shape from the data and generates a list of
+    ordered dimlabels each assigned to the index of the dimension"""
+    ordered_labels = {}
+    # {{{ Labels for phase cycling dimensions
+    for this_dim in [j for j in data.dimlabels if j.startswith("ph")]:
+        if data.get_ft_prop(this_dim):
+            n_ph = ndshape(data)[this_dim]
+            this_max_coh_jump = max_coh_jump[this_dim]
+            all_possibilities = np.empty(
+                (int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph
+            )  # on reviewing, I *believe* this this is designed to fit the
+            #    array from -this_max_coh_jump to +this_max_coh_jump, but
+            #    it needs to round up to the closest multiple of n_ph
+            all_possibilities[:] = nan
+            all_possibilities[: this_max_coh_jump + 1] = r_[
+                0 : this_max_coh_jump + 1
+            ]  # label the positive jumps in order
+            all_possibilities[-this_max_coh_jump:] = r_[
+                -this_max_coh_jump:0
+            ]  # and alias the negative ones into the correct locations
+            all_possibilities = all_possibilities.reshape(
+                (-1, n_ph)
+            )  # now, reshape according to the number of dimensions we
+            #    actually have for discriminating
+            labels_in_order = []
+            for j in range(n_ph):
+                temp = all_possibilities[
+                    :, j
+                ]  # grab the columns, which are the labels for all aliases
+                #    that belong at this index
+                if j == 0:
+                    temp = ", ".join(
+                        ["%d" % j for j in np.sort(temp[np.isfinite(temp)])]
+                    )
+                else:
+                    temp = ", ".join(
+                        ["%+d" % j for j in np.sort(temp[np.isfinite(temp)])]
+                    )
+                if len(temp) == 0:
+                    temp = "X"
+                labels_in_order.append(temp)
+            ordered_labels[this_dim] = labels_in_order
+        # }}}
+    else:
+        ordered_labels[this_dim] = [
+            "0" if j == 0.0 else f"{j}" for j in data.getaxis(this_dim)
+        ]
+    return ordered_labels
+
+
+def draw_span(
+    ax1, ax2, label, this_label_num, horiz_label_spacer, fig, transXdispYfig
+):
+    """Place the vertical lines and labels of the coherence transfer
+    pathways"""
+    label_spacing = (
+        this_label_num
+        + 1  # plus one so the first horizontal isn't placed at 0
+        #      (overlapping with the spine of the indirect axis)
+    ) * horiz_label_spacer  # will space the vertical lines along x approp.
+    x1_disp = -label_spacing
+    # {{{ Take y coordinate of top and bottom of axes objects to get the 2
+    #     points for drawing the lines. To be lazy I pull this from the
+    #     axes objects themselves.
+    _, y1_fig = (ax1.transAxes + fig.transFigure.inverted()).transform(
+        r_[0, 0.95]
+    )
+    _, y2_fig = (ax2.transAxes + fig.transFigure.inverted()).transform(
+        r_[0, 0.05]
+    )
+    # }}}
+    # for scaled translation, x coords should be display and y coords
+    # should be figure
+    lineA = lines.Line2D(
+        [x1_disp, x1_disp],
+        [y1_fig, y2_fig],
+        linewidth=1,
+        color="k",
+        transform=transXdispYfig,
+        clip_on=False,
+    )
+    plt.text(
+        x1_disp,  # same x coord as the line to keep simple
+        (y2_fig + y1_fig) / 2,  # put in middle of line
+        label,
+        va="center",
+        ha="right",
+        rotation=90,
+        transform=transXdispYfig,
+        color="k",
+    )
+    fig.add_artist(lineA)
+
+
+def place_labels(
+    my_data,
+    ax1,
+    label,
+    label_placed,
+    this_label_num,
+    horiz_label_spacer,
+    arrow_dx,
+    arrow_dy,
+    fig,
+    transDispTranslated,
+    check_for_label_num=True,
+    arrow_width_px=4.0,
+):
+    """Place arrows and dimname labels"""
+    # Take y of bottom axes object as this is the y we want the tip
+    # of the arrow to go to
+    if not check_for_label_num or not label_placed[this_label_num]:
+        # {{{ determine the x and y position of the label in display coords
+        if check_for_label_num:
+            # the x coordinate will be the product of the horizontal label
+            # spacer and the index of the dimension. In this way the x
+            # position will increment with the number of the dimension
+            label_spacing = (this_label_num + 1) * horiz_label_spacer
+            # Calculate coord for base of arrow
+            x_textdisp = -label_spacing
+        else:
+            # same as above, but determine text position based on tick
+            # labels
+            label = my_data.unitify_axis(my_data.dimlabels[-2])
+            # from here https://stackoverflow.com/questions/44012436/pytho\
+            # n-matplotlib-get-position-of-xtick-labels then searching for
+            # BBox docs
+            logging.debug(
+                strm(
+                    "tick locations",
+                    [
+                        j.get_window_extent().bounds
+                        for j in ax1.get_yticklabels()
+                    ],
+                )
+            )
+            # {{{ only for the innermost,
+            tick_length = [
+                j.get_window_extent().bounds for j in ax1.get_yticklabels()
+            ][-1][-1]
+            x_textdisp = -tick_length
+            # }}}
+        y_textdisp = -2  # define base of arrow y coord
+        # }}}
+        debug = False
+        if debug:
+            thiscirc = Circle(
+                (x_textdisp, y_textdisp),
+                3,
+                clip_on=False,
+                transform=transDispTranslated,
+                alpha=0.1,
+                color="r",
+            )
+        AnArrow = FancyArrowPatch(
+            (x_textdisp - arrow_dx, y_textdisp - arrow_dy),
+            (x_textdisp, y_textdisp),
+            clip_on=False,
+            transform=transDispTranslated,
+            alpha=0.1,
+            color="k",
+            mutation_scale=20,
+        )
+        # could do fancier w/ the following, but need to mess w/ width
+        # parameters
+        # arrow_base = r_[x_arrowbase_fig-arrow_width/2, y_arrowbase_fig]
+        # a = FancyArrowPatch(arrow_base, arrow_base+r_[dx, dy],
+        #        arrowstyle='|-|',
+        #        alpha=0.1,  color='k')
+        if debug:
+            fig.add_artist(thiscirc)
+        fig.add_artist(AnArrow)
+        plt.text(
+            x_textdisp - arrow_dx,
+            y_textdisp - arrow_dy,
+            label,
+            va="top",
+            ha="right",
+            rotation=np.arctan2(arrow_dy, arrow_dx) * 180 / np.pi,
+            clip_on=False,
+            transform=transDispTranslated,
+            color="k",
+        )
+        if check_for_label_num:
+            label_placed[this_label_num] = 1
+
+
 def DCCT(
     this_nddata,
     fig=None,
@@ -110,7 +377,6 @@ def DCCT(
     if fig is None:
         fig = plt.figure()
     my_data = this_nddata.C
-    ordered_labels = {}
     if isinstance(bbox, SubplotSpec):
         temp = bbox.get_position(fig)
         bbox = [
@@ -120,191 +386,8 @@ def DCCT(
             temp.height,
         ]
 
-    # {{{ Functions
-    def gen_labels(data):
-        """Takes dimlabels and shape from the data and generates a list of
-        ordered dimlabels each assigned to the index of the dimension"""
-        # {{{ Labels for phase cycling dimensions
-        for this_dim in [j for j in data.dimlabels if j.startswith("ph")]:
-            if data.get_ft_prop(this_dim):
-                n_ph = ndshape(data)[this_dim]
-                this_max_coh_jump = max_coh_jump[this_dim]
-                all_possibilities = np.empty(
-                    (int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph
-                )  # on reviewing, I *believe* this this is designed to fit the
-                #    array from -this_max_coh_jump to +this_max_coh_jump, but
-                #    it needs to round up to the closest multiple of n_ph
-                all_possibilities[:] = nan
-                all_possibilities[: this_max_coh_jump + 1] = r_[
-                    0 : this_max_coh_jump + 1
-                ]  # label the positive jumps in order
-                all_possibilities[-this_max_coh_jump:] = r_[
-                    -this_max_coh_jump:0
-                ]  # and alias the negative ones into the correct locations
-                all_possibilities = all_possibilities.reshape(
-                    (-1, n_ph)
-                )  # now, reshape according to the number of dimensions we
-                #    actually have for discriminating
-                labels_in_order = []
-                for j in range(n_ph):
-                    temp = all_possibilities[
-                        :, j
-                    ]  # grab the columns, which are the labels for all aliases
-                    #    that belong at this index
-                    if j == 0:
-                        temp = ", ".join([
-                            "%d" % j for j in np.sort(temp[np.isfinite(temp)])
-                        ])
-                    else:
-                        temp = ", ".join([
-                            "%+d" % j for j in np.sort(temp[np.isfinite(temp)])
-                        ])
-                    if len(temp) == 0:
-                        temp = "X"
-                    labels_in_order.append(temp)
-                ordered_labels[this_dim] = labels_in_order
-            # }}}
-            else:
-                ordered_labels[this_dim] = [
-                    "0" if j == 0.0 else f"{j}"
-                    for j in my_data.getaxis(this_dim)
-                ]
-
-    def draw_span(
-        ax1,
-        ax2,
-        label,
-        this_label_num,
-    ):
-        """Place the vertical lines and labels of the coherence transfer
-        pathways"""
-        label_spacing = (
-            this_label_num
-            + 1  # plus one so the first horizontal isn't placed at 0
-            #      (overlapping with the spine of the indirect axis)
-        ) * horiz_label_spacer  # will space the vertical lines along x approp.
-        x1_disp = -label_spacing
-        # {{{ Take y coordinate of top and bottom of axes objects to get the 2
-        #     points for drawing the lines. To be lazy I pull this from the
-        #     axes objects themselves.
-        _, y1_fig = (ax1.transAxes + fig.transFigure.inverted()).transform(
-            r_[0, 0.95]
-        )
-        _, y2_fig = (ax2.transAxes + fig.transFigure.inverted()).transform(
-            r_[0, 0.05]
-        )
-        # }}}
-        # for scaled translation, x coords should be display and y coords
-        # should be figure
-        lineA = lines.Line2D(
-            [x1_disp, x1_disp],
-            [y1_fig, y2_fig],
-            linewidth=1,
-            color="k",
-            transform=transXdispYfig,
-            clip_on=False,
-        )
-        plt.text(
-            x1_disp,  # same x coord as the line to keep simple
-            (y2_fig + y1_fig) / 2,  # put in middle of line
-            label,
-            va="center",
-            ha="right",
-            rotation=90,
-            transform=transXdispYfig,
-            color="k",
-        )
-        fig.add_artist(lineA)
-
-    def place_labels(
-        ax1,
-        label,
-        label_placed,
-        this_label_num,
-        check_for_label_num=True,
-        arrow_width_px=4.0,
-    ):
-        """Place arrows and dimname labels"""
-        # Take y of bottom axes object as this is the y we want the tip
-        # of the arrow to go to
-        if not check_for_label_num or not label_placed[this_label_num]:
-            # {{{ determine the x and y position of the label in display coords
-            if check_for_label_num:
-                # the x coordinate will be the product of the horizontal label
-                # spacer and the index of the dimension. In this way the x
-                # position will increment with the number of the dimension
-                label_spacing = (this_label_num + 1) * horiz_label_spacer
-                # Calculate coord for base of arrow
-                x_textdisp = -label_spacing
-            else:
-                # same as above, but determine text position based on tick
-                # labels
-                label = my_data.unitify_axis(my_data.dimlabels[-2])
-                # from here https://stackoverflow.com/questions/44012436/pytho\
-                # n-matplotlib-get-position-of-xtick-labels then searching for
-                # BBox docs
-                logging.debug(
-                    strm(
-                        "tick locations",
-                        [
-                            j.get_window_extent().bounds
-                            for j in ax1.get_yticklabels()
-                        ],
-                    )
-                )
-                # {{{ only for the innermost,
-                tick_length = [
-                    j.get_window_extent().bounds for j in ax1.get_yticklabels()
-                ][-1][-1]
-                x_textdisp = -tick_length
-                # }}}
-            y_textdisp = -2  # define base of arrow y coord
-            # }}}
-            debug = False
-            if debug:
-                thiscirc = Circle(
-                    (x_textdisp, y_textdisp),
-                    3,
-                    clip_on=False,
-                    transform=transDispTranslated,
-                    alpha=0.1,
-                    color="r",
-                )
-            AnArrow = FancyArrowPatch(
-                (x_textdisp - arrow_dx, y_textdisp - arrow_dy),
-                (x_textdisp, y_textdisp),
-                clip_on=False,
-                transform=transDispTranslated,
-                alpha=0.1,
-                color="k",
-                mutation_scale=20,
-            )
-            # could do fancier w/ the following, but need to mess w/ width
-            # parameters
-            # arrow_base = r_[x_arrowbase_fig-arrow_width/2, y_arrowbase_fig]
-            # a = FancyArrowPatch(arrow_base, arrow_base+r_[dx, dy],
-            #        arrowstyle='|-|',
-            #        alpha=0.1,  color='k')
-            if debug:
-                fig.add_artist(thiscirc)
-            fig.add_artist(AnArrow)
-            plt.text(
-                x_textdisp - arrow_dx,
-                y_textdisp - arrow_dy,
-                label,
-                va="top",
-                ha="right",
-                rotation=np.arctan2(arrow_dy, arrow_dx) * 180 / np.pi,
-                clip_on=False,
-                transform=transDispTranslated,
-                color="k",
-            )
-            if check_for_label_num:
-                label_placed[this_label_num] = 1
-
-    # }}}
     # {{{ Generate alias labels - goes to scientific fn
-    gen_labels(my_data)
+    ordered_labels = gen_labels(my_data, max_coh_jump)
     # }}}
     real_data = False
     if cmap is not None:
@@ -539,48 +622,34 @@ def DCCT(
     depth = num_dims
 
     # {{{ Place decorations on figure
-    def decorate_axes(idx, remaining_dim, depth):
-        thisdim = remaining_dim[0]
-        logging.debug(strm("This is remaining dim", remaining_dim))
-        logging.debug(strm("This dim is", thisdim))
-        depth -= 1
-        for j in range(a_shape[thisdim]):
-            idx_slice = idx[thisdim, j]
-            logging.debug(
-                strm("For", thisdim, "element", j, idx_slice.data.ravel())
-            )
-            first_axes = ax_list[idx_slice.data.ravel()[0]]
-            last_axes = ax_list[idx_slice.data.ravel()[-1]]
-            if j == 0:
-                draw_span(
-                    last_axes,
-                    first_axes,
-                    "%s" % ordered_labels[thisdim][0],
-                    this_label_num=depth,
-                )
-            else:
-                draw_span(
-                    last_axes,
-                    first_axes,
-                    "%s" % ordered_labels[thisdim][j],
-                    this_label_num=depth,
-                )
-            place_labels(
-                ax_list[0],
-                "%s" % my_data.unitify_axis("%s" % thisdim),
-                label_placed,
-                this_label_num=depth,
-            )
-            new_remaining_dim = remaining_dim[1:]
-            if len(remaining_dim) > 1:
-                decorate_axes(idx_slice, new_remaining_dim, depth)
 
-    decorate_axes(idx, remaining_dim, depth)
+    decorate_axes(
+        my_data,
+        idx,
+        remaining_dim,
+        depth,
+        a_shape,
+        ax_list,
+        ordered_labels,
+        label_placed,
+        horiz_label_spacer,
+        arrow_dx,
+        arrow_dy,
+        fig,
+        transDispTranslated,
+        transXdispYfig,
+    )
     place_labels(
+        my_data,
         ax_list[0],
         "%s" % (a_shape.dimlabels[-2]),
         label_placed,
-        this_label_num=depth - 1,
+        depth - 1,
+        horiz_label_spacer,
+        arrow_dx,
+        arrow_dy,
+        fig,
+        transDispTranslated,
         check_for_label_num=False,
     )
     if title is not None:

@@ -2396,6 +2396,14 @@ class nddata(object):
         return
 
     def set_plot_color_next(self):
+        """set the plot color associated with this dataset to the next
+        one in the global color cycle
+
+        Note that if you want to set the color cycle to something that's
+        not the matplotlib default cycle,
+        you can modify `pyspecdata.core.default_cycler`
+        in your script.
+        """
         self.set_plot_color(next(default_cycler))
 
     def get_plot_color(self):
