@@ -1337,7 +1337,7 @@ class nddata(object):
         elif format_spec == "~L":
             retval = str(self.C.human_units(scale_data=True))
             retval.replace("±", "\\pm")
-            return re.sub(r"([^0-9. ]+)", "\;\\text{\1}", retval)
+            return re.sub(r"([^0-9. ]+)", r"\;\\text{\1}", retval)
         else:
             raise ValueError(
                 "Right now, pyspecdata only responds to the ~P and ~L format"
