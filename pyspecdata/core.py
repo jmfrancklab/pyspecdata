@@ -341,9 +341,9 @@ def make_bar_graph_indices(
                 recursion_depth=recursion_depth + 1,
             )
             index_values.append(these_index_values)
-            label_values.append(
-                [str(unique_values[k]) + "," + j for j in these_labels]
-            )
+            label_values.append([
+                str(unique_values[k]) + "," + j for j in these_labels
+            ])
         # {{{ scale the result of each call down to the equal size (regardless
         #     of number of elements), shift by the position in this np.array,
         #     and return
@@ -1337,7 +1337,7 @@ class nddata(object):
         elif format_spec == "~L":
             retval = str(self.C.human_units(scale_data=True))
             retval.replace("±", "\\pm")
-            return re.sub("([^0-9. ]+)", "\;\\\\text{\\1}", retval)
+            return re.sub(r"([^0-9. ]+)", r"\;\\text{\1}", retval)
         else:
             raise ValueError(
                 "Right now, pyspecdata only responds to the ~P and ~L format"
@@ -2396,6 +2396,14 @@ class nddata(object):
         return
 
     def set_plot_color_next(self):
+        """set the plot color associated with this dataset to the next
+        one in the global color cycle
+
+        Note that if you want to set the color cycle to something that's
+        not the matplotlib default cycle,
+        you can modify `pyspecdata.core.default_cycler`
+        in your script.
+        """
         self.set_plot_color(next(default_cycler))
 
     def get_plot_color(self):
@@ -3026,9 +3034,11 @@ class nddata(object):
         if backwards is True:
             self.data = self[thisaxis, ::-1].data
         t = None
-        if (self.get_units() is not None) and (self.get_units(thisaxis) is not None):
+        if (self.get_units() is not None) and (
+            self.get_units(thisaxis) is not None
+        ):
             ret_units = Q_(self.get_units()) * Q_(self.get_units(thisaxis))
-            self.set_units(f"{Q_(ret_units).units:~P}")
+            self.set_units(f"{ret_units.units:~P}")
         if len(self.axis_coords) > 0:
             t = self.getaxis(thisaxis)
             dt_array = np.diff(t)
@@ -3791,6 +3801,7 @@ class nddata(object):
             return Q_(retval,self.get_units())
         else:
             return retval
+
     # }}}
     # {{{ ft-related functions
     def unitify_axis(self, axis_name, is_axis=True):
