@@ -440,7 +440,6 @@ def find_file(
             )
             return data
         else:
-            hi
             if postproc_type == "None":
                 logger.debug(
                     "You specified you do not want any preprocessing"
