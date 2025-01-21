@@ -283,9 +283,9 @@ def ft_clear_startpoints(self, axis, t=None, f=None, nearest=None):
     t: float, 'current', 'reset', or None
         keyword arguments `t` and `f` can be set by (1) manually setting
         the start point (2) using the string 'current' to leave the
-        current setting a lone (3) 'reset', which clears the startpoint
+        current setting alone (3) 'reset', which clears the startpoint
         and (4) None, which will be changed to 'current' when the other is set
-        to a number or 'rest' if both are set to None.
+        to a number or 'reset' if both are set to None.
     t: float, 'current', 'reset', or None
         see `t`
     nearest: bool
