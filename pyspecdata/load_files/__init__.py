@@ -221,6 +221,19 @@ def search_filename(searchstring, exp_type, print_result=True, unique=False):
     return retval
 
 
+def register_lookup_table(newdict):
+    """this updates the dictionary at
+    pyspecdata.load_files.postproc_lookup
+    this is equivalent to passing newdict to the lookup
+    keyword argument of `find_file`.
+
+    Remember that you only have to pass the keyword argument or call this
+    function once per script, and the effects are persistent!
+    """
+    postproc_lookup.update(newdict)
+    return
+
+
 def find_file(
     searchstring,
     exp_type=None,
@@ -323,13 +336,17 @@ def find_file(
         provides a dictionary called `postproc_lookup` (some are already
         available in pySpecData, but also, see the `lookup` argument,
         below).
-        ** Note: the lookup argument need only be fed ONCE! It will only
-        reset when another import pyspecdata is called **
 
+        Note that we call this "postprocessing" here because it follows
+        the data organization, *etc.*, performed by the rest of the file
+        in other contexts, however, we might call this "preprocessing"
 
         If `postproc` is a string,
         it looks up the string inside the `postproc_lookup`
         dictionary that's appropriate for the file type.
+
+        If `postproc` is `"none"`,
+        then explicitly do not apply any type of postprocessing.
 
         If `postproc` is None,
         it checks to see if the any of the loading functions that were
@@ -338,9 +355,6 @@ def find_file(
         ``data.get_prop('postproc_type')`` --
         if this is set, it uses this as a key
         to pull the corresponding value from `postproc_lookup`.
-        Along these lines, if you do NOT want any post processing
-        to be applied but the data has a postproc_type set, set the 
-        kwarg postproc = "None"
         For example, if this is a bruker file, it sets postproc to the
         name of the pulse sequence.
 
@@ -440,11 +454,12 @@ def find_file(
             )
             return data
         else:
-            if postproc_type == "None":
+            if postproc_type == "none":
                 logger.debug(
                     "You specified you do not want any preprocessing"
                     "applied so I am bypassing that to just give the raw"
-                    "data")
+                    "data"
+                )
             elif postproc_type in list(postproc_lookup.keys()):
                 data = postproc_lookup[postproc_type](data, **kwargs)
                 if "fl" in kwargs.keys():
@@ -457,11 +472,11 @@ def find_file(
                     " in load_files.__init__.py"
                     + postproc_type
                 )
-                if len(lookup) > 0:
+                if len(postproc_lookup.keys()) > 0:
                     raise ValueError(
-                        "You passed me a lookup argument, which implies that"
-                        " you think there is a defined postprocessing function"
-                        " for this data, which has postproc_type="
+                        "You have a postproc_lookup dictionary, which implies"
+                        " that you think there is a defined postprocessing"
+                        " function for this data, which has postproc_type="
                         + postproc_type
                         + ", but I'm not finding a postproc function for that"
                         " in the lookup dictionary that you provided me with"
