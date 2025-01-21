@@ -37,7 +37,6 @@ from .general_functions import (
     redim_C_to_F,
     redim_F_to_C,
     reformat_exp,
-    register_lookup_table,
     render_matrix,
     sech,
     strm,

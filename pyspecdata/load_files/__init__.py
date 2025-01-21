@@ -221,7 +221,7 @@ def search_filename(searchstring, exp_type, print_result=True, unique=False):
     return retval
 
 
-def register_lookup_table(newdict):
+def register_proc_lookup(newdict):
     """this updates the dictionary at
     pyspecdata.load_files.postproc_lookup
     this is equivalent to passing newdict to the lookup
