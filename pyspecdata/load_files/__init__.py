@@ -323,6 +323,9 @@ def find_file(
         provides a dictionary called `postproc_lookup` (some are already
         available in pySpecData, but also, see the `lookup` argument,
         below).
+        ** Note: the lookup argument need only be fed ONCE! It will only
+        reset when another import pyspecdata is called **
+
 
         If `postproc` is a string,
         it looks up the string inside the `postproc_lookup`
@@ -335,6 +338,9 @@ def find_file(
         ``data.get_prop('postproc_type')`` --
         if this is set, it uses this as a key
         to pull the corresponding value from `postproc_lookup`.
+        Along these lines, if you do NOT want any post processing
+        to be applied but the data has a postproc_type set, set the 
+        kwarg postproc = "None"
         For example, if this is a bruker file, it sets postproc to the
         name of the pulse sequence.
 
@@ -434,7 +440,12 @@ def find_file(
             )
             return data
         else:
-            if postproc_type in list(postproc_lookup.keys()):
+            if postproc_type == "None":
+                logger.debug(
+                    "You specified you do not want any preprocessing"
+                    "applied so I am bypassing that to just give the raw"
+                    "data")
+            elif postproc_type in list(postproc_lookup.keys()):
                 data = postproc_lookup[postproc_type](data, **kwargs)
                 if "fl" in kwargs.keys():
                     kwargs.pop("fl")
