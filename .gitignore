@@ -1,6 +1,7 @@
 .scf
 *.egg-info
 *.pyc
+**/data_files.csv
 .idea/
 _build/
 build/

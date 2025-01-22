@@ -2,8 +2,8 @@
 
 .. _sphx_glr_auto_examples_indiv_funcs:
 
-Individual Functions
---------------------
+XX Individual Functions XX
+--------------------------
 
 These are not very important -- just tests to verify the performance of individual functions.
 

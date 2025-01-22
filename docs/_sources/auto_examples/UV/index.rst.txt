@@ -1,0 +1,79 @@
+
+
+.. _sphx_glr_auto_examples_UV:
+
+UV
+--
+
+Reading Cary UV-Vis data and performing manipulations.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A simple demo of loading Cary UV-Vis data. This example just loads a file and plots all the spe...">
+
+.. only:: html
+
+  .. image:: /auto_examples/UV/images/thumb/sphx_glr_Cary_simple_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_UV_Cary_simple.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Simple Cary UV-Vis loading</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="After you&#x27;ve looked at the simple UV-Vis example, this one shows how you can manipulate UV-Vis ...">
+
+.. only:: html
+
+  .. image:: /auto_examples/UV/images/thumb/sphx_glr_ellmans_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_UV_ellmans.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Manipulation of UV-Vis data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example is specifically designed to process data from a BSA calibration curve lab exercise...">
+
+.. only:: html
+
+  .. image:: /auto_examples/UV/images/thumb/sphx_glr_BSA_calibration_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_UV_BSA_calibration.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">BSA UV-Vis Calibration</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/UV/Cary_simple
+   /auto_examples/UV/ellmans
+   /auto_examples/UV/BSA_calibration
+

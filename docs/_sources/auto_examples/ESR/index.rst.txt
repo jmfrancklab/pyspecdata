@@ -1,0 +1,79 @@
+
+
+.. _sphx_glr_auto_examples_ESR:
+
+ESR
+---
+
+Examples involving Bruker Electron Spin (Paramagnetic) Resonance Data.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="We use this to demonstrate:">
+
+.. only:: html
+
+  .. image:: /auto_examples/ESR/images/thumb/sphx_glr_epr_u_domain_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_ESR_epr_u_domain.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">EPR u-domain</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Load cw Bruker ESR data, both 1D and 2D.">
+
+.. only:: html
+
+  .. image:: /auto_examples/ESR/images/thumb/sphx_glr_esr_example_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_ESR_esr_example.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Bruker cw ESR Data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This makes use of the package pint, which is a very nice package for handling units.">
+
+.. only:: html
+
+  .. image:: /auto_examples/ESR/images/thumb/sphx_glr_QESR_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_ESR_QESR.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Quantitative ESR</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/ESR/epr_u_domain
+   /auto_examples/ESR/esr_example
+   /auto_examples/ESR/QESR
+

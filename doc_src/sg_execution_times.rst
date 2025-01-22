@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:11.772** total execution time for 27 files **from all galleries**:
+**00:12.897** total execution time for 27 files **from all galleries**:
 
 .. container::
 
@@ -32,22 +32,31 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_auto_examples_DCCT_side_by_side.py` (``../examples/DCCT_side_by_side.py``)
-     - 00:09.646
+   * - :ref:`sphx_glr_auto_examples_ESR_epr_u_domain.py` (``../examples/ESR/epr_u_domain.py``)
+     - 00:07.081
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_DCCT_dimensions.py` (``../examples/DCCT_dimensions.py``)
-     - 00:02.125
+   * - :ref:`sphx_glr_auto_examples_ESR_QESR.py` (``../examples/ESR/QESR.py``)
+     - 00:04.890
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_ESR_esr_example.py` (``../examples/ESR/esr_example.py``)
+     - 00:00.925
      - 0.0
    * - :ref:`sphx_glr_auto_examples_BRD_test.py` (``../examples/BRD_test.py``)
      - 00:00.000
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_BSA_calibration.py` (``../examples/BSA_calibration.py``)
+   * - :ref:`sphx_glr_auto_examples_DCCT_DCCT_dimensions.py` (``../examples/DCCT/DCCT_dimensions.py``)
      - 00:00.000
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_Cary_simple.py` (``../examples/Cary_simple.py``)
+   * - :ref:`sphx_glr_auto_examples_DCCT_DCCT_side_by_side.py` (``../examples/DCCT/DCCT_side_by_side.py``)
      - 00:00.000
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_QESR.py` (``../examples/QESR.py``)
+   * - :ref:`sphx_glr_auto_examples_UV_BSA_calibration.py` (``../examples/UV/BSA_calibration.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_UV_Cary_simple.py` (``../examples/UV/Cary_simple.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_UV_ellmans.py` (``../examples/UV/ellmans.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_basic_example.py` (``../examples/basic_example.py``)
@@ -59,16 +68,7 @@ Computation times
    * - :ref:`sphx_glr_auto_examples_convolution.py` (``../examples/convolution.py``)
      - 00:00.000
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_ellmans.py` (``../examples/ellmans.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_epr_u_domain.py` (``../examples/epr_u_domain.py``)
-     - 00:00.000
-     - 0.0
    * - :ref:`sphx_glr_auto_examples_error_example.py` (``../examples/error_example.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_esr_example.py` (``../examples/esr_example.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_fit_complex.py` (``../examples/fit_complex.py``)

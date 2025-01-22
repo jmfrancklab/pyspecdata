@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Manipulation of UV-Vis data &#8212; pySpecData 0.9.5.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=832af5b0" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css?v=7f9a90b1" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=2b30a6e6" />
+    <script src="../../_static/documentation_options.js?v=a4fd5d96"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="BSA UV-Vis Calibration" href="BSA_calibration.html" />
+    <link rel="prev" title="Simple Cary UV-Vis loading" href="Cary_simple.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-uv-ellmans-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="manipulation-of-uv-vis-data">
+<span id="sphx-glr-auto-examples-uv-ellmans-py"></span><h1>Manipulation of UV-Vis data<a class="headerlink" href="#manipulation-of-uv-vis-data" title="Link to this heading">¶</a></h1>
+<p>After you’ve looked at the simple UV-Vis example, this one shows how you can
+manipulate UV-Vis data.</p>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../_images/sphx_glr_ellmans_001.png" srcset="../../_images/sphx_glr_ellmans_001.png, ../../_images/sphx_glr_ellmans_001_2_00x.png 2.00x" alt="UV data" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_ellmans_002.png" srcset="../../_images/sphx_glr_ellmans_002.png, ../../_images/sphx_glr_ellmans_002_2_00x.png 2.00x" alt="subtract" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_ellmans_003.png" srcset="../../_images/sphx_glr_ellmans_003.png, ../../_images/sphx_glr_ellmans_003_2_00x.png 2.00x" alt="kinetics data" class = "sphx-glr-multi-img"/></li>
+</ul>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>the experiments present in this file are: dict_keys([&#39;rxn buffer w_o&#39;, &#39;rxn buffer with&#39;, &#39;TCM w_o&#39;, &#39;TCMI36C w_o&#39;, &#39;rxn buff w_ellman&#39;, &#39;elution buff w_ellman&#39;, &#39;TCM w_ellman&#39;, &#39;TCMI36C_w_ellman&#39;])
+now I&#39;m going to try a DSW file
+the experiments present in this file are: dict_keys([&#39;protein_1&#39;, &#39;protein_2&#39;, &#39;protein_3&#39;, &#39;protein_4&#39;, &#39;protein_5&#39;, &#39;protein_6&#39;, &#39;protein_7&#39;, &#39;protein_8&#39;, &#39;protein_9&#39;])
+1: UV data |||nm
+2: subtract |||nm
+3: kinetics data |||nm
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">cycle</span>
+<span class="n">color_cycle</span> <span class="o">=</span> <span class="n">cycle</span><span class="p">([</span><span class="s1">&#39;#1f77b4&#39;</span><span class="p">,</span> <span class="s1">&#39;#ff7f0e&#39;</span><span class="p">,</span> <span class="s1">&#39;#2ca02c&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;#d62728&#39;</span><span class="p">,</span> <span class="s1">&#39;#9467bd&#39;</span><span class="p">,</span> <span class="s1">&#39;#8c564b&#39;</span><span class="p">,</span> <span class="s1">&#39;#e377c2&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;#7f7f7f&#39;</span><span class="p">,</span> <span class="s1">&#39;#bcbd22&#39;</span><span class="p">,</span> <span class="s1">&#39;#17becf&#39;</span><span class="p">])</span>
+<span class="c1">#init_logging(&#39;debug&#39;)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">find_file</span><span class="p">(</span><span class="s1">&#39;200703_Ellman_before_SL.DSW&#39;</span><span class="p">,</span>
+    <span class="n">exp_type</span><span class="o">=</span><span class="s1">&#39;UV_Vis/Ellmans_Assay&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;the experiments present in this file are:&quot;</span><span class="p">,</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="k">with</span> <a href="../../modules.html#module-pyspecdata.figlist" title="pyspecdata.figlist" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">figlist_var</span></a><span class="p">()</span> <span class="k">as</span> <a href="../../modules.html#module-pyspecdata.figlist" title="pyspecdata.figlist" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">fl</span></a><span class="p">:</span>
+    <a href="../../auto_api/pyspecdata.html#pyspecdata.figlist.next" title="pyspecdata.figlist.next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">next</span></a><span class="p">(</span><span class="s2">&quot;UV data&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">thisspectrum</span></a> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <a href="../../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">thisspectrum</span></a><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+    <span class="n">ylabel</span><span class="p">(</span><a href="../../auto_api/pyspecdata.html#pyspecdata.nddata.get_units" title="pyspecdata.nddata.get_units" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">thisspectrum</span><span class="o">.</span><span class="n">get_units</span></a><span class="p">())</span>
+    <span class="n">ylim</span><span class="p">((</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <a href="../../auto_api/pyspecdata.html#pyspecdata.figlist.next" title="pyspecdata.figlist.next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">next</span></a><span class="p">(</span><span class="s1">&#39;subtract&#39;</span><span class="p">)</span>
+    <span class="n">subdata</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;TCM&#39;</span><span class="p">:</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;TCM w_ellman&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;TCM w_o&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;136C&#39;</span><span class="p">:</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;TCMI36C_w_ellman&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;TCMI36C w_o&#39;</span><span class="p">],</span>
+            <span class="p">}</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a> <span class="ow">in</span> <span class="n">subdata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">thiscolor</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">color_cycle</span><span class="p">)</span>
+        <a href="../../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">thiscolor</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+        <a href="../../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rxn buff w_ellman&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;:&#39;</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">thiscolor</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">, subtracted&#39;</span><span class="o">%</span><span class="n">k</span><span class="p">)</span>
+    <span class="n">ylabel</span><span class="p">(</span><a href="../../auto_api/pyspecdata.html#pyspecdata.nddata.get_units" title="pyspecdata.nddata.get_units" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">d</span><span class="o">.</span><span class="n">get_units</span></a><span class="p">())</span>
+    <span class="n">gridandtick</span><span class="p">(</span><span class="n">gca</span><span class="p">())</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;now I&#39;m going to try a DSW file&quot;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">find_file</span><span class="p">(</span><span class="s1">&#39;Ras_Stability4&#39;</span><span class="p">,</span>
+            <span class="n">exp_type</span><span class="o">=</span><span class="s1">&#39;UV_Vis/Ras_stability/200803_RT&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;the experiments present in this file are:&quot;</span><span class="p">,</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <a href="../../auto_api/pyspecdata.html#pyspecdata.figlist.next" title="pyspecdata.figlist.next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">next</span></a><span class="p">(</span><span class="s2">&quot;kinetics data&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">thisspectrum</span></a> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <a href="../../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">thisspectrum</span></a><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+    <span class="n">ylabel</span><span class="p">(</span><a href="../../auto_api/pyspecdata.html#pyspecdata.nddata.get_units" title="pyspecdata.nddata.get_units" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">thisspectrum</span><span class="o">.</span><span class="n">get_units</span></a><span class="p">())</span>
+    <span class="n">ylim</span><span class="p">((</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">gridandtick</span><span class="p">(</span><span class="n">gca</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.349 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-uv-ellmans-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/6621c549cb7925de363ef5db8ed6f4cc/ellmans.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">ellmans.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/2518974dbd76c8042a90f8718153bdc3/ellmans.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">ellmans.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/pyspec_path_equaltip.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../fitdata.html">the lmfitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">PySpecData Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../polyfit.html">Polynomial Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ppm_2D.html">PPM in 2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../error_example.html">Error and units example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../calculate_covariance.html">Calculation of the Covariance Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../convolution.html">Simple Convolution Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../image_plot.html">Plotting Routines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ppm_example.html">ppm Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../fit_with_bounds.html">Fit Using Bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../fit_complex.html">Fit complex data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../basic_example.html">Basic Slicing/Filtering Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pcolor_example.html">Unevenly spaced data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../BRD_test.html">1D BRD regularization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../fit_complex_with_transform.html">Fit complex data with transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../fit_fake_data.html">Fitting Data (Nonlinear + Symbolic)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#dcct">DCCT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#esr">ESR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#uv">UV</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#xx-individual-functions-xx">XX Individual Functions XX</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">PySpecData Examples</a><ul>
+  <li><a href="index.html">UV</a><ul>
+      <li>Previous: <a href="Cary_simple.html" title="previous chapter">Simple Cary UV-Vis loading</a></li>
+      <li>Next: <a href="BSA_calibration.html" title="next chapter">BSA UV-Vis Calibration</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2016, John M. Franck.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/auto_examples/UV/ellmans.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
