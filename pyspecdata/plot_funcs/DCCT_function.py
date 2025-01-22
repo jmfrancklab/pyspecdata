@@ -633,6 +633,8 @@ def fl_DCCT(self, this_nddata, **kwargs):
     this_nddata.squeeze()
     if len(this_nddata.dimlabels) < 3:
         image(this_nddata, **kwargs)
+        plt.title(self.current)
     else:
         kwargs["fig"] = self.figdict[self.current]
+        kwargs["title"] = self.current
         DCCT(this_nddata, **kwargs)
