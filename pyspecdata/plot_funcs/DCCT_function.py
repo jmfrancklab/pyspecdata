@@ -344,10 +344,10 @@ def DCCT(
             "0" if j == 0.0 else f"{j}" for j in my_data.getaxis(this_dim)
         ]
     # }}}
-    real_data = False
+    real_data = not any(np.iscomplex(my_data.data.ravel()))
     if cmap is not None:
-        assert all(
-            np.isclose(my_data.data.imag, 0)
+        assert (
+            real_data
         ), "In order to use a color map, you must pass real data"
         if type(cmap) is str:
             cmap = plt.get_cmap(cmap)
@@ -570,14 +570,14 @@ def DCCT(
     # }}}
     # {{{ grab the initialization for nddata without having to cyclically
     #     import
-    if type(this_nddata).__name__ == 'nddata':
+    if type(this_nddata).__name__ == "nddata":
         inifn = type(this_nddata)
         print("nddata")
-    elif type(this_nddata).__name__ == 'nddata_hdf5':
+    elif type(this_nddata).__name__ == "nddata_hdf5":
         inifn = type(this_nddata).__base__
         print("nddata_hdf5")
     else:
-        raise ValueError("type is"+type(this_nddata).__name__)
+        raise ValueError("type is" + type(this_nddata).__name__)
     # }}}
     # to drop into ax_list, just do
     # A.smoosh(a_shape.dimlabels, 'smooshed', noaxis=True)
@@ -627,12 +627,12 @@ def DCCT(
             "transXdispYfig": transXdispYfig,
         },
     )
+
+
 def fl_DCCT(self, this_nddata, **kwargs):
+    this_nddata.squeeze()
     if len(this_nddata.dimlabels) < 3:
-        if cmap is not None:
-            kwargs["cmap"] = cmap
-        if fig is not None:
-            kwargs["fig"] = fig
         image(this_nddata, **kwargs)
     else:
+        kwargs["fig"] = self.figdict[self.current]
         DCCT(this_nddata, **kwargs)
