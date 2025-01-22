@@ -297,9 +297,8 @@ def DCCT(
             temp.height,
         ]
 
-    # {{{ Generate alias labels
+    # {{{ Generate alias labels for phase cycling dimensions
     ordered_labels = {}
-    # {{{ Labels for phase cycling dimensions
     for this_dim in [j for j in my_data.dimlabels if j.startswith("ph")]:
         if my_data.get_ft_prop(this_dim):
             n_ph = my_data.shape[this_dim]
@@ -338,11 +337,10 @@ def DCCT(
                     temp = "X"
                 labels_in_order.append(temp)
             ordered_labels[this_dim] = labels_in_order
-        # }}}
-    else:
-        ordered_labels[this_dim] = [
-            "0" if j == 0.0 else f"{j}" for j in my_data.getaxis(this_dim)
-        ]
+        else:
+            ordered_labels[this_dim] = [
+                "0" if j == 0.0 else f"{j}" for j in my_data.getaxis(this_dim)
+            ]
     # }}}
     real_data = not any(np.iscomplex(my_data.data.ravel()))
     if cmap is not None:
