@@ -343,10 +343,10 @@ def DCCT(
                 labels_in_order.append(temp)
             ordered_labels[this_dim] = labels_in_order
         # }}}
-    else:
-        ordered_labels[this_dim] = [
-            "0" if j == 0.0 else f"{j}" for j in my_data.getaxis(this_dim)
-        ]
+        else:
+            ordered_labels[this_dim] = [
+                "0" if j == 0.0 else f"{j}" for j in my_data.getaxis(this_dim)
+            ]
     # }}}
     real_data = False
     if cmap is not None:
@@ -581,7 +581,7 @@ def DCCT(
     depth = num_dims
 
     # {{{ Place decorations on figure
-
+    
     decorate_axes(
         my_data,
         idx,
