@@ -2,7 +2,6 @@ r"""This subpackage contains plotting functions that take advantage of :class:`n
 __all__ = [
     "image",
     "pcolormesh",
-    "DCCT",
 ]
 
 from . import *

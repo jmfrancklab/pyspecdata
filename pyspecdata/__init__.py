@@ -27,11 +27,8 @@ from .general_functions import (
     strm,
     whereblocks,
 )
-from .plot_funcs import (
-    DCCT,
-    image,
-    plot,
-)
+from .plot_funcs.DCCT_function import DCCT
+from .plot_funcs.image import image
 from .core import *
 from .load_files import *
 from .figlist import *
