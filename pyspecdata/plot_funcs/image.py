@@ -6,7 +6,8 @@ import logging
 
 
 def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
-    r"Please don't call image directly anymore -- use the image method of figurelist"
+    """Please don't call image directly anymore -- use the image method of
+    figurelist"""
     x_inverted = False
     y_inverted = False
     A = A.copy()
@@ -61,13 +62,14 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
                     A.setaxis(thisaxis, "#").set_units(thisaxis, "#")
                 else:
                     raise ValueError(
-                        "You are not allowed to use image on data that"
-                        " doesn't have a uniformly spaced axis -- it is likely a"
+                        "You are not allowed to use image on data that doesn't"
+                        " have a uniformly spaced axis -- it is likely a"
                         " misrepresentation of the data you are looking at."
-                        " For example, if you are looking at NMR data with a set of"
-                        " variable delays that are unevenly spaced, relabel this axis"
-                        " by index number --> .C.setaxis('%s','#').set_units('%s','scan"
-                        " #').\nThen you have an accurate representation of your data"
+                        " For example, if you are looking at NMR data with a"
+                        " set of variable delays that are unevenly spaced,"
+                        " relabel this axis by index number -->"
+                        " .C.setaxis('%s','#').set_units('%s','scan #').\nThen"
+                        " you have an accurate representation of your data"
                         % (2 * (thisaxis,))
                     )
         setlabels = True
@@ -154,20 +156,22 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
         # }}}
     else:
         raise ValueError(
-            "I don't understand the value you've set for the origin keyword argument"
+            "I don't understand the value you've set for the origin keyword"
+            " argument"
         )
-    kwargs[
-        "origin"
-    ] = origin  # required so that imshow now displays the image correctly
+    kwargs["origin"] = (
+        origin  # required so that imshow now displays the image correctly
+    )
     linecounter = 0
     if A.ndim > 2:
         setp(ax.get_yticklabels(), visible=False)
         ax.yaxis.set_ticks_position("none")
     while (
         A.ndim > 2
-    ):  # to substitude for imagehsvm, etc., so that we just need a ersion of ft
-        # order according to how it's ordered in the memory
-        # the innermost two will form the image -- first add a line to the end of the images we're going to join up
+    ):  # to substitude for imagehsvm, etc., so that we just need a version of
+        # ft order according to how it's ordered in the memory the innermost
+        # two will form the image -- first add a line to the end of the images
+        # we're going to join up
         tempsize = np.array(A.shape)  # make a tuple the right shape
         if linecounter == 0 and spacing < 1.0:
             spacing = round(
@@ -175,7 +179,8 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
             )  # find the length of the thing not counting the columns
         tempsize[-2] = (
             2 * linecounter + spacing
-        )  # all dims are the same except the image row, to which I add an increasing number of rows
+        )  # all dims are the same except the image row, to which I add an
+        #    increasing number of rows
         # print "iterate (A.ndim=%d) -- now linecounter is "%A.ndim,linecounter
         linecounter += tempsize[-2]  # keep track of the extra lines at the end
         A = np.concatenate(
@@ -198,7 +203,9 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
             )
     A = A[
         : A.shape[0] - linecounter, :
-    ]  # really I should an extra counter besides linecounter now that I am using "spacing", but leave alone for now, to be sure I don't cut off data
+    ]  # really I should an extra counter besides linecounter now that I am
+    #    using "spacing", but leave alone for now, to be sure I don't cut off
+    #    data
     if origin == "flip":
         # {{{ if origin is "flip", we need to manually flip the data
         A = A[::-1, :]
@@ -256,7 +263,8 @@ def imagehsv(A, logscale=False, black=False, scaling=None):
     C = V * S
     H = (
         (np.angle(-1 * A).reshape(-1, 1) + pi) / 2.0 / pi * 6.0
-    )  # divide into 60 degree chunks -- the -1 is to rotate so red is at origin
+    )  # divide into 60 degree chunks -- the -1 is to rotate so red is at
+    #    origin
     X = C * (1 - abs(np.mod(H, 2) - 1))
     m = V - C
     colors = np.ones(list(A.shape) + [3])
@@ -287,7 +295,8 @@ def imagehsv(A, logscale=False, black=False, scaling=None):
     colors *= n - 1
     if black:
         # if the background is black, make the separators white
-        # here, we have to remember that we're already scaled up to a scale of 0--255
+        # here, we have to remember that we're already scaled up to a scale of
+        # 0--255
         colors[mask * r_[True, True, True]] = 255.0
     else:
         # if the background is white, make the separators black
@@ -401,7 +410,8 @@ def fl_image(self, A, **kwargs):
     if human_units:
         firstarg = self.check_units(
             A, -1, 0
-        )  # check units, and if need be convert to human units, where x is the last dimension and y is the first
+        )  # check units, and if need be convert to human units, where x is the
+        #    last dimension and y is the first
     else:
         firstarg = A
     if self.black and "black" not in list(kwargs.keys()):
