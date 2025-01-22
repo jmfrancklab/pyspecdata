@@ -1,4 +1,5 @@
 from ..general_functions import strm, process_kwargs, check_ascending_axis
+from .DCCT_function import DCCT
 from numpy import r_, c_, ix_, nan, pi
 import numpy as np
 from ..ndshape import ndshape_base as ndshape
@@ -423,3 +424,12 @@ def fl_image(self, A, **kwargs):
                 interpolation = "nearest"
         retval.set_interpolation(interpolation)
     return retval
+def fl_DCCT(self, this_nddata, **kwargs):
+    if len(this_nddata.dimlabels) < 3:
+        if cmap is not None:
+            kwargs["cmap"] = cmap
+        if fig is not None:
+            kwargs["fig"] = fig
+        image(this_nddata, **kwargs)
+    else:
+        DCCT(this_nddata, **kwargs)

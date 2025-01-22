@@ -5,8 +5,9 @@ coherence transfer dimensions using domain coloring plotting.
 
 from numpy import r_, nan
 import numpy as np
-from .core import ndshape, nddata
-from .general_functions import strm, process_kwargs
+from .image import image
+from ..core import ndshape, nddata
+from ..general_functions import strm, process_kwargs
 import matplotlib.pyplot as plt
 import matplotlib.lines as lines
 from matplotlib.patches import FancyArrowPatch
@@ -162,10 +163,7 @@ def place_labels(
         logging.debug(
             strm(
                 "tick locations",
-                [
-                    j.get_window_extent().bounds
-                    for j in ax1.get_yticklabels()
-                ],
+                [j.get_window_extent().bounds for j in ax1.get_yticklabels()],
             )
         )
         # {{{ only for the innermost,
