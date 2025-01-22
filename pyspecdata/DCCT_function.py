@@ -598,7 +598,6 @@ def DCCT(
         transDispTranslated,
         transXdispYfig,
     )
-    het
     place_labels(
         my_data,
         ax_list[0],
