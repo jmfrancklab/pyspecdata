@@ -1,10 +1,13 @@
-from .general_functions import *
+from .plot_funcs import (
+    DCCT,
+    image,
+    plot,
+)
 from .core import *
 from .load_files import *
 from .figlist import *
 from .nnls import *
 from .lmfitdata import lmfitdata
-from .DCCT_function import DCCT
 from .generate_fake_data import fake_data
 from .dict_utils import make_ndarray, unmake_ndarray
 from .datadir import getDATADIR, log_fname, proc_data_target_dir

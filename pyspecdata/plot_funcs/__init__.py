@@ -2,6 +2,7 @@ r"""This subpackage contains plotting functions that take advantage of :class:`n
 __all__ = [
     "image",
     "pcolormesh",
+    "DCCT",
 ]
 
-from . import *  # needed so that pyspecdata.fourier contains all the previous names
+from . import *
