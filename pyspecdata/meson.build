@@ -1,5 +1,4 @@
 py_sources=[
-'DCCT_function.py',
 '__init__.py',
 'axis_class.py',
 'core.py',

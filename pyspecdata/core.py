@@ -248,12 +248,11 @@ def mydiff(data, axis=-1):
 # }}}
 def normal_attrs(obj):
     myattrs = [
-        x for x in dir(obj) if not inspect.ismethod(obj.__getattribute__(x))
-    ]
-    myattrs = [x for x in myattrs if not x[0:2] == "__"]
-    # next line filters out properties
-    myattrs = [
-        x for x in myattrs if x not in ["C", "angle", "imag", "real", "shape"]
+        x
+        for x in dir(obj)
+        if (x[0:2] != "__")
+        and (x not in ["C", "angle", "imag", "real", "shape"])
+        and (not inspect.ismethod(obj.__getattribute__(x)))
     ]
     return myattrs
 
@@ -341,9 +340,9 @@ def make_bar_graph_indices(
                 recursion_depth=recursion_depth + 1,
             )
             index_values.append(these_index_values)
-            label_values.append([
-                str(unique_values[k]) + "," + j for j in these_labels
-            ])
+            label_values.append(
+                [str(unique_values[k]) + "," + j for j in these_labels]
+            )
         # {{{ scale the result of each call down to the equal size (regardless
         #     of number of elements), shift by the position in this np.array,
         #     and return
@@ -3798,7 +3797,7 @@ class nddata(object):
         if self.get_units() is not None:
             # if the data has units, return a pint quantity rather than
             # just a floating-point number
-            return Q_(retval,self.get_units())
+            return Q_(retval, self.get_units())
         else:
             return retval
 

@@ -4,4 +4,4 @@ __all__ = [
     "pcolormesh",
 ]
 
-from . import *  # needed so that pyspecdata.fourier contains all the previous names
+from . import *

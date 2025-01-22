@@ -465,6 +465,8 @@ def find_file(
                 if "fl" in kwargs.keys():
                     kwargs.pop("fl")
                 logger.debug("this file was postprocessed successfully")
+            elif postproc_type == "stub":
+                pass
             else:
                 logger.debug(
                     "postprocessing not defined for file with postproc_type %s"
