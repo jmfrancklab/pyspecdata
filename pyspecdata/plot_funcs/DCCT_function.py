@@ -5,8 +5,6 @@ coherence transfer dimensions using domain coloring plotting.
 
 from numpy import r_, nan
 import numpy as np
-from .image import image
-from ..core import ndshape, nddata
 from ..general_functions import strm, process_kwargs
 import matplotlib.pyplot as plt
 import matplotlib.lines as lines
@@ -304,7 +302,7 @@ def DCCT(
     # {{{ Labels for phase cycling dimensions
     for this_dim in [j for j in my_data.dimlabels if j.startswith("ph")]:
         if my_data.get_ft_prop(this_dim):
-            n_ph = ndshape(my_data)[this_dim]
+            n_ph = my_data.shape[this_dim]
             this_max_coh_jump = max_coh_jump[this_dim]
             all_possibilities = np.empty(
                 (int((2 * this_max_coh_jump + 1) / n_ph) + 1) * n_ph
@@ -356,7 +354,7 @@ def DCCT(
             my_data.data = my_data.data.real
             real_data = True
     my_data.human_units()
-    a_shape = ndshape(this_nddata)
+    a_shape = this_nddata.shape
     num_dims = len(a_shape.dimlabels[:-2])
     divisions = []
 
@@ -573,7 +571,7 @@ def DCCT(
     # to drop into ax_list, just do
     # A.smoosh(a_shape.dimlabels, 'smooshed', noaxis=True)
     # in ax_list[0] put A['smooshed',0], etc
-    idx = nddata(r_[0 : np.prod(a_shape.shape[:-2])], [-1], ["smooshed"])
+    idx = type(this_nddata)(r_[0 : np.prod(a_shape.shape[:-2])], [-1], ["smooshed"])
     idx.chunk("smooshed", a_shape.dimlabels[:-2], a_shape.shape[:-2])
     remaining_dim = a_shape.dimlabels[:-2]
     depth = num_dims

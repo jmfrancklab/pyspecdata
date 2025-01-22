@@ -2,7 +2,6 @@ from ..general_functions import strm, process_kwargs, check_ascending_axis
 from .DCCT_function import DCCT
 from numpy import r_, c_, ix_, nan, pi
 import numpy as np
-from ..ndshape import ndshape_base as ndshape
 from pylab import gca, sca, imshow, xlabel, ylabel, title, colorbar, setp
 import logging
 
@@ -80,7 +79,7 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
             y_inverted = True
         x_label = templabels[-1]
         if A.getaxis(x_label) is None:
-            x = r_[0, ndshape(A)[x_label]]
+            x = r_[0, A.shape[x_label]]
         else:
             x = list(A.getaxis(x_label))
         x_label = A.unitify_axis(x_label)
@@ -94,7 +93,7 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
                 y = r_[0 : A.data.shape[A.axn(y_label)]]
             y_label = A.unitify_axis(y_label)
         else:
-            these_dimsizes = [str(ndshape(A)[x]) for x in templabels]
+            these_dimsizes = [str(A.shape[x]) for x in templabels]
 
             def axis_labeler(
                 x,

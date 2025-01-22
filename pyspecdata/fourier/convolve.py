@@ -1,6 +1,6 @@
 from pylab import pi
 import numpy as np
-from pyspecdata import strm
+from ..general_functions import strm
 import logging
 
 

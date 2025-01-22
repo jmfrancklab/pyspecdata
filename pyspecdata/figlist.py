@@ -673,7 +673,6 @@ class figlist(object):
         return
 
     image = this_plotting.image.fl_image
-    DCCT = this_plotting.image.fl_DCCT
 
     def marked_text(self, marker, input_text="", sep="\n"):
         """Creates a named `marker` where we can place text.   If `marker`
