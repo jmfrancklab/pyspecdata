@@ -39,7 +39,7 @@ if not inside_sphinx():
     from .core import plot as pyspec_plot
     from .core import nddata as pyspec_nddata
     from .core import nddata_hdf5 as pyspec_nddata_hdf5
-    from .DCCT_function import DCCT as pyspec_DCCT
+    from . import DCCT as pyspec_DCCT
 
 
 class mat_formatter(object):

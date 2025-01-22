@@ -55,6 +55,7 @@ from . import plot_funcs as this_plotting
 from .general_functions import lsafe as orig_lsafe
 from .general_functions import (
     Q_,
+    ureg,
     autostringconvert,
     dp,
     emptytest,

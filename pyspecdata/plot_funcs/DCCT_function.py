@@ -568,10 +568,21 @@ def DCCT(
                 hatch="//",
             )
     # }}}
+    # {{{ grab the initialization for nddata without having to cyclically
+    #     import
+    if type(this_nddata).__name__ == 'nddata':
+        inifn = type(this_nddata)
+        print("nddata")
+    elif type(this_nddata).__name__ == 'nddata_hdf5':
+        inifn = type(this_nddata).__base__
+        print("nddata_hdf5")
+    else:
+        raise ValueError("type is"+type(this_nddata).__name__)
+    # }}}
     # to drop into ax_list, just do
     # A.smoosh(a_shape.dimlabels, 'smooshed', noaxis=True)
     # in ax_list[0] put A['smooshed',0], etc
-    idx = type(this_nddata)(r_[0 : np.prod(a_shape.shape[:-2])], [-1], ["smooshed"])
+    idx = inifn(r_[0 : np.prod(a_shape.shape[:-2])], [-1], ["smooshed"])
     idx.chunk("smooshed", a_shape.dimlabels[:-2], a_shape.shape[:-2])
     remaining_dim = a_shape.dimlabels[:-2]
     depth = num_dims
