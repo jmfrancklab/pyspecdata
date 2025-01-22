@@ -33,14 +33,14 @@ Show how :func:`to_ppm()` can apply to two dimensions!
 
       .. image-sg:: /auto_examples/images/sphx_glr_ppm_2D_001.png
          :alt: the spectrum
-         :srcset: /auto_examples/images/sphx_glr_ppm_2D_001.png
+         :srcset: /auto_examples/images/sphx_glr_ppm_2D_001.png, /auto_examples/images/sphx_glr_ppm_2D_001_2_00x.png 2.00x
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /auto_examples/images/sphx_glr_ppm_2D_002.png
          :alt: after converting to ppm
-         :srcset: /auto_examples/images/sphx_glr_ppm_2D_002.png
+         :srcset: /auto_examples/images/sphx_glr_ppm_2D_002.png, /auto_examples/images/sphx_glr_ppm_2D_002_2_00x.png 2.00x
          :class: sphx-glr-multi-img
 
 
@@ -91,7 +91,7 @@ Show how :func:`to_ppm()` can apply to two dimensions!
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.254 seconds)
+   **Total running time of the script:** (0 minutes 3.517 seconds)
 
 
 .. _sphx_glr_download_auto_examples_ppm_2D.py:

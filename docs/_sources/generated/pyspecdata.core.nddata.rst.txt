@@ -37,6 +37,7 @@
       ~nddata.cov_mat
       ~nddata.cropped_log
       ~nddata.diff
+      ~nddata.div_units
       ~nddata.dot
       ~nddata.eval_poly
       ~nddata.extend
@@ -46,6 +47,7 @@
       ~nddata.fromaxis
       ~nddata.ft
       ~nddata.ft_clear_startpoints
+      ~nddata.ft_new_startpoint
       ~nddata.ft_state_to_str
       ~nddata.ftshift
       ~nddata.get_covariance
@@ -104,6 +106,7 @@
       ~nddata.secsy_transform
       ~nddata.secsy_transform_manual
       ~nddata.set_error
+      ~nddata.set_ft_initial
       ~nddata.set_ft_prop
       ~nddata.set_plot_color
       ~nddata.set_plot_color_next

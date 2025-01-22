@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:01.906** total execution time for 5 files **from auto_examples/indiv_funcs**:
+**00:03.949** total execution time for 5 files **from auto_examples/indiv_funcs**:
 
 .. container::
 
@@ -33,17 +33,17 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_auto_examples_indiv_funcs_extend.py` (``extend.py``)
-     - 00:00.764
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_indiv_funcs_unitary_ft.py` (``unitary_ft.py``)
-     - 00:00.534
+     - 00:02.360
      - 0.0
    * - :ref:`sphx_glr_auto_examples_indiv_funcs_convolve.py` (``convolve.py``)
-     - 00:00.425
+     - 00:00.702
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_indiv_funcs_unitary_ft.py` (``unitary_ft.py``)
+     - 00:00.586
      - 0.0
    * - :ref:`sphx_glr_auto_examples_indiv_funcs_test_colormatch.py` (``test_colormatch.py``)
-     - 00:00.132
+     - 00:00.229
      - 0.0
    * - :ref:`sphx_glr_auto_examples_indiv_funcs_hdf_test.py` (``hdf_test.py``)
-     - 00:00.052
+     - 00:00.071
      - 0.0

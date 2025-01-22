@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>List of Modules and Sub-Packages &#8212; pySpecData 0.9.5.3.2 documentation</title>
+    <title>List of Modules and Sub-Packages &#8212; pySpecData 0.9.5.5.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=832af5b0" />
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css?v=7f9a90b1" />
@@ -14,7 +14,7 @@
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=2b30a6e6" />
-    <script src="_static/documentation_options.js?v=5b73e601"></script>
+    <script src="_static/documentation_options.js?v=a4fd5d96"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="icon" href="_static/favicon.ico"/>
@@ -82,42 +82,58 @@ will hopefull be intuitive to those familiar with SQL, etc.</p>
 <p>The figure list gives us three things:</p>
 <ul>
 <li><p>Automatically handle the display and scaling of nddata units.</p></li>
-<li><p>Refer to plots by name, rather than number (matplotlib has a mechanism for this, which we ignore)</p></li>
-<li><p>A “basename” allowing us to generate multiple sets of plots for different datasets – <em>e.g.</em> 5 plots with 5 names plotted for 3 different datasets and labeled by 3 different basenames to give 15 plots total</p></li>
-<li><p>Ability to run the same code from the command line or from within a python environment inside latex.
-*   this is achieved by choosing figlist (default gui) and figlistl (inherits</p>
+<li><p>Refer to plots by name, rather than number (matplotlib has a mechanism for
+this, which we ignore)</p></li>
+<li><p>A “basename” allowing us to generate multiple sets of plots for different
+datasets – <em>e.g.</em> 5 plots with 5 names plotted for 3 different datasets
+and labeled by 3 different basenames to give 15 plots total</p></li>
+<li><p>Ability to run the same code from the command line or from within a python
+environment inside latex.
+*   this is achieved by choosing figlist (default gui) and figlistl</p>
 <blockquote>
-<div><p>from figlist – renders to latex – the <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.figlist.figlist.show" title="pyspecdata.figlist.figlist.show"><code class="xref py py-func docutils literal notranslate"><span class="pre">figlist.show()</span></code></a> method is
-changed)</p>
+<div><p>(inherits from figlist – renders to latex – the <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.figlist.figlist.show" title="pyspecdata.figlist.figlist.show"><code class="xref py py-func docutils literal notranslate"><span class="pre">figlist.show()</span></code></a>
+method is changed)</p>
 </div></blockquote>
 <ul class="simple">
 <li><p>potential planned future ability to handle html</p></li>
 </ul>
 </li>
-<li><p>Ability to handle mayavi plots and matplotlib plots (switch to glumpy, etc.?)
+<li><p>Ability to handle mayavi plots and matplotlib plots (switch to glumpy,
+etc.?)
 *   potential planned future ability to handle gnuplot</p></li>
 </ul>
 <div class="admonition-todo admonition" id="id3">
 <p class="admonition-title">Todo</p>
-<p>Currently the “items” that the list tracks correspond to either plot formatting directives (see <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.figlist.figlist.setprops" title="pyspecdata.figlist.figlist.setprops"><code class="xref py py-func docutils literal notranslate"><span class="pre">figlist.setprops()</span></code></a>), text, or figures.</p>
-<p>We should scrap most elements of the current implementation of figlist and rebuild it</p>
+<p>Currently the “items” that the list tracks correspond to either plot
+formatting directives (see <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.figlist.figlist.setprops" title="pyspecdata.figlist.figlist.setprops"><code class="xref py py-func docutils literal notranslate"><span class="pre">figlist.setprops()</span></code></a>), text, or figures.</p>
+<p>We should scrap most elements of the current implementation of figlist and
+rebuild it</p>
 <ul>
-<li><p>currently the figlist is set up to use a context block.  We will not only keep this, but also make it so the individual axes.  Syntax (following a <code class="docutils literal notranslate"><span class="pre">fl</span> <span class="pre">=</span> <span class="pre">figlist_var()</span></code> should look like this: <code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">fl['my</span> <span class="pre">plot</span> <span class="pre">name']</span> <span class="pre">as</span> <span class="pre">p:</span></code> and contents of the block would then be <code class="docutils literal notranslate"><span class="pre">p.plot(...)</span></code>, <em>etc.</em></p></li>
+<li><p>currently the figlist is set up to use a context block.  We will not
+only keep this, but also make it so the individual axes.  Syntax
+(following a <code class="docutils literal notranslate"><span class="pre">fl</span> <span class="pre">=</span> <span class="pre">figlist_var()</span></code> should look like this: <code class="docutils literal notranslate"><span class="pre">with</span>
+<span class="pre">fl['my</span> <span class="pre">plot</span> <span class="pre">name']</span> <span class="pre">as</span> <span class="pre">p:</span></code> and contents of the block would then be
+<code class="docutils literal notranslate"><span class="pre">p.plot(...)</span></code>, <em>etc.</em></p></li>
 <li><p>define an “organization” function of the figlist block.  This allows us
-to use standard matplotlib commands to set up and organize the axes, using
-standard matplotlib commands (twinx, subplot, etc.)</p></li>
-<li><p>figlist will still have a “next” function, but its purpose will be to simply:
-*   grab the current axis using matplotlib gca() (assuming the id of the axis isn’t yet assigned to an existing figlist_axis – see below)
-*   otherwise, if the name argument to “next” has not yet been called,</p>
+to use standard matplotlib commands to set up and organize the axes,
+using standard matplotlib commands (twinx, subplot, etc.)</p></li>
+<li><p>figlist will still have a “next” function, but its purpose will be to
+simply:
+*   grab the current axis using matplotlib gca() (assuming the id of</p>
 <blockquote>
-<div><p>call matplotlib’s figure(), followed by subplot(111), then do the
-previous bullet point</p>
+<div><p>the axis isn’t yet assigned to an existing figlist_axis – see
+below)</p>
 </div></blockquote>
 <ul class="simple">
-<li><p>the next function is only intended to be called explicitly from within the organization function</p></li>
+<li><p>otherwise, if the name argument to “next” has not yet been called,
+call matplotlib’s figure(), followed by subplot(111), then do the
+previous bullet point</p></li>
+<li><p>the next function is only intended to be called explicitly from
+within the organization function</p></li>
 </ul>
 </li>
-<li><p>figlist will consist simply of a list of figlist_axis objects (a new object type), which have the following attributes:
+<li><p>figlist will consist simply of a list of figlist_axis objects (a new
+object type), which have the following attributes:
 *   type – indicating the type of object:</p>
 <blockquote>
 <div><ul class="simple">
@@ -131,33 +147,45 @@ previous bullet point</p>
 <li><p>the name of the plot</p></li>
 <li><p>a matplotlib or mayavi axes object</p></li>
 <li><p>the units associated with the axes</p></li>
-<li><p>a collection.OrderedDict giving the nddata that are associated with the plot, by name.
-*   If these do not have a name, they will be automatically assigned a name.
-*   The name should be used by the new “plot” method to generate</p>
+<li><p>a collection.OrderedDict giving the nddata that are associated with
+the plot, by name.
+*   If these do not have a name, they will be automatically</p>
 <blockquote>
-<div><p>the “label” for the legend, and can be subsequently used to quickly
-replace data – e.g. in a Qt application.</p>
+<div><p>assigned a name.</p>
 </div></blockquote>
+<ul class="simple">
+<li><p>The name should be used by the new “plot” method to generate
+the “label” for the legend, and can be subsequently used to
+quickly replace data – e.g. in a Qt application.</p></li>
+</ul>
 </li>
-<li><p>a dictionary giving any arguments to the pyspecdata.core.plot (or countour, waterfall, etc) function</p></li>
+<li><p>a dictionary giving any arguments to the pyspecdata.core.plot (or
+countour, waterfall, etc) function</p></li>
 <li><p>the title – by default the name of the plot – can be a setter</p></li>
 <li><p>the result of the id(…) function, called on the axes object –&gt;
 this can be used to determine if the axes has been used yet</p></li>
 <li><p>do not use check_units – the plot method (or contour, waterfall,
 etc.) will only add the nddata objects to the OrderedDict, add the
 arguments to the argument dictionary, then exit
-*   In the event that more than one plot method is called, the name of the underlying nddaata should be changed</p></li>
+*   In the event that more than one plot method is called, the name</p>
+<blockquote>
+<div><p>of the underlying nddaata should be changed</p>
+</div></blockquote>
+</li>
 <li><p>a boolean legend_suppress attribute</p></li>
-<li><p>a boolean legend_internal attribute (to place the legend internally, rather than outside the axis)</p></li>
+<li><p>a boolean legend_internal attribute (to place the legend
+internally, rather than outside the axis)</p></li>
 <li><p>a show method that is called by the figlistl show method.  This
 will determine the appropriate units and use them to determine the
 units and scale of the axes, and then go through and call
 pyspecdata.core.plot on each dataset
-(in matplotlib, this should be done with a formatting statement rather than by manipulating the axes themselves)
+(in matplotlib, this should be done with a formatting statement
+rather than by manipulating the axes themselves)
 and finally call autolegend, unless the legend is supressed</p></li>
 </ul>
 </li>
-<li><p>The “plottype” (currently an argument to the plot function) should be an attribute of the axis object</p></li>
+<li><p>The “plottype” (currently an argument to the plot function) should be
+an attribute of the axis object</p></li>
 </ul>
 </div>
 </section>
@@ -269,9 +297,14 @@ It’s assumed that each module for each different file type
 provides a dictionary called <cite>postproc_lookup</cite> (some are already
 available in pySpecData, but also, see the <cite>lookup</cite> argument,
 below).</p>
+<p>Note that we call this “postprocessing” here because it follows
+the data organization, <em>etc.</em>, performed by the rest of the file
+in other contexts, however, we might call this “preprocessing”</p>
 <p>If <cite>postproc</cite> is a string,
 it looks up the string inside the <cite>postproc_lookup</cite>
 dictionary that’s appropriate for the file type.</p>
+<p>If <cite>postproc</cite> is <cite>“none”</cite>,
+then explicitly do not apply any type of postprocessing.</p>
 <p>If <cite>postproc</cite> is None,
 it checks to see if the any of the loading functions that were
 called set the <cite>postproc_type</cite> property
@@ -337,14 +370,14 @@ This makes the compilation of a Latex lab notebook extremely efficient.</p>
 <blockquote>
 <div><p>%load_ext pyspecdata.ipy</p>
 </div></blockquote>
-<p>That allows for fancy representation nddata instances – <em>i.e.</em> you can type the name of
-an instance and hit shift-Enter, and a plot will appear rather than some text
-representation.</p>
+<p>That allows for fancy representation nddata instances – <em>i.e.</em> you can type
+the name of an instance and hit shift-Enter, and a plot will appear rather than
+some text representation.</p>
 <p>Also overrides plain text representation
 of numpy arrays with latex representation that we build ourselves
 or pull from sympy.</p>
 <p>Also known as “generalized jupyter awesomeness” in only ~150 lines of code!</p>
-<p>See [O’Reilly Book](<a class="reference external" href="https://www.safaribooksonline.com/blog/2014/02/11/altering-display-existing-classes-ipython/">https://www.safaribooksonline.com/blog/2014/02/11/altering-display-existing-classes-ipython/</a>)
+<p>See [O’Reilly Book](<a class="reference external" href="https://www.safaribooksonline.com/blog/2014/02/11/altering">https://www.safaribooksonline.com/blog/2014/02/11/altering</a>-display-existing-classes-ipython/)
 for minimal guidance if you’re interested.</p>
 </section>
 <section id="module-pyspecdata.ndshape">

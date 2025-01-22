@@ -36,7 +36,9 @@
       ~lmfitdata.copyaxes
       ~lmfitdata.cov_mat
       ~lmfitdata.cropped_log
+      ~lmfitdata.define_residual_transform
       ~lmfitdata.diff
+      ~lmfitdata.div_units
       ~lmfitdata.dot
       ~lmfitdata.eval
       ~lmfitdata.eval_poly
@@ -48,6 +50,7 @@
       ~lmfitdata.fromaxis
       ~lmfitdata.ft
       ~lmfitdata.ft_clear_startpoints
+      ~lmfitdata.ft_new_startpoint
       ~lmfitdata.ft_state_to_str
       ~lmfitdata.ftshift
       ~lmfitdata.gen_indices
@@ -113,6 +116,7 @@
       ~lmfitdata.secsy_transform
       ~lmfitdata.secsy_transform_manual
       ~lmfitdata.set_error
+      ~lmfitdata.set_ft_initial
       ~lmfitdata.set_ft_prop
       ~lmfitdata.set_guess
       ~lmfitdata.set_plot_color

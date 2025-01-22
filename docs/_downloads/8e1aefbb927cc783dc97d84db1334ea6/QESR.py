@@ -16,7 +16,6 @@ from pint import UnitRegistry
 ureg = UnitRegistry(system="mks",autoconvert_offset_to_baseunit=True, auto_reduce_dimensions=True)
 
 Q_ = ureg.Quantity
-colors = plt.rcParams["axes.prop_cycle"]() # this is the default matplotlib cycler for line styles
 fieldaxis = '$B_0$'
 pushout = 3
 QESR_concs = r_[190.8,
@@ -60,8 +59,9 @@ with figlist_var() as fl:
                 f"S {S:~P}\n",
                 f"c {c:~P}\n",
                 f"signal_denom {signal_denom:~P} {signal_denom.magnitude}")
-        d.set_plot_color(next(colors)['color'])
-        #d -= d[fieldaxis, -100:].data.mean()
+        d.set_plot_color_next() # move to the next plot color -- note that all
+        #                         datasets derived from this will share the
+        #                         same color, until we change it
         d -= background
         fl.next("absorption, direct")
         d_abs = d.C.integrate(fieldaxis, cumulative=True)

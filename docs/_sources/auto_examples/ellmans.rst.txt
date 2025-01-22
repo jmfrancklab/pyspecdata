@@ -35,21 +35,21 @@ manipulate UV-Vis data.
 
       .. image-sg:: /auto_examples/images/sphx_glr_ellmans_001.png
          :alt: UV data
-         :srcset: /auto_examples/images/sphx_glr_ellmans_001.png
+         :srcset: /auto_examples/images/sphx_glr_ellmans_001.png, /auto_examples/images/sphx_glr_ellmans_001_2_00x.png 2.00x
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /auto_examples/images/sphx_glr_ellmans_002.png
          :alt: subtract
-         :srcset: /auto_examples/images/sphx_glr_ellmans_002.png
+         :srcset: /auto_examples/images/sphx_glr_ellmans_002.png, /auto_examples/images/sphx_glr_ellmans_002_2_00x.png 2.00x
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /auto_examples/images/sphx_glr_ellmans_003.png
          :alt: kinetics data
-         :srcset: /auto_examples/images/sphx_glr_ellmans_003.png
+         :srcset: /auto_examples/images/sphx_glr_ellmans_003.png, /auto_examples/images/sphx_glr_ellmans_003_2_00x.png 2.00x
          :class: sphx-glr-multi-img
 
 
@@ -125,7 +125,7 @@ manipulate UV-Vis data.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.734 seconds)
+   **Total running time of the script:** (0 minutes 2.648 seconds)
 
 
 .. _sphx_glr_download_auto_examples_ellmans.py:

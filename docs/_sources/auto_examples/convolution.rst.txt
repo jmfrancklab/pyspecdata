@@ -40,14 +40,14 @@ treated differently.
 
       .. image-sg:: /auto_examples/images/sphx_glr_convolution_001.png
          :alt: Time domain
-         :srcset: /auto_examples/images/sphx_glr_convolution_001.png
+         :srcset: /auto_examples/images/sphx_glr_convolution_001.png, /auto_examples/images/sphx_glr_convolution_001_2_00x.png 2.00x
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /auto_examples/images/sphx_glr_convolution_002.png
          :alt: Fourier transform
-         :srcset: /auto_examples/images/sphx_glr_convolution_002.png
+         :srcset: /auto_examples/images/sphx_glr_convolution_002.png, /auto_examples/images/sphx_glr_convolution_002_2_00x.png 2.00x
          :class: sphx-glr-multi-img
 
 
@@ -98,7 +98,7 @@ treated differently.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.573 seconds)
+   **Total running time of the script:** (0 minutes 1.006 seconds)
 
 
 .. _sphx_glr_download_auto_examples_convolution.py:

@@ -30,7 +30,7 @@ function.
 
 .. image-sg:: /auto_examples/images/sphx_glr_fit_fake_data_001.png
    :alt: fit with guess
-   :srcset: /auto_examples/images/sphx_glr_fit_fake_data_001.png
+   :srcset: /auto_examples/images/sphx_glr_fit_fake_data_001.png, /auto_examples/images/sphx_glr_fit_fake_data_001_2_00x.png 2.00x
    :class: sphx-glr-single-img
 
 
@@ -38,18 +38,18 @@ function.
 
  .. code-block:: none
 
-    {M_inf, M_0, R_1}
+    {R_1, M_inf, M_0}
     {\bf Warning:} You have no error associated with your plot, and I want to flag this for now
 
 
     ----- Results for fitdata: -----
-    output for fitdata: {'M_0': -101.31178480026007, 'M_inf': 102.28085672058833, 'R_1': 5.980377869772943}
-    latex for fitdata: $f(\tau)=102.28 + \left(-1.01\times 10^{2} - 102.28\right) e^{- 5.98 \tau}$
-    $T_1$ for fitdata, 0.1672135142253088
+    output for fitdata: {'M_0': -102.87857607503906, 'M_inf': 102.23079377453595, 'R_1': 6.036261113706332}
+    latex for fitdata: $f(\tau)=102.23 + \left(-1.03\times 10^{2} - 102.23\right) e^{- 6.04 \tau}$
+    $T_1$ for fitdata, 0.1656654642936725
     ----- Results for lmfitdata: -----
-    output for lmfitdata: {'M_inf': 102.2841476766555, 'M_0': -101.28393805288175, 'R_1': 5.978460581918396}
-    latex for lmfitdata: $f(\tau)=(102.28) + \left((-1.01\times 10^{2}) - (102.28)\right) e^{- (5.98) \tau}$
-    $T_1$ for lmfitdata, 0.1672671394747434
+    output for lmfitdata: {'R_1': 5.457476228851562, 'M_inf': 115.28125398542505, 'M_0': -107.02731635058058}
+    latex for lmfitdata: $f(\tau)=(115.28) + \left((-1.07\times 10^{2}) - (115.28)\right) e^{- (5.46) \tau}$
+    $T_1$ for lmfitdata, 0.18323487965250082
     1: fit with guess |||None
 
 
@@ -167,7 +167,7 @@ function.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.471 seconds)
+   **Total running time of the script:** (0 minutes 0.911 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fit_fake_data.py:

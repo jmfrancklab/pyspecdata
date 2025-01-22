@@ -44,21 +44,21 @@ parameter is masked out as white here.
 
       .. image-sg:: /auto_examples/images/sphx_glr_image_plot_001.png
          :alt: 1D data
-         :srcset: /auto_examples/images/sphx_glr_image_plot_001.png
+         :srcset: /auto_examples/images/sphx_glr_image_plot_001.png, /auto_examples/images/sphx_glr_image_plot_001_2_00x.png 2.00x
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /auto_examples/images/sphx_glr_image_plot_002.png
          :alt: image plot
-         :srcset: /auto_examples/images/sphx_glr_image_plot_002.png
+         :srcset: /auto_examples/images/sphx_glr_image_plot_002.png, /auto_examples/images/sphx_glr_image_plot_002_2_00x.png 2.00x
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /auto_examples/images/sphx_glr_image_plot_003.png
          :alt: adjust by 2.0, adjust by 1.0, adjust by 0.5
-         :srcset: /auto_examples/images/sphx_glr_image_plot_003.png
+         :srcset: /auto_examples/images/sphx_glr_image_plot_003.png, /auto_examples/images/sphx_glr_image_plot_003_2_00x.png 2.00x
          :class: sphx-glr-multi-img
 
 
@@ -112,7 +112,7 @@ parameter is masked out as white here.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.700 seconds)
+   **Total running time of the script:** (0 minutes 2.649 seconds)
 
 
 .. _sphx_glr_download_auto_examples_image_plot.py:

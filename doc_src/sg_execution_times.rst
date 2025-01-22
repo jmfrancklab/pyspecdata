@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:13.230** total execution time for 25 files **from all galleries**:
+**00:11.772** total execution time for 27 files **from all galleries**:
 
 .. container::
 
@@ -32,14 +32,11 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_auto_examples_fit_complex_with_transform.py` (``../examples/fit_complex_with_transform.py``)
-     - 00:12.079
+   * - :ref:`sphx_glr_auto_examples_DCCT_side_by_side.py` (``../examples/DCCT_side_by_side.py``)
+     - 00:09.646
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_fit_with_bounds.py` (``../examples/fit_with_bounds.py``)
-     - 00:00.694
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_fit_complex.py` (``../examples/fit_complex.py``)
-     - 00:00.457
+   * - :ref:`sphx_glr_auto_examples_DCCT_dimensions.py` (``../examples/DCCT_dimensions.py``)
+     - 00:02.125
      - 0.0
    * - :ref:`sphx_glr_auto_examples_BRD_test.py` (``../examples/BRD_test.py``)
      - 00:00.000
@@ -48,9 +45,6 @@ Computation times
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_Cary_simple.py` (``../examples/Cary_simple.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_DCCT_function.py` (``../examples/DCCT_function.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_QESR.py` (``../examples/QESR.py``)
@@ -68,10 +62,25 @@ Computation times
    * - :ref:`sphx_glr_auto_examples_ellmans.py` (``../examples/ellmans.py``)
      - 00:00.000
      - 0.0
+   * - :ref:`sphx_glr_auto_examples_epr_u_domain.py` (``../examples/epr_u_domain.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_error_example.py` (``../examples/error_example.py``)
+     - 00:00.000
+     - 0.0
    * - :ref:`sphx_glr_auto_examples_esr_example.py` (``../examples/esr_example.py``)
      - 00:00.000
      - 0.0
+   * - :ref:`sphx_glr_auto_examples_fit_complex.py` (``../examples/fit_complex.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_fit_complex_with_transform.py` (``../examples/fit_complex_with_transform.py``)
+     - 00:00.000
+     - 0.0
    * - :ref:`sphx_glr_auto_examples_fit_fake_data.py` (``../examples/fit_fake_data.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_fit_with_bounds.py` (``../examples/fit_with_bounds.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_image_plot.py` (``../examples/image_plot.py``)
@@ -90,9 +99,6 @@ Computation times
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_indiv_funcs_unitary_ft.py` (``../examples/indiv_funcs/unitary_ft.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_nddata_NNLS_Tikhonov_190104.py` (``../examples/nddata_NNLS_Tikhonov_190104.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_pcolor_example.py` (``../examples/pcolor_example.py``)

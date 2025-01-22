@@ -29,7 +29,7 @@ A quick demonstration of polynomial fitting.
 
 .. image-sg:: /auto_examples/images/sphx_glr_polyfit_001.png
    :alt: polyfit
-   :srcset: /auto_examples/images/sphx_glr_polyfit_001.png
+   :srcset: /auto_examples/images/sphx_glr_polyfit_001.png, /auto_examples/images/sphx_glr_polyfit_001_2_00x.png 2.00x
    :class: sphx-glr-single-img
 
 
@@ -37,7 +37,7 @@ A quick demonstration of polynomial fitting.
 
  .. code-block:: none
 
-    I found the minimum here at 2.5019908593240685
+    I found the minimum here at 1.8721946788507402
 
 
 
@@ -82,7 +82,7 @@ A quick demonstration of polynomial fitting.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.106 seconds)
+   **Total running time of the script:** (0 minutes 0.280 seconds)
 
 
 .. _sphx_glr_download_auto_examples_polyfit.py:

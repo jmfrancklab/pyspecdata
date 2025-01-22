@@ -35,28 +35,28 @@ ppm scale
 
       .. image-sg:: /auto_examples/images/sphx_glr_ppm_example_001.png
          :alt: full spectrum, Hz
-         :srcset: /auto_examples/images/sphx_glr_ppm_example_001.png
+         :srcset: /auto_examples/images/sphx_glr_ppm_example_001.png, /auto_examples/images/sphx_glr_ppm_example_001_2_00x.png 2.00x
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /auto_examples/images/sphx_glr_ppm_example_002.png
          :alt: full spectrum, ppm
-         :srcset: /auto_examples/images/sphx_glr_ppm_example_002.png
+         :srcset: /auto_examples/images/sphx_glr_ppm_example_002.png, /auto_examples/images/sphx_glr_ppm_example_002_2_00x.png 2.00x
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /auto_examples/images/sphx_glr_ppm_example_003.png
          :alt: sliced spectrum, Hz
-         :srcset: /auto_examples/images/sphx_glr_ppm_example_003.png
+         :srcset: /auto_examples/images/sphx_glr_ppm_example_003.png, /auto_examples/images/sphx_glr_ppm_example_003_2_00x.png 2.00x
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /auto_examples/images/sphx_glr_ppm_example_004.png
          :alt: sliced spectrum, ppm
-         :srcset: /auto_examples/images/sphx_glr_ppm_example_004.png
+         :srcset: /auto_examples/images/sphx_glr_ppm_example_004.png, /auto_examples/images/sphx_glr_ppm_example_004_2_00x.png 2.00x
          :class: sphx-glr-multi-img
 
 
@@ -131,7 +131,7 @@ ppm scale
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.055 seconds)
+   **Total running time of the script:** (0 minutes 1.402 seconds)
 
 
 .. _sphx_glr_download_auto_examples_ppm_example.py:

@@ -48,14 +48,14 @@ To run the curve for your data:
 
       .. image-sg:: /auto_examples/images/sphx_glr_BSA_calibration_001.png
          :alt: raw data
-         :srcset: /auto_examples/images/sphx_glr_BSA_calibration_001.png
+         :srcset: /auto_examples/images/sphx_glr_BSA_calibration_001.png, /auto_examples/images/sphx_glr_BSA_calibration_001_2_00x.png 2.00x
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /auto_examples/images/sphx_glr_BSA_calibration_002.png
          :alt: calibration curve
-         :srcset: /auto_examples/images/sphx_glr_BSA_calibration_002.png
+         :srcset: /auto_examples/images/sphx_glr_BSA_calibration_002.png, /auto_examples/images/sphx_glr_BSA_calibration_002_2_00x.png 2.00x
          :class: sphx-glr-multi-img
 
 
@@ -168,7 +168,7 @@ To run the curve for your data:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.481 seconds)
+   **Total running time of the script:** (0 minutes 2.397 seconds)
 
 
 .. _sphx_glr_download_auto_examples_BSA_calibration.py:

@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Fit complex data &#8212; pySpecData 0.9.5.3.2 documentation</title>
+    <title>Fit complex data &#8212; pySpecData 0.9.5.5.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=832af5b0" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css?v=7f9a90b1" />
@@ -14,14 +14,14 @@
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=2b30a6e6" />
-    <script src="../_static/documentation_options.js?v=5b73e601"></script>
+    <script src="../_static/documentation_options.js?v=a4fd5d96"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Using the DCCT function" href="DCCT_function.html" />
-    <link rel="prev" title="Fit Using Bounds" href="fit_with_bounds.html" />
+    <link rel="next" title="Basic Slicing/Filtering Example" href="basic_example.html" />
+    <link rel="prev" title="Arranging Multiple DCCT Plots" href="DCCT_side_by_side.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -48,7 +48,7 @@ to download the full example code</p>
 <span id="sphx-glr-auto-examples-fit-complex-py"></span><h1>Fit complex data<a class="headerlink" href="#fit-complex-data" title="Link to this heading">¶</a></h1>
 <p>Using lmfitdata, fit a complex data set.</p>
 <img src="../_images/sphx_glr_fit_complex_001.png" srcset="../_images/sphx_glr_fit_complex_001.png, ../_images/sphx_glr_fit_complex_001_2_00x.png 2.00x" alt="fit complex" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>----------  logging output to /home/jmfranck/pyspecdata.0.log  ----------
---&gt; fit_complex.py(25):pyspecdata.core             &lt;module&gt; 2024-10-13 21:55:40,991
+--&gt; fit_complex.py(25):pyspecdata.core             &lt;module&gt; 2025-01-22 14:37:23,110
 INFO: Functional Form: A*exp(-6.28318530717959*I*nu*t)*exp(-pi*R*Abs(t))
 </pre></div>
 </div>
@@ -116,7 +116,7 @@ INFO: Functional Form: A*exp(-6.28318530717959*I*nu*t)*exp(-pi*R*Abs(t))
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.457 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.455 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-fit-complex-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/51a1b133acbac52818c0f70ebdee464b/fit_complex.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">fit_complex.ipynb</span></code></a></p>
@@ -162,25 +162,27 @@ INFO: Functional Form: A*exp(-6.28318530717959*I*nu*t)*exp(-pi*R*Abs(t))
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">PySpecData Examples</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Cary_simple.html">Simple Cary UV-Vis loading</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pcolor_example.html">Unevenly spaced data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epr_u_domain.html">EPR u-domain</a></li>
 <li class="toctree-l2"><a class="reference internal" href="esr_example.html">Bruker cw ESR Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="polyfit.html">Polynomial Fitting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ppm_2D.html">PPM in 2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="error_example.html">Error and units example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="calculate_covariance.html">Calculation of the Covariance Matrix</a></li>
 <li class="toctree-l2"><a class="reference internal" href="convolution.html">Simple Convolution Example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="image_plot.html">Plotting Routines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ppm_example.html">ppm Example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ellmans.html">Manipulation of UV-Vis data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fit_with_bounds.html">Fit Using Bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DCCT_side_by_side.html">Arranging Multiple DCCT Plots</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Fit complex data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="DCCT_function.html">Using the DCCT function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basic_example.html">Basic Slicing/Filtering Example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="fit_complex_with_transform.html">Fit complex data with transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pcolor_example.html">Unevenly spaced data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BRD_test.html">1D BRD regularization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_complex_with_transform.html">Fit complex data with transform</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BSA_calibration.html">BSA UV-Vis Calibration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fit_fake_data.html">Fitting Data (Nonlinear + Symbolic)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DCCT_dimensions.html">Using the DCCT function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="QESR.html">Quantitative ESR</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nddata_NNLS_Tikhonov_190104.html">2D ILT test</a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#individual-functions">Individual Functions</a></li>
 </ul>
 </li>
@@ -191,8 +193,8 @@ INFO: Functional Form: A*exp(-6.28318530717959*I*nu*t)*exp(-pi*R*Abs(t))
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="index.html">PySpecData Examples</a><ul>
-      <li>Previous: <a href="fit_with_bounds.html" title="previous chapter">Fit Using Bounds</a></li>
-      <li>Next: <a href="DCCT_function.html" title="next chapter">Using the DCCT function</a></li>
+      <li>Previous: <a href="DCCT_side_by_side.html" title="previous chapter">Arranging Multiple DCCT Plots</a></li>
+      <li>Next: <a href="basic_example.html" title="next chapter">Basic Slicing/Filtering Example</a></li>
   </ul></li>
   </ul></li>
 </ul>
