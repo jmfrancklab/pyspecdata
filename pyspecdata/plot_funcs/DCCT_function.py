@@ -400,9 +400,6 @@ def DCCT(
                 axes_height,
             ])
         )  # lbwh
-    for ax in ax_list:
-        ax.sharex(ax_list[0])
-        ax.sharey(ax_list[0])
     # {{{ make blended transform for plotting decorations sets origin for the
     #     blended transform to the bottom left corner of the bottom axes object
     transDispTranslated = IdentityTransform() + ScaledTranslation(
@@ -415,27 +412,25 @@ def DCCT(
     )
     # }}}
     # {{{ adjust tick settings -- AFTER extents are set
+    for j in range(len(ax_list)):
+        ax_list[j].set_ylabel(None)
+    for j in [0, len(ax_list) - 1]:
+        ax_list[j].xaxis.set_major_locator(majorLocator())
+        ax_list[j].xaxis.set_minor_locator(minorLocator())
     # {{{ bottom subplot
-    ax_list[0].xaxis.set_major_locator(majorLocator())
-    ax_list[0].xaxis.set_minor_locator(minorLocator())
-    ax_list[0].set_ylabel(None)
     ax_list[0].set_xlabel(
-        my_data.unitify_axis(my_data.dimlabels[-1]), labelpad=20
+        my_data.unitify_axis(my_data.dimlabels[-1]), labelpad=12
     )
     # }}}
     # {{{ intermediate subplots
-    for j in range(1, len(axes_bottom) - 1):
+    for j in range(1, len(ax_list) - 1):
         ax_list[j].xaxis.set_ticks([])
         ax_list[j].get_xaxis().set_visible(False)
         ax_list[j].set_xlabel(None)
     # }}}
     # {{{ top subplot
-    ax_list[-1].xaxis.set_major_locator(majorLocator())
-    # for the minor ticks, use no labels; default NullFormatter
-    ax_list[-1].xaxis.set_minor_locator(minorLocator())
+    ax_list[-1].set_xlabel(None)
     ax_list[-1].xaxis.tick_top()
-    if not shareaxis:
-        ax_list[-1].set_xticklabels([])
     # }}}
     # {{{ all subplots
     for j in range(0, len(axes_bottom)):
@@ -453,6 +448,19 @@ def DCCT(
             tick.set_rotation(0)
             tick.set_va("center")
     # }}}
+    # }}}
+    # {{{ sharex needs to come at the END, or else it
+    #     messes up setting independent tick appearance
+    #     above
+    for ax in ax_list:
+        ax.sharex(ax_list[0])
+        ax.sharey(ax_list[0])
+    # I need to set visibility on top tick labels after sharex
+    # This doesn't work before, and doing
+    # set_xticklabels either affects both (if used
+    # after) or does nothing (if used before)
+    for thislabel in ax_list[-1].get_xticklabels():
+        thislabel.set_visible(False)
     # }}}
     # {{{ smoosh dataset if needed
     if len(a_shape.dimlabels) > 3:
