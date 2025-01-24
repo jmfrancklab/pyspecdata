@@ -1,9 +1,18 @@
 import sys
 from collections import OrderedDict
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QComboBox
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PyQt5.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QVBoxLayout,
+    QWidget,
+    QComboBox,
+)
+from matplotlib.backends.backend_qt5agg import (
+    FigureCanvasQTAgg as FigureCanvas,
+)
 from matplotlib.figure import Figure
 import numpy as np
+import threading
 
 
 class PlotApp(object):
@@ -13,6 +22,9 @@ class PlotApp(object):
         self.main_window.setWindowTitle("Polynomial Plotter")
         self.main_window.setGeometry(100, 100, 800, 600)
         self.figures = OrderedDict()  # Ordered storage for figures
+        self.canvas = None
+        # Canvas placeholder (set later in `first_screen`)
+        self.preloaded_canvases = {}
 
     def __getitem__(self, key):
         if key not in self.figures:
@@ -26,15 +38,15 @@ class PlotApp(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.canvas = FigureCanvas(self[list(self.figures.keys())[0]])
-        self.layout.addWidget(self.canvas)
-        self.populate_combo_box()  # Populate combo box after all figures are added
+        self.first_screen()  # Populate combo box after all figures are added
+        self.preload_figures()  # Preload other figures in a separate thread
         self.main_window.show()  # Show the main window
+        self.thread.join()  # Ensure the preload thread completes before exiting
         sys.exit(self.app.exec_())  # Start the event loop
 
     def initUI(self):
         # Instantiate QApplication at the end of the UI setup
-                # Create central widget and layout
+        # Create central widget and layout
         self.central_widget = QWidget(self.main_window)
         self.main_window.setCentralWidget(self.central_widget)
         self.layout = QVBoxLayout(self.central_widget)
@@ -43,32 +55,55 @@ class PlotApp(object):
         self.combo_box = QComboBox(self.central_widget)
         self.layout.addWidget(self.combo_box)
 
-        # Canvas placeholder (set later in `populate_combo_box`)
-        self.canvas = None
-
         # Connect combo box to figure update logic
         self.combo_box.currentIndexChanged.connect(self.update_figure)
 
-    def populate_combo_box(self):
-        self.combo_box.addItems(self.figures.keys())  # Add figure names to the combo box
+    def generate_canvas(self, key):
+        print("generating", key)
+        canvas = FigureCanvas(self.figures[key])
+        canvas.setStyleSheet(
+            "background: transparent;"
+        )  # Make the canvas background transparent
+        self.preloaded_canvases[key] = canvas
+        return
 
-        # Initialize the canvas with the first figure
-        if self.figures:
-                        self.update_figure(0)  # Display the first figure
+    def preload_figures(self):
+        for key in list(self.figures.keys())[1:]:  # Skip the first figure
+            self.generate_canvas(key)
+
+        def render_figures():
+            for key in list(self.figures.keys())[1:]:  # Skip the first figure
+                self.preloaded_canvases[key].draw_idle()
+
+        self.thread = threading.Thread(target=render_figures)
+        self.thread.start()
+
+    def first_screen(self):
+        self.combo_box.addItems(
+            self.figures.keys()
+        )  # Add figure names to the combo box
+        # note that this seems to call update_figure
 
     def update_figure(self, index):
-        figure_name = list(self.figures.keys())[index]  # Access figure key by index
-
-        # Remove the old canvas from the layout
-        if self.canvas is not None:
+        figure_name = list(self.figures.keys())[
+            index
+        ]  # Access figure key by index
+        print("update figure", index, figure_name, self.canvas)
+        if self.canvas is None:
+            # no figure set yet, so use the first key
+            figure_name = next(iter(self.figures.keys()))
+            # and preload the first figure
+            self.generate_canvas(figure_name)
+            self.preloaded_canvases[figure_name].draw_idle()
+        else:
+            # Remove the old canvas from the layout
+            self.canvas.hide()
             self.layout.removeWidget(self.canvas)
-            self.canvas.deleteLater()
-
-        # Create a new canvas for the selected figure
-        self.canvas = FigureCanvas(self[figure_name])
-        self.canvas.setStyleSheet("background: transparent;")  # Make the canvas background transparent
+            self.thread.join()  # Ensure the preload thread completes before exiting
+        self.canvas = self.preloaded_canvases[figure_name]
+        self.canvas.show()
+        # Use the preloaded canvas for the selected figure
         self.layout.addWidget(self.canvas)
-        self.canvas.draw_idle()
 
 
 def main():
