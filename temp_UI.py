@@ -57,8 +57,16 @@ class PlotApp(object):
 
     def update_figure(self, index):
         figure_name = list(self.figures.keys())[index]  # Access figure key by index
-        self.canvas.figure = self[figure_name]
-        self.canvas.draw()
+
+        # Remove the old canvas from the layout
+        if self.canvas is not None:
+            self.layout.removeWidget(self.canvas)
+            self.canvas.deleteLater()
+
+        # Create a new canvas for the selected figure
+        self.canvas = FigureCanvas(self[figure_name])
+        self.layout.addWidget(self.canvas)
+        self.canvas.draw_idle()
 
 
 def main():
@@ -70,7 +78,7 @@ def main():
             x = np.linspace(-10, 10, 500)  # Smooth range of x values
             y = np.power(x, i)  # NumPy for polynomial calculation
             ax.plot(x, y)
-            ax.set_title(f"y = x^{i}")
+            ax.set_title(f"$y = x^{i}$")
 
 
 if __name__ == "__main__":
