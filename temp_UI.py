@@ -12,6 +12,7 @@ from matplotlib.backends.backend_qt5agg import (
 )
 from matplotlib.figure import Figure
 import numpy as np
+import pyspecdata as psd
 import threading
 
 
@@ -109,13 +110,13 @@ class PlotApp(object):
 def main():
     with PlotApp() as main_window:
         # Create and plot figures
-        for i in range(1, 6):  # Polynomial orders 1 to 5
-            fig = main_window[f"Polynomial {i}"]
+        for j in range(1, 6):  # Polynomial orders 1 to 5
+            fig = main_window[f"Polynomial {j}"]
             ax = fig.add_subplot(111)
-            x = np.linspace(-10, 10, 500)  # Smooth range of x values
-            y = np.power(x, i)  # NumPy for polynomial calculation
-            ax.plot(x, y)
-            ax.set_title(f"$y = x^{i}$")
+            data = psd.nddata(np.linspace(-10, 10, 500), "x")  # Smooth range of x values
+            data.run(lambda x: x**j)  # NumPy for polynomial calculation
+            psd.plot(data, ax=ax)
+            ax.set_title(f"$y = x^{j}$")
 
 
 if __name__ == "__main__":
