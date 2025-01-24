@@ -17,6 +17,7 @@ class PlotApp(object):
     def __getitem__(self, key):
         if key not in self.figures:
             fig = Figure()
+            fig.patch.set_facecolor("none")  # Make the figure box transparent
             self.figures[key] = fig  # Add figure to the ordered dictionary
         return self.figures[key]
 
@@ -65,6 +66,7 @@ class PlotApp(object):
 
         # Create a new canvas for the selected figure
         self.canvas = FigureCanvas(self[figure_name])
+        self.canvas.setStyleSheet("background: transparent;")  # Make the canvas background transparent
         self.layout.addWidget(self.canvas)
         self.canvas.draw_idle()
 
