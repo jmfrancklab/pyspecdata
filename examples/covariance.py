@@ -16,7 +16,6 @@ data["t2":0] *= 0.5
 # relabel nScans axis with indices
 data.setaxis("nScans", "#")
 with psd.figlist_var() as fl:
-    write
     covariance_matrix = psdpr.select_pathway(
         data, data.get_prop("coherence_pathway")
     ).cov_mat("nScans")
