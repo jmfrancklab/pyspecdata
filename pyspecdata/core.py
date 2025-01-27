@@ -55,7 +55,6 @@ from . import plot_funcs as this_plotting
 from .general_functions import lsafe as orig_lsafe
 from .general_functions import (
     Q_,
-    ureg,
     autostringconvert,
     dp,
     emptytest,
@@ -3544,22 +3543,23 @@ class nddata(object):
         Parameters
         ==========
         along_dim:  str
-            the "observations" dimension of the data set (as opposed to
-            the variable)
+            the "variables" dimension of the data set (as opposed to
+            the variable). Note when rowvar = True for np.cov the rows are the
+            variables.
         """
         assert len(self.dimlabels) == 2, (
             "we are only calculating covariance matrices for datasets with one"
             " variable and on observation axis"
         )
         assert along_dim in self.dimlabels
-        var_dim = list(set(self.dimlabels) - set([along_dim]))[0]
-        var_dim_units = self.get_units(var_dim)
+        obs_dim = list(set(self.dimlabels) - set([along_dim]))[0]
+        along_dim_units = self.get_units(along_dim)
         if self.axn(along_dim) == 0:
-            trans = False
-        else:
             trans = True
+        else:
+            trans = False
         self.data = np.cov(self.data, rowvar=trans)
-        self.setaxis(along_dim, self.getaxis(var_dim).copy())
+        self.setaxis(obs_dim, self.getaxis(along_dim).copy())
 
         def add_subscript(start, sub):
             ismath = re.compile(r"\$(.*)\$")
@@ -3580,10 +3580,10 @@ class nddata(object):
             else:
                 return f"${start}_{sub}$"
 
-        firstdim = add_subscript(var_dim, "i")
-        self.rename(along_dim, firstdim)
-        self.rename(var_dim, add_subscript(var_dim, "j"))
-        self.set_units(firstdim, var_dim_units)
+        self.rename(along_dim, add_subscript(along_dim,"i"))
+        seconddim = add_subscript(along_dim, "j")
+        self.rename(obs_dim, seconddim)
+        self.set_units(seconddim, along_dim_units)
         return self
 
     def popdim(self, dimname):
