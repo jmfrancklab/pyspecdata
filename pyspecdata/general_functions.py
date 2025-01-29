@@ -26,7 +26,7 @@ try:
 except Exception:
     print(
         "**Warning!** I'm hacking the sqrt behavior of pint.  Consider using"
-        " the jmfranck/pint fork"
+        " the jmfranck/pint fork, which you can find at https://github.com/jmfranck/pint"
     )
 
     def Q_(*args):
