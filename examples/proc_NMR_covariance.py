@@ -52,7 +52,7 @@ with psd.figlist_var() as fl:
             ).real
         )
         fl.next("pyspec ft - %s" % label)
-        if label == "aligned":
+        if label == "With Alignment":
             fl.image(thisdata.C.ft("t2")["t2":(-200, 0)].run(abs))
         else:
             fl.image(
