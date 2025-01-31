@@ -229,6 +229,7 @@ def ft_new_startpoint(self, axis, which_domain, value=None, nearest=False):
     elif which_domain == "f":
         which_domain = "freq"
         thisconditional = True
+    other_domain = tuple(set(("freq","time"))-set((which_domain,)))[0]
     du = _get_ft_df(self, axis)
     orig_u = self.get_ft_prop(axis, ["start", which_domain])
     if orig_u is None:
@@ -269,6 +270,9 @@ def ft_new_startpoint(self, axis, which_domain, value=None, nearest=False):
         else:
             value = orig_u - round(n_du) * du
     self.set_ft_prop(axis, ["start", which_domain], value)
+    self.set_ft_prop(axis, [which_domain, "not", "aliased"], None)
+    if nearest is False:
+        self.set_ft_prop(axis, [other_domain, "not", "aliased"], True)
     return self
 
 
