@@ -244,10 +244,8 @@ def ft_new_startpoint(self, axis, which_domain, value=None, nearest=False):
             )
     if value is not None:
         n_du = (orig_u - value) / du  # number of du's shifted by
-        if abs((n_du - round(n_du)) / n_du) > 1e-3:
-            if nearest:
-                value = round((value - orig_u) / du) * du + orig_u
-            else:
+        if not n_du==0 and abs((n_du - round(n_du)) / n_du) > 1e-3:
+            if nearest is None:
                 raise ValueError(
                     strm(
                         "You need to explicitly"
@@ -267,8 +265,10 @@ def ft_new_startpoint(self, axis, which_domain, value=None, nearest=False):
                         " for ft_clear_startpoints!!",
                     )
                 )
-        else:
-            value = orig_u - round(n_du) * du
+            if nearest:
+                value = round((value - orig_u) / du) * du + orig_u
+            else:
+                value = orig_u - round(n_du) * du
     self.set_ft_prop(axis, ["start", which_domain], value)
     self.set_ft_prop(axis, [which_domain, "not", "aliased"], None)
     if nearest is False:
