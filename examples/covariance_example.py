@@ -6,8 +6,6 @@ operations. The covariance of the FID tail shows the expected diagonal.
 
 import pyspecdata as psd
 import numpy as np
-import pyspecProcScripts as psdpr
-import matplotlib.pyplot as plt
 
 signal_pathway = {"ph1": 1}
 thisdata = psd.find_file(
