@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def register_axis(self, arg, nearest=None):
     r"""Interpolate the data so that the given axes are in register with a set
     of specified values. Does not change the spacing of the axis labels.
@@ -24,9 +25,8 @@ def register_axis(self, arg, nearest=None):
     for k, v in arg.items():
         x = self.getaxis(k)
         idx = np.argmin(abs(x - v))
-        offset = (v # where I want to be
-                - x[idx]) # where I actually am
-        offset += x[0] # since the following takes the startpoint
+        offset = v - x[idx]  # where I want to be  # where I actually am
+        offset += x[0]  # since the following takes the startpoint
         if self.get_ft_prop(k):
             self.ift(k).ft_new_startpoint(k, "f", value=offset, nearest=False)
             self.set_ft_prop(k, "freq_not_aliased").ft(k)
