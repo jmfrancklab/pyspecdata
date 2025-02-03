@@ -13,6 +13,7 @@ warnings.filterwarnings("ignore")
 from .core import *
 from .figlist import figlist
 from .general_functions import fname_makenice
+from .mpl_utils import autopad_figure
 from scipy.io import savemat,loadmat
 from os.path import exists as path_exists
 from os import name as os_name
@@ -101,7 +102,7 @@ class figlistl (figlist):
                     fig.scene.anti_aliasing_frames = 0
                     #fig.scene.off_screen_rendering = True
                 else:
-                    figure(j)
+                    plt.figure(j)
                 sep = ''
                 if len(string)>0:
                     sep = '_'
@@ -139,7 +140,7 @@ def lplotfigures(figurelist,string,**kwargs):
             if 'print_string' in kwargs:
                 print('\n\n'+kwargs.pop('print_string')+'\n\n')
         else:
-            figure(j+1)
+            plt.figure(j+1)
             try:
                 lplot(figname+string,**kwargs)
             except:
@@ -797,7 +798,7 @@ def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'ref
     print('\n\n')
     # noise tests
     close(1)
-    figure(1,figsize=(16,8))
+    plt.figure(1,figsize=(16,8))
     v = save_data();our_calibration = np.double(v['our_calibration']);cnsi_calibration = np.double(v['cnsi_calibration'])
     calibration = cnsi_calibration*np.sqrt(50.0/10.0)*np.sqrt(50.0/40.0)
     path_list = []
@@ -818,7 +819,7 @@ def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'ref
     ind = 0
     smoothing = 5e3
     for j in range(0,1): # for multiple plots $\Rightarrow$ add in j index below if this is what i want
-       figure(1)
+       plt.figure(1)
        ind += 1
        legendstr = []
        linelist = []
@@ -844,7 +845,7 @@ def standard_noise_comparison(name,path = 'franck_cnsi/nmr/', data_subdir = 'ref
            x.set_visible(False)
        lplot('noise'+plotlabel+'_%d.pdf'%ind,grid=False,width=5,gensvg=True)
        print('\n\n')
-       figure(2)
+       plt.figure(2)
        legendstr = []
        for k in range(0,len(signalexpno)):
           data = load_file(dirformat(path_list[k])+'%d'%noiseexpno[k],calibration=calibration)
