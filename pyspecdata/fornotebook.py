@@ -14,6 +14,7 @@ from .core import *
 from .mpl_utils import *
 from .figlist import figlist
 from .general_functions import fname_makenice
+from .mpl_utils import autopad_figure
 from scipy.io import savemat,loadmat
 from os.path import exists as path_exists
 from os import name as os_name
