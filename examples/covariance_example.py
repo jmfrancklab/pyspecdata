@@ -20,12 +20,15 @@ with psd.figlist_var() as fl:
     # numpy and matplotlib
     thisdata.reorder(["t2", "nScans"])
     mycov = abs(np.cov(thisdata.data))
-    fl.next("covariance")
+    fl.next("covariance -- numpy")
     fl.image(mycov)
+    # Make copy since the data is returned with the subscript axes
+    pycov = abs(thisdata.C.cov_mat("nScans"))
     fl.next("covariance - pyspecdata")
-    fl.image(abs(thisdata.C.cov_mat("nScans")))
+    fl.image(pycov)
     # now I zoom in to show that when I'm in the part of the FID that's
     # just noise (no shifting frequencies, I get the diagonal covariance
     # that I expect)
+    zoom_pycov = abs(thisdata["t2":(0.6, 0.7)].cov_mat("nScans"))
     fl.next("covariance - FID tail")
-    fl.image(abs(thisdata["t2":(0.6,0.7)].cov_mat("nScans")))
+    fl.image(zoom_pycov)
