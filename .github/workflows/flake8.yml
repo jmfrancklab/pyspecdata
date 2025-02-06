@@ -61,3 +61,8 @@ jobs:
           fi
         env:
           CHANGED_FILES: ${{ env.CHANGED_FILES }}
+
+      - name: Check for TODO items
+        run: ./.github/workflows/todo_check.sh
+        env:
+          CHANGED_FILES: ${{ env.CHANGED_FILES }}
