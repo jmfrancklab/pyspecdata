@@ -69,3 +69,25 @@ nnls_extension = py.extension_module(
 )
 
 subdir('pyspecdata')
+
+scripts = [
+    ['update_notebook_pythonscripts', 'pyspecdata.latexscripts', 'main'],
+    ['pdflatex_notebook_wrapper', 'pyspecdata.latexscripts', 'wraplatex'],
+    ['pdflatex_notebook_view_wrapper', 'pyspecdata.latexscripts', 'wrapviewer'],
+    ['pyspecdata_dataconfig', 'pyspecdata.latexscripts', 'genconfig'],
+    ['pyspecdata_register_dir', 'pyspecdata.datadir', 'register_directory'],
+]
+
+foreach script : scripts
+    configure_file(
+        output: script[0],
+        input: 'scripts/entry_point_template',
+        configuration: {
+            'python_executable': py.path(),
+            'module': script[1],
+            'function': script[2],
+        },
+        install: true,
+        install_dir: get_option('bindir'),
+    )
+endforeach
