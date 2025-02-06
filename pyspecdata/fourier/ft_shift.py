@@ -265,13 +265,15 @@ def ft_new_startpoint(self, axis, which_domain, value=None, nearest=False):
                         " for ft_clear_startpoints!!",
                     )
                 )
-            if nearest:
+            elif nearest:
                 value = round((value - orig_u) / du) * du + orig_u
             else:
                 value = orig_u - round(n_du) * du
     self.set_ft_prop(axis, ["start", which_domain], value)
-    self.set_ft_prop(axis, [which_domain, "not", "aliased"], None)
     if nearest is False:
+        # assume that if we choose to precisely set the startpoint in
+        # one domain, we must be pretty sure we don't have aliases in
+        # the other domain
         self.set_ft_prop(axis, [other_domain, "not", "aliased"], True)
     return self
 
