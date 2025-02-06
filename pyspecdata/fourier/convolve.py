@@ -76,9 +76,6 @@ def convolve(
         # }}}
         myfilter = convfunc(x, filterwidth)
         myfilter.copy_props(self)
-        myfilter.ft_new_startpoint(
-            axisname, whichdomain, x[axisname][0], nearest=True
-        )
         return myfilter
 
     myfilter = generate_filter(self)
