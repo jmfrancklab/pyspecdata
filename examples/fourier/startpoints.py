@@ -7,6 +7,13 @@ In one case, the Gaussian is aliased, so that half
 is at negative frequencies, and the other half at
 very high positive frequencies.
 
+The key point is that when these work,
+they give the *same information*:
+a limited viewport,
+always 1 SW wide,
+into the infinitely period signal that we are
+studying.
+
 I know this should give a Gaussian in the time
 domain,
 but I see what happens when I start from different
@@ -14,7 +21,12 @@ combinations of:
 
     -   (non-)/aliased signal
     -   shifting my startpoint by (non-)/integer multiples of dt
+
+The point is that this will always work,
+*except* when we apply a *non-integer* multiple of
+dt shift to an *aliased* signal.
 """
+
 import numpy as np
 from numpy import r_, pi
 import pyspecdata as psd
@@ -32,7 +44,9 @@ t = psd.nddata(
 sigma = 1.0
 with psd.figlist_var(file_name="interpolation_test_150824.pdf") as fl:
     for test_non_aliased in [True, False]:
-        fl.basename = "not aliased f-domain" if test_non_aliased else "aliased f-domain"
+        fl.basename = (
+            "not aliased f-domain" if test_non_aliased else "aliased f-domain"
+        )
         data = np.exp(-(t**2) / 2.0 / sigma**2)
         data.ft(
             "t", shift=test_non_aliased
@@ -50,7 +64,6 @@ with psd.figlist_var(file_name="interpolation_test_150824.pdf") as fl:
             ),
         )
         fl.plot(data.imag, alpha=0.5)
-        psd.expand_x()
         psd.expand_y()
         print(
             "what is the initial desired startpoint?",
@@ -78,10 +91,10 @@ with psd.figlist_var(file_name="interpolation_test_150824.pdf") as fl:
         )
         fl.plot(
             forplot.imag,
-            **ChainMap({'alpha':0.03},default_plot_kwargs),
+            **ChainMap({"alpha": 0.03}, default_plot_kwargs),
         )
         symbols = iter(["d", "x", "s", "o"])
-        for this_integer in [2, -250, 1000]:
+        for this_integer in [2, -250, 600]:
             print("-----------------------")
             print("starting integral shift for", this_integer)
             forplot = data.C  # keep and re-use the gaussian
@@ -94,28 +107,34 @@ with psd.figlist_var(file_name="interpolation_test_150824.pdf") as fl:
             print("now, I try to reset the startpoint to", new_startpoint)
             print("my dt", dt, data.get_ft_prop("t", "dt"))
             forplot.ft_new_startpoint("t", "time", new_startpoint)
-            print("is it safe?", data.get_ft_prop("t", ["freq", "not", "aliased"]))
+            print(
+                "is it safe?",
+                data.get_ft_prop("t", ["freq", "not", "aliased"]),
+            )
             fl.next("ift")
             forplot.ift("t")
-            print("And the actual t startpoint after ift? ", forplot.getaxis("t")[0])
+            print(
+                "And the actual t startpoint after ift? ",
+                forplot.getaxis("t")[0],
+            )
             print(
                 "the difference between the two?",
-                forplot.getaxis("t")[0] - forplot.get_ft_prop("t", "start_time"),
+                forplot.getaxis("t")[0]
+                - forplot.get_ft_prop("t", "start_time"),
             )
             default_plot_kwargs["marker"] = next(symbols)
             fl.plot(
                 forplot,
                 label=(
-                    f"$t_{{start}}={t_start:#0.4g}$, $t_{{start}}/\\Delta"
-                    f" t={t_start/dt:#0.6g}$"
+                    f"$t_{{start}}={new_startpoint:#0.4g}$,"
+                    f" $t_{{start}}/\\Delta t={new_startpoint/dt:#0.6g}$"
                 ),
                 **default_plot_kwargs,
             )
             fl.plot(
                 forplot.imag,
-                **ChainMap({'alpha':0.03},default_plot_kwargs),
+                **ChainMap({"alpha": 0.03}, default_plot_kwargs),
             )
-        psd.expand_x()
         psd.expand_y()
         #
         # if test_non_aliased:
