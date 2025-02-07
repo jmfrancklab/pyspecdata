@@ -229,7 +229,7 @@ def ft_new_startpoint(self, axis, which_domain, value=None, nearest=False):
     elif which_domain == "f":
         which_domain = "freq"
         thisconditional = True
-    du = _get_ft_df(self, axis)
+    du = self.get_ft_prop(axis, "dt" if which_domain == "time" else "df")
     orig_u = self.get_ft_prop(axis, ["start", which_domain])
     if orig_u is None:
         if self.get_ft_prop(axis) is thisconditional:

@@ -38,9 +38,11 @@ from .generate_fake_data import fake_data
 from .dict_utils import make_ndarray, unmake_ndarray
 from .datadir import getDATADIR, log_fname, proc_data_target_dir
 from .mpl_utils import (
-    plot_label_points,
-    figlistret,
+    expand_x,
+    expand_y,
     figlistini_old,
+    figlistret,
+    plot_label_points,
 )
 
 # import numpy
