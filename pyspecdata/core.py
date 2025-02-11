@@ -2045,7 +2045,9 @@ class nddata(object):
         data units by seconds.
 
         In other words, if you pass "a" and the units of your data are
-        in "b", then this returns x, such that (x a)/(b) = 1.
+        in "b", then this returns x, such that (x a)/(b) = 1,
+        *i.e.* there are x a units per axis unit (b),
+        *i.e.* b/a=x.
 
         e.g. to convert a variable from seconds
         to the units of `axisname`, do
