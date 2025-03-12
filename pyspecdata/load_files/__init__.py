@@ -201,7 +201,7 @@ def search_filename(searchstring, exp_type, print_result=True, unique=False):
             )
         elif len(retval) > 1:
             raise ValueError(
-                "found more than on file in",
+                "found more than one file in",
                 directory,
                 "matching",
                 searchstring,

@@ -6,6 +6,7 @@ from .general_functions import (
     check_ascending_axis,
     complex_str,
     copy_maybe_none,
+    det_unit_prefactor,
     dp,
     emptytest,
     fa,

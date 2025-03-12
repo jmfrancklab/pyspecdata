@@ -32,6 +32,9 @@ jobs:
             git fetch origin ${{ github.event.before }}
           fi
           git fetch origin ${{ github.event.after }}
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "$(git branch)" # show the branch names
+          fi
 
       - name: Get changed files
         id: get_changed_files
