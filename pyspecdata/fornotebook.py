@@ -79,6 +79,7 @@ class figlistl(figlist):
         line_spacing : bool
             if false, suppress empty lines between output
         """
+        print("\n\n")
         self.basename = None  # must be turned off, so it can cycle through lists, etc, on its own
         # {{{ process kwargs
         verbose = False

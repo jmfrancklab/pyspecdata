@@ -2287,16 +2287,24 @@ class nddata(object):
             del self.other_info
         return self
 
-    def set_prop(self, *args):
+    def set_prop(self, *args, **kwargs):
         r"""set a 'property' of the nddata
         This is where you can put all unstructured information (e.g.
         experimental parameters, etc)
+
+        Accepts:
+
+        -   a single string, value pair
+        -   a dictionary
+        -   a set of keyword arguments
         """
         if len(args) == 2:
             propname, val = args
             self.other_info.update({propname: val})
         elif len(args) == 1 and isinstance(args[0], dict):
             self.other_info.update(args[0])
+        elif len(args) == 0 and isinstance(kwargs, dict):
+            self.other_info.update(kwargs)
         else:
             raise ValueError("I don't know what you're passing to set prop!!!")
         return self
