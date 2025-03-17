@@ -5,6 +5,7 @@ but ``figlist_var`` will be assigned to :class:`figlistl` when
 python code is embedded in a python environment inside latex.
 """
 
+import logging
 import matplotlib
 
 matplotlib.use("Agg")
@@ -18,7 +19,7 @@ warnings.filterwarnings("ignore")
 from .core import *
 from .mpl_utils import *
 from .figlist import figlist
-from .general_functions import fname_makenice
+from .general_functions import fname_makenice, strm
 from .mpl_utils import autopad_figure
 from scipy.io import savemat, loadmat
 from os.path import exists as path_exists
@@ -79,27 +80,8 @@ class figlistl(figlist):
         line_spacing : bool
             if false, suppress empty lines between output
         """
-        print("\n\n")
-        self.basename = None  # must be turned off, so it can cycle through lists, etc, on its own
-        # {{{ process kwargs
-        verbose = False
-        if "verbose" in list(kwargs.keys()):
-            verbose = kwargs.pop("verbose")
-        # }}}
-        if line_spacing:
-            print("\n\n")
-        self.show_prep()
-        if not len(kwargs):
-            kwargs = {}
-            mlab = False
-            if hasattr(self, "mlab") and self.mlab:
-                kwargs.update({"mlab": self.mlab})
-                mlab = True
-        if hasattr(self, "lplot_kwargs"):
-            kwargs.update(self.lplot_kwargs)
         for figname in self.figurelist:
-            if verbose:
-                print("showing figure" + lsafen(figname))
+            logging.debug(strm("showing figure" + figname))
             if isinstance(figname, dict):
                 kwargs.update(figname)
                 if "print_string" in kwargs:
@@ -114,39 +96,12 @@ class figlistl(figlist):
                     sys.stdout.buffer.flush()
             else:
                 j = self.get_fig_number(figname)
-                if mlab:
-                    # self.mlab.options.offscreen = True
-                    thefigure = self.figdict[figname]  # an object
-                    fig = self.mlab.figure(
-                        thefigure, bgcolor=(1, 0, 0), fgcolor=(1, 1, 1)
-                    )  # set background to red (no antialiasing) to be set to transparent later
-                    fig.scene.render_window.aa_frames = 0
-                    fig.scene.anti_aliasing_frames = 0
-                    # fig.scene.off_screen_rendering = True
-                else:
-                    plt.figure(j)
-                sep = ""
-                if len(string) > 0:
-                    sep = "_"
-                if self.env == "test":
-                    print("not running lplot")
-                else:
-                    if mlab:
-                        lplot(
-                            figname.replace(".", "_") + sep + string,
-                            fig=thefigure,
-                            **kwargs,
-                        )
-                    else:
-                        if figname in list(self.twinx_list.keys()):
-                            kwargs.update(
-                                autopad=False
-                            )  # because the autopad is done manually, since it freaks out with twinx
-                        lplot(
-                            figname.replace(".", "_") + sep + string, **kwargs
-                        )
-        while len(self.figurelist) > 0:
-            self.figurelist.pop(-1)
+                plt.figure(j)
+                sep = "_"
+                logging.debug("calling it: "+ figname.replace(".", "_") + sep + string)
+                lplot(
+                    figname.replace(".", "_") + sep + string, **kwargs
+                )
         return
 
     def obs(self, *args):
@@ -606,27 +561,28 @@ def lplot(
         fig.scene.disable_render = False
         fig.scene.anti_aliasing_frames = temp
     else:
-        ax = plt.gca()
-        if equal_aspect:
-            ax.set_aspect("equal")
-        fig.autofmt_xdate()
-        if autopad:
-            autopad_figure(centered=centered, figname=fname)
+        #ax = plt.gca()
+        #if equal_aspect:
+        #    ax.set_aspect("equal")
+        #fig.autofmt_xdate()
+        #if autopad:
+        #    autopad_figure(centered=centered, figname=fname)
         # replaced outer_legend with appropriate modification to the "legend" option of figlist.show_prep(), same with legend option
-        if not boundaries:
-            ax = plt.gca()
-            for j in list(ax.spines.keys()):
-                ax.spines[j].set_visible(False)
-            setp(ax.get_xticklabels(), visible=False)
-            setp(ax.get_yticklabels(), visible=False)
-            setp(ax.get_xticklines(), visible=False)
-            setp(ax.get_yticklines(), visible=False)
-            this_xlabel = ax.get_xlabel()
-            if len(this_xlabel) > 0:
-                ax.set_xlabel(this_xlabel + r" $\rightarrow$")
-            this_ylabel = ax.get_ylabel()
-            if len(this_ylabel) > 0:
-                ax.set_ylabel(this_ylabel + r" $\rightarrow$")
+        logging.debug(strm("about to save",fname))
+        #if not boundaries:
+        #    ax = plt.gca()
+        #    for j in list(ax.spines.keys()):
+        #        ax.spines[j].set_visible(False)
+        #    setp(ax.get_xticklabels(), visible=False)
+        #    setp(ax.get_yticklabels(), visible=False)
+        #    setp(ax.get_xticklines(), visible=False)
+        #    setp(ax.get_yticklines(), visible=False)
+        #    this_xlabel = ax.get_xlabel()
+        #    if len(this_xlabel) > 0:
+        #        ax.set_xlabel(this_xlabel + r" $\rightarrow$")
+        #    this_ylabel = ax.get_ylabel()
+        #    if len(this_ylabel) > 0:
+        #        ax.set_ylabel(this_ylabel + r" $\rightarrow$")
         try:
             plt.savefig(
                 fname, dpi=dpi, facecolor=(1, 1, 1, 0), bbox_inches="tight"
@@ -669,18 +625,18 @@ def lplot(
     if showbox:
         bufwr(r"""\mbox{\begin{minipage}{%s}""" % mpwidth)
         if alsosave != None:
-            bufwr(r"also saved \fn{%s}" % alsosave + "\n\n")
+            bufwr(r"also saved \fn{%s}" % alsosave + r"\par")
     bufwr(
         r"\includegraphics[width=%s]{%s}"
         % (figwidth, fname.replace(r"auto_figures", r"\autofiguredir"))
     )
     if showbox:
-        bufwr("\n\n" + r"\hrulefill" + "\n\n")
+        bufwr(r"\par\hrulefill\par")
         bufwr(
             r"""{\color{red}{\tiny %s}:}\begin{tiny}\fn{%s}\end{tiny}"""
             % ("file:", fname)
         )
-        bufwr("\n\n" + r"\hrulefill" + "\n\n")
+        bufwr(r"\par\hrulefill\par")
         bufwr(r"""\end{minipage} }""", end=" ")
     plt.clf()
     sys.stdout.buffer.flush()

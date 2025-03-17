@@ -268,18 +268,7 @@ class figlist(object):
         return len(cleanlist)
 
     def get_fig_number(self, name):
-        cleanlist = [x for x in self.figurelist if isinstance(x, str)]
-        try:
-            return cleanlist.index(name) + 1
-        except ValueError:
-            raise ValueError(
-                strm(
-                    "You are looking for",
-                    name,
-                    "which isn't in the list of figures",
-                    cleanlist,
-                )
-            )
+        return self.figdict[name].number
 
     def _clean_name(self, input_name):
         "just perform various checks on the name and incorporate the basename"
