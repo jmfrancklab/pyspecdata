@@ -102,7 +102,7 @@ def fake_data(
     for j in signal_pathway.keys():
         data.ft(j, unitary=True)
     fl.pop_marker()
-    data.setaxis(direct, lambda x: x - data.getaxis(direct)[0])
+    data.setaxis(direct, data.getaxis(direct))
     data.ft(direct, shift=True)
     data.ift(direct)
     data.register_axis({direct: 0})
