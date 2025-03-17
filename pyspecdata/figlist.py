@@ -1162,7 +1162,7 @@ class figlist(object):
         return
 
     def __contains__(self, input_name):
-        name = self._clean_name
+        name = self._clean_name(input_name)
         return name in self.figurelist
 
     def __repr__(self):
