@@ -98,7 +98,7 @@ class figlistl(figlist):
                 j = self.get_fig_number(figname)
                 plt.figure(j)
                 sep = "_"
-                logging.debug("calling it: "+ figname.replace(".", "_") + sep + string)
+                logging.debug(f"calling figure {j}, {id(plt.gcf())}: "+ figname.replace(".", "_") + sep + string)
                 lplot(
                     figname.replace(".", "_") + sep + string, **kwargs
                 )
@@ -583,24 +583,9 @@ def lplot(
         #    this_ylabel = ax.get_ylabel()
         #    if len(this_ylabel) > 0:
         #        ax.set_ylabel(this_ylabel + r" $\rightarrow$")
-        try:
-            plt.savefig(
-                fname, dpi=dpi, facecolor=(1, 1, 1, 0), bbox_inches="tight"
-            )
-        except ValueError as exc_string:
-            if exc_string.find("finite numbers") > -1:
-                raise ValueError(
-                    "It gives this error because you're trying to do a bar"
-                    " graph with zero width"
-                )
-            else:
-                raise ValueError(exc_string)
-        except IOError as e:
-            raise IOError(
-                "This is giving an IOError -- check that you haven't maybe"
-                " changed directories"
-                + os.getcwd().replace("\\", "/")
-            )
+        plt.savefig(
+            fname, dpi=dpi, facecolor=(1, 1, 1, 0), bbox_inches="tight"
+        )
         if alsosave != None:
             plt.savefig(alsosave, dpi=dpi, facecolor=(1, 1, 1, 0))
     if figure:
