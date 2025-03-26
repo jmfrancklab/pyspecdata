@@ -1637,7 +1637,7 @@ class nddata(object):
     pcolor = this_plotting.pcolormesh.pcolormesh
 
     def waterfall(
-        self, alpha=0.3, ax=None, rotation=None, color="b", edgecolor="k"
+        self, alpha=0.5, ax=None, rotation=None, color="b", edgecolor="k"
     ):
         if ax is None:
             ax = self._init_3d_axis(ax, rotation=rotation)
@@ -2039,7 +2039,7 @@ class nddata(object):
         an error will be generated.
 
         e.g. call as `d.div_units("axisname","s")`
-        to divide the axis units by seconds
+        to divide the axis units by seconds.
 
         or `d.div_units("s")` to divide the
         data units by seconds.
@@ -2385,7 +2385,7 @@ class nddata(object):
     # {{{ set and get plot color
     def set_plot_color(self, thiscolor):
         if thiscolor is None:
-            return
+            self.other_info.pop("plot_color")
         if thiscolor is str:
             colordict = {
                 "r": [1, 0, 0],
