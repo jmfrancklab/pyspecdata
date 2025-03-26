@@ -2400,8 +2400,8 @@ class nddata(object):
                 thiscolor = colordict[thiscolor]
             except Exception:
                 raise ValueError(strm("Color", thiscolor, "not in dictionary"))
-        self.other_info.update({"plot_color": thiscolor})
-        return
+            self.other_info.update({"plot_color": thiscolor})
+        return self
 
     def set_plot_color_next(self):
         """set the plot color associated with this dataset to the next
@@ -2413,6 +2413,7 @@ class nddata(object):
         in your script.
         """
         self.set_plot_color(next(default_cycler))
+        return self
 
     def get_plot_color(self):
         if "plot_color" in self.get_prop():
