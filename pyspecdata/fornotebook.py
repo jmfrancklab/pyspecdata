@@ -80,6 +80,24 @@ class figlistl(figlist):
         line_spacing : bool
             if false, suppress empty lines between output
         """
+        print("\n\n")
+        self.basename = None  # must be turned off, so it can cycle through lists, etc, on its own
+        # {{{ process kwargs
+        verbose = False
+        if "verbose" in list(kwargs.keys()):
+            verbose = kwargs.pop("verbose")
+        # }}}
+        if line_spacing:
+            print("\n\n")
+        self.show_prep()
+        if not len(kwargs):
+            kwargs = {}
+            mlab = False
+            if hasattr(self, "mlab") and self.mlab:
+                kwargs.update({"mlab": self.mlab})
+                mlab = True
+        if hasattr(self, "lplot_kwargs"):
+            kwargs.update(self.lplot_kwargs)
         for figname in self.figurelist:
             logging.debug(strm("showing figure" + figname))
             if isinstance(figname, dict):
@@ -96,12 +114,40 @@ class figlistl(figlist):
                     sys.stdout.buffer.flush()
             else:
                 j = self.get_fig_number(figname)
-                plt.figure(j)
-                sep = "_"
-                logging.debug(f"calling figure {j}, {id(plt.gcf())}: "+ figname.replace(".", "_") + sep + string)
-                lplot(
-                    figname.replace(".", "_") + sep + string, **kwargs
-                )
+                if mlab:
+                    # self.mlab.options.offscreen = True
+                    thefigure = self.figdict[figname]  # an object
+                    fig = self.mlab.figure(
+                        thefigure, bgcolor=(1, 0, 0), fgcolor=(1, 1, 1)
+                    )  # set background to red (no antialiasing) to be set to transparent later
+                    fig.scene.render_window.aa_frames = 0
+                    fig.scene.anti_aliasing_frames = 0
+                    # fig.scene.off_screen_rendering = True
+                else:
+                    plt.figure(j)
+                sep = ""
+                if len(string) > 0:
+                    sep = "_"
+                if self.env == "test":
+                    print("not running lplot")
+                else:
+                    if mlab:
+                        lplot(
+                            figname.replace(".", "_") + sep + string,
+                            fig=thefigure,
+                            **kwargs,
+                        )
+                    else:
+                        if figname in list(self.twinx_list.keys()):
+                            kwargs.update(
+                                autopad=False
+                            )  # because the autopad is done manually, since it freaks out with twinx
+                        logging.debug(f"calling figure {j}, {id(plt.gcf())}: "+ figname.replace(".", "_") + sep + string)
+                        lplot(
+                            figname.replace(".", "_") + sep + string, **kwargs
+                        )
+        while len(self.figurelist) > 0:
+            self.figurelist.pop(-1)
         return
 
     def obs(self, *args):
@@ -561,31 +607,48 @@ def lplot(
         fig.scene.disable_render = False
         fig.scene.anti_aliasing_frames = temp
     else:
-        #ax = plt.gca()
-        #if equal_aspect:
-        #    ax.set_aspect("equal")
-        #fig.autofmt_xdate()
-        #if autopad:
-        #    autopad_figure(centered=centered, figname=fname)
+        ax = plt.gca()
+        if equal_aspect:
+            ax.set_aspect("equal")
+        fig.autofmt_xdate()
+        if autopad:
+            autopad_figure(centered=centered, figname=fname)
         # replaced outer_legend with appropriate modification to the "legend" option of figlist.show_prep(), same with legend option
         logging.debug(strm("about to save",fname))
-        #if not boundaries:
-        #    ax = plt.gca()
-        #    for j in list(ax.spines.keys()):
-        #        ax.spines[j].set_visible(False)
-        #    setp(ax.get_xticklabels(), visible=False)
-        #    setp(ax.get_yticklabels(), visible=False)
-        #    setp(ax.get_xticklines(), visible=False)
-        #    setp(ax.get_yticklines(), visible=False)
-        #    this_xlabel = ax.get_xlabel()
-        #    if len(this_xlabel) > 0:
-        #        ax.set_xlabel(this_xlabel + r" $\rightarrow$")
-        #    this_ylabel = ax.get_ylabel()
-        #    if len(this_ylabel) > 0:
-        #        ax.set_ylabel(this_ylabel + r" $\rightarrow$")
-        plt.savefig(
-            fname, dpi=dpi, facecolor=(1, 1, 1, 0), bbox_inches="tight"
-        )
+        if not boundaries:
+            ax = plt.gca()
+            for j in list(ax.spines.keys()):
+                ax.spines[j].set_visible(False)
+            setp(ax.get_xticklabels(), visible=False)
+            setp(ax.get_yticklabels(), visible=False)
+            setp(ax.get_xticklines(), visible=False)
+            setp(ax.get_yticklines(), visible=False)
+            this_xlabel = ax.get_xlabel()
+            if len(this_xlabel) > 0:
+                ax.set_xlabel(this_xlabel + r" $\rightarrow$")
+            this_ylabel = ax.get_ylabel()
+            if len(this_ylabel) > 0:
+                ax.set_ylabel(this_ylabel + r" $\rightarrow$")
+        try:
+            plt.savefig(
+                fname, dpi=dpi, facecolor=(1, 1, 1, 0), bbox_inches="tight"
+            )
+        except ValueError as exc_string:
+            if exc_string.find("finite numbers") > -1:
+                raise ValueError(
+                    "It gives this error because you're trying to do a bar"
+                    " graph with zero width"
+                )
+            else:
+                raise ValueError(exc_string)
+        except IOError:
+            raise IOError(
+                "This is giving an IOError -- check that you haven't maybe"
+                " changed directories"
+                + os.getcwd().replace("\\", "/")
+            )
+        except:
+            raise ValueError("Some other error!")
         if alsosave != None:
             plt.savefig(alsosave, dpi=dpi, facecolor=(1, 1, 1, 0))
     if figure:
