@@ -13,14 +13,31 @@ import matplotlib.pyplot as plt
 # from pylab import *
 import warnings
 
+import logging
+
 # sympy doesn't like to be imported from fornotebook as part of a *
 warnings.filterwarnings("ignore")
 from .core import plot, nddata
 from .load_files import load_file, load_indiv_file
 from .datadir import getDATADIR, dirformat
-from .figlist import figlist, setp, figlistini, figlistret
-from .general_functions import fname_makenice, strm, whereblocks, dp, lsafe, lsafen
-from .mpl_utils import autolegend, grid, gridandtick, autopad_figure, nextfigure, addlabels
+from .figlist import figlist
+from .general_functions import (
+    fname_makenice,
+    strm,
+    whereblocks,
+    dp,
+    lsafe,
+    lsafen,
+)
+from .mpl_utils import (
+    autolegend,
+    gridandtick,
+    autopad_figure,
+    nextfigure,
+    addlabels,
+    figlistini,
+    figlistret,
+)
 from os.path import exists as path_exists
 from os import name as os_name
 from scipy.signal import fftconvolve
@@ -653,10 +670,10 @@ def lplot(
             ax = plt.gca()
             for j in list(ax.spines.keys()):
                 ax.spines[j].set_visible(False)
-            setp(ax.get_xticklabels(), visible=False)
-            setp(ax.get_yticklabels(), visible=False)
-            setp(ax.get_xticklines(), visible=False)
-            setp(ax.get_yticklines(), visible=False)
+            plt.setp(ax.get_xticklabels(), visible=False)
+            plt.setp(ax.get_yticklabels(), visible=False)
+            plt.setp(ax.get_xticklines(), visible=False)
+            plt.setp(ax.get_yticklines(), visible=False)
             this_xlabel = ax.get_xlabel()
             if len(this_xlabel) > 0:
                 ax.set_xlabel(this_xlabel + r" $\rightarrow$")
@@ -1204,7 +1221,9 @@ def standard_noise_comparison(
         linelist = []
         plt.subplot(121)  # so that legend will fit
         for k in range(0, len(noiseexpno)):
-            raise RuntimeError("plot noise was here, but it's old -- not sure where it went!")
+            raise RuntimeError(
+                "plot noise was here, but it's old -- not sure where it went!"
+            )
         plt.ylabel(r"$\Omega$")
         titlestr = (
             "Noise scans (smoothed %0.2f $kHz$) for CNSI spectrometer\n"
@@ -1219,7 +1238,7 @@ def standard_noise_comparison(
         # gridandtick(plt.gca(),formatonly = True)
         gridandtick(plt.gca(), logarithmic=True)
         plt.subplot(122)
-        grid(False)
+        plt.grid(False)
         autolegend(linelist, legendstr)
         ax = plt.gca()
         ax.get_xaxis().set_visible(False)
