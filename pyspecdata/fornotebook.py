@@ -261,7 +261,7 @@ def lrecordarray_broken(recordlist, rows=30, numwide=5):
         retval += lrecordarray(recordlist[j : j + rows], resizebox=True) + "\n"
         retval += r"\end{minipage}"
     if j + rows < len(recordlist):
-        retval += r"\begin{minipage}[t]{%0.3\linewidth}" % width
+        retval += r"\begin{minipage}[t]{%0.3f\linewidth}" % width
         retval += lrecordarray(recordlist[j + rows :], resizebox=True) + "\n"
         retval += r"\end{minipage}"
     return retval
@@ -583,9 +583,9 @@ def lplot(
     fname = r"auto_figures/" + fname_makenice(fname)
     if alsosave is not None:
         alsosave = r"auto_figures/" + alsosave
-    if gensvg == True:
+    if gensvg is True:
         alsosave = fname.replace(".pdf", ".svg")
-    if genpng == True:
+    if genpng is True:
         alsosave = fname.replace(".pdf", ".png")
     if grid:
         gridandtick(plt.gca())
@@ -675,7 +675,7 @@ def lplot(
                 )
             else:
                 raise ValueError(exc_string)
-        except IOError as e:
+        except IOError:
             raise IOError(
                 "This is giving an IOError -- check that you haven't maybe"
                 " changed directories"
@@ -906,7 +906,7 @@ def cpmgseries(filename, plotlabel, tau=None, alpha=None, alphaselect=None):
     # data.ft('t2')
     # image(data)
     # lplot(plotlabel+'ft.pdf',grid=False)
-    data = process_cpmg(filename)
+    raise RuntimeError("process_cpmg is outdated!")
     if tau is not None:
         coeff, fit, rms = regularize1d(
             data.data, data.getaxis("echo"), tau, alpha
@@ -993,7 +993,6 @@ def esr_saturation(
         minind = 1
         # {{{ find the peaks for the segments above threshold
         peakmask = whereblocks(smoothed > smoothed.max() * threshold)
-        indeces = np.r_[0 : len(thisslice)]
         for peakset in peakmask:  # peakset gives the indeces for a given slice
             if len(peakset) > minind:
                 peak_ind = peakset[np.argmax(thisslice[peakset])]
@@ -1141,7 +1140,7 @@ def esr_saturation(
     height_n23.rename("power", newpname)
     height_n23_avg = height_n23.copy()
     height_n23_avg.mean("peak")
-    if show_avg == True:
+    if show_avg is True:
         plot(height_n23_avg / hn23adjustment, ".", nosemilog=True)
     else:
         plot(height_n23 / hn23adjustment, ".", nosemilog=True)
@@ -1170,7 +1169,6 @@ def standard_noise_comparison(
     plt.close(1)
     plt.figure(1, figsize=(16, 8))
     v = save_data()
-    our_calibration = np.double(v["our_calibration"])
     cnsi_calibration = np.double(v["cnsi_calibration"])
     calibration = (
         cnsi_calibration * np.sqrt(50.0 / 10.0) * np.sqrt(50.0 / 40.0)
@@ -1206,21 +1204,7 @@ def standard_noise_comparison(
         linelist = []
         plt.subplot(121)  # so that legend will fit
         for k in range(0, len(noiseexpno)):
-            retval = plot_noise(
-                path_list[k],
-                noiseexpno[k],
-                calibration,
-                mask_start,
-                mask_stop,
-                smoothing=smoothing,
-                both=False,
-                retplot=True,
-            )
-            linelist += retval[0]
-            legendstr.append(
-                "\n".join(textwrap.wrap(explabel[k] + ":" + retval[1][0], 50))
-                + "\n"
-            )
+            raise RuntimeError("plot noise was here, but it's old -- not sure where it went!")
         plt.ylabel(r"$\Omega$")
         titlestr = (
             "Noise scans (smoothed %0.2f $kHz$) for CNSI spectrometer\n"
