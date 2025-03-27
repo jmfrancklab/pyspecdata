@@ -15,24 +15,28 @@ import warnings
 
 # sympy doesn't like to be imported from fornotebook as part of a *
 warnings.filterwarnings("ignore")
-from .core import *
-from .mpl_utils import *
-from .figlist import figlist
-from .general_functions import fname_makenice
-from .mpl_utils import autopad_figure
-from scipy.io import savemat, loadmat
+from .core import plot, nddata
+from .load_files import load_file, load_indiv_file
+from .datadir import getDATADIR, dirformat
+from .figlist import figlist, setp, figlistini, figlistret
+from .general_functions import fname_makenice, strm, whereblocks, dp, lsafe, lsafen
+from .mpl_utils import autolegend, grid, gridandtick, autopad_figure, nextfigure, addlabels
 from os.path import exists as path_exists
 from os import name as os_name
-from scipy.optimize import leastsq
 from scipy.signal import fftconvolve
 from datetime import datetime
-from time import mktime
 from PIL import Image
+from numpy import pi
 import numpy as np
-import re
+import os
 import sys
+import textwrap
 
 golden_ratio = (1.0 + np.sqrt(5)) / 2.0
+
+
+def regularize1d(*args):
+    raise ValueError("this is an old function! where did it go?")
 
 
 def dprint(*stuff):
@@ -50,13 +54,12 @@ def thisjobname():
 
 def show_matrix(B, plot_name, first_figure=None):
     fl = figlistini(first_figure)
-    # nextfigure(fl,{'width':1}) # only do this once I am able to pop the command later
     nextfigure(fl, "matrix" + plot_name)
-    B[~isfinite(B)] = max(B.flatten())
-    image(B)
-    colorbar()
+    B[~np.isfinite(B)] = max(B.flatten())
+    plt.image(B)
+    plt.colorbar()
     # nextfigure(fl,'matrix'+plot_name+'_finite')
-    # image(~isfinite(B))
+    # image(~np.isfinite(B))
     return figlistret(first_figure, fl)
 
 
@@ -72,7 +75,8 @@ class figlistl(figlist):
         return
 
     def show(self, string, line_spacing=True, **kwargs):
-        """latexify the series of figures, where "string" gives the base file name
+        """latexify the series of figures, where "string" gives the base
+        file name
 
         Parameters
         ----------
@@ -80,7 +84,8 @@ class figlistl(figlist):
             if false, suppress empty lines between output
         """
         print("\n\n")
-        self.basename = None  # must be turned off, so it can cycle through lists, etc, on its own
+        self.basename = None  # must be turned off, so it can cycle
+        #                       through lists, etc, on its own
         # {{{ process kwargs
         verbose = False
         if "verbose" in list(kwargs.keys()):
@@ -119,7 +124,8 @@ class figlistl(figlist):
                     thefigure = self.figdict[figname]  # an object
                     fig = self.mlab.figure(
                         thefigure, bgcolor=(1, 0, 0), fgcolor=(1, 1, 1)
-                    )  # set background to red (no antialiasing) to be set to transparent later
+                    )  # set background to red (no antialiasing) to be
+                    #    set to transparent later
                     fig.scene.render_window.aa_frames = 0
                     fig.scene.anti_aliasing_frames = 0
                     # fig.scene.off_screen_rendering = True
@@ -141,7 +147,8 @@ class figlistl(figlist):
                         if figname in list(self.twinx_list.keys()):
                             kwargs.update(
                                 autopad=False
-                            )  # because the autopad is done manually, since it freaks out with twinx
+                            )  # because the autopad is done manually,
+                            #    since it freaks out with twinx
                         logging.debug(
                             f"calling figure {j}, {id(plt.gcf())}: "
                             + figname.replace(".", "_")
@@ -189,14 +196,16 @@ def lplotfigures(figurelist, string, **kwargs):
             plt.figure(j + 1)
             try:
                 lplot(figname + string, **kwargs)
-            except:
-                raise CustomError(
-                    "figurelist = ",
-                    figurelist,
-                    "figname = ",
-                    figname,
-                    "while string = ",
-                    string,
+            except Exception:
+                raise RuntimeError(
+                    strm(
+                        "figurelist = ",
+                        figurelist,
+                        "figname = ",
+                        figname,
+                        "while string = ",
+                        string,
+                    )
                 )
     while len(figurelist) > 0:
         figurelist.pop(-1)
@@ -214,7 +223,11 @@ def figlisterr(figurelist, *args, **kwargs):
 
 
 def see_if_math(recnames):
-    "return latex formatted strings --> ultimately, have this actually check to see if the individual strings are math or not, rather than just assuming that they are.  Do this simply by seeing whether or not the thing starts with a full word (more than two characters) or not."
+    """return latex formatted strings --> ultimately, have this actually
+    check to see if the individual strings are math or not, rather than
+    just assuming that they are.  Do this simply by seeing whether or
+    not the thing starts with a full word (more than two characters) or
+    not."""
 
     def ismath(myin):
         out = myin.split("_")
@@ -267,8 +280,11 @@ def lrecordarray(
     scientific_notation=True,
 ):
     r"""generate latex representation of a structured array
-    if set to True, resizebox will automatically scale down the table so it fits on the page (but it will also scale up a small table to fit the width of the page)
-    resizebox can also be a fractional number, so that it is resized to a fraction of the page
+    if set to True, resizebox will automatically scale down the table so
+    it fits on the page (but it will also scale up a small table to fit
+    the width of the page)
+    resizebox can also be a fractional number, so that it is resized to
+    a fraction of the page
     """
     error_names = [j for j in recordlist.dtype.names if j[-6:] == "_ERROR"]
     data_names = [j for j in recordlist.dtype.names if j[-6:] != "_ERROR"]
@@ -318,7 +334,8 @@ def lrecordarray(
                     highest_significant = np.floor(np.log10(x))
                     lowest_significant = highest_significant - (
                         number_sf - 1
-                    )  # the -1 is for number_sf significant figures, not just one
+                    )  # the -1 is for number_sf significant figures,
+                    #    not just one
                     x /= 10**lowest_significant
                     x = round(x)
                     x *= 10**lowest_significant
@@ -468,14 +485,16 @@ def lrecordarray(
                             j
                         ] = False  # remove this cline
                         numrows += 1
-                    # clinelist[k+numrows-1][j] = True # add the cline for the last one
-                    # if there are matching rows, replace the first with a multirow statement
+                    # clinelist[k+numrows-1][j] = True # add the cline
+                    # for the last one if there are matching rows,
+                    # replace the first with a multirow statement
                     if numrows > 1:
                         datastrings[k][j] = r"\multirow{%d}{*}{%s}" % (
                             numrows,
                             datastrings[k][j],
                         )
-                    k += numrows  # jump ahead past the end of the processed rows
+                    k += numrows  # jump ahead past the end of the
+                    #               processed rows
             # }}}
         for j in range(0, len(recordlist)):
             if smoosh:
@@ -551,7 +570,8 @@ def lplot(
     used with python.sty instead of savefig
 
     by default, if width is less than 1,
-    it's interpreted as bytextwidth = True (i.e. width given as a fraction of the linewidth)
+    it's interpreted as bytextwidth = True (i.e. width given as a
+    fraction of the linewidth)
     if it's greater than, the width is interpreted in inches.
     """
     if width <= 1.0:
@@ -561,7 +581,7 @@ def lplot(
     if print_string is not None:
         print(print_string)
     fname = r"auto_figures/" + fname_makenice(fname)
-    if alsosave != None:
+    if alsosave is not None:
         alsosave = r"auto_figures/" + alsosave
     if gensvg == True:
         alsosave = fname.replace(".pdf", ".svg")
@@ -574,31 +594,38 @@ def lplot(
     if mlab:
         temp = fig.scene.anti_aliasing_frames
         fig.scene.disable_render = True
-        fig.scene.anti_aliasing_frames = 0  # mayavi antialiasing is terrible, so just acquire at a high dpi setting
+        fig.scene.anti_aliasing_frames = 0  # mayavi antialiasing is
+        #                                     terrible, so just acquire
+        #                                     at a high dpi setting
         mlab.savefig(
             fname, magnification=int(dpi / 72 + 0.5), bbox_inches="tight"
         )
-        # {{{ convert to transparent, find red pixels, and change them to transparent
-        data = imread(fname)
+        # {{{ convert to transparent, find red pixels, and change them
+        #     to transparent
+        data = plt.imread(fname)
         data_shape = list(data.shape)
         data_shape[-1] = 4
-        new_data = ones(data_shape, dtype=data.dtype)
+        new_data = np.ones(data_shape, dtype=data.dtype)
         new_data[:, :, :3] = data
         data = new_data
         new_data = data.view(dtype=[("", data.dtype)] * 4)
-        mask = new_data == array([(1, 0, 0, 1)], dtype=new_data.dtype)
-        new_data[mask] = array([(1, 1, 1, 0)], dtype=new_data.dtype)
-        # data = imresize(data,data.shape[:2]/4,interp = 'bilinear') # this takes huge amounts of memory
+        mask = new_data == np.array([(1, 0, 0, 1)], dtype=new_data.dtype)
+        new_data[mask] = np.array([(1, 1, 1, 0)], dtype=new_data.dtype)
+        # # the following takes huge amounts of memory
+        # data = imresize(data,data.shape[:2]/4,interp = 'bilinear')
         imsave(fname, data)
-        if os_name == "posix":  # seems like windows can't handle the resize
+        if os_name == "posix":  # seems like windows can't handle the
+            #                     resize
             imshape = data.shape[0:2]
             resize_factor = 4
-            data = uint8((data * 255).round())
+            data = np.uint8((data * 255).round())
             img = Image.fromarray(data)
             if verbose:
                 print("old size", img.size)
             newimgsize = tuple(
-                uint((np.r_[img.size[0], img.size[1]] / resize_factor).round())
+                np.uint(
+                    (np.r_[img.size[0], img.size[1]] / resize_factor).round()
+                )
             )
             if verbose:
                 print("target new size", newimgsize)
@@ -618,7 +645,9 @@ def lplot(
         fig.autofmt_xdate()
         if autopad:
             autopad_figure(centered=centered, figname=fname)
-        # replaced outer_legend with appropriate modification to the "legend" option of figlist.show_prep(), same with legend option
+        # replaced outer_legend with appropriate modification to the
+        # "legend" option of figlist.show_prep(), same with legend
+        # option
         logging.debug(strm("about to save", fname))
         if not boundaries:
             ax = plt.gca()
@@ -652,7 +681,9 @@ def lplot(
                 " changed directories"
                 + os.getcwd().replace("\\", "/")
             )
-        if alsosave != None:
+        except Exception:
+            raise ValueError("Some other error!")
+        if alsosave is not None:
             plt.savefig(alsosave, dpi=dpi, facecolor=(1, 1, 1, 0))
     if figure:
         print(r"""
@@ -675,8 +706,8 @@ def lplot(
 
     if showbox:
         bufwr(r"""\mbox{\begin{minipage}{%s}""" % mpwidth)
-        if alsosave != None:
-            bufwr(r"also saved \fn{%s}" % alsosave + "\n\n")
+        if alsosave is not None:
+            bufwr(r"also saved \fn{%s}" % alsosave + r"\par")
     bufwr(
         r"\includegraphics[width=%s]{%s}"
         % (figwidth, fname.replace(r"auto_figures", r"\autofiguredir"))
@@ -695,7 +726,7 @@ def lplot(
 
 
 def ordplot(x, y, labels, formatstring):
-    order = argsort(x)
+    order = np.argsort(x)
     plot(x[order], y[order], "o-")
     newlabels = []
     for j in range(0, len(order)):
@@ -773,13 +804,15 @@ def save_data(inputdata={}, file="data.txt"):
     if not (inputdata == {}):
         try:
             data.update(inputdata)
-        except:
-            raise CustomError("trying to update", data, "with", inputdata)
+        except Exception:
+            raise RuntimeError(
+                strm("trying to update", data, "with", inputdata)
+            )
         try:
             dict_to_txt(data, file=file)
             # print "DEBUG, saved",data,'to',mat_file
-        except:
-            raise CustomError("trying to write", data, "to", file)
+        except Exception:
+            raise RuntimeError(strm("trying to write", data, "to", file))
     return data
 
 
@@ -841,8 +874,8 @@ def qcalc(freq1, freq2):
 
 def ernstangle(pulsetime=None, pulsetip=None, Tr=None, T1=None):
     ninetytime = pulsetime / pulsetip * pi / 2.0
-    if not (Tr == None):
-        alpha = arccos(exp(-Tr / T1))
+    if Tr is not None:
+        alpha = np.arccos(np.exp(-Tr / T1))
         obs(
             r"optimal $T_r=%0.2f\;s$ with $\alpha=%0.2f^o$"
             % (Tr, alpha * 180 / pi)
@@ -874,46 +907,50 @@ def cpmgseries(filename, plotlabel, tau=None, alpha=None, alphaselect=None):
     # image(data)
     # lplot(plotlabel+'ft.pdf',grid=False)
     data = process_cpmg(filename)
-    if tau != None:
+    if tau is not None:
         coeff, fit, rms = regularize1d(
             data.data, data.getaxis("echo"), tau, alpha
         )
         plot(alpha, rms)
-        if alphaselect != None:
+        if alphaselect is not None:
             coeff, fit, rms = regularize1d(
                 data.data, data.getaxis("echo"), tau, [alphaselect]
             )
             plot([alphaselect], rms, "rx")
-        axis("tight")
+        plt.axis("tight")
         lplot(plotlabel + "_reg.pdf")
         print("\n\n")
     plot(data)
-    if alphaselect != None:
+    if alphaselect is not None:
         plot(data.getaxis("echo"), fit.flatten(), "r", alpha=0.5, linewidth=2)
     lplot(plotlabel + "_filt.pdf")
-    if alphaselect != None:
+    if alphaselect is not None:
         plot(tau, coeff.flatten(), "r")
     lplot(plotlabel + "_coeff.pdf")
 
 
-def cpmgs(exp, number, tau=None, alpha=None, alphaselect=None, first=False):
+def cpmgs(
+    thisexp, number, tau=None, alpha=None, alphaselect=None, first=False
+):
     # {{{ carry over stored data
     if first:
         clear_local()
-    if tau != None:
+    if tau is not None:
         local_data = save_local({"tau": tau})
-    if alpha != None:
+    if alpha is not None:
         local_data = save_local({"alpha": alpha})
-    if alphaselect != None:
+    if alphaselect is not None:
         local_data = save_local({"alphaselect": alphaselect})
     local_data = save_local()
     tau = local_data["tau"]
     alpha = local_data["alpha"]
     alphaselect = local_data["alphaselect"]
     # }}}
-    filename = getDATADIR() + "franck_hanlabMagritek/" + exp + "/%d/" % number
-    print(r"\fn{%s %d}" % (exp, number) + "\n\n")
-    cpmgseries(filename, exp + thisjobname(), tau, alpha, alphaselect)
+    filename = (
+        getDATADIR() + "franck_hanlabMagritek/" + thisexp + "/%d/" % number
+    )
+    print(r"\fn{%s %d}" % (thisexp, number) + "\n\n")
+    cpmgseries(filename, thisexp + thisjobname(), tau, alpha, alphaselect)
 
 
 # {{{ esr_saturation
@@ -926,14 +963,14 @@ def esr_saturation(
     hn23adjustment=1.0,
     show_avg=False,
 ):
-    if figname == None:
+    if figname is None:
         figname = thisjobname()
     print("\n\n\\fn{", file, "}\n\n")
     data = load_indiv_file(file, dimname="power")
     # plot(data,'.-')
     x = data.getaxis("$B_0$").flatten()
-    k = exp(-((x - x.mean()) ** 2) / 2.0 / smoothing**2)
-    nslices = ndshape(data)["power"]
+    k = np.exp(-((x - x.mean()) ** 2) / 2.0 / smoothing**2)
+    nslices = data.shape["power"]
     allpeaks_top = []
     allpeaks_bottom = []
     allpeaks_top_x = []
@@ -959,7 +996,7 @@ def esr_saturation(
         indeces = np.r_[0 : len(thisslice)]
         for peakset in peakmask:  # peakset gives the indeces for a given slice
             if len(peakset) > minind:
-                peak_ind = peakset[argmax(thisslice[peakset])]
+                peak_ind = peakset[np.argmax(thisslice[peakset])]
                 top_peak_x += [x[peak_ind]]
                 top_peak += [thisslice[peak_ind]]
         # }}}
@@ -967,7 +1004,7 @@ def esr_saturation(
         peakmask = whereblocks(smoothed < smoothed.min() * threshold)
         for peakset in peakmask:
             if len(peakset) > minind:
-                peak_ind = peakset[argmin(thisslice[peakset])]
+                peak_ind = peakset[np.argmin(thisslice[peakset])]
                 bottom_peak_x += [x[peak_ind]]
                 bottom_peak += [thisslice[peak_ind]]
         # }}}
@@ -975,21 +1012,21 @@ def esr_saturation(
             plot(
                 x,
                 thisslice,
-                color=cm.hsv(np.double(j) / np.double(nslices)),
+                color=plt.cm.hsv(np.double(j) / np.double(nslices)),
                 alpha=0.5,
             )
             plot(
                 bottom_peak_x,
                 bottom_peak,
                 "o",
-                color=cm.hsv(np.double(j) / np.double(nslices)),
+                color=plt.cm.hsv(np.double(j) / np.double(nslices)),
                 alpha=0.5,
             )
             plot(
                 top_peak_x,
                 top_peak,
                 "o",
-                color=cm.hsv(np.double(j) / np.double(nslices)),
+                color=plt.cm.hsv(np.double(j) / np.double(nslices)),
                 alpha=0.5,
             )
         allpeaks_top += [top_peak]
@@ -1001,7 +1038,7 @@ def esr_saturation(
         allpeaks_top_x = nddata(
             allpeaks_top_x, [nslices, num_peaks], ["power", "peak"]
         ).reorder(["power", "peak"])
-    except:
+    except Exception:
         print(
             r"\begin{verbatim} If you have an error here, probably change"
             r" smoothing (%0.2f) or threshold (%0.2f)\end{verbatim}"
@@ -1026,7 +1063,7 @@ def esr_saturation(
         allpeaks_bottom_x = nddata(
             allpeaks_bottom_x, [nslices, num_peaks], ["power", "peak"]
         ).reorder(["power", "peak"])
-    except:
+    except Exception:
         print(
             r"\begin{verbatim} If you have an error here, probably change"
             r" smoothing (%0.2f) or threshold (%0.2f)\end{verbatim}"
@@ -1058,7 +1095,7 @@ def esr_saturation(
         allpeaks_bottom, [nslices, num_peaks], ["power", "peak"]
     ).reorder(["power", "peak"])
     if imageformat:
-        image(data.data, x=x, y=np.r_[0 : len(powerseries)])
+        plt.image(data.data, x=x, y=np.r_[0 : len(powerseries)])
         plot(np.r_[0 : len(powerseries)], allpeaks_top_x.data)
         # plot(np.r_[0:shape(data.data)[1]],allpeaks_bottom_x.data)
         lplot("esr_dataset" + figname + ".png", width=6, grid=False)
@@ -1092,7 +1129,7 @@ def esr_saturation(
     plt.ylabel(r"$y'_m$")
     lplot("esr_dataset" + figname + "_height.pdf")
     # {{{linearity test
-    b1 = ndshape(height_n23)
+    b1 = height_n23.shape
     b1["peak"] = 1
     b1 = b1.alloc()
     # b1['power',:] = powerseries.copy().reshape(-1,1)
@@ -1161,7 +1198,8 @@ def standard_noise_comparison(
     smoothing = 5e3
     for j in range(
         0, 1
-    ):  # for multiple plots $\Rightarrow$ add in j index below if this is what i want
+    ):  # for multiple plots $\Rightarrow$ add in j index below if this
+        # is what I want
         plt.figure(1)
         ind += 1
         legendstr = []
@@ -1194,12 +1232,11 @@ def standard_noise_comparison(
             % (calibration * 1e9, mask_start, mask_stop)
         )
         ax = plt.gca()
-        ylims = list(ax.get_ylim())
         # gridandtick(plt.gca(),formatonly = True)
         gridandtick(plt.gca(), logarithmic=True)
         plt.subplot(122)
         grid(False)
-        lg = autolegend(linelist, legendstr)
+        autolegend(linelist, legendstr)
         ax = plt.gca()
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
@@ -1224,7 +1261,7 @@ def standard_noise_comparison(
             data["t2", abs(x) > 1e3] = 0
             data.ift("t2", shift=True)
             plot(abs(data["t2", 0:300]) * 1e9)
-            xlabel("signal / $nV$")
+            plt.xlabel("signal / $nV$")
             legendstr += [explabel[k]]
         if len(signalexpno) > 0:
             autolegend(legendstr)
