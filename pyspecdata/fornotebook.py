@@ -142,7 +142,12 @@ class figlistl(figlist):
                             kwargs.update(
                                 autopad=False
                             )  # because the autopad is done manually, since it freaks out with twinx
-                        logging.debug(f"calling figure {j}, {id(plt.gcf())}: "+ figname.replace(".", "_") + sep + string)
+                        logging.debug(
+                            f"calling figure {j}, {id(plt.gcf())}: "
+                            + figname.replace(".", "_")
+                            + sep
+                            + string
+                        )
                         lplot(
                             figname.replace(".", "_") + sep + string, **kwargs
                         )
@@ -614,7 +619,7 @@ def lplot(
         if autopad:
             autopad_figure(centered=centered, figname=fname)
         # replaced outer_legend with appropriate modification to the "legend" option of figlist.show_prep(), same with legend option
-        logging.debug(strm("about to save",fname))
+        logging.debug(strm("about to save", fname))
         if not boundaries:
             ax = plt.gca()
             for j in list(ax.spines.keys()):
