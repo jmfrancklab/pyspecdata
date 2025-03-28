@@ -268,18 +268,7 @@ class figlist(object):
         return len(cleanlist)
 
     def get_fig_number(self, name):
-        cleanlist = [x for x in self.figurelist if isinstance(x, str)]
-        try:
-            return cleanlist.index(name) + 1
-        except ValueError:
-            raise ValueError(
-                strm(
-                    "You are looking for",
-                    name,
-                    "which isn't in the list of figures",
-                    cleanlist,
-                )
-            )
+        return self.figdict[name].number
 
     def _clean_name(self, input_name):
         "just perform various checks on the name and incorporate the basename"
@@ -461,6 +450,15 @@ class figlist(object):
             )
             self.figurelist.append(name)
             self.figdict.update({self.current: fig})
+            logging.debug(
+                strm(
+                    "I just added",
+                    self.current,
+                    "with figure object",
+                    id(fig),
+                    "to the dict",
+                )
+            )
             if boundaries is False:
                 self.setprops(boundaries=True)  # set this back
         if twinx is not None:
@@ -1162,7 +1160,7 @@ class figlist(object):
         return
 
     def __contains__(self, input_name):
-        name = self._clean_name
+        name = self._clean_name(input_name)
         return name in self.figurelist
 
     def __repr__(self):

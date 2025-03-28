@@ -101,11 +101,6 @@ class figlistl(figlist):
         print("\n\n")
         self.basename = None  # must be turned off, so it can cycle
         #                       through lists, etc, on its own
-        # {{{ process kwargs
-        verbose = False
-        if "verbose" in list(kwargs.keys()):
-            verbose = kwargs.pop("verbose")
-        # }}}
         if line_spacing:
             print("\n\n")
         self.show_prep()
@@ -118,8 +113,7 @@ class figlistl(figlist):
         if hasattr(self, "lplot_kwargs"):
             kwargs.update(self.lplot_kwargs)
         for figname in self.figurelist:
-            if verbose:
-                print("showing figure" + lsafen(figname))
+            logging.debug(strm("showing figure" + figname))
             if isinstance(figname, dict):
                 kwargs.update(figname)
                 if "print_string" in kwargs:
@@ -727,12 +721,12 @@ def lplot(
         % (figwidth, fname.replace(r"auto_figures", r"\autofiguredir"))
     )
     if showbox:
-        bufwr("\n\n" + r"\hrulefill" + "\n\n")
+        bufwr(r"\par\hrulefill\par")
         bufwr(
             r"""{\color{red}{\tiny %s}:}\begin{tiny}\fn{%s}\end{tiny}"""
             % ("file:", fname)
         )
-        bufwr("\n\n" + r"\hrulefill" + "\n\n")
+        bufwr(r"\par\hrulefill\par")
         bufwr(r"""\end{minipage} }""", end=" ")
     plt.clf()
     sys.stdout.buffer.flush()
