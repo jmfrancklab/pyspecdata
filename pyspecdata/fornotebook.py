@@ -25,13 +25,11 @@ from .general_functions import fname_makenice, strm, whereblocks, dp, lsafe, lsa
 from os.path import exists as path_exists
 from os import name as os_name
 from scipy.signal import fftconvolve
-from datetime import datetime
 from PIL import Image
 from numpy import pi
 import numpy as np
 import os
 import sys
-import textwrap
 
 golden_ratio = (1.0 + np.sqrt(5)) / 2.0
 
@@ -613,10 +611,9 @@ def lplot(
         new_data[mask] = np.array([(1, 1, 1, 0)], dtype=new_data.dtype)
         # # the following takes huge amounts of memory
         # data = imresize(data,data.shape[:2]/4,interp = 'bilinear')
-        imsave(fname, data)
+        plt.imsave(fname, data)
         if os_name == "posix":  # seems like windows can't handle the
             #                     resize
-            imshape = data.shape[0:2]
             resize_factor = 4
             data = np.uint8((data * 255).round())
             img = Image.fromarray(data)
@@ -787,7 +784,6 @@ def txt_to_dict(file="data.txt"):
 
 
 def dict_to_txt(mydict, file="data.txt"):
-    set_printoptions(precision=16)
     fp = open(file, "w")
     for k, v in mydict.items():
         fp.write("%s::%s\n" % (k, repr(v).replace("\n", "\\n")))
