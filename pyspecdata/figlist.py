@@ -450,7 +450,15 @@ class figlist(object):
             )
             self.figurelist.append(name)
             self.figdict.update({self.current: fig})
-            logging.debug(strm("I just added",self.current,"with figure object",id(fig),"to the dict"))
+            logging.debug(
+                strm(
+                    "I just added",
+                    self.current,
+                    "with figure object",
+                    id(fig),
+                    "to the dict",
+                )
+            )
             if boundaries is False:
                 self.setprops(boundaries=True)  # set this back
         if twinx is not None:
