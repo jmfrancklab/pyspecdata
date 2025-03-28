@@ -2384,9 +2384,10 @@ class nddata(object):
     # }}}
     # {{{ set and get plot color
     def set_plot_color(self, thiscolor):
-        if thiscolor is None:
+        if (thiscolor is None) and ("plot_color" in self.other_info.keys()):
             self.other_info.pop("plot_color")
-        if thiscolor is str:
+            return self
+        if type(thiscolor) is str:
             colordict = {
                 "r": [1, 0, 0],
                 "g": [0, 1, 0],
@@ -2396,11 +2397,9 @@ class nddata(object):
                 "o": [0.75, 0.25, 0],
                 "c": [0, 0.5, 0.5],
             }
-            try:
+            if thiscolor in colordict.keys():
                 thiscolor = colordict[thiscolor]
-            except Exception:
-                raise ValueError(strm("Color", thiscolor, "not in dictionary"))
-            self.other_info.update({"plot_color": thiscolor})
+        self.set_prop("plot_color", thiscolor)
         return self
 
     def set_plot_color_next(self):
@@ -2416,10 +2415,7 @@ class nddata(object):
         return self
 
     def get_plot_color(self):
-        if "plot_color" in self.get_prop():
-            return self.other_info["plot_color"]
-        else:
-            return None
+        return self.get_prop("plot_color")
 
     # }}}
     # }}}
