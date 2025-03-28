@@ -5,7 +5,6 @@ but ``figlist_var`` will be assigned to :class:`figlistl` when
 python code is embedded in a python environment inside latex.
 """
 
-import logging
 import matplotlib
 
 matplotlib.use("Agg")
@@ -102,11 +101,6 @@ class figlistl(figlist):
         print("\n\n")
         self.basename = None  # must be turned off, so it can cycle
         #                       through lists, etc, on its own
-        # {{{ process kwargs
-        verbose = False
-        if "verbose" in list(kwargs.keys()):
-            verbose = kwargs.pop("verbose")
-        # }}}
         if line_spacing:
             print("\n\n")
         self.show_prep()
