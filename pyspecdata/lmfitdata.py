@@ -279,7 +279,7 @@ class lmfitdata(nddata):
             # here you see that fit_coeff stores the coefficients that
             # were previously fit, and these are stored in p, here
         else:
-            p = np.array([NaN] * len(self.variable_names))
+            p = np.array([np.nan] * len(self.variable_names))
         # JF notes this is a copy of older code -- we should be able to
         # clean this up by using the newer copy functions -- currently I
         # see  the copy_props and copyaxes functions, but thought there

@@ -473,7 +473,7 @@ def _find_index(u, origin=0.0, tolerance=1e-4):
         logging.debug(strm("(_find_index) range of axis:", u[0], u[-1]))
         logging.debug(strm("(_find_index) alias number is", alias_number))
         logging.debug(
-            strm("(_find_index) set origin from", origin, end=" ")
+            strm("(_find_index) set origin from", origin)
         )
         origin -= alias_number * SW
         logging.debug(strm("to", origin))
