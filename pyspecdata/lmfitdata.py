@@ -355,12 +355,14 @@ class lmfitdata(nddata):
             themin = Minimizer(
                 self.residual,
                 self.guess_parameters,
+                nan_policy='omit',
             )
         else:
             themin = Minimizer(
                 self.residual,
                 self.guess_parameters,
                 fcn_args=(sigma,),
+                nan_policy='omit',
             )
         if use_jacobian:
             out = themin.leastsq(Dfun=self.jacobian, col_deriv=True)
