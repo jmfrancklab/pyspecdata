@@ -5,7 +5,7 @@ from .ft_shift import _find_index, thinkaboutit_message
 
 
 def ift(
-    self, axes, n=False, tolerance=1e-5, verbose=False, unitary=None, **kwargs
+    self, axes, n=False, tolerance=1e-5, unitary=None, **kwargs
 ):
     r"""This performs an inverse Fourier transform along the axes identified by the string or list of strings `axes`.
 
@@ -39,8 +39,7 @@ def ift(
     unitary : boolean (None)
         return a result that is vector-unitary
     """
-    if verbose:
-        print("check 1", self.data.dtype)
+    logging.debug(strm("check 1", self.data.dtype))
     if self.data.dtype == np.float64:
         self.data = np.complex128(
             self.data
@@ -92,7 +91,6 @@ def ift(
                     ' self.set_ft_prop(axisname,"unitary",True/False) before'
                     " calling ft or ift"
                 )
-        # print("for",axes[j],"set to",unitary[j])
     # }}}
     for j in range(0, len(axes)):
         do_post_shift = False
@@ -170,23 +168,20 @@ def ift(
                     " which the index for $t=0$ has already been"
                     " determined!"
                 )
-            if verbose:
-                print("check for p2_post_discrepancy")
-            if verbose:
-                print("desired startpoint", desired_startpoint)
+            logging.debug(strm("check for p2_post_discrepancy"))
+            logging.debug(strm("desired startpoint", desired_startpoint))
             p2_post, p2_post_discrepancy, alias_shift_post = _find_index(
-                v, origin=desired_startpoint, verbose=verbose
+                v, origin=desired_startpoint,
             )
-            if verbose:
-                print(
-                    "p2_post,p2_post_discrepancy,alias_shift_post,v at"
-                    " p2_post, and v at p2_post-1:",
-                    p2_post,
-                    p2_post_discrepancy,
-                    alias_shift_post,
-                    v[p2_post],
-                    v[p2_post - 1],
-                )
+            logging.debug(strm(
+                "p2_post,p2_post_discrepancy,alias_shift_post,v at"
+                " p2_post, and v at p2_post-1:",
+                p2_post,
+                p2_post_discrepancy,
+                alias_shift_post,
+                v[p2_post],
+                v[p2_post - 1],
+            ))
             if p2_post != 0 or p2_post_discrepancy is not None:
                 do_post_shift = True
             else:
@@ -257,7 +252,7 @@ def ift(
         # }}}
         # {{{ pre-IFT shift so that we start at u=0
         p2_pre, p2_pre_discrepancy, alias_shift_pre = _find_index(
-            u, verbose=verbose
+            u,
         )
         self._ft_shift(thisaxis, p2_pre)
         # }}}
@@ -276,13 +271,7 @@ def ift(
         #    must apply a phase shift to reflect the fact that I need to add
         #    back that frequency
         if p2_post_discrepancy is not None:
-            if verbose:
-                print(
-                    "adjusting axis by",
-                    p2_post_discrepancy,
-                    "where du is",
-                    u[1] - u[0],
-                )
+            logging.debug(strm( "adjusting axis by", p2_post_discrepancy, "where du is", u[1] - u[0],))
             self.axis_coords[thisaxis][:] += p2_post_discrepancy  # reflect the
             #   p2_post_discrepancy that we have already incorporated via a
             #   phase-shift above

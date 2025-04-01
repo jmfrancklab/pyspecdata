@@ -85,7 +85,7 @@ def set_ft_prop(self, axis, propname=None, value=True):
     return self  # important, so that I can chain operations
 
 
-def _ft_shift(self, thisaxis, p2, shift_axis=None, verbose=False):
+def _ft_shift(self, thisaxis, p2, shift_axis=None):
     (
         "perform a generalized fftshift along the axis indicated by the"
         " integer `thisaxis`, where `p2` gives the index that will become the"
@@ -448,7 +448,7 @@ def _get_ft_dt(self, axis):
         return np.diff(self.getaxis(axis)[r_[0, 1]]).item()
 
 
-def _find_index(u, origin=0.0, tolerance=1e-4, verbose=False):
+def _find_index(u, origin=0.0, tolerance=1e-4):
     (
         "identify the index of `u` (represents either time or frequency)"
         " where `origin` lives -- if it finds a value exactly equal to"
@@ -470,17 +470,13 @@ def _find_index(u, origin=0.0, tolerance=1e-4, verbose=False):
             origin - u[0]
         ) // SW  # subtracting this many SW's from origin
         #          will land me back inside the range of u
-        if verbose:
-            logging.debug(strm("(_find_index) range of axis:", u[0], u[-1]))
-        if verbose:
-            logging.debug(strm("(_find_index) alias number is", alias_number))
-        if verbose:
-            logging.debug(
-                strm("(_find_index) set origin from", origin, end=" ")
-            )
+        logging.debug(strm("(_find_index) range of axis:", u[0], u[-1]))
+        logging.debug(strm("(_find_index) alias number is", alias_number))
+        logging.debug(
+            strm("(_find_index) set origin from", origin, end=" ")
+        )
         origin -= alias_number * SW
-        if verbose:
-            logging.debug(strm("to", origin))
+        logging.debug(strm("to", origin))
     p2 = np.argmin(abs(u - origin))
     assert np.count_nonzero(u[p2] == u) == 1, (
         "there seem to be "
@@ -493,19 +489,18 @@ def _find_index(u, origin=0.0, tolerance=1e-4, verbose=False):
         p2_discrepancy = origin - u[p2]
     else:
         p2_discrepancy = None
-    if verbose:
-        logging.debug(
-            strm(
-                "(_find_index) for origin",
-                origin,
-                "I am returning p2",
-                p2,
-                "out of",
-                N,
-                "and discrepancy",
-                p2_discrepancy,
-            )
+    logging.debug(
+        strm(
+            "(_find_index) for origin",
+            origin,
+            "I am returning p2",
+            p2,
+            "out of",
+            N,
+            "and discrepancy",
+            p2_discrepancy,
         )
+    )
     alias_number += 1  # because the way that _ft_shift works essentially
     #                    entails one aliasing
     return p2, p2_discrepancy, alias_number * SW
