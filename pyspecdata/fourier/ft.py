@@ -1,21 +1,26 @@
-from ..general_functions import *
-from numpy import r_
+from ..general_functions import strm, process_kwargs, check_ascending_axis
+from numpy import r_, pi
 import numpy as np
-from .ft_shift import _find_index, thinkaboutit_message
+import logging
+from .ft_shift import _find_index
 
 
 def ft(self, axes, tolerance=1e-5, cosine=False, unitary=None, **kwargs):
-    r"""This performs a Fourier transform along the axes identified by the string or list of strings `axes`.
+    r"""This performs a Fourier transform along the axes identified by the
+    string or list of strings `axes`.
 
     It adjusts normalization and units so that the result conforms to
-            :math:`\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt`
 
-    **pre-FT**, we use the axis to cyclically permute :math:`t=0` to the first index
+    :math:`\tilde{s}(f)=\int_{x_{min}}^{x_{max}} s(t) e^{-i 2 \pi f t} dt`
+
+    **pre-FT**, we use the axis to cyclically permute :math:`t=0` to the first
+    index
 
     **post-FT**, we assume that the data has previously been IFT'd
     If this is the case, passing ``shift=True`` will cause an error
-    If this is not the case, passing ``shift=True`` generates a standard fftshift
-    ``shift=None`` will choose True, if and only if this is not the case
+    If this is not the case, passing ``shift=True`` generates a standard
+    fftshift ``shift=None`` will choose True, if and only if this is not
+    the case
 
     Parameters
     ----------
@@ -88,20 +93,18 @@ def ft(self, axes, tolerance=1e-5, cosine=False, unitary=None, **kwargs):
                     ' self.set_ft_prop(axisname,"unitary",True/False) before'
                     " calling ft or ift"
                 )
-        # print("for",axes[j],"set to",unitary[j])
     # }}}
     for j in range(0, len(axes)):
         do_post_shift = False
         p2_post_discrepancy = None
         p2_pre_discrepancy = None
-        # {{{ if this is NOT the source data, I need to mark it as not alias-safe!
-        if (
-            self.get_ft_prop(axes[j], ["start", "freq"]) is None
-        ):  #  this is the same
-            #           as saying that I have NOT run .ift() on this data yet,
-            #           meaning that I must have started with time as the
-            #           source data, and am now constructing an artificial and
-            #           possibly aliased frequency-domain
+        # {{{ if this is NOT the source data, I need to mark it as not
+        #     alias-safe!
+        if self.get_ft_prop(axes[j], ["start", "freq"]) is None:
+            # this is the same as saying that I have NOT run .ift() on this
+            # data yet, meaning that I must have started with time as the
+            # source data, and am now constructing an artificial and possibly
+            # aliased frequency-domain
             if (
                 self.get_ft_prop(axes[j], ["freq", "not", "aliased"])
                 is not True
@@ -109,8 +112,8 @@ def ft(self, axes, tolerance=1e-5, cosine=False, unitary=None, **kwargs):
                 #                              has been manually set/overridden
                 self.set_ft_prop(axes[j], ["freq", "not", "aliased"], False)
             # {{{ but on the other hand, I am taking the time as the
-            #    not-aliased "source", so as long as I haven't explicitly set it as
-            #    unsafe, declare it "safe"
+            #    not-aliased "source", so as long as I haven't
+            #    explicitly set it as unsafe, declare it "safe"
             if (
                 self.get_ft_prop(axes[j], ["time", "not", "aliased"])
                 is not False
@@ -123,7 +126,7 @@ def ft(self, axes, tolerance=1e-5, cosine=False, unitary=None, **kwargs):
             self.set_units(axes[j], self._ft_conj(self.get_units(axes[j])))
         try:
             thisaxis = self.dimlabels.index(axes[j])
-        except:
+        except ValueError:
             raise RuntimeError(
                 strm("I can't find", axes[j], "dimlabels is: ", self.dimlabels)
             )
@@ -195,7 +198,10 @@ def ft(self, axes, tolerance=1e-5, cosine=False, unitary=None, **kwargs):
             n = padded_length
             p2_post = (
                 n + 1
-            ) // 2  # this is the starting index of what starts out as the second half (// is floordiv) -- copied from scipy -- this essentially rounds up (by default assigning more negative frequencies than positive ones)
+            ) // 2  # this is the starting index of what starts out as the
+            #         second half (// is floordiv) -- copied from scipy --
+            #         this essentially rounds up (by default assigning
+            #         more negative frequencies than positive ones)
             alias_shift_post = 0
             do_post_shift = True
             # {{{ if I start with an alias-safe axis, and perform a
@@ -208,13 +214,14 @@ def ft(self, axes, tolerance=1e-5, cosine=False, unitary=None, **kwargs):
         #          in order to adjust for a final u-axis that doesn't pass
         #          exactly through zero
         if p2_post_discrepancy is not None:
-            asrt_msg = r"""You are trying to shift the frequency axis by (%d+%g) du (%g).
+            asrt_msg = r"""You are trying to shift the frequency axis by
+            (%d+%g) du (%g).
 
             In order to shift by a frequency that is not
             integral w.r.t. the frequency resolution step, you need to be sure
             that the time-domain spectrum is not aliased.
-            This is typically achieved by starting from a time domain spectrum and
-            generating the frequency domain by an FT.
+            This is typically achieved by starting from a time domain spectrum
+            and generating the frequency domain by an FT.
             If you **know** by other means that the time-domain spectrum
             is not aliased, you can also set the `time_not_aliased` FT property
             to `True`.""" % (
@@ -245,8 +252,9 @@ def ft(self, axes, tolerance=1e-5, cosine=False, unitary=None, **kwargs):
                 else:
                     raise TypeError(e)
         # }}}
-        # {{{ do zero-filling manually and first, so I can properly pre-shift the data
-        if not pad is False:
+        # {{{ do zero-filling manually and first, so I can properly
+        #     pre-shift the data
+        if pad is not False:
             newdata = list(self.data.shape)
             newdata[thisaxis] = padded_length
             targetslice = [slice(None, None, None)] * len(newdata)
@@ -298,20 +306,20 @@ def ft(self, axes, tolerance=1e-5, cosine=False, unitary=None, **kwargs):
         if unitary[j]:
             self.data /= np.sqrt(padded_length)
         else:
-            self.data *= du  # this gives the units in the integral noted in the docstring
+            self.data *= du  # this gives the units in the integral noted in
+            #                  the docstring
         # }}}
-        # {{{ finally, if "p2_pre" for the pre-shift didn't correspond exactly to
-        #       zero, then the pre-ft data was shifted, and I must reflect
-        #       that by performing a post-ft phase shift
+        # {{{ finally, if "p2_pre" for the pre-shift didn't correspond exactly
+        #     to zero, then the pre-ft data was shifted, and I must reflect
+        #     that by performing a post-ft phase shift
         if p2_pre_discrepancy is not None:
             assert abs(p2_pre_discrepancy) < abs(du) or np.isclose(
                 abs(p2_pre_discrepancy), abs(du)
             ), (
                 "I expect the discrepancy to be"
-                " smaller than du ({:0.5g}), but it's {:0.5g} -- what's going"
-                " on??"
-            ).format(
-                du, p2_pre_discrepancy
+                f" smaller than du ({du:0.5g}),"
+                f" but it's {p2_pre_discrepancy:0.5g}"
+                " -- what's going on??"
             )
             result = self * self.fromaxis(
                 axes[j], lambda f: np.exp(1j * 2 * pi * f * p2_pre_discrepancy)

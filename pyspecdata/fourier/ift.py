@@ -1,23 +1,26 @@
-from ..general_functions import *
-from numpy import r_
+from ..general_functions import strm, process_kwargs, check_ascending_axis
+from numpy import r_, pi
 import numpy as np
-from .ft_shift import _find_index, thinkaboutit_message
+import logging
+from .ft_shift import _find_index
 
 
-def ift(
-    self, axes, n=False, tolerance=1e-5, unitary=None, **kwargs
-):
-    r"""This performs an inverse Fourier transform along the axes identified by the string or list of strings `axes`.
+def ift(self, axes, n=False, tolerance=1e-5, unitary=None, **kwargs):
+    r"""This performs an inverse Fourier transform along the axes
+    identified by the string or list of strings `axes`.
 
     It adjusts normalization and units so that the result conforms to
-            :math:`s(t)=\int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df`
 
-    **pre-IFT**, we use the axis to cyclically permute :math:`f=0` to the first index
+    :math:`s(t)=\int_{x_{min}}^{x_{max}} \tilde{s}(f) e^{i 2 \pi f t} df`
+
+    **pre-IFT**, we use the axis to cyclically permute :math:`f=0` to
+    the first index
 
     **post-IFT**, we assume that the data has previously been FT'd
     If this is the case, passing ``shift=True`` will cause an error
-    If this is not the case, passing ``shift=True`` generates a standard ifftshift
-    ``shift=None`` will choose True, if and only if this is not the case
+    If this is not the case, passing ``shift=True`` generates a standard
+    ifftshift ``shift=None`` will choose True, if and only if this is
+    not the case
 
     Parameters
     ----------
@@ -29,9 +32,9 @@ def ift(
         `start_time` ft property to determine the start of the axis.  To
         do this, it assumes that it is a stationary signal
         (convolved with infinite comb function).
-        The value of `start_time` can differ from by a non-integral multiple of
-        :math:`\Delta t`, though the routine will check whether or not it is safe to
-        do this.
+        The value of `start_time` can differ from by a non-integral
+        multiple of :math:`\Delta t`, though the routine will check
+        whether or not it is safe to do this.
 
         ..note ::
             In the code, this is controlled by `p2_post` (the integral
@@ -50,7 +53,7 @@ def ift(
         axes = [axes]
     # {{{ check and set the FT property
     for j in axes:
-        if self.get_ft_prop(j) == False:
+        if self.get_ft_prop(j) is False:
             errmsg = "This data has been IFT'd along " + str(j)
             raise ValueError(
                 errmsg
@@ -96,14 +99,13 @@ def ift(
         do_post_shift = False
         p2_post_discrepancy = None
         p2_pre_discrepancy = None
-        # {{{ if this is NOT the source data, I need to mark it as not alias-safe!
-        if (
-            self.get_ft_prop(axes[j], ["start", "time"]) is None
-        ):  #  this is the same
-            #           as saying that I have NOT run .ft() on this data yet,
-            #           meaning that I must have started with frequency as the
-            #           source data, and am now constructing an artificial and
-            #           possibly aliased time-domain
+        # {{{ if this is NOT the source data, I need to mark it as not
+        #     alias-safe!
+        if self.get_ft_prop(axes[j], ["start", "time"]) is None:
+            # this is the same as saying that I have NOT run .ft() on
+            # this data yet, meaning that I must have started with
+            # frequency as the source data, and am now constructing an
+            # artificial and possibly aliased time-domain
             if (
                 self.get_ft_prop(axes[j], ["time", "not", "aliased"])
                 is not True
@@ -111,8 +113,8 @@ def ift(
                 #                              has been manually set/overridden
                 self.set_ft_prop(axes[j], ["time", "not", "aliased"], False)
             # {{{ but on the other hand, I am taking the frequency as the
-            #    not-aliased "source", so as long as I haven't explicitly set it as
-            #    unsafe, declare it "safe"
+            #    not-aliased "source", so as long as I haven't
+            #    explicitly set it as unsafe, declare it "safe"
             if (
                 self.get_ft_prop(axes[j], ["freq", "not", "aliased"])
                 is not False
@@ -125,7 +127,7 @@ def ift(
             self.set_units(axes[j], self._ft_conj(self.get_units(axes[j])))
         try:
             thisaxis = self.dimlabels.index(axes[j])
-        except:
+        except ValueError:
             raise RuntimeError(
                 strm("I can't find", axes[j], "dimlabels is: ", self.dimlabels)
             )
@@ -171,17 +173,20 @@ def ift(
             logging.debug(strm("check for p2_post_discrepancy"))
             logging.debug(strm("desired startpoint", desired_startpoint))
             p2_post, p2_post_discrepancy, alias_shift_post = _find_index(
-                v, origin=desired_startpoint,
+                v,
+                origin=desired_startpoint,
             )
-            logging.debug(strm(
-                "p2_post,p2_post_discrepancy,alias_shift_post,v at"
-                " p2_post, and v at p2_post-1:",
-                p2_post,
-                p2_post_discrepancy,
-                alias_shift_post,
-                v[p2_post],
-                v[p2_post - 1],
-            ))
+            logging.debug(
+                strm(
+                    "p2_post,p2_post_discrepancy,alias_shift_post,v at"
+                    " p2_post, and v at p2_post-1:",
+                    p2_post,
+                    p2_post_discrepancy,
+                    alias_shift_post,
+                    v[p2_post],
+                    v[p2_post - 1],
+                )
+            )
             if p2_post != 0 or p2_post_discrepancy is not None:
                 do_post_shift = True
             else:
@@ -190,7 +195,9 @@ def ift(
             n = padded_length
             p2_post = (
                 n - (n + 1) // 2
-            )  # this is the size of what starts out as the second half // is floordiv -- copied from scipy -- this whole thing essentially rounds down
+            )  # this is the size of what starts out as the second half
+            #    // is floordiv -- copied from scipy -- this whole thing
+            #    essentially rounds down
             alias_shift_post = 0
             do_post_shift = True
             # {{{ if I start with an alias-safe axis, and perform a
@@ -203,7 +210,8 @@ def ift(
         #          in order to adjust for a final u-axis that doesn't pass
         #          exactly through zero
         if p2_post_discrepancy is not None:
-            asrt_msg = r"""You are trying to shift the time axis by (%d+%g) du (%g).
+            asrt_msg = r"""You are trying to shift the time axis by
+            (%d+%g) du (%g).
 
             In order to shift by a time that is not
             integral w.r.t. the dwell time, you need to be sure
@@ -238,8 +246,9 @@ def ift(
                 else:
                     raise TypeError(e)
         # }}}
-        # {{{ do zero-filling manually and first, so I can properly pre-shift the data
-        if not pad is False:
+        # {{{ do zero-filling manually and first, so I can properly
+        #     pre-shift the data
+        if pad is not False:
             newdata = list(self.data.shape)
             newdata[thisaxis] = padded_length
             targetslice = [slice(None, None, None)] * len(newdata)
@@ -271,7 +280,14 @@ def ift(
         #    must apply a phase shift to reflect the fact that I need to add
         #    back that frequency
         if p2_post_discrepancy is not None:
-            logging.debug(strm( "adjusting axis by", p2_post_discrepancy, "where du is", u[1] - u[0],))
+            logging.debug(
+                strm(
+                    "adjusting axis by",
+                    p2_post_discrepancy,
+                    "where du is",
+                    u[1] - u[0],
+                )
+            )
             self.axis_coords[thisaxis][:] += p2_post_discrepancy  # reflect the
             #   p2_post_discrepancy that we have already incorporated via a
             #   phase-shift above
@@ -281,17 +297,18 @@ def ift(
             self.data *= np.sqrt(padded_length)
         else:
             self.data *= padded_length * du  # here, the algorithm divides by
-            #       padded_length, so for integration, we need to not do that
+            #                                  padded_length, so for
+            #                                  integration, we need to
+            #                                  not do that
         # }}}
-        # {{{ finally, if "p2_pre" for the pre-shift didn't correspond exactly to
-        #       zero, then the pre-ift data was shifted, and I must reflect
-        #       that by performing a post-ift phase shift
+        # {{{ finally, if "p2_pre" for the pre-shift didn't correspond
+        #     exactly to zero, then the pre-ift data was shifted, and I
+        #     must reflect that by performing a post-ift phase shift
         if p2_pre_discrepancy is not None:
             assert abs(p2_pre_discrepancy) < abs(du), (
-                "I expect the discrepancy to be"
-                " smaller than du ({:0.2f}), but it's {:0.2f} -- what's going"
-                " on??"
-            ).format(du, p2_pre_discrepancy)
+                f"I expect the discrepancy to be smaller than du ({du:0.2f}),"
+                f" but it's {p2_pre_discrepancy:0.2f} -- what's going on??"
+            )
             result = self * self.fromaxis(
                 axes[j],
                 lambda f: np.exp(-1j * 2 * pi * f * p2_pre_discrepancy),
