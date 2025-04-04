@@ -85,7 +85,7 @@ The figure list gives us three things:
         an attribute of the axis object
 """
 
-from .general_functions import process_kwargs, strm, lsafen
+from .general_functions import process_kwargs, strm, lsafen, Q_
 from .mpl_utils import autopad_figure, autolegend, gridandtick
 from . import plot_funcs as this_plotting
 from .core import nddata
@@ -563,6 +563,21 @@ class figlist(object):
         if not hasattr(self, "skip_check"):
             self.skip_check = []
         self.skip_check.append(self.current)
+
+    def div_units(self, units, whichdim=None):
+        "div units (see core) with the current plotting units"
+        numer_units = self.units[self.current]
+        if whichdim is not None:
+            numer_units = numer_units[whichdim]
+        assert type(numer_units) is str
+        numer_units = Q_(numer_units)
+        denom_units = Q_(units)
+        retval = (numer_units / denom_units).to_base_units()
+        assert retval.check(""), (
+            "the quotient you're asking for is not unitless -- it has units"
+            f" of {retval.dimensionality}"
+        )
+        return retval.magnitude
 
     def check_units(self, testdata, x_index, y_index):
         logging.debug(strm("-" * 30))
