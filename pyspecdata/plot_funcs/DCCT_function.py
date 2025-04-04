@@ -341,6 +341,12 @@ def DCCT(
             ordered_labels[this_dim] = [
                 "0" if j == 0.0 else f"{j}" for j in my_data.getaxis(this_dim)
             ]
+    for this_dim in [
+        j for j in my_data.dimlabels[:-1] if not j.startswith("ph")
+    ]:
+        if my_data.getaxis(this_dim) is None:
+            my_data.set_axis(this_dim, "#")
+        ordered_labels[this_dim] = [f"{j}" for j in my_data.getaxis(this_dim)]
     # }}}
     real_data = not any(np.iscomplex(my_data.data.ravel()))
     if cmap is not None:
