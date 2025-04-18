@@ -341,6 +341,12 @@ def DCCT(
             ordered_labels[this_dim] = [
                 "0" if j == 0.0 else f"{j}" for j in my_data.getaxis(this_dim)
             ]
+    for this_dim in [
+        j for j in my_data.dimlabels[:-1] if not j.startswith("ph")
+    ]:
+        if my_data.getaxis(this_dim) is None:
+            my_data.set_axis(this_dim, "#")
+        ordered_labels[this_dim] = [f"{j}" for j in my_data.getaxis(this_dim)]
     # }}}
     real_data = not any(np.iscomplex(my_data.data.ravel()))
     if cmap is not None:
@@ -536,6 +542,31 @@ def DCCT(
             )
         kwargs["origin"] = origin  # required so that imshow now displays the
         #                           image correctly
+        # {{{ IdentityTransform maps display to display, so we use the inverse
+        # of ax.transAxes which maps from axes coords (0–1) to display coords
+        # (pixels)
+        width_px, height_px = ax_list[0].transAxes.transform((1, 1)) - ax_list[
+            0
+        ].transAxes.transform((0, 0))
+        if A["smooshed", j].data.shape[0] > width_px:
+            print(
+                "using bilinear interpolation because data is",
+                A["smooshed", j].data.shape[0],
+                "wide, but each image block has only",
+                width_px,
+                "pixels",
+            )
+            kwargs["interpolation"] = "bilinear"
+        elif A["smooshed", j].data.shape[1] > height_px:
+            print(
+                "using bilinear interpolation because data is",
+                A["smooshed", j].data.shape[1],
+                "high, but each image block has only",
+                height_px,
+                "pixels",
+            )
+            kwargs["interpolation"] = "bilinear"
+        # }}}
         if real_data:
             kwargs["cmap"] = cmap
             K = A["smooshed", j].data / abs(A).data.max()
