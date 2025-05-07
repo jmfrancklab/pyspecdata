@@ -457,7 +457,10 @@ class lmfitdata(nddata):
                 raise ValueError(
                     "I don't understand the dtype", self.data.dtype
                 )
-        return jacobian_array.view(float)
+        jacobian_array = jacobian_array.view(float)
+        jacobian_array = jacobian_array[self.nan_mask,:] # because the parameters dimension is on the outside
+        jacobian_array[~np.isfinite(jacobian_array)] = 0 # if any of our function elements are finite for the residual but not the jacobian, set those to zero (not great, but what can you do?)
+        return jacobian_array
 
     def define_residual_transform(self,thefunc):
         """If we do something like fit a lorentzian or voigt lineshape,
@@ -550,7 +553,9 @@ class lmfitdata(nddata):
                 )
                 + explain_error(e)
             )
-        return retval.view(float)  # to deal with complex data
+        retval = retval.view(float)  # to deal with complex data
+        self.nan_mask = np.isfinite(retval)
+        return retval[self.nan_mask]
 
     def copy(self, **kwargs):
         namelist = []
