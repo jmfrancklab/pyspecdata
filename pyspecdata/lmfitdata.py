@@ -458,7 +458,7 @@ class lmfitdata(nddata):
                     "I don't understand the dtype", self.data.dtype
                 )
         jacobian_array = jacobian_array.view(float)
-        jacobian_array = jacobian_array[self.nan_mask,:] # because the parameters dimension is on the inside
+        jacobian_array = jacobian_array[:, self.nan_mask] # because the parameters dimension is on the outside
         jacobian_array[~np.isfinite(jacobian_array)] = 0 # if any of our function elements are finite for the residual but not the jacobian, set those to zero (not great, but what can you do?)
         return jacobian_array
 
