@@ -29,7 +29,6 @@ def list_symbs(f):
 
 
 # }}}
-fl = figlist_var()
 # {{{creating a fake data recovery curve
 tau = nddata(r_[0:2:256j], "tau")
 fake_data = 102 * (1 - 2 * exp(-tau * 6.0))
@@ -99,9 +98,9 @@ with figlist_var() as fl:
     lmfitdata_instance = lmfitdata(fake_data)
     lmfitdata_instance.functional_form = functional_form
     lmfitdata_instance.set_guess(
-        M_0=dict(value=-500, max=0, min=-501),
-        M_inf=dict(value=500, max=501, min=0),
-        R_1=dict(value=1, max=10, min=1),
+        M_0=dict(value=-500),
+        M_inf=dict(value=500),
+        R_1=dict(value=1),
     )
     show_guess_and_fit(lmfitdata_instance, "lmfitdata", 0.6, 0.25)
     # }}}
