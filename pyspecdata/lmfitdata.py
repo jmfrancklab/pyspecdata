@@ -571,16 +571,8 @@ class lmfitdata(nddata):
                 retval = fit - self.transformed_data
         except ValueError:
             raise ValueError(
-                strm(
-                    "your error (",
-                    np.shape(sigma),
-                    ") probably doesn't match y (",
-                    # np.shape(y),
-                    "?) and fit (",
-                    np.shape(fit),
-                    ")",
-                )
-                # + explain_error(e)
+                f"your error ({np.shape(sigma)}) probably doesn't match y"
+                f" ({self.transformed_data}) and fit ({np.shape(fit)})"
             )
         retval = retval.view(float)  # to deal with complex data
         self.nan_mask = np.isfinite(retval)
