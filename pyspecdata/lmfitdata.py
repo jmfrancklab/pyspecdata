@@ -1,12 +1,10 @@
 # just put this in the package
 import sympy as sp
 from lmfit import Parameters, Minimizer
-from lmfit.printfuncs import report_fit
 import numpy as np
 from .core import nddata, normal_attrs, issympy, ndshape, dp
 from .general_functions import strm, pinvr
-import logging, warnings
-from copy import deepcopy
+import logging
 
 
 # {{{ functions and modules
@@ -37,7 +35,7 @@ def finite_difference_heaviside_derivative(x, k=0):
         weights[idx] = 1.0
         return weights
         # mid_idx = np.searchsorted(x, 0)  # Find index where x crosses zero
-        ## Calculate weights
+        # Calculate weights
         # if x[mid_idx - 1] < 0 and x[mid_idx] > 0:
         #    d1 = -x[mid_idx - 1] / dx
         #    d2 = x[mid_idx] / dx
@@ -73,7 +71,8 @@ sympy_module_arg = [
 
 
 class lmfitdata(nddata):
-    r"""Inherits from an nddata and enables curve fitting through use of a sympy expression.
+    r"""Inherits from an nddata and enables curve fitting through use of a
+    sympy expression.
 
     The user creates a lmfitdata class object from an existing nddata
     class object, and on this lmfitdata object can define the
@@ -86,7 +85,9 @@ class lmfitdata(nddata):
 
     def __init__(self, *args, **kwargs):
         # copied from fitdata
-        self.residual_transform = None  # if this is not set to None, we transform before taking the residual or eval
+        self.residual_transform = None  # if this is not set to None, we
+        #                                 transform before taking the residual
+        #                                 or eval
         fit_axis = None
         if "fit_axis" in list(kwargs.keys()):
             fit_axis = kwargs.pop("fit_axis")
@@ -125,7 +126,8 @@ class lmfitdata(nddata):
 
     @functional_form.setter
     def functional_form(self, this_expr):
-        """generate parameter descriptions and a numpy (lambda) function from a sympy expresssion
+        """generate parameter descriptions and a numpy (lambda) function from a
+        sympy expresssion
 
         Parameters
         ==========
@@ -188,7 +190,8 @@ class lmfitdata(nddata):
             (min/max)
 
             Can be passed either as the only argument, or a kwarg called
-            guesses, or as the kwargs themselves (i.e. `.set_guesses(**guesses)`)
+            guesses, or as the kwargs themselves (i.e.
+            `.set_guesses(**guesses)`)
 
             For example (the last case:)
 
@@ -196,7 +199,7 @@ class lmfitdata(nddata):
             >>>     param1=dict(value=1.0, min=0, max=10),
             >>>     param2=dict(value=2.0, min=0, max=10))
         """
-        if len(args) == 1 and type(args[0]) == dict:
+        if len(args) == 1 and isinstance(args[0], dict):
             guesses = args[0]
         elif len(kwargs) == 1 and "guesses" in kwargs.keys():
             guesses = kwargs["guesses"]
@@ -210,6 +213,21 @@ class lmfitdata(nddata):
                 logging.debug(strm("adding", this_name))
                 if type(guesses[this_name]) is dict:
                     self.guess_dict[this_name] = {}
+                    if (
+                        "min" in guesses[this_name].keys()
+                        and "max" in guesses[this_name].keys()
+                        and "value" in guesses[this_name].keys()
+                    ):
+                        temp = eval(
+                            "2*(value-min)/(max-min)-1", guesses[this_name]
+                        )
+                        Pinternal = np.arcsin(temp)
+                        assert abs(Pinternal / np.pi) < 0.48, (
+                            "Your guess is too close to your"
+                            f" bounds!!\n(P_internal/π for {this_name} is"
+                            f" {Pinternal/np.pi})\n(this will play havoc with"
+                            " the minuit boundaries used by lmfit)"
+                        )
                     for k, v in guesses[this_name].items():
                         setattr(self.guess_parameters[this_name], k, v)
                         self.guess_dict[this_name][k] = v
@@ -245,7 +263,9 @@ class lmfitdata(nddata):
         return self
 
     def _taxis(self, taxis):
-        r"You can enter None, to get the fit along the same range as the data, an integer to give the number of points, or a range of data, which will return 300 points"
+        r"""You can enter None, to get the fit along the same range as the
+        data, an integer to give the number of points, or a range of data,
+        which will return 300 points"""
         if taxis is None:
             taxis = self.getaxis(self.fit_axis).copy()
         elif isinstance(taxis, int):
@@ -264,27 +284,24 @@ class lmfitdata(nddata):
         Parameters
         ----------
         taxis: ndarray, int
-            :if ndarray: the new axis coordinates along which we want to calculate the fit.
-            :if int: number of evenly spaced points along the t-axis along the fit
+            :if ndarray: the new axis coordinates along which we want to
+                         calculate the fit.
+            :if int: number of evenly spaced points along the t-axis along the
+                     fit
 
         Returns
         -------
         self: nddata
-            the fit function evaluated along the axis coordinates that were passed
+            the fit function evaluated along the axis coordinates that were
+            passed
         """
         fit_axn = self.axn(self.fit_axis)
         taxis = self._taxis(taxis)
-        if hasattr(self, "fit_coeff") and self.fit_coeff is not None:
-            p = self.fit_coeff.copy()
-            # here you see that fit_coeff stores the coefficients that
-            # were previously fit, and these are stored in p, here
-        else:
-            p = np.array([NaN] * len(self.variable_names))
-        # JF notes this is a copy of older code -- we should be able to
-        # clean this up by using the newer copy functions -- currently I
-        # see  the copy_props and copyaxes functions, but thought there
-        # was a function to copy everything BUT data -- maybe this is on
-        # the SVD branch or somesuch?
+        # JF notes this is a copy of older code -- we should be able to clean
+        # this up by using the newer copy functions -- currently I see  the
+        # copy_props and copyaxes functions, but thought there was a function
+        # to copy everything BUT data -- maybe this is on the SVD branch or
+        # somesuch?
         # {{{ make a new blank np.array with the fit axis expanded to fit taxis
         newdata = ndshape(self)
         newdata[self.fit_axis] = np.size(taxis)
@@ -304,14 +321,10 @@ class lmfitdata(nddata):
         # }}}
         variable_coords = {
             self.fit_axis: taxis
-        }  # even though it's possible to
-        #                                         combine this and the next line
-        #                                         to make it more
-        #                                         compact/efficient for one
-        #                                         variable, we want to leave
-        #                                         open the posisbility that we
-        #                                         will be using more than one
-        #                                         variable
+        }  # even though it's possible to combine this and the next
+        #    line to make it more compact/efficient for one variable, we want
+        #    to leave open the posisbility that we will be using more than one
+        #    variable
         newdata.data[:] = self.fitfunc_multiarg_v2(*(
             tuple(
                 (
@@ -347,9 +360,8 @@ class lmfitdata(nddata):
         #
         # I think that a lot of this could be copied with little modification
         #
-        # But you  should read through and see what the previous fit method is doing
-        # and then copy over what you can
-        x = self.getaxis(self.fit_axis)
+        # But you  should read through and see what the previous fit method is
+        # doing and then copy over what you can
         sigma = self.get_error()
         if sigma is not None:
             themin = Minimizer(
@@ -376,7 +388,8 @@ class lmfitdata(nddata):
 
     def pinvr_step(self, sigma=None):
         r"""Use regularized Pseudo-inverse to (partly) solve:
-        :math:`-residual = f(\mathbf{p}+\Delta \mathbf{p})-f(\mathbf{p}) \approx \nabla f(\mathbf{p}) \cdot \Delta \mathbf{p}`
+        :math:`-residual = f(\mathbf{p}+\Delta \mathbf{p})-f(\mathbf{p})
+        \approx \nabla f(\mathbf{p}) \cdot \Delta \mathbf{p}`
         """
         print(10 * "*", "orig guess", self.guess_parameters)
         thejac = self.jacobian(self.guess_parameters, sigma=sigma)
@@ -412,13 +425,19 @@ class lmfitdata(nddata):
         return
 
     def jacobian(self, pars, sigma=None):
-        """cache the symbolic jacobian and/or use it to compute the numeric result
+        """cache the symbolic jacobian and/or use it to compute the numeric
+        result
 
-        Note that, like residual, this is designed for use by lmfit, so that if you want to actually *see* the Jacobian, you need to pass something a bit more complicated, like this:
+        Note that, like residual, this is designed for use by lmfit, so that if
+        you want to actually *see* the Jacobian, you need to pass something a
+        bit more complicated, like this:
 
-        >>> jac = newfit.jacobian(newfit.fit_parameters).view(newfit.data.dtype)
+        >>> jac =
+        >>> newfit.jacobian(newfit.fit_parameters).view(newfit.data.dtype)
 
-        which assumes that I have run the fit, and so have access to the fit parameters, and gives the complex view for complex data (since in a complex fit, we use view to treat real an imaginary parts the same)
+        which assumes that I have run the fit, and so have access to the fit
+        parameters, and gives the complex view for complex data (since in a
+        complex fit, we use view to treat real an imaginary parts the same)
         """
         if sigma is not None:
             raise ValueError(
@@ -443,7 +462,8 @@ class lmfitdata(nddata):
                     *(self.getaxis(k) for k in self.variable_names),
                     **pars.valuesdict(),
                 )
-            )  # function elements on the outside, so parameters can go on the inside
+            )  # function elements on the outside, so parameters can go on the
+            #    inside
             for j in self.jacobian_lambda
         ])
         if np.issubdtype(
@@ -457,9 +477,18 @@ class lmfitdata(nddata):
                 raise ValueError(
                     "I don't understand the dtype", self.data.dtype
                 )
-        return jacobian_array.view(float)
+        jacobian_array = jacobian_array.view(float)
+        jacobian_array = jacobian_array[
+            :, self.nan_mask
+        ]  # because the parameters dimension is on the outside
+        jacobian_array[~np.isfinite(jacobian_array)] = (
+            0  # if any of our function elements are finite for the residual
+            # but not the jacobian, set those to zero (not great, but what
+            # can you do?)
+        )
+        return jacobian_array
 
-    def define_residual_transform(self,thefunc):
+    def define_residual_transform(self, thefunc):
         """If we do something like fit a lorentzian or voigt lineshape,
         it makes more sense to define our fit function in the time domain,
         but to calculate the residuals and to evaluate in the frequency
@@ -473,6 +502,7 @@ class lmfitdata(nddata):
 
         self.residual_transform = thefunc
         return thefunc
+
     @property
     def transformed_data(self):
         """If we do something like fit a lorentzian or voigt lineshape,
@@ -482,7 +512,8 @@ class lmfitdata(nddata):
         Therefore, we define a function `self.residual_transform` that
         accepts an nddata, and defines how the data is manipulated to move
         into the (e.g. frequency) residual domain.
-        (It's easiest to do this by using the `self.define_residual_transform` decorator)
+        (It's easiest to do this by using the `self.define_residual_transform`
+        decorator)
 
         Returns
         =======
@@ -531,26 +562,21 @@ class lmfitdata(nddata):
             sigma[sigma == 0.0] = 1
             sigma[~np.isfinite(sigma)] = 1
         try:
-            # as noted here: https://stackoverflow.com/questions/6949370/scipy-leastsq-dfun-usage
+            # as noted here:
+            # https://stackoverflow.com/questions/6949370/scipy-leastsq-dfun-usage
             # this needs to be fit - self.data, not vice versa
             if sigma is not None:
                 retval = (fit - self.transformed_data) / sigma * normalization
             else:
                 retval = fit - self.transformed_data
-        except ValueError as e:
+        except ValueError:
             raise ValueError(
-                strm(
-                    "your error (",
-                    np.shape(sigma),
-                    ") probably doesn't match y (",
-                    np.shape(y),
-                    ") and fit (",
-                    np.shape(fit),
-                    ")",
-                )
-                + explain_error(e)
+                f"your error ({np.shape(sigma)}) probably doesn't match y"
+                f" ({self.transformed_data}) and fit ({np.shape(fit)})"
             )
-        return retval.view(float)  # to deal with complex data
+        retval = retval.view(float)  # to deal with complex data
+        self.nan_mask = np.isfinite(retval)
+        return retval[self.nan_mask]
 
     def copy(self, **kwargs):
         namelist = []
@@ -596,7 +622,8 @@ class lmfitdata(nddata):
         return set_indices, set_to, active_mask
 
     def output(self, *name):
-        r"""give the fit value of a particular symbol, or a dictionary of all values.
+        r"""give the fit value of a particular symbol, or a dictionary of all
+        values.
 
         Parameters
         -----------
@@ -621,7 +648,7 @@ class lmfitdata(nddata):
         if len(name) == 1:
             try:
                 return p[self.parameter_names.index(name[0])]
-            except:
+            except Exception:
                 raise ValueError(
                     strm(
                         "While running output: couldn't find",
@@ -638,7 +665,8 @@ class lmfitdata(nddata):
             )
 
     def latex(self):
-        r"""show the latex string for the function, with all the symbols substituted by their values"""
+        r"""show the latex string for the function, with all the symbols
+        substituted by their values"""
         # this should actually be generic to fitdata
         thisdp = lambda x: "(" + dp(x) + ")"
         p = self.fit_coeff
@@ -664,13 +692,15 @@ class lmfitdata(nddata):
                         retval[: location - 1]
                         + thisdp(-1 * p[j])
                         + retval[location + len(symbol) :]
-                    )  # replace the symbol in the written function with the appropriate number
+                    )  # replace the symbol in the written function with the
+                    #    appropriate number
                 else:
                     newstring = (
                         retval[:location]
                         + thisdp(p[j])
                         + retval[location + len(symbol) :]
-                    )  # replace the symbol in the written function with the appropriate number
+                    )  # replace the symbol in the written function with the
+                    #    appropriate number
                 logging.debug(
                     strm(
                         r"trying to replace",
