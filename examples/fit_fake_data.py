@@ -98,9 +98,9 @@ with psd.figlist_var() as fl:
     lmfitdata_instance = psd.lmfitdata(fake_data)
     lmfitdata_instance.functional_form = functional_form
     lmfitdata_instance.set_guess(
-        M_0=dict(value=-500),
-        M_inf=dict(value=500),
-        R_1=dict(value=1),
+        M_0=dict(value=-400, max=0, min=-500),
+        M_inf=dict(value=400, max=500, min=0),
+        R_1=dict(value=1, max=10, min=0),
     )
     show_guess_and_fit(lmfitdata_instance, "lmfitdata", 0.6, 0.25)
     # }}}

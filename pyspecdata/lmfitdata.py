@@ -199,7 +199,7 @@ class lmfitdata(nddata):
             >>>     param1=dict(value=1.0, min=0, max=10),
             >>>     param2=dict(value=2.0, min=0, max=10))
         """
-        if len(args) == 1 and isinstance(args[0],dict):
+        if len(args) == 1 and isinstance(args[0], dict):
             guesses = args[0]
         elif len(kwargs) == 1 and "guesses" in kwargs.keys():
             guesses = kwargs["guesses"]
@@ -213,6 +213,21 @@ class lmfitdata(nddata):
                 logging.debug(strm("adding", this_name))
                 if type(guesses[this_name]) is dict:
                     self.guess_dict[this_name] = {}
+                    if (
+                        "min" in guesses[this_name].keys()
+                        and "max" in guesses[this_name].keys()
+                        and "value" in guesses[this_name].keys()
+                    ):
+                        temp = eval(
+                            "2*(value-min)/(max-min)-1", guesses[this_name]
+                        )
+                        Pinternal = np.arcsin(temp)
+                        assert abs(Pinternal / np.pi) < 0.48, (
+                            "Your guess is too close to your"
+                            f" bounds!!\n(P_internal/π for {this_name} is"
+                            f" {Pinternal/np.pi})\n(this will play havoc with"
+                            " the minuit boundaries used by lmfit)"
+                        )
                     for k, v in guesses[this_name].items():
                         setattr(self.guess_parameters[this_name], k, v)
                         self.guess_dict[this_name][k] = v
@@ -390,9 +405,9 @@ class lmfitdata(nddata):
         resid_norm = np.sqrt(((theresid) ** 2).sum())
         alpha = resid_norm
         print(5 * "*", "alpha is", alpha)
-        orig_guess = np.array([
-            self.guess_parameters[j].value for j in self.guess_parameters
-        ])
+        orig_guess = np.array(
+            [self.guess_parameters[j].value for j in self.guess_parameters]
+        )
 
         def set_new_guess(new_guess):
             for j, k in enumerate(self.guess_parameters.keys()):
@@ -468,8 +483,8 @@ class lmfitdata(nddata):
         ]  # because the parameters dimension is on the outside
         jacobian_array[~np.isfinite(jacobian_array)] = (
             0  # if any of our function elements are finite for the residual
-               # but not the jacobian, set those to zero (not great, but what
-               # can you do?)
+            # but not the jacobian, set those to zero (not great, but what
+            # can you do?)
         )
         return jacobian_array
 
@@ -560,12 +575,12 @@ class lmfitdata(nddata):
                     "your error (",
                     np.shape(sigma),
                     ") probably doesn't match y (",
-                    #np.shape(y),
+                    # np.shape(y),
                     "?) and fit (",
                     np.shape(fit),
                     ")",
                 )
-                #+ explain_error(e)
+                # + explain_error(e)
             )
         retval = retval.view(float)  # to deal with complex data
         self.nan_mask = np.isfinite(retval)
