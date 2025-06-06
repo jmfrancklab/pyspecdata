@@ -1139,6 +1139,32 @@ def concat(datalist, dimname, chop=False):
 
 
 # }}}
+
+
+# {{{ helper function for diagnosing
+def _find_bad_attr(obj, inistring, path="root"):
+    outstring = inistring
+    try:
+        deepcopy(obj)
+        return outstring
+    except Exception:
+        # If object has attributes, recurse into them
+        outstring += "failed on "
+        outstring += path
+        outstring += "\n"
+        if hasattr(obj, "__dict__"):
+            for name, val in obj.__dict__.items():
+                find_bad_attr(val, f"{path}.{name}")
+            return outstring
+        elif type(obj) is dict:
+            for k, v in obj.items():
+                find_bad_attr(v, f"{path}[{k}]")
+            return outstring
+
+
+# }}}
+
+
 class nddata(object):
     """This is the detailed API reference.
     For an introduction on how to use ND-Data, see the
@@ -6097,7 +6123,12 @@ class nddata(object):
             nddata metadata.
         """
         if data:
-            retval = deepcopy(self)
+            try:
+                retval = deepcopy(self)
+            except:
+                raise RuntimeError(
+                    "Detailed failure:\n" + _find_bad_attr(self, "")
+                )
             retval.other_info = deepcopy(self.other_info)
             return retval
         else:
@@ -7732,7 +7763,12 @@ class fitdata(nddata):
                 namelist.append(j)
                 vallist.append(self.__getattribute__(j))
                 self.__delattr__(j)
-        new = deepcopy(self)
+        try:
+            new = deepcopy(self)
+        except:
+            raise RuntimeError(
+                "Detailed failure:\n" + _find_bad_attr(self, "")
+            )
         for j in range(0, len(namelist)):
             new.__setattr__(namelist[j], vallist[j])
         for j in range(0, len(namelist)):
