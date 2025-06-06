@@ -5962,6 +5962,7 @@ class nddata(object):
             "tanh": np.tanh,
             "log": np.log,
             "log10": np.log10,
+            "sqrt": np.sqrt,
         }
         if arg in list(fundict.keys()):
             argf = fundict[arg]

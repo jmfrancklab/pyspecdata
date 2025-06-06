@@ -549,22 +549,22 @@ def DCCT(
             0
         ].transAxes.transform((0, 0))
         if A["smooshed", j].data.shape[0] > width_px:
-            print(
+            logging.debug(strm(
                 "using bilinear interpolation because data is",
                 A["smooshed", j].data.shape[0],
                 "wide, but each image block has only",
                 width_px,
                 "pixels",
-            )
+            ))
             kwargs["interpolation"] = "bilinear"
         elif A["smooshed", j].data.shape[1] > height_px:
-            print(
+            logging.debug(strm(
                 "using bilinear interpolation because data is",
                 A["smooshed", j].data.shape[1],
                 "high, but each image block has only",
                 height_px,
                 "pixels",
-            )
+            ))
             kwargs["interpolation"] = "bilinear"
         # }}}
         if real_data:
@@ -609,10 +609,10 @@ def DCCT(
     #     import
     if type(this_nddata).__name__ == "nddata":
         inifn = type(this_nddata)
-        print("nddata")
+        logging.debug("nddata")
     elif type(this_nddata).__name__ == "nddata_hdf5":
         inifn = type(this_nddata).__base__
-        print("nddata_hdf5")
+        logging.debug("nddata_hdf5")
     else:
         raise ValueError("type is" + type(this_nddata).__name__)
     # }}}

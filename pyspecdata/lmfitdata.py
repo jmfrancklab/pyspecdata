@@ -5,6 +5,7 @@ import numpy as np
 from .core import nddata, normal_attrs, issympy, ndshape, dp
 from .general_functions import strm, pinvr
 import logging
+import asteval
 
 
 # {{{ functions and modules
@@ -218,9 +219,10 @@ class lmfitdata(nddata):
                         and "max" in guesses[this_name].keys()
                         and "value" in guesses[this_name].keys()
                     ):
-                        temp = eval(
-                            "2*(value-min)/(max-min)-1", guesses[this_name]
+                        aeval = asteval.Interpreter(
+                            symtable=guesses[this_name]
                         )
+                        temp = aeval("2*(value-min)/(max-min)-1")
                         Pinternal = np.arcsin(temp)
                         assert abs(Pinternal / np.pi) < 0.48, (
                             "Your guess is too close to your"
@@ -229,8 +231,11 @@ class lmfitdata(nddata):
                             " the minuit boundaries used by lmfit)"
                         )
                     for k, v in guesses[this_name].items():
-                        setattr(self.guess_parameters[this_name], k, v)
-                        self.guess_dict[this_name][k] = v
+                        if (
+                            k != "print"
+                        ):  # appears to be a method -- not deepcopyable
+                            setattr(self.guess_parameters[this_name], k, v)
+                            self.guess_dict[this_name][k] = v
                 elif np.isscalar(guesses[this_name]):
                     self.guess_parameters[this_name].value = guesses[this_name]
                     self.guess_dict[this_name] = {"value": guesses[this_name]}
@@ -383,6 +388,7 @@ class lmfitdata(nddata):
         self.fit_coeff = [out.params[j].value for j in self.parameter_names]
         self.fit_output = out
         assert self.fit_output.success
+        del self.fit_output.call_kws  # not deepcopyable
         # }}}
         return self
 
