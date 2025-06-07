@@ -13,4 +13,6 @@ def test_voltage_times_current_yields_power_units():
     i = nddata(np.ones(3), "t")
     i.set_units("A")
     p = v * i
-    assert p.get_units() == "W"
+    gf = load_module("general_functions")
+    Q_ = gf.Q_
+    assert Q_(1, p.get_units()).to("W").units == gf.ureg.watt
