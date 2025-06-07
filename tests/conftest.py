@@ -51,10 +51,51 @@ def load_module(name: str):
     except Exception:
         pint_stub = types.ModuleType("pint")
 
+        class DummyUnit(str):
+            def __format__(self, _spec):
+                return str(self)
+
         class DummyQuantity:
             def __init__(self, magnitude, units=""):
                 self.magnitude = magnitude
-                self.units = units
+                self.units = DummyUnit(units)
+
+            def _combine_units(self, other, op):
+                if isinstance(other, DummyQuantity):
+                    other_units = other.units
+                    other = other.magnitude
+                else:
+                    other_units = ""
+                if op == "*":
+                    if self.units and other_units:
+                        units = f"{self.units}*{other_units}"
+                    else:
+                        units = self.units or other_units
+                    magnitude = self.magnitude * other
+                elif op == "/":
+                    if self.units and other_units:
+                        units = f"{self.units}/{other_units}"
+                    else:
+                        units = self.units or other_units
+                    magnitude = self.magnitude / other
+                elif op == "+":
+                    units = self.units
+                    magnitude = self.magnitude + other
+                elif op == "-":
+                    units = self.units
+                    magnitude = self.magnitude - other
+                else:
+                    raise NotImplementedError
+                return DummyQuantity(magnitude, units)
+
+            __add__ = lambda self, other: self._combine_units(other, "+")
+            __sub__ = lambda self, other: self._combine_units(other, "-")
+            __mul__ = lambda self, other: self._combine_units(other, "*")
+            __truediv__ = lambda self, other: self._combine_units(other, "/")
+            __radd__ = __add__
+            __rsub__ = lambda self, other: DummyQuantity(other, self.units)._combine_units(self, "-")
+            __rmul__ = __mul__
+            __rtruediv__ = lambda self, other: DummyQuantity(other, self.units)._combine_units(self, "/")
 
             def to_base_units(self):
                 return self
