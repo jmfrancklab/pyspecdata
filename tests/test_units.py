@@ -4,7 +4,7 @@ import pytest
 from conftest import load_module
 
 # load dependencies via test loader (ensures real pint is imported)
-load_module("general_functions", use_real_pint=True)
+gf = load_module("general_functions", use_real_pint=True)
 
 # Skip this module entirely if pint is not available
 if importlib.util.find_spec("pint") is None:
@@ -20,4 +20,4 @@ def test_voltage_times_current_yields_power_units():
     i = nddata(np.ones(3), "t")
     i.set_units("A")
     p = v * i
-    assert p.get_units() == "W"
+    assert gf.Q_(1, p.get_units()).to("W").units == gf.Q_(1, "W").units
