@@ -253,7 +253,10 @@ def load_module(name: str, *, use_real_pint: bool = False):
         sys.modules["scipy.interpolate"] = interpolate_stub
     if "numpy.core.rec" not in sys.modules:
         rec = types.ModuleType("rec")
-        rec.fromarrays = np.core.records.fromarrays
+        try:
+            rec.fromarrays = np._core.records.fromarrays
+        except Exception:  # fall back for older NumPy versions
+            rec.fromarrays = np.core.records.fromarrays
         sys.modules["numpy.core.rec"] = rec
     sys.modules.setdefault("pyspecdata.fornotebook", types.ModuleType("fornotebook"))
     fig_stub = sys.modules.setdefault("pyspecdata.figlist", types.ModuleType("figlist"))
