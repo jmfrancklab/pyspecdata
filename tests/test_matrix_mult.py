@@ -1,6 +1,10 @@
 import unittest
-from pyspecdata import *
 import numpy as np
+from conftest import load_module
+
+load_module("general_functions")
+core = load_module("core")
+nddata = core.nddata
 
 class TestMatrixMultiplication(unittest.TestCase):
     def test_matrix_multiplication(self):

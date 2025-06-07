@@ -2604,7 +2604,8 @@ class nddata(object):
         unitB = Q_(
             "dimensionless" if arg.get_units() is None else arg.get_units()
         )
-        unit_ret = f"{(unitA*unitB).units:~P}"
+        prod = unitA * unitB
+        unit_ret = f"{prod.to_compact().units:~P}"
         unit_ret = None if len(unit_ret) == 0 else unit_ret
         retval.set_units(unit_ret)
         return retval
@@ -2727,7 +2728,8 @@ class nddata(object):
         unitB = Q_(
             "dimensionless" if arg.get_units() is None else arg.get_units()
         )
-        unit_ret = f"{(unitA/unitB).units:~P}"
+        prod = unitA / unitB
+        unit_ret = f"{prod.to_compact().units:~P}"
         unit_ret = None if len(unit_ret) == 0 else unit_ret
         retval.set_units(unit_ret)
         return retval
@@ -3069,7 +3071,7 @@ class nddata(object):
             self.get_units(thisaxis) is not None
         ):
             ret_units = Q_(self.get_units()) * Q_(self.get_units(thisaxis))
-            self.set_units(f"{ret_units.units:~P}")
+            self.set_units(f"{ret_units.to_compact().units:~P}")
         if len(self.axis_coords) > 0:
             t = self.getaxis(thisaxis)
             dt_array = np.diff(t)
