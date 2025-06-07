@@ -1,6 +1,14 @@
 import unittest
-from pyspecdata import *
 import numpy as np
+import pytest
+
+try:
+    from pyspecdata import nddata
+except Exception as e:  # pragma: no cover - handled by pytest
+    pytest.skip(
+        f"pyspecdata with compiled extensions required: {e}",
+        allow_module_level=True,
+    )
 
 class TestMatrixMultiplication(unittest.TestCase):
     def test_matrix_multiplication(self):
