@@ -1,4 +1,5 @@
 import importlib.util
+import importlib.machinery
 import pathlib
 import sys
 import types
@@ -31,6 +32,8 @@ def load_module(name: str, *, use_real_pint: bool = False):
             import pint  # noqa: F401
         except Exception:
             pint_stub = types.ModuleType("pint")
+            pint_stub.__spec__ = importlib.machinery.ModuleSpec("pint", loader=None)
+            pint_stub.__pyspec_stub__ = True
 
             class DummyUnit:
                 def __init__(self, name=""):
