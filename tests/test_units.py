@@ -2,8 +2,8 @@ import numpy as np
 from conftest import load_module
 
 # load dependencies via test loader
-load_module("general_functions")
-core = load_module("core")
+load_module("general_functions", use_real_pint=True)
+core = load_module("core", use_real_pint=True)
 nddata = core.nddata
 
 
