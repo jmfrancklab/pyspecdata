@@ -14,20 +14,17 @@ image39.png: ViTables screenshot displaying HDF5 hierarchical structure of nddat
 image40.png: Two-panel plot of DNP buildup curves (kσ·s(p) vs. microwave power) at 10μM and 150μM hydroxytempo, showing fitted saturation values.
 image41.jpg: Photograph of a plain cardboard box used metaphorically as a generic container.
 image43.png: Image of a Tektronix 11801C digital sampling oscilloscope illustrating hardware for data acquisition.
-image45.png: 5×5 grid of circular nodes with numeric values representing an error or covariance matrix across indices.
-image47.png: 2D grid of data values with error bars plotted at different t₁ (y-axis) and t₂ (x-axis) delays, showing value ± uncertainty.
+image45.png: this is a visual representation of a 2D numpy array, which can be constrasted with an nddata object
+image47.png: this is a visual representation of a pyspecdata nddata, where we can see how it also stores dimension names, coordinate axes, and error
 image490.png: Code snippet defining fitdata class inheriting from nddata, specifying functional form for T₁ relaxation fit using sympy symbols.
 image50.png: Three-panel demonstration of automatic error propagation: plots of variables a, b, and their ratio a/b with correctly propagated error bars.
 image52.png: Four-panel figure illustrating automatic axis relabeling: time-domain signal, frequency-domain before/after zero-fill, and pad+FFT with consistent labels.
 image54.png: Plot showing aliasing and axis registration: multiple traces of a transient response with different start-point offsets aligned on time axis.
 image56.png: Demonstration of smart dimensionality: plotting 1D arrays a(x), b(y), and their computed 2D surface ab − a with correct axis interpretation.
-image57.png: Freehand illustration sketch (in red) depicting region-of-interest or dimensionality selection workflow.
-image58.png: Hand-drawn method schematic mapping phase cycling indices (ph1, ph2) to data selection via a function call illustration.
-image59.png: Freehand red line representing a procedural timeline or placeholder for method workflow steps.
 image62.png: Comparison of frequency-domain spin echo signals with and without time-axis correction to improve phasing, plotted vs. frequency offset.
-image63.png: Hand-annotated sketch highlighting misalignment at t=0 for echo phasing and indicating correction brackets.
 image64.png: T₁ fitting plot: experimental points and fitted exponential curve with annotated fit equation and parameters.
 image66.png: Time-domain plot of raw microwave pulse and its reflection used for determining the system transfer function.
 image67.png: Plot of analytic signal magnitude for control and reflected pulses over time, showing envelope of reflection response.
 image68.png: Decay slice plot for final blip with real and imaginary components, initial guess, and fitted curve annotation.
 image69.png: Detailed annotated diagram of nddata instance “d,” showing get/set operations for data, labels, units, error, and proposed interface changes.
+image_cues.txt
