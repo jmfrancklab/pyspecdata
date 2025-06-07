@@ -8,12 +8,99 @@ import os
 PACKAGE_ROOT = pathlib.Path(__file__).resolve().parents[1] / "pyspecdata"
 
 
-def load_module(name: str):
-    """Load a pyspecdata submodule without requiring compiled extensions."""
+def load_module(name: str, *, use_real_pint: bool = False):
+    """Load a pyspecdata submodule without requiring compiled extensions.
+
+    Parameters
+    ----------
+    name
+        The submodule to import from ``pyspecdata``.
+    use_real_pint
+        If ``True`` the real :mod:`pint` package is required and will be
+        imported.  When ``False`` (the default), a very small dummy
+        implementation of :mod:`pint` is supplied so that tests can run in an
+        environment without the real dependency installed.
+    """
     # provide dummy replacements for optional compiled dependencies
     sys.modules.setdefault("_nnls", types.ModuleType("_nnls"))
     sys.modules.setdefault("tables", types.ModuleType("tables"))
     sys.modules.setdefault("h5py", types.ModuleType("h5py"))
+
+    if not use_real_pint:
+        try:
+            import pint  # noqa: F401
+        except Exception:
+            pint_stub = types.ModuleType("pint")
+
+            class DummyUnit:
+                def __init__(self, name=""):
+                    self.name = name
+
+                def __str__(self):
+                    return self.name
+
+                __repr__ = __str__
+
+            class DummyQuantity:
+                def __init__(self, magnitude=1.0, units=""):
+                    self.magnitude = magnitude
+                    self._units = units
+
+                def __mul__(self, other):
+                    if isinstance(other, DummyQuantity):
+                        return DummyQuantity(
+                            self.magnitude * other.magnitude,
+                            f"{self._units}*{other._units}".strip("*"),
+                        )
+                    return DummyQuantity(self.magnitude * other, self._units)
+
+                def __truediv__(self, other):
+                    if isinstance(other, DummyQuantity):
+                        units = (
+                            f"{self._units}/{other._units}"
+                            if other._units
+                            else self._units
+                        )
+                        return DummyQuantity(self.magnitude / other.magnitude, units)
+                    return DummyQuantity(self.magnitude / other, self._units)
+
+                def __add__(self, other):
+                    other_val = other.magnitude if isinstance(other, DummyQuantity) else other
+                    return DummyQuantity(self.magnitude + other_val, self._units)
+
+                def __sub__(self, other):
+                    other_val = other.magnitude if isinstance(other, DummyQuantity) else other
+                    return DummyQuantity(self.magnitude - other_val, self._units)
+
+                def to_compact(self):
+                    return self
+
+                @property
+                def units(self):
+                    return DummyUnit(self._units)
+
+                def __repr__(self):
+                    if self._units:
+                        return f"{self.magnitude} {self._units}"
+                    return str(self.magnitude)
+
+            class DummyUnitRegistry:
+                def __init__(self):
+                    pass
+
+                def define(self, *_a, **_k):
+                    pass
+
+                def Quantity(self, magnitude=1.0, units=""):
+                    return DummyQuantity(magnitude, units)
+
+            pint_stub.UnitRegistry = DummyUnitRegistry
+            pint_stub.Quantity = DummyQuantity
+            sys.modules.setdefault("pint", pint_stub)
+    else:
+        if "pint" in sys.modules:
+            del sys.modules["pint"]
+        import pint  # noqa: F401
     try:
         import matplotlib  # noqa: F401
     except Exception:

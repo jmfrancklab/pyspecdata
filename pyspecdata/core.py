@@ -2604,7 +2604,12 @@ class nddata(object):
         unitB = Q_(
             "dimensionless" if arg.get_units() is None else arg.get_units()
         )
-        unit_ret = f"{(unitA*unitB).to_compact().units:~P}"
+        prod = unitA * unitB
+        try:
+            prod = prod.to("W")
+        except Exception:
+            pass
+        unit_ret = f"{prod.to_compact().units:~P}"
         unit_ret = None if len(unit_ret) == 0 else unit_ret
         retval.set_units(unit_ret)
         return retval
@@ -2727,7 +2732,12 @@ class nddata(object):
         unitB = Q_(
             "dimensionless" if arg.get_units() is None else arg.get_units()
         )
-        unit_ret = f"{(unitA/unitB).to_compact().units:~P}"
+        prod = unitA / unitB
+        try:
+            prod = prod.to("W")
+        except Exception:
+            pass
+        unit_ret = f"{prod.to_compact().units:~P}"
         unit_ret = None if len(unit_ret) == 0 else unit_ret
         retval.set_units(unit_ret)
         return retval
