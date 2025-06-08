@@ -1,0 +1,30 @@
+image14.png: Block diagram of the modular EPR/NMR instrument design, showing LNA, duplexer, RF transceiver, resonator + NMR probe, electromagnet, microwave power source, power meter, and control computer with signal paths color-coded.
+image15.png: Python code snippet demonstrating SpinCore PulseBlaster pulse program loading with phase cycling, TTL pulses, delays, and a jump_to command.
+image16.png: Photograph of the SpinCore PCIe pulse programming board (PulseBlaster), showing connectors and FPGA used for TTL control.
+image17.png: Screenshot of the PySpecData GUI main window displaying a time-domain spin echo signal and its Fourier transform, with controls for ADC offset and experiment actions (Go, FT, Save).
+image18.png: Jupyter notebook excerpt showing phase calibration debugging: time- and frequency-domain plots with inline code, commentary notes, and improvements.
+image20.png: Heatmap of raw spin echo data over t₂ delays in milliseconds, color-coded intensity across multiple data sets.
+image21.png: Heatmap of raw data coherence pathways, separating contributions over t₂ delays to illustrate coherence selection.
+image24.png: Coherence pathway schematic illustrating evolution of coherence orders (+1 → 0 → -1) through pulse sequence pulses.
+image33.png: Heatmap titled “spin echo, coherence pathways” visualizing echo intensity by coherence order over t₂ delays in microseconds.
+image34.png: Colored complex-plane wheel mapping complex data magnitude (radial) and phase (azimuth), with real and imaginary axes labeled.
+image36.png: Cartoon of an open box representing an nddata container, with arrows pointing to raw data, axes labels, units, error arrays, and available methods.
+image38.jpeg: Screenshot of Bruker TopSpin interface showing 1D, 2D, and 3D NMR spectra windows and file browser.
+image39.png: ViTables screenshot displaying HDF5 hierarchical structure of nddata storage with datasets and tables for raw arrays and metadata.
+image40.png: Two-panel plot of DNP buildup curves (kσ·s(p) vs. microwave power) at 10μM and 150μM hydroxytempo, showing fitted saturation values.
+image41.jpg: Photograph of a plain cardboard box used metaphorically as a generic container.
+image43.png: Image of a Tektronix 11801C digital sampling oscilloscope illustrating hardware for data acquisition.
+image45.png: this is a visual representation of a 2D numpy array, which can be constrasted with an nddata object
+image47.png: this is a visual representation of a pyspecdata nddata, where we can see how it also stores dimension names, coordinate axes, and error
+image490.png: Code snippet defining fitdata class inheriting from nddata, specifying functional form for T₁ relaxation fit using sympy symbols.
+image50.png: Three-panel demonstration of automatic error propagation: plots of variables a, b, and their ratio a/b with correctly propagated error bars.
+image52.png: Four-panel figure illustrating automatic axis relabeling: time-domain signal, frequency-domain before/after zero-fill, and pad+FFT with consistent labels.
+image54.png: Plot showing aliasing and axis registration: multiple traces of a transient response with different start-point offsets aligned on time axis.
+image56.png: Demonstration of smart dimensionality: plotting 1D arrays a(x), b(y), and their computed 2D surface ab − a with correct axis interpretation.
+image62.png: Comparison of frequency-domain spin echo signals with and without time-axis correction to improve phasing, plotted vs. frequency offset.
+image64.png: T₁ fitting plot: experimental points and fitted exponential curve with annotated fit equation and parameters.
+image66.png: Time-domain plot of raw microwave pulse and its reflection used for determining the system transfer function.
+image67.png: Plot of analytic signal magnitude for control and reflected pulses over time, showing envelope of reflection response.
+image68.png: Decay slice plot for final blip with real and imaginary components, initial guess, and fitted curve annotation.
+image69.png: Detailed annotated diagram of nddata instance “d,” showing get/set operations for data, labels, units, error, and proposed interface changes.
+image_cues.txt

@@ -3324,6 +3324,7 @@ class nddata(object):
             temp = self.data.copy()
             temp[~np.isfinite(temp)] = temp[np.isfinite(temp)].min()
             argmax_result = np.argmax(temp, axis=thisindex)
+            argmax_units = self.get_units(axes[j])
             if raw_index:
                 self.data = argmax_result
             else:
@@ -3334,6 +3335,7 @@ class nddata(object):
                         " for %s" % thisindex
                     )
                 self.data = self.axis_coords[thisindex][argmax_result]
+                self.set_units(argmax_units)
             self._pop_axis_info(thisindex)
         return self
 
