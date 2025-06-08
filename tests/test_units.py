@@ -3,9 +3,15 @@ import numpy as np
 import pytest
 from conftest import load_module
 
-# Skip this module entirely if Pint is unavailable
-if importlib.util.find_spec("pint") is None:
+# Skip if the real Pint library isn't available. ``load_module`` supplies a
+# minimal stub when Pint can't be imported, which lacks the functionality this
+# test requires.
+pint_spec = importlib.util.find_spec("pint")
+if pint_spec is None:
     pytest.skip("pint not installed", allow_module_level=True)
+import pint
+if getattr(pint, "__pyspec_stub__", False):
+    pytest.skip("pint stub in use", allow_module_level=True)
 
 # Load dependencies via the test loader (ensures real Pint is imported)
 gf = load_module("general_functions", use_real_pint=True)
