@@ -42,6 +42,9 @@ def load_module(name: str, *, use_real_pint: bool = False):
                 def __str__(self):
                     return self.name
 
+                def __format__(self, _spec):
+                    return self.name
+
                 __repr__ = __str__
 
             class DummyQuantity:
@@ -94,7 +97,14 @@ def load_module(name: str, *, use_real_pint: bool = False):
                 def define(self, *_a, **_k):
                     pass
 
-                def Quantity(self, magnitude=1.0, units=""):
+                def Quantity(self, *args):
+                    if len(args) == 1:
+                        magnitude = 1.0
+                        units = args[0]
+                    elif len(args) == 2:
+                        magnitude, units = args
+                    else:
+                        raise TypeError("Quantity expects one or two arguments")
                     return DummyQuantity(magnitude, units)
 
             pint_stub.UnitRegistry = DummyUnitRegistry
