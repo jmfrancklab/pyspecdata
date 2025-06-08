@@ -3,13 +3,12 @@ import numpy as np
 import pytest
 from conftest import load_module
 
-# load dependencies via test loader (ensures real pint is imported)
-gf = load_module("general_functions", use_real_pint=True)
-
-# Skip this module entirely if pint is not available
+# Skip this module entirely if Pint is unavailable
 if importlib.util.find_spec("pint") is None:
     pytest.skip("pint not installed", allow_module_level=True)
 
+# Load dependencies via the test loader (ensures real Pint is imported)
+gf = load_module("general_functions", use_real_pint=True)
 core = load_module("core", use_real_pint=True)
 nddata = core.nddata
 
