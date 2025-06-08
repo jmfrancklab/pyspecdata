@@ -32,7 +32,9 @@ def load_module(name: str, *, use_real_pint: bool = False):
             import pint  # noqa: F401
         except Exception:
             pint_stub = types.ModuleType("pint")
-            pint_stub.__spec__ = importlib.machinery.ModuleSpec("pint", loader=None)
+            pint_stub.__spec__ = importlib.machinery.ModuleSpec(
+                "pint", loader=None
+            )
             pint_stub.__pyspec_stub__ = True
 
             class DummyUnit:
@@ -67,16 +69,30 @@ def load_module(name: str, *, use_real_pint: bool = False):
                             if other._units
                             else self._units
                         )
-                        return DummyQuantity(self.magnitude / other.magnitude, units)
+                        return DummyQuantity(
+                            self.magnitude / other.magnitude, units
+                        )
                     return DummyQuantity(self.magnitude / other, self._units)
 
                 def __add__(self, other):
-                    other_val = other.magnitude if isinstance(other, DummyQuantity) else other
-                    return DummyQuantity(self.magnitude + other_val, self._units)
+                    other_val = (
+                        other.magnitude
+                        if isinstance(other, DummyQuantity)
+                        else other
+                    )
+                    return DummyQuantity(
+                        self.magnitude + other_val, self._units
+                    )
 
                 def __sub__(self, other):
-                    other_val = other.magnitude if isinstance(other, DummyQuantity) else other
-                    return DummyQuantity(self.magnitude - other_val, self._units)
+                    other_val = (
+                        other.magnitude
+                        if isinstance(other, DummyQuantity)
+                        else other
+                    )
+                    return DummyQuantity(
+                        self.magnitude - other_val, self._units
+                    )
 
                 def to_compact(self):
                     return self
@@ -104,7 +120,9 @@ def load_module(name: str, *, use_real_pint: bool = False):
                     elif len(args) == 2:
                         magnitude, units = args
                     else:
-                        raise TypeError("Quantity expects one or two arguments")
+                        raise TypeError(
+                            "Quantity expects one or two arguments"
+                        )
                     return DummyQuantity(magnitude, units)
 
             pint_stub.UnitRegistry = DummyUnitRegistry
@@ -179,12 +197,17 @@ def load_module(name: str, *, use_real_pint: bool = False):
         pylab_stub.cm = types.SimpleNamespace(gray=None)
         pylab_stub.rc = rc
         pylab_stub.rcParams = {
-            "axes.prop_cycle": types.SimpleNamespace(by_key=lambda: {"color": ["k"]})
+            "axes.prop_cycle": types.SimpleNamespace(
+                by_key=lambda: {"color": ["k"]}
+            )
         }
         pylab_stub.pi = np.pi
         pylab_stub.r_ = np.r_
         ticker_stub.AutoMinorLocator = type("AutoMinorLocator", (), {})
-        ticker_stub.MaxNLocator = type("MaxNLocator", (), {"__init__": lambda self, *a, **k: None})
+        ticker_stub.MaxNLocator = type(
+            "MaxNLocator", (), {"__init__": lambda self, *a, **k: None}
+        )
+
         class DummyBbox:
             @staticmethod
             def union(_bboxes):
@@ -245,12 +268,16 @@ def load_module(name: str, *, use_real_pint: bool = False):
         sympy_stub.nsimplify = nsimplify
         sympy_stub.I = 1j
         sympy_stub.pi = np.pi
-        sympy_stub.utilities = types.SimpleNamespace(lambdify=lambda *a, **k: None)
+        sympy_stub.utilities = types.SimpleNamespace(
+            lambdify=lambda *a, **k: None
+        )
         fem = types.ModuleType("sympy.functions.elementary.miscellaneous")
         fem.sqrt = sqrt
         sys.modules["sympy"] = sympy_stub
         sys.modules["sympy.functions"] = types.ModuleType("sympy.functions")
-        sys.modules["sympy.functions.elementary"] = types.ModuleType("sympy.functions.elementary")
+        sys.modules["sympy.functions.elementary"] = types.ModuleType(
+            "sympy.functions.elementary"
+        )
         sys.modules["sympy.functions.elementary.miscellaneous"] = fem
     try:
         import scipy  # noqa: F401
@@ -271,8 +298,12 @@ def load_module(name: str, *, use_real_pint: bool = False):
         except Exception:  # fall back for older NumPy versions
             rec.fromarrays = np.core.records.fromarrays
         sys.modules["numpy.core.rec"] = rec
-    sys.modules.setdefault("pyspecdata.fornotebook", types.ModuleType("fornotebook"))
-    fig_stub = sys.modules.setdefault("pyspecdata.figlist", types.ModuleType("figlist"))
+    sys.modules.setdefault(
+        "pyspecdata.fornotebook", types.ModuleType("fornotebook")
+    )
+    fig_stub = sys.modules.setdefault(
+        "pyspecdata.figlist", types.ModuleType("figlist")
+    )
     if not hasattr(fig_stub, "figlist"):
         fig_stub.figlist = type("figlist", (), {})
     os.environ.setdefault("pyspecdata_figures", "standard")

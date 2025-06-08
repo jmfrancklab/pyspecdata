@@ -55,7 +55,6 @@ from . import plot_funcs as this_plotting
 from .general_functions import lsafe as orig_lsafe
 from .general_functions import (
     Q_,
-    ureg,
     autostringconvert,
     dp,
     emptytest,
@@ -1154,11 +1153,11 @@ def _find_bad_attr(obj, inistring, path="root"):
         outstring += "\n"
         if hasattr(obj, "__dict__"):
             for name, val in obj.__dict__.items():
-                find_bad_attr(val, f"{path}.{name}")
+                _find_bad_attr(val, f"{path}.{name}")
             return outstring
         elif type(obj) is dict:
             for k, v in obj.items():
-                find_bad_attr(v, f"{path}[{k}]")
+                _find_bad_attr(v, f"{path}[{k}]")
             return outstring
 
 
@@ -6129,7 +6128,7 @@ class nddata(object):
         if data:
             try:
                 retval = deepcopy(self)
-            except:
+            except TypeError:
                 raise RuntimeError(
                     "Detailed failure:\n" + _find_bad_attr(self, "")
                 )
@@ -7769,7 +7768,7 @@ class fitdata(nddata):
                 self.__delattr__(j)
         try:
             new = deepcopy(self)
-        except:
+        except TypeError:
             raise RuntimeError(
                 "Detailed failure:\n" + _find_bad_attr(self, "")
             )
