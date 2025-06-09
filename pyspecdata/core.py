@@ -712,7 +712,7 @@ def plot(*args, **kwargs):
         # pass
         if yaxislabels is not None:
             if len(yaxislabels) > 0:
-                if isinstance(yaxislabels[0], np.string_):
+                if isinstance(yaxislabels[0], np.bytes_):
                     has_labels = True
                 elif label_format_string is not None:
                     yaxislabels = [
