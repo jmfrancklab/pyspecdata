@@ -14,6 +14,19 @@ ND-Data
 The nddata class is built on top of numpy_.
 Numpy allows you to create multi-dimensional arrays of data.
 
+Conceptually, an :class:`nddata` instance acts as a container that holds the raw
+array along with its descriptive metadata.
+
+.. figure:: _static/presentation_images/image41.jpg
+   :align: center
+
+   A simple container metaphor for an ``nddata`` object.
+
+.. figure:: _static/presentation_images/image36.png
+   :align: center
+
+   Axes, units and error arrays are stored alongside the data itself.
+
 Multidimensional data
 ---------------------
 
@@ -48,6 +61,18 @@ So, while this general setup is different than the standard numpy setup,
 *etc.*, it should lead to you writing more efficient code, with less variables
 to keep track of, and generally also leads to far more compact code,
 and you should probably not try to bypass it by creating copies of your data.
+
+The next figure contrasts a plain two-dimensional numpy array with the richer nddata representation.
+
+.. figure:: _static/presentation_images/image45.png
+   :align: center
+
+   A traditional 2D numpy array for comparison.
+
+.. figure:: _static/presentation_images/image47.png
+   :align: center
+
+   The nddata object keeps track of dimension names, coordinate axes and their uncertainties, making operations and plotting far easier.
 
 In rare circumstances, you *need* to create a copy of your data
 (I think there is only one case where this is true:
@@ -104,8 +129,13 @@ multi-dimensional data.
     but follows a distinctly different philosophy.
     Here, we place a strong an emphasis on benefits that can be derived from
     object-oriented programming.
-    For example, we emphasize effort-free error propagation and Fourier transformation,
-    as well as a compact and meaningful slicing notation.
+   For example, we emphasize effort-free error propagation and Fourier transformation, as illustrated below.
+   as well as a compact and meaningful slicing notation.
+
+.. figure:: _static/presentation_images/image50.png
+   :align: center
+
+   Automatic propagation of errors during arithmetic operations.
 
 Dimension labels
 ----------------
@@ -155,6 +185,12 @@ and
                         +/-None}
 
 which are arrays of data organized along two *different* dimensions.
+The figure below shows how independent axes are expanded during such operations.
+
+.. figure:: _static/presentation_images/image56.png
+   :align: center
+
+   Smart dimensionality when combining independent axes.
 
 You can refer to a time dimension, such as `t1`, `t_1`, `t_direct`, *etc.*
 as `f1`, `f_1`, *etc.* in order to retrieve the Fourier transform.
@@ -240,6 +276,11 @@ since it can be used to generate a series of ranges based on logic.
 For example, peak selection frequently uses the
 :meth:`~nddata.contiguous` method.
 
+.. figure:: _static/presentation_images/image69.png
+   :align: center
+
+   This annotated diagram highlights the attributes stored within an ``nddata`` instance and how they can be accessed.
+
 Selecting and manipulating the axis coordinates
 ```````````````````````````````````````````````
 
@@ -320,9 +361,15 @@ It's important to note that, in contrast to standard numpy,
 nddata routines are designed to be called as methods,
 rather than independent functions.
 Also, these methods **modify the data in-place** rather than returning a copy.
-For example, after executing
-``d.ft('t2')``, the object ``d`` will contain the *Fourier transformed* data.
-There is not need to assign the result to a new variable.
+For example, after executing ``d.ft('t2')`` the object ``d`` now contains the
+Fourier-transformed data.  The axes are relabeled automatically, as shown
+below.
+
+.. figure:: _static/presentation_images/image52.png
+   :align: center
+
+   Automatic relabeling of the frequency axis.
+There is no need to assign the result to a new variable.
 Alternatively, the property ``C`` offers easy access to a copy:
 ``a = d.C.ft('t2')`` leaves ``d`` alone, and returns the FT as a new object
 called ``a``.
@@ -336,15 +383,27 @@ In order to encourage this style, we provide the method :meth:`~nddata.run`, whi
 
 *For a full list of methods*, see the API documentation: :class:`nddata`.
 
-.. Basic Examples
-.. --------------
-.. 
-.. .. todo::
-..     Give good examples/plots here
-.. 
-.. * Apply a filter (fromaxis).
-.. * Slicing.
-.. * Aliasing of FT.
+Basic Examples
+--------------
+
+.. todo::
+    Give good examples/plots here
+
+* Apply a filter (fromaxis).
+* Slicing.
+* Aliasing of FT.
+
+The following plots demonstrate aliasing and subsequent correction.
+
+.. figure:: _static/presentation_images/image54.png
+   :align: center
+
+   Aliasing and axis registration applied to a transient response.
+
+.. figure:: _static/presentation_images/image62.png
+   :align: center
+
+   Correcting the time origin greatly improves the phasing.
   
 
 Methods by Sub-Topic

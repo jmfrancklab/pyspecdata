@@ -2,11 +2,15 @@ LaTeX Notebook Functionality
 ============================
 
 This package contains tools for running a LaTeX notebook with
-embedded python code.  One can then, for instance, keep an
-electronic lab notebook where the plots and data are generated
-and processed in place, immediately from the *raw data*.  (The author of the project has kept an
-electronic notebook for several years in this way with great
-success.)
+embedded python code.
+One can then, for instance, keep an electronic lab notebook where the plots and data are generated and processed in place, immediately from the *raw data*.
+The figure below shows a typical debugging session.
+(The author of the project has kept an electronic notebook for several years in this way with great success.)
+
+.. figure:: _static/presentation_images/image18.png
+   :align: center
+
+   Example Jupyter notebook used for phase calibration debugging.
 
 Please note that this is a very different "notebook" than the one
 supplied by jupyter notebooks (which pyspecdata also supports).

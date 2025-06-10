@@ -1169,6 +1169,11 @@ class nddata(object):
     """This is the detailed API reference.
     For an introduction on how to use ND-Data, see the
     :ref:`Main ND-Data Documentation <nddata-summary-label>`.
+
+    .. figure:: ../doc_src/_static/presentation_images/image36.png
+       :align: center
+
+       This schematic shows how an ``nddata`` container stores its data array together with axes, units and errors.
     """
 
     want_to_prospa_decim_correct = False
@@ -6886,6 +6891,11 @@ class nddata(object):
         datasets,
         and each is named (here, the name is `test_data`).
 
+        .. figure:: ../doc_src/_static/presentation_images/image39.png
+           :align: center
+
+           View of an HDF5 file with nddata arrays and metadata inside ViTables.
+
         .. code-block:: python
 
             from pyspecdata import *
@@ -7225,6 +7235,14 @@ class testclass:
 
 
 class nddata_hdf5(nddata):
+    r"""Load an :class:`nddata` object saved with
+    :meth:`nddata.hdf5_write`.
+
+    This subclass opens an array from an HDF5 file and exposes it as a
+    regular ``nddata`` instance.  Use :func:`pyspecdata.find_file` to
+    conveniently locate the desired file and then instantiate this class
+    or call :func:`nddata_hdf5` directly.
+    """
     def __repr__(self):
         if hasattr(self, "_node_children"):
             return repr(self.datanode)

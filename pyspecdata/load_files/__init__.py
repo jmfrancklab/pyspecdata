@@ -60,6 +60,11 @@ def search_filename(searchstring, exp_type, print_result=True, unique=False):
         Teams or Google Drive, etc.)
     *   The user wants to seamlessly access the data on their laptop.
 
+    .. figure:: ../../doc_src/_static/presentation_images/image38.jpeg
+       :align: center
+
+       Bruker TopSpin interface showing a typical NMR directory.
+
     The ``.pyspecdata`` config file stores all the info about where the data
     lives + is stored locally.  You have basically two options:
 
