@@ -11,11 +11,9 @@ it from the ``[zenodo]`` section of ``~/.pyspecdata``::
 
     [zenodo]
     token_file = /path/to/zenodo.token
-    deposition_id = 123456
 
-``deposition_id`` is the numeric identifier of an existing deposition record.
-When you create a new upload on Zenodo, the URL ends with this ID.  Files
-uploaded through the API are added to that deposition.
+The script will create a new deposition record automatically and then upload
+the file to that deposition.
 """
 
 import os
@@ -33,10 +31,19 @@ local_path = search_filename(
 
 # retrieve authentication info from the config file
 token_path = pyspec_config.get_setting("token_file", section="zenodo")
-deposition_id = pyspec_config.get_setting("deposition_id", section="zenodo")
 
 with open(os.path.expanduser(token_path)) as fp:
     token = fp.read().strip()
+
+# create an empty deposition so we can upload files
+r = requests.post(
+    "https://zenodo.org/api/deposit/depositions",
+    params={"access_token": token},
+    json={},
+)
+r.raise_for_status()
+deposition = r.json()
+deposition_id = deposition["id"]
 
 with open(local_path, "rb") as fp:
     r = requests.post(
@@ -47,4 +54,5 @@ with open(local_path, "rb") as fp:
 
 r.raise_for_status()
 info = r.json()
-print("Uploaded", info["filename"], "download URL:", info["links"]["download"]) 
+print("Uploaded", info["filename"], "download URL:", info["links"]["download"])
+print("View deposition at", deposition["links"]["html"])
