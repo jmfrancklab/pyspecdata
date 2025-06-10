@@ -1172,7 +1172,8 @@ class nddata(object):
     .. figure:: ../doc_src/_static/presentation_images/image36.png
        :align: center
 
-       This schematic shows how an ``nddata`` container stores its data array together with axes, units and errors.
+       This schematic shows how an ``nddata`` container stores its data array
+       together with axes, units and errors.
     """
 
     want_to_prospa_decim_correct = False
@@ -6895,7 +6896,8 @@ class nddata(object):
         .. figure:: ../doc_src/_static/presentation_images/image39.png
            :align: center
 
-           View of an HDF5 file with nddata arrays and metadata inside ViTables.
+           View of an HDF5 file with nddata arrays and metadata inside
+           ViTables.
 
         .. code-block:: python
 

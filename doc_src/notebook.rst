@@ -10,7 +10,7 @@ The figure below shows a typical debugging session.
 .. figure:: _static/presentation_images/image18.png
    :align: center
 
-   Example LaTeX notebook page used for phase calibration debugging.
+   Example LaTeX notebook page, showing embedded figures
 
 Please note that this is a very different "notebook" than the one
 supplied by jupyter notebooks (which pyspecdata also supports).
