@@ -22,7 +22,6 @@ from pyspecdata import find_file, search_filename
 from pyspecdata.datadir import pyspec_config
 
 # locate the data using the same search string as :mod:`examples.UV.Cary_simple`
-find_file("T177R1a_pR_210615", exp_type="UV_Vis/proteorhodopsin")
 local_path = search_filename(
     "T177R1a_pR_210615",
     exp_type="UV_Vis/proteorhodopsin",
@@ -43,11 +42,10 @@ r = requests.post(
 )
 r.raise_for_status()
 deposition = r.json()
-deposition_id = deposition["id"]
 
 with open(local_path, "rb") as fp:
     r = requests.post(
-        f"https://zenodo.org/api/deposit/depositions/{deposition_id}/files",
+        f"https://zenodo.org/api/deposit/depositions/{deposition['id']}/files",
         params={"access_token": token},
         files={"file": fp},
     )
