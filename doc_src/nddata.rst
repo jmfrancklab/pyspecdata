@@ -129,13 +129,8 @@ multi-dimensional data.
     but follows a distinctly different philosophy.
     Here, we place a strong an emphasis on benefits that can be derived from
     object-oriented programming.
-   For example, we emphasize effort-free error propagation and Fourier transformation, as illustrated below.
+   For example, we emphasize effort-free error propagation and Fourier transformation,
    as well as a compact and meaningful slicing notation.
-
-.. figure:: _static/presentation_images/image50.png
-   :align: center
-
-   Automatic propagation of errors during arithmetic operations.
 
 Dimension labels
 ----------------
@@ -354,6 +349,11 @@ Error propagation
 .. todo::
     this works very well, but show an example here.
 
+.. figure:: _static/presentation_images/image50.png
+   :align: center
+
+   Automatic propagation of errors during arithmetic operations.
+
 Methods for Manipulating Data
 -----------------------------
 
@@ -393,17 +393,8 @@ Basic Examples
 * Slicing.
 * Aliasing of FT.
 
-The following plots demonstrate aliasing and subsequent correction.
-
-.. figure:: _static/presentation_images/image54.png
-   :align: center
-
-   Aliasing and axis registration applied to a transient response.
-
-.. figure:: _static/presentation_images/image62.png
-   :align: center
-
-   Correcting the time origin greatly improves the phasing.
+See :func:`~pyspecdata.fourier.ft_shift.ft_new_startpoint` for example
+plots demonstrating aliasing and time-origin correction.
   
 
 Methods by Sub-Topic
