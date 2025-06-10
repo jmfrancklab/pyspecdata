@@ -55,7 +55,6 @@ from . import plot_funcs as this_plotting
 from .general_functions import lsafe as orig_lsafe
 from .general_functions import (
     Q_,
-    ureg,
     autostringconvert,
     dp,
     emptytest,
@@ -713,7 +712,7 @@ def plot(*args, **kwargs):
         # pass
         if yaxislabels is not None:
             if len(yaxislabels) > 0:
-                if isinstance(yaxislabels[0], np.string_):
+                if isinstance(yaxislabels[0], np.bytes_):
                     has_labels = True
                 elif label_format_string is not None:
                     yaxislabels = [
@@ -1154,11 +1153,11 @@ def _find_bad_attr(obj, inistring, path="root"):
         outstring += "\n"
         if hasattr(obj, "__dict__"):
             for name, val in obj.__dict__.items():
-                find_bad_attr(val, f"{path}.{name}")
+                _find_bad_attr(val, f"{path}.{name}")
             return outstring
         elif type(obj) is dict:
             for k, v in obj.items():
-                find_bad_attr(v, f"{path}[{k}]")
+                _find_bad_attr(v, f"{path}[{k}]")
             return outstring
 
 
@@ -2609,7 +2608,8 @@ class nddata(object):
         unitB = Q_(
             "dimensionless" if arg.get_units() is None else arg.get_units()
         )
-        unit_ret = f"{(unitA*unitB).units:~P}"
+        prod = unitA * unitB
+        unit_ret = f"{prod.to_compact().units:~P}"
         unit_ret = None if len(unit_ret) == 0 else unit_ret
         retval.set_units(unit_ret)
         return retval
@@ -2732,7 +2732,8 @@ class nddata(object):
         unitB = Q_(
             "dimensionless" if arg.get_units() is None else arg.get_units()
         )
-        unit_ret = f"{(unitA/unitB).units:~P}"
+        prod = unitA / unitB
+        unit_ret = f"{prod.to_compact().units:~P}"
         unit_ret = None if len(unit_ret) == 0 else unit_ret
         retval.set_units(unit_ret)
         return retval
@@ -3074,7 +3075,7 @@ class nddata(object):
             self.get_units(thisaxis) is not None
         ):
             ret_units = Q_(self.get_units()) * Q_(self.get_units(thisaxis))
-            self.set_units(f"{ret_units.units:~P}")
+            self.set_units(f"{ret_units.to_compact().units:~P}")
         if len(self.axis_coords) > 0:
             t = self.getaxis(thisaxis)
             dt_array = np.diff(t)
@@ -6132,7 +6133,7 @@ class nddata(object):
         if data:
             try:
                 retval = deepcopy(self)
-            except:
+            except TypeError:
                 raise RuntimeError(
                     "Detailed failure:\n" + _find_bad_attr(self, "")
                 )
@@ -7785,7 +7786,7 @@ class fitdata(nddata):
                 self.__delattr__(j)
         try:
             new = deepcopy(self)
-        except:
+        except TypeError:
             raise RuntimeError(
                 "Detailed failure:\n" + _find_bad_attr(self, "")
             )
