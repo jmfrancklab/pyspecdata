@@ -187,13 +187,11 @@ def search_filename(
                 map(
                     set,
                     list(
-                        zip(
-                            *[
-                                j.rsplit(".", 1)
-                                for j in files
-                                if len(j.rsplit(".", 1)) > 1
-                            ]
-                        )
+                        zip(*[
+                            j.rsplit(".", 1)
+                            for j in files
+                            if len(j.rsplit(".", 1)) > 1
+                        ])
                     ),
                 )
             )
@@ -474,7 +472,8 @@ def find_file(
             logger.debug("got a postproc_type value of None")
             assert len(kwargs) == 0, (
                 "there must be no keyword arguments left, because you're done"
-                " postprocessing (you have %s)" % str(kwargs)
+                " postprocessing (you have %s)"
+                % str(kwargs)
             )
             return data
         else:
@@ -495,7 +494,8 @@ def find_file(
                 logger.debug(
                     "postprocessing not defined for file with postproc_type %s"
                     " --> it should be defined in the postproc_type dictionary"
-                    " in load_files.__init__.py" + postproc_type
+                    " in load_files.__init__.py"
+                    + postproc_type
                 )
                 if len(postproc_lookup.keys()) > 0:
                     raise ValueError(
@@ -592,13 +592,11 @@ def _check_signature(filename):
             thiskey in inistring for thiskey in list(file_signatures.keys())
         ):  # this will fail without overriding the numpy any( above
             retval = file_signatures[
-                next(
-                    (
-                        thiskey
-                        for thiskey in list(file_signatures.keys())
-                        if thiskey in inistring
-                    )
-                )
+                next((
+                    thiskey
+                    for thiskey in list(file_signatures.keys())
+                    if thiskey in inistring
+                ))
             ]
             logger.debug(strm("Found magic signature, returning", retval))
             return retval
@@ -725,7 +723,8 @@ def load_indiv_file(
         else:
             logger.debug(
                 "Identified a potential prospa file, because I didn't find ser"
-                " or acqus in " + strm(file_reference, expno_as_str)
+                " or acqus in "
+                + strm(file_reference, expno_as_str)
             )
             # the rest are for prospa
             # even though I've made steps towards supporting zipped prospa (by
@@ -796,7 +795,8 @@ def load_indiv_file(
                             return attrlist
                         raise ValueError(
                             "please select a node from the list and set to"
-                            " expno:\n\t" + "\n\t".join(attrlist)
+                            " expno:\n\t"
+                            + "\n\t".join(attrlist)
                         )
                     # assume this is a normal pySpecData HDF5 file
                     dirname, filename = os.path.split(filename)
