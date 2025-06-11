@@ -17,8 +17,24 @@ calculating the jacobian.
 You simply wrap your existing nddata with `lmfitdata`, set the
 `functional_form` property to the equation you want to fit,
 and provide guesses and bounds with `set_guess`.
-The easiest way to get started is to just see the fitting examples in
-the example gallery.
+The easiest way to get started is to see the fitting examples in
+the example gallery.  A few typical ``lmfitdata`` results are
+illustrated here.
+
+.. figure:: _static/presentation_images/image64.png
+   :align: center
+
+   A simple T₁ relaxation fit.
+
+.. figure:: _static/presentation_images/image40.png
+   :align: center
+
+   Fitting also handles global DNP buildup data at different concentrations.
+
+.. figure:: _static/presentation_images/image490.png
+   :align: center
+
+   A ``fitdata`` subclass can also be defined in its own module.
 
 .. currentmodule:: pyspecdata.lmfitdata
 

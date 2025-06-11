@@ -222,6 +222,16 @@ def ft_new_startpoint(self, axis, which_domain, value=None, nearest=False):
         know the data is not aliased in the
         inverse domain and/or are willing to
         deal with the consequences.
+
+        .. figure:: ../../doc_src/_static/presentation_images/image54.png
+           :align: center
+
+           Aliasing and axis registration applied to a simple Gaussian example.
+
+        .. figure:: ../../doc_src/_static/presentation_images/image62.png
+           :align: center
+
+           Correcting the time origin in NMR greatly improves the phasing.
     """
     if which_domain == "t":
         which_domain = "time"

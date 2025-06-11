@@ -4,7 +4,7 @@ from ..datadir import getDATADIR, pyspec_config
 import logging
 import requests
 
-__all__ = ["download"]
+__all__ = ["zenodo_download", "zenodo_upload"]
 
 
 def zenodo_download(url, exp_type=None):
@@ -33,6 +33,7 @@ def zenodo_download(url, exp_type=None):
     logging.debug(f"downloading zenodo '{url}' to '{dest}'")
     return dest
 
+
 def zenodo_upload(local_path):
     # retrieve authentication info from the config file
     token_path = pyspec_config.get_setting("token_file", section="zenodo")
@@ -51,12 +52,18 @@ def zenodo_upload(local_path):
 
     with open(local_path, "rb") as fp:
         r = requests.post(
-            f"https://zenodo.org/api/deposit/depositions/{deposition['id']}/files",
+            "https://zenodo.org/api/deposit/depositions/"
+            f"{deposition['id']}/files",
             params={"access_token": token},
             files={"file": fp},
         )
 
     r.raise_for_status()
     info = r.json()
-    print("Uploaded", info["filename"], "download URL:", info["links"]["download"])
+    print(
+        "Uploaded",
+        info["filename"],
+        "download URL:",
+        info["links"]["download"],
+    )
     print("View deposition at", deposition["links"]["html"])

@@ -18,3 +18,5 @@ We provide the command XXXX.  You supply this with a csv file containing two col
 -   file name
 
 Of the files that you want.  It will then run rclone to copy all those files to your local computer.
+
+See :meth:`~pyspecdata.nddata.hdf5_write` for an overview of how the data are stored in HDF5 files.  A typical Bruker directory layout is illustrated in the :func:`~pyspecdata.find_file` documentation.
