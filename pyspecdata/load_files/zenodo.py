@@ -51,8 +51,8 @@ def zenodo_download(deposition, searchstring, exp_type=None):
         )
     elif len(matches) > 1:
         raise ValueError(
-            f"multiple files match {searchstring!r} in deposition {deposition}:"
-            f" {[f['key'] for f in matches]}"
+            f"multiple files match {searchstring!r} in deposition"
+            f" {deposition}: {[f['key'] for f in matches]}"
         )
     fileinfo = matches[0]
     dest = os.path.join(dest_dir, fileinfo["key"])
@@ -96,12 +96,15 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
 
     if deposition_id is None:
         if title is None:
-            raise ValueError("must provide title when creating a new deposition")
+            raise ValueError(
+                "must provide title when creating a new deposition"
+            )
         deposition_id = create_deposition(title)
 
     with open(local_path, "rb") as fp:
         r = requests.post(
-            f"https://zenodo.org/api/deposit/depositions/{deposition_id}/files",
+            "https://zenodo.org/api/deposit/depositions/"
+            f"{deposition_id}/files",
             params={"access_token": token},
             files={"file": fp},
         )
@@ -113,7 +116,9 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
 
     # record the upload in the config file
     n_uploads = int(
-        pyspec_config.get_setting("upload_number", section="zenodo", default="0")
+        pyspec_config.get_setting(
+            "upload_number", section="zenodo", default="0"
+        )
     )
     n_uploads += 1
     pyspec_config.set_setting("zenodo", "upload_number", str(n_uploads))
