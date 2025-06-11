@@ -4,7 +4,7 @@ from ..datadir import getDATADIR, pyspec_config
 import logging
 import requests
 
-__all__ = ["download"]
+__all__ = ["zenodo_download", "zenodo_upload"]
 
 
 def zenodo_download(url, exp_type=None):

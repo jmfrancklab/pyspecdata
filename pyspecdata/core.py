@@ -1174,7 +1174,8 @@ class nddata(object):
         .. figure:: ../doc_src/_static/presentation_images/image69.png
            :align: center
 
-           This annotated diagram highlights the attributes stored within an ``nddata`` instance and how they can be accessed.
+           This annotated diagram highlights the attributes stored within an
+           ``nddata`` instance and how they can be accessed.
     """
 
     want_to_prospa_decim_correct = False
