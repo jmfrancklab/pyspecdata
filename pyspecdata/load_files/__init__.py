@@ -25,6 +25,7 @@ from . import load_cary
 from .open_subpath import open_subpath
 from ..datadir import getDATADIR, rclone_search
 from ..datadir import pyspec_config, log_fname
+from .zenodo import zenodo_download 
 from ..general_functions import strm
 from ..core import nddata_hdf5
 from numpy import r_
@@ -46,7 +47,13 @@ def _dirformat(file):
 
 
 # }}}
-def search_filename(searchstring, exp_type, print_result=True, unique=False):
+def search_filename(
+    searchstring,
+    exp_type,
+    print_result=True,
+    unique=False,
+    zenodo=None,
+):
     r"""Use regular expression `searchstring` to find a file inside the
     directory indicated by `exp_type`
     (For information on how to set up the file searching mechanism, see
@@ -107,6 +114,10 @@ def search_filename(searchstring, exp_type, print_result=True, unique=False):
         more info.
     unique : boolean (default False)
         If true, then throw an error unless only one file is found.
+    zenodo : str, optional
+        If provided and the file is not found locally, download it from this
+        Zenodo URL.  Rclone remotes are *not* searched when this option is
+        used.
     """
     # {{{ actually find the files
     directory = getDATADIR(exp_type=exp_type)
@@ -156,7 +167,9 @@ def search_filename(searchstring, exp_type, print_result=True, unique=False):
 
     files = look_inside(directory)
     logger.debug(strm("look_inside found the files", files))
-    if files is None or len(files) == 0:
+    if (files is None or len(files) == 0) and zenodo is not None:
+        zenodo_download(zenodo, exp_type=exp_type)
+    elif (files is None or len(files) == 0) and zenodo is None:
         rclone_search(
             searchstring.replace(".*", "*")
             .replace("(", "{")
@@ -255,6 +268,7 @@ def find_file(
     indirect_dimlabels=None,
     lookup={},
     return_list=False,
+    zenodo=None,
     **kwargs,
 ):
     r"""Find the file  given by the regular expression `searchstring` inside
@@ -381,6 +395,10 @@ def find_file(
                              :func:`~pyspecdata.load_files.load_indiv_file`
                              lookup : dictionary with str:function pairs
         types of postprocessing to add to the `postproc_lookup` dictionary
+    zenodo : str, optional
+        If provided, a URL pointing to a file hosted on Zenodo.  When the
+        requested file is not found locally, it will be downloaded from this
+        URL instead of searching rclone remotes.
     """
     postproc_lookup.update(lookup)
     logger.debug(strm("find_file sees indirect_dimlabels", indirect_dimlabels))
@@ -397,7 +415,12 @@ def find_file(
             (searchstring, exp_type, print_result),
         )
     )
-    files = search_filename(searchstring, exp_type, print_result=print_result)
+    files = search_filename(
+        searchstring,
+        exp_type,
+        print_result=print_result,
+        zenodo=zenodo,
+    )
     # search_filename will raise an error if it can't find anything even after
     # checking remotely
     data = None
