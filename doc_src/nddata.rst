@@ -273,11 +273,6 @@ since it can be used to generate a series of ranges based on logic.
 For example, peak selection frequently uses the
 :meth:`~nddata.contiguous` method.
 
-.. figure:: _static/presentation_images/image69.png
-   :align: center
-
-   This annotated diagram highlights the attributes stored within an ``nddata`` instance and how they can be accessed.
-
 Selecting and manipulating the axis coordinates
 ```````````````````````````````````````````````
 

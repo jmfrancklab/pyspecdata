@@ -1171,11 +1171,10 @@ class nddata(object):
 
     .. _nddata-container-fig:
 
-    .. figure:: ../doc_src/_static/presentation_images/image36.png
-       :align: center
+        .. figure:: ../doc_src/_static/presentation_images/image69.png
+           :align: center
 
-       This schematic shows how an ``nddata`` container stores its data array
-       together with axes, units and errors.
+           This annotated diagram highlights the attributes stored within an ``nddata`` instance and how they can be accessed.
     """
 
     want_to_prospa_decim_correct = False
