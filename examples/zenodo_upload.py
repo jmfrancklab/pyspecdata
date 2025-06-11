@@ -21,6 +21,9 @@ import requests
 from pyspecdata import search_filename
 from pyspecdata.datadir import pyspec_config
 
+# locate the data using the same search string as
+# :mod:`examples.UV.Cary_simple`
+local_path = search_filename(
     "T177R1a_pR_210615",
     exp_type="UV_Vis/proteorhodopsin",
     unique=True,

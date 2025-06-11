@@ -31,5 +31,3 @@ def download(url, exp_type=None):
     urllib.request.urlretrieve(url, dest)
     logging.debug(f"downloading zenodo '{url}' to '{dest}'")
     return dest
-
-
