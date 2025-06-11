@@ -17,9 +17,7 @@ the file to that deposition.
 """
 
 import os
-import requests
-from pyspecdata import search_filename
-from pyspecdata.datadir import pyspec_config
+from pyspecdata import search_filename, zenodo_upload
 
 # locate the data using the same search string as
 # :mod:`examples.UV.Cary_simple`
@@ -29,29 +27,4 @@ local_path = search_filename(
     unique=True,
 )
 
-# retrieve authentication info from the config file
-token_path = pyspec_config.get_setting("token_file", section="zenodo")
-
-with open(os.path.expanduser(token_path)) as fp:
-    token = fp.read().strip()
-
-# create an empty deposition so we can upload files
-r = requests.post(
-    "https://zenodo.org/api/deposit/depositions",
-    params={"access_token": token},
-    json={},
-)
-r.raise_for_status()
-deposition = r.json()
-
-with open(local_path, "rb") as fp:
-    r = requests.post(
-        f"https://zenodo.org/api/deposit/depositions/{deposition['id']}/files",
-        params={"access_token": token},
-        files={"file": fp},
-    )
-
-r.raise_for_status()
-info = r.json()
-print("Uploaded", info["filename"], "download URL:", info["links"]["download"])
-print("View deposition at", deposition["links"]["html"])
+zenodo_upload(local_path)

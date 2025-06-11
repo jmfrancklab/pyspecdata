@@ -37,6 +37,7 @@ from .nnls import *
 from .lmfitdata import lmfitdata
 from .generate_fake_data import fake_data
 from .dict_utils import make_ndarray, unmake_ndarray
+from .zenodo import zenodo_upload
 from .datadir import getDATADIR, log_fname, proc_data_target_dir
 from .mpl_utils import (
     plot_label_points,
