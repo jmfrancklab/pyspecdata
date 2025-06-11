@@ -88,7 +88,12 @@ def create_deposition(title):
         params={"access_token": token},
         json={"metadata": metadata},
     )
-    r.raise_for_status()
+    try:
+        r.raise_for_status()
+    except requests.HTTPError as exc:
+        msg = f"{exc}\n{r.text}"
+        logging.error("failed to create deposition: %s", msg)
+        raise requests.HTTPError(msg) from exc
     return r.json()["id"]
 
 
@@ -127,7 +132,7 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
     r.raise_for_status()
     info = r.json()
     print("Uploaded", info["filename"])
-    print("View deposition at", f"https://zenodo.org/deposit/{deposition_id}")
+    print("View deposition at", f"https://zenodo.org/uploads/{deposition_id}")
 
     # record the upload in the config file
     n_uploads = int(
