@@ -1,6 +1,7 @@
 import os
 import urllib.request
-from .datadir import getDATADIR
+from ..datadir import getDATADIR
+import logging
 
 __all__ = ["download"]
 
@@ -28,6 +29,7 @@ def download(url, exp_type=None):
     fname = os.path.basename(url.split("?", 1)[0])
     dest = os.path.join(dest_dir, fname)
     urllib.request.urlretrieve(url, dest)
+    logging.debug(f"downloading zenodo '{url}' to '{dest}'")
     return dest
 
 

@@ -25,6 +25,7 @@ from . import load_cary
 from .open_subpath import open_subpath
 from ..datadir import getDATADIR, rclone_search
 from ..datadir import pyspec_config, log_fname
+from .zenodo import download as z_download
 from ..general_functions import strm
 from ..core import nddata_hdf5
 from numpy import r_
@@ -162,8 +163,7 @@ def search_filename(
     files = look_inside(directory)
     logger.debug(strm("look_inside found the files", files))
     if (files is None or len(files) == 0) and zenodo is not None:
-        from ..zenodo import download as _zenodo_download
-        _zenodo_download(zenodo, exp_type=exp_type)
+        z_download(zenodo, exp_type=exp_type)
     elif (files is None or len(files) == 0) and zenodo is None:
         rclone_search(
             searchstring.replace(".*", "*")
