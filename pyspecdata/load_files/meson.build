@@ -6,6 +6,7 @@ py_sources=[
 'load_cary.py',
 'open_subpath.py',
 'prospa.py',
+'zenodo.py',
 ]
 py.install_sources(
   py_sources,
