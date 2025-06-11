@@ -110,8 +110,9 @@ def search_filename(
     unique : boolean (default False)
         If true, then throw an error unless only one file is found.
     zenodo : str, optional
-        If provided and the file is not found locally, download it from this
-        Zenodo URL.  Rclone remotes are *not* searched when this option is
+        Deposition number on Zenodo.  If provided and the file is not found
+        locally, a file matching ``searchstring`` will be downloaded from this
+        deposition.  Rclone remotes are *not* searched when this option is
         used.
     """
     # {{{ actually find the files
@@ -163,7 +164,7 @@ def search_filename(
     files = look_inside(directory)
     logger.debug(strm("look_inside found the files", files))
     if (files is None or len(files) == 0) and zenodo is not None:
-        zenodo_download(zenodo, exp_type=exp_type)
+        zenodo_download(zenodo, searchstring, exp_type=exp_type)
     elif (files is None or len(files) == 0) and zenodo is None:
         rclone_search(
             searchstring.replace(".*", "*")
@@ -391,9 +392,9 @@ def find_file(
                              lookup : dictionary with str:function pairs
         types of postprocessing to add to the `postproc_lookup` dictionary
     zenodo : str, optional
-        If provided, a URL pointing to a file hosted on Zenodo.  When the
-        requested file is not found locally, it will be downloaded from this
-        URL instead of searching rclone remotes.
+        Deposition number on Zenodo.  When the requested file is not found
+        locally, a file matching ``searchstring`` will be downloaded from this
+        deposition instead of searching rclone remotes.
     """
     postproc_lookup.update(lookup)
     logger.debug(strm("find_file sees indirect_dimlabels", indirect_dimlabels))
