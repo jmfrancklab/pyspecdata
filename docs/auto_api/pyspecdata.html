@@ -549,7 +549,7 @@ and determines the axis values as follows:
 <p>Provides the core components of pyspecdata.
 Currently, this is a very large file that we will slowly break down into
 separate modules or packages.</p>
-<p>The classes <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata_hdf</span></code>, <a class="reference internal" href="#pyspecdata.core.ndshape" title="pyspecdata.core.ndshape"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code></a>, the
+<p>The classes <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata_hdf</span></code>, <a class="reference internal" href="#pyspecdata.core.ndshape" title="pyspecdata.core.ndshape"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code></a>, the
 function <a class="reference internal" href="#pyspecdata.core.plot" title="pyspecdata.core.plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot()</span></code></a>, and the class <a class="reference internal" href="#pyspecdata.core.fitdata" title="pyspecdata.core.fitdata"><code class="xref py py-class docutils literal notranslate"><span class="pre">fitdata</span></code></a>
 are the core components of the N-Dimensional processing routines.
 Start by familiarizing yourself with those.</p>
@@ -604,7 +604,7 @@ The np.array is modified in-place.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>datalist</strong> (<em>list</em><em> of </em><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – the data you want to concatenate – they must have the same ndshape!</p></li>
+<li><p><strong>datalist</strong> (<em>list</em><em> of </em><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – the data you want to concatenate – they must have the same ndshape!</p></li>
 <li><p><strong>dimname</strong> (<em>str</em>) – name of the new dimension</p></li>
 </ul>
 </dd>
@@ -636,7 +636,7 @@ The np.array is modified in-place.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.core.fitdata">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.core.</span></span><span class="sig-name descname"><span class="pre">fitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.fitdata" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
 <p>Inherits from an nddata and enables curve fitting through use of a
 sympy expression.</p>
 <p>The user creates a fitdata class object from an existing nddata
@@ -731,7 +731,7 @@ fit</p>
 passed</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -867,7 +867,7 @@ must be sympy symbols</p>
 <dd class="field-even"><p><strong>self</strong> – The modified nddata</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -924,6 +924,15 @@ indices, with the last being the copy of the first</p>
 <p>This is the detailed API reference.
 For an introduction on how to use ND-Data, see the
 <a class="reference internal" href="../nddata.html#nddata-summary-label"><span class="std std-ref">Main ND-Data Documentation</span></a>.</p>
+<blockquote id="nddata-container-fig">
+<div><figure class="align-center" id="id104">
+<img alt="doc_src/_static/presentation_images/image69.png" src="doc_src/_static/presentation_images/image69.png" />
+<figcaption>
+<p><span class="caption-text">This annotated diagram highlights the attributes stored within an
+<code class="docutils literal notranslate"><span class="pre">nddata</span></code> instance and how they can be accessed.</span><a class="headerlink" href="#id104" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</div></blockquote>
 <dl class="py property">
 <dt class="sig sig-object py" id="pyspecdata.core.nddata.C">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">C</span></span><a class="headerlink" href="#pyspecdata.core.nddata.C" title="Link to this definition">¶</a></dt>
@@ -988,7 +997,7 @@ you’re going to do math with them, and that the singleton dimensions
 will be expanded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a><em> or </em><em>np.ndarray</em>) – The nddata that you want to align to <cite>self</cite>.
+<dd class="field-odd"><p><strong>arg</strong> (<a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a><em> or </em><em>np.ndarray</em>) – The nddata that you want to align to <cite>self</cite>.
 If arg is an np.ndarray, it will try to match dimensions to self
 based
 on the length of the dimension.
@@ -1368,7 +1377,7 @@ return the multiplier as a number.</p>
 <p>If the result is not dimensionless,
 an error will be generated.</p>
 <p>e.g. call as <cite>d.div_units(“axisname”,”s”)</cite>
-to divide the axis units by seconds</p>
+to divide the axis units by seconds.</p>
 <p>or <cite>d.div_units(“s”)</cite> to divide the
 data units by seconds.</p>
 <p>In other words, if you pass “a” and the units of your data are
@@ -1495,7 +1504,7 @@ dimensioned numpy ndarray rather than an nddata.</p></li>
 inferred from <cite>inputsymbolic</cite>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> | ndarray</p>
+<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> | ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1628,6 +1637,18 @@ essentially telling the code that you
 know the data is not aliased in the
 inverse domain and/or are willing to
 deal with the consequences.</p>
+<figure class="align-center" id="id105">
+<img alt="../_images/image54.png" src="../_images/image54.png" />
+<figcaption>
+<p><span class="caption-text">Aliasing and axis registration applied to a simple Gaussian example.</span><a class="headerlink" href="#id105" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id106">
+<img alt="../_images/image62.png" src="../_images/image62.png" />
+<figcaption>
+<p><span class="caption-text">Correcting the time origin in NMR greatly improves the phasing.</span><a class="headerlink" href="#id106" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 </p></li>
 </ul>
 </dd>
@@ -1772,6 +1793,13 @@ The directory can be passed to the <cite>directory</cite> argument.</p>
 When reading this, please note that HDF5 files store <em>multiple</em>
 datasets,
 and each is named (here, the name is <cite>test_data</cite>).</p>
+<figure class="align-center" id="id107">
+<img alt="doc_src/_static/presentation_images/image39.png" src="doc_src/_static/presentation_images/image39.png" />
+<figcaption>
+<p><span class="caption-text">View of an HDF5 file with nddata arrays and metadata inside
+ViTables.</span><a class="headerlink" href="#id107" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="n">init_logging</span><span class="p">(</span><span class="s1">&#39;debug&#39;</span><span class="p">)</span>
 <span class="n">a</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">:</span><span class="mi">10</span><span class="n">j</span><span class="p">],</span> <span class="s1">&#39;x&#39;</span><span class="p">)</span>
@@ -2094,7 +2122,7 @@ distribution (the “fit” dimension);
 <p>If you are performing 2D regularization, then this
 is a tuple (pair) of 2 names</p>
 </p></li>
-<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><em>(</em><em>tuple of</em><em>) </em><a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – <p>a dictionary whose key is the name of the “fit” dimension
+<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><em>(</em><em>tuple of</em><em>) </em><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – <p>a dictionary whose key is the name of the “fit” dimension
 (<span class="math notranslate nohighlight">\(R_1\)</span> in the example above)
 and whose value is an np.array with the new axis labels.</p>
 <p>OR</p>
@@ -2268,18 +2296,22 @@ out</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.core.nddata.register_axis">
 <span class="sig-name descname"><span class="pre">register_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.register_axis" title="Link to this definition">¶</a></dt>
-<dd><p>Interpolate the data so that the given axes are in register with a set of specified values. Does not change the spacing of the axis labels.</p>
-<p>It finds the axis label position that is closest to the values given in <cite>arg</cite>, then interpolates (Fourier/sinc method) the data onto a new, slightly shifted, axis that passes exactly through the value given.
+<dd><p>Interpolate the data so that the given axes are in register with a set
+of specified values. Does not change the spacing of the axis labels.</p>
+<p>It finds the axis label position that is closest to the values given in
+<cite>arg</cite>, then interpolates (Fourier/sinc method) the data onto a new,
+slightly shifted, axis that passes exactly through the value given.
 To do this, it uses
-<a class="reference internal" href="#pyspecdata.core.nddata.ft_clear_startpoints" title="pyspecdata.core.nddata.ft_clear_startpoints"><code class="xref py py-func docutils literal notranslate"><span class="pre">.ft_clear_startpoints()</span></code></a>
+<a class="reference internal" href="#pyspecdata.core.nddata.ft_new_startpoint" title="pyspecdata.core.nddata.ft_new_startpoint"><code class="xref py py-func docutils literal notranslate"><span class="pre">.ft_new_startpoint()</span></code></a>
 and uses
 <a class="reference internal" href="#pyspecdata.core.nddata.set_ft_prop" title="pyspecdata.core.nddata.set_ft_prop"><code class="xref py py-func docutils literal notranslate"><span class="pre">.set_ft_prop()</span></code></a>
 to override the “not aliased” flag.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>arg</strong> (<em>dict</em><em> (</em><em>key</em><em>,</em><em>value = str</em><em>,</em><em>double</em><em>)</em>) – A list of the dimensions that you want to place in register, and the values you want them registered to.</p></li>
-<li><p><strong>nearest</strong> (<em>bool</em><em>, </em><em>optional</em>) – Passed through to ft_clear_startpoints</p></li>
+<li><p><strong>arg</strong> (<em>dict</em><em> (</em><em>key</em><em>,</em><em>value = str</em><em>,</em><em>double</em><em>)</em>) – A list of the dimensions that you want to place in register, and the
+values you want them registered to.</p></li>
+<li><p><strong>nearest</strong> (<em>bool</em><em>, </em><em>optional</em>) – Passed through to ft_new_startpoint</p></li>
 </ul>
 </dd>
 </dl>
@@ -2457,10 +2489,16 @@ in your script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.core.nddata.set_prop">
-<span class="sig-name descname"><span class="pre">set_prop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.set_prop" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set_prop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.set_prop" title="Link to this definition">¶</a></dt>
 <dd><p>set a ‘property’ of the nddata
 This is where you can put all unstructured information (e.g.
 experimental parameters, etc)</p>
+<p>Accepts:</p>
+<ul class="simple">
+<li><p>a single string, value pair</p></li>
+<li><p>a dictionary</p></li>
+<li><p>a set of keyword arguments</p></li>
+</ul>
 </dd></dl>
 
 <dl class="py method">
@@ -2776,7 +2814,7 @@ reference (TMS, DSS, etc.)</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.core.nddata.waterfall">
-<span class="sig-name descname"><span class="pre">waterfall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'b'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edgecolor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'k'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.waterfall" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">waterfall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'b'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edgecolor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'k'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.waterfall" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -2784,7 +2822,13 @@ reference (TMS, DSS, etc.)</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.core.nddata_hdf5">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.core.</span></span><span class="sig-name descname"><span class="pre">nddata_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathstring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata_hdf5" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
+<p>Load an <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a> object saved with
+<a class="reference internal" href="#pyspecdata.core.nddata.hdf5_write" title="pyspecdata.core.nddata.hdf5_write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">nddata.hdf5_write()</span></code></a>.</p>
+<p>This subclass opens an array from an HDF5 file and exposes it as a
+regular <code class="docutils literal notranslate"><span class="pre">nddata</span></code> instance.  Use <a class="reference internal" href="#pyspecdata.find_file" title="pyspecdata.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">pyspecdata.find_file()</span></code></a> to
+conveniently locate the desired file and then instantiate this class
+or call <a class="reference internal" href="#pyspecdata.core.nddata_hdf5" title="pyspecdata.core.nddata_hdf5"><code class="xref py py-func docutils literal notranslate"><span class="pre">nddata_hdf5()</span></code></a> directly.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -3743,7 +3787,7 @@ python code is embedded in a python environment inside latex.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.fornotebook.cpmgs">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.fornotebook.</span></span><span class="sig-name descname"><span class="pre">cpmgs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphaselect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fornotebook.cpmgs" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fornotebook.</span></span><span class="sig-name descname"><span class="pre">cpmgs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thisexp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphaselect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fornotebook.cpmgs" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -3808,7 +3852,8 @@ note in tex</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.fornotebook.figlistl.show">
 <span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_spacing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fornotebook.figlistl.show" title="Link to this definition">¶</a></dt>
-<dd><p>latexify the series of figures, where “string” gives the base file name</p>
+<dd><p>latexify the series of figures, where “string” gives the base
+file name</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>line_spacing</strong> (<em>bool</em>) – if false, suppress empty lines between output</p>
@@ -3823,7 +3868,8 @@ note in tex</p>
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.fornotebook.</span></span><span class="sig-name descname"><span class="pre">lplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.33</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">72</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alsosave</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gensvg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equal_aspect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autopad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bytextwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showbox</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundaries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">genpng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlab</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fornotebook.lplot" title="Link to this definition">¶</a></dt>
 <dd><p>used with python.sty instead of savefig</p>
 <p>by default, if width is less than 1,
-it’s interpreted as bytextwidth = True (i.e. width given as a fraction of the linewidth)
+it’s interpreted as bytextwidth = True (i.e. width given as a
+fraction of the linewidth)
 if it’s greater than, the width is interpreted in inches.</p>
 </dd></dl>
 
@@ -3837,8 +3883,11 @@ if it’s greater than, the width is interpreted in inches.</p>
 <dt class="sig sig-object py" id="pyspecdata.fornotebook.lrecordarray">
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.fornotebook.</span></span><span class="sig-name descname"><span class="pre">lrecordarray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recordlist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columnformat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoosh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resizebox</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showpipe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%0.3f'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std_sf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scientific_notation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fornotebook.lrecordarray" title="Link to this definition">¶</a></dt>
 <dd><p>generate latex representation of a structured array
-if set to True, resizebox will automatically scale down the table so it fits on the page (but it will also scale up a small table to fit the width of the page)
-resizebox can also be a fractional number, so that it is resized to a fraction of the page</p>
+if set to True, resizebox will automatically scale down the table so
+it fits on the page (but it will also scale up a small table to fit
+the width of the page)
+resizebox can also be a fractional number, so that it is resized to
+a fraction of the page</p>
 </dd></dl>
 
 <dl class="py function">
@@ -3872,6 +3921,11 @@ resizebox can also be a fractional number, so that it is resized to a fraction o
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.fornotebook.regularize1d">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.fornotebook.</span></span><span class="sig-name descname"><span class="pre">regularize1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fornotebook.regularize1d" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.fornotebook.save_data">
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.fornotebook.</span></span><span class="sig-name descname"><span class="pre">save_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputdata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'data.txt'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fornotebook.save_data" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -3889,7 +3943,11 @@ resizebox can also be a fractional number, so that it is resized to a fraction o
 <dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.fornotebook.see_if_math">
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.fornotebook.</span></span><span class="sig-name descname"><span class="pre">see_if_math</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recnames</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fornotebook.see_if_math" title="Link to this definition">¶</a></dt>
-<dd><p>return latex formatted strings –&gt; ultimately, have this actually check to see if the individual strings are math or not, rather than just assuming that they are.  Do this simply by seeing whether or not the thing starts with a full word (more than two characters) or not.</p>
+<dd><p>return latex formatted strings –&gt; ultimately, have this actually
+check to see if the individual strings are math or not, rather than
+just assuming that they are.  Do this simply by seeing whether or
+not the thing starts with a full word (more than two characters) or
+not.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -4174,7 +4232,12 @@ but, see the “contiguous” method, which is more OO</p>
 <dt class="sig sig-object py" id="pyspecdata.generate_fake_data.fake_data">
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.generate_fake_data.</span></span><span class="sig-name descname"><span class="pre">fake_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">expression,</span> <span class="pre">axis_coords,</span> <span class="pre">signal_pathway,</span> <span class="pre">direct='t2',</span> <span class="pre">SD_sigma=[0.05,</span> <span class="pre">0.003],</span> <span class="pre">SD_amp=[1,</span> <span class="pre">5],</span> <span class="pre">scale=100,</span> <span class="pre">fake_data_noise_std=1.0,</span> <span class="pre">fl=&lt;class</span> <span class="pre">'pyspecdata.fl_dummy.fl_dummy_class'&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.generate_fake_data.fake_data" title="Link to this definition">¶</a></dt>
 <dd><p>Generate fake data subject to noise and frequency variation.</p>
-<p>This includes a variation of the resonance frequency.  The user can adjust the scale and the timescale of the frequency variation, which is modeled by way of spectral density function that describes the random fluctuation of the resonance frequency.  (To avoid confusion, note that this spectral density function does NOT control the noise voltage, which is given by a standard normal distribution of constant variation.)</p>
+<p>This includes a variation of the resonance frequency.  The user can adjust
+the scale and the timescale of the frequency variation, which is modeled by
+way of spectral density function that describes the random fluctuation of
+the resonance frequency.  (To avoid confusion, note that this spectral
+density function does NOT control the noise voltage, which is given by a
+standard normal distribution of constant variation.)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -4185,7 +4248,8 @@ but, see the “contiguous” method, which is more OO</p>
 or the frequency drift will not be modeled correctly.</p>
 <p>To enable <em>simulating echo-like data</em>, you can specify a direct axis
 that starts at a negative number.
-If you do this, the beginning of the axis will be re-set to 0 before returning.</p>
+If you do this, the beginning of the axis will be re-set to 0 before
+returning.</p>
 </p></li>
 <li><p><strong>SD_sigma</strong> (<em>list</em><em> of </em><em>floats</em>) – <p>Gives the Gaussian σ for the spectral density of the
 time-dependent variation of the resonance frequency.
@@ -4211,12 +4275,12 @@ values being the corresponding Δp.</p></li>
 <dd><p>Draw random samples from a normal (Gaussian) distribution.</p>
 <p>The probability density function of the normal distribution, first
 derived by De Moivre and 200 years later by both Gauss and Laplace
-independently <a href="#id103"><span class="problematic" id="id35">[2]_</span></a>, is often called the bell curve because of
+independently <a href="#id115"><span class="problematic" id="id35">[2]_</span></a>, is often called the bell curve because of
 its characteristic shape (see the example below).</p>
 <p>The normal distributions occurs often in nature.  For example, it
 describes the commonly occurring distribution of samples influenced
 by a large number of tiny, random disturbances, each with its own
-unique distribution <a href="#id104"><span class="problematic" id="id36">[2]_</span></a>.</p>
+unique distribution <a href="#id116"><span class="problematic" id="id36">[2]_</span></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>New code should use the <cite>~numpy.random.Generator.normal</cite>
@@ -4261,7 +4325,7 @@ deviation. The square of the standard deviation, <span class="math notranslate n
 is called the variance.</p>
 <p>The function has its peak at the mean, and its “spread” increases with
 the standard deviation (the function reaches 0.607 times its maximum at
-<span class="math notranslate nohighlight">\(x + \sigma\)</span> and <span class="math notranslate nohighlight">\(x - \sigma\)</span> <a href="#id105"><span class="problematic" id="id37">[2]_</span></a>).  This implies that
+<span class="math notranslate nohighlight">\(x + \sigma\)</span> and <span class="math notranslate nohighlight">\(x - \sigma\)</span> <a href="#id117"><span class="problematic" id="id37">[2]_</span></a>).  This implies that
 normal is more likely to return samples lying close to the mean, rather
 than those far away.</p>
 <p class="rubric">References</p>
@@ -4549,8 +4613,9 @@ This can be used in combination with wrapviewer() and latexmk by using a <code c
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.lmfitdata.</span></span><span class="sig-name descname"><span class="pre">lmfitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
-<p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
+<p>Inherits from an nddata and enables curve fitting through use of a
+sympy expression.</p>
 <p>The user creates a lmfitdata class object from an existing nddata
 class object, and on this lmfitdata object can define the
 <a class="reference internal" href="#pyspecdata.lmfitdata.functional_form" title="pyspecdata.lmfitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
@@ -4558,6 +4623,13 @@ data of the original nddata.
 This functional form must be provided as a sympy expression, with
 one of its variables matching the name of the dimension that the
 user would like to fit to.</p>
+<figure class="align-center" id="id108">
+<img alt="doc_src/_static/presentation_images/image64.png" src="doc_src/_static/presentation_images/image64.png" />
+<figcaption>
+<p><span class="caption-text">A typical T₁ relaxation fit produced with <code class="docutils literal notranslate"><span class="pre">lmfitdata</span></code>.
+See the gallery for more complete examples.</span><a class="headerlink" href="#id108" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.copy">
 <span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.copy" title="Link to this definition">¶</a></dt>
@@ -4598,16 +4670,19 @@ into the (e.g. frequency) residual domain.u</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>taxis</strong> (<em>ndarray</em><em>, </em><em>int</em>) – <dl class="field-list simple">
 <dt class="field-odd">if ndarray<span class="colon">:</span></dt>
-<dd class="field-odd"><p>the new axis coordinates along which we want to calculate the fit.</p>
+<dd class="field-odd"><p>the new axis coordinates along which we want to
+calculate the fit.</p>
 </dd>
 <dt class="field-even">if int<span class="colon">:</span></dt>
-<dd class="field-even"><p>number of evenly spaced points along the t-axis along the fit</p>
+<dd class="field-even"><p>number of evenly spaced points along the t-axis along the
+fit</p>
 </dd>
 </dl>
 </p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
+<dd class="field-even"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were
+passed</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a></p>
@@ -4657,24 +4732,32 @@ parameters; by default, based on pseudoinverse</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.jacobian">
 <span class="sig-name descname"><span class="pre">jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.jacobian" title="Link to this definition">¶</a></dt>
-<dd><p>cache the symbolic jacobian and/or use it to compute the numeric result</p>
-<p>Note that, like residual, this is designed for use by lmfit, so that if you want to actually <em>see</em> the Jacobian, you need to pass something a bit more complicated, like this:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">jac</span> <span class="o">=</span> <span class="n">newfit</span><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+<dd><p>cache the symbolic jacobian and/or use it to compute the numeric
+result</p>
+<p>Note that, like residual, this is designed for use by lmfit, so that if
+you want to actually <em>see</em> the Jacobian, you need to pass something a
+bit more complicated, like this:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">jac</span> <span class="o">=</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">newfit</span><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>which assumes that I have run the fit, and so have access to the fit parameters, and gives the complex view for complex data (since in a complex fit, we use view to treat real an imaginary parts the same)</p>
+<p>which assumes that I have run the fit, and so have access to the fit
+parameters, and gives the complex view for complex data (since in a
+complex fit, we use view to treat real an imaginary parts the same)</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.latex">
 <span class="sig-name descname"><span class="pre">latex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.latex" title="Link to this definition">¶</a></dt>
-<dd><p>show the latex string for the function, with all the symbols substituted by their values</p>
+<dd><p>show the latex string for the function, with all the symbols
+substituted by their values</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.output">
 <span class="sig-name descname"><span class="pre">output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.output" title="Link to this definition">¶</a></dt>
-<dd><p>give the fit value of a particular symbol, or a dictionary of all values.</p>
+<dd><p>give the fit value of a particular symbol, or a dictionary of all
+values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>name</strong> (<em>str</em><em> (</em><em>optional</em><em>)</em>) – name of the symbol.
@@ -4694,7 +4777,8 @@ resulting values.</p>
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.pinvr_step">
 <span class="sig-name descname"><span class="pre">pinvr_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.pinvr_step" title="Link to this definition">¶</a></dt>
 <dd><p>Use regularized Pseudo-inverse to (partly) solve:
-<span class="math notranslate nohighlight">\(-residual = f(\mathbf{p}+\Delta \mathbf{p})-f(\mathbf{p}) \approx \nabla f(\mathbf{p}) \cdot \Delta \mathbf{p}\)</span></p>
+<span class="math notranslate nohighlight">\(-residual = f(\mathbf{p}+\Delta \mathbf{p})-f(\mathbf{p})
+\approx \nabla f(\mathbf{p}) \cdot \Delta \mathbf{p}\)</span></p>
 </dd></dl>
 
 <dl class="py method">
@@ -4713,7 +4797,8 @@ resulting values.</p>
 that comprises a dict with guesses (value) and/or constraints
 (min/max)</p>
 <p>Can be passed either as the only argument, or a kwarg called
-guesses, or as the kwargs themselves (i.e. <cite>.set_guesses(**guesses)</cite>)</p>
+guesses, or as the kwargs themselves (i.e.
+<cite>.set_guesses(**guesses)</cite>)</p>
 <p>For example (the last case:)</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">set_guess</span><span class="p">(</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">param1</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
@@ -4741,7 +4826,8 @@ domain.
 Therefore, we define a function <cite>self.residual_transform</cite> that
 accepts an nddata, and defines how the data is manipulated to move
 into the (e.g. frequency) residual domain.
-(It’s easiest to do this by using the <cite>self.define_residual_transform</cite> decorator)</p>
+(It’s easiest to do this by using the <cite>self.define_residual_transform</cite>
+decorator)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>retval</strong> – just return the ndarray</p>
@@ -4990,7 +5076,7 @@ accessed many times. Sort of like memoization.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.placeholder.nddata_placeholder">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.placeholder.</span></span><span class="sig-name descname"><span class="pre">nddata_placeholder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_data_hook</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.placeholder.nddata_placeholder" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
 <p>When you open a file with many datasets, and only want to load one, this is used to store a placeholder to the different datasets.
 Rather than passing the initialization any type of data, you simply pass it one argument: the “data hook”:
 a function that accepts a single argument (self), alters the dimlabels and axes as needed, and returns an ndarray containing the data.</p>
@@ -5582,6 +5668,25 @@ coming from, supply some extra text for the respective message.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.det_unit_prefactor">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">det_unit_prefactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thisstr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.det_unit_prefactor" title="Link to this definition">¶</a></dt>
+<dd><p>Use pint to determine the prefactor of the string-formatted unit thisstr.</p>
+<p>This function is <strong>obsolete</strong>: instead, use <code class="xref py py-func docutils literal notranslate"><span class="pre">div_units()</span></code> which is the
+preferred method of handling unit multipliers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>thisstr</strong> (<em>str</em>) – units that the prefactor is being determined for</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The prefactor of the fed units floored to a multiple of 3</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.dp">
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">dp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimalplaces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scientific</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_front</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.dp" title="Link to this definition">¶</a></dt>
 <dd><p>format out to a certain decimal places, potentially in scientific
@@ -5617,7 +5722,12 @@ automatically to scientific notation.</p></li>
 <dt class="sig sig-object py" id="pyspecdata.fake_data">
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">fake_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">expression,</span> <span class="pre">axis_coords,</span> <span class="pre">signal_pathway,</span> <span class="pre">direct='t2',</span> <span class="pre">SD_sigma=[0.05,</span> <span class="pre">0.003],</span> <span class="pre">SD_amp=[1,</span> <span class="pre">5],</span> <span class="pre">scale=100,</span> <span class="pre">fake_data_noise_std=1.0,</span> <span class="pre">fl=&lt;class</span> <span class="pre">'pyspecdata.fl_dummy.fl_dummy_class'&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fake_data" title="Link to this definition">¶</a></dt>
 <dd><p>Generate fake data subject to noise and frequency variation.</p>
-<p>This includes a variation of the resonance frequency.  The user can adjust the scale and the timescale of the frequency variation, which is modeled by way of spectral density function that describes the random fluctuation of the resonance frequency.  (To avoid confusion, note that this spectral density function does NOT control the noise voltage, which is given by a standard normal distribution of constant variation.)</p>
+<p>This includes a variation of the resonance frequency.  The user can adjust
+the scale and the timescale of the frequency variation, which is modeled by
+way of spectral density function that describes the random fluctuation of
+the resonance frequency.  (To avoid confusion, note that this spectral
+density function does NOT control the noise voltage, which is given by a
+standard normal distribution of constant variation.)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -5628,7 +5738,8 @@ automatically to scientific notation.</p></li>
 or the frequency drift will not be modeled correctly.</p>
 <p>To enable <em>simulating echo-like data</em>, you can specify a direct axis
 that starts at a negative number.
-If you do this, the beginning of the axis will be re-set to 0 before returning.</p>
+If you do this, the beginning of the axis will be re-set to 0 before
+returning.</p>
 </p></li>
 <li><p><strong>SD_sigma</strong> (<em>list</em><em> of </em><em>floats</em>) – <p>Gives the Gaussian σ for the spectral density of the
 time-dependent variation of the resonance frequency.
@@ -6082,7 +6193,7 @@ current plot</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.find_file">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">find_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">searchstring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">postproc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefilter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expno</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_acq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_sizes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sweep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indirect_dimlabels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.find_file" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">find_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">searchstring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">postproc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefilter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expno</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_acq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_sizes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sweep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indirect_dimlabels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zenodo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.find_file" title="Link to this definition">¶</a></dt>
 <dd><p>Find the file  given by the regular expression <cite>searchstring</cite> inside
 the directory identified by <cite>exp_type</cite>, load the nddata object, and
 postprocess with the function <cite>postproc</cite>.</p>
@@ -6208,6 +6319,9 @@ lookup : dictionary with str:function pairs</p>
 </dl>
 <p>types of postprocessing to add to the <cite>postproc_lookup</cite> dictionary</p>
 </p></li>
+<li><p><strong>zenodo</strong> (<em>str</em><em>, </em><em>optional</em>) – If provided, a URL pointing to a file hosted on Zenodo.  When the
+requested file is not found locally, it will be downloaded from this
+URL instead of searching rclone remotes.</p></li>
 </ul>
 </dd>
 </dl>
@@ -6216,7 +6330,7 @@ lookup : dictionary with str:function pairs</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.fitdata">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">fitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.fitdata" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
 <p>Inherits from an nddata and enables curve fitting through use of a
 sympy expression.</p>
 <p>The user creates a fitdata class object from an existing nddata
@@ -6771,8 +6885,9 @@ undefined and specific to the choice of <cite>kind</cite>, i.e., changing
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">lmfitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
-<p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
+<p>Inherits from an nddata and enables curve fitting through use of a
+sympy expression.</p>
 <p>The user creates a lmfitdata class object from an existing nddata
 class object, and on this lmfitdata object can define the
 <a class="reference internal" href="#pyspecdata.lmfitdata.functional_form" title="pyspecdata.lmfitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
@@ -6780,6 +6895,13 @@ data of the original nddata.
 This functional form must be provided as a sympy expression, with
 one of its variables matching the name of the dimension that the
 user would like to fit to.</p>
+<figure class="align-center" id="id109">
+<img alt="doc_src/_static/presentation_images/image64.png" src="doc_src/_static/presentation_images/image64.png" />
+<figcaption>
+<p><span class="caption-text">A typical T₁ relaxation fit produced with <code class="docutils literal notranslate"><span class="pre">lmfitdata</span></code>.
+See the gallery for more complete examples.</span><a class="headerlink" href="#id109" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.copy">
 <span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.copy" title="Link to this definition">¶</a></dt>
@@ -6820,16 +6942,19 @@ into the (e.g. frequency) residual domain.u</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>taxis</strong> (<em>ndarray</em><em>, </em><em>int</em>) – <dl class="field-list simple">
 <dt class="field-odd">if ndarray<span class="colon">:</span></dt>
-<dd class="field-odd"><p>the new axis coordinates along which we want to calculate the fit.</p>
+<dd class="field-odd"><p>the new axis coordinates along which we want to
+calculate the fit.</p>
 </dd>
 <dt class="field-even">if int<span class="colon">:</span></dt>
-<dd class="field-even"><p>number of evenly spaced points along the t-axis along the fit</p>
+<dd class="field-even"><p>number of evenly spaced points along the t-axis along the
+fit</p>
 </dd>
 </dl>
 </p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
+<dd class="field-even"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were
+passed</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a></p>
@@ -6879,24 +7004,32 @@ parameters; by default, based on pseudoinverse</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.jacobian">
 <span class="sig-name descname"><span class="pre">jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.jacobian" title="Link to this definition">¶</a></dt>
-<dd><p>cache the symbolic jacobian and/or use it to compute the numeric result</p>
-<p>Note that, like residual, this is designed for use by lmfit, so that if you want to actually <em>see</em> the Jacobian, you need to pass something a bit more complicated, like this:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">jac</span> <span class="o">=</span> <span class="n">newfit</span><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+<dd><p>cache the symbolic jacobian and/or use it to compute the numeric
+result</p>
+<p>Note that, like residual, this is designed for use by lmfit, so that if
+you want to actually <em>see</em> the Jacobian, you need to pass something a
+bit more complicated, like this:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">jac</span> <span class="o">=</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">newfit</span><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>which assumes that I have run the fit, and so have access to the fit parameters, and gives the complex view for complex data (since in a complex fit, we use view to treat real an imaginary parts the same)</p>
+<p>which assumes that I have run the fit, and so have access to the fit
+parameters, and gives the complex view for complex data (since in a
+complex fit, we use view to treat real an imaginary parts the same)</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.latex">
 <span class="sig-name descname"><span class="pre">latex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.latex" title="Link to this definition">¶</a></dt>
-<dd><p>show the latex string for the function, with all the symbols substituted by their values</p>
+<dd><p>show the latex string for the function, with all the symbols
+substituted by their values</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.output">
 <span class="sig-name descname"><span class="pre">output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.output" title="Link to this definition">¶</a></dt>
-<dd><p>give the fit value of a particular symbol, or a dictionary of all values.</p>
+<dd><p>give the fit value of a particular symbol, or a dictionary of all
+values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>name</strong> (<em>str</em><em> (</em><em>optional</em><em>)</em>) – name of the symbol.
@@ -6916,7 +7049,8 @@ resulting values.</p>
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.pinvr_step">
 <span class="sig-name descname"><span class="pre">pinvr_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.pinvr_step" title="Link to this definition">¶</a></dt>
 <dd><p>Use regularized Pseudo-inverse to (partly) solve:
-<span class="math notranslate nohighlight">\(-residual = f(\mathbf{p}+\Delta \mathbf{p})-f(\mathbf{p}) \approx \nabla f(\mathbf{p}) \cdot \Delta \mathbf{p}\)</span></p>
+<span class="math notranslate nohighlight">\(-residual = f(\mathbf{p}+\Delta \mathbf{p})-f(\mathbf{p})
+\approx \nabla f(\mathbf{p}) \cdot \Delta \mathbf{p}\)</span></p>
 </dd></dl>
 
 <dl class="py method">
@@ -6935,7 +7069,8 @@ resulting values.</p>
 that comprises a dict with guesses (value) and/or constraints
 (min/max)</p>
 <p>Can be passed either as the only argument, or a kwarg called
-guesses, or as the kwargs themselves (i.e. <cite>.set_guesses(**guesses)</cite>)</p>
+guesses, or as the kwargs themselves (i.e.
+<cite>.set_guesses(**guesses)</cite>)</p>
 <p>For example (the last case:)</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">set_guess</span><span class="p">(</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">param1</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
@@ -6963,7 +7098,8 @@ domain.
 Therefore, we define a function <cite>self.residual_transform</cite> that
 accepts an nddata, and defines how the data is manipulated to move
 into the (e.g. frequency) residual domain.
-(It’s easiest to do this by using the <cite>self.define_residual_transform</cite> decorator)</p>
+(It’s easiest to do this by using the <cite>self.define_residual_transform</cite>
+decorator)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>retval</strong> – just return the ndarray</p>
@@ -7471,6 +7607,15 @@ additionally use any  <cite>matplotlib.colors</cite> spec, e.g. full names
 <p>This is the detailed API reference.
 For an introduction on how to use ND-Data, see the
 <a class="reference internal" href="../nddata.html#nddata-summary-label"><span class="std std-ref">Main ND-Data Documentation</span></a>.</p>
+<blockquote id="id69">
+<div><figure class="align-center" id="id110">
+<img alt="doc_src/_static/presentation_images/image69.png" src="doc_src/_static/presentation_images/image69.png" />
+<figcaption>
+<p><span class="caption-text">This annotated diagram highlights the attributes stored within an
+<code class="docutils literal notranslate"><span class="pre">nddata</span></code> instance and how they can be accessed.</span><a class="headerlink" href="#id110" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</div></blockquote>
 <dl class="py property">
 <dt class="sig sig-object py" id="pyspecdata.nddata.C">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">C</span></span><a class="headerlink" href="#pyspecdata.nddata.C" title="Link to this definition">¶</a></dt>
@@ -7915,7 +8060,7 @@ return the multiplier as a number.</p>
 <p>If the result is not dimensionless,
 an error will be generated.</p>
 <p>e.g. call as <cite>d.div_units(“axisname”,”s”)</cite>
-to divide the axis units by seconds</p>
+to divide the axis units by seconds.</p>
 <p>or <cite>d.div_units(“s”)</cite> to divide the
 data units by seconds.</p>
 <p>In other words, if you pass “a” and the units of your data are
@@ -8175,6 +8320,18 @@ essentially telling the code that you
 know the data is not aliased in the
 inverse domain and/or are willing to
 deal with the consequences.</p>
+<figure class="align-center" id="id111">
+<img alt="../_images/image54.png" src="../_images/image54.png" />
+<figcaption>
+<p><span class="caption-text">Aliasing and axis registration applied to a simple Gaussian example.</span><a class="headerlink" href="#id111" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id112">
+<img alt="../_images/image62.png" src="../_images/image62.png" />
+<figcaption>
+<p><span class="caption-text">Correcting the time origin in NMR greatly improves the phasing.</span><a class="headerlink" href="#id112" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 </p></li>
 </ul>
 </dd>
@@ -8245,7 +8402,7 @@ If no exact match is found, and propname contains a . or * or [,
 it’s assumed to be a regular expression.
 If several such matches are found, the error message is
 informative.</p>
-<div class="admonition-todo admonition" id="id70">
+<div class="admonition-todo admonition" id="id71">
 <p class="admonition-title">Todo</p>
 <p>have it recursively search dictionaries (e.g. bruker acq)</p>
 </div>
@@ -8319,6 +8476,13 @@ The directory can be passed to the <cite>directory</cite> argument.</p>
 When reading this, please note that HDF5 files store <em>multiple</em>
 datasets,
 and each is named (here, the name is <cite>test_data</cite>).</p>
+<figure class="align-center" id="id113">
+<img alt="doc_src/_static/presentation_images/image39.png" src="doc_src/_static/presentation_images/image39.png" />
+<figcaption>
+<p><span class="caption-text">View of an HDF5 file with nddata arrays and metadata inside
+ViTables.</span><a class="headerlink" href="#id113" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="n">init_logging</span><span class="p">(</span><span class="s1">&#39;debug&#39;</span><span class="p">)</span>
 <span class="n">a</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">:</span><span class="mi">10</span><span class="n">j</span><span class="p">],</span> <span class="s1">&#39;x&#39;</span><span class="p">)</span>
@@ -8487,8 +8651,8 @@ axis values and returns a data value.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id71">
-<span class="sig-name descname"><span class="pre">labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id71" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="id72">
+<span class="sig-name descname"><span class="pre">labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id72" title="Link to this definition">¶</a></dt>
 <dd><p>label the dimensions, given in listofstrings with the axis labels
 given in listofaxes – listofaxes must be a numpy np.array; you can
 pass either a dictionary or a axis name (string)/axis label (numpy
@@ -8615,15 +8779,15 @@ given input matrix <span class="math notranslate nohighlight">\(A\)</span>, the 
 and the second term accounts for noise with the regularization parameter <span class="math notranslate nohighlight">\(\lambda\)</span>
 according to Tikhonov regularization.</p>
 <p>To perform regularized minimization in 1 dimension, provide
-<a href="#id72"><span class="problematic" id="id73">:str:`dimname_list`</span></a>, <a href="#id74"><span class="problematic" id="id75">:nddata:`newaxis_dict`</span></a>, <a href="#id76"><span class="problematic" id="id77">:function:`kernel_func`</span></a>, and
+<a href="#id73"><span class="problematic" id="id74">:str:`dimname_list`</span></a>, <a href="#id75"><span class="problematic" id="id76">:nddata:`newaxis_dict`</span></a>, <a href="#id77"><span class="problematic" id="id78">:function:`kernel_func`</span></a>, and
 regularization parameter <cite>l</cite>. One may set <cite>l</cite> to a :double: of the regularization
 parameter of choice (found, for instance, through L-curve analysis) or
-set <cite>l</cite> to <a href="#id78"><span class="problematic" id="id79">:str:`BRD`</span></a> to enable automatic selection of a regularization
+set <cite>l</cite> to <a href="#id79"><span class="problematic" id="id80">:str:`BRD`</span></a> to enable automatic selection of a regularization
 parameter via the BRD algorithm - namely that described in Venkataramanan et al. 2002
 but adapted for 1D case (DOI:10.1109/78.995059).</p>
 <p>To perform regularized minimization in 2 dimensions, set <cite>l</cite> to
-<a href="#id80"><span class="problematic" id="id81">:str:`BRD`</span></a> and provide a tuple of parameters <a href="#id82"><span class="problematic" id="id83">:str:`dimname_list`</span></a>,
-<a href="#id84"><span class="problematic" id="id85">:nddata:`newaxis_dict`</span></a>, and <a href="#id86"><span class="problematic" id="id87">:function:`kernel_func`</span></a>.  Algorithm
+<a href="#id81"><span class="problematic" id="id82">:str:`BRD`</span></a> and provide a tuple of parameters <a href="#id83"><span class="problematic" id="id84">:str:`dimname_list`</span></a>,
+<a href="#id85"><span class="problematic" id="id86">:nddata:`newaxis_dict`</span></a>, and <a href="#id87"><span class="problematic" id="id88">:function:`kernel_func`</span></a>.  Algorithm
 described in Venkataramanan et al. 2002 is performed which determines
 optimal <span class="math notranslate nohighlight">\(\lambda\)</span> for the data (DOI:10.1109/78.995059).
 Note that setting <cite>l</cite> to a :double: for a regularization
@@ -8662,7 +8826,7 @@ the product of the two.</p>
 </p></li>
 <li><p><strong>l</strong> (<em>double</em><em> (</em><em>default 0</em><em>) or </em><em>str</em>) – the regularization parameter <span class="math notranslate nohighlight">\(lambda\)</span> – if this is
 set to 0, the algorithm reverts to standard nnls.  If this
-is set to <a href="#id90"><span class="problematic" id="id91">:str:`BRD`</span></a>, then automatic parameter selection is executed
+is set to <a href="#id91"><span class="problematic" id="id92">:str:`BRD`</span></a>, then automatic parameter selection is executed
 according to the BRD algorithm, either in 1-dimension or
 2-dimensions depending on presence of tuple synax
 (i.e., specifying more than 1 dimension).</p></li>
@@ -8676,7 +8840,7 @@ For future use, both the kernel (as an nddata, in a property called
 The regularized dimension is always last
 (innermost).</p>
 <p>If the tuple syntax is used to input 2 dimensions and
-<a href="#id92"><span class="problematic" id="id93">:str:`BRD`</span></a> is specified, then the individual,
+<a href="#id93"><span class="problematic" id="id94">:str:`BRD`</span></a> is specified, then the individual,
 uncompressed kernels <span class="math notranslate nohighlight">\(K_{1}\)</span> and <span class="math notranslate nohighlight">\(K_{2}\)</span>
 are returned as properties of the nddata “K1” and “K2”
 respectively. The number of singular values used to
@@ -8815,18 +8979,22 @@ out</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.nddata.register_axis">
 <span class="sig-name descname"><span class="pre">register_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.register_axis" title="Link to this definition">¶</a></dt>
-<dd><p>Interpolate the data so that the given axes are in register with a set of specified values. Does not change the spacing of the axis labels.</p>
-<p>It finds the axis label position that is closest to the values given in <cite>arg</cite>, then interpolates (Fourier/sinc method) the data onto a new, slightly shifted, axis that passes exactly through the value given.
+<dd><p>Interpolate the data so that the given axes are in register with a set
+of specified values. Does not change the spacing of the axis labels.</p>
+<p>It finds the axis label position that is closest to the values given in
+<cite>arg</cite>, then interpolates (Fourier/sinc method) the data onto a new,
+slightly shifted, axis that passes exactly through the value given.
 To do this, it uses
-<a class="reference internal" href="#pyspecdata.core.nddata.ft_clear_startpoints" title="pyspecdata.core.nddata.ft_clear_startpoints"><code class="xref py py-func docutils literal notranslate"><span class="pre">.ft_clear_startpoints()</span></code></a>
+<a class="reference internal" href="#pyspecdata.core.nddata.ft_new_startpoint" title="pyspecdata.core.nddata.ft_new_startpoint"><code class="xref py py-func docutils literal notranslate"><span class="pre">.ft_new_startpoint()</span></code></a>
 and uses
 <a class="reference internal" href="#pyspecdata.core.nddata.set_ft_prop" title="pyspecdata.core.nddata.set_ft_prop"><code class="xref py py-func docutils literal notranslate"><span class="pre">.set_ft_prop()</span></code></a>
 to override the “not aliased” flag.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>arg</strong> (<em>dict</em><em> (</em><em>key</em><em>,</em><em>value = str</em><em>,</em><em>double</em><em>)</em>) – A list of the dimensions that you want to place in register, and the values you want them registered to.</p></li>
-<li><p><strong>nearest</strong> (<em>bool</em><em>, </em><em>optional</em>) – Passed through to ft_clear_startpoints</p></li>
+<li><p><strong>arg</strong> (<em>dict</em><em> (</em><em>key</em><em>,</em><em>value = str</em><em>,</em><em>double</em><em>)</em>) – A list of the dimensions that you want to place in register, and the
+values you want them registered to.</p></li>
+<li><p><strong>nearest</strong> (<em>bool</em><em>, </em><em>optional</em>) – Passed through to ft_new_startpoint</p></li>
 </ul>
 </dd>
 </dl>
@@ -8947,7 +9115,7 @@ and then throw out the data for which <span class="math notranslate nohighlight"
 <p><cite>set_error(‘axisname’,error_for_axis)</cite> or <cite>set_error(error_for_data)</cite></p>
 <p><cite>error_for_data</cite> can be a scalar, in which case, <strong>all</strong> the data
 errors are set to <cite>error_for_data</cite></p>
-<div class="admonition-todo admonition" id="id94">
+<div class="admonition-todo admonition" id="id95">
 <p class="admonition-title">Todo</p>
 <p>several options below – enumerate them in the documentation</p>
 </div>
@@ -9004,10 +9172,16 @@ in your script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.nddata.set_prop">
-<span class="sig-name descname"><span class="pre">set_prop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.set_prop" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set_prop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.set_prop" title="Link to this definition">¶</a></dt>
 <dd><p>set a ‘property’ of the nddata
 This is where you can put all unstructured information (e.g.
 experimental parameters, etc)</p>
+<p>Accepts:</p>
+<ul class="simple">
+<li><p>a single string, value pair</p></li>
+<li><p>a dictionary</p></li>
+<li><p>a set of keyword arguments</p></li>
+</ul>
 </dd></dl>
 
 <dl class="py method">
@@ -9251,7 +9425,7 @@ If you are using it when this note is still around, be sure to
 </div>
 <p>will be the same as <code class="docutils literal notranslate"><span class="pre">thisinstance</span></code>.
 Note that this relies on the fact that nddata matrix multiplication doesn’t care about the ordering
-of the dimensions (see <a href="#id95"><span class="problematic" id="id96">:method:`~pyspecdata.core.dot`</span></a>).
+of the dimensions (see <a href="#id96"><span class="problematic" id="id97">:method:`~pyspecdata.core.dot`</span></a>).
 The vector space that contains the singular values is called <cite>‘SV’</cite> (see more below).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -9323,7 +9497,7 @@ reference (TMS, DSS, etc.)</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.nddata.waterfall">
-<span class="sig-name descname"><span class="pre">waterfall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'b'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edgecolor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'k'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.waterfall" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">waterfall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'b'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edgecolor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'k'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.waterfall" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -9331,7 +9505,13 @@ reference (TMS, DSS, etc.)</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.nddata_hdf5">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">nddata_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathstring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata_hdf5" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a></p>
+<p>Load an <a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a> object saved with
+<a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.hdf5_write" title="pyspecdata.nddata.hdf5_write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">nddata.hdf5_write()</span></code></a>.</p>
+<p>This subclass opens an array from an HDF5 file and exposes it as a
+regular <code class="docutils literal notranslate"><span class="pre">nddata</span></code> instance.  Use <a class="reference internal" href="#pyspecdata.find_file" title="pyspecdata.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">pyspecdata.find_file()</span></code></a> to
+conveniently locate the desired file and then instantiate this class
+or call <a class="reference internal" href="#pyspecdata.nddata_hdf5" title="pyspecdata.nddata_hdf5"><code class="xref py py-func docutils literal notranslate"><span class="pre">nddata_hdf5()</span></code></a> directly.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -9531,7 +9711,7 @@ user forgets to pass the <cite>kwargs</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kwargs</strong> (<a href="#id97"><span class="problematic" id="id98">**</span></a>dictionary) – The keyword arguments that you want to process.</p></li>
+<li><p><strong>kwargs</strong> (<a href="#id98"><span class="problematic" id="id99">**</span></a>dictionary) – The keyword arguments that you want to process.</p></li>
 <li><p><strong>listoftuples</strong> (<em>list</em><em> of </em><em>tuple pairs</em>) – Tuple pairs, consisting of <code class="docutils literal notranslate"><span class="pre">('param_name',param_value)</span></code>, that give
 the default values for the various parameters.</p></li>
 <li><p><strong>pass_through</strong> (<em>bool</em>) – Defaults to False.  If it’s true, then it’s OK not to process all the
@@ -9540,7 +9720,7 @@ In that case, the used kwargs are popped out of the dictionary, and you
 are expected to pass the unprocessed values (in the dictionary after
 the call) on to subsequent processing.
 Importantly, you should <em>always</em> end with a <cite>pass_through`=`False</cite> call
-of this function, or by passing <a href="#id99"><span class="problematic" id="id100">**</span></a>kwargs to a standard function in the
+of this function, or by passing <a href="#id100"><span class="problematic" id="id101">**</span></a>kwargs to a standard function in the
 standard way.
 Otherwise it’s possible for the user to pass kwargs that are never
 processed!</p></li>
@@ -9620,7 +9800,7 @@ function once per script, and the effects are persistent!</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.search_filename">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">search_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">searchstring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.search_filename" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">search_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">searchstring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zenodo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.search_filename" title="Link to this definition">¶</a></dt>
 <dd><p>Use regular expression <cite>searchstring</cite> to find a file inside the
 directory indicated by <cite>exp_type</cite>
 (For information on how to set up the file searching mechanism, see
@@ -9633,6 +9813,12 @@ The basic scheme we assume is that:</p>
 Teams or Google Drive, etc.)</p></li>
 <li><p>The user wants to seamlessly access the data on their laptop.</p></li>
 </ul>
+<figure class="align-center" id="id114">
+<img alt="../_images/image38.jpeg" src="../_images/image38.jpeg" />
+<figcaption>
+<p><span class="caption-text">Bruker TopSpin interface showing a typical NMR directory.</span><a class="headerlink" href="#id114" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 <p>The <code class="docutils literal notranslate"><span class="pre">.pyspecdata</span></code> config file stores all the info about where the data
 lives + is stored locally.  You have basically two options:</p>
 <ul>
@@ -9677,6 +9863,9 @@ specifies the type of experiment see
 <a class="reference internal" href="#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a> for
 more info.</p></li>
 <li><p><strong>unique</strong> (<em>boolean</em><em> (</em><em>default False</em><em>)</em>) – If true, then throw an error unless only one file is found.</p></li>
+<li><p><strong>zenodo</strong> (<em>str</em><em>, </em><em>optional</em>) – If provided and the file is not found locally, download it from this
+Zenodo URL.  Rclone remotes are <em>not</em> searched when this option is
+used.</p></li>
 </ul>
 </dd>
 </dl>
@@ -9783,11 +9972,11 @@ the force option set to True:</p>
 </div>
 <p class="rubric">References</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id101" role="doc-footnote">
+<aside class="footnote brackets" id="id102" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/Square_root">https://en.wikipedia.org/wiki/Square_root</a></p>
 </aside>
-<aside class="footnote brackets" id="id102" role="doc-footnote">
+<aside class="footnote brackets" id="id103" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/Principal_value">https://en.wikipedia.org/wiki/Principal_value</a></p>
 </aside>
@@ -9817,6 +10006,11 @@ the force option set to True:</p>
 <dd><p>returns contiguous chunks where the condition is true
 but, see the “contiguous” method, which is more OO</p>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.zenodo_upload">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">zenodo_upload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.zenodo_upload" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </section>
 </section>

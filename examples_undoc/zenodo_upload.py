@@ -26,4 +26,4 @@ local_path = search_filename(
     unique=True,
 )
 
-zenodo_upload(local_path)
+zenodo_upload(local_path, title="UV-Vis documentation examples for pySpecdata")

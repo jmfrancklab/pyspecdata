@@ -45,9 +45,10 @@
 </section>
 <section id="module-pyspecdata.plot_funcs.DCCT_function">
 <span id="pyspecdata-plot-funcs-dcct-function-module"></span><h2>pyspecdata.plot_funcs.DCCT_function module<a class="headerlink" href="#module-pyspecdata.plot_funcs.DCCT_function" title="Link to this heading">¶</a></h2>
-<p>Domain Colored Coherence Transfer (DCCT) function allows us to
-visualize the complex-valued data, as well as the formalization of the
-coherence transfer dimensions using domain coloring plotting.</p>
+<p>Domain Colored Coherence Transfer (DCCT) plots coherence pathways.</p>
+<p>See <a class="reference internal" href="#pyspecdata.plot_funcs.image.imagehsv" title="pyspecdata.plot_funcs.image.imagehsv"><code class="xref py py-func docutils literal notranslate"><span class="pre">pyspecdata.plot_funcs.image.imagehsv()</span></code></a> for examples of domain
+colored spin-echo data.  This routine displays coherence pathways using
+domain coloring.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.plot_funcs.DCCT_function.DCCT">
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.DCCT_function.</span></span><span class="sig-name descname"><span class="pre">DCCT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">this_nddata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.05,</span> <span class="pre">0.1,</span> <span class="pre">0.9,</span> <span class="pre">0.8]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horiz_label_spacer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">35</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shareaxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diagnostic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pass_frq_slice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_coh_jump</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'ph1':</span> <span class="pre">1,</span> <span class="pre">'ph2':</span> <span class="pre">2}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'t2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.DCCT_function.DCCT" title="Link to this definition">¶</a></dt>
@@ -317,7 +318,42 @@ figurelist</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.plot_funcs.image.imagehsv">
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.plot_funcs.image.</span></span><span class="sig-name descname"><span class="pre">imagehsv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">black</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.plot_funcs.image.imagehsv" title="Link to this definition">¶</a></dt>
-<dd><p>This provides the HSV mapping used to plot complex number</p>
+<dd><p>Map complex-valued data to color using an HSV scheme.</p>
+<p>The phase of the complex number controls the hue while the magnitude
+sets the brightness.  This form of <em>domain coloring</em> is summarized
+below.</p>
+<figure class="align-center" id="id1">
+<img alt="doc_src/_static/presentation_images/image34.png" src="doc_src/_static/presentation_images/image34.png" />
+<figcaption>
+<p><span class="caption-text">Mapping from phase and magnitude onto the complex color wheel.</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>Two typical results from a spin-echo experiment are shown next.</p>
+<figure class="align-center" id="id2">
+<img alt="doc_src/_static/presentation_images/image20.png" src="doc_src/_static/presentation_images/image20.png" />
+<figcaption>
+<p><span class="caption-text">Raw spin-echo data displayed with <a class="reference internal" href="#pyspecdata.plot_funcs.image.imagehsv" title="pyspecdata.plot_funcs.image.imagehsv"><code class="xref py py-func docutils literal notranslate"><span class="pre">imagehsv()</span></code></a>.</span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id3">
+<img alt="doc_src/_static/presentation_images/image21.png" src="doc_src/_static/presentation_images/image21.png" />
+<figcaption>
+<p><span class="caption-text">Coherence pathways visualized after processing.</span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>The coherence order scheme for these pathways is illustrated below.</p>
+<figure class="align-center" id="id4">
+<img alt="doc_src/_static/presentation_images/image24.png" src="doc_src/_static/presentation_images/image24.png" />
+<figcaption>
+<p><span class="caption-text">Evolution of coherence orders under successive pulses.</span><a class="headerlink" href="#id4" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id5">
+<img alt="doc_src/_static/presentation_images/image33.png" src="doc_src/_static/presentation_images/image33.png" />
+<figcaption>
+<p><span class="caption-text">Echo intensity separated by coherence order.</span><a class="headerlink" href="#id5" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 </dd></dl>
 
 </section>

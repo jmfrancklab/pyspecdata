@@ -44,18 +44,22 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.axis_manipulation.register_axis.register_axis">
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.axis_manipulation.register_axis.</span></span><span class="sig-name descname"><span class="pre">register_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.axis_manipulation.register_axis.register_axis" title="Link to this definition">¶</a></dt>
-<dd><p>Interpolate the data so that the given axes are in register with a set of specified values. Does not change the spacing of the axis labels.</p>
-<p>It finds the axis label position that is closest to the values given in <cite>arg</cite>, then interpolates (Fourier/sinc method) the data onto a new, slightly shifted, axis that passes exactly through the value given.
+<dd><p>Interpolate the data so that the given axes are in register with a set
+of specified values. Does not change the spacing of the axis labels.</p>
+<p>It finds the axis label position that is closest to the values given in
+<cite>arg</cite>, then interpolates (Fourier/sinc method) the data onto a new,
+slightly shifted, axis that passes exactly through the value given.
 To do this, it uses
-<a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.ft_clear_startpoints" title="pyspecdata.core.nddata.ft_clear_startpoints"><code class="xref py py-func docutils literal notranslate"><span class="pre">.ft_clear_startpoints()</span></code></a>
+<a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.ft_new_startpoint" title="pyspecdata.core.nddata.ft_new_startpoint"><code class="xref py py-func docutils literal notranslate"><span class="pre">.ft_new_startpoint()</span></code></a>
 and uses
 <a class="reference internal" href="../auto_api/pyspecdata.html#pyspecdata.core.nddata.set_ft_prop" title="pyspecdata.core.nddata.set_ft_prop"><code class="xref py py-func docutils literal notranslate"><span class="pre">.set_ft_prop()</span></code></a>
 to override the “not aliased” flag.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>arg</strong> (<em>dict</em><em> (</em><em>key</em><em>,</em><em>value = str</em><em>,</em><em>double</em><em>)</em>) – A list of the dimensions that you want to place in register, and the values you want them registered to.</p></li>
-<li><p><strong>nearest</strong> (<em>bool</em><em>, </em><em>optional</em>) – Passed through to ft_clear_startpoints</p></li>
+<li><p><strong>arg</strong> (<em>dict</em><em> (</em><em>key</em><em>,</em><em>value = str</em><em>,</em><em>double</em><em>)</em>) – A list of the dimensions that you want to place in register, and the
+values you want them registered to.</p></li>
+<li><p><strong>nearest</strong> (<em>bool</em><em>, </em><em>optional</em>) – Passed through to ft_new_startpoint</p></li>
 </ul>
 </dd>
 </dl>

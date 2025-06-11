@@ -14,10 +14,7 @@ path = search_filename(
     "Pure_T177R1a_pR_210615.BSW",
     exp_type="UV_Vis/proteorhodopsin",
     unique=True,
-    zenodo=(
-        "https://zenodo.org/api/records/15636512/draft/files/"
-        "Pure_T177R1a_pR_210615.BSW/content"
-    ),
+    zenodo="15636512",
 )
 
 print(f"Downloaded to {path}")

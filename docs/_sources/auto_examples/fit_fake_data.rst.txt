@@ -24,7 +24,7 @@ This example creates fake data with noise
 then fits the exponential with the fitdata
 function.
 
-.. GENERATED FROM PYTHON SOURCE LINES 7-108
+.. GENERATED FROM PYTHON SOURCE LINES 7-107
 
 
 
@@ -38,18 +38,18 @@ function.
 
  .. code-block:: none
 
-    {R_1, M_inf, M_0}
+    {M_0, R_1, M_inf}
     {\bf Warning:} You have no error associated with your plot, and I want to flag this for now
 
 
     ----- Results for fitdata: -----
-    output for fitdata: {'M_0': -102.87857607503906, 'M_inf': 102.23079377453595, 'R_1': 6.036261113706332}
-    latex for fitdata: $f(\tau)=102.23 + \left(-1.03\times 10^{2} - 102.23\right) e^{- 6.04 \tau}$
-    $T_1$ for fitdata, 0.1656654642936725
+    output for fitdata: {'M_0': -103.63721413191084, 'M_inf': 101.9531108968069, 'R_1': 6.158657562577949}
+    latex for fitdata: $f(\tau)=101.95 + \left(-1.04\times 10^{2} - 101.95\right) e^{- 6.16 \tau}$
+    $T_1$ for fitdata, 0.16237304799609778
     ----- Results for lmfitdata: -----
-    output for lmfitdata: {'R_1': 5.457476228851562, 'M_inf': 115.28125398542505, 'M_0': -107.02731635058058}
-    latex for lmfitdata: $f(\tau)=(115.28) + \left((-1.07\times 10^{2}) - (115.28)\right) e^{- (5.46) \tau}$
-    $T_1$ for lmfitdata, 0.18323487965250082
+    output for lmfitdata: {'M_0': -103.63721323329156, 'R_1': 6.158657499877911, 'M_inf': 101.95311099880192}
+    latex for lmfitdata: $f(\tau)=(101.95) + \left((-1.04\times 10^{2}) - (101.95)\right) e^{- (6.16) \tau}$
+    $T_1$ for lmfitdata, 0.16237304964918473
     1: fit with guess |||None
 
 
@@ -62,17 +62,16 @@ function.
 
 .. code-block:: Python
 
-    from pylab import *
-    from pyspecdata import *
+
+    import pylab as pl
+    import pyspecdata as psd
     import sympy as sp
+    from numpy import r_,exp
 
     # {{{ this is the contents of pylab.py -- works
     # need to go through and figure out which lines
     # are actually needed and which are not
     # -- I have already stripped out some
-    from lmfit import Parameters, minimize
-    from matplotlib.pyplot import figure, subplot, show, xlim, ylim, plot, gca
-    from numpy import *  # I think it wasn't importing from numpy b/c it seems we're inside sphinx
 
 
     def list_symbs(f):
@@ -87,9 +86,8 @@ function.
 
 
     # }}}
-    fl = figlist_var()
     # {{{creating a fake data recovery curve
-    tau = nddata(r_[0:2:256j], "tau")
+    tau = psd.nddata(r_[0:2:256j], "tau")
     fake_data = 102 * (1 - 2 * exp(-tau * 6.0))
     fake_data.add_noise(5.0)
     # }}}
@@ -98,12 +96,13 @@ function.
     M0, Mi, R1, vd = sp.symbols("M_0 M_inf R_1 tau", real=True)
     functional_form = Mi + (M0 - Mi) * sp.exp(-vd * R1)
     # }}}
-    with figlist_var() as fl:
+    with psd.figlist_var() as fl:
         fl.next("fit with guess")
         fl.plot(fake_data, "o", alpha=0.5, label="fake data")
 
         def show_guess_and_fit(fitinst, thislabel, x_text, y_text):
-            "show the guess and the fit -- group as a function so we're sure we do this consistently"
+            """show the guess and the fit -- group as a function so we're sure we
+            do this consistently"""
             fl.next("fit with guess")
             fitinst.settoguess()
             guess_line = fl.plot(
@@ -119,15 +118,15 @@ function.
             this_ls = "-"
             if thislabel == "fitdata":
                 this_ls = "--"
-            fit_line = fl.plot(
+            fl.plot(
                 fitinst.eval(100),
                 ls=this_ls,
                 color=thiscolor,
                 alpha=0.5,
                 label=f"{thislabel} fit",
             )
-            ax = gca()
-            text(
+            ax = pl.gca()
+            pl.text(
                 x_text,
                 y_text,
                 f"{thislabel} RESULT: %s" % fitinst.latex(),
@@ -136,7 +135,7 @@ function.
                 color=thiscolor,
                 transform=ax.transAxes,
             )
-            text(
+            pl.text(
                 x_text,
                 y_text,
                 (3 * "\n") + list_symbs(fitinst),
@@ -148,18 +147,18 @@ function.
             )
 
         # {{{ use fitdata
-        fitdata_instance = fitdata(fake_data)
+        fitdata_instance = psd.fitdata(fake_data)
         fitdata_instance.functional_form = functional_form
         fitdata_instance.set_guess({M0: -500, Mi: 500, R1: 2})
         show_guess_and_fit(fitdata_instance, "fitdata", 0.6, 0.5)
         # }}}
         # {{{ lmfitdata method
-        lmfitdata_instance = lmfitdata(fake_data)
+        lmfitdata_instance = psd.lmfitdata(fake_data)
         lmfitdata_instance.functional_form = functional_form
         lmfitdata_instance.set_guess(
-            M_0=dict(value=-500, max=0, min=-501),
-            M_inf=dict(value=500, max=501, min=0),
-            R_1=dict(value=1, max=10, min=1),
+            M_0=dict(value=-400, max=0, min=-500),
+            M_inf=dict(value=400, max=500, min=0),
+            R_1=dict(value=1, max=10, min=0),
         )
         show_guess_and_fit(lmfitdata_instance, "lmfitdata", 0.6, 0.25)
         # }}}
@@ -167,7 +166,7 @@ function.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.911 seconds)
+   **Total running time of the script:** (0 minutes 1.050 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fit_fake_data.py:
