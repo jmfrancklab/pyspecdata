@@ -80,7 +80,7 @@ def create_deposition(title):
         "upload_type": "dataset",
         "publication_date": today,
         # ``type`` corresponds to the "Type" field on the website
-        "dates": [{"date": today, "type": "Available"}],
+        "dates": [{"start": today, "end": today, "type": "Available"}],
     }
 
     r = requests.post(
