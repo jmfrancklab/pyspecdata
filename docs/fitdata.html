@@ -55,12 +55,32 @@ calculating the jacobian.</p>
 <p>You simply wrap your existing nddata with <cite>lmfitdata</cite>, set the
 <cite>functional_form</cite> property to the equation you want to fit,
 and provide guesses and bounds with <cite>set_guess</cite>.
-The easiest way to get started is to just see the fitting examples in
-the example gallery.</p>
+The easiest way to get started is to see the fitting examples in
+the example gallery.  A few typical <code class="docutils literal notranslate"><span class="pre">lmfitdata</span></code> results are
+illustrated here.</p>
+<figure class="align-center" id="id1">
+<img alt="_images/image64.png" src="_images/image64.png" />
+<figcaption>
+<p><span class="caption-text">A simple T₁ relaxation fit.</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id2">
+<img alt="_images/image40.png" src="_images/image40.png" />
+<figcaption>
+<p><span class="caption-text">Fitting also handles global DNP buildup data at different concentrations.</span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id3">
+<img alt="_images/image490.png" src="_images/image490.png" />
+<figcaption>
+<p><span class="caption-text">A <code class="docutils literal notranslate"><span class="pre">fitdata</span></code> subclass can also be defined in its own module.</span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.lmfitdata.</span></span><span class="sig-name descname"><span class="pre">lmfitdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata" title="Link to this definition">¶</a></dt>
-<dd><p>Inherits from an nddata and enables curve fitting through use of a sympy expression.</p>
+<dd><p>Inherits from an nddata and enables curve fitting through use of a
+sympy expression.</p>
 <p>The user creates a lmfitdata class object from an existing nddata
 class object, and on this lmfitdata object can define the
 <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.lmfitdata.functional_form" title="pyspecdata.lmfitdata.functional_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">functional_form()</span></code></a> of the curve it would like to fit to the
@@ -68,6 +88,13 @@ data of the original nddata.
 This functional form must be provided as a sympy expression, with
 one of its variables matching the name of the dimension that the
 user would like to fit to.</p>
+<figure class="align-center" id="id4">
+<img alt="_images/image641.png" src="_images/image641.png" />
+<figcaption>
+<p><span class="caption-text">A typical T₁ relaxation fit produced with <code class="docutils literal notranslate"><span class="pre">lmfitdata</span></code>.
+See the gallery for more complete examples.</span><a class="headerlink" href="#id4" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.copy">
 <span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.copy" title="Link to this definition">¶</a></dt>
@@ -108,16 +135,19 @@ into the (e.g. frequency) residual domain.u</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>taxis</strong> (<em>ndarray</em><em>, </em><em>int</em>) – <dl class="field-list simple">
 <dt class="field-odd">if ndarray<span class="colon">:</span></dt>
-<dd class="field-odd"><p>the new axis coordinates along which we want to calculate the fit.</p>
+<dd class="field-odd"><p>the new axis coordinates along which we want to
+calculate the fit.</p>
 </dd>
 <dt class="field-even">if int<span class="colon">:</span></dt>
-<dd class="field-even"><p>number of evenly spaced points along the t-axis along the fit</p>
+<dd class="field-even"><p>number of evenly spaced points along the t-axis along the
+fit</p>
 </dd>
 </dl>
 </p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were passed</p>
+<dd class="field-even"><p><strong>self</strong> – the fit function evaluated along the axis coordinates that were
+passed</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a></p>
@@ -167,24 +197,32 @@ parameters; by default, based on pseudoinverse</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.jacobian">
 <span class="sig-name descname"><span class="pre">jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.jacobian" title="Link to this definition">¶</a></dt>
-<dd><p>cache the symbolic jacobian and/or use it to compute the numeric result</p>
-<p>Note that, like residual, this is designed for use by lmfit, so that if you want to actually <em>see</em> the Jacobian, you need to pass something a bit more complicated, like this:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">jac</span> <span class="o">=</span> <span class="n">newfit</span><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+<dd><p>cache the symbolic jacobian and/or use it to compute the numeric
+result</p>
+<p>Note that, like residual, this is designed for use by lmfit, so that if
+you want to actually <em>see</em> the Jacobian, you need to pass something a
+bit more complicated, like this:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">jac</span> <span class="o">=</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">newfit</span><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">newfit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>which assumes that I have run the fit, and so have access to the fit parameters, and gives the complex view for complex data (since in a complex fit, we use view to treat real an imaginary parts the same)</p>
+<p>which assumes that I have run the fit, and so have access to the fit
+parameters, and gives the complex view for complex data (since in a
+complex fit, we use view to treat real an imaginary parts the same)</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.latex">
 <span class="sig-name descname"><span class="pre">latex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.latex" title="Link to this definition">¶</a></dt>
-<dd><p>show the latex string for the function, with all the symbols substituted by their values</p>
+<dd><p>show the latex string for the function, with all the symbols
+substituted by their values</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.output">
 <span class="sig-name descname"><span class="pre">output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.output" title="Link to this definition">¶</a></dt>
-<dd><p>give the fit value of a particular symbol, or a dictionary of all values.</p>
+<dd><p>give the fit value of a particular symbol, or a dictionary of all
+values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>name</strong> (<em>str</em><em> (</em><em>optional</em><em>)</em>) – name of the symbol.
@@ -204,7 +242,8 @@ resulting values.</p>
 <dt class="sig sig-object py" id="pyspecdata.lmfitdata.lmfitdata.pinvr_step">
 <span class="sig-name descname"><span class="pre">pinvr_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.lmfitdata.lmfitdata.pinvr_step" title="Link to this definition">¶</a></dt>
 <dd><p>Use regularized Pseudo-inverse to (partly) solve:
-<span class="math notranslate nohighlight">\(-residual = f(\mathbf{p}+\Delta \mathbf{p})-f(\mathbf{p}) \approx \nabla f(\mathbf{p}) \cdot \Delta \mathbf{p}\)</span></p>
+<span class="math notranslate nohighlight">\(-residual = f(\mathbf{p}+\Delta \mathbf{p})-f(\mathbf{p})
+\approx \nabla f(\mathbf{p}) \cdot \Delta \mathbf{p}\)</span></p>
 </dd></dl>
 
 <dl class="py method">
@@ -223,7 +262,8 @@ resulting values.</p>
 that comprises a dict with guesses (value) and/or constraints
 (min/max)</p>
 <p>Can be passed either as the only argument, or a kwarg called
-guesses, or as the kwargs themselves (i.e. <cite>.set_guesses(**guesses)</cite>)</p>
+guesses, or as the kwargs themselves (i.e.
+<cite>.set_guesses(**guesses)</cite>)</p>
 <p>For example (the last case:)</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">set_guess</span><span class="p">(</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">param1</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
@@ -251,7 +291,8 @@ domain.
 Therefore, we define a function <cite>self.residual_transform</cite> that
 accepts an nddata, and defines how the data is manipulated to move
 into the (e.g. frequency) residual domain.
-(It’s easiest to do this by using the <cite>self.define_residual_transform</cite> decorator)</p>
+(It’s easiest to do this by using the <cite>self.define_residual_transform</cite>
+decorator)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>retval</strong> – just return the ndarray</p>

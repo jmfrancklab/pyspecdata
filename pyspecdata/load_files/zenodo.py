@@ -108,8 +108,8 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
 
     r.raise_for_status()
     info = r.json()
-    print("Uploaded", info["filename"], "download URL:", info["links"]["download"])
-    print("View deposition at", f"https://zenodo.org/deposit/{deposition_id}")
+    print("Uploaded", info["filename"])
+    print("View deposition at", f"https://zenodo.org/uploads/{deposition_id}")
 
     # record the upload in the config file
     n_uploads = int(
@@ -123,3 +123,4 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
     pyspec_config.set_setting(
         "zenodo", f"upload_localfile{n_uploads}", local_path
     )
+    return deposition_id

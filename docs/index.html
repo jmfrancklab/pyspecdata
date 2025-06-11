@@ -53,8 +53,65 @@ and for a simple example applied to 1D data, see
 <li><p>(Note that the previous two used be separate repositories – they have been combined to improve maintenance).</p></li>
 </ul>
 </li>
+</ul>
+<section id="instrumentation-use-cases">
+<h2>Instrumentation use cases<a class="headerlink" href="#instrumentation-use-cases" title="Link to this heading">¶</a></h2>
+<p>PySpecData interfaces with a variety of laboratory hardware.  The diagram below
+summarizes how the resonator, RF transceiver and control computer are
+connected.  This setup comes from our lab and represents just one example of
+how pySpecData can be used alongside instrumentation.</p>
+<figure class="align-center" id="id1">
+<img alt="_images/image14.png" src="_images/image14.png" />
+<figcaption>
+<p><span class="caption-text">Modular EPR/NMR instrument layout.</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>Experiment pulse programs are uploaded to a SpinCore PulseBlaster as shown
+below.</p>
+<figure class="align-center" id="id2">
+<img alt="_images/image15.png" src="_images/image15.png" />
+<figcaption>
+<p><span class="caption-text">Loading a PulseBlaster program with phase cycling.</span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>A close-up of the PCIe board used for TTL control is shown here.</p>
+<figure class="align-center" id="id3">
+<img alt="_images/image16.png" src="_images/image16.png" />
+<figcaption>
+<p><span class="caption-text">SpinCore PulseBlaster board used for TTL control.</span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>Signals are digitized with a Tektronix 11801C sampling oscilloscope.</p>
+<figure class="align-center" id="id4">
+<img alt="_images/image43.png" src="_images/image43.png" />
+<figcaption>
+<p><span class="caption-text">Tektronix sampling oscilloscope for high-speed digitization.</span><a class="headerlink" href="#id4" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>To measure the resonator transfer function we capture the reflected microwave
+pulse, isolate its envelope and fit an exponential decay.</p>
+<figure class="align-center" id="id5">
+<img alt="_images/image66.png" src="_images/image66.png" />
+<figcaption>
+<p><span class="caption-text">Raw pulse and reflection used for the measurement.</span><a class="headerlink" href="#id5" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id6">
+<img alt="_images/image67.png" src="_images/image67.png" />
+<figcaption>
+<p><span class="caption-text">Analytic-signal envelope of the reflection.</span><a class="headerlink" href="#id6" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id7">
+<img alt="_images/image68.png" src="_images/image68.png" />
+<figcaption>
+<p><span class="caption-text">Exponential fit to the decay slice.</span><a class="headerlink" href="#id7" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<ul class="simple">
 <li><p><a class="reference external" href="https://github.com/jmfrancklab/proc_scripts/">ODNP processing scripts</a>.</p></li>
 </ul>
+</section>
 </section>
 <section id="the-basics">
 <h1>The Basics<a class="headerlink" href="#the-basics" title="Link to this heading">¶</a></h1>
@@ -103,6 +160,16 @@ without keeping many copies of a large dataset and with less typing for each ope
 it automatically plots the data on the correct axes and includes the units
 and the name of dimension (<em>t2</em> in this example) and its units along the
 <em>x</em> axis.</p>
+<p>Because the axes are tracked transparently, pySpecData is easy to
+integrate into graphical interfaces.  Our <code class="xref py py-mod docutils literal notranslate"><span class="pre">FLInst</span></code> package makes
+heavy use of this feature to acquire data in real time, as shown below.</p>
+<figure class="align-center" id="id8">
+<img alt="_images/image17.png" src="_images/image17.png" />
+<figcaption>
+<p><span class="caption-text">A simple GUI window can be used to acquire a spin echo and immediately
+Fourier transform the result.</span><a class="headerlink" href="#id8" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 <section id="how-do-i-generate-an-nddata-object">
 <h2>How do I generate an nddata object?<a class="headerlink" href="#how-do-i-generate-an-nddata-object" title="Link to this heading">¶</a></h2>
 <p>We primarily work in magnetic resonance,
@@ -135,6 +202,7 @@ These and further details are covered in the various sections of the documentati
 <li class="toctree-l2"><a class="reference internal" href="nddata.html#item-selection-and-slicing">Item selection and slicing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nddata.html#error-propagation">Error propagation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nddata.html#methods-for-manipulating-data">Methods for Manipulating Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nddata.html#basic-examples">Basic Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nddata.html#methods-by-sub-topic">Methods by Sub-Topic</a></li>
 </ul>
 </li>

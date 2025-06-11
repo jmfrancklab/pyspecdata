@@ -19,6 +19,61 @@ Please note this package is heavily utilized by two other packages that our lab 
     *   Includes our Custom SpinCore NMR extension
     *   (Note that the previous two used be separate repositories -- they have been combined to improve maintenance).
 
+
+Instrumentation use cases
+-------------------------
+
+PySpecData interfaces with a variety of laboratory hardware.  The diagram below
+summarizes how the resonator, RF transceiver and control computer are
+connected.  This setup comes from our lab and represents just one example of
+how pySpecData can be used alongside instrumentation.
+
+.. figure:: _static/presentation_images/image14.png
+   :align: center
+
+   Modular EPR/NMR instrument layout.
+
+Experiment pulse programs are uploaded to a SpinCore PulseBlaster as shown
+below.
+
+.. figure:: _static/presentation_images/image15.png
+   :align: center
+
+   Loading a PulseBlaster program with phase cycling.
+
+A close-up of the PCIe board used for TTL control is shown here.
+
+.. figure:: _static/presentation_images/image16.png
+   :align: center
+
+   SpinCore PulseBlaster board used for TTL control.
+
+Signals are digitized with a Tektronix 11801C sampling oscilloscope.
+
+.. figure:: _static/presentation_images/image43.png
+   :align: center
+
+   Tektronix sampling oscilloscope for high-speed digitization.
+
+To measure the resonator transfer function we capture the reflected microwave
+pulse, isolate its envelope and fit an exponential decay.
+
+.. figure:: _static/presentation_images/image66.png
+   :align: center
+
+   Raw pulse and reflection used for the measurement.
+
+.. figure:: _static/presentation_images/image67.png
+   :align: center
+
+   Analytic-signal envelope of the reflection.
+
+.. figure:: _static/presentation_images/image68.png
+   :align: center
+
+   Exponential fit to the decay slice.
+
+
 *   `ODNP processing scripts <https://github.com/jmfrancklab/proc_scripts/>`_.
 
 The Basics
@@ -30,7 +85,7 @@ PySpecData *automatically* handles the following issues, without any additional 
 *   relabeling axes after a Fourier transformation
 *   propagation of errors
 *   adding units to plots
-*   calculating analytical Jacobians used during least-squares fitting  
+*   calculating analytical Jacobians used during least-squares fitting
 
 To enable this, you work with a pySpecData `nddata` object
 (which includes information about dimension names, axis values, errors, and the units)
@@ -75,6 +130,16 @@ it automatically plots the data on the correct axes and includes the units
 and the name of dimension (*t2* in this example) and its units along the
 *x* axis.
 
+Because the axes are tracked transparently, pySpecData is easy to
+integrate into graphical interfaces.  Our :mod:`FLInst` package makes
+heavy use of this feature to acquire data in real time, as shown below.
+
+
+.. figure:: _static/presentation_images/image17.png
+   :align: center
+
+   A simple GUI window can be used to acquire a spin echo and immediately
+   Fourier transform the result.
 How do I generate an nddata object?
 -----------------------------------
 
@@ -83,6 +148,7 @@ so have written wrappers for a few different types of NMR
 (nuclear magnetic resonance) and ESR (electron spin resonance)
 file formats.
 You can use the :func:`pyspecdata.find_file` function to automatically load them as nddata.
+
 
 Additionally, we have written several classes that allow you to read
 nddata objects directly from *e.g.* an oscilloscope.
@@ -114,13 +180,16 @@ These and further details are covered in the various sections of the documentati
     notebook.rst
     figlist.rst
     units.rst
-    examples.rst 
+    examples.rst
 
 .. toctree::
     :maxdepth: 2
     :caption: Example Gallery
 
     auto_examples/index
+
+
+
 
 
 Indices and tables

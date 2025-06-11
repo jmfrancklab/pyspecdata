@@ -61,6 +61,15 @@
 <dd><p>This is the detailed API reference.
 For an introduction on how to use ND-Data, see the
 <a class="reference internal" href="nddata.html#nddata-summary-label"><span class="std std-ref">Main ND-Data Documentation</span></a>.</p>
+<blockquote id="nddata-container-fig">
+<div><figure class="align-center" id="id25">
+<img alt="_images/image69.png" src="_images/image69.png" />
+<figcaption>
+<p><span class="caption-text">This annotated diagram highlights the attributes stored within an
+<code class="docutils literal notranslate"><span class="pre">nddata</span></code> instance and how they can be accessed.</span><a class="headerlink" href="#id25" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</div></blockquote>
 <dl class="py property">
 <dt class="sig sig-object py" id="pyspecdata.nddata.C">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">C</span></span><a class="headerlink" href="#pyspecdata.nddata.C" title="Link to this definition">¶</a></dt>
@@ -480,7 +489,7 @@ return the multiplier as a number.</p>
 <p>If the result is not dimensionless,
 an error will be generated.</p>
 <p>e.g. call as <cite>d.div_units(“axisname”,”s”)</cite>
-to divide the axis units by seconds</p>
+to divide the axis units by seconds.</p>
 <p>or <cite>d.div_units(“s”)</cite> to divide the
 data units by seconds.</p>
 <p>In other words, if you pass “a” and the units of your data are
@@ -740,6 +749,18 @@ essentially telling the code that you
 know the data is not aliased in the
 inverse domain and/or are willing to
 deal with the consequences.</p>
+<figure class="align-center" id="id26">
+<img alt="../../doc_src/_static/presentation_images/image54.png" src="../../doc_src/_static/presentation_images/image54.png" />
+<figcaption>
+<p><span class="caption-text">Aliasing and axis registration applied to a simple Gaussian example.</span><a class="headerlink" href="#id26" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id27">
+<img alt="../../doc_src/_static/presentation_images/image62.png" src="../../doc_src/_static/presentation_images/image62.png" />
+<figcaption>
+<p><span class="caption-text">Correcting the time origin in NMR greatly improves the phasing.</span><a class="headerlink" href="#id27" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 </p></li>
 </ul>
 </dd>
@@ -859,6 +880,13 @@ The directory can be passed to the <cite>directory</cite> argument.</p>
 When reading this, please note that HDF5 files store <em>multiple</em>
 datasets,
 and each is named (here, the name is <cite>test_data</cite>).</p>
+<figure class="align-center" id="id28">
+<img alt="_images/image39.png" src="_images/image39.png" />
+<figcaption>
+<p><span class="caption-text">View of an HDF5 file with nddata arrays and metadata inside
+ViTables.</span><a class="headerlink" href="#id28" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="n">init_logging</span><span class="p">(</span><span class="s1">&#39;debug&#39;</span><span class="p">)</span>
 <span class="n">a</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">:</span><span class="mi">10</span><span class="n">j</span><span class="p">],</span> <span class="s1">&#39;x&#39;</span><span class="p">)</span>
@@ -1325,18 +1353,22 @@ out</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.nddata.register_axis">
 <span class="sig-name descname"><span class="pre">register_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.register_axis" title="Link to this definition">¶</a></dt>
-<dd><p>Interpolate the data so that the given axes are in register with a set of specified values. Does not change the spacing of the axis labels.</p>
-<p>It finds the axis label position that is closest to the values given in <cite>arg</cite>, then interpolates (Fourier/sinc method) the data onto a new, slightly shifted, axis that passes exactly through the value given.
+<dd><p>Interpolate the data so that the given axes are in register with a set
+of specified values. Does not change the spacing of the axis labels.</p>
+<p>It finds the axis label position that is closest to the values given in
+<cite>arg</cite>, then interpolates (Fourier/sinc method) the data onto a new,
+slightly shifted, axis that passes exactly through the value given.
 To do this, it uses
-<a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.nddata.ft_clear_startpoints" title="pyspecdata.core.nddata.ft_clear_startpoints"><code class="xref py py-func docutils literal notranslate"><span class="pre">.ft_clear_startpoints()</span></code></a>
+<a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.nddata.ft_new_startpoint" title="pyspecdata.core.nddata.ft_new_startpoint"><code class="xref py py-func docutils literal notranslate"><span class="pre">.ft_new_startpoint()</span></code></a>
 and uses
 <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.nddata.set_ft_prop" title="pyspecdata.core.nddata.set_ft_prop"><code class="xref py py-func docutils literal notranslate"><span class="pre">.set_ft_prop()</span></code></a>
 to override the “not aliased” flag.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>arg</strong> (<em>dict</em><em> (</em><em>key</em><em>,</em><em>value = str</em><em>,</em><em>double</em><em>)</em>) – A list of the dimensions that you want to place in register, and the values you want them registered to.</p></li>
-<li><p><strong>nearest</strong> (<em>bool</em><em>, </em><em>optional</em>) – Passed through to ft_clear_startpoints</p></li>
+<li><p><strong>arg</strong> (<em>dict</em><em> (</em><em>key</em><em>,</em><em>value = str</em><em>,</em><em>double</em><em>)</em>) – A list of the dimensions that you want to place in register, and the
+values you want them registered to.</p></li>
+<li><p><strong>nearest</strong> (<em>bool</em><em>, </em><em>optional</em>) – Passed through to ft_new_startpoint</p></li>
 </ul>
 </dd>
 </dl>
@@ -1479,10 +1511,16 @@ in your script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.nddata.set_prop">
-<span class="sig-name descname"><span class="pre">set_prop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.set_prop" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set_prop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.set_prop" title="Link to this definition">¶</a></dt>
 <dd><p>set a ‘property’ of the nddata
 This is where you can put all unstructured information (e.g.
 experimental parameters, etc)</p>
+<p>Accepts:</p>
+<ul class="simple">
+<li><p>a single string, value pair</p></li>
+<li><p>a dictionary</p></li>
+<li><p>a set of keyword arguments</p></li>
+</ul>
 </dd></dl>
 
 <dl class="py method">
