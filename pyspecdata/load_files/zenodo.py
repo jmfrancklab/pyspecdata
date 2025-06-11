@@ -79,7 +79,8 @@ def create_deposition(title):
         "prereserve_doi": True,
         "upload_type": "dataset",
         "publication_date": today,
-        "dates": [{"date": today, "date_type": "Available"}],
+        # ``type`` corresponds to the "Type" field on the website
+        "dates": [{"date": today, "type": "Available"}],
     }
 
     r = requests.post(
@@ -126,7 +127,7 @@ def zenodo_upload(local_path, title=None, deposition_id=None):
     r.raise_for_status()
     info = r.json()
     print("Uploaded", info["filename"])
-    print("View deposition at", f"https://zenodo.org/uploads/{deposition_id}")
+    print("View deposition at", f"https://zenodo.org/deposit/{deposition_id}")
 
     # record the upload in the config file
     n_uploads = int(

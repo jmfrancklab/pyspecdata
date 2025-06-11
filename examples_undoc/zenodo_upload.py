@@ -38,4 +38,4 @@ for search_str, exp_type in files_to_upload:
     else:
         zenodo_upload(local_path, deposition_id=deposition_id)
 
-print("View deposition at https://zenodo.org/uploads/" + str(deposition_id))
+print("View deposition at https://zenodo.org/deposit/" + str(deposition_id))
