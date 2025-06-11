@@ -82,6 +82,12 @@ class lmfitdata(nddata):
     This functional form must be provided as a sympy expression, with
     one of its variables matching the name of the dimension that the
     user would like to fit to.
+
+    .. figure:: ../doc_src/_static/presentation_images/image64.png
+       :align: center
+
+       A typical T₁ relaxation fit produced with ``lmfitdata``.
+       See the gallery for more complete examples.
     """
 
     def __init__(self, *args, **kwargs):

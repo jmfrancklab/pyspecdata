@@ -16,7 +16,6 @@ The script will create a new deposition record automatically and then upload
 the file to that deposition.
 """
 
-import os
 from pyspecdata import search_filename, zenodo_upload
 
 # locate the data using the same search string as

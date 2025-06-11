@@ -232,7 +232,41 @@ def image(A, x=[], y=[], allow_nonuniform=True, **kwargs):
 
 
 def imagehsv(A, logscale=False, black=False, scaling=None):
-    "This provides the HSV mapping used to plot complex number"
+    """Map complex-valued data to color using an HSV scheme.
+
+    The phase of the complex number controls the hue while the magnitude
+    sets the brightness.  This form of *domain coloring* is summarized
+    below.
+
+    .. figure:: ../doc_src/_static/presentation_images/image34.png
+       :align: center
+
+       Mapping from phase and magnitude onto the complex color wheel.
+
+    Two typical results from a spin-echo experiment are shown next.
+
+    .. figure:: ../doc_src/_static/presentation_images/image20.png
+       :align: center
+
+       Raw spin-echo data displayed with :func:`imagehsv`.
+
+    .. figure:: ../doc_src/_static/presentation_images/image21.png
+       :align: center
+
+       Coherence pathways visualized after processing.
+
+    The coherence order scheme for these pathways is illustrated below.
+
+    .. figure:: ../doc_src/_static/presentation_images/image24.png
+       :align: center
+
+       Evolution of coherence orders under successive pulses.
+
+    .. figure:: ../doc_src/_static/presentation_images/image33.png
+       :align: center
+
+       Echo intensity separated by coherence order.
+    """
     # compare to http://www.rapidtables.com/convert/color/hsv-to-rgb.htm
     A = A.copy()
     n = 256

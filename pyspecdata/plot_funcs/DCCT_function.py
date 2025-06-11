@@ -1,6 +1,8 @@
-"""Domain Colored Coherence Transfer (DCCT) function allows us to 
-visualize the complex-valued data, as well as the formalization of the 
-coherence transfer dimensions using domain coloring plotting. 
+"""Domain Colored Coherence Transfer (DCCT) plots coherence pathways.
+
+See :func:`pyspecdata.plot_funcs.image.imagehsv` for examples of domain
+colored spin-echo data.  This routine displays coherence pathways using
+domain coloring.
 """
 
 from numpy import r_, nan
