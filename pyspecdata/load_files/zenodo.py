@@ -76,7 +76,9 @@ def create_deposition(title):
     today = datetime.date.today().isoformat()
     metadata = {
         "title": title,
+        # set prereserve_doi but explicitly indicate we do not already have one
         "prereserve_doi": True,
+        "doi": None,
         "upload_type": "dataset",
         "publication_date": today,
         # ``type`` corresponds to the "Type" field on the website
