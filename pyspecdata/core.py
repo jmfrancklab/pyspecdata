@@ -1153,6 +1153,8 @@ def _find_bad_attr(obj, inistring, path="root"):
         outstring += "\n"
         if hasattr(obj, "__dict__"):
             for name, val in obj.__dict__.items():
+    .. _nddata-container-fig:
+
                 _find_bad_attr(val, f"{path}.{name}")
             return outstring
         elif type(obj) is dict:

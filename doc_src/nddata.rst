@@ -15,7 +15,9 @@ The nddata class is built on top of numpy_.
 Numpy allows you to create multi-dimensional arrays of data.
 
 Conceptually, an :class:`nddata` instance acts as a container that holds the raw
-array along with its descriptive metadata.
+array along with its descriptive metadata.  A schematic view of this
+structure appears in :numref:`nddata-container-fig` inside the
+API documentation for :class:`pyspecdata.nddata`.
 
 .. figure:: _static/presentation_images/image41.jpg
    :align: center
