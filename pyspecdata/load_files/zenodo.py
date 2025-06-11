@@ -66,9 +66,9 @@ def zenodo_download(deposition, searchstring, exp_type=None):
 def create_deposition(title):
     """Create a new Zenodo deposition using ``title``.
 
-    The deposition will reserve a DOI, set the resource type to
-    ``dataset``, set today's date as the publication date, and mark the
-    date type as ``Available``.
+    The deposition will pre-reserve a DOI, set the upload type to
+    ``dataset`` and mark today's date as both the publication date and the
+    availability date.
     """
 
     token = _get_token()
@@ -77,9 +77,9 @@ def create_deposition(title):
     metadata = {
         "title": title,
         "prereserve_doi": True,
-        "resource_type": {"type": "dataset"},
+        "upload_type": "dataset",
         "publication_date": today,
-        "dates": [{"start": today, "end": today, "type": "Available"}],
+        "dates": [{"date": today, "date_type": "Available"}],
     }
 
     r = requests.post(
