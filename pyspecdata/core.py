@@ -1153,8 +1153,6 @@ def _find_bad_attr(obj, inistring, path="root"):
         outstring += "\n"
         if hasattr(obj, "__dict__"):
             for name, val in obj.__dict__.items():
-    .. _nddata-container-fig:
-
                 _find_bad_attr(val, f"{path}.{name}")
             return outstring
         elif type(obj) is dict:
@@ -1170,6 +1168,8 @@ class nddata(object):
     """This is the detailed API reference.
     For an introduction on how to use ND-Data, see the
     :ref:`Main ND-Data Documentation <nddata-summary-label>`.
+
+    .. _nddata-container-fig:
 
     .. figure:: ../doc_src/_static/presentation_images/image36.png
        :align: center
