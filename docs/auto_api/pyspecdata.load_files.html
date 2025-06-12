@@ -475,9 +475,9 @@ lookup : dictionary with str:function pairs</p>
 </dl>
 <p>types of postprocessing to add to the <cite>postproc_lookup</cite> dictionary</p>
 </p></li>
-<li><p><strong>zenodo</strong> (<em>str</em><em>, </em><em>optional</em>) – If provided, a URL pointing to a file hosted on Zenodo.  When the
-requested file is not found locally, it will be downloaded from this
-URL instead of searching rclone remotes.</p></li>
+<li><p><strong>zenodo</strong> (<em>str</em><em>, </em><em>optional</em>) – Deposition number on Zenodo.  When the requested file is not found
+locally, a file matching <code class="docutils literal notranslate"><span class="pre">searchstring</span></code> will be downloaded from this
+deposition instead of searching rclone remotes.</p></li>
 </ul>
 </dd>
 </dl>
@@ -633,9 +633,9 @@ lookup : dictionary with str:function pairs</p>
 </dl>
 <p>types of postprocessing to add to the <cite>postproc_lookup</cite> dictionary</p>
 </p></li>
-<li><p><strong>zenodo</strong> (<em>str</em><em>, </em><em>optional</em>) – If provided, a URL pointing to a file hosted on Zenodo.  When the
-requested file is not found locally, it will be downloaded from this
-URL instead of searching rclone remotes.</p></li>
+<li><p><strong>zenodo</strong> (<em>str</em><em>, </em><em>optional</em>) – Deposition number on Zenodo.  When the requested file is not found
+locally, a file matching <code class="docutils literal notranslate"><span class="pre">searchstring</span></code> will be downloaded from this
+deposition instead of searching rclone remotes.</p></li>
 </ul>
 </dd>
 </dl>
@@ -804,8 +804,9 @@ specifies the type of experiment see
 <a class="reference internal" href="pyspecdata.html#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a> for
 more info.</p></li>
 <li><p><strong>unique</strong> (<em>boolean</em><em> (</em><em>default False</em><em>)</em>) – If true, then throw an error unless only one file is found.</p></li>
-<li><p><strong>zenodo</strong> (<em>str</em><em>, </em><em>optional</em>) – If provided and the file is not found locally, download it from this
-Zenodo URL.  Rclone remotes are <em>not</em> searched when this option is
+<li><p><strong>zenodo</strong> (<em>str</em><em>, </em><em>optional</em>) – Deposition number on Zenodo.  If provided and the file is not found
+locally, a file matching <code class="docutils literal notranslate"><span class="pre">searchstring</span></code> will be downloaded from this
+deposition.  Rclone remotes are <em>not</em> searched when this option is
 used.</p></li>
 </ul>
 </dd>

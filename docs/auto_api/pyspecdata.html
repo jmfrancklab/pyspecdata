@@ -5639,6 +5639,15 @@ coming from, supply some extra text for the respective message.</p></li>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.create_deposition">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">create_deposition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.create_deposition" title="Link to this definition">¶</a></dt>
+<dd><p>Create a new Zenodo deposition using <code class="docutils literal notranslate"><span class="pre">title</span></code>.</p>
+<p>The deposition will pre-reserve a DOI, set the upload type to
+<code class="docutils literal notranslate"><span class="pre">dataset</span></code> and mark today’s date as both the publication date and the
+availability date.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.cw">
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">cw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.cw" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -6319,9 +6328,9 @@ lookup : dictionary with str:function pairs</p>
 </dl>
 <p>types of postprocessing to add to the <cite>postproc_lookup</cite> dictionary</p>
 </p></li>
-<li><p><strong>zenodo</strong> (<em>str</em><em>, </em><em>optional</em>) – If provided, a URL pointing to a file hosted on Zenodo.  When the
-requested file is not found locally, it will be downloaded from this
-URL instead of searching rclone remotes.</p></li>
+<li><p><strong>zenodo</strong> (<em>str</em><em>, </em><em>optional</em>) – Deposition number on Zenodo.  When the requested file is not found
+locally, a file matching <code class="docutils literal notranslate"><span class="pre">searchstring</span></code> will be downloaded from this
+deposition instead of searching rclone remotes.</p></li>
 </ul>
 </dd>
 </dl>
@@ -9863,8 +9872,9 @@ specifies the type of experiment see
 <a class="reference internal" href="#pyspecdata.datadir.getDATADIR" title="pyspecdata.datadir.getDATADIR"><code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code></a> for
 more info.</p></li>
 <li><p><strong>unique</strong> (<em>boolean</em><em> (</em><em>default False</em><em>)</em>) – If true, then throw an error unless only one file is found.</p></li>
-<li><p><strong>zenodo</strong> (<em>str</em><em>, </em><em>optional</em>) – If provided and the file is not found locally, download it from this
-Zenodo URL.  Rclone remotes are <em>not</em> searched when this option is
+<li><p><strong>zenodo</strong> (<em>str</em><em>, </em><em>optional</em>) – Deposition number on Zenodo.  If provided and the file is not found
+locally, a file matching <code class="docutils literal notranslate"><span class="pre">searchstring</span></code> will be downloaded from this
+deposition.  Rclone remotes are <em>not</em> searched when this option is
 used.</p></li>
 </ul>
 </dd>
@@ -10009,8 +10019,20 @@ but, see the “contiguous” method, which is more OO</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.zenodo_upload">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">zenodo_upload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.zenodo_upload" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">zenodo_upload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deposition_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.zenodo_upload" title="Link to this definition">¶</a></dt>
+<dd><p>Upload <code class="docutils literal notranslate"><span class="pre">local_path</span></code> to Zenodo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>local_path</strong> (<em>str</em>) – Path to the local file that will be uploaded.</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – Title of the deposition when creating a new one.  <code class="docutils literal notranslate"><span class="pre">title</span></code> must be
+provided if <code class="docutils literal notranslate"><span class="pre">deposition_id</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>deposition_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Existing deposition identifier.  If <code class="docutils literal notranslate"><span class="pre">None</span></code> a new deposition is
+created using <code class="docutils literal notranslate"><span class="pre">title</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 </section>
