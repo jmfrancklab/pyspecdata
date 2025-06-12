@@ -1,6 +1,7 @@
 import os
 import urllib.request
 import re
+import datetime
 from ..datadir import getDATADIR, pyspec_config
 import logging
 import requests
@@ -63,17 +64,37 @@ def zenodo_download(deposition, searchstring, exp_type=None):
 
 
 def create_deposition(title):
-    """Create a new Zenodo deposition with ``title`` and return the
-    deposition identifier."""
+    """Create a new Zenodo deposition using ``title``.
+
+    The deposition will pre-reserve a DOI, set the upload type to
+    ``dataset`` and mark today's date as both the publication date and the
+    availability date.
+    """
 
     token = _get_token()
+
+    today = datetime.date.today().isoformat()
+    metadata = {
+        "title": title,
+        # reserve a DOI without providing an existing one
+        "prereserve_doi": True,
+        "upload_type": "dataset",
+        "publication_date": today,
+        # ``type`` corresponds to the "Type" field on the website
+        "dates": [{"start": today, "end": today, "type": "Available"}],
+    }
 
     r = requests.post(
         "https://zenodo.org/api/deposit/depositions",
         params={"access_token": token},
-        json={"metadata": {"title": title}},
+        json={"metadata": metadata},
     )
-    r.raise_for_status()
+    try:
+        r.raise_for_status()
+    except requests.HTTPError as exc:
+        msg = f"{exc}\n{r.text}"
+        logging.error("failed to create deposition: %s", msg)
+        raise requests.HTTPError(msg) from exc
     return r.json()["id"]
 
 
