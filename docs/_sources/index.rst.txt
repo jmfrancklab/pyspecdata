@@ -7,9 +7,7 @@ pySpecData: compact spectral data processing!
 =============================================
 
 pySpecData allows you to deal with multi-dimensional spectroscopy data in an object-oriented fashion.
-:ref:`See pySpecData examples here <sphx_glr_auto_examples>`,
-and for a simple example applied to 1D data, see
-:ref:`here <sphx_glr_auto_examples_basic_example.py>`.
+This has many benefits, which you can read about below, or check out in the example gallery (menu to the left).
 
 Please note this package is heavily utilized by two other packages that our lab manages on github:
 
@@ -19,67 +17,21 @@ Please note this package is heavily utilized by two other packages that our lab 
     *   Includes our Custom SpinCore NMR extension
     *   (Note that the previous two used be separate repositories -- they have been combined to improve maintenance).
 
+*   `Processing scripts <https://github.com/jmfrancklab/proc_scripts/>`_ library that does things like:
 
-Instrumentation use cases
--------------------------
+    *   Automatically process ODNP data.
+    *   Correlation alignment.
+    *   Phasing of echo-like NMR data.
+    *   Quantitative ESR calculation.
+    *   Aligning ESR spectra for maximum overlap.
+    *   ...*etc*...
 
-PySpecData interfaces with a variety of laboratory hardware.  The diagram below
-summarizes how the resonator, RF transceiver and control computer are
-connected.  This setup comes from our lab and represents just one example of
-how pySpecData can be used alongside instrumentation.
-
-.. figure:: _static/presentation_images/image14.png
-   :align: center
-
-   Modular EPR/NMR instrument layout.
-
-Experiment pulse programs are uploaded to a SpinCore PulseBlaster as shown
-below.
-
-.. figure:: _static/presentation_images/image15.png
-   :align: center
-
-   Loading a PulseBlaster program with phase cycling.
-
-A close-up of the PCIe board used for TTL control is shown here.
-
-.. figure:: _static/presentation_images/image16.png
-   :align: center
-
-   SpinCore PulseBlaster board used for TTL control.
-
-Signals are digitized with a Tektronix 11801C sampling oscilloscope.
-
-.. figure:: _static/presentation_images/image43.png
-   :align: center
-
-   Tektronix sampling oscilloscope for high-speed digitization.
-
-To measure the resonator transfer function we capture the reflected microwave
-pulse, isolate its envelope and fit an exponential decay.
-
-.. figure:: _static/presentation_images/image66.png
-   :align: center
-
-   Raw pulse and reflection used for the measurement.
-
-.. figure:: _static/presentation_images/image67.png
-   :align: center
-
-   Analytic-signal envelope of the reflection.
-
-.. figure:: _static/presentation_images/image68.png
-   :align: center
-
-   Exponential fit to the decay slice.
-
-
-*   `ODNP processing scripts <https://github.com/jmfrancklab/proc_scripts/>`_.
 
 The Basics
 ==========
 
-Our goal is that after you put in a little effort to learn the new way of manipulating data with pySpecData, you can then make the code for processing spectral data that is shorter and also more quickly legible.
+Our goal is that after you put in a little effort to learn the new way of manipulating data with pySpecData, you can then make the code for processing spectral data that is shorter and that can be written and read in a shorter amount of time
+(*vs* using standard numpy).
 PySpecData *automatically* handles the following issues, without any additional code:
 
 *   relabeling axes after a Fourier transformation
@@ -149,18 +101,24 @@ so have written wrappers for a few different types of NMR
 file formats.
 You can use the :func:`pyspecdata.find_file` function to automatically load them as nddata.
 
-
 Additionally, we have written several classes that allow you to read
 nddata objects directly from *e.g.* an oscilloscope.
-These are available as separate repositories on github (please contact us for further info).
+These are available in
+`separate repositories on github <https://github.com/jmfrancklab/FLInst/>`_.
 
-Finally, you can easily build nddata from standard arrays, as discussed in the section :doc:`about nddata objects <nddata>`.
+Finally, you can easily build nddata from standard arrays, as discussed in the
+section :doc:`about nddata objects <nddata>`.
 
 What can I do with nddata objects?
 ------------------------------------------
 
 To understand how to manipulate nddata objects, head over to the section
 :doc:`about nddata objects <nddata>`.
+
+You are **strongly** encouraged to check out the example gallery (menu to the left)
+both for this repo,
+and for the companion 
+`processing scripts <https://github.com/jmfrancklab/proc_scripts/>`_ library.
 
 Contents:
 ---------
@@ -188,9 +146,83 @@ These and further details are covered in the various sections of the documentati
 
     auto_examples/index
 
+Instrumentation use cases
+-------------------------
 
+PySpecData interfaces with a variety of laboratory hardware.  The diagram below
+summarizes how the resonator, RF transceiver and control computer are
+connected.  This setup comes from our lab and represents just one example of
+how pySpecData can be used alongside instrumentation.
 
+.. figure:: _static/presentation_images/image14.png
+   :align: center
 
+   Modular EPR/NMR instrument layout.
+
+Experiment pulse programs are uploaded to a SpinCore PulseBlaster as shown
+below.
+
+.. figure:: _static/presentation_images/image15.png
+   :align: center
+
+   Loading a PulseBlaster program with phase cycling.
+
+A close-up of the PCIe board used for TTL control is shown here.
+
+.. figure:: _static/presentation_images/image16.png
+   :align: center
+
+   SpinCore PulseBlaster board used for TTL control.
+
+One question is -- how do we take information
+from this board *as one unit/object* and
+manipulate it seamlessly?
+
+As other example, what if you want to take a basic instrument, like an oscilloscope,
+and use it to do something mildly more
+complicated, like measure the response of an
+NMR probe? 
+We can do this by isolating the envelope of
+the probe's ring-down and
+fitting it to an exponential decay.
+Even though the signal looks like this:
+
+.. figure:: _static/presentation_images/image66.png
+   :align: center
+
+   Raw pulse and reflection used for the measurement.
+
+To interpret it meaningfully, we want to
+convert to analytic signal, as we show below.
+The *key* is that to perform these types of
+manipulations:
+
+* We want to easily move back and forth
+  between the frequency and time domain,
+  while having axes with *real units*.
+* The computer likes to refer to the
+  index/position of a datapoint in a dataset
+  (think frequency spectrum), but we want to
+  be able to use *natural/intuitive* notation
+  for things like frequency selection and
+  filtration.
+
+.. figure:: _static/presentation_images/image67.png
+   :align: center
+
+   Analytic-signal envelope of the reflection.
+   (This is the magnitude of the analytic signal,
+   while the phase gives us information about
+   phase/frequency.)
+
+.. figure:: _static/presentation_images/image68.png
+   :align: center
+
+   Exponential fit to the decay slice tells
+   us about the :math:`Q`-factor (while the
+   phase tells us about resonance offset).
+
+For more examples of specific implementations, see our `processing scripts <https://github.com/jmfrancklab/proc_scripts/>`_ library.
 
 Indices and tables
 ==================

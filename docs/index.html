@@ -17,6 +17,7 @@
     <script src="_static/documentation_options.js?v=a4fd5d96"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -41,9 +42,7 @@
   <section id="pyspecdata-compact-spectral-data-processing">
 <h1>pySpecData: compact spectral data processing!<a class="headerlink" href="#pyspecdata-compact-spectral-data-processing" title="Link to this heading">¶</a></h1>
 <p>pySpecData allows you to deal with multi-dimensional spectroscopy data in an object-oriented fashion.
-<span class="xref std std-ref">See pySpecData examples here</span>,
-and for a simple example applied to 1D data, see
-<a class="reference internal" href="auto_examples/basic_example.html#sphx-glr-auto-examples-basic-example-py"><span class="std std-ref">here</span></a>.</p>
+This has many benefits, which you can read about below, or check out in the example gallery (menu to the left).</p>
 <p>Please note this package is heavily utilized by two other packages that our lab manages on github:</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/jmfrancklab/FLInst/">Classes for communicating with instruments</a>.</p>
@@ -53,69 +52,22 @@ and for a simple example applied to 1D data, see
 <li><p>(Note that the previous two used be separate repositories – they have been combined to improve maintenance).</p></li>
 </ul>
 </li>
+<li><p><a class="reference external" href="https://github.com/jmfrancklab/proc_scripts/">Processing scripts</a> library that does things like:</p>
+<ul>
+<li><p>Automatically process ODNP data.</p></li>
+<li><p>Correlation alignment.</p></li>
+<li><p>Phasing of echo-like NMR data.</p></li>
+<li><p>Quantitative ESR calculation.</p></li>
+<li><p>Aligning ESR spectra for maximum overlap.</p></li>
+<li><p>…*etc*…</p></li>
 </ul>
-<section id="instrumentation-use-cases">
-<h2>Instrumentation use cases<a class="headerlink" href="#instrumentation-use-cases" title="Link to this heading">¶</a></h2>
-<p>PySpecData interfaces with a variety of laboratory hardware.  The diagram below
-summarizes how the resonator, RF transceiver and control computer are
-connected.  This setup comes from our lab and represents just one example of
-how pySpecData can be used alongside instrumentation.</p>
-<figure class="align-center" id="id1">
-<img alt="_images/image14.png" src="_images/image14.png" />
-<figcaption>
-<p><span class="caption-text">Modular EPR/NMR instrument layout.</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
-</figcaption>
-</figure>
-<p>Experiment pulse programs are uploaded to a SpinCore PulseBlaster as shown
-below.</p>
-<figure class="align-center" id="id2">
-<img alt="_images/image15.png" src="_images/image15.png" />
-<figcaption>
-<p><span class="caption-text">Loading a PulseBlaster program with phase cycling.</span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
-</figcaption>
-</figure>
-<p>A close-up of the PCIe board used for TTL control is shown here.</p>
-<figure class="align-center" id="id3">
-<img alt="_images/image16.png" src="_images/image16.png" />
-<figcaption>
-<p><span class="caption-text">SpinCore PulseBlaster board used for TTL control.</span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
-</figcaption>
-</figure>
-<p>Signals are digitized with a Tektronix 11801C sampling oscilloscope.</p>
-<figure class="align-center" id="id4">
-<img alt="_images/image43.png" src="_images/image43.png" />
-<figcaption>
-<p><span class="caption-text">Tektronix sampling oscilloscope for high-speed digitization.</span><a class="headerlink" href="#id4" title="Link to this image">¶</a></p>
-</figcaption>
-</figure>
-<p>To measure the resonator transfer function we capture the reflected microwave
-pulse, isolate its envelope and fit an exponential decay.</p>
-<figure class="align-center" id="id5">
-<img alt="_images/image66.png" src="_images/image66.png" />
-<figcaption>
-<p><span class="caption-text">Raw pulse and reflection used for the measurement.</span><a class="headerlink" href="#id5" title="Link to this image">¶</a></p>
-</figcaption>
-</figure>
-<figure class="align-center" id="id6">
-<img alt="_images/image67.png" src="_images/image67.png" />
-<figcaption>
-<p><span class="caption-text">Analytic-signal envelope of the reflection.</span><a class="headerlink" href="#id6" title="Link to this image">¶</a></p>
-</figcaption>
-</figure>
-<figure class="align-center" id="id7">
-<img alt="_images/image68.png" src="_images/image68.png" />
-<figcaption>
-<p><span class="caption-text">Exponential fit to the decay slice.</span><a class="headerlink" href="#id7" title="Link to this image">¶</a></p>
-</figcaption>
-</figure>
-<ul class="simple">
-<li><p><a class="reference external" href="https://github.com/jmfrancklab/proc_scripts/">ODNP processing scripts</a>.</p></li>
+</li>
 </ul>
-</section>
 </section>
 <section id="the-basics">
 <h1>The Basics<a class="headerlink" href="#the-basics" title="Link to this heading">¶</a></h1>
-<p>Our goal is that after you put in a little effort to learn the new way of manipulating data with pySpecData, you can then make the code for processing spectral data that is shorter and also more quickly legible.
+<p>Our goal is that after you put in a little effort to learn the new way of manipulating data with pySpecData, you can then make the code for processing spectral data that is shorter and that can be written and read in a shorter amount of time
+(<em>vs</em> using standard numpy).
 PySpecData <em>automatically</em> handles the following issues, without any additional code:</p>
 <ul class="simple">
 <li><p>relabeling axes after a Fourier transformation</p></li>
@@ -163,11 +115,11 @@ and the name of dimension (<em>t2</em> in this example) and its units along the
 <p>Because the axes are tracked transparently, pySpecData is easy to
 integrate into graphical interfaces.  Our <code class="xref py py-mod docutils literal notranslate"><span class="pre">FLInst</span></code> package makes
 heavy use of this feature to acquire data in real time, as shown below.</p>
-<figure class="align-center" id="id8">
+<figure class="align-center" id="id3">
 <img alt="_images/image17.png" src="_images/image17.png" />
 <figcaption>
 <p><span class="caption-text">A simple GUI window can be used to acquire a spin echo and immediately
-Fourier transform the result.</span><a class="headerlink" href="#id8" title="Link to this image">¶</a></p>
+Fourier transform the result.</span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <section id="how-do-i-generate-an-nddata-object">
@@ -179,13 +131,19 @@ file formats.
 You can use the <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.find_file" title="pyspecdata.find_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">pyspecdata.find_file()</span></code></a> function to automatically load them as nddata.</p>
 <p>Additionally, we have written several classes that allow you to read
 nddata objects directly from <em>e.g.</em> an oscilloscope.
-These are available as separate repositories on github (please contact us for further info).</p>
-<p>Finally, you can easily build nddata from standard arrays, as discussed in the section <a class="reference internal" href="nddata.html"><span class="doc">about nddata objects</span></a>.</p>
+These are available in
+<a class="reference external" href="https://github.com/jmfrancklab/FLInst/">separate repositories on github</a>.</p>
+<p>Finally, you can easily build nddata from standard arrays, as discussed in the
+section <a class="reference internal" href="nddata.html"><span class="doc">about nddata objects</span></a>.</p>
 </section>
 <section id="what-can-i-do-with-nddata-objects">
 <h2>What can I do with nddata objects?<a class="headerlink" href="#what-can-i-do-with-nddata-objects" title="Link to this heading">¶</a></h2>
 <p>To understand how to manipulate nddata objects, head over to the section
 <a class="reference internal" href="nddata.html"><span class="doc">about nddata objects</span></a>.</p>
+<p>You are <strong>strongly</strong> encouraged to check out the example gallery (menu to the left)
+both for this repo,
+and for the companion
+<a class="reference external" href="https://github.com/jmfrancklab/proc_scripts/">processing scripts</a> library.</p>
 </section>
 <section id="contents">
 <h2>Contents:<a class="headerlink" href="#contents" title="Link to this heading">¶</a></h2>
@@ -248,6 +206,84 @@ These and further details are covered in the various sections of the documentati
 </li>
 </ul>
 </div>
+</section>
+<section id="instrumentation-use-cases">
+<h2>Instrumentation use cases<a class="headerlink" href="#instrumentation-use-cases" title="Link to this heading">¶</a></h2>
+<p>PySpecData interfaces with a variety of laboratory hardware.  The diagram below
+summarizes how the resonator, RF transceiver and control computer are
+connected.  This setup comes from our lab and represents just one example of
+how pySpecData can be used alongside instrumentation.</p>
+<figure class="align-center" id="id4">
+<img alt="_images/image14.png" src="_images/image14.png" />
+<figcaption>
+<p><span class="caption-text">Modular EPR/NMR instrument layout.</span><a class="headerlink" href="#id4" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>Experiment pulse programs are uploaded to a SpinCore PulseBlaster as shown
+below.</p>
+<figure class="align-center" id="id5">
+<img alt="_images/image15.png" src="_images/image15.png" />
+<figcaption>
+<p><span class="caption-text">Loading a PulseBlaster program with phase cycling.</span><a class="headerlink" href="#id5" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>A close-up of the PCIe board used for TTL control is shown here.</p>
+<figure class="align-center" id="id6">
+<img alt="_images/image16.png" src="_images/image16.png" />
+<figcaption>
+<p><span class="caption-text">SpinCore PulseBlaster board used for TTL control.</span><a class="headerlink" href="#id6" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>One question is – how do we take information
+from this board <em>as one unit/object</em> and
+manipulate it seamlessly?</p>
+<p>As other example, what if you want to take a basic instrument, like an oscilloscope,
+and use it to do something mildly more
+complicated, like measure the response of an
+NMR probe?
+We can do this by isolating the envelope of
+the probe’s ring-down and
+fitting it to an exponential decay.
+Even though the signal looks like this:</p>
+<figure class="align-center" id="id7">
+<img alt="_images/image66.png" src="_images/image66.png" />
+<figcaption>
+<p><span class="caption-text">Raw pulse and reflection used for the measurement.</span><a class="headerlink" href="#id7" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>To interpret it meaningfully, we want to
+convert to analytic signal, as we show below.
+The <em>key</em> is that to perform these types of
+manipulations:</p>
+<ul class="simple">
+<li><p>We want to easily move back and forth
+between the frequency and time domain,
+while having axes with <em>real units</em>.</p></li>
+<li><p>The computer likes to refer to the
+index/position of a datapoint in a dataset
+(think frequency spectrum), but we want to
+be able to use <em>natural/intuitive</em> notation
+for things like frequency selection and
+filtration.</p></li>
+</ul>
+<figure class="align-center" id="id8">
+<img alt="_images/image67.png" src="_images/image67.png" />
+<figcaption>
+<p><span class="caption-text">Analytic-signal envelope of the reflection.
+(This is the magnitude of the analytic signal,
+while the phase gives us information about
+phase/frequency.)</span><a class="headerlink" href="#id8" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id9">
+<img alt="_images/image68.png" src="_images/image68.png" />
+<figcaption>
+<p><span class="caption-text">Exponential fit to the decay slice tells
+us about the <span class="math notranslate nohighlight">\(Q\)</span>-factor (while the
+phase tells us about resonance offset).</span><a class="headerlink" href="#id9" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>For more examples of specific implementations, see our <a class="reference external" href="https://github.com/jmfrancklab/proc_scripts/">processing scripts</a> library.</p>
 </section>
 </section>
 <section id="indices-and-tables">
