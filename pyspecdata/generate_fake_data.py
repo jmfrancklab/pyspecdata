@@ -5,6 +5,7 @@ from pyspecdata import nddata, ndshape
 import numpy as np
 from numpy.random import normal
 
+
 def fake_data(
     expression,
     axis_coords,
@@ -14,11 +15,16 @@ def fake_data(
     SD_amp=[1, 5],
     scale=100,
     fake_data_noise_std=1.0,
-    fl=fl_dummy
+    fl=fl_dummy,
 ):
     """Generate fake data subject to noise and frequency variation.
 
-    This includes a variation of the resonance frequency.  The user can adjust the scale and the timescale of the frequency variation, which is modeled by way of spectral density function that describes the random fluctuation of the resonance frequency.  (To avoid confusion, note that this spectral density function does NOT control the noise voltage, which is given by a standard normal distribution of constant variation.)
+    This includes a variation of the resonance frequency.  The user can adjust
+    the scale and the timescale of the frequency variation, which is modeled by
+    way of spectral density function that describes the random fluctuation of
+    the resonance frequency.  (To avoid confusion, note that this spectral
+    density function does NOT control the noise voltage, which is given by a
+    standard normal distribution of constant variation.)
 
     Parameters
     ==========
@@ -32,7 +38,8 @@ def fake_data(
 
         To enable *simulating echo-like data*, you can specify a direct axis
         that starts at a negative number.
-        If you do this, the beginning of the axis will be re-set to 0 before returning.
+        If you do this, the beginning of the axis will be re-set to 0 before
+        returning.
     SD_sigma: list of floats
         Gives the Gaussian σ for the spectral density of the
         time-dependent variation of the resonance frequency.
@@ -54,14 +61,17 @@ def fake_data(
     mysymbols = list(expression.atoms(sympy_symbol))
     missing = set(str(j) for j in mysymbols) - set(axis_coords.keys())
     assert len(missing) == 0, (
-        "all non-phase cycling symbols in your expression must have matching axis coordinates in the dictionary -- you are missing %s!"
+        "all non-phase cycling symbols in your expression must have matching"
+        " axis coordinates in the dictionary -- you are missing %s!"
         % str(missing)
     )
     thefunction = lambdify(mysymbols, expression, "numpy")
     clean_data = thefunction(*tuple(axis_coords[str(j)] for j in mysymbols))
     for j in signal_pathway.keys():
-        clean_data *= np.exp(signal_pathway[j] * 1j * 2 * np.pi * axis_coords[j])
-    ## {{{ model frequency drift
+        clean_data *= np.exp(
+            signal_pathway[j] * 1j * 2 * np.pi * axis_coords[j]
+        )
+    # {{{ model frequency drift
     indirect_size = np.prod(
         [ndshape(clean_data)[j] for j in axis_coords.keys() if j != direct]
     )
@@ -70,12 +80,18 @@ def fake_data(
     # {{{ control the spectral density of the shifts to be gaussian
     frq_noise = nddata(frq_noise, [-1], ["temp"])
     N = ndshape(frq_noise)["temp"]
-    frq_noise.setaxis("temp", -0.5 + np.r_[0:N] / N).set_units("temp", "cycperscan")
+    frq_noise.setaxis("temp", -0.5 + np.r_[0:N] / N).set_units(
+        "temp", "cycperscan"
+    )
     SD_gen = zip(SD_sigma, SD_amp)
     sigma, A = next(SD_gen)
-    frq_noise_dens = A * np.exp(-frq_noise.fromaxis("temp") ** 2 / 2 / sigma ** 2)
+    frq_noise_dens = A * np.exp(
+        -frq_noise.fromaxis("temp") ** 2 / 2 / sigma**2
+    )
     for sigma, A in SD_gen:
-        frq_noise_dens += A * np.exp(-frq_noise.fromaxis("temp") ** 2 / 2 / sigma ** 2)
+        frq_noise_dens += A * np.exp(
+            -frq_noise.fromaxis("temp") ** 2 / 2 / sigma**2
+        )
     frq_noise *= frq_noise_dens
     fl.push_marker()
     fl.next("frq-noise density")
@@ -92,7 +108,7 @@ def fake_data(
         [ndshape(clean_data)[j] for j in axis_coords.keys() if j != direct],
         [j for j in axis_coords.keys() if j != direct],
     )
-    ## }}}
+    # }}}
     data = clean_data.C
     data.add_noise(fake_data_noise_std)
     data *= np.exp(
@@ -102,7 +118,7 @@ def fake_data(
     for j in signal_pathway.keys():
         data.ft(j, unitary=True)
     fl.pop_marker()
-    data.setaxis(direct, lambda x: x - data.getaxis(direct)[0])
+    data.setaxis(direct, data.getaxis(direct))
     data.ft(direct, shift=True)
     data.ift(direct)
     data.register_axis({direct: 0})

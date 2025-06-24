@@ -1,0 +1,37 @@
+pyspecdata.matrix\_math package
+===============================
+
+Submodules
+----------
+
+pyspecdata.matrix\_math.dot module
+----------------------------------
+
+.. automodule:: pyspecdata.matrix_math.dot
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pyspecdata.matrix\_math.nnls module
+-----------------------------------
+
+.. automodule:: pyspecdata.matrix_math.nnls
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pyspecdata.matrix\_math.svd module
+----------------------------------
+
+.. automodule:: pyspecdata.matrix_math.svd
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: pyspecdata.matrix_math
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -4,6 +4,7 @@ from matplotlib import ticker as mticker
 import matplotlib.pylab as plt
 import matplotlib.transforms as mtransforms
 import matplotlib.ticker as mticker
+import itertools
 #{{{ old grid and tick
 def gridandtick(ax,rotation=(0,0),precision=(2,2),
         labelstring=('',''),gridcolor=r_[0,0,0],
@@ -550,3 +551,5 @@ def colormap(points,colors,n=256):
     g = np.interp(np.linspace(0,1,n),points,colors[:,1].flatten())
     b = np.interp(np.linspace(0,1,n),points,colors[:,2].flatten())
     return np.reshape(r_[r,g,b],(3,n)).T
+
+default_cycler = itertools.cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])

@@ -127,6 +127,8 @@ def wraplatex():
     os.system(shellcmd)
     print("executing:",'update_notebook_pythonscripts')
     os.system('update_notebook_pythonscripts')
+    print("executing:",shellcmd)
+    os.system(shellcmd)
     if orig_tex_basename != new_pdf_basename:
         print("preparing to:",'cp '+orig_tex_basename+'.pdf '+new_pdf_basename+'.pdf')
         os.system('cp '+orig_tex_basename+'.pdf '+new_pdf_basename+'.pdf')

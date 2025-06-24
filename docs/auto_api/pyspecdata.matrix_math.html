@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pyspecdata.matrix_math package &#8212; pySpecData 0.9.5.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=832af5b0" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css?v=7f9a90b1" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=2b30a6e6" />
+    <script src="../_static/documentation_options.js?v=a4fd5d96"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="pyspecdata-matrix-math-package">
+<h1>pyspecdata.matrix_math package<a class="headerlink" href="#pyspecdata-matrix-math-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-pyspecdata.matrix_math.dot">
+<span id="pyspecdata-matrix-math-dot-module"></span><h2>pyspecdata.matrix_math.dot module<a class="headerlink" href="#module-pyspecdata.matrix_math.dot" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.matrix_math.dot.along">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.dot.</span></span><span class="sig-name descname"><span class="pre">along</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rename_redundant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.dot.along" title="Link to this definition">¶</a></dt>
+<dd><p>Specifies the dimension for the next matrix
+multiplication (represents the rows/columns).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimname</strong> (<em>str</em>) – <p>The next time matrix multiplication is called,
+‘dimname’ will be summed over.
+That is, <cite>dimname</cite> will become the columns position if this
+is the first matrix.</p>
+<p>If <cite>along</cite> is not called for the second matrix,
+<cite>dimname</cite> will also take the position of rows for that
+matrix!</p>
+</p></li>
+<li><p><strong>rename_redundant</strong> (<em>tuple</em><em> of </em><em>str</em><em> or </em><em>(</em><em>default</em><em>) </em><em>None</em>) – <p>If you are multiplying two different matrices,
+then it is only sensible that before the multiplication,
+you should identify the dimension representing the row
+space of the right matrix and the column space of the left
+matrix with different names.</p>
+<p><strong>However</strong> sometimes
+(<em>e.g.</em> constructing projection matrices)
+you may want to start with two matrices where both the
+row space of the right matrix and the column space of the
+left have the same name.
+If so, you will want to rename the column space of the
+resulting matrix – then you pass
+<code class="docutils literal notranslate"><span class="pre">rename_redundant=('orig</span> <span class="pre">name','new</span> <span class="pre">name')</span></code></p>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.matrix_math.dot.dot">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.dot.</span></span><span class="sig-name descname"><span class="pre">dot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.dot.dot" title="Link to this definition">¶</a></dt>
+<dd><p>This will perform a dot product or a matrix multiplication.
+If one dimension in <code class="docutils literal notranslate"><span class="pre">arg</span></code> matches that in <code class="docutils literal notranslate"><span class="pre">self</span></code>,
+it will dot along that dimension
+(take a matrix multiplication where that
+dimension represents the columns of
+<code class="docutils literal notranslate"><span class="pre">self</span></code> and the rows of <code class="docutils literal notranslate"><span class="pre">arg</span></code>)</p>
+<p>Note that if you have your dimensions
+named “rows” and “columns”, this will be
+very confusing, but if you have your
+dimensions named in terms of the vector
+basis they are defined/live in, this
+makes sense.</p>
+<p>If there are zero or no matching
+dimensions, then use
+<a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata.along" title="pyspecdata.nddata.along"><code class="xref py py-func docutils literal notranslate"><span class="pre">along()</span></code></a> to
+specify the dimensions for matrix
+multiplication / dot product.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.matrix_math.dot.matmul">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.dot.</span></span><span class="sig-name descname"><span class="pre">matmul</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.dot.matmul" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-pyspecdata.matrix_math.nnls">
+<span id="pyspecdata-matrix-math-nnls-module"></span><h2>pyspecdata.matrix_math.nnls module<a class="headerlink" href="#module-pyspecdata.matrix_math.nnls" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.G">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">G</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.G" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.H">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">H</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">product</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.H" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.chi">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">chi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_fornnls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.chi" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.d_chi">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">d_chi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_fornnls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.d_chi" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.dd_chi">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">dd_chi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.dd_chi" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.demand_real">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">demand_real</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addtxt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.demand_real" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.mod_BRD">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">mod_BRD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">guess</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_fornnls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.mod_BRD" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.newton_min">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">newton_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_fornnls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.newton_min" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.nnls">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">nnls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimname_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newaxis_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_uncompressed_kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.nnls" title="Link to this definition">¶</a></dt>
+<dd><p>Perform regularized non-negative least-squares “fit” on self.</p>
+<p>Capable of solving for solution in 1 or 2 dimensions.</p>
+<p>We seek to minimize
+<span class="math notranslate nohighlight">\(Q = \| Ax - b \|_2 + \|\lambda x\|_2\)</span>
+in order to obtain solution vector <span class="math notranslate nohighlight">\(x\)</span> subject to non-negativity constraint
+given input matrix <span class="math notranslate nohighlight">\(A\)</span>, the kernel, and input vector <span class="math notranslate nohighlight">\(b\)</span>, the data.</p>
+<p>The first term assesses agreement between the fit <span class="math notranslate nohighlight">\(Ax\)</span> and the data <span class="math notranslate nohighlight">\(b\)</span>,
+and the second term accounts for noise with the regularization parameter <span class="math notranslate nohighlight">\(\lambda\)</span>
+according to Tikhonov regularization.</p>
+<p>To perform regularized minimization in 1 dimension, provide
+<a href="#id1"><span class="problematic" id="id2">:str:`dimname_list`</span></a>, <a href="#id3"><span class="problematic" id="id4">:nddata:`newaxis_dict`</span></a>, <a href="#id5"><span class="problematic" id="id6">:function:`kernel_func`</span></a>, and
+regularization parameter <cite>l</cite>. One may set <cite>l</cite> to a :double: of the regularization
+parameter of choice (found, for instance, through L-curve analysis) or
+set <cite>l</cite> to <a href="#id7"><span class="problematic" id="id8">:str:`BRD`</span></a> to enable automatic selection of a regularization
+parameter via the BRD algorithm - namely that described in Venkataramanan et al. 2002
+but adapted for 1D case (DOI:10.1109/78.995059).</p>
+<p>To perform regularized minimization in 2 dimensions, set <cite>l</cite> to
+<a href="#id9"><span class="problematic" id="id10">:str:`BRD`</span></a> and provide a tuple of parameters <a href="#id11"><span class="problematic" id="id12">:str:`dimname_list`</span></a>,
+<a href="#id13"><span class="problematic" id="id14">:nddata:`newaxis_dict`</span></a>, and <a href="#id15"><span class="problematic" id="id16">:function:`kernel_func`</span></a>.  Algorithm
+described in Venkataramanan et al. 2002 is performed which determines
+optimal <span class="math notranslate nohighlight">\(\lambda\)</span> for the data (DOI:10.1109/78.995059).
+Note that setting <cite>l</cite> to a :double: for a regularization
+parameter is supported in this 2 dimensional should an
+appropriate parameter be known.</p>
+<p>See: <a class="reference external" href="https://en.wikipedia.org/wiki/Non-negative_least_squares">Wikipedia page on NNLS</a>,
+<a class="reference external" href="https://en.wikipedia.org/wiki/Tikhonov_regularization">Wikipedia page on Tikhonov regularization</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimname_list</strong> (<em>str</em><em> or </em><em>tuple</em>) – <p>Name of the “data” dimension that is to be replaced by a
+distribution (the “fit” dimension);
+<em>e.g.</em> if you are regularizing a set of functions
+<span class="math notranslate nohighlight">\(\exp(-\tau*R_1)\)</span>, then this is <span class="math notranslate nohighlight">\(\tau\)</span></p>
+<p>If you are performing 2D regularization, then this
+is a tuple (pair) of 2 names</p>
+</p></li>
+<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><em>(</em><em>tuple of</em><em>) </em><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><em>nddata</em></a>) – <p>a dictionary whose key is the name of the “fit” dimension
+(<span class="math notranslate nohighlight">\(R_1\)</span> in the example above)
+and whose value is an np.array with the new axis labels.</p>
+<p>OR</p>
+<p>this can be a 1D nddata
+– if it has an axis, the axis will be used to create the
+fit axis; if it has no axis, the data will be used</p>
+<p>OR</p>
+<p>if dimname_list is a tuple of 2 dimensions indicating a 2D ILT, this
+should also be a tuple of 2 nddata, representing the two axes</p>
+</p></li>
+<li><p><strong>kernel_func</strong> (<em>function</em><em> or </em><em>tuple</em><em> of </em><em>functions</em>) – <p>a function giving the kernel for the regularization.
+The first argument is the “data” variable
+and the second argument is the “fit” variable
+(in the example above, this would be something like
+<code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">x,y:</span> <span class="pre">exp(-x*y)</span></code>)</p>
+<p>For 2D, this must be a tuple or dictionary of functions – the kernel is
+the product of the two.</p>
+</p></li>
+<li><p><strong>l</strong> (<em>double</em><em> (</em><em>default 0</em><em>) or </em><em>str</em>) – the regularization parameter <span class="math notranslate nohighlight">\(lambda\)</span> – if this is
+set to 0, the algorithm reverts to standard nnls.  If this
+is set to <a href="#id17"><span class="problematic" id="id18">:str:`BRD`</span></a>, then automatic parameter selection is executed
+according to the BRD algorithm, either in 1-dimension or
+2-dimensions depending on presence of tuple synax
+(i.e., specifying more than 1 dimension).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>The regularized result.
+For future use, both the kernel (as an nddata, in a property called
+“nnls_kernel”) and the residual (as an nddata, in a property called
+“nnls_residual”) are stored as properties of the nddata.
+The regularized dimension is always last
+(innermost).</p>
+<p>If the tuple syntax is used to input 2 dimensions and
+<a href="#id19"><span class="problematic" id="id20">:str:`BRD`</span></a> is specified, then the individual,
+uncompressed kernels <span class="math notranslate nohighlight">\(K_{1}\)</span> and <span class="math notranslate nohighlight">\(K_{2}\)</span>
+are returned as properties of the nddata “K1” and “K2”
+respectively. The number of singular values used to
+compressed each kernel is returned in properties of the
+nddata called, respectively, “s1” and “s2”.</p>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>self</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.optimize_alpha">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">optimize_alpha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.optimize_alpha" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.square_heaviside">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">square_heaviside</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.square_heaviside" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-pyspecdata.matrix_math.svd">
+<span id="pyspecdata-matrix-math-svd-module"></span><h2>pyspecdata.matrix_math.svd module<a class="headerlink" href="#module-pyspecdata.matrix_math.svd" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.matrix_math.svd.svd">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.svd.</span></span><span class="sig-name descname"><span class="pre">svd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">todim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fromdim</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.svd.svd" title="Link to this definition">¶</a></dt>
+<dd><p>Singular value decomposition.  Original matrix is unmodified.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Because we are planning to upgrade with axis objects,
+FT properties, axis errors, etc, are not transferred here.
+If you are using it when this note is still around, be sure to
+<cite>.copy_props(</cite></p>
+<p>Also, error, units, are not currently propagated, but could be relatively easily!</p>
+</div>
+<p>If</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">U</span><span class="p">,</span> <span class="n">Sigma</span><span class="p">,</span> <span class="n">Vh</span> <span class="o">=</span> <span class="n">thisinstance</span><span class="o">.</span><span class="n">svd</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>then <code class="docutils literal notranslate"><span class="pre">U</span></code>, <code class="docutils literal notranslate"><span class="pre">Sigma</span></code>, and <code class="docutils literal notranslate"><span class="pre">Vh</span></code> are nddata such that <code class="docutils literal notranslate"><span class="pre">result</span></code> in</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">U</span> <span class="o">@</span> <span class="n">Sigma</span> <span class="o">@</span> <span class="n">Vh</span>
+</pre></div>
+</div>
+<p>will be the same as <code class="docutils literal notranslate"><span class="pre">thisinstance</span></code>.
+Note that this relies on the fact that nddata matrix multiplication doesn’t care about the ordering
+of the dimensions (see <a href="#id21"><span class="problematic" id="id22">:method:`~pyspecdata.core.dot`</span></a>).
+The vector space that contains the singular values is called <cite>‘SV’</cite> (see more below).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fromdim</strong> (<em>str</em>) – This dimension corresponds to the columns of the matrix that is
+being analyzed by SVD.
+(The matrix transforms from the vector space labeled by <code class="docutils literal notranslate"><span class="pre">fromdim</span></code>
+and into the vector space labeled by <code class="docutils literal notranslate"><span class="pre">todim</span></code>).</p></li>
+<li><p><strong>todim</strong> (<em>str</em>) – This dimension corresponds to the rows of the matrix that is
+being analyzed by SVD.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>U</strong> (<em>nddata</em>) – Has dimensions (all other dimensions) × ‘todim’ × ‘SV’,
+where the dimension ‘SV’ is the vector space of the singular
+values.</p></li>
+<li><p><strong>Sigma</strong> (<em>nddata</em>) – Has dimensions (all other dimensions) × ‘SV’.
+Only non-zero</p></li>
+<li><p><strong>Vh</strong> (<em>nddata</em>) – Has dimensions (all other dimensions) × ‘SV’ × ‘fromdim’,</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pyspecdata.matrix_math">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyspecdata.matrix_math" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/pyspec_path_equaltip.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the lmfitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">PySpecData Examples</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2016, John M. Franck.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/auto_api/pyspecdata.matrix_math.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

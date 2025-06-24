@@ -6,34 +6,74 @@
 
 Computation times
 =================
-**00:12.110** total execution time for **auto_examples** files:
+**00:29.267** total execution time for 15 files **from auto_examples**:
 
-+---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_QESR.py` (``QESR.py``)                       | 00:03.870 | 0.0 MB |
-+---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_DCCT_function.py` (``DCCT_function.py``)     | 00:02.175 | 0.0 MB |
-+---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_image_plot.py` (``image_plot.py``)           | 00:01.250 | 0.0 MB |
-+---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_BSA_calibration.py` (``BSA_calibration.py``) | 00:00.925 | 0.0 MB |
-+---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_ellmans.py` (``ellmans.py``)                 | 00:00.905 | 0.0 MB |
-+---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_ppm_example.py` (``ppm_example.py``)         | 00:00.502 | 0.0 MB |
-+---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_Cary_simple.py` (``Cary_simple.py``)         | 00:00.490 | 0.0 MB |
-+---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_esr_example.py` (``esr_example.py``)         | 00:00.465 | 0.0 MB |
-+---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_basic_example.py` (``basic_example.py``)     | 00:00.387 | 0.0 MB |
-+---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_convolution.py` (``convolution.py``)         | 00:00.307 | 0.0 MB |
-+---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_fit_fake_data.py` (``fit_fake_data.py``)     | 00:00.303 | 0.0 MB |
-+---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_fit_with_bounds.py` (``fit_with_bounds.py``) | 00:00.246 | 0.0 MB |
-+---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_fit_complex.py` (``fit_complex.py``)         | 00:00.205 | 0.0 MB |
-+---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_polyfit.py` (``polyfit.py``)                 | 00:00.080 | 0.0 MB |
-+---------------------------------------------------------------------------+-----------+--------+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_auto_examples_temp.py` (``temp.py``)
+     - 00:28.217
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_fit_fake_data.py` (``fit_fake_data.py``)
+     - 00:01.050
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_BRD_test.py` (``BRD_test.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_basic_example.py` (``basic_example.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_calculate_covariance.py` (``calculate_covariance.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_convolution.py` (``convolution.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_error_example.py` (``error_example.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_fit_complex.py` (``fit_complex.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_fit_complex_with_transform.py` (``fit_complex_with_transform.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_fit_with_bounds.py` (``fit_with_bounds.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_image_plot.py` (``image_plot.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_pcolor_example.py` (``pcolor_example.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_polyfit.py` (``polyfit.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_ppm_2D.py` (``ppm_2D.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_ppm_example.py` (``ppm_example.py``)
+     - 00:00.000
+     - 0.0

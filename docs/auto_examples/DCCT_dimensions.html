@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Using the DCCT function &#8212; pySpecData 0.9.5.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=832af5b0" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css?v=7f9a90b1" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=2b30a6e6" />
+    <script src="../_static/documentation_options.js?v=a4fd5d96"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-dcct-dimensions-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="using-the-dcct-function">
+<span id="sphx-glr-auto-examples-dcct-dimensions-py"></span><h1>Using the DCCT function<a class="headerlink" href="#using-the-dcct-function" title="Link to this heading">¶</a></h1>
+<p>Visualize a simulated inversion recovery dataset utilizing the benefits of the
+DCCT plotting style.</p>
+<p>We can image data in both the phase cycling domain, or the coherence transfer
+domain. Artifacts can clearly be discerned from signal in the coherence
+transfer domain as well as visualizing the inversion of phase using the domain
+colored plotting style.</p>
+<p>Here, kwargs plotted in red (e.g. vert_label_space) illustrate the kwargs are
+in display coordinates while kwargs that are in blue (e.g. bbox and LHS_pad)
+illustrate the kwargs are in figure coordinates</p>
+<img src="../_images/sphx_glr_DCCT_dimensions_001.png" srcset="../_images/sphx_glr_DCCT_dimensions_001.png, ../_images/sphx_glr_DCCT_dimensions_001_2_00x.png 2.00x" alt="DCCT dimensions" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>----------  logging output to /home/jmfranck/pyspecdata.0.log  ----------
+Warning!!! FT clear startpoints is obsolete! use ft_new_startpoint instead
+1: Data
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="n">rcParams</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pyspecdata</span> <span class="k">as</span> <span class="nn">psd</span>
+<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">seed</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">r_</span>
+<span class="kn">import</span> <span class="nn">sympy</span> <span class="k">as</span> <span class="nn">s</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+
+<span class="k">def</span> <span class="nf">plot_w_markup</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">thistext</span><span class="p">,</span> <span class="n">thiscolor</span><span class="p">,</span> <span class="n">thistransf</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">endmarker</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span>
+        <span class="n">alignment</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+            <span class="n">va</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">thistext</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">thistext</span>  <span class="c1"># make space between vert bar and text</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">endmarker</span> <span class="o">=</span> <span class="s2">&quot;|&quot;</span>
+        <span class="n">alignment</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+            <span class="n">va</span><span class="o">=</span><span class="s2">&quot;top&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">,</span>
+        <span class="n">thiscolor</span><span class="p">,</span>
+        <span class="n">marker</span><span class="o">=</span><span class="n">endmarker</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">clip_on</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">=</span><span class="n">thistransf</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
+        <span class="n">thistext</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">thiscolor</span><span class="p">,</span>
+        <span class="n">clip_on</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">=</span><span class="n">thistransf</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">alignment</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="n">seed</span><span class="p">(</span><span class="mi">2021</span><span class="p">)</span>
+<span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;image.aspect&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span>  <span class="c1"># needed for sphinx gallery</span>
+<span class="c1"># sphinx_gallery_thumbnail_number = 1</span>
+<a href="../auto_api/pyspecdata.html#pyspecdata.init_logging" title="pyspecdata.init_logging" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-function"><span class="n">psd</span><span class="o">.</span><span class="n">init_logging</span></a><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;debug&quot;</span><span class="p">)</span>
+<span class="c1"># {{{ kwargs for DCCT plot</span>
+<span class="n">bbox</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">]</span>
+<span class="n">horiz_label_spacer</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">gap</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="c1"># }}}</span>
+
+<span class="k">with</span> <a href="../modules.html#module-pyspecdata.figlist" title="pyspecdata.figlist" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">psd</span><span class="o">.</span><span class="n">figlist_var</span></a><span class="p">()</span> <span class="k">as</span> <a href="../modules.html#module-pyspecdata.figlist" title="pyspecdata.figlist" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">fl</span></a><span class="p">:</span>
+    <span class="c1"># provide the symbols that we use for the fake data:</span>
+    <span class="n">t2</span><span class="p">,</span> <span class="n">td</span><span class="p">,</span> <span class="n">vd</span><span class="p">,</span> <span class="n">ph1</span><span class="p">,</span> <span class="n">ph2</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="s2">&quot;t2 td vd ph1 ph2&quot;</span><span class="p">)</span>
+    <span class="n">echo_time</span> <span class="o">=</span> <span class="mf">5e-3</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a> <span class="o">=</span> <a href="../auto_api/pyspecdata.html#pyspecdata.fake_data" title="pyspecdata.fake_data" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-function"><span class="n">psd</span><span class="o">.</span><span class="n">fake_data</span></a><span class="p">(</span>
+        <span class="c1"># Give the functional form of the fake data.</span>
+        <span class="c1"># This is an inversion recovery with</span>
+        <span class="c1"># T₁ of 0.2</span>
+        <span class="c1"># T₂* broadening of 50 Hz</span>
+        <span class="c1"># (echo maximum at echo_time)</span>
+        <span class="c1"># amplitude of 21</span>
+        <span class="c1"># resonance offset 100 Hz</span>
+        <span class="mi">21</span>
+        <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">vd</span> <span class="o">/</span> <span class="mf">0.2</span><span class="p">))</span>
+        <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">+</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">t2</span><span class="p">)</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">t2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">50</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span>
+        <span class="c1"># next we give our dimensions with outer loops first, as they</span>
+        <span class="c1"># would be acquired on the spectrometer</span>
+        <span class="c1"># (ordering does matter, because fake_data applies a</span>
+        <span class="c1"># time-dependent resonance variation -- see fake_data doc.)</span>
+        <span class="n">OrderedDict</span><span class="p">([</span>
+            <span class="p">(</span><span class="s2">&quot;vd&quot;</span><span class="p">,</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">psd</span><span class="o">.</span><span class="n">nddata</span></a><span class="p">(</span><span class="n">psd</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">:</span><span class="mi">40</span><span class="n">j</span><span class="p">],</span> <span class="s2">&quot;vd&quot;</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s2">&quot;ph1&quot;</span><span class="p">,</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">psd</span><span class="o">.</span><span class="n">nddata</span></a><span class="p">(</span><span class="n">psd</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="mf">4.0</span><span class="p">,</span> <span class="s2">&quot;ph1&quot;</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s2">&quot;ph2&quot;</span><span class="p">,</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">psd</span><span class="o">.</span><span class="n">nddata</span></a><span class="p">(</span><span class="n">psd</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">/</span> <span class="mf">4.0</span><span class="p">,</span> <span class="s2">&quot;ph2&quot;</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s2">&quot;t2&quot;</span><span class="p">,</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">psd</span><span class="o">.</span><span class="n">nddata</span></a><span class="p">(</span><span class="n">psd</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mf">0.2</span><span class="p">:</span><span class="mi">256</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">echo_time</span><span class="p">,</span> <span class="s2">&quot;t2&quot;</span><span class="p">)),</span>
+        <span class="p">]),</span>
+        <span class="p">{</span><span class="s2">&quot;ph1&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;ph2&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="c1"># reorder into a format more suitable for plotting</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata.reorder" title="pyspecdata.nddata.reorder" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">data</span><span class="o">.</span><span class="n">reorder</span></a><span class="p">([</span><span class="s2">&quot;ph1&quot;</span><span class="p">,</span> <span class="s2">&quot;ph2&quot;</span><span class="p">,</span> <span class="s2">&quot;vd&quot;</span><span class="p">,</span> <span class="s2">&quot;t2&quot;</span><span class="p">])</span>
+    <span class="n">fig</span> <span class="o">=</span> <a href="../auto_api/pyspecdata.html#pyspecdata.figlist.next" title="pyspecdata.figlist.next" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">next</span></a><span class="p">(</span><span class="s2">&quot;Data&quot;</span><span class="p">)</span>  <span class="c1"># Make figure object to place the DCCT</span>
+    <span class="n">ax_list</span><span class="p">,</span> <span class="n">trans_dict</span> <span class="o">=</span> <a href="../auto_api/pyspecdata.html#pyspecdata.DCCT" title="pyspecdata.DCCT" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-function"><span class="n">psd</span><span class="o">.</span><span class="n">DCCT</span></a><span class="p">(</span>
+        <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a><span class="p">,</span>
+        <span class="n">fig</span><span class="p">,</span>
+        <span class="n">horiz_label_spacer</span><span class="o">=</span><span class="n">horiz_label_spacer</span><span class="p">,</span>
+        <span class="n">gap</span><span class="o">=</span><span class="n">gap</span><span class="p">,</span>
+        <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># {{{ add lines indicating kwargs</span>
+    <span class="c1"># {{{ bbox kwargs</span>
+    <span class="n">plot_w_markup</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span> <span class="s2">&quot;bbox[0]&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">fig</span><span class="o">.</span><span class="n">transFigure</span><span class="p">)</span>
+    <span class="n">plot_w_markup</span><span class="p">(</span>
+        <span class="p">[</span><span class="mf">0.16</span><span class="p">,</span> <span class="mf">0.16</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+        <span class="s2">&quot;bbox[1]&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;b&quot;</span><span class="p">,</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">transFigure</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">plot_w_markup</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+        <span class="p">[</span><span class="mf">0.97</span><span class="p">,</span> <span class="mf">0.97</span><span class="p">],</span>
+        <span class="s2">&quot;bbox[2]&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;b&quot;</span><span class="p">,</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">transFigure</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">plot_w_markup</span><span class="p">(</span>
+        <span class="p">[</span><span class="mf">0.93</span><span class="p">,</span> <span class="mf">0.93</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">bbox</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">3</span><span class="p">]],</span>
+        <span class="s2">&quot;bbox[3]&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;b&quot;</span><span class="p">,</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">transFigure</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">plot_w_markup</span><span class="p">(</span>
+        <span class="p">[</span><span class="o">-</span><span class="n">horiz_label_spacer</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">horiz_label_spacer</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
+        <span class="s2">&quot;kwarg(horiz_label_space)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;r&quot;</span><span class="p">,</span>
+        <span class="n">trans_dict</span><span class="p">[</span><span class="s2">&quot;transXdispYfig&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">plot_w_markup</span><span class="p">(</span>
+        <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">horiz_label_spacer</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.55</span><span class="p">,</span> <span class="mf">0.55</span><span class="p">],</span>
+        <span class="s2">&quot;kwarg(horiz_label_space)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;r&quot;</span><span class="p">,</span>
+        <span class="n">trans_dict</span><span class="p">[</span><span class="s2">&quot;transXdispYfig&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">plot_w_markup</span><span class="p">(</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="mi">30</span><span class="p">,</span> <span class="o">+</span><span class="mi">30</span><span class="p">],</span>
+        <span class="s2">&quot;60 pts bracketing origin&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;r&quot;</span><span class="p">,</span>
+        <span class="n">trans_dict</span><span class="p">[</span><span class="s2">&quot;transDispTranslated&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="c1"># }}}</span>
+    <span class="c1"># {{{ gap</span>
+    <span class="n">ax3_bbox</span> <span class="o">=</span> <span class="n">ax_list</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+    <span class="n">ax4_bbox</span> <span class="o">=</span> <span class="n">ax_list</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+    <span class="c1"># {{{ this gives the relative size of the divisions between my plots for</span>
+    <span class="c1">#     the *specific* example here, where ph1 (outer) and ph2 (inner) are</span>
+    <span class="c1">#     the two outermost dimensions</span>
+    <span class="n">divisions</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><a href="../auto_api/pyspecdata.html#pyspecdata.nddata.shape" title="pyspecdata.nddata.shape" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">data</span><span class="o">.</span><span class="n">shape</span></a><span class="p">[</span><span class="s2">&quot;ph2&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="o">+</span> <span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><a href="../auto_api/pyspecdata.html#pyspecdata.nddata.shape" title="pyspecdata.nddata.shape" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">data</span><span class="o">.</span><span class="n">shape</span></a><span class="p">[</span><span class="s2">&quot;ph1&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><a href="../auto_api/pyspecdata.html#pyspecdata.nddata.shape" title="pyspecdata.nddata.shape" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">data</span><span class="o">.</span><span class="n">shape</span></a><span class="p">[</span><span class="s2">&quot;ph2&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">divisions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">divisions</span><span class="p">)</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">divisions</span><span class="p">)</span>
+    <span class="n">small_division</span> <span class="o">=</span> <span class="n">divisions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">big_division</span> <span class="o">=</span> <span class="n">divisions</span><span class="p">[</span><a href="../auto_api/pyspecdata.html#pyspecdata.nddata.shape" title="pyspecdata.nddata.shape" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">data</span><span class="o">.</span><span class="n">shape</span></a><span class="p">[</span><span class="s2">&quot;ph2&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># }}}</span>
+    <span class="n">plot_w_markup</span><span class="p">(</span>
+        <span class="p">[(</span><span class="n">ax3_bbox</span><span class="o">.</span><span class="n">x0</span> <span class="o">+</span> <span class="n">ax3_bbox</span><span class="o">.</span><span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ax3_bbox</span><span class="o">.</span><span class="n">y1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">gap</span> <span class="o">*</span> <span class="n">big_division</span><span class="p">],</span>
+        <span class="sa">r</span><span class="s2">&quot;gap * big_division (see code) &quot;</span><span class="p">,</span>
+        <span class="s2">&quot;b&quot;</span><span class="p">,</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">transFigure</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">plot_w_markup</span><span class="p">(</span>
+        <span class="p">[(</span><span class="n">ax4_bbox</span><span class="o">.</span><span class="n">x0</span> <span class="o">+</span> <span class="n">ax4_bbox</span><span class="o">.</span><span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ax4_bbox</span><span class="o">.</span><span class="n">y1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">gap</span> <span class="o">*</span> <span class="n">small_division</span><span class="p">],</span>
+        <span class="sa">r</span><span class="s2">&quot;gap * small_division (see code) &quot;</span><span class="p">,</span>
+        <span class="s2">&quot;b&quot;</span><span class="p">,</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">transFigure</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># }}}</span>
+    <span class="c1"># }}}</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.125 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-dcct-dimensions-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/379b87f8d1553a000ecad7150e4cad02/DCCT_dimensions.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">DCCT_dimensions.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/d51c0d74da4e7cd88298645e8bcb5868/DCCT_dimensions.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">DCCT_dimensions.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/pyspec_path_equaltip.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the lmfitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">PySpecData Examples</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2016, John M. Franck.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/auto_examples/DCCT_dimensions.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

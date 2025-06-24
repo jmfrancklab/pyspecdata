@@ -1,134 +1,68 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ND-Data &mdash; pySpecData 0.9.5.3.2 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/sg_gallery.css" type="text/css" />
-      <link rel="stylesheet" href="_static/sg_gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="_static/sg_gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="_static/sg_gallery-rendered-html.css" type="text/css" />
-      <link rel="stylesheet" href="_static/gallery_custom.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-    <script src="_static/js/theme.js"></script>
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>ND-Data &#8212; pySpecData 0.9.5.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=832af5b0" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css?v=7f9a90b1" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=2b30a6e6" />
+    <script src="_static/documentation_options.js?v=a4fd5d96"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Documentation of Notebook Helper Functions" href="latexscripts.html" />
-    <link rel="prev" title="Fourier Functions" href="fourier.html" /> 
-</head>
+    <link rel="next" title="Axis Manipulation Functions" href="axis_manipulation.html" />
+    <link rel="prev" title="pySpecData: compact spectral data processing!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> pySpecData
-          </a>
-              <div class="version">
-                0.9.5.3.2
-              </div>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="notebook.html#setting-up-the-notebook">Setting up the notebook</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebook.html#requirements">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebook.html#running-the-notebook">Running the notebook</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="notebook.html#how-it-works">How it works</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="notebook.html#the-latex-end">The LaTeX end</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="notebook.html#the-python-end">The python end</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="pyspecdata.html">N-dimensional Data (nddata)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyspecdata.html#full-list-of-nddata-methods">Full list of <cite>nddata</cite> methods</a></li>
-<li class="toctree-l4"><a class="reference internal" href="latexscripts.html">Documentation of Notebook Helper Functions</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">ND-Data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#multidimensional-data">Multidimensional data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#building-an-nddata-from-numpy-arrays">Building an nddata from numpy arrays</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dimension-labels">Dimension labels</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#item-selection-and-slicing">Item selection and slicing</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#axis-based-indexing">Axis-based Indexing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#axis-ranges">Axis Ranges</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#numbered-indexing-and-slicing">Numbered Indexing and Slicing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#logical">Logical</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#axis-based-indexing-and-slicing-in-the-fourier-domain">Axis-Based Indexing and Slicing in the Fourier Domain</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#error-propagation">Error propagation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#methods-for-manipulating-data">Methods for Manipulating Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#basic-examples">Basic Examples</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#methods-by-sub-topic">Methods by Sub-Topic</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="axis_manipulation.html">Axis Manipulation Functions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="fourier.html">Fourier Functions</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="fitdata.html">the lmfitdata class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
-<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
-</ul>
+  
+  
 
-        </div>
-      </div>
-    </nav>
+  </head><body>
+  
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">pySpecData</a>
-      </nav>
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
 
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="notebook.html">LaTeX Notebook Functionality</a></li>
-          <li class="breadcrumb-item"><a href="pyspecdata.html">N-dimensional Data (nddata)</a></li>
-      <li class="breadcrumb-item active">ND-Data</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="_sources/nddata.rst.txt" rel="nofollow"> View page source</a>
-      </li>
-  </ul>
-  <hr/>
-</div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
+          <div class="body" role="main">
+            
   <section id="nd-data">
-<h1>ND-Data<a class="headerlink" href="#nd-data" title="Permalink to this heading">¶</a></h1>
+<h1>ND-Data<a class="headerlink" href="#nd-data" title="Link to this heading">¶</a></h1>
 <span class="target" id="nddata-summary-label"></span><p>(This is an introduction.  For detailed info, see <a class="reference internal" href="pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">API</span> <span class="pre">documentation</span></code></a>.)</p>
 <p>The nddata class is built on top of <a class="reference external" href="http://numpy.org">numpy</a>.
 Numpy allows you to create multi-dimensional arrays of data.</p>
+<p>Conceptually, an <code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code> instance acts as a container that holds the raw
+array along with its descriptive metadata.  A schematic view of this
+structure appears in <code class="xref std std-numref docutils literal notranslate"><span class="pre">nddata-container-fig</span></code> inside the
+API documentation for <a class="reference internal" href="pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.nddata</span></code></a>.</p>
+<figure class="align-center" id="id4">
+<img alt="_images/image41.jpg" src="_images/image41.jpg" />
+<figcaption>
+<p><span class="caption-text">A simple container metaphor for an <code class="docutils literal notranslate"><span class="pre">nddata</span></code> object.</span><a class="headerlink" href="#id4" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id5">
+<img alt="_images/image36.png" src="_images/image36.png" />
+<figcaption>
+<p><span class="caption-text">Axes, units and error arrays are stored alongside the data itself.</span><a class="headerlink" href="#id5" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 <section id="multidimensional-data">
-<h2>Multidimensional data<a class="headerlink" href="#multidimensional-data" title="Permalink to this heading">¶</a></h2>
+<h2>Multidimensional data<a class="headerlink" href="#multidimensional-data" title="Link to this heading">¶</a></h2>
 <p>The nddata class labels the dimensions (with a short text identifier)
 and allows you to associate
 axes, units, and errors with the data.
@@ -136,10 +70,6 @@ These attributes
 <em>are correctly transformed</em> when you perform arithmetic operations
 or Fourier transforms,
 and are used to automatically format plots.</p>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>also implement with blocks for working in the Fourier domain</p>
-</div>
 <p>Very importantly, most pyspecdata functions are designed to operate on the data <em>in place</em>, meaning that
 rather than doing something like:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="c1"># numpy</span>
@@ -161,23 +91,30 @@ Also, this allows us to string together several operation, e.g.:</p>
 <em>etc.</em>, it should lead to you writing more efficient code, with less variables
 to keep track of, and generally also leads to far more compact code,
 and you should probably not try to bypass it by creating copies of your data.</p>
+<p>The next figure contrasts a plain two-dimensional numpy array with the richer nddata representation.</p>
+<figure class="align-center" id="id6">
+<img alt="_images/image45.png" src="_images/image45.png" />
+<figcaption>
+<p><span class="caption-text">A traditional 2D numpy array for comparison.</span><a class="headerlink" href="#id6" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id7">
+<img alt="_images/image47.png" src="_images/image47.png" />
+<figcaption>
+<p><span class="caption-text">The nddata object keeps track of dimension names, coordinate axes and their uncertainties, making operations and plotting far easier.</span><a class="headerlink" href="#id7" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 <p>In rare circumstances, you <em>need</em> to create a copy of your data
 (I think there is only one case where this is true:
 when you
 need to process the same data in parallel in two different ways to generate two results,
 and then perform math that uses both results).
 For these cases, you can use an easy shortcut for the copy method: <cite>C</cite> (as in <cite>data.C</cite>).</p>
-<div class="admonition-todo admonition" id="id2">
-<p class="admonition-title">Todo</p>
-<p>say something about slicing and copies here</p>
-</div>
 <p>Note that, if all else fails,
 you can always use numpy directly:
 <em>The `data` attribute of an nddata object is just a standard numpy array.</em>
 For example, if you have an nddata object called <code class="docutils literal notranslate"><span class="pre">mydata</span></code>,
 then <code class="docutils literal notranslate"><span class="pre">mydata.data</span></code> is just a <strong>standard numpy array</strong>.
-For beginning users,
-this can be a very helpful fall back.
 But, note that – in most cases – it should be more beneficial if you don’t
 directly access the <cite>data</cite> attribute.</p>
 <p>Below, we outline how you can use
@@ -186,7 +123,7 @@ Then, we note how slicing operations are different (and easier) for nddata than 
 Finally, we outline several classes of methods by sub-topic.</p>
 </section>
 <section id="building-an-nddata-from-numpy-arrays">
-<h2>Building an nddata from numpy arrays<a class="headerlink" href="#building-an-nddata-from-numpy-arrays" title="Permalink to this heading">¶</a></h2>
+<h2>Building an nddata from numpy arrays<a class="headerlink" href="#building-an-nddata-from-numpy-arrays" title="Link to this heading">¶</a></h2>
 <p>You can build nddata objects manually, and we do this a bit in our examples
 (in order to provide a simple example).
 However, in practice, you should first ask yourself whether there is already a means for
@@ -211,16 +148,18 @@ However, the true strength of pySpecData lies in how it treats
 multi-dimensional data.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Please note that the xarray package is another package that deals with multidimensional data, and it does have some of the benefits listed here,
+<blockquote>
+<div><p>Please note that the xarray package is another package that deals with multidimensional data, and it does have some of the benefits listed here,
 but follows a distinctly different philosophy.
 Here, we place a strong an emphasis on benefits that can be derived from
-object-oriented programming.
-For example, error propagation and Fourier transformation are not handled in the same way,
-and the slicing notation is less compact.</p>
+object-oriented programming.</p>
+</div></blockquote>
+<p>For example, we emphasize effort-free error propagation and Fourier transformation,
+as well as a compact and meaningful slicing notation.</p>
 </div>
 </section>
 <section id="dimension-labels">
-<h2>Dimension labels<a class="headerlink" href="#dimension-labels" title="Permalink to this heading">¶</a></h2>
+<h2>Dimension labels<a class="headerlink" href="#dimension-labels" title="Link to this heading">¶</a></h2>
 <p id="nddata-dimension-label">All dimension labels can have a display name (used for printing and plotting)
 and one or more short names (used for writing code).</p>
 <p>You don’t need to keep track of the order of dimensions or align dimensions
@@ -261,26 +200,42 @@ and</p>
 <span class="go">                        +/-None}</span>
 </pre></div>
 </div>
-<p>which are arrays of data organized along two <em>different</em> dimensions.</p>
+<p>which are arrays of data organized along two <em>different</em> dimensions.
+The figure below shows how independent axes are expanded during such operations.</p>
+<figure class="align-center" id="id8">
+<img alt="_images/image56.png" src="_images/image56.png" />
+<figcaption>
+<p><span class="caption-text">Smart dimensionality when combining independent axes.</span><a class="headerlink" href="#id8" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 <p>You can refer to a time dimension, such as <cite>t1</cite>, <cite>t_1</cite>, <cite>t_direct</cite>, <em>etc.</em>
 as <cite>f1</cite>, <cite>f_1</cite>, <em>etc.</em> in order to retrieve the Fourier transform.
 You can set the pairs …</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>error propagation for trig functions doesn’t yet work;
-automatic t <em>vs.</em> f naming not yet implemented.</p>
-</div>
 </section>
 <section id="item-selection-and-slicing">
-<h2>Item selection and slicing<a class="headerlink" href="#item-selection-and-slicing" title="Permalink to this heading">¶</a></h2>
+<h2>Item selection and slicing<a class="headerlink" href="#item-selection-and-slicing" title="Link to this heading">¶</a></h2>
 <p>Pyspecdata offers several different synataxes
 for item selection and slicing.
-These fall into two main categories:
-<em>numbered indexing and slicing</em> (which will be familiar to most users of python)
-and <a href="#id3"><span class="problematic" id="id4">*</span></a>axis-based indexing*a.
-These can be combined in a single square bracket, separated by commas.</p>
-<section id="axis-based-indexing">
-<h3>Axis-based Indexing<a class="headerlink" href="#axis-based-indexing" title="Permalink to this heading">¶</a></h3>
+These fall into two main categories:</p>
+<ul class="simple">
+<li><p><em>numbered</em> indexing and slicing. These will be familiar to most users of python, but require the addition of the dimension name.</p></li>
+</ul>
+<p>and</p>
+<ul class="simple">
+<li><p><em>axis-coordinate-based</em>.  These use the natural axis coordinates.  For example, you can specify a range of frequencies, <em>etc.</em>, directly, and with a <em>very compact</em> syntax.</p></li>
+</ul>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#axis-coordinate-based-indexing" id="id11">Axis-coordinate-based Indexing</a></p></li>
+<li><p><a class="reference internal" href="#ranges-that-use-axis-coordinates" id="id12">Ranges that use Axis Coordinates</a></p></li>
+<li><p><a class="reference internal" href="#numbered-indexing-and-slicing" id="id13">Numbered Indexing and Slicing</a></p></li>
+<li><p><a class="reference internal" href="#selection-based-on-logic" id="id14">Selection Based on Logic</a></p></li>
+<li><p><a class="reference internal" href="#the-contiguous-method" id="id15">The <cite>.contiguous(</cite> method</a></p></li>
+<li><p><a class="reference internal" href="#selecting-and-manipulating-the-axis-coordinates" id="id16">Selecting and manipulating the axis coordinates</a></p></li>
+</ul>
+</nav>
+<section id="axis-coordinate-based-indexing">
+<h3><a class="toc-backref" href="#id11" role="doc-backlink">Axis-coordinate-based Indexing</a><a class="headerlink" href="#axis-coordinate-based-indexing" title="Link to this heading">¶</a></h3>
 <p>To pull a single point along a particular dimension,
 you can just use the value of the axis.
 The point nearest to the axis will be returned.</p>
@@ -289,8 +244,8 @@ The point nearest to the axis will be returned.</p>
 </div>
 <p>Will return the point (or slice of data) where the t2 axis is closest to 1.1 s.</p>
 </section>
-<section id="axis-ranges">
-<h3>Axis Ranges<a class="headerlink" href="#axis-ranges" title="Permalink to this heading">¶</a></h3>
+<section id="ranges-that-use-axis-coordinates">
+<h3><a class="toc-backref" href="#id12" role="doc-backlink">Ranges that use Axis Coordinates</a><a class="headerlink" href="#ranges-that-use-axis-coordinates" title="Link to this heading">¶</a></h3>
 <p>You can specify an inclusive range of numbers along an axis.
 For example, to select from 0 to 100 μs along <cite>t2</cite>, you use:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">:(</span><span class="mi">0</span><span class="p">,</span><span class="mf">100e-6</span><span class="p">)]</span>
@@ -299,7 +254,7 @@ For example, to select from 0 to 100 μs along <cite>t2</cite>, you use:</p>
 <p>Either value in parentheses can be <cite>None</cite>, in which case, all values to the end of the axis will be selected.</p>
 </section>
 <section id="numbered-indexing-and-slicing">
-<h3>Numbered Indexing and Slicing<a class="headerlink" href="#numbered-indexing-and-slicing" title="Permalink to this heading">¶</a></h3>
+<h3><a class="toc-backref" href="#id13" role="doc-backlink">Numbered Indexing and Slicing</a><a class="headerlink" href="#numbered-indexing-and-slicing" title="Link to this heading">¶</a></h3>
 <p>You can still use standard index-based references
 or slices:
 you do this by placing a comma after your dimension name, rather than a colon:</p>
@@ -308,8 +263,8 @@ you do this by placing a comma after your dimension name, rather than a colon:</
 </pre></div>
 </div>
 </section>
-<section id="logical">
-<h3>Logical<a class="headerlink" href="#logical" title="Permalink to this heading">¶</a></h3>
+<section id="selection-based-on-logic">
+<h3><a class="toc-backref" href="#id14" role="doc-backlink">Selection Based on Logic</a><a class="headerlink" href="#selection-based-on-logic" title="Link to this heading">¶</a></h3>
 <p>You can use functions that return logical values to select</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">5</span><span class="p">]</span>
 </pre></div>
@@ -321,77 +276,74 @@ you do this by placing a comma after your dimension name, rather than a colon:</
 <p>When this is done, nddata will check to see if slices along any dimension are uniformly missing.
 If they are, the dataset will be trimmed to remove them.</p>
 <p>When the deselected data are scattered throughout, a mask is used instead.</p>
-<div class="admonition-todo admonition" id="id5">
-<p class="admonition-title">Todo</p>
-<p>include examples/tests here</p>
-</div>
 </section>
+<section id="the-contiguous-method">
+<h3><a class="toc-backref" href="#id15" role="doc-backlink">The <cite>.contiguous(</cite> method</a><a class="headerlink" href="#the-contiguous-method" title="Link to this heading">¶</a></h3>
+<p>The <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.nddata.contiguous" title="pyspecdata.core.nddata.contiguous"><code class="xref py py-meth docutils literal notranslate"><span class="pre">contiguous()</span></code></a> method deserves special mention,
+since it can be used to generate a series of ranges based on logic.
+For example, peak selection frequently uses the
+<a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.nddata.contiguous" title="pyspecdata.core.nddata.contiguous"><code class="xref py py-meth docutils literal notranslate"><span class="pre">contiguous()</span></code></a> method.</p>
 </section>
-<section id="axis-based-indexing-and-slicing-in-the-fourier-domain">
-<h2>Axis-Based Indexing and Slicing in the Fourier Domain<a class="headerlink" href="#axis-based-indexing-and-slicing-in-the-fourier-domain" title="Permalink to this heading">¶</a></h2>
-<p>Data can be manipulated not only in the direct domain,
-but also in the Fourier conjugate domain.
-This is achieved in one of two ways → by changing the name
-of the axis,
-and by explicitly specifying the domain.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>this feature is planned, not yet implemented.</p>
-</div>
-<p>The property <code class="docutils literal notranslate"><span class="pre">FT_regexp</span></code> is a dictionary that controls
-By default, it is initially set to <code class="docutils literal notranslate"><span class="pre">{'\&lt;t':'\&lt;f','\&lt;T':'\&lt;F'}</span></code>,
-meaning that t and f at the beginning of word will be converted into each other.
-This means that the following command:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;f2&#39;</span><span class="p">:(</span><span class="o">-</span><span class="mf">1e6</span><span class="p">,</span><span class="mf">1e6</span><span class="p">)]</span>
+<section id="selecting-and-manipulating-the-axis-coordinates">
+<h3><a class="toc-backref" href="#id16" role="doc-backlink">Selecting and manipulating the axis coordinates</a><a class="headerlink" href="#selecting-and-manipulating-the-axis-coordinates" title="Link to this heading">¶</a></h3>
+<p>Sometimes, rather than manipulating the data, you want to manipulate the axis
+coordinates.
+This is achieve by using square brackets with only the name of the relevant
+dimension.</p>
+<p>For example:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>would switch something with a dimension named <cite>t2</cite> to the frequency dimension
-(shift by default – shift should be a property).</p>
-<p>Alternatively, a slice of the form
-<code class="docutils literal notranslate"><span class="pre">dimname:'t/f':(range)</span></code>
-or
-<code class="docutils literal notranslate"><span class="pre">dimname:'u/v':(range)</span></code>
-can be used.
-Here, ‘t’ and ‘f’ always correspond to the “original” and “conjugate” domains, respectively.
-Since, sometimes this might lead to confusion, ‘u’ and ‘v’ serve the same respective functions.</p>
-<p>Therefore this command performs the same function as the last line of code:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">:</span><span class="s1">&#39;f&#39;</span><span class="p">:(</span><span class="o">-</span><span class="mf">1e6</span><span class="p">,</span><span class="mf">1e6</span><span class="p">)]</span>
+<p>tells you the spacing between the first two points along the <span class="math notranslate nohighlight">\(t_2\)</span> axis.</p>
+<p>Also,</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;t2&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mf">2e-3</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition" id="id6">
-<p class="admonition-title">Todo</p>
-<p>show how this works with aliases</p>
-</div>
+<p>adds an offset of 3 ms (assuming your units are seconds) to the <span class="math notranslate nohighlight">\(t_2\)</span> axis.</p>
+</section>
 </section>
 <section id="error-propagation">
-<h2>Error propagation<a class="headerlink" href="#error-propagation" title="Permalink to this heading">¶</a></h2>
-<div class="admonition-todo admonition" id="id7">
+<h2>Error propagation<a class="headerlink" href="#error-propagation" title="Link to this heading">¶</a></h2>
+<div class="admonition-todo admonition" id="id1">
 <p class="admonition-title">Todo</p>
 <p>this works very well, but show an example here.</p>
 </div>
+<figure class="align-center" id="id9">
+<img alt="_images/image50.png" src="_images/image50.png" />
+<figcaption>
+<p><span class="caption-text">Automatic propagation of errors during arithmetic operations.</span><a class="headerlink" href="#id9" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
 </section>
 <section id="methods-for-manipulating-data">
-<h2>Methods for Manipulating Data<a class="headerlink" href="#methods-for-manipulating-data" title="Permalink to this heading">¶</a></h2>
+<h2>Methods for Manipulating Data<a class="headerlink" href="#methods-for-manipulating-data" title="Link to this heading">¶</a></h2>
 <p>It’s important to note that, in contrast to standard numpy,
 nddata routines are designed to be called as methods,
 rather than independent functions.
 Also, these methods <strong>modify the data in-place</strong> rather than returning a copy.
-For example, after executing
-<code class="docutils literal notranslate"><span class="pre">d.ft('t2')</span></code>, the object <code class="docutils literal notranslate"><span class="pre">d</span></code> will contain the <em>Fourier transformed</em> data.
-There is not need to assign the result to a new variable.
+For example, after executing <code class="docutils literal notranslate"><span class="pre">d.ft('t2')</span></code> the object <code class="docutils literal notranslate"><span class="pre">d</span></code> now contains the
+Fourier-transformed data.  The axes are relabeled automatically, as shown
+below.</p>
+<figure class="align-center" id="id10">
+<img alt="_images/image52.png" src="_images/image52.png" />
+<figcaption>
+<p><span class="caption-text">Automatic relabeling of the frequency axis.</span><a class="headerlink" href="#id10" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>There is no need to assign the result to a new variable.
 Alternatively, the property <code class="docutils literal notranslate"><span class="pre">C</span></code> offers easy access to a copy:
 <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">d.C.ft('t2')</span></code> leaves <code class="docutils literal notranslate"><span class="pre">d</span></code> alone, and returns the FT as a new object
 called <code class="docutils literal notranslate"><span class="pre">a</span></code>.</p>
 <p>This encourages a style where methods are chained together, <em>e.g.</em> <code class="docutils literal notranslate"><span class="pre">d.ft('t2').mean('t1')</span></code>.</p>
-<p>In order to encourage this style, we provide the method <a class="reference internal" href="pyspecdata.html#pyspecdata.nddata.run" title="pyspecdata.nddata.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyspecdata.nddata.run()</span></code></a>, which allows you to run a standard numpy function on the data:
+<p>In order to encourage this style, we provide the method <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.nddata.run" title="pyspecdata.core.nddata.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>, which allows you to run a standard numpy function on the data:
 <code class="docutils literal notranslate"><span class="pre">d.run(abs)</span></code> will take the absolute value of the data in-place, while
 <code class="docutils literal notranslate"><span class="pre">d.run(std,'t2')</span></code> will run a standard deviation along the ‘t2’ axis
-(this removes the ‘t2’ dimension once you’re done, since it would have a length of only 1 – <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.nddata.run_nopop" title="pyspecdata.nddata.run_nopop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyspecdata.nddata.run_nopop()</span></code></a> would not remove the dimension).</p>
-<p><em>For a full list of methods</em>, see the API documentation: <a class="reference internal" href="pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyspecdata.nddata</span></code></a>.</p>
+(this removes the ‘t2’ dimension once you’re done, since it would have a length of only 1 – <a class="reference internal" href="auto_api/pyspecdata.html#pyspecdata.core.nddata.run_nopop" title="pyspecdata.core.nddata.run_nopop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run_nopop()</span></code></a> would not remove the dimension).</p>
+<p><em>For a full list of methods</em>, see the API documentation: <a class="reference internal" href="generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><code class="xref py py-class docutils literal notranslate"><span class="pre">nddata</span></code></a>.</p>
 </section>
 <section id="basic-examples">
-<h2>Basic Examples<a class="headerlink" href="#basic-examples" title="Permalink to this heading">¶</a></h2>
-<div class="admonition-todo admonition" id="id8">
+<h2>Basic Examples<a class="headerlink" href="#basic-examples" title="Link to this heading">¶</a></h2>
+<div class="admonition-todo admonition" id="id2">
 <p class="admonition-title">Todo</p>
 <p>Give good examples/plots here</p>
 </div>
@@ -400,12 +352,16 @@ called <code class="docutils literal notranslate"><span class="pre">a</span></co
 <li><p>Slicing.</p></li>
 <li><p>Aliasing of FT.</p></li>
 </ul>
+<p>See <a class="reference internal" href="auto_api/pyspecdata.fourier.html#pyspecdata.fourier.ft_shift.ft_new_startpoint" title="pyspecdata.fourier.ft_shift.ft_new_startpoint"><code class="xref py py-func docutils literal notranslate"><span class="pre">ft_new_startpoint()</span></code></a> for example
+plots demonstrating aliasing and time-origin correction.</p>
 </section>
 <section id="methods-by-sub-topic">
-<h2>Methods by Sub-Topic<a class="headerlink" href="#methods-by-sub-topic" title="Permalink to this heading">¶</a></h2>
-<div class="admonition-todo admonition" id="id9">
+<h2>Methods by Sub-Topic<a class="headerlink" href="#methods-by-sub-topic" title="Link to this heading">¶</a></h2>
+<div class="admonition-todo admonition" id="id3">
 <p class="admonition-title">Todo</p>
-<p>we are in the process of organizing most methods into categories.</p>
+<p>We are in the process of organizing most methods into categories.
+For now, we encourage you to look through the gallery examples and to click
+on or search different methods.</p>
 </div>
 <p>A selection of the methods noted below are broken down by sub-topic.</p>
 <div class="toctree-wrapper compound">
@@ -418,34 +374,100 @@ called <code class="docutils literal notranslate"><span class="pre">a</span></co
 </section>
 
 
-           </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="fourier.html" class="btn btn-neutral float-left" title="Fourier Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="latexscripts.html" class="btn btn-neutral float-right" title="Documentation of Notebook Helper Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2016, John M. Franck.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
+          
         </div>
       </div>
-    </section>
-  </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/pyspec_path_equaltip.png" alt="Logo" />
+    
+  </a>
+</p>
 
-</body>
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ND-Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#multidimensional-data">Multidimensional data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-an-nddata-from-numpy-arrays">Building an nddata from numpy arrays</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dimension-labels">Dimension labels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#item-selection-and-slicing">Item selection and slicing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#error-propagation">Error propagation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#methods-for-manipulating-data">Methods for Manipulating Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#basic-examples">Basic Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#methods-by-sub-topic">Methods by Sub-Topic</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="fitdata.html">the lmfitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="notebook.html">LaTeX Notebook Functionality</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="notebook.html#setting-up-the-notebook">Setting up the notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebook.html#running-the-notebook">Running the notebook</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="notebook.html#how-it-works">How it works</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">PySpecData Examples</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">pySpecData: compact spectral data processing!</a></li>
+      <li>Next: <a href="axis_manipulation.html" title="next chapter">Axis Manipulation Functions</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2016, John M. Franck.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/nddata.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
 </html>

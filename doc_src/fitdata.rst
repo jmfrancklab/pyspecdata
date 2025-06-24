@@ -3,39 +3,38 @@ the lmfitdata class
 
 This is a child class of nddata used for fitting.
 
-For old fitdata documentation
-(obsolete, for development reference) see :ref:`fitdata_old`
+It works with two other very useful packages
+lmfit -- which does a very good job of setting
+up bounded fits -- and sympy -- which we can use
+to represent the function that we are fitting.
 
-creating new types of lmfitdata modules
-----------------------------------------
+Bounds improve the likelihood that our fit will converge,
+while the symbolic representation both helps us to
+generate latex representations of the function that we are fitting
+and to *improve performance and error estimates* by automatically
+calculating the jacobian.
 
-There is a base class called “lmfitdata” that defines the basic routines
-necessary for fitting. Currently, the lmfitdata class only supports
-fitting along one dimension, so before constructing a new class, one
-must first choose what dimension they will be fitting along.
+You simply wrap your existing nddata with `lmfitdata`, set the
+`functional_form` property to the equation you want to fit,
+and provide guesses and bounds with `set_guess`.
+The easiest way to get started is to see the fitting examples in
+the example gallery.  A few typical ``lmfitdata`` results are
+illustrated here.
 
-.. todo::
-    Of
-    course, for multidimensional data, the fit will be repeated along the
-    dimensions that are not the fit dimension. see how easy it would be to
-    allow more than one dimension
+.. figure:: _static/presentation_images/image64.png
+   :align: center
 
-To fit a new type of function, one simply creates a new type of class
-that *inherits* from the lmfitdata class. We override all the methods that
-have to do with the definition of the functional format. These are
-defined in the first section, where we build up an example for fitting a
-general :math:`T_1` recovery curve. This example should be used as a
-starting point for making new fit classes. Then, we can make instances
-of the new class, and use their methods (described in the subsequent
-section) next.
+   A simple T₁ relaxation fit.
 
-.. todo::
-    the option block :no-inherited-members: doesn't work -- not sure how to modify class.rst
-    I put a template from stackexchange inside _templates
-    -- see https://stackoverflow.com/questions/28147432/how-to-customize-sphinx-ext-autosummary-rst-template
-    on how to use it
+.. figure:: _static/presentation_images/image40.png
+   :align: center
 
-    then, I need to link to or include generated/pyspecdata.lmfitdata.rst
+   Fitting also handles global DNP buildup data at different concentrations.
+
+.. figure:: _static/presentation_images/image490.png
+   :align: center
+
+   A ``fitdata`` subclass can also be defined in its own module.
 
 .. currentmodule:: pyspecdata.lmfitdata
 

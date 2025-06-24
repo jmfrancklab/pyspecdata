@@ -1,14 +1,14 @@
-from ..general_functions import inside_sphinx
-from pylab import r_,fft,ifft,ifftshift,fftshift,exp,ones_like,sqrt,pi
+from pylab import pi
 import numpy as np
-from pyspecdata import init_logging,strm
+from ..general_functions import strm
 import logging
 
-def convolve(self,axisname,filterwidth,convfunc='gaussian',
-    enforce_causality=True
-    ):
-    r'''Perform a convolution.
-    
+
+def convolve(
+    self, axisname, filterwidth, convfunc="gaussian", enforce_causality=True
+):
+    r"""Perform a convolution.
+
     Parameters
     ==========
 
@@ -28,7 +28,8 @@ def convolve(self,axisname,filterwidth,convfunc='gaussian',
         `filterwidth` (see `filterwidth`).
         Default is a normalized Gaussian of FWHM
         (:math:`\lambda`) `filterwidth`
-        For example if you want a complex Lorentzian with `filterwidth` controlled by the rate :math:`R`, 
+        For example if you want a complex Lorentzian with `filterwidth`
+        controlled by the rate :math:`R`,
         *i.e.*
         :math:`\frac{-1}{-i 2 \pi f - R}`
         then ``convfunc = lambda f,R: -1./(-1j*2*pi*f-R)``
@@ -49,16 +50,38 @@ def convolve(self,axisname,filterwidth,convfunc='gaussian',
         set enforce_causality to False.
 
         It is ignored if you call a convolution on time-domain data.
-    '''
-    if convfunc == 'gaussian':
-        def convfunc(x,filterwidth):
-            sigma = filterwidth/(2*np.sqrt(2*np.log(2)))
-            retval = np.exp(-x**2/2/sigma**2)
-            retval /= sigma*np.sqrt(2*pi)
+    """
+    if convfunc == "gaussian":
+
+        def convfunc(x, filterwidth):
+            sigma = filterwidth / (2 * np.sqrt(2 * np.log(2)))
+            retval = np.exp(-(x**2) / 2 / sigma**2)
+            retval /= sigma * np.sqrt(2 * pi)
             return retval
-    time_domain = True
-    x = self.fromaxis(axisname)
-    myfilter = convfunc(x,filterwidth)
+
+    if self.get_ft_prop(axisname):
+        time_domain = False
+        whichdomain = "f"
+    else:
+        time_domain = True
+        whichdomain = "t"
+
+    def generate_filter(self):
+        x = self.fromaxis(axisname)
+        # {{{ we assume the filtered is centered about zero, always
+        N = len(x[axisname])
+        centerval = x[axisname][N // 2]
+        x[axisname] -= centerval
+        x.data[:] -= centerval
+        # }}}
+        myfilter = convfunc(x, filterwidth)
+        myfilter.copy_props(self)
+        myfilter.ft_new_startpoint(
+            axisname, whichdomain, x[axisname][0], nearest=True
+        )
+        return myfilter
+
+    myfilter = generate_filter(self)
     if self.get_ft_prop(axisname):
         # detect self in frequency domain
         logging.debug(strm("detect self in frequency domain"))
@@ -69,34 +92,37 @@ def convolve(self,axisname,filterwidth,convfunc='gaussian',
             # can think of doing this -- would be greatly helped if we could
             # "FT" the "axis object" instead
             orig_start = myfilter.getaxis(axisname)[0]
-            tlen = myfilter.getaxis(axisname)[-1]-orig_start
-            assert orig_start-2*tlen < 0, "the time origin (%f vs tlen %f) is at too high of a positive value for me to try to enforce causality"%(orig_start,tlen)
+            tlen = myfilter.getaxis(axisname)[-1] - orig_start
+            assert orig_start - 2 * tlen < 0, (
+                "the time origin (%f vs tlen %f) is at too high of a positive"
+                " value for me to try to enforce causality"
+                % (orig_start, tlen)
+            )
             # create a negative part for it to alias into:
-            myfilter.extend(axisname,-myfilter.getaxis(axisname)[-1])
+            myfilter.extend(axisname, -myfilter.getaxis(axisname)[-1])
             myfilter.ft(axisname)
             # recalculate the filter on the new axis
-            x = myfilter.fromaxis(axisname)
-            myfilter = convfunc(x,filterwidth)
+            myfilter = generate_filter(myfilter)
             myfilter.ift(axisname)
             # throw out the stuff to the left of the original time origin
-            myfilter = myfilter[axisname:(orig_start,None)]
-        time_domain = False
-    elif self.get_ft_prop(axisname,['start','freq']) is None:
+            myfilter = myfilter[axisname:(orig_start, None)]
+    elif self.get_ft_prop(axisname, ["start", "freq"]) is None:
         # detect self in time domain, never FT'd
         logging.debug(strm("detect self in time domain, never FT'd"))
         self.ft(axisname, shift=True)
-        # here enforcing causality wouldn't have the same meaning, so we don't do it
+        # here enforcing causality wouldn't have the same meaning, so we don't
+        # do it
         myfilter.ft(axisname)
     else:
         # detect self in time domain, already FT'd
         logging.debug(strm("detect self in time domain, already FT'd"))
         self.ft(axisname)
         myfilter.ft(axisname)
-    newdata = self*myfilter
+    newdata = self * myfilter
     self.data = newdata.data
     if time_domain:
         self.ift(axisname)
     else:
         self.ft(axisname)
-    logging.debug(strm("before return",axisname,self.get_ft_prop(axisname)))
+    logging.debug(strm("before return", axisname, self.get_ft_prop(axisname)))
     return self

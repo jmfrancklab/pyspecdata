@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Unevenly spaced data &#8212; pySpecData 0.9.5.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=832af5b0" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css?v=7f9a90b1" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=2b30a6e6" />
+    <script src="../_static/documentation_options.js?v=a4fd5d96"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="1D BRD regularization" href="BRD_test.html" />
+    <link rel="prev" title="Basic Slicing/Filtering Example" href="basic_example.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-pcolor-example-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="unevenly-spaced-data">
+<span id="sphx-glr-auto-examples-pcolor-example-py"></span><h1>Unevenly spaced data<a class="headerlink" href="#unevenly-spaced-data" title="Link to this heading">¶</a></h1>
+<p>Basic demonstration of pcolor, which can deal with unevenly spaced data</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Right now, we just do this with real/imaginary,
+but in principal, it should be easily
+possible to extend this to use domain
+coloring (and to use it in the main DCCT
+method)</p>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../_images/sphx_glr_pcolor_example_001.png" srcset="../_images/sphx_glr_pcolor_example_001.png, ../_images/sphx_glr_pcolor_example_001_2_00x.png 2.00x" alt="colorscales independent -- small data, (real), (imag)" class = "sphx-glr-multi-img"/></li>
+<li><img src="../_images/sphx_glr_pcolor_example_002.png" srcset="../_images/sphx_glr_pcolor_example_002.png, ../_images/sphx_glr_pcolor_example_002_2_00x.png 2.00x" alt="colorscales independent -- large data, (real), (imag)" class = "sphx-glr-multi-img"/></li>
+<li><img src="../_images/sphx_glr_pcolor_example_003.png" srcset="../_images/sphx_glr_pcolor_example_003.png, ../_images/sphx_glr_pcolor_example_003_2_00x.png 2.00x" alt="colorscales independent, (real), (imag), (real), (imag)" class = "sphx-glr-multi-img"/></li>
+<li><img src="../_images/sphx_glr_pcolor_example_004.png" srcset="../_images/sphx_glr_pcolor_example_004.png, ../_images/sphx_glr_pcolor_example_004_2_00x.png 2.00x" alt="re/im dependent, but two rows independent, (real), (imag), (real), (imag)" class = "sphx-glr-multi-img"/></li>
+<li><img src="../_images/sphx_glr_pcolor_example_005.png" srcset="../_images/sphx_glr_pcolor_example_005.png, ../_images/sphx_glr_pcolor_example_005_2_00x.png 2.00x" alt="colorscales dependent -- large second, (real), (imag), (real), (imag)" class = "sphx-glr-multi-img"/></li>
+<li><img src="../_images/sphx_glr_pcolor_example_006.png" srcset="../_images/sphx_glr_pcolor_example_006.png, ../_images/sphx_glr_pcolor_example_006_2_00x.png 2.00x" alt="colorscales dependent -- large first, (real), (imag), (real), (imag)" class = "sphx-glr-multi-img"/></li>
+<li><img src="../_images/sphx_glr_pcolor_example_007.png" srcset="../_images/sphx_glr_pcolor_example_007.png, ../_images/sphx_glr_pcolor_example_007_2_00x.png 2.00x" alt="manually set vmin/vmax -- large second, (real), (imag), (real), (imag)" class = "sphx-glr-multi-img"/></li>
+</ul>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyspecdata</span> <span class="k">as</span> <span class="nn">psp</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">r_</span>
+
+
+<span class="k">def</span> <span class="nf">new_figure_and_grid</span><span class="p">():</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">gs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">ax_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+            <span class="n">ax_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">ax_list</span>
+
+
+<span class="n">run_to_checkpoint</span> <span class="o">=</span> <span class="mi">7</span>  <span class="c1"># allows us to run to different checkpoints.  If</span>
+<span class="c1">#                       everything is working correctly, this should go up to 5</span>
+
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">x</span></a> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">psp</span><span class="o">.</span><span class="n">nddata</span></a><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="s2">&quot;x&quot;</span><span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">y</span></a> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">psp</span><span class="o">.</span><span class="n">nddata</span></a><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">r_</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="s2">&quot;y&quot;</span><span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">z1</span></a> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">y</span></a> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">x</span></a> <span class="o">-</span> <span class="mi">0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">x</span></a>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">z2</span></a> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">z1</span></a>
+<span class="c1"># {{{ plot the smaller data</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;colorscales independent -- small data&quot;</span><span class="p">)</span>
+<span class="n">mpbl</span> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata.pcolor" title="pyspecdata.nddata.pcolor" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">z1</span><span class="o">.</span><span class="n">pcolor</span></a><span class="p">(</span><span class="n">scale_independently</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># }}}</span>
+<span class="k">if</span> <span class="n">run_to_checkpoint</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="c1"># {{{ plot the larger data</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;colorscales independent -- large data&quot;</span><span class="p">)</span>
+    <span class="n">mpbl</span> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata.pcolor" title="pyspecdata.nddata.pcolor" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">z2</span><span class="o">.</span><span class="n">pcolor</span></a><span class="p">(</span><span class="n">scale_independently</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mappable_list</span><span class="o">=</span><span class="p">[])</span>
+    <span class="c1"># }}}</span>
+<span class="k">if</span> <span class="n">run_to_checkpoint</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="c1"># {{{ independent</span>
+    <span class="n">ax_list</span> <span class="o">=</span> <span class="n">new_figure_and_grid</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;colorscales independent&quot;</span><span class="p">)</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata.pcolor" title="pyspecdata.nddata.pcolor" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">z1</span><span class="o">.</span><span class="n">pcolor</span></a><span class="p">(</span><span class="n">scale_independently</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax1</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ax2</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">mpbl</span> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata.pcolor" title="pyspecdata.nddata.pcolor" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">z2</span><span class="o">.</span><span class="n">pcolor</span></a><span class="p">(</span><span class="n">scale_independently</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax1</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">ax2</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="c1"># }}}</span>
+<span class="k">if</span> <span class="n">run_to_checkpoint</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+    <span class="c1"># {{{ independent rows, dependent columns</span>
+    <span class="n">ax_list</span> <span class="o">=</span> <span class="n">new_figure_and_grid</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;re/im dependent, but two rows independent&quot;</span><span class="p">)</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata.pcolor" title="pyspecdata.nddata.pcolor" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">z1</span><span class="o">.</span><span class="n">pcolor</span></a><span class="p">(</span><span class="n">ax1</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ax2</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata.pcolor" title="pyspecdata.nddata.pcolor" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">z2</span><span class="o">.</span><span class="n">pcolor</span></a><span class="p">(</span><span class="n">ax1</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">ax2</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="c1"># }}}</span>
+<span class="k">if</span> <span class="n">run_to_checkpoint</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+    <span class="c1"># {{{ small first, then large</span>
+    <span class="n">ax_list</span> <span class="o">=</span> <span class="n">new_figure_and_grid</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;colorscales dependent -- large second&quot;</span><span class="p">)</span>
+    <span class="n">mpbl</span> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata.pcolor" title="pyspecdata.nddata.pcolor" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">z1</span><span class="o">.</span><span class="n">pcolor</span></a><span class="p">(</span><span class="n">ax1</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ax2</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">mpbl</span> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata.pcolor" title="pyspecdata.nddata.pcolor" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">z2</span><span class="o">.</span><span class="n">pcolor</span></a><span class="p">(</span><span class="n">mappable_list</span><span class="o">=</span><span class="n">mpbl</span><span class="p">,</span> <span class="n">ax1</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">ax2</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="c1"># }}}</span>
+<span class="k">if</span> <span class="n">run_to_checkpoint</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+    <span class="c1"># {{{ large in first row, then small in second row</span>
+    <span class="n">ax_list</span> <span class="o">=</span> <span class="n">new_figure_and_grid</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;colorscales dependent -- large first&quot;</span><span class="p">)</span>
+    <span class="n">mpbl</span> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata.pcolor" title="pyspecdata.nddata.pcolor" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">z2</span><span class="o">.</span><span class="n">pcolor</span></a><span class="p">(</span><span class="n">ax1</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ax2</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata.pcolor" title="pyspecdata.nddata.pcolor" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">z1</span><span class="o">.</span><span class="n">pcolor</span></a><span class="p">(</span><span class="n">mappable_list</span><span class="o">=</span><span class="n">mpbl</span><span class="p">,</span> <span class="n">ax1</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">ax2</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="c1"># }}}</span>
+<span class="k">if</span> <span class="n">run_to_checkpoint</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="p">:</span>
+    <span class="c1"># {{{ manually set vmin and vmax</span>
+    <span class="n">ax_list</span> <span class="o">=</span> <span class="n">new_figure_and_grid</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;manually set vmin/vmax -- large second&quot;</span><span class="p">)</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata.pcolor" title="pyspecdata.nddata.pcolor" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">z1</span><span class="o">.</span><span class="n">pcolor</span></a><span class="p">(</span>
+        <span class="n">ax1</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">ax2</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">vmin</span><span class="o">=-</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="p">)</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata.pcolor" title="pyspecdata.nddata.pcolor" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">z2</span><span class="o">.</span><span class="n">pcolor</span></a><span class="p">(</span>
+        <span class="n">ax1</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+        <span class="n">ax2</span><span class="o">=</span><span class="n">ax_list</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+        <span class="n">vmin</span><span class="o">=-</span><span class="mi">150</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># }}}</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.181 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-pcolor-example-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/6daa94457c6963dec7c534ea887a922b/pcolor_example.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">pcolor_example.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/9fba4f5c9f798ba2d94e14a25397cbc0/pcolor_example.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">pcolor_example.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/pyspec_path_equaltip.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the lmfitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">PySpecData Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="polyfit.html">Polynomial Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppm_2D.html">PPM in 2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="error_example.html">Error and units example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="calculate_covariance.html">Calculation of the Covariance Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convolution.html">Simple Convolution Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="image_plot.html">Plotting Routines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="temp.html">Calculation of the Covariance Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppm_example.html">ppm Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_with_bounds.html">Fit Using Bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_complex.html">Fit complex data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_example.html">Basic Slicing/Filtering Example</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Unevenly spaced data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BRD_test.html">1D BRD regularization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_complex_with_transform.html">Fit complex data with transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fit_fake_data.html">Fitting Data (Nonlinear + Symbolic)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#dcct">DCCT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#esr">ESR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#uv">UV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#xx-individual-functions-xx">XX Individual Functions XX</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">PySpecData Examples</a><ul>
+      <li>Previous: <a href="basic_example.html" title="previous chapter">Basic Slicing/Filtering Example</a></li>
+      <li>Next: <a href="BRD_test.html" title="next chapter">1D BRD regularization</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2016, John M. Franck.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/auto_examples/pcolor_example.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

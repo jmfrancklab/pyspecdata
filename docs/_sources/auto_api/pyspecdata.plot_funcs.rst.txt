@@ -4,10 +4,26 @@ pyspecdata.plot\_funcs package
 Submodules
 ----------
 
+pyspecdata.plot\_funcs.DCCT\_function module
+--------------------------------------------
+
+.. automodule:: pyspecdata.plot_funcs.DCCT_function
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pyspecdata.plot\_funcs.image module
 -----------------------------------
 
 .. automodule:: pyspecdata.plot_funcs.image
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pyspecdata.plot\_funcs.pcolormesh module
+----------------------------------------
+
+.. automodule:: pyspecdata.plot_funcs.pcolormesh
    :members:
    :undoc-members:
    :show-inheritance:

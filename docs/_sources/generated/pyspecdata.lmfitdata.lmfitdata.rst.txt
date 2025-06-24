@@ -34,8 +34,11 @@
       ~lmfitdata.copy_axes
       ~lmfitdata.copy_props
       ~lmfitdata.copyaxes
+      ~lmfitdata.cov_mat
       ~lmfitdata.cropped_log
+      ~lmfitdata.define_residual_transform
       ~lmfitdata.diff
+      ~lmfitdata.div_units
       ~lmfitdata.dot
       ~lmfitdata.eval
       ~lmfitdata.eval_poly
@@ -47,6 +50,7 @@
       ~lmfitdata.fromaxis
       ~lmfitdata.ft
       ~lmfitdata.ft_clear_startpoints
+      ~lmfitdata.ft_new_startpoint
       ~lmfitdata.ft_state_to_str
       ~lmfitdata.ftshift
       ~lmfitdata.gen_indices
@@ -62,7 +66,6 @@
       ~lmfitdata.gnuplot_save
       ~lmfitdata.guess
       ~lmfitdata.hdf5_write
-      ~lmfitdata.histogram
       ~lmfitdata.human_units
       ~lmfitdata.ift
       ~lmfitdata.indices
@@ -71,6 +74,7 @@
       ~lmfitdata.interp
       ~lmfitdata.invinterp
       ~lmfitdata.item
+      ~lmfitdata.jacobian
       ~lmfitdata.labels
       ~lmfitdata.latex
       ~lmfitdata.like
@@ -86,12 +90,14 @@
       ~lmfitdata.meshplot
       ~lmfitdata.min
       ~lmfitdata.mkd
-      ~lmfitdata.multimin
       ~lmfitdata.name
       ~lmfitdata.nnls
       ~lmfitdata.normalize
       ~lmfitdata.oldtimey
       ~lmfitdata.output
+      ~lmfitdata.pcolor
+      ~lmfitdata.phdiff
+      ~lmfitdata.pinvr_step
       ~lmfitdata.plot_labels
       ~lmfitdata.polyfit
       ~lmfitdata.popdim
@@ -110,9 +116,11 @@
       ~lmfitdata.secsy_transform
       ~lmfitdata.secsy_transform_manual
       ~lmfitdata.set_error
+      ~lmfitdata.set_ft_initial
       ~lmfitdata.set_ft_prop
       ~lmfitdata.set_guess
       ~lmfitdata.set_plot_color
+      ~lmfitdata.set_plot_color_next
       ~lmfitdata.set_prop
       ~lmfitdata.set_to
       ~lmfitdata.set_units
@@ -122,9 +130,11 @@
       ~lmfitdata.smoosh
       ~lmfitdata.sort
       ~lmfitdata.sort_and_xy
+      ~lmfitdata.spline_lambda
       ~lmfitdata.squeeze
       ~lmfitdata.sum
       ~lmfitdata.sum_nopop
+      ~lmfitdata.svd
       ~lmfitdata.to_ppm
       ~lmfitdata.unitify_axis
       ~lmfitdata.units_texsafe
@@ -145,6 +155,8 @@
       ~lmfitdata.functional_form
       ~lmfitdata.imag
       ~lmfitdata.real
+      ~lmfitdata.shape
+      ~lmfitdata.transformed_data
       ~lmfitdata.want_to_prospa_decim_correct
    
    
