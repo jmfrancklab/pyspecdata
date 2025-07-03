@@ -14,102 +14,74 @@ def venk_BRD(initial_lambda, K, factor, data_fornnls, tol=1e-6, maxiter=20):
 
     Full Unicode Structured Pseudocode:
 
-    01  # Step 2: For fixed λ, estimate f⃗ᵣ via BRD
+    01  # Step 2: For fixed α, solve ∇⃗χ(c⃗ᵣ)=0 via Newton’s method  
     02  
-    03  # Inputs per dataset ᵣ:
-    04  #   m⃗ᵣ ← vec(compressed data)
-    05  #   w⃗ᵣ ← vec(singular-value weights)
-    06  #   λ   ← current smoothing parameter
-    07  #   β   ← BRD multiplier
-    08  # Output:
-    09  #   f⃗ᵣ ← estimated density vector
-    10  
-    11  # 2.1  Build C̿ᵣ and h⃗ᵣ (eqs. 29 & 30):
-    12      for each index i:
-    13        h⃗ᵣ[i]   = w⃗ᵣ[i] ⋅ m⃗ᵣ[i] ÷ (w⃗ᵣ[i]² + λ)     # eq.(29)
-    14        C̿ᵣ[i,i] = w⃗ᵣ[i]² ÷ (w⃗ᵣ[i]² + λ)          # eq.(30)
-    15      # off-diagonals of C̿ᵣ ← β⋅H-mask (see paper)
+    03  # Inputs per dataset ᵣ:  
+    04  #   m⃗ᵣ ← vec(compressed data)  
+    05  #   K̿₀ ← compressed kernel matrix  
+    06  #   α   ← current smoothing parameter  
+    07  # Output:  
+    08  #   c⃗ᵣ ← root of ∇⃗χ(c⃗ᵣ)  
+    09  
+    10  # Build g⃗(c⃗ᵣ) ≡ the diagonal of G(c⃗ᵣ) as a vector (eq. 30):  
+    11  g⃗(c⃗ᵣ) = K̿₀ ⋅ ( max(0, K̿₀ᵀ ⋅ c⃗ᵣ) ⊙ K̿₀ᵀ )  
+        # — replaces diag(H(K₀ᵀc))·K₀ᵀ with a single vector  
+    12  
+    13  # Define χ and its first/second derivatives (eq. 29):  
+    14  ∇⃗χ(c⃗ᵣ)   = g⃗(c⃗ᵣ) + α·c⃗ᵣ   − m⃗ᵣ  
+    15  ∇∇⃗χ(c⃗ᵣ) = diag(g⃗(c⃗ᵣ)) + α·I̿  
+        # — Hessian is a diagonal matrix of g⃗ plus α times the double‐overbar identity  
     16  
-    17  # 2.2  Initialize g⃗ᵣ > 0, e.g. g⃗ᵣ[i] = √(h⃗ᵣ[i] ÷ C̿ᵣ[i,i])
-    18  
-    19  repeat until g⃗ᵣ converges:
-    20      ∇U = 2 ⋅ C̿ᵣ ⋅ g⃗ᵣ   −  2 ⋅ h⃗ᵣ   +  β ⋅ 1   # eq.(32)
-    21      H_U = 2 ⋅ C̿ᵣ                         # eq.(33)
-    22  
-    23      Δg⃗ᵣ = − solve(H_U, ∇U)             # solve H_U·Δg = −∇U (LAPACK)
-    24      g⃗ᵣ  = max(0, g⃗ᵣ + Δg⃗ᵣ)             # enforce gᵢ ≥ 0
-    25  end repeat
-    26  
-    27  f⃗ᵣ = g⃗ᵣ²                             # recover fᵢ = (gᵢ)²
-    28  
-    29  # Step 3: Update λ by BRD rule
-    30  
-    31  Eᵣ    = ‖ w⃗ᵣ ∘ f⃗ᵣ − m⃗ᵣ ‖²        # eq.(40)
-    32  nᵣ    = length(m⃗ᵣ)               # # compressed points
-    33  Q     = ‖ f⃗ᵣ ‖²                  # eq.(35)
-    34  λₙₑw = max(ε, (Eᵣ − nᵣ) ÷ Q)        # eq.(41)
-    35  
-    36  # For R datasets:
-    37  # λₙₑw = max(ε, (Σᵣ Eᵣ − Σᵣ nᵣ) ÷ Q)   # eq.(48)
-    38  
-    39  if |λₙₑw − λ| ÷ λ < tol:
-    40      stop      # λ & f have converged
-    41  else:
-    42      λ = λₙₑw
-    43      goto Step 2
-    44  end
-    45  """
-    # 03 m⃗ᵣ ← vec(compressed data)
-    # 04 w⃗ᵣ ← vec(singular-value weights)
-    # 06 λ   ← current smoothing parameter
-    # 07 β   ← BRD multiplier
-    m⃗ᵣ = data_fornnls
-    w⃗ᵣ = np.sqrt((K**2).sum(axis=0)) if factor is None else factor
-    λ   = initial_lambda
-    β   = 1.0
-
-    # 13 h⃗ᵣ[i] = w⃗ᵣ[i] ⋅ m⃗ᵣ[i] ÷ (w⃗ᵣ[i]² + λ)
-    # 14 C̿ᵣ[i,i] = w⃗ᵣ[i]² ÷ (w⃗ᵣ[i]² + λ)
-    diag = w⃗ᵣ**2 + λ
-    h = (w⃗ᵣ * m⃗ᵣ) / diag                    # vectorized eq.(29)
-    C = np.diag(w⃗ᵣ**2 / diag)                # vectorized diag of eq.(30)
-
-    # 17 g⃗ᵣ[i] = √(h⃗ᵣ[i] ÷ C̿ᵣ[i,i])
-    g = np.sqrt(h / np.diag(C))               # from line 17
-
-    # 20 ∇U = 2 ⋅ C̿ᵣ ⋅ g⃗ᵣ − 2 ⋅ h⃗ᵣ + β ⋅ 1
-    # 21 H_U = 2 ⋅ C̿ᵣ
-    # 23 Δg⃗ᵣ = − solve(H_U, ∇U)
-    # 24 g⃗ᵣ = max(0, g⃗ᵣ + Δg⃗ᵣ)
-    while True:
-        grad = 2*(C @ g) - 2*h + β             # eq.(32)
-        H = 2*C                                # eq.(33)
-        delta = -np.linalg.solve(H, grad)
-        g_new = np.maximum(0, g + delta)
-        if np.linalg.norm(g_new - g) < tol:
-            g = g_new
+    17  # Newton root‐find:  
+    18  c⃗ᵣ ← newton(  
+    19    f      = ∇⃗χ,      # function whose root we want  
+    20    fprime = ∇∇⃗χ,     # its Jacobian (Hessian)  
+    21    x0     = c⃗_initial,  
+    22    tol    = tol  
+    23  )  
+    24  
+    25  # 2.3  Recover f⃗ᵣ (nonneg. projection, eq. 27):  
+    26  f⃗ᵣ = max(0, K̿₀ᵀ ⋅ c⃗ᵣ)  
+    27  
+    28  # Step 3: BRD α‐update (eq. 41)  
+    29  n_r    = dim(c⃗ᵣ)                       # = s₁·s₂  
+    30  α_new  = sqrt(n_r) ÷ ‖c⃗ᵣ‖              # α_opt = √(s₁s₂)/‖c⃗ᵣ‖  
+    31  if |α_new − α| ÷ α < tol_α:  
+    32      STOP  # α has converged  
+    33  else:  
+    34      α = α_new  
+    35      goto line 01  # repeat Step 2 with updated α  
+    """
+    α_new = ???
+    # 31  if |α_new − α| ÷ α < tol_α:  
+    while code_needed:
+        # 31  if |α_new − α| ÷ α < tol_α:  
+        # 32      STOP  # α has converged  
+        if ????:
             break
-        g = g_new
-
-    # 27 f⃗ᵣ = g⃗ᵣ²
-    f⃗ᵣ = g**2                                # eq.(27)
-
-    # 31 Eᵣ = ‖ w⃗ᵣ ∘ f⃗ᵣ − m⃗ᵣ ‖²
-    # 32 nᵣ = length(m⃗ᵣ)
-    # 33 Q = ‖ f⃗ᵣ ‖²
-    # 34 λₙₑw = max(ε, (Eᵣ − nᵣ) ÷ Q)
-    E = np.linalg.norm(w⃗ᵣ * f⃗ᵣ - m⃗ᵣ)**2      # eq.(40)
-    n = m⃗ᵣ.size                            # line 32
-    Q = np.linalg.norm(f⃗ᵣ)**2              # eq.(35)
-    λₙₑw = max(1e-12, (E - n) / Q)          # eq.(41)
-    # 39 if |λₙₑw − λ| ÷ λ < tol
-    # 40     return f⃗ᵣ, λₙₑw
-    if abs(λₙₑw - λ) / λ < tol:
-        return f⃗ᵣ, λₙₑw
-    # 42 λ = λₙₑw
-    λ = λₙₑw
-
-    return f⃗ᵣ, λ                            
+        # 33  else:  
+        # 34      α = α_new  
+        # 35      goto line 01  # repeat Step 2 with updated α  
+        α = α_new
+        # 11  g⃗(c⃗ᵣ) = K̿₀ ⋅ ( max(0, K̿₀ᵀ ⋅ c⃗ᵣ) ⊙ K̿₀ᵀ )  
+        def g⃗(c⃗ᵣ):
+            # give code here
+        # 14  ∇⃗χ(c⃗ᵣ)   = g⃗(c⃗ᵣ) + α·c⃗ᵣ   − m⃗ᵣ  
+        def ∇⃗χ(c⃗ᵣ):
+            # give code here
+        # 15  ∇∇⃗χ(c⃗ᵣ) = diag(g⃗(c⃗ᵣ)) + α·I̿  
+        def ∇∇⃗χ(c⃗ᵣ):
+            # give code here
+        # 18  c⃗ᵣ ← newton(  
+        # 19    f      = ∇⃗χ,      # function whose root we want  
+        # 20    fprime = ∇∇⃗χ,     # its Jacobian (Hessian)  
+        # 21    x0     = c⃗_initial,  
+        # 22    tol    = tol  
+        # 23  )  
+        # call scipy newton here
+        # 26  f⃗ᵣ = max(0, K̿₀ᵀ ⋅ c⃗ᵣ)  
+        # code needed here
+    return f⃗ᵣ, α
 
 
 def demand_real(x, addtxt=""):
