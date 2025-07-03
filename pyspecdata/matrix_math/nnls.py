@@ -8,80 +8,69 @@ logger = logging.getLogger("pyspecdata.matrix_math")
 
 # {{{ local functions
 
-def venk_BRD(initial_lambda, K, factor, data_fornnls, tol=1e-6, maxiter=20):
+def venk_BRD(initial_α, K̿₀, factor, m⃗ᵣ, tol=1e-6, maxiter=20):
     """
-    venk_BRD: Butler–Reeds–Dawson regularization via direct inverse-Newton and lambda update
+    venk_BRD: Butler–Reeds–Dawson regularization via direct inverse-Newton and alpha update
 
     Full Unicode Structured Pseudocode:
 
-    01  # Step 2: For fixed α, solve ∇⃗χ(c⃗ᵣ)=0 via Newton’s method  
-    02  
-    03  # Inputs per dataset ᵣ:  
-    04  #   m⃗ᵣ ← vec(compressed data)  
-    05  #   K̿₀ ← compressed kernel matrix  
-    06  #   α   ← current smoothing parameter  
-    07  # Output:  
-    08  #   c⃗ᵣ ← root of ∇⃗χ(c⃗ᵣ)  
-    09  
-    10  # Build g⃗(c⃗ᵣ) ≡ the diagonal of G(c⃗ᵣ) as a vector (eq. 30):  
-    11  g⃗(c⃗ᵣ) = K̿₀ ⋅ ( max(0, K̿₀ᵀ ⋅ c⃗ᵣ) ⊙ K̿₀ᵀ )  
-        # — replaces diag(H(K₀ᵀc))·K₀ᵀ with a single vector  
-    12  
-    13  # Define χ and its first/second derivatives (eq. 29):  
-    14  ∇⃗χ(c⃗ᵣ)   = g⃗(c⃗ᵣ) + α·c⃗ᵣ   − m⃗ᵣ  
-    15  ∇∇⃗χ(c⃗ᵣ) = diag(g⃗(c⃗ᵣ)) + α·I̿  
-        # — Hessian is a diagonal matrix of g⃗ plus α times the double‐overbar identity  
-    16  
-    17  # Newton root‐find:  
-    18  c⃗ᵣ ← newton(  
-    19    f      = ∇⃗χ,      # function whose root we want  
-    20    fprime = ∇∇⃗χ,     # its Jacobian (Hessian)  
-    21    x0     = c⃗_initial,  
-    22    tol    = tol  
-    23  )  
-    24  
-    25  # 2.3  Recover f⃗ᵣ (nonneg. projection, eq. 27):  
-    26  f⃗ᵣ = max(0, K̿₀ᵀ ⋅ c⃗ᵣ)  
-    27  
-    28  # Step 3: BRD α‐update (eq. 41)  
-    29  n_r    = dim(c⃗ᵣ)                       # = s₁·s₂  
-    30  α_new  = sqrt(n_r) ÷ ‖c⃗ᵣ‖              # α_opt = √(s₁s₂)/‖c⃗ᵣ‖  
-    31  if |α_new − α| ÷ α < tol_α:  
-    32      STOP  # α has converged  
-    33  else:  
-    34      α = α_new  
-    35      goto line 01  # repeat Step 2 with updated α  
+    01  # Step 2: For fixed α, solve ∇⃗χ(c⃗ᵣ)=0 via Newton’s method
+    02  # Inputs:
+    03  #   factor ← √(s₁s₂) in the paper
+    04  #   m⃗ᵣ ← vec(compressed data)
+    05  #   K̿₀ ← compressed kernel matrix
+    06  #   α   ← current smoothing parameter
+    07  # Output:
+    08  #   c⃗ᵣ ← root of ∇⃗χ(c⃗ᵣ)
+    09
+    10  # Build g⃗(c⃗ᵣ) ≡ the diagonal of G(c⃗ᵣ) as a vector (eq.30):
+    11  g⃗(c⃗ᵣ) = K̿₀ ⋅ ( max(0, K̿₀ᵀ⋅c⃗ᵣ ) ⊙ K̿₀ᵀ )
+    12
+    13  # Define χ and its derivatives (eq.29):
+    14  ∇⃗χ(c⃗ᵣ)   = g⃗(c⃗ᵣ) + α·c⃗ᵣ − m⃗ᵣ
+    15  ∇∇⃗χ(c⃗ᵣ)=diag(g⃗(c⃗ᵣ))+α·I̿
+    16
+    17  # Newton root-find:
+    18  c⃗ᵣ ← newton(f=∇⃗χ, fprime=∇∇⃗χ, x0=c⃗_initial, tol=tol)
+    19
+    20  # 2.3 Recover f⃗ᵣ (eq.27):
+    21  f⃗ᵣ = max(0, K̿₀ᵀ⋅c⃗ᵣ)
+    22
+    23  # Step 3: BRD α-update (eq.41):
+    24  n_r   = length(c⃗ᵣ)
+    25  α_new = factor ÷ ‖c⃗ᵣ‖
+    26  if |α_new−α|÷α < tol: stop
+    27  else: α=α_new; goto 01
     """
-    α_new = ???
-    # 31  if |α_new − α| ÷ α < tol_α:  
-    while code_needed:
-        # 31  if |α_new − α| ÷ α < tol_α:  
-        # 32      STOP  # α has converged  
-        if ????:
+    # Initialize
+    α = initial_α
+    c = np.zeros_like(m⃗ᵣ)
+
+    for _ in range(maxiter):
+        # Newton on c⃗ᵣ
+        while True:
+            # g⃗(c) = K·(H(v)⊙K^T)
+            v = K̿₀.T.dot(c)
+            g = lambda c: K̿₀.dot(K̿₀.T.dot(c) * K̿₀.T)
+            # gradient ∇⃗χ = g + α c − m
+            grad = lambda c: g(c) + α * c - m⃗ᵣ
+            # Hessian H=∇∇⃗χ = diag(H(v)) + α I
+            H = np.diag(g(c)) + α * np.eye(c.size)
+            # Newton step Δc given by ∇q⋅Δc=-q where q is ∇⃗χ
+            Δc = np.linalg.solve(H, -grad)
+            c += Δc
+            if np.linalg.norm(Δc) < tol:
+                break
+        # BRD α-update
+        n = c.size
+        α_new = factor / np.linalg.norm(c)
+        if abs(α_new - α) / α < tol:
             break
-        # 33  else:  
-        # 34      α = α_new  
-        # 35      goto line 01  # repeat Step 2 with updated α  
         α = α_new
-        # 11  g⃗(c⃗ᵣ) = K̿₀ ⋅ ( max(0, K̿₀ᵀ ⋅ c⃗ᵣ) ⊙ K̿₀ᵀ )  
-        def g⃗(c⃗ᵣ):
-            # give code here
-        # 14  ∇⃗χ(c⃗ᵣ)   = g⃗(c⃗ᵣ) + α·c⃗ᵣ   − m⃗ᵣ  
-        def ∇⃗χ(c⃗ᵣ):
-            # give code here
-        # 15  ∇∇⃗χ(c⃗ᵣ) = diag(g⃗(c⃗ᵣ)) + α·I̿  
-        def ∇∇⃗χ(c⃗ᵣ):
-            # give code here
-        # 18  c⃗ᵣ ← newton(  
-        # 19    f      = ∇⃗χ,      # function whose root we want  
-        # 20    fprime = ∇∇⃗χ,     # its Jacobian (Hessian)  
-        # 21    x0     = c⃗_initial,  
-        # 22    tol    = tol  
-        # 23  )  
-        # call scipy newton here
-        # 26  f⃗ᵣ = max(0, K̿₀ᵀ ⋅ c⃗ᵣ)  
-        # code needed here
+    # Recover f⃗ᵣ (unused internally)
+    f⃗ᵣ = np.maximum(0, K̿₀.T.dot(c))
     return f⃗ᵣ, α
+
 
 
 def demand_real(x, addtxt=""):
