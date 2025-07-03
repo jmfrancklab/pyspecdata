@@ -8,7 +8,7 @@ logger = logging.getLogger("pyspecdata.matrix_math")
 
 # {{{ local functions
 
-def venk_BRD(initial_α, K̿₀, factor, m⃗ᵣ, tol=1e-6, maxiter=20):
+def venk_BRD(initial_α, K₀, factor, m⃗ᵣ, tol=1e-6, maxiter=20):
     """
     venk_BRD: Butler–Reeds–Dawson regularization via direct inverse-Newton and alpha update
 
@@ -18,13 +18,13 @@ def venk_BRD(initial_α, K̿₀, factor, m⃗ᵣ, tol=1e-6, maxiter=20):
     02  # Inputs:
     03  #   factor ← √(s₁s₂) in the paper
     04  #   m⃗ᵣ ← vec(compressed data)
-    05  #   K̿₀ ← compressed kernel matrix
+    05  #   K₀ ← compressed kernel matrix
     06  #   α   ← current smoothing parameter
     07  # Output:
     08  #   c⃗ᵣ ← root of ∇⃗χ(c⃗ᵣ)
     09
     10  # Build g⃗(c⃗ᵣ) ≡ the diagonal of G(c⃗ᵣ) as a vector (eq.30):
-    11  g⃗(c⃗ᵣ) = K̿₀ ⋅ ( max(0, K̿₀ᵀ⋅c⃗ᵣ ) ⊙ K̿₀ᵀ )
+    11  g⃗(c⃗ᵣ) = K₀ ⋅ ( max(0, K₀ᵀ⋅c⃗ᵣ ) ⊙ K₀ᵀ )
     12
     13  # Define χ and its derivatives (eq.29):
     14  ∇⃗χ(c⃗ᵣ)   = g⃗(c⃗ᵣ) + α·c⃗ᵣ − m⃗ᵣ
@@ -34,7 +34,7 @@ def venk_BRD(initial_α, K̿₀, factor, m⃗ᵣ, tol=1e-6, maxiter=20):
     18  c⃗ᵣ ← newton(f=∇⃗χ, fprime=∇∇⃗χ, x0=c⃗_initial, tol=tol)
     19
     20  # 2.3 Recover f⃗ᵣ (eq.27):
-    21  f⃗ᵣ = max(0, K̿₀ᵀ⋅c⃗ᵣ)
+    21  f⃗ᵣ = max(0, K₀ᵀ⋅c⃗ᵣ)
     22
     23  # Step 3: BRD α-update (eq.41):
     24  n_r   = length(c⃗ᵣ)
@@ -44,31 +44,31 @@ def venk_BRD(initial_α, K̿₀, factor, m⃗ᵣ, tol=1e-6, maxiter=20):
     """
     # Initialize
     α = initial_α
-    c = np.zeros_like(m⃗ᵣ)
+    c⃗ = np.zeros_like(m⃗ᵣ)
 
     for _ in range(maxiter):
         # Newton on c⃗ᵣ
         while True:
-            # g⃗(c) = K·(H(v)⊙K^T)
-            v = K̿₀.T.dot(c)
-            g = lambda c: K̿₀.dot(K̿₀.T.dot(c) * K̿₀.T)
-            # gradient ∇⃗χ = g + α c − m
-            grad = lambda c: g(c) + α * c - m⃗ᵣ
+            # TODO: move the lambda function defs outside the loop, but include alpha as an arg
+            # g⃗(c⃗) = K·(H(v)⊙K^T)
+            g⃗ = lambda c⃗: K₀.dot(K₀.T.dot(c⃗) * K₀.T)
+            # gradient ∇⃗χ = g⃗ + α c⃗ − m
+            grad = lambda c⃗: g⃗(c⃗) + α * c⃗ - m⃗ᵣ
             # Hessian H=∇∇⃗χ = diag(H(v)) + α I
-            H = np.diag(g(c)) + α * np.eye(c.size)
-            # Newton step Δc given by ∇q⋅Δc=-q where q is ∇⃗χ
-            Δc = np.linalg.solve(H, -grad)
-            c += Δc
-            if np.linalg.norm(Δc) < tol:
+            H = lambda c⃗: np.diag(g⃗(c⃗)) + α * np.eye(c⃗.size)
+            # Newton step Δc⃗ given by ∇q⋅Δc⃗=-q where q is ∇⃗χ
+            Δc⃗ = np.linalg.solve(H, -grad)
+            c⃗ += Δc⃗
+            if np.linalg.norm(Δc⃗) < tol:
                 break
         # BRD α-update
-        n = c.size
-        α_new = factor / np.linalg.norm(c)
+        n = c⃗.size
+        α_new = factor / np.linalg.norm(c⃗)
         if abs(α_new - α) / α < tol:
             break
         α = α_new
     # Recover f⃗ᵣ (unused internally)
-    f⃗ᵣ = np.maximum(0, K̿₀.T.dot(c))
+    f⃗ᵣ = np.maximum(0, K₀.T.dot(c⃗))
     return f⃗ᵣ, α
 
 
