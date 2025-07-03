@@ -440,10 +440,12 @@ def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default
             factor = np.sqrt(np.prod(s))
         else:
             factor = None
-        # TODO: this shoudl not call nnls_regularized, which stacks with an identity matrix.  Rather, venk_BRD should be capable of returning the regularization parameter, the fit vector, and the 
-        retval, residual = this_nnls.nnls_regularized(
-            K_alldims, data_fornnls, l=venk_BRD(1.0, K_alldims, factor, data_fornnls)
-        )
+        # Automatic BRD parameter selection without stacking identity
+        # 1) Compute optimal f⃗ᵣ and λ via venk_BRD
+        retval, l = venk_BRD(1.0, K_alldims, factor, data_fornnls)
+        # 2) Compute residual: A·x − b (eq. 40)
+        residual = K_alldims.dot(retval) - data_fornnls
+        # Replace l with the chosen λ for downstream recording
     else:
         logger.debug(strm("I'm preparing to call nnls_regularized with kernel dtype",
                           K_alldims.dtype,
