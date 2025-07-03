@@ -7,83 +7,110 @@ from .. import nnls as this_nnls
 logger = logging.getLogger("pyspecdata.matrix_math")
 
 # {{{ local functions
-def chi(x_vec, val, data_fornnls, K):
-    # appears to not be used?
-    return 0.5 * np.dot(
-        x_vec.T, np.dot(dd_chi(G(x_vec, K), val**2), x_vec)
-    ) - np.dot(x_vec.T, data_fornnls[:, newaxis])
 
-def d_chi(x_vec, val, data_fornnls, K):
-    return np.dot(dd_chi(G(x_vec, K), val**2), x_vec) - data_fornnls[:, newaxis]
+def venk_BRD(initial_lambda, K, factor, data_fornnls, tol=1e-6, maxiter=20):
+    """
+    venk_BRD: Butler–Reeds–Dawson regularization via direct inverse-Newton and lambda update
 
-def dd_chi(G, val):
-    return G + (val**2) * np.eye(np.shape(G)[0])
+    Full Unicode Structured Pseudocode:
 
-def G(x_vec, K):
-    return np.dot(K, np.dot(square_heaviside(x_vec, K), K.T))
+    01  # Step 2: For fixed λ, estimate f⃗ᵣ via BRD
+    02  
+    03  # Inputs per dataset ᵣ:
+    04  #   m⃗ᵣ ← vec(compressed data)
+    05  #   w⃗ᵣ ← vec(singular-value weights)
+    06  #   λ   ← current smoothing parameter
+    07  #   β   ← BRD multiplier
+    08  # Output:
+    09  #   f⃗ᵣ ← estimated density vector
+    10  
+    11  # 2.1  Build C̿ᵣ and h⃗ᵣ (eqs. 29 & 30):
+    12      for each index i:
+    13        h⃗ᵣ[i]   = w⃗ᵣ[i] ⋅ m⃗ᵣ[i] ÷ (w⃗ᵣ[i]² + λ)     # eq.(29)
+    14        C̿ᵣ[i,i] = w⃗ᵣ[i]² ÷ (w⃗ᵣ[i]² + λ)          # eq.(30)
+    15      # off-diagonals of C̿ᵣ ← β⋅H-mask (see paper)
+    16  
+    17  # 2.2  Initialize g⃗ᵣ > 0, e.g. g⃗ᵣ[i] = √(h⃗ᵣ[i] ÷ C̿ᵣ[i,i])
+    18  
+    19  repeat until g⃗ᵣ converges:
+    20      ∇U = 2 ⋅ C̿ᵣ ⋅ g⃗ᵣ   −  2 ⋅ h⃗ᵣ   +  β ⋅ 1   # eq.(32)
+    21      H_U = 2 ⋅ C̿ᵣ                         # eq.(33)
+    22  
+    23      Δg⃗ᵣ = − solve(H_U, ∇U)             # solve H_U·Δg = −∇U (LAPACK)
+    24      g⃗ᵣ  = max(0, g⃗ᵣ + Δg⃗ᵣ)             # enforce gᵢ ≥ 0
+    25  end repeat
+    26  
+    27  f⃗ᵣ = g⃗ᵣ²                             # recover fᵢ = (gᵢ)²
+    28  
+    29  # Step 3: Update λ by BRD rule
+    30  
+    31  Eᵣ    = ‖ w⃗ᵣ ∘ f⃗ᵣ − m⃗ᵣ ‖²        # eq.(40)
+    32  nᵣ    = length(m⃗ᵣ)               # # compressed points
+    33  Q     = ‖ f⃗ᵣ ‖²                  # eq.(35)
+    34  λₙₑw = max(ε, (Eᵣ − nᵣ) ÷ Q)        # eq.(41)
+    35  
+    36  # For R datasets:
+    37  # λₙₑw = max(ε, (Σᵣ Eᵣ − Σᵣ nᵣ) ÷ Q)   # eq.(48)
+    38  
+    39  if |λₙₑw − λ| ÷ λ < tol:
+    40      stop      # λ & f have converged
+    41  else:
+    42      λ = λₙₑw
+    43      goto Step 2
+    44  end
+    45  """
+    # 03 m⃗ᵣ ← vec(compressed data)
+    # 04 w⃗ᵣ ← vec(singular-value weights)
+    # 06 λ   ← current smoothing parameter
+    # 07 β   ← BRD multiplier
+    m⃗ᵣ = data_fornnls
+    w⃗ᵣ = np.sqrt((K**2).sum(axis=0)) if factor is None else factor
+    λ   = initial_lambda
+    β   = 1.0
 
-def H(product):
-    if product <= 0:
-        return 0
-    if product > 0:
-        return 1
+    # 13 h⃗ᵣ[i] = w⃗ᵣ[i] ⋅ m⃗ᵣ[i] ÷ (w⃗ᵣ[i]² + λ)
+    # 14 C̿ᵣ[i,i] = w⃗ᵣ[i]² ÷ (w⃗ᵣ[i]² + λ)
+    diag = w⃗ᵣ**2 + λ
+    h = (w⃗ᵣ * m⃗ᵣ) / diag                    # vectorized eq.(29)
+    C = np.diag(w⃗ᵣ**2 / diag)                # vectorized diag of eq.(30)
 
-def square_heaviside(x_vec, K):
-    K_dim = np.shape(K.T)[0]
-    diag_heavi = np.empty(K_dim)
-    for q in range(K_dim):
-        pull_val = np.dot(K.T[q, :], x_vec)
-        temp = pull_val[0]
-        diag_heavi[q] = H(temp)
-    return np.diag(diag_heavi)
+    # 17 g⃗ᵣ[i] = √(h⃗ᵣ[i] ÷ C̿ᵣ[i,i])
+    g = np.sqrt(h / np.diag(C))               # from line 17
 
-def optimize_alpha(input_vec, val, factor, K, tol=1e-6):
-    # if not twoD, then factor should be None
-    alpha_converged = False
-    if factor is None:
-        factor = np.sqrt(input_vec.shape[0])
-    T = np.linalg.inv(dd_chi(G(input_vec, K), val**2))
-    dot_product = np.dot(input_vec.T, np.dot(T, input_vec))
-    ans = dot_product * factor
-    ans = ans / np.linalg.norm(input_vec) / dot_product
-    if abs(ans - val**2) <= tol:
-        logger.debug(strm("ALPHA HAS CONVERGED."))
-        alpha_converged = True
-        return ans, alpha_converged
-    return ans, alpha_converged
-
-def newton_min(input_vec, val, data_fornnls, K):
-    fder = dd_chi(G(input_vec, K), val)
-    fval = d_chi(input_vec, val, data_fornnls, K)
-    return input_vec + np.dot(np.linalg.inv(fder), fval)
-
-def mod_BRD(guess, K, factor, data_fornnls, maxiter=20):
-    smoothing_param = guess
-    alpha_converged = False
-    for iter in range(maxiter):
-        logger.debug(strm("ITERATION NO.", iter))
-        logger.debug(strm("CURRENT LAMBDA", smoothing_param))
-        retval, residual = this_nnls.nnls_regularized(
-            K, data_fornnls, l=smoothing_param
-        )
-        f_vec = retval[:, newaxis]
-        alpha = smoothing_param**2
-        c_vec = np.dot(K, f_vec) - data_fornnls[:, newaxis]
-        c_vec /= -1 * alpha
-        c_update = newton_min(c_vec, smoothing_param, data_fornnls, K)
-        alpha_update, alpha_converged = optimize_alpha(
-            c_update, smoothing_param, factor, K
-        )
-        lambda_update = np.sqrt(alpha_update[0, 0])
-        if alpha_converged:
-            logger.debug(strm("*** OPTIMIZED LAMBDA", lambda_update, "***"))
+    # 20 ∇U = 2 ⋅ C̿ᵣ ⋅ g⃗ᵣ − 2 ⋅ h⃗ᵣ + β ⋅ 1
+    # 21 H_U = 2 ⋅ C̿ᵣ
+    # 23 Δg⃗ᵣ = − solve(H_U, ∇U)
+    # 24 g⃗ᵣ = max(0, g⃗ᵣ + Δg⃗ᵣ)
+    while True:
+        grad = 2*(C @ g) - 2*h + β             # eq.(32)
+        H = 2*C                                # eq.(33)
+        delta = -np.linalg.solve(H, grad)
+        g_new = np.maximum(0, g + delta)
+        if np.linalg.norm(g_new - g) < tol:
+            g = g_new
             break
-        if not alpha_converged:
-            logger.debug(strm("UPDATED LAMBDA", lambda_update))
-            smoothing_param = lambda_update
-        if iter == maxiter - 1:
-            logger.debug(strm("DID NOT CONVERGE."))
-    return lambda_update
+        g = g_new
+
+    # 27 f⃗ᵣ = g⃗ᵣ²
+    f⃗ᵣ = g**2                                # eq.(27)
+
+    # 31 Eᵣ = ‖ w⃗ᵣ ∘ f⃗ᵣ − m⃗ᵣ ‖²
+    # 32 nᵣ = length(m⃗ᵣ)
+    # 33 Q = ‖ f⃗ᵣ ‖²
+    # 34 λₙₑw = max(ε, (Eᵣ − nᵣ) ÷ Q)
+    E = np.linalg.norm(w⃗ᵣ * f⃗ᵣ - m⃗ᵣ)**2      # eq.(40)
+    n = m⃗ᵣ.size                            # line 32
+    Q = np.linalg.norm(f⃗ᵣ)**2              # eq.(35)
+    λₙₑw = max(1e-12, (E - n) / Q)          # eq.(41)
+    # 39 if |λₙₑw − λ| ÷ λ < tol
+    # 40     return f⃗ᵣ, λₙₑw
+    if abs(λₙₑw - λ) / λ < tol:
+        return f⃗ᵣ, λₙₑw
+    # 42 λ = λₙₑw
+    λ = λₙₑw
+
+    return f⃗ᵣ, λ                            
+
 
 def demand_real(x, addtxt=""):
     if not x.dtype == np.float64:
@@ -413,8 +440,9 @@ def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default
             factor = np.sqrt(np.prod(s))
         else:
             factor = None
+        # TODO: this shoudl not call nnls_regularized, which stacks with an identity matrix.  Rather, venk_BRD should be capable of returning the regularization parameter, the fit vector, and the 
         retval, residual = this_nnls.nnls_regularized(
-            K_alldims, data_fornnls, l=mod_BRD(1.0, K_alldims, factor, data_fornnls)
+            K_alldims, data_fornnls, l=venk_BRD(1.0, K_alldims, factor, data_fornnls)
         )
     else:
         logger.debug(strm("I'm preparing to call nnls_regularized with kernel dtype",
