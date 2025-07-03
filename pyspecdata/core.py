@@ -7427,7 +7427,7 @@ class ndshape(ndshape_base):
 
     """
 
-    def alloc(self, dtype="complex128", labels=False, format=0):
+    def alloc(self, dtype=np.complex128, labels=False, format=0):
         r"""Use the shape object to allocate an empty nddata object.
 
         Parameters
