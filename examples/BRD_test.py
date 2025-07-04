@@ -36,7 +36,7 @@ print(ndshape(M))
 print(ndshape(logT1))
 print("*** *** ***")
 solution = M.C.nnls('vd',logT1, lambda x,y: 1-2*exp(-x/10**(y)), l='BRD')
-hardcoded_BRD = 20
+hardcoded_BRD = 0.2
 solution_confirm = M.C.nnls('vd',logT1, lambda x,y: 1-2*exp(-x/10**(y)), l=hardcoded_BRD)
 
 def nnls_reg(K,b,val):

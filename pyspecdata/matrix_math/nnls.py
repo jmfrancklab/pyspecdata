@@ -47,7 +47,7 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
     """
     sqrt_n = np.sqrt(m⃗ᵣ.size)
     # Initialize
-    α = 20
+    α = 0.2
     print("BRD initial α", α)
     c⃗ = np.ones_like(m⃗ᵣ)
     # c⃗ = (K_0.T @ m⃗ᵣ) / (K_0.T @ K_0) # initial guess
