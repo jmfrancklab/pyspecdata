@@ -105,7 +105,7 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
         α_new = sqrt_n / np.linalg.norm(c⃗)
         # 07  if |α_new−α|÷α < tol: stop
         if abs(α_new - α) / α < tol:
-            print("converged")
+            print("α converged")
             break
         # 08  else: α=α_new; goto 01
         α = α_new
@@ -113,7 +113,7 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
     # Recover f⃗ᵣ (unused internally)
     # 05  f⃗ᵣ = max(0, K₀ᵀ⋅c⃗ᵣ)
     f⃗ᵣ = np.maximum(0, K_0.T.dot(c⃗))
-    return f⃗ᵣ, α
+    return f⃗ᵣ, α_new
 
 
 def demand_real(x, addtxt=""):
