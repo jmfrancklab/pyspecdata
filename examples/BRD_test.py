@@ -29,6 +29,7 @@ M = K @ true_F # the fake data
 print(shape(M))
 #M.setaxis('vd',y_axis)
 M.add_noise(0.2)
+M /= 0.2 # this is key -- make sure that the noise variance is 1, for BRD
 
 # this is here to test the integrated 1D-BRD (for pyspecdata)
 print("*** *** ***")
@@ -36,8 +37,7 @@ print(ndshape(M))
 print(ndshape(logT1))
 print("*** *** ***")
 solution = M.C.nnls('vd',logT1, lambda x,y: 1-2*exp(-x/10**(y)), l='BRD')
-hardcoded_BRD = 0.5
-solution_confirm = M.C.nnls('vd',logT1, lambda x,y: 1-2*exp(-x/10**(y)), l=hardcoded_BRD)
+solution_confirm = M.C.nnls('vd',logT1, lambda x,y: 1-2*exp(-x/10**(y)), l=sqrt(solution.get_prop('opt_alpha')))
 
 def nnls_reg(K,b,val):
     b_prime = r_[b,zeros(K.shape[1])]
@@ -83,7 +83,7 @@ print("true mean:",true_F.C.mean(t1_name).item(),"±",true_F.run(std,t1_name).it
 plot(L_opt_vec,label='L-Curve')
 print("opt. λ mean:",L_opt_vec.C.mean(t1_name).item(),"±",L_opt_vec.run(std,t1_name).item())
 plot(solution,':',label='pyspecdata-BRD')
-plot(solution_confirm,'--',label=fr'manual BRD $\alpha={hardcoded_BRD:#0.3g}$')
+plot(solution_confirm,'--',label=fr'manual BRD $\alpha={solution.get_prop("opt_alpha"):#0.2g}$', alpha=0.5)
 print("BRD mean:",solution.C.mean(t1_name).item(),"±",solution.run(std,t1_name).item())
 legend()
 show()

@@ -45,9 +45,10 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
     07  if |α_new−α|÷α < tol: stop
     08  else: α=α_new; goto 01
     """
-    sqrt_n = np.sqrt(m⃗ᵣ.size)
+    #sqrt_n = np.sqrt(m⃗ᵣ.size)
+    sqrt_n = np.sqrt(K_0.shape[0])
     # Initialize
-    α = 0.5
+    α = 1e-3
     print("BRD initial α", α)
     c⃗ = np.ones_like(m⃗ᵣ)
     # c⃗ = (K_0.T @ m⃗ᵣ) / (K_0.T @ K_0) # initial guess
@@ -63,7 +64,7 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
     H = lambda c⃗, α: g⃗(c⃗) + α * np.eye(c⃗.size)
     print("starting gradient", np.linalg.norm(grad(c⃗, α)))
     print("sizes", [j.shape for j in [c⃗, grad(c⃗, α), H(c⃗, α)]])
-    for _ in range(1):
+    for _ in range(100):
         # 04  c⃗ᵣ ← newton(f=∇⃗χ, fprime=∇∇⃗χ, x0=c⃗_initial, tol=tol)
         for j in range(int(1e4)):
             epsilon = 1
@@ -88,7 +89,7 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
                 f" {np.linalg.norm(grad(c⃗,α)) / np.linalg.norm(m⃗ᵣ) } step"
                 f" {j} k {k}"
             )
-            if np.linalg.norm(grad(c⃗, α)) / np.linalg.norm(m⃗ᵣ) < 1e-6:
+            if np.linalg.norm(grad(c⃗, α)) / np.linalg.norm(m⃗ᵣ) < 1e-8:
                 print("converged")
                 break
         # sol = root(fun=lambda c: grad(c, α),
@@ -103,6 +104,9 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
         # c⃗ = sol.x
         # 06  α_new = √n ÷ ‖c⃗ᵣ‖
         print(f"norm of grad {np.linalg.norm(grad(c⃗,α))}")
+        f⃗ᵣ = np.maximum(0, K_0.T.dot(c⃗))
+        print(f"norm of back-calc diff {np.linalg.norm(c⃗ - (K_0 @ f⃗ᵣ - m⃗ᵣ) / - α)}")
+        print(f"norm of c⃗ {np.linalg.norm(c⃗)} sqrt_n {sqrt_n}")
         α_new = sqrt_n / np.linalg.norm(c⃗)
         # 07  if |α_new−α|÷α < tol: stop
         if abs(α_new - α) / α < tol:
