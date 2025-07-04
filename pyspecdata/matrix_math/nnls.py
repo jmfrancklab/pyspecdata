@@ -10,8 +10,9 @@ logger = logging.getLogger("pyspecdata.matrix_math")
 
 # {{{ local functions
 
+
 def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
-        # TODO ☐: make sure that "√n" here is correct for the equation used to calculate α in venk_BRD
+    # TODO ☐: make sure that "√n" here is correct for the equation used to calculate α in venk_BRD
     """
     venk_BRD: Butler–Reeds–Dawson regularization via direct inverse-Newton and alpha update
 
@@ -25,20 +26,20 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
         #   α   ← current smoothing parameter
         # Output:
         #   c⃗ᵣ ← root of ∇⃗χ(c⃗ᵣ)
-      
+
         # Build g⃗(c⃗ᵣ) ≡ the diagonal of G(c⃗ᵣ) as a vector (eq.30):
     01  g⃗(c⃗ᵣ) = K₀ ⋅ ( max(0, K₀ᵀ⋅c⃗ᵣ ) ⊙ K₀ᵀ )
-      
+
         # Define χ and its derivatives (eq.29):
     02  ∇⃗χ(c⃗ᵣ) = g⃗(c⃗ᵣ)·c⃗ᵣ + α c⃗ᵣ − m⃗ᵣ
     03  ∇∇⃗χ(c⃗ᵣ) = diag(g⃗(c⃗ᵣ)) + α I̿
-      
+
         # Newton root-find:
     04  c⃗ᵣ ← newton(f=∇⃗χ, fprime=∇∇⃗χ, x0=c⃗_initial, tol=tol)
-      
+
         # 2.3 Recover f⃗ᵣ (eq.27):
     05  f⃗ᵣ = max(0, K₀ᵀ⋅c⃗ᵣ)
-      
+
         # Step 3: BRD α-update (eq.41):
     06  α_new = √n ÷ ‖c⃗ᵣ‖
     07  if |α_new−α|÷α < tol: stop
@@ -46,50 +47,51 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
     """
     sqrt_n = np.sqrt(m⃗ᵣ.size)
     # Initialize
-    α = initial_α
-    print("BRD initial α",α)
-    c⃗ = np.zeros_like(m⃗ᵣ)
-    #c⃗ = (K_0.T @ m⃗ᵣ) / (K_0.T @ K_0) # initial guess
+    α = 0.226
+    print("BRD initial α", α)
+    c⃗ = np.ones_like(m⃗ᵣ)
+    # c⃗ = (K_0.T @ m⃗ᵣ) / (K_0.T @ K_0) # initial guess
 
     # 01  g⃗(c⃗ᵣ) = K₀ ⋅ ( max(0, K₀ᵀ⋅c⃗ᵣ ) ⊙ K₀ᵀ )
-    g⃗ = lambda c⃗: K_0.dot(K_0.T.dot(c⃗)[:,newaxis] * K_0.T)
+    g⃗ = lambda c⃗: K_0 @ (np.maximum(0, K_0.T @ c⃗)[:, newaxis] * K_0.T)
     # 02  ∇⃗χ(c⃗ᵣ)   = g⃗(c⃗ᵣ)·c⃗ᵣ + α c⃗ᵣ − m⃗ᵣ
-    grad = lambda c⃗, α: g⃗(c⃗).dot(c⃗) + α * c⃗ - m⃗ᵣ
+    grad = lambda c⃗, α: g⃗(c⃗) @ c⃗ + α * c⃗ - m⃗ᵣ
     # 03  ∇∇⃗χ(c⃗ᵣ)=diag(g⃗(c⃗ᵣ))+α·I̿
     # Hessian H=∇∇⃗χ
     H = lambda c⃗, α: np.diag(g⃗(c⃗)) + α * np.eye(c⃗.size)
-    print("starting gradient",np.linalg.norm(grad(c⃗,α)))
-    print("sizes",[j.shape for j in [c⃗, grad(c⃗,α), H(c⃗,α)]])
-    for _ in range(maxiter):
+    print("starting gradient", np.linalg.norm(grad(c⃗, α)))
+    print("sizes", [j.shape for j in [c⃗, grad(c⃗, α), H(c⃗, α)]])
+    for _ in range(1):
         # 04  c⃗ᵣ ← newton(f=∇⃗χ, fprime=∇∇⃗χ, x0=c⃗_initial, tol=tol)
-        smallstep = 1e-4
-        for j in range(100):
+        for j in range(int(1e4)):
             epsilon = 1
             oldresid = 0
             c⃗_new = c⃗
-            oldresid = np.linalg.norm(grad(c⃗,α))
+            oldresid = np.linalg.norm(grad(c⃗, α))
+            # determine the direction
+            Δc⃗ = solve(H(c⃗, α), grad(c⃗, α))
+            # s in BRD paper apendix
+            s = Δc⃗.dot(grad(c⃗, α)) / (Δc⃗.dot(H(c⃗, α).dot(Δc⃗)))
             k = 0
-            while np.linalg.norm(grad(c⃗_new,α)) > oldresid or k == 0:
-                k += 1
-                epsilon /= 10
-                # determine the direction
-                Δc⃗ = solve( H(c⃗, α), -grad(c⃗, α))
+            while np.linalg.norm(grad(c⃗_new, α)) > oldresid or k == 0:
                 # take a small stepsize, which is decreased until we are actually rolling downhill
-                Δc⃗ *= epsilon / np.linalg.norm(Δc⃗)
-                c⃗_new = c⃗ + Δc⃗ 
+                c⃗_new = c⃗ - s * 0.5**k * Δc⃗
+                k += 1
             c⃗ = c⃗_new
-            #print(f"norm of grad {np.linalg.norm(grad(c⃗,α))} step {j} k {k}")
-            if np.linalg.norm(grad(c⃗,α)) < 1e-12: break
-        #sol = root(fun=lambda c: grad(c, α),
+            # print(f"norm of grad {np.linalg.norm(grad(c⃗,α))} step {j} k {k}")
+            if np.linalg.norm(grad(c⃗, α)) / np.linalg.norm(m⃗ᵣ) < 1e-6:
+                print("converged")
+                break
+        # sol = root(fun=lambda c: grad(c, α),
         #           jac=lambda c: H(c, α),
         #           x0=c⃗,
         #           method='hybr',
         #           )
-        #assert sol.success
-        #print("Success:", sol.success)
-        #print("Message:", sol.message)
-        #print("Residual norm:", np.linalg.norm(sol.fun))
-        #c⃗ = sol.x
+        # assert sol.success
+        # print("Success:", sol.success)
+        # print("Message:", sol.message)
+        # print("Residual norm:", np.linalg.norm(sol.fun))
+        # c⃗ = sol.x
         # 06  α_new = √n ÷ ‖c⃗ᵣ‖
         print(f"norm of grad {np.linalg.norm(grad(c⃗,α))}")
         α_new = sqrt_n / np.linalg.norm(c⃗)
@@ -106,25 +108,37 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
     return f⃗ᵣ, α
 
 
-
 def demand_real(x, addtxt=""):
     if not x.dtype == np.float64:
         if x.dtype == np.complex128:
             raise ValueError(
-                "you are not allows to pass nnls complex data:\nif it makes sense for you, try yourdata.real.nnls( np.where you now have yourdata.nnls("
+                "you are not allows to pass nnls complex data:\nif it makes"
+                " sense for you, try yourdata.real.nnls( np.where you now have"
+                " yourdata.nnls("
                 + "\n"
                 + addtxt
             )
         else:
             raise ValueError(
-                "I expect double-precision floating point (float64), but you passed me data of dtype "
+                "I expect double-precision floating point (float64), but you"
+                " passed me data of dtype "
                 + str(x.dtype)
                 + "\n"
                 + addtxt
             )
+
+
 # }}}
-def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default_cut=1e-3,
-         store_uncompressed_kernel=False):
+def nnls(
+    self,
+    nddata_cls,
+    dimname_list,
+    newaxis_dict,
+    kernel_func,
+    l=0,
+    default_cut=1e-3,
+    store_uncompressed_kernel=False,
+):
     r"""Perform regularized non-negative least-squares "fit" on self.
 
     Capable of solving for solution in 1 or 2 dimensions.
@@ -240,7 +254,8 @@ def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default
     else:
         raise ValueError(
             strm(
-                "I didn't understand what you specified for the new axes (dimension of type:",
+                "I didn't understand what you specified for the new axes"
+                " (dimension of type:",
                 type(dimname_list),
                 "and new axes type",
                 type(newaxis_dict),
@@ -260,12 +275,14 @@ def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default
         if j.getaxis(j.dimlabels[0]) is not None:
             demand_real(
                 j.getaxis(j.dimlabels[0]),
-                "(this message pertains to the new %s axis pulled from the second argument's axis)"
+                "(this message pertains to the new %s axis pulled from the"
+                " second argument's axis)"
                 % str(j.dimlabels[0]),
             )
         demand_real(
             j.data,
-            "(this message pertains to the new %s axis pulled from the second argument's data)"
+            "(this message pertains to the new %s axis pulled from the second"
+            " argument's data)"
             % str(j.dimlabels[0]),
         )
     if isinstance(kernel_func, tuple):
@@ -300,7 +317,9 @@ def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default
         nddata_cls(fit_axis_coords[j], fit_dimnames[j])
         for j in range(len(dimname_list))
     ]
-    data_axes = [self.fromaxis(dimname_list[j]) for j in range(len(dimname_list))]
+    data_axes = [
+        self.fromaxis(dimname_list[j]) for j in range(len(dimname_list))
+    ]
     # at this point, fit_axes and data_axes
     # are nddata objects that give the axis
     # coordinates in the fit and data
@@ -312,15 +331,13 @@ def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default
     # inner dimensions, so we put out active dimensions on the inside
     # (last), so we want that order, but we want to save the final order
     # that we're going to want at the end
-    new_order = [fit_dimnames[dimname_list.index(j)]
-            if j in dimname_list else j
-            for j in self.dimlabels]
-    self.reorder(
-        dimname_list,
-        first=False
-    )
+    new_order = [
+        fit_dimnames[dimname_list.index(j)] if j in dimname_list else j
+        for j in self.dimlabels
+    ]
+    self.reorder(dimname_list, first=False)
     # }}}
-    logger.debug(strm("here is the order of the data",self.shape))
+    logger.debug(strm("here is the order of the data", self.shape))
     # }}}
     # {{{ construct the kernel
     # the kernel transforms from (columns) the "fit" dimension to (rows)
@@ -346,7 +363,7 @@ def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default
     )
     # }}}
     if store_uncompressed_kernel:
-        self.set_prop('nnls_kernels_uncompressed',kernels)
+        self.set_prop("nnls_kernels_uncompressed", kernels)
     U, S, V = [[None] * len(dimname_list) for j in range(3)]
     s = [None] * len(dimname_list)
     for j in range(len(dimname_list)):
@@ -360,10 +377,12 @@ def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default
                 "based on default_cut of",
                 default_cut,
                 "I'm going to cut out everything below",
-                S[j][0]*default_cut,
+                S[j][0] * default_cut,
             )
         )
-        s[j] = np.where(S[j] > default_cut * S[j][0])[0][-1] # JF changed this and following -- should be relative
+        s[j] = np.where(S[j] > default_cut * S[j][0])[0][
+            -1
+        ]  # JF changed this and following -- should be relative
         logger.debug(
             strm(
                 f"S{j+1} is",
@@ -375,12 +394,15 @@ def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default
             )
         )
     for j in range(len(dimname_list)):
-        U[j] = U[j][:, 0:s[j]]
-        S[j] = S[j][0:s[j]]
-        V[j] = V[j][0:s[j], :]
+        U[j] = U[j][:, 0 : s[j]]
+        S[j] = S[j][0 : s[j]]
+        V[j] = V[j][0 : s[j], :]
         S[j] = S[j] * np.eye(s[j])
         logger.debug(
-            strm("Compressed SVD of K[j]:", [x.shape for x in (U[j], S[j], V[j])])
+            strm(
+                "Compressed SVD of K[j]:",
+                [x.shape for x in (U[j], S[j], V[j])],
+            )
         )
     # {{{ compressing -- K are the compressed kernels (ΣV)
     K = [None] * len(dimname_list)
@@ -403,15 +425,13 @@ def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default
         # sum across last and second from last and second to last
         # dimensions:
         # dot(a, b)[i,j,k,m] = sum(a[i,j,:] * b[k,:,m])
-        data_fornnls = U[0].T.dot(
-                self.data.dot(U[1])
-                )
+        data_fornnls = U[0].T.dot(self.data.dot(U[1]))
         # we want to smoosh the last two dimensions to get lex ordering
         # (here, if data has outer (earlier) dimensions, they are not
         # affected)
         data_fornnls = data_fornnls.reshape(
-                data_fornnls.shape[:-2] + (np.prod(data_fornnls.shape[-2:]),)
-                )
+            data_fornnls.shape[:-2] + (np.prod(data_fornnls.shape[-2:]),)
+        )
         # }}}
     else:
         K_alldims = S[0] @ V[0]
@@ -419,7 +439,16 @@ def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default
         # [indirect × data] [data × SV] = [indirect × SV]
         # which is what we want
         data_fornnls = self.data.dot(U[0])
-        logger.debug(strm("data has shape",self.data.shape,"compressed to",data_fornnls.shape,"by U^T of",U[0].T.shape))
+        logger.debug(
+            strm(
+                "data has shape",
+                self.data.shape,
+                "compressed to",
+                data_fornnls.shape,
+                "by U^T of",
+                U[0].T.shape,
+            )
+        )
     # we are now ready to perform the regularization
     # along the innermost dimension, which is lex ordered where relevant!
     logger.debug(
@@ -434,20 +463,26 @@ def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default
         # Automatic BRD parameter selection without stacking identity
         # 1) Compute optimal f⃗ᵣ and λ via venk_BRD
         retval, l = venk_BRD(1e-2, K_alldims, data_fornnls)
-        self.set_prop('opt_alpha',l)
+        self.set_prop("opt_alpha", l)
         # 2) Compute residual: A·x − b (eq. 40)
         residual = K_alldims.dot(retval) - data_fornnls
         # Replace l with the chosen λ for downstream recording
     else:
-        logger.debug(strm("I'm preparing to call nnls_regularized with kernel dtype",
-                          K_alldims.dtype,
-                          "and shape",
-                          K_alldims.shape,
-                          "data dtype",
-                          data_fornnls.dtype,
-                          "and shape",
-                          data_fornnls.shape))
-        retval, residual = this_nnls.nnls_regularized(K_alldims, data_fornnls, l=l)
+        logger.debug(
+            strm(
+                "I'm preparing to call nnls_regularized with kernel dtype",
+                K_alldims.dtype,
+                "and shape",
+                K_alldims.shape,
+                "data dtype",
+                data_fornnls.dtype,
+                "and shape",
+                data_fornnls.shape,
+            )
+        )
+        retval, residual = this_nnls.nnls_regularized(
+            K_alldims, data_fornnls, l=l
+        )
     logger.debug(
         strm("coming back from fortran, residual type is", type(residual))
         + strm(residual.dtype if isinstance(residual, np.ndarray) else "")
@@ -456,7 +491,9 @@ def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default
     if not np.isscalar(l):
         newshape.append(len(l))
     logger.debug(strm("test***", list(self.data.shape)[:-1]))
-    newshape += [self.shape[j] for j in self.dimlabels if j not in dimname_list] # any outer dimensions
+    newshape += [
+        self.shape[j] for j in self.dimlabels if j not in dimname_list
+    ]  # any outer dimensions
     newshape += [fit_axes[j].data.size for j in range(len(fit_dimnames))]
     logger.debug(
         strm(

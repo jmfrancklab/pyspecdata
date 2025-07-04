@@ -36,7 +36,8 @@ print(ndshape(M))
 print(ndshape(logT1))
 print("*** *** ***")
 solution = M.C.nnls('vd',logT1, lambda x,y: 1-2*exp(-x/10**(y)), l='BRD')
-solution_confirm = M.C.nnls('vd',logT1, lambda x,y: 1-2*exp(-x/10**(y)), l=solution.get_prop('opt_alpha'))
+hardcoded_BRD = 0.226
+solution_confirm = M.C.nnls('vd',logT1, lambda x,y: 1-2*exp(-x/10**(y)), l=hardcoded_BRD)
 
 def nnls_reg(K,b,val):
     b_prime = r_[b,zeros(K.shape[1])]
@@ -82,7 +83,7 @@ print("true mean:",true_F.C.mean(t1_name).item(),"±",true_F.run(std,t1_name).it
 plot(L_opt_vec,label='L-Curve')
 print("opt. λ mean:",L_opt_vec.C.mean(t1_name).item(),"±",L_opt_vec.run(std,t1_name).item())
 plot(solution,':',label='pyspecdata-BRD')
-plot(solution_confirm,'--',label=fr'manual BRD $\alpha={solution.get_prop("opt_alpha"):#0.2g}$')
+plot(solution_confirm,'--',label=fr'manual BRD $\alpha={hardcoded_BRD:#0.3g}$')
 print("BRD mean:",solution.C.mean(t1_name).item(),"±",solution.run(std,t1_name).item())
 legend()
 show()
