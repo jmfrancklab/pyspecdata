@@ -47,18 +47,19 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
     """
     sqrt_n = np.sqrt(m⃗ᵣ.size)
     # Initialize
-    α = 0.226
+    α = 20
     print("BRD initial α", α)
     c⃗ = np.ones_like(m⃗ᵣ)
     # c⃗ = (K_0.T @ m⃗ᵣ) / (K_0.T @ K_0) # initial guess
 
-    # 01  g⃗(c⃗ᵣ) = K₀ ⋅ ( max(0, K₀ᵀ⋅c⃗ᵣ ) ⊙ K₀ᵀ )
-    g⃗ = lambda c⃗: K_0 @ (np.maximum(0, K_0.T @ c⃗)[:, newaxis] * K_0.T)
+    # 01  g⃗(c⃗ᵣ) = K₀ ⋅ ( max(0, K₀ᵀ⋅c⃗ᵣ ))
+    g⃗ = lambda c⃗: (K_0 @ np.diag(np.maximum(0, K_0.T @ c⃗)) @ K_0.T)
+    print(K_0.shape, c⃗.shape, g⃗(c⃗).shape, m⃗ᵣ.shape)
     # 02  ∇⃗χ(c⃗ᵣ)   = g⃗(c⃗ᵣ)·c⃗ᵣ + α c⃗ᵣ − m⃗ᵣ
-    grad = lambda c⃗, α: g⃗(c⃗) @ c⃗ + α * c⃗ - m⃗ᵣ
+    grad = lambda c⃗, α: g⃗(c⃗).dot(c⃗) + α * c⃗ - m⃗ᵣ
     # 03  ∇∇⃗χ(c⃗ᵣ)=diag(g⃗(c⃗ᵣ))+α·I̿
     # Hessian H=∇∇⃗χ
-    H = lambda c⃗, α: np.diag(g⃗(c⃗)) + α * np.eye(c⃗.size)
+    H = lambda c⃗, α: g⃗(c⃗) + α * np.eye(c⃗.size)
     print("starting gradient", np.linalg.norm(grad(c⃗, α)))
     print("sizes", [j.shape for j in [c⃗, grad(c⃗, α), H(c⃗, α)]])
     for _ in range(1):
@@ -70,15 +71,22 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
             oldresid = np.linalg.norm(grad(c⃗, α))
             # determine the direction
             Δc⃗ = solve(H(c⃗, α), grad(c⃗, α))
+            # Δc⃗ = np.linalg.inv(H(c⃗, α)).dot(grad(c⃗, α))
             # s in BRD paper apendix
             s = Δc⃗.dot(grad(c⃗, α)) / (Δc⃗.dot(H(c⃗, α).dot(Δc⃗)))
             k = 0
-            while np.linalg.norm(grad(c⃗_new, α)) > oldresid or k == 0:
+            while (
+                np.linalg.norm(grad(c⃗_new, α)) >= oldresid and k < 62
+            ) or k == 0:
                 # take a small stepsize, which is decreased until we are actually rolling downhill
                 c⃗_new = c⃗ - s * 0.5**k * Δc⃗
                 k += 1
             c⃗ = c⃗_new
-            # print(f"norm of grad {np.linalg.norm(grad(c⃗,α))} step {j} k {k}")
+            print(
+                "norm of grad rel data"
+                f" {np.linalg.norm(grad(c⃗,α)) / np.linalg.norm(m⃗ᵣ) } step"
+                f" {j} k {k}"
+            )
             if np.linalg.norm(grad(c⃗, α)) / np.linalg.norm(m⃗ᵣ) < 1e-6:
                 print("converged")
                 break
