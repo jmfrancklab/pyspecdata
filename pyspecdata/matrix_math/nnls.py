@@ -47,13 +47,14 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
     """
     sqrt_n = np.sqrt(m⃗ᵣ.size)
     # Initialize
-    α = 0.2
+    α = 0.5
     print("BRD initial α", α)
     c⃗ = np.ones_like(m⃗ᵣ)
     # c⃗ = (K_0.T @ m⃗ᵣ) / (K_0.T @ K_0) # initial guess
 
     # 01  g⃗(c⃗ᵣ) = K₀ ⋅ ( max(0, K₀ᵀ⋅c⃗ᵣ ))
-    g⃗ = lambda c⃗: (K_0 @ np.diag(np.maximum(0, K_0.T @ c⃗)) @ K_0.T)
+    # 01  g⃗(c⃗ᵣ) = K₀ ⋅ diag( Heaviside( K₀ᵀ⋅c⃗ᵣ )) · K₀ᵀ
+    g⃗ = lambda c⃗: (K_0 @ np.diag(np.float64((K_0.T @ c⃗)>0)) @ K_0.T)
     print(K_0.shape, c⃗.shape, g⃗(c⃗).shape, m⃗ᵣ.shape)
     # 02  ∇⃗χ(c⃗ᵣ)   = g⃗(c⃗ᵣ)·c⃗ᵣ + α c⃗ᵣ − m⃗ᵣ
     grad = lambda c⃗, α: g⃗(c⃗).dot(c⃗) + α * c⃗ - m⃗ᵣ
