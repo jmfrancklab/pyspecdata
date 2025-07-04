@@ -45,7 +45,7 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
     07  if |α_new−α|÷α < tol: stop
     08  else: α=α_new; goto 01
     """
-    #sqrt_n = np.sqrt(m⃗ᵣ.size)
+    # sqrt_n = np.sqrt(m⃗ᵣ.size)
     sqrt_n = np.sqrt(K_0.shape[0])
     # Initialize
     α = 1e-3
@@ -55,7 +55,7 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
 
     # 01  g⃗(c⃗ᵣ) = K₀ ⋅ ( max(0, K₀ᵀ⋅c⃗ᵣ ))
     # 01  g⃗(c⃗ᵣ) = K₀ ⋅ diag( Heaviside( K₀ᵀ⋅c⃗ᵣ )) · K₀ᵀ
-    g⃗ = lambda c⃗: (K_0 @ np.diag(np.float64((K_0.T @ c⃗)>0)) @ K_0.T)
+    g⃗ = lambda c⃗: (K_0 @ np.diag(np.float64((K_0.T @ c⃗) > 0)) @ K_0.T)
     print(K_0.shape, c⃗.shape, g⃗(c⃗).shape, m⃗ᵣ.shape)
     # 02  ∇⃗χ(c⃗ᵣ)   = g⃗(c⃗ᵣ)·c⃗ᵣ + α c⃗ᵣ − m⃗ᵣ
     grad = lambda c⃗, α: g⃗(c⃗).dot(c⃗) + α * c⃗ - m⃗ᵣ
@@ -105,7 +105,10 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
         # 06  α_new = √n ÷ ‖c⃗ᵣ‖
         print(f"norm of grad {np.linalg.norm(grad(c⃗,α))}")
         f⃗ᵣ = np.maximum(0, K_0.T.dot(c⃗))
-        print(f"norm of back-calc diff {np.linalg.norm(c⃗ - (K_0 @ f⃗ᵣ - m⃗ᵣ) / - α)}")
+        print(
+            "norm of back-calc diff"
+            f" {np.linalg.norm(c⃗ - (K_0 @ f⃗ᵣ - m⃗ᵣ) / - α)}"
+        )
         print(f"norm of c⃗ {np.linalg.norm(c⃗)} sqrt_n {sqrt_n}")
         α_new = sqrt_n / np.linalg.norm(c⃗)
         # 07  if |α_new−α|÷α < tol: stop

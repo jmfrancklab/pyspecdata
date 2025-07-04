@@ -3976,10 +3976,12 @@ class nddata(object):
     secsy_transform = axis_manipulation.secsy_transform
     register_axis = axis_manipulation.register_axis
     fourier_shear = this_fourier.shear
+
     # }}}
     # }}}
     def nnls(self, *args, **kwargs):
         return MM_nnls(self, nddata, *args, **kwargs)
+
     # {{{ interpolation and binning
     def run_avg(self, thisaxisname, decimation=20, centered=False):
         "a simple running average"
@@ -7229,13 +7231,22 @@ class nddata(object):
 
 class testclass:
     def __getitem__(self, *args, **kwargs):
-        logger.debug(strm("you called __getitem__ with args",args,"and kwargs",kwargs))
+        logger.debug(
+            strm(
+                "you called __getitem__ with args", args, "and kwargs", kwargs
+            )
+        )
         return
 
     def __getattribute__(self, *args, **kwargs):
-        logger.debug(strm(
-            "you called __getattribute__ with args", args, "and kwargs", kwargs
-        ))
+        logger.debug(
+            strm(
+                "you called __getattribute__ with args",
+                args,
+                "and kwargs",
+                kwargs,
+            )
+        )
         return
 
 
@@ -7248,6 +7259,7 @@ class nddata_hdf5(nddata):
     conveniently locate the desired file and then instantiate this class
     or call :func:`nddata_hdf5` directly.
     """
+
     def __repr__(self):
         if hasattr(self, "_node_children"):
             return repr(self.datanode)
@@ -8676,28 +8688,37 @@ class fitdata(nddata):
                                 self.getaxis(self.fit_axis), set=guess_dict
                             )
                     if alpha > alpha_max:
-                        logger.debug(strm(
-                            "\n\n.core.guess) I can't find a new guess without"
-                            " increasing the alpha beyond %d\n\n" % alpha_max
-                        ))
+                        logger.debug(
+                            strm(
+                                "\n\n.core.guess) I can't find a new guess"
+                                " without increasing the alpha beyond %d\n\n"
+                                % alpha_max
+                            )
+                        )
                         if (
                             which_starting_guess
                             >= len(self.starting_guesses) - 1
                         ):
-                            logger.debug(strm(
-                                "\n\n.core.guess) {\\color{red} Warning!!!}"
-                                " ran out of guesses!!!%d\n\n" % alpha_max
-                            ))
+                            logger.debug(
+                                strm(
+                                    "\n\n.core.guess) {\\color{red}"
+                                    " Warning!!!} ran out of guesses!!!%d\n\n"
+                                    % alpha_max
+                                )
+                            )
                             return thisguess
                         else:
                             which_starting_guess += 1
                             thisguess = self.starting_guesses[
                                 which_starting_guess
                             ]
-                            logger.debug(strm(
-                                "\n\n.core.guess) try a new starting guess:",
-                                lsafen(thisguess),
-                            ))
+                            logger.debug(
+                                strm(
+                                    "\n\n.core.guess) try a new starting"
+                                    " guess:",
+                                    lsafen(thisguess),
+                                )
+                            )
                             j = 0  # restart the loop
                             # {{{ evaluate f, fprime and residuals for the new
                             #     starting guess
