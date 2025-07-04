@@ -1,6 +1,8 @@
 import logging
 import numpy as np
 from numpy import newaxis
+from scipy.optimize import root
+from scipy.linalg import solve
 from ..general_functions import strm
 from .. import nnls as this_nnls
 
@@ -8,67 +10,99 @@ logger = logging.getLogger("pyspecdata.matrix_math")
 
 # {{{ local functions
 
-def venk_BRD(initial_α, K₀, factor, m⃗ᵣ, tol=1e-6, maxiter=20):
+def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
+        # TODO ☐: make sure that "√n" here is correct for the equation used to calculate α in venk_BRD
     """
     venk_BRD: Butler–Reeds–Dawson regularization via direct inverse-Newton and alpha update
 
     Full Unicode Structured Pseudocode:
 
-    01  # Step 2: For fixed α, solve ∇⃗χ(c⃗ᵣ)=0 via Newton’s method
-    02  # Inputs:
-    03  #   factor ← √(s₁s₂) in the paper
-    04  #   m⃗ᵣ ← vec(compressed data)
-    05  #   K₀ ← compressed kernel matrix
-    06  #   α   ← current smoothing parameter
-    07  # Output:
-    08  #   c⃗ᵣ ← root of ∇⃗χ(c⃗ᵣ)
-    09
-    10  # Build g⃗(c⃗ᵣ) ≡ the diagonal of G(c⃗ᵣ) as a vector (eq.30):
-    11  g⃗(c⃗ᵣ) = K₀ ⋅ ( max(0, K₀ᵀ⋅c⃗ᵣ ) ⊙ K₀ᵀ )
-    12
-    13  # Define χ and its derivatives (eq.29):
-    14  ∇⃗χ(c⃗ᵣ)   = g⃗(c⃗ᵣ) + α·c⃗ᵣ − m⃗ᵣ
-    15  ∇∇⃗χ(c⃗ᵣ)=diag(g⃗(c⃗ᵣ))+α·I̿
-    16
-    17  # Newton root-find:
-    18  c⃗ᵣ ← newton(f=∇⃗χ, fprime=∇∇⃗χ, x0=c⃗_initial, tol=tol)
-    19
-    20  # 2.3 Recover f⃗ᵣ (eq.27):
-    21  f⃗ᵣ = max(0, K₀ᵀ⋅c⃗ᵣ)
-    22
-    23  # Step 3: BRD α-update (eq.41):
-    24  n_r   = length(c⃗ᵣ)
-    25  α_new = factor ÷ ‖c⃗ᵣ‖
-    26  if |α_new−α|÷α < tol: stop
-    27  else: α=α_new; goto 01
+        # Step 2: For fixed α, solve ∇⃗χ(c⃗ᵣ)=0 via Newton’s method
+        # Inputs:
+        #   √n ← √(s₁s₂) in the paper
+        #   m⃗ᵣ ← vec(compressed data)
+        #   K₀ ← compressed kernel matrix
+        #   α   ← current smoothing parameter
+        # Output:
+        #   c⃗ᵣ ← root of ∇⃗χ(c⃗ᵣ)
+      
+        # Build g⃗(c⃗ᵣ) ≡ the diagonal of G(c⃗ᵣ) as a vector (eq.30):
+    01  g⃗(c⃗ᵣ) = K₀ ⋅ ( max(0, K₀ᵀ⋅c⃗ᵣ ) ⊙ K₀ᵀ )
+      
+        # Define χ and its derivatives (eq.29):
+    02  ∇⃗χ(c⃗ᵣ) = g⃗(c⃗ᵣ)·c⃗ᵣ + α c⃗ᵣ − m⃗ᵣ
+    03  ∇∇⃗χ(c⃗ᵣ) = diag(g⃗(c⃗ᵣ)) + α I̿
+      
+        # Newton root-find:
+    04  c⃗ᵣ ← newton(f=∇⃗χ, fprime=∇∇⃗χ, x0=c⃗_initial, tol=tol)
+      
+        # 2.3 Recover f⃗ᵣ (eq.27):
+    05  f⃗ᵣ = max(0, K₀ᵀ⋅c⃗ᵣ)
+      
+        # Step 3: BRD α-update (eq.41):
+    06  α_new = √n ÷ ‖c⃗ᵣ‖
+    07  if |α_new−α|÷α < tol: stop
+    08  else: α=α_new; goto 01
     """
+    sqrt_n = np.sqrt(m⃗ᵣ.size)
     # Initialize
     α = initial_α
+    print("BRD initial α",α)
     c⃗ = np.zeros_like(m⃗ᵣ)
+    #c⃗ = (K_0.T @ m⃗ᵣ) / (K_0.T @ K_0) # initial guess
 
+    # 01  g⃗(c⃗ᵣ) = K₀ ⋅ ( max(0, K₀ᵀ⋅c⃗ᵣ ) ⊙ K₀ᵀ )
+    g⃗ = lambda c⃗: K_0.dot(K_0.T.dot(c⃗)[:,newaxis] * K_0.T)
+    # 02  ∇⃗χ(c⃗ᵣ)   = g⃗(c⃗ᵣ)·c⃗ᵣ + α c⃗ᵣ − m⃗ᵣ
+    grad = lambda c⃗, α: g⃗(c⃗).dot(c⃗) + α * c⃗ - m⃗ᵣ
+    # 03  ∇∇⃗χ(c⃗ᵣ)=diag(g⃗(c⃗ᵣ))+α·I̿
+    # Hessian H=∇∇⃗χ
+    H = lambda c⃗, α: np.diag(g⃗(c⃗)) + α * np.eye(c⃗.size)
+    print("starting gradient",np.linalg.norm(grad(c⃗,α)))
+    print("sizes",[j.shape for j in [c⃗, grad(c⃗,α), H(c⃗,α)]])
     for _ in range(maxiter):
-        # Newton on c⃗ᵣ
-        while True:
-            # TODO: move the lambda function defs outside the loop, but include alpha as an arg
-            # g⃗(c⃗) = K·(H(v)⊙K^T)
-            g⃗ = lambda c⃗: K₀.dot(K₀.T.dot(c⃗) * K₀.T)
-            # gradient ∇⃗χ = g⃗ + α c⃗ − m
-            grad = lambda c⃗: g⃗(c⃗) + α * c⃗ - m⃗ᵣ
-            # Hessian H=∇∇⃗χ = diag(H(v)) + α I
-            H = lambda c⃗: np.diag(g⃗(c⃗)) + α * np.eye(c⃗.size)
-            # Newton step Δc⃗ given by ∇q⋅Δc⃗=-q where q is ∇⃗χ
-            Δc⃗ = np.linalg.solve(H, -grad)
-            c⃗ += Δc⃗
-            if np.linalg.norm(Δc⃗) < tol:
-                break
-        # BRD α-update
-        n = c⃗.size
-        α_new = factor / np.linalg.norm(c⃗)
+        # 04  c⃗ᵣ ← newton(f=∇⃗χ, fprime=∇∇⃗χ, x0=c⃗_initial, tol=tol)
+        smallstep = 1e-4
+        for j in range(100):
+            epsilon = 1
+            oldresid = 0
+            c⃗_new = c⃗
+            oldresid = np.linalg.norm(grad(c⃗,α))
+            k = 0
+            while np.linalg.norm(grad(c⃗_new,α)) > oldresid or k == 0:
+                k += 1
+                epsilon /= 10
+                # determine the direction
+                Δc⃗ = solve( H(c⃗, α), -grad(c⃗, α))
+                # take a small stepsize, which is decreased until we are actually rolling downhill
+                Δc⃗ *= epsilon / np.linalg.norm(Δc⃗)
+                c⃗_new = c⃗ + Δc⃗ 
+            c⃗ = c⃗_new
+            #print(f"norm of grad {np.linalg.norm(grad(c⃗,α))} step {j} k {k}")
+            if np.linalg.norm(grad(c⃗,α)) < 1e-12: break
+        #sol = root(fun=lambda c: grad(c, α),
+        #           jac=lambda c: H(c, α),
+        #           x0=c⃗,
+        #           method='hybr',
+        #           )
+        #assert sol.success
+        #print("Success:", sol.success)
+        #print("Message:", sol.message)
+        #print("Residual norm:", np.linalg.norm(sol.fun))
+        #c⃗ = sol.x
+        # 06  α_new = √n ÷ ‖c⃗ᵣ‖
+        print(f"norm of grad {np.linalg.norm(grad(c⃗,α))}")
+        α_new = sqrt_n / np.linalg.norm(c⃗)
+        # 07  if |α_new−α|÷α < tol: stop
         if abs(α_new - α) / α < tol:
+            print("converged")
             break
+        # 08  else: α=α_new; goto 01
         α = α_new
+        print(f"iterating BRD, α={α}")
     # Recover f⃗ᵣ (unused internally)
-    f⃗ᵣ = np.maximum(0, K₀.T.dot(c⃗))
+    # 05  f⃗ᵣ = max(0, K₀ᵀ⋅c⃗ᵣ)
+    f⃗ᵣ = np.maximum(0, K_0.T.dot(c⃗))
     return f⃗ᵣ, α
 
 
@@ -397,13 +431,10 @@ def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default
         )
     )
     if type(l) is str and l == "BRD":
-        if twoD:
-            factor = np.sqrt(np.prod(s))
-        else:
-            factor = None
         # Automatic BRD parameter selection without stacking identity
         # 1) Compute optimal f⃗ᵣ and λ via venk_BRD
-        retval, l = venk_BRD(1.0, K_alldims, factor, data_fornnls)
+        retval, l = venk_BRD(1e-2, K_alldims, data_fornnls)
+        self.set_prop('opt_alpha',l)
         # 2) Compute residual: A·x − b (eq. 40)
         residual = K_alldims.dot(retval) - data_fornnls
         # Replace l with the chosen λ for downstream recording
@@ -461,21 +492,11 @@ def nnls(self, nddata_cls, dimname_list, newaxis_dict, kernel_func, l=0, default
         axis_units_dict["lambda"] = None
         axis_coords_error_dict["lambda"] = None
     self.data = retval
-    if not np.isscalar(residual):
-        # make the residual nddata as well
-        residual_nddata = self.shape.pop(fit_dimnames[0])
-        if twoD:
-            residual_nddata.pop(fit_dimnames[1])
-        residual_nddata = residual_nddata.alloc(dtype=residual.dtype)
-        residual_nddata.data[:] = residual[:]
-    else:
-        residual_nddata = residual
     # store the kernel and the residual as properties
     self.set_prop("nnls_kernel", K_alldims)
     for j in range(len(dimname_list)):
         self.set_prop(f"s{j+1}", s[j])
         self.set_prop(f"K{j+1}", K[j])
-    self.set_prop("nnls_residual", residual_nddata)
     self.axis_coords = self.fld(axis_coords_dict)
     self.axis_coords_units = self.fld(axis_units_dict)
     self.axis_coords_error = self.fld(axis_coords_error_dict)

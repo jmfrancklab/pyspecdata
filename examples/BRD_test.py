@@ -36,6 +36,7 @@ print(ndshape(M))
 print(ndshape(logT1))
 print("*** *** ***")
 solution = M.C.nnls('vd',logT1, lambda x,y: 1-2*exp(-x/10**(y)), l='BRD')
+solution_confirm = M.C.nnls('vd',logT1, lambda x,y: 1-2*exp(-x/10**(y)), l=solution.get_prop('opt_alpha'))
 
 def nnls_reg(K,b,val):
     b_prime = r_[b,zeros(K.shape[1])]
@@ -61,29 +62,12 @@ def vec_lcurve(l):
 x = vec_lcurve(l)
 print(ndshape(x))
 # norm of the residual (data - soln)
-r_norm = x.get_prop('nnls_residual').data
 # norm of the solution (taken along the fit axis)
 x_norm = x.C.run(linalg.norm,t1_name).data
 
 # From L-curve
 this_L = 0.226
 
-if plot_Lcurve:
-    # Next plot the L-curve
-    figure();title('L-Curve')
-    # I do not actually know why we take the log, but this is important for the shape
-    plot(log10(r_norm[:]),log10(x_norm[:]),'.')
-    annotate_plot = True
-    show_lambda = True
-    if annotate_plot:
-        if show_lambda:
-            for j,this_l in enumerate(l):
-                annotate('%0.4f'%this_l, (log10(r_norm[j]),log10(x_norm[j])),
-                         ha='left',va='bottom',rotation=45)
-        else:
-            for j,this_l in enumerate(l):
-                annotate('%d'%j, (log10(r_norm[j]),log10(x_norm[j])),
-                         ha='left',va='bottom',rotation=45)
 #}}}
 
 # generate data vector for smoothing
@@ -98,6 +82,7 @@ print("true mean:",true_F.C.mean(t1_name).item(),"±",true_F.run(std,t1_name).it
 plot(L_opt_vec,label='L-Curve')
 print("opt. λ mean:",L_opt_vec.C.mean(t1_name).item(),"±",L_opt_vec.run(std,t1_name).item())
 plot(solution,':',label='pyspecdata-BRD')
+plot(solution_confirm,'--',label=fr'manual BRD $\alpha={solution.get_prop("opt_alpha"):#0.2g}$')
 print("BRD mean:",solution.C.mean(t1_name).item(),"±",solution.run(std,t1_name).item())
 legend()
 show()
