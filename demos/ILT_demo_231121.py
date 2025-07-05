@@ -25,9 +25,10 @@ mu = [ # convert to slanted coords
         (mu[1]-mu[0])/sqrt(2)]
 sigma = [0.5,0.05] # in slanted
 exact_data += exp(-(slanted_coord1-mu[0])**2/2/sigma[0]**2-(slanted_coord2-mu[1])**2/2/sigma[1]**2)
+exact_data.reorder(LT2_name) # T₂ along y axis
 exact_data
 
-# In[2]:
+# Now add the experimental decay dimensions
 
 tau1 = nddata(logspace(log10(5.0e-4),log10(4),30),'tau1')
 tau2 = nddata(linspace(5.0e-4,3.8,1000),'tau2')
@@ -39,16 +40,20 @@ tau2 = nddata(linspace(5.0e-4,3.8,1000),'tau2')
 basis = exp(-tau2/10**LT2)*(1-2*exp(-tau1/10**LT1))
 basis.shape
 
-# In[3]:
+# Sum along the distribution dimensions, to create fake data
+# then add noise, and scale data so that noise has norm of 1
 
 simulated_data = basis*exact_data
 simulated_data.sum(LT1_name).sum(LT2_name)
+simulated_data.add_noise(0.1)
+simulated_data /= 0.1
+simulated_data
 
 # First, I cheat and run with the value of $\lambda$ that I know BRD chooses on the next step (I can figure this out by looking at the log file)
 
 simulated_data.C.nnls(('tau1','tau2'),(LT1,LT2),
                     (lambda tau1,LT1: 1-2*exp(-tau1*10**-LT1),
-                     lambda tau2,LT2: exp(-tau2*10**-LT2)), l=2.08)
+                     lambda tau2,LT2: exp(-tau2*10**-LT2)), l=sqrt(0.1909575506433772))
 
 # Then, I have it actually use BRD to find the value of $\lambda$ 
 

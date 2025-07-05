@@ -53,9 +53,11 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
     c⃗ = np.ones_like(m⃗ᵣ)
     # c⃗ = (K_0.T @ m⃗ᵣ) / (K_0.T @ K_0) # initial guess
 
+    χ = lambda c⃗, α: c⃗.dot(g⃗(c⃗).dot(c⃗)) + α * c⃗.dot(c⃗) - c⃗.dot(m⃗ᵣ)
     # 01  g⃗(c⃗ᵣ) = K₀ ⋅ ( max(0, K₀ᵀ⋅c⃗ᵣ ))
     # 01  g⃗(c⃗ᵣ) = K₀ ⋅ diag( Heaviside( K₀ᵀ⋅c⃗ᵣ )) · K₀ᵀ
-    g⃗ = lambda c⃗: (K_0 @ np.diag(np.float64((K_0.T @ c⃗) > 0)) @ K_0.T)
+    # 01  g⃗(c⃗ᵣ) = K₀ ⋅ (Heaviside( K₀ᵀ⋅c⃗ᵣ ) ⊙ K₀ᵀ)
+    g⃗ = lambda c⃗: (K_0 @ (np.float64((K_0.T @ c⃗) > 0)[:, newaxis] * K_0.T))
     print(K_0.shape, c⃗.shape, g⃗(c⃗).shape, m⃗ᵣ.shape)
     # 02  ∇⃗χ(c⃗ᵣ)   = g⃗(c⃗ᵣ)·c⃗ᵣ + α c⃗ᵣ − m⃗ᵣ
     grad = lambda c⃗, α: g⃗(c⃗).dot(c⃗) + α * c⃗ - m⃗ᵣ
@@ -66,22 +68,32 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
     print("sizes", [j.shape for j in [c⃗, grad(c⃗, α), H(c⃗, α)]])
     for _ in range(100):
         # 04  c⃗ᵣ ← newton(f=∇⃗χ, fprime=∇∇⃗χ, x0=c⃗_initial, tol=tol)
-        for j in range(int(1e4)):
+        k = 0
+        for j in range(int(200)):
             epsilon = 1
             oldresid = 0
             c⃗_new = c⃗
             oldresid = np.linalg.norm(grad(c⃗, α))
+            χ_old = np.linalg.norm(χ(c⃗, α))
             # determine the direction
             Δc⃗ = solve(H(c⃗, α), grad(c⃗, α))
             # Δc⃗ = np.linalg.inv(H(c⃗, α)).dot(grad(c⃗, α))
             # s in BRD paper apendix
             s = Δc⃗.dot(grad(c⃗, α)) / (Δc⃗.dot(H(c⃗, α).dot(Δc⃗)))
-            k = 0
-            while (
-                np.linalg.norm(grad(c⃗_new, α)) >= oldresid and k < 62
-            ) or k == 0:
+            oldgrad = grad(c⃗, α)
+            while True:
                 # take a small stepsize, which is decreased until we are actually rolling downhill
                 c⃗_new = c⃗ - s * 0.5**k * Δc⃗
+                newgrad = grad(c⃗_new, α)
+                χ_new = χ(c⃗_new, α)
+                if χ_new < χ_old:
+                    print("reduced χ")
+                    break
+                if newgrad.dot(oldgrad) > 0:
+                    print("break s on similar aligned grad")
+                    break
+                if k == 62:
+                    break
                 k += 1
             c⃗ = c⃗_new
             print(
@@ -89,9 +101,15 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
                 f" {np.linalg.norm(grad(c⃗,α)) / np.linalg.norm(m⃗ᵣ) } step"
                 f" {j} k {k}"
             )
+            newgrad = grad(c⃗, α)
             if np.linalg.norm(grad(c⃗, α)) / np.linalg.norm(m⃗ᵣ) < 1e-8:
                 print("converged")
                 break
+        if j == 199:
+            print(
+                "didn't converge -- rel. gradient size:",
+                np.linalg.norm(grad(c⃗, α)) / np.linalg.norm(m⃗ᵣ),
+            )
         # sol = root(fun=lambda c: grad(c, α),
         #           jac=lambda c: H(c, α),
         #           x0=c⃗,
