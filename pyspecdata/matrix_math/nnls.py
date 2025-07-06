@@ -1,145 +1,41 @@
 import logging
 import numpy as np
 from numpy import newaxis
-from scipy.optimize import root
-from scipy.linalg import solve
-from ..general_functions import strm
+from ..general_functions import strm, redim_C_to_F, redim_F_to_C
 from .. import nnls as this_nnls
+import _nnls
 
 logger = logging.getLogger("pyspecdata.matrix_math")
 
+
 # {{{ local functions
-
-
+# Translated to Fortran extension
 def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
-    # TODO ☐: make sure that "√n" here is correct for the equation used to calculate α in venk_BRD
+    r"""Compute the BRD update for :math:`\alpha` and :math:`f`.
+
+    This is a thin wrapper around the Fortran routine :func:`venk_brd`.
+    The algorithm closely mirrors the structured pseudocode in the
+    original Python implementation:
+
+    ``01``  ``g(c) = K₀ · (max(0, K₀ᵀ·c) ⊙ K₀ᵀ)``
+    ``02``  ``∇χ(c) = g(c)·c + α c − m``
+    ``03``  ``H(c) = diag(g(c)) + α I``
+    ``04``  ``c ← Newton solve of ∇χ(c)=0 using H(c)``
+    ``05``  ``f = max(0, K₀ᵀ·c)``
+    ``06``  ``α_new = √n / ‖c‖``
+
+    Arrays are converted to Fortran order before the call so that the
+    column-major memory layout matches Fortran's expectation.
     """
-    venk_BRD: Butler–Reeds–Dawson regularization via direct inverse-Newton and alpha update
 
-    Full Unicode Structured Pseudocode:
-
-        # Step 2: For fixed α, solve ∇⃗χ(c⃗ᵣ)=0 via Newton’s method
-        # Inputs:
-        #   √n ← √(s₁s₂) in the paper
-        #   m⃗ᵣ ← vec(compressed data)
-        #   K₀ ← compressed kernel matrix
-        #   α   ← current smoothing parameter
-        # Output:
-        #   c⃗ᵣ ← root of ∇⃗χ(c⃗ᵣ)
-
-        # Build g⃗(c⃗ᵣ) ≡ the diagonal of G(c⃗ᵣ) as a vector (eq.30):
-    01  g⃗(c⃗ᵣ) = K₀ ⋅ ( max(0, K₀ᵀ⋅c⃗ᵣ ) ⊙ K₀ᵀ )
-
-        # Define χ and its derivatives (eq.29):
-    02  ∇⃗χ(c⃗ᵣ) = g⃗(c⃗ᵣ)·c⃗ᵣ + α c⃗ᵣ − m⃗ᵣ
-    03  ∇∇⃗χ(c⃗ᵣ) = diag(g⃗(c⃗ᵣ)) + α I̿
-
-        # Newton root-find:
-    04  c⃗ᵣ ← newton(f=∇⃗χ, fprime=∇∇⃗χ, x0=c⃗_initial, tol=tol)
-
-        # 2.3 Recover f⃗ᵣ (eq.27):
-    05  f⃗ᵣ = max(0, K₀ᵀ⋅c⃗ᵣ)
-
-        # Step 3: BRD α-update (eq.41):
-    06  α_new = √n ÷ ‖c⃗ᵣ‖
-    07  if |α_new−α|÷α < tol: stop
-    08  else: α=α_new; goto 01
-    """
-    # sqrt_n = np.sqrt(m⃗ᵣ.size)
-    sqrt_n = np.sqrt(K_0.shape[0])
-    # Initialize
-    α = 1e-3
-    print("BRD initial α", α)
-    c⃗ = np.ones_like(m⃗ᵣ)
-    # c⃗ = (K_0.T @ m⃗ᵣ) / (K_0.T @ K_0) # initial guess
-
-    χ = lambda c⃗, α: c⃗.dot(g⃗(c⃗).dot(c⃗)) + α * c⃗.dot(c⃗) - c⃗.dot(m⃗ᵣ)
-    # 01  g⃗(c⃗ᵣ) = K₀ ⋅ ( max(0, K₀ᵀ⋅c⃗ᵣ ))
-    # 01  g⃗(c⃗ᵣ) = K₀ ⋅ diag( Heaviside( K₀ᵀ⋅c⃗ᵣ )) · K₀ᵀ
-    # 01  g⃗(c⃗ᵣ) = K₀ ⋅ (Heaviside( K₀ᵀ⋅c⃗ᵣ ) ⊙ K₀ᵀ)
-    g⃗ = lambda c⃗: (K_0 @ (np.float64((K_0.T @ c⃗) > 0)[:, newaxis] * K_0.T))
-    print(K_0.shape, c⃗.shape, g⃗(c⃗).shape, m⃗ᵣ.shape)
-    # 02  ∇⃗χ(c⃗ᵣ)   = g⃗(c⃗ᵣ)·c⃗ᵣ + α c⃗ᵣ − m⃗ᵣ
-    grad = lambda c⃗, α: g⃗(c⃗).dot(c⃗) + α * c⃗ - m⃗ᵣ
-    # 03  ∇∇⃗χ(c⃗ᵣ)=diag(g⃗(c⃗ᵣ))+α·I̿
-    # Hessian H=∇∇⃗χ
-    H = lambda c⃗, α: g⃗(c⃗) + α * np.eye(c⃗.size)
-    print("starting gradient", np.linalg.norm(grad(c⃗, α)))
-    print("sizes", [j.shape for j in [c⃗, grad(c⃗, α), H(c⃗, α)]])
-    for _ in range(100):
-        # 04  c⃗ᵣ ← newton(f=∇⃗χ, fprime=∇∇⃗χ, x0=c⃗_initial, tol=tol)
-        k = 0
-        for j in range(int(200)):
-            epsilon = 1
-            oldresid = 0
-            c⃗_new = c⃗
-            oldresid = np.linalg.norm(grad(c⃗, α))
-            χ_old = np.linalg.norm(χ(c⃗, α))
-            # determine the direction
-            Δc⃗ = solve(H(c⃗, α), grad(c⃗, α))
-            # Δc⃗ = np.linalg.inv(H(c⃗, α)).dot(grad(c⃗, α))
-            # s in BRD paper apendix
-            s = Δc⃗.dot(grad(c⃗, α)) / (Δc⃗.dot(H(c⃗, α).dot(Δc⃗)))
-            oldgrad = grad(c⃗, α)
-            while True:
-                # take a small stepsize, which is decreased until we are actually rolling downhill
-                c⃗_new = c⃗ - s * 0.5**k * Δc⃗
-                newgrad = grad(c⃗_new, α)
-                χ_new = χ(c⃗_new, α)
-                if χ_new < χ_old:
-                    print("reduced χ")
-                    break
-                if newgrad.dot(oldgrad) > 0:
-                    print("break s on similar aligned grad")
-                    break
-                if k == 62:
-                    break
-                k += 1
-            c⃗ = c⃗_new
-            print(
-                "norm of grad rel data"
-                f" {np.linalg.norm(grad(c⃗,α)) / np.linalg.norm(m⃗ᵣ) } step"
-                f" {j} k {k}"
-            )
-            newgrad = grad(c⃗, α)
-            if np.linalg.norm(grad(c⃗, α)) / np.linalg.norm(m⃗ᵣ) < 1e-8:
-                print("converged")
-                break
-        if j == 199:
-            print(
-                "didn't converge -- rel. gradient size:",
-                np.linalg.norm(grad(c⃗, α)) / np.linalg.norm(m⃗ᵣ),
-            )
-        # sol = root(fun=lambda c: grad(c, α),
-        #           jac=lambda c: H(c, α),
-        #           x0=c⃗,
-        #           method='hybr',
-        #           )
-        # assert sol.success
-        # print("Success:", sol.success)
-        # print("Message:", sol.message)
-        # print("Residual norm:", np.linalg.norm(sol.fun))
-        # c⃗ = sol.x
-        # 06  α_new = √n ÷ ‖c⃗ᵣ‖
-        print(f"norm of grad {np.linalg.norm(grad(c⃗,α))}")
-        f⃗ᵣ = np.maximum(0, K_0.T.dot(c⃗))
-        print(
-            "norm of back-calc diff"
-            f" {np.linalg.norm(c⃗ - (K_0 @ f⃗ᵣ - m⃗ᵣ) / - α)}"
-        )
-        print(f"norm of c⃗ {np.linalg.norm(c⃗)} sqrt_n {sqrt_n}")
-        α_new = sqrt_n / np.linalg.norm(c⃗)
-        # 07  if |α_new−α|÷α < tol: stop
-        if abs(α_new - α) / α < tol:
-            print("α converged")
-            break
-        # 08  else: α=α_new; goto 01
-        α = α_new
-        print(f"iterating BRD, α={α}")
-    # Recover f⃗ᵣ (unused internally)
-    # 05  f⃗ᵣ = max(0, K₀ᵀ⋅c⃗ᵣ)
-    f⃗ᵣ = np.maximum(0, K_0.T.dot(c⃗))
-    return f⃗ᵣ, α_new
+    fvec, alpha_out = _nnls.venk_brd(
+        redim_C_to_F(K_0),
+        redim_C_to_F(m⃗ᵣ),
+        initial_alpha=initial_α,
+        tol=tol,
+        maxiter=maxiter,
+    )
+    return redim_F_to_C(fvec), alpha_out
 
 
 def demand_real(x, addtxt=""):
@@ -148,17 +44,12 @@ def demand_real(x, addtxt=""):
             raise ValueError(
                 "you are not allows to pass nnls complex data:\nif it makes"
                 " sense for you, try yourdata.real.nnls( np.where you now have"
-                " yourdata.nnls("
-                + "\n"
-                + addtxt
+                " yourdata.nnls(" + "\n" + addtxt
             )
         else:
             raise ValueError(
                 "I expect double-precision floating point (float64), but you"
-                " passed me data of dtype "
-                + str(x.dtype)
-                + "\n"
-                + addtxt
+                " passed me data of dtype " + str(x.dtype) + "\n" + addtxt
             )
 
 
@@ -310,14 +201,12 @@ def nnls(
             demand_real(
                 j.getaxis(j.dimlabels[0]),
                 "(this message pertains to the new %s axis pulled from the"
-                " second argument's axis)"
-                % str(j.dimlabels[0]),
+                " second argument's axis)" % str(j.dimlabels[0]),
             )
         demand_real(
             j.data,
             "(this message pertains to the new %s axis pulled from the second"
-            " argument's data)"
-            % str(j.dimlabels[0]),
+            " argument's data)" % str(j.dimlabels[0]),
         )
     if isinstance(kernel_func, tuple):
         assert callable(kernel_func[0]) and callable(
