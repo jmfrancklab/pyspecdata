@@ -29,11 +29,11 @@ def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
     """
 
     fvec, alpha_out = _nnls.venk_brd(
-        redim_C_to_F(K_0),
-        redim_C_to_F(m⃗ᵣ),
-        initial_alpha=initial_α,
-        tol=tol,
-        maxiter=maxiter,
+        np.asfortranarray(K_0),
+        np.asfortranarray(m⃗ᵣ),
+        initial_α,
+        tol,
+        maxiter,
     )
     return redim_F_to_C(fvec), alpha_out
 

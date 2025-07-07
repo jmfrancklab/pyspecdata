@@ -83,13 +83,11 @@
          end if
       end subroutine compute_gmat
       subroutine compute_grad(g,c,mvec,alpha,grad)
-         integer,intent(in) :: m
          double precision,intent(in) :: g(m,m),c(m),mvec(m),alpha
          double precision,intent(out) :: grad(m)
          grad = matmul(g,c) + alpha*c - mvec
       end subroutine compute_grad
       subroutine compute_hessian(g,alpha,h)
-         integer,intent(in) :: m
          double precision,intent(in) :: g(m,m),alpha
          double precision,intent(out) :: h(m,m)
          h = g
