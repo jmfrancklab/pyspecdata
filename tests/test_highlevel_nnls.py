@@ -2,7 +2,6 @@ import numpy as np
 from numpy import linspace, r_, exp, sqrt
 from numpy.random import seed
 from conftest import load_module
-import importlib.util
 import sys
 
 # ensure submodules are reloaded fresh for this test

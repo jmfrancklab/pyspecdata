@@ -7,17 +7,6 @@ import numpy as np
 import os
 
 PACKAGE_ROOT = pathlib.Path(__file__).resolve().parents[1] / "pyspecdata"
-BUILD_DIR = PACKAGE_ROOT.parent / "build"
-MESON_SKIP = os.environ.get("MESONPY_EDITABLE_SKIP", "").split(os.pathsep)
-for path in (
-    BUILD_DIR,
-    BUILD_DIR / f"cp{sys.version_info.major}{sys.version_info.minor}",
-):
-    if str(path) not in MESON_SKIP:
-        MESON_SKIP.append(str(path))
-    if str(path) not in sys.path:
-        sys.path.insert(0, str(path))
-os.environ["MESONPY_EDITABLE_SKIP"] = os.pathsep.join(filter(None, MESON_SKIP))
 
 
 def load_module(name: str, *, use_real_pint: bool = False):
