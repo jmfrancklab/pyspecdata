@@ -6,7 +6,11 @@ import importlib.util
 import sys
 
 # ensure submodules are reloaded fresh for this test
-for name in ["pyspecdata.nnls", "pyspecdata.matrix_math.nnls", "pyspecdata.core"]:
+for name in [
+    "pyspecdata.nnls",
+    "pyspecdata.matrix_math.nnls",
+    "pyspecdata.core",
+]:
     sys.modules.pop(name, None)
 
 load_module("nnls")
@@ -17,6 +21,9 @@ core = load_module("core")
 nddata = core.nddata
 init_logging = load_module("general_functions").init_logging
 
+mu1 = 0.5
+sigma1 = 0.3
+
 
 def test_highlevel_nnls():
     seed(1234)
@@ -25,11 +32,11 @@ def test_highlevel_nnls():
     t1_name = r"$\\log(T_1)$"
     logT1 = nddata(r_[-4:2:100j], t1_name)
 
-    def Gaussian_1d(axis, mu1, sigma1):
-        this_G = exp(-((axis - mu1) ** 2) / 2 / sigma1**2)
-        return this_G
-
-    true_F = Gaussian_1d(logT1.C.run(lambda x: 10 ** (x)), 6, 0.3)
+    true_F = (
+        1
+        / np.sqrt(2 * np.pi * sigma1**2)
+        * exp(-((logT1 - mu1) ** 2) / 2 / sigma1**2)
+    )
 
     K = 1.0 - 2 * exp(-vd_list / 10 ** (logT1))
     K.reorder("vd")
@@ -49,10 +56,20 @@ def test_highlevel_nnls():
     )
 
     diff = np.linalg.norm(solution.data - solution_confirm.data)
-    assert diff < 0.2
+    assert diff < 0.01 * np.linalg.norm(solution.data)
 
-    axis_T1 = 10 ** logT1.data
-    max_T1 = axis_T1[np.argmax(solution.data)]
-    avg_T1 = np.average(axis_T1, weights=solution.data)
-    assert abs(max_T1 - 6) < 1
-    assert abs(avg_T1 - 6) < 5
+    max_log_T1 = logT1.data[np.argmax(solution.data)]
+    avg_log_T1 = np.average(logT1.data, weights=solution.data)
+    betteravg_log_T1 = np.average(
+        logT1[t1_name:(-2, None)].data,
+        weights=solution[t1_name:(-2, None)].data,
+    )
+    assert (
+        abs(max_log_T1 - mu1) < 0.1
+    ), f"max_log_T1 is {max_log_T1} while mu1 is {mu1}"
+    assert (
+        abs(avg_log_T1 - mu1) < 0.2
+    ), f"avg_log_T1 is {avg_log_T1} while mu1 is {mu1}"
+    assert (
+        abs(betteravg_log_T1 - mu1) < 0.2
+    ), f"betteravg_log_T1 is {betteravg_log_T1} while mu1 is {mu1}"

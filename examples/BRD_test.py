@@ -17,12 +17,15 @@ t1_name = r"$\log(T_1)$"
 logT1 = nddata(r_[-4:2:100j], t1_name)
 
 
-def Gaussian_1d(axis, mu1, sigma1):
-    this_G = exp(-((axis - mu1) ** 2) / 2 / sigma1**2)
-    return this_G
-
-
-true_F = Gaussian_1d(logT1.C.run(lambda x: 10 ** (x)), 6, 0.3)
+mu1 = 0.5
+sigma1 = 0.3
+L_curve_l = 0.036 # read manually off of plot
+plot_Lcurve = True
+true_F = (
+    1
+    / np.sqrt(2 * np.pi * sigma1**2)
+    * exp(-((logT1 - mu1) ** 2) / 2 / sigma1**2)
+)
 
 
 K = 1.0 - 2 * exp(-vd_list / 10 ** (logT1))
@@ -67,40 +70,38 @@ def A_prime(K, val):
     return A_prime
 
 
-plot_Lcurve = True
-# {{{ L-curve
-l = sqrt(
-    logspace(-10, 1, 25)
-)  # adjusting the left number will adjust the right side of L-curve
-
-
-def vec_lcurve(l):
-    return M.real.C.nnls(
-        "vd", logT1, lambda x, y: (1.0 - 2 * exp(-x / 10 ** (y))), l=l
+if plot_Lcurve:
+    # {{{ L-curve
+    # solution matrix for l different lambda values
+    x = M.real.C.nnls(
+        "vd",
+        logT1,
+        lambda x, y: (1.0 - 2 * exp(-x / 10 ** (y))),
+        l=sqrt(
+            logspace(-10, 1, 25)
+        ),  # adjusting the left number will adjust the right side of L-curve
     )
+    print(ndshape(x))
+    # norm of the residual (data - soln)
+    # norm of the solution (taken along the fit axis)
+    x.run(linalg.norm, t1_name)
 
-
-# solution matrix for l different lambda values
-x = vec_lcurve(l)
-print(ndshape(x))
-# norm of the residual (data - soln)
-# norm of the solution (taken along the fit axis)
-x_norm = x.C.run(linalg.norm, t1_name).data
-
-# From L-curve
-this_L = 0.226
-
-# }}}
+    # From L-curve
+    figure()
+    axvline(x=L_curve_l, ls='--')
+    plot(x)
+    # }}}
 
 # generate data vector for smoothing
 
 print(K.shape)
-L_opt_vec = nnls_reg(K.data, M.data.squeeze(), this_L)
+L_opt_vec = nnls_reg(K.data, M.data.squeeze(), L_curve_l)
 
 figure()
 title("ILT distributions")
 L_opt_vec = nddata(L_opt_vec, t1_name).copy_axes(true_F)
-plot(true_F, label="True")
+normalization = solution.data.max() / true_F.data.max()
+plot(true_F * normalization, label="True")
 print(
     "true mean:",
     true_F.C.mean(t1_name).item(),
