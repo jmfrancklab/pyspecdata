@@ -34,17 +34,46 @@ image(exact_data)
 tau1 = nddata(logspace(log10(5.0e-4),log10(4),30),'tau1')
 tau2 = nddata(linspace(5.0e-4,3.8,1000),'tau2')
 
+# Pre-allocate the τ₁×τ₂ result via ndshape’s alloc, inline
+
+simulated_data = (tau1.shape | tau2.shape).alloc(dtype=np.float64)
+
+# Block sizes (tune to available RAM)
+
+bLT1 = 10
+bLT2 = 10
+
+# Loop over LT1 and LT2 in blocks, vectorized over τ dims each time
+# 
 # $$T_1 = 10^{\log(T_1)}$$
 # $$R_1 = 10^{-\log(T_1)}$$
 # $$\ln(R_1) = -\log(T_1) \ln(10)$$
 
-basis = exp(-tau2/10**LT2)*(1-2*exp(-tau1/10**LT1))
+for i in range(0, LT1.shape[LT1_name], bLT1):
+    LT1_blk = LT1[LT1_name, slice(i, i+bLT1)]
+    B1      = 1 - 2*exp(-tau1/10**LT1_blk)    # dims: (tau1, LT1_blk)
 
-# Sum along the distribution dimensions, to create fake data
+    for j in range(0, LT2.shape[LT2_name], bLT2):
+        print(i,j)
+        LT2_blk = LT2[LT2_name, slice(j, j+bLT2)]
+        B2      = exp(-tau2/10**LT2_blk)       # dims: (tau2, LT2_blk)
+
+        # Extract matching block of exact_data
+        data_blk = (
+            exact_data
+            [LT1_name, slice(i, i+bLT1)]
+            [LT2_name, slice(j, j+bLT2)]
+        )                                       # dims: (tau1, tau2, LT1_blk, LT2_blk)
+
+        # Multiply, sum out both LT axes, and accumulate
+        simulated_data += (B2 * B1 * data_blk).real.sum(LT1_name).sum(LT2_name)
+
+print("done generating")
+
+# `simulated_data` now holds the τ₁×τ₂ synthetic data
+
 # then add noise, and scale data so that noise has norm of 1
 
-simulated_data = basis*exact_data
-simulated_data.sum(LT1_name).sum(LT2_name)
 simulated_data.add_noise(0.1)
 simulated_data /= 0.1
 
