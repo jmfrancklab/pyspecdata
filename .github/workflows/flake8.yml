@@ -43,7 +43,7 @@ jobs:
             MYCMD="git diff --name-only origin/${{ github.base_ref }}...origin/${{ github.event.pull_request.head.ref }} --diff-filter=AM" 
             echo "$MYCMD"
             echo "$($MYCMD)"
-            CHANGED_FILES=$($MYCMD | grep '\.py$' | sed '/__init/d' | tr '\n' ' ')
+            CHANGED_FILES=$($MYCMD | grep '\.py$' | sed '/__init/d' | sed '/demos\//d' | tr '\n' ' ')
           else
             MYCMD="git diff --name-only ${{ github.event.before }} ${{ github.event.after }} --diff-filter=AM"
             echo "$MYCMD"
