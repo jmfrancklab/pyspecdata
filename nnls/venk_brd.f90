@@ -22,7 +22,6 @@
       c = 1.0d0
       norm_mr = sqrt(sum(mr*mr))
       do iter=1,maxiter
-         write(*,*) 'starting iteration', iter, 'alpha', alpha
         do j=1,100
             ! IN: k0,m,n,c OUT: G,K0t
             call compute_g(k0,m,n,c,G,K0t)
@@ -55,7 +54,7 @@
             if (norm_grad/norm_mr < 1.d-8) exit
          end do
          alpha_new = sqrt_n / sqrt(sum(c*c))
-         write(*,*) 'alpha iteration', iter, 'value', alpha_new
+!         write(*,*) 'alpha iteration', iter, 'value', alpha_new
          if (abs(alpha_new-alpha)/alpha < tol) exit
          alpha = alpha_new
       end do
