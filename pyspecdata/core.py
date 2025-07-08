@@ -7438,6 +7438,12 @@ class ndshape(ndshape_base):
     arrays -- see :func:`alloc`.
 
     """
+    def __or__(self, *args):
+        retval = super().__or__(*args)
+        retval.__class__ = type(self)
+        return retval
+
+    __ror__ = __or__
 
     def alloc(self, dtype=np.complex128, labels=False, format=0):
         r"""Use the shape object to allocate an empty nddata object.

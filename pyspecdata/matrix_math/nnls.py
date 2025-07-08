@@ -1,145 +1,19 @@
 import logging
 import numpy as np
 from numpy import newaxis
-from scipy.optimize import root
-from scipy.linalg import solve
-from ..general_functions import strm
 from .. import nnls as this_nnls
+from ..general_functions import strm
+import _nnls
 
 logger = logging.getLogger("pyspecdata.matrix_math")
 
 # {{{ local functions
 
 
-def venk_BRD(initial_α, K_0, m⃗ᵣ, tol=1e-6, maxiter=100):
-    # TODO ☐: make sure that "√n" here is correct for the equation used to calculate α in venk_BRD
-    """
-    venk_BRD: Butler–Reeds–Dawson regularization via direct inverse-Newton and alpha update
-
-    Full Unicode Structured Pseudocode:
-
-        # Step 2: For fixed α, solve ∇⃗χ(c⃗ᵣ)=0 via Newton’s method
-        # Inputs:
-        #   √n ← √(s₁s₂) in the paper
-        #   m⃗ᵣ ← vec(compressed data)
-        #   K₀ ← compressed kernel matrix
-        #   α   ← current smoothing parameter
-        # Output:
-        #   c⃗ᵣ ← root of ∇⃗χ(c⃗ᵣ)
-
-        # Build g⃗(c⃗ᵣ) ≡ the diagonal of G(c⃗ᵣ) as a vector (eq.30):
-    01  g⃗(c⃗ᵣ) = K₀ ⋅ ( max(0, K₀ᵀ⋅c⃗ᵣ ) ⊙ K₀ᵀ )
-
-        # Define χ and its derivatives (eq.29):
-    02  ∇⃗χ(c⃗ᵣ) = g⃗(c⃗ᵣ)·c⃗ᵣ + α c⃗ᵣ − m⃗ᵣ
-    03  ∇∇⃗χ(c⃗ᵣ) = diag(g⃗(c⃗ᵣ)) + α I̿
-
-        # Newton root-find:
-    04  c⃗ᵣ ← newton(f=∇⃗χ, fprime=∇∇⃗χ, x0=c⃗_initial, tol=tol)
-
-        # 2.3 Recover f⃗ᵣ (eq.27):
-    05  f⃗ᵣ = max(0, K₀ᵀ⋅c⃗ᵣ)
-
-        # Step 3: BRD α-update (eq.41):
-    06  α_new = √n ÷ ‖c⃗ᵣ‖
-    07  if |α_new−α|÷α < tol: stop
-    08  else: α=α_new; goto 01
-    """
-    # sqrt_n = np.sqrt(m⃗ᵣ.size)
-    sqrt_n = np.sqrt(K_0.shape[0])
-    # Initialize
-    α = 1e-3
-    print("BRD initial α", α)
-    c⃗ = np.ones_like(m⃗ᵣ)
-    # c⃗ = (K_0.T @ m⃗ᵣ) / (K_0.T @ K_0) # initial guess
-
-    χ = lambda c⃗, α: c⃗.dot(g⃗(c⃗).dot(c⃗)) + α * c⃗.dot(c⃗) - c⃗.dot(m⃗ᵣ)
-    # 01  g⃗(c⃗ᵣ) = K₀ ⋅ ( max(0, K₀ᵀ⋅c⃗ᵣ ))
-    # 01  g⃗(c⃗ᵣ) = K₀ ⋅ diag( Heaviside( K₀ᵀ⋅c⃗ᵣ )) · K₀ᵀ
-    # 01  g⃗(c⃗ᵣ) = K₀ ⋅ (Heaviside( K₀ᵀ⋅c⃗ᵣ ) ⊙ K₀ᵀ)
-    g⃗ = lambda c⃗: (K_0 @ (np.float64((K_0.T @ c⃗) > 0)[:, newaxis] * K_0.T))
-    print(K_0.shape, c⃗.shape, g⃗(c⃗).shape, m⃗ᵣ.shape)
-    # 02  ∇⃗χ(c⃗ᵣ)   = g⃗(c⃗ᵣ)·c⃗ᵣ + α c⃗ᵣ − m⃗ᵣ
-    grad = lambda c⃗, α: g⃗(c⃗).dot(c⃗) + α * c⃗ - m⃗ᵣ
-    # 03  ∇∇⃗χ(c⃗ᵣ)=diag(g⃗(c⃗ᵣ))+α·I̿
-    # Hessian H=∇∇⃗χ
-    H = lambda c⃗, α: g⃗(c⃗) + α * np.eye(c⃗.size)
-    print("starting gradient", np.linalg.norm(grad(c⃗, α)))
-    print("sizes", [j.shape for j in [c⃗, grad(c⃗, α), H(c⃗, α)]])
-    for _ in range(100):
-        # 04  c⃗ᵣ ← newton(f=∇⃗χ, fprime=∇∇⃗χ, x0=c⃗_initial, tol=tol)
-        k = 0
-        for j in range(int(200)):
-            epsilon = 1
-            oldresid = 0
-            c⃗_new = c⃗
-            oldresid = np.linalg.norm(grad(c⃗, α))
-            χ_old = np.linalg.norm(χ(c⃗, α))
-            # determine the direction
-            Δc⃗ = solve(H(c⃗, α), grad(c⃗, α))
-            # Δc⃗ = np.linalg.inv(H(c⃗, α)).dot(grad(c⃗, α))
-            # s in BRD paper apendix
-            s = Δc⃗.dot(grad(c⃗, α)) / (Δc⃗.dot(H(c⃗, α).dot(Δc⃗)))
-            oldgrad = grad(c⃗, α)
-            while True:
-                # take a small stepsize, which is decreased until we are actually rolling downhill
-                c⃗_new = c⃗ - s * 0.5**k * Δc⃗
-                newgrad = grad(c⃗_new, α)
-                χ_new = χ(c⃗_new, α)
-                if χ_new < χ_old:
-                    print("reduced χ")
-                    break
-                if newgrad.dot(oldgrad) > 0:
-                    print("break s on similar aligned grad")
-                    break
-                if k == 62:
-                    break
-                k += 1
-            c⃗ = c⃗_new
-            print(
-                "norm of grad rel data"
-                f" {np.linalg.norm(grad(c⃗,α)) / np.linalg.norm(m⃗ᵣ) } step"
-                f" {j} k {k}"
-            )
-            newgrad = grad(c⃗, α)
-            if np.linalg.norm(grad(c⃗, α)) / np.linalg.norm(m⃗ᵣ) < 1e-8:
-                print("converged")
-                break
-        if j == 199:
-            print(
-                "didn't converge -- rel. gradient size:",
-                np.linalg.norm(grad(c⃗, α)) / np.linalg.norm(m⃗ᵣ),
-            )
-        # sol = root(fun=lambda c: grad(c, α),
-        #           jac=lambda c: H(c, α),
-        #           x0=c⃗,
-        #           method='hybr',
-        #           )
-        # assert sol.success
-        # print("Success:", sol.success)
-        # print("Message:", sol.message)
-        # print("Residual norm:", np.linalg.norm(sol.fun))
-        # c⃗ = sol.x
-        # 06  α_new = √n ÷ ‖c⃗ᵣ‖
-        print(f"norm of grad {np.linalg.norm(grad(c⃗,α))}")
-        f⃗ᵣ = np.maximum(0, K_0.T.dot(c⃗))
-        print(
-            "norm of back-calc diff"
-            f" {np.linalg.norm(c⃗ - (K_0 @ f⃗ᵣ - m⃗ᵣ) / - α)}"
-        )
-        print(f"norm of c⃗ {np.linalg.norm(c⃗)} sqrt_n {sqrt_n}")
-        α_new = sqrt_n / np.linalg.norm(c⃗)
-        # 07  if |α_new−α|÷α < tol: stop
-        if abs(α_new - α) / α < tol:
-            print("α converged")
-            break
-        # 08  else: α=α_new; goto 01
-        α = α_new
-        print(f"iterating BRD, α={α}")
-    # Recover f⃗ᵣ (unused internally)
-    # 05  f⃗ᵣ = max(0, K₀ᵀ⋅c⃗ᵣ)
-    f⃗ᵣ = np.maximum(0, K_0.T.dot(c⃗))
-    return f⃗ᵣ, α_new
+def venk_BRD(initial_α, K_0, mvec, tol=1e-3, maxiter=100):
+    """Wrapper calling the compiled Butler-Reeds-Dawson algorithm."""
+    f, alpha_new = _nnls.venk_brd(initial_α, K_0, mvec, tol, maxiter)
+    return f, alpha_new
 
 
 def demand_real(x, addtxt=""):
@@ -148,17 +22,12 @@ def demand_real(x, addtxt=""):
             raise ValueError(
                 "you are not allows to pass nnls complex data:\nif it makes"
                 " sense for you, try yourdata.real.nnls( np.where you now have"
-                " yourdata.nnls("
-                + "\n"
-                + addtxt
+                " yourdata.nnls(" + "\n" + addtxt
             )
         else:
             raise ValueError(
                 "I expect double-precision floating point (float64), but you"
-                " passed me data of dtype "
-                + str(x.dtype)
-                + "\n"
-                + addtxt
+                " passed me data of dtype " + str(x.dtype) + "\n" + addtxt
             )
 
 
@@ -179,20 +48,21 @@ def nnls(
 
     We seek to minimize
     :math:`Q = \| Ax - b \|_2 + \|\lambda x\|_2`
-    in order to obtain solution vector :math:`x` subject to non-negativity constraint
-    given input matrix :math:`A`, the kernel, and input vector :math:`b`, the data.
+    in order to obtain solution vector :math:`x` subject to non-negativity
+    constraint given input matrix :math:`A`, the kernel, and input vector
+    :math:`b`, the data.
 
-    The first term assesses agreement between the fit :math:`Ax` and the data :math:`b`,
-    and the second term accounts for noise with the regularization parameter :math:`\lambda`
-    according to Tikhonov regularization.
+    The first term assesses agreement between the fit :math:`Ax` and the data
+    :math:`b`, and the second term accounts for noise with the regularization
+    parameter :math:`\lambda` according to Tikhonov regularization.
 
     To perform regularized minimization in 1 dimension, provide
     :str:`dimname_list`, :nddata:`newaxis_dict`, :function:`kernel_func`, and
-    regularization parameter `l`. One may set `l` to a :double: of the regularization
-    parameter of choice (found, for instance, through L-curve analysis) or
-    set `l` to :str:`BRD` to enable automatic selection of a regularization
-    parameter via the BRD algorithm - namely that described in Venkataramanan et al. 2002
-    but adapted for 1D case (DOI:10.1109/78.995059).
+    regularization parameter `l`. One may set `l` to a :double: of the
+    regularization parameter of choice (found, for instance, through L-curve
+    analysis) or set `l` to :str:`BRD` to enable automatic selection of a
+    regularization parameter via the BRD algorithm - namely that described in
+    Venkataramanan et al. 2002 but adapted for 1D case (DOI:10.1109/78.995059).
 
     To perform regularized minimization in 2 dimensions, set `l` to
     :str:`BRD` and provide a tuple of parameters :str:`dimname_list`,
@@ -203,8 +73,10 @@ def nnls(
     parameter is supported in this 2 dimensional should an
     appropriate parameter be known.
 
-    See: `Wikipedia page on NNLS <https://en.wikipedia.org/wiki/Non-negative_least_squares>`_,
-    `Wikipedia page on Tikhonov regularization <https://en.wikipedia.org/wiki/Tikhonov_regularization>`_
+    See: `Wikipedia page on NNLS
+    <https://en.wikipedia.org/wiki/Non-negative_least_squares>`_,
+    `Wikipedia page on Tikhonov regularization
+    <https://en.wikipedia.org/wiki/Tikhonov_regularization>`_
 
     Parameters
     ==========
@@ -238,8 +110,8 @@ def nnls(
         (in the example above, this would be something like
         ``lambda x,y: exp(-x*y)``)
 
-        For 2D, this must be a tuple or dictionary of functions -- the kernel is
-        the product of the two.
+        For 2D, this must be a tuple or dictionary of functions -- the kernel
+        is the product of the two.
     l : double (default 0) or str
         the regularization parameter :math:`lambda` -- if this is
         set to 0, the algorithm reverts to standard nnls.  If this
@@ -297,32 +169,31 @@ def nnls(
                 type(self),
             )
         )
+    logger.info("argcheck done")
     # make sure axes are real
     for j in dimname_list:
         demand_real(
             self.getaxis(j), "(this message pertains to the %s axis)" % j
         )
     for j in newaxis_dict:
-        assert (
-            len(j.dimlabels) == 1
-        ), "must be one-dimensional, has dimensions:" + str(j.dimlabels)
+        assert len(j.dimlabels) == 1, (
+            "must be one-dimensional, has dimensions:" + str(j.dimlabels)
+        )
         if j.getaxis(j.dimlabels[0]) is not None:
             demand_real(
                 j.getaxis(j.dimlabels[0]),
                 "(this message pertains to the new %s axis pulled from the"
-                " second argument's axis)"
-                % str(j.dimlabels[0]),
+                " second argument's axis)" % str(j.dimlabels[0]),
             )
         demand_real(
             j.data,
             "(this message pertains to the new %s axis pulled from the second"
-            " argument's data)"
-            % str(j.dimlabels[0]),
+            " argument's data)" % str(j.dimlabels[0]),
         )
     if isinstance(kernel_func, tuple):
-        assert callable(kernel_func[0]) and callable(
-            kernel_func[1]
-        ), "third argument is tuple of kernel functions"
+        assert callable(kernel_func[0]) and callable(kernel_func[1]), (
+            "third argument is tuple of kernel functions"
+        )
     elif isinstance(kernel_func, dict):
         kernel_func = [kernel_func[j] for j in dimname_list]
         assert all([callable(j) for j in kernel_func])
@@ -404,7 +275,7 @@ def nnls(
         U[j], S[j], V[j] = np.linalg.svd(kernels[j].data, full_matrices=False)
         logger.debug(
             strm(
-                f"the first few singular value are",
+                "the first few singular value are",
                 S[j][:4],
                 "the biggest is",
                 S[j][0],
@@ -417,9 +288,9 @@ def nnls(
         s[j] = np.where(S[j] > default_cut * S[j][0])[0][
             -1
         ]  # JF changed this and following -- should be relative
-        logger.debug(
+        logger.info(
             strm(
-                f"S{j+1} is",
+                f"S{j + 1} is",
                 S[j],
                 "so I'm going to",
                 s[j],
@@ -449,7 +320,7 @@ def nnls(
         K_alldims = K_alldims.reshape(
             K[0].shape[0] * K[1].shape[0], K[0].shape[1] * K[1].shape[1]
         )
-        logger.debug(
+        logger.info(
             strm(
                 "Compressed K, K1, and K2:",
                 [x.shape for x in (K_alldims, K[0], K[1])],
@@ -496,6 +367,9 @@ def nnls(
     if type(l) is str and l == "BRD":
         # Automatic BRD parameter selection without stacking identity
         # 1) Compute optimal f⃗ᵣ and λ via venk_BRD
+        logger.info(
+            "about to run venk" + strm(K_alldims.shape, data_fornnls.shape)
+        )
         retval, l = venk_BRD(1e-2, K_alldims, data_fornnls)
         self.set_prop("opt_alpha", l)
         # 2) Compute residual: A·x − b (eq. 40)
@@ -566,8 +440,8 @@ def nnls(
     # store the kernel and the residual as properties
     self.set_prop("nnls_kernel", K_alldims)
     for j in range(len(dimname_list)):
-        self.set_prop(f"s{j+1}", s[j])
-        self.set_prop(f"K{j+1}", K[j])
+        self.set_prop(f"s{j + 1}", s[j])
+        self.set_prop(f"K{j + 1}", K[j])
     self.axis_coords = self.fld(axis_coords_dict)
     self.axis_coords_units = self.fld(axis_units_dict)
     self.axis_coords_error = self.fld(axis_coords_error_dict)
