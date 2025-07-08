@@ -6,8 +6,8 @@ from pyspecdata import *
 # 
 # pySpecData makes it easy to construct fake data like this: let's see how!
 
-NT1 = 50 # Number of T1 values
-NT2 = 50 # Number of T2 values
+NT1 = 200 # Number of T1 values
+NT2 = 200 # Number of T2 values
 LT1_name = r'$\log(T_1)$'
 LT1 = nddata(linspace(-2.5,0.5,NT1), LT1_name)
 LT2_name = r'$\log(T_2)$'

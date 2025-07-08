@@ -10,7 +10,7 @@ logger = logging.getLogger("pyspecdata.matrix_math")
 # {{{ local functions
 
 
-def venk_BRD(initial_α, K_0, mvec, tol=1e-6, maxiter=100):
+def venk_BRD(initial_α, K_0, mvec, tol=1e-3, maxiter=100):
     """Wrapper calling the compiled Butler-Reeds-Dawson algorithm."""
     f, alpha_new = _nnls.venk_brd(initial_α, K_0, mvec, tol, maxiter)
     return f, alpha_new
@@ -172,6 +172,7 @@ def nnls(
                 type(self),
             )
         )
+    logger.info("argcheck done")
     # make sure axes are real
     for j in dimname_list:
         demand_real(
@@ -292,7 +293,7 @@ def nnls(
         s[j] = np.where(S[j] > default_cut * S[j][0])[0][
             -1
         ]  # JF changed this and following -- should be relative
-        logger.debug(
+        logger.info(
             strm(
                 f"S{j+1} is",
                 S[j],
@@ -324,7 +325,7 @@ def nnls(
         K_alldims = K_alldims.reshape(
             K[0].shape[0] * K[1].shape[0], K[0].shape[1] * K[1].shape[1]
         )
-        logger.debug(
+        logger.info(
             strm(
                 "Compressed K, K1, and K2:",
                 [x.shape for x in (K_alldims, K[0], K[1])],
@@ -371,6 +372,7 @@ def nnls(
     if type(l) is str and l == "BRD":
         # Automatic BRD parameter selection without stacking identity
         # 1) Compute optimal f⃗ᵣ and λ via venk_BRD
+        logger.info("about to run venk"+strm(K_alldims.shape,data_fornnls.shape))
         retval, l = venk_BRD(1e-2, K_alldims, data_fornnls)
         self.set_prop("opt_alpha", l)
         # 2) Compute residual: A·x − b (eq. 40)
