@@ -1,10 +1,26 @@
-from pylab import *
-from pyspecdata import *
+from pylab import (
+    figure,
+    title,
+    image,
+    show,
+    linspace,
+    logspace,
+    log10,
+    exp,
+    sqrt,
+)
+import numpy as np
+from pyspecdata import nddata
 
-# Here, we're going to provide a few demonstrations of the ILT functionality.  Let's start with Fig 1.10 in A. Beaton's thesis, which is based off the figures
-# in Venkataramanan.
+# Here, we're going to provide a few demonstrations of the ILT functionality.
+# Let's start with Fig 1.10 in A. Beaton's thesis, which is based off the
+# figures in Venkataramanan.
 #
-# pySpecData makes it easy to construct fake data like this: let's see how!
+# pySpecData makes it easy to construct fake data like this. Typically this is
+# very easy, but here, we must contend with the fact that we are
+# memory-limited, so if we want a highly resolved fit basis, we need to chunk
+# up the calculation.  Nonetheless, pySpecData still makes that easy: let's see
+# how!
 
 NT1 = 300  # Number of T1 values
 NT2 = 300  # Number of T2 values
