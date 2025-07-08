@@ -10,7 +10,7 @@ PACKAGE_ROOT = pathlib.Path(__file__).resolve().parents[1] / "pyspecdata"
 
 
 def load_module(name: str, *, use_real_pint: bool = False):
-    """Load a pyspecdata submodule without requiring compiled extensions.
+    """Load a pyspecdata submodule without requiring external packages.
 
     Parameters
     ----------
@@ -23,7 +23,6 @@ def load_module(name: str, *, use_real_pint: bool = False):
         environment without the real dependency installed.
     """
     # provide dummy replacements for optional compiled dependencies
-    sys.modules.setdefault("_nnls", types.ModuleType("_nnls"))
     sys.modules.setdefault("tables", types.ModuleType("tables"))
     sys.modules.setdefault("h5py", types.ModuleType("h5py"))
 

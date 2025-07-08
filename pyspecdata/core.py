@@ -3976,9 +3976,11 @@ class nddata(object):
     secsy_transform = axis_manipulation.secsy_transform
     register_axis = axis_manipulation.register_axis
     fourier_shear = this_fourier.shear
+
     # }}}
     # }}}
-    nnls = MM_nnls
+    def nnls(self, *args, **kwargs):
+        return MM_nnls(self, nddata, *args, **kwargs)
 
     # {{{ interpolation and binning
     def run_avg(self, thisaxisname, decimation=20, centered=False):
@@ -7229,12 +7231,21 @@ class nddata(object):
 
 class testclass:
     def __getitem__(self, *args, **kwargs):
-        print("you called __getitem__ with args", args, "and kwargs", kwargs)
+        logger.debug(
+            strm(
+                "you called __getitem__ with args", args, "and kwargs", kwargs
+            )
+        )
         return
 
     def __getattribute__(self, *args, **kwargs):
-        print(
-            "you called __getattribute__ with args", args, "and kwargs", kwargs
+        logger.debug(
+            strm(
+                "you called __getattribute__ with args",
+                args,
+                "and kwargs",
+                kwargs,
+            )
         )
         return
 
@@ -7248,6 +7259,7 @@ class nddata_hdf5(nddata):
     conveniently locate the desired file and then instantiate this class
     or call :func:`nddata_hdf5` directly.
     """
+
     def __repr__(self):
         if hasattr(self, "_node_children"):
             return repr(self.datanode)
@@ -7426,8 +7438,14 @@ class ndshape(ndshape_base):
     arrays -- see :func:`alloc`.
 
     """
+    def __or__(self, *args):
+        retval = super().__or__(*args)
+        retval.__class__ = type(self)
+        return retval
 
-    def alloc(self, dtype="complex128", labels=False, format=0):
+    __ror__ = __or__
+
+    def alloc(self, dtype=np.complex128, labels=False, format=0):
         r"""Use the shape object to allocate an empty nddata object.
 
         Parameters
@@ -7662,7 +7680,7 @@ class fitdata(nddata):
         r"""A property of the fitdata class which is set by the user,
         takes as input a sympy expression of the desired fit
         expression"""
-        print("Getting symbolic function")
+        logger.debug("Getting symbolic function")
         return self.symbolic_expr
 
     @functional_form.setter
@@ -7771,7 +7789,6 @@ class fitdata(nddata):
             J = np.matrix(fprime.T)
             S = np.matrix(self.get_covariance())
             Omegainv = S**-1
-            print("a")
             minimizer = scipy.linalg.inv(J.T * Omegainv * J) * J.T * Omegainv
             covarmatrix = minimizer * S * minimizer.T
         # }}}
@@ -8524,7 +8541,7 @@ class fitdata(nddata):
         """
 
         input_guesses = set(dict_of_values.keys())
-        print(input_guesses)
+        logger.debug(str(input_guesses))
         symbols_not_present = input_guesses - set(self.symbolic_vars)
         if len(symbols_not_present) > 0:
             raise ValueError(
@@ -8677,17 +8694,23 @@ class fitdata(nddata):
                                 self.getaxis(self.fit_axis), set=guess_dict
                             )
                     if alpha > alpha_max:
-                        print(
-                            "\n\n.core.guess) I can't find a new guess without"
-                            " increasing the alpha beyond %d\n\n" % alpha_max
+                        logger.debug(
+                            strm(
+                                "\n\n.core.guess) I can't find a new guess"
+                                " without increasing the alpha beyond %d\n\n"
+                                % alpha_max
+                            )
                         )
                         if (
                             which_starting_guess
                             >= len(self.starting_guesses) - 1
                         ):
-                            print(
-                                "\n\n.core.guess) {\\color{red} Warning!!!}"
-                                " ran out of guesses!!!%d\n\n" % alpha_max
+                            logger.debug(
+                                strm(
+                                    "\n\n.core.guess) {\\color{red}"
+                                    " Warning!!!} ran out of guesses!!!%d\n\n"
+                                    % alpha_max
+                                )
                             )
                             return thisguess
                         else:
@@ -8695,9 +8718,12 @@ class fitdata(nddata):
                             thisguess = self.starting_guesses[
                                 which_starting_guess
                             ]
-                            print(
-                                "\n\n.core.guess) try a new starting guess:",
-                                lsafen(thisguess),
+                            logger.debug(
+                                strm(
+                                    "\n\n.core.guess) try a new starting"
+                                    " guess:",
+                                    lsafen(thisguess),
+                                )
                             )
                             j = 0  # restart the loop
                             # {{{ evaluate f, fprime and residuals for the new
