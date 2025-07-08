@@ -41,15 +41,12 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             MYCMD="git diff --name-only origin/${{ github.base_ref }}...origin/${{ github.event.pull_request.head.ref }} --diff-filter=AM" 
-            echo "$MYCMD"
-            echo "$($MYCMD)"
-            CHANGED_FILES=$($MYCMD | grep '\.py$' | sed '/__init/d' | sed '/demos\//d' | tr '\n' ' ')
           else
             MYCMD="git diff --name-only ${{ github.event.before }} ${{ github.event.after }} --diff-filter=AM"
-            echo "$MYCMD"
-            echo "$($MYCMD)"
-            CHANGED_FILES=$($MYCMD | grep '\.py$' | sed '/__init/d' | tr '\n' ' ')
           fi
+          echo "$MYCMD"
+          echo "$($MYCMD)"
+          CHANGED_FILES=$($MYCMD | grep '\.py$' | sed '/__init/d' | sed '/demos\//d' | tr '\n' ' ')
           echo "Here are the changed py files:"
           echo "$CHANGED_FILES"
           echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_ENV
