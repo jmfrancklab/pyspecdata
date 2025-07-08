@@ -11,10 +11,8 @@ logger = logging.getLogger("pyspecdata.matrix_math")
 
 
 def venk_BRD(initial_α, K_0, mvec, tol=1e-6, maxiter=100):
-    """Call the Fortran Butler–Reeds–Dawson solver."""
-    K_fortran = np.asfortranarray(K_0)
-    f, alpha_new = _nnls.venk_brd(initial_α, K_fortran, mvec, tol, maxiter)
-    f = np.array(f, order="C")
+    """Wrapper calling the compiled Butler-Reeds-Dawson algorithm."""
+    f, alpha_new = _nnls.venk_brd(initial_α, K_0, mvec, tol, maxiter)
     return f, alpha_new
 
 
@@ -373,7 +371,7 @@ def nnls(
     if type(l) is str and l == "BRD":
         # Automatic BRD parameter selection without stacking identity
         # 1) Compute optimal f⃗ᵣ and λ via venk_BRD
-        retval, l = venk_BRD(0.1, K_alldims, data_fornnls)
+        retval, l = venk_BRD(1e-2, K_alldims, data_fornnls)
         self.set_prop("opt_alpha", l)
         # 2) Compute residual: A·x − b (eq. 40)
         residual = K_alldims.dot(retval) - data_fornnls
