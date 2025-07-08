@@ -373,7 +373,7 @@ def nnls(
     if type(l) is str and l == "BRD":
         # Automatic BRD parameter selection without stacking identity
         # 1) Compute optimal f⃗ᵣ and λ via venk_BRD
-        retval, l = venk_BRD(1e-2, K_alldims, data_fornnls)
+        retval, l = venk_BRD(0.1, K_alldims, data_fornnls)
         self.set_prop("opt_alpha", l)
         # 2) Compute residual: A·x − b (eq. 40)
         residual = K_alldims.dot(retval) - data_fornnls

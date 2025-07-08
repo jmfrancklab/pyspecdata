@@ -58,7 +58,7 @@
             if (norm_grad/norm_mr < 1.d-8) exit
          end do
          alpha_new = sqrt_n / norm2(c)
-!         write(*,*) 'alpha iteration', iter, 'value', alpha_new
+         write(*,*) 'alpha iteration', iter, 'value', alpha_new
          if (abs(alpha_new-alpha)/alpha < tol) exit
          alpha = alpha_new
       end do
