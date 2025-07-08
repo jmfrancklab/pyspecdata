@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Using the DCCT function &#8212; pySpecData 0.9.5.5.2 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=832af5b0" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css?v=7f9a90b1" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
@@ -56,24 +56,23 @@ colored plotting style.</p>
 in display coordinates while kwargs that are in blue (e.g. bbox and LHS_pad)
 illustrate the kwargs are in figure coordinates</p>
 <img src="../../_images/sphx_glr_DCCT_dimensions_001.png" srcset="../../_images/sphx_glr_DCCT_dimensions_001.png, ../../_images/sphx_glr_DCCT_dimensions_001_2_00x.png 2.00x" alt="DCCT dimensions" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>----------  logging output to /home/jmfranck/pyspecdata.0.log  ----------
-Warning!!! FT clear startpoints is obsolete! use ft_new_startpoint instead
 1: Data
 </pre></div>
 </div>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="n">rcParams</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">pyspecdata</span> <span class="k">as</span> <span class="nn">psd</span>
-<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">seed</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">r_</span>
-<span class="kn">import</span> <span class="nn">sympy</span> <span class="k">as</span> <span class="nn">s</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pylab</span><span class="w"> </span><span class="kn">import</span> <span class="n">rcParams</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyspecdata</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">psd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.random</span><span class="w"> </span><span class="kn">import</span> <span class="n">seed</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">r_</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">s</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedDict</span>
 
 
-<span class="k">def</span> <span class="nf">plot_w_markup</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">thistext</span><span class="p">,</span> <span class="n">thiscolor</span><span class="p">,</span> <span class="n">thistransf</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_w_markup</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">thistext</span><span class="p">,</span> <span class="n">thiscolor</span><span class="p">,</span> <span class="n">thistransf</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">endmarker</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span>
         <span class="n">alignment</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
@@ -234,7 +233,7 @@ Warning!!! FT clear startpoints is obsolete! use ft_new_startpoint instead
     <span class="c1"># }}}</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.090 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.333 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-dcct-dcct-dimensions-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/d7a6329b4e9ddffffc44ebdc4c335c13/DCCT_dimensions.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">DCCT_dimensions.ipynb</span></code></a></p>
@@ -287,16 +286,13 @@ Warning!!! FT clear startpoints is obsolete! use ft_new_startpoint instead
 <li class="toctree-l2"><a class="reference internal" href="../image_plot.html">Plotting Routines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../temp.html">Calculation of the Covariance Matrix</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../ppm_example.html">ppm Example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../fit_with_bounds.html">Fit Using Bounds</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../fit_complex.html">Fit complex data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../basic_example.html">Basic Slicing/Filtering Example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../pcolor_example.html">Unevenly spaced data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../BRD_test.html">1D BRD regularization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../fit_complex_with_transform.html">Fit complex data with transform</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../fit_fake_data.html">Fitting Data (Nonlinear + Symbolic)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#dcct">DCCT</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#esr">ESR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#regularization">Regularization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#uv">UV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#fitting">Fitting</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#xx-individual-functions-xx">XX Individual Functions XX</a></li>
 </ul>
 </li>

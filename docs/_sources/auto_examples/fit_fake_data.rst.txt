@@ -38,18 +38,17 @@ function.
 
  .. code-block:: none
 
-    {M_0, R_1, M_inf}
     {\bf Warning:} You have no error associated with your plot, and I want to flag this for now
 
 
     ----- Results for fitdata: -----
-    output for fitdata: {'M_0': -103.63721413191084, 'M_inf': 101.9531108968069, 'R_1': 6.158657562577949}
-    latex for fitdata: $f(\tau)=101.95 + \left(-1.04\times 10^{2} - 101.95\right) e^{- 6.16 \tau}$
-    $T_1$ for fitdata, 0.16237304799609778
+    output for fitdata: {'M_0': -101.31178480026007, 'M_inf': 102.28085672058833, 'R_1': 5.980377869772943}
+    latex for fitdata: $f(\tau)=102.28 + \left(-1.01\times 10^{2} - 102.28\right) e^{- 5.98 \tau}$
+    $T_1$ for fitdata, 0.1672135142253088
     ----- Results for lmfitdata: -----
-    output for lmfitdata: {'M_0': -103.63721323329156, 'R_1': 6.158657499877911, 'M_inf': 101.95311099880192}
-    latex for lmfitdata: $f(\tau)=(101.95) + \left((-1.04\times 10^{2}) - (101.95)\right) e^{- (6.16) \tau}$
-    $T_1$ for lmfitdata, 0.16237304964918473
+    output for lmfitdata: {'M_0': -101.31176496615092, 'M_inf': 102.28085908221091, 'R_1': 5.980376507713949}
+    latex for lmfitdata: $f(\tau)=(102.28) + \left((-1.01\times 10^{2}) - (102.28)\right) e^{- (5.98) \tau}$
+    $T_1$ for lmfitdata, 0.16721355230897642
     1: fit with guess |||None
 
 
@@ -166,7 +165,7 @@ function.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.050 seconds)
+   **Total running time of the script:** (0 minutes 0.785 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fit_fake_data.py:

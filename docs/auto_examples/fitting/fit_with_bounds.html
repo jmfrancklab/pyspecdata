@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Fit Using Bounds &#8212; pySpecData 0.9.5.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=832af5b0" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css?v=7f9a90b1" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=2b30a6e6" />
+    <script src="../../_static/documentation_options.js?v=a4fd5d96"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Fit complex data" href="fit_complex.html" />
+    <link rel="prev" title="Fitting" href="index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-fitting-fit-with-bounds-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="fit-using-bounds">
+<span id="sphx-glr-auto-examples-fitting-fit-with-bounds-py"></span><h1>Fit Using Bounds<a class="headerlink" href="#fit-using-bounds" title="Link to this heading">¶</a></h1>
+<p>Adapt one of the examples from lmfit to use sympy and pyspecdata.
+Eventually, we want to use parts of this in the base library, so we don’t have
+to retype them every time.</p>
+<img src="../../_images/sphx_glr_fit_with_bounds_001.png" srcset="../../_images/sphx_glr_fit_with_bounds_001.png, ../../_images/sphx_glr_fit_with_bounds_001_2_00x.png 2.00x" alt="fit with bounds" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>----------  logging output to /home/jmfranck/pyspecdata.0.log  ----------
+--&gt; fit_with_bounds.py(28):pyspecdata.core             &lt;module&gt; 2025-07-08 15:00:10,100
+INFO: Functional Form: A*exp(-decay**2*x**2)*sin(shift + x/period)
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">exp</span><span class="p">,</span> <span class="n">linspace</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">random</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">sin</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lmfit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">minimize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lmfit.printfuncs</span><span class="w"> </span><span class="kn">import</span> <span class="n">report_fit</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspecdata</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">init_logging</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;debug&quot;</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">15816</span><span class="p">)</span>
+<a href="../../modules.html#module-pyspecdata.figlist" title="pyspecdata.figlist" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">fl</span></a> <span class="o">=</span> <a href="../../modules.html#module-pyspecdata.figlist" title="pyspecdata.figlist" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-module"><span class="n">figlist_var</span></a><span class="p">()</span>
+<span class="n">A</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">decay</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="s2">&quot;A shift period decay x&quot;</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># create an empty dataset that we will drop the fake data into</span>
+<a href="../../auto_api/pyspecdata.html#pyspecdata.lmfitdata" title="pyspecdata.lmfitdata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">thisfit</span></a> <span class="o">=</span> <a href="../../auto_api/pyspecdata.html#pyspecdata.lmfitdata" title="pyspecdata.lmfitdata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">lmfitdata</span></a><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">nddata</span></a><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">250</span><span class="p">:</span><span class="mi">1500</span><span class="n">j</span><span class="p">],</span> <span class="s2">&quot;x&quot;</span><span class="p">))</span>
+<a href="../../auto_api/pyspecdata.html#pyspecdata.lmfitdata.functional_form" title="pyspecdata.lmfitdata.functional_form" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">thisfit</span><span class="o">.</span><span class="n">functional_form</span></a> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">A</span> <span class="o">*</span> <span class="n">sp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">shift</span> <span class="o">+</span> <span class="n">x</span> <span class="o">/</span> <span class="n">period</span><span class="p">)</span> <span class="o">*</span> <span class="n">sp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">x</span> <span class="o">*</span> <span class="n">decay</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+<span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">strm</span><span class="p">(</span><span class="s2">&quot;Functional Form:&quot;</span><span class="p">,</span> <a href="../../auto_api/pyspecdata.html#pyspecdata.lmfitdata.functional_form" title="pyspecdata.lmfitdata.functional_form" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">thisfit</span><span class="o">.</span><span class="n">functional_form</span></a><span class="p">))</span>
+<span class="c1"># {{{ create the &quot;true&quot; parameters for the fake data by pretending like</span>
+<span class="c1">#     the true values are a guess, and then outputting the guess data</span>
+<span class="n">true_values</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="mf">14.0</span><span class="p">,</span> <span class="s2">&quot;period&quot;</span><span class="p">:</span> <span class="mf">5.4321</span><span class="p">,</span> <span class="s2">&quot;shift&quot;</span><span class="p">:</span> <span class="mf">0.12345</span><span class="p">,</span> <span class="s2">&quot;decay&quot;</span><span class="p">:</span> <span class="mf">0.01000</span><span class="p">}</span>
+<a href="../../auto_api/pyspecdata.html#pyspecdata.lmfitdata.set_guess" title="pyspecdata.lmfitdata.set_guess" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">thisfit</span><span class="o">.</span><span class="n">set_guess</span></a><span class="p">(</span><span class="n">true_values</span><span class="p">)</span>
+<a href="../../auto_api/pyspecdata.html#pyspecdata.lmfitdata.settoguess" title="pyspecdata.lmfitdata.settoguess" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">thisfit</span><span class="o">.</span><span class="n">settoguess</span></a><span class="p">()</span>
+<a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mydata</span></a> <span class="o">=</span> <a href="../../auto_api/pyspecdata.html#pyspecdata.lmfitdata.eval" title="pyspecdata.lmfitdata.eval" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">thisfit</span><span class="o">.</span><span class="n">eval</span></a><span class="p">()</span>
+<a href="../../pyspecdata.html#pyspecdata.nddata.add_noise" title="pyspecdata.nddata.add_noise" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">mydata</span><span class="o">.</span><span class="n">add_noise</span></a><span class="p">(</span><span class="mf">2.8</span><span class="p">)</span>
+<span class="c1"># }}}</span>
+<span class="c1"># {{{Making guess data</span>
+<a href="../../auto_api/pyspecdata.html#pyspecdata.lmfitdata" title="pyspecdata.lmfitdata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">newfit</span></a> <span class="o">=</span> <a href="../../auto_api/pyspecdata.html#pyspecdata.lmfitdata" title="pyspecdata.lmfitdata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">lmfitdata</span></a><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mydata</span></a><span class="p">)</span>
+<a href="../../auto_api/pyspecdata.html#pyspecdata.lmfitdata.functional_form" title="pyspecdata.lmfitdata.functional_form" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">newfit</span><span class="o">.</span><span class="n">functional_form</span></a> <span class="o">=</span> <a href="../../auto_api/pyspecdata.html#pyspecdata.lmfitdata.functional_form" title="pyspecdata.lmfitdata.functional_form" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">thisfit</span><span class="o">.</span><span class="n">functional_form</span></a>
+<a href="../../auto_api/pyspecdata.html#pyspecdata.lmfitdata.set_guess" title="pyspecdata.lmfitdata.set_guess" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">newfit</span><span class="o">.</span><span class="n">set_guess</span></a><span class="p">(</span>
+    <span class="n">A</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">13.0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+    <span class="n">shift</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">),</span>
+    <span class="n">period</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
+    <span class="n">decay</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">0.10</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">0.00</span><span class="p">),</span>
+<span class="p">)</span>
+<a href="../../auto_api/pyspecdata.html#pyspecdata.lmfitdata.settoguess" title="pyspecdata.lmfitdata.settoguess" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">newfit</span><span class="o">.</span><span class="n">settoguess</span></a><span class="p">()</span>
+<a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">guess</span></a> <span class="o">=</span> <a href="../../auto_api/pyspecdata.html#pyspecdata.lmfitdata.eval" title="pyspecdata.lmfitdata.eval" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">newfit</span><span class="o">.</span><span class="n">eval</span></a><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="c1"># }}}</span>
+<span class="c1"># {{{ run the fit and generate nddata</span>
+<span class="c1"># again, now that this is a class, why is this not handled by the fit method?</span>
+<a href="../../auto_api/pyspecdata.html#pyspecdata.lmfitdata.fit" title="pyspecdata.lmfitdata.fit" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">newfit</span><span class="o">.</span><span class="n">fit</span></a><span class="p">()</span>
+<span class="c1"># {{{plot the data with fits and guesses</span>
+<span class="n">plot</span><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mydata</span></a><span class="p">,</span> <span class="s2">&quot;ro&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><a href="../../auto_api/pyspecdata.html#pyspecdata.lmfitdata.eval" title="pyspecdata.lmfitdata.eval" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">newfit</span><span class="o">.</span><span class="n">eval</span></a><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;fit&quot;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">guess</span></a><span class="p">,</span> <span class="s2">&quot;g--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;guess&quot;</span><span class="p">)</span>
+<span class="c1"># }}}</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.443 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-fitting-fit-with-bounds-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/6b048ad4c78c0b45b0e22876034fa8ef/fit_with_bounds.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">fit_with_bounds.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/4d508f406672de61bfdbcfecb46678ad/fit_with_bounds.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">fit_with_bounds.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/pyspec_path_equaltip.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../fitdata.html">the lmfitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">PySpecData Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../polyfit.html">Polynomial Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ppm_2D.html">PPM in 2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../error_example.html">Error and units example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../calculate_covariance.html">Calculation of the Covariance Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../convolution.html">Simple Convolution Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../image_plot.html">Plotting Routines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../temp.html">Calculation of the Covariance Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ppm_example.html">ppm Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../basic_example.html">Basic Slicing/Filtering Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pcolor_example.html">Unevenly spaced data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#dcct">DCCT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#esr">ESR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#regularization">Regularization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#uv">UV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#fitting">Fitting</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#xx-individual-functions-xx">XX Individual Functions XX</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">PySpecData Examples</a><ul>
+  <li><a href="index.html">Fitting</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Fitting</a></li>
+      <li>Next: <a href="fit_complex.html" title="next chapter">Fit complex data</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2016, John M. Franck.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/auto_examples/fitting/fit_with_bounds.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

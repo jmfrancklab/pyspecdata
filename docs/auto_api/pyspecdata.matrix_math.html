@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>pyspecdata.matrix_math package &#8212; pySpecData 0.9.5.5.2 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=832af5b0" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css?v=7f9a90b1" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
@@ -111,64 +111,30 @@ multiplication / dot product.</p>
 <section id="module-pyspecdata.matrix_math.nnls">
 <span id="pyspecdata-matrix-math-nnls-module"></span><h2>pyspecdata.matrix_math.nnls module<a class="headerlink" href="#module-pyspecdata.matrix_math.nnls" title="Link to this heading">¶</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.G">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">G</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.G" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.H">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">H</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">product</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.H" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.chi">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">chi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_fornnls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.chi" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.d_chi">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">d_chi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_fornnls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.d_chi" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.dd_chi">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">dd_chi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.dd_chi" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.demand_real">
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">demand_real</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addtxt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.demand_real" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.mod_BRD">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">mod_BRD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">guess</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_fornnls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.mod_BRD" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.newton_min">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">newton_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_fornnls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.newton_min" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.nnls">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">nnls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimname_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newaxis_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_uncompressed_kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.nnls" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">nnls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nddata_cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimname_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newaxis_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_uncompressed_kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.nnls" title="Link to this definition">¶</a></dt>
 <dd><p>Perform regularized non-negative least-squares “fit” on self.</p>
 <p>Capable of solving for solution in 1 or 2 dimensions.</p>
 <p>We seek to minimize
 <span class="math notranslate nohighlight">\(Q = \| Ax - b \|_2 + \|\lambda x\|_2\)</span>
-in order to obtain solution vector <span class="math notranslate nohighlight">\(x\)</span> subject to non-negativity constraint
-given input matrix <span class="math notranslate nohighlight">\(A\)</span>, the kernel, and input vector <span class="math notranslate nohighlight">\(b\)</span>, the data.</p>
-<p>The first term assesses agreement between the fit <span class="math notranslate nohighlight">\(Ax\)</span> and the data <span class="math notranslate nohighlight">\(b\)</span>,
-and the second term accounts for noise with the regularization parameter <span class="math notranslate nohighlight">\(\lambda\)</span>
-according to Tikhonov regularization.</p>
+in order to obtain solution vector <span class="math notranslate nohighlight">\(x\)</span> subject to non-negativity
+constraint given input matrix <span class="math notranslate nohighlight">\(A\)</span>, the kernel, and input vector
+<span class="math notranslate nohighlight">\(b\)</span>, the data.</p>
+<p>The first term assesses agreement between the fit <span class="math notranslate nohighlight">\(Ax\)</span> and the data
+<span class="math notranslate nohighlight">\(b\)</span>, and the second term accounts for noise with the regularization
+parameter <span class="math notranslate nohighlight">\(\lambda\)</span> according to Tikhonov regularization.</p>
 <p>To perform regularized minimization in 1 dimension, provide
 <a href="#id1"><span class="problematic" id="id2">:str:`dimname_list`</span></a>, <a href="#id3"><span class="problematic" id="id4">:nddata:`newaxis_dict`</span></a>, <a href="#id5"><span class="problematic" id="id6">:function:`kernel_func`</span></a>, and
-regularization parameter <cite>l</cite>. One may set <cite>l</cite> to a :double: of the regularization
-parameter of choice (found, for instance, through L-curve analysis) or
-set <cite>l</cite> to <a href="#id7"><span class="problematic" id="id8">:str:`BRD`</span></a> to enable automatic selection of a regularization
-parameter via the BRD algorithm - namely that described in Venkataramanan et al. 2002
-but adapted for 1D case (DOI:10.1109/78.995059).</p>
+regularization parameter <cite>l</cite>. One may set <cite>l</cite> to a :double: of the
+regularization parameter of choice (found, for instance, through L-curve
+analysis) or set <cite>l</cite> to <a href="#id7"><span class="problematic" id="id8">:str:`BRD`</span></a> to enable automatic selection of a
+regularization parameter via the BRD algorithm - namely that described in
+Venkataramanan et al. 2002 but adapted for 1D case (DOI:10.1109/78.995059).</p>
 <p>To perform regularized minimization in 2 dimensions, set <cite>l</cite> to
 <a href="#id9"><span class="problematic" id="id10">:str:`BRD`</span></a> and provide a tuple of parameters <a href="#id11"><span class="problematic" id="id12">:str:`dimname_list`</span></a>,
 <a href="#id13"><span class="problematic" id="id14">:nddata:`newaxis_dict`</span></a>, and <a href="#id15"><span class="problematic" id="id16">:function:`kernel_func`</span></a>.  Algorithm
@@ -189,7 +155,7 @@ distribution (the “fit” dimension);
 <p>If you are performing 2D regularization, then this
 is a tuple (pair) of 2 names</p>
 </p></li>
-<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><em>(</em><em>tuple of</em><em>) </em><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><em>nddata</em></a>) – <p>a dictionary whose key is the name of the “fit” dimension
+<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><em>(</em><em>tuple of</em><em>) </em><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – <p>a dictionary whose key is the name of the “fit” dimension
 (<span class="math notranslate nohighlight">\(R_1\)</span> in the example above)
 and whose value is an np.array with the new axis labels.</p>
 <p>OR</p>
@@ -205,8 +171,8 @@ The first argument is the “data” variable
 and the second argument is the “fit” variable
 (in the example above, this would be something like
 <code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">x,y:</span> <span class="pre">exp(-x*y)</span></code>)</p>
-<p>For 2D, this must be a tuple or dictionary of functions – the kernel is
-the product of the two.</p>
+<p>For 2D, this must be a tuple or dictionary of functions – the kernel
+is the product of the two.</p>
 </p></li>
 <li><p><strong>l</strong> (<em>double</em><em> (</em><em>default 0</em><em>) or </em><em>str</em>) – the regularization parameter <span class="math notranslate nohighlight">\(lambda\)</span> – if this is
 set to 0, the algorithm reverts to standard nnls.  If this
@@ -239,14 +205,10 @@ nddata called, respectively, “s1” and “s2”.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.optimize_alpha">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">optimize_alpha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.optimize_alpha" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.square_heaviside">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">square_heaviside</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.square_heaviside" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="pyspecdata.matrix_math.nnls.venk_BRD">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.matrix_math.nnls.</span></span><span class="sig-name descname"><span class="pre">venk_BRD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_α</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mvec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.matrix_math.nnls.venk_BRD" title="Link to this definition">¶</a></dt>
+<dd><p>Wrapper calling the compiled Butler-Reeds-Dawson algorithm.</p>
+</dd></dl>
 
 </section>
 <section id="module-pyspecdata.matrix_math.svd">

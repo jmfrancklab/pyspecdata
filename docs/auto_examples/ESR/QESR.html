@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Quantitative ESR &#8212; pySpecData 0.9.5.5.2 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=832af5b0" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css?v=7f9a90b1" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
@@ -20,7 +20,7 @@
     <link rel="icon" href="../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="UV" href="../UV/index.html" />
+    <link rel="next" title="Regularization" href="../ILT/index.html" />
     <link rel="prev" title="Bruker cw ESR Data" href="esr_example.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -147,10 +147,10 @@ Bruker: 155.90 Ours: 153.04
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">import</span> <span class="n">axvline</span><span class="p">,</span> <span class="n">axhline</span><span class="p">,</span> <span class="n">gca</span>
-<span class="kn">from</span> <span class="nn">pint</span> <span class="kn">import</span> <span class="n">UnitRegistry</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyspecdata</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="kn">import</span> <span class="n">axvline</span><span class="p">,</span> <span class="n">axhline</span><span class="p">,</span> <span class="n">gca</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pint</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnitRegistry</span>
 
 <span class="n">ureg</span> <span class="o">=</span> <span class="n">UnitRegistry</span><span class="p">(</span><span class="n">system</span><span class="o">=</span><span class="s2">&quot;mks&quot;</span><span class="p">,</span><span class="n">autoconvert_offset_to_baseunit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_reduce_dimensions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -258,7 +258,7 @@ Bruker: 155.90 Ours: 153.04
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bruker: </span><span class="si">%04.2f</span><span class="s2"> Ours: </span><span class="si">%04.2f</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">QESR_concs</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="mf">1e-6</span><span class="p">,</span><span class="n">myconcs</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="n">m_hardcode</span><span class="o">/</span><span class="mf">1e-6</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.890 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.225 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-esr-qesr-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/008aab2b6c8bc5c5ab38abbb0297b2a5/QESR.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">QESR.ipynb</span></code></a></p>
@@ -311,16 +311,13 @@ Bruker: 155.90 Ours: 153.04
 <li class="toctree-l2"><a class="reference internal" href="../image_plot.html">Plotting Routines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../temp.html">Calculation of the Covariance Matrix</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../ppm_example.html">ppm Example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../fit_with_bounds.html">Fit Using Bounds</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../fit_complex.html">Fit complex data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../basic_example.html">Basic Slicing/Filtering Example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../pcolor_example.html">Unevenly spaced data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../BRD_test.html">1D BRD regularization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../fit_complex_with_transform.html">Fit complex data with transform</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../fit_fake_data.html">Fitting Data (Nonlinear + Symbolic)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#dcct">DCCT</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#esr">ESR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#regularization">Regularization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#uv">UV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#fitting">Fitting</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#xx-individual-functions-xx">XX Individual Functions XX</a></li>
 </ul>
 </li>
@@ -333,7 +330,7 @@ Bruker: 155.90 Ours: 153.04
   <li><a href="../index.html">PySpecData Examples</a><ul>
   <li><a href="index.html">ESR</a><ul>
       <li>Previous: <a href="esr_example.html" title="previous chapter">Bruker cw ESR Data</a></li>
-      <li>Next: <a href="../UV/index.html" title="next chapter">UV</a></li>
+      <li>Next: <a href="../ILT/index.html" title="next chapter">Regularization</a></li>
   </ul></li>
   </ul></li>
   </ul></li>

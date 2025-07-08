@@ -1,0 +1,61 @@
+
+
+.. _sphx_glr_auto_examples_ILT:
+
+Regularization
+--------------
+
+1, 1.5, and 2D regularization
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="2D ILT">
+
+.. only:: html
+
+  .. image:: /auto_examples/ILT/images/thumb/sphx_glr_2DILT_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_ILT_2DILT.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">2D ILT</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="For 1D BRD, adapted mainly from Venkataramanan 2002 but checked against a compiled stacked regu...">
+
+.. only:: html
+
+  .. image:: /auto_examples/ILT/images/thumb/sphx_glr_BRD_test_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_ILT_BRD_test.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">1D BRD regularization</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/ILT/2DILT
+   /auto_examples/ILT/BRD_test
+

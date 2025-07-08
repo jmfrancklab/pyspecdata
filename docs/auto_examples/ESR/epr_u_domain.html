@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>EPR u-domain &#8212; pySpecData 0.9.5.5.2 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=832af5b0" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css?v=7f9a90b1" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
@@ -63,17 +63,17 @@ and conjugate is inverse domain</p></li>
 1: initial spectrum |||mT
 2: u-domain |||kcyc · (T)$^{-1}$
 
---&gt; _mathtext.py(648):matplotlib.mathtext           _get_glyph 2025-01-22 14:49:45,157
+--&gt; _mathtext.py(648):matplotlib.mathtext           _get_glyph 2025-07-08 14:55:19,900
 INFO: Substituting symbol F from STIXNonUnicode
---&gt; _mathtext.py(648):matplotlib.mathtext           _get_glyph 2025-01-22 14:49:45,527
+--&gt; _mathtext.py(648):matplotlib.mathtext           _get_glyph 2025-07-08 14:55:20,252
 INFO: Substituting symbol F from STIXNonUnicode
 </pre></div>
 </div>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyspecdata</span> <span class="k">as</span> <span class="nn">psd</span>
-<span class="kn">import</span> <span class="nn">re</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyspecdata</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">psd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 
 <a href="../../auto_api/pyspecdata.html#pyspecdata.init_logging" title="pyspecdata.init_logging" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-function"><span class="n">psd</span><span class="o">.</span><span class="n">init_logging</span></a><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;debug&quot;</span><span class="p">)</span>
 <span class="n">Bname</span> <span class="o">=</span> <span class="s2">&quot;$B_0$&quot;</span>
@@ -99,7 +99,7 @@ INFO: Substituting symbol F from STIXNonUnicode
     <a href="../../auto_api/pyspecdata.html#pyspecdata.figlist.plot" title="pyspecdata.figlist.plot" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">fl</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><a href="../../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 7.081 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.692 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-esr-epr-u-domain-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/86fbcdd3cde0552480dac85b6aa4b89c/epr_u_domain.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">epr_u_domain.ipynb</span></code></a></p>
@@ -152,16 +152,13 @@ INFO: Substituting symbol F from STIXNonUnicode
 <li class="toctree-l2"><a class="reference internal" href="../image_plot.html">Plotting Routines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../temp.html">Calculation of the Covariance Matrix</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../ppm_example.html">ppm Example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../fit_with_bounds.html">Fit Using Bounds</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../fit_complex.html">Fit complex data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../basic_example.html">Basic Slicing/Filtering Example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../pcolor_example.html">Unevenly spaced data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../BRD_test.html">1D BRD regularization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../fit_complex_with_transform.html">Fit complex data with transform</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../fit_fake_data.html">Fitting Data (Nonlinear + Symbolic)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#dcct">DCCT</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#esr">ESR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#regularization">Regularization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#uv">UV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#fitting">Fitting</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#xx-individual-functions-xx">XX Individual Functions XX</a></li>
 </ul>
 </li>

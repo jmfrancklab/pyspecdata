@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:12.897** total execution time for 3 files **from auto_examples/ESR**:
+**00:06.887** total execution time for 3 files **from auto_examples/ESR**:
 
 .. container::
 
@@ -32,12 +32,12 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_auto_examples_ESR_epr_u_domain.py` (``epr_u_domain.py``)
-     - 00:07.081
-     - 0.0
    * - :ref:`sphx_glr_auto_examples_ESR_QESR.py` (``QESR.py``)
-     - 00:04.890
+     - 00:05.225
      - 0.0
    * - :ref:`sphx_glr_auto_examples_ESR_esr_example.py` (``esr_example.py``)
-     - 00:00.925
+     - 00:00.970
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_ESR_epr_u_domain.py` (``epr_u_domain.py``)
+     - 00:00.692
      - 0.0

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>2D ILT &#8212; pySpecData 0.9.5.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=832af5b0" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css?v=7f9a90b1" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=2b30a6e6" />
+    <script src="../_static/documentation_options.js?v=a4fd5d96"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-2dilt-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="d-ilt">
+<span id="sphx-glr-auto-examples-2dilt-py"></span><h1>2D ILT<a class="headerlink" href="#d-ilt" title="Link to this heading">¶</a></h1>
+<p>Here, we’re going to provide a few demonstrations of the ILT functionality.
+Let’s start with Fig 1.10 in A. Beaton’s thesis, which is based off the
+figures in Venkataramanan.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pylab</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">figure</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">,</span>
+    <span class="n">show</span><span class="p">,</span>
+    <span class="n">linspace</span><span class="p">,</span>
+    <span class="n">logspace</span><span class="p">,</span>
+    <span class="n">log10</span><span class="p">,</span>
+    <span class="n">exp</span><span class="p">,</span>
+    <span class="n">sqrt</span><span class="p">,</span>
+    <span class="n">rcParams</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspecdata</span><span class="w"> </span><span class="kn">import</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">nddata</span></a><span class="p">,</span> <a href="../auto_api/pyspecdata.html#pyspecdata.image" title="pyspecdata.image" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-function"><span class="n">image</span></a>
+
+<span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;image.aspect&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span>  <span class="c1"># needed for sphinx gallery</span>
+<span class="c1"># sphinx_gallery_thumbnail_number = 2</span>
+
+<span class="n">NT1</span> <span class="o">=</span> <span class="mi">300</span>  <span class="c1"># Number of T1 values</span>
+<span class="n">NT2</span> <span class="o">=</span> <span class="mi">300</span>  <span class="c1"># Number of T2 values</span>
+<span class="n">LT1_name</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$\log(T_1)$&quot;</span>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT1</span></a> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">nddata</span></a><span class="p">(</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">NT1</span><span class="p">),</span> <span class="n">LT1_name</span><span class="p">)</span>
+<span class="n">LT2_name</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$\log(T_2)$&quot;</span>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT2</span></a> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">nddata</span></a><span class="p">(</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">NT2</span><span class="p">),</span> <span class="n">LT2_name</span><span class="p">)</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.25</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.75</span><span class="p">]</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]</span>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">exact_data</span></a> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span>
+    <span class="o">-</span><span class="p">((</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT1</span></a> <span class="o">-</span> <span class="n">mu</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="o">-</span> <span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT2</span></a> <span class="o">-</span> <span class="n">mu</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">slanted_coord1</span></a> <span class="o">=</span> <span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT1</span></a> <span class="o">+</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT2</span></a><span class="p">)</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">slanted_coord2</span></a> <span class="o">=</span> <span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT2</span></a> <span class="o">-</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT1</span></a><span class="p">)</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4</span><span class="p">]</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="p">[</span>  <span class="c1"># convert to slanted coords</span>
+    <span class="p">(</span><span class="n">mu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">mu</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">mu</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">mu</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]</span>  <span class="c1"># in slanted</span>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">exact_data</span></a> <span class="o">+=</span> <span class="n">exp</span><span class="p">(</span>
+    <span class="o">-</span><span class="p">((</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">slanted_coord1</span></a> <span class="o">-</span> <span class="n">mu</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="o">-</span> <span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">slanted_coord2</span></a> <span class="o">-</span> <span class="n">mu</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata.reorder" title="pyspecdata.nddata.reorder" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">exact_data</span><span class="o">.</span><span class="n">reorder</span></a><span class="p">(</span><span class="n">LT2_name</span><span class="p">)</span>  <span class="c1"># T₂ along y axis</span>
+
+<span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">title</span><span class="p">(</span><span class="s2">&quot;exact data&quot;</span><span class="p">)</span>
+<a href="../auto_api/pyspecdata.html#pyspecdata.image" title="pyspecdata.image" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-function"><span class="n">image</span></a><span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">exact_data</span></a><span class="p">)</span>
+
+<span class="c1"># Now add the experimental decay dimensions</span>
+
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tau1</span></a> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">nddata</span></a><span class="p">(</span><span class="n">logspace</span><span class="p">(</span><span class="n">log10</span><span class="p">(</span><span class="mf">5.0e-4</span><span class="p">),</span> <span class="n">log10</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="mi">30</span><span class="p">),</span> <span class="s2">&quot;tau1&quot;</span><span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tau2</span></a> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class"><span class="n">nddata</span></a><span class="p">(</span><span class="n">linspace</span><span class="p">(</span><span class="mf">5.0e-4</span><span class="p">,</span> <span class="mf">3.8</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span> <span class="s2">&quot;tau2&quot;</span><span class="p">)</span>
+
+<span class="c1"># Pre-allocate the τ₁×τ₂ result via ndshape’s alloc, inline</span>
+
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">simulated_data</span></a> <span class="o">=</span> <span class="p">(</span><a href="../auto_api/pyspecdata.html#pyspecdata.nddata.shape" title="pyspecdata.nddata.shape" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">tau1</span><span class="o">.</span><span class="n">shape</span></a> <span class="o">|</span> <a href="../auto_api/pyspecdata.html#pyspecdata.nddata.shape" title="pyspecdata.nddata.shape" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">tau2</span><span class="o">.</span><span class="n">shape</span></a><span class="p">)</span><span class="o">.</span><span class="n">alloc</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_2DILT_001.png" srcset="../_images/sphx_glr_2DILT_001.png, ../_images/sphx_glr_2DILT_001_2_00x.png 2.00x" alt="exact data" class = "sphx-glr-single-img"/><p>pySpecData makes it easy to construct fake data like this. Typically this is
+very easy, but here, we must contend with the fact that we are
+memory-limited, so if we want a highly resolved fit basis, we need to chunk
+up the calculation.  Nonetheless, pySpecData still makes that easy: let’s see
+how!</p>
+<p>Block sizes (tune to available RAM)</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">bLT1</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">bLT2</span> <span class="o">=</span> <span class="mi">20</span>
+</pre></div>
+</div>
+<p>Loop over LT1 and LT2 in blocks, vectorized over τ dims each time</p>
+<p>$$T_1 = 10^{log(T_1)}$$
+$$R_1 = 10^{-log(T_1)}$$
+$$ln(R_1) = -log(T_1) ln(10)$$</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span>
+    <span class="s2">&quot;Generating the fake data can take some time.  I need to loop a&quot;</span>
+    <span class="sa">f</span><span class="s2">&quot; calculation in chunks over a </span><span class="si">{</span><a href="../auto_api/pyspecdata.html#pyspecdata.nddata.shape" title="pyspecdata.nddata.shape" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">LT1</span><span class="o">.</span><span class="n">shape</span></a><span class="p">[</span><span class="n">LT1_name</span><span class="p">]</span><span class="si">}</span><span class="s2"> ×&quot;</span>
+    <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><a href="../auto_api/pyspecdata.html#pyspecdata.nddata.shape" title="pyspecdata.nddata.shape" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">LT2</span><span class="o">.</span><span class="n">shape</span></a><span class="p">[</span><span class="n">LT2_name</span><span class="p">]</span><span class="si">}</span><span class="s2"> grid&quot;</span>
+<span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <a href="../auto_api/pyspecdata.html#pyspecdata.nddata.shape" title="pyspecdata.nddata.shape" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">LT1</span><span class="o">.</span><span class="n">shape</span></a><span class="p">[</span><span class="n">LT1_name</span><span class="p">],</span> <span class="n">bLT1</span><span class="p">):</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT1_blk</span></a> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT1</span></a><span class="p">[</span><span class="n">LT1_name</span><span class="p">,</span> <span class="nb">slice</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">bLT1</span><span class="p">)]</span>
+    <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">B1</span></a> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tau1</span></a> <span class="o">/</span> <span class="mi">10</span><span class="o">**</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT1_blk</span></a><span class="p">)</span>  <span class="c1"># dims: (tau1, LT1_blk)</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <a href="../auto_api/pyspecdata.html#pyspecdata.nddata.shape" title="pyspecdata.nddata.shape" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-property"><span class="n">LT2</span><span class="o">.</span><span class="n">shape</span></a><span class="p">[</span><span class="n">LT2_name</span><span class="p">],</span> <span class="n">bLT2</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+        <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT2_blk</span></a> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT2</span></a><span class="p">[</span><span class="n">LT2_name</span><span class="p">,</span> <span class="nb">slice</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="n">bLT2</span><span class="p">)]</span>
+        <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">B2</span></a> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tau2</span></a> <span class="o">/</span> <span class="mi">10</span><span class="o">**</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT2_blk</span></a><span class="p">)</span>  <span class="c1"># dims: (tau2, LT2_blk)</span>
+        <span class="c1"># Extract matching block of exact_data</span>
+        <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data_blk</span></a> <span class="o">=</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">exact_data</span></a><span class="p">[</span><span class="n">LT1_name</span><span class="p">,</span> <span class="nb">slice</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">bLT1</span><span class="p">)][</span>
+            <span class="n">LT2_name</span><span class="p">,</span> <span class="nb">slice</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="n">bLT2</span><span class="p">)</span>
+        <span class="p">]</span>  <span class="c1"># dims: (tau1, tau2, LT1_blk, LT2_blk)</span>
+        <span class="c1"># Multiply, sum out both LT axes, and accumulate</span>
+        <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">simulated_data</span></a> <span class="o">+=</span> <span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">B2</span></a> <span class="o">*</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">B1</span></a> <span class="o">*</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data_blk</span></a><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">LT1_name</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">LT2_name</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;done generating&quot;</span><span class="p">)</span>
+
+<span class="c1"># `simulated_data` now holds the τ₁×τ₂ synthetic data</span>
+
+<span class="c1"># then add noise, and scale data so that noise has norm of 1</span>
+
+<a href="../pyspecdata.html#pyspecdata.nddata.add_noise" title="pyspecdata.nddata.add_noise" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">simulated_data</span><span class="o">.</span><span class="n">add_noise</span></a><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+<a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">simulated_data</span></a> <span class="o">/=</span> <span class="mf">0.1</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Generating the fake data can take some time.  I need to loop a calculation in chunks over a 300 × 300 grid
+0 0
+0 20
+0 40
+0 60
+0 80
+0 100
+0 120
+0 140
+0 160
+0 180
+0 200
+0 220
+0 240
+0 260
+0 280
+20 0
+20 20
+20 40
+20 60
+20 80
+20 100
+20 120
+20 140
+20 160
+20 180
+20 200
+20 220
+20 240
+20 260
+20 280
+40 0
+40 20
+40 40
+40 60
+40 80
+40 100
+40 120
+40 140
+40 160
+40 180
+40 200
+40 220
+40 240
+40 260
+40 280
+60 0
+60 20
+60 40
+60 60
+60 80
+60 100
+60 120
+60 140
+60 160
+60 180
+60 200
+60 220
+60 240
+60 260
+60 280
+80 0
+80 20
+80 40
+80 60
+80 80
+80 100
+80 120
+80 140
+80 160
+80 180
+80 200
+80 220
+80 240
+80 260
+80 280
+100 0
+100 20
+100 40
+100 60
+100 80
+100 100
+100 120
+100 140
+100 160
+100 180
+100 200
+100 220
+100 240
+100 260
+100 280
+120 0
+120 20
+120 40
+120 60
+120 80
+120 100
+120 120
+120 140
+120 160
+120 180
+120 200
+120 220
+120 240
+120 260
+120 280
+140 0
+140 20
+140 40
+140 60
+140 80
+140 100
+140 120
+140 140
+140 160
+140 180
+140 200
+140 220
+140 240
+140 260
+140 280
+160 0
+160 20
+160 40
+160 60
+160 80
+160 100
+160 120
+160 140
+160 160
+160 180
+160 200
+160 220
+160 240
+160 260
+160 280
+180 0
+180 20
+180 40
+180 60
+180 80
+180 100
+180 120
+180 140
+180 160
+180 180
+180 200
+180 220
+180 240
+180 260
+180 280
+200 0
+200 20
+200 40
+200 60
+200 80
+200 100
+200 120
+200 140
+200 160
+200 180
+200 200
+200 220
+200 240
+200 260
+200 280
+220 0
+220 20
+220 40
+220 60
+220 80
+220 100
+220 120
+220 140
+220 160
+220 180
+220 200
+220 220
+220 240
+220 260
+220 280
+240 0
+240 20
+240 40
+240 60
+240 80
+240 100
+240 120
+240 140
+240 160
+240 180
+240 200
+240 220
+240 240
+240 260
+240 280
+260 0
+260 20
+260 40
+260 60
+260 80
+260 100
+260 120
+260 140
+260 160
+260 180
+260 200
+260 220
+260 240
+260 260
+260 280
+280 0
+280 20
+280 40
+280 60
+280 80
+280 100
+280 120
+280 140
+280 160
+280 180
+280 200
+280 220
+280 240
+280 260
+280 280
+done generating
+</pre></div>
+</div>
+<p>Use BRD to find the value of $lambda$ ($alpha$).
+Note that BRD assumes that you have scaled your data so that the stdev
+of the noise is 1.0.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="../auto_api/pyspecdata.html#pyspecdata.nddata.nnls" title="pyspecdata.nddata.nnls" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-method"><span class="n">simulated_data</span><span class="o">.</span><span class="n">nnls</span></a><span class="p">(</span>
+    <span class="p">(</span><span class="s2">&quot;tau1&quot;</span><span class="p">,</span> <span class="s2">&quot;tau2&quot;</span><span class="p">),</span>
+    <span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT1</span></a><span class="p">,</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT2</span></a><span class="p">),</span>
+    <span class="p">(</span>
+        <span class="k">lambda</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tau1</span></a><span class="p">,</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT1</span></a><span class="p">:</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tau1</span></a> <span class="o">*</span> <span class="mi">10</span><span class="o">**-</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT1</span></a><span class="p">),</span>
+        <span class="k">lambda</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tau2</span></a><span class="p">,</span> <a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT2</span></a><span class="p">:</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tau2</span></a> <span class="o">*</span> <span class="mi">10</span><span class="o">**-</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">LT2</span></a><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="n">l</span><span class="o">=</span><span class="s2">&quot;BRD&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">figure</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">title</span><span class="p">(</span><span class="s2">&quot;BRD&quot;</span><span class="p">)</span>
+<a href="../auto_api/pyspecdata.html#pyspecdata.image" title="pyspecdata.image" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-function"><span class="n">image</span></a><span class="p">(</span><a href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata" class="sphx-glr-backref-module-pyspecdata sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">simulated_data</span></a><span class="p">)</span>
+
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_2DILT_002.png" srcset="../_images/sphx_glr_2DILT_002.png, ../_images/sphx_glr_2DILT_002_2_00x.png 2.00x" alt="BRD" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 16.252 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-2dilt-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/e9f1876d1fefabf377888329eee8c3e7/2DILT.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">2DILT.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/b31064db06627c7973fcf0ab6a9b17da/2DILT.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">2DILT.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/pyspec_path_equaltip.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../nddata.html">ND-Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fitdata.html">the lmfitdata class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of Modules and Sub-Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebook.html">LaTeX Notebook Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../figlist.html">The Figure List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../units.html">Units</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example Gallery</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">PySpecData Examples</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2016, John M. Franck.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/auto_examples/2DILT.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

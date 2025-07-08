@@ -2,15 +2,23 @@
 1D BRD regularization
 =====================
 
-for 1D BRD, adapted mainly from Venkataramanan 2002
-but checked against BRD 1981"""
+For 1D BRD, adapted mainly from Venkataramanan 2002
+but checked against a compiled stacked regularization
+that uses Lawson-Hansen.
 
-from matplotlib.pyplot import figure, show, title, legend, axvline
+Note that one of the unit tests essentially tests that this example
+behaves as expected.
+"""
+
+from matplotlib.pyplot import figure, show, title, legend, axvline, rcParams
 from numpy import linspace, exp, zeros, eye, logspace, r_, sqrt, pi, std
 from pylab import linalg
 from pyspecdata import nddata, init_logging, plot
 from scipy.optimize import nnls
 from numpy.random import seed
+
+rcParams["image.aspect"] = "auto"  # needed for sphinx gallery
+# sphinx_gallery_thumbnail_number = 2
 
 seed(1234)
 init_logging("debug")

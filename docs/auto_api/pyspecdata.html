@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>pyspecdata package &#8212; pySpecData 0.9.5.5.2 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=832af5b0" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css?v=7f9a90b1" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
@@ -176,6 +176,12 @@
 <li class="toctree-l3"><a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.prospa.t1_info"><code class="docutils literal notranslate"><span class="pre">t1_info()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="pyspecdata.load_files.html#module-pyspecdata.load_files.zenodo">pyspecdata.load_files.zenodo module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.zenodo.create_deposition"><code class="docutils literal notranslate"><span class="pre">create_deposition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.zenodo.zenodo_download"><code class="docutils literal notranslate"><span class="pre">zenodo_download()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.zenodo.zenodo_upload"><code class="docutils literal notranslate"><span class="pre">zenodo_upload()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="pyspecdata.load_files.html#module-pyspecdata.load_files">Module contents</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.find_file"><code class="docutils literal notranslate"><span class="pre">find_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="pyspecdata.load_files.html#pyspecdata.load_files.bruker_dir"><code class="docutils literal notranslate"><span class="pre">bruker_dir()</span></code></a></li>
@@ -202,17 +208,9 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pyspecdata.matrix_math.html#module-pyspecdata.matrix_math.nnls">pyspecdata.matrix_math.nnls module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="pyspecdata.matrix_math.html#pyspecdata.matrix_math.nnls.G"><code class="docutils literal notranslate"><span class="pre">G()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyspecdata.matrix_math.html#pyspecdata.matrix_math.nnls.H"><code class="docutils literal notranslate"><span class="pre">H()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyspecdata.matrix_math.html#pyspecdata.matrix_math.nnls.chi"><code class="docutils literal notranslate"><span class="pre">chi()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyspecdata.matrix_math.html#pyspecdata.matrix_math.nnls.d_chi"><code class="docutils literal notranslate"><span class="pre">d_chi()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyspecdata.matrix_math.html#pyspecdata.matrix_math.nnls.dd_chi"><code class="docutils literal notranslate"><span class="pre">dd_chi()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="pyspecdata.matrix_math.html#pyspecdata.matrix_math.nnls.demand_real"><code class="docutils literal notranslate"><span class="pre">demand_real()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyspecdata.matrix_math.html#pyspecdata.matrix_math.nnls.mod_BRD"><code class="docutils literal notranslate"><span class="pre">mod_BRD()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyspecdata.matrix_math.html#pyspecdata.matrix_math.nnls.newton_min"><code class="docutils literal notranslate"><span class="pre">newton_min()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="pyspecdata.matrix_math.html#pyspecdata.matrix_math.nnls.nnls"><code class="docutils literal notranslate"><span class="pre">nnls()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyspecdata.matrix_math.html#pyspecdata.matrix_math.nnls.optimize_alpha"><code class="docutils literal notranslate"><span class="pre">optimize_alpha()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyspecdata.matrix_math.html#pyspecdata.matrix_math.nnls.square_heaviside"><code class="docutils literal notranslate"><span class="pre">square_heaviside()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyspecdata.matrix_math.html#pyspecdata.matrix_math.nnls.venk_BRD"><code class="docutils literal notranslate"><span class="pre">venk_BRD()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pyspecdata.matrix_math.html#module-pyspecdata.matrix_math.svd">pyspecdata.matrix_math.svd module</a><ul>
@@ -925,11 +923,11 @@ indices, with the last being the copy of the first</p>
 For an introduction on how to use ND-Data, see the
 <a class="reference internal" href="../nddata.html#nddata-summary-label"><span class="std std-ref">Main ND-Data Documentation</span></a>.</p>
 <blockquote id="nddata-container-fig">
-<div><figure class="align-center" id="id104">
+<div><figure class="align-center" id="id60">
 <img alt="doc_src/_static/presentation_images/image69.png" src="doc_src/_static/presentation_images/image69.png" />
 <figcaption>
 <p><span class="caption-text">This annotated diagram highlights the attributes stored within an
-<code class="docutils literal notranslate"><span class="pre">nddata</span></code> instance and how they can be accessed.</span><a class="headerlink" href="#id104" title="Link to this image">¶</a></p>
+<code class="docutils literal notranslate"><span class="pre">nddata</span></code> instance and how they can be accessed.</span><a class="headerlink" href="#id60" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 </div></blockquote>
@@ -1637,16 +1635,16 @@ essentially telling the code that you
 know the data is not aliased in the
 inverse domain and/or are willing to
 deal with the consequences.</p>
-<figure class="align-center" id="id105">
+<figure class="align-center" id="id61">
 <img alt="../_images/image54.png" src="../_images/image54.png" />
 <figcaption>
-<p><span class="caption-text">Aliasing and axis registration applied to a simple Gaussian example.</span><a class="headerlink" href="#id105" title="Link to this image">¶</a></p>
+<p><span class="caption-text">Aliasing and axis registration applied to a simple Gaussian example.</span><a class="headerlink" href="#id61" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
-<figure class="align-center" id="id106">
+<figure class="align-center" id="id62">
 <img alt="../_images/image62.png" src="../_images/image62.png" />
 <figcaption>
-<p><span class="caption-text">Correcting the time origin in NMR greatly improves the phasing.</span><a class="headerlink" href="#id106" title="Link to this image">¶</a></p>
+<p><span class="caption-text">Correcting the time origin in NMR greatly improves the phasing.</span><a class="headerlink" href="#id62" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 </p></li>
@@ -1793,14 +1791,14 @@ The directory can be passed to the <cite>directory</cite> argument.</p>
 When reading this, please note that HDF5 files store <em>multiple</em>
 datasets,
 and each is named (here, the name is <cite>test_data</cite>).</p>
-<figure class="align-center" id="id107">
+<figure class="align-center" id="id63">
 <img alt="doc_src/_static/presentation_images/image39.png" src="doc_src/_static/presentation_images/image39.png" />
 <figcaption>
 <p><span class="caption-text">View of an HDF5 file with nddata arrays and metadata inside
-ViTables.</span><a class="headerlink" href="#id107" title="Link to this image">¶</a></p>
+ViTables.</span><a class="headerlink" href="#id63" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyspecdata</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="n">init_logging</span><span class="p">(</span><span class="s1">&#39;debug&#39;</span><span class="p">)</span>
 <span class="n">a</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">:</span><span class="mi">10</span><span class="n">j</span><span class="p">],</span> <span class="s1">&#39;x&#39;</span><span class="p">)</span>
 <span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s1">&#39;test_data&#39;</span><span class="p">)</span>
@@ -2085,91 +2083,8 @@ only use the light kwarg to generate a black and white shading display</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.core.nddata.nnls">
-<span class="sig-name descname"><span class="pre">nnls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimname_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newaxis_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_uncompressed_kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.nnls" title="Link to this definition">¶</a></dt>
-<dd><p>Perform regularized non-negative least-squares “fit” on self.</p>
-<p>Capable of solving for solution in 1 or 2 dimensions.</p>
-<p>We seek to minimize
-<span class="math notranslate nohighlight">\(Q = \| Ax - b \|_2 + \|\lambda x\|_2\)</span>
-in order to obtain solution vector <span class="math notranslate nohighlight">\(x\)</span> subject to non-negativity constraint
-given input matrix <span class="math notranslate nohighlight">\(A\)</span>, the kernel, and input vector <span class="math notranslate nohighlight">\(b\)</span>, the data.</p>
-<p>The first term assesses agreement between the fit <span class="math notranslate nohighlight">\(Ax\)</span> and the data <span class="math notranslate nohighlight">\(b\)</span>,
-and the second term accounts for noise with the regularization parameter <span class="math notranslate nohighlight">\(\lambda\)</span>
-according to Tikhonov regularization.</p>
-<p>To perform regularized minimization in 1 dimension, provide
-<a href="#id5"><span class="problematic" id="id6">:str:`dimname_list`</span></a>, <a href="#id7"><span class="problematic" id="id8">:nddata:`newaxis_dict`</span></a>, <a href="#id9"><span class="problematic" id="id10">:function:`kernel_func`</span></a>, and
-regularization parameter <cite>l</cite>. One may set <cite>l</cite> to a :double: of the regularization
-parameter of choice (found, for instance, through L-curve analysis) or
-set <cite>l</cite> to <a href="#id11"><span class="problematic" id="id12">:str:`BRD`</span></a> to enable automatic selection of a regularization
-parameter via the BRD algorithm - namely that described in Venkataramanan et al. 2002
-but adapted for 1D case (DOI:10.1109/78.995059).</p>
-<p>To perform regularized minimization in 2 dimensions, set <cite>l</cite> to
-<a href="#id13"><span class="problematic" id="id14">:str:`BRD`</span></a> and provide a tuple of parameters <a href="#id15"><span class="problematic" id="id16">:str:`dimname_list`</span></a>,
-<a href="#id17"><span class="problematic" id="id18">:nddata:`newaxis_dict`</span></a>, and <a href="#id19"><span class="problematic" id="id20">:function:`kernel_func`</span></a>.  Algorithm
-described in Venkataramanan et al. 2002 is performed which determines
-optimal <span class="math notranslate nohighlight">\(\lambda\)</span> for the data (DOI:10.1109/78.995059).
-Note that setting <cite>l</cite> to a :double: for a regularization
-parameter is supported in this 2 dimensional should an
-appropriate parameter be known.</p>
-<p>See: <a class="reference external" href="https://en.wikipedia.org/wiki/Non-negative_least_squares">Wikipedia page on NNLS</a>,
-<a class="reference external" href="https://en.wikipedia.org/wiki/Tikhonov_regularization">Wikipedia page on Tikhonov regularization</a></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dimname_list</strong> (<em>str</em><em> or </em><em>tuple</em>) – <p>Name of the “data” dimension that is to be replaced by a
-distribution (the “fit” dimension);
-<em>e.g.</em> if you are regularizing a set of functions
-<span class="math notranslate nohighlight">\(\exp(-\tau*R_1)\)</span>, then this is <span class="math notranslate nohighlight">\(\tau\)</span></p>
-<p>If you are performing 2D regularization, then this
-is a tuple (pair) of 2 names</p>
-</p></li>
-<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><em>(</em><em>tuple of</em><em>) </em><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata"><em>nddata</em></a>) – <p>a dictionary whose key is the name of the “fit” dimension
-(<span class="math notranslate nohighlight">\(R_1\)</span> in the example above)
-and whose value is an np.array with the new axis labels.</p>
-<p>OR</p>
-<p>this can be a 1D nddata
-– if it has an axis, the axis will be used to create the
-fit axis; if it has no axis, the data will be used</p>
-<p>OR</p>
-<p>if dimname_list is a tuple of 2 dimensions indicating a 2D ILT, this
-should also be a tuple of 2 nddata, representing the two axes</p>
-</p></li>
-<li><p><strong>kernel_func</strong> (<em>function</em><em> or </em><em>tuple</em><em> of </em><em>functions</em>) – <p>a function giving the kernel for the regularization.
-The first argument is the “data” variable
-and the second argument is the “fit” variable
-(in the example above, this would be something like
-<code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">x,y:</span> <span class="pre">exp(-x*y)</span></code>)</p>
-<p>For 2D, this must be a tuple or dictionary of functions – the kernel is
-the product of the two.</p>
-</p></li>
-<li><p><strong>l</strong> (<em>double</em><em> (</em><em>default 0</em><em>) or </em><em>str</em>) – the regularization parameter <span class="math notranslate nohighlight">\(lambda\)</span> – if this is
-set to 0, the algorithm reverts to standard nnls.  If this
-is set to <a href="#id21"><span class="problematic" id="id22">:str:`BRD`</span></a>, then automatic parameter selection is executed
-according to the BRD algorithm, either in 1-dimension or
-2-dimensions depending on presence of tuple synax
-(i.e., specifying more than 1 dimension).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><p>The regularized result.
-For future use, both the kernel (as an nddata, in a property called
-“nnls_kernel”) and the residual (as an nddata, in a property called
-“nnls_residual”) are stored as properties of the nddata.
-The regularized dimension is always last
-(innermost).</p>
-<p>If the tuple syntax is used to input 2 dimensions and
-<a href="#id23"><span class="problematic" id="id24">:str:`BRD`</span></a> is specified, then the individual,
-uncompressed kernels <span class="math notranslate nohighlight">\(K_{1}\)</span> and <span class="math notranslate nohighlight">\(K_{2}\)</span>
-are returned as properties of the nddata “K1” and “K2”
-respectively. The number of singular values used to
-compressed each kernel is returned in properties of the
-nddata called, respectively, “s1” and “s2”.</p>
-</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>self</p>
-</dd>
-</dl>
-</dd></dl>
+<span class="sig-name descname"><span class="pre">nnls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.nddata.nnls" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.core.nddata.normalize">
@@ -2432,7 +2347,7 @@ and then throw out the data for which <span class="math notranslate nohighlight"
 <p><cite>set_error(‘axisname’,error_for_axis)</cite> or <cite>set_error(error_for_data)</cite></p>
 <p><cite>error_for_data</cite> can be a scalar, in which case, <strong>all</strong> the data
 errors are set to <cite>error_for_data</cite></p>
-<div class="admonition-todo admonition" id="id25">
+<div class="admonition-todo admonition" id="id5">
 <p class="admonition-title">Todo</p>
 <p>several options below – enumerate them in the documentation</p>
 </div>
@@ -2742,7 +2657,7 @@ If you are using it when this note is still around, be sure to
 </div>
 <p>will be the same as <code class="docutils literal notranslate"><span class="pre">thisinstance</span></code>.
 Note that this relies on the fact that nddata matrix multiplication doesn’t care about the ordering
-of the dimensions (see <a href="#id26"><span class="problematic" id="id27">:method:`~pyspecdata.core.dot`</span></a>).
+of the dimensions (see <a href="#id6"><span class="problematic" id="id7">:method:`~pyspecdata.core.dot`</span></a>).
 The vector space that contains the singular values is called <cite>‘SV’</cite> (see more below).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2840,7 +2755,7 @@ or call <a class="reference internal" href="#pyspecdata.core.nddata_hdf5" title=
 arrays – see <a class="reference internal" href="#pyspecdata.core.ndshape.alloc" title="pyspecdata.core.ndshape.alloc"><code class="xref py py-func docutils literal notranslate"><span class="pre">alloc()</span></code></a>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.core.ndshape.alloc">
-<span class="sig-name descname"><span class="pre">alloc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'complex128'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.ndshape.alloc" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">alloc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.complex128'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format=0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.core.ndshape.alloc" title="Link to this definition">¶</a></dt>
 <dd><p>Use the shape object to allocate an empty nddata object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -3119,7 +3034,7 @@ variable set to <code class="docutils literal notranslate"><span class="pre">PYT
 that will guide you on how to selectively copy down this data from a
 remote source (google drive, etc.), <em>e.g.</em>:</p>
 <dl class="simple">
-<dt><a href="#id28"><span class="problematic" id="id29">``</span></a>Traceback (most recent call last):</dt><dd><dl class="simple">
+<dt><a href="#id8"><span class="problematic" id="id9">``</span></a>Traceback (most recent call last):</dt><dd><dl class="simple">
 <dt>File “proc_square_refl.py”, line 21, in &lt;module&gt;</dt><dd><p>directory=getDATADIR(exp_type=’test_equip’))</p>
 </dd>
 <dt>File “c:usersjohnfnotebookpyspecdatapyspecdatacore.py”, line 6630,</dt><dd><p>in __init__ check_only=True, directory=directory)</p>
@@ -3218,7 +3133,7 @@ method is changed)</p>
 etc.?)
 *   potential planned future ability to handle gnuplot</p></li>
 </ul>
-<div class="admonition-todo admonition" id="id30">
+<div class="admonition-todo admonition" id="id10">
 <p class="admonition-title">Todo</p>
 <p>Currently the “items” that the list tracks correspond to either plot
 formatting directives (see <a class="reference internal" href="#pyspecdata.figlist.figlist.setprops" title="pyspecdata.figlist.figlist.setprops"><code class="xref py py-func docutils literal notranslate"><span class="pre">figlist.setprops()</span></code></a>), text, or figures.</p>
@@ -3455,7 +3370,7 @@ current plot in the figurelist</p></li>
 <span class="sig-name descname"><span class="pre">A</span></span><a class="headerlink" href="#pyspecdata.figlist.figlist.A" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a> or numpy array</p>
+<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or numpy array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4153,7 +4068,7 @@ user forgets to pass the <cite>kwargs</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kwargs</strong> (<a href="#id31"><span class="problematic" id="id32">**</span></a>dictionary) – The keyword arguments that you want to process.</p></li>
+<li><p><strong>kwargs</strong> (<a href="#id11"><span class="problematic" id="id12">**</span></a>dictionary) – The keyword arguments that you want to process.</p></li>
 <li><p><strong>listoftuples</strong> (<em>list</em><em> of </em><em>tuple pairs</em>) – Tuple pairs, consisting of <code class="docutils literal notranslate"><span class="pre">('param_name',param_value)</span></code>, that give
 the default values for the various parameters.</p></li>
 <li><p><strong>pass_through</strong> (<em>bool</em>) – Defaults to False.  If it’s true, then it’s OK not to process all the
@@ -4162,7 +4077,7 @@ In that case, the used kwargs are popped out of the dictionary, and you
 are expected to pass the unprocessed values (in the dictionary after
 the call) on to subsequent processing.
 Importantly, you should <em>always</em> end with a <cite>pass_through`=`False</cite> call
-of this function, or by passing <a href="#id33"><span class="problematic" id="id34">**</span></a>kwargs to a standard function in the
+of this function, or by passing <a href="#id13"><span class="problematic" id="id14">**</span></a>kwargs to a standard function in the
 standard way.
 Otherwise it’s possible for the user to pass kwargs that are never
 processed!</p></li>
@@ -4275,12 +4190,12 @@ values being the corresponding Δp.</p></li>
 <dd><p>Draw random samples from a normal (Gaussian) distribution.</p>
 <p>The probability density function of the normal distribution, first
 derived by De Moivre and 200 years later by both Gauss and Laplace
-independently <a href="#id115"><span class="problematic" id="id35">[2]_</span></a>, is often called the bell curve because of
+independently <a href="#id71"><span class="problematic" id="id15">[2]_</span></a>, is often called the bell curve because of
 its characteristic shape (see the example below).</p>
 <p>The normal distributions occurs often in nature.  For example, it
 describes the commonly occurring distribution of samples influenced
 by a large number of tiny, random disturbances, each with its own
-unique distribution <a href="#id116"><span class="problematic" id="id36">[2]_</span></a>.</p>
+unique distribution <a href="#id72"><span class="problematic" id="id16">[2]_</span></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>New code should use the <cite>~numpy.random.Generator.normal</cite>
@@ -4325,17 +4240,17 @@ deviation. The square of the standard deviation, <span class="math notranslate n
 is called the variance.</p>
 <p>The function has its peak at the mean, and its “spread” increases with
 the standard deviation (the function reaches 0.607 times its maximum at
-<span class="math notranslate nohighlight">\(x + \sigma\)</span> and <span class="math notranslate nohighlight">\(x - \sigma\)</span> <a href="#id117"><span class="problematic" id="id37">[2]_</span></a>).  This implies that
+<span class="math notranslate nohighlight">\(x + \sigma\)</span> and <span class="math notranslate nohighlight">\(x - \sigma\)</span> <a href="#id73"><span class="problematic" id="id17">[2]_</span></a>).  This implies that
 normal is more likely to return samples lying close to the mean, rather
 than those far away.</p>
 <p class="rubric">References</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id38" role="doc-footnote">
+<aside class="footnote brackets" id="id18" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
 <p>Wikipedia, “Normal distribution”,
 <a class="reference external" href="https://en.wikipedia.org/wiki/Normal_distribution">https://en.wikipedia.org/wiki/Normal_distribution</a></p>
 </aside>
-<aside class="footnote brackets" id="id39" role="doc-footnote">
+<aside class="footnote brackets" id="id19" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
 <p>P. R. Peebles Jr., “Central Limit Theorem” in “Probability,
 Random Variables and Random Signal Principles”, 4th ed., 2001,
@@ -4359,7 +4274,7 @@ pp. 51, 51, 125.</p>
 </div>
 <p>Display the histogram of the samples, along with
 the probability density function:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">count</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">ignored</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="o">*</span>
 <span class="gp">... </span>               <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="o">-</span> <span class="p">(</span><span class="n">bins</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="p">),</span>
@@ -4623,11 +4538,11 @@ data of the original nddata.
 This functional form must be provided as a sympy expression, with
 one of its variables matching the name of the dimension that the
 user would like to fit to.</p>
-<figure class="align-center" id="id108">
+<figure class="align-center" id="id64">
 <img alt="doc_src/_static/presentation_images/image64.png" src="doc_src/_static/presentation_images/image64.png" />
 <figcaption>
 <p><span class="caption-text">A typical T₁ relaxation fit produced with <code class="docutils literal notranslate"><span class="pre">lmfitdata</span></code>.
-See the gallery for more complete examples.</span><a class="headerlink" href="#id108" title="Link to this image">¶</a></p>
+See the gallery for more complete examples.</span><a class="headerlink" href="#id64" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <dl class="py method">
@@ -4685,7 +4600,7 @@ fit</p>
 passed</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -4973,7 +4888,8 @@ and not return a figure list in the output</p>
 </section>
 <section id="module-pyspecdata.ndshape">
 <span id="pyspecdata-ndshape-module"></span><h2>pyspecdata.ndshape module<a class="headerlink" href="#module-pyspecdata.ndshape" title="Link to this heading">¶</a></h2>
-<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code> class allows you to allocate arrays and determine the shape of existing arrays.</p>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">ndshape</span></code> class allows you to allocate arrays and determine the
+shape of existing arrays.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyspecdata.ndshape.ndshape_base">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyspecdata.ndshape.</span></span><span class="sig-name descname"><span class="pre">ndshape_base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.ndshape.ndshape_base" title="Link to this definition">¶</a></dt>
@@ -4993,7 +4909,9 @@ and not return a figure list in the output</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.ndshape.ndshape_base.matchdims">
 <span class="sig-name descname"><span class="pre">matchdims</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.ndshape.ndshape_base.matchdims" title="Link to this definition">¶</a></dt>
-<dd><p>returns shape with [not in self, len 1] + [overlapping dims between arg + self] + [not in arg] –&gt; this is better accomplished by using sets as I do in the matchdims below</p>
+<dd><p>returns shape with [not in self, len 1] + [overlapping dims
+between arg + self] + [not in arg] –&gt; this is better accomplished
+by using sets as I do in the matchdims below</p>
 </dd></dl>
 
 <dl class="py method">
@@ -5376,26 +5294,27 @@ multiplication / dot product.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pyspecdata.MM_nnls">
-<span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">MM_nnls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimname_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newaxis_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_uncompressed_kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.MM_nnls" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.</span></span><span class="sig-name descname"><span class="pre">MM_nnls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nddata_cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimname_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newaxis_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_uncompressed_kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.MM_nnls" title="Link to this definition">¶</a></dt>
 <dd><p>Perform regularized non-negative least-squares “fit” on self.</p>
 <p>Capable of solving for solution in 1 or 2 dimensions.</p>
 <p>We seek to minimize
 <span class="math notranslate nohighlight">\(Q = \| Ax - b \|_2 + \|\lambda x\|_2\)</span>
-in order to obtain solution vector <span class="math notranslate nohighlight">\(x\)</span> subject to non-negativity constraint
-given input matrix <span class="math notranslate nohighlight">\(A\)</span>, the kernel, and input vector <span class="math notranslate nohighlight">\(b\)</span>, the data.</p>
-<p>The first term assesses agreement between the fit <span class="math notranslate nohighlight">\(Ax\)</span> and the data <span class="math notranslate nohighlight">\(b\)</span>,
-and the second term accounts for noise with the regularization parameter <span class="math notranslate nohighlight">\(\lambda\)</span>
-according to Tikhonov regularization.</p>
+in order to obtain solution vector <span class="math notranslate nohighlight">\(x\)</span> subject to non-negativity
+constraint given input matrix <span class="math notranslate nohighlight">\(A\)</span>, the kernel, and input vector
+<span class="math notranslate nohighlight">\(b\)</span>, the data.</p>
+<p>The first term assesses agreement between the fit <span class="math notranslate nohighlight">\(Ax\)</span> and the data
+<span class="math notranslate nohighlight">\(b\)</span>, and the second term accounts for noise with the regularization
+parameter <span class="math notranslate nohighlight">\(\lambda\)</span> according to Tikhonov regularization.</p>
 <p>To perform regularized minimization in 1 dimension, provide
-<a href="#id40"><span class="problematic" id="id41">:str:`dimname_list`</span></a>, <a href="#id42"><span class="problematic" id="id43">:nddata:`newaxis_dict`</span></a>, <a href="#id44"><span class="problematic" id="id45">:function:`kernel_func`</span></a>, and
-regularization parameter <cite>l</cite>. One may set <cite>l</cite> to a :double: of the regularization
-parameter of choice (found, for instance, through L-curve analysis) or
-set <cite>l</cite> to <a href="#id46"><span class="problematic" id="id47">:str:`BRD`</span></a> to enable automatic selection of a regularization
-parameter via the BRD algorithm - namely that described in Venkataramanan et al. 2002
-but adapted for 1D case (DOI:10.1109/78.995059).</p>
+<a href="#id20"><span class="problematic" id="id21">:str:`dimname_list`</span></a>, <a href="#id22"><span class="problematic" id="id23">:nddata:`newaxis_dict`</span></a>, <a href="#id24"><span class="problematic" id="id25">:function:`kernel_func`</span></a>, and
+regularization parameter <cite>l</cite>. One may set <cite>l</cite> to a :double: of the
+regularization parameter of choice (found, for instance, through L-curve
+analysis) or set <cite>l</cite> to <a href="#id26"><span class="problematic" id="id27">:str:`BRD`</span></a> to enable automatic selection of a
+regularization parameter via the BRD algorithm - namely that described in
+Venkataramanan et al. 2002 but adapted for 1D case (DOI:10.1109/78.995059).</p>
 <p>To perform regularized minimization in 2 dimensions, set <cite>l</cite> to
-<a href="#id48"><span class="problematic" id="id49">:str:`BRD`</span></a> and provide a tuple of parameters <a href="#id50"><span class="problematic" id="id51">:str:`dimname_list`</span></a>,
-<a href="#id52"><span class="problematic" id="id53">:nddata:`newaxis_dict`</span></a>, and <a href="#id54"><span class="problematic" id="id55">:function:`kernel_func`</span></a>.  Algorithm
+<a href="#id28"><span class="problematic" id="id29">:str:`BRD`</span></a> and provide a tuple of parameters <a href="#id30"><span class="problematic" id="id31">:str:`dimname_list`</span></a>,
+<a href="#id32"><span class="problematic" id="id33">:nddata:`newaxis_dict`</span></a>, and <a href="#id34"><span class="problematic" id="id35">:function:`kernel_func`</span></a>.  Algorithm
 described in Venkataramanan et al. 2002 is performed which determines
 optimal <span class="math notranslate nohighlight">\(\lambda\)</span> for the data (DOI:10.1109/78.995059).
 Note that setting <cite>l</cite> to a :double: for a regularization
@@ -5429,12 +5348,12 @@ The first argument is the “data” variable
 and the second argument is the “fit” variable
 (in the example above, this would be something like
 <code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">x,y:</span> <span class="pre">exp(-x*y)</span></code>)</p>
-<p>For 2D, this must be a tuple or dictionary of functions – the kernel is
-the product of the two.</p>
+<p>For 2D, this must be a tuple or dictionary of functions – the kernel
+is the product of the two.</p>
 </p></li>
 <li><p><strong>l</strong> (<em>double</em><em> (</em><em>default 0</em><em>) or </em><em>str</em>) – the regularization parameter <span class="math notranslate nohighlight">\(lambda\)</span> – if this is
 set to 0, the algorithm reverts to standard nnls.  If this
-is set to <a href="#id58"><span class="problematic" id="id59">:str:`BRD`</span></a>, then automatic parameter selection is executed
+is set to <a href="#id36"><span class="problematic" id="id37">:str:`BRD`</span></a>, then automatic parameter selection is executed
 according to the BRD algorithm, either in 1-dimension or
 2-dimensions depending on presence of tuple synax
 (i.e., specifying more than 1 dimension).</p></li>
@@ -5448,7 +5367,7 @@ For future use, both the kernel (as an nddata, in a property called
 The regularized dimension is always last
 (innermost).</p>
 <p>If the tuple syntax is used to input 2 dimensions and
-<a href="#id60"><span class="problematic" id="id61">:str:`BRD`</span></a> is specified, then the individual,
+<a href="#id38"><span class="problematic" id="id39">:str:`BRD`</span></a> is specified, then the individual,
 uncompressed kernels <span class="math notranslate nohighlight">\(K_{1}\)</span> and <span class="math notranslate nohighlight">\(K_{2}\)</span>
 are returned as properties of the nddata “K1” and “K2”
 respectively. The number of singular values used to
@@ -5484,7 +5403,7 @@ If you are using it when this note is still around, be sure to
 </div>
 <p>will be the same as <code class="docutils literal notranslate"><span class="pre">thisinstance</span></code>.
 Note that this relies on the fact that nddata matrix multiplication doesn’t care about the ordering
-of the dimensions (see <a href="#id62"><span class="problematic" id="id63">:method:`~pyspecdata.core.dot`</span></a>).
+of the dimensions (see <a href="#id40"><span class="problematic" id="id41">:method:`~pyspecdata.core.dot`</span></a>).
 The vector space that contains the singular values is called <cite>‘SV’</cite> (see more below).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -6853,9 +6772,9 @@ undefined behaviour.</p>
 undefined and specific to the choice of <cite>kind</cite>, i.e., changing
 <cite>kind</cite> will change the behavior for duplicates.</p>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">interpolate</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">/</span><span class="mf">3.0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
@@ -6873,8 +6792,8 @@ undefined and specific to the choice of <cite>kind</cite>, i.e., changing
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id64">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fill_value</span></span><a class="headerlink" href="#id64" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="id42">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fill_value</span></span><a class="headerlink" href="#id42" title="Link to this definition">¶</a></dt>
 <dd><p>The fill value.</p>
 </dd></dl>
 
@@ -6904,11 +6823,11 @@ data of the original nddata.
 This functional form must be provided as a sympy expression, with
 one of its variables matching the name of the dimension that the
 user would like to fit to.</p>
-<figure class="align-center" id="id109">
+<figure class="align-center" id="id65">
 <img alt="doc_src/_static/presentation_images/image64.png" src="doc_src/_static/presentation_images/image64.png" />
 <figcaption>
 <p><span class="caption-text">A typical T₁ relaxation fit produced with <code class="docutils literal notranslate"><span class="pre">lmfitdata</span></code>.
-See the gallery for more complete examples.</span><a class="headerlink" href="#id109" title="Link to this image">¶</a></p>
+See the gallery for more complete examples.</span><a class="headerlink" href="#id65" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <dl class="py method">
@@ -7171,7 +7090,7 @@ files that should be skipped</p>
 that will guide you on how to selectively copy down this data from a
 remote source (google drive, etc.), <em>e.g.</em>:</p>
 <dl class="simple">
-<dt><a href="#id65"><span class="problematic" id="id66">``</span></a>Traceback (most recent call last):</dt><dd><dl class="simple">
+<dt><a href="#id43"><span class="problematic" id="id44">``</span></a>Traceback (most recent call last):</dt><dd><dl class="simple">
 <dt>File “proc_square_refl.py”, line 21, in &lt;module&gt;</dt><dd><p>directory=getDATADIR(exp_type=’test_equip’))</p>
 </dd>
 <dt>File “c:usersjohnfnotebookpyspecdatapyspecdatacore.py”, line 6630,</dt><dd><p>in __init__ check_only=True, directory=directory)</p>
@@ -7327,7 +7246,7 @@ parameter.</p>
 ‘style cycle’. The <em>fmt</em> and line property parameters are only
 necessary if you want explicit deviations from these defaults.
 Alternatively, you can also change the style cycle using
-<a href="#id67"><span class="problematic" id="id68">:rc:`axes.prop_cycle`</span></a>.</p>
+<a href="#id45"><span class="problematic" id="id46">:rc:`axes.prop_cycle`</span></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -7616,12 +7535,12 @@ additionally use any  <cite>matplotlib.colors</cite> spec, e.g. full names
 <p>This is the detailed API reference.
 For an introduction on how to use ND-Data, see the
 <a class="reference internal" href="../nddata.html#nddata-summary-label"><span class="std std-ref">Main ND-Data Documentation</span></a>.</p>
-<blockquote id="id69">
-<div><figure class="align-center" id="id110">
+<blockquote id="id47">
+<div><figure class="align-center" id="id66">
 <img alt="doc_src/_static/presentation_images/image69.png" src="doc_src/_static/presentation_images/image69.png" />
 <figcaption>
 <p><span class="caption-text">This annotated diagram highlights the attributes stored within an
-<code class="docutils literal notranslate"><span class="pre">nddata</span></code> instance and how they can be accessed.</span><a class="headerlink" href="#id110" title="Link to this image">¶</a></p>
+<code class="docutils literal notranslate"><span class="pre">nddata</span></code> instance and how they can be accessed.</span><a class="headerlink" href="#id66" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 </div></blockquote>
@@ -8329,16 +8248,16 @@ essentially telling the code that you
 know the data is not aliased in the
 inverse domain and/or are willing to
 deal with the consequences.</p>
-<figure class="align-center" id="id111">
+<figure class="align-center" id="id67">
 <img alt="../_images/image54.png" src="../_images/image54.png" />
 <figcaption>
-<p><span class="caption-text">Aliasing and axis registration applied to a simple Gaussian example.</span><a class="headerlink" href="#id111" title="Link to this image">¶</a></p>
+<p><span class="caption-text">Aliasing and axis registration applied to a simple Gaussian example.</span><a class="headerlink" href="#id67" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
-<figure class="align-center" id="id112">
+<figure class="align-center" id="id68">
 <img alt="../_images/image62.png" src="../_images/image62.png" />
 <figcaption>
-<p><span class="caption-text">Correcting the time origin in NMR greatly improves the phasing.</span><a class="headerlink" href="#id112" title="Link to this image">¶</a></p>
+<p><span class="caption-text">Correcting the time origin in NMR greatly improves the phasing.</span><a class="headerlink" href="#id68" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 </p></li>
@@ -8411,7 +8330,7 @@ If no exact match is found, and propname contains a . or * or [,
 it’s assumed to be a regular expression.
 If several such matches are found, the error message is
 informative.</p>
-<div class="admonition-todo admonition" id="id71">
+<div class="admonition-todo admonition" id="id49">
 <p class="admonition-title">Todo</p>
 <p>have it recursively search dictionaries (e.g. bruker acq)</p>
 </div>
@@ -8485,14 +8404,14 @@ The directory can be passed to the <cite>directory</cite> argument.</p>
 When reading this, please note that HDF5 files store <em>multiple</em>
 datasets,
 and each is named (here, the name is <cite>test_data</cite>).</p>
-<figure class="align-center" id="id113">
+<figure class="align-center" id="id69">
 <img alt="doc_src/_static/presentation_images/image39.png" src="doc_src/_static/presentation_images/image39.png" />
 <figcaption>
 <p><span class="caption-text">View of an HDF5 file with nddata arrays and metadata inside
-ViTables.</span><a class="headerlink" href="#id113" title="Link to this image">¶</a></p>
+ViTables.</span><a class="headerlink" href="#id69" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspecdata</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyspecdata</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="n">init_logging</span><span class="p">(</span><span class="s1">&#39;debug&#39;</span><span class="p">)</span>
 <span class="n">a</span> <span class="o">=</span> <span class="n">nddata</span><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">:</span><span class="mi">10</span><span class="n">j</span><span class="p">],</span> <span class="s1">&#39;x&#39;</span><span class="p">)</span>
 <span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s1">&#39;test_data&#39;</span><span class="p">)</span>
@@ -8660,8 +8579,8 @@ axis values and returns a data value.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id72">
-<span class="sig-name descname"><span class="pre">labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id72" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="id50">
+<span class="sig-name descname"><span class="pre">labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id50" title="Link to this definition">¶</a></dt>
 <dd><p>label the dimensions, given in listofstrings with the axis labels
 given in listofaxes – listofaxes must be a numpy np.array; you can
 pass either a dictionary or a axis name (string)/axis label (numpy
@@ -8777,91 +8696,8 @@ only use the light kwarg to generate a black and white shading display</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.nddata.nnls">
-<span class="sig-name descname"><span class="pre">nnls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimname_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newaxis_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_uncompressed_kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.nnls" title="Link to this definition">¶</a></dt>
-<dd><p>Perform regularized non-negative least-squares “fit” on self.</p>
-<p>Capable of solving for solution in 1 or 2 dimensions.</p>
-<p>We seek to minimize
-<span class="math notranslate nohighlight">\(Q = \| Ax - b \|_2 + \|\lambda x\|_2\)</span>
-in order to obtain solution vector <span class="math notranslate nohighlight">\(x\)</span> subject to non-negativity constraint
-given input matrix <span class="math notranslate nohighlight">\(A\)</span>, the kernel, and input vector <span class="math notranslate nohighlight">\(b\)</span>, the data.</p>
-<p>The first term assesses agreement between the fit <span class="math notranslate nohighlight">\(Ax\)</span> and the data <span class="math notranslate nohighlight">\(b\)</span>,
-and the second term accounts for noise with the regularization parameter <span class="math notranslate nohighlight">\(\lambda\)</span>
-according to Tikhonov regularization.</p>
-<p>To perform regularized minimization in 1 dimension, provide
-<a href="#id73"><span class="problematic" id="id74">:str:`dimname_list`</span></a>, <a href="#id75"><span class="problematic" id="id76">:nddata:`newaxis_dict`</span></a>, <a href="#id77"><span class="problematic" id="id78">:function:`kernel_func`</span></a>, and
-regularization parameter <cite>l</cite>. One may set <cite>l</cite> to a :double: of the regularization
-parameter of choice (found, for instance, through L-curve analysis) or
-set <cite>l</cite> to <a href="#id79"><span class="problematic" id="id80">:str:`BRD`</span></a> to enable automatic selection of a regularization
-parameter via the BRD algorithm - namely that described in Venkataramanan et al. 2002
-but adapted for 1D case (DOI:10.1109/78.995059).</p>
-<p>To perform regularized minimization in 2 dimensions, set <cite>l</cite> to
-<a href="#id81"><span class="problematic" id="id82">:str:`BRD`</span></a> and provide a tuple of parameters <a href="#id83"><span class="problematic" id="id84">:str:`dimname_list`</span></a>,
-<a href="#id85"><span class="problematic" id="id86">:nddata:`newaxis_dict`</span></a>, and <a href="#id87"><span class="problematic" id="id88">:function:`kernel_func`</span></a>.  Algorithm
-described in Venkataramanan et al. 2002 is performed which determines
-optimal <span class="math notranslate nohighlight">\(\lambda\)</span> for the data (DOI:10.1109/78.995059).
-Note that setting <cite>l</cite> to a :double: for a regularization
-parameter is supported in this 2 dimensional should an
-appropriate parameter be known.</p>
-<p>See: <a class="reference external" href="https://en.wikipedia.org/wiki/Non-negative_least_squares">Wikipedia page on NNLS</a>,
-<a class="reference external" href="https://en.wikipedia.org/wiki/Tikhonov_regularization">Wikipedia page on Tikhonov regularization</a></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dimname_list</strong> (<em>str</em><em> or </em><em>tuple</em>) – <p>Name of the “data” dimension that is to be replaced by a
-distribution (the “fit” dimension);
-<em>e.g.</em> if you are regularizing a set of functions
-<span class="math notranslate nohighlight">\(\exp(-\tau*R_1)\)</span>, then this is <span class="math notranslate nohighlight">\(\tau\)</span></p>
-<p>If you are performing 2D regularization, then this
-is a tuple (pair) of 2 names</p>
-</p></li>
-<li><p><strong>newaxis_dict</strong> (<em>dict</em><em> or </em><em>(</em><em>tuple of</em><em>) </em><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata"><em>nddata</em></a>) – <p>a dictionary whose key is the name of the “fit” dimension
-(<span class="math notranslate nohighlight">\(R_1\)</span> in the example above)
-and whose value is an np.array with the new axis labels.</p>
-<p>OR</p>
-<p>this can be a 1D nddata
-– if it has an axis, the axis will be used to create the
-fit axis; if it has no axis, the data will be used</p>
-<p>OR</p>
-<p>if dimname_list is a tuple of 2 dimensions indicating a 2D ILT, this
-should also be a tuple of 2 nddata, representing the two axes</p>
-</p></li>
-<li><p><strong>kernel_func</strong> (<em>function</em><em> or </em><em>tuple</em><em> of </em><em>functions</em>) – <p>a function giving the kernel for the regularization.
-The first argument is the “data” variable
-and the second argument is the “fit” variable
-(in the example above, this would be something like
-<code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">x,y:</span> <span class="pre">exp(-x*y)</span></code>)</p>
-<p>For 2D, this must be a tuple or dictionary of functions – the kernel is
-the product of the two.</p>
-</p></li>
-<li><p><strong>l</strong> (<em>double</em><em> (</em><em>default 0</em><em>) or </em><em>str</em>) – the regularization parameter <span class="math notranslate nohighlight">\(lambda\)</span> – if this is
-set to 0, the algorithm reverts to standard nnls.  If this
-is set to <a href="#id91"><span class="problematic" id="id92">:str:`BRD`</span></a>, then automatic parameter selection is executed
-according to the BRD algorithm, either in 1-dimension or
-2-dimensions depending on presence of tuple synax
-(i.e., specifying more than 1 dimension).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><p>The regularized result.
-For future use, both the kernel (as an nddata, in a property called
-“nnls_kernel”) and the residual (as an nddata, in a property called
-“nnls_residual”) are stored as properties of the nddata.
-The regularized dimension is always last
-(innermost).</p>
-<p>If the tuple syntax is used to input 2 dimensions and
-<a href="#id93"><span class="problematic" id="id94">:str:`BRD`</span></a> is specified, then the individual,
-uncompressed kernels <span class="math notranslate nohighlight">\(K_{1}\)</span> and <span class="math notranslate nohighlight">\(K_{2}\)</span>
-are returned as properties of the nddata “K1” and “K2”
-respectively. The number of singular values used to
-compressed each kernel is returned in properties of the
-nddata called, respectively, “s1” and “s2”.</p>
-</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>self</p>
-</dd>
-</dl>
-</dd></dl>
+<span class="sig-name descname"><span class="pre">nnls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.nddata.nnls" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.nddata.normalize">
@@ -9124,7 +8960,7 @@ and then throw out the data for which <span class="math notranslate nohighlight"
 <p><cite>set_error(‘axisname’,error_for_axis)</cite> or <cite>set_error(error_for_data)</cite></p>
 <p><cite>error_for_data</cite> can be a scalar, in which case, <strong>all</strong> the data
 errors are set to <cite>error_for_data</cite></p>
-<div class="admonition-todo admonition" id="id95">
+<div class="admonition-todo admonition" id="id51">
 <p class="admonition-title">Todo</p>
 <p>several options below – enumerate them in the documentation</p>
 </div>
@@ -9434,7 +9270,7 @@ If you are using it when this note is still around, be sure to
 </div>
 <p>will be the same as <code class="docutils literal notranslate"><span class="pre">thisinstance</span></code>.
 Note that this relies on the fact that nddata matrix multiplication doesn’t care about the ordering
-of the dimensions (see <a href="#id96"><span class="problematic" id="id97">:method:`~pyspecdata.core.dot`</span></a>).
+of the dimensions (see <a href="#id52"><span class="problematic" id="id53">:method:`~pyspecdata.core.dot`</span></a>).
 The vector space that contains the singular values is called <cite>‘SV’</cite> (see more below).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -9537,7 +9373,7 @@ or call <a class="reference internal" href="#pyspecdata.nddata_hdf5" title="pysp
 arrays – see <a class="reference internal" href="#pyspecdata.ndshape.alloc" title="pyspecdata.ndshape.alloc"><code class="xref py py-func docutils literal notranslate"><span class="pre">alloc()</span></code></a>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.ndshape.alloc">
-<span class="sig-name descname"><span class="pre">alloc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'complex128'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.ndshape.alloc" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">alloc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.complex128'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format=0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.ndshape.alloc" title="Link to this definition">¶</a></dt>
 <dd><p>Use the shape object to allocate an empty nddata object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -9586,7 +9422,9 @@ dimension z)</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyspecdata.ndshape_base.matchdims">
 <span class="sig-name descname"><span class="pre">matchdims</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.ndshape_base.matchdims" title="Link to this definition">¶</a></dt>
-<dd><p>returns shape with [not in self, len 1] + [overlapping dims between arg + self] + [not in arg] –&gt; this is better accomplished by using sets as I do in the matchdims below</p>
+<dd><p>returns shape with [not in self, len 1] + [overlapping dims
+between arg + self] + [not in arg] –&gt; this is better accomplished
+by using sets as I do in the matchdims below</p>
 </dd></dl>
 
 <dl class="py method">
@@ -9720,7 +9558,7 @@ user forgets to pass the <cite>kwargs</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kwargs</strong> (<a href="#id98"><span class="problematic" id="id99">**</span></a>dictionary) – The keyword arguments that you want to process.</p></li>
+<li><p><strong>kwargs</strong> (<a href="#id54"><span class="problematic" id="id55">**</span></a>dictionary) – The keyword arguments that you want to process.</p></li>
 <li><p><strong>listoftuples</strong> (<em>list</em><em> of </em><em>tuple pairs</em>) – Tuple pairs, consisting of <code class="docutils literal notranslate"><span class="pre">('param_name',param_value)</span></code>, that give
 the default values for the various parameters.</p></li>
 <li><p><strong>pass_through</strong> (<em>bool</em>) – Defaults to False.  If it’s true, then it’s OK not to process all the
@@ -9729,7 +9567,7 @@ In that case, the used kwargs are popped out of the dictionary, and you
 are expected to pass the unprocessed values (in the dictionary after
 the call) on to subsequent processing.
 Importantly, you should <em>always</em> end with a <cite>pass_through`=`False</cite> call
-of this function, or by passing <a href="#id100"><span class="problematic" id="id101">**</span></a>kwargs to a standard function in the
+of this function, or by passing <a href="#id56"><span class="problematic" id="id57">**</span></a>kwargs to a standard function in the
 standard way.
 Otherwise it’s possible for the user to pass kwargs that are never
 processed!</p></li>
@@ -9822,10 +9660,10 @@ The basic scheme we assume is that:</p>
 Teams or Google Drive, etc.)</p></li>
 <li><p>The user wants to seamlessly access the data on their laptop.</p></li>
 </ul>
-<figure class="align-center" id="id114">
+<figure class="align-center" id="id70">
 <img alt="../_images/image38.jpeg" src="../_images/image38.jpeg" />
 <figcaption>
-<p><span class="caption-text">Bruker TopSpin interface showing a typical NMR directory.</span><a class="headerlink" href="#id114" title="Link to this image">¶</a></p>
+<p><span class="caption-text">Bruker TopSpin interface showing a typical NMR directory.</span><a class="headerlink" href="#id70" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>The <code class="docutils literal notranslate"><span class="pre">.pyspecdata</span></code> config file stores all the info about where the data
@@ -9913,7 +9751,7 @@ If <code class="docutils literal notranslate"><span class="pre">None</span></cod
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">S</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">S</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -9932,7 +9770,7 @@ If <code class="docutils literal notranslate"><span class="pre">None</span></cod
 </div>
 <p>This is because the two are not equal to each other in general.
 For example, consider x == -1:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">Eq</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Eq</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Eq</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">False</span>
 </pre></div>
@@ -9947,7 +9785,7 @@ positive:</p>
 </div>
 <p>You can force this simplification by using the powdenest() function with
 the force option set to True:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">powdenest</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">powdenest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
 <span class="go">sqrt(x**2)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">powdenest</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -9955,7 +9793,7 @@ the force option set to True:</p>
 </pre></div>
 </div>
 <p>To get both branches of the square root you can use the rootof function:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">rootof</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">rootof</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">rootof</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)]</span>
@@ -9964,7 +9802,7 @@ the force option set to True:</p>
 </div>
 <p>Although <code class="docutils literal notranslate"><span class="pre">sqrt</span></code> is printed, there is no <code class="docutils literal notranslate"><span class="pre">sqrt</span></code> function so looking for
 <code class="docutils literal notranslate"><span class="pre">sqrt</span></code> in an expression will fail:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sympy.utilities.misc</span> <span class="kn">import</span> <span class="n">func_name</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sympy.utilities.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">func_name</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">func_name</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 <span class="go">&#39;Pow&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="n">sqrt</span><span class="p">)</span>
@@ -9982,11 +9820,11 @@ the force option set to True:</p>
 </div>
 <p class="rubric">References</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id102" role="doc-footnote">
+<aside class="footnote brackets" id="id58" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/Square_root">https://en.wikipedia.org/wiki/Square_root</a></p>
 </aside>
-<aside class="footnote brackets" id="id103" role="doc-footnote">
+<aside class="footnote brackets" id="id59" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/Principal_value">https://en.wikipedia.org/wiki/Principal_value</a></p>
 </aside>

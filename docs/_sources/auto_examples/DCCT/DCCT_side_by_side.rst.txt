@@ -45,7 +45,6 @@ using the domain colored plotting style.
  .. code-block:: none
 
     ----------  logging output to /home/jmfranck/pyspecdata.0.log  ----------
-    Warning!!! FT clear startpoints is obsolete! use ft_new_startpoint instead
     1: Data
 
 
@@ -119,7 +118,7 @@ using the domain colored plotting style.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 9.541 seconds)
+   **Total running time of the script:** (0 minutes 3.360 seconds)
 
 
 .. _sphx_glr_download_auto_examples_DCCT_DCCT_side_by_side.py:

@@ -38,7 +38,7 @@ Using lmfitdata, fit a complex data set.
  .. code-block:: none
 
     ----------  logging output to /home/jmfranck/pyspecdata.0.log  ----------
-    --> fit_complex.py(25):pyspecdata.core             <module> 2025-01-22 14:37:23,110
+    --> fit_complex.py(25):pyspecdata.core             <module> 2025-07-08 14:53:47,023
     INFO: Functional Form: A*exp(-6.28318530717959*I*nu*t)*exp(-pi*R*Abs(t))
 
 
@@ -114,7 +114,7 @@ Using lmfitdata, fit a complex data set.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.455 seconds)
+   **Total running time of the script:** (0 minutes 0.506 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fit_complex.py:

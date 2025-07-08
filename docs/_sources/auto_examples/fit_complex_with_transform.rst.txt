@@ -51,7 +51,7 @@ things, such as masking, etc.
  .. code-block:: none
 
     ----------  logging output to /home/jmfranck/pyspecdata.0.log  ----------
-    --> fit_complex_with_transform.py(44):pyspecdata.core             <module> 2025-01-22 14:37:30,483
+    --> fit_complex_with_transform.py(44):pyspecdata.core             <module> 2025-07-08 14:55:10,132
     INFO: Functional Form: A*exp(-6.28318530717959*I*nu*(t - t_origin))*exp(-pi*R*Abs(t - t_origin))
 
 
@@ -155,7 +155,7 @@ things, such as masking, etc.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.086 seconds)
+   **Total running time of the script:** (0 minutes 0.971 seconds)
 
 
 .. _sphx_glr_download_auto_examples_fit_complex_with_transform.py:

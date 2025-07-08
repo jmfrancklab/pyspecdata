@@ -151,40 +151,6 @@ various functions.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Adapt one of the examples from lmfit to use sympy and pyspecdata. Eventually, we want to use pa...">
-
-.. only:: html
-
-  .. image:: /auto_examples/images/thumb/sphx_glr_fit_with_bounds_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_auto_examples_fit_with_bounds.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Fit Using Bounds</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Using lmfitdata, fit a complex data set.">
-
-.. only:: html
-
-  .. image:: /auto_examples/images/thumb/sphx_glr_fit_complex_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_auto_examples_fit_complex.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Fit complex data</div>
-    </div>
-
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="The case considered here is that of an NMR FID that has been acquired with a wider spectral wid...">
 
 .. only:: html
@@ -219,57 +185,6 @@ various functions.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="for 1D BRD, adapted mainly from Venkataramanan 2002 but checked against BRD 1981">
-
-.. only:: html
-
-  .. image:: /auto_examples/images/thumb/sphx_glr_BRD_test_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_auto_examples_BRD_test.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">1D BRD regularization</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Using lmfitdata, fit a complex data set.">
-
-.. only:: html
-
-  .. image:: /auto_examples/images/thumb/sphx_glr_fit_complex_with_transform_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_auto_examples_fit_complex_with_transform.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Fit complex data with transform</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="This example creates fake data with noise then fits the exponential with the fitdata function.">
-
-.. only:: html
-
-  .. image:: /auto_examples/images/thumb/sphx_glr_fit_fake_data_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_auto_examples_fit_fake_data.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Fitting Data (Nonlinear + Symbolic)</div>
-    </div>
-
-
-.. raw:: html
-
     </div>
 
 
@@ -284,13 +199,8 @@ various functions.
    /auto_examples/image_plot
    /auto_examples/temp
    /auto_examples/ppm_example
-   /auto_examples/fit_with_bounds
-   /auto_examples/fit_complex
    /auto_examples/basic_example
    /auto_examples/pcolor_example
-   /auto_examples/BRD_test
-   /auto_examples/fit_complex_with_transform
-   /auto_examples/fit_fake_data
 
 DCCT
 ----
@@ -410,6 +320,56 @@ Examples involving Bruker Electron Spin (Paramagnetic) Resonance Data.
 
     </div>
 
+Regularization
+--------------
+
+1, 1.5, and 2D regularization
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="2D ILT">
+
+.. only:: html
+
+  .. image:: /auto_examples/ILT/images/thumb/sphx_glr_2DILT_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_ILT_2DILT.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">2D ILT</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="For 1D BRD, adapted mainly from Venkataramanan 2002 but checked against a compiled stacked regu...">
+
+.. only:: html
+
+  .. image:: /auto_examples/ILT/images/thumb/sphx_glr_BRD_test_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_ILT_BRD_test.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">1D BRD regularization</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
 UV
 --
 
@@ -470,6 +430,90 @@ Reading Cary UV-Vis data and performing manipulations.
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">BSA UV-Vis Calibration</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+Fitting
+-------
+
+Classes that we have developed to make curve-fitting nicer.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Adapt one of the examples from lmfit to use sympy and pyspecdata. Eventually, we want to use pa...">
+
+.. only:: html
+
+  .. image:: /auto_examples/fitting/images/thumb/sphx_glr_fit_with_bounds_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_fitting_fit_with_bounds.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fit Using Bounds</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Using lmfitdata, fit a complex data set.">
+
+.. only:: html
+
+  .. image:: /auto_examples/fitting/images/thumb/sphx_glr_fit_complex_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_fitting_fit_complex.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fit complex data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Using lmfitdata, fit a complex data set.">
+
+.. only:: html
+
+  .. image:: /auto_examples/fitting/images/thumb/sphx_glr_fit_complex_with_transform_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_fitting_fit_complex_with_transform.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fit complex data with transform</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example creates fake data with noise then fits the exponential with the fitdata function.">
+
+.. only:: html
+
+  .. image:: /auto_examples/fitting/images/thumb/sphx_glr_fit_fake_data_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_fitting_fit_fake_data.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fitting Data (Nonlinear + Symbolic)</div>
     </div>
 
 
@@ -586,7 +630,9 @@ These are not very important -- just tests to verify the performance of individu
 
    /auto_examples/DCCT/index.rst
    /auto_examples/ESR/index.rst
+   /auto_examples/ILT/index.rst
    /auto_examples/UV/index.rst
+   /auto_examples/fitting/index.rst
    /auto_examples/indiv_funcs/index.rst
 
 

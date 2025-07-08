@@ -52,6 +52,14 @@ pyspecdata.load\_files.prospa module
    :undoc-members:
    :show-inheritance:
 
+pyspecdata.load\_files.zenodo module
+------------------------------------
+
+.. automodule:: pyspecdata.load_files.zenodo
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

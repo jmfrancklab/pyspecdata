@@ -59,9 +59,9 @@ We use this to demonstrate:
     1: initial spectrum |||mT
     2: u-domain |||kcyc · (T)$^{-1}$
 
-    --> _mathtext.py(648):matplotlib.mathtext           _get_glyph 2025-01-22 14:49:45,157
+    --> _mathtext.py(648):matplotlib.mathtext           _get_glyph 2025-07-08 14:55:19,900
     INFO: Substituting symbol F from STIXNonUnicode
-    --> _mathtext.py(648):matplotlib.mathtext           _get_glyph 2025-01-22 14:49:45,527
+    --> _mathtext.py(648):matplotlib.mathtext           _get_glyph 2025-07-08 14:55:20,252
     INFO: Substituting symbol F from STIXNonUnicode
 
 
@@ -102,7 +102,7 @@ We use this to demonstrate:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 7.081 seconds)
+   **Total running time of the script:** (0 minutes 0.692 seconds)
 
 
 .. _sphx_glr_download_auto_examples_ESR_epr_u_domain.py:

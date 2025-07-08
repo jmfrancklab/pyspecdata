@@ -1,26 +1,27 @@
+"""
+2D ILT
+======
+Here, we're going to provide a few demonstrations of the ILT functionality.
+Let's start with Fig 1.10 in A. Beaton's thesis, which is based off the
+figures in Venkataramanan.
+"""
+
 from pylab import (
     figure,
     title,
-    image,
     show,
     linspace,
     logspace,
     log10,
     exp,
     sqrt,
+    rcParams,
 )
 import numpy as np
-from pyspecdata import nddata
+from pyspecdata import nddata, image
 
-# Here, we're going to provide a few demonstrations of the ILT functionality.
-# Let's start with Fig 1.10 in A. Beaton's thesis, which is based off the
-# figures in Venkataramanan.
-#
-# pySpecData makes it easy to construct fake data like this. Typically this is
-# very easy, but here, we must contend with the fact that we are
-# memory-limited, so if we want a highly resolved fit basis, we need to chunk
-# up the calculation.  Nonetheless, pySpecData still makes that easy: let's see
-# how!
+rcParams["image.aspect"] = "auto"  # needed for sphinx gallery
+# sphinx_gallery_thumbnail_number = 2
 
 NT1 = 300  # Number of T1 values
 NT2 = 300  # Number of T2 values
@@ -61,11 +62,19 @@ tau2 = nddata(linspace(5.0e-4, 3.8, 1000), "tau2")
 
 simulated_data = (tau1.shape | tau2.shape).alloc(dtype=np.float64)
 
+# %%
+# pySpecData makes it easy to construct fake data like this. Typically this is
+# very easy, but here, we must contend with the fact that we are
+# memory-limited, so if we want a highly resolved fit basis, we need to chunk
+# up the calculation.  Nonetheless, pySpecData still makes that easy: let's see
+# how!
+#
 # Block sizes (tune to available RAM)
 
 bLT1 = 20
 bLT2 = 20
 
+# %%
 # Loop over LT1 and LT2 in blocks, vectorized over τ dims each time
 #
 # $$T_1 = 10^{\log(T_1)}$$
@@ -73,9 +82,9 @@ bLT2 = 20
 # $$\ln(R_1) = -\log(T_1) \ln(10)$$
 
 print(
-    "Generating the fake data is the most laborious part.  Because I am"
-    f" impatient I will count up to {LT1.shape[LT1_name]} ×"
-    f" {LT2.shape[LT2_name]}"
+    "Generating the fake data can take some time.  I need to loop a"
+    f" calculation in chunks over a {LT1.shape[LT1_name]} ×"
+    f" {LT2.shape[LT2_name]} grid"
 )
 for i in range(0, LT1.shape[LT1_name], bLT1):
     LT1_blk = LT1[LT1_name, slice(i, i + bLT1)]
@@ -100,7 +109,10 @@ simulated_data.add_noise(0.1)
 simulated_data /= 0.1
 
 
-# use BRD to find the value of $\lambda$
+# %%
+# Use BRD to find the value of $\lambda$ ($\alpha$).
+# Note that BRD assumes that you have scaled your data so that the stdev
+# of the noise is 1.0.
 
 simulated_data.nnls(
     ("tau1", "tau2"),

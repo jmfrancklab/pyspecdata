@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>pyspecdata.load_files package &#8212; pySpecData 0.9.5.5.2 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=832af5b0" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css?v=7f9a90b1" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
@@ -333,6 +333,59 @@ use dims=2 if it’s a 2D file</p>
 <dt class="sig sig-object py" id="pyspecdata.load_files.prospa.t1_info">
 <span class="sig-prename descclassname"><span class="pre">pyspecdata.load_files.prospa.</span></span><span class="sig-name descname"><span class="pre">t1_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.prospa.t1_info" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</section>
+<section id="module-pyspecdata.load_files.zenodo">
+<span id="pyspecdata-load-files-zenodo-module"></span><h2>pyspecdata.load_files.zenodo module<a class="headerlink" href="#module-pyspecdata.load_files.zenodo" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.load_files.zenodo.create_deposition">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.load_files.zenodo.</span></span><span class="sig-name descname"><span class="pre">create_deposition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.zenodo.create_deposition" title="Link to this definition">¶</a></dt>
+<dd><p>Create a new Zenodo deposition using <code class="docutils literal notranslate"><span class="pre">title</span></code>.</p>
+<p>The deposition will pre-reserve a DOI, set the upload type to
+<code class="docutils literal notranslate"><span class="pre">dataset</span></code> and mark today’s date as both the publication date and the
+availability date.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.load_files.zenodo.zenodo_download">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.load_files.zenodo.</span></span><span class="sig-name descname"><span class="pre">zenodo_download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deposition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">searchstring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.zenodo.zenodo_download" title="Link to this definition">¶</a></dt>
+<dd><p>Download the file from Zenodo <code class="docutils literal notranslate"><span class="pre">deposition</span></code> that matches
+<code class="docutils literal notranslate"><span class="pre">searchstring</span></code> and place it in the directory associated with
+<code class="docutils literal notranslate"><span class="pre">exp_type</span></code> using <code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>deposition</strong> (<em>str</em>) – Deposition identifier on Zenodo.</p></li>
+<li><p><strong>searchstring</strong> (<em>str</em>) – Regular expression used to search the file names inside the deposition.</p></li>
+<li><p><strong>exp_type</strong> (<em>str</em>) – Experiment type used to determine where the file should be stored via
+<code class="xref py py-func docutils literal notranslate"><span class="pre">getDATADIR()</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to the downloaded file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyspecdata.load_files.zenodo.zenodo_upload">
+<span class="sig-prename descclassname"><span class="pre">pyspecdata.load_files.zenodo.</span></span><span class="sig-name descname"><span class="pre">zenodo_upload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deposition_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyspecdata.load_files.zenodo.zenodo_upload" title="Link to this definition">¶</a></dt>
+<dd><p>Upload <code class="docutils literal notranslate"><span class="pre">local_path</span></code> to Zenodo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>local_path</strong> (<em>str</em>) – Path to the local file that will be uploaded.</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – Title of the deposition when creating a new one.  <code class="docutils literal notranslate"><span class="pre">title</span></code> must be
+provided if <code class="docutils literal notranslate"><span class="pre">deposition_id</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>deposition_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Existing deposition identifier.  If <code class="docutils literal notranslate"><span class="pre">None</span></code> a new deposition is
+created using <code class="docutils literal notranslate"><span class="pre">title</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 <section id="module-pyspecdata.load_files">
@@ -713,7 +766,7 @@ or else, <cite>None</cite>, indicating that this is part of a pair of
 files that should be skipped</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../pyspecdata.html#pyspecdata.nddata" title="pyspecdata.nddata">nddata</a> or None</p>
+<dd class="field-odd"><p><a class="reference internal" href="../generated/pyspecdata.core.nddata.html#pyspecdata.core.nddata" title="pyspecdata.core.nddata">nddata</a> or None</p>
 </dd>
 </dl>
 </dd></dl>
