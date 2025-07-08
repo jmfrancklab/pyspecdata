@@ -118,6 +118,40 @@ class ndshape_base ():
         self.shape = self.shape + shape
         self.dimlabels = self.dimlabels + dimlabels
         return self
+    def __or__(self, other):
+        r"""Combine two :class:`ndshape_base` objects.
+
+        The result contains the union of dimensions from ``self`` and
+        ``other``.  If both objects define a dimension with the same name
+        but different lengths a :class:`ValueError` is raised."""
+
+        if not isinstance(other, ndshape_base):
+            other = ndshape_base(other)
+
+        new_dimlabels = list(self.dimlabels)
+        new_shape = list(self.shape)
+
+        for label, length in zip(other.dimlabels, other.shape):
+            if label in new_dimlabels:
+                idx = new_dimlabels.index(label)
+                if new_shape[idx] != length:
+                    raise ValueError(
+                        strm(
+                            "dimension",
+                            label,
+                            "has conflicting lengths",
+                            new_shape[idx],
+                            "and",
+                            length,
+                        )
+                    )
+            else:
+                new_dimlabels.append(label)
+                new_shape.append(length)
+
+        return ndshape_base(new_shape, new_dimlabels)
+
+    __ror__ = __or__
     def __repr__(self): #how it responds to print
         return list(zip(self.shape,self.dimlabels)).__repr__()
     def __iter__(self):
