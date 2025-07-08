@@ -8,13 +8,16 @@
       double precision,allocatable :: c(:),c_new(:),grad(:),newgrad(:)
       double precision,allocatable :: G(:,:),h(:,:),hd(:,:),K0t(:)
       double precision,allocatable :: tempvec(:)
+      integer,allocatable :: piv(:)
       double precision :: alpha,alpha_new,sqrt_n
       double precision :: chi_old,chi_new,s,denom
       integer :: iter,j,k,info
+      external dgesv
       double precision :: norm_grad,norm_mr
       sqrt_n = sqrt(dble(m))
       alpha = 1.0d-3
       allocate(c(m),c_new(m),grad(m),newgrad(m),G(m,m),h(m,m),hd(m,1),K0t(n),tempvec(m))
+      allocate(piv(m))
       c = 1.0d0
       norm_mr = sqrt(sum(mr*mr))
       do iter=1,maxiter
@@ -25,7 +28,8 @@
             call compute_grad(G,c,m,alpha,mr,grad)
             ! IN: G,m,alpha OUT: H
             call add_diag(G,m,alpha,H)
-            call solve_linear(H,grad,hd(:,1),m)
+            ! IN: m, 1, m, m INOUT: H,hd(:,1) OUT: piv,info
+            call dgesv(m,1,H,m,piv,hd(:,1),m,info)
             tempvec = matmul(H,hd(:,1))
             denom = dot_product(hd(:,1),tempvec)
             if (denom == 0.d0) denom = 1.d-12
@@ -61,7 +65,7 @@
             f(j) = 0.d0
          end if
       end do
-      deallocate(c,c_new,grad,newgrad,G,H,hd,K0t,tempvec)
+      deallocate(c,c_new,grad,newgrad,G,H,hd,K0t,tempvec,piv)
       alpha_out = alpha_new
       return
       contains
