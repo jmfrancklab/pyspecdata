@@ -1,6 +1,6 @@
 import numpy as np
 import logging
-from numpy.core import records as rec
+from numpy import rec
 from .general_functions import strm
 
 logger = logging.getLogger("pyspecdata.dict_utils")
