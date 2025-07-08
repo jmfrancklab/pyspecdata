@@ -20,7 +20,7 @@
       allocate(c(m),c_new(m),grad(m),newgrad(m),delta(m),G(m,m),H(m,m),K0t(n),tempvec(m))
       allocate(piv(m))
       c = 1.0d0
-      norm_mr = sqrt(sum(mr*mr))
+      norm_mr = norm2(mr)
       do iter=1,maxiter
         do j=1,100
             ! IN: k0,m,n,c OUT: G,K0t
@@ -30,6 +30,7 @@
             ! IN: G,m,alpha OUT: H
             call add_diag(G,m,alpha,H)
             delta = grad
+            ! INOUT: H,delta; IN: m,piv; OUT: info
             call dgesv(m,1,H,m,piv,delta,m,info)
             tempvec = matmul(H,delta)
             denom = dot_product(delta,tempvec)
@@ -38,7 +39,9 @@
             c_new = c - s*delta
             ! IN: G,c_new,m,alpha,mr OUT: newgrad
             call compute_grad(G,c_new,m,alpha,mr,newgrad)
+            ! IN: c,G,alpha,mr OUT: chi_old
             call chi_func(c,G,alpha,mr,chi_old)
+            ! IN: c_new,G,alpha,mr OUT: chi_new
             call chi_func(c_new,G,alpha,mr,chi_new)
             k=0
             do while (chi_new >= chi_old .and. k < 20)
@@ -46,14 +49,15 @@
                c_new = c - s*(0.5d0**k)*delta
                ! IN: G,c_new,m,alpha,mr OUT: newgrad
                call compute_grad(G,c_new,m,alpha,mr,newgrad)
+               ! IN: c_new,G,alpha,mr OUT: chi_new
                call chi_func(c_new,G,alpha,mr,chi_new)
             end do
             c = c_new
             grad = newgrad
-            norm_grad = sqrt(sum(grad*grad))
+            norm_grad = norm2(grad)
             if (norm_grad/norm_mr < 1.d-8) exit
          end do
-         alpha_new = sqrt_n / sqrt(sum(c*c))
+         alpha_new = sqrt_n / norm2(c)
 !         write(*,*) 'alpha iteration', iter, 'value', alpha_new
          if (abs(alpha_new-alpha)/alpha < tol) exit
          alpha = alpha_new
@@ -80,6 +84,7 @@
             do p=1,n
                k0t(p) = dot_product(k0(:,p),c)
                if (k0t(p) > 0.d0) then
+                  ! IN: k0(:,p) INOUT: G
                   call add_outer(k0(:,p),G)
                end if
             end do
