@@ -11,8 +11,9 @@ logger = logging.getLogger("pyspecdata.matrix_math")
 
 
 def venk_BRD(initial_α, K_0, mvec, tol=1e-6, maxiter=100):
-    """Wrapper calling the compiled Butler-Reeds-Dawson algorithm."""
-    f, alpha_new = _nnls.venk_brd(initial_α, K_0, mvec, tol, maxiter)
+    """Wrapper calling the compiled Butler–Reeds–Dawson algorithm."""
+    K_fortran = np.asfortranarray(K_0)
+    f, alpha_new = _nnls.venk_brd(initial_α, K_fortran, mvec, tol, maxiter)
     return f, alpha_new
 
 
