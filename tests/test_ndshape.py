@@ -58,7 +58,7 @@ def test_or_overlapping_equal():
     s1 = ns.ndshape([3, 5], ["x", "y"])
     s2 = ns.ndshape([3, 6], ["x", "z"])
     s3 = s1 | s2
-    assert type(s3) == ns.ndshape
+    assert type(s3) is ns.ndshape
     assert s3.shape == [3, 5, 6]
     assert s3.dimlabels == ["x", "y", "z"]
 
