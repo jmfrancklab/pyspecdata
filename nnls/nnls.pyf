@@ -47,6 +47,18 @@ python module _nnls ! in
             integer intent(in) :: maxiter
             double precision intent(in) :: lambda
         end subroutine nnls_regularized_loop
+        subroutine venk_brd(initial_alpha,k0,m,n,mr,f,alpha_out,tol,maxiter) ! in :_nnls:venk_brd.f90
+            threadsafe
+            double precision intent(in) :: initial_alpha
+            double precision dimension(m,n),intent(in) :: k0
+            integer, optional,intent(in),check(shape(k0,0)==m),depend(k0) :: m=shape(k0,0)
+            integer, optional,intent(in),check(shape(k0,1)==n),depend(k0) :: n=shape(k0,1)
+            double precision dimension(m),intent(in) :: mr
+            double precision dimension(n),intent(out) :: f
+            double precision intent(out) :: alpha_out
+            double precision intent(in) :: tol
+            integer intent(in) :: maxiter
+        end subroutine venk_brd
     end interface 
 end python module _nnls
 

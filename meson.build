@@ -61,6 +61,7 @@ nnls_extension = py.extension_module(
     'nnls/nnls.f',
     'nnls/nnls_regularized.f90',
     'nnls/nnls_regularized_loop.f90',
+    'nnls/venk_brd.f90',
   ],
   include_directories: include_directories(numpy_include_dir),
   install: true,
