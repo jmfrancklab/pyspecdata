@@ -169,7 +169,7 @@ def nnls(
                 type(self),
             )
         )
-    logger.info("argcheck done")
+    logger.debug("argcheck done")
     # make sure axes are real
     for j in dimname_list:
         demand_real(
@@ -288,7 +288,7 @@ def nnls(
         s[j] = np.where(S[j] > default_cut * S[j][0])[0][
             -1
         ]  # JF changed this and following -- should be relative
-        logger.info(
+        logger.debug(
             strm(
                 f"S{j + 1} is",
                 S[j],
@@ -320,7 +320,7 @@ def nnls(
         K_alldims = K_alldims.reshape(
             K[0].shape[0] * K[1].shape[0], K[0].shape[1] * K[1].shape[1]
         )
-        logger.info(
+        logger.debug(
             strm(
                 "Compressed K, K1, and K2:",
                 [x.shape for x in (K_alldims, K[0], K[1])],
@@ -367,7 +367,7 @@ def nnls(
     if type(l) is str and l == "BRD":
         # Automatic BRD parameter selection without stacking identity
         # 1) Compute optimal f⃗ᵣ and λ via venk_BRD
-        logger.info(
+        logger.debug(
             "about to run venk" + strm(K_alldims.shape, data_fornnls.shape)
         )
         retval, l = venk_BRD(1e-2, K_alldims, data_fornnls)

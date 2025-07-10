@@ -115,7 +115,7 @@ plt.rcParams["ytick.direction"] = "out"
 # rcParams['font.size'] = 6
 plt.rcParams["axes.grid"] = False
 plt.rcParams["image.cmap"] = "jet"
-plt.rcParams["figure.figsize"] = (7 * (1 + np.sqrt(5)) / 2, 7)
+plt.rcParams["figure.figsize"] = (plt.rcParams["figure.figsize"][0] , plt.rcParams["figure.figsize"][0] / (1 + np.sqrt(5)) * 2)
 mat2array = [
     {"ImmutableMatrix": np.array},
     "numpy",
