@@ -107,7 +107,8 @@ def nnls_regularized(A, b, l=0, maxiter=None):
             if len(b.shape) == 2:
                 logger.debug(
                     "about to execute a regularized fit in a loop using the"
-                    " nnls_regularized_loop routine"
+                    " nnls_regularized_loop routine (because this is 1.5D or"
+                    " 2.5D data)"
                 )
                 x, rnorm, mode = _nnls.nnls_regularized_loop(
                     A, redim_C_to_F(b), w, zz, index, maxiter, l

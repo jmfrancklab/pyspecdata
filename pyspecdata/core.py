@@ -120,6 +120,8 @@ mat2array = [
     {"ImmutableMatrix": np.array},
     "numpy",
 ]  # for sympy returns arrays rather than the stupid matrix class
+# supress annoying matplotlib messages!
+logging.getLogger('matplotlib.mathtext').setLevel(logging.WARNING)
 logger = logging.getLogger("pyspecdata.core")
 # {{{ constants
 k_B = 1.380648813e-23

@@ -99,7 +99,8 @@ def pcolormesh(
         mappable_list.append(mappable)
         thisax.set_ylabel(forplot.unitify_axis(forplot.dimlabels[0]))
         thisax.set_xlabel(forplot.unitify_axis(forplot.dimlabels[1]))
-        thisax.set_title(f"({thislabel})")
+        if len(ax_list) > 1:
+            thisax.set_title(f"({thislabel})")
         # {{{ handle the creation of colorbars here, since adjusting the
         #     mappable clim later changes the colorbars just fine
         if j == 0:

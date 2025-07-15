@@ -47,6 +47,8 @@ def along(self, dimname, rename_redundant=None):
         self._rename_redundant = rename_redundant
         assert self._rename_redundant[0] in self.dimlabels
     return self
+
+
 def dot(self, arg):
     """This will perform a dot product or a matrix multiplication.
     If one dimension in ``arg`` matches that in ``self``,
@@ -113,13 +115,11 @@ def dot(self, arg):
         del self._rename_redundant
     else:
         rename_redundant = ["XXXRENAMED", "XXXRENAMED"]
-    uninvolved_dims = [
-        [
-            rename_redundant[1] if j == rename_redundant[0] else j
-            for j in self.dimlabels
-            if j != dot_dim_self
-        ]
-    ]
+    uninvolved_dims = [[
+        rename_redundant[1] if j == rename_redundant[0] else j
+        for j in self.dimlabels
+        if j != dot_dim_self
+    ]]
     uninvolved_dims += [[j for j in arg.dimlabels if j != dot_dim_arg]]
     mult_dims = [[dot_dim_self], [dot_dim_arg]]
     # {{{ dimensions involved in multiplication must not be
@@ -153,7 +153,9 @@ def dot(self, arg):
         if axis_coords_error_dict[j] is None:
             assert arg_axis_coords_error_dict[j] is None
         else:
-            assert all(axis_coords_error_dict[j] == arg_axis_coords_error_dict[j])
+            assert all(
+                axis_coords_error_dict[j] == arg_axis_coords_error_dict[j]
+            )
     info_needed_from_arg = (
         (
             set(uninvolved_dims[0])
@@ -270,15 +272,19 @@ def dot(self, arg):
     logger.debug(strm("ndshape", self.shape))
     time_dotfinish = time.time()
     logger.debug(
-        f"initial took {(time_matmulstart-time_dotstart)*1e6:0.2f} μs, matmul {(time_matmulfinish-time_matmulstart)*1e6:0.2f} μs, finish {(time_dotfinish-time_matmulfinish)*1e6:0.2f} μs "
+        f"initial took {(time_matmulstart-time_dotstart)*1e6:0.2f} μs, matmul"
+        f" {(time_matmulfinish-time_matmulstart)*1e6:0.2f} μs, finish"
+        f" {(time_dotfinish-time_matmulfinish)*1e6:0.2f} μs "
     )
     return self
 
 
 # @profile
 def matmul(self, arg):
-    assert type(arg) is type(
-        self
-    ), "currently matrix multiplication only allowed if both are nddata"
+    cls1, cls2 = type(arg), type(self)
+    assert cls1 is cls2 or issubclass(cls1, cls2) or issubclass(cls2, cls1), (
+        "currently matrix multiplication only allowed if both are nddata"
+        f" however, the argument is {type(arg)} and self is {type(self)}"
+    )
     logger.debug("about to call dot")
     return self.C.dot(arg)

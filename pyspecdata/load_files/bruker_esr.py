@@ -100,6 +100,11 @@ def xepr(filename, exp_type=None, dimname='', verbose=False):
     if n_harmonics > 1:
         logger.debug('there are %d harmonics, first is of type %s'%(n_harmonics,ikkf[0]))
     # }}}
+    # {{{ fix redundant naming
+    if 'YNAM' in v.keys() and 'XNAM' in v.keys() and v['YNAM'] == v['XNAM'] == 'Time':
+        v['YNAM'] = 't1'
+        v['XNAM'] = 't2'
+    # }}}
     # {{{ check that calculated axes match dimensions
     y_points_calcd = len(data)//x_points//n_harmonics
     if 'XNAM' in list(v.keys()):
@@ -172,6 +177,11 @@ def xepr(filename, exp_type=None, dimname='', verbose=False):
                     y_axis = fp.read()
                 y_axis = np.fromstring(y_axis,'>f8')
                 assert len(y_axis)==y_points_calcd, "Length of the power axis doesn't seem to match!"
+            if v['YTYP'] == 'IDX':
+                temp = v.pop('YMIN')
+                y_axis = np.linspace(temp,temp+v.pop('YWID'),v.pop('YPTS'))
+                y_dim_name = v.pop('YNAM')
+                assert len(y_axis)==y_points_calcd, "Length of the y axis doesn't seem to match!"
             else:
                 raise ValueError(strm("found YTYP=",v['YTYP']," which is not currently programmed"))
         else:
