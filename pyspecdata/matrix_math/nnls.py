@@ -15,6 +15,12 @@ def venk_BRD(initial_α, K_0, mvec, tol=1e-3, maxiter=100):
     f, alpha_new = _nnls.venk_brd(initial_α, K_0, mvec, tol, maxiter)
     return f, alpha_new
 
+def venk_nnls(α, K_0, mvec):
+    """Wrapper calling the compiled Butler-Reeds-Dawson algorithm."""
+    c = np.ones(K_0.shape[0])
+    f, alpha_new = _nnls.venk_brd(K_0, mvec, c, α)
+    return f, alpha_new
+
 
 def demand_real(x, addtxt=""):
     if not x.dtype == np.float64:

@@ -49,7 +49,7 @@
     double precision :: chi_old,chi_new,s,denom,norm_grad
     external dgesv
     allocate(delta_c(n), tempvec(m))
-    allocate(g_mat(m,m),c_new(m),grad(m),newgrad(m),h_mat(m,m),h_mat_copy(m,m),k0_t(n),piv(m),delta_c(m))
+    allocate(g_mat(m,m),c_new(m),grad(m),newgrad(m),h_mat(m,m),h_mat_copy(m,m),k0_t(n),piv(m))
     do j=1,100
       ! IN: k0_mat,m,n,c OUT: g_mat,k0_t
       call compute_g(k0_mat,m,n,c,g_mat,k0_t)
@@ -110,6 +110,17 @@
         call add_outer(k0_mat(:,p),g_mat)
       end if
     end do
+    contains
+      subroutine add_outer(col,a_mat)
+        double precision,intent(in)::col(:)
+        double precision,intent(inout)::a_mat(:,:)
+        integer :: i,j
+        do i=1,size(col)
+          do j=1,size(col)
+            a_mat(i,j) = a_mat(i,j) + col(i)*col(j)
+          end do
+        end do
+      end subroutine add_outer
   end subroutine compute_g
   subroutine compute_grad(g_mat,c,m,alpha,m_r,grad)
     integer,intent(in)::m
