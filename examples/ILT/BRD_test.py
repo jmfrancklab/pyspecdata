@@ -14,6 +14,7 @@ from matplotlib.pyplot import figure, show, title, legend, axvline, rcParams
 from numpy import linspace, exp, zeros, eye, logspace, r_, sqrt, pi, std
 from pylab import linalg
 from pyspecdata import nddata, init_logging, plot
+from pyspecdata.matrix_math.nnls import venk_nnls
 from scipy.optimize import nnls
 from numpy.random import seed
 
@@ -61,6 +62,13 @@ solution_confirm = M.C.nnls(
     logT1,
     lambda x, y: 1 - 2 * exp(-x / 10 ** (y)),
     l=sqrt(solution.get_prop("opt_alpha")),
+)
+solution_venk = M.C.nnls(
+    "vd",
+    logT1,
+    lambda x, y: 1 - 2 * exp(-x / 10 ** (y)),
+    l=sqrt(solution.get_prop("opt_alpha")),
+    method=venk_nnls,
 )
 
 
@@ -130,6 +138,7 @@ plot(
     label=rf"manual BRD $\alpha={solution.get_prop('opt_alpha'):#0.2g}$",
     alpha=0.5,
 )
+plot(solution_venk, label="venk_nnls")
 print(
     "BRD mean:",
     solution.C.mean(t1_name).item(),
