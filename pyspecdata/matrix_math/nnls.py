@@ -10,10 +10,40 @@ logger = logging.getLogger("pyspecdata.matrix_math")
 # {{{ local functions
 
 
-def venk_BRD(initial_α, K_0, mvec, tol=1e-3, maxiter=100):
+def venk_BRD(initial_α, K_0, mvec, tol=1e-3, maxiter=300):
     """Wrapper calling the compiled Butler-Reeds-Dawson algorithm."""
     f, alpha_new = _nnls.venk_brd(initial_α, K_0, mvec, tol, maxiter)
     return f, alpha_new
+
+
+def venk_nnls(K_0, mvec, l):
+    r"""Use the BRD NNLS routine for a given ``lambda`` value.
+
+    Parameters
+    ----------
+    K_0 : ndarray
+        Kernel matrix ``A``.
+    mvec : ndarray
+        Data vector ``b``.
+    l : float
+        Regularization parameter :math:`\lambda`.
+
+    Returns
+    -------
+    tuple(ndarray, ndarray)
+        The solution vector and residual ``A·x - b``.
+    """
+    c = np.ones(K_0.shape[0])
+    for j in range(20):
+        # re-run to make c is converged
+        old_c = c.copy()
+        _nnls.venk_nnls(K_0, mvec, c, l**2)
+        if np.linalg.norm(c - old_c) / np.linalg.norm(c) < 1e-5:
+            break
+    f = K_0.T.dot(c)
+    f[f < 0] = 0
+    residual = K_0.dot(f) - mvec
+    return f, residual
 
 
 def demand_real(x, addtxt=""):
@@ -22,12 +52,17 @@ def demand_real(x, addtxt=""):
             raise ValueError(
                 "you are not allows to pass nnls complex data:\nif it makes"
                 " sense for you, try yourdata.real.nnls( np.where you now have"
-                " yourdata.nnls(" + "\n" + addtxt
+                " yourdata.nnls("
+                + "\n"
+                + addtxt
             )
         else:
             raise ValueError(
                 "I expect double-precision floating point (float64), but you"
-                " passed me data of dtype " + str(x.dtype) + "\n" + addtxt
+                " passed me data of dtype "
+                + str(x.dtype)
+                + "\n"
+                + addtxt
             )
 
 
@@ -41,6 +76,7 @@ def nnls(
     l=0,
     default_cut=1e-3,
     store_uncompressed_kernel=False,
+    method=None,
 ):
     r"""Perform regularized non-negative least-squares "fit" on self.
 
@@ -119,6 +155,9 @@ def nnls(
         according to the BRD algorithm, either in 1-dimension or
         2-dimensions depending on presence of tuple synax
         (i.e., specifying more than 1 dimension).
+    method : callable, optional
+        Function to compute the regularized solution when ``l`` is not
+        ``"BRD"``.  Defaults to :func:`pyspecdata.nnls.nnls_regularized`.
 
     Returns
     =======
@@ -176,24 +215,26 @@ def nnls(
             self.getaxis(j), "(this message pertains to the %s axis)" % j
         )
     for j in newaxis_dict:
-        assert len(j.dimlabels) == 1, (
-            "must be one-dimensional, has dimensions:" + str(j.dimlabels)
-        )
+        assert (
+            len(j.dimlabels) == 1
+        ), "must be one-dimensional, has dimensions:" + str(j.dimlabels)
         if j.getaxis(j.dimlabels[0]) is not None:
             demand_real(
                 j.getaxis(j.dimlabels[0]),
                 "(this message pertains to the new %s axis pulled from the"
-                " second argument's axis)" % str(j.dimlabels[0]),
+                " second argument's axis)"
+                % str(j.dimlabels[0]),
             )
         demand_real(
             j.data,
             "(this message pertains to the new %s axis pulled from the second"
-            " argument's data)" % str(j.dimlabels[0]),
+            " argument's data)"
+            % str(j.dimlabels[0]),
         )
     if isinstance(kernel_func, tuple):
-        assert callable(kernel_func[0]) and callable(kernel_func[1]), (
-            "third argument is tuple of kernel functions"
-        )
+        assert callable(kernel_func[0]) and callable(
+            kernel_func[1]
+        ), "third argument is tuple of kernel functions"
     elif isinstance(kernel_func, dict):
         kernel_func = [kernel_func[j] for j in dimname_list]
         assert all([callable(j) for j in kernel_func])
@@ -376,9 +417,13 @@ def nnls(
         residual = K_alldims.dot(retval) - data_fornnls
         # Replace l with the chosen λ for downstream recording
     else:
+        if method is None:
+            method = this_nnls.nnls_regularized
         logger.debug(
             strm(
-                "I'm preparing to call nnls_regularized with kernel dtype",
+                "I'm preparing to call",
+                getattr(method, "__name__", str(method)),
+                "with kernel dtype",
                 K_alldims.dtype,
                 "and shape",
                 K_alldims.shape,
@@ -388,9 +433,12 @@ def nnls(
                 data_fornnls.shape,
             )
         )
-        retval, residual = this_nnls.nnls_regularized(
-            K_alldims, data_fornnls, l=l
-        )
+        result = method(K_alldims, data_fornnls, l=l)
+        if isinstance(result, tuple):
+            retval, residual = result
+        else:
+            retval = result
+            residual = K_alldims.dot(retval) - data_fornnls
     logger.debug(
         strm("coming back from fortran, residual type is", type(residual))
         + strm(residual.dtype if isinstance(residual, np.ndarray) else "")
