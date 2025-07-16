@@ -47,12 +47,15 @@ def test_highlevel_nnls():
     solution = M.C.nnls(
         "vd", logT1, lambda x, y: 1 - 2 * exp(-x / 10 ** (y)), l="BRD"
     )
-    solution_confirm = M.C.nnls(
+    solution_stackcalc = M.C.nnls(
         "vd",
         logT1,
         lambda x, y: 1 - 2 * exp(-x / 10 ** (y)),
         l=sqrt(solution.get_prop("opt_alpha")),
     )
+    diff = np.linalg.norm(solution.data - solution_stackcalc.data)
+    assert diff < 0.01 * np.linalg.norm(solution.data)
+
     solution_venk = M.C.nnls(
         "vd",
         logT1,
@@ -60,11 +63,10 @@ def test_highlevel_nnls():
         l=sqrt(solution.get_prop("opt_alpha")),
         method=matrix_nnls.venk_nnls,
     )
-
-    diff = np.linalg.norm(solution.data - solution_confirm.data)
-    assert diff < 0.01 * np.linalg.norm(solution.data)
-    diff2 = np.linalg.norm(solution_confirm.data - solution_venk.data)
-    assert diff2 < 0.18 * np.linalg.norm(solution_confirm.data)
+    diff = np.linalg.norm(solution_stackcalc.data - solution_venk.data)
+    assert diff < 0.054 * np.linalg.norm(
+        solution_stackcalc.data
+    ), f"venk diff is {diff/np.linalg.norm(solution_stackcalc.data)}"
 
     max_log_T1 = logT1.data[np.argmax(solution.data)]
     avg_log_T1 = np.average(logT1.data, weights=solution.data)

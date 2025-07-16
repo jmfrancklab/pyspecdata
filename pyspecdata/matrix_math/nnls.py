@@ -15,6 +15,7 @@ def venk_BRD(initial_α, K_0, mvec, tol=1e-3, maxiter=300):
     f, alpha_new = _nnls.venk_brd(initial_α, K_0, mvec, tol, maxiter)
     return f, alpha_new
 
+
 def venk_nnls(K_0, mvec, l):
     r"""Use the BRD NNLS routine for a given ``lambda`` value.
 
@@ -36,8 +37,9 @@ def venk_nnls(K_0, mvec, l):
     for j in range(20):
         # re-run to make c is converged
         old_c = c.copy()
-        _nnls.venk_nnls(K_0, mvec, c, l ** 2)
-        if np.linalg.norm(c-old_c)/np.linalg.norm(c) < 1e-5: break
+        _nnls.venk_nnls(K_0, mvec, c, l**2)
+        if np.linalg.norm(c - old_c) / np.linalg.norm(c) < 1e-5:
+            break
     f = K_0.T.dot(c)
     f[f < 0] = 0
     residual = K_0.dot(f) - mvec
@@ -50,12 +52,17 @@ def demand_real(x, addtxt=""):
             raise ValueError(
                 "you are not allows to pass nnls complex data:\nif it makes"
                 " sense for you, try yourdata.real.nnls( np.where you now have"
-                " yourdata.nnls(" + "\n" + addtxt
+                " yourdata.nnls("
+                + "\n"
+                + addtxt
             )
         else:
             raise ValueError(
                 "I expect double-precision floating point (float64), but you"
-                " passed me data of dtype " + str(x.dtype) + "\n" + addtxt
+                " passed me data of dtype "
+                + str(x.dtype)
+                + "\n"
+                + addtxt
             )
 
 
@@ -208,24 +215,26 @@ def nnls(
             self.getaxis(j), "(this message pertains to the %s axis)" % j
         )
     for j in newaxis_dict:
-        assert len(j.dimlabels) == 1, (
-            "must be one-dimensional, has dimensions:" + str(j.dimlabels)
-        )
+        assert (
+            len(j.dimlabels) == 1
+        ), "must be one-dimensional, has dimensions:" + str(j.dimlabels)
         if j.getaxis(j.dimlabels[0]) is not None:
             demand_real(
                 j.getaxis(j.dimlabels[0]),
                 "(this message pertains to the new %s axis pulled from the"
-                " second argument's axis)" % str(j.dimlabels[0]),
+                " second argument's axis)"
+                % str(j.dimlabels[0]),
             )
         demand_real(
             j.data,
             "(this message pertains to the new %s axis pulled from the second"
-            " argument's data)" % str(j.dimlabels[0]),
+            " argument's data)"
+            % str(j.dimlabels[0]),
         )
     if isinstance(kernel_func, tuple):
-        assert callable(kernel_func[0]) and callable(kernel_func[1]), (
-            "third argument is tuple of kernel functions"
-        )
+        assert callable(kernel_func[0]) and callable(
+            kernel_func[1]
+        ), "third argument is tuple of kernel functions"
     elif isinstance(kernel_func, dict):
         kernel_func = [kernel_func[j] for j in dimname_list]
         assert all([callable(j) for j in kernel_func])
