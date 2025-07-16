@@ -33,7 +33,7 @@
       end if
     end do
     deallocate(c,tempvec)
-    alpha_out = alpha_new
+    alpha_out = alpha
     return
   end subroutine venk_brd
   subroutine venk_nnls(k0_mat,m_r,c,alpha,m,n)
@@ -46,11 +46,16 @@
     double precision,allocatable :: h_mat(:,:),h_mat_copy(:,:),k0_t(:)
     integer,allocatable :: piv(:)
     double precision,allocatable :: delta_c(:)
-    double precision :: chi_old,chi_new,s,denom,norm_grad
+    double precision :: chi_old,chi_new,s,denom,norm_grad,norm_mr
     external dgesv
     allocate(delta_c(n), tempvec(m))
     allocate(g_mat(m,m),c_new(m),grad(m),newgrad(m),h_mat(m,m),h_mat_copy(m,m),k0_t(n),piv(m))
-    do j=1,100
+    norm_mr = norm2(m_r)
+    !write(*,*) 'venk_nnls called with', alpha, 'and initial c'
+    !do j=1,m
+    !  write(*,*) c(j)
+    !end do
+    do j=1,500
       ! IN: k0_mat,m,n,c OUT: g_mat,k0_t
       call compute_g(k0_mat,m,n,c,g_mat,k0_t)
       ! IN: g_mat,c,m,alpha,m_r OUT: grad
