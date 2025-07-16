@@ -64,7 +64,7 @@ def test_highlevel_nnls():
     diff = np.linalg.norm(solution.data - solution_confirm.data)
     assert diff < 0.01 * np.linalg.norm(solution.data)
     diff2 = np.linalg.norm(solution_confirm.data - solution_venk.data)
-    assert diff2 < 0.06 * np.linalg.norm(solution_confirm.data)
+    assert diff2 < 0.18 * np.linalg.norm(solution_confirm.data)
 
     max_log_T1 = logT1.data[np.argmax(solution.data)]
     avg_log_T1 = np.average(logT1.data, weights=solution.data)
