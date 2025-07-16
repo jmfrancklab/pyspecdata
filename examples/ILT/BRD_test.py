@@ -135,10 +135,14 @@ plot(solution, ":", label="pyspecdata-BRD")
 plot(
     solution_confirm,
     "--",
-    label=rf"manual BRD $\alpha={solution.get_prop('opt_alpha'):#0.2g}$",
+    label=rf"stacked, $\alpha={solution.get_prop('opt_alpha'):#0.2g}$",
     alpha=0.5,
 )
-plot(solution_venk, label="venk_nnls")
+plot(
+    solution_venk,
+    label=rf"venk_nnls, $\alpha={solution.get_prop('opt_alpha'):#0.2g}$",
+    alpha=0.5,
+)
 print(
     "BRD mean:",
     solution.C.mean(t1_name).item(),

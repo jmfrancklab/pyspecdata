@@ -33,7 +33,7 @@
       end if
     end do
     deallocate(c,tempvec)
-    alpha_out = alpha_new
+    alpha_out = alpha
     return
   end subroutine venk_brd
   subroutine venk_nnls(k0_mat,m_r,c,alpha,m,n)
@@ -55,7 +55,7 @@
     !do j=1,m
     !  write(*,*) c(j)
     !end do
-    do j=1,100
+    do j=1,500
       ! IN: k0_mat,m,n,c OUT: g_mat,k0_t
       call compute_g(k0_mat,m,n,c,g_mat,k0_t)
       ! IN: g_mat,c,m,alpha,m_r OUT: grad
