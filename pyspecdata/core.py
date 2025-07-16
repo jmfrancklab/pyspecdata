@@ -115,13 +115,16 @@ plt.rcParams["ytick.direction"] = "out"
 # rcParams['font.size'] = 6
 plt.rcParams["axes.grid"] = False
 plt.rcParams["image.cmap"] = "jet"
-plt.rcParams["figure.figsize"] = (plt.rcParams["figure.figsize"][0] , plt.rcParams["figure.figsize"][0] / (1 + np.sqrt(5)) * 2)
+plt.rcParams["figure.figsize"] = (
+    plt.rcParams["figure.figsize"][0],
+    plt.rcParams["figure.figsize"][0] / (1 + np.sqrt(5)) * 2,
+)
 mat2array = [
     {"ImmutableMatrix": np.array},
     "numpy",
 ]  # for sympy returns arrays rather than the stupid matrix class
 # supress annoying matplotlib messages!
-logging.getLogger('matplotlib.mathtext').setLevel(logging.WARNING)
+logging.getLogger("matplotlib.mathtext").setLevel(logging.WARNING)
 logger = logging.getLogger("pyspecdata.core")
 # {{{ constants
 k_B = 1.380648813e-23
@@ -2296,7 +2299,10 @@ class nddata(object):
             j for j in self.other_info.keys() if j.startswith("FT")
         ]
         for k in all_ft_props:
-            if previous in self.other_info[k].keys():
+            if (
+                type(self.other_info[k]) is dict
+                and previous in self.other_info[k].keys()
+            ):
                 self.other_info[k][new] = self.other_info[k][previous]
                 self.other_info[k].pop(previous)
         return self
@@ -7440,6 +7446,7 @@ class ndshape(ndshape_base):
     arrays -- see :func:`alloc`.
 
     """
+
     def __or__(self, *args):
         retval = super().__or__(*args)
         retval.__class__ = type(self)
