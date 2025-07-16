@@ -91,7 +91,9 @@
       subroutine chi_func(c_forchi,g_mat_forchi,alpha_forchi,m_r_forchi,val_forchi)
         double precision,intent(in)::c_forchi(:),g_mat_forchi(size(c_forchi),size(c_forchi)),alpha_forchi,m_r_forchi(:)
         double precision,intent(out)::val_forchi
-        val_forchi = dot_product(c_forchi,matmul(g_mat_forchi,c_forchi)) + alpha_forchi*dot_product(c_forchi,c_forchi) - dot_product(c_forchi,m_r_forchi)
+        val_forchi = dot_product(c_forchi,matmul(g_mat_forchi,c_forchi)) &
+          & + alpha_forchi*dot_product(c_forchi,c_forchi) &
+          & - dot_product(c_forchi,m_r_forchi)
       end subroutine chi_func
   end subroutine venk_nnls
   subroutine compute_g(k0_mat,m,n,c,g_mat,k0_t)
