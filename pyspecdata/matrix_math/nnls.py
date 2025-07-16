@@ -15,11 +15,30 @@ def venk_BRD(initial_α, K_0, mvec, tol=1e-3, maxiter=100):
     f, alpha_new = _nnls.venk_brd(initial_α, K_0, mvec, tol, maxiter)
     return f, alpha_new
 
-def venk_nnls(α, K_0, mvec):
-    """Wrapper calling the compiled Butler-Reeds-Dawson algorithm."""
+def venk_nnls(K_0, mvec, l):
+    r"""Use the BRD NNLS routine for a given ``lambda`` value.
+
+    Parameters
+    ----------
+    K_0 : ndarray
+        Kernel matrix ``A``.
+    mvec : ndarray
+        Data vector ``b``.
+    l : float
+        Regularization parameter :math:`\lambda`.  The underlying
+        Fortran routine expects :math:`\alpha = \lambda^2`.
+
+    Returns
+    -------
+    tuple(ndarray, ndarray)
+        The solution vector and residual ``A·x - b``.
+    """
     c = np.ones(K_0.shape[0])
-    f, alpha_new = _nnls.venk_brd(K_0, mvec, c, α)
-    return f, alpha_new
+    _nnls.venk_nnls(K_0, mvec, c, l ** 2, K_0.shape[0], K_0.shape[1])
+    f = K_0.T.dot(c)
+    f[f < 0] = 0
+    residual = K_0.dot(f) - mvec
+    return f, residual
 
 
 def demand_real(x, addtxt=""):
