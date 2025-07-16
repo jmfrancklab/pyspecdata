@@ -65,7 +65,8 @@ python module _nnls ! in
           double precision, intent(in)    :: m_r(m)
           double precision, intent(inout) :: c(m)
           double precision, intent(in)    :: alpha
-          integer,           intent(in)   :: m, n
+          integer, optional,intent(in),check(shape(k0_mat,0)==m),depend(k0_mat) :: m=shape(k0_mat,0)
+          integer, optional,intent(in),check(shape(k0_mat,1)==n),depend(k0_mat) :: n=shape(k0_mat,1)
         end subroutine venk_nnls
     end interface 
 end python module _nnls

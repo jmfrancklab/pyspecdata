@@ -25,8 +25,7 @@ def venk_nnls(K_0, mvec, l):
     mvec : ndarray
         Data vector ``b``.
     l : float
-        Regularization parameter :math:`\lambda`.  The underlying
-        Fortran routine expects :math:`\alpha = \lambda^2`.
+        Regularization parameter :math:`\lambda`.
 
     Returns
     -------
@@ -34,7 +33,7 @@ def venk_nnls(K_0, mvec, l):
         The solution vector and residual ``A·x - b``.
     """
     c = np.ones(K_0.shape[0])
-    _nnls.venk_nnls(K_0, mvec, c, l ** 2, K_0.shape[0], K_0.shape[1])
+    _nnls.venk_nnls(K_0, mvec, c, l ** 2)
     f = K_0.T.dot(c)
     f[f < 0] = 0
     residual = K_0.dot(f) - mvec
