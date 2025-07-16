@@ -33,7 +33,11 @@ def venk_nnls(K_0, mvec, l):
         The solution vector and residual ``A·x - b``.
     """
     c = np.ones(K_0.shape[0])
-    _nnls.venk_nnls(K_0, mvec, c, l ** 2)
+    for j in range(20):
+        # re-run to make c is converged
+        old_c = c.copy()
+        _nnls.venk_nnls(K_0, mvec, c, l ** 2)
+        if np.linalg.norm(c-old_c)/np.linalg.norm(c) < 1e-5: break
     f = K_0.T.dot(c)
     f[f < 0] = 0
     residual = K_0.dot(f) - mvec

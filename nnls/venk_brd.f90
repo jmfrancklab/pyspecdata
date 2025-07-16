@@ -51,6 +51,10 @@
     allocate(delta_c(n), tempvec(m))
     allocate(g_mat(m,m),c_new(m),grad(m),newgrad(m),h_mat(m,m),h_mat_copy(m,m),k0_t(n),piv(m))
     norm_mr = norm2(m_r)
+    !write(*,*) 'venk_nnls called with', alpha, 'and initial c'
+    !do j=1,m
+    !  write(*,*) c(j)
+    !end do
     do j=1,100
       ! IN: k0_mat,m,n,c OUT: g_mat,k0_t
       call compute_g(k0_mat,m,n,c,g_mat,k0_t)
