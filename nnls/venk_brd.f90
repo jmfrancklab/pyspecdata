@@ -47,7 +47,7 @@
     integer,allocatable :: piv(:)
     double precision,allocatable :: delta_c(:)
     double precision :: chi_old,chi_new,s,denom,norm_grad,norm_mr
-    external dgesv
+    external dgesv, dgemm
     allocate(delta_c(n), tempvec(m))
     allocate(g_mat(m,m),c_new(m),grad(m),newgrad(m),h_mat(m,m),h_mat_copy(m,m),k0_t(n),piv(m))
     norm_mr = norm2(m_r)
@@ -66,7 +66,7 @@
       h_mat_copy = h_mat
       ! IN: m, 1, m, m INOUT: h_mat,delta_c OUT: piv,info
       call dgesv(m,1,h_mat_copy,m,piv,delta_c,m,info)
-      tempvec = matmul(h_mat,delta_c)
+      call dgemm('N','N',m,1,m,1.0d0,h_mat,m,delta_c,m,0.0d0,tempvec,m)
       denom = dot_product(delta_c,tempvec)
       if (denom == 0.d0) denom = 1.d-12
       s = dot_product(delta_c,grad) / denom
@@ -96,7 +96,11 @@
       subroutine chi_func(c_forchi,g_mat_forchi,alpha_forchi,m_r_forchi,val_forchi)
         double precision,intent(in)::c_forchi(:),g_mat_forchi(size(c_forchi),size(c_forchi)),alpha_forchi,m_r_forchi(:)
         double precision,intent(out)::val_forchi
-        val_forchi = dot_product(c_forchi,matmul(g_mat_forchi,c_forchi)) &
+        double precision :: temp(size(c_forchi))
+        call dgemm('N','N',size(c_forchi),1,size(c_forchi),1.0d0, &
+            g_mat_forchi,size(c_forchi),c_forchi,size(c_forchi),0.0d0, &
+            temp,size(c_forchi))
+        val_forchi = dot_product(c_forchi,temp) &
           & + alpha_forchi*dot_product(c_forchi,c_forchi) &
           & - dot_product(c_forchi,m_r_forchi)
       end subroutine chi_func
@@ -131,7 +135,9 @@
     integer,intent(in)::m
     double precision,intent(in)::g_mat(m,m),c(m),alpha,m_r(m)
     double precision,intent(out)::grad(m)
-    grad = matmul(g_mat,c) + alpha*c - m_r
+    double precision :: temp(m)
+    call dgemm('N','N',m,1,m,1.0d0,g_mat,m,c,m,0.0d0,temp,m)
+    grad = temp + alpha*c - m_r
   end subroutine compute_grad
   subroutine add_diag(g_mat,m,alpha,h_mat)
     integer,intent(in)::m
