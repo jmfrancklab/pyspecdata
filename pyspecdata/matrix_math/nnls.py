@@ -35,6 +35,7 @@ def venk_nnls(K_0, mvec, l):
     """
     c = np.ones(K_0.shape[0])
     for j in range(20):
+        print(f"venk_nnls iteration {j}")
         # re-run to make c is converged
         old_c = c.copy()
         _nnls.venk_nnls(K_0, mvec, c, l**2)
