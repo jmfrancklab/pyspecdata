@@ -11,10 +11,11 @@
     double precision :: alpha,alpha_new,sqrt_n
     integer :: iter,j
     double precision :: norm_mr
+    external dgemv
     sqrt_n = sqrt(dble(m))
     alpha = initial_alpha
 
-    allocate(c(m),tempvec(m))
+    allocate(c(m),tempvec(n))
     c = 1.0d0
     norm_mr = norm2(m_r)
     do iter=1,maxiter
@@ -24,7 +25,7 @@
       if (abs(alpha_new-alpha)/alpha < tol) exit
       alpha = alpha_new
     end do
-    tempvec = matmul(transpose(k0_mat),c)
+    call dgemv('T',m,n,1.0d0,k0_mat,m,c,1,0.0d0,tempvec,1)
     do j=1,n
       if (tempvec(j) > 0.d0) then
         f(j) = tempvec(j)
@@ -48,7 +49,7 @@
     double precision,allocatable :: delta_c(:)
     double precision :: chi_old,chi_new,s,denom,norm_grad,norm_mr
     external dgesv, dgemm
-    allocate(delta_c(n), tempvec(m))
+    allocate(delta_c(m), tempvec(m))
     allocate(g_mat(m,m),c_new(m),grad(m),newgrad(m),h_mat(m,m),h_mat_copy(m,m),k0_t(n),piv(m))
     norm_mr = norm2(m_r)
     !write(*,*) 'venk_nnls called with', alpha, 'and initial c'

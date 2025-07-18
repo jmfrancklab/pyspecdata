@@ -72,6 +72,7 @@ nnls_extension = py.extension_module(
     'lapack-3.4.0/SRC/ieeeck.f',
     'lapack-3.4.0/INSTALL/dlamch.f',
     'lapack-3.4.0/BLAS/SRC/dgemm.f',
+    'lapack-3.4.0/BLAS/SRC/dgemv.f',
     'lapack-3.4.0/BLAS/SRC/dtrsm.f',
     'lapack-3.4.0/BLAS/SRC/dger.f',
     'lapack-3.4.0/BLAS/SRC/dscal.f',
