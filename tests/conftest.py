@@ -307,9 +307,17 @@ def load_module(name: str, *, use_real_pint: bool = False):
         fig_stub.figlist = type("figlist", (), {})
     os.environ.setdefault("pyspecdata_figures", "standard")
 
-    pkg = sys.modules.setdefault("pyspecdata", types.ModuleType("pyspecdata"))
-    if not hasattr(pkg, "__path__"):
-        pkg.__path__ = [str(PACKAGE_ROOT)]
+    if "pyspecdata" not in sys.modules:
+        try:
+            pkg = importlib.import_module("pyspecdata")
+        except Exception:
+            pkg = types.ModuleType("pyspecdata")
+            sys.modules["pyspecdata"] = pkg
+    else:
+        pkg = sys.modules["pyspecdata"]
+    existing_paths = list(getattr(pkg, "__path__", []))
+    if str(PACKAGE_ROOT) not in existing_paths:
+        pkg.__path__ = existing_paths + [str(PACKAGE_ROOT)]
 
     spec = importlib.util.spec_from_file_location(
         f"pyspecdata.{name}", PACKAGE_ROOT / f"{name.replace('.', '/')}.py"
