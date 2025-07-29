@@ -2,6 +2,9 @@ project('pyspecdata', ['fortran', 'c'], version: '0.9.5.5.2', meson_version: '>=
 
 py = import('python').find_installation('python3')
 
+# Directory with compatibility headers for newer NumPy versions
+compat_inc = include_directories('nnls/compat')
+
 # Retrieve NumPy include directory
 numpy_include_dir = run_command(
   py, '-c', 'import numpy; print(numpy.get_include())'
@@ -82,7 +85,7 @@ nnls_extension = py.extension_module(
     'lapack-3.4.0/BLAS/SRC/lsame.f',
     'lapack-3.4.0/BLAS/SRC/xerbla.f',
   ],
-  include_directories: include_directories(numpy_include_dir),
+  include_directories: [include_directories(numpy_include_dir), compat_inc],
   install: true,
   cpp_args: ['-DADD_UNDERSCORE', '-I'+numpy_include_dir],  # Equivalent to define_macros=[("ADD_UNDERSCORE", None)]
   fortran_args: fortran_args,
