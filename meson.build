@@ -152,3 +152,8 @@ foreach script : scripts
         install_dir: get_option('bindir'),
     )
 endforeach
+
+# Install the Python test suite alongside the package so editable installs
+# can locate the extension module without modifying sys.path in tests.
+install_subdir('tests',
+    install_dir: join_paths(py.get_install_dir(), 'pyspecdata', 'tests'))
