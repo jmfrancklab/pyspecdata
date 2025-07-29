@@ -71,7 +71,7 @@ c_wrappers = custom_target(
       'lapack-3.4.0/BLAS/SRC/lsame.f',
       'lapack-3.4.0/BLAS/SRC/xerbla.f',
       ],
-    output: ['_nnlsmodule.c', '_nnls-f2pywrappers2.f90'],
+    output: ['_nnlsmodule.c', '_nnls-f2pywrappers.f'],
     command: [py, '-m', 'numpy.f2py', '@INPUT@', '-m', '_nnls', '--lower'],
     build_by_default: true,
 )
@@ -126,7 +126,6 @@ py.extension_module(
         c_lib.extract_all_objects(),
     ],
     c_args: ['-I'+numpy_inc, '-I'+numpy_f2py_src],
-    subdir: 'nnls',
     install: true,
 )
 
