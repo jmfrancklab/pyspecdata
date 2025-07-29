@@ -33,14 +33,8 @@ fortranobject_o = custom_target(
   build_by_default: true
 )
 
-# Define custom target to generate _nnlsmodule.c from .pyf file
-f2py_wrapper = custom_target(
-  '_nnlsmodule.c',
-  input: 'nnls/nnls.pyf',
-  output: '_nnlsmodule.c',
-  command: [py, '-m', 'numpy.f2py', '@INPUT@'],
-  capture: false,
-)
+# Pre-generated F2PY wrapper C file
+pregen_f2py = files('meson_f2py/_nnlsmodule.c')
 
 fortran_args = []
 if host_machine.system() == 'windows'
@@ -55,7 +49,7 @@ endif
 nnls_extension = py.extension_module(
   '_nnls',
   sources: [
-    f2py_wrapper,
+    pregen_f2py,
     fortran_header,
     fortranobject_o,
     'nnls/nnls.f',
