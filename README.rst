@@ -179,6 +179,12 @@ and type
 ``pip install --editable . --no-build-isolation``.
 Make sure that this terminates with a successful message, and without any compilation errors.  In particular:
 
+If you upgrade NumPy after installing ``pyspecdata``,
+any existing ``_nnls*.so`` files may be incompatible with the new version.
+Remove the old build directory (or the ``_nnls`` shared library) and reinstall
+with ``pip install --no-build-isolation --force-reinstall .`` to rebuild
+against the current NumPy headers.
+
 - If it gives an error about permissions (will happen for a system-wide anaconda install), you need to load the anaconda prompt as admin (right click and run as administrator).
 - Near the end (above EXT compiler optimization) it should tell you that you can run `pyspecdata_dataconfig`.  You should do this, unless you've installed pyspecdata before on the computer you are working at.
 

@@ -24,8 +24,7 @@ authors = [
     { name = "John Franck", email = "john.franck@outlook.com" }
 ]
 
-[tool.mesonpy]
-setup-kwargs = { native_file = "cross_file.txt" }
+
 
 [tool.black]
 line-length = 79
